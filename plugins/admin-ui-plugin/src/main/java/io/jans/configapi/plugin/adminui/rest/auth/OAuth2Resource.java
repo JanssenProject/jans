@@ -5,6 +5,7 @@ import io.jans.configapi.plugin.adminui.model.auth.TokenResponse;
 import io.jans.configapi.plugin.adminui.model.auth.UserInfoRequest;
 import io.jans.configapi.plugin.adminui.model.auth.UserInfoResponse;
 import io.jans.configapi.plugin.adminui.model.config.AUIConfiguration;
+import io.jans.configapi.plugin.adminui.model.exception.ApplicationException;
 import io.jans.configapi.plugin.adminui.service.auth.OAuth2Service;
 import io.jans.configapi.plugin.adminui.service.config.AUIConfigurationService;
 import org.slf4j.Logger;
@@ -64,6 +65,9 @@ public class OAuth2Resource {
             TokenResponse tokenResponse = oAuth2Service.getAccessToken(code);
             log.info("Access token gotten from Auth Server: {}", tokenResponse.toString());
             return Response.ok(tokenResponse).build();
+        } catch (ApplicationException e) {
+            log.error("Problems getting access token", e);
+            return Response.status(e.getErrorCode()).entity(e.getMessage()).build();
         } catch (Exception e) {
             log.error("Problems getting access token", e);
             return Response.serverError().entity(e.getMessage()).build();
@@ -78,6 +82,9 @@ public class OAuth2Resource {
             TokenResponse tokenResponse = oAuth2Service.getApiProtectionToken(ujwt);
             log.info("Api protection token gotten from Auth Server: {}", tokenResponse.toString());
             return Response.ok(tokenResponse).build();
+        } catch (ApplicationException e) {
+            log.error("Problems getting access token", e);
+            return Response.status(e.getErrorCode()).entity(e.getMessage()).build();
         } catch (Exception e) {
             log.error("Problems getting access token", e);
             return Response.serverError().entity(e.getMessage()).build();
@@ -93,6 +100,9 @@ public class OAuth2Resource {
             UserInfoResponse userInfoResponse = oAuth2Service.getUserInfo(userInfoRequest);
             log.info("Get User-Info gotten from IdP: {}", userInfoRequest.toString());
             return Response.ok(userInfoResponse).build();
+        } catch (ApplicationException e) {
+            log.error("Problems getting access token", e);
+            return Response.status(e.getErrorCode()).entity(e.getMessage()).build();
         } catch (Exception e) {
             log.error("Problems getting access token", e);
             return Response.serverError().entity(e.getMessage()).build();
