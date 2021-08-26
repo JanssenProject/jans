@@ -64,7 +64,7 @@ public class LicenseResource {
     @POST
     @Path(ACTIVATE_LICENSE)
     @Produces(MediaType.TEXT_PLAIN)
-    Boolean activateLicense(@Valid @NotNull LicenseRequest licenseRequest) throws Exception {
+    public Boolean activateLicense(@Valid @NotNull LicenseRequest licenseRequest) throws Exception {
         AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
 
         LicenseManager licenseManager = auiConfiguration.getLicenseConfiguration().getLicenseManager();
