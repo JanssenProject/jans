@@ -5,7 +5,9 @@
  */
 package io.jans.as.client.ws.rs.jarm;
 
-import io.jans.as.client.*;
+import io.jans.as.client.AuthorizationRequest;
+import io.jans.as.client.BaseTest;
+import io.jans.as.client.RegisterResponse;
 import io.jans.as.client.model.authorize.Claim;
 import io.jans.as.client.model.authorize.ClaimValue;
 import io.jans.as.client.model.authorize.JwtAuthorizationRequest;
@@ -14,8 +16,6 @@ import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.jwt.JwtClaimName;
-import io.jans.as.model.register.ApplicationType;
-import io.jans.as.model.util.StringUtils;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
@@ -23,12 +23,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-
 /**
  * @author Javier Rojas Blum
- * @version July 28, 2021
+ * @version August 26, 2021
  */
 public class AuthorizationResponseModeJwtResponseTypeCodeSignedHttpTest extends BaseTest {
 
@@ -346,26 +343,10 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedHttpTest extends 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setResponseTypes(responseTypes);
-        registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS256);
-        registerRequest.setAuthorizationSignedResponseAlg(SignatureAlgorithm.RS256);
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, sectorIdentifierUri, clientJwksUri,
+                SignatureAlgorithm.RS256, null, null);
 
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse response = registerClient.exec();
-
-        showClient(registerClient);
-        assertEquals(response.getStatus(), 201, "Unexpected response code: " + response.getEntity());
-        assertNotNull(response.getClientId());
-        assertNotNull(response.getClientSecret());
-        assertNotNull(response.getRegistrationAccessToken());
-        assertNotNull(response.getClientSecretExpiresAt());
-
-        String clientId = response.getClientId();
+        String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
         AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
@@ -404,26 +385,10 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedHttpTest extends 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setResponseTypes(responseTypes);
-        registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS384);
-        registerRequest.setAuthorizationSignedResponseAlg(SignatureAlgorithm.RS384);
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, sectorIdentifierUri, clientJwksUri,
+                SignatureAlgorithm.RS384, null, null);
 
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse response = registerClient.exec();
-
-        showClient(registerClient);
-        assertEquals(response.getStatus(), 201, "Unexpected response code: " + response.getEntity());
-        assertNotNull(response.getClientId());
-        assertNotNull(response.getClientSecret());
-        assertNotNull(response.getRegistrationAccessToken());
-        assertNotNull(response.getClientSecretExpiresAt());
-
-        String clientId = response.getClientId();
+        String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
         AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
@@ -462,26 +427,10 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedHttpTest extends 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setResponseTypes(responseTypes);
-        registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS512);
-        registerRequest.setAuthorizationSignedResponseAlg(SignatureAlgorithm.RS512);
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, sectorIdentifierUri, clientJwksUri,
+                SignatureAlgorithm.RS512, null, null);
 
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse response = registerClient.exec();
-
-        showClient(registerClient);
-        assertEquals(response.getStatus(), 201, "Unexpected response code: " + response.getEntity());
-        assertNotNull(response.getClientId());
-        assertNotNull(response.getClientSecret());
-        assertNotNull(response.getRegistrationAccessToken());
-        assertNotNull(response.getClientSecretExpiresAt());
-
-        String clientId = response.getClientId();
+        String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
         AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
@@ -520,26 +469,10 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedHttpTest extends 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setResponseTypes(responseTypes);
-        registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.ES256);
-        registerRequest.setAuthorizationSignedResponseAlg(SignatureAlgorithm.ES256);
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, sectorIdentifierUri, clientJwksUri,
+                SignatureAlgorithm.ES256, null, null);
 
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse response = registerClient.exec();
-
-        showClient(registerClient);
-        assertEquals(response.getStatus(), 201, "Unexpected response code: " + response.getEntity());
-        assertNotNull(response.getClientId());
-        assertNotNull(response.getClientSecret());
-        assertNotNull(response.getRegistrationAccessToken());
-        assertNotNull(response.getClientSecretExpiresAt());
-
-        String clientId = response.getClientId();
+        String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
         AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
@@ -578,26 +511,10 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedHttpTest extends 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setResponseTypes(responseTypes);
-        registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.ES384);
-        registerRequest.setAuthorizationSignedResponseAlg(SignatureAlgorithm.ES384);
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, sectorIdentifierUri, clientJwksUri,
+                SignatureAlgorithm.ES384, null, null);
 
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse response = registerClient.exec();
-
-        showClient(registerClient);
-        assertEquals(response.getStatus(), 201, "Unexpected response code: " + response.getEntity());
-        assertNotNull(response.getClientId());
-        assertNotNull(response.getClientSecret());
-        assertNotNull(response.getRegistrationAccessToken());
-        assertNotNull(response.getClientSecretExpiresAt());
-
-        String clientId = response.getClientId();
+        String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
         AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
@@ -636,26 +553,10 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedHttpTest extends 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setResponseTypes(responseTypes);
-        registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.ES512);
-        registerRequest.setAuthorizationSignedResponseAlg(SignatureAlgorithm.ES512);
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, sectorIdentifierUri, clientJwksUri,
+                SignatureAlgorithm.ES512, null, null);
 
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse response = registerClient.exec();
-
-        showClient(registerClient);
-        assertEquals(response.getStatus(), 201, "Unexpected response code: " + response.getEntity());
-        assertNotNull(response.getClientId());
-        assertNotNull(response.getClientSecret());
-        assertNotNull(response.getRegistrationAccessToken());
-        assertNotNull(response.getClientSecretExpiresAt());
-
-        String clientId = response.getClientId();
+        String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
         AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
@@ -689,31 +590,15 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedHttpTest extends 
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
             final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
             final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
-        showTitle("requestParameterMethodRS256");
+        showTitle("requestParameterMethodPS256");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setResponseTypes(responseTypes);
-        registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.PS256);
-        registerRequest.setAuthorizationSignedResponseAlg(SignatureAlgorithm.PS256);
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, sectorIdentifierUri, clientJwksUri,
+                SignatureAlgorithm.PS256, null, null);
 
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse response = registerClient.exec();
-
-        showClient(registerClient);
-        assertEquals(response.getStatus(), 201, "Unexpected response code: " + response.getEntity());
-        assertNotNull(response.getClientId());
-        assertNotNull(response.getClientSecret());
-        assertNotNull(response.getRegistrationAccessToken());
-        assertNotNull(response.getClientSecretExpiresAt());
-
-        String clientId = response.getClientId();
+        String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
         AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
@@ -747,31 +632,15 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedHttpTest extends 
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
             final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
             final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
-        showTitle("requestParameterMethodRS256");
+        showTitle("requestParameterMethodPS256");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setResponseTypes(responseTypes);
-        registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.PS384);
-        registerRequest.setAuthorizationSignedResponseAlg(SignatureAlgorithm.PS384);
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, sectorIdentifierUri, clientJwksUri,
+                SignatureAlgorithm.PS384, null, null);
 
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse response = registerClient.exec();
-
-        showClient(registerClient);
-        assertEquals(response.getStatus(), 201, "Unexpected response code: " + response.getEntity());
-        assertNotNull(response.getClientId());
-        assertNotNull(response.getClientSecret());
-        assertNotNull(response.getRegistrationAccessToken());
-        assertNotNull(response.getClientSecretExpiresAt());
-
-        String clientId = response.getClientId();
+        String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
         AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
@@ -805,31 +674,15 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedHttpTest extends 
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
             final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
             final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
-        showTitle("requestParameterMethodRS256");
+        showTitle("requestParameterMethodPS256");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
 
         // 1. Dynamic Client Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setResponseTypes(responseTypes);
-        registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.PS512);
-        registerRequest.setAuthorizationSignedResponseAlg(SignatureAlgorithm.PS512);
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, sectorIdentifierUri, clientJwksUri,
+                SignatureAlgorithm.PS512, null, null);
 
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse response = registerClient.exec();
-
-        showClient(registerClient);
-        assertEquals(response.getStatus(), 201, "Unexpected response code: " + response.getEntity());
-        assertNotNull(response.getClientId());
-        assertNotNull(response.getClientSecret());
-        assertNotNull(response.getRegistrationAccessToken());
-        assertNotNull(response.getClientSecretExpiresAt());
-
-        String clientId = response.getClientId();
+        String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
         AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
