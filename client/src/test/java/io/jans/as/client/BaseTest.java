@@ -76,7 +76,7 @@ import static org.testng.Assert.*;
 
 /**
  * @author Javier Rojas Blum
- * @version July 28, 2021
+ * @version August 26, 2021
  */
 public abstract class BaseTest {
 
@@ -1155,6 +1155,12 @@ public abstract class BaseTest {
         registerRequest.setAuthorizationSignedResponseAlg(signatureAlgorithm);
         registerRequest.setAuthorizationEncryptedResponseAlg(keyEncryptionAlgorithm);
         registerRequest.setAuthorizationEncryptedResponseEnc(blockEncryptionAlgorithm);
+        registerRequest.setRequestObjectSigningAlg(signatureAlgorithm);
+        registerRequest.setRequestObjectEncryptionAlg(keyEncryptionAlgorithm);
+        registerRequest.setRequestObjectEncryptionEnc(blockEncryptionAlgorithm);
+        registerRequest.setUserInfoSignedResponseAlg(signatureAlgorithm);
+        registerRequest.setUserInfoEncryptedResponseAlg(keyEncryptionAlgorithm);
+        registerRequest.setUserInfoEncryptedResponseEnc(blockEncryptionAlgorithm);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
