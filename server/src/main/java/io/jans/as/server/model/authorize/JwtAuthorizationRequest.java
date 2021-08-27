@@ -531,10 +531,18 @@ public class JwtAuthorizationRequest {
             throw new InvalidJwtException("nbf claim is not set");
         }
         final long nowSeconds = System.currentTimeMillis() / 1000;
-        final long nbfDiff = nbf - nowSeconds;
+        final long nbfDiff = nowSeconds - nbf;
         if (nbfDiff > SIXTY_MINUTES_AS_SECONDS) { // https://github.com/JanssenProject/jans-auth-server/issues/166
-            log.error("nbf claim is more then 60 in the past, nbf: " + nbf + ", nowSeconds: " + nowSeconds);
+            log.error("nbf claim is more then 60 Minutes in the past, nbf: " + nbf + ", nowSeconds: " + nowSeconds);
             throw new InvalidJwtException("nbf claim is more then 60 in the past");
         }
+        final Integer exp = getExp();
+        final long nowSecondsExp = System.currentTimeMillis() / 1000;
+        final long expDiff = exp-nowSecondsExp;
+        if (expDiff > SIXTY_MINUTES_AS_SECONDS) {  //https://github.com/JanssenProject/jans-auth-server/issues/165
+            log.error("exp claim is more then 60 minutes in the future, exp: " + exp + ", nowSecondsExp: " + nowSecondsExp);
+            throw new InvalidJwtException("exp claim is more then 60 in the future");
+        }
+        
     }
 }
