@@ -6,12 +6,26 @@
 
 package io.jans.as.server.ws.rs;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
+import com.google.common.collect.Lists;
+import io.jans.as.client.EndSessionRequest;
+import io.jans.as.client.RegisterRequest;
+import io.jans.as.model.authorize.AuthorizeResponseParam;
+import io.jans.as.model.common.Prompt;
+import io.jans.as.model.common.ResponseType;
+import io.jans.as.model.jwt.Jwt;
+import io.jans.as.model.register.ApplicationType;
+import io.jans.as.model.util.StringUtils;
+import io.jans.as.server.BaseTest;
+import io.jans.as.server.model.TClientService;
+import org.jboss.arquillian.container.test.api.RunAsClient;
+import org.jboss.arquillian.test.api.ArquillianResource;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
 
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
@@ -19,27 +33,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
-import org.jboss.arquillian.container.test.api.RunAsClient;
-import org.jboss.arquillian.test.api.ArquillianResource;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-
-import com.google.common.collect.Lists;
-
-import io.jans.as.client.EndSessionRequest;
-import io.jans.as.client.RegisterRequest;
-import io.jans.as.model.authorize.AuthorizeResponseParam;
-import io.jans.as.model.common.Prompt;
-import io.jans.as.model.common.ResponseType;
-import io.jans.as.model.register.ApplicationType;
-import io.jans.as.model.util.StringUtils;
-import io.jans.as.server.BaseTest;
-import io.jans.as.server.model.TClientService;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -114,7 +112,7 @@ public class EndSessionBackchannelRestServerTest extends BaseTest {
                 assertEquals(params.get(AuthorizeResponseParam.STATE), state);
 
                 idToken = params.get(AuthorizeResponseParam.ID_TOKEN);
-                sid = params.get(AuthorizeResponseParam.SID);
+                sid = Jwt.parseOrThrow(idToken).getClaims().getClaimAsString("sid");
             } catch (URISyntaxException e) {
                 e.printStackTrace();
                 fail("Response URI is not well formed");
