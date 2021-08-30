@@ -6,10 +6,9 @@ import os
 import re
 from collections import OrderedDict
 from collections import defaultdict
-# from string import Template
 
 from ldap3.utils import dn as dnutils
-from ldif3 import LDIFParser
+from ldif import LDIFParser
 
 from jans.pycloudlib.persistence.spanner import SpannerClient
 from jans.pycloudlib.utils import as_boolean

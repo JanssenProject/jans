@@ -5,7 +5,8 @@ import time
 
 from ldap3.core.exceptions import LDAPSessionTerminatedByServerError
 from ldap3.core.exceptions import LDAPSocketOpenError
-from ldif3 import LDIFParser
+
+from ldif import LDIFParser
 
 from jans.pycloudlib.utils import as_boolean
 from jans.pycloudlib.persistence.ldap import LdapClient

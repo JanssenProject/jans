@@ -8,7 +8,7 @@ from collections import defaultdict
 from string import Template
 
 from ldap3.utils import dn as dnutils
-from ldif3 import LDIFParser
+from ldif import LDIFParser
 
 from jans.pycloudlib.persistence.sql import SQLClient
 

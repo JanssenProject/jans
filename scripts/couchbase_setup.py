@@ -5,7 +5,7 @@ import logging.config
 import os
 import time
 
-from ldif3 import LDIFParser
+from ldif import LDIFParser
 
 from jans.pycloudlib.persistence.couchbase import get_couchbase_user
 from jans.pycloudlib.persistence.couchbase import get_couchbase_superuser
