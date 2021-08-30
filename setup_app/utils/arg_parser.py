@@ -57,6 +57,8 @@ def arg_parser():
     parser.add_argument('-jans-max-mem', help="Total memory (in KB) to be used by Jannses Server")
     parser.add_argument('-properties-password', help="Encoded setup.properties file password")
     parser.add_argument('--no-config-api', help="Do not install Jans Auth Config Api", action='store_true')
+    parser.add_argument('--disable-config-api-security', help="Turn off oauth2 security validation for jans-config-api", action='store_true')
+
     #parser.add_argument('--install-oxd', help="Install Oxd Server", action='store_true')
     parser.add_argument('--no-scim', help="Do not install Scim Server", action='store_true')
     parser.add_argument('--no-fido2', help="Do not install Fido2 Server", action='store_true')
