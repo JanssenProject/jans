@@ -193,10 +193,12 @@ public class EndSessionRestWebServiceHttpTest extends BaseTest {
         assertNotNull(authorizationResponse.getScope(), "The scope must be null");
         assertNotNull(authorizationResponse.getSessionId(), "The session_id is null");
 
+        String sid = Jwt.parseOrThrow(authorizationResponse.getIdToken()).getClaims().getClaimAsString("sid");
+
         // 3. End session
         String endSessionId1 = UUID.randomUUID().toString();
         EndSessionRequest endSessionRequest1 = new EndSessionRequest(null, postLogoutRedirectUri, endSessionId1);
-        endSessionRequest1.setSid(authorizationResponse.getSid());
+        endSessionRequest1.setSid(sid);
 
         EndSessionClient endSessionClient = new EndSessionClient(endSessionEndpoint);
         endSessionClient.setRequest(endSessionRequest1);
@@ -216,7 +218,7 @@ public class EndSessionRestWebServiceHttpTest extends BaseTest {
         // 4. End session with an already ended session
         String endSessionId2 = UUID.randomUUID().toString();
         EndSessionRequest endSessionRequest2 = new EndSessionRequest(null, postLogoutRedirectUri, endSessionId2);
-        endSessionRequest2.setSid(authorizationResponse.getSid());
+        endSessionRequest2.setSid(sid);
 
         EndSessionClient endSessionClient2 = new EndSessionClient(endSessionEndpoint);
         endSessionClient2.setRequest(endSessionRequest2);
