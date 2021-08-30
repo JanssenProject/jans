@@ -154,6 +154,7 @@ class ConfigApiInstaller(JettyInstaller):
 
     def render_import_templates(self):
 
+        Config.templateRenderingDict['configOauthEnabled'] = 'false' if base.argsp.disable_config_api_security else 'true'
         Config.templateRenderingDict['apiApprovedIssuer'] = base.argsp.approved_issuer or 'https://{}'.format(Config.hostname)
 
         oxauth_config_str = base64.decodestring(Config.templateRenderingDict['oxauth_config_base64'].encode())
