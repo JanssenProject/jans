@@ -242,8 +242,9 @@ public class GrantTypesRestrictionHttpTest extends BaseTest {
             if (idToken != null) {
                 // 8. End session
                 String endSessionId = UUID.randomUUID().toString();
+                String sid = Jwt.parseOrThrow(idToken).getClaims().getClaimAsString("sid");
                 EndSessionRequest endSessionRequest = new EndSessionRequest(idToken, postLogoutRedirectUri, endSessionId);
-                endSessionRequest.setSid(authorizationResponse.getSid());
+                endSessionRequest.setSid(sid);
 
                 EndSessionClient endSessionClient = new EndSessionClient(endSessionEndpoint);
                 endSessionClient.setRequest(endSessionRequest);
