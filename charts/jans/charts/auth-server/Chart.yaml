@@ -2,7 +2,7 @@
 # https://www.apache.org/licenses/LICENSE-2.0
 apiVersion: v2
 name: auth-server
-version: 1.0.0-b9
+version: 1.0.0-b10
 kubeVersion: ">=v1.17.0-0"
 description: OAuth Authorization Server, the OpenID Connect Provider, the UMA Authorization Server--this is the main Internet facing component of Janssen. It's the service that returns tokens, JWT's and identity assertions. This service must be Internet facing.
 type: application
@@ -19,4 +19,4 @@ maintainers:
     email: support@jans.io
     url: https://github.com/moabu
 icon: https://jans.io/favicon.ico
-appVersion: "1.0.0-b9"
+appVersion: "1.0.0-b10"
