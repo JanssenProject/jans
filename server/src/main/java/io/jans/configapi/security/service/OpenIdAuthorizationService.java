@@ -131,7 +131,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
 
         // If only authSpecificScope missing then proceed with token creation else throw
         // error
-        if (!isEqualCollection(missingScopes, authSpecificScope)) {
+        if ( missingScopes!=null && missingScopes.size()>0 && !isEqualCollection(missingScopes, authSpecificScope)) {
             log.error("Insufficient scopes!! Required scope: " + resourceScopes + ", however token scopes: "
                     + tokenScopes);
             throw new WebApplicationException("Insufficient scopes!! , Required scope: " + resourceScopes
