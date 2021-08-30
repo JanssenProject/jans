@@ -93,7 +93,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.MOWORKFLOWTOKEN }}
           GPG_KEY_ID: ${{ steps.import_gpg.outputs.keyid }}
-          PR_BRANCH_NAME: docker_repo_sync
+          PR_BRANCH_NAME: code_owner_repo_sync
         run: |
           wget https://raw.githubusercontent.com/mo-auto/scripts/main/org_workflows_sync.sh
           chmod u+x org_workflows_sync.sh
