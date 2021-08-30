@@ -75,11 +75,14 @@ public class AuthorizationFilter implements ContainerRequestFilter {
             return;
         }
         try {
-            String accessToken = this.authorizationService.processAuthorization(authorizationHeader, issuer, resourceInfo,
+            authorizationHeader = this.authorizationService.processAuthorization(authorizationHeader, issuer, resourceInfo,
                     context.getMethod(), request.getRequestURI());
-            if(StringUtils.isNotBlank(accessToken)) {
-                context.getHeaders().add(HttpHeaders.AUTHORIZATION,accessToken);
+
+            if(authorizationHeader!=null && authorizationHeader.trim().length()>0) {
+                context.getHeaders().remove(HttpHeaders.AUTHORIZATION);
+                context.getHeaders().add(HttpHeaders.AUTHORIZATION,authorizationHeader);               
             }
+
             log.info("======AUTHORIZATION  GRANTED===========================================");
         } catch (Exception ex) {
             log.error("======AUTHORIZATION  FAILED ===========================================", ex);
