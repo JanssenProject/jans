@@ -115,6 +115,10 @@ public class JwtAuthorizationRequest {
 
             String[] parts = encodedJwt.split("\\.");
 
+            if (appConfiguration.getRequireRequestObjectEncryption() && parts.length != 5) {
+                throw new InvalidJwtException("Request object is not encrypted.");
+            }
+
             if (parts.length == 5) {
                 String encodedHeader = parts[0];
 
