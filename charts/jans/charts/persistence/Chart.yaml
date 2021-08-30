@@ -2,7 +2,7 @@
 # https://www.apache.org/licenses/LICENSE-2.0
 apiVersion: v2
 name: persistence
-version: 1.0.0-b9
+version: 1.0.0-b10
 kubeVersion: ">=v1.17.0-0"
 description: Job to generate data and initial config for Janssen Server persistence layer.
 type: application
@@ -17,5 +17,5 @@ maintainers:
     email: support@jans.io
     url: https://github.com/moabu
 icon: https://jans.io/favicon.ico
-appVersion: "1.0.0-b9"
+appVersion: "1.0.0-b10"
 
