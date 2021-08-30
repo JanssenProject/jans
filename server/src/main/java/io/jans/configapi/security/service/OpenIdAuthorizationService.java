@@ -46,7 +46,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
     @Inject
     OpenIdService openIdService;
 
-    public void processAuthorization(String token, String issuer, ResourceInfo resourceInfo, String method, String path)
+    public String processAuthorization(String token, String issuer, ResourceInfo resourceInfo, String method, String path)
             throws Exception {
         log.debug("oAuth  Authorization parameters , token:{}, issuer:{}, resourceInfo:{}, method: {}, path: {} ",
                 token, issuer, resourceInfo, method, path);
@@ -77,8 +77,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
                 tokenScopes = jwtUtil.validateToken(acccessToken);
 
                 // Validate Scopes
-                this.validateScope(tokenScopes, resourceInfo, issuer);
-                return;
+                return this.validateScope(tokenScopes, resourceInfo, issuer);
             } catch (InvalidJwtException exp) {
                 log.error("oAuth Invalid Jwt " + token + " - Exception is " + exp);
                 throw new WebApplicationException("Jwt Token is Invalid.",
@@ -99,12 +98,12 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
 
         tokenScopes = introspectionResponse.getScope();
         // Validate Scopes
-        this.validateScope(tokenScopes, resourceInfo, issuer);
+        return this.validateScope(tokenScopes, resourceInfo, issuer);
     }
 
-    private void validateScope(List<String> tokenScopes, ResourceInfo resourceInfo, String issuer) throws Exception {
+    private String  validateScope(List<String> tokenScopes, ResourceInfo resourceInfo, String issuer) throws Exception {
         log.debug("Validate scope, tokenScopes:{}, resourceInfo: {}, issuer: {}", tokenScopes, resourceInfo, issuer);
-
+        String accessToken = null;
         // Get resource scope
         List<String> resourceScopes = getRequestedScopes(resourceInfo);
 
@@ -122,7 +121,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
                         + ", however token scopes: " + tokenScopes,
                         Response.status(Response.Status.UNAUTHORIZED).build());
             }
-            return;
+            return null;
         }
 
         // find missing scopes
@@ -140,7 +139,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
 
         // Generate token with required resourceScopes
         resourceScopes.addAll(authSpecificScope);
-        String accessToken = openIdService.requestAccessToken(authUtil.getClientId(), resourceScopes);
+        accessToken = openIdService.requestAccessToken(authUtil.getClientId(), resourceScopes);
         log.debug("Introspecting new accessToken = " + accessToken);
 
         // Introspect
@@ -157,7 +156,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
         }
 
         log.info("Token scopes Valid");
-
+        return "Bearer " +accessToken;
     }
 
 }
