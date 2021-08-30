@@ -22,6 +22,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.Provider;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
 /**
@@ -74,8 +75,11 @@ public class AuthorizationFilter implements ContainerRequestFilter {
             return;
         }
         try {
-            this.authorizationService.processAuthorization(authorizationHeader, issuer, resourceInfo,
+            String accessToken = this.authorizationService.processAuthorization(authorizationHeader, issuer, resourceInfo,
                     context.getMethod(), request.getRequestURI());
+            if(StringUtils.isNotBlank(accessToken)) {
+                context.getHeaders().add(HttpHeaders.AUTHORIZATION,accessToken);
+            }
             log.info("======AUTHORIZATION  GRANTED===========================================");
         } catch (Exception ex) {
             log.error("======AUTHORIZATION  FAILED ===========================================", ex);
