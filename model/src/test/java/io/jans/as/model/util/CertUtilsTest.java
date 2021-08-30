@@ -67,4 +67,17 @@ public class CertUtilsTest {
 
         assertFalse(CertUtils.equalsRdn(r1, r2));
     }
+
+    @Test
+    public void equalsRdn_withJurisdictionCountryName() {
+        String r1 = "jurisdictionCountryName=BR,businessCategory=Private Organization," +
+                "UID=c395f15d-23bd-477f-8d3d-725685268059,CN=castello.sensedia.com,serialNumber=08583723000172," +
+                "OU=1eb7e8de-2a06-46d7-888d-b44e82c398cd,L=Campinas,ST=SP,O=Open Banking Brasil - Sensedia,C=BR";
+        String r2 = "C = BR, ST = SP, L = Campinas, O = Open Banking Brasil - Sensedia, " +
+                "OU = 1eb7e8de-2a06-46d7-888d-b44e82c398cd, CN = castello.sensedia.com, " +
+                "serialNumber = 08583723000172, businessCategory = Private Organization, jurisdictionCountryName = BR, " +
+                "UID = c395f15d-23bd-477f-8d3d-725685268059";
+
+        assertTrue(CertUtils.equalsRdn(r1, r2));
+    }
 }
