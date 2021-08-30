@@ -16,6 +16,7 @@ import io.jans.as.client.RegisterClient;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
 import io.jans.as.model.common.ResponseType;
+import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.session.EndSessionErrorResponseType;
 import io.jans.as.model.util.StringUtils;
@@ -93,14 +94,16 @@ public class EndSessionRestWebServiceHttpTest extends BaseTest {
         assertNotNull(authorizationResponse.getExpiresIn(), "The expires in value is null");
         assertNotNull(authorizationResponse.getScope(), "The scope must be null");
         assertNotNull(authorizationResponse.getSessionId(), "The session_id is null");
-        assertNotNull(authorizationResponse.getSid(), "The sid is null");
 
         String idToken = authorizationResponse.getIdToken();
+
+        String sid = Jwt.parse(idToken).getClaims().getClaimAsString("sid");
+        assertNotNull(sid, "The sid is null");
 
         // 3. End session
         String state1 = UUID.randomUUID().toString();
         EndSessionRequest endSessionRequest1 = new EndSessionRequest(idToken, postLogoutRedirectUri, state1);
-        endSessionRequest1.setSid(authorizationResponse.getSid());
+        endSessionRequest1.setSid(sid);
 
         EndSessionClient endSessionClient = new EndSessionClient(endSessionEndpoint);
         endSessionClient.setRequest(endSessionRequest1);
@@ -120,7 +123,7 @@ public class EndSessionRestWebServiceHttpTest extends BaseTest {
         // 4. End session with an already ended session
         String endSessionId2 = UUID.randomUUID().toString();
         EndSessionRequest endSessionRequest2 = new EndSessionRequest(idToken, postLogoutRedirectUri, endSessionId2);
-        endSessionRequest2.setSid(authorizationResponse.getSid());
+        endSessionRequest2.setSid(sid);
 
         EndSessionClient endSessionClient2 = new EndSessionClient(endSessionEndpoint);
         endSessionClient2.setRequest(endSessionRequest2);
