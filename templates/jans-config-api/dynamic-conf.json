@@ -1,4 +1,5 @@
 {
+  "configOauthEnabled": ${configOauthEnabled},
   "apiApprovedIssuer": ["${apiApprovedIssuer}"],
   "apiProtectionType": "${apiProtectionType}",
   "apiClientId": "${jca_client_id}",
