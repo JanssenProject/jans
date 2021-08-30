@@ -1,4 +1,4 @@
-FROM alpine:3.14
+FROM alpine:3.13
 
 # ===============
 # Alpine packages
@@ -115,7 +115,7 @@ LABEL name="configuration-manager" \
     maintainer="Janssen <support@jans.io>" \
     vendor="Janssen" \
     version="1.0.0" \
-    release="b9" \
+    release="b10" \
     summary="Janssen Configuration Manager" \
     description="Manage config and secret"
 
