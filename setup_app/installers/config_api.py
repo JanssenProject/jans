@@ -185,8 +185,14 @@ class ConfigApiInstaller(JettyInstaller):
         scopes_id_list = []
 
         for scope in result:
-            scopes.append('jansScope: ' + (scope['dn'] if isinstance(scope, dict) else scope[1]['dn']))
-            scopes_id_list.append(scope['jansId'] if isinstance(scope, dict) else scope[1]['jansId'])
+            if isinstance(scope, dict):
+                if 'jansScope' in scope.get('objectClass', scope.get('objectclass',[])):
+                    scopes.append('jansScope: ' + scope['dn'])
+                    scopes_id_list.append(scope['jansId'])
+            else:
+                if 'jansScope' in scope[1]['objectClass']:
+                    scopes.append('jansScope: ' +  scope[1]['dn'])
+                    scopes_id_list.append(scope[1]['jansId'])
 
         stat_scope = 'jansScope: inum=C4F7,ou=scopes,o=jans'
 
