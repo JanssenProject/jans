@@ -52,6 +52,10 @@ public abstract class AuthorizationService implements Serializable {
         return this.configurationFactory.getApiApprovedIssuer();
     }
 
+    public boolean isConfigOauthEnabled() {
+        return this.configurationFactory.isConfigOauthEnabled();
+    }
+
     public List<String> getAuthSpecificScopeRequired(ResourceInfo resourceInfo) {
         return authUtil.getAuthSpecificScopeRequired(resourceInfo);
     }
