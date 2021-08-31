@@ -187,14 +187,4 @@ class CBM:
                 logIt("Query Result: {}".format(str(js)))
         except:
             pass
-if __name__ == '__main__':
-    hostname = raw_input('hostname: ')
-    admin = raw_input('admin: ')
-    admin_pass = raw_input('admin password: ')
-    
-    cbm = CBM(hostname, admin, admin_pass)
-    cbm.initialize_node()
-    cbm.rename_node()
-    cbm.set_index_storage_mode()
-    cbm.setup_services()
-    cbm.set_admin_password()
+
