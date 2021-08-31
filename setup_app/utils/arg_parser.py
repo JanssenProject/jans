@@ -42,6 +42,7 @@ def arg_parser():
     parser.add_argument('-couchbase-admin-user', help="Couchbase admin user")
     parser.add_argument('-couchbase-admin-password', help="Couchbase admin user password")
     parser.add_argument('-couchbase-bucket-prefix', help="Set prefix for couchbase buckets", default='jans')
+    parser.add_argument('-couchbase-hostname', help="Remote couchbase server hostname")
 
     parser.add_argument('--no-data', help="Do not import any data to database backend, used for clustering", action='store_true')
     parser.add_argument('--no-jsauth', help="Do not install OAuth2 Authorization Server", action='store_true')
