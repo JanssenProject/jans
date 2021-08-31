@@ -52,7 +52,7 @@ def get_setup_options():
         if base.argsp.rdbm_port:
             setupOptions['rdbm_port'] = base.argsp.rdbm_port
         else:
-            if setupOptions['rdbm_type'] == 'pgsql':
+            if setupOptions.get('rdbm_type') == 'pgsql':
                 setupOptions['rdbm_port'] = 5432
 
         if base.argsp.rdbm_db:
@@ -83,6 +83,8 @@ def get_setup_options():
     setupOptions['couchbase_bucket_prefix'] = base.argsp.couchbase_bucket_prefix
     setupOptions['cb_password'] = base.argsp.couchbase_admin_password
     setupOptions['couchebaseClusterAdmin'] = base.argsp.couchbase_admin_user
+    if base.argsp.couchbase_hostname:
+        setupOptions['couchbase_hostname'] = base.argsp.couchbase_hostname
 
     if base.argsp.no_jsauth:
         setupOptions['installOxAuth'] = False
