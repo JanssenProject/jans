@@ -481,7 +481,7 @@ public class Scim2UserService implements Serializable {
 	public void createUser(ScimCustomPerson gluuPerson, UserResource user, String url) throws Exception {
 
 		String location = url + "/" + gluuPerson.getInum();
-		gluuPerson.setAttribute("oxTrustMetaLocation", location);
+		gluuPerson.setAttribute("jansMetaLocation", location);
 
 		log.info("Persisting user {}", user.getUserName());
 		userPersistenceHelper.addCustomObjectClass(gluuPerson);
