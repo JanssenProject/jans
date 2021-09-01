@@ -192,7 +192,7 @@ public class Scim2GroupService implements Serializable {
 	public void createGroup(GluuGroup gluuGroup, GroupResource group, String groupsUrl, String usersUrl) throws Exception {
 
 		String location = groupsUrl + "/" + gluuGroup.getInum();
-		gluuGroup.setAttribute("oxTrustMetaLocation", location);
+		gluuGroup.setAttribute("jansMetaLocation", location);
 
 		log.info("Persisting group {}", group.getDisplayName());
 
