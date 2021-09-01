@@ -6,19 +6,8 @@
 
 package io.jans.as.common.model.registration;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
-import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
-import io.jans.as.model.crypto.signature.SignatureAlgorithm;
-import org.apache.commons.lang.StringUtils;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.BackchannelTokenDeliveryMode;
 import io.jans.as.model.common.GrantType;
@@ -37,6 +26,12 @@ import io.jans.orm.annotation.JsonObject;
 import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.model.base.CustomAttribute;
 import io.jans.orm.model.base.DeletableEntity;
+import org.apache.commons.lang.StringUtils;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author Javier Rojas Blum
