@@ -99,7 +99,9 @@ public class JwtAuthorizationRequest {
     private String payload;
     private JSONObject jsonPayload;
 
-    private AppConfiguration appConfiguration;
+    private final AppConfiguration appConfiguration;
+    private final AbstractCryptoProvider cryptoProvider;
+    private final Client client;
 
     public JwtAuthorizationRequest(AppConfiguration appConfiguration, AbstractCryptoProvider cryptoProvider, String encodedJwt, Client client) throws InvalidJwtException {
         try {
@@ -108,6 +110,8 @@ public class JwtAuthorizationRequest {
             this.scopes = new ArrayList<>();
             this.prompts = new ArrayList<>();
             this.encodedJwt = encodedJwt;
+            this.cryptoProvider = cryptoProvider;
+            this.client = client;
 
             if (StringUtils.isEmpty(encodedJwt)) {
                 throw new InvalidJwtException("The JWT is null or empty");
@@ -148,9 +152,7 @@ public class JwtAuthorizationRequest {
                 Jwe jwe = jweDecrypter.decrypt(encodedJwt);
 
                 final Jwt nestedJwt = jwe.getSignedJWTPayload();
-                if (nestedJwt != null && !validateSignature(cryptoProvider, nestedJwt.getHeader().getSignatureAlgorithm(), client, nestedJwt.getSigningInput(), nestedJwt.getEncodedSignature())) {
-                    throw new InvalidJwtException("The Nested JWT signature is not valid");
-                }
+                validateNestedJwt(nestedJwt);
 
                 loadHeader(jwe.getHeader().toJsonString());
                 loadPayload(jwe.getClaims().toJsonString());
@@ -176,7 +178,7 @@ public class JwtAuthorizationRequest {
                 if (sigAlg == SignatureAlgorithm.NONE && appConfiguration.getFapiCompatibility()) {
                     throw new InvalidJwtException("None algorithm is not allowed for FAPI");
                 }
-                if (!validateSignature(cryptoProvider, sigAlg, client, signingInput, encodedSignature)) {
+                if (!validateSignature(sigAlg, signingInput, encodedSignature)) {
                     throw new InvalidJwtException("The JWT signature is not valid");
                 }
 
@@ -187,6 +189,20 @@ public class JwtAuthorizationRequest {
 
         } catch (Exception e) {
             throw new InvalidJwtException(e);
+        }
+    }
+
+    private void validateNestedJwt(Jwt nestedJwt) throws Exception {
+        if (nestedJwt == null) { // we validated nested JWT only if it's present.
+            return;
+        }
+
+        String kid = nestedJwt.getHeader().getKeyId();
+        if (StringUtils.isBlank(kid))
+            kid = keyId;
+
+        if (!validateSignature(cryptoProvider, nestedJwt.getHeader().getSignatureAlgorithm(), client, nestedJwt.getSigningInput(), nestedJwt.getEncodedSignature(), kid)) {
+            throw new InvalidJwtException("The Nested JWT signature is not valid");
         }
     }
 
@@ -316,13 +332,17 @@ public class JwtAuthorizationRequest {
         }
     }
 
-    private boolean validateSignature(AbstractCryptoProvider cryptoProvider, SignatureAlgorithm signatureAlgorithm, Client client, String signingInput, String signature) throws Exception {
+    public boolean validateSignature(SignatureAlgorithm signatureAlgorithm, String signingInput, String signature) throws Exception {
+        return validateSignature(cryptoProvider, signatureAlgorithm, client, signingInput, signature, keyId);
+    }
+
+    public static boolean validateSignature(AbstractCryptoProvider cryptoProvider, SignatureAlgorithm signatureAlgorithm, Client client, String signingInput, String signature, String kid) throws Exception {
         ClientService clientService = CdiUtil.bean(ClientService.class);
         String sharedSecret = clientService.decryptSecret(client.getClientSecret());
         JSONObject jwks = Strings.isNullOrEmpty(client.getJwks()) ?
                 JwtUtil.getJSONWebKeys(client.getJwksUri()) :
                 new JSONObject(client.getJwks());
-        return cryptoProvider.verifySignature(signingInput, signature, keyId, jwks, sharedSecret, signatureAlgorithm);
+        return cryptoProvider.verifySignature(signingInput, signature, kid, jwks, sharedSecret, signatureAlgorithm);
     }
 
     public JSONObject getJsonPayload() {
