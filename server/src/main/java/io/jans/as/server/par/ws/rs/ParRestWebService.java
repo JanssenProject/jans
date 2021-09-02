@@ -135,7 +135,6 @@ public class ParRestWebService {
             par.getAttributes().setRedirectUri(redirectUri);
             par.getAttributes().setState(state);
             par.getAttributes().setResponseMode(responseMode);
-            par.getAttributes().setResponseMode(responseMode);
             par.getAttributes().setNonce(nonce);
             par.getAttributes().setDisplay(display);
             par.getAttributes().setPrompt(prompt);
