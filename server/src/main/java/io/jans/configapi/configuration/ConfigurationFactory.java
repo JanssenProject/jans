@@ -178,6 +178,7 @@ public class ConfigurationFactory {
         this.configOauthEnabled = configOauthEnabled;
     }
 
+    @SuppressWarnings({ "all" })
     public void create() {
         loadBaseConfiguration();
         this.saltFilePath = confDir() + SALT_FILE_NAME;

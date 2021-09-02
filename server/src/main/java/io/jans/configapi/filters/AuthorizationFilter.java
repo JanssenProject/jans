@@ -53,6 +53,7 @@ public class AuthorizationFilter implements ContainerRequestFilter {
     @Inject
     AuthorizationService authorizationService;
 
+    @SuppressWarnings({ "all" })
     public void filter(ContainerRequestContext context) {
         log.info("=======================================================================");
         log.info("====== context = " + context + " , info.getAbsolutePath() = " + info.getAbsolutePath()
