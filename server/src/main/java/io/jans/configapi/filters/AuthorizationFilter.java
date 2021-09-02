@@ -69,27 +69,31 @@ public class AuthorizationFilter implements ContainerRequestFilter {
         log.info("\n\n\n AuthorizationFilter::filter() - authorizationHeader = " + authorizationHeader + " , issuer = "
                 + issuer + " , configOauthEnabled = " + configOauthEnabled + "\n\n\n");
 
-        if (configOauthEnabled) {
-            log.info("\n\n\n AuthorizationFilter::filter() - Config Api OAuth Valdation Enabled");
-            if (!isTokenBasedAuthentication(authorizationHeader)) {
-                abortWithUnauthorized(context);
-                log.info("======ONLY TOKEN BASED AUTHORIZATION IS SUPPORTED======================");
-                return;
-            }
-            try {
-                authorizationHeader = this.authorizationService.processAuthorization(authorizationHeader, issuer,
-                        resourceInfo, context.getMethod(), request.getRequestURI());
-
-                if (authorizationHeader != null && authorizationHeader.trim().length() > 0) {
-                    context.getHeaders().remove(HttpHeaders.AUTHORIZATION);
-                    context.getHeaders().add(HttpHeaders.AUTHORIZATION, authorizationHeader);
-                }
-            } catch (Exception ex) {
-                log.error("======AUTHORIZATION  FAILED ===========================================", ex);
-                abortWithUnauthorized(context);
-            }
+        if (!configOauthEnabled) {
+            log.info("====== Authorization Granted...====== ");
+            return;
         }
-        log.info("======AUTHORIZATION  GRANTED===========================================");
+
+        log.info("\n\n\n AuthorizationFilter::filter() - Config Api OAuth Valdation Enabled");
+        if (!isTokenBasedAuthentication(authorizationHeader)) {
+            abortWithUnauthorized(context);
+            log.info("======ONLY TOKEN BASED AUTHORIZATION IS SUPPORTED======================");
+            return;
+        }
+        try {
+            authorizationHeader = this.authorizationService.processAuthorization(authorizationHeader, issuer,
+                    resourceInfo, context.getMethod(), request.getRequestURI());
+
+            if (authorizationHeader != null && authorizationHeader.trim().length() > 0) {
+                context.getHeaders().remove(HttpHeaders.AUTHORIZATION);
+                context.getHeaders().add(HttpHeaders.AUTHORIZATION, authorizationHeader);
+            }
+            log.info("======AUTHORIZATION  GRANTED===========================================");
+        } catch (Exception ex) {
+            log.error("======AUTHORIZATION  FAILED ===========================================", ex);
+            abortWithUnauthorized(context);
+        }
+
     }
 
     private boolean isTokenBasedAuthentication(String authorizationHeader) {
