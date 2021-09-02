@@ -216,7 +216,8 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         serviceConfiguration['installed'] = True
 
         # don't send header to server
-        self.set_jetty_param(serviceName, 'jetty.httpConfig.sendServerVersion', 'false', inifile='http.ini')
+        inifile = 'http.ini' if self.jetty_dist_string == 'jetty-home' else 'start.ini'
+        self.set_jetty_param(serviceName, 'jetty.httpConfig.sendServerVersion', 'false', inifile=inifile)
 
         if base.snap:
             run_dir = os.path.join(jettyServiceBase, 'run')
