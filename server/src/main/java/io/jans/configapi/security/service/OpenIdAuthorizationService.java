@@ -46,8 +46,8 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
     @Inject
     OpenIdService openIdService;
 
-    public String processAuthorization(String token, String issuer, ResourceInfo resourceInfo, String method, String path)
-            throws Exception {
+    public String processAuthorization(String token, String issuer, ResourceInfo resourceInfo, String method,
+            String path) throws Exception {
         log.debug("oAuth  Authorization parameters , token:{}, issuer:{}, resourceInfo:{}, method: {}, path: {} ",
                 token, issuer, resourceInfo, method, path);
 
@@ -101,7 +101,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
         return this.validateScope(tokenScopes, resourceInfo, issuer);
     }
 
-    private String  validateScope(List<String> tokenScopes, ResourceInfo resourceInfo, String issuer) throws Exception {
+    private String validateScope(List<String> tokenScopes, ResourceInfo resourceInfo, String issuer) throws Exception {
         log.debug("Validate scope, tokenScopes:{}, resourceInfo: {}, issuer: {}", tokenScopes, resourceInfo, issuer);
         String accessToken = null;
         // Get resource scope
@@ -130,12 +130,12 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
 
         // If only authSpecificScope missing then proceed with token creation else throw
         // error
-        if ( missingScopes!=null && missingScopes.size()>0 && !isEqualCollection(missingScopes, authSpecificScope)) {
+        if (missingScopes != null && missingScopes.size() > 0 && !isEqualCollection(missingScopes, authSpecificScope)) {
             log.error("Insufficient scopes!! Required scope: " + resourceScopes + ", however token scopes: "
                     + tokenScopes);
             throw new WebApplicationException("Insufficient scopes!! , Required scope: " + resourceScopes
                     + ", however token scopes: " + tokenScopes, Response.status(Response.Status.UNAUTHORIZED).build());
-        }        
+        }
 
         // Generate token with required resourceScopes
         resourceScopes.addAll(authSpecificScope);
@@ -156,7 +156,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
         }
 
         log.info("Token scopes Valid");
-        return "Bearer " +accessToken;
+        return "Bearer " + accessToken;
     }
 
 }

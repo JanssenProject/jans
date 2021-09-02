@@ -22,13 +22,13 @@
 
     <Loggers>
 		<!-- ############### Jans ################# -->
-		<Logger name="io.jans" level="DEBUG" />
-
-        <Logger name="io.jans.configapi" level="DEBUG">
+        <Logger name="io.jans" level="${log4j.default.log.level}" />
+        
+        <Logger name="io.jans.configapi" level="${log4j.default.log.level}" additivity="false">
             <AppenderRef ref="FILE" />
         </Logger>
-
-        <Root level="INFO">
+            
+        <Root level="info">
 			<AppenderRef ref="FILE" />
 			<AppenderRef ref="STDOUT" />
         </Root>
