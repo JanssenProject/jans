@@ -1,7 +1,8 @@
 import os
 import glob
 import re
-
+import shutil
+import xml.etree.ElementTree as ET
 
 from setup_app import paths
 from setup_app.utils import base
@@ -74,7 +75,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         except:
             self.logIt("Error encountered while extracting archive %s" % jettyArchive)
 
-        jettyDestinationPath = max(glob.glob(os.path.join(jetty_dist, 'jetty-distribution-*')))
+        jettyDestinationPath = max(glob.glob(os.path.join(jetty_dist, '{}-*'.format(self.jetty_dist_string))))
 
         self.run([paths.cmd_ln, '-sf', jettyDestinationPath, self.jetty_home])
         self.run([paths.cmd_chmod, '-R', "755", "%s/bin/" % jettyDestinationPath])
@@ -98,34 +99,44 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         self.run([paths.cmd_chmod, '-R', '755', "%s/bin/jetty.sh" % self.jetty_home])
 
     def get_jetty_info(self):
-        jetty_archive_list = glob.glob(os.path.join(Config.distAppFolder, 'jetty-distribution-*.tar.gz'))
-
+        self.jetty_dist_string = 'jetty-home'
+        # first try latest versions
+        jetty_archive_list = glob.glob(os.path.join(Config.distAppFolder, 'jetty-home-*.tar.gz'))
+        if not jetty_archive_list:
+            jetty_archive_list = glob.glob(os.path.join(Config.distAppFolder, 'jetty-distribution-*.tar.gz'))
+            self.jetty_dist_string = 'jetty-distribution'
         if not jetty_archive_list:
             self.logIt("Jetty archive not found in {}. Exiting...".format(Config.distAppFolder), True, True)
 
         jettyArchive = max(jetty_archive_list)
 
         jettyArchive_fn = os.path.basename(jettyArchive)
-        jetty_regex = re.search('jetty-distribution-(\d*\.\d*)', jettyArchive_fn)
-
+        jetty_regex = re.search('{}-(\d*\.\d*)'.format(self.jetty_dist_string), jettyArchive_fn)
         if not jetty_regex:
             self.logIt("Can't determine Jetty version", True, True)
 
         jetty_dist = '/opt/jetty-' + jetty_regex.groups()[0]
         Config.templateRenderingDict['jetty_dist'] = jetty_dist
+        self.jetty_version_string = jetty_regex.groups()[0]
 
         return jettyArchive, jetty_dist
 
 
     def installJettyService(self, serviceConfiguration, supportCustomizations=False, supportOnlyPageCustomizations=False):
         serviceName = serviceConfiguration['name']
-
         self.logIt("Installing jetty service %s..." % serviceName)
 
+        self.get_jetty_info()
         jettyServiceBase = '%s/%s' % (self.jetty_base, serviceName)
         jettyModules = serviceConfiguration['jetty']['modules']
         jettyModulesList = jettyModules.split(',')
-        
+
+        jettyModulesList = [m.strip() for m in jettyModules.split(',')]
+        if self.jetty_dist_string == 'jetty-home':
+            if not 'cdi-decorate' in jettyModulesList:
+                jettyModulesList.append('cdi-decorate')
+            jettyModules = ','.join(jettyModulesList)
+
         if base.snap:
             Config.templateRenderingDict['jetty_dist'] = self.jetty_base
         else:
@@ -205,18 +216,22 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         serviceConfiguration['installed'] = True
 
         # don't send header to server
-        self.set_jetty_param(serviceName, 'jetty.httpConfig.sendServerVersion', 'false')
+        self.set_jetty_param(serviceName, 'jetty.httpConfig.sendServerVersion', 'false', inifile='http.ini')
 
         if base.snap:
             run_dir = os.path.join(jettyServiceBase, 'run')
             if not os.path.exists(run_dir):
                 self.run([paths.cmd_mkdir, '-p', run_dir])
 
-    def set_jetty_param(self, jettyServiceName, jetty_param, jetty_val):
+    def set_jetty_param(self, jettyServiceName, jetty_param, jetty_val, inifile='start.ini'):
 
         self.logIt("Seeting jetty parameter {0}={1} for service {2}".format(jetty_param, jetty_val, jettyServiceName))
 
-        service_fn = os.path.join(self.jetty_base, jettyServiceName, 'start.ini')
+        path_list = [self.jetty_base, jettyServiceName, inifile]
+        if inifile != 'start.ini':
+            path_list.insert(-1, 'start.d')
+        service_fn = os.path.join(*tuple(path_list))
+
         start_ini = self.readFile(service_fn)
         start_ini_list = start_ini.splitlines()
         param_ln = jetty_param + '=' + jetty_val
@@ -231,7 +246,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         else:
             start_ini_list.append(param_ln)
 
-        self.writeFile(service_fn, '\n'.join(start_ini_list))
+        self.writeFile(service_fn, '\n'.join(start_ini_list), backup=False)
 
     def calculate_aplications_memory(self, application_max_ram, jetty_app_configuration, installedComponents):
         self.logIt("Calculating memory setting for applications")
@@ -309,3 +324,34 @@ class JettyInstaller(BaseInstaller, SetupUtils):
                 installedComponents.append(self.jetty_app_configuration[service])
 
         return self.calculate_aplications_memory(Config.application_max_ram, self.jetty_app_configuration, installedComponents)
+
+    def war_for_jetty10(self, war_file):
+        if self.jetty_dist_string == 'jetty-home':
+            tmp_dir = '/tmp/war_{}'.format(os.urandom(6).hex())
+            shutil.unpack_archive(war_file, tmp_dir, format='zip')
+            jetty_env_fn = os.path.join(tmp_dir, 'WEB-INF/jetty-env.xml')
+
+            tree = ET.parse(jetty_env_fn)
+            root = tree.getroot()
+
+            for new in root.findall("New"):
+                for arg in new.findall("Arg"):
+                    for ref in arg.findall("Ref"):
+                        if ref.attrib.get('id') == 'webAppCtx':
+                            ref.set('refid', 'webAppCtx')
+                            ref.attrib.pop('id')
+
+            jetty_web_fn = os.path.join(tmp_dir, 'WEB-INF/jetty-web.xml')
+            if os.path.exists(jetty_web_fn):
+                os.remove(jetty_web_fn)
+            xml_header = '<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "https://www.eclipse.org/jetty/configure_{}.dtd">\n\n'.format(self.jetty_version_string.replace('.', '_'))
+            with open(jetty_env_fn, 'wb') as f:
+                f.write(b'<?xml version="1.0" encoding="UTF-8"?>\n')
+                f.write(xml_header.encode())
+                f.write(ET.tostring(root,method='xml'))
+
+            tmp_war_fn = '/tmp/{}.war'.format(os.urandom(6).hex())
+            shutil.make_archive(tmp_war_fn, format='zip', root_dir=tmp_dir)
+            shutil.rmtree(tmp_dir)
+            os.remove(war_file)
+            shutil.move(tmp_war_fn+'.zip', war_file)
