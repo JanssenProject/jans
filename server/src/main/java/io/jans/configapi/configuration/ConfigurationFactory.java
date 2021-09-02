@@ -96,6 +96,7 @@ public class ConfigurationFactory {
     private String apiClientId;
     private String apiClientPassword;
     private List<String> apiApprovedIssuer;
+    private boolean configOauthEnabled;
 
     @Produces
     @ApplicationScoped
@@ -169,6 +170,15 @@ public class ConfigurationFactory {
         return this.apiApprovedIssuer;
     }
 
+    public boolean isConfigOauthEnabled() {
+        return configOauthEnabled;
+    }
+
+    public void setConfigOauthEnabled(boolean configOauthEnabled) {
+        this.configOauthEnabled = configOauthEnabled;
+    }
+
+    @SuppressWarnings({ "all" })
     public void create() {
         loadBaseConfiguration();
         this.saltFilePath = confDir() + SALT_FILE_NAME;
@@ -253,6 +263,7 @@ public class ConfigurationFactory {
         this.apiProtectionType = this.apiAppConfiguration.getApiProtectionType();
         this.apiClientId = this.apiAppConfiguration.getApiClientId();
         this.apiClientPassword = this.apiAppConfiguration.getApiClientPassword();
+        this.configOauthEnabled = this.apiAppConfiguration.isConfigOauthEnabled();
 
         if (this.apiAppConfiguration.getCorsConfigurationFilters() != null
                 && this.apiAppConfiguration.getCorsConfigurationFilters().size() > 0) {
@@ -262,7 +273,8 @@ public class ConfigurationFactory {
 
         log.debug("Properties set, this.apiApprovedIssuer = " + this.apiApprovedIssuer + " , this.apiProtectionType = "
                 + this.apiProtectionType + " , this.apiClientId = " + this.apiClientId + " , this.apiClientPassword = "
-                + this.apiClientPassword + " , this.corsConfigurationFilter = " + this.corsConfigurationFilter);
+                + this.apiClientPassword + " , this.corsConfigurationFilter = " + this.corsConfigurationFilter
+                + " , this.configOauthEnabled =" + this.configOauthEnabled);
 
         // Populate corsConfigurationFilter object
         CorsConfiguration corsConfiguration = this.getCorsConfiguration();

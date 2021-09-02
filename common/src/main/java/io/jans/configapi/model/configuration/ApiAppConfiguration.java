@@ -9,6 +9,7 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ApiAppConfiguration implements Configuration {
 
+    private boolean configOauthEnabled;
     private List<String> apiApprovedIssuer;
     private String apiProtectionType;
     private String apiClientId;
@@ -25,6 +26,14 @@ public class ApiAppConfiguration implements Configuration {
     private List<String> exclusiveAuthScopes;
 
     private List<CorsConfigurationFilter> corsConfigurationFilters;
+
+    public boolean isConfigOauthEnabled() {
+        return configOauthEnabled;
+    }
+
+    public void setConfigOauthEnabled(boolean configOauthEnabled) {
+        this.configOauthEnabled = configOauthEnabled;
+    }
 
     public List<String> getApiApprovedIssuer() {
         return apiApprovedIssuer;
