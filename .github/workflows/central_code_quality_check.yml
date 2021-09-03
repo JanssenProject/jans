@@ -42,21 +42,23 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of sonarqube analysis
-      
+
       - name: Set up JDK 11
-        if: contains(env.JVM_PROJECTS, github.repository)
+        # JanssenProject/jans-cli is too similar to JanssenProject/jans-client-api as the contains function is returning it belonging to the JVM_PROJECT
+        if: contains(env.JVM_PROJECTS, github.repository) && github.repository != 'JanssenProject/jans-cli'
         uses: actions/setup-java@v2.3.0
         with:
           java-version: '11'
           distribution: 'adopt'
           
       - name: Build with Maven
-        if: contains(env.JVM_PROJECTS, github.repository)
+        # JanssenProject/jans-cli is too similar to JanssenProject/jans-client-api as the contains function is returning it belonging to the JVM_PROJECT
+        if: contains(env.JVM_PROJECTS, github.repository) && github.repository != 'JanssenProject/jans-cli'
         run: |
           case "$GITHUB_REPOSITORY" in
             "JanssenProject/jans-auth-server") 
               echo "Run maven build for jans-auth-server "
-              mvn clean -fae -X -pl \!client,\!static,\!server,\!rp-spring-boot jacoco:prepare-agent test install jacoco:report
+              mvn clean -fae -X -pl \!client,\!static,\!server jacoco:prepare-agent test install jacoco:report
             ;;
             "JanssenProject/jans-client-api") 
               echo "Run maven build for jans-client-api"
@@ -81,7 +83,8 @@ jobs:
           esac
 
       - name: Cache SonarCloud packages for JVM based project
-        if: contains(env.JVM_PROJECTS, github.repository)
+        # JanssenProject/jans-cli is too similar to JanssenProject/jans-client-api as the contains function is returning it belonging to the JVM_PROJECT
+        if: contains(env.JVM_PROJECTS, github.repository) && github.repository != 'JanssenProject/jans-cli'
         uses: actions/cache@v2.1.6
         with:
           path: ~/.sonar/cache
@@ -89,7 +92,8 @@ jobs:
           restore-keys: ${{ runner.os }}-sonar
           
       - name: Cache Maven packages
-        if: contains(env.JVM_PROJECTS, github.repository)
+        # JanssenProject/jans-cli is too similar to JanssenProject/jans-client-api as the contains function is returning it belonging to the JVM_PROJECT
+        if: contains(env.JVM_PROJECTS, github.repository) && github.repository != 'JanssenProject/jans-cli'
         uses: actions/cache@v2.1.6
         with:
           path: ~/.m2
@@ -97,7 +101,8 @@ jobs:
           restore-keys: ${{ runner.os }}-m2
           
       - name: Build and analyze JVM based project
-        if: contains(env.JVM_PROJECTS, github.repository)
+        # JanssenProject/jans-cli is too similar to JanssenProject/jans-client-api as the contains function is returning it belonging to the JVM_PROJECT
+        if: contains(env.JVM_PROJECTS, github.repository) && github.repository != 'JanssenProject/jans-cli'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -105,7 +110,7 @@ jobs:
           case "$GITHUB_REPOSITORY" in
             "JanssenProject/jans-auth-server") 
               echo "Run Sonar analysis for jans-auth-server "
-              mvn -B -pl \!client,\!static,\!server,\!rp-spring-boot verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+              mvn -B -pl \!client,\!static,\!server org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
             ;;
             "JanssenProject/jans-client-api") 
               echo "Run Sonar analysis for jans-client-api"
