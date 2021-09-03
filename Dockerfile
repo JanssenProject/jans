@@ -14,16 +14,16 @@ RUN apk update \
 # Jetty
 # =====
 
-ARG JETTY_VERSION=9.4.43.v20210629
+ARG JETTY_VERSION=10.0.6
 ARG JETTY_HOME=/opt/jetty
 ARG JETTY_BASE=/opt/jans/jetty
 ARG JETTY_USER_HOME_LIB=/home/jetty/lib
 
 # Install jetty
-RUN wget -q https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-distribution/${JETTY_VERSION}/jetty-distribution-${JETTY_VERSION}.tar.gz -O /tmp/jetty.tar.gz \
+RUN wget -q https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/${JETTY_VERSION}/jetty-home-${JETTY_VERSION}.tar.gz -O /tmp/jetty.tar.gz \
     && mkdir -p /opt \
     && tar -xzf /tmp/jetty.tar.gz -C /opt \
-    && mv /opt/jetty-distribution-${JETTY_VERSION} ${JETTY_HOME} \
+    && mv /opt/jetty-home-${JETTY_VERSION} ${JETTY_HOME} \
     && rm -rf /tmp/jetty.tar.gz
 
 # Ports required by jetty
@@ -44,15 +44,16 @@ RUN wget -q https://repo1.maven.org/maven2/org/python/jython-installer/${JYTHON_
 # ====
 
 ENV CN_VERSION=1.0.0-SNAPSHOT
-ENV CN_BUILD_DATE='2021-08-30 12:59'
+ENV CN_BUILD_DATE='2021-09-02 13:16'
 ENV CN_SOURCE_URL=https://maven.jans.io/maven/io/jans/jans-scim-server/${CN_VERSION}/jans-scim-server-${CN_VERSION}.war
 
 # Install SCIM
 RUN wget -q ${CN_SOURCE_URL} -O /tmp/scim.war \
     && mkdir -p ${JETTY_BASE}/jans-scim/webapps/jans-scim \
     && unzip -qq /tmp/scim.war -d ${JETTY_BASE}/jans-scim/webapps/jans-scim \
-    && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-scim --add-to-start=server,deploy,resources,http,http-forwarded,jsp,websocket \
-    && rm -f /tmp/scim.war
+    && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-scim --add-to-start=server,deploy,resources,http,http-forwarded,jsp,websocket,cdi-decorate \
+    && rm -f /tmp/scim.war \
+    && rm -f ${JETTY_BASE}/jans-scim/webapps/jans-scim/WEB-INF/jetty-web.xml
 
 # ======
 # Python
@@ -167,7 +168,8 @@ RUN mkdir -p /etc/certs /deploy \
     /etc/jans/conf \
     /app/templates
 
-COPY jetty/*.xml ${JETTY_BASE}/jans-scim/webapps/
+COPY jetty/jans-scim.xml ${JETTY_BASE}/jans-scim/webapps/
+COPY jetty/jetty-env.xml ${JETTY_BASE}/jans-scim/webapps/jans-scim/WEB-INF/
 COPY conf/*.tmpl /app/templates/
 
 COPY scripts /app/scripts
@@ -188,7 +190,9 @@ RUN chown -R 1000:1000 /opt/jans/jetty \
     && chgrp -R 0 /deploy && chmod -R g=u /deploy \
     && chgrp -R 0 /etc/certs && chmod -R g=u /etc/certs \
     && chgrp -R 0 /etc/jans && chmod -R g=u /etc/jans \
-    && chmod -R +w /etc/ssl/certs/java/cacerts && chgrp -R 0 /etc/ssl/certs/java/cacerts && chmod -R g=u /etc/ssl/certs/java/cacerts
+    && chmod -R +w /etc/ssl/certs/java/cacerts && chgrp -R 0 /etc/ssl/certs/java/cacerts && chmod -R g=u /etc/ssl/certs/java/cacerts \
+    && chmod 664 /opt/jetty/etc/jetty.xml \
+    && chmod 664 /opt/jetty/etc/webdefault.xml
 
 USER 1000
 
