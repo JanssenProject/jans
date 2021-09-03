@@ -98,6 +98,7 @@ def main():
 
     modify_jetty_xml()
     modify_webdefault_xml()
+    modify_server_ini()
 
 
 def modify_jetty_xml():
@@ -110,14 +111,6 @@ def modify_jetty_xml():
         r'<New id="DefaultHandler" class="org.eclipse.jetty.server.handler.DefaultHandler"/>',
         r'<New id="DefaultHandler" class="org.eclipse.jetty.server.handler.DefaultHandler">\n\t\t\t\t <Set name="showContexts">false</Set>\n\t\t\t </New>',
         txt,
-        flags=re.DOTALL | re.M,
-    )
-
-    # disable Jetty version info
-    updates = re.sub(
-        r'(<Set name="sendServerVersion"><Property name="jetty.httpConfig.sendServerVersion" deprecated="jetty.send.server.version" default=")true(" /></Set>)',
-        r'\1false\2',
-        updates,
         flags=re.DOTALL | re.M,
     )
 
@@ -139,6 +132,15 @@ def modify_webdefault_xml():
     )
 
     with open(fn, "w") as f:
+        f.write(updates)
+
+
+def modify_server_ini():
+    with open("/opt/jans/jetty/jans-config-api/start.d/server.ini", "a") as f:
+        updates = "\n".join([
+            # disable server version info
+            "jetty.httpConfig.sendServerVersion=false",
+        ])
         f.write(updates)
 
 
