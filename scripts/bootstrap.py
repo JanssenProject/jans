@@ -37,23 +37,6 @@ def modify_jetty_xml():
         flags=re.DOTALL | re.M,
     )
 
-    # disable Jetty version info
-    updates = re.sub(
-        r'(<Set name="sendServerVersion"><Property name="jetty.httpConfig.sendServerVersion" deprecated="jetty.send.server.version" default=")true(" /></Set>)',
-        r'\1false\2',
-        updates,
-        flags=re.DOTALL | re.M,
-    )
-
-    # set custom request header size
-    req_header_size = os.environ.get("CN_JETTY_REQUEST_HEADER_SIZE", "8192")
-    updates = re.sub(
-        r'(<Set name="requestHeaderSize"><Property name="jetty.httpConfig.requestHeaderSize" deprecated="jetty.request.header.size" default=)"\d+"( /></Set>)',
-        r'\1"{}"\2'.format(req_header_size),
-        updates,
-        flags=re.DOTALL | re.M,
-    )
-
     with open(fn, "w") as f:
         f.write(updates)
 
@@ -147,6 +130,7 @@ def main():
     #     )
 
     modify_jetty_xml()
+    modify_server_ini()
     modify_webdefault_xml()
 
     ext_jwks_uri = os.environ.get("CN_OB_EXT_SIGNING_JWKS_URI", "")
@@ -251,6 +235,18 @@ def main():
 
     # ensure we're using correct JKS file and JWKS uri
     modify_keystore_path(manager, keystore_path, jwks_uri)
+
+
+def modify_server_ini():
+    with open("/opt/jans/jetty/jans-auth/start.d/server.ini", "a") as f:
+        req_header_size = os.environ.get("CN_JETTY_REQUEST_HEADER_SIZE", "8192")
+        updates = "\n".join([
+            # disable server version info
+            "jetty.httpConfig.sendServerVersion=false",
+            # customize request header size
+            f"jetty.httpConfig.requestHeaderSize={req_header_size}",
+        ])
+        f.write(updates)
 
 
 if __name__ == "__main__":
