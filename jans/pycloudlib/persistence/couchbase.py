@@ -244,7 +244,7 @@ def render_couchbase_properties(manager, src: str, dest: str) -> None:
                 "ssl_enabled": str(as_boolean(
                     os.environ.get("CN_COUCHBASE_TRUSTSTORE_ENABLE", True)
                 )).lower(),
-                "couchbaseTrustStoreFn": manager.config.get("couchbaseTrustStoreFn"),
+                "couchbaseTrustStoreFn": manager.config.get("couchbaseTrustStoreFn") or "/etc/certs/couchbase.pkcs12",
                 "encoded_couchbaseTrustStorePass": encode_text(
                     CN_COUCHBASE_TRUSTSTORE_PASSWORD,
                     manager.secret.get("encoded_salt"),
@@ -265,7 +265,7 @@ def sync_couchbase_cert(manager=None) -> str:
         return f.read()
 
 
-def sync_couchbase_truststore(manager, dest: str = "") -> None:
+def sync_couchbase_truststore(manager, dest: str = "/etc/certs/couchbase.pkcs12") -> None:
     """Pull secret contains base64-string contents of Couchbase truststore,
     and save it as a JKS file, i.e. ``/etc/certs/couchbase.pkcs12``.
 
