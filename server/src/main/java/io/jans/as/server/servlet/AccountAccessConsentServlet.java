@@ -138,7 +138,7 @@ public class AccountAccessConsentServlet extends HttpServlet {
         	data.put(permissionKey, permissionValue);
         	data.put("ConsentId",ConsentID);
         	data.put("statusUpdateDateTime", timestamp.getTime());
-        	jsonObj.put("data",data);
+        	jsonObj.put("Data",data);
         	   	
         	out.print(jsonObj.toString());
         	httpResponse.setStatus(201, "Created");
