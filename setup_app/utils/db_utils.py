@@ -313,6 +313,11 @@ class DBUtils:
                 return result.__dict__
             return
 
+        elif mapping_location == BackendTypes.SPANNER:
+            table = self.get_spanner_table_for_dn(dn)
+            data = self.dn_exists_rdbm(dn, table)
+            return self.spanner_to_dict(data)
+
         elif mapping_location == BackendTypes.LDAP:
             base.logIt("Querying LDAP for dn {}".format(dn))
             result = self.ldap_conn.search(search_base=dn, search_filter='(objectClass=*)', search_scope=ldap3.BASE, attributes=['*'])
@@ -343,6 +348,31 @@ class DBUtils:
             return
         sqlalchemy_table = self.Base.classes[table].__table__
         return self.session.query(sqlalchemy_table).filter(sqlalchemy_table).filter(sqlalchemy_table.columns.dn == dn).first()
+
+
+    def spanner_to_dict(self, data):
+        if not data or not'rows' in data:
+            return {}
+
+        n = len(data['rows'])
+        retVal = []
+        for j in range(n):
+            row = data['rows'][j]
+            row_dict = {}
+
+            for i, field in enumerate(data['fields']):
+                val = row[i]
+                if val:
+                    if field['type'] == 'INT64':
+                        val = int(val)
+                    row_dict[field['name']] = val
+            if n > 1:
+                retVal.append(row_dict)
+            else:
+                return row_dict
+
+            return retVal
+
 
     def search(self, search_base, search_filter='(objectClass=*)', search_scope=ldap3.LEVEL, fetchmany=False):
         base.logIt("Searching database for dn {} with filter {}".format(search_base, search_filter))
@@ -423,24 +453,7 @@ class DBUtils:
                 if not data.get('rows'):
                     return retVal
 
-                n = len(data['rows']) if fetchmany else 1
-                for j in range(n):
-                    row = data['rows'][j]
-                    row_dict = {}
-
-                    for i, field in enumerate(data['fields']):
-                        val = row[i]
-                        if val:
-                            if field['type'] == 'INT64':
-                                val = int(val)
-                            row_dict[field['name']] = val
-                    if fetchmany:
-                        retVal.append(row_dict)
-                    else:
-                        retVal = row_dict
-                        break
-
-                return retVal
+                return self.spanner_to_dict(data)
 
             sqlalchemy_table = self.Base.classes[s_table]
             sqlalchemyQueryObject = self.session.query(sqlalchemy_table)
@@ -567,20 +580,22 @@ class DBUtils:
             data = self.spanner.exec_sql('SELECT jansConfProperty from jansCustomScr WHERE dn="{}"'.format(dn))
             jansConfProperty = []
             added = False
+            spanner_data = self.spanner_to_dict(data)
+            jansConfProperty = spanner_data.get('jansConfProperty', [])
 
-            if data and 'rows' in data and data['rows'] and data['rows'][0] and data['rows'][0][0]:
-                jansConfProperty = data['rows'][0][0]
-                for i, oxconfigprop in enumerate(jansConfProperty[:]):
-                    oxconfigpropjs = json.loads(oxconfigprop)
-                    if oxconfigpropjs.get('value1') == 'allowed_clients' and not client_id in oxconfigpropjs['value2']:
-                        oxconfigpropjs['value2'] = self.add2strlist(client_id, oxconfigpropjs['value2'])
-                        jansConfProperty[i] = json.dumps(oxconfigpropjs)
-                        added = True
-                        break
+            for i, oxconfigprop in enumerate(jansConfProperty):
+                oxconfigpropjs = json.loads(oxconfigprop)
+                if oxconfigpropjs.get('value1') == 'allowed_clients':
+                    if client_id in oxconfigpropjs['value2']:
+                        return
+                    oxconfigpropjs['value2'] = self.add2strlist(client_id, oxconfigpropjs['value2'])
+                    jansConfProperty[i] = json.dumps(oxconfigpropjs)
+                    added = True
+                    break
 
             if not added:
                 jansConfProperty.append(json.dumps({'value1': 'allowed_clients', 'value2': client_id}))
-                self.spanner.update_data(table='jansCustomScr', columns=['doc_id', 'jansConfProperty'], values=[[script_inum,  jansConfProperty]])
+            self.spanner.update_data(table='jansCustomScr', columns=['doc_id', 'jansConfProperty'], values=[[script_inum,  jansConfProperty]])
 
         elif backend_location == BackendTypes.COUCHBASE:
             bucket = self.get_bucket_for_dn(dn)
