@@ -5008,11 +5008,9 @@ components:
     StatResponse:
       type: object
       description: Server statistics response Object
-      properties:
-        response:
-          type: object
-          additionalProperties:
-            $ref: '#/components/schemas/StatResponseItem'
+      additionalProperties:
+        $ref: '#/components/schemas/StatResponseItem'
+		
     StatResponseItem:
       type: object
       description: Server statistics data
