@@ -226,6 +226,11 @@
 				<artifactId>guava</artifactId>
 				<version>${guava.version}</version>
 			</dependency>
+			<dependency>
+			    <groupId>com.google.http-client</groupId>
+			    <artifactId>google-http-client-jackson2</artifactId>
+			    <version>1.40.0</version>
+			</dependency>
 
 			<!-- Security -->
 			<dependency>
