@@ -17,7 +17,7 @@ jobs:
         uses: actions/checkout@master
       - name: Import GPG key
         id: import_gpg
-        uses: crazy-max/ghaction-import-gpg@v3
+        uses: crazy-max/ghaction-import-gpg@v4
         with:
           gpg-private-key: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY_PASSPHRASE }}
