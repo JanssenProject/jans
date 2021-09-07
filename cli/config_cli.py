@@ -788,8 +788,11 @@ class JCA_CLI:
         tabulated = False
 
         if api_response:
-            if 'response' in api_response:
-                api_response = api_response['response']
+            try:
+                if 'response' in api_response:
+                    api_response = api_response['response']
+            except:
+                pass
 
             selections.append('w')
             api_response_unmapped = []
