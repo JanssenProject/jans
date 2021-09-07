@@ -3,7 +3,6 @@ package io.jans.as.server.par.ws.rs;
 import com.google.common.collect.Lists;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
-import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.error.ErrorResponseFactory;
@@ -23,7 +22,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -68,8 +66,6 @@ public class ParValidator {
             return;
         }
 
-        List<ResponseType> responseTypes = ResponseType.fromString(par.getAttributes().getResponseType(), " ");
-
         try {
             JwtAuthorizationRequest jwtRequest = JwtAuthorizationRequest.createJwtRequest(request, null, client, redirectUriResponse, cryptoProvider, appConfiguration);
 
@@ -87,12 +83,11 @@ public class ParValidator {
 
             authorizeRestWebServiceValidator.validateRequestObject(jwtRequest, redirectUriResponse);
 
-            // MUST be equal
-            if (!jwtRequest.getResponseTypes().containsAll(responseTypes) || !responseTypes.containsAll(jwtRequest.getResponseTypes())) {
-                throw authorizeRestWebServiceValidator.createInvalidJwtRequestException(redirectUriResponse, "The responseType parameter is not the same in the JWT");
+            if (!jwtRequest.getResponseTypes().isEmpty()) {
+                par.getAttributes().setResponseType(jwtRequest.getJsonPayload().optString("response_type"));
             }
-            if (StringUtils.isBlank(jwtRequest.getClientId()) || !jwtRequest.getClientId().equals(par.getAttributes().getClientId())) {
-                throw authorizeRestWebServiceValidator.createInvalidJwtRequestException(redirectUriResponse, "The clientId parameter is not the same in the JWT");
+            if (StringUtils.isNotBlank(jwtRequest.getClientId())) {
+                par.getAttributes().setClientId(jwtRequest.getClientId());
             }
 
             Set<String> scopes = scopeChecker.checkScopesPolicy(client, par.getAttributes().getScope());
@@ -107,8 +102,8 @@ public class ParValidator {
                 scopes = scopeChecker.checkScopesPolicy(client, Lists.newArrayList(jwtRequest.getScopes()));
                 par.getAttributes().setScope(io.jans.as.model.util.StringUtils.implode(scopes, " "));
             }
-            if (jwtRequest.getRedirectUri() != null && !jwtRequest.getRedirectUri().equals(par.getAttributes().getRedirectUri())) {
-                throw authorizeRestWebServiceValidator.createInvalidJwtRequestException(redirectUriResponse, "The redirect_uri parameter is not the same in the JWT");
+            if (StringUtils.isNotBlank(jwtRequest.getRedirectUri())) {
+                par.getAttributes().setRedirectUri(jwtRequest.getRedirectUri());
             }
             if (StringUtils.isNotBlank(jwtRequest.getNonce())) {
                 par.getAttributes().setNonce(jwtRequest.getNonce());
