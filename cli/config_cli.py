@@ -701,6 +701,7 @@ class JCA_CLI:
     def unmap_model(self, model, data_dict=None):
         if data_dict is None:
             data_dict = {}
+
         for key_ in model.attribute_map:
 
             val = getattr(model, key_)
@@ -785,13 +786,19 @@ class JCA_CLI:
         selections = ['q', 'b']
         item_counters = []
         tabulated = False
+
         if api_response:
+            if 'response' in api_response:
+                api_response = api_response['response']
+
             selections.append('w')
             api_response_unmapped = []
             if isinstance(api_response, list):
                 for model in api_response:
                     data_dict = self.unmap_model(model)
                     api_response_unmapped.append(data_dict)
+            elif isinstance(api_response, dict):
+                api_response_unmapped = api_response
             else:
                 data_dict = self.unmap_model(api_response)
                 api_response_unmapped = data_dict
