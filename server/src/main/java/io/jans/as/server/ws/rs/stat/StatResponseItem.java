@@ -1,14 +1,17 @@
 package io.jans.as.server.ws.rs.stat;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * @author Yuriy Zabrovarnyy
  */
 public class StatResponseItem {
+
+    @JsonProperty
+    private String month;
 
     @JsonProperty(value = "monthly_active_users")
     private long monthlyActiveUsers;
@@ -33,10 +36,19 @@ public class StatResponseItem {
         this.tokenCountPerGrantType = tokenCountPerGrantType;
     }
 
+    public String getMonth() {
+        return month;
+    }
+
+    public void setMonth(String month) {
+        this.month = month;
+    }
+
     @Override
     public String toString() {
         return "StatResponseItem{" +
                 "monthlyActiveUsers=" + monthlyActiveUsers +
+                ", month=" + month +
                 ", tokenCountPerGrantType=" + tokenCountPerGrantType +
                 '}';
     }
