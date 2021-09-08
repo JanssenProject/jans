@@ -106,8 +106,10 @@ public class StatWS {
             final String responseAsStr;
             if ("openmetrics".equalsIgnoreCase(format)) {
                 responseAsStr = createOpenMetricsResponse(statResponse);
-            } else {
+            } else if ("jsonmonth".equalsIgnoreCase(format)) {
                 responseAsStr = ServerUtil.asJson(statResponse);
+            } else {
+                responseAsStr = ServerUtil.asJson(new FlatStatResponse(new ArrayList<>(statResponse.getResponse().values())));
             }
             log.trace("Stat: " + responseAsStr);
             return Response.ok().entity(responseAsStr).build();
@@ -144,6 +146,7 @@ public class StatWS {
 
             final StatResponseItem responseItem = new StatResponseItem();
             responseItem.setMonthlyActiveUsers(userCardinality(entries));
+            responseItem.setMonth(month);
 
             unionTokenMapIntoResponseItem(entries, responseItem);
 
