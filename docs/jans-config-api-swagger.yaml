@@ -2274,9 +2274,11 @@ paths:
           content:
             application/json:
               schema:
-                title: StatResponse
+                title: FlatStatResponse
                 description: Jans Authorization Server statistic data.
-                $ref: '#/components/schemas/StatResponse'
+                type: array
+                items:
+                  $ref: '#/components/schemas/StatResponseItem'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -5005,16 +5007,13 @@ components:
           type: string
           description: Public Vapid Key
 		  
-    StatResponse:
-      type: object
-      description: Server statistics response Object
-      additionalProperties:
-        $ref: '#/components/schemas/StatResponseItem'
 		
     StatResponseItem:
       type: object
       description: Server statistics data
       properties:
+        month:
+          type: integer
         monthlyActiveUsers:
           type: integer
           format: int64
@@ -5023,12 +5022,14 @@ components:
         tokenCountPerGrantType:
           type: object
           additionalProperties:
-            $ref: '#/components/schemas/DataMapObject'
-    DataMapObject:
+            $ref: '#/components/schemas/TokenMapObject'
+			  
+    TokenMapObject:
       type: object
       description: A hashmap with statistical item as a key and the value as statistical value.
       additionalProperties:
         type: integer
+        format: int64
 		
     HealthStatus:
       type: object
