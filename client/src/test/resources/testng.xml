@@ -1008,6 +1008,11 @@
             <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeJwtResponseTypeCodeIdTokenTokenSignedHttpTest"/>
         </classes>
     </test>
+    <test name="Test Authorization Response Mode jwt Response Type code Signed and Encrypted" enabled="true">
+        <classes>
+            <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest"/>
+        </classes>
+    </test>
     <test name="Test Authorization Response Mode jwt Response Type code Signed" enabled="true">
         <classes>
             <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeJwtResponseTypeCodeSignedHttpTest"/>
