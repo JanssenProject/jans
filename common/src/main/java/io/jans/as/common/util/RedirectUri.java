@@ -33,7 +33,7 @@ import static io.jans.as.model.authorize.AuthorizeResponseParam.*;
 
 /**
  * @author Javier Rojas Blum
- * @version July 28, 2021
+ * @version September 9, 2021
  */
 public class RedirectUri {
 
@@ -50,9 +50,12 @@ public class RedirectUri {
     private KeyEncryptionAlgorithm keyEncryptionAlgorithm;
     private BlockEncryptionAlgorithm blockEncryptionAlgorithm;
     private String keyId;
+    private String nestedKeyId;
     private String sharedSecret;
     private JSONObject jsonWebKeys;
     private byte[] sharedSymmetricKey;
+    private String nestedSharedSecret;
+    private JSONObject nestedJsonWebKeys;
     private AbstractCryptoProvider cryptoProvider;
 
     public RedirectUri(String baseRedirectUri) {
@@ -146,6 +149,14 @@ public class RedirectUri {
         this.keyId = keyId;
     }
 
+    public String getNestedKeyId() {
+        return nestedKeyId;
+    }
+
+    public void setNestedKeyId(String nestedKeyId) {
+        this.nestedKeyId = nestedKeyId;
+    }
+
     public String getSharedSecret() {
         return sharedSecret;
     }
@@ -168,6 +179,22 @@ public class RedirectUri {
 
     public void setSharedSymmetricKey(byte[] sharedSymmetricKey) {
         this.sharedSymmetricKey = sharedSymmetricKey;
+    }
+
+    public String getNestedSharedSecret() {
+        return nestedSharedSecret;
+    }
+
+    public void setNestedSharedSecret(String nestedSharedSecret) {
+        this.nestedSharedSecret = nestedSharedSecret;
+    }
+
+    public JSONObject getNestedJsonWebKeys() {
+        return nestedJsonWebKeys;
+    }
+
+    public void setNestedJsonWebKeys(JSONObject nestedJsonWebKeys) {
+        this.nestedJsonWebKeys = nestedJsonWebKeys;
     }
 
     public AbstractCryptoProvider getCryptoProvider() {
@@ -236,24 +263,33 @@ public class RedirectUri {
 
     private String getJarmResponse() throws Exception {
         if (keyEncryptionAlgorithm != null && blockEncryptionAlgorithm != null) {
-            return getJweResponse();
+            if (signatureAlgorithm != null) {
+                String jws = getJwsResponse(true);
+                return getJweResponse(jws);
+            } else {
+                return getJweResponse(null);
+            }
         } else {
             if (signatureAlgorithm == null) {
                 signatureAlgorithm = SignatureAlgorithm.RS256;
             }
 
-            return getJwtResponse();
+            return getJwsResponse(false);
         }
     }
 
-    private String getJwtResponse() throws Exception {
+    private String getJwsResponse(boolean nested) throws Exception {
         Jwt jwt = new Jwt();
 
         // Header
         jwt.getHeader().setType(JwtType.JWT);
         jwt.getHeader().setAlgorithm(signatureAlgorithm);
 
-        if (keyId != null) {
+        if (nested) {
+            if (nestedKeyId != null) {
+                jwt.getHeader().setKeyId(nestedKeyId);
+            }
+        } else if (keyId != null) {
             jwt.getHeader().setKeyId(keyId);
         }
 
@@ -272,13 +308,13 @@ public class RedirectUri {
         }
 
         // Signature
-        String signature = cryptoProvider.sign(jwt.getSigningInput(), jwt.getHeader().getKeyId(), sharedSecret, signatureAlgorithm);
+        String signature = cryptoProvider.sign(jwt.getSigningInput(), jwt.getHeader().getKeyId(), nested ? nestedSharedSecret : sharedSecret, signatureAlgorithm);
         jwt.setEncodedSignature(signature);
 
         return jwt.toString();
     }
 
-    private String getJweResponse() throws Exception {
+    private String getJweResponse(String nestedJws) throws Exception {
         Jwe jwe = new Jwe();
 
         // Header
@@ -287,17 +323,22 @@ public class RedirectUri {
         jwe.getHeader().setEncryptionMethod(blockEncryptionAlgorithm);
 
         // Claims
-        jwe.getClaims().setClaim(ISS, issuer);
-        jwe.getClaims().setClaim(AUD, audience);
-        if (responseParameters.containsKey(EXPIRES_IN)) {
-            jwe.getClaims().setClaim(EXP, responseParameters.get(EXPIRES_IN));
+        if (nestedJws == null) {
+            jwe.getClaims().setClaim(ISS, issuer);
+            jwe.getClaims().setClaim(AUD, audience);
+            if (responseParameters.containsKey(EXPIRES_IN)) {
+                jwe.getClaims().setClaim(EXP, responseParameters.get(EXPIRES_IN));
+            } else {
+                final Calendar calendar = Calendar.getInstance();
+                calendar.add(Calendar.SECOND, authorizationCodeLifetime);
+                jwe.getClaims().setClaim(EXP, calendar.getTime());
+            }
+            for (Map.Entry<String, String> entry : responseParameters.entrySet()) {
+                jwe.getClaims().setClaim(entry.getKey(), entry.getValue());
+            }
         } else {
-            final Calendar calendar = Calendar.getInstance();
-            calendar.add(Calendar.SECOND, authorizationCodeLifetime);
-            jwe.getClaims().setClaim(EXP, calendar.getTime());
-        }
-        for (Map.Entry<String, String> entry : responseParameters.entrySet()) {
-            jwe.getClaims().setClaim(entry.getKey(), entry.getValue());
+            Jwt jwt = Jwt.parse(nestedJws);
+            jwe.setSignedJWTPayload(jwt);
         }
 
         // Encryption
