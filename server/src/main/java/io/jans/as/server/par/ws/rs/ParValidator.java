@@ -21,7 +21,6 @@ import org.slf4j.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 import java.util.Set;
 
 /**
@@ -91,14 +90,8 @@ public class ParValidator {
             }
 
             Set<String> scopes = scopeChecker.checkScopesPolicy(client, par.getAttributes().getScope());
-            // JWT wins
-            if (!jwtRequest.getScopes().isEmpty()) {
-                if (!scopes.contains("openid")) { // spec: Even if a scope parameter is present in the Request Object value, a scope parameter MUST always be passed using the OAuth 2.0 request syntax containing the openid scope value
-                    throw new WebApplicationException(Response
-                            .status(Response.Status.BAD_REQUEST)
-                            .entity(errorResponseFactory.getErrorAsJson(io.jans.as.model.authorize.AuthorizeErrorResponseType.INVALID_SCOPE, par.getAttributes().getState(), "scope parameter does not contain openid value which is required."))
-                            .build());
-                }
+
+            if (!jwtRequest.getScopes().isEmpty()) { // JWT wins
                 scopes = scopeChecker.checkScopesPolicy(client, Lists.newArrayList(jwtRequest.getScopes()));
                 par.getAttributes().setScope(io.jans.as.model.util.StringUtils.implode(scopes, " "));
             }
