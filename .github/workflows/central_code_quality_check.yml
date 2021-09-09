@@ -60,15 +60,6 @@ jobs:
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
           
-      - name: Cache Maven packages
-        # JanssenProject/jans-cli is too similar to JanssenProject/jans-client-api as the contains function is returning it belonging to the JVM_PROJECT
-        if: contains(env.JVM_PROJECTS, github.repository) && github.repository != 'JanssenProject/jans-cli'
-        uses: actions/cache@v2.1.6
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
-          
       - name: Build and analyze JVM based project
         # JanssenProject/jans-cli is too similar to JanssenProject/jans-client-api as the contains function is returning it belonging to the JVM_PROJECT
         if: contains(env.JVM_PROJECTS, github.repository) && github.repository != 'JanssenProject/jans-cli'
