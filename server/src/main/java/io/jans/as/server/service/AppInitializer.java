@@ -541,7 +541,7 @@ public class AppInitializer {
 	}
 
 	private Properties prepareAuthConnectionProperties(GluuLdapConfiguration persistenceAuthConfig, String persistenceType) {
-		String prefix = persistenceType + ".";
+		String prefix = persistenceType + "#";
 		FileConfiguration configuration = configurationFactory.getPersistenceConfiguration().getConfiguration();
 
 		Properties properties = (Properties) configuration.getProperties().clone();
