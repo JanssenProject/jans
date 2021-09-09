@@ -80,7 +80,7 @@ import static io.jans.as.model.util.StringUtils.toList;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version July 30, 2021
+ * @version September 9, 2021
  */
 @Path("/")
 public class RegisterRestWebServiceImpl implements RegisterRestWebService {
@@ -202,9 +202,6 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             }
             if (r.getAccessTokenSigningAlg() == null) {
                 r.setAccessTokenSigningAlg(SignatureAlgorithm.fromString(appConfiguration.getDefaultSignatureAlgorithm()));
-            }
-            if (r.getAuthorizationSignedResponseAlg() == null) {
-                r.setAuthorizationSignedResponseAlg(SignatureAlgorithm.fromString(appConfiguration.getDefaultSignatureAlgorithm()));
             }
 
             if (r.getClaimsRedirectUris() != null && !r.getClaimsRedirectUris().isEmpty()) {

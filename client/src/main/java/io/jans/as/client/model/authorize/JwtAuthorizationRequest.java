@@ -6,24 +6,12 @@
 
 package io.jans.as.client.model.authorize;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.security.PublicKey;
-import java.util.List;
-
-import io.jans.as.model.common.ResponseMode;
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
-
 import io.jans.as.client.AuthorizationRequest;
 import io.jans.as.client.util.ClientUtil;
 import io.jans.as.model.common.Display;
 import io.jans.as.model.common.Prompt;
+import io.jans.as.model.common.ResponseMode;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
@@ -32,15 +20,26 @@ import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwe.Jwe;
 import io.jans.as.model.jwe.JweEncrypterImpl;
+import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaims;
 import io.jans.as.model.jwt.JwtHeader;
 import io.jans.as.model.jwt.JwtType;
 import io.jans.as.model.util.Base64Util;
 import io.jans.as.model.util.Util;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.security.PublicKey;
+import java.util.List;
 
 /**
  * @author Javier Rojas Blum
- * @version November 20, 2018
+ * @version September 9, 2021
  */
 public class JwtAuthorizationRequest {
 
@@ -85,6 +84,7 @@ public class JwtAuthorizationRequest {
 
     private UserInfoMember userInfoMember;
     private IdTokenMember idTokenMember;
+    private Jwt nestedPayload;
 
     // Signature/Encryption Keys
     private String sharedKey;
@@ -343,6 +343,14 @@ public class JwtAuthorizationRequest {
         this.idTokenMember = idTokenMember;
     }
 
+    public Jwt getNestedPayload() {
+        return nestedPayload;
+    }
+
+    public void setNestedPayload(Jwt nestedPayload) {
+        this.nestedPayload = nestedPayload;
+    }
+
     public void addUserInfoClaim(Claim claim) {
         userInfoMember.getClaims().add(claim);
     }
@@ -454,12 +462,17 @@ public class JwtAuthorizationRequest {
             String header = ClientUtil.toPrettyJson(headerToJSONObject());
             String encodedHeader = Base64Util.base64urlencode(header.getBytes(Util.UTF8_STRING_ENCODING));
 
-            String claims = ClientUtil.toPrettyJson(payloadToJSONObject());
-            String encodedClaims = Base64Util.base64urlencode(claims.getBytes(Util.UTF8_STRING_ENCODING));
-
             Jwe jwe = new Jwe();
             jwe.setHeader(new JwtHeader(encodedHeader));
-            jwe.setClaims(new JwtClaims(encodedClaims));
+
+            if (nestedPayload == null) {
+                String claims = ClientUtil.toPrettyJson(payloadToJSONObject());
+                String encodedClaims = Base64Util.base64urlencode(claims.getBytes(Util.UTF8_STRING_ENCODING));
+                jwe.setClaims(new JwtClaims(encodedClaims));
+            } else {
+                jwe.setSignedJWTPayload(nestedPayload);
+            }
+
             jweEncrypter.encrypt(jwe);
 
             encodedJwt = jwe.toString();
@@ -494,8 +507,8 @@ public class JwtAuthorizationRequest {
         } catch (JSONException e) {
             e.printStackTrace();
         } catch (JsonProcessingException e) {
-			e.printStackTrace();
-		}
+            e.printStackTrace();
+        }
 
         return decodedJwt;
     }

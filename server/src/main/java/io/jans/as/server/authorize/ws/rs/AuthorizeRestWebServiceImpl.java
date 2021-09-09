@@ -36,26 +36,8 @@ import io.jans.as.server.ciba.CIBAPingCallbackService;
 import io.jans.as.server.ciba.CIBAPushTokenDeliveryService;
 import io.jans.as.server.model.audit.Action;
 import io.jans.as.server.model.audit.OAuth2AuditLog;
-import io.jans.as.server.model.authorize.AuthorizeParamsValidator;
-import io.jans.as.server.model.authorize.Claim;
-import io.jans.as.server.model.authorize.IdTokenMember;
-import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
-import io.jans.as.server.model.authorize.ScopeChecker;
-import io.jans.as.server.model.common.AccessToken;
-import io.jans.as.server.model.common.AuthorizationCode;
-import io.jans.as.server.model.common.AuthorizationGrant;
-import io.jans.as.server.model.common.AuthorizationGrantList;
-import io.jans.as.server.model.common.CIBAGrant;
-import io.jans.as.server.model.common.CibaRequestCacheControl;
-import io.jans.as.server.model.common.CibaRequestStatus;
-import io.jans.as.server.model.common.DeviceAuthorizationCacheControl;
-import io.jans.as.server.model.common.DeviceAuthorizationStatus;
-import io.jans.as.server.model.common.DeviceCodeGrant;
-import io.jans.as.server.model.common.ExecutionContext;
-import io.jans.as.server.model.common.IdToken;
-import io.jans.as.server.model.common.RefreshToken;
-import io.jans.as.server.model.common.SessionId;
-import io.jans.as.server.model.common.SessionIdState;
+import io.jans.as.server.model.authorize.*;
+import io.jans.as.server.model.common.*;
 import io.jans.as.server.model.config.ConfigurationFactory;
 import io.jans.as.server.model.config.Constants;
 import io.jans.as.server.model.exception.AcrChangedException;
@@ -95,12 +77,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.SecurityContext;
 import java.net.URI;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import static io.jans.as.model.util.StringUtils.implode;
 
@@ -108,7 +86,7 @@ import static io.jans.as.model.util.StringUtils.implode;
  * Implementation for request authorization through REST web services.
  *
  * @author Javier Rojas Blum
- * @version July 30, 2021
+ * @version September 9, 2021
  */
 @Path("/")
 public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
@@ -140,7 +118,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     @Inject
     private SessionIdService sessionIdService;
 
-    @Inject CookieService cookieService;
+    @Inject
+    CookieService cookieService;
 
     @Inject
     private ScopeChecker scopeChecker;
@@ -317,7 +296,6 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             Client client = authorizeRestWebServiceValidator.validateClient(clientId, state, isPar);
             String deviceAuthzUserCode = deviceAuthorizationService.getUserCodeFromSession(httpRequest);
             redirectUri = authorizeRestWebServiceValidator.validateRedirectUri(client, redirectUri, state, deviceAuthzUserCode, httpRequest);
-            log.trace("Validated URI: {}", redirectUri);
             checkAcrChanged(acrValuesStr, prompts, sessionUser); // check after redirect uri is validated
 
             RedirectUriResponse redirectUriResponse = new RedirectUriResponse(new RedirectUri(redirectUri, responseTypes, responseMode), state, httpRequest, errorResponseFactory);
@@ -716,6 +694,21 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
                 String keyId = null;
                 if (client.getAttributes().getAuthorizationEncryptedResponseAlg() != null && client.getAttributes().getAuthorizationEncryptedResponseEnc() != null) {
+                    if (client.getAttributes().getAuthorizationSignedResponseAlg() != null) { // Signed then Encrypted response
+                        SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(client.getAttributes().getAuthorizationSignedResponseAlg());
+
+                        String nestedKeyId = new ServerCryptoProvider(cryptoProvider).getKeyId(webKeysConfiguration,
+                                Algorithm.fromString(signatureAlgorithm.getName()), Use.SIGNATURE);
+
+                        JSONObject jsonWebKeys = JwtUtil.getJSONWebKeys(client.getJwksUri());
+                        redirectUriResponse.getRedirectUri().setNestedJsonWebKeys(jsonWebKeys);
+
+                        String clientSecret = clientService.decryptSecret(client.getClientSecret());
+                        redirectUriResponse.getRedirectUri().setNestedSharedSecret(clientSecret);
+                        redirectUriResponse.getRedirectUri().setNestedKeyId(nestedKeyId);
+                    }
+
+                    // Encrypted response
                     JSONObject jsonWebKeys = JwtUtil.getJSONWebKeys(authorizationGrant.getClient().getJwksUri());
                     if (jsonWebKeys != null) {
                         keyId = new ServerCryptoProvider(cryptoProvider).getKeyId(JSONWebKeySet.fromJSONObject(jsonWebKeys),
@@ -725,9 +718,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     String sharedSecret = clientService.decryptSecret(authorizationGrant.getClient().getClientSecret());
                     byte[] sharedSymmetricKey = sharedSecret.getBytes(Util.UTF8_STRING_ENCODING);
                     redirectUriResponse.getRedirectUri().setSharedSymmetricKey(sharedSymmetricKey);
-                    redirectUriResponse.getRedirectUri().setSharedSecret(sharedSecret);
                     redirectUriResponse.getRedirectUri().setJsonWebKeys(jsonWebKeys);
-                } else {
+                    redirectUriResponse.getRedirectUri().setKeyId(keyId);
+                } else { // Signed response
                     SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.RS256;
                     if (client.getAttributes().getAuthorizationSignedResponseAlg() != null) {
                         signatureAlgorithm = SignatureAlgorithm.fromString(client.getAttributes().getAuthorizationSignedResponseAlg());
@@ -740,14 +733,11 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     redirectUriResponse.getRedirectUri().setJsonWebKeys(jsonWebKeys);
 
                     String clientSecret = clientService.decryptSecret(client.getClientSecret());
-                    byte[] sharedSymmetricKey = clientSecret.getBytes(Util.UTF8_STRING_ENCODING);
-                    redirectUriResponse.getRedirectUri().setSharedSymmetricKey(sharedSymmetricKey);
                     redirectUriResponse.getRedirectUri().setSharedSecret(clientSecret);
+                    redirectUriResponse.getRedirectUri().setKeyId(keyId);
                 }
-                redirectUriResponse.getRedirectUri().setKeyId(keyId);
             }
 
-            log.trace("Preparing redirect to: {}", redirectUriResponse.getRedirectUri());
             builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse.getRedirectUri(), httpRequest);
 
             if (appConfiguration.getCustomHeadersWithAuthorizationResponse()) {
@@ -1060,8 +1050,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
     /**
      * Processes an authorization granted for device code grant type.
+     *
      * @param userCode User code used in the device code flow.
-     * @param user Authenticated user that is giving the permissions.
+     * @param user     Authenticated user that is giving the permissions.
      */
     private void processDeviceAuthorization(String userCode, User user) {
         DeviceAuthorizationCacheControl cacheData = deviceAuthorizationService.getDeviceAuthzByUserCode(userCode);
