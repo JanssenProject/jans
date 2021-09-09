@@ -116,7 +116,7 @@ public class U2fRegistrationWS {
 
                 if (removeEnrollment) {
                     // We allow to use enrollment code only one time
-                    user.setAttribute(io.jans.as.model.fido.u2f.U2fConstants.U2F_ENROLLMENT_CODE_ATTRIBUTE, (String) null);
+                    user.setAttribute(io.jans.as.model.fido.u2f.U2fConstants.U2F_ENROLLMENT_CODE_ATTRIBUTE, "", false);
                     userService.updateUser(user);
                 }
             }
