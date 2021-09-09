@@ -51,37 +51,6 @@ jobs:
           java-version: '11'
           distribution: 'adopt'
           
-      - name: Build with Maven
-        # JanssenProject/jans-cli is too similar to JanssenProject/jans-client-api as the contains function is returning it belonging to the JVM_PROJECT
-        if: contains(env.JVM_PROJECTS, github.repository) && github.repository != 'JanssenProject/jans-cli'
-        run: |
-          case "$GITHUB_REPOSITORY" in
-            "JanssenProject/jans-auth-server") 
-              echo "Run maven build for jans-auth-server "
-              mvn clean -fae -X -pl \!client,\!static,\!server jacoco:prepare-agent test install jacoco:report
-            ;;
-            "JanssenProject/jans-client-api") 
-              echo "Run maven build for jans-client-api"
-              mvn clean -fae -pl \!server jacoco:prepare-agent test install jacoco:report
-            ;;
-            "JanssenProject/jans-scim") 
-              echo "Run maven build for jans-scim"
-              mvn clean -fae -pl \!client jacoco:prepare-agent test install jacoco:report
-            ;;
-            "JanssenProject/jans-eleven")
-              echo "Run maven build for jans-eleven"
-              mvn clean -fae -pl \!client,\!server jacoco:prepare-agent test jacoco:report
-            ;;
-            "JanssenProject/jans-config-api")
-              echo "Run maven build for jans-config-api"
-              mvn clean -fae -DskipTests=true jacoco:prepare-agent install jacoco:report
-            ;;
-            *) 
-            echo "Run maven build for Java repository"
-            mvn clean -fae jacoco:prepare-agent test install jacoco:report
-            ;;
-          esac
-
       - name: Cache SonarCloud packages for JVM based project
         # JanssenProject/jans-cli is too similar to JanssenProject/jans-client-api as the contains function is returning it belonging to the JVM_PROJECT
         if: contains(env.JVM_PROJECTS, github.repository) && github.repository != 'JanssenProject/jans-cli'
@@ -91,15 +60,6 @@ jobs:
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
           
-      - name: Cache Maven packages
-        # JanssenProject/jans-cli is too similar to JanssenProject/jans-client-api as the contains function is returning it belonging to the JVM_PROJECT
-        if: contains(env.JVM_PROJECTS, github.repository) && github.repository != 'JanssenProject/jans-cli'
-        uses: actions/cache@v2.1.6
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
-          
       - name: Build and analyze JVM based project
         # JanssenProject/jans-cli is too similar to JanssenProject/jans-client-api as the contains function is returning it belonging to the JVM_PROJECT
         if: contains(env.JVM_PROJECTS, github.repository) && github.repository != 'JanssenProject/jans-cli'
@@ -108,31 +68,24 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           case "$GITHUB_REPOSITORY" in
-            "JanssenProject/jans-auth-server") 
-              echo "Run Sonar analysis for jans-auth-server "
-              mvn -B -pl \!client,\!static,\!server org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
-            ;;
-            "JanssenProject/jans-client-api") 
-              echo "Run Sonar analysis for jans-client-api"
-              mvn -B -pl \!server verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
-            ;;
-            "JanssenProject/jans-scim") 
-              echo "Run Sonar analysis for jans-scim"
-              mvn -B -pl \!client verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
-            ;;
+            "JanssenProject/jans-auth-server")
+                    ;&
+            "JanssenProject/jans-client-api")
+                    ;&
+            "JanssenProject/jans-scim")
+                    ;&
             "JanssenProject/jans-eleven")
-              echo "Run Sonar analysis for jans-scim"
-              mvn -B -pl \!client,\!server verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
-            ;;
+                    ;&
             "JanssenProject/jans-config-api")
-              echo "Run Sonar analysis for jans-config-api"
-              mvn -B -DskipTests=true verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
-            ;;
-            *) 
-            echo "Run maven build for Java repository"
+                  echo "Run Sonar analysis without test execution"
+                  mvn -B -DskipTests=true verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+                ;;
+            *)
+            echo "Run Sonar analysis with test execution"
             mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
             ;;
           esac
+
 
       - name: Convert repo org name to lowercase for non JVM projects
         if: contains(env.NON_JVM_PROJECTS, github.repository)
