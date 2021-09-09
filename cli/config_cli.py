@@ -46,6 +46,7 @@ warning_color = 214
 error_color = 196
 success_color = 10
 bold_color = 15
+grey_color = 242
 
 clear = lambda: os.system('clear')
 urllib3.disable_warnings()
@@ -413,6 +414,7 @@ class JCA_CLI:
                   help_text=None, sitype=None, enforce='__true__',
                   example=None, spacing=0
                   ):
+        print(self.colored_text("b: back, q: quit", grey_color))
         print()
         type_text = ''
         if itype:
