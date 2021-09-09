@@ -5014,12 +5014,12 @@ components:
       properties:
         month:
           type: integer
-        monthlyActiveUsers:
+        monthly_active_users:
           type: integer
           format: int64
           description: Number of active users
           default: 0
-        tokenCountPerGrantType:
+        token_count_per_granttype:
           type: object
           additionalProperties:
             $ref: '#/components/schemas/TokenMapObject'
