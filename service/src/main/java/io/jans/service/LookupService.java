@@ -58,6 +58,26 @@ public class LookupService implements Serializable {
 	}
 
 	/**
+	 * Returns DisplayNameEntry based on display name
+	 *
+	 * @param dn
+	 *            display name
+	 * @return DisplayNameEntry object
+	 */
+	public Object getTypedEntry(String dn, String clazz) throws Exception {
+		Class entryClass = Class.class.forName(clazz);
+		String key = "l_" + dn;
+		Object entry = cacheService.get(OxConstants.CACHE_LOOKUP_NAME, key);
+		if (entry == null) {
+			entry = persistenceEntryManager.find(entryClass, dn);
+
+			cacheService.put(OxConstants.CACHE_LOOKUP_NAME, key, entry);
+		}
+
+		return entry;
+	}
+
+	/**
 	 * Returns list of DisplayNameEntry objects
 	 *
 	 * @param baseDn
