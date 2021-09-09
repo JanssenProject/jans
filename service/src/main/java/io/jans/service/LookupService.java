@@ -15,6 +15,8 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.apache.commons.lang3.StringUtils;
+
 import io.jans.model.DisplayNameEntry;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.base.Entry;
@@ -65,6 +67,10 @@ public class LookupService implements Serializable {
 	 * @return DisplayNameEntry object
 	 */
 	public Object getTypedEntry(String dn, String clazz) throws Exception {
+		if (StringUtils.isEmpty(clazz)) {
+			return null;
+		}
+
 		Class entryClass = Class.class.forName(clazz);
 		String key = "l_" + dn;
 		Object entry = cacheService.get(OxConstants.CACHE_LOOKUP_NAME, key);
