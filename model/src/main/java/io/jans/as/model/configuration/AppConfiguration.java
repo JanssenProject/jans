@@ -570,6 +570,10 @@ public class AppConfiguration implements Configuration {
         this.returnClientSecretOnRead = returnClientSecretOnRead;
     }
 
+    public boolean isFapi() {
+        return Boolean.TRUE.equals(getFapiCompatibility());
+    }
+
     public Boolean getFapiCompatibility() {
         if (fapiCompatibility == null) fapiCompatibility = false;
         return fapiCompatibility;

@@ -399,7 +399,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 }
             }
             if (!cibaRequestService.hasCibaCompatibility(client)) {
-                if (appConfiguration.getFapiCompatibility() && jwtRequest == null) {
+                if (appConfiguration.isFapi() && jwtRequest == null && !isPar) {
                     throw redirectUriResponse.createWebException(io.jans.as.model.authorize.AuthorizeErrorResponseType.INVALID_REQUEST);
                 }
                 authorizeRestWebServiceValidator.validateRequestJwt(request, requestUri, redirectUriResponse);
