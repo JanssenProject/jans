@@ -321,7 +321,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
                                     ('installConfigApi', 'jans-config-api'),
                                     ('installEleven', 'jans-eleven')]:
 
-            if Config.get(config_var):
+            if Config.get(config_var) and service in self.jetty_app_configuration:
                 installedComponents.append(self.jetty_app_configuration[service])
 
         return self.calculate_aplications_memory(Config.application_max_ram, self.jetty_app_configuration, installedComponents)
