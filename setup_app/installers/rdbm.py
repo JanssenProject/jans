@@ -39,12 +39,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 
         self.create_tables(jans_schema_files)
         self.create_subtables()
-
-        if Config.profile == 'jans':
-            self.import_ldif()
-        else:
-            self.import_app_templates()
-
+        self.import_ldif()
         self.create_indexes()
         self.rdbmProperties()
 
@@ -318,10 +313,10 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
         for group in ldap_mappings:
             ldif_files +=  Config.couchbaseBucketDict[group]['ldif']
 
-        if Config.ldif_metric in ldif_files:
+        if Config.get('ldif_metric') in ldif_files:
             ldif_files.remove(Config.ldif_metric)
 
-        if Config.ldif_site in ldif_files:
+        if Config.get('ldif_site') in ldif_files:
             ldif_files.remove(Config.ldif_site)
 
         Config.pbar.progress(self.service_name, "Importing ldif files to {}".format(Config.rdbm_type), False)
@@ -334,22 +329,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                 force = BackendTypes.SPANNER
             self.dbUtils.import_ldif([Config.ldif_base], force=force)
 
-
         self.dbUtils.import_ldif(ldif_files)
-
-    def import_app_templates(self):
-        templates = [
-                        os.path.join(self.output_dir, 'attributes.json'),
-                        os.path.join(self.output_dir, 'scopes.json'),
-                        os.path.join(self.output_dir, 'configuration.json'),
-                     ]
-        for template in templates:
-            self.renderTemplateInOut(template, Config.templateFolder, self.output_dir)
-
-        Config.pbar.progress(self.service_name, "Importing templates to {}".format(Config.rdbm_type), False)
-
-        self.dbUtils.import_templates(templates)
-
 
     def server_time_zone(self):
         my_time_zone = str(datetime.datetime.now(datetime.timezone(datetime.timedelta(0))).astimezone().tzinfo)
