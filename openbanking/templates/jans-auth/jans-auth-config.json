@@ -1,4 +1,4 @@
-{
+-{
     "issuer":"https://%(hostname)s",
     "baseEndpoint":"https://%(hostname)s/jans-auth/restv1",
     "authorizationEndpoint":"https://%(hostname)s/jans-auth/restv1/authorize",
@@ -333,5 +333,5 @@
     "deviceAuthzTokenPollInterval": 5,
     "deviceAuthzResponseTypeToProcessAuthz": "code",
     "staticKid": "%(staticKid)s",
-	"forceOfflineAccessScopeToEnableRefreshToken" : false
+    "forceOfflineAccessScopeToEnableRefreshToken" : false
 }

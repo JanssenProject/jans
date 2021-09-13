@@ -309,11 +309,12 @@ class Crypto64:
         self.logIt("Encoding passwords")
 
         try:
-            if Config.ldapPass:
+            if Config.get('ldapPass'):
                 Config.encoded_ox_ldap_pw = self.obscure(Config.ldapPass)
-            if Config.cb_password:
+            if Config.get('cb_password'):
                 Config.encoded_cb_password = self.obscure(Config.cb_password)
-            Config.encoded_opendj_p12_pass = self.obscure(Config.opendj_p12_pass)
+            if Config.get('opendj_p12_pass'):
+                Config.encoded_opendj_p12_pass = self.obscure(Config.opendj_p12_pass)
         except:
             self.logIt("Error encoding passwords", True, True)
 
