@@ -86,7 +86,7 @@ public class LicenseResource {
         }
     }
 
-    @GET
+    /*@GET
     @Path(GET_LICENSE_DETAILS)
     @Produces(MediaType.APPLICATION_JSON)
     public LicenseResponse getLicenseDetails() {
@@ -126,5 +126,5 @@ public class LicenseResource {
             licenseResponse.setIsLicenseEnable(false);
             return licenseResponse;
         }
-    }
+    }*/
 }
