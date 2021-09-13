@@ -209,11 +209,19 @@ class Config:
 
         self.post_messages = []
 
+        self.ldif_base = os.path.join(self.outputFolder, 'base.ldif')
+        self.ldif_attributes = os.path.join(self.outputFolder, 'attributes.ldif')
+        self.ldif_scopes = os.path.join(self.outputFolder, 'scopes.ldif')
+        self.ldif_configuration = os.path.join(self.outputFolder, 'configuration.ldif')
+
         self.ce_templates = {
                              self.jans_python_readme: True,
                              self.etc_hostname: False,
                              self.network: False,
                              self.jans_properties_fn: True,
+                             self.ldif_base: False,
+                             self.ldif_attributes: False,
+                             self.ldif_scopes: False,
                              }
 
         self.non_setup_properties = {
@@ -222,3 +230,17 @@ class Config:
         self.mappingLocations = {'default': 'rdbm'}
         Config.addPostSetupService = []
 
+        self.couchbaseBucketDict = OrderedDict()
+        self.couchbaseBucketDict['default'] = { 'ldif':[
+                                                    self.ldif_base, 
+                                                    self.ldif_attributes,
+                                                    self.ldif_scopes,
+                                                    self.ldif_configuration,
+                                                    ],
+                                                 'document_key_prefix': []
+                                            }
+
+        self.service_requirements = {
+                        'jans-auth': ['opendj', 72],
+                        'jans-config-api': ['opendj jans-auth', 85],
+                        }

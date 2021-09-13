@@ -18,9 +18,12 @@ from setup_app.static import InstallTypes, colors
 
 from setup_app.config import Config
 from setup_app.utils.setup_utils import SetupUtils
-from setup_app.utils.spanner import Spanner
 from setup_app.utils.db_utils import dbUtils
 from setup_app.pylib.jproperties import Properties
+
+if Config.profile == 'jans':
+    from setup_app.utils.spanner import Spanner
+
 
 class PropertiesUtils(SetupUtils):
 
