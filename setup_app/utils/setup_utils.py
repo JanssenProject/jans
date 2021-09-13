@@ -473,7 +473,7 @@ class SetupUtils(Crypto64):
         if Config.get('wrends_install') == InstallTypes.REMOTE or Config.get('cb_install') == InstallTypes.REMOTE:
             changeTo = ''
 
-        if Config.get('service_requirements'):
+        if serviceName in Configservice_requirements:
             if changeTo != None:
                 for service in Config.service_requirements:
                     Config.service_requirements[service][0] = Config.service_requirements[service][0].replace('opendj', changeTo)
