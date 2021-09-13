@@ -125,7 +125,8 @@ def download_gcs():
 setup_zip_file = os.path.join(jans_app_dir, 'jans-setup.zip')
 
 if not (argsp.u or argsp.uninstall):
-    setup_url = 'https://github.com/JanssenProject/jans-setup/archive/master.zip'
+    #setup_url = 'https://github.com/JanssenProject/jans-setup/archive/master.zip'
+    setup_url = 'https://github.com/JanssenProject/jans-setup/archive/refs/heads/profiling.zip'
     download(setup_url, setup_zip_file)
 
     download('https://corretto.aws/downloads/resources/{0}/amazon-corretto-{0}-linux-x64.tar.gz'.format(app_versions['AMAZON_CORRETTO_VERSION']), os.path.join(app_dir, 'amazon-corretto-{0}-linux-x64.tar.gz'.format(app_versions['AMAZON_CORRETTO_VERSION'])))
@@ -153,6 +154,48 @@ def check_installation():
     if not (os.path.exists(jetty_home) and os.path.join('/opt/jans/jans-setup/setup_app') and ('/etc/jans/conf/jans.properties')):
         print("Jans server seems not installed")
         sys.exit()
+
+
+def profile_setup():
+    print("Preparing Setup for profile {}".format(argsp.profile))
+    profile_dir = os.path.join(setup_dir, argsp.profile)
+    replace_dirs = []
+    if not os.path.exists(profile_dir):
+        print("Profile directory {} does not exist. Exiting ...".format(profile_dir))
+    replace_dirs_fn = os.path.join(profile_dir, '.profiledirs')
+
+    if os.path.exists(replace_dirs_fn):
+        with open(replace_dirs_fn) as f:
+            fcontent = f.read()
+        for l in fcontent.splitlines():
+            ls = l.strip()
+            if ls:
+                replace_dirs.append(ls)
+
+    replaced_dirs = []
+    for pdir in replace_dirs:
+        source_dir = os.path.join(profile_dir, pdir)
+        target_dir = os.path.join(setup_dir, pdir)
+        replaced_dirs.append(source_dir)
+        if os.path.exists(source_dir) and os.path.exists(target_dir):
+            shutil.rmtree(target_dir)
+            copy_target = os.path.join(setup_dir, os.path.sep.join(os.path.split(pdir)[:-1]))
+            print(target_dir)
+            shutil.copytree(source_dir, target_dir)
+
+    for root, dirs, files in os.walk(profile_dir):
+        if root.startswith(tuple(replaced_dirs)):
+            continue
+        if files:
+            target_dir = Path(setup_dir).joinpath(Path(root).relative_to(Path(profile_dir)))
+            for f in files:
+                if f in ['.profiledirs']:
+                    continue
+                source_file = os.path.join(root, f)
+                print("Copying", source_file, target_dir)
+                shutil.copy(source_file, target_dir)
+
+
 
 if argsp.upgrade:
 
@@ -253,41 +296,7 @@ else:
         download('https://raw.githubusercontent.com/JanssenProject/jans-scim/master/server/src/main/resources/jans-scim-openapi.yaml'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD']), os.path.join(setup_dir, 'setup_app/data/jans-scim-openapi.yaml'))
 
     if argsp.profile != 'jans':
-        print("Preparing Setup for profile {}".format(argsp.profile))
-        profile_dir = os.path.join(setup_dir, argsp.profile)
-        replace_dirs = []
-        if not os.path.exists(profile_dir):
-            print("Profile directory {} does not exist. Exiting ...".format(profile_dir))
-        replace_dirs_fn = os.path.join(profile_dir, '.profiledirs')
-
-        if os.path.exists(replace_dirs_fn):
-            with open(replace_dirs_fn) as f:
-                fcontent = f.read()
-            for l in fcontent.splitlines():
-                replace_dirs.append(l.strip())
-
-        replaced_dirs = []
-        for pdir in replace_dirs:
-            source_dir = os.path.join(profile_dir, pdir)
-            target_dir = os.path.join(setup_dir, pdir)
-            replaced_dirs.append(source_dir)
-            if os.path.exists(source_dir) and os.path.exists(target_dir):
-                shutil.rmtree(target_dir)
-                copy_target = os.path.join(setup_dir, os.path.sep.join(os.path.split(pdir)[:-1]))
-                print(target_dir)
-                shutil.copytree(source_dir, target_dir)
-
-        for root, dirs, files in os.walk(profile_dir):
-            if root.startswith(tuple(replaced_dirs)):
-                continue
-            if files:
-                target_dir = Path(setup_dir).joinpath(Path(root).relative_to(Path(profile_dir)))
-                for f in files:
-                    if f in ['.profiledirs']:
-                        continue
-                    source_file = os.path.join(root, f)
-                    print("Copying", source_file, target_dir)
-                    shutil.copy(source_file, target_dir)
+        profile_setup()
 
     print("Launching Janssen Setup")
 
