@@ -21,7 +21,8 @@ from setup_app.utils import base
 from setup_app.utils.cbm import CBM
 from setup_app.utils import ldif_utils
 from setup_app.utils.attributes import attribDataTypes
-from setup_app.utils.spanner import Spanner
+if Config.profile == 'jans':
+    from setup_app.utils.spanner import Spanner
 
 my_path = PurePath(os.path.dirname(os.path.realpath(__file__)))
 sys.path.append(my_path.parent.joinpath('pylib/sqlalchemy'))
