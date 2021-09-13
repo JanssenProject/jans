@@ -52,16 +52,19 @@ from setup_app.utils.collect_properties import CollectProperties
 
 from setup_app.installers.jans import JansInstaller
 from setup_app.installers.httpd import HttpdInstaller
-from setup_app.installers.opendj import OpenDjInstaller
-from setup_app.installers.couchbase import CouchbaseInstaller
 from setup_app.installers.jre import JreInstaller
 from setup_app.installers.jetty import JettyInstaller
 from setup_app.installers.jython import JythonInstaller
 from setup_app.installers.jans_auth import JansAuthInstaller
-from setup_app.installers.scim import ScimInstaller
-from setup_app.installers.fido import FidoInstaller
+
+if Config.profile == 'jans':
+    from setup_app.installers.opendj import OpenDjInstaller
+    from setup_app.installers.couchbase import CouchbaseInstaller
+    from setup_app.installers.scim import ScimInstaller
+    from setup_app.installers.fido import FidoInstaller
+    from setup_app.installers.eleven import ElevenInstaller
+
 from setup_app.installers.config_api import ConfigApiInstaller
-from setup_app.installers.eleven import ElevenInstaller
 from setup_app.installers.jans_cli import JansCliInstaller
 from setup_app.installers.rdbm import RDBMInstaller
 #from setup_app.installers.admin_ui import AdminUIInstaller
@@ -80,6 +83,10 @@ if base.snap:
 # initialize config object
 Config.init(paths.INSTALL_DIR)
 Config.determine_version()
+
+base.profile = Config.profile
+if Config.profile != 'jans':
+    argsp.t = False
 
 # we must initilize SetupUtils after initilizing Config
 SetupUtils.init()
@@ -111,6 +118,7 @@ jansInstaller.initialize()
 
 print()
 print("Installing Janssen Server...\n\nFor more info see:\n  {}  \n  {}\n".format(paths.LOG_FILE, paths.LOG_ERROR_FILE))
+print("Profile         :  {}".format(Config.profile))
 print("Detected OS     :  {} {} {}".format('snap' if base.snap else '', base.os_type, base.os_version))
 print("Janssen Version :  {}".format(Config.oxVersion))
 print("Detected init   :  {}".format(base.os_initdaemon))
@@ -143,20 +151,21 @@ if not Config.noPrompt and not Config.installed_instance and not setup_loaded:
     propertiesUtils.promptForProperties()
 
 propertiesUtils.check_properties()
-
 # initialize installers, order is important!
 jreInstaller = JreInstaller()
 jettyInstaller = JettyInstaller()
 jythonInstaller = JythonInstaller()
-openDjInstaller = OpenDjInstaller()
-couchbaseInstaller = CouchbaseInstaller()
+if Config.profile == 'jans':
+    openDjInstaller = OpenDjInstaller()
+    couchbaseInstaller = CouchbaseInstaller()
 rdbmInstaller = RDBMInstaller()
 httpdinstaller = HttpdInstaller()
 jansAuthInstaller = JansAuthInstaller()
 configApiInstaller = ConfigApiInstaller()
-fidoInstaller = FidoInstaller()
-scimInstaller = ScimInstaller()
-elevenInstaller = ElevenInstaller()
+if Config.profile == 'jans':
+    fidoInstaller = FidoInstaller()
+    scimInstaller = ScimInstaller()
+    elevenInstaller = ElevenInstaller()
 jansCliInstaller = JansCliInstaller()
 #adminUIInstaller = AdminUIInstaller()
 
@@ -165,13 +174,9 @@ jansCliInstaller = JansCliInstaller()
 rdbmInstaller.packageUtils = packageUtils
 
 if Config.installed_instance:
-    for installer in (openDjInstaller, couchbaseInstaller, rdbmInstaller, httpdinstaller,
-                      jansAuthInstaller, scimInstaller, fidoInstaller, 
-                      #adminUIInstaller,
-                      elevenInstaller, jansCliInstaller
-            # oxdInstaller
-                      ):
-        setattr(Config, installer.install_var, installer.installed())
+    for service in jansProgress.services:
+        print("Checking if {} installed".format(service['object'].install_var))
+        setattr(Config, service['object'].install_var, service['object'].installed())
 
     if not argsp.shell:
         propertiesUtils.promptForProperties()
@@ -180,31 +185,31 @@ if Config.installed_instance:
             print("No service was selected to install. Exiting ...")
             sys.exit()
 
-
 def print_or_log(msg):
     print(msg) if argsp.x else base.logIt(msg)
 
 
-if argsp.t:
-    testDataLoader = TestDataLoader()
+if Config.profile == 'jans':
+    if argsp.t:
+        testDataLoader = TestDataLoader()
 
-if argsp.t and argsp.x:
-    print_or_log("Loading test data")
-    testDataLoader.dbUtils.bind()
-    testDataLoader.createLdapPw()
-    configApiInstaller.load_test_data()
-    testDataLoader.load_test_data()
-    testDataLoader.deleteLdapPw()
-    print_or_log("Test data loaded.")
+    if argsp.t and argsp.x:
+        print_or_log("Loading test data")
+        testDataLoader.dbUtils.bind()
+        testDataLoader.createLdapPw()
+        configApiInstaller.load_test_data()
+        testDataLoader.load_test_data()
+        testDataLoader.deleteLdapPw()
+        print_or_log("Test data loaded.")
 
-if not argsp.t and argsp.x and argsp.load_config_api_test:
-    print_or_log("Loading Config Api Test data")
-    configApiInstaller.load_test_data()
-    print_or_log("Test data loaded. Exiting ...")
+    if not argsp.t and argsp.x and argsp.load_config_api_test:
+        print_or_log("Loading Config Api Test data")
+        configApiInstaller.load_test_data()
+        print_or_log("Test data loaded. Exiting ...")
 
-if argsp.x:
-    print("Exiting ...")
-    sys.exit()
+    if argsp.x:
+        print("Exiting ...")
+        sys.exit()
 
 Config.installJansCli = Config.installConfigApi or Config.installScimServer
 
@@ -214,8 +219,9 @@ if argsp.shell:
     code.interact(local=locals())
     sys.exit()
 
-# re-calculate memory usage
-Config.calculate_mem()
+if Config.profile == 'jans':
+    # re-calculate memory usage
+    Config.calculate_mem()
 
 print()
 print(jansInstaller)
@@ -247,8 +253,6 @@ def do_installation():
     jansProgress.before_start()
     jansProgress.start()
 
-    
-
     try:
         jettyInstaller.calculate_selected_aplications_memory()
 
@@ -266,13 +270,15 @@ def do_installation():
             jansInstaller.copy_scripts()
             jansInstaller.encode_passwords()
 
-            Config.ldapCertFn = Config.opendj_cert_fn
-            Config.ldapTrustStoreFn = Config.opendj_p12_fn
-            Config.encoded_ldapTrustStorePass = Config.encoded_opendj_p12_pass
+            if Config.profile == 'jans':
+                Config.ldapCertFn = Config.opendj_cert_fn
+                Config.ldapTrustStoreFn = Config.opendj_p12_fn
+                Config.encoded_ldapTrustStorePass = Config.encoded_opendj_p12_pass
 
             jansInstaller.prepare_base64_extension_scripts()
             jansInstaller.render_templates()
-            jansInstaller.render_configuration_template()
+            if Config.profile == 'jans':
+                jansInstaller.render_configuration_template()
 
             if not base.snap:
                 jansInstaller.update_hostname()
@@ -282,12 +288,12 @@ def do_installation():
             jansInstaller.setup_init_scripts()
 
             # Installing jans components
+            if Config.profile == 'jans':
+                if Config.wrends_install:
+                    openDjInstaller.start_installation()
 
-            if Config.wrends_install:
-                openDjInstaller.start_installation()
-
-            if Config.cb_install:
-                couchbaseInstaller.start_installation()
+                if Config.cb_install:
+                    couchbaseInstaller.start_installation()
 
             if Config.rdbm_install:
                 rdbmInstaller.start_installation()
@@ -303,20 +309,22 @@ def do_installation():
         if (Config.installed_instance and configApiInstaller.install_var in Config.addPostSetupService) or (
                 not Config.installed_instance and Config.get(configApiInstaller.install_var)):
             configApiInstaller.start_installation()
-            if argsp.t or argsp.load_config_api_test:
+            if argsp.t or getattr(argsp, 'load_config_api_test', None):
                 configApiInstaller.load_test_data()
 
-        if (Config.installed_instance and 'installFido2' in Config.addPostSetupService) or (
-                not Config.installed_instance and Config.installFido2):
-            fidoInstaller.start_installation()
+        if Config.profile == 'jans':
 
-        if (Config.installed_instance and 'installScimServer' in Config.addPostSetupService) or (
-                not Config.installed_instance and Config.installScimServer):
-            scimInstaller.start_installation()
+            if (Config.installed_instance and 'installFido2' in Config.addPostSetupService) or (
+                    not Config.installed_instance and Config.installFido2):
+                fidoInstaller.start_installation()
 
-        if (Config.installed_instance and elevenInstaller.install_var in Config.addPostSetupService) or (
-                not Config.installed_instance and Config.get(elevenInstaller.install_var)):
-            elevenInstaller.start_installation()
+            if (Config.installed_instance and 'installScimServer' in Config.addPostSetupService) or (
+                    not Config.installed_instance and Config.installScimServer):
+                scimInstaller.start_installation()
+
+            if (Config.installed_instance and elevenInstaller.install_var in Config.addPostSetupService) or (
+                    not Config.installed_instance and Config.get(elevenInstaller.install_var)):
+                elevenInstaller.start_installation()
 
         #if (Config.installed_instance and adminUIInstaller.install_var in Config.addPostSetupService) or (
         #        not Config.installed_instance and Config.get(adminUIInstaller.install_var)):
@@ -368,7 +376,7 @@ if proceed:
         msg.installation_completed += "CLI available to manage Jannsen Server:\n"
         if Config.installConfigApi:
             msg.installation_completed += "/opt/jans/jans-cli/config-cli.py\n"
-        if Config.installScimServer:
+        if  Config.profile == 'jans' and Config.installScimServer:
             msg.installation_completed += "/opt/jans/jans-cli/scim-cli.py"
 
     msg_text = msg.post_installation if Config.installed_instance else msg.installation_completed.format(
