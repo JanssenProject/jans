@@ -362,7 +362,7 @@ class SetupUtils(Crypto64):
             self.logIt("Error writing temporary LDAP password.")
 
     def deleteLdapPw(self):
-        if os.path.isfile(Config.ldapPassFn):
+        if Config.get('ldapPassFn') and os.path.isfile(Config.ldapPassFn):
             os.remove(Config.ldapPassFn)
 
     def getMappingType(self, mtype):
@@ -473,7 +473,7 @@ class SetupUtils(Crypto64):
         if Config.get('wrends_install') == InstallTypes.REMOTE or Config.get('cb_install') == InstallTypes.REMOTE:
             changeTo = ''
 
-        if serviceName in Configservice_requirements:
+        if serviceName in Config.service_requirements:
             if changeTo != None:
                 for service in Config.service_requirements:
                     Config.service_requirements[service][0] = Config.service_requirements[service][0].replace('opendj', changeTo)
