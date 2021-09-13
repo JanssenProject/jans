@@ -277,8 +277,12 @@ public class AuthorizeRestWebServiceValidator {
         }
     }
 
-    public String validateRedirectUri(@NotNull Client client, @Nullable String redirectUri, String state,
-                                      String deviceAuthzUserCode, HttpServletRequest httpRequest) {
+    public String validateRedirectUri(@NotNull Client client, @Nullable String redirectUri, @Nullable String state, @Nullable String deviceAuthzUserCode, @Nullable HttpServletRequest httpRequest) {
+        return validateRedirectUri(client, redirectUri, state, deviceAuthzUserCode, httpRequest, AuthorizeErrorResponseType.INVALID_REQUEST_REDIRECT_URI);
+    }
+
+    public String validateRedirectUri(@NotNull Client client, @Nullable String redirectUri, @Nullable String state,
+                                      @Nullable String deviceAuthzUserCode, @Nullable HttpServletRequest httpRequest, @NotNull AuthorizeErrorResponseType error) {
         if (StringUtils.isNotBlank(deviceAuthzUserCode)) {
             DeviceAuthorizationCacheControl deviceAuthorizationCacheControl = deviceAuthorizationService
                     .getDeviceAuthzByUserCode(deviceAuthzUserCode);
@@ -291,7 +295,7 @@ public class AuthorizeRestWebServiceValidator {
         }
         throw new WebApplicationException(Response
                 .status(Response.Status.BAD_REQUEST)
-                .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST_REDIRECT_URI, state, ""))
+                .entity(errorResponseFactory.getErrorAsJson(error, state, ""))
                 .build());
     }
 
