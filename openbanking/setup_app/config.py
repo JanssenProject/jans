@@ -219,6 +219,6 @@ class Config:
         self.non_setup_properties = {
             'oxauth_client_jar_fn': os.path.join(self.distJansFolder, 'jans-auth-client-jar-with-dependencies.jar')
                 }
-
+        self.mappingLocations = {'default': 'rdbm'}
         Config.addPostSetupService = []
 

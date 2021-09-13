@@ -14,7 +14,7 @@ def get_setup_options():
         'installOxAuth': True,
         'installConfigApi': True,
         'installHTTPD': True,
-        'installScimServer': True,
+        'installScimServer': True if base.profile == 'jans' else False,
         'installOxd': False,
         'installFido2': True,
         'installEleven': False,
@@ -26,14 +26,12 @@ def get_setup_options():
         'properties_password': None,
     }
 
-
-
-    if not (base.argsp.remote_couchbase or base.argsp.remote_rdbm or base.argsp.local_rdbm):
+    if not (getattr(base.argsp, 'remote_couchbase', None) or base.argsp.remote_rdbm or base.argsp.local_rdbm):
         setupOptions['wrends_install'] = InstallTypes.LOCAL
     else:
         setupOptions['wrends_install'] = InstallTypes.NONE
 
-        if base.argsp.remote_couchbase:
+        if getattr(base.argsp, 'remote_couchbase', None):
             setupOptions['cb_install'] = InstallTypes.REMOTE
 
         if base.argsp.remote_rdbm:
@@ -62,44 +60,96 @@ def get_setup_options():
         if base.argsp.rdbm_password:
             setupOptions['rdbm_password'] = base.argsp.rdbm_password
 
-        if base.argsp.spanner_project:
-            setupOptions['spanner_project'] = base.argsp.spanner_project
-        if base.argsp.spanner_instance:
-            setupOptions['spanner_instance'] = base.argsp.spanner_instance
-        if base.argsp.spanner_database:
-            setupOptions['spanner_database'] = base.argsp.spanner_database
-        if base.argsp.spanner_emulator_host:
-            setupOptions['spanner_emulator_host'] = base.argsp.spanner_emulator_host
-        if base.argsp.google_application_credentials:
-            setupOptions['google_application_credentials'] = base.argsp.google_application_credentials
+        if base.profile == 'jans':
+            if base.argsp.spanner_project:
+                setupOptions['spanner_project'] = base.argsp.spanner_project
+            if base.argsp.spanner_instance:
+                setupOptions['spanner_instance'] = base.argsp.spanner_instance
+            if base.argsp.spanner_database:
+                setupOptions['spanner_database'] = base.argsp.spanner_database
+            if base.argsp.spanner_emulator_host:
+                setupOptions['spanner_emulator_host'] = base.argsp.spanner_emulator_host
+            if base.argsp.google_application_credentials:
+                setupOptions['google_application_credentials'] = base.argsp.google_application_credentials
 
 
-    if base.argsp.disable_local_ldap:
-        setupOptions['wrends_install'] = InstallTypes.NONE
-        
-    if base.argsp.local_couchbase:
-        setupOptions['cb_install'] = InstallTypes.LOCAL
+    if base.profile == 'jans':
+        if base.argsp.disable_local_ldap:
+            setupOptions['wrends_install'] = InstallTypes.NONE
+            
+        if base.argsp.local_couchbase:
+            setupOptions['cb_install'] = InstallTypes.LOCAL
 
-    setupOptions['couchbase_bucket_prefix'] = base.argsp.couchbase_bucket_prefix
-    setupOptions['cb_password'] = base.argsp.couchbase_admin_password
-    setupOptions['couchebaseClusterAdmin'] = base.argsp.couchbase_admin_user
-    if base.argsp.couchbase_hostname:
-        setupOptions['couchbase_hostname'] = base.argsp.couchbase_hostname
+        setupOptions['couchbase_bucket_prefix'] = base.argsp.couchbase_bucket_prefix
+        setupOptions['cb_password'] = base.argsp.couchbase_admin_password
+        setupOptions['couchebaseClusterAdmin'] = base.argsp.couchbase_admin_user
+        if base.argsp.couchbase_hostname:
+            setupOptions['couchbase_hostname'] = base.argsp.couchbase_hostname
 
-    if base.argsp.no_jsauth:
-        setupOptions['installOxAuth'] = False
+        if base.argsp.no_jsauth:
+            setupOptions['installOxAuth'] = False
 
-    if base.argsp.no_config_api:
-        setupOptions['installConfigApi'] = False
+        if base.argsp.no_config_api:
+            setupOptions['installConfigApi'] = False
 
-    if base.argsp.no_scim:
-        setupOptions['installScimServer'] = False
+        if base.argsp.no_scim:
+            setupOptions['installScimServer'] = False
 
-    if base.argsp.no_fido2:
-        setupOptions['installFido2'] = False
+        if base.argsp.no_fido2:
+            setupOptions['installFido2'] = False
 
-    if base.argsp.install_eleven:
-        setupOptions['installEleven'] = True
+        if base.argsp.install_eleven:
+            setupOptions['installEleven'] = True
+
+        if base.argsp.jans_max_mem:
+            setupOptions['jans_max_mem'] = base.argsp.jans_max_mem
+
+        if base.argsp.ldap_admin_password:
+            setupOptions['ldapPass'] = base.argsp.ldap_admin_password
+
+        if base.argsp.install_admin_ui:
+            setupOptions['installAdminUI'] = True
+
+        if base.argsp.admin_password:
+            setupOptions['admin_password'] = base.argsp.admin_password
+        elif base.argsp.ldap_admin_password:
+            setupOptions['admin_password'] = base.argsp.ldap_admin_password
+
+        if base.argsp.f:
+            if os.path.isfile(base.argsp.f):
+                setupOptions['setup_properties'] = base.argsp.f
+                print("Found setup properties %s\n" % base.argsp.f)
+            else:
+                print("\nOoops... %s file not found for setup properties.\n" %base.argsp.f)
+
+        setupOptions['downloadWars'] = base.argsp.w
+        setupOptions['loadTestData']  = base.argsp.t
+        setupOptions['loadTestDataExit'] = base.argsp.x
+        setupOptions['allowPreReleasedFeatures'] = base.argsp.allow_pre_released_features
+        setupOptions['listenAllInterfaces'] = base.argsp.listen_all_interfaces
+        setupOptions['config_patch_creds'] = base.argsp.config_patch_creds
+        setupOptions['dump_config_on_error'] = base.argsp.dump_config_on_error
+
+        if base.argsp.remote_ldap:
+            setupOptions['wrends_install'] = InstallTypes.REMOTE
+
+        if base.argsp.no_data:
+            setupOptions['loadData'] = False
+
+        if base.argsp.remote_ldap:
+            setupOptions['listenAllInterfaces'] = True
+
+        if base.argsp.import_ldif:
+            if os.path.isdir(base.argsp.import_ldif):
+                setupOptions['importLDIFDir'] = base.argsp.import_ldif
+                print("Found setup LDIF import directory {}\n".format(base.argsp.import_ldif))
+            else:
+                print("The custom LDIF import directory {} does not exist. Exiting...".format(base.argsp.import_ldif))
+                sys.exit(2)
+
+        setupOptions['properties_password'] = base.argsp.properties_password
+
+
 
     if base.argsp.ip_address:
         setupOptions['ip'] = base.argsp.ip_address
@@ -122,59 +172,11 @@ def get_setup_options():
     if base.argsp.country:
         setupOptions['countryCode'] = base.argsp.country
 
-    if base.argsp.jans_max_mem:
-        setupOptions['jans_max_mem'] = base.argsp.jans_max_mem
-
-    if base.argsp.ldap_admin_password:
-        setupOptions['ldapPass'] = base.argsp.ldap_admin_password
-
-    if base.argsp.install_admin_ui:
-        setupOptions['installAdminUI'] = True
-
-    if base.argsp.admin_password:
-        setupOptions['admin_password'] = base.argsp.admin_password
-    elif base.argsp.ldap_admin_password:
-        setupOptions['admin_password'] = base.argsp.ldap_admin_password
-
-    if base.argsp.f:
-        if os.path.isfile(base.argsp.f):
-            setupOptions['setup_properties'] = base.argsp.f
-            print("Found setup properties %s\n" % base.argsp.f)
-        else:
-            print("\nOoops... %s file not found for setup properties.\n" %base.argsp.f)
-
     setupOptions['noPrompt'] = base.argsp.n
 
     if base.argsp.no_httpd:
         setupOptions['installHTTPD'] = False
 
-    setupOptions['downloadWars'] = base.argsp.w
-    setupOptions['loadTestData']  = base.argsp.t
-    setupOptions['loadTestDataExit'] = base.argsp.x
-    setupOptions['allowPreReleasedFeatures'] = base.argsp.allow_pre_released_features
-    setupOptions['listenAllInterfaces'] = base.argsp.listen_all_interfaces
-    setupOptions['config_patch_creds'] = base.argsp.config_patch_creds
-    setupOptions['dump_config_on_error'] = base.argsp.dump_config_on_error
 
-    if base.argsp.remote_ldap:
-        setupOptions['wrends_install'] = InstallTypes.REMOTE
-
-    if base.argsp.no_data:
-        setupOptions['loadData'] = False
-
-    if base.argsp.remote_ldap:
-        setupOptions['listenAllInterfaces'] = True
-
-
-
-    if base.argsp.import_ldif:
-        if os.path.isdir(base.argsp.import_ldif):
-            setupOptions['importLDIFDir'] = base.argsp.import_ldif
-            print("Found setup LDIF import directory {}\n".format(base.argsp.import_ldif))
-        else:
-            print("The custom LDIF import directory {} does not exist. Exiting...".format(base.argsp.import_ldif))
-            sys.exit(2)
-
-    setupOptions['properties_password'] = base.argsp.properties_password
 
     return setupOptions
