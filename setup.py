@@ -277,8 +277,7 @@ def do_installation():
 
             jansInstaller.prepare_base64_extension_scripts()
             jansInstaller.render_templates()
-            if Config.profile == 'jans':
-                jansInstaller.render_configuration_template()
+            jansInstaller.render_configuration_template()
 
             if not base.snap:
                 jansInstaller.update_hostname()
