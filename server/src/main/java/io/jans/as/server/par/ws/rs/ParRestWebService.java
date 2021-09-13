@@ -2,6 +2,7 @@ package io.jans.as.server.par.ws.rs;
 
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.util.RedirectUri;
+import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.authorize.AuthorizeRequestParam;
 import io.jans.as.model.common.ComponentType;
 import io.jans.as.model.common.ResponseMode;
@@ -120,7 +121,7 @@ public class ParRestWebService {
             Client client = authorizeRestWebServiceValidator.validateClient(clientId, state, true);
 
             redirectUri = getRedirectUri(redirectUri, request);
-            redirectUri = authorizeRestWebServiceValidator.validateRedirectUri(client, redirectUri, state, null, httpRequest);
+            redirectUri = authorizeRestWebServiceValidator.validateRedirectUri(client, redirectUri, state, null, httpRequest, AuthorizeErrorResponseType.INVALID_REQUEST);
 
             RedirectUriResponse redirectUriResponse = new RedirectUriResponse(new RedirectUri(redirectUri, responseTypes, responseModeObj), state, httpRequest, errorResponseFactory);
             redirectUriResponse.setFapiCompatible(appConfiguration.getFapiCompatibility());
