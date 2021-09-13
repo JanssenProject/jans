@@ -66,7 +66,7 @@ class JansAuthInstaller(JettyInstaller):
         jwks = self.gen_openid_jwks_jks_keys(self.oxauth_openid_jks_fn, Config.oxauth_openid_jks_pass, key_expiration=2, key_algs=sig_keys, enc_keys=enc_keys)
         self.write_openid_keys(self.oxauth_openid_jwks_fn, jwks)
 
-        if Config.use_external_key:
+        if Config.get('use_external_key'):
             self.import_openbanking_key()
 
     def render_import_templates(self):
