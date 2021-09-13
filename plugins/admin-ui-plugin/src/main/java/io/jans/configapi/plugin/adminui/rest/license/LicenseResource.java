@@ -5,6 +5,7 @@ import com.licensespring.LicenseManager;
 import com.licensespring.model.ActivationLicense;
 import com.licensespring.model.exceptions.LicenseSpringException;
 import io.jans.configapi.plugin.adminui.model.auth.LicenseRequest;
+import io.jans.configapi.plugin.adminui.model.auth.LicenseResponse;
 import io.jans.configapi.plugin.adminui.model.config.AUIConfiguration;
 import io.jans.configapi.plugin.adminui.service.config.AUIConfigurationService;
 import org.slf4j.Logger;
@@ -23,6 +24,7 @@ public class LicenseResource {
 
     static final String CHECK_LICENSE = "/checkLicense";
     static final String ACTIVATE_LICENSE = "/activateLicense";
+    static final String GET_LICENSE_DETAILS = "/getLicenseDetails";
 
     @Inject
     Logger log;
@@ -56,6 +58,7 @@ public class LicenseResource {
                 return true;
             }
         } catch (LicenseSpringException e) {
+            log.error("Check-License failed. ", e);
             log.error(e.getCause().getMessage());
             return false;
         }
@@ -80,6 +83,48 @@ public class LicenseResource {
         } catch (Exception e) {
             log.error("Error in activating license: ", e);
             return false;
+        }
+    }
+
+    @GET
+    @Path(GET_LICENSE_DETAILS)
+    @Produces(MediaType.APPLICATION_JSON)
+    public LicenseResponse getLicenseDetails() {
+        LicenseResponse licenseResponse = new LicenseResponse();
+        try {
+            AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
+
+            if(!auiConfiguration.getLicenseConfiguration().getEnabled()) {
+                log.info("License configuration is disabled.");
+                licenseResponse.setIsLicenseEnable(false);
+                return licenseResponse;
+            }
+            License activeLicense = auiConfiguration.getLicenseConfiguration().getLicenseManager().getCurrent();
+            if (activeLicense == null) {
+                log.info("Active license for admin-ui not present ");
+                licenseResponse.setIsLicenseEnable(false);
+                return licenseResponse;
+            } else {
+                log.info("Active license for admin-ui found :: " + activeLicense.getProduct());
+                licenseResponse.setIsLicenseEnable(true);
+                licenseResponse.setProductName(activeLicense.getProduct().getProductName());
+                licenseResponse.setProductCode(activeLicense.getProduct().getShortCode());
+                licenseResponse.setLicenseType(activeLicense.getData().getLicenseType().name());
+                licenseResponse.setMaxActivations(activeLicense.getData().getMaxActivations());
+                licenseResponse.setLicenseKey(activeLicense.getIdentity().getLicenseKey());
+                licenseResponse.setValidityPeriod(activeLicense.getData().getValidityPeriod().toString());
+                licenseResponse.setCompanyName(activeLicense.getData().getCustomer().getCompanyName());
+                licenseResponse.setCustomerEmail(activeLicense.getData().getCustomer().getEmail());
+                licenseResponse.setCustomerFirstName(activeLicense.getData().getCustomer().getFirstName());
+                licenseResponse.setCustomerLastName(activeLicense.getData().getCustomer().getLastName());
+                licenseResponse.setLicenseActive(activeLicense.getData().isExpired());
+                return licenseResponse;
+            }
+        } catch (LicenseSpringException e) {
+            log.error("Check-License failed. ", e);
+            log.error(e.getCause().getMessage());
+            licenseResponse.setIsLicenseEnable(false);
+            return licenseResponse;
         }
     }
 }
