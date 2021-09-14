@@ -37,7 +37,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
                 txt += 'countryCode'.ljust(30) + Config.countryCode.rjust(35) + "\n"
                 txt += 'Applications max ram (MB)'.ljust(30) + str(Config.application_max_ram).rjust(35) + "\n"
 
-                if Config.wrends_install:
+                if Config.get('wrends_install') and Config.get('opendj_max_ram'):
                     txt += 'OpenDJ max ram (MB)'.ljust(30) + str(Config.opendj_max_ram).rjust(35) + "\n"
 
                 bc = []
