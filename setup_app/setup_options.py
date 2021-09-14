@@ -76,7 +76,7 @@ def get_setup_options():
     if base.profile == 'jans':
         if base.argsp.disable_local_ldap:
             setupOptions['wrends_install'] = InstallTypes.NONE
-            
+
         if base.argsp.local_couchbase:
             setupOptions['cb_install'] = InstallTypes.LOCAL
 
@@ -149,7 +149,8 @@ def get_setup_options():
 
         setupOptions['properties_password'] = base.argsp.properties_password
 
-
+    if base.profile == 'openbanking':
+        setupOptions['wrends_install'] = InstallTypes.NONE
 
     if base.argsp.ip_address:
         setupOptions['ip'] = base.argsp.ip_address
