@@ -1,4 +1,5 @@
 {
+  "configOauthEnabled": %(configOauthEnabled)s,
   "apiApprovedIssuer": ["%(apiApprovedIssuer)s"],
   "apiProtectionType": "%(apiProtectionType)s",
   "apiClientId": "%(jca_client_id)s",
@@ -10,12 +11,13 @@
   "authOpenidTokenUrl": "%(tokenEndpoint)s",
   "authOpenidRevokeUrl": "%(tokenRevocationEndpoint)s",
   "smallryeHealthRootPath": "/health-check",
+  "exclusiveAuthScopes": ["jans_stat"],
   "corsConfigurationFilters": [
     {
       "filterName": "CorsFilter",
       "corsAllowedOrigins": "*",
-      "corsAllowedMethods": "GET,POST,HEAD,OPTIONS",
-      "corsAllowedHeaders": "Origin,Authorization,Accept,X-Requested-With,Content-Type,Access-Control-Request-Method,Access-Control-Request-Headers",
+      "corsAllowedMethods": "GET,PUT,POST,DELETE,PATCH,HEAD,OPTIONS",
+      "corsAllowedHeaders": "",
       "corsExposedHeaders": "",
       "corsSupportCredentials": true,
       "corsLoggingEnabled": false,

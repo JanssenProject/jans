@@ -100,8 +100,6 @@ def get_base_ctx(manager):
         'encoded_ox_ldap_pw': manager.secret.get('encoded_ox_ldap_pw'),
         'jetty_base': manager.config.get('jetty_base'),
         'orgName': manager.config.get('orgName'),
-        'auth_client_id': manager.config.get('auth_client_id'),
-        'authClient_encoded_pw': manager.secret.get('authClient_encoded_pw'),
         'hostname': manager.config.get('hostname'),
         'idp_client_id': manager.config.get('idp_client_id'),
         'idpClient_encoded_pw': manager.secret.get('idpClient_encoded_pw'),
@@ -342,6 +340,7 @@ def merge_config_api_ctx(ctx):
         "jca_client_id": ctx["jca_client_id"],
         "jca_client_encoded_pw": ctx["jca_client_encoded_pw"],
         "endpointInjectionEnabled": "true",
+        "configOauthEnabled": str(os.environ.get("CN_CONFIG_API_OAUTH_ENABLED") or True).lower(),
     }
     local_ctx.update(get_injected_urls())
 
@@ -402,7 +401,7 @@ def get_ldif_mappings(optional_scopes=None):
         files += [
             "jans-config-api/configuration.ldif",
             "jans-auth/configuration.ldif",
-            "jans-auth/clients.ldif",
+            # "jans-auth/clients.ldif",
         ]
 
         if "scim" in optional_scopes:

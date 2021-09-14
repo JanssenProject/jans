@@ -890,5 +890,39 @@
     "spanner": {
       "type": "STRING(MAX)"
     }
+  },
+  "jansMobileDevices": {
+    "mysql": {
+      "type": "JSON"
+    },
+    "spanner": {
+      "type": "ARRAY<STRING(MAX)>"
+    }
+  },
+  "jansOTPDevices": {
+    "mysql": {
+      "type": "JSON"
+    },
+    "spanner": {
+      "type": "ARRAY<STRING(MAX)>"
+    }
+  },
+  "jansTrustedDevices": {
+    "mysql": {
+      "type": "TEXT"
+    },
+    "spanner": {
+      "type": "STRING(MAX)"
+    }
+  },
+  "jansProfileURL": {
+    "mysql": {
+      "size": 256,
+      "type": "VARCHAR"
+    },
+    "spanner": {
+      "size": 256,
+      "type": "STRING"
+    }
   }
 }
