@@ -284,11 +284,6 @@ class CtxGenerator:
         self.set_secret("pairwiseCalculationKey", partial(get_sys_random_chars, random.randint(20, 30)))
         self.set_secret("pairwiseCalculationSalt", partial(get_sys_random_chars, random.randint(20, 30)))
 
-        self.set_config("auth_client_id", lambda: f"1001.{uuid4()}")
-        self.set_secret(
-            "authClient_encoded_pw",
-            partial(encode_text, get_random_chars(), encoded_salt),
-        )
         auth_openid_jks_fn = self.set_config("auth_openid_jks_fn", "/etc/certs/auth-keys.jks")
         self.set_secret("auth_openid_jks_pass", get_random_chars)
         auth_openid_jwks_fn = self.set_config("auth_openid_jwks_fn", "/etc/certs/auth-keys.json")
