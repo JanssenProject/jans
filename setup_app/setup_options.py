@@ -151,6 +151,8 @@ def get_setup_options():
 
     if base.profile == 'openbanking':
         setupOptions['wrends_install'] = InstallTypes.NONE
+        if base.argsp.static_kid:
+            setupOptions['staticKid'] = base.argsp.static_kid
 
     if base.argsp.ip_address:
         setupOptions['ip'] = base.argsp.ip_address
@@ -177,7 +179,6 @@ def get_setup_options():
 
     if base.argsp.no_httpd:
         setupOptions['installHTTPD'] = False
-
 
 
     return setupOptions
