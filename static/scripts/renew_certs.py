@@ -1,4 +1,9 @@
 import os
+import sys
+
+sys.path.append('../..')
+
+from setup_app.utils import base
 
 prop_file = '/install/community-edition-setup/setup.properties.last'
 
@@ -27,7 +32,7 @@ def delete_key(suffix):
                         "-keystore", defaultTrustStoreFN,
                         "-storepass", defaultTrustStorePW
                         ])
-        os.system(cmd)
+        base.run(cmd, shell=True)
 
 
 def import_key(suffix):
@@ -43,10 +48,11 @@ def import_key(suffix):
                     "-storepass", defaultTrustStorePW, "-noprompt"
                     ])
 
-    os.system(cmd)
+    base.run(cmd, shell=True)
 
 def create_new_certs():
-    print "Creating certificates"
+    print ("Creating certificates")
+
     cmd_list = [
         '/usr/bin/openssl ecparam -name "secp384r1" -genkey -noout -out /etc/certs/{0}.key',
         '/usr/bin/openssl ec -des3 -in /etc/certs/{0}.key -inform PEM -out /etc/certs/{0}.key.orig -outform PEM -passout pass:secret',
@@ -57,8 +63,7 @@ def create_new_certs():
         'chmod 700 /etc/certs/{0}.key.orig',
         'chown root:gluu /etc/certs/{0}.key',
         'chmod 700 /etc/certs/{0}.key',
-        ]    
-
+        ]
     cert_list = ['httpd', 'asimba', 'idp-encryption', 'idp-signing', 'shibIDP', 'saml.pem']
 
     for crt in cert_list:
@@ -73,6 +78,6 @@ def create_new_certs():
 
     os.rename('/etc/certs/saml.pem.crt', '/etc/certs/saml.pem')
 
-    os.system('chown jetty:jetty /etc/certs/oxauth-keys.*')    
+    base.run('chown jetty:jetty /etc/certs/oxauth-keys.*', shell=True)
 
 create_new_certs()
