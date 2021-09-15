@@ -117,7 +117,7 @@ public class LicenseResource {
                 licenseResponse.setCustomerEmail(activeLicense.getData().getCustomer().getEmail());
                 licenseResponse.setCustomerFirstName(activeLicense.getData().getCustomer().getFirstName());
                 licenseResponse.setCustomerLastName(activeLicense.getData().getCustomer().getLastName());
-                licenseResponse.setLicenseActive(activeLicense.getData().isExpired());
+                licenseResponse.setLicenseActive(!activeLicense.getData().isExpired());
                 return licenseResponse;
             }
         } catch (LicenseSpringException e) {
