@@ -8,6 +8,7 @@ import io.jans.as.model.common.ComponentType;
 import io.jans.as.model.common.ResponseMode;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.error.ErrorResponse;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.util.Util;
@@ -18,6 +19,7 @@ import io.jans.as.server.service.RequestParameterService;
 import io.jans.as.server.util.QueryStringDecoder;
 import io.jans.as.server.util.ServerUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
@@ -36,6 +38,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
+import java.net.URI;
 import java.util.List;
 
 /**
@@ -169,16 +172,32 @@ public class ParRestWebService {
 
             final String responseAsString = ServerUtil.asJson(parResponse);
 
-            log.debug("Created PAR " + responseAsString);
+            log.debug("Created PAR {}", responseAsString);
 
             return Response.status(Response.Status.CREATED).entity(responseAsString).type(MediaType.APPLICATION_JSON_TYPE).build();
         } catch (WebApplicationException e) {
-            log.error(e.getMessage(), e);
+            if (e.getResponse().getStatus() == Response.Status.FOUND.getStatusCode()) {
+                throw errorResponseFactory.createBadRequestException(createErrorResponseFromRedirectErrorUri(e.getResponse().getLocation()));
+            }
+
+            if (log.isErrorEnabled())
+                log.error(e.getMessage(), e);
             throw e;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_JSON_TYPE).build();
         }
+    }
+
+    @NotNull
+    private ErrorResponse createErrorResponseFromRedirectErrorUri(@NotNull URI location) {
+        final RedirectUri locationRedirect = new RedirectUri(location.toString());
+        locationRedirect.parseQueryString(location.getQuery());
+
+        final ErrorResponse response = new ErrorResponse();
+        response.setErrorCode(locationRedirect.getResponseParameter("error"));
+        response.setErrorDescription(locationRedirect.getResponseParameter("error_description"));
+        return response;
     }
 
     private String getRedirectUri(String redirectUri, String request) {
@@ -188,7 +207,7 @@ public class ParRestWebService {
         Jwt jwt = Jwt.parseSilently(request);
         if (jwt != null) {
             final String redirectUriFromJwt = jwt.getClaims().getClaimAsString("redirect_uri");
-            log.trace("redirectUriFromJwt: " + redirectUriFromJwt);
+            log.trace("redirectUriFromJwt: {}", redirectUriFromJwt);
             return redirectUriFromJwt;
         }
 
