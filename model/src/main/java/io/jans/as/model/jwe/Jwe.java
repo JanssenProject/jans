@@ -6,12 +6,12 @@
 
 package io.jans.as.model.jwe;
 
-import java.security.PrivateKey;
-
 import io.jans.as.model.exception.InvalidJweException;
 import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.token.JsonWebResponse;
+
+import java.security.PrivateKey;
 
 /**
  * @author Javier Rojas Blum
@@ -33,6 +33,20 @@ public class Jwe extends JsonWebResponse {
         encodedInitializationVector = null;
         encodedCiphertext = null;
         encodedIntegrityValue = null;
+    }
+
+    public static Jwe parse(String encodedJwe, PrivateKey privateKey, byte[] sharedSymmetricKey) throws InvalidJweException, InvalidJwtException {
+        Jwe jwe = null;
+
+        if (privateKey != null) {
+            JweDecrypter jweDecrypter = new JweDecrypterImpl(privateKey);
+            jwe = jweDecrypter.decrypt(encodedJwe);
+        } else if (sharedSymmetricKey != null) {
+            JweDecrypter jweDecrypter = new JweDecrypterImpl(sharedSymmetricKey);
+            jwe = jweDecrypter.decrypt(encodedJwe);
+        }
+
+        return jwe;
     }
 
     public String getEncodedHeader() {
@@ -81,20 +95,6 @@ public class Jwe extends JsonWebResponse {
                 + encodedInitializationVector;
 
         return additionalAuthenticatedData;
-    }
-
-    public static Jwe parse(String encodedJwe, PrivateKey privateKey, byte[] sharedSymmetricKey) throws InvalidJweException, InvalidJwtException {
-        Jwe jwe = null;
-
-        if (privateKey != null) {
-            JweDecrypter jweDecrypter = new JweDecrypterImpl(privateKey);
-            jwe = jweDecrypter.decrypt(encodedJwe);
-        } else if (sharedSymmetricKey != null) {
-            JweDecrypter jweDecrypter = new JweDecrypterImpl(sharedSymmetricKey);
-            jwe = jweDecrypter.decrypt(encodedJwe);
-        }
-
-        return jwe;
     }
 
     public Jwt getSignedJWTPayload() {

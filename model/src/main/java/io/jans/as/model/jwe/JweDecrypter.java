@@ -15,13 +15,13 @@ import io.jans.as.model.exception.InvalidJweException;
  */
 public interface JweDecrypter {
 
-    public KeyEncryptionAlgorithm getKeyEncryptionAlgorithm();
+    KeyEncryptionAlgorithm getKeyEncryptionAlgorithm();
 
-    public void setKeyEncryptionAlgorithm(KeyEncryptionAlgorithm keyEncryptionAlgorithm);
+    void setKeyEncryptionAlgorithm(KeyEncryptionAlgorithm keyEncryptionAlgorithm);
 
-    public BlockEncryptionAlgorithm getBlockEncryptionAlgorithm();
+    BlockEncryptionAlgorithm getBlockEncryptionAlgorithm();
 
-    public void setBlockEncryptionAlgorithm(BlockEncryptionAlgorithm blockEncryptionAlgorithm);
+    void setBlockEncryptionAlgorithm(BlockEncryptionAlgorithm blockEncryptionAlgorithm);
 
-    public Jwe decrypt(String encryptedJwe) throws InvalidJweException;
+    Jwe decrypt(String encryptedJwe) throws InvalidJweException;
 }
