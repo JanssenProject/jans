@@ -6,15 +6,13 @@
 
 package io.jans.as.common;
 
-import static org.testng.Assert.assertEquals;
-
-import org.testng.annotations.Test;
-
 import com.google.common.collect.Lists;
-
 import io.jans.as.common.claims.Audience;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.jwt.JwtClaims;
+import org.testng.annotations.Test;
+
+import static org.testng.Assert.assertEquals;
 
 /**
  * @author Yuriy Zabrovarnyy

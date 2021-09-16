@@ -6,15 +6,16 @@
 
 package io.jans.as.model.authorize;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import org.testng.annotations.Test;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -22,6 +23,22 @@ import org.testng.annotations.Test;
  */
 
 public class CodeVerifierTest {
+
+    private static void assertMatch(CodeVerifier.CodeChallengeMethod type) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        CodeVerifier verifier = new CodeVerifier(type);
+        System.out.println(verifier);
+
+        if (type == CodeVerifier.CodeChallengeMethod.PLAIN) {
+            assertEquals(verifier.getCodeChallenge(), verifier.getCodeVerifier());
+            return;
+        }
+
+        MessageDigest md = MessageDigest.getInstance(type.getMessageDigestString());
+        md.update(verifier.getCodeVerifier().getBytes(StandardCharsets.UTF_8)); // Change this to "UTF-16" if needed
+        byte[] digest = md.digest();
+
+        assertEquals(CodeVerifier.base64UrlEncode(digest), verifier.getCodeChallenge());
+    }
 
     @Test
     public void verifierAndChallengeMatch() throws NoSuchAlgorithmException, UnsupportedEncodingException {
@@ -43,21 +60,5 @@ public class CodeVerifierTest {
         for (int i = 0; i < 10; i++) {
             assertTrue(CodeVerifier.isCodeVerifierValid(CodeVerifier.generateCodeVerifier()));
         }
-    }
-
-    private static void assertMatch(CodeVerifier.CodeChallengeMethod type) throws NoSuchAlgorithmException, UnsupportedEncodingException {
-        CodeVerifier verifier = new CodeVerifier(type);
-        System.out.println(verifier);
-
-        if (type == CodeVerifier.CodeChallengeMethod.PLAIN) {
-            assertEquals(verifier.getCodeChallenge(), verifier.getCodeVerifier());
-            return;
-        }
-
-        MessageDigest md = MessageDigest.getInstance(type.getMessageDigestString());
-        md.update(verifier.getCodeVerifier().getBytes("UTF-8")); // Change this to "UTF-16" if needed
-        byte[] digest = md.digest();
-
-        assertEquals(CodeVerifier.base64UrlEncode(digest), verifier.getCodeChallenge());
     }
 }

@@ -14,6 +14,8 @@ import java.util.Map;
 public class ParAttributes implements Serializable {
 
     @JsonProperty
+    Integer maxAge;
+    @JsonProperty
     private String scope;
     @JsonProperty
     private String responseType;
@@ -31,8 +33,6 @@ public class ParAttributes implements Serializable {
     private String display;
     @JsonProperty
     private String prompt;
-    @JsonProperty
-    Integer maxAge;
     @JsonProperty
     private String uiLocales;
     @JsonProperty

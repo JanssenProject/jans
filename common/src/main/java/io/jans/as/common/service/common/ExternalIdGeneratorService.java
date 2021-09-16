@@ -6,16 +6,15 @@
 
 package io.jans.as.common.service.common;
 
-import java.util.Map;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Named;
-
 import io.jans.model.SimpleCustomProperty;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.custom.script.type.id.IdGeneratorType;
 import io.jans.service.custom.script.ExternalScriptService;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Named;
+import java.util.Map;
 
 /**
  * @author gasmyr on 9/17/20.

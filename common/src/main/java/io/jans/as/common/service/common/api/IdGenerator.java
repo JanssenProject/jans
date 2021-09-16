@@ -25,7 +25,7 @@ public interface IdGenerator {
      * @param p_idPrefix id prefix : If you want to prefix all ids, use this, otherwise pass ""
      * @return generated id as string
      */
-    public String generateId(String p_idType, String p_idPrefix);
+    String generateId(String p_idType, String p_idPrefix);
 
-    public String generateId(IdType p_idType, String p_idPrefix);
+    String generateId(IdType p_idType, String p_idPrefix);
 }
