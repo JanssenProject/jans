@@ -13,7 +13,6 @@ package io.jans.as.model.error;
 public class DefaultErrorResponse extends ErrorResponse {
 
     private IErrorType type;
-    private String state;
 
     /**
      * Returns the error response type.
@@ -34,18 +33,9 @@ public class DefaultErrorResponse extends ErrorResponse {
     }
 
     @Override
-    public String getState() {
-        return state;
-    }
-
-    public void setState(String p_state) {
-        state = p_state;
-    }
-
-    @Override
     public String getErrorCode() {
         if (type != null)
             return type.toString();
-        return null;
+        return super.getErrorCode();
     }
 }
