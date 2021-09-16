@@ -62,12 +62,8 @@ import static org.testng.Assert.fail;
  */
 public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 
-    @ArquillianResource
-    private URI url;
-
     private static String clientId;
     private static String clientSecret;
-
     private static String accessToken1;
     private static String accessToken3;
     private static String accessToken4;
@@ -80,6 +76,8 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
     private static String clientSecret1;
     private static String clientSecret2;
     private static String clientSecret3;
+    @ArquillianResource
+    private URI url;
 
     @Parameters({"registerPath", "redirectUris", "sectorIdentifierUri"})
     @Test

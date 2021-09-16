@@ -6,20 +6,6 @@
 
 package io.jans.as.server.uma.service;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.uma.UmaPermissionList;
@@ -29,6 +15,18 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.base.SimpleBranch;
 import io.jans.orm.search.filter.Filter;
 import io.jans.util.INumGenerator;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * Holds permission tokens and permissions
@@ -82,7 +80,7 @@ public class UmaPermissionService {
     }
 
     public String generateNewTicket() {
-       return UUID.randomUUID().toString();
+        return UUID.randomUUID().toString();
     }
 
     public String addPermission(UmaPermissionList permissionList, String clientDn) {
@@ -163,11 +161,11 @@ public class UmaPermissionService {
     }
 
     public void addBranchIfNeeded(String clientDn) {
-    	if (ldapEntryManager.hasBranchesSupport(clientDn)) {
-	        if (!containsBranch(clientDn)) {
-	            addBranch(clientDn);
-	        }
-    	}
+        if (ldapEntryManager.hasBranchesSupport(clientDn)) {
+            if (!containsBranch(clientDn)) {
+                addBranch(clientDn);
+            }
+        }
     }
 
     public boolean containsBranch(String clientDn) {

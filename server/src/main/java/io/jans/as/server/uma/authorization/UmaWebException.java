@@ -6,22 +6,20 @@
 
 package io.jans.as.server.uma.authorization;
 
-import static javax.ws.rs.core.Response.Status.FOUND;
-import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
-
-import java.net.URI;
-import java.net.URLEncoder;
-
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-
+import io.jans.as.model.error.DefaultErrorResponse;
+import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.as.model.uma.UmaErrorResponseType;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.jans.as.model.error.DefaultErrorResponse;
-import io.jans.as.model.error.ErrorResponseFactory;
-import io.jans.as.model.uma.UmaErrorResponseType;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+import java.net.URI;
+import java.net.URLEncoder;
+
+import static javax.ws.rs.core.Response.Status.FOUND;
+import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 
 /**
  * @author yuriyz on 06/06/2017.

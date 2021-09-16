@@ -6,9 +6,8 @@
 
 package io.jans.as.server.model.auth;
 
-import java.io.Serializable;
-
 import javax.enterprise.inject.Vetoed;
+import java.io.Serializable;
 
 /**
  * @author Yuriy Movchan
@@ -17,22 +16,23 @@ import javax.enterprise.inject.Vetoed;
 @Vetoed
 public class AuthenticationMode implements Serializable {
 
-	private static final long serialVersionUID = -3187893527945584013L;
+    private static final long serialVersionUID = -3187893527945584013L;
 
-	private String name;
+    private String name;
 
-	public AuthenticationMode() {}
+    public AuthenticationMode() {
+    }
 
-	public AuthenticationMode(String name) {
-		this.name = name;
-	}
+    public AuthenticationMode(String name) {
+        this.name = name;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
 }

@@ -63,36 +63,31 @@ import static org.testng.Assert.fail;
  */
 public class TokenEndpointAuthMethodRestrictionEmbeddedTest extends BaseTest {
 
-    @ArquillianResource
-    private URI url;
-
     private static String clientId1;
     private static String registrationAccessToken1;
     private static String registrationClientUri1;
-
     private static String clientId2;
     private static String clientSecret2;
     private static String registrationAccessToken2;
     private static String authorizationCode2;
     private static String registrationClientUri2;
-
     private static String clientId3;
     private static String clientSecret3;
     private static String registrationAccessToken3;
     private static String authorizationCode3;
     private static String registrationClientUri3;
-
     private static String clientId4;
     private static String clientSecret4;
     private static String registrationAccessToken4;
     private static String authorizationCode4;
     private static String registrationClientUri4;
-
     private static String clientId5;
     private static String clientSecret5;
     private static String registrationAccessToken5;
     private static String authorizationCode5;
     private static String registrationClientUri5;
+    @ArquillianResource
+    private URI url;
 
     /**
      * Register a client without specify a Token Endpoint Auth Method.

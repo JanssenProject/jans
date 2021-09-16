@@ -6,11 +6,6 @@
 
 package io.jans.as.server.model.ldap;
 
-import java.io.Serializable;
-import java.util.Date;
-
-import org.apache.commons.lang.StringUtils;
-
 import io.jans.as.model.common.GrantType;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DN;
@@ -18,6 +13,10 @@ import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.Expiration;
 import io.jans.orm.annotation.JsonObject;
 import io.jans.orm.annotation.ObjectClass;
+import org.apache.commons.lang.StringUtils;
+
+import java.io.Serializable;
+import java.util.Date;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -90,16 +89,16 @@ public class TokenLdap implements Serializable {
         return attributes;
     }
 
+    public final void setAttributes(TokenAttributes attributes) {
+        this.attributes = attributes;
+    }
+
     public Integer getTtl() {
         return ttl;
     }
 
     public void setTtl(Integer ttl) {
         this.ttl = ttl;
-    }
-
-    public final void setAttributes(TokenAttributes attributes) {
-        this.attributes = attributes;
     }
 
     public boolean isDeletable() {
@@ -292,9 +291,7 @@ public class TokenLdap implements Serializable {
         TokenLdap tokenLdap = (TokenLdap) o;
 
         if (tokenCode != null ? !tokenCode.equals(tokenLdap.tokenCode) : tokenLdap.tokenCode != null) return false;
-        if (tokenType != null ? !tokenType.equals(tokenLdap.tokenType) : tokenLdap.tokenType != null) return false;
-
-        return true;
+        return tokenType != null ? tokenType.equals(tokenLdap.tokenType) : tokenLdap.tokenType == null;
     }
 
     @Override

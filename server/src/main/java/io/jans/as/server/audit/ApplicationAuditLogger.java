@@ -6,11 +6,18 @@
 
 package io.jans.as.server.audit;
 
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.concurrent.locks.ReentrantLock;
+import com.google.common.base.Objects;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.server.model.audit.OAuth2AuditLog;
+import io.jans.as.server.util.ServerUtil;
+import io.jans.service.cdi.async.Asynchronous;
+import io.jans.service.cdi.event.ConfigurationUpdate;
+import io.jans.util.StringHelper;
+import org.apache.activemq.ActiveMQConnectionFactory;
+import org.apache.activemq.pool.PooledConnectionFactory;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.BooleanUtils;
+import org.slf4j.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -25,191 +32,178 @@ import javax.jms.QueueConnection;
 import javax.jms.QueueSession;
 import javax.jms.Session;
 import javax.jms.TextMessage;
-
-import org.apache.activemq.ActiveMQConnectionFactory;
-import org.apache.activemq.pool.PooledConnectionFactory;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.BooleanUtils;
-import org.slf4j.Logger;
-
-import com.google.common.base.Objects;
-
-import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.server.model.audit.OAuth2AuditLog;
-import io.jans.as.server.util.ServerUtil;
-import io.jans.service.cdi.async.Asynchronous;
-import io.jans.service.cdi.event.ConfigurationUpdate;
-import io.jans.util.StringHelper;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.concurrent.locks.ReentrantLock;
 
 @Named
 @ApplicationScoped
 @DependsOn("appInitializer")
 public class ApplicationAuditLogger {
 
-	@Inject
-	private Logger log;
+    private final String BROKER_URL_PREFIX = "failover:(";
+    private final String BROKER_URL_SUFFIX = ")?timeout=5000&jms.useAsyncSend=true";
+    private final int ACK_MODE = Session.AUTO_ACKNOWLEDGE;
+    private final String CLIENT_QUEUE_NAME = "oauth2.audit.logging";
+    private final boolean transacted = false;
 
-	@Inject
-	private AppConfiguration appConfiguration;
+    private final ReentrantLock lock = new ReentrantLock();
 
-	private final String BROKER_URL_PREFIX = "failover:(";
-	private final String BROKER_URL_SUFFIX = ")?timeout=5000&jms.useAsyncSend=true";
-	private final int ACK_MODE = Session.AUTO_ACKNOWLEDGE;
-	private final String CLIENT_QUEUE_NAME = "oauth2.audit.logging";
-	private final boolean transacted = false;
+    @Inject
+    private Logger log;
+    @Inject
+    private AppConfiguration appConfiguration;
 
-	private volatile PooledConnectionFactory pooledConnectionFactory;
+    private volatile PooledConnectionFactory pooledConnectionFactory;
+    private Set<String> jmsBrokerURISet;
+    private String jmsUserName;
+    private String jmsPassword;
+    private boolean enabled;
+    private boolean sendAuditJms;
 
-	private Set<String> jmsBrokerURISet;
-	private String jmsUserName;
-	private String jmsPassword;
+    @PostConstruct
+    public void init() {
+        updateConfiguration(appConfiguration);
+    }
 
-	private final ReentrantLock lock = new ReentrantLock();
+    public void updateConfiguration(@Observes @ConfigurationUpdate AppConfiguration appConfiguration) {
+        this.enabled = BooleanUtils.isTrue(appConfiguration.getEnabledOAuthAuditLogging());
+        this.sendAuditJms = StringHelper.isNotEmpty(appConfiguration.getJmsUserName())
+                && StringHelper.isNotEmpty(appConfiguration.getJmsPassword())
+                && CollectionUtils.isNotEmpty(appConfiguration.getJmsBrokerURISet());
 
-	private boolean enabled;
-	private boolean sendAuditJms;
+        boolean configChanged = !Objects.equal(this.jmsUserName, appConfiguration.getJmsUserName())
+                || !Objects.equal(this.jmsPassword, appConfiguration.getJmsPassword())
+                || !Objects.equal(this.jmsBrokerURISet, appConfiguration.getJmsBrokerURISet());
 
-	@PostConstruct
-	public void init() {
-		updateConfiguration(appConfiguration);
-	}
+        if (configChanged) {
+            destroy();
+        }
+    }
 
-	public void updateConfiguration(@Observes @ConfigurationUpdate AppConfiguration appConfiguration) {
-		this.enabled = BooleanUtils.isTrue(appConfiguration.getEnabledOAuthAuditLogging());
-		this.sendAuditJms = StringHelper.isNotEmpty(appConfiguration.getJmsUserName())
-				&& StringHelper.isNotEmpty(appConfiguration.getJmsPassword())
-				&& CollectionUtils.isNotEmpty(appConfiguration.getJmsBrokerURISet());
+    @Asynchronous
+    public void sendMessage(OAuth2AuditLog oAuth2AuditLog) {
+        if (!enabled) {
+            return;
+        }
 
-		boolean configChanged = !Objects.equal(this.jmsUserName, appConfiguration.getJmsUserName())
-				|| !Objects.equal(this.jmsPassword, appConfiguration.getJmsPassword())
-				|| !Objects.equal(this.jmsBrokerURISet, appConfiguration.getJmsBrokerURISet());
+        boolean messageDelivered = false;
+        if (sendAuditJms) {
+            if (tryToEstablishJMSConnection()) {
+                messageDelivered = loggingThroughJMS(oAuth2AuditLog);
+            }
+        }
 
-		if (configChanged) {
-			destroy();
-		}
-	}
+        if (!messageDelivered) {
+            loggingThroughFile(oAuth2AuditLog);
+        }
+    }
 
-	@Asynchronous
-	public void sendMessage(OAuth2AuditLog oAuth2AuditLog) {
-		if (!enabled) {
-			return;
-		}
+    @PreDestroy
+    public void destroy() {
+        if (this.pooledConnectionFactory == null) {
+            return;
+        }
 
-		boolean messageDelivered = false;
-		if (sendAuditJms) {
-			if (tryToEstablishJMSConnection()) {
-				messageDelivered = loggingThroughJMS(oAuth2AuditLog);
-			}
-		}
+        this.pooledConnectionFactory.clear();
+        this.pooledConnectionFactory = null;
+    }
 
-		if (!messageDelivered) {
-			loggingThroughFile(oAuth2AuditLog);
-		}
-	}
+    private boolean tryToEstablishJMSConnection() {
+        if (this.pooledConnectionFactory != null) {
+            return true;
+        }
 
-	@PreDestroy
-	public void destroy() {
-		if (this.pooledConnectionFactory == null) {
-			return;
-		}
+        lock.lock();
+        try {
+            // Check if another thread initialized JMS pool already
+            if (this.pooledConnectionFactory == null) {
+                return tryToEstablishJMSConnectionImpl();
+            }
 
-		this.pooledConnectionFactory.clear();
-		this.pooledConnectionFactory = null;
-	}
+            return true;
+        } finally {
+            lock.unlock();
+        }
+    }
 
-	private boolean tryToEstablishJMSConnection() {
-		if (this.pooledConnectionFactory != null) {
-			return true;
-		}
+    private boolean tryToEstablishJMSConnectionImpl() {
+        Set<String> jmsBrokerURISet = appConfiguration.getJmsBrokerURISet();
+        if (!enabled || CollectionUtils.isEmpty(jmsBrokerURISet)) {
+            return false;
+        }
 
-		lock.lock();
-		try {
-			// Check if another thread initialized JMS pool already
-			if (this.pooledConnectionFactory == null) {
-				return tryToEstablishJMSConnectionImpl();
-			}
+        this.jmsBrokerURISet = new HashSet<String>(jmsBrokerURISet);
+        this.jmsUserName = appConfiguration.getJmsUserName();
+        this.jmsPassword = appConfiguration.getJmsPassword();
 
-			return true;
-		} finally {
-			lock.unlock();
-		}
-	}
+        Iterator<String> jmsBrokerURIIterator = jmsBrokerURISet.iterator();
 
-	private boolean tryToEstablishJMSConnectionImpl() {
-		Set<String> jmsBrokerURISet = appConfiguration.getJmsBrokerURISet();
-		if (!enabled || CollectionUtils.isEmpty(jmsBrokerURISet)) {
-			return false;
-		}
+        StringBuilder uriBuilder = new StringBuilder();
+        while (jmsBrokerURIIterator.hasNext()) {
+            String jmsBrokerURI = jmsBrokerURIIterator.next();
+            uriBuilder.append("tcp://");
+            uriBuilder.append(jmsBrokerURI);
+            if (jmsBrokerURIIterator.hasNext()) {
+                uriBuilder.append(",");
+            }
+        }
 
-		this.jmsBrokerURISet = new HashSet<String>(jmsBrokerURISet);
-		this.jmsUserName = appConfiguration.getJmsUserName();
-		this.jmsPassword = appConfiguration.getJmsPassword();
+        String brokerUrl = BROKER_URL_PREFIX + uriBuilder + BROKER_URL_SUFFIX;
 
-		Iterator<String> jmsBrokerURIIterator = jmsBrokerURISet.iterator();
+        ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(this.jmsUserName, this.jmsPassword, brokerUrl);
+        this.pooledConnectionFactory = new PooledConnectionFactory(connectionFactory);
 
-		StringBuilder uriBuilder = new StringBuilder();
-		while (jmsBrokerURIIterator.hasNext()) {
-			String jmsBrokerURI = jmsBrokerURIIterator.next();
-			uriBuilder.append("tcp://");
-			uriBuilder.append(jmsBrokerURI);
-			if (jmsBrokerURIIterator.hasNext()) {
-				uriBuilder.append(",");
-			}
-		}
+        pooledConnectionFactory.setIdleTimeout(5000);
+        pooledConnectionFactory.setMaxConnections(10);
+        pooledConnectionFactory.start();
 
-		String brokerUrl = BROKER_URL_PREFIX + uriBuilder + BROKER_URL_SUFFIX;
+        return true;
+    }
 
-		ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(this.jmsUserName, this.jmsPassword, brokerUrl);
-		this.pooledConnectionFactory = new PooledConnectionFactory(connectionFactory);
+    private boolean loggingThroughJMS(OAuth2AuditLog oAuth2AuditLog) {
+        QueueConnection connection = null;
+        try {
+            connection = pooledConnectionFactory.createQueueConnection();
+            connection.start();
 
-		pooledConnectionFactory.setIdleTimeout(5000);
-		pooledConnectionFactory.setMaxConnections(10);
-		pooledConnectionFactory.start();
+            QueueSession session = connection.createQueueSession(transacted, ACK_MODE);
+            MessageProducer producer = session.createProducer(session.createQueue(CLIENT_QUEUE_NAME));
 
-		return true;
-	}
+            TextMessage txtMessage = session.createTextMessage();
+            txtMessage.setText(ServerUtil.asPrettyJson(oAuth2AuditLog));
+            producer.send(txtMessage);
 
-	private boolean loggingThroughJMS(OAuth2AuditLog oAuth2AuditLog) {
-		QueueConnection connection = null;
-		try {
-			connection = pooledConnectionFactory.createQueueConnection();
-			connection.start();
+            return true;
+        } catch (JMSException e) {
+            log.error("Can't send message", e);
+        } catch (IOException e) {
+            log.error("Can't serialize the audit log", e);
+        } catch (Exception e) {
+            log.error("Can't send message, please check your activeMQ configuration.", e);
+        } finally {
+            if (connection == null) {
+                return false;
+            }
 
-			QueueSession session = connection.createQueueSession(transacted, ACK_MODE);
-			MessageProducer producer = session.createProducer(session.createQueue(CLIENT_QUEUE_NAME));
+            try {
+                connection.close();
+            } catch (JMSException e) {
+                log.error("Can't close connection.");
+            }
+        }
 
-			TextMessage txtMessage = session.createTextMessage();
-			txtMessage.setText(ServerUtil.asPrettyJson(oAuth2AuditLog));
-			producer.send(txtMessage);
-			
-			return true;
-		} catch (JMSException e) {
-			log.error("Can't send message", e);
-		} catch (IOException e) {
-			log.error("Can't serialize the audit log", e);
-		} catch (Exception e) {
-			log.error("Can't send message, please check your activeMQ configuration.", e);
-		} finally {
-			if (connection == null) {
-				return false;
-			}
+        return false;
+    }
 
-			try {
-				connection.close();
-			} catch (JMSException e) {
-				log.error("Can't close connection.");
-			}
-		}
-		
-		return false;
-	}
-
-	private void loggingThroughFile(OAuth2AuditLog oAuth2AuditLog) {
-		try {
-			log.info(ServerUtil.asPrettyJson(oAuth2AuditLog));
-		} catch (IOException e) {
-			log.error("Can't serialize the audit log", e);
-		}
-	}
+    private void loggingThroughFile(OAuth2AuditLog oAuth2AuditLog) {
+        try {
+            log.info(ServerUtil.asPrettyJson(oAuth2AuditLog));
+        } catch (IOException e) {
+            log.error("Can't serialize the audit log", e);
+        }
+    }
 
 }

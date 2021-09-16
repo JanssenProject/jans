@@ -6,17 +6,16 @@
 
 package io.jans.as.server.ciba;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.jans.as.client.ciba.ping.PingCallbackClient;
 import io.jans.as.client.ciba.ping.PingCallbackRequest;
 import io.jans.as.client.ciba.ping.PingCallbackResponse;
 import io.jans.as.model.configuration.AppConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
 
 /**
  * @author Javier Rojas Blum

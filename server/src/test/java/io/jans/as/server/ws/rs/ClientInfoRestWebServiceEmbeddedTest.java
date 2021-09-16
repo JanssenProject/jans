@@ -50,14 +50,13 @@ import static org.testng.Assert.fail;
  */
 public class ClientInfoRestWebServiceEmbeddedTest extends BaseTest {
 
-    @ArquillianResource
-    private URI url;
-
     private static String clientId;
     private static String clientSecret;
     private static String accessToken1;
     private static String accessToken2;
     private static String accessToken3;
+    @ArquillianResource
+    private URI url;
 
     @Parameters({"registerPath", "redirectUris"})
     @Test

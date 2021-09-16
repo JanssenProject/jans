@@ -6,20 +6,7 @@
 
 package io.jans.as.server.uma.service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.ws.rs.core.Response;
-
-import org.slf4j.Logger;
-
 import com.google.common.collect.Lists;
-
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.uma.JsonLogic;
 import io.jans.as.model.uma.JsonLogicNode;
@@ -32,6 +19,16 @@ import io.jans.as.server.service.external.ExternalUmaRptPolicyService;
 import io.jans.as.server.uma.authorization.UmaAuthorizationContext;
 import io.jans.as.server.uma.authorization.UmaScriptByScope;
 import io.jans.util.StringHelper;
+import org.slf4j.Logger;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.ws.rs.core.Response;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author yuriyz
@@ -51,6 +48,36 @@ public class UmaExpressionService {
     @Inject
 
     private UmaPermissionService permissionService;
+
+    private static Map<String, String> scopeIdToDnMap(Map<UmaScriptByScope, UmaAuthorizationContext> scriptMap, List<String> scriptDNs) {
+        Map<String, String> result = new HashMap<String, String>();
+        for (Map.Entry<UmaScriptByScope, UmaAuthorizationContext> entry : scriptMap.entrySet()) {
+            if (scriptDNs.contains(entry.getKey().getScope().getDn())) {
+                result.put(entry.getKey().getScope().getId(), entry.getKey().getScope().getDn());
+            }
+        }
+        return result;
+    }
+
+    private static Map<UmaScriptByScope, UmaAuthorizationContext> filterByScopeDns(Map<UmaScriptByScope, UmaAuthorizationContext> scriptMap, List<String> scopeDNs) {
+        Map<UmaScriptByScope, UmaAuthorizationContext> result = new HashMap<UmaScriptByScope, UmaAuthorizationContext>();
+        for (Map.Entry<UmaScriptByScope, UmaAuthorizationContext> entry : scriptMap.entrySet()) {
+            if (scopeDNs.contains(entry.getKey().getScope().getDn())) {
+                result.put(entry.getKey(), entry.getValue());
+            }
+        }
+        return result;
+    }
+
+    private static Map<UmaScriptByScope, UmaAuthorizationContext> filterByScopeId(Map<UmaScriptByScope, UmaAuthorizationContext> scriptMap, String scopeId) {
+        Map<UmaScriptByScope, UmaAuthorizationContext> result = new HashMap<UmaScriptByScope, UmaAuthorizationContext>();
+        for (Map.Entry<UmaScriptByScope, UmaAuthorizationContext> entry : scriptMap.entrySet()) {
+            if (entry.getKey().getScope().getId().equals(scopeId)) {
+                result.put(entry.getKey(), entry.getValue());
+            }
+        }
+        return result;
+    }
 
     public boolean isExpressionValid(String expression) {
         return JsonLogicNodeParser.isNodeValid(expression);
@@ -150,35 +177,5 @@ public class UmaExpressionService {
                 permissionService.mergeSilently(permission);
             }
         }
-    }
-
-    private static Map<String, String> scopeIdToDnMap(Map<UmaScriptByScope, UmaAuthorizationContext> scriptMap, List<String> scriptDNs) {
-        Map<String, String> result = new HashMap<String, String>();
-        for (Map.Entry<UmaScriptByScope, UmaAuthorizationContext> entry : scriptMap.entrySet()) {
-            if (scriptDNs.contains(entry.getKey().getScope().getDn())) {
-                result.put(entry.getKey().getScope().getId(), entry.getKey().getScope().getDn());
-            }
-        }
-        return result;
-    }
-
-    private static Map<UmaScriptByScope, UmaAuthorizationContext> filterByScopeDns(Map<UmaScriptByScope, UmaAuthorizationContext> scriptMap, List<String> scopeDNs) {
-        Map<UmaScriptByScope, UmaAuthorizationContext> result = new HashMap<UmaScriptByScope, UmaAuthorizationContext>();
-        for (Map.Entry<UmaScriptByScope, UmaAuthorizationContext> entry : scriptMap.entrySet()) {
-            if (scopeDNs.contains(entry.getKey().getScope().getDn())) {
-                result.put(entry.getKey(), entry.getValue());
-            }
-        }
-        return result;
-    }
-
-    private static Map<UmaScriptByScope, UmaAuthorizationContext> filterByScopeId(Map<UmaScriptByScope, UmaAuthorizationContext> scriptMap, String scopeId) {
-        Map<UmaScriptByScope, UmaAuthorizationContext> result = new HashMap<UmaScriptByScope, UmaAuthorizationContext>();
-        for (Map.Entry<UmaScriptByScope, UmaAuthorizationContext> entry : scriptMap.entrySet()) {
-            if (entry.getKey().getScope().getId().equals(scopeId)) {
-                result.put(entry.getKey(), entry.getValue());
-            }
-        }
-        return result;
     }
 }

@@ -6,44 +6,8 @@
 
 package io.jans.as.server.uma.service;
 
-import static io.jans.as.model.uma.UmaErrorResponseType.ACCESS_DENIED;
-import static io.jans.as.model.uma.UmaErrorResponseType.EXPIRED_TICKET;
-import static io.jans.as.model.uma.UmaErrorResponseType.INVALID_CLAIMS_GATHERING_SCRIPT_NAME;
-import static io.jans.as.model.uma.UmaErrorResponseType.INVALID_CLAIMS_REDIRECT_URI;
-import static io.jans.as.model.uma.UmaErrorResponseType.INVALID_CLAIM_TOKEN;
-import static io.jans.as.model.uma.UmaErrorResponseType.INVALID_CLAIM_TOKEN_FORMAT;
-import static io.jans.as.model.uma.UmaErrorResponseType.INVALID_CLIENT_SCOPE;
-import static io.jans.as.model.uma.UmaErrorResponseType.INVALID_PCT;
-import static io.jans.as.model.uma.UmaErrorResponseType.INVALID_RESOURCE_ID;
-import static io.jans.as.model.uma.UmaErrorResponseType.INVALID_RPT;
-import static io.jans.as.model.uma.UmaErrorResponseType.INVALID_SCOPE;
-import static io.jans.as.model.uma.UmaErrorResponseType.INVALID_TICKET;
-import static io.jans.as.model.uma.UmaErrorResponseType.UNAUTHORIZED_CLIENT;
-import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
-import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
-
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.ws.rs.core.Response;
-
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
-import org.python.google.common.base.Function;
-import org.python.google.common.collect.Iterables;
-import org.slf4j.Logger;
-
 import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
-
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.config.WebKeysConfiguration;
@@ -74,6 +38,39 @@ import io.jans.as.server.uma.authorization.UmaWebException;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.util.StringHelper;
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
+import org.python.google.common.base.Function;
+import org.python.google.common.collect.Iterables;
+import org.slf4j.Logger;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.ws.rs.core.Response;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static io.jans.as.model.uma.UmaErrorResponseType.ACCESS_DENIED;
+import static io.jans.as.model.uma.UmaErrorResponseType.EXPIRED_TICKET;
+import static io.jans.as.model.uma.UmaErrorResponseType.INVALID_CLAIMS_GATHERING_SCRIPT_NAME;
+import static io.jans.as.model.uma.UmaErrorResponseType.INVALID_CLAIMS_REDIRECT_URI;
+import static io.jans.as.model.uma.UmaErrorResponseType.INVALID_CLAIM_TOKEN;
+import static io.jans.as.model.uma.UmaErrorResponseType.INVALID_CLAIM_TOKEN_FORMAT;
+import static io.jans.as.model.uma.UmaErrorResponseType.INVALID_CLIENT_SCOPE;
+import static io.jans.as.model.uma.UmaErrorResponseType.INVALID_PCT;
+import static io.jans.as.model.uma.UmaErrorResponseType.INVALID_RESOURCE_ID;
+import static io.jans.as.model.uma.UmaErrorResponseType.INVALID_RPT;
+import static io.jans.as.model.uma.UmaErrorResponseType.INVALID_SCOPE;
+import static io.jans.as.model.uma.UmaErrorResponseType.INVALID_TICKET;
+import static io.jans.as.model.uma.UmaErrorResponseType.UNAUTHORIZED_CLIENT;
+import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
+import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -369,7 +366,7 @@ public class UmaValidationService {
     }
 
     /**
-     * @param scope scope string from token request
+     * @param scope       scope string from token request
      * @param permissions permissions
      * @return map of loaded scope and boolean, true - if client requested scope and false if it is permission ticket scope
      */
@@ -499,7 +496,7 @@ public class UmaValidationService {
         validateScopeExpression(resource.getScopeExpression());
 
         List<String> scopeDNs = umaScopeService.getScopeDNsByIdsAndAddToLdapIfNeeded(resource.getScopes());
-        if (scopeDNs.isEmpty() && StringUtils.isBlank(resource.getScopeExpression()) ) {
+        if (scopeDNs.isEmpty() && StringUtils.isBlank(resource.getScopeExpression())) {
             log.error("Invalid resource. Both `scope` and `scope_expression` are blank.");
             throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, UmaErrorResponseType.INVALID_SCOPE, "Invalid resource. Both `scope` and `scope_expression` are blank.");
         }
