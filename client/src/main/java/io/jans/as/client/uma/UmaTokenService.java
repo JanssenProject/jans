@@ -6,14 +6,14 @@
 
 package io.jans.as.client.uma;
 
+import io.jans.as.model.uma.UmaConstants;
+import io.jans.as.model.uma.UmaTokenResponse;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Produces;
-
-import io.jans.as.model.uma.UmaConstants;
-import io.jans.as.model.uma.UmaTokenResponse;
 
 /**
  * @author yuriyz on 06/21/2017.

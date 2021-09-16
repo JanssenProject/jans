@@ -21,8 +21,8 @@ public class BenchmarkTestSuiteListener implements ISuiteListener {
 
     @Override
     public void onStart(ISuite suite) {
-    	this.start = System.currentTimeMillis();
-    	Reporter.log("Suite '" + suite.getName() + "' started ...", true);
+        this.start = System.currentTimeMillis();
+        Reporter.log("Suite '" + suite.getName() + "' started ...", true);
     }
 
     @Override

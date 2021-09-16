@@ -6,14 +6,13 @@
 
 package io.jans.as.client.ciba.fcm;
 
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.core.MediaType;
-
+import io.jans.as.client.BaseClient;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
 
-import io.jans.as.client.BaseClient;
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.core.MediaType;
 
 /**
  * @author Javier Rojas Blum

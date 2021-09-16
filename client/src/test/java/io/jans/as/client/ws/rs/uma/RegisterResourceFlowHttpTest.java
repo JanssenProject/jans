@@ -6,22 +6,6 @@
 
 package io.jans.as.client.ws.rs.uma;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
-
-import java.util.Arrays;
-import java.util.List;
-
-import javax.ws.rs.ClientErrorException;
-import javax.ws.rs.core.Response;
-
-import org.jboss.resteasy.client.ClientResponseFailure;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-
 import io.jans.as.client.BaseTest;
 import io.jans.as.client.uma.UmaClientFactory;
 import io.jans.as.client.uma.UmaResourceService;
@@ -32,6 +16,20 @@ import io.jans.as.model.uma.UmaResourceResponse;
 import io.jans.as.model.uma.UmaResourceWithId;
 import io.jans.as.model.uma.UmaTestUtil;
 import io.jans.as.model.uma.wrapper.Token;
+import org.jboss.resteasy.client.ClientResponseFailure;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
+import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.core.Response;
+import java.util.Arrays;
+import java.util.List;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 /**
  * Test cases for the registering UMA resources

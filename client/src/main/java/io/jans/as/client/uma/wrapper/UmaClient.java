@@ -6,13 +6,6 @@
 
 package io.jans.as.client.uma.wrapper;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-
-import org.jboss.resteasy.client.ClientExecutor;
-
 import io.jans.as.client.AuthorizationRequest;
 import io.jans.as.client.AuthorizationResponse;
 import io.jans.as.client.AuthorizeClient;
@@ -30,6 +23,12 @@ import io.jans.as.model.uma.UmaScopeType;
 import io.jans.as.model.uma.wrapper.Token;
 import io.jans.as.model.util.Util;
 import io.jans.util.StringHelper;
+import org.jboss.resteasy.client.ClientExecutor;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -37,11 +36,11 @@ import io.jans.util.StringHelper;
 
 public class UmaClient {
 
-	public static Token requestPat(final String tokenUrl, final String clientKeyStoreFile, final String clientKeyStorePassword, final String clientId, final String keyId) throws UmaException {
+    public static Token requestPat(final String tokenUrl, final String clientKeyStoreFile, final String clientKeyStorePassword, final String clientId, final String keyId) throws UmaException {
         TokenRequest tokenRequest = TokenRequest.builder().pat().grantType(GrantType.CLIENT_CREDENTIALS).build();
 
         return request(tokenUrl, clientKeyStoreFile, clientKeyStorePassword, clientId, keyId, tokenRequest);
-	}
+    }
 
     @Deprecated
     public static Token requestPat(final String authorizeUrl, final String tokenUrl,
@@ -173,9 +172,9 @@ public class UmaClient {
     }
 
     public static Token request(final String tokenUrl, final TokenRequest tokenRequest) throws Exception {
-    	if (tokenRequest.getGrantType() != GrantType.CLIENT_CREDENTIALS) {
-    		return null;
-    	}
+        if (tokenRequest.getGrantType() != GrantType.CLIENT_CREDENTIALS) {
+            return null;
+        }
 
         TokenClient tokenClient = new TokenClient(tokenUrl);
 
@@ -194,46 +193,46 @@ public class UmaClient {
         return null;
     }
 
-	private static Token request(final String tokenUrl, final String clientKeyStoreFile,
-			final String clientKeyStorePassword, final String clientId, final String keyId, TokenRequest tokenRequest)
-			throws UmaException {
-		AuthCryptoProvider cryptoProvider;
-		try {
-			cryptoProvider = new AuthCryptoProvider(clientKeyStoreFile, clientKeyStorePassword, null);
-		} catch (Exception ex) {
-			throw new UmaException("Failed to initialize crypto provider");
-		}
+    private static Token request(final String tokenUrl, final String clientKeyStoreFile,
+                                 final String clientKeyStorePassword, final String clientId, final String keyId, TokenRequest tokenRequest)
+            throws UmaException {
+        AuthCryptoProvider cryptoProvider;
+        try {
+            cryptoProvider = new AuthCryptoProvider(clientKeyStoreFile, clientKeyStorePassword, null);
+        } catch (Exception ex) {
+            throw new UmaException("Failed to initialize crypto provider");
+        }
 
-		try {
-			String tmpKeyId = keyId;
-	        if (StringHelper.isEmpty(tmpKeyId)) {
-	        	// Get first key
-	        	List<String> aliases = cryptoProvider.getKeys();
-	        	if (aliases.size() > 0) {
-	        		tmpKeyId = aliases.get(0);
-	        	}
-	        }
+        try {
+            String tmpKeyId = keyId;
+            if (StringHelper.isEmpty(tmpKeyId)) {
+                // Get first key
+                List<String> aliases = cryptoProvider.getKeys();
+                if (aliases.size() > 0) {
+                    tmpKeyId = aliases.get(0);
+                }
+            }
 
-	        if (StringHelper.isEmpty(tmpKeyId)) {
-				throw new UmaException("UMA keyId is empty");
-			}
+            if (StringHelper.isEmpty(tmpKeyId)) {
+                throw new UmaException("UMA keyId is empty");
+            }
 
-	        SignatureAlgorithm algorithm = cryptoProvider.getSignatureAlgorithm(tmpKeyId);
-	
-	
-			tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-			tokenRequest.setAuthUsername(clientId);
-			tokenRequest.setCryptoProvider(cryptoProvider);
-			tokenRequest.setAlgorithm(algorithm);
-			tokenRequest.setKeyId(tmpKeyId);
-			tokenRequest.setAudience(tokenUrl);
+            SignatureAlgorithm algorithm = cryptoProvider.getSignatureAlgorithm(tmpKeyId);
 
-			Token umaPat = UmaClient.request(tokenUrl, tokenRequest);
-			
-			return umaPat;
-		} catch (Exception ex) {
-			throw new UmaException("Failed to obtain valid UMA PAT token", ex);
-		}
-	}
+
+            tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+            tokenRequest.setAuthUsername(clientId);
+            tokenRequest.setCryptoProvider(cryptoProvider);
+            tokenRequest.setAlgorithm(algorithm);
+            tokenRequest.setKeyId(tmpKeyId);
+            tokenRequest.setAudience(tokenUrl);
+
+            Token umaPat = UmaClient.request(tokenUrl, tokenRequest);
+
+            return umaPat;
+        } catch (Exception ex) {
+            throw new UmaException("Failed to obtain valid UMA PAT token", ex);
+        }
+    }
 
 }

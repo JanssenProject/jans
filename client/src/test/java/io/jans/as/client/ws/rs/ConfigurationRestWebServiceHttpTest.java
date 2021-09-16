@@ -39,14 +39,14 @@ public class ConfigurationRestWebServiceHttpTest extends BaseTest {
         showTitle("OpenID Connect Discovery");
 
         OpenIdConnectDiscoveryClient openIdConnectDiscoveryClient = new OpenIdConnectDiscoveryClient(resource);
-        
+
         CloseableHttpClient httpClient = createHttpClient(HostnameVerifierType.ALLOW_ALL);
         OpenIdConnectDiscoveryResponse openIdConnectDiscoveryResponse;
-		try {
-			openIdConnectDiscoveryResponse = openIdConnectDiscoveryClient.exec(new ApacheHttpClient4Executor(httpClient));
-		} finally {
-			httpClient.close();
-		}
+        try {
+            openIdConnectDiscoveryResponse = openIdConnectDiscoveryClient.exec(new ApacheHttpClient4Executor(httpClient));
+        } finally {
+            httpClient.close();
+        }
 
         showClient(openIdConnectDiscoveryClient);
         assertEquals(openIdConnectDiscoveryResponse.getStatus(), 200, "Unexpected response code");

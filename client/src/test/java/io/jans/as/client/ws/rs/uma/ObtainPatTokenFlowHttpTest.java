@@ -6,18 +6,17 @@
 
 package io.jans.as.client.ws.rs.uma;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-
 import io.jans.as.client.BaseTest;
 import io.jans.as.client.TokenClient;
 import io.jans.as.client.TokenResponse;
 import io.jans.as.client.uma.wrapper.UmaClient;
 import io.jans.as.model.uma.UmaTestUtil;
 import io.jans.as.model.uma.wrapper.Token;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 /**
  * Test cases for the obtaining UMA PAT token flow (HTTP)

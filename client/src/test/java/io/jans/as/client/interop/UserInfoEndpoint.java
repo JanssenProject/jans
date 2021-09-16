@@ -6,12 +6,11 @@
 
 package io.jans.as.client.interop;
 
-import static org.testng.Assert.assertTrue;
-
+import io.jans.as.client.BaseTest;
 import org.apache.commons.lang.StringUtils;
 import org.testng.annotations.Test;
 
-import io.jans.as.client.BaseTest;
+import static org.testng.Assert.assertTrue;
 
 /**
  * OC5:FeatureTest-UserInfo Endpoint

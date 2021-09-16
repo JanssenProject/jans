@@ -6,13 +6,13 @@
 
 package io.jans.as.client.uma;
 
+import io.jans.as.model.uma.RptIntrospectionResponse;
+import io.jans.as.model.uma.UmaConstants;
+
 import javax.ws.rs.FormParam;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Produces;
-
-import io.jans.as.model.uma.RptIntrospectionResponse;
-import io.jans.as.model.uma.UmaConstants;
 
 /**
  * The endpoint at which the host requests the status of an RPT presented to it by a requester.

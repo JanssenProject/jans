@@ -6,22 +6,20 @@
 
 package io.jans.as.client.page;
 
-import static org.testng.Assert.fail;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.util.Set;
-
+import com.google.common.base.Preconditions;
+import io.jans.as.model.common.Holder;
+import io.jans.as.model.util.Util;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Cookie;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import com.google.common.base.Preconditions;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.util.Set;
 
-import io.jans.as.model.common.Holder;
-import io.jans.as.model.util.Util;
+import static org.testng.Assert.fail;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -33,6 +31,20 @@ public class AbstractPage implements Page {
     public AbstractPage(PageConfig config) {
         Preconditions.checkNotNull(config);
         this.config = config;
+    }
+
+    public static String waitForPageSwitch(WebDriver currentDriver, String previousURL) {
+        Holder<String> currentUrl = new Holder<>();
+        WebDriverWait wait = new WebDriverWait(currentDriver, PageConfig.WAIT_OPERATION_TIMEOUT);
+        wait.until((WebDriver d) -> {
+            currentUrl.setT(d.getCurrentUrl());
+            return !currentUrl.getT().equals(previousURL);
+        });
+        return currentUrl.getT();
+    }
+
+    public static void output(String str) {
+        System.out.println(str); // switch to logger?
     }
 
     public void navigate(String url) {
@@ -75,19 +87,5 @@ public class AbstractPage implements Page {
 
     public String waitForPageSwitch(String previousUrl) {
         return waitForPageSwitch(driver(), previousUrl);
-    }
-
-    public static String waitForPageSwitch(WebDriver currentDriver, String previousURL) {
-        Holder<String> currentUrl = new Holder<>();
-        WebDriverWait wait = new WebDriverWait(currentDriver, PageConfig.WAIT_OPERATION_TIMEOUT);
-        wait.until((WebDriver d) -> {
-            currentUrl.setT(d.getCurrentUrl());
-            return !currentUrl.getT().equals(previousURL);
-        });
-        return currentUrl.getT();
-    }
-
-    public static void output(String str) {
-        System.out.println(str); // switch to logger?
     }
 }
