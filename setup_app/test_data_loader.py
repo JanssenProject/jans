@@ -37,7 +37,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         self.logIt("Creating client_keystore.jks")
         client_keystore_fn = os.path.join(Config.outputFolder, 'test/jans-auth/client/client_keystore.jks')
         keys_json_fn =  os.path.join(Config.outputFolder, 'test/jans-auth/client/keys_client_keystore.json')
-        keys_props_fn = os.path.join(Config.outputFolder, 'test/jans-auth/client/keys_client_keystore.properties')        
+        keys_props_fn = os.path.join(Config.outputFolder, 'test/jans-auth/client/keys_client_keystore.properties')
 
         args = [Config.cmd_keytool, '-genkey', '-alias', 'dummy', '-keystore', 
                     client_keystore_fn, '-storepass', 'secret', '-keypass', 
@@ -254,7 +254,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                                     'skipRefreshTokenDuringRefreshing': False,
                                     'enabledComponents': ['unknown', 'health_check', 'userinfo', 'clientinfo', 'id_generation', 'registration', 'introspection', 'revoke_token', 'revoke_session', 'end_session', 'status_session', 'jans_configuration', 'ciba', 'uma', 'u2f', 'device_authz', 'stat', 'par'],
                                     'cleanServiceInterval':7200
-                                    }        
+                                    }
 
         if Config.get('config_patch_creds'):
             data = None
