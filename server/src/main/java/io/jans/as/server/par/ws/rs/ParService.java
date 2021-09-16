@@ -34,6 +34,14 @@ public class ParService {
     @Inject
     private ErrorResponseFactory errorResponseFactory;
 
+    public static String toPersistenceId(String id) {
+        return StringUtils.replace(id, Util.PAR_ID_REFIX, Util.PAR_ID_SHORT_REFIX);
+    }
+
+    public static String toOutsideId(String id) {
+        return StringUtils.replace(id, Util.PAR_ID_SHORT_REFIX, Util.PAR_ID_REFIX);
+    }
+
     public void persist(Par par) {
         setIdAndDnIfNeeded(par);
 
@@ -70,14 +78,6 @@ public class ParService {
         return String.format("jansId=%s,%s", toPersistenceId(id), branchBaseDn());
     }
 
-    public static String toPersistenceId(String id) {
-        return StringUtils.replace(id, Util.PAR_ID_REFIX, Util.PAR_ID_SHORT_REFIX);
-    }
-
-    public static String toOutsideId(String id) {
-        return StringUtils.replace(id, Util.PAR_ID_SHORT_REFIX, Util.PAR_ID_REFIX);
-    }
-
     public String branchBaseDn() {
         return staticConfiguration.getBaseDn().getPar(); // "ou=par,o=jans"
     }
@@ -86,7 +86,7 @@ public class ParService {
         Par par = getPar(id);
 
         if (par == null) {
-            log.debug("Failed to find PAR by request_uri (id): " + id );
+            log.debug("Failed to find PAR by request_uri (id): " + id);
             throw new WebApplicationException(Response
                     .status(Response.Status.BAD_REQUEST)
                     .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST, state, "Failed to find par by request_uri"))

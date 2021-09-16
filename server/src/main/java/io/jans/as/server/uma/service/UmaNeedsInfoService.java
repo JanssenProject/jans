@@ -6,24 +6,6 @@
 
 package io.jans.as.server.uma.service;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.AttributeService;
 import io.jans.as.common.service.common.UserService;
@@ -41,6 +23,22 @@ import io.jans.as.server.uma.authorization.UmaScriptByScope;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.uma.ClaimDefinition;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author yuriyz on 06/16/2017.
@@ -65,6 +63,19 @@ public class UmaNeedsInfoService {
     private UmaSessionService sessionService;
     @Inject
     private UserService userService;
+
+    public static Set<String> getScriptDNs(List<Scope> scopes) {
+        HashSet<String> result = new HashSet<String>();
+
+        for (Scope scope : scopes) {
+            List<String> authorizationPolicies = scope.getUmaAuthorizationPolicies();
+            if (authorizationPolicies != null) {
+                result.addAll(authorizationPolicies);
+            }
+        }
+
+        return result;
+    }
 
     public Map<UmaScriptByScope, UmaAuthorizationContext> checkNeedsInfo(Claims claims, Map<Scope, Boolean> requestedScopes,
                                                                          List<UmaPermission> permissions, UmaPCT pct, HttpServletRequest httpRequest,
@@ -149,19 +160,6 @@ public class UmaNeedsInfoService {
             result += "?" + queryParameters;
         }
         result += "&client_id=" + client.getClientId() + "&ticket=" + newTicket;
-        return result;
-    }
-
-    public static Set<String> getScriptDNs(List<Scope> scopes) {
-        HashSet<String> result = new HashSet<String>();
-
-        for (Scope scope : scopes) {
-            List<String> authorizationPolicies = scope.getUmaAuthorizationPolicies();
-            if (authorizationPolicies != null) {
-                result.addAll(authorizationPolicies);
-            }
-        }
-
         return result;
     }
 }

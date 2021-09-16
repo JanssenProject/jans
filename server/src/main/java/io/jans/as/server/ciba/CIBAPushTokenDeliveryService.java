@@ -6,16 +6,15 @@
 
 package io.jans.as.server.ciba;
 
-import javax.ejb.Stateless;
-import javax.inject.Named;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.jans.as.client.ciba.push.PushTokenDeliveryClient;
 import io.jans.as.client.ciba.push.PushTokenDeliveryRequest;
 import io.jans.as.client.ciba.push.PushTokenDeliveryResponse;
 import io.jans.as.model.common.TokenType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.ejb.Stateless;
+import javax.inject.Named;
 
 /**
  * @author Javier Rojas Blum

@@ -51,12 +51,11 @@ import static org.testng.Assert.fail;
  */
 public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
 
-    @ArquillianResource
-    private URI url;
-
     private static String clientId1;
     private static String clientId2;
     private static String accessToken2;
+    @ArquillianResource
+    private URI url;
 
     @Parameters({"registerPath", "redirectUris"})
     @Test

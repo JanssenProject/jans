@@ -28,7 +28,14 @@ import org.slf4j.Logger;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import java.net.URI;
@@ -68,6 +75,10 @@ public class UmaGatheringWS {
     private AppConfiguration appConfiguration;
     @Inject
     private UserService userService;
+
+    private static String getScriptNames(List<UmaPermission> permissions) {
+        return permissions.get(0).getAttributes().get(UmaConstants.GATHERING_ID);
+    }
 
     public Response gatherClaims(String clientId, String ticket, String claimRedirectUri, String state, Boolean reset,
                                  Boolean authenticationRedirect, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
@@ -136,10 +147,6 @@ public class UmaGatheringWS {
 
         log.error("Failed to handle call to UMA Claims Gathering Endpoint.");
         throw errorResponseFactory.createWebApplicationException(Response.Status.INTERNAL_SERVER_ERROR, UmaErrorResponseType.SERVER_ERROR, "Failed to handle call to UMA Claims Gathering Endpoint.");
-    }
-
-    private static String getScriptNames(List<UmaPermission> permissions) {
-        return permissions.get(0).getAttributes().get(UmaConstants.GATHERING_ID);
     }
 
     @GET

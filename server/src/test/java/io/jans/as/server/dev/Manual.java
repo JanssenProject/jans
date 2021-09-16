@@ -31,31 +31,31 @@ import io.jans.util.security.PropertiesDecrypter;
 
 public class Manual {
 
-	public static String LDAP_CONF_FILE_NAME = "oxauth-ldap.properties";
-	public static final String CONF_FOLDER = "conf";
+    public static String LDAP_CONF_FILE_NAME = "oxauth-ldap.properties";
+    public static final String CONF_FOLDER = "conf";
 
-	private static final String LDAP_FILE_PATH = CONF_FOLDER + File.separator + LDAP_CONF_FILE_NAME;
+    private static final String LDAP_FILE_PATH = CONF_FOLDER + File.separator + LDAP_CONF_FILE_NAME;
 
-	public static PersistenceEntryManager MANAGER = null;
+    public static PersistenceEntryManager MANAGER = null;
 
-	@BeforeClass
-	public void init() {
-		final FileConfiguration fileConfiguration = new FileConfiguration(LDAP_FILE_PATH);
-		final Properties props = PropertiesDecrypter.decryptProperties(fileConfiguration.getProperties(), "passoword");
-		final LdapEntryManagerFactory ldapEntryManagerFactory = new LdapEntryManagerFactory(); 
-		final LdapConnectionProvider connectionProvider = new LdapConnectionProvider(props);
-		connectionProvider.create();
-		MANAGER = ldapEntryManagerFactory.createEntryManager(props);
-	}
+    @BeforeClass
+    public void init() {
+        final FileConfiguration fileConfiguration = new FileConfiguration(LDAP_FILE_PATH);
+        final Properties props = PropertiesDecrypter.decryptProperties(fileConfiguration.getProperties(), "passoword");
+        final LdapEntryManagerFactory ldapEntryManagerFactory = new LdapEntryManagerFactory();
+        final LdapConnectionProvider connectionProvider = new LdapConnectionProvider(props);
+        connectionProvider.create();
+        MANAGER = ldapEntryManagerFactory.createEntryManager(props);
+    }
 
-	@AfterClass
-	public void destroy() {
-		MANAGER.destroy();
-	}
+    @AfterClass
+    public void destroy() {
+        MANAGER.destroy();
+    }
 
-	@Test
-	public void getGroupsFromClient() {
-		final Client client = MANAGER.find(Client.class, "inum=@!0000!0008!7652.0000,ou=clients,o=jans");
-		System.out.println(client);
-	}
+    @Test
+    public void getGroupsFromClient() {
+        final Client client = MANAGER.find(Client.class, "inum=@!0000!0008!7652.0000,ou=clients,o=jans");
+        System.out.println(client);
+    }
 }

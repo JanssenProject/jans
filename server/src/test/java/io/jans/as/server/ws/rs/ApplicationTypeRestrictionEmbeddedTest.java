@@ -46,17 +46,15 @@ import static org.testng.Assert.fail;
  */
 public class ApplicationTypeRestrictionEmbeddedTest extends BaseTest {
 
-    @ArquillianResource
-    private URI url;
-
     private static String registrationAccessToken1;
     private static String registrationClientUri1;
-
     private static String registrationAccessToken2;
     private static String registrationClientUri2;
-
     private static String registrationAccessToken3;
     private static String registrationClientUri3;
+
+    @ArquillianResource
+    private URI url;
 
     /**
      * Register a client without specify an Application Type.

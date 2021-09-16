@@ -6,14 +6,14 @@
 
 package io.jans.as.server.model.ldap;
 
-import java.io.Serializable;
-import java.util.Date;
-
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DN;
 import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.Expiration;
 import io.jans.orm.annotation.ObjectClass;
+
+import java.io.Serializable;
+import java.util.Date;
 
 /**
  * @author Javier Rojas Blum
@@ -119,9 +119,7 @@ public class ClientAuthorization implements Serializable {
         ClientAuthorization that = (ClientAuthorization) o;
 
         if (!dn.equals(that.dn)) return false;
-        if (!id.equals(that.id)) return false;
-
-        return true;
+        return id.equals(that.id);
     }
 
     @Override
