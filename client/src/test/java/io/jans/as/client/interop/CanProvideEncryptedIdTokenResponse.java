@@ -6,18 +6,6 @@
 
 package io.jans.as.client.interop;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.fail;
-
-import java.security.PrivateKey;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-
 import io.jans.as.client.AuthorizationRequest;
 import io.jans.as.client.AuthorizationResponse;
 import io.jans.as.client.AuthorizeClient;
@@ -35,6 +23,18 @@ import io.jans.as.model.jwt.JwtHeaderName;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.StringUtils;
 import io.jans.as.model.util.Util;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
+import java.nio.charset.StandardCharsets;
+import java.security.PrivateKey;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.fail;
 
 /**
  * OC5:FeatureTest-Can Provide Encrypted ID Token Response
@@ -100,7 +100,7 @@ public class CanProvideEncryptedIdTokenResponse extends BaseTest {
             String idToken = authorizationResponse.getIdToken();
 
             // 3. Read Encrypted ID Token
-            Jwe jwe = Jwe.parse(idToken, null, clientSecret.getBytes(Util.UTF8_STRING_ENCODING));
+            Jwe jwe = Jwe.parse(idToken, null, clientSecret.getBytes(StandardCharsets.UTF_8));
             assertNotNull(jwe.getHeader().getClaimAsString(JwtHeaderName.TYPE));
             assertNotNull(jwe.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
             assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ISSUER));
@@ -169,7 +169,7 @@ public class CanProvideEncryptedIdTokenResponse extends BaseTest {
             String idToken = authorizationResponse.getIdToken();
 
             // 3. Read Encrypted ID Token
-            Jwe jwe = Jwe.parse(idToken, null, clientSecret.getBytes(Util.UTF8_STRING_ENCODING));
+            Jwe jwe = Jwe.parse(idToken, null, clientSecret.getBytes(StandardCharsets.UTF_8));
             assertNotNull(jwe.getHeader().getClaimAsString(JwtHeaderName.TYPE));
             assertNotNull(jwe.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
             assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ISSUER));

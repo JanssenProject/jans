@@ -6,13 +6,13 @@
 
 package io.jans.as.client.model.authorize;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author Javier Rojas Blum Date: 03.07.2012
@@ -98,6 +98,6 @@ public class ClaimValue {
         ESSENTIAL_TRUE,
         ESSENTIAL_FALSE,
         VALUE_LIST,
-        SINGLE_VALUE;
+        SINGLE_VALUE
     }
 }

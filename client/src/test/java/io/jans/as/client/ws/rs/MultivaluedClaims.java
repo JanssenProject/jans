@@ -6,19 +6,6 @@
 
 package io.jans.as.client.ws.rs;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-
-import java.security.PrivateKey;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-
-import org.json.JSONObject;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-
 import io.jans.as.client.AuthorizationRequest;
 import io.jans.as.client.AuthorizationResponse;
 import io.jans.as.client.AuthorizeClient;
@@ -55,6 +42,19 @@ import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.JwtUtil;
 import io.jans.as.model.util.StringUtils;
 import io.jans.as.model.util.Util;
+import org.json.JSONObject;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
+import java.nio.charset.StandardCharsets;
+import java.security.PrivateKey;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 /**
  * Note: In order to run this tests, set legacyIdTokenClaims to true.
@@ -1283,7 +1283,7 @@ public class MultivaluedClaims extends BaseTest {
         String accessToken = authorizationResponse.getAccessToken();
 
         // 3. Validate id_token
-        Jwe jwe = Jwe.parse(idToken, null, clientSecret.getBytes(Util.UTF8_STRING_ENCODING));
+        Jwe jwe = Jwe.parse(idToken, null, clientSecret.getBytes(StandardCharsets.UTF_8));
         assertNotNull(jwe.getHeader().getClaimAsString(JwtHeaderName.TYPE));
         assertNotNull(jwe.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
         assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ISSUER));
@@ -1369,7 +1369,7 @@ public class MultivaluedClaims extends BaseTest {
         String accessToken = authorizationResponse.getAccessToken();
 
         // 3. Validate id_token
-        Jwe jwe = Jwe.parse(idToken, null, clientSecret.getBytes(Util.UTF8_STRING_ENCODING));
+        Jwe jwe = Jwe.parse(idToken, null, clientSecret.getBytes(StandardCharsets.UTF_8));
         assertNotNull(jwe.getHeader().getClaimAsString(JwtHeaderName.TYPE));
         assertNotNull(jwe.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
         assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ISSUER));
@@ -3069,7 +3069,7 @@ public class MultivaluedClaims extends BaseTest {
         String accessToken = authorizationResponse.getAccessToken();
 
         // 3. Validate id_token
-        Jwe jwe = Jwe.parse(idToken, null, clientSecret.getBytes(Util.UTF8_STRING_ENCODING));
+        Jwe jwe = Jwe.parse(idToken, null, clientSecret.getBytes(StandardCharsets.UTF_8));
         assertNotNull(jwe.getHeader().getClaimAsString(JwtHeaderName.TYPE));
         assertNotNull(jwe.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
         assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ISSUER));
@@ -3168,7 +3168,7 @@ public class MultivaluedClaims extends BaseTest {
         String accessToken = authorizationResponse.getAccessToken();
 
         // 3. Validate id_token
-        Jwe jwe = Jwe.parse(idToken, null, clientSecret.getBytes(Util.UTF8_STRING_ENCODING));
+        Jwe jwe = Jwe.parse(idToken, null, clientSecret.getBytes(StandardCharsets.UTF_8));
         assertNotNull(jwe.getHeader().getClaimAsString(JwtHeaderName.TYPE));
         assertNotNull(jwe.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
         assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ISSUER));

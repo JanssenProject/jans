@@ -53,6 +53,10 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
     protected UmaNeedInfoResponse needInfo;
     protected String claimsGatheringTicket;
 
+    public static String encodeCredentials(String username, String password) throws UnsupportedEncodingException {
+        return Base64.encodeBase64String(Util.getBytes(username + ":" + password));
+    }
+
     @BeforeClass
     @Parameters({"umaMetaDataUrl", "umaPatClientId", "umaPatClientSecret"})
     public void init(final String umaMetaDataUrl, final String umaPatClientId, final String umaPatClientSecret) throws Exception {
@@ -119,7 +123,6 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
 
         throw new AssertionError("need_info error was not returned");
     }
-
 
     @Test(dependsOnMethods = {"requestRptAndGetNeedsInfo"})
     @Parameters({"umaPatClientId"})
@@ -198,9 +201,5 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
     public void rptStatus() {
         showTitle("rptStatus");
         assertIt(this.rptStatusService.requestRptStatus("Bearer " + pat.getAccessToken(), rpt, ""));
-    }
-
-    public static String encodeCredentials(String username, String password) throws UnsupportedEncodingException {
-        return Base64.encodeBase64String(Util.getBytes(username + ":" + password));
     }
 }

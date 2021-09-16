@@ -35,7 +35,35 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import static io.jans.as.model.register.RegisterRequestParam.*;
+import static io.jans.as.model.register.RegisterRequestParam.APPLICATION_TYPE;
+import static io.jans.as.model.register.RegisterRequestParam.CLIENT_NAME;
+import static io.jans.as.model.register.RegisterRequestParam.CONTACTS;
+import static io.jans.as.model.register.RegisterRequestParam.FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED;
+import static io.jans.as.model.register.RegisterRequestParam.FRONT_CHANNEL_LOGOUT_URI;
+import static io.jans.as.model.register.RegisterRequestParam.GRANT_TYPES;
+import static io.jans.as.model.register.RegisterRequestParam.ID_TOKEN_ENCRYPTED_RESPONSE_ALG;
+import static io.jans.as.model.register.RegisterRequestParam.ID_TOKEN_ENCRYPTED_RESPONSE_ENC;
+import static io.jans.as.model.register.RegisterRequestParam.ID_TOKEN_SIGNED_RESPONSE_ALG;
+import static io.jans.as.model.register.RegisterRequestParam.JWKS_URI;
+import static io.jans.as.model.register.RegisterRequestParam.LOGO_URI;
+import static io.jans.as.model.register.RegisterRequestParam.POLICY_URI;
+import static io.jans.as.model.register.RegisterRequestParam.REDIRECT_URIS;
+import static io.jans.as.model.register.RegisterRequestParam.REQUEST_OBJECT_ENCRYPTION_ALG;
+import static io.jans.as.model.register.RegisterRequestParam.REQUEST_OBJECT_ENCRYPTION_ENC;
+import static io.jans.as.model.register.RegisterRequestParam.REQUEST_OBJECT_SIGNING_ALG;
+import static io.jans.as.model.register.RegisterRequestParam.REQUEST_URIS;
+import static io.jans.as.model.register.RegisterRequestParam.RESPONSE_TYPES;
+import static io.jans.as.model.register.RegisterRequestParam.SCOPE;
+import static io.jans.as.model.register.RegisterRequestParam.SECTOR_IDENTIFIER_URI;
+import static io.jans.as.model.register.RegisterRequestParam.SOFTWARE_ID;
+import static io.jans.as.model.register.RegisterRequestParam.SOFTWARE_STATEMENT;
+import static io.jans.as.model.register.RegisterRequestParam.SOFTWARE_VERSION;
+import static io.jans.as.model.register.RegisterRequestParam.SUBJECT_TYPE;
+import static io.jans.as.model.register.RegisterRequestParam.TOKEN_ENDPOINT_AUTH_METHOD;
+import static io.jans.as.model.register.RegisterRequestParam.TOKEN_ENDPOINT_AUTH_SIGNING_ALG;
+import static io.jans.as.model.register.RegisterRequestParam.USERINFO_ENCRYPTED_RESPONSE_ALG;
+import static io.jans.as.model.register.RegisterRequestParam.USERINFO_ENCRYPTED_RESPONSE_ENC;
+import static io.jans.as.model.register.RegisterRequestParam.USERINFO_SIGNED_RESPONSE_ALG;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
@@ -469,21 +497,21 @@ public class RegistrationWithSoftwareStatement extends BaseTest {
     /**
      * Request client registration with signed request object and software statement (with jwks_uri against which validation has to be performed).
      * It should be run with following server configuration settings:
-     *   - "dcrSignatureValidationEnabled": true,
-     *   - "dcrSignatureValidationSoftwareStatementJwksURIClaim": "jwks_uri",
-     *   - "dcrSignatureValidationSoftwareStatementJwksClaim": null,
-     *   - "dcrSignatureValidationJwks": null,
-     *   - "dcrSignatureValidationJwksUri": null,
-     *   - "softwareStatementValidationType": "jwks_uri",
-     *   - "softwareStatementValidationClaimName": "jwks_uri",
+     * - "dcrSignatureValidationEnabled": true,
+     * - "dcrSignatureValidationSoftwareStatementJwksURIClaim": "jwks_uri",
+     * - "dcrSignatureValidationSoftwareStatementJwksClaim": null,
+     * - "dcrSignatureValidationJwks": null,
+     * - "dcrSignatureValidationJwksUri": null,
+     * - "softwareStatementValidationType": "jwks_uri",
+     * - "softwareStatementValidationClaimName": "jwks_uri",
      */
     @Parameters({"redirectUris", "sectorIdentifierUri", "logoutUri", "keyStoreFile", "keyStoreSecret", "dnName",
             "RS256_keyId", "clientJwksUri"})
     @Ignore("server's `dcrSignatureValidationEnabled` configuration property should be set to true to get this test passed.")
     //@Test
     public void registerClientWithRequestObject(final String redirectUris, final String sectorIdentifierUri,
-                                        final String logoutUri, final String keyStoreFile, final String keyStoreSecret,
-                                        final String dnName, final String keyId, final String clientJwksUri) throws Exception {
+                                                final String logoutUri, final String keyStoreFile, final String keyStoreSecret,
+                                                final String dnName, final String keyId, final String clientJwksUri) throws Exception {
         showTitle("registerClientWithRequestObject");
 
         String softwareId = UUID.randomUUID().toString();
@@ -597,22 +625,22 @@ public class RegistrationWithSoftwareStatement extends BaseTest {
     /**
      * Request client registration with signed request object and software statement (with jwks_uri against which validation has to be performed).
      * It should be run with following server configuration settings:
-     *   - "dcrSignatureValidationEnabled": true,
-     *   - "dcrSignatureValidationSoftwareStatementJwksURIClaim": "jwks_uri",
-     *   - "dcrSignatureValidationSoftwareStatementJwksClaim": null,
-     *   - "dcrSignatureValidationJwks": null,
-     *   - "dcrSignatureValidationJwksUri": null,
-     *   - "softwareStatementValidationType": "jwks_uri",
-     *   - "softwareStatementValidationClaimName": "jwks_uri",
-     *   - "dcrAuthorizationWithClientCredentials": true
+     * - "dcrSignatureValidationEnabled": true,
+     * - "dcrSignatureValidationSoftwareStatementJwksURIClaim": "jwks_uri",
+     * - "dcrSignatureValidationSoftwareStatementJwksClaim": null,
+     * - "dcrSignatureValidationJwks": null,
+     * - "dcrSignatureValidationJwksUri": null,
+     * - "softwareStatementValidationType": "jwks_uri",
+     * - "softwareStatementValidationClaimName": "jwks_uri",
+     * - "dcrAuthorizationWithClientCredentials": true
      */
     @Parameters({"redirectUris", "sectorIdentifierUri", "logoutUri", "keyStoreFile", "keyStoreSecret", "dnName",
             "RS256_keyId", "clientJwksUri"})
     @Ignore("server's `dcrSignatureValidationEnabled` and `dcrAuthorizationWithClientCredentials` configuration properties should be set to true to get this test passed.")
     //@Test
     public void registerClientWithRequestObjectAndUpdateWithClientCredentialsGrant(final String redirectUris, final String sectorIdentifierUri,
-                                                final String logoutUri, final String keyStoreFile, final String keyStoreSecret,
-                                                final String dnName, final String keyId, final String clientJwksUri) throws Exception {
+                                                                                   final String logoutUri, final String keyStoreFile, final String keyStoreSecret,
+                                                                                   final String dnName, final String keyId, final String clientJwksUri) throws Exception {
         showTitle("registerClientWithRequestObjectAndUpdateWithClientCredentialsGrant");
 
         String softwareId = UUID.randomUUID().toString();

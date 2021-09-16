@@ -6,16 +6,6 @@
 
 package io.jans.as.client.interop;
 
-import static io.jans.as.model.common.GrantType.AUTHORIZATION_CODE;
-import static io.jans.as.model.common.ResponseType.CODE;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-
-import java.util.Arrays;
-
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-
 import io.jans.as.client.BaseTest;
 import io.jans.as.client.RegisterClient;
 import io.jans.as.client.RegisterRequest;
@@ -23,6 +13,15 @@ import io.jans.as.client.RegisterResponse;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.StringUtils;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
+import java.util.Arrays;
+
+import static io.jans.as.model.common.GrantType.AUTHORIZATION_CODE;
+import static io.jans.as.model.common.ResponseType.CODE;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 /**
  * OP-3rd_party-init-login-nohttps

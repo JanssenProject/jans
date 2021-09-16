@@ -6,15 +6,14 @@
 
 package io.jans.as.client.ws.rs.uma;
 
-import org.jboss.resteasy.client.ClientResponseFailure;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-
 import io.jans.as.client.BaseTest;
 import io.jans.as.client.uma.UmaClientFactory;
 import io.jans.as.client.uma.UmaMetadataService;
 import io.jans.as.model.uma.UmaMetadata;
 import io.jans.as.model.uma.UmaTestUtil;
+import org.jboss.resteasy.client.ClientResponseFailure;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
 
 /**
  * Test cases for getting meta data configuration flow (HTTP)

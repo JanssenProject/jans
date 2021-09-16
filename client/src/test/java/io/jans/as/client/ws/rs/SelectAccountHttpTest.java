@@ -61,8 +61,8 @@ public class SelectAccountHttpTest extends BaseTest {
     @Parameters({"userId", "userSecret", "userId2", "userSecret2", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
     public void selectAccountTest(final String userId, final String userSecret,
-                              final String userId2, final String userSecret2,
-                              final String redirectUris, final String redirectUri, String sectorIdentifierUri) throws Exception {
+                                  final String userId2, final String userSecret2,
+                                  final String redirectUris, final String redirectUri, String sectorIdentifierUri) throws Exception {
         showTitle("authorizationCodeFlow");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN);

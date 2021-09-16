@@ -6,16 +6,6 @@
 
 package io.jans.as.client.ws.rs;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.fail;
-
-import java.security.PrivateKey;
-import java.util.Arrays;
-import java.util.List;
-
-import org.testng.annotations.Parameters;
-
 import io.jans.as.client.BaseTest;
 import io.jans.as.client.RegisterClient;
 import io.jans.as.client.RegisterRequest;
@@ -33,6 +23,16 @@ import io.jans.as.model.jwt.JwtHeaderName;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.StringUtils;
 import io.jans.as.model.util.Util;
+import org.testng.annotations.Parameters;
+
+import java.nio.charset.StandardCharsets;
+import java.security.PrivateKey;
+import java.util.Arrays;
+import java.util.List;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.fail;
 
 /**
  * @author Javier Rojas Blum
@@ -337,7 +337,7 @@ public class TokenEncryptionHttpTest extends BaseTest {
             String idToken = tokenResponse.getIdToken();
 
             // 3. Read Encrypted ID Token
-            Jwe jwe = Jwe.parse(idToken, null, clientSecret.getBytes(Util.UTF8_STRING_ENCODING));
+            Jwe jwe = Jwe.parse(idToken, null, clientSecret.getBytes(StandardCharsets.UTF_8));
             assertNotNull(jwe.getHeader().getClaimAsString(JwtHeaderName.TYPE));
             assertNotNull(jwe.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
             assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ISSUER));
@@ -410,7 +410,7 @@ public class TokenEncryptionHttpTest extends BaseTest {
             String idToken = tokenResponse.getIdToken();
 
             // 3. Read Encrypted ID Token
-            Jwe jwe = Jwe.parse(idToken, null, clientSecret.getBytes(Util.UTF8_STRING_ENCODING));
+            Jwe jwe = Jwe.parse(idToken, null, clientSecret.getBytes(StandardCharsets.UTF_8));
             assertNotNull(jwe.getHeader().getClaimAsString(JwtHeaderName.TYPE));
             assertNotNull(jwe.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
             assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ISSUER));

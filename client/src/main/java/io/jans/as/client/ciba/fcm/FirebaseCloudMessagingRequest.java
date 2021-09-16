@@ -6,19 +6,18 @@
 
 package io.jans.as.client.ciba.fcm;
 
+import io.jans.as.client.BaseRequest;
+import org.apache.commons.lang.StringUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import javax.ws.rs.core.MediaType;
+
 import static io.jans.as.model.ciba.FirebaseCloudMessagingRequestParam.BODY;
 import static io.jans.as.model.ciba.FirebaseCloudMessagingRequestParam.CLICK_ACTION;
 import static io.jans.as.model.ciba.FirebaseCloudMessagingRequestParam.NOTIFICATION;
 import static io.jans.as.model.ciba.FirebaseCloudMessagingRequestParam.TITLE;
 import static io.jans.as.model.ciba.FirebaseCloudMessagingRequestParam.TO;
-
-import javax.ws.rs.core.MediaType;
-
-import org.apache.commons.lang.StringUtils;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import io.jans.as.client.BaseRequest;
 
 /**
  * @author Javier Rojas Blum
@@ -26,9 +25,9 @@ import io.jans.as.client.BaseRequest;
  */
 public class FirebaseCloudMessagingRequest extends BaseRequest {
 
-    private String key;
-    private String to;
-    private Notification notification;
+    private final String key;
+    private final String to;
+    private final Notification notification;
 
     public FirebaseCloudMessagingRequest(String key, String to, String title, String body, String clickAction) {
         this.key = key;
@@ -71,9 +70,9 @@ public class FirebaseCloudMessagingRequest extends BaseRequest {
 }
 
 class Notification {
-    private String title;
-    private String body;
-    private String clickAction;
+    private final String title;
+    private final String body;
+    private final String clickAction;
 
     public Notification(String title, String body, String clickAction) {
         this.title = title;

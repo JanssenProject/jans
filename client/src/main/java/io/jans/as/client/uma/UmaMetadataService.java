@@ -6,11 +6,11 @@
 
 package io.jans.as.client.uma;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Produces;
-
 import io.jans.as.model.uma.UmaConstants;
 import io.jans.as.model.uma.UmaMetadata;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.Produces;
 
 /**
  * The endpoint at which the requester can obtain UMA metadata.
@@ -19,8 +19,8 @@ import io.jans.as.model.uma.UmaMetadata;
  */
 public interface UmaMetadataService {
 
-	@GET
-	@Produces({ UmaConstants.JSON_MEDIA_TYPE })
-	UmaMetadata getMetadata();
+    @GET
+    @Produces({UmaConstants.JSON_MEDIA_TYPE})
+    UmaMetadata getMetadata();
 
 }
