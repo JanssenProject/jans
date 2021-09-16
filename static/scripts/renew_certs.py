@@ -32,7 +32,7 @@ def delete_key(suffix):
                         "-keystore", defaultTrustStoreFN,
                         "-storepass", defaultTrustStorePW
                         ])
-        base.run(cmd, shell=True)
+        base.run(cmd, None, None, False, True, False)
 
 
 def import_key(suffix):
@@ -48,7 +48,7 @@ def import_key(suffix):
                     "-storepass", defaultTrustStorePW, "-noprompt"
                     ])
 
-    base.run(cmd, shell=True)
+    base.run(cmd, None, None, False, True, False)
 
 def create_new_certs():
     print ("Creating certificates")
@@ -78,6 +78,6 @@ def create_new_certs():
 
     os.rename('/etc/certs/saml.pem.crt', '/etc/certs/saml.pem')
 
-    base.run('chown jetty:jetty /etc/certs/oxauth-keys.*', shell=True)
+    base.run('chown jetty:jetty /etc/certs/oxauth-keys.*', None, None, False, True, False)
 
 create_new_certs()
