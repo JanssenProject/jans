@@ -20,7 +20,7 @@ import javax.ws.rs.core.MediaType;
 
 /**
  * Health check controller
- * 
+ *
  * @author Yuriy Movchan
  * @version Jul 24, 2020
  */
@@ -28,21 +28,21 @@ import javax.ws.rs.core.MediaType;
 @Path("/")
 public class HealthCheckController {
 
-	@Inject
-	private PersistenceEntryManager persistenceEntryManager;
+    @Inject
+    private PersistenceEntryManager persistenceEntryManager;
 
-	@Inject
+    @Inject
     private ErrorResponseFactory errorResponseFactory;
 
     @GET
     @POST
     @Path("/health-check")
     @Produces(MediaType.APPLICATION_JSON)
-	public String healthCheckController() {
+    public String healthCheckController() {
         errorResponseFactory.validateComponentEnabled(ComponentType.HEALTH_CHECK);
-    	boolean isConnected = persistenceEntryManager.getOperationService().isConnected();
-    	String dbStatus = isConnected ? "online" : "offline"; 
+        boolean isConnected = persistenceEntryManager.getOperationService().isConnected();
+        String dbStatus = isConnected ? "online" : "offline";
         return "{\"status\": \"running\", \"db_status\":\"" + dbStatus + "\"}";
-	}
+    }
 
 }

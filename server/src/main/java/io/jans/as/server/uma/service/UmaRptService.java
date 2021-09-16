@@ -6,26 +6,7 @@
 
 package io.jans.as.server.uma.service;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-
-import org.apache.commons.lang.ArrayUtils;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-
 import com.google.common.base.Preconditions;
-
 import io.jans.as.common.claims.Audience;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.common.GrantType;
@@ -50,6 +31,22 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.base.SimpleBranch;
 import io.jans.util.INumGenerator;
 import io.jans.util.StringHelper;
+import org.apache.commons.lang.ArrayUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * RPT manager component
@@ -61,10 +58,8 @@ import io.jans.util.StringHelper;
 @ApplicationScoped
 public class UmaRptService {
 
-    private static final String ORGUNIT_OF_RPT = "uma_rpt";
-
     public static final int DEFAULT_RPT_LIFETIME = 3600;
-
+    private static final String ORGUNIT_OF_RPT = "uma_rpt";
     @Inject
     private Logger log;
 
@@ -96,6 +91,16 @@ public class UmaRptService {
     private StatService statService;
 
     private boolean containsBranch = false;
+
+    public static List<String> getPermissionDns(Collection<UmaPermission> permissions) {
+        final List<String> result = new ArrayList<String>();
+        if (permissions != null) {
+            for (UmaPermission p : permissions) {
+                result.add(p.getDn());
+            }
+        }
+        return result;
+    }
 
     public String createDn(String tokenCode) {
         return String.format("tknCde=%s,%s", TokenHashUtil.hash(tokenCode), branchDn());
@@ -168,16 +173,6 @@ public class UmaRptService {
             log.error(e.getMessage(), e);
             return false;
         }
-    }
-
-    public static List<String> getPermissionDns(Collection<UmaPermission> permissions) {
-        final List<String> result = new ArrayList<String>();
-        if (permissions != null) {
-            for (UmaPermission p : permissions) {
-                result.add(p.getDn());
-            }
-        }
-        return result;
     }
 
     public List<UmaPermission> getRptPermissions(UmaRPT p_rpt) {
@@ -313,13 +308,13 @@ public class UmaRptService {
     }
 
     public void addBranchIfNeeded() {
-    	if (ldapEntryManager.hasBranchesSupport(branchDn())) {
-	        if (!containsBranch() && !containsBranch) {
-	            addBranch();
-	        } else {
-	            containsBranch = true;
-	        }
-    	}
+        if (ldapEntryManager.hasBranchesSupport(branchDn())) {
+            if (!containsBranch() && !containsBranch) {
+                addBranch();
+            } else {
+                containsBranch = true;
+            }
+        }
     }
 
     public boolean containsBranch() {

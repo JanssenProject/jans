@@ -6,17 +6,6 @@
 
 package io.jans.as.server.idgen.ws.rs;
 
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-
 import io.jans.as.model.common.IdType;
 import io.jans.as.model.config.BaseDnConfiguration;
 import io.jans.as.model.config.StaticConfiguration;
@@ -24,6 +13,15 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.base.DummyEntry;
 import io.jans.orm.search.filter.Filter;
 import io.jans.util.INumGenerator;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Inum ID generator. Generates inum: e.g. @!1111!0001!1234.
@@ -39,7 +37,7 @@ public class InumGenerator {
 
     private static final int MAX = 100;
 
-	private final Pattern baseRdnPattern = Pattern.compile(".+o=([\\w\\!\\@\\.]+)$");
+    private final Pattern baseRdnPattern = Pattern.compile(".+o=([\\w\\!\\@\\.]+)$");
 
     @Inject
     private Logger log;
@@ -71,10 +69,10 @@ public class InumGenerator {
                         append(p_idType.getInum()).
                         append(InumGenerator.SEPARATOR);
 
-                if ((IdType.CLIENTS == p_idType) || (IdType.PEOPLE == p_idType)) { 
-                	sb.append(INumGenerator.generate(4));
+                if ((IdType.CLIENTS == p_idType) || (IdType.PEOPLE == p_idType)) {
+                    sb.append(INumGenerator.generate(4));
                 } else {
-                	sb.append(INumGenerator.generate(2));
+                    sb.append(INumGenerator.generate(2));
                 }
 
                 inum = sb.toString();
@@ -102,12 +100,12 @@ public class InumGenerator {
         return inum;
     }
 
-	public boolean contains(String inum, IdType type) {
-		final String baseDn = baseDn(type);
-		final Filter filter = Filter.createEqualityFilter("inum", inum);
-		final List<DummyEntry> entries = ldapEntryManager.findEntries(baseDn, DummyEntry.class, filter);
-		return entries != null && !entries.isEmpty();
-	}
+    public boolean contains(String inum, IdType type) {
+        final String baseDn = baseDn(type);
+        final Filter filter = Filter.createEqualityFilter("inum", inum);
+        final List<DummyEntry> entries = ldapEntryManager.findEntries(baseDn, DummyEntry.class, filter);
+        return entries != null && !entries.isEmpty();
+    }
 
     public String baseDn(IdType p_type) {
         final BaseDnConfiguration baseDn = staticConfiguration.getBaseDn();
@@ -125,7 +123,7 @@ public class InumGenerator {
         // if not able to identify baseDn by type then return organization baseDn, e.g. o=jans
         Matcher m = baseRdnPattern.matcher(baseDn.getClients());
         if (m.matches()) {
-        	return m.group(1);
+            return m.group(1);
         }
 
         log.error("Use fallback DN: o=jans, for ID generator, please check Jans Auth configuration, clientDn must be valid DN");

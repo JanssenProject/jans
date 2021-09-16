@@ -154,7 +154,7 @@ public class AuthenticationFilter implements Filter {
 
                 // #686 : allow authenticated client via user access_token
                 final String accessToken = tokenService.getToken(authorizationHeader,
-                    HttpAuthTokenType.Bearer,HttpAuthTokenType.AccessToken);
+                        HttpAuthTokenType.Bearer, HttpAuthTokenType.AccessToken);
                 if (StringUtils.isNotBlank(accessToken)) {
                     processAuthByAccessToken(accessToken, httpRequest, httpResponse, filterChain);
                     return;

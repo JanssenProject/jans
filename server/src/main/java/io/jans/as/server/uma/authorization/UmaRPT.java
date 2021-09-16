@@ -6,14 +6,14 @@
 
 package io.jans.as.server.uma.authorization;
 
-import java.util.Date;
-import java.util.List;
-
 import io.jans.as.server.model.common.AbstractToken;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DN;
 import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.ObjectClass;
+
+import java.util.Date;
+import java.util.List;
 
 /**
  * Requesting Party Token.

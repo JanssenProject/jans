@@ -6,21 +6,20 @@
 
 package io.jans.as.server.ciba;
 
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.BACKCHANNEL_AUTHENTICATION_ENDPOINT;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG_VALUES_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.BACKCHANNEL_TOKEN_DELIVERY_MODES_SUPPORTED;
-import static io.jans.as.model.configuration.ConfigurationResponseClaim.BACKCHANNEL_USER_CODE_PAREMETER_SUPPORTED;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-
+import io.jans.as.model.configuration.AppConfiguration;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.jans.as.model.configuration.AppConfiguration;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.BACKCHANNEL_AUTHENTICATION_ENDPOINT;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG_VALUES_SUPPORTED;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.BACKCHANNEL_TOKEN_DELIVERY_MODES_SUPPORTED;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.BACKCHANNEL_USER_CODE_PAREMETER_SUPPORTED;
 
 /**
  * @author Javier Rojas Blum

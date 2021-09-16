@@ -64,24 +64,21 @@ import static org.testng.Assert.fail;
  */
 public class ResponseTypesRestrictionEmbeddedTest extends BaseTest {
 
-    @ArquillianResource
-    private URI url;
-
     private static String clientId1;
     private static String clientSecret1;
     private static String registrationAccessToken1;
     private static String registrationClientUri1;
     private static String authorizationCode1;
-
     private static String clientId2;
     private static String clientSecret2;
     private static String registrationAccessToken2;
     private static String registrationClientUri2;
     private static String authorizationCode2;
-
     private static String clientId3;
     private static String registrationAccessToken3;
     private static String registrationClientUri3;
+    @ArquillianResource
+    private URI url;
 
     /**
      * Registering without provide the response_types param, should register the

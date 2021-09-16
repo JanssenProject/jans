@@ -52,12 +52,6 @@ import static org.testng.Assert.fail;
  */
 public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
 
-    @ArquillianResource
-    private URI url;
-
-    @Inject
-    private AppConfiguration appConfiguration;
-
     private static String clientId;
     private static String clientSecret;
     private static String authorizationCode1;
@@ -68,6 +62,10 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
     private static String refreshToken1;
     private static String refreshToken2;
     private static String refreshToken3;
+    @ArquillianResource
+    private URI url;
+    @Inject
+    private AppConfiguration appConfiguration;
 
     @Parameters({"registerPath", "redirectUris"})
     @Test
@@ -598,66 +596,66 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
     public void tokenExpirationStep1(final String authorizePath, final String userId, final String userSecret,
                                      final String redirectUri) throws Exception {
 
-    	// Store current configuration
-    	int currentAuthorizationCodeLifetime = appConfiguration.getAuthorizationCodeLifetime();
-    	int currentCleanServiceInterval = appConfiguration.getCleanServiceInterval();
-    	
-    	// We need to expire in test test code token faster than usual to avoid sleeping test for long time
-    	appConfiguration.setAuthorizationCodeLifetime(8);
-    	appConfiguration.setCleanServiceInterval(6);
-    	try {
-	        final String state = UUID.randomUUID().toString();
-	
-	        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-	        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
-	
-	        io.jans.as.client.AuthorizationRequest authorizationRequest = new io.jans.as.client.AuthorizationRequest(responseTypes, clientId, scopes,
-	                redirectUri, null);
-	        authorizationRequest.getPrompts().add(Prompt.NONE);
-	        authorizationRequest.setAuthUsername(userId);
-	        authorizationRequest.setAuthPassword(userSecret);
-	        authorizationRequest.setState(state);
-	
-	        Builder request = ResteasyClientBuilder.newClient()
-	                .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
-	
-	        request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
-	        request.header("Accept", MediaType.TEXT_PLAIN);
-	
-	        Response response = request.get();
-	        String entity = response.readEntity(String.class);
-	
-	        showResponse("tokenExpirationStep1", response, entity);
-	
-	        assertEquals(response.getStatus(), 302, "Unexpected response code.");
-	        assertNotNull(response.getLocation(), "Unexpected result: " + response.getLocation());
-	
-	        if (response.getLocation() != null) {
-	            try {
-	                URI uri = new URI(response.getLocation().toString());
-	                assertNotNull(uri.getQuery(), "The query string is null");
-	
-	                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getQuery());
-	
-	                assertNotNull(params.get(AuthorizeResponseParam.CODE), "The code is null");
-	                assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
-	                assertNotNull(params.get(AuthorizeResponseParam.STATE), "The state is null");
-	                assertEquals(params.get(AuthorizeResponseParam.STATE), state);
-	
-	                authorizationCode3 = params.get(AuthorizeResponseParam.CODE);
-	            } catch (URISyntaxException e) {
-	                e.printStackTrace();
-	                fail("Response URI is not well formed");
-	            } catch (Exception e) {
-	                e.printStackTrace();
-	                fail(e.getMessage());
-	            }
-	        }
-    	} finally {
-        	// Restore configuration
-    		appConfiguration.setAuthorizationCodeLifetime(currentAuthorizationCodeLifetime);
-    		appConfiguration.setCleanServiceInterval(currentCleanServiceInterval);
-    	}
+        // Store current configuration
+        int currentAuthorizationCodeLifetime = appConfiguration.getAuthorizationCodeLifetime();
+        int currentCleanServiceInterval = appConfiguration.getCleanServiceInterval();
+
+        // We need to expire in test test code token faster than usual to avoid sleeping test for long time
+        appConfiguration.setAuthorizationCodeLifetime(8);
+        appConfiguration.setCleanServiceInterval(6);
+        try {
+            final String state = UUID.randomUUID().toString();
+
+            List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+            List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+
+            io.jans.as.client.AuthorizationRequest authorizationRequest = new io.jans.as.client.AuthorizationRequest(responseTypes, clientId, scopes,
+                    redirectUri, null);
+            authorizationRequest.getPrompts().add(Prompt.NONE);
+            authorizationRequest.setAuthUsername(userId);
+            authorizationRequest.setAuthPassword(userSecret);
+            authorizationRequest.setState(state);
+
+            Builder request = ResteasyClientBuilder.newClient()
+                    .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+
+            request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
+            request.header("Accept", MediaType.TEXT_PLAIN);
+
+            Response response = request.get();
+            String entity = response.readEntity(String.class);
+
+            showResponse("tokenExpirationStep1", response, entity);
+
+            assertEquals(response.getStatus(), 302, "Unexpected response code.");
+            assertNotNull(response.getLocation(), "Unexpected result: " + response.getLocation());
+
+            if (response.getLocation() != null) {
+                try {
+                    URI uri = new URI(response.getLocation().toString());
+                    assertNotNull(uri.getQuery(), "The query string is null");
+
+                    Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getQuery());
+
+                    assertNotNull(params.get(AuthorizeResponseParam.CODE), "The code is null");
+                    assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
+                    assertNotNull(params.get(AuthorizeResponseParam.STATE), "The state is null");
+                    assertEquals(params.get(AuthorizeResponseParam.STATE), state);
+
+                    authorizationCode3 = params.get(AuthorizeResponseParam.CODE);
+                } catch (URISyntaxException e) {
+                    e.printStackTrace();
+                    fail("Response URI is not well formed");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    fail(e.getMessage());
+                }
+            }
+        } finally {
+            // Restore configuration
+            appConfiguration.setAuthorizationCodeLifetime(currentAuthorizationCodeLifetime);
+            appConfiguration.setCleanServiceInterval(currentCleanServiceInterval);
+        }
     }
 
     @Parameters({"tokenPath", "redirectUri"})

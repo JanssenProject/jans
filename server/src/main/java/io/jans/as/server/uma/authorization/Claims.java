@@ -6,23 +6,22 @@
 
 package io.jans.as.server.uma.authorization;
 
+import io.jans.as.model.jwt.Jwt;
+import org.apache.commons.lang.StringUtils;
+
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-
-import org.apache.commons.lang.StringUtils;
-
-import io.jans.as.model.jwt.Jwt;
 
 /**
  * @author yuriyz on 06/02/2017.
  */
 public class Claims {
 
-    private Jwt claimsToken;
-    private String claimsTokenAsString;
-    private UmaPCT pct;
-    private Map<String, Object> claims = new ConcurrentHashMap<String, Object>();
+    private final Jwt claimsToken;
+    private final String claimsTokenAsString;
+    private final UmaPCT pct;
+    private final Map<String, Object> claims = new ConcurrentHashMap<String, Object>();
 
     public Claims(Jwt claimsToken, UmaPCT pct, String claimsTokenAsString) {
         this.claimsToken = claimsToken;

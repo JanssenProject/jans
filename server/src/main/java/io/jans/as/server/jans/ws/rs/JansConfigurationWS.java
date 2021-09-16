@@ -29,7 +29,11 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by eugeniuparvan on 8/5/16.
@@ -41,10 +45,10 @@ public class JansConfigurationWS {
     private Logger log;
 
     @Inject
-    private ScopeService scopeService;    
+    private ScopeService scopeService;
 
     @Inject
-    private AttributeService attributeService;    
+    private AttributeService attributeService;
 
     @Inject
     private ErrorResponseFactory errorResponseFactory;

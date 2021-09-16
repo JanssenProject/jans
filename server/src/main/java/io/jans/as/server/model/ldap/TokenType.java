@@ -9,9 +9,9 @@ package io.jans.as.server.model.ldap;
 import org.apache.commons.lang.StringUtils;
 
 /**
-* @author Yuriy Zabrovarnyy
-* @version 0.9, 08/01/2013
-*/
+ * @author Yuriy Zabrovarnyy
+ * @version 0.9, 08/01/2013
+ */
 public enum TokenType {
     ID_TOKEN("id_token"),
     ACCESS_TOKEN("access_token"),
@@ -25,10 +25,6 @@ public enum TokenType {
         value = name;
     }
 
-    public String getValue() {
-        return value;
-    }
-
     public static TokenType fromValue(String value) {
         if (StringUtils.isNotBlank(value)) {
             for (TokenType t : values()) {
@@ -38,5 +34,9 @@ public enum TokenType {
             }
         }
         return null;
+    }
+
+    public String getValue() {
+        return value;
     }
 }
