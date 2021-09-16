@@ -15,37 +15,38 @@ import java.io.Serializable;
  */
 public class DeviceRegistrationResult implements Serializable {
 
-	private static final long serialVersionUID = -1542131162244920584L;
+    private static final long serialVersionUID = -1542131162244920584L;
 
-	private DeviceRegistration deviceRegistration;
+    private DeviceRegistration deviceRegistration;
 
-	private Status status;
+    private Status status;
 
-	public DeviceRegistrationResult() {}
+    public DeviceRegistrationResult() {
+    }
 
-	public DeviceRegistrationResult(DeviceRegistration deviceRegistration, Status status) {
-		this.deviceRegistration = deviceRegistration;
-		this.status = status;
-	}
+    public DeviceRegistrationResult(DeviceRegistration deviceRegistration, Status status) {
+        this.deviceRegistration = deviceRegistration;
+        this.status = status;
+    }
 
-	public DeviceRegistration getDeviceRegistration() {
-		return deviceRegistration;
-	}
+    public DeviceRegistration getDeviceRegistration() {
+        return deviceRegistration;
+    }
 
-	public void setDeviceRegistration(DeviceRegistration deviceRegistration) {
-		this.deviceRegistration = deviceRegistration;
-	}
+    public void setDeviceRegistration(DeviceRegistration deviceRegistration) {
+        this.deviceRegistration = deviceRegistration;
+    }
 
-	public Status getStatus() {
-		return status;
-	}
+    public Status getStatus() {
+        return status;
+    }
 
-	public void setStatus(Status status) {
-		this.status = status;
-	}
+    public void setStatus(Status status) {
+        this.status = status;
+    }
 
-	public enum Status {
-		APPROVED, CANCELED;
-	}
+    public enum Status {
+        APPROVED, CANCELED
+    }
 
 }

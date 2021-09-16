@@ -51,17 +51,14 @@ import static org.testng.Assert.fail;
  */
 public class TokenRestWebServiceWithHSAlgEmbeddedTest extends BaseTest {
 
-    @ArquillianResource
-    private URI url;
-
     private static String clientId1;
     private static String clientSecret1;
-
     private static String clientId2;
     private static String clientSecret2;
-
     private static String clientId3;
     private static String clientSecret3;
+    @ArquillianResource
+    private URI url;
 
     @Parameters({"registerPath", "redirectUris", "clientJwksUri"})
     @Test

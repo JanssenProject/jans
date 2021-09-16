@@ -6,18 +6,12 @@
 
 package io.jans.as.server.ciba;
 
-import static io.jans.as.model.common.BackchannelTokenDeliveryMode.PING;
-import static io.jans.as.model.common.BackchannelTokenDeliveryMode.POLL;
-import static io.jans.as.model.common.BackchannelTokenDeliveryMode.PUSH;
-import static io.jans.as.model.common.GrantType.CIBA;
-
-import java.util.List;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.ws.rs.HttpMethod;
-
+import io.jans.as.model.common.BackchannelTokenDeliveryMode;
+import io.jans.as.model.common.GrantType;
+import io.jans.as.model.common.SubjectType;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.crypto.signature.AsymmetricSignatureAlgorithm;
+import io.jans.as.model.util.Util;
 import org.apache.logging.log4j.util.Strings;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
@@ -25,12 +19,16 @@ import org.json.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.jans.as.model.common.BackchannelTokenDeliveryMode;
-import io.jans.as.model.common.GrantType;
-import io.jans.as.model.common.SubjectType;
-import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.model.crypto.signature.AsymmetricSignatureAlgorithm;
-import io.jans.as.model.util.Util;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.ws.rs.HttpMethod;
+import java.util.List;
+
+import static io.jans.as.model.common.BackchannelTokenDeliveryMode.PING;
+import static io.jans.as.model.common.BackchannelTokenDeliveryMode.POLL;
+import static io.jans.as.model.common.BackchannelTokenDeliveryMode.PUSH;
+import static io.jans.as.model.common.GrantType.CIBA;
 
 /**
  * @author Javier Rojas Blum

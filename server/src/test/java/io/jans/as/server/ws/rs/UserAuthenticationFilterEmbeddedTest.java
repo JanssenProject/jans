@@ -57,25 +57,19 @@ import static org.testng.Assert.fail;
  */
 public class UserAuthenticationFilterEmbeddedTest extends BaseTest {
 
-    @ArquillianResource
-    private URI url;
-
     private static String clientId;
     private static String clientSecret;
-
     private static String clientId1;
     private static String clientSecret1;
-
     private static String clientId2;
     private static String clientSecret2;
-
     private static String clientId3;
     private static String clientSecret3;
-
     private static String clientId4;
     private static String clientSecret4;
-
     private static String authorizationCode1;
+    @ArquillianResource
+    private URI url;
 
     @Parameters({"registerPath", "redirectUris"})
     @Test

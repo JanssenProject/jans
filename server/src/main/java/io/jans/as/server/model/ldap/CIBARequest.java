@@ -6,13 +6,13 @@
 
 package io.jans.as.server.model.ldap;
 
-import java.io.Serializable;
-import java.util.Date;
-
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DN;
 import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.ObjectClass;
+
+import java.io.Serializable;
+import java.util.Date;
 
 /**
  * Object class used to save information of every CIBA request.
@@ -110,9 +110,7 @@ public class CIBARequest implements Serializable {
         CIBARequest that = (CIBARequest) o;
 
         if (!dn.equals(that.dn)) return false;
-        if (!authReqId.equals(that.authReqId)) return false;
-
-        return true;
+        return authReqId.equals(that.authReqId);
     }
 
     @Override

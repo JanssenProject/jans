@@ -53,13 +53,12 @@ import static org.testng.Assert.fail;
  */
 public class EndSessionRestWebServiceEmbeddedTest extends BaseTest {
 
-    @ArquillianResource
-    private URI url;
-
     private static String clientId;
     private static String idToken;
     private static String sessionId;
     private static String sid;
+    @ArquillianResource
+    private URI url;
 
     @Parameters({"registerPath", "redirectUris", "postLogoutRedirectUri"})
     @Test
@@ -210,7 +209,8 @@ public class EndSessionRestWebServiceEmbeddedTest extends BaseTest {
     // }
 
     @Parameters({"endSessionPath"})
-    @Test(enabled = true) // switched off test : WebApplicationException seems to not translated correctly into response by container and results in 500 error. See EndSessionRestWebServiceImpl.endSession()
+    @Test(enabled = true)
+    // switched off test : WebApplicationException seems to not translated correctly into response by container and results in 500 error. See EndSessionRestWebServiceImpl.endSession()
     public void requestEndSessionFail1(final String endSessionPath) throws Exception {
         EndSessionRequest endSessionRequest = new EndSessionRequest(null, null, null);
 

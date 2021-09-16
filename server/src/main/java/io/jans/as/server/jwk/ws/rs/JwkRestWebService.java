@@ -40,7 +40,7 @@ public interface JwkRestWebService {
      * @param securityContext An injectable interface that provides access to security
      *                        related information.
      * @return The JSON Web Key data structure JWK. A JWK consists of a JWK Container Object, which is a JSON object
-     *         that contains an array of JWK Key Objects as a member.
+     * that contains an array of JWK Key Objects as a member.
      */
     @GET
     @Path("/jwks")

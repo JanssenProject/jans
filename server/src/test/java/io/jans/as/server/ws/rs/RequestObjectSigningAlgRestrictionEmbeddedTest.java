@@ -64,54 +64,43 @@ import static org.testng.Assert.fail;
 public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
 
     public static final String ACR_VALUE = "basic";
-    @ArquillianResource
-    private URI url;
-
     private static String clientId1;
     private static String clientSecret1;
     private static String registrationAccessToken1;
     private static String registrationClientUri1;
-
     private static String clientId2;
     private static String clientSecret2;
     private static String registrationAccessToken2;
     private static String registrationClientUri2;
-
     private static String clientId3;
     private static String clientSecret3;
     private static String registrationAccessToken3;
-
     private static String clientId4;
     private static String clientSecret4;
     private static String registrationAccessToken4;
-
     private static String clientId5;
     private static String clientSecret5;
     private static String registrationAccessToken5;
-
     private static String clientId6;
     private static String clientSecret6;
     private static String registrationAccessToken6;
-
     private static String clientId7;
     private static String clientSecret7;
     private static String registrationAccessToken7;
-
     private static String clientId8;
     private static String clientSecret8;
     private static String registrationAccessToken8;
-
     private static String clientId9;
     private static String clientSecret9;
     private static String registrationAccessToken9;
-
     private static String clientId10;
     private static String clientSecret10;
     private static String registrationAccessToken10;
-
     private static String clientId11;
     private static String clientSecret11;
     private static String registrationAccessToken11;
+    @ArquillianResource
+    private URI url;
 
     /**
      * Register a client without specify a Request Object Signing Alg.

@@ -13,5 +13,5 @@ package io.jans.as.server.uma.authorization;
 
 public interface IPolicyExternalAuthorization {
 
-    public boolean authorize(UmaAuthorizationContext authorizationContext);
+    boolean authorize(UmaAuthorizationContext authorizationContext);
 }

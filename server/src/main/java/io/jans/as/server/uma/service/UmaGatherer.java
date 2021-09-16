@@ -6,22 +6,6 @@
 
 package io.jans.as.server.uma.service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.enterprise.context.RequestScoped;
-import javax.faces.application.FacesMessage;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-
 import io.jans.as.common.service.common.UserService;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.uma.persistence.UmaPermission;
@@ -32,6 +16,20 @@ import io.jans.as.server.service.external.ExternalUmaClaimsGatheringService;
 import io.jans.as.server.uma.authorization.UmaGatherContext;
 import io.jans.jsf2.service.FacesService;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+
+import javax.enterprise.context.RequestScoped;
+import javax.faces.application.FacesMessage;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author yuriyz
@@ -41,6 +39,7 @@ import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 @Named(value = "gatherer")
 public class UmaGatherer {
 
+    private final Map<String, String> pageClaims = new HashMap<String, String>();
     @Inject
     private Logger log;
     @Inject
@@ -64,7 +63,30 @@ public class UmaGatherer {
     @Inject
     private UserService userService;
 
-    private final Map<String, String> pageClaims = new HashMap<String, String>();
+    public static String addQueryParameters(String url, String parameters) {
+        if (StringUtils.isNotBlank(parameters)) {
+            if (url.contains("?")) {
+                url += "&" + parameters;
+            } else {
+                url += "?" + parameters;
+            }
+        }
+        return url;
+    }
+
+    public static String addQueryParameter(String url, String paramName, String paramValue) {
+        if (StringUtils.isBlank(url)) {
+            return "";
+        }
+        if (StringUtils.isNotBlank(paramValue)) {
+            if (url.contains("?")) {
+                url += "&" + paramName + "=" + paramValue;
+            } else {
+                url += "?" + paramName + "=" + paramValue;
+            }
+        }
+        return url;
+    }
 
     public boolean gather() {
         try {
@@ -155,31 +177,6 @@ public class UmaGatherer {
         return claimsRedirectUri;
     }
 
-    public static String addQueryParameters(String url, String parameters) {
-        if (StringUtils.isNotBlank(parameters)) {
-            if (url.contains("?")) {
-                url += "&" + parameters;
-            } else {
-                url += "?" + parameters;
-            }
-        }
-        return url;
-    }
-
-    public static String addQueryParameter(String url, String paramName, String paramValue) {
-        if (StringUtils.isBlank(url)) {
-            return "";
-        }
-        if (StringUtils.isNotBlank(paramValue)) {
-            if (url.contains("?")) {
-                url += "&" + paramName + "=" + paramValue;
-            } else {
-                url += "?" + paramName + "=" + paramValue;
-            }
-        }
-        return url;
-    }
-
     public String prepareForStep() {
         try {
             final HttpServletRequest httpRequest = (HttpServletRequest) externalContext.getRequest();
@@ -255,10 +252,10 @@ public class UmaGatherer {
     }
 
     protected CustomScriptConfiguration getScript(final SessionId session) {
-		String scriptName = umaSessionService.getScriptName(session);
-		CustomScriptConfiguration script = external.getCustomScriptConfigurationByName(scriptName);
+        String scriptName = umaSessionService.getScriptName(session);
+        CustomScriptConfiguration script = external.getCustomScriptConfigurationByName(scriptName);
 
-		return script;
-	}
+        return script;
+    }
 
 }

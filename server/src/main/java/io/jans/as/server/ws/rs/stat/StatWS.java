@@ -73,6 +73,79 @@ public class StatWS {
 
     private long lastProcessedAt;
 
+    public static String createOpenMetricsResponse(StatResponse statResponse) throws IOException {
+        Writer writer = new StringWriter();
+        CollectorRegistry registry = new CollectorRegistry();
+
+        final Counter usersCounter = Counter.build()
+                .name("monthly_active_users")
+                .labelNames("month")
+                .help("Monthly active users")
+                .register(registry);
+
+        final Counter accessTokenCounter = Counter.build()
+                .name(StatService.ACCESS_TOKEN_KEY)
+                .labelNames("month", "grantType")
+                .help("Access Token")
+                .register(registry);
+
+        final Counter idTokenCounter = Counter.build()
+                .name(StatService.ID_TOKEN_KEY)
+                .labelNames("month", "grantType")
+                .help("Id Token")
+                .register(registry);
+
+        final Counter refreshTokenCounter = Counter.build()
+                .name(StatService.REFRESH_TOKEN_KEY)
+                .labelNames("month", "grantType")
+                .help("Refresh Token")
+                .register(registry);
+
+        final Counter umaTokenCounter = Counter.build()
+                .name(StatService.UMA_TOKEN_KEY)
+                .labelNames("month", "grantType")
+                .help("UMA Token")
+                .register(registry);
+
+        for (Map.Entry<String, StatResponseItem> entry : statResponse.getResponse().entrySet()) {
+            final String month = entry.getKey();
+            final StatResponseItem item = entry.getValue();
+
+            usersCounter
+                    .labels(month)
+                    .inc(item.getMonthlyActiveUsers());
+
+            for (Map.Entry<String, Map<String, Long>> tokenEntry : item.getTokenCountPerGrantType().entrySet()) {
+                final String grantType = tokenEntry.getKey();
+                final Map<String, Long> tokenMap = tokenEntry.getValue();
+
+                accessTokenCounter
+                        .labels(month, grantType)
+                        .inc(getToken(tokenMap, StatService.ACCESS_TOKEN_KEY));
+
+                idTokenCounter
+                        .labels(month, grantType)
+                        .inc(getToken(tokenMap, StatService.ID_TOKEN_KEY));
+
+                refreshTokenCounter
+                        .labels(month, grantType)
+                        .inc(getToken(tokenMap, StatService.REFRESH_TOKEN_KEY));
+
+                umaTokenCounter
+                        .labels(month, grantType)
+                        .inc(getToken(tokenMap, StatService.UMA_TOKEN_KEY));
+            }
+        }
+
+        TextFormat.write004(writer, registry.metricFamilySamples());
+        return writer.toString();
+    }
+
+    private static long getToken(Map<String, Long> map, String key) {
+        Long v = map.get(key);
+        return v != null ? v : 0;
+    }
+
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response statGet(@HeaderParam("Authorization") String authorization, @QueryParam("month") String month, @QueryParam("format") String format) {
@@ -263,78 +336,5 @@ public class StatWS {
         long timeDiff = System.currentTimeMillis() - lastProcessedAt;
 
         return timeDiff >= timerInterval;
-    }
-
-    public static String createOpenMetricsResponse(StatResponse statResponse) throws IOException {
-        Writer writer = new StringWriter();
-        CollectorRegistry registry = new CollectorRegistry();
-
-        final Counter usersCounter = Counter.build()
-                .name("monthly_active_users")
-                .labelNames("month")
-                .help("Monthly active users")
-                .register(registry);
-
-        final Counter accessTokenCounter = Counter.build()
-                .name(StatService.ACCESS_TOKEN_KEY)
-                .labelNames("month", "grantType")
-                .help("Access Token")
-                .register(registry);
-
-        final Counter idTokenCounter = Counter.build()
-                .name(StatService.ID_TOKEN_KEY)
-                .labelNames("month", "grantType")
-                .help("Id Token")
-                .register(registry);
-
-        final Counter refreshTokenCounter = Counter.build()
-                .name(StatService.REFRESH_TOKEN_KEY)
-                .labelNames("month", "grantType")
-                .help("Refresh Token")
-                .register(registry);
-
-        final Counter umaTokenCounter = Counter.build()
-                .name(StatService.UMA_TOKEN_KEY)
-                .labelNames("month", "grantType")
-                .help("UMA Token")
-                .register(registry);
-
-        for (Map.Entry<String, StatResponseItem> entry : statResponse.getResponse().entrySet()) {
-            final String month = entry.getKey();
-            final StatResponseItem item = entry.getValue();
-
-            usersCounter
-                    .labels(month)
-                    .inc(item.getMonthlyActiveUsers());
-
-            for (Map.Entry<String, Map<String, Long>> tokenEntry : item.getTokenCountPerGrantType().entrySet()) {
-                final String grantType = tokenEntry.getKey();
-                final Map<String, Long> tokenMap = tokenEntry.getValue();
-
-                accessTokenCounter
-                        .labels(month, grantType)
-                        .inc(getToken(tokenMap, StatService.ACCESS_TOKEN_KEY));
-
-                idTokenCounter
-                        .labels(month, grantType)
-                        .inc(getToken(tokenMap, StatService.ID_TOKEN_KEY));
-
-                refreshTokenCounter
-                        .labels(month, grantType)
-                        .inc(getToken(tokenMap, StatService.REFRESH_TOKEN_KEY));
-
-                umaTokenCounter
-                        .labels(month, grantType)
-                        .inc(getToken(tokenMap, StatService.UMA_TOKEN_KEY));
-            }
-        }
-
-        TextFormat.write004(writer, registry.metricFamilySamples());
-        return writer.toString();
-    }
-
-    private static long getToken(Map<String, Long> map, String key) {
-        Long v = map.get(key);
-        return v != null ? v : 0;
     }
 }
