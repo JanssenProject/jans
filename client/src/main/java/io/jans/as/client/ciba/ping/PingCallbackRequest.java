@@ -6,14 +6,13 @@
 
 package io.jans.as.client.ciba.ping;
 
-import static io.jans.as.model.ciba.PushTokenDeliveryRequestParam.AUTHORIZATION_REQUEST_ID;
-
+import io.jans.as.client.BaseRequest;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.entity.ContentType;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import io.jans.as.client.BaseRequest;
+import static io.jans.as.model.ciba.PushTokenDeliveryRequestParam.AUTHORIZATION_REQUEST_ID;
 
 /**
  * @author Javier Rojas Blum

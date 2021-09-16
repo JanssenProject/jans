@@ -804,7 +804,8 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
     }
 
     @Parameters({"userId", "userSecret", "redirectUri"})
-    @Test(enabled = false) // retain claims script has to be enabled and client pre-configured (not avaiable in test suite)
+    @Test(enabled = false)
+    // retain claims script has to be enabled and client pre-configured (not avaiable in test suite)
     public void retainClaimAuthorizationCodeFlow(final String userId, final String userSecret, final String redirectUri) throws Exception {
         showTitle("authorizationCodeFlow");
 

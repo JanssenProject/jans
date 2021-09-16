@@ -6,15 +6,14 @@
 
 package io.jans.as.client.page;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
+import io.jans.as.client.BaseTest;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import io.jans.as.client.BaseTest;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -23,6 +22,12 @@ public class SelectPage extends AbstractPage {
 
     public SelectPage(PageConfig config) {
         super(config);
+    }
+
+    public static SelectPage navigate(PageConfig config, String authorizationUrlWithPromptSelectAccount) {
+        final SelectPage page = new SelectPage(config);
+        page.navigate(authorizationUrlWithPromptSelectAccount);
+        return page;
     }
 
     public WebElement getLoginAsAnotherUserButton() {
@@ -65,11 +70,5 @@ public class SelectPage extends AbstractPage {
         element.click();
         waitForPageSwitch(url);
         return this;
-    }
-
-    public static SelectPage navigate(PageConfig config, String authorizationUrlWithPromptSelectAccount) {
-        final SelectPage page = new SelectPage(config);
-        page.navigate(authorizationUrlWithPromptSelectAccount);
-        return page;
     }
 }

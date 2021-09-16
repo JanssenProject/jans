@@ -6,11 +6,9 @@
 
 package io.jans.as.client.util;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.net.ssl.SSLContext;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
@@ -29,9 +27,9 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
+import javax.net.ssl.SSLContext;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -74,16 +72,17 @@ public class ClientUtil {
 
     /**
      * Creates a special SSLContext using a custom TLS version and a set of ciphers enabled to process SSL connections.
+     *
      * @param tlsVersion TLS version, for example TLSv1.2
-     * @param ciphers Set of ciphers used to create connections.
+     * @param ciphers    Set of ciphers used to create connections.
      */
     public static CloseableHttpClient createHttpClient(String tlsVersion, String[] ciphers) {
         try {
             SSLContext sslContext = SSLContexts.createDefault();
             SSLConnectionSocketFactory sslConnectionFactory = new SSLConnectionSocketFactory(sslContext,
-                    new String[] { tlsVersion }, ciphers, NoopHostnameVerifier.INSTANCE);
+                    new String[]{tlsVersion}, ciphers, NoopHostnameVerifier.INSTANCE);
 
-            Registry<ConnectionSocketFactory> registry = RegistryBuilder.<ConnectionSocketFactory> create()
+            Registry<ConnectionSocketFactory> registry = RegistryBuilder.<ConnectionSocketFactory>create()
                     .register("https", sslConnectionFactory)
                     .register("http", new PlainConnectionSocketFactory())
                     .build();
