@@ -22,6 +22,8 @@ import io.jans.as.model.token.TokenRevocationErrorResponseType;
 import io.jans.as.model.uma.UmaErrorResponseType;
 import io.jans.as.model.userinfo.UserInfoErrorResponseType;
 import io.jans.as.model.util.Util;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -106,7 +108,7 @@ public class ErrorResponseFactory implements Configuration {
             return;
         }
 
-        log.info("Component is disabled, type:" + componentType);
+        log.info("Component is disabled, type: {}", componentType);
 
         throw new WebApplicationException(Response
                 .status(Response.Status.FORBIDDEN)
@@ -120,6 +122,22 @@ public class ErrorResponseFactory implements Configuration {
                 .status(status)
                 .entity(errorAsJson(type, reason))
                 .type(MediaType.APPLICATION_JSON_TYPE)
+                .build());
+    }
+
+    @NotNull
+    public WebApplicationException createBadRequestException(@NotNull ErrorResponse error) {
+        throw new WebApplicationException(Response
+                .status(Response.Status.BAD_REQUEST)
+                .entity(error.toJSonString())
+                .build());
+    }
+
+    @NotNull
+    public WebApplicationException createBadRequestException(@NotNull IErrorType error, @Nullable String state) {
+        throw new WebApplicationException(Response
+                .status(Response.Status.BAD_REQUEST)
+                .entity(getErrorAsJson(error, state, ""))
                 .build());
     }
 
