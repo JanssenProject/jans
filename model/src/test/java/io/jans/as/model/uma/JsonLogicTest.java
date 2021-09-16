@@ -9,10 +9,23 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import javax.script.ScriptException;
+
 /**
  * @author yuriyz
  */
 public class JsonLogicTest {
+
+    private static void assertResult(String script, Boolean expectedResult) throws ScriptException {
+        Assert.assertEquals(JsonLogic.eval(script), expectedResult);
+    }
+
+    private static void assertTrue(String script) throws ScriptException {
+        assertResult(script, Boolean.TRUE);
+    }
+
+    private static void assertFalse(String script) throws ScriptException {
+        assertResult(script, Boolean.FALSE);
+    }
 
     @Test
     public void testJsEngine() throws ScriptException, NoSuchMethodException {
@@ -58,17 +71,5 @@ public class JsonLogicTest {
         Assert.assertFalse(JsonLogic.apply(rule, "[false, false, false]"));
         Assert.assertFalse(JsonLogic.apply(rule, "[false, false, true]"));
         Assert.assertFalse(JsonLogic.apply(rule, "[true, true, false]"));
-    }
-
-    private static void assertResult(String script, Boolean expectedResult) throws ScriptException {
-        Assert.assertEquals(JsonLogic.eval(script), expectedResult);
-    }
-
-    private static void assertTrue(String script) throws ScriptException {
-        assertResult(script, Boolean.TRUE);
-    }
-
-    private static void assertFalse(String script) throws ScriptException {
-        assertResult(script, Boolean.FALSE);
     }
 }

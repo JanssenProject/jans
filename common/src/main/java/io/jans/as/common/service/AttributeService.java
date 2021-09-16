@@ -6,23 +6,20 @@
 
 package io.jans.as.common.service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-
 import io.jans.as.common.util.AttributeConstants;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.model.GluuAttribute;
 import io.jans.orm.PersistenceEntryManager;
-import io.jans.orm.ldap.impl.LdapEntryManagerFactory;
 import io.jans.orm.search.filter.Filter;
 import io.jans.service.BaseCacheService;
 import io.jans.util.OxConstants;
 import io.jans.util.StringHelper;
+import org.slf4j.Logger;
+
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * @author Javier Rojas Blum
@@ -52,35 +49,35 @@ public abstract class AttributeService extends io.jans.service.AttributeService 
         return usedCacheService.getWithPut(dn, () -> persistenceEntryManager.find(GluuAttribute.class, dn), 60);
     }
 
-	public GluuAttribute getByLdapName(String name) {
-		BaseCacheService usedCacheService = getCacheService();
-		return usedCacheService.getWithPut(OxConstants.CACHE_ATTRIBUTE_DB_NAME + "_" + name, () -> {
-			List<GluuAttribute> gluuAttributes = getAttributesByAttribute("jansAttrName", name, staticConfiguration.getBaseDn().getAttributes());
-			if (gluuAttributes.size() > 0) {
-				for (GluuAttribute gluuAttribute : gluuAttributes) {
-					if (gluuAttribute.getName() != null && gluuAttribute.getName().equals(name)) {
-						return gluuAttribute;
-					}
-				}
-			}
+    public GluuAttribute getByLdapName(String name) {
+        BaseCacheService usedCacheService = getCacheService();
+        return usedCacheService.getWithPut(OxConstants.CACHE_ATTRIBUTE_DB_NAME + "_" + name, () -> {
+            List<GluuAttribute> gluuAttributes = getAttributesByAttribute("jansAttrName", name, staticConfiguration.getBaseDn().getAttributes());
+            if (gluuAttributes.size() > 0) {
+                for (GluuAttribute gluuAttribute : gluuAttributes) {
+                    if (gluuAttribute.getName() != null && gluuAttribute.getName().equals(name)) {
+                        return gluuAttribute;
+                    }
+                }
+            }
 
-			return null;
-		}, 30);
-	}
+            return null;
+        }, 30);
+    }
 
     public GluuAttribute getByClaimName(String name) {
-		BaseCacheService usedCacheService = getCacheService();
-		return usedCacheService.getWithPut(OxConstants.CACHE_ATTRIBUTE_CLAIM_NAME + "_" + name, () -> {
-			List<GluuAttribute> gluuAttributes = getAttributesByAttribute("jansClaimName", name, staticConfiguration.getBaseDn().getAttributes());
-			if (gluuAttributes.size() > 0) {
-				for (GluuAttribute gluuAttribute : gluuAttributes) {
-					if (gluuAttribute.getClaimName() != null && gluuAttribute.getClaimName().equals(name)) {
-						return gluuAttribute;
-					}
-				}
-			}
-			return null;
-		}, 30);
+        BaseCacheService usedCacheService = getCacheService();
+        return usedCacheService.getWithPut(OxConstants.CACHE_ATTRIBUTE_CLAIM_NAME + "_" + name, () -> {
+            List<GluuAttribute> gluuAttributes = getAttributesByAttribute("jansClaimName", name, staticConfiguration.getBaseDn().getAttributes());
+            if (gluuAttributes.size() > 0) {
+                for (GluuAttribute gluuAttribute : gluuAttributes) {
+                    if (gluuAttribute.getClaimName() != null && gluuAttribute.getClaimName().equals(name)) {
+                        return gluuAttribute;
+                    }
+                }
+            }
+            return null;
+        }, 30);
     }
 
     public String generateInumForNewAttribute() {
@@ -130,25 +127,25 @@ public abstract class AttributeService extends io.jans.service.AttributeService 
     }
 
     public List<GluuAttribute> searchAttributes(String pattern, int sizeLimit) throws Exception {
-    	String baseDn = getDnForAttribute(null);
+        String baseDn = getDnForAttribute(null);
 
-    	String[] targetArray = new String[]{pattern};
-        
+        String[] targetArray = new String[]{pattern};
+
         boolean useLowercaseFilter = !PersistenceEntryManager.PERSITENCE_TYPES.ldap.name().equals(persistenceEntryManager.getPersistenceType(baseDn));
         Filter searchFilter;
-		if (useLowercaseFilter) {
-	        Filter displayNameFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter(AttributeConstants.displayName), null, targetArray, null);
-	        Filter descriptionFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter(AttributeConstants.description), null, targetArray, null);
-	        Filter nameFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter(AttributeConstants.attributeName), null, targetArray, null);
-	        searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter, nameFilter);
-		} else {
-	        Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.displayName, null, targetArray, null);
-	        Filter descriptionFilter = Filter.createSubstringFilter(AttributeConstants.description, null, targetArray, null);
-	        Filter nameFilter = Filter.createSubstringFilter(AttributeConstants.attributeName, null, targetArray, null);
-	        searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter, nameFilter);
-		}
+        if (useLowercaseFilter) {
+            Filter displayNameFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter(AttributeConstants.displayName), null, targetArray, null);
+            Filter descriptionFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter(AttributeConstants.description), null, targetArray, null);
+            Filter nameFilter = Filter.createSubstringFilter(Filter.createLowercaseFilter(AttributeConstants.attributeName), null, targetArray, null);
+            searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter, nameFilter);
+        } else {
+            Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.displayName, null, targetArray, null);
+            Filter descriptionFilter = Filter.createSubstringFilter(AttributeConstants.description, null, targetArray, null);
+            Filter nameFilter = Filter.createSubstringFilter(AttributeConstants.attributeName, null, targetArray, null);
+            searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter, nameFilter);
+        }
 
-		return persistenceEntryManager.findEntries(baseDn, GluuAttribute.class,
+        return persistenceEntryManager.findEntries(baseDn, GluuAttribute.class,
                 searchFilter, sizeLimit);
     }
 

@@ -50,7 +50,7 @@ public class RedirectUri {
     private String baseRedirectUri;
     private List<ResponseType> responseTypes;
     private ResponseMode responseMode;
-    private Map<String, String> responseParameters;
+    private final Map<String, String> responseParameters;
 
     // JARM
     private String issuer;
