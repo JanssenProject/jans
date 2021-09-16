@@ -6,13 +6,14 @@
 
 package io.jans.as.model.error;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Base class for error responses.
@@ -20,14 +21,16 @@ import org.json.JSONObject;
  * @author Javier Rojas Blum
  * @version August 20, 2019
  */
-public abstract class ErrorResponse {
+public class ErrorResponse {
 
-    private final static Logger log = Logger.getLogger(ErrorResponse.class);
+    private static final Logger log = Logger.getLogger(ErrorResponse.class);
 
 	private int status;
+	private String errorCode;
 	private String errorDescription;
 	private String errorUri;
 	private String reason;
+	private String state;
 
 	/**
 	 * Return the HTTP response status code.
@@ -48,21 +51,20 @@ public abstract class ErrorResponse {
 	}
 
 	/**
-	 * Returns the error code of the response.
-	 *
-	 * @return The error code.
-	 */
-	public abstract String getErrorCode();
-
-	/**
 	 * If a valid state parameter was present in the request, it returns the
 	 * exact value received from the client.
 	 *
 	 * @return The state value of the request.
 	 */
-	public abstract String getState();
+	public String getState() {
+	    return state;
+    }
 
-	/**
+    public void setState(String state) {
+        this.state = state;
+    }
+
+    /**
 	 * Returns a human-readable UTF-8 encoded text providing additional
 	 * information, used to assist the client developer in understanding the
 	 * error that occurred.
@@ -117,6 +119,19 @@ public abstract class ErrorResponse {
     }
 
     /**
+     * Returns the error code of the response.
+     *
+     * @return The error code.
+     */
+    public String getErrorCode() {
+        return errorCode;
+    }
+
+    public void setErrorCode(String errorCode) {
+        this.errorCode = errorCode;
+    }
+
+    /**
 	 * Returns a query string representation of the object.
 	 *
 	 * @return The object represented in a query string.
@@ -129,16 +144,16 @@ public abstract class ErrorResponse {
 
 			if (errorDescription != null && !errorDescription.isEmpty()) {
 				queryStringBuilder.append("&error_description=").append(
-						URLEncoder.encode(errorDescription, "UTF-8"));
+						URLEncoder.encode(errorDescription, StandardCharsets.UTF_8.name()));
 			}
 
 			if (errorUri != null && !errorUri.isEmpty()) {
 				queryStringBuilder.append("&error_uri=").append(
-						URLEncoder.encode(errorUri, "UTF-8"));
+						URLEncoder.encode(errorUri, StandardCharsets.UTF_8.name()));
 			}
 
             if (StringUtils.isNotBlank(reason)) {
-                queryStringBuilder.append("&reason=").append(URLEncoder.encode(reason, "UTF-8"));
+                queryStringBuilder.append("&reason=").append(URLEncoder.encode(reason, StandardCharsets.UTF_8.name()));
             }
 
 			if (getState() != null && !getState().isEmpty()) {
