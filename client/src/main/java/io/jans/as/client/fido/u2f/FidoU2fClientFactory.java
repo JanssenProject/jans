@@ -6,15 +6,14 @@
 
 package io.jans.as.client.fido.u2f;
 
-import javax.ws.rs.core.UriBuilder;
-
+import io.jans.as.client.service.ClientFactory;
+import io.jans.as.model.fido.u2f.U2fConfiguration;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
 
-import io.jans.as.client.service.ClientFactory;
-import io.jans.as.model.fido.u2f.U2fConfiguration;
+import javax.ws.rs.core.UriBuilder;
 
 /**
  * Helper class which creates proxy FIDO U2F services
@@ -25,7 +24,7 @@ public class FidoU2fClientFactory {
 
     private final static FidoU2fClientFactory instance = new FidoU2fClientFactory();
 
-    private ApacheHttpClient4Engine engine;
+    private final ApacheHttpClient4Engine engine;
 
     private FidoU2fClientFactory() {
         this.engine = ClientFactory.instance().createEngine();

@@ -6,16 +6,15 @@
 
 package io.jans.as.client.ciba.ping;
 
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.core.MediaType;
-
+import io.jans.as.client.BaseClient;
+import io.jans.as.client.util.ClientUtil;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
 import org.json.JSONObject;
 
-import io.jans.as.client.BaseClient;
-import io.jans.as.client.util.ClientUtil;
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.core.MediaType;
 
 /**
  * @author Javier Rojas Blum
@@ -76,7 +75,7 @@ public class PingCallbackClient extends BaseClient<PingCallbackRequest, PingCall
      */
     private ApacheHttpClient4Executor getApacheHttpClient4ExecutorForMTLS() {
         // Ciphers accepted by FAPI-CIBA specs and OpenJDK.
-        String[] ciphers = new String[] { "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384" };
+        String[] ciphers = new String[]{"TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"};
         return new ApacheHttpClient4Executor(ClientUtil.createHttpClient("TLSv1.2", ciphers));
     }
 

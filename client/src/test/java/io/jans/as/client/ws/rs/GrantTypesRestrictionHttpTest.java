@@ -6,7 +6,22 @@
 
 package io.jans.as.client.ws.rs;
 
-import io.jans.as.client.*;
+import io.jans.as.client.AuthorizationRequest;
+import io.jans.as.client.AuthorizationResponse;
+import io.jans.as.client.AuthorizeClient;
+import io.jans.as.client.BaseTest;
+import io.jans.as.client.EndSessionClient;
+import io.jans.as.client.EndSessionRequest;
+import io.jans.as.client.EndSessionResponse;
+import io.jans.as.client.JwkClient;
+import io.jans.as.client.RegisterClient;
+import io.jans.as.client.RegisterRequest;
+import io.jans.as.client.RegisterResponse;
+import io.jans.as.client.TokenClient;
+import io.jans.as.client.TokenRequest;
+import io.jans.as.client.TokenResponse;
+import io.jans.as.client.UserInfoClient;
+import io.jans.as.client.UserInfoResponse;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;

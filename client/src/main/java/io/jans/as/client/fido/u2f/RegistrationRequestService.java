@@ -6,14 +6,14 @@
 
 package io.jans.as.client.fido.u2f;
 
+import io.jans.as.model.fido.u2f.protocol.RegisterRequestMessage;
+import io.jans.as.model.fido.u2f.protocol.RegisterStatus;
+
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-
-import io.jans.as.model.fido.u2f.protocol.RegisterRequestMessage;
-import io.jans.as.model.fido.u2f.protocol.RegisterStatus;
 
 /**
  * Еhe endpoint allows to start and finish U2F registration process
@@ -25,14 +25,14 @@ public interface RegistrationRequestService {
 
     @GET
     @Produces({"application/json"})
-    public RegisterRequestMessage startRegistration(@QueryParam("username") String userName, @QueryParam("application") String appId, @QueryParam("session_id") String sessionId);
+    RegisterRequestMessage startRegistration(@QueryParam("username") String userName, @QueryParam("application") String appId, @QueryParam("session_id") String sessionId);
 
     @GET
     @Produces({"application/json"})
-    public RegisterRequestMessage startRegistration(@QueryParam("username") String userName, @QueryParam("application") String appId, @QueryParam("session_id") String sessionId, @QueryParam("enrollment_code") String enrollmentCode);
+    RegisterRequestMessage startRegistration(@QueryParam("username") String userName, @QueryParam("application") String appId, @QueryParam("session_id") String sessionId, @QueryParam("enrollment_code") String enrollmentCode);
 
     @POST
     @Produces({"application/json"})
-    public RegisterStatus finishRegistration(@FormParam("username") String userName, @FormParam("tokenResponse") String registerResponseString);
+    RegisterStatus finishRegistration(@FormParam("username") String userName, @FormParam("tokenResponse") String registerResponseString);
 
 }

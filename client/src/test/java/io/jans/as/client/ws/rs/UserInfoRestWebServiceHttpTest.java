@@ -1811,8 +1811,8 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
     @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "sectorIdentifierUri"})
     @Test
     public void requestUserInfoSubjectTypePublic(final String redirectUris, final String redirectUri,
-                                     final String userId, final String userSecret,
-                                     final String sectorIdentifierUri) {
+                                                 final String userId, final String userSecret,
+                                                 final String sectorIdentifierUri) {
         showTitle("requestUserInfoSubjectTypePublic");
 
         List<ResponseType> responseTypes = Arrays.asList(

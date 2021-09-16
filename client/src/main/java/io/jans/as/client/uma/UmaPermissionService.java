@@ -6,14 +6,14 @@
 
 package io.jans.as.client.uma;
 
+import io.jans.as.model.uma.PermissionTicket;
+import io.jans.as.model.uma.UmaConstants;
+import io.jans.as.model.uma.UmaPermissionList;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Produces;
-
-import io.jans.as.model.uma.PermissionTicket;
-import io.jans.as.model.uma.UmaConstants;
-import io.jans.as.model.uma.UmaPermissionList;
 
 /**
  * The endpoint at which the host registers permissions that it anticipates a
@@ -25,14 +25,13 @@ import io.jans.as.model.uma.UmaPermissionList;
  * permission with the AS that would be sufficient for the type of access
  * sought. The AS returns a permission ticket for the host to give to the
  * requester in its response.
- * 
  */
 public interface UmaPermissionService {
 
-	@POST
-	@Consumes({ UmaConstants.JSON_MEDIA_TYPE })
-	@Produces({ UmaConstants.JSON_MEDIA_TYPE })
-	PermissionTicket registerPermission(
-			@HeaderParam("Authorization") String authorization,
-			UmaPermissionList permissions);
+    @POST
+    @Consumes({UmaConstants.JSON_MEDIA_TYPE})
+    @Produces({UmaConstants.JSON_MEDIA_TYPE})
+    PermissionTicket registerPermission(
+            @HeaderParam("Authorization") String authorization,
+            UmaPermissionList permissions);
 }

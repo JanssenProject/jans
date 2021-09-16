@@ -49,8 +49,8 @@ public class TokenBindingHttpTest extends BaseTest {
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
     public void tokenBindingWithImplicitFlow(final String userId, final String userSecret,
-                                            final String redirectUris, final String redirectUri,
-                                            final String sectorIdentifierUri) throws Exception {
+                                             final String redirectUris, final String redirectUri,
+                                             final String sectorIdentifierUri) throws Exception {
         showTitle("tokenBindingWithImplicitFlow");
 
         List<ResponseType> responseTypes = Arrays.asList(
@@ -110,7 +110,7 @@ public class TokenBindingHttpTest extends BaseTest {
     }
 
     private RegisterResponse registerClientInternal(final String redirectUris, final List<ResponseType> responseTypes,
-                                            final List<GrantType> grantTypes, final String sectorIdentifierUri) throws UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+                                                    final List<GrantType> grantTypes, final String sectorIdentifierUri) throws UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
