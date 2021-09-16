@@ -292,7 +292,8 @@ class Config:
 
         # OpenID key generation default setting
         self.default_openid_jks_dn_name = 'CN=Jans Auth CA Certificates'
-        self.default_key_algs = 'RS256 RS384 RS512 ES256 ES384 ES512'
+        self.default_sig_key_algs = 'RS256 RS384 RS512 ES256 ES256K ES384 ES512 PS256 PS384 PS512 Ed25519 Ed448'
+        self.default_enc_key_algs = 'RSA1_5 RSA-OAEP ECDH-ES ECDH-ES+A128KW ECDH-ES+A192KW ECDH-ES+A256KW'
         self.default_key_expiration = 365
 
         self.post_messages = []
