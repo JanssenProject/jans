@@ -6,19 +6,19 @@
 
 package io.jans.as.client.util;
 
-import static io.jans.as.model.jwk.JWKParameter.CERTIFICATE_CHAIN;
-import static io.jans.as.model.jwk.JWKParameter.EXPIRATION_TIME;
-import static io.jans.as.model.jwk.JWKParameter.EXPONENT;
-import static io.jans.as.model.jwk.JWKParameter.KEY_ID;
-import static io.jans.as.model.jwk.JWKParameter.MODULUS;
-import static io.jans.as.model.jwk.JWKParameter.X;
-import static io.jans.as.model.jwk.JWKParameter.Y;
-
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.List;
-
+import io.jans.as.model.crypto.AbstractCryptoProvider;
+import io.jans.as.model.crypto.AuthCryptoProvider;
+import io.jans.as.model.crypto.ElevenCryptoProvider;
+import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.jwk.Algorithm;
+import io.jans.as.model.jwk.JSONWebKey;
+import io.jans.as.model.jwk.JSONWebKeySet;
+import io.jans.as.model.jwk.KeyType;
+import io.jans.as.model.jwk.Use;
+import io.jans.as.model.util.SecurityProviderUtility;
+import io.jans.as.model.util.StringUtils;
+import io.jans.util.StringHelper;
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -33,19 +33,18 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import io.jans.as.model.crypto.AbstractCryptoProvider;
-import io.jans.as.model.crypto.AuthCryptoProvider;
-import io.jans.as.model.crypto.ElevenCryptoProvider;
-import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
-import io.jans.as.model.crypto.signature.SignatureAlgorithm;
-import io.jans.as.model.jwk.Algorithm;
-import io.jans.as.model.jwk.JSONWebKey;
-import io.jans.as.model.jwk.JSONWebKeySet;
-import io.jans.as.model.jwk.KeyType;
-import io.jans.as.model.jwk.Use;
-import io.jans.as.model.util.SecurityProviderUtility;
-import io.jans.as.model.util.StringUtils;
-import io.jans.util.StringHelper;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.List;
+
+import static io.jans.as.model.jwk.JWKParameter.CERTIFICATE_CHAIN;
+import static io.jans.as.model.jwk.JWKParameter.EXPIRATION_TIME;
+import static io.jans.as.model.jwk.JWKParameter.EXPONENT;
+import static io.jans.as.model.jwk.JWKParameter.KEY_ID;
+import static io.jans.as.model.jwk.JWKParameter.MODULUS;
+import static io.jans.as.model.jwk.JWKParameter.X;
+import static io.jans.as.model.jwk.JWKParameter.Y;
 
 /**
  * Command example:
@@ -84,7 +83,7 @@ public class KeyGenerator {
 
     public static class Cli {
         private String[] args = null;
-        private Options options = new Options();
+        private final Options options = new Options();
 
         public Cli(String[] args) {
             this.args = args;
@@ -175,60 +174,60 @@ public class KeyGenerator {
             }
         }
 
-		private void generateKeys(AbstractCryptoProvider cryptoProvider, List<Algorithm> signatureAlgorithms,
-				List<Algorithm> encryptionAlgorithms, int expiration, int expiration_hours) throws Exception, JSONException {
-			JSONWebKeySet jwks = new JSONWebKeySet();
+        private void generateKeys(AbstractCryptoProvider cryptoProvider, List<Algorithm> signatureAlgorithms,
+                                  List<Algorithm> encryptionAlgorithms, int expiration, int expiration_hours) throws Exception {
+            JSONWebKeySet jwks = new JSONWebKeySet();
 
-			Calendar calendar = new GregorianCalendar();
-			calendar.add(Calendar.DATE, expiration);
-			calendar.add(Calendar.HOUR, expiration_hours);
+            Calendar calendar = new GregorianCalendar();
+            calendar.add(Calendar.DATE, expiration);
+            calendar.add(Calendar.HOUR, expiration_hours);
 
-			for (Algorithm algorithm : signatureAlgorithms) {
-				SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(algorithm.name());
-				JSONObject result = cryptoProvider.generateKey(algorithm, calendar.getTimeInMillis(), Use.SIGNATURE);
+            for (Algorithm algorithm : signatureAlgorithms) {
+                SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(algorithm.name());
+                JSONObject result = cryptoProvider.generateKey(algorithm, calendar.getTimeInMillis(), Use.SIGNATURE);
 
-				JSONWebKey key = new JSONWebKey();
-				key.setKid(result.getString(KEY_ID));
-				key.setUse(Use.SIGNATURE);
-				key.setAlg(algorithm);
-				key.setKty(KeyType.fromString(signatureAlgorithm.getFamily().toString()));
-				key.setExp(result.optLong(EXPIRATION_TIME));
-				key.setCrv(signatureAlgorithm.getCurve());
-				key.setN(result.optString(MODULUS));
-				key.setE(result.optString(EXPONENT));
-				key.setX(result.optString(X));
-				key.setY(result.optString(Y));
+                JSONWebKey key = new JSONWebKey();
+                key.setKid(result.getString(KEY_ID));
+                key.setUse(Use.SIGNATURE);
+                key.setAlg(algorithm);
+                key.setKty(KeyType.fromString(signatureAlgorithm.getFamily().toString()));
+                key.setExp(result.optLong(EXPIRATION_TIME));
+                key.setCrv(signatureAlgorithm.getCurve());
+                key.setN(result.optString(MODULUS));
+                key.setE(result.optString(EXPONENT));
+                key.setX(result.optString(X));
+                key.setY(result.optString(Y));
 
-				JSONArray x5c = result.optJSONArray(CERTIFICATE_CHAIN);
-				key.setX5c(StringUtils.toList(x5c));
+                JSONArray x5c = result.optJSONArray(CERTIFICATE_CHAIN);
+                key.setX5c(StringUtils.toList(x5c));
 
-				jwks.getKeys().add(key);
-			}
+                jwks.getKeys().add(key);
+            }
 
-			for (Algorithm algorithm : encryptionAlgorithms) {
-			    KeyEncryptionAlgorithm encryptionAlgorithm = KeyEncryptionAlgorithm.fromName(algorithm.getParamName());
-			    JSONObject result = cryptoProvider.generateKey(algorithm,
-			            calendar.getTimeInMillis(), Use.ENCRYPTION);
+            for (Algorithm algorithm : encryptionAlgorithms) {
+                KeyEncryptionAlgorithm encryptionAlgorithm = KeyEncryptionAlgorithm.fromName(algorithm.getParamName());
+                JSONObject result = cryptoProvider.generateKey(algorithm,
+                        calendar.getTimeInMillis(), Use.ENCRYPTION);
 
-			    JSONWebKey key = new JSONWebKey();
-			    key.setKid(result.getString(KEY_ID));
-			    key.setUse(Use.ENCRYPTION);
-			    key.setAlg(algorithm);
-			    key.setKty(KeyType.fromString(encryptionAlgorithm.getFamily()));
-			    key.setExp(result.optLong(EXPIRATION_TIME));
-			    key.setN(result.optString(MODULUS));
-			    key.setE(result.optString(EXPONENT));
-			    key.setX(result.optString(X));
-			    key.setY(result.optString(Y));
+                JSONWebKey key = new JSONWebKey();
+                key.setKid(result.getString(KEY_ID));
+                key.setUse(Use.ENCRYPTION);
+                key.setAlg(algorithm);
+                key.setKty(KeyType.fromString(encryptionAlgorithm.getFamily()));
+                key.setExp(result.optLong(EXPIRATION_TIME));
+                key.setN(result.optString(MODULUS));
+                key.setE(result.optString(EXPONENT));
+                key.setX(result.optString(X));
+                key.setY(result.optString(Y));
 
-			    JSONArray x5c = result.optJSONArray(CERTIFICATE_CHAIN);
-			    key.setX5c(StringUtils.toList(x5c));
+                JSONArray x5c = result.optJSONArray(CERTIFICATE_CHAIN);
+                key.setX5c(StringUtils.toList(x5c));
 
-			    jwks.getKeys().add(key);
-			}
+                jwks.getKeys().add(key);
+            }
 
-			System.out.println(jwks);
-		}
+            System.out.println(jwks);
+        }
 
         private void help() {
             HelpFormatter formatter = new HelpFormatter();

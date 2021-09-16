@@ -6,19 +6,17 @@
 
 package io.jans.as.client.json;
 
-import static org.testng.Assert.assertEquals;
-
-import java.util.HashMap;
-import java.util.Map;
-
+import com.google.common.collect.Lists;
+import io.jans.as.client.RegisterRequest;
+import io.jans.as.model.json.JsonApplier;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.testng.annotations.Test;
 
-import com.google.common.collect.Lists;
+import java.util.HashMap;
+import java.util.Map;
 
-import io.jans.as.client.RegisterRequest;
-import io.jans.as.model.json.JsonApplier;
+import static org.testng.Assert.assertEquals;
 
 /**
  * @author Yuriy Zabrovarnyy

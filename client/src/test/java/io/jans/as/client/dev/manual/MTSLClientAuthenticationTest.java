@@ -46,7 +46,7 @@ public class MTSLClientAuthenticationTest {
         KeyStore ts = KeyStore.getInstance("JKS", "SUN");
         ts.load(new FileInputStream(jdkJks), "secret".toCharArray());
 // if you remove me, you've got 'javax.net.ssl.SSLPeerUnverifiedException: peer not authenticated' on missing truststore
-        if(0 == ts.size()) throw new IOException("Error loading truststore");
+        if (0 == ts.size()) throw new IOException("Error loading truststore");
 // tmf
         TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
         tmf.init(ts);
@@ -54,7 +54,7 @@ public class MTSLClientAuthenticationTest {
         KeyStore ks = KeyStore.getInstance("PKCS12", "SunJSSE");
         ks.load(new FileInputStream(certificate), "".toCharArray());
 // if you remove me, you've got 'javax.net.ssl.SSLPeerUnverifiedException: peer not authenticated' on missing keystore
-        if(0 == ks.size()) throw new IOException("Error loading keystore");
+        if (0 == ks.size()) throw new IOException("Error loading keystore");
 // kmf
         KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
         kmf.init(ks, "".toCharArray());

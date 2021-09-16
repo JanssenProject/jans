@@ -6,7 +6,11 @@
 
 package io.jans.as.client.ws.rs.jarm;
 
-import io.jans.as.client.*;
+import io.jans.as.client.BaseTest;
+import io.jans.as.client.OpenIdConfigurationClient;
+import io.jans.as.client.OpenIdConfigurationResponse;
+import io.jans.as.client.OpenIdConnectDiscoveryClient;
+import io.jans.as.client.OpenIdConnectDiscoveryResponse;
 import io.jans.as.client.dev.HostnameVerifierType;
 import io.jans.as.model.common.ResponseMode;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -14,7 +18,9 @@ import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author Javier Rojas Blum

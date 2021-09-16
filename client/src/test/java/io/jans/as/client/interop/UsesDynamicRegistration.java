@@ -6,14 +6,6 @@
 
 package io.jans.as.client.interop;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-
-import java.util.Arrays;
-
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-
 import io.jans.as.client.BaseTest;
 import io.jans.as.client.RegisterClient;
 import io.jans.as.client.RegisterRequest;
@@ -23,6 +15,13 @@ import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.StringUtils;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
+import java.util.Arrays;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 /**
  * OC5:FeatureTest-Uses Dynamic Registration
@@ -34,7 +33,7 @@ public class UsesDynamicRegistration extends BaseTest {
     @Parameters({"redirectUris", "sectorIdentifierUri", "clientJwksUri"})
     @Test
     public void usesDynamicRegistration(final String redirectUris, final String sectorIdentifierUri,
-                                           final String clientJwksUri) throws Exception {
+                                        final String clientJwksUri) throws Exception {
         showTitle("OC5:FeatureTest-Uses Dynamic Registration");
 
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",

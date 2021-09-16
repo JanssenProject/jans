@@ -6,14 +6,6 @@
 
 package io.jans.as.client.ws.rs;
 
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-
-import org.jboss.resteasy.client.ClientExecutor;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-
 import io.jans.as.client.BaseRequest;
 import io.jans.as.client.BaseTest;
 import io.jans.as.client.service.ClientFactory;
@@ -22,6 +14,13 @@ import io.jans.as.client.uma.wrapper.UmaClient;
 import io.jans.as.model.common.IntrospectionResponse;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.uma.wrapper.Token;
+import org.jboss.resteasy.client.ClientExecutor;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author Yuriy Zabrovarnyy

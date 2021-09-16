@@ -6,15 +6,7 @@
 
 package io.jans.as.client.ciba.fcm;
 
-import static io.jans.as.model.ciba.FirebaseCloudMessagingResponseParam.FAILURE;
-import static io.jans.as.model.ciba.FirebaseCloudMessagingResponseParam.MESSAGE_ID;
-import static io.jans.as.model.ciba.FirebaseCloudMessagingResponseParam.MULTICAST_ID;
-import static io.jans.as.model.ciba.FirebaseCloudMessagingResponseParam.RESULTS;
-import static io.jans.as.model.ciba.FirebaseCloudMessagingResponseParam.SUCCESS;
-
-import java.util.ArrayList;
-import java.util.List;
-
+import io.jans.as.client.BaseResponse;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.jboss.resteasy.client.ClientResponse;
@@ -22,7 +14,14 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import io.jans.as.client.BaseResponse;
+import java.util.ArrayList;
+import java.util.List;
+
+import static io.jans.as.model.ciba.FirebaseCloudMessagingResponseParam.FAILURE;
+import static io.jans.as.model.ciba.FirebaseCloudMessagingResponseParam.MESSAGE_ID;
+import static io.jans.as.model.ciba.FirebaseCloudMessagingResponseParam.MULTICAST_ID;
+import static io.jans.as.model.ciba.FirebaseCloudMessagingResponseParam.RESULTS;
+import static io.jans.as.model.ciba.FirebaseCloudMessagingResponseParam.SUCCESS;
 
 /**
  * @author Javier Rojas Blum
@@ -80,7 +79,7 @@ public class FirebaseCloudMessagingResponse extends BaseResponse {
     }
 
     class Result {
-        private String messageId;
+        private final String messageId;
 
         public Result(String messageId) {
             this.messageId = messageId;

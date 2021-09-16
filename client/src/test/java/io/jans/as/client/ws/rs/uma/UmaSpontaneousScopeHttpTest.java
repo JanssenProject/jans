@@ -43,9 +43,8 @@ import static org.testng.Assert.assertNotNull;
  */
 public class UmaSpontaneousScopeHttpTest extends BaseTest {
 
-    private static final String REDIRECT_URI = "https://cb.example.com";
     public static final String USER_2_SCOPE = "/user/2";
-
+    private static final String REDIRECT_URI = "https://cb.example.com";
     private UmaMetadata metadata;
 
     private RegisterResourceFlowHttpTest registerResourceTest;

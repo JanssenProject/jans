@@ -5,7 +5,13 @@
  */
 package io.jans.as.client.ws.rs.jarm;
 
-import io.jans.as.client.*;
+import io.jans.as.client.AuthorizationRequest;
+import io.jans.as.client.AuthorizationResponse;
+import io.jans.as.client.BaseTest;
+import io.jans.as.client.RegisterResponse;
+import io.jans.as.client.UserInfoClient;
+import io.jans.as.client.UserInfoRequest;
+import io.jans.as.client.UserInfoResponse;
 import io.jans.as.client.model.authorize.Claim;
 import io.jans.as.client.model.authorize.ClaimValue;
 import io.jans.as.client.model.authorize.JwtAuthorizationRequest;

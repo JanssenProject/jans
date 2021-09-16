@@ -6,15 +6,14 @@
 
 package io.jans.as.client.uma;
 
+import io.jans.as.client.service.ClientFactory;
+import io.jans.as.model.uma.UmaMetadata;
 import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
 import org.jboss.resteasy.specimpl.ResteasyUriBuilder;
-
-import io.jans.as.client.service.ClientFactory;
-import io.jans.as.model.uma.UmaMetadata;
 
 /**
  * Helper class which creates proxied UMA services
@@ -26,7 +25,7 @@ public class UmaClientFactory {
 
     private final static UmaClientFactory instance = new UmaClientFactory();
 
-    private ApacheHttpClient4Engine engine;
+    private final ApacheHttpClient4Engine engine;
 
     private UmaClientFactory() {
         this.engine = ClientFactory.instance().createEngine(true);
