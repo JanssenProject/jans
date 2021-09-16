@@ -7,6 +7,7 @@ import socket
 import ldap3
 import urllib.request
 import base64
+import shutil
 
 from setup_app import paths
 from setup_app import static
@@ -31,11 +32,12 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         self.install_var = 'loadTestData'
         self.register_progess()
         self.template_base = os.path.join(Config.templateFolder, 'test')
-
+        
     def create_test_client_keystore(self):
         self.logIt("Creating client_keystore.jks")
         client_keystore_fn = os.path.join(Config.outputFolder, 'test/jans-auth/client/client_keystore.jks')
         keys_json_fn =  os.path.join(Config.outputFolder, 'test/jans-auth/client/keys_client_keystore.json')
+        keys_props_fn = os.path.join(Config.outputFolder, 'test/jans-auth/client/keys_client_keystore.properties')
 
         args = [Config.cmd_keytool, '-genkey', '-alias', 'dummy', '-keystore', 
                     client_keystore_fn, '-storepass', 'secret', '-keypass', 
@@ -49,10 +51,12 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                 '-cp', Config.non_setup_properties['oxauth_client_jar_fn'], Config.non_setup_properties['key_gen_path'],
                 '-keystore', client_keystore_fn,
                 '-keypasswd', 'secret',
-                '-sig_keys', Config.default_key_algs,
-                '-enc_keys', Config.default_key_algs,
+                '-sig_keys', Config.default_sig_key_algs,
+                '-enc_keys', Config.default_enc_key_algs,
                 '-dnname', "'{}'".format(Config.default_openid_jks_dn_name),
-                '-expiration', '365','>', keys_json_fn]
+                '-expiration', '365',
+                '-test_prop_file', keys_props_fn,
+                '>', keys_json_fn]
 
         cmd = ' '.join(args)
 
@@ -60,6 +64,17 @@ class TestDataLoader(BaseInstaller, SetupUtils):
 
         self.copyFile(client_keystore_fn, os.path.join(Config.outputFolder, 'test/jans-auth/server'))
         self.copyFile(keys_json_fn, os.path.join(Config.outputFolder, 'test/jans-auth/server'))
+        self.copyFile(keys_props_fn, os.path.join(Config.outputFolder, 'test/jans-auth/server'))
+
+        apache_user = 'www-data' if base.clone_type == 'deb' else 'apache'
+
+        www_keys_dir='/var/www/html/jans-auth-client/test/resources'
+        
+        self.createDirs(www_keys_dir)
+
+        shutil.copyfile(keys_json_fn, os.path.join(www_keys_dir, 'jwks.json'))
+        self.run([paths.cmd_chown, '-R', 'root:'+apache_user, '/var/www/html/jans-auth-client'])
+        self.run([paths.cmd_chmod, '-R', '0770', '/var/www/html/jans-auth-client'])
 
     def load_test_data(self):
         Config.pbar.progress(self.service_name, "Loading Test Data", False)
@@ -190,12 +205,6 @@ class TestDataLoader(BaseInstaller, SetupUtils):
 
         apache_user = 'www-data' if base.clone_type == 'deb' else 'apache'
 
-        # Client keys deployment
-        base.download('https://raw.githubusercontent.com/JanssenProject/jans-auth-server/master/client/src/test/resources/jans_test_client_keys.zip', '/var/www/html/jans_test_client_keys.zip')
-        self.run([paths.cmd_unzip, '-o', '/var/www/html/jans_test_client_keys.zip', '-d', '/var/www/html/'])
-        self.run([paths.cmd_rm, '-rf', 'jans_test_client_keys.zip'])
-        self.run([paths.cmd_chown, '-R', 'root:'+apache_user, '/var/www/html/jans-auth-client'])
-
         Config.pbar.progress(self.service_name, "Updating oxauth config", False)
         oxAuthConfDynamic_changes = {
                                     'dynamicRegistrationCustomObjectClass':  'jansClntCustomAttributes',
@@ -211,16 +220,26 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                                     'dynamicRegistrationPasswordGrantTypeEnabled' : True,
                                     'cibaEnabled': True,
                                     'backchannelTokenDeliveryModesSupported': ["poll", "ping", "push"],
-                                    'backchannelAuthenticationRequestSigningAlgValuesSupported': [ "RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "PS256", "PS384", "PS512" ],
+                                    'jwksAlgorithmsSupported':[ "RS256", "RS384", "RS512", "ES256", "ES256K", "ES384", "ES512", "PS256", "PS384", "PS512", "RSA1_5", "RSA-OAEP", "Ed25519", "Ed448", "ECDH-ES", "ECDH-ES+A128KW", "ECDH-ES+A192KW", "ECDH-ES+A256KW" ],
+                                    'authorizationSigningAlgValuesSupported':[ "none", "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "ES256", "ES256K", "ES384", "ES512", "ES512", "PS256", "PS384", "PS512", "Ed25519", "Ed448" ],
+                                    'authorizationEncryptionAlgValuesSupported':[ "RSA1_5", "RSA-OAEP", "A128KW", "A256KW", "RSA-OEAP-256", "ECDH-ES", "ECDH-ES+A128KW", "ECDH-ES+A192KW", "ECDH-ES+A256KW", "A192KW", "A128GCMKW", "A192GCMKW", "A256GCMKW", "PBES2-HS256+A128KW", "PBES2-HS384+A192KW", "PBES2-HS512+A256KW","dir" ],
+                                    'authorizationEncryptionEncValuesSupported':[ "A128CBC+HS256", "A256CBC+HS512", "A128CBC-HS256", "A192CBC-HS384", "A256CBC-HS512", "A128GCM", "A192GCM", "A256GCM" ],
+                                    'backchannelAuthenticationRequestSigningAlgValuesSupported': [ "none", "RS256", "RS384", "RS512", "ES256", "ES256K", "ES384", "ES512", "PS256", "PS384", "PS512", "Ed25519", "Ed448" ],
                                     'backchannelClientId': '123-123-123',
                                     'backchannelUserCodeParameterSupported': True,
-                                    'tokenEndpointAuthSigningAlgValuesSupported': [ 'HS256', 'HS384', 'HS512', 'RS256', 'RS384', 'RS512', 'ES256', 'ES384', 'ES512', 'PS256', 'PS384', 'PS512' ],
-                                    'userInfoSigningAlgValuesSupported': [ 'none', 'HS256', 'HS384', 'HS512', 'RS256', 'RS384', 'RS512', 'ES256', 'ES384', 'ES512', 'PS256', 'PS384', 'PS512' ],
+                                    'tokenEndpointAuthSigningAlgValuesSupported':[ "none", "HS256", "HS384", "HS512", "RS256","RS384", "RS512", "ES256", "ES256K", "ES384", "ES512", "PS256", "PS384", "PS512", "Ed25519", "Ed448" ],
+                                    'userInfoSigningAlgValuesSupported':[ "HS256", "none", "HS384", "HS512", "RS256", "RS384", "RS512", "ES256", "ES256K", "ES384", "ES512", "PS256", "PS384", "PS512", "Ed25519", "Ed448" ],
+                                    'userInfoEncryptionAlgValuesSupported':[ "RSA1_5", "RSA-OAEP", "A128KW", "A256KW", "RSA-OEAP-256", "ECDH-ES", "ECDH-ES+A128KW", "ECDH-ES+A192KW", "ECDH-ES+A256KW", "A192KW", "A128GCMKW", "A192GCMKW", "A256GCMKW", "PBES2-HS256+A128KW", "PBES2-HS384+A192KW", "PBES2-HS512+A256KW","dir"  ],
+                                    'userInfoEncryptionEncValuesSupported':[ "A128CBC+HS256", "A256CBC+HS512", "A128CBC-HS256", "A192CBC-HS384", "A256CBC-HS512", "A128GCM", "A192GCM", "A256GCM" ],
                                     'consentGatheringScriptBackwardCompatibility': False,
                                     'claimsParameterSupported': True,
                                     'grantTypesSupported': [ 'urn:openid:params:grant-type:ciba', 'authorization_code', 'urn:ietf:params:oauth:grant-type:uma-ticket', 'urn:ietf:params:oauth:grant-type:device_code', 'client_credentials', 'implicit', 'refresh_token', 'password' ],
-                                    'idTokenSigningAlgValuesSupported': [ 'none', 'HS256', 'HS384', 'HS512', 'RS256', 'RS384', 'RS512', 'ES256', 'ES384', 'ES512', 'PS256', 'PS384', 'PS512' ],
-                                    'requestObjectSigningAlgValuesSupported': [ 'none', 'HS256', 'HS384', 'HS512', 'RS256', 'RS384', 'RS512', 'ES256', 'ES384', 'ES512', 'PS256', 'PS384', 'PS512' ],
+                                    'idTokenSigningAlgValuesSupported':[ "none", "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "ES256", "ES256K", "ES384", "ES512", "PS256", "PS384", "PS512", "Ed25519", "Ed448" ],
+                                    'idTokenEncryptionAlgValuesSupported':[ "RSA1_5", "RSA-OAEP", "A128KW", "A256KW", "RSA-OEAP-256", "ECDH-ES", "ECDH-ES+A128KW", "ECDH-ES+A192KW", "ECDH-ES+A256KW", "A192KW", "A128GCMKW", "A192GCMKW", "A256GCMKW", "PBES2-HS256+A128KW", "PBES2-HS384+A192KW", "PBES2-HS512+A256KW","dir" ],
+                                    'idTokenEncryptionEncValuesSupported':[ "A128CBC+HS256", "A256CBC+HS512", "A128CBC-HS256", "A192CBC-HS384", "A256CBC-HS512", "A128GCM", "A192GCM", "A256GCM" ],
+                                    'requestObjectSigningAlgValuesSupported':[ "none", "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "ES256", "ES256K", "ES384", "ES512", "PS256", "PS384", "PS512", "Ed25519", "Ed448" ],
+                                    'requestObjectEncryptionAlgValuesSupported':[ "RSA1_5", "RSA-OAEP", "A128KW", "A256KW", "RSA-OEAP-256", "ECDH-ES", "ECDH-ES+A128KW", "ECDH-ES+A192KW", "ECDH-ES+A256KW", "A192KW", "A128GCMKW", "A192GCMKW", "A256GCMKW", "PBES2-HS256+A128KW", "PBES2-HS384+A192KW", "PBES2-HS512+A256KW","dir" ],
+                                    'requestObjectEncryptionEncValuesSupported':[ "A128CBC+HS256", "A256CBC+HS512", "A128CBC-HS256", "A192CBC-HS384", "A256CBC-HS512", "A128GCM", "A192GCM", "A256GCM" ],
                                     'softwareStatementValidationClaimName': 'jwks_uri',
                                     'softwareStatementValidationType': 'jwks_uri',
                                     'umaGrantAccessIfNoPolicies': True,
