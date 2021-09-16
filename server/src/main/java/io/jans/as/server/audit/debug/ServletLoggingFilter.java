@@ -6,10 +6,17 @@
 
 package io.jans.as.server.audit.debug;
 
-import java.io.IOException;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.Set;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.server.audit.debug.entity.HttpRequest;
+import io.jans.as.server.audit.debug.entity.HttpResponse;
+import io.jans.as.server.audit.debug.wrapper.RequestWrapper;
+import io.jans.as.server.audit.debug.wrapper.ResponseWrapper;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.BooleanUtils;
+import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import javax.servlet.Filter;
@@ -21,20 +28,10 @@ import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.BooleanUtils;
-import org.slf4j.Logger;
-
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.server.audit.debug.entity.HttpRequest;
-import io.jans.as.server.audit.debug.entity.HttpResponse;
-import io.jans.as.server.audit.debug.wrapper.RequestWrapper;
-import io.jans.as.server.audit.debug.wrapper.ResponseWrapper;
+import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Set;
 
 /**
  * Created by eugeniuparvan on 5/10/17.
@@ -62,8 +59,8 @@ public class ServletLoggingFilter implements Filter {
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-    	Instant start = now(); 
-    			
+        Instant start = now();
+
         if (!(request instanceof HttpServletRequest) || !(response instanceof HttpServletResponse)) {
             throw new ServletException("LoggingFilter just supports HTTP requests");
         }
@@ -89,14 +86,14 @@ public class ServletLoggingFilter implements Filter {
         ResponseWrapper responseWrapper = new ResponseWrapper(httpResponse);
 
         chain.doFilter(httpRequest, httpResponse);
-        
+
         Duration duration = duration(start);
 
         // yuriyz: log request and response only after filter handling.
         // #914 - we don't want to effect server functionality due to logging. Currently content can be messed if it is InputStream.
         if (log.isDebugEnabled()) {
-	        log.debug(getRequestDescription(requestWrapper, duration));
-	        log.debug(getResponseDescription(responseWrapper));
+            log.debug(getRequestDescription(requestWrapper, duration));
+            log.debug(getResponseDescription(responseWrapper));
         }
     }
 

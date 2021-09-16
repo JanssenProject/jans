@@ -16,7 +16,7 @@ public enum PolicyExternalAuthorizationEnum implements IPolicyExternalAuthorizat
 
     private final boolean m_result;
 
-    private PolicyExternalAuthorizationEnum(boolean p_result) {
+    PolicyExternalAuthorizationEnum(boolean p_result) {
         m_result = p_result;
     }
 

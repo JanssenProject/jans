@@ -45,12 +45,11 @@ import static org.testng.Assert.fail;
 @RunAsClient
 public class EndSessionBackchannelRestServerTest extends BaseTest {
 
-    @ArquillianResource
-    private URI url;
-
     private static io.jans.as.client.RegisterResponse registerResponse;
     private static String idToken;
     private static String sid;
+    @ArquillianResource
+    private URI url;
 
     @Parameters({"redirectUris", "postLogoutRedirectUri"})
     @Test

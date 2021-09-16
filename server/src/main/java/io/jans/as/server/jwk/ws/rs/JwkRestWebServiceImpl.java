@@ -56,6 +56,7 @@ public class JwkRestWebServiceImpl implements JwkRestWebService {
     /**
      * Method responsible to filter keys and return a new list of keys with all
      * algorithms that it is inside Json config attribute called "jwksAlgorithmsSupported"
+     *
      * @param allKeys All keys that should be filtered
      * @return Filtered list
      */

@@ -46,11 +46,10 @@ import static org.testng.Assert.fail;
  */
 public class TokenRestWebServiceEmbeddedTest extends BaseTest {
 
-    @ArquillianResource
-    private URI url;
-
     private static String clientId;
     private static String clientSecret;
+    @ArquillianResource
+    private URI url;
 
     @Parameters({"registerPath", "redirectUris"})
     @Test

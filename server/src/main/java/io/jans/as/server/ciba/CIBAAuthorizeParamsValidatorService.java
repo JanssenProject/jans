@@ -6,27 +6,25 @@
 
 package io.jans.as.server.ciba;
 
-import static io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType.INVALID_BINDING_MESSAGE;
-import static io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType.INVALID_REQUEST;
-import static io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType.INVALID_SCOPE;
-import static io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType.INVALID_USER_CODE;
-import static io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType.UNAUTHORIZED_CLIENT;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Pattern;
+import io.jans.as.model.common.BackchannelTokenDeliveryMode;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.error.DefaultErrorResponse;
+import org.apache.commons.lang.BooleanUtils;
+import org.apache.logging.log4j.util.Strings;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.core.Response;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Pattern;
 
-import org.apache.commons.lang.BooleanUtils;
-import org.apache.logging.log4j.util.Strings;
-
-import io.jans.as.model.common.BackchannelTokenDeliveryMode;
-import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.model.error.DefaultErrorResponse;
+import static io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType.INVALID_BINDING_MESSAGE;
+import static io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType.INVALID_REQUEST;
+import static io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType.INVALID_SCOPE;
+import static io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType.INVALID_USER_CODE;
+import static io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType.UNAUTHORIZED_CLIENT;
 
 /**
  * @author Javier Rojas Blum
@@ -86,7 +84,7 @@ public class CIBAAuthorizeParamsValidatorService {
             }
         }
 
-        if(Strings.isNotBlank(bindingMessage)) {
+        if (Strings.isNotBlank(bindingMessage)) {
             final Pattern pattern = Pattern.compile(appConfiguration.getBackchannelBindingMessagePattern());
             if (!pattern.matcher(bindingMessage).matches()) {
                 DefaultErrorResponse errorResponse = new DefaultErrorResponse();

@@ -6,12 +6,12 @@
 
 package io.jans.as.server.model.fido.u2f;
 
-import java.io.Serializable;
-import java.util.Date;
-
 import io.jans.as.model.fido.u2f.protocol.RegisterRequestMessage;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.JsonObject;
+
+import java.io.Serializable;
+import java.util.Date;
 
 /**
  * U2F registration requests

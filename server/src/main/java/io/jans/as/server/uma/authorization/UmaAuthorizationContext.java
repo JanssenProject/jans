@@ -6,17 +6,8 @@
 
 package io.jans.as.server.uma.authorization;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.servlet.http.HttpServletRequest;
-
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.AttributeService;
@@ -31,6 +22,13 @@ import io.jans.as.server.uma.service.RedirectParameters;
 import io.jans.as.server.uma.service.UmaPermissionService;
 import io.jans.as.server.uma.service.UmaSessionService;
 import io.jans.model.SimpleCustomProperty;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -58,10 +56,10 @@ public class UmaAuthorizationContext extends ExternalScriptContext {
                                    Set<UmaResource> resources, Claims claims, String scriptDn, HttpServletRequest httpRequest,
                                    Map<String, SimpleCustomProperty> configurationAttributes, UmaSessionService sessionService,
                                    UserService userService, UmaPermissionService permissionService, Client client) {
-    	super(httpRequest);
+        super(httpRequest);
 
         this.configuration = configuration;
-    	this.attributeService = attributeService;
+        this.attributeService = attributeService;
         this.sessionService = sessionService;
         this.userService = userService;
         this.permissionService = permissionService;

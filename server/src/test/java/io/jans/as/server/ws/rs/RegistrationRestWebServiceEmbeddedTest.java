@@ -59,11 +59,33 @@ import static org.testng.Assert.fail;
  */
 public class RegistrationRestWebServiceEmbeddedTest extends BaseTest {
 
+    private static String registrationAccessToken1;
+    private static String registrationClientUri1;
     @ArquillianResource
     private URI url;
 
-    private static String registrationAccessToken1;
-    private static String registrationClientUri1;
+    public static void readResponseAssert(Response response, String entity) {
+        assertEquals(response.getStatus(), 200, "Unexpected response code. " + entity);
+        assertNotNull(entity, "Unexpected result: " + entity);
+        try {
+            JSONObject jsonObj = new JSONObject(entity);
+            assertTrue(jsonObj.has(RegisterResponseParam.CLIENT_ID.toString()));
+            assertTrue(jsonObj.has(CLIENT_SECRET.toString()));
+            assertTrue(jsonObj.has(CLIENT_ID_ISSUED_AT.toString()));
+            assertTrue(jsonObj.has(CLIENT_SECRET_EXPIRES_AT.toString()));
+
+            // Registered Metadata
+            assertTrue(jsonObj.has(REDIRECT_URIS.toString()));
+            assertTrue(jsonObj.has(CLAIMS_REDIRECT_URIS.toString()));
+            assertTrue(jsonObj.has(APPLICATION_TYPE.toString()));
+            assertTrue(jsonObj.has(CLIENT_NAME.toString()));
+            assertTrue(jsonObj.has(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+            assertTrue(jsonObj.has(SCOPE.toString()));
+        } catch (JSONException e) {
+            e.printStackTrace();
+            fail(e.getMessage() + "\nResponse was: " + entity);
+        }
+    }
 
     @Parameters({"registerPath", "redirectUris"})
     @Test
@@ -175,29 +197,6 @@ public class RegistrationRestWebServiceEmbeddedTest extends BaseTest {
 
         showResponse("requestClientRead", response, entity);
         readResponseAssert(response, entity);
-    }
-
-    public static void readResponseAssert(Response response, String entity) {
-        assertEquals(response.getStatus(), 200, "Unexpected response code. " + entity);
-        assertNotNull(entity, "Unexpected result: " + entity);
-        try {
-            JSONObject jsonObj = new JSONObject(entity);
-            assertTrue(jsonObj.has(RegisterResponseParam.CLIENT_ID.toString()));
-            assertTrue(jsonObj.has(CLIENT_SECRET.toString()));
-            assertTrue(jsonObj.has(CLIENT_ID_ISSUED_AT.toString()));
-            assertTrue(jsonObj.has(CLIENT_SECRET_EXPIRES_AT.toString()));
-
-            // Registered Metadata
-            assertTrue(jsonObj.has(REDIRECT_URIS.toString()));
-            assertTrue(jsonObj.has(CLAIMS_REDIRECT_URIS.toString()));
-            assertTrue(jsonObj.has(APPLICATION_TYPE.toString()));
-            assertTrue(jsonObj.has(CLIENT_NAME.toString()));
-            assertTrue(jsonObj.has(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-            assertTrue(jsonObj.has(SCOPE.toString()));
-        } catch (JSONException e) {
-            e.printStackTrace();
-            fail(e.getMessage() + "\nResponse was: " + entity);
-        }
     }
 
     @Parameters({"registerPath", "redirectUris", "contactEmail1", "contactEmail2"})

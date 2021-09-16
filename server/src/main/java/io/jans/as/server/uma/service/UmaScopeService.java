@@ -6,19 +6,6 @@
 
 package io.jans.as.server.uma.service;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.ws.rs.core.Response;
-
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.common.InumService;
 import io.jans.as.model.common.ScopeType;
@@ -30,6 +17,17 @@ import io.jans.as.persistence.model.Scope;
 import io.jans.as.server.service.SpontaneousScopeService;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.search.filter.Filter;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.ws.rs.core.Response;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -60,6 +58,14 @@ public class UmaScopeService {
 
     @Inject
     private SpontaneousScopeService spontaneousScopeService;
+
+    public static String asString(Collection<Scope> scopes) {
+        String result = "";
+        for (Scope scope : scopes) {
+            result += scope.getId() + " ";
+        }
+        return result.trim();
+    }
 
     public Scope getOrCreate(Client client, String scopeId, Set<String> regExps) {
         Scope fromLdap = getScope(scopeId);
@@ -199,10 +205,10 @@ public class UmaScopeService {
 
     private Filter createAnyFilterByIds(List<String> scopeIds) {
         if (scopeIds != null && !scopeIds.isEmpty()) {
-        	List<Filter> filters = new ArrayList<Filter>();
+            List<Filter> filters = new ArrayList<Filter>();
             for (String url : scopeIds) {
-            	Filter filter = Filter.createEqualityFilter("jansId", url);
-            	filters.add(filter);
+                Filter filter = Filter.createEqualityFilter("jansId", url);
+                filters.add(filter);
             }
             Filter filter = Filter.createORFilter(filters.toArray(new Filter[0]));
             log.trace("Uma scope ids: " + scopeIds + ", ldapFilter: " + filter);
@@ -214,13 +220,5 @@ public class UmaScopeService {
 
     public String baseDn() {
         return staticConfiguration.getBaseDn().getScopes();
-    }
-
-    public static String asString(Collection<Scope> scopes) {
-        String result = "";
-        for (Scope scope : scopes) {
-            result += scope.getId() + " ";
-        }
-        return result.trim();
     }
 }
