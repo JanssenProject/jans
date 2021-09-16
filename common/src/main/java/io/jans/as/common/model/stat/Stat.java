@@ -1,11 +1,11 @@
 package io.jans.as.common.model.stat;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -20,7 +20,7 @@ public class Stat implements Serializable {
     @JsonProperty("month")
     private String month;
 
-    public Map<String, Map<String, Long>>  getTokenCountPerGrantType() {
+    public Map<String, Map<String, Long>> getTokenCountPerGrantType() {
         if (tokenCountPerGrantType == null) tokenCountPerGrantType = new HashMap<>();
         return tokenCountPerGrantType;
     }

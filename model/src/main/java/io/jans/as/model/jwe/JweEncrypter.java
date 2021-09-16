@@ -13,5 +13,5 @@ import io.jans.as.model.exception.InvalidJweException;
  */
 public interface JweEncrypter {
 
-    public Jwe encrypt(Jwe jwe) throws InvalidJweException;
+    Jwe encrypt(Jwe jwe) throws InvalidJweException;
 }

@@ -6,25 +6,24 @@
 
 package io.jans.as.model.util;
 
-import static org.testng.Assert.assertEquals;
-
-import java.security.Security;
-
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.testng.annotations.Test;
 
-import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import java.security.Security;
+
+import static org.testng.Assert.assertEquals;
 
 /**
  * @author Yuriy Zabrovarnyy
  */
 public class HashUtilTest {
 
+    private static final String INPUT = "a308bb8f-25b0-4b1f-85a6-778698a35a43";
+
     static {
         Security.addProvider(new BouncyCastleProvider());
     }
-
-    private static final String INPUT = "a308bb8f-25b0-4b1f-85a6-778698a35a43";
 
     @Test
     public void s256Hash() {

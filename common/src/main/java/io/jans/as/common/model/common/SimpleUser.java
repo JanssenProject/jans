@@ -6,11 +6,10 @@
 
 package io.jans.as.common.model.common;
 
-import java.util.List;
-
+import io.jans.as.model.exception.InvalidClaimException;
 import org.json.JSONArray;
 
-import io.jans.as.model.exception.InvalidClaimException;
+import java.util.List;
 
 /**
  * @author Javier Rojas Blum
