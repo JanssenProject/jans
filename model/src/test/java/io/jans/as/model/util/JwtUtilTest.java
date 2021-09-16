@@ -6,13 +6,12 @@
 
 package io.jans.as.model.util;
 
-import static org.testng.Assert.assertEquals;
-
+import io.jans.as.model.jwt.Jwt;
+import io.jans.as.model.jwt.JwtClaims;
 import org.json.JSONObject;
 import org.testng.annotations.Test;
 
-import io.jans.as.model.jwt.Jwt;
-import io.jans.as.model.jwt.JwtClaims;
+import static org.testng.Assert.assertEquals;
 
 /**
  * @author Yuriy Zabrovarnyy
