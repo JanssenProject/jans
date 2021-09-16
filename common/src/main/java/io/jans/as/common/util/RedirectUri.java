@@ -21,15 +21,25 @@ import io.jans.as.model.jwt.JwtType;
 import io.jans.as.model.util.Util;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.security.PublicKey;
-import java.util.*;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
 
-import static io.jans.as.model.authorize.AuthorizeResponseParam.*;
+import static io.jans.as.model.authorize.AuthorizeResponseParam.AUD;
+import static io.jans.as.model.authorize.AuthorizeResponseParam.EXP;
+import static io.jans.as.model.authorize.AuthorizeResponseParam.EXPIRES_IN;
+import static io.jans.as.model.authorize.AuthorizeResponseParam.ISS;
+import static io.jans.as.model.authorize.AuthorizeResponseParam.RESPONSE;
 
 /**
  * @author Javier Rojas Blum
@@ -91,6 +101,11 @@ public class RedirectUri {
         if (StringUtils.isNotBlank(key)) {
             responseParameters.put(key, value);
         }
+    }
+
+    @Nullable
+    public String getResponseParameter(@NotNull String key) {
+        return responseParameters.get(key);
     }
 
     public String getIssuer() {
