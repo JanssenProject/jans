@@ -48,30 +48,22 @@ class Crypto64:
             truststore_fn = Config.defaultTrustStoreFN
 
         self.run([paths.cmd_openssl,
-                  'genpkey',
+                  'genrsa',
+                  '-des3',
                   '-out',
                   key_with_password,
-                  '-algorithm',
-                  'EC',
-                  '-pkeyopt',
-                  'ec_paramgen_curve:P-384',
-                  '-aes256',
-                  '-pass',
-                  'pass:%s' % password
+                  '-passout',
+                  'pass:%s' % password,
+                  '2048'
                   ])
-
         self.run([paths.cmd_openssl,
-                  'ec',
+                  'rsa',
                   '-in',
                   key_with_password,
-                  '-inform',
-                  'PEM',
-                  '-out',
-                  key,
-                  '-outform',
-                  'PEM',
                   '-passin',
-                  'pass:%s' % password
+                  'pass:%s' % password,
+                  '-out',
+                  key
                   ])
 
         certCn = cn
@@ -86,15 +78,13 @@ class Crypto64:
                   '-out',
                   csr,
                   '-subj',
-                  '/C=%s/ST=%s/L=%s/O=%s/CN=%s/emailAddress=%s' % (Config.countryCode, Config.state, Config.city, Config.orgName, certCn, Config.admin_email),
-                  '-sha384'
+                  '/C=%s/ST=%s/L=%s/O=%s/CN=%s/emailAddress=%s' % (Config.countryCode, Config.state, Config.city, Config.orgName, certCn, Config.admin_email)
                   ])
         self.run([paths.cmd_openssl,
                   'x509',
                   '-req',
                   '-days',
                   '365',
-                  '-sha384',
                   '-in',
                   csr,
                   '-signkey',
@@ -102,7 +92,6 @@ class Crypto64:
                   '-out',
                   public_certificate
                   ])
-
         self.run([paths.cmd_chown, '%s:%s' % (user, user), key_with_password])
         self.run([paths.cmd_chmod, '700', key_with_password])
         self.run([paths.cmd_chown, '%s:%s' % (user, user), key])
