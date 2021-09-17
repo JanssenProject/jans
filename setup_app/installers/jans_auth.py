@@ -57,8 +57,8 @@ class JansAuthInstaller(JettyInstaller):
         Config.encoded_admin_password = self.ldap_encode(Config.admin_password)
 
         self.logIt("Generating OAuth openid keys", pbar=self.service_name)
-        sig_keys = 'RS256 RS384 RS512 ES256 ES256K ES384 ES512 PS256 PS384 PS512 Ed25519 Ed448'
-        enc_keys = 'RSA1_5 RSA-OAEP ECDH-ES ECDH-ES+A128KW ECDH-ES+A192KW ECDH-ES+A256KW'
+        sig_keys = 'RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512'
+        enc_keys = 'RSA1_5 RSA-OAEP'
         jwks = self.gen_openid_jwks_jks_keys(self.oxauth_openid_jks_fn, Config.oxauth_openid_jks_pass, key_expiration=2, key_algs=sig_keys, enc_keys=enc_keys)
         self.write_openid_keys(self.oxauth_openid_jwks_fn, jwks)
 
