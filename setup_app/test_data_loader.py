@@ -69,12 +69,14 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         apache_user = 'www-data' if base.clone_type == 'deb' else 'apache'
 
         www_keys_dir='/var/www/html/jans-auth-client/test/resources'
-        
-        self.createDirs(www_keys_dir)
+
+        try:
+            os.makedirs(www_keys_dir)
+        except Exception as ex:
+            self.logIt(ex, True, False)
 
         shutil.copyfile(keys_json_fn, os.path.join(www_keys_dir, 'jwks.json'))
-        self.run([paths.cmd_chown, '-R', 'root:'+apache_user, '/var/www/html/jans-auth-client'])
-        self.run([paths.cmd_chmod, '-R', '0770', '/var/www/html/jans-auth-client'])
+        self.run([paths.cmd_chown, '-R', 'root:'+apache_user, '/var/www/html/jans-auth-client'])        
 
     def load_test_data(self):
         Config.pbar.progress(self.service_name, "Loading Test Data", False)
