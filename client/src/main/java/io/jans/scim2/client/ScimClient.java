@@ -14,11 +14,17 @@ import io.jans.util.StringHelper;
 import io.jans.scim2.client.exception.ScimInitializationException;
 
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.Form;
+import javax.ws.rs.client.Invocation;
 import javax.ws.rs.core.Response;
 
 /**
@@ -78,7 +84,7 @@ public class ScimClient<T> extends AbstractScimClient<T> {
 
         super(serviceUrl, serviceClass);
         checkRequiredness(id, keyStorePassword, OIDCMetadataUrl);
-        
+
 		try {
 			cryptoProvider = new AuthCryptoProvider(keyStorePath.toString(), keyStorePassword, null);
 		} catch (Exception ex) {
@@ -113,30 +119,32 @@ public class ScimClient<T> extends AbstractScimClient<T> {
     }
     
     private void updateTokens() throws Exception {
-		access_token = getTokens().getAccessToken();
-		logger.debug("Got token: " + access_token);
-    }
 
-    private TokenResponse getTokens() throws Exception {
-
-        TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
-        tokenRequest.setAuthenticationMethod(tokenEndpointAuthnMethod);
-        tokenRequest.setScope(SCOPES);
-        tokenRequest.setAuthUsername(clientId);
+        WebTarget target = ClientBuilder.newClient().target(tokenEndpoint);
+        Form form = new Form().param("grant_type", "client_credentials").param("scope", SCOPES);
+        Invocation.Builder builder = target.request();
         
-        if (keyId == null) {
-            tokenRequest.setAuthPassword(password);
-        } else {
-            tokenRequest.setCryptoProvider(cryptoProvider);
-            tokenRequest.setAlgorithm(cryptoProvider.getSignatureAlgorithm(keyId));
-            tokenRequest.setKeyId(keyId);
-            tokenRequest.setAudience(tokenEndpoint);
+        if (tokenEndpointAuthnMethod.equals(AuthenticationMethod.CLIENT_SECRET_BASIC)) {
+            String authz = clientId + ":" + password;
+            authz = new String(Base64.getEncoder().encode(authz.getBytes("UTF-8")), StandardCharsets.UTF_8);
+
+            builder.header("Authorization", "Basic " + authz);
+            
+        } else if (tokenEndpointAuthnMethod.equals(AuthenticationMethod.CLIENT_SECRET_POST)) {
+            form.param("client_id", clientId).param("client_secret", password);            
+        } else
+            throw new ScimInitializationException("Authentication method " + tokenEndpointAuthnMethod + 
+                " not yet supported, please contact the project maintainer");
+
+        Response response = builder.post(Entity.form(form));
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            access_token = mapper.readTree(response.readEntity(String.class)).get("access_token").asText();
+        } finally {
+            response.close();
         }
-
-        TokenClient tokenClient = new TokenClient(tokenEndpoint);
-        tokenClient.setRequest(tokenRequest);
-        return tokenClient.exec();
-
+		logger.debug("Got token: " + access_token);
+		
     }
 
     /**
