@@ -4,13 +4,12 @@ import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
-import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
+import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
 
 import io.jans.scim2.client.rest.CloseableClient;
 import io.jans.scim2.client.rest.FreelyAccessible;
@@ -25,6 +24,7 @@ import java.util.Optional;
 
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.client.ClientBuilder;
 
 /**
  * The base class for specific SCIM clients.
@@ -57,35 +57,24 @@ public abstract class AbstractScimClient<T> implements CloseableClient, Invocati
 
     AbstractScimClient(String domain, Class<T> serviceClass) {
         /*
-         Configures a proxy to interact with the service using the new JAX-RS 2.0 Client API, see section
-         "Resteasy Proxy Framework" of RESTEasy JAX-RS user guide
+         Configures a proxy to interact with the service using the JAX-RS 2.0 Client API
          */
-        if (System.getProperty("httpclient.multithreaded") == null) {
-            client = new ResteasyClientBuilder().build();
-        } else {
-            PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
-            //Change defaults if supplied
-            getIntegerProperty("httpclient.multithreaded.maxtotal").ifPresent(cm::setMaxTotal);
-            getIntegerProperty("httpclient.multithreaded.maxperroute").ifPresent(cm::setDefaultMaxPerRoute);
-            getIntegerProperty("httpclient.multithreaded.validateafterinactivity").ifPresent(cm::setValidateAfterInactivity);
+        CloseableHttpClient httpClient = HttpClients.custom()
+                .setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
+                .build();
 
-            logger.debug("Using multithreaded support with maxTotalConnections={} and maxPerRoutConnections={}", cm.getMaxTotal(), cm.getDefaultMaxPerRoute());
-
-            CloseableHttpClient httpClient = HttpClients.custom()
-					.setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
-            		.setConnectionManager(cm).build();
-            ApacheHttpClient4Engine engine = new ApacheHttpClient4Engine(httpClient);
-
-            client = new ResteasyClientBuilder().httpEngine(engine).build();
-        }
+        ResteasyClientBuilder builder = (ResteasyClientBuilder) ClientBuilder.newBuilder();
+        //client = builder.httpEngine(new ApacheHttpClient43Engine(httpClient)).build();
+        client = (ResteasyClient) ClientBuilder.newClient();
         ResteasyWebTarget target = client.target(domain);
 
-        scimService = target.proxy(serviceClass);
         target.register(ListResponseProvider.class);
         target.register(AuthorizationInjectionFilter.class);
         target.register(ScimResourceProvider.class);
+        scimService = target.proxy(serviceClass);
 
         clientMap.update(client, null);
+
     }
 
     /*
