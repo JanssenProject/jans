@@ -64,8 +64,8 @@ public abstract class AbstractScimClient<T> implements CloseableClient, Invocati
                 .build();
 
         ResteasyClientBuilder builder = (ResteasyClientBuilder) ClientBuilder.newBuilder();
-        //client = builder.httpEngine(new ApacheHttpClient43Engine(httpClient)).build();
-        client = (ResteasyClient) ClientBuilder.newClient();
+        client = builder.httpEngine(new ApacheHttpClient43Engine(httpClient)).build();
+        //client = (ResteasyClient) ClientBuilder.newClient();
         ResteasyWebTarget target = client.target(domain);
 
         target.register(ListResponseProvider.class);
