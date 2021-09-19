@@ -18,7 +18,7 @@ info:
 
 host: jenkins-ldap.jans.io
 
-basePath: /scim/restv1/v2
+basePath: /jans-scim/restv1/v2
 schemes:
  - https
 
