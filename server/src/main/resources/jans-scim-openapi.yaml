@@ -9,7 +9,7 @@ info:
     url: https://github.com/JanssenProject/blob/master/LICENSE
   version: 5.0.0
 servers:
-- url: https://jenkins-ldap.jans.io/scim/restv1/v2
+- url: https://jenkins-ldap.jans.io/jans-scim/restv1/v2
 tags:
 - name: user
   description: Endpoints for management of User resources
