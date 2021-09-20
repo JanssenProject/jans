@@ -1,5 +1,33 @@
 # Changelog
 
+## [0.3.0](https://www.github.com/JanssenProject/jans-cli/compare/v0.2.0...v0.3.0) (2021-09-10)
+
+
+### Features
+
+* display back and quit keys (ref: [#39](https://www.github.com/JanssenProject/jans-cli/issues/39)) ([5ab1619](https://www.github.com/JanssenProject/jans-cli/commit/5ab1619d918b15dfa73ad4324d2750a2bd862841))
+* **stat:** spec changes for new stat endpoint jans-config-api issue[#35](https://www.github.com/JanssenProject/jans-cli/issues/35) ([a9a430e](https://www.github.com/JanssenProject/jans-cli/commit/a9a430ee495e6ba15a2eff3e6f91ba6e0c0628ee))
+
+
+### Bug Fixes
+
+* catch execptiob ([1bb8fae](https://www.github.com/JanssenProject/jans-cli/commit/1bb8faeefedb6d66ab2d492f8fc68f11191636e6))
+* statistic results ([d5905ad](https://www.github.com/JanssenProject/jans-cli/commit/d5905ad50b78cd03b32794f481d69bb3e10dcbe7))
+* update jca swagger client ([f2e25ac](https://www.github.com/JanssenProject/jans-cli/commit/f2e25acb07376c7e1975574ab5ea0329654145d8))
+* update jca swagger client ([d942e73](https://www.github.com/JanssenProject/jans-cli/commit/d942e73378168e984406faca7cc5ac5f7632dcee))
+* update swagger client ([1930016](https://www.github.com/JanssenProject/jans-cli/commit/1930016bc334d6e2b7c70a0d2fe4ba870fc5ea5d))
+* update swagger client ([3fb65ea](https://www.github.com/JanssenProject/jans-cli/commit/3fb65ea7ff608532b6d378e78a8237c097b5c60f))
+* update swagger client and fix for non-secure endpoints ([d833eab](https://www.github.com/JanssenProject/jans-cli/commit/d833eabb680cbff8b7c616d30cf76d0688031910))
+
+
+### Documentation
+
+* **cli-couchbase:** edited new operations ([7b2ed0e](https://www.github.com/JanssenProject/jans-cli/commit/7b2ed0e331f162aa2181fdf7ecef378483808024))
+* **cli-jwk:** edited patch operations ([8faffc2](https://www.github.com/JanssenProject/jans-cli/commit/8faffc2708cb1c43191397c49f4a8c74cfe5a60e))
+* **health:** added health liveness n readiness endpoints issue[#52](https://www.github.com/JanssenProject/jans-cli/issues/52) ([d333b41](https://www.github.com/JanssenProject/jans-cli/commit/d333b4129248654df8f3afbe4f4c3e7f2af53f6b))
+* **im-jwk:** edited operations ([452c47f](https://www.github.com/JanssenProject/jans-cli/commit/452c47f749ba34c86f0205494f231807ea8e9977))
+* updated spec for health endpoints - jansissue[#52](https://www.github.com/JanssenProject/jans-cli/issues/52) ([6c2e946](https://www.github.com/JanssenProject/jans-cli/commit/6c2e946c86c9343daff89b75e61c2c1aafc6d176))
+
 ## [0.2.0](https://www.github.com/JanssenProject/jans-cli/compare/v0.1.1...v0.2.0) (2021-07-08)
 
 
