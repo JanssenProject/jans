@@ -8,12 +8,14 @@ This module contains various helpers related to Couchbase persistence.
 import json
 import logging
 import os
+from binascii import Error as AsciiError
 from functools import partial
 from typing import NoReturn
 
 import requests
 from requests_toolbelt.adapters.host_header_ssl import HostHeaderSSLAdapter
 
+from jans.pycloudlib.utils import decode_text
 from jans.pycloudlib.utils import encode_text
 from jans.pycloudlib.utils import cert_to_truststore
 from jans.pycloudlib.utils import as_boolean
@@ -33,32 +35,45 @@ def get_couchbase_user(manager=None) -> str:
     return os.environ.get("CN_COUCHBASE_USER", "admin")
 
 
-def get_couchbase_password(manager, plaintext: bool = True) -> str:
+def get_couchbase_password(manager) -> str:
     """Get Couchbase user's password from file
     (default to ``/etc/jans/conf/couchbase_password``).
 
     To change the location, simply pass ``CN_COUCHBASE_PASSWORD_FILE`` environment variable.
 
     :params manager: An instance of :class:`~jans.pycloudlib.manager._Manager`.
-    :params plaintext: Whether to return plaintext or encoded password.
     :returns: Plaintext or encoded password.
     """
     password_file = os.environ.get(
         "CN_COUCHBASE_PASSWORD_FILE", "/etc/jans/conf/couchbase_password"
     )
 
+    # get password
     with open(password_file) as f:
         password = f.read().strip()
-        if not plaintext:
-            password = encode_text(password, manager.secret.get("encoded_salt")).decode()
-        return password
 
+    # check if password is encoded; non-encoded and empty password will throw incorrect
+    # padding/bytes which will be handled by encoding the password;
+    # other errors will be thrown automatically by interpreter
+    salt = manager.secret.get("encoded_salt")
+    should_encode = False
 
-#: Get Couchbase user's encoded password from file.
-#:
-#: This is a shortcut of :func:`get_couchbase_password` with ``plaintext``
-#: argument set as ``False``.
-get_encoded_couchbase_password = partial(get_couchbase_password, plaintext=False)
+    try:
+        password = decode_text(password, salt).decode()
+    except AsciiError:
+        logger.warning(f"Current password in {password_file} is not encoded")
+        should_encode = True
+    except ValueError:
+        logger.warning(f"Got empty password in {password_file}")
+        should_encode = True
+
+    if should_encode:
+        logger.warning(f"Attempting to encode the password in {password_file}")
+        with open(password_file, "w") as f:
+            f.write(encode_text(password, salt).decode())
+
+    # returns plain password for compatibility
+    return password
 
 
 def get_couchbase_superuser(manager=None) -> str:
@@ -71,7 +86,7 @@ def get_couchbase_superuser(manager=None) -> str:
     return os.environ.get("CN_COUCHBASE_SUPERUSER", "")
 
 
-def get_couchbase_superuser_password(manager, plaintext: bool = True) -> str:
+def get_couchbase_superuser_password(manager) -> str:
     """Get Couchbase superuser's password from file (default to
     ``/etc/jans/conf/couchbase_superuser_password``).
 
@@ -87,16 +102,29 @@ def get_couchbase_superuser_password(manager, plaintext: bool = True) -> str:
 
     with open(password_file) as f:
         password = f.read().strip()
-        if not plaintext:
-            password = encode_text(password, manager.secret.get("encoded_salt")).decode()
-        return password
 
+    # check if password is encoded; non-encoded and empty password will throw incorrect
+    # padding/bytes which will be handled by encoding the password;
+    # other errors will be thrown automatically by interpreter
+    salt = manager.secret.get("encoded_salt")
+    should_encode = False
 
-#: Get Couchbase superuser's encoded password from file.
-#:
-#: This is a shortcut of :func:`get_couchbase_superuser_password` with ``plaintext``
-#: argument set as ``False``.
-get_encoded_couchbase_superuser_password = partial(get_couchbase_superuser_password, plaintext=False)
+    try:
+        password = decode_text(password, salt).decode()
+    except AsciiError:
+        logger.warning(f"Current password in {password_file} is not encoded")
+        should_encode = True
+    except ValueError:
+        logger.warning(f"Got empty password in {password_file}")
+        should_encode = True
+
+    if should_encode:
+        logger.warning(f"Attempting to encode the password in {password_file}")
+        with open(password_file, "w") as f:
+            f.write(encode_text(password, salt).decode())
+
+    # returns plain password for compatibility
+    return password
 
 
 def prefixed_couchbase_mappings():
@@ -236,7 +264,10 @@ def render_couchbase_properties(manager, src: str, dest: str) -> None:
             rendered_txt = txt % {
                 "hostname": hostname,
                 "couchbase_server_user": get_couchbase_user(manager),
-                "encoded_couchbase_server_pw": get_encoded_couchbase_password(manager),
+                "encoded_couchbase_server_pw": encode_text(
+                    get_couchbase_password(manager),
+                    manager.secret.get("encoded_salt"),
+                ).decode(),
                 "couchbase_buckets": ", ".join(couchbase_buckets),
                 "default_bucket": bucket_prefix,
                 "couchbase_mappings": "\n".join(couchbase_mappings),
