@@ -145,7 +145,7 @@ class Crypto64:
     def generate_base64_ldap_file(self, fn):
         return self.generate_base64_file(fn, 1)
 
-    def gen_keystore(self, suffix, keystoreFN, keystorePW, inKey, inCert):
+    def gen_keystore(self, suffix, keystoreFN, keystorePW, inKey, inCert, alias=None):
 
         self.logIt("Creating keystore %s" % suffix)
         # Convert key to pkcs12
@@ -160,12 +160,12 @@ class Crypto64:
                   '-out',
                   pkcs_fn,
                   '-name',
-                  Config.hostname,
+                  alias or Config.hostname,
                   '-passout',
                   'pass:%s' % keystorePW
                   ])
         # Import p12 to keystore
-        self.run([Config.cmd_keytool,
+        import_cmd = [Config.cmd_keytool,
                   '-importkeystore',
                   '-srckeystore',
                   '%s/%s.pkcs12' % (Config.certFolder, suffix),
@@ -182,7 +182,11 @@ class Crypto64:
                   '-keyalg',
                   'RSA',
                   '-noprompt'
-                  ])
+                  ]
+        if alias:
+            import_cmd += ['-alias', alias]
+
+        self.run(import_cmd)
 
 
     def gen_openid_jwks_jks_keys(self, jks_path, jks_pwd, jks_create=True, key_expiration=None, dn_name=None, key_algs=None, enc_keys=None):
