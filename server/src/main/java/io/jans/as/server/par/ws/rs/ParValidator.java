@@ -16,12 +16,15 @@ import io.jans.as.server.model.authorize.ScopeChecker;
 import io.jans.as.server.service.RedirectUriResponse;
 import io.jans.as.server.service.RequestParameterService;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
 import java.util.Set;
+
+import static io.jans.as.model.util.StringUtils.implode;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -50,12 +53,12 @@ public class ParValidator {
     @Inject
     private RequestParameterService requestParameterService;
 
-    public void validateRequestUriIsAbsent(RedirectUriResponse redirectUriResponse, String requestUri) {
+    public void validateRequestUriIsAbsent(String requestUri) {
         if (StringUtils.isBlank(requestUri))
             return;
 
         log.trace("request_uri parameter is not allowed at PAR endpoint. Return error.");
-        throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST);
+        throw errorResponseFactory.createBadRequestException(AuthorizeErrorResponseType.INVALID_REQUEST, "");
     }
 
     public void validateRequestObject(RedirectUriResponse redirectUriResponse, Par par, Client client) {
@@ -71,14 +74,8 @@ public class ParValidator {
             if (jwtRequest == null) {
                 throw authorizeRestWebServiceValidator.createInvalidJwtRequestException(redirectUriResponse, "Failed to parse jwt.");
             }
-            if (StringUtils.isNotBlank(jwtRequest.getState())) {
-                par.getAttributes().setState(jwtRequest.getState());
-                redirectUriResponse.setState(jwtRequest.getState());
-            }
-            if (appConfiguration.getFapiCompatibility() && StringUtils.isBlank(jwtRequest.getState())) {
-                par.getAttributes().setState(""); // #1250 - FAPI : discard state if in JWT we don't have state
-                redirectUriResponse.setState("");
-            }
+            validateRequestUriIsAbsent(jwtRequest.getJsonPayload().getString("request_uri"));
+            setStateIntoPar(redirectUriResponse, par, jwtRequest);
 
             authorizeRestWebServiceValidator.validateRequestObject(jwtRequest, redirectUriResponse);
 
@@ -89,11 +86,9 @@ public class ParValidator {
                 par.getAttributes().setClientId(jwtRequest.getClientId());
             }
 
-            Set<String> scopes = scopeChecker.checkScopesPolicy(client, par.getAttributes().getScope());
-
             if (!jwtRequest.getScopes().isEmpty()) { // JWT wins
-                scopes = scopeChecker.checkScopesPolicy(client, Lists.newArrayList(jwtRequest.getScopes()));
-                par.getAttributes().setScope(io.jans.as.model.util.StringUtils.implode(scopes, " "));
+                Set<String> scopes = scopeChecker.checkScopesPolicy(client, Lists.newArrayList(jwtRequest.getScopes()));
+                par.getAttributes().setScope(implode(scopes, " "));
             }
             if (StringUtils.isNotBlank(jwtRequest.getRedirectUri())) {
                 par.getAttributes().setRedirectUri(jwtRequest.getRedirectUri());
@@ -118,22 +113,39 @@ public class ParValidator {
                 par.getAttributes().setResponseMode(jwtRequest.getJsonPayload().optString("response_mode"));
             }
 
-            final IdTokenMember idTokenMember = jwtRequest.getIdTokenMember();
-            if (idTokenMember != null) {
-                if (idTokenMember.getMaxAge() != null) {
-                    par.getAttributes().setMaxAge(idTokenMember.getMaxAge());
-                }
-                final Claim acrClaim = idTokenMember.getClaim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE);
-                if (acrClaim != null && acrClaim.getClaimValue() != null) {
-                    par.getAttributes().setAcrValuesStr(acrClaim.getClaimValue().getValueAsString());
-                }
-            }
+            setParAttributesFromIdTokenMember(par, jwtRequest);
             requestParameterService.getCustomParameters(jwtRequest, par.getAttributes().getCustomParameters());
         } catch (WebApplicationException e) {
             throw e;
         } catch (Exception e) {
             log.error("Invalid JWT authorization request. Message : " + e.getMessage(), e);
             throw authorizeRestWebServiceValidator.createInvalidJwtRequestException(redirectUriResponse, "Invalid JWT authorization request");
+        }
+    }
+
+    private void setParAttributesFromIdTokenMember(@NotNull Par par, @NotNull JwtAuthorizationRequest jwtRequest) {
+        final IdTokenMember idTokenMember = jwtRequest.getIdTokenMember();
+        if (idTokenMember == null) {
+            return;
+        }
+
+        if (idTokenMember.getMaxAge() != null) {
+            par.getAttributes().setMaxAge(idTokenMember.getMaxAge());
+        }
+        final Claim acrClaim = idTokenMember.getClaim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE);
+        if (acrClaim != null && acrClaim.getClaimValue() != null) {
+            par.getAttributes().setAcrValuesStr(acrClaim.getClaimValue().getValueAsString());
+        }
+    }
+
+    private void setStateIntoPar(@NotNull RedirectUriResponse redirectUriResponse, @NotNull Par par, @NotNull JwtAuthorizationRequest jwtRequest) {
+        if (StringUtils.isNotBlank(jwtRequest.getState())) {
+            par.getAttributes().setState(jwtRequest.getState());
+            redirectUriResponse.setState(jwtRequest.getState());
+        }
+        if (appConfiguration.isFapi() && StringUtils.isBlank(jwtRequest.getState())) {
+            par.getAttributes().setState(""); // #1250 - FAPI : discard state if in JWT we don't have state
+            redirectUriResponse.setState("");
         }
     }
 }
