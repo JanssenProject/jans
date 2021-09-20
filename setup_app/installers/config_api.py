@@ -172,6 +172,7 @@ class ConfigApiInstaller(JettyInstaller):
         Config.templateRenderingDict['config_api_dynamic_conf_base64'] = self.generate_base64_file(self.dynamic_conf_json, 1)
         self.renderTemplateInOut(self.config_ldif_fn, self.templates_folder, self.output_folder)
 
+        self.write_webapps_xml()
         self.dbUtils.import_ldif(self.load_ldif_files)
 
 
