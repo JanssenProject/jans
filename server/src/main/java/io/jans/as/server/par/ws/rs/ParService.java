@@ -86,7 +86,7 @@ public class ParService {
         Par par = getPar(id);
 
         if (par == null) {
-            log.debug("Failed to find PAR by request_uri (id): " + id);
+            log.debug("Failed to find PAR by request_uri (id): {}", id);
             throw new WebApplicationException(Response
                     .status(Response.Status.BAD_REQUEST)
                     .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST, state, "Failed to find par by request_uri"))
@@ -94,7 +94,7 @@ public class ParService {
                     .build());
         }
         if (StringUtils.isBlank(clientIdInRequest) || !clientIdInRequest.equals(par.getAttributes().getClientId())) {
-            log.debug("client_id does not match to PAR's client_id (used during PAR registration). Reject request. PAR clientId: " + par.getAttributes().getClientId() + ", request's clientId: " + clientIdInRequest);
+            log.debug("client_id does not match to PAR's client_id (used during PAR registration). Reject request. PAR clientId: {}, request's clientId: {}", par.getAttributes().getClientId(), clientIdInRequest);
             throw new WebApplicationException(Response
                     .status(Response.Status.BAD_REQUEST)
                     .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST, state, "client_id does not match to PAR's client_id"))

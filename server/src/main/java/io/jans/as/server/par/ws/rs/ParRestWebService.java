@@ -129,7 +129,7 @@ public class ParRestWebService {
             RedirectUriResponse redirectUriResponse = new RedirectUriResponse(new RedirectUri(redirectUri, responseTypes, responseModeObj), state, httpRequest, errorResponseFactory);
             redirectUriResponse.setFapiCompatible(appConfiguration.getFapiCompatibility());
 
-            parValidator.validateRequestUriIsAbsent(redirectUriResponse, requestUri);
+            parValidator.validateRequestUriIsAbsent(requestUri);
 
             final Integer parLifetime = client.getAttributes().getParLifetime();
 
