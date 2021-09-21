@@ -7,11 +7,9 @@
 package io.jans.as.client;
 
 import io.jans.as.model.common.AuthorizationMethod;
-import io.jans.as.model.config.Constants;
 import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.jwe.Jwe;
 import io.jans.as.model.jwt.Jwt;
-import io.jans.as.model.userinfo.UserInfoErrorResponseType;
 import io.jans.as.model.util.JwtUtil;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -109,9 +107,7 @@ public class UserInfoClient extends BaseClient<UserInfoRequest, UserInfoResponse
                 clientResponse = clientRequest.post(String.class);
             }
 
-            int status = clientResponse.getStatus();
-
-            setResponse(new UserInfoResponse(status));
+            setResponse(new UserInfoResponse(clientResponse));
 
             String entity = clientResponse.getEntity(String.class);
             getResponse().setEntity(entity);
@@ -142,20 +138,8 @@ public class UserInfoClient extends BaseClient<UserInfoRequest, UserInfoResponse
                     }
                 } else {
                     try {
+                        getResponse().injectErrorIfExistSilently(entity);
                         JSONObject jsonObj = new JSONObject(entity);
-
-                        if (jsonObj.has(Constants.ERROR)) {
-                            getResponse().setErrorType(UserInfoErrorResponseType.fromString(jsonObj.getString(Constants.ERROR)));
-                            jsonObj.remove(Constants.ERROR);
-                        }
-                        if (jsonObj.has(Constants.ERROR_DESCRIPTION)) {
-                            getResponse().setErrorDescription(jsonObj.getString(Constants.ERROR_DESCRIPTION));
-                            jsonObj.remove(Constants.ERROR_DESCRIPTION);
-                        }
-                        if (jsonObj.has(Constants.ERROR_URI)) {
-                            getResponse().setErrorUri(jsonObj.getString(Constants.ERROR_URI));
-                            jsonObj.remove(Constants.ERROR_URI);
-                        }
 
                         for (Iterator<String> iterator = jsonObj.keys(); iterator.hasNext(); ) {
                             String key = iterator.next();
