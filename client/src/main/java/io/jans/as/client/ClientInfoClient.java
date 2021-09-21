@@ -7,8 +7,6 @@
 package io.jans.as.client;
 
 import io.jans.as.model.common.AuthorizationMethod;
-import io.jans.as.model.config.Constants;
-import io.jans.as.model.userinfo.UserInfoErrorResponseType;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.jboss.resteasy.client.ClientExecutor;
@@ -113,29 +111,15 @@ public class ClientInfoClient extends BaseClient<ClientInfoRequest, ClientInfoRe
                 clientResponse = clientRequest.get(String.class);
             }
 
-            int status = clientResponse.getStatus();
-
-            setResponse(new ClientInfoResponse(status));
+            setResponse(new ClientInfoResponse(clientResponse));
 
             String entity = clientResponse.getEntity(String.class);
             getResponse().setEntity(entity);
             getResponse().setHeaders(clientResponse.getMetadata());
             if (StringUtils.isNotBlank(entity)) {
+                getResponse().injectErrorIfExistSilently(entity);
                 try {
                     JSONObject jsonObj = new JSONObject(entity);
-
-                    if (jsonObj.has(Constants.ERROR)) {
-                        getResponse().setErrorType(UserInfoErrorResponseType.fromString(jsonObj.getString(Constants.ERROR)));
-                        jsonObj.remove(Constants.ERROR);
-                    }
-                    if (jsonObj.has(Constants.ERROR_DESCRIPTION)) {
-                        getResponse().setErrorDescription(jsonObj.getString(Constants.ERROR_DESCRIPTION));
-                        jsonObj.remove(Constants.ERROR_DESCRIPTION);
-                    }
-                    if (jsonObj.has(Constants.ERROR_URI)) {
-                        getResponse().setErrorUri(jsonObj.getString(Constants.ERROR_URI));
-                        jsonObj.remove(Constants.ERROR_URI);
-                    }
 
                     for (Iterator<String> iterator = jsonObj.keys(); iterator.hasNext(); ) {
                         String key = iterator.next();
