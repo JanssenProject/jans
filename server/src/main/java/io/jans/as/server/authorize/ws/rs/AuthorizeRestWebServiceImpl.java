@@ -77,6 +77,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.SecurityContext;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -717,7 +718,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                 Use.ENCRYPTION);
                     }
                     String sharedSecret = clientService.decryptSecret(authorizationGrant.getClient().getClientSecret());
-                    byte[] sharedSymmetricKey = sharedSecret.getBytes(Util.UTF8_STRING_ENCODING);
+                    byte[] sharedSymmetricKey = sharedSecret.getBytes(StandardCharsets.UTF_8);
                     redirectUriResponse.getRedirectUri().setSharedSymmetricKey(sharedSymmetricKey);
                     redirectUriResponse.getRedirectUri().setJsonWebKeys(jsonWebKeys);
                     redirectUriResponse.getRedirectUri().setKeyId(keyId);

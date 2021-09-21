@@ -51,6 +51,7 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 
 /**
@@ -264,7 +265,7 @@ public class IntrospectionWebService {
             
             String encodedCredentials = tokenService.getBasicToken(authorization);
 
-            String token = new String(Base64.decodeBase64(encodedCredentials), Util.UTF8_STRING_ENCODING);
+            String token = new String(Base64.decodeBase64(encodedCredentials), StandardCharsets.UTF_8);
 
             int delim = token.indexOf(":");
 
