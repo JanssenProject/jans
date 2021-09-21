@@ -6,16 +6,14 @@
 
 package io.jans.as.model.discovery;
 
-import java.util.Arrays;
-
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
-import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import java.util.Arrays;
 
 /**
  * OAuth discovery
@@ -75,10 +73,6 @@ public class OAuth2Discovery {
     @XmlElement(name = "response_types_supported")
     private String[] responseTypesSupported;
 
-//    @JsonProperty(value = "response_modes_supported")
-//    @XmlElement(name = "response_modes_supported")
-//    private String[] responseModesSupported;
-
     @JsonProperty(value = "grant_types_supported")
     @XmlElement(name = "grant_types_supported")
     private String[] grantTypesSupported;
@@ -107,29 +101,9 @@ public class OAuth2Discovery {
     @XmlElement(name = "op_tos_uri")
     private String opTosUri;
 
-//    @JsonProperty(value = "revocation_endpoint")
-//    @XmlElement(name = "revocation_endpoint")
-//    private String revocationEndpoint;
-//
-//    @JsonProperty(value = "revocation_endpoint_auth_methods_supported")
-//    @XmlElement(name = "revocation_endpoint_auth_methods_supported")
-//    private String[] revocation_endpoint_auth_methods_supported;
-//
-//    @JsonProperty(value = "revocation_endpoint_auth_signing_alg_values_supported")
-//    @XmlElement(name = "revocation_endpoint_auth_signing_alg_values_supported")
-//    private String[] revocationEndpointAuthSigningAlgValuesSupported;
-
     @JsonProperty(value = "introspection_endpoint")
     @XmlElement(name = "introspection_endpoint")
     private String introspectionEndpoint;
-
-//    @JsonProperty(value = "introspection_endpoint_auth_methods_supported")
-//    @XmlElement(name = "introspection_endpoint_auth_methods_supported")
-//    private String[] introspectionEndpointAuthMethodsSupported;
-//
-//    @JsonProperty(value = "introspection_endpoint_auth_signing_alg_values_supported")
-//    @XmlElement(name = "introspection_endpoint_auth_signing_alg_values_supported")
-//    private String[] introspectionEndpointAuthSigningAlgValuesSupported;
 
     @JsonProperty(value = "code_challenge_methods_supported")
     @XmlElement(name = "code_challenge_methods_supported")
@@ -182,14 +156,6 @@ public class OAuth2Discovery {
     public void setResponseTypesSupported(String[] responseTypesSupported) {
         this.responseTypesSupported = responseTypesSupported;
     }
-
-//    public String[] getResponseModesSupported() {
-//        return responseModesSupported;
-//    }
-//
-//    public void setResponseModesSupported(String[] responseModesSupported) {
-//        this.responseModesSupported = responseModesSupported;
-//    }
 
     public String[] getGrantTypesSupported() {
         return grantTypesSupported;
@@ -247,30 +213,6 @@ public class OAuth2Discovery {
         this.opTosUri = opTosUri;
     }
 
-//    public String getRevocationEndpoint() {
-//        return revocationEndpoint;
-//    }
-//
-//    public void setRevocationEndpoint(String revocationEndpoint) {
-//        this.revocationEndpoint = revocationEndpoint;
-//    }
-//
-//    public String[] getRevocation_endpoint_auth_methods_supported() {
-//        return revocation_endpoint_auth_methods_supported;
-//    }
-//
-//    public void setRevocation_endpoint_auth_methods_supported(String[] revocation_endpoint_auth_methods_supported) {
-//        this.revocation_endpoint_auth_methods_supported = revocation_endpoint_auth_methods_supported;
-//    }
-//
-//    public String[] getRevocationEndpointAuthSigningAlgValuesSupported() {
-//        return revocationEndpointAuthSigningAlgValuesSupported;
-//    }
-//
-//    public void setRevocationEndpointAuthSigningAlgValuesSupported(String[] revocationEndpointAuthSigningAlgValuesSupported) {
-//        this.revocationEndpointAuthSigningAlgValuesSupported = revocationEndpointAuthSigningAlgValuesSupported;
-//    }
-
     public String getIntrospectionEndpoint() {
         return introspectionEndpoint;
     }
@@ -278,22 +220,6 @@ public class OAuth2Discovery {
     public void setIntrospectionEndpoint(String introspectionEndpoint) {
         this.introspectionEndpoint = introspectionEndpoint;
     }
-
-//    public String[] getIntrospectionEndpointAuthMethodsSupported() {
-//        return introspectionEndpointAuthMethodsSupported;
-//    }
-//
-//    public void setIntrospectionEndpointAuthMethodsSupported(String[] introspectionEndpointAuthMethodsSupported) {
-//        this.introspectionEndpointAuthMethodsSupported = introspectionEndpointAuthMethodsSupported;
-//    }
-//
-//    public String[] getIntrospectionEndpointAuthSigningAlgValuesSupported() {
-//        return introspectionEndpointAuthSigningAlgValuesSupported;
-//    }
-//
-//    public void setIntrospectionEndpointAuthSigningAlgValuesSupported(String[] introspectionEndpointAuthSigningAlgValuesSupported) {
-//        this.introspectionEndpointAuthSigningAlgValuesSupported = introspectionEndpointAuthSigningAlgValuesSupported;
-//    }
 
     public String[] getCodeChallengeMethodsSupported() {
         return codeChallengeMethodsSupported;
@@ -312,7 +238,6 @@ public class OAuth2Discovery {
                 ", jwksUri='" + jwksUri + '\'' +
                 ", registrationEndpoint='" + registrationEndpoint + '\'' +
                 ", responseTypesSupported=" + Arrays.toString(responseTypesSupported) +
-//                ", responseModesSupported=" + Arrays.toString(responseModesSupported) +
                 ", grantTypesSupported=" + Arrays.toString(grantTypesSupported) +
                 ", tokenEndpointAuthMethodsSupported=" + Arrays.toString(tokenEndpointAuthMethodsSupported) +
                 ", tokenEndpointAuthSigningAlgValuesSupported=" + Arrays.toString(tokenEndpointAuthSigningAlgValuesSupported) +
@@ -320,12 +245,7 @@ public class OAuth2Discovery {
                 ", uiLocalesSupported=" + Arrays.toString(uiLocalesSupported) +
                 ", opPolicyUri='" + opPolicyUri + '\'' +
                 ", opTosUri='" + opTosUri + '\'' +
-//                ", revocationEndpoint='" + revocationEndpoint + '\'' +
-//                ", revocation_endpoint_auth_methods_supported=" + Arrays.toString(revocation_endpoint_auth_methods_supported) +
-//                ", revocationEndpointAuthSigningAlgValuesSupported=" + Arrays.toString(revocationEndpointAuthSigningAlgValuesSupported) +
                 ", introspectionEndpoint='" + introspectionEndpoint + '\'' +
-//                ", introspectionEndpointAuthMethodsSupported=" + Arrays.toString(introspectionEndpointAuthMethodsSupported) +
-//                ", introspectionEndpointAuthSigningAlgValuesSupported=" + Arrays.toString(introspectionEndpointAuthSigningAlgValuesSupported) +
                 ", codeChallengeMethodsSupported=" + Arrays.toString(codeChallengeMethodsSupported) +
                 '}';
     }

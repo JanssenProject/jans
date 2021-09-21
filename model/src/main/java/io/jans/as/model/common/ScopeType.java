@@ -6,13 +6,12 @@
 
 package io.jans.as.model.common;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-
 import io.jans.orm.annotation.AttributeEnum;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Scope types
@@ -72,7 +71,7 @@ public enum ScopeType implements AttributeEnum {
     private final String value;
     private final String displayName;
 
-    private static Map<String, ScopeType> mapByValues = new HashMap<String, ScopeType>();
+    private static Map<String, ScopeType> mapByValues = new HashMap<>();
 
     static {
         for (ScopeType enumType : values()) {

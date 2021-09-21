@@ -18,7 +18,7 @@ public enum UmaScopeType {
 
     PROTECTION("uma_protection");
 
-    private static Map<String, UmaScopeType> lookup = new HashMap<String, UmaScopeType>();
+    private static Map<String, UmaScopeType> lookup = new HashMap<>();
 
     static {
         for (UmaScopeType enumType : values()) {
@@ -26,17 +26,17 @@ public enum UmaScopeType {
         }
     }
 
-    private String m_value;
+    private String value;
 
-    private UmaScopeType(String p_value) {
-        m_value = p_value;
+    private UmaScopeType(String value) {
+        this.value = value;
     }
 
     public String getValue() {
-        return m_value;
+        return value;
     }
 
-    public static UmaScopeType fromValue(String p_value) {
-        return lookup.get(p_value);
+    public static UmaScopeType fromValue(String value) {
+        return lookup.get(value);
     }
 }

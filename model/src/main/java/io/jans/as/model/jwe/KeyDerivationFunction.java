@@ -6,24 +6,26 @@
 
 package io.jans.as.model.jwe;
 
+import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
+import io.jans.as.model.exception.InvalidParameterException;
+import io.jans.as.model.util.Base64Util;
+import org.apache.commons.lang.ArrayUtils;
+
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.Arrays;
-
-import org.apache.commons.lang.ArrayUtils;
-
-import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
-import io.jans.as.model.exception.InvalidParameterException;
-import io.jans.as.model.util.Base64Util;
-import io.jans.as.model.util.Util;
 
 /**
  * @author Javier Rojas Blum
  * @version July 31, 2016
  */
 public class KeyDerivationFunction {
+
+    private KeyDerivationFunction() {
+    }
 
     public static byte[] generateCek(byte[] cmk, BlockEncryptionAlgorithm blockEncryptionAlgorithm)
             throws UnsupportedEncodingException, NoSuchProviderException, NoSuchAlgorithmException, InvalidParameterException {
@@ -45,10 +47,10 @@ public class KeyDerivationFunction {
         } else { //A256CBC_PLUS_HS512
             outputBitSize = Base64Util.unsignedToBytes(new int[]{0, 0, 1, 0});
         }
-        byte[] encValue = blockEncryptionAlgorithm.getName().getBytes(Util.UTF8_STRING_ENCODING);
+        byte[] encValue = blockEncryptionAlgorithm.getName().getBytes(StandardCharsets.UTF_8);
         byte[] epu = Base64Util.unsignedToBytes(new int[]{0, 0, 0, 0});
         byte[] epv = Base64Util.unsignedToBytes(new int[]{0, 0, 0, 0});
-        byte[] label = "Encryption".getBytes(Util.UTF8_STRING_ENCODING);
+        byte[] label = "Encryption".getBytes(StandardCharsets.UTF_8);
         byte[] round1Input = ArrayUtils.addAll(round1, cmk);
         round1Input = ArrayUtils.addAll(round1Input, outputBitSize);
         round1Input = ArrayUtils.addAll(round1Input, encValue);
@@ -58,9 +60,7 @@ public class KeyDerivationFunction {
 
         MessageDigest mda = MessageDigest.getInstance(blockEncryptionAlgorithm.getMessageDiggestAlgorithm(), "BC");
         byte[] round1Hash = mda.digest(round1Input);
-        byte[] cek = Arrays.copyOf(round1Hash, blockEncryptionAlgorithm.getCekLength() / 8);
-
-        return cek;
+        return Arrays.copyOf(round1Hash, blockEncryptionAlgorithm.getCekLength() / 8);
     }
 
     public static byte[] generateCik(byte[] cmk, BlockEncryptionAlgorithm blockEncryptionAlgorithm)
@@ -83,10 +83,10 @@ public class KeyDerivationFunction {
         } else { //A256CBC_PLUS_HS512
             outputBitSize = Base64Util.unsignedToBytes(new int[]{0, 0, 2, 0});
         }
-        byte[] encValue = blockEncryptionAlgorithm.getName().getBytes(Util.UTF8_STRING_ENCODING);
+        byte[] encValue = blockEncryptionAlgorithm.getName().getBytes(StandardCharsets.UTF_8);
         byte[] epu = Base64Util.unsignedToBytes(new int[]{0, 0, 0, 0});
         byte[] epv = Base64Util.unsignedToBytes(new int[]{0, 0, 0, 0});
-        byte[] label = "Integrity".getBytes(Util.UTF8_STRING_ENCODING);
+        byte[] label = "Integrity".getBytes(StandardCharsets.UTF_8);
         byte[] round1Input = ArrayUtils.addAll(round1, cmk);
         round1Input = ArrayUtils.addAll(round1Input, outputBitSize);
         round1Input = ArrayUtils.addAll(round1Input, encValue);
@@ -95,8 +95,6 @@ public class KeyDerivationFunction {
         round1Input = ArrayUtils.addAll(round1Input, label);
 
         MessageDigest mda = MessageDigest.getInstance(blockEncryptionAlgorithm.getMessageDiggestAlgorithm(), "BC");
-        byte[] cik = mda.digest(round1Input);
-
-        return cik;
+        return mda.digest(round1Input);
     }
 }
