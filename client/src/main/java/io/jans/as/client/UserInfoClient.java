@@ -6,26 +6,26 @@
 
 package io.jans.as.client;
 
-import java.security.PrivateKey;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.core.MediaType;
-
-import org.apache.commons.lang.StringUtils;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import io.jans.as.model.common.AuthorizationMethod;
+import io.jans.as.model.config.Constants;
 import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.jwe.Jwe;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.userinfo.UserInfoErrorResponseType;
 import io.jans.as.model.util.JwtUtil;
-import io.jans.as.model.util.Util;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.core.MediaType;
+import java.nio.charset.StandardCharsets;
+import java.security.PrivateKey;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Encapsulates functionality to make user info request calls to an authorization server via REST Services.
@@ -34,6 +34,8 @@ import io.jans.as.model.util.Util;
  * @version December 26, 2016
  */
 public class UserInfoClient extends BaseClient<UserInfoRequest, UserInfoResponse> {
+
+    private static final Logger LOG = Logger.getLogger(UserInfoClient.class);
 
     private String sharedKey;
     private PrivateKey privateKey;
@@ -119,7 +121,7 @@ public class UserInfoClient extends BaseClient<UserInfoRequest, UserInfoResponse
                 if (contentType != null && contentType.contains("application/jwt")) {
                     String[] jwtParts = entity.split("\\.");
                     if (jwtParts.length == 5) {
-                        byte[] sharedSymmetricKey = sharedKey != null ? sharedKey.getBytes(Util.UTF8_STRING_ENCODING) : null;
+                        byte[] sharedSymmetricKey = sharedKey != null ? sharedKey.getBytes(StandardCharsets.UTF_8) : null;
                         Jwe jwe = Jwe.parse(entity, privateKey, sharedSymmetricKey);
                         getResponse().setClaims(jwe.getClaims().toMap());
                     } else {
@@ -142,17 +144,17 @@ public class UserInfoClient extends BaseClient<UserInfoRequest, UserInfoResponse
                     try {
                         JSONObject jsonObj = new JSONObject(entity);
 
-                        if (jsonObj.has("error")) {
-                            getResponse().setErrorType(UserInfoErrorResponseType.fromString(jsonObj.getString("error")));
-                            jsonObj.remove("error");
+                        if (jsonObj.has(Constants.ERROR)) {
+                            getResponse().setErrorType(UserInfoErrorResponseType.fromString(jsonObj.getString(Constants.ERROR)));
+                            jsonObj.remove(Constants.ERROR);
                         }
-                        if (jsonObj.has("error_description")) {
-                            getResponse().setErrorDescription(jsonObj.getString("error_description"));
-                            jsonObj.remove("error_description");
+                        if (jsonObj.has(Constants.ERROR_DESCRIPTION)) {
+                            getResponse().setErrorDescription(jsonObj.getString(Constants.ERROR_DESCRIPTION));
+                            jsonObj.remove(Constants.ERROR_DESCRIPTION);
                         }
-                        if (jsonObj.has("error_uri")) {
-                            getResponse().setErrorUri(jsonObj.getString("error_uri"));
-                            jsonObj.remove("error_uri");
+                        if (jsonObj.has(Constants.ERROR_URI)) {
+                            getResponse().setErrorUri(jsonObj.getString(Constants.ERROR_URI));
+                            jsonObj.remove(Constants.ERROR_URI);
                         }
 
                         for (Iterator<String> iterator = jsonObj.keys(); iterator.hasNext(); ) {
@@ -177,12 +179,12 @@ public class UserInfoClient extends BaseClient<UserInfoRequest, UserInfoResponse
                             getResponse().getClaims().put(key, values);
                         }
                     } catch (JSONException e) {
-                        e.printStackTrace();
+                        LOG.error(e.getMessage(), e);
                     }
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
         } finally {
             closeConnection();
         }
