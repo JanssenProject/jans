@@ -271,7 +271,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         return jwt.toString();
     }
 
-    private JwtClaims createJwtClaims(User user, AuthorizationGrant authorizationGrant, Collection<String> scopes) throws Exception {
+    private JwtClaims createJwtClaims(User user, AuthorizationGrant authorizationGrant, Collection<String> scopes) throws ParseException, InvalidClaimException {
         String claimsString = getJSonResponse(user, authorizationGrant, scopes);
         JwtClaims claims = new JwtClaims(new JSONObject(claimsString));
 
@@ -328,7 +328,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
      * Builds a JSon String with the response parameters.
      */
     public String getJSonResponse(User user, AuthorizationGrant authorizationGrant, Collection<String> scopes) throws InvalidClaimException, ParseException {
-        log.trace("Building JSON reponse with next scopes {0} for user {1} and user custom attributes {2}", scopes, user.getUserId(), user.getCustomAttributes());
+        log.trace("Building JSON reponse with next scopes {} for user {} and user custom attributes {}", scopes, user.getUserId(), user.getCustomAttributes());
 
         JsonWebResponse jsonWebResponse = new JsonWebResponse();
 
