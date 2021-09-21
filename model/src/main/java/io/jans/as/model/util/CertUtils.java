@@ -62,7 +62,7 @@ public class CertUtils {
                 return result;
             }
         } catch (Exception e) {
-            log.trace("Failed to parse pem. " + e.getMessage() + ", trying to url decode it.");
+            log.trace("Failed to parse pem. {}, trying to url decode it.", e.getMessage());
         }
         try {
             return x509CertificateFromPemInternal(URLDecoder.decode(pem, Util.UTF8_STRING_ENCODING));

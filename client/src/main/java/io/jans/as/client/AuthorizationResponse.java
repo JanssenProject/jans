@@ -9,26 +9,40 @@ package io.jans.as.client;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.common.ResponseMode;
 import io.jans.as.model.common.TokenType;
+import io.jans.as.model.config.Constants;
 import io.jans.as.model.crypto.AuthCryptoProvider;
-import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwe.Jwe;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.util.JwtUtil;
 import io.jans.as.model.util.Util;
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 import org.jboss.resteasy.client.ClientResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.security.PrivateKey;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import static io.jans.as.model.authorize.AuthorizeResponseParam.*;
+import static io.jans.as.model.authorize.AuthorizeResponseParam.ACCESS_TOKEN;
+import static io.jans.as.model.authorize.AuthorizeResponseParam.AUD;
+import static io.jans.as.model.authorize.AuthorizeResponseParam.CODE;
+import static io.jans.as.model.authorize.AuthorizeResponseParam.EXP;
+import static io.jans.as.model.authorize.AuthorizeResponseParam.EXPIRES_IN;
+import static io.jans.as.model.authorize.AuthorizeResponseParam.ID_TOKEN;
+import static io.jans.as.model.authorize.AuthorizeResponseParam.ISS;
+import static io.jans.as.model.authorize.AuthorizeResponseParam.RESPONSE;
+import static io.jans.as.model.authorize.AuthorizeResponseParam.SCOPE;
+import static io.jans.as.model.authorize.AuthorizeResponseParam.SESSION_ID;
+import static io.jans.as.model.authorize.AuthorizeResponseParam.SID;
+import static io.jans.as.model.authorize.AuthorizeResponseParam.STATE;
+import static io.jans.as.model.authorize.AuthorizeResponseParam.TOKEN_TYPE;
 
 /**
  * Represents an authorization response received from the authorization server.
@@ -37,6 +51,8 @@ import static io.jans.as.model.authorize.AuthorizeResponseParam.*;
  * @version July 28, 2021
  */
 public class AuthorizationResponse extends BaseResponse {
+
+    private static final Logger LOG = Logger.getLogger(AuthorizationResponse.class);
 
     private String code;
     private String accessToken;
@@ -69,28 +85,28 @@ public class AuthorizationResponse extends BaseResponse {
      */
     public AuthorizationResponse(ClientResponse<String> clientResponse) {
         super(clientResponse);
-        customParams = new HashMap<String, String>();
+        customParams = new HashMap<>();
 
         if (StringUtils.isNotBlank(entity)) {
             try {
                 JSONObject jsonObj = new JSONObject(entity);
-                if (jsonObj.has("error")) {
-                    errorType = AuthorizeErrorResponseType.fromString(jsonObj.getString("error"));
+                if (jsonObj.has(Constants.ERROR)) {
+                    errorType = AuthorizeErrorResponseType.fromString(jsonObj.getString(Constants.ERROR));
                 }
-                if (jsonObj.has("error_description")) {
-                    errorDescription = jsonObj.getString("error_description");
+                if (jsonObj.has(Constants.ERROR_DESCRIPTION)) {
+                    errorDescription = jsonObj.getString(Constants.ERROR_DESCRIPTION);
                 }
-                if (jsonObj.has("error_uri")) {
-                    errorUri = jsonObj.getString("error_uri");
+                if (jsonObj.has(Constants.ERROR_URI)) {
+                    errorUri = jsonObj.getString(Constants.ERROR_URI);
                 }
-                if (jsonObj.has("state")) {
-                    state = jsonObj.getString("state");
+                if (jsonObj.has(Constants.STATE)) {
+                    state = jsonObj.getString(Constants.STATE);
                 }
-                if (jsonObj.has("redirect")) {
-                    location = jsonObj.getString("redirect");
+                if (jsonObj.has(Constants.REDIRECT)) {
+                    location = jsonObj.getString(Constants.REDIRECT);
                 }
             } catch (JSONException e) {
-                e.printStackTrace();
+                LOG.error(e.getMessage(), e);
             }
         }
         processLocation();
@@ -98,7 +114,7 @@ public class AuthorizationResponse extends BaseResponse {
 
     public AuthorizationResponse(String location) {
         this.location = location;
-        customParams = new HashMap<String, String>();
+        customParams = new HashMap<>();
 
         processLocation();
     }
@@ -109,7 +125,7 @@ public class AuthorizationResponse extends BaseResponse {
         this.privateKey = privateKey;
         this.jwksUri = jwksUri;
 
-        customParams = new HashMap<String, String>();
+        customParams = new HashMap<>();
 
         processLocation();
     }
@@ -150,7 +166,7 @@ public class AuthorizationResponse extends BaseResponse {
                         String[] jwtParts = response.split("\\.");
 
                         if (jwtParts.length == 5) {
-                            byte[] sharedSymmetricKey = sharedKey != null ? sharedKey.getBytes(Util.UTF8_STRING_ENCODING) : null;
+                            byte[] sharedSymmetricKey = sharedKey != null ? sharedKey.getBytes(StandardCharsets.UTF_8) : null;
                             Jwe jwe = Jwe.parse(response, privateKey, sharedSymmetricKey);
 
                             for (Map.Entry<String, List<String>> entry : jwe.getClaims().toMap().entrySet()) {
@@ -176,19 +192,15 @@ public class AuthorizationResponse extends BaseResponse {
                         }
                     }
 
-                    loadparams(params);
+                    loadParams(params);
                 }
             }
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        } catch (InvalidJwtException e) {
-            e.printStackTrace();
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
         }
     }
 
-    private void loadparams(Map<String, String> params) throws UnsupportedEncodingException {
+    private void loadParams(Map<String, String> params) throws UnsupportedEncodingException {
         if (params.containsKey(CODE)) {
             code = params.get(CODE);
             params.remove(CODE);
@@ -240,17 +252,17 @@ public class AuthorizationResponse extends BaseResponse {
         }
 
         // Error
-        if (params.containsKey("error")) {
-            errorType = AuthorizeErrorResponseType.fromString(params.get("error"));
-            params.remove("error");
+        if (params.containsKey(Constants.ERROR)) {
+            errorType = AuthorizeErrorResponseType.fromString(params.get(Constants.ERROR));
+            params.remove(Constants.ERROR);
         }
-        if (params.containsKey("error_description")) {
-            errorDescription = URLDecoder.decode(params.get("error_description"), Util.UTF8_STRING_ENCODING);
-            params.remove("error_description");
+        if (params.containsKey(Constants.ERROR_DESCRIPTION)) {
+            errorDescription = URLDecoder.decode(params.get(Constants.ERROR_DESCRIPTION), Util.UTF8_STRING_ENCODING);
+            params.remove(Constants.ERROR_DESCRIPTION);
         }
-        if (params.containsKey("error_uri")) {
-            errorUri = URLDecoder.decode(params.get("error_uri"), Util.UTF8_STRING_ENCODING);
-            params.remove("error_uri");
+        if (params.containsKey(Constants.ERROR_URI)) {
+            errorUri = URLDecoder.decode(params.get(Constants.ERROR_URI), Util.UTF8_STRING_ENCODING);
+            params.remove(Constants.ERROR_URI);
         }
 
         for (Iterator<String> it = params.keySet().iterator(); it.hasNext(); ) {
@@ -316,10 +328,10 @@ public class AuthorizationResponse extends BaseResponse {
     /**
      * Sets session id.
      *
-     * @param p_sessionId session id.
+     * @param sessionId session id.
      */
-    public void setSessionId(String p_sessionId) {
-        sessionId = p_sessionId;
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
     }
 
     public Map<String, String> getCustomParams() {

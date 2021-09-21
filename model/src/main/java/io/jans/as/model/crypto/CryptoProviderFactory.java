@@ -11,6 +11,8 @@ import org.apache.commons.lang.StringUtils;
 import io.jans.as.model.common.WebKeyStorage;
 import io.jans.as.model.configuration.AppConfiguration;
 
+import java.security.KeyStoreException;
+
 /**
  * @author Javier Rojas Blum
  * @version April 25, 2017
@@ -19,35 +21,34 @@ public class CryptoProviderFactory {
 
     private static AuthCryptoProvider keyStoreProvider = null;
 
-    public static AbstractCryptoProvider getCryptoProvider(AppConfiguration configuration) throws Exception {
+    private CryptoProviderFactory() {
+    }
+
+    public static AbstractCryptoProvider getCryptoProvider(AppConfiguration configuration) throws KeyStoreException {
         AbstractCryptoProvider cryptoProvider = null;
         WebKeyStorage webKeyStorage = configuration.getWebKeysStorage();
         if (webKeyStorage == null) {
             return null;
         }
 
-        switch (webKeyStorage) {
-            case KEYSTORE:
-                cryptoProvider = getKeyStoreProvider(configuration);
-
-                break;
-            case PKCS11:
-                cryptoProvider = new ElevenCryptoProvider(
-                        configuration.getOxElevenGenerateKeyEndpoint(),
-                        configuration.getOxElevenSignEndpoint(),
-                        configuration.getOxElevenVerifySignatureEndpoint(),
-                        configuration.getOxElevenDeleteKeyEndpoint(),
-                        configuration.getOxElevenTestModeToken());
-                break;
+        if (webKeyStorage == WebKeyStorage.KEYSTORE) {
+            cryptoProvider = getKeyStoreProvider(configuration);
+        } else if (webKeyStorage == WebKeyStorage.PKCS11) {
+            cryptoProvider = new ElevenCryptoProvider(
+                    configuration.getOxElevenGenerateKeyEndpoint(),
+                    configuration.getOxElevenSignEndpoint(),
+                    configuration.getOxElevenVerifySignatureEndpoint(),
+                    configuration.getOxElevenDeleteKeyEndpoint(),
+                    configuration.getOxElevenTestModeToken());
         }
 
-        if (configuration.getKeyRegenerationEnabled()) { // set interval only if re-generation is enabled
+        if (cryptoProvider != null && configuration.getKeyRegenerationEnabled()) { // set interval only if re-generation is enabled
             cryptoProvider.setKeyRegenerationIntervalInDays(configuration.getKeyRegenerationInterval() / 24);
         }
         return cryptoProvider;
     }
 
-    private static AbstractCryptoProvider getKeyStoreProvider(AppConfiguration configuration) throws Exception {
+    private static AbstractCryptoProvider getKeyStoreProvider(AppConfiguration configuration) throws KeyStoreException {
         if (keyStoreProvider != null &&
                 StringUtils.isNotBlank(keyStoreProvider.getKeyStoreFile()) &&
                 StringUtils.isNotBlank(keyStoreProvider.getKeyStoreSecret()) &&
@@ -58,7 +59,8 @@ public class CryptoProviderFactory {
             return keyStoreProvider;
         }
 
-        return keyStoreProvider = new AuthCryptoProvider(configuration.getKeyStoreFile(), configuration.getKeyStoreSecret(), configuration.getDnName(), configuration.getRejectJwtWithNoneAlg(), configuration.getKeySelectionStrategy());
+        keyStoreProvider = new AuthCryptoProvider(configuration.getKeyStoreFile(), configuration.getKeyStoreSecret(), configuration.getDnName(), configuration.getRejectJwtWithNoneAlg(), configuration.getKeySelectionStrategy());
+        return keyStoreProvider;
     }
 
     public static void reset() {

@@ -135,7 +135,7 @@ public class ApplicationAuditLogger {
             return false;
         }
 
-        this.jmsBrokerURISet = new HashSet<String>(jmsBrokerURISet);
+        this.jmsBrokerURISet = new HashSet<>(jmsBrokerURISet);
         this.jmsUserName = appConfiguration.getJmsUserName();
         this.jmsPassword = appConfiguration.getJmsPassword();
 
