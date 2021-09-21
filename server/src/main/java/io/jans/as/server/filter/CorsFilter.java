@@ -6,12 +6,15 @@
 
 package io.jans.as.server.filter;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import io.jans.as.common.model.registration.Client;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.util.Util;
+import io.jans.as.server.model.config.ConfigurationFactory;
+import io.jans.as.server.service.ClientService;
+import io.jans.server.filters.AbstractCorsFilter;
+import io.jans.util.StringHelper;
+import org.apache.commons.codec.binary.Base64;
+import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import javax.servlet.FilterChain;
@@ -21,17 +24,13 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
-
-import org.apache.commons.codec.binary.Base64;
-import org.slf4j.Logger;
-
-import io.jans.as.common.model.registration.Client;
-import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.model.util.Util;
-import io.jans.as.server.model.config.ConfigurationFactory;
-import io.jans.as.server.service.ClientService;
-import io.jans.server.filters.AbstractCorsFilter;
-import io.jans.util.StringHelper;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * CORS Filter to support both Tomcat and Jetty
@@ -143,7 +142,7 @@ public class CorsFilter extends AbstractCorsFilter {
             if (httpRequest.getRequestURI().endsWith("/token")) {
                 if (header != null && header.startsWith("Basic ")) {
                     String base64Token = header.substring(6);
-                    String token = new String(Base64.decodeBase64(base64Token), Util.UTF8_STRING_ENCODING);
+                    String token = new String(Base64.decodeBase64(base64Token), StandardCharsets.UTF_8);
 
                     String username = "";
                     int delim = token.indexOf(":");

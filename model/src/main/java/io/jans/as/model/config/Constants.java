@@ -20,4 +20,12 @@ public class Constants {
     public static final String COUCHBASE_PROPERTIES_FILE_NAME = "jans-couchbase.properties";
     public static final String SALT_FILE_NAME = "salt";
     public static final String CERTS_DIR = "certsDir";
+
+    public static final String ERROR = "error";
+    public static final String ERROR_DESCRIPTION = "error_description";
+    public static final String ERROR_URI = "error_uri";
+    public static final String REASON = "reason";
+
+    public static final String STATE = "state";
+    public static final String REDIRECT = "redirect";
 }
