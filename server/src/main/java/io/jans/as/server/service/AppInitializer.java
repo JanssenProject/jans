@@ -251,10 +251,9 @@ public class AppInitializer {
 		quartzSchedulerManager.start();
 
 		String disableScheduler = System.getProperties().getProperty("gluu.disable.scheduler");
-		if ((disableScheduler != null) && Boolean.valueOf(disableScheduler)) {
+		if (Boolean.parseBoolean(disableScheduler)) {
 			this.log.warn("Suspending Quartz Scheduler Service...");
 			quartzSchedulerManager.standby();
-			return;
 		}
 	}
 
@@ -268,9 +267,7 @@ public class AppInitializer {
 		}
 
 		try {
-			StringEncrypter stringEncrypter = StringEncrypter.instance(encodeSalt);
-
-			return stringEncrypter;
+			return StringEncrypter.instance(encodeSalt);
 		} catch (EncryptionException ex) {
 			throw new ConfigurationException("Failed to create StringEncrypter instance");
 		}
@@ -342,11 +339,10 @@ public class AppInitializer {
 	protected Properties preparePersistanceProperties() {
 		PersistenceConfiguration persistenceConfiguration = this.configurationFactory.getPersistenceConfiguration();
 		FileConfiguration persistenceConfig = persistenceConfiguration.getConfiguration();
-		Properties connectionProperties = (Properties) persistenceConfig.getProperties();
+		Properties connectionProperties = persistenceConfig.getProperties();
 
 		EncryptionService securityService = encryptionServiceInstance.get();
-		Properties decryptedConnectionProperties = securityService.decryptAllProperties(connectionProperties);
-		return decryptedConnectionProperties;
+		return securityService.decryptAllProperties(connectionProperties);
 	}
 
 	protected Properties prepareCustomPersistanceProperties(String configId) {
@@ -418,7 +414,7 @@ public class AppInitializer {
 	@ApplicationScoped
 	@Named(ApplicationFactory.PERSISTENCE_AUTH_ENTRY_MANAGER_NAME)
 	public List<PersistenceEntryManager> createPersistenceAuthEntryManager() {
-		List<PersistenceEntryManager> persistenceAuthEntryManagers = new ArrayList<PersistenceEntryManager>();
+		List<PersistenceEntryManager> persistenceAuthEntryManagers = new ArrayList<>();
 		if (this.persistenceAuthConfigs.size() == 0) {
 			return persistenceAuthEntryManagers;
 		}
@@ -528,7 +524,7 @@ public class AppInitializer {
 	}
 
 	private List<Properties> prepareAuthConnectionProperties(List<GluuLdapConfiguration> persistenceAuthConfigs, String persistenceType) {
-		List<Properties> result = new ArrayList<Properties>();
+		List<Properties> result = new ArrayList<>();
 
 		// Prepare connection providers per LDAP authentication configuration
 		for (GluuLdapConfiguration persistenceAuthConfig : persistenceAuthConfigs) {
@@ -650,21 +646,21 @@ public class AppInitializer {
 	}
 
 	private List<GluuLdapConfiguration> loadPersistenceAuthConfigs(GluuConfiguration configuration) {
-		List<GluuLdapConfiguration> persistenceAuthConfigs = new ArrayList<GluuLdapConfiguration>();
+		List<GluuLdapConfiguration> config = new ArrayList<>();
 
 		List<IDPAuthConf> persistenceIdpAuthConfigs = loadLdapIdpAuthConfigs(configuration);
 		if (persistenceIdpAuthConfigs == null) {
-			return persistenceAuthConfigs;
+			return config;
 		}
 
 		for (IDPAuthConf persistenceIdpAuthConfig : persistenceIdpAuthConfigs) {
 			GluuLdapConfiguration persistenceAuthConfig = persistenceIdpAuthConfig.asLdapConfiguration();
 			if ((persistenceAuthConfig != null) && persistenceAuthConfig.isEnabled()) {
-				persistenceAuthConfigs.add(persistenceAuthConfig);
+				config.add(persistenceAuthConfig);
 			}
 		}
 
-		return persistenceAuthConfigs;
+		return config;
 	}
 
 	private List<IDPAuthConf> loadLdapIdpAuthConfigs(GluuConfiguration configuration) {
@@ -672,7 +668,7 @@ public class AppInitializer {
 			return null;
 		}
 
-		List<IDPAuthConf> configurations = new ArrayList<IDPAuthConf>();
+		List<IDPAuthConf> configurations = new ArrayList<>();
 		for (IDPAuthConf authConf : configuration.getIdpAuthn()) {
 			if (authConf.getType().equalsIgnoreCase("ldap") || authConf.getType().equalsIgnoreCase("auth")) {
 				configurations.add(authConf);

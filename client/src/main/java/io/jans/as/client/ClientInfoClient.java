@@ -6,13 +6,7 @@
 
 package io.jans.as.client;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.core.MediaType;
-
+import io.jans.as.model.common.AuthorizationMethod;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.jboss.resteasy.client.ClientExecutor;
@@ -21,8 +15,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import io.jans.as.model.common.AuthorizationMethod;
-import io.jans.as.model.userinfo.UserInfoErrorResponseType;
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.core.MediaType;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Encapsulates functionality to make client info request calls to an authorization server via REST Services.
@@ -114,9 +111,7 @@ public class ClientInfoClient extends BaseClient<ClientInfoRequest, ClientInfoRe
                 clientResponse = clientRequest.get(String.class);
             }
 
-            int status = clientResponse.getStatus();
-
-            setResponse(new ClientInfoResponse(status));
+            setResponse(new ClientInfoResponse(clientResponse));
 
             String entity = clientResponse.getEntity(String.class);
             getResponse().setEntity(entity);
@@ -124,19 +119,6 @@ public class ClientInfoClient extends BaseClient<ClientInfoRequest, ClientInfoRe
             if (StringUtils.isNotBlank(entity)) {
                 try {
                     JSONObject jsonObj = new JSONObject(entity);
-
-                    if (jsonObj.has("error")) {
-                        getResponse().setErrorType(UserInfoErrorResponseType.fromString(jsonObj.getString("error")));
-                        jsonObj.remove("error");
-                    }
-                    if (jsonObj.has("error_description")) {
-                        getResponse().setErrorDescription(jsonObj.getString("error_description"));
-                        jsonObj.remove("error_description");
-                    }
-                    if (jsonObj.has("error_uri")) {
-                        getResponse().setErrorUri(jsonObj.getString("error_uri"));
-                        jsonObj.remove("error_uri");
-                    }
 
                     for (Iterator<String> iterator = jsonObj.keys(); iterator.hasNext(); ) {
                         String key = iterator.next();
@@ -157,7 +139,7 @@ public class ClientInfoClient extends BaseClient<ClientInfoRequest, ClientInfoRe
                             }
                         }
 
-                        getResponse().getClaims().put(key, values);
+                        getResponse().getClaimMap().put(key, values);
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();

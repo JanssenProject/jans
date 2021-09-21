@@ -13,6 +13,7 @@ import io.jans.as.model.common.Display;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseMode;
 import io.jans.as.model.common.ResponseType;
+import io.jans.as.model.config.Constants;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
 import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
@@ -566,7 +567,7 @@ public class JwtAuthorizationRequest {
                 obj.put("redirect_uri", URLEncoder.encode(redirectUri, "UTF-8"));
             }
             if (StringUtils.isNotBlank(state)) {
-                obj.put("state", state);
+                obj.put(Constants.STATE, state);
             }
             if (StringUtils.isNotBlank(nonce)) {
                 obj.put("nonce", nonce);
