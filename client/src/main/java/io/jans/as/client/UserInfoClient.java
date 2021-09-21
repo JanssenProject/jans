@@ -138,7 +138,6 @@ public class UserInfoClient extends BaseClient<UserInfoRequest, UserInfoResponse
                     }
                 } else {
                     try {
-                        getResponse().injectErrorIfExistSilently(entity);
                         JSONObject jsonObj = new JSONObject(entity);
 
                         for (Iterator<String> iterator = jsonObj.keys(); iterator.hasNext(); ) {
