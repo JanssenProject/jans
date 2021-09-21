@@ -117,7 +117,6 @@ public class ClientInfoClient extends BaseClient<ClientInfoRequest, ClientInfoRe
             getResponse().setEntity(entity);
             getResponse().setHeaders(clientResponse.getMetadata());
             if (StringUtils.isNotBlank(entity)) {
-                getResponse().injectErrorIfExistSilently(entity);
                 try {
                     JSONObject jsonObj = new JSONObject(entity);
 
