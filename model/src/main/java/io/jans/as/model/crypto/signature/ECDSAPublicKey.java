@@ -6,19 +6,18 @@
 
 package io.jans.as.model.crypto.signature;
 
+import io.jans.as.model.crypto.PublicKey;
+import io.jans.as.model.util.Base64Util;
+import io.jans.as.model.util.StringUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.math.BigInteger;
+
 import static io.jans.as.model.jwk.JWKParameter.EXPONENT;
 import static io.jans.as.model.jwk.JWKParameter.MODULUS;
 import static io.jans.as.model.jwk.JWKParameter.X;
 import static io.jans.as.model.jwk.JWKParameter.Y;
-
-import java.math.BigInteger;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import io.jans.as.model.crypto.PublicKey;
-import io.jans.as.model.util.Base64Util;
-import io.jans.as.model.util.StringUtils;
 
 /**
  * The Public Key for the Elliptic Curve Digital Signature Algorithm (ECDSA)
@@ -27,9 +26,6 @@ import io.jans.as.model.util.StringUtils;
  * @version July 31, 2016
  */
 public class ECDSAPublicKey extends PublicKey {
-
-    private static final String ECDSA_ALGORITHM = "EC";
-    private static final String USE = "sig";
 
     private SignatureAlgorithm signatureAlgorithm;
     private BigInteger x;
@@ -47,10 +43,12 @@ public class ECDSAPublicKey extends PublicKey {
                 new BigInteger(1, Base64Util.base64urldecode(y)));
     }
 
+    @Override
     public SignatureAlgorithm getSignatureAlgorithm() {
         return signatureAlgorithm;
     }
 
+    @Override
     public void setSignatureAlgorithm(SignatureAlgorithm signatureAlgorithm) {
         this.signatureAlgorithm = signatureAlgorithm;
     }
@@ -87,8 +85,6 @@ public class ECDSAPublicKey extends PublicKey {
     public String toString() {
         try {
             return toJSONObject().toString(4);
-        } catch (JSONException e) {
-            return StringUtils.EMPTY_STRING;
         } catch (Exception e) {
             return StringUtils.EMPTY_STRING;
         }

@@ -32,7 +32,7 @@ import java.security.cert.X509Certificate;
  */
 public class CertUtils {
 
-    private final static Logger log = LoggerFactory.getLogger(CertUtils.class);
+    private static final Logger log = LoggerFactory.getLogger(CertUtils.class);
 
     private CertUtils() {
     }

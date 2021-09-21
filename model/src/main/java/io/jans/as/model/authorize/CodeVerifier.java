@@ -73,13 +73,13 @@ public class CodeVerifier {
         Preconditions.checkNotNull(codeChallengeMethod);
         Preconditions.checkNotNull(codeVerifier);
 
-        switch (codeChallengeMethod) {
-            case PLAIN:
-                return codeVerifier;
-            case S256:
-                return s256(codeVerifier);
+        if (codeChallengeMethod == CodeChallengeMethod.PLAIN) {
+            return codeVerifier;
         }
-        throw new RuntimeException("Unsupported code challenge method: " + codeChallengeMethod);
+        if (codeChallengeMethod == CodeChallengeMethod.S256) {
+            return s256(codeVerifier);
+        }
+        throw new IllegalArgumentException("Unknown code challenge method: " + codeChallengeMethod);
     }
 
     public static boolean matched(String codeChallenge, String codeChallengeMethod, String codeVerifier) {
@@ -117,10 +117,7 @@ public class CodeVerifier {
             return false;
         }
         int length = codeVerifier.length();
-        if (length > MAX_CODE_VERIFIER_LENGTH || length < MIN_CODE_VERIFIER_LENGTH) {
-            return false;
-        }
-        return true;
+        return length <= MAX_CODE_VERIFIER_LENGTH && length >= MIN_CODE_VERIFIER_LENGTH;
     }
 
     public String getCodeChallenge() {

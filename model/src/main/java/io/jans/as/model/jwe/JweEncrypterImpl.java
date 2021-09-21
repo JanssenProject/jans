@@ -6,14 +6,6 @@
 
 package io.jans.as.model.jwe;
 
-import java.io.UnsupportedEncodingException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
-import java.security.interfaces.RSAPublicKey;
-import java.text.ParseException;
-import java.util.Arrays;
-
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWEEncrypter;
 import com.nimbusds.jose.JWEHeader;
@@ -23,7 +15,6 @@ import com.nimbusds.jose.crypto.AESEncrypter;
 import com.nimbusds.jose.crypto.RSAEncrypter;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jwt.SignedJWT;
-
 import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
 import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
 import io.jans.as.model.exception.InvalidJweException;
@@ -31,6 +22,14 @@ import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwt.JwtHeader;
 import io.jans.as.model.jwt.JwtType;
 import io.jans.as.model.util.Base64Util;
+
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
+import java.security.interfaces.RSAPublicKey;
+import java.text.ParseException;
+import java.util.Arrays;
 
 /**
  * @author Javier Rojas Blum
@@ -79,11 +78,11 @@ public class JweEncrypterImpl extends AbstractJweEncrypter {
         }
     }
 
-    public static Payload createPayload(Jwe jwe) throws ParseException, InvalidJwtException, UnsupportedEncodingException {
+    public static Payload createPayload(Jwe jwe) throws ParseException, InvalidJwtException {
         if (jwe.getSignedJWTPayload() != null) {
             return new Payload(SignedJWT.parse(jwe.getSignedJWTPayload().toString()));
         }
-        return new Payload(Base64Util.base64urlencode(jwe.getClaims().toJsonString().getBytes("UTF-8")));
+        return new Payload(Base64Util.base64urlencode(jwe.getClaims().toJsonString().getBytes(StandardCharsets.UTF_8)));
     }
 
     @Override

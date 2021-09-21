@@ -6,17 +6,15 @@
 
 package io.jans.as.model.crypto.binding;
 
+import com.google.common.base.Preconditions;
+import io.jans.as.model.util.Base64Util;
+import io.jans.as.model.util.ByteUtils;
+import org.apache.log4j.Logger;
+
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import org.apache.log4j.Logger;
-
-import com.google.common.base.Preconditions;
-
-import io.jans.as.model.util.Base64Util;
-import io.jans.as.model.util.ByteUtils;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -41,7 +39,7 @@ public class TokenBindingMessageParser {
                 throw new TokenBindingParseException("Invalid token binding message. First two bytes length value does not match actual bytes length.");
             }
 
-            List<TokenBinding> result = new ArrayList<TokenBinding>();
+            List<TokenBinding> result = new ArrayList<>();
 
             TokenBindingStream stream = new TokenBindingStream(raw, 2, raw.length);
             Preconditions.checkState(stream.getPos() == 2);

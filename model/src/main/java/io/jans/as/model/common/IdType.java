@@ -22,41 +22,40 @@ public enum IdType {
     SERVER("server", "server", "0004", "New Unique Server Inum Generator"),
     ATTRIBUTE("attribute", "attribute", "0005", "New Unique Attribute Inum Generator"),
     TRUST_RELATIONSHIP("trelationship", "0006", "trustRelationship", "New Unique Trust Relationship Inum Generator"),
-    LINK_CONTRACTS("lcontracts", "linkContracts", "0007", "New Unique Link Contracts Inum Generator"),
     CLIENTS("oclient", "openidConnectClient", "0008", "New Unique Openid Connect Client Inum Generator");
 
-    private final String m_type;
-    private final String m_value;
-    private final String m_inum;
-    private final String m_htmlText;
+    private final String type;
+    private final String value;
+    private final String inum;
+    private final String htmlText;
 
-    private IdType(String p_type, String p_value, String p_inum, String p_htmlText) {
-        m_type = p_type;
-        m_value = p_value;
-        m_inum = p_inum;
-        m_htmlText = p_htmlText;
+    private IdType(String type, String value, String inum, String htmlText) {
+        this.type = type;
+        this.value = value;
+        this.inum = inum;
+        this.htmlText = htmlText;
     }
 
     public String getInum() {
-        return m_inum;
+        return inum;
     }
 
     public String getHtmlText() {
-        return m_htmlText;
+        return htmlText;
     }
 
     public String getType() {
-        return m_type;
+        return type;
     }
 
     public String getValue() {
-        return m_value;
+        return value;
     }
 
-    public static IdType fromString(String p_string) {
-        if (StringUtils.isNotBlank(p_string)) {
+    public static IdType fromString(String string) {
+        if (StringUtils.isNotBlank(string)) {
             for (IdType t : values()) {
-                if (t.getType().equalsIgnoreCase(p_string) || t.getValue().equalsIgnoreCase(p_string)) {
+                if (t.getType().equalsIgnoreCase(string) || t.getValue().equalsIgnoreCase(string)) {
                     return t;
                 }
             }
