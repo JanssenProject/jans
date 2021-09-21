@@ -13,6 +13,10 @@ import org.jboss.resteasy.client.ClientResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 09/10/2012
@@ -24,16 +28,35 @@ public abstract class BaseResponseWithErrors<T extends IErrorType> extends BaseR
     private String errorDescription;
     private String errorUri;
 
+    private Map<String, List<String>> claims;
+
     public BaseResponseWithErrors() {
         super();
     }
 
     public BaseResponseWithErrors(ClientResponse<String> clientResponse) {
         super(clientResponse);
+        claims = new HashMap<>();
         final String entity = getEntity();
         if (StringUtils.isNotBlank(entity)) {
             injectErrorIfExistSilently(entity);
         }
+    }
+
+    public Map<String, List<String>> getClaims() {
+        return claims;
+    }
+
+    public void setClaims(Map<String, List<String>> claims) {
+        this.claims = claims;
+    }
+
+    public List<String> getClaim(String claimName) {
+        if (claims.containsKey(claimName)) {
+            return claims.get(claimName);
+        }
+
+        return null;
     }
 
     public String getErrorDescription() {
@@ -88,6 +111,7 @@ public abstract class BaseResponseWithErrors<T extends IErrorType> extends BaseR
     @Override
     public String toString() {
         return "BaseResponseWithErrors{" +
+                "claims=" + claims +
                 "errorType=" + errorType +
                 ", errorDescription='" + errorDescription + '\'' +
                 ", errorUri='" + errorUri + '\'' +
