@@ -221,7 +221,7 @@
     <!-- Registration test with Software Statement -->
     <test name="Registration test with Software Statement" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.RegistrationWithSoftwareStatement"/>
+            <class name="io.jans.as.client.ws.rs.RegistrationWithSoftwareStatementTest"/>
         </classes>
     </test>
 
