@@ -90,11 +90,9 @@ public class Jwe extends JsonWebResponse {
     }
 
     public String getAdditionalAuthenticatedData() {
-        String additionalAuthenticatedData = encodedHeader + "."
+        return encodedHeader + "."
                 + encodedEncryptedKey + "."
                 + encodedInitializationVector;
-
-        return additionalAuthenticatedData;
     }
 
     public Jwt getSignedJWTPayload() {

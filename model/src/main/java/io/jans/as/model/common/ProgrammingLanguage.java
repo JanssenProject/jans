@@ -18,20 +18,20 @@ public enum ProgrammingLanguage {
     PYTHON("Python"),
     JAVA_SCRIPT("JavaScript");
 
-    private final String m_value;
+    private final String value;
 
-    private ProgrammingLanguage(String p_value) {
-        m_value = p_value;
+    private ProgrammingLanguage(String value) {
+        this.value = value;
     }
 
     public String getValue() {
-        return m_value;
+        return value;
     }
 
     @JsonCreator
-    public static ProgrammingLanguage fromString(String p_string) {
+    public static ProgrammingLanguage fromString(String string) {
         for (ProgrammingLanguage v : values()) {
-            if (v.getValue().equalsIgnoreCase(p_string)) {
+            if (v.getValue().equalsIgnoreCase(string)) {
                 return v;
             }
         }
@@ -41,7 +41,7 @@ public enum ProgrammingLanguage {
     @Override
     @JsonValue
     public String toString() {
-        return m_value;
+        return value;
     }
 
 }

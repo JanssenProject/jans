@@ -6,12 +6,10 @@
 
 package io.jans.as.model.jwt;
 
-import java.io.UnsupportedEncodingException;
-
+import io.jans.as.model.util.Base64Util;
 import org.apache.commons.lang.StringUtils;
 
-import io.jans.as.model.util.Base64Util;
-import io.jans.as.model.util.Util;
+import java.nio.charset.StandardCharsets;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -21,36 +19,32 @@ import io.jans.as.model.util.Util;
 
 public class PureJwt {
 
-    private final String m_encodedHeader;
-    private final String m_encodedPayload;
-    private final String m_encodedSignature;
-    private final String m_signingInput;
+    private final String encodedHeader;
+    private final String encodedPayload;
+    private final String encodedSignature;
+    private final String signingInput;
 
-    private final String m_decodedHeader;
-    private final String m_decodedPayload;
+    private final String decodedHeader;
+    private final String decodedPayload;
 
-    public PureJwt(String p_encodedHeader, String p_encodedPayload, String p_encodedSignature) {
+    public PureJwt(String encodedHeader, String encodedPayload, String encodedSignature) {
 
-        m_encodedHeader = p_encodedHeader;
-        m_encodedPayload = p_encodedPayload;
-        m_encodedSignature = p_encodedSignature;
-        m_signingInput = m_encodedHeader + "." + m_encodedPayload;
+        this.encodedHeader = encodedHeader;
+        this.encodedPayload = encodedPayload;
+        this.encodedSignature = encodedSignature;
+        this.signingInput = this.encodedHeader + "." + this.encodedPayload;
 
         String decodedPayloadTemp = null;
         String decodedHeaderTemp = null;
-        try {
-            decodedHeaderTemp = new String(Base64Util.base64urldecode(p_encodedHeader), Util.UTF8_STRING_ENCODING);
-            decodedPayloadTemp = new String(Base64Util.base64urldecode(p_encodedPayload), Util.UTF8_STRING_ENCODING);
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        m_decodedHeader = decodedHeaderTemp;
-        m_decodedPayload = decodedPayloadTemp;
+        decodedHeaderTemp = new String(Base64Util.base64urldecode(encodedHeader), StandardCharsets.UTF_8);
+        decodedPayloadTemp = new String(Base64Util.base64urldecode(encodedPayload), StandardCharsets.UTF_8);
+        this.decodedHeader = decodedHeaderTemp;
+        this.decodedPayload = decodedPayloadTemp;
     }
 
-    public static PureJwt parse(String p_encodedString) {
-        if (StringUtils.isNotBlank(p_encodedString)) {
-            String[] jwtParts = p_encodedString.split("\\.");
+    public static PureJwt parse(String encodedString) {
+        if (StringUtils.isNotBlank(encodedString)) {
+            String[] jwtParts = encodedString.split("\\.");
             if (jwtParts.length == 3) {
                 return new PureJwt(jwtParts[0], jwtParts[1], jwtParts[2]);
             } else if (jwtParts.length == 2) {
@@ -61,27 +55,27 @@ public class PureJwt {
     }
 
     public String getDecodedHeader() {
-        return m_decodedHeader;
+        return decodedHeader;
     }
 
     public String getDecodedPayload() {
-        return m_decodedPayload;
+        return decodedPayload;
     }
 
     public String getSigningInput() {
-        return m_signingInput;
+        return signingInput;
     }
 
     public String getEncodedHeader() {
-        return m_encodedHeader;
+        return encodedHeader;
     }
 
     public String getEncodedPayload() {
-        return m_encodedPayload;
+        return encodedPayload;
     }
 
     public String getEncodedSignature() {
-        return m_encodedSignature;
+        return encodedSignature;
     }
 
     @Override
@@ -91,21 +85,18 @@ public class PureJwt {
 
         PureJwt pureJwt = (PureJwt) o;
 
-        if (m_encodedHeader != null ? !m_encodedHeader.equals(pureJwt.m_encodedHeader) : pureJwt.m_encodedHeader != null)
+        if (encodedHeader != null ? !encodedHeader.equals(pureJwt.encodedHeader) : pureJwt.encodedHeader != null)
             return false;
-        if (m_encodedPayload != null ? !m_encodedPayload.equals(pureJwt.m_encodedPayload) : pureJwt.m_encodedPayload != null)
+        if (encodedPayload != null ? !encodedPayload.equals(pureJwt.encodedPayload) : pureJwt.encodedPayload != null)
             return false;
-        if (m_encodedSignature != null ? !m_encodedSignature.equals(pureJwt.m_encodedSignature) : pureJwt.m_encodedSignature != null)
-            return false;
-
-        return true;
+        return encodedSignature != null ? encodedSignature.equals(pureJwt.encodedSignature) : pureJwt.encodedSignature == null;
     }
 
     @Override
     public int hashCode() {
-        int result = m_encodedHeader != null ? m_encodedHeader.hashCode() : 0;
-        result = 31 * result + (m_encodedPayload != null ? m_encodedPayload.hashCode() : 0);
-        result = 31 * result + (m_encodedSignature != null ? m_encodedSignature.hashCode() : 0);
+        int result = encodedHeader != null ? encodedHeader.hashCode() : 0;
+        result = 31 * result + (encodedPayload != null ? encodedPayload.hashCode() : 0);
+        result = 31 * result + (encodedSignature != null ? encodedSignature.hashCode() : 0);
         return result;
     }
 }
