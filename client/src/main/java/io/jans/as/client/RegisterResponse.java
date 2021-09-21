@@ -6,6 +6,7 @@
 
 package io.jans.as.client;
 
+import com.google.common.collect.Lists;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.register.RegisterErrorResponseType;
@@ -15,16 +16,12 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.jboss.resteasy.client.ClientResponse;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import static io.jans.as.model.register.RegisterRequestParam.GRANT_TYPES;
 import static io.jans.as.model.register.RegisterRequestParam.RESPONSE_TYPES;
@@ -51,7 +48,6 @@ public class RegisterResponse extends BaseResponseWithErrors<RegisterErrorRespon
     private Date clientSecretExpiresAt;
     private List<ResponseType> responseTypes;
     private List<GrantType> grantTypes;
-    private Map<String, String> claims = new HashMap<String, String>();
 
     public RegisterResponse() {
     }
@@ -128,15 +124,9 @@ public class RegisterResponse extends BaseResponseWithErrors<RegisterErrorRespon
 
                 for (Iterator<String> it = jsonObj.keys(); it.hasNext(); ) {
                     String key = it.next();
-                    getClaims().put(key, String.valueOf(jsonObj.get(key)));
+                    getClaimMap().put(key, Lists.newArrayList(String.valueOf(jsonObj.get(key))));
                 }
-            } catch (JSONException e) {
-                LOG.error(e.getMessage(), e);
-            } catch (NoSuchMethodException e) {
-                LOG.error(e.getMessage(), e);
-            } catch (IllegalAccessException e) {
-                LOG.error(e.getMessage(), e);
-            } catch (InvocationTargetException e) {
+            } catch (Exception e) {
                 LOG.error(e.getMessage(), e);
             }
         }
@@ -241,13 +231,5 @@ public class RegisterResponse extends BaseResponseWithErrors<RegisterErrorRespon
 
     public void setGrantTypes(List<GrantType> grantTypes) {
         this.grantTypes = grantTypes;
-    }
-
-    public Map<String, String> getClaims() {
-        return claims;
-    }
-
-    public void setClaims(Map<String, String> claims) {
-        this.claims = claims;
     }
 }

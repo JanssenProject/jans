@@ -6,11 +6,6 @@
 
 package io.jans.as.server.model.common;
 
-import java.io.Serializable;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.concurrent.TimeUnit;
-
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.util.HashUtil;
 import io.jans.as.model.util.Util;
@@ -19,6 +14,11 @@ import io.jans.as.server.util.ServerUtil;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.Expiration;
 import io.jans.orm.model.base.Deletable;
+
+import java.io.Serializable;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 /**
  * <p>
@@ -60,7 +60,7 @@ public abstract class AbstractToken implements Serializable, Deletable {
      *
      * @param lifeTime The life time of the token.
      */
-    public AbstractToken(int lifeTime) {
+    protected AbstractToken(int lifeTime) {
         if (lifeTime <= 0) {
             throw new IllegalArgumentException("Lifetime of the token is less or equal to zero.");
         }
@@ -102,9 +102,9 @@ public abstract class AbstractToken implements Serializable, Deletable {
     }
 
     public void resetTtlFromExpirationDate() {
-        final Integer ttl = Util.getNumberOfSecondFromNow(getExpirationDate());
-        if (ttl != null) {
-            this.ttl = ttl;
+        final Integer seconds = Util.getNumberOfSecondFromNow(getExpirationDate());
+        if (seconds != null) {
+            this.ttl = seconds;
         }
     }
 
@@ -193,7 +193,7 @@ public abstract class AbstractToken implements Serializable, Deletable {
      *
      * @return <code>true</code> if the token has been revoked.
      */
-    public boolean isRevoked() {
+    public synchronized boolean isRevoked() {
         return revoked;
     }
 
@@ -212,7 +212,7 @@ public abstract class AbstractToken implements Serializable, Deletable {
      *
      * @return <code>true</code> if the token has expired.
      */
-    public boolean isExpired() {
+    public synchronized boolean isExpired() {
         return expired;
     }
 

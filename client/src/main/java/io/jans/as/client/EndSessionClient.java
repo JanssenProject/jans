@@ -6,19 +6,18 @@
 
 package io.jans.as.client;
 
-import java.util.Map;
-
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.core.MediaType;
-
-import org.apache.commons.lang.StringUtils;
-import org.json.JSONException;
-import org.json.JSONObject;
-
+import io.jans.as.model.config.Constants;
 import io.jans.as.model.session.EndSessionErrorResponseType;
 import io.jans.as.model.session.EndSessionRequestParam;
 import io.jans.as.model.session.EndSessionResponseParam;
 import io.jans.as.model.util.Util;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+import org.json.JSONObject;
+
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.core.MediaType;
+import java.util.Map;
 
 /**
  * Encapsulates functionality to make end session request calls to an
@@ -29,7 +28,7 @@ import io.jans.as.model.util.Util;
  */
 public class EndSessionClient extends BaseClient<EndSessionRequest, EndSessionResponse> {
 
-    private static final String mediaType = MediaType.TEXT_PLAIN;
+    private static final Logger LOG = Logger.getLogger(EndSessionClient.class);
 
     /**
      * Constructs an end session client by providing an URL where the REST service is located.
@@ -68,7 +67,7 @@ public class EndSessionClient extends BaseClient<EndSessionRequest, EndSessionRe
     public EndSessionResponse exec() {
         // Prepare request parameters
         initClientRequest();
-        clientRequest.accept(mediaType);
+        clientRequest.accept(MediaType.TEXT_PLAIN);
         clientRequest.setHttpMethod(getHttpMethod());
 
         if (StringUtils.isNotBlank(getRequest().getIdTokenHint())) {
@@ -109,23 +108,19 @@ public class EndSessionClient extends BaseClient<EndSessionRequest, EndSessionRe
             }
 
             if (!Util.isNullOrEmpty(entity) && !entity.contains("<html>")) {
-                try {
-                    JSONObject jsonObj = new JSONObject(entity);
-                    if (jsonObj.has("error")) {
-                        getResponse().setErrorType(EndSessionErrorResponseType.fromString(jsonObj.getString("error")));
-                    }
-                    if (jsonObj.has("error_description")) {
-                        getResponse().setErrorDescription(jsonObj.getString("error_description"));
-                    }
-                    if (jsonObj.has("error_uri")) {
-                        getResponse().setErrorUri(jsonObj.getString("error_uri"));
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
+                JSONObject jsonObj = new JSONObject(entity);
+                if (jsonObj.has(Constants.ERROR)) {
+                    getResponse().setErrorType(EndSessionErrorResponseType.fromString(jsonObj.getString(Constants.ERROR)));
+                }
+                if (jsonObj.has(Constants.ERROR_DESCRIPTION)) {
+                    getResponse().setErrorDescription(jsonObj.getString(Constants.ERROR_DESCRIPTION));
+                }
+                if (jsonObj.has(Constants.ERROR_URI)) {
+                    getResponse().setErrorUri(jsonObj.getString(Constants.ERROR_URI));
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
         } finally {
             closeConnection();
         }

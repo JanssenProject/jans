@@ -6,18 +6,21 @@
 
 package io.jans.as.client;
 
+import io.jans.as.model.config.Constants;
+import io.jans.as.model.token.TokenRevocationErrorResponseType;
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 import org.jboss.resteasy.client.ClientResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import io.jans.as.model.token.TokenRevocationErrorResponseType;
 
 /**
  * @author Javier Rojas Blum
  * @version January 16, 2019
  */
 public class TokenRevocationResponse extends BaseResponse {
+
+    private static final Logger LOG = Logger.getLogger(TokenRevocationResponse.class);
 
     private TokenRevocationErrorResponseType errorType;
     private String errorDescription;
@@ -32,17 +35,17 @@ public class TokenRevocationResponse extends BaseResponse {
         if (StringUtils.isNotBlank(entity)) {
             try {
                 JSONObject jsonObj = new JSONObject(entity);
-                if (jsonObj.has("error")) {
-                    errorType = TokenRevocationErrorResponseType.getByValue(jsonObj.getString("error"));
+                if (jsonObj.has(Constants.ERROR)) {
+                    errorType = TokenRevocationErrorResponseType.getByValue(jsonObj.getString(Constants.ERROR));
                 }
-                if (jsonObj.has("error_description")) {
-                    errorDescription = jsonObj.getString("error_description");
+                if (jsonObj.has(Constants.ERROR_DESCRIPTION)) {
+                    errorDescription = jsonObj.getString(Constants.ERROR_DESCRIPTION);
                 }
-                if (jsonObj.has("error_uri")) {
-                    errorUri = jsonObj.getString("error_uri");
+                if (jsonObj.has(Constants.ERROR_URI)) {
+                    errorUri = jsonObj.getString(Constants.ERROR_URI);
                 }
             } catch (JSONException e) {
-                e.printStackTrace();
+                LOG.error(e.getMessage(), e);
             }
         }
     }

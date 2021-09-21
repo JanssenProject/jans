@@ -6,6 +6,11 @@
 
 package io.jans.as.model.crypto;
 
+import io.jans.as.model.common.JSONable;
+import io.jans.as.model.util.StringUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import static io.jans.as.model.jwk.JWKParameter.ALGORITHM;
 import static io.jans.as.model.jwk.JWKParameter.CERTIFICATE_CHAIN;
 import static io.jans.as.model.jwk.JWKParameter.CURVE;
@@ -15,12 +20,6 @@ import static io.jans.as.model.jwk.JWKParameter.KEY_TYPE;
 import static io.jans.as.model.jwk.JWKParameter.KEY_USE;
 import static io.jans.as.model.jwk.JWKParameter.PRIVATE_KEY;
 import static io.jans.as.model.jwk.JWKParameter.PUBLIC_KEY;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import io.jans.as.model.common.JSONable;
-import io.jans.as.model.util.StringUtils;
 
 /**
  * @author Javier Rojas Blum
@@ -131,8 +130,6 @@ public class Key<E extends PrivateKey, F extends PublicKey> implements JSONable 
     public String toString() {
         try {
             return toJSONObject().toString(4).replace("\\/", "/");
-        } catch (JSONException e) {
-            return StringUtils.EMPTY_STRING;
         } catch (Exception e) {
             return StringUtils.EMPTY_STRING;
         }
