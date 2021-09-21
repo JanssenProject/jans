@@ -6,12 +6,12 @@
 
 package io.jans.as.client;
 
+import io.jans.as.model.config.Constants;
+import io.jans.as.model.error.IErrorType;
 import org.apache.commons.lang.StringUtils;
 import org.jboss.resteasy.client.ClientResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import io.jans.as.model.error.IErrorType;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -68,14 +68,14 @@ public abstract class BaseResponseWithErrors<T extends IErrorType> extends BaseR
     }
 
     public void injectErrorIfExistSilently(JSONObject jsonObj) throws JSONException {
-        if (jsonObj.has("error")) {
-            errorType = fromString(jsonObj.getString("error"));
+        if (jsonObj.has(Constants.ERROR)) {
+            errorType = fromString(jsonObj.getString(Constants.ERROR));
         }
-        if (jsonObj.has("error_description")) {
-            errorDescription = jsonObj.getString("error_description");
+        if (jsonObj.has(Constants.ERROR_DESCRIPTION)) {
+            errorDescription = jsonObj.getString(Constants.ERROR_DESCRIPTION);
         }
-        if (jsonObj.has("error_uri")) {
-            errorUri = jsonObj.getString("error_uri");
+        if (jsonObj.has(Constants.ERROR_URI)) {
+            errorUri = jsonObj.getString(Constants.ERROR_URI);
         }
     }
 

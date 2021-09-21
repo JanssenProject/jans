@@ -35,7 +35,7 @@ public class AuthorizationRequest extends BaseRequest {
 
     private static final Logger LOG = Logger.getLogger(AuthorizationRequest.class);
 
-    public static String NO_REDIRECT_HEADER = "X-Gluu-NoRedirect";
+    public static final String NO_REDIRECT_HEADER = "X-Gluu-NoRedirect";
 
     private List<ResponseType> responseTypes;
     private String clientId;
@@ -401,10 +401,10 @@ public class AuthorizationRequest extends BaseRequest {
     /**
      * Sets whether session id should be requested.
      *
-     * @param p_requestSessionId session id.
+     * @param requestSessionId session id.
      */
-    public void setRequestSessionId(boolean p_requestSessionId) {
-        requestSessionId = p_requestSessionId;
+    public void setRequestSessionId(boolean requestSessionId) {
+        this.requestSessionId = requestSessionId;
     }
 
     /**
@@ -419,10 +419,10 @@ public class AuthorizationRequest extends BaseRequest {
     /**
      * Sets session id.
      *
-     * @param p_sessionId session id
+     * @param sessionId session id
      */
-    public void setSessionId(String p_sessionId) {
-        sessionId = p_sessionId;
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
     }
 
     public String getAccessToken() {
@@ -643,10 +643,8 @@ public class AuthorizationRequest extends BaseRequest {
                 queryStringBuilder.append("&");
                 queryStringBuilder.append(key).append("=").append(getCustomParameters().get(key));
             }
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
+        } catch (UnsupportedEncodingException | JSONException e) {
+            LOG.error(e.getMessage(), e);
         }
 
         return queryStringBuilder.toString();
@@ -658,8 +656,9 @@ public class AuthorizationRequest extends BaseRequest {
      *
      * @return A collection of parameters.
      */
+    @Override
     public Map<String, String> getParameters() {
-        Map<String, String> parameters = new HashMap<String, String>();
+        Map<String, String> parameters = new HashMap<>();
 
         try {
             // OAuth 2.0 request parameters
@@ -755,7 +754,7 @@ public class AuthorizationRequest extends BaseRequest {
                 parameters.put(key, getCustomParameters().get(key));
             }
         } catch (JSONException e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
         }
 
         return parameters;
