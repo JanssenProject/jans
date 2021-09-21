@@ -6,6 +6,7 @@ import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.as.model.error.IErrorType;
 import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.persistence.model.Par;
 import io.jans.as.server.authorize.ws.rs.AuthorizeRestWebServiceValidator;
@@ -17,6 +18,7 @@ import io.jans.as.server.service.RedirectUriResponse;
 import io.jans.as.server.service.RequestParameterService;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -53,12 +55,16 @@ public class ParValidator {
     @Inject
     private RequestParameterService requestParameterService;
 
-    public void validateRequestUriIsAbsent(String requestUri) {
+    public void validateRequestUriIsAbsent(@Nullable String requestUri) {
+        validateRequestUriIsAbsent(requestUri, AuthorizeErrorResponseType.INVALID_REQUEST);
+    }
+
+    public void validateRequestUriIsAbsent(@Nullable String requestUri, @NotNull IErrorType error) {
         if (StringUtils.isBlank(requestUri))
             return;
 
         log.trace("request_uri parameter is not allowed at PAR endpoint. Return error.");
-        throw errorResponseFactory.createBadRequestException(AuthorizeErrorResponseType.INVALID_REQUEST, "");
+        throw errorResponseFactory.createBadRequestException(error, "");
     }
 
     public void validateRequestObject(RedirectUriResponse redirectUriResponse, Par par, Client client) {
@@ -74,7 +80,7 @@ public class ParValidator {
             if (jwtRequest == null) {
                 throw authorizeRestWebServiceValidator.createInvalidJwtRequestException(redirectUriResponse, "Failed to parse jwt.");
             }
-            validateRequestUriIsAbsent(jwtRequest.getJsonPayload().getString("request_uri"));
+            validateRequestUriIsAbsent(jwtRequest.getJsonPayload().getString("request_uri"), AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT);
             setStateIntoPar(redirectUriResponse, par, jwtRequest);
 
             authorizeRestWebServiceValidator.validateRequestObject(jwtRequest, redirectUriResponse);

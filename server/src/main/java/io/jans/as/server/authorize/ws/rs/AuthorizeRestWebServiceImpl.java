@@ -81,6 +81,7 @@ import java.util.*;
 import java.util.Map.Entry;
 
 import static io.jans.as.model.util.StringUtils.implode;
+import static io.jans.as.server.util.ServerUtil.isTrue;
 
 /**
  * Implementation for request authorization through REST web services.
@@ -233,8 +234,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         Map<String, String> customParameters = requestParameterService.getCustomParameters(QueryStringDecoder.decode(httpRequest.getQueryString()));
 
         boolean isPar = Util.isPar(requestUri);
-        if (!isPar && ServerUtil.isTrue(appConfiguration.getRequirePar())) {
-            log.debug("Server configured for PAR only (via requirePar conf property). Failed to find PAR by request_uri (id): " + requestUri);
+        if (!isPar && isTrue(appConfiguration.getRequirePar())) {
+            log.debug("Server configured for PAR only (via requirePar conf property). Failed to find PAR by request_uri (id): {}", requestUri);
             throw new WebApplicationException(Response
                     .status(Response.Status.BAD_REQUEST)
                     .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST, state, "Failed to find par by request_uri"))
@@ -248,7 +249,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             requestUri = null; // set it to null, we don't want to follow request uri for PAR
             request = null; // request is validated and parameters parsed by PAR endpoint before PAR persistence
 
-            log.debug("Setting request parameters from PAR - " + par);
+            log.debug("Setting request parameters from PAR - {}", par);
 
             responseType = par.getAttributes().getResponseType();
             respMode = par.getAttributes().getResponseMode();
@@ -493,7 +494,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                         codeChallenge, codeChallengeMethod, sessionId, claims, authReqId, customParameters, oAuth2AuditLog, httpRequest);
             }
 
-            oAuth2AuditLog.setUsername(user.getUserId());
+            oAuth2AuditLog.setUsername(user != null ? user.getUserId() : "");
 
             ExternalPostAuthnContext postAuthnContext = new ExternalPostAuthnContext(client, sessionUser, httpRequest, httpResponse);
             final boolean forceReAuthentication = externalPostAuthnService.externalForceReAuthentication(client, postAuthnContext);
@@ -560,7 +561,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                         codeChallenge, codeChallengeMethod, sessionId, claims, authReqId, customParameters, oAuth2AuditLog, httpRequest);
             }
 
-            if (prompts.contains(io.jans.as.model.common.Prompt.CONSENT) || !sessionUser.isPermissionGrantedForClient(clientId)) {
+            if (prompts.contains(io.jans.as.model.common.Prompt.CONSENT) || !isTrue(sessionUser.isPermissionGrantedForClient(clientId))) {
                 if (!clientAuthorizationFetched) {
                     clientAuthorization = clientAuthorizationsService.find(user.getAttribute("inum"), client.getClientId());
                 }
@@ -654,7 +655,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 redirectUriResponse.getRedirectUri().addResponseParameter(AuthorizeResponseParam.ID_TOKEN, idToken.getCode());
             }
 
-            if (authorizationGrant != null && StringHelper.isNotEmpty(acrValuesStr) && !appConfiguration.getFapiCompatibility()) {
+            if (authorizationGrant != null && StringHelper.isNotEmpty(acrValuesStr) && !appConfiguration.isFapi()) {
                 redirectUriResponse.getRedirectUri().addResponseParameter(AuthorizeResponseParam.ACR_VALUES, acrValuesStr);
             }
 
@@ -664,15 +665,15 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 sessionUser.setId(newSessionId);
                 log.trace("newSessionId = {}", newSessionId);
             }
-            if (!appConfiguration.getFapiCompatibility() && appConfiguration.getSessionIdRequestParameterEnabled()) {
+            if (!appConfiguration.isFapi() && isTrue(appConfiguration.getSessionIdRequestParameterEnabled())) {
                 redirectUriResponse.getRedirectUri().addResponseParameter(AuthorizeResponseParam.SESSION_ID, sessionUser.getId());
             }
-            if (appConfiguration.getIncludeSidInResponse()) { // by defalut we do not include sid in response. It should be read by RP from id_token
+            if (isTrue(appConfiguration.getIncludeSidInResponse())) { // by defalut we do not include sid in response. It should be read by RP from id_token
                 redirectUriResponse.getRedirectUri().addResponseParameter(AuthorizeResponseParam.SID, sessionUser.getOutsideSid());
             }
             redirectUriResponse.getRedirectUri().addResponseParameter(AuthorizeResponseParam.SESSION_STATE, sessionIdService.computeSessionState(sessionUser, clientId, redirectUri));
             redirectUriResponse.getRedirectUri().addResponseParameter(AuthorizeResponseParam.STATE, state);
-            if (scope != null && !scope.isEmpty() && authorizationGrant != null && !appConfiguration.getFapiCompatibility()) {
+            if (scope != null && !scope.isEmpty() && authorizationGrant != null && !appConfiguration.isFapi()) {
                 scope = authorizationGrant.checkScopesPolicy(scope);
 
                 redirectUriResponse.getRedirectUri().addResponseParameter(AuthorizeResponseParam.SCOPE, scope);
@@ -740,9 +741,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
             builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse.getRedirectUri(), httpRequest);
 
-            if (appConfiguration.getCustomHeadersWithAuthorizationResponse()) {
-                for (String key : customResponseHeaders.keySet()) {
-                    builder.header(key, customResponseHeaders.get(key));
+            if (isTrue(appConfiguration.getCustomHeadersWithAuthorizationResponse())) {
+                for (Map.Entry<String, String> entry : customResponseHeaders.entrySet()) {
+                    builder.header(entry.getKey(), entry.getValue());
                 }
             }
 
@@ -754,7 +755,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             }
         } catch (WebApplicationException e) {
             applicationAuditLogger.sendMessage(oAuth2AuditLog);
-            log.error(e.getMessage(), e);
+            if (log.isErrorEnabled())
+                log.error(e.getMessage(), e);
             throw e;
         } catch (AcrChangedException e) { // Acr changed
             log.error("ACR is changed, please provide a supported and enabled acr value");
@@ -988,7 +990,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         if (StringUtils.isNotBlank(codeChallengeMethod)) {
             redirectUriResponse.addResponseParameter(io.jans.as.model.authorize.AuthorizeRequestParam.CODE_CHALLENGE_METHOD, codeChallengeMethod);
         }
-        if (StringUtils.isNotBlank(sessionId) && appConfiguration.getSessionIdRequestParameterEnabled()) {
+        if (StringUtils.isNotBlank(sessionId) && isTrue(appConfiguration.getSessionIdRequestParameterEnabled())) {
             redirectUriResponse.addResponseParameter(io.jans.as.model.authorize.AuthorizeRequestParam.SESSION_ID, sessionId);
         }
         if (StringUtils.isNotBlank(claims)) {
