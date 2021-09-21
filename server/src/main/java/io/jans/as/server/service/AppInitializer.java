@@ -646,21 +646,21 @@ public class AppInitializer {
 	}
 
 	private List<GluuLdapConfiguration> loadPersistenceAuthConfigs(GluuConfiguration configuration) {
-		List<GluuLdapConfiguration> persistenceAuthConfigs = new ArrayList<>();
+		List<GluuLdapConfiguration> config = new ArrayList<>();
 
 		List<IDPAuthConf> persistenceIdpAuthConfigs = loadLdapIdpAuthConfigs(configuration);
 		if (persistenceIdpAuthConfigs == null) {
-			return persistenceAuthConfigs;
+			return config;
 		}
 
 		for (IDPAuthConf persistenceIdpAuthConfig : persistenceIdpAuthConfigs) {
 			GluuLdapConfiguration persistenceAuthConfig = persistenceIdpAuthConfig.asLdapConfiguration();
 			if ((persistenceAuthConfig != null) && persistenceAuthConfig.isEnabled()) {
-				persistenceAuthConfigs.add(persistenceAuthConfig);
+				config.add(persistenceAuthConfig);
 			}
 		}
 
-		return persistenceAuthConfigs;
+		return config;
 	}
 
 	private List<IDPAuthConf> loadLdapIdpAuthConfigs(GluuConfiguration configuration) {
