@@ -6,6 +6,7 @@
 
 package io.jans.as.model.error;
 
+import io.jans.as.model.config.Constants;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONException;
@@ -183,15 +184,15 @@ public class ErrorResponse {
 			}
 
 			if (errorUri != null && !errorUri.isEmpty()) {
-				jsonObj.put("error_uri", errorUri);
+				jsonObj.put(Constants.ERROR_URI, errorUri);
 			}
 
 			if (StringUtils.isNotBlank(reason)) {
-			    jsonObj.put("reason", reason);
+			    jsonObj.put(Constants.REASON, reason);
             }
 
 			if (getState() != null && !getState().isEmpty()) {
-				jsonObj.put("state", getState());
+				jsonObj.put(Constants.STATE, getState());
 			}
 
 			return jsonObj.toString(4).replace("\\/", "/");
