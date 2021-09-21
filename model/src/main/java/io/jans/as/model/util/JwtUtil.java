@@ -27,8 +27,8 @@ import org.slf4j.LoggerFactory;
 import javax.ws.rs.HttpMethod;
 import java.io.IOException;
 import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -56,30 +56,33 @@ public class JwtUtil {
 
     private static final Logger log = LoggerFactory.getLogger(JwtUtil.class);
 
+    private JwtUtil() {
+    }
+
     public static void printAlgorithmsAndProviders() {
         Set<String> algorithms = Security.getAlgorithms("Signature");
         for (String algorithm : algorithms) {
-            log.trace("Algorithm (Signature): " + algorithm);
+            log.trace("Algorithm (Signature): {}", algorithm);
         }
         algorithms = Security.getAlgorithms("MessageDigest");
         for (String algorithm : algorithms) {
-            log.trace("Algorithm (MessageDigest): " + algorithm);
+            log.trace("Algorithm (MessageDigest): {}", algorithm);
         }
         algorithms = Security.getAlgorithms("Cipher");
         for (String algorithm : algorithms) {
-            log.trace("Algorithm (Cipher): " + algorithm);
+            log.trace("Algorithm (Cipher): {}", algorithm);
         }
         algorithms = Security.getAlgorithms("Mac");
         for (String algorithm : algorithms) {
-            log.trace("Algorithm (Mac): " + algorithm);
+            log.trace("Algorithm (Mac): {}", algorithm);
         }
         algorithms = Security.getAlgorithms("KeyStore");
         for (String algorithm : algorithms) {
-            log.trace("Algorithm (KeyStore): " + algorithm);
+            log.trace("Algorithm (KeyStore): {}", algorithm);
         }
         Provider[] providers = Security.getProviders();
         for (Provider provider : providers) {
-            log.trace("Provider: " + provider.getName());
+            log.trace("Provider: {}", provider.getName());
         }
     }
 
@@ -95,21 +98,21 @@ public class JwtUtil {
     }
 
     public static byte[] getMessageDigestSHA256(String data)
-            throws NoSuchProviderException, NoSuchAlgorithmException, UnsupportedEncodingException {
+            throws NoSuchProviderException, NoSuchAlgorithmException {
         MessageDigest mda = MessageDigest.getInstance("SHA-256", "BC");
-        return mda.digest(data.getBytes(Util.UTF8_STRING_ENCODING));
+        return mda.digest(data.getBytes(StandardCharsets.UTF_8));
     }
 
     public static byte[] getMessageDigestSHA384(String data)
-            throws NoSuchProviderException, NoSuchAlgorithmException, UnsupportedEncodingException {
+            throws NoSuchProviderException, NoSuchAlgorithmException {
         MessageDigest mda = MessageDigest.getInstance("SHA-384", "BC");
-        return mda.digest(data.getBytes(Util.UTF8_STRING_ENCODING));
+        return mda.digest(data.getBytes(StandardCharsets.UTF_8));
     }
 
     public static byte[] getMessageDigestSHA512(String data)
-            throws NoSuchProviderException, NoSuchAlgorithmException, UnsupportedEncodingException {
+            throws NoSuchProviderException, NoSuchAlgorithmException {
         MessageDigest mda = MessageDigest.getInstance("SHA-512", "BC");
-        return mda.digest(data.getBytes(Util.UTF8_STRING_ENCODING));
+        return mda.digest(data.getBytes(StandardCharsets.UTF_8));
     }
 
     public static io.jans.as.model.crypto.PublicKey getPublicKey(
@@ -141,8 +144,6 @@ public class JwtUtil {
             }
 
             if (signatureAlgorithm == SignatureAlgorithm.RS256 || signatureAlgorithm == SignatureAlgorithm.RS384 || signatureAlgorithm == SignatureAlgorithm.RS512) {
-                //String alg = jsonKeyValue.getString(ALGORITHM);
-                //String use = jsonKeyValue.getString(KEY_USE);
                 String exp = jsonPublicKey.getString(EXPONENT);
                 String mod = jsonPublicKey.getString(MODULUS);
 
@@ -151,9 +152,6 @@ public class JwtUtil {
 
                 publicKey = new RSAPublicKey(modulus, publicExponent);
             } else if (signatureAlgorithm == SignatureAlgorithm.ES256 || signatureAlgorithm == SignatureAlgorithm.ES384 || signatureAlgorithm == SignatureAlgorithm.ES512) {
-                //String alg = jsonKeyValue.getString(ALGORITHM);
-                //String use = jsonKeyValue.getString(KEY_USE);
-                //String crv = jsonKeyValue.getString(CURVE);
                 String xx = jsonPublicKey.getString(X);
                 String yy = jsonPublicKey.getString(Y);
 
@@ -201,7 +199,7 @@ public class JwtUtil {
 
                 if (status == 200) {
                     jwks = clientResponse.getEntity(String.class);
-                    log.debug(String.format("JWK: %s", jwks));
+                    log.debug("JWK: {}", jwks);
                 }
             }
             if (StringHelper.isNotEmpty(jwks)) {
@@ -233,7 +231,7 @@ public class JwtUtil {
     }
 
     public static JSONObject getJSONWebKeys(String jwksUri, ClientExecutor executor) {
-        log.debug("Retrieving jwks " + jwksUri + "...");
+        log.debug("Retrieving jwks {}...", jwksUri);
 
         JSONObject jwks = null;
         try {
@@ -247,7 +245,7 @@ public class JwtUtil {
 
                 if (status == 200) {
                     jwks = fromJson(clientResponse.getEntity(String.class));
-                    log.debug(String.format("JWK: %s", jwks));
+                    log.debug("JWK: {}", jwks);
                 }
             }
         } catch (Exception ex) {

@@ -6,13 +6,12 @@
 
 package io.jans.as.model.common;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-
 import io.jans.orm.annotation.AttributeEnum;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Javier Rojas Blum
@@ -32,7 +31,7 @@ public enum TokenTypeHint implements HasParamName, AttributeEnum {
 
     private final String value;
 
-    private static Map<String, TokenTypeHint> mapByValues = new HashMap<String, TokenTypeHint>();
+    private static Map<String, TokenTypeHint> mapByValues = new HashMap<>();
 
     static {
         for (TokenTypeHint enumType : values()) {

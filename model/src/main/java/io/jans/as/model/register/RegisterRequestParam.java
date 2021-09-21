@@ -373,13 +373,13 @@ public enum RegisterRequestParam {
     /**
      * Returns whether parameter is standard
      *
-     * @param p_parameterName parameter name
+     * @param parameterName parameter name
      * @return whether parameter is standard
      */
-    public static boolean isStandard(String p_parameterName) {
-        if (StringUtils.isNotBlank(p_parameterName)) {
+    public static boolean isStandard(String parameterName) {
+        if (StringUtils.isNotBlank(parameterName)) {
             for (RegisterRequestParam t : values()) {
-                if (t.getName().equalsIgnoreCase(p_parameterName)) {
+                if (t.getName().equalsIgnoreCase(parameterName)) {
                     return true;
                 }
             }
@@ -390,11 +390,11 @@ public enum RegisterRequestParam {
     /**
      * Returns whether custom parameter is valid.
      *
-     * @param p_parameterName parameter name
+     * @param parameterName parameter name
      * @return whether custom parameter is valid
      */
-    public static boolean isCustomParameterValid(String p_parameterName) {
-        return StringUtils.isNotBlank(p_parameterName) && !isStandard(p_parameterName);
+    public static boolean isCustomParameterValid(String parameterName) {
+        return StringUtils.isNotBlank(parameterName) && !isStandard(parameterName);
     }
 
 

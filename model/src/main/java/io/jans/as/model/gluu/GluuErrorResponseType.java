@@ -6,10 +6,10 @@
 
 package io.jans.as.model.gluu;
 
+import io.jans.as.model.error.IErrorType;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import io.jans.as.model.error.IErrorType;
 
 public enum GluuErrorResponseType implements IErrorType {
 
@@ -20,7 +20,7 @@ public enum GluuErrorResponseType implements IErrorType {
     SERVER_ERROR("server_error");
 
 
-    private static Map<String, GluuErrorResponseType> lookup = new HashMap<String, GluuErrorResponseType>();
+    private static Map<String, GluuErrorResponseType> lookup = new HashMap<>();
 
     static {
         for (GluuErrorResponseType enumType : values()) {

@@ -15,7 +15,7 @@ import io.jans.as.model.crypto.signature.SignatureAlgorithm;
  */
 public class HashUtil {
 
-    private final static Logger log = Logger.getLogger(HashUtil.class);
+    private static final Logger log = Logger.getLogger(HashUtil.class);
 
     private HashUtil() {
     }

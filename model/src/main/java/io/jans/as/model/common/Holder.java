@@ -13,20 +13,20 @@ package io.jans.as.model.common;
 
 public class Holder<T> {
 
-    private T m_t;
+    private T t;
 
     public Holder() {
     }
 
-    public Holder(T p_t) {
-        m_t = p_t;
+    public Holder(T t) {
+        this.t = t;
     }
 
     public T getT() {
-        return m_t;
+        return t;
     }
 
-    public void setT(T p_t) {
-        m_t = p_t;
+    public void setT(T t) {
+        this.t = t;
     }
 }

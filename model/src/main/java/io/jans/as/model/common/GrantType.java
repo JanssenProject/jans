@@ -6,13 +6,12 @@
 
 package io.jans.as.model.common;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-
 import io.jans.orm.annotation.AttributeEnum;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This class allows to enumerate and identify the possible values of the
@@ -92,7 +91,7 @@ public enum GrantType implements HasParamName, AttributeEnum {
 
     private final String value;
 
-    private static Map<String, GrantType> mapByValues = new HashMap<String, GrantType>();
+    private static Map<String, GrantType> mapByValues = new HashMap<>();
 
     static {
         for (GrantType enumType : values()) {

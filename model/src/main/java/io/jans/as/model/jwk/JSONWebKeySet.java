@@ -6,23 +6,21 @@
 
 package io.jans.as.model.jwk;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
+import io.jans.as.model.crypto.signature.AlgorithmFamily;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
-
-import io.jans.as.model.crypto.signature.AlgorithmFamily;
-import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author Javier Rojas Blum
@@ -36,7 +34,7 @@ public class JSONWebKeySet {
     private List<JSONWebKey> keys;
 
     public JSONWebKeySet() {
-        keys = new ArrayList<JSONWebKey>();
+        keys = new ArrayList<>();
     }
 
     public List<JSONWebKey> getKeys() {
@@ -59,7 +57,7 @@ public class JSONWebKeySet {
 
     @Deprecated
     public List<JSONWebKey> getKeys(SignatureAlgorithm algorithm) {
-        List<JSONWebKey> jsonWebKeys = new ArrayList<JSONWebKey>();
+        List<JSONWebKey> jsonWebKeys = new ArrayList<>();
 
         if (AlgorithmFamily.RSA.equals(algorithm.getFamily())) {
             for (JSONWebKey jsonWebKey : keys) {
@@ -98,13 +96,10 @@ public class JSONWebKeySet {
         try {
             JSONObject jwks = toJSONObject();
             return toPrettyJson(jwks).replace("\\/", "/");
-        } catch (JSONException e) {
+        } catch (JSONException | JsonProcessingException e) {
             LOG.error(e.getMessage(), e);
             return null;
-        } catch (JsonProcessingException e) {
-            LOG.error(e.getMessage(), e);
-            return null;
-		}
+        }
     }
 
 	private String toPrettyJson(JSONObject jsonObject) throws JsonProcessingException {
