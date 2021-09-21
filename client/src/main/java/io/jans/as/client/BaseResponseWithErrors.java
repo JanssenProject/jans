@@ -10,6 +10,8 @@ import io.jans.as.model.config.Constants;
 import io.jans.as.model.error.IErrorType;
 import org.apache.commons.lang.StringUtils;
 import org.jboss.resteasy.client.ClientResponse;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -57,6 +59,12 @@ public abstract class BaseResponseWithErrors<T extends IErrorType> extends BaseR
         }
 
         return null;
+    }
+
+    @Nullable
+    public String getFirstClaim(@NotNull String claimName) {
+        final List<String> values = getClaim(claimName);
+        return !values.isEmpty() ? values.get(0) : null;
     }
 
     public String getErrorDescription() {
