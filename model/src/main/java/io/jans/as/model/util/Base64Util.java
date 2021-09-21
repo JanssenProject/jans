@@ -17,6 +17,9 @@ import java.nio.charset.StandardCharsets;
  */
 public class Base64Util {
 
+    private Base64Util() {
+    }
+
     public static String base64urlencode(byte[] arg) {
         String s = Base64.encodeBase64String(arg); // Standard base64 encoder
         s = s.split("=")[0]; // Remove any trailing '='s

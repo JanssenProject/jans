@@ -18,20 +18,20 @@ public enum PairwiseIdType {
     ALGORITHMIC("algorithmic"),
     PERSISTENT("persistent");
 
-    private final String m_value;
+    private final String value;
 
-    private PairwiseIdType(String p_value) {
-        m_value = p_value;
+    private PairwiseIdType(String value) {
+        this.value = value;
     }
 
     public String getValue() {
-        return m_value;
+        return value;
     }
 
     @JsonCreator
-    public static PairwiseIdType fromString(String p_string) {
+    public static PairwiseIdType fromString(String string) {
         for (PairwiseIdType v : values()) {
-            if (v.getValue().equalsIgnoreCase(p_string)) {
+            if (v.getValue().equalsIgnoreCase(string)) {
                 return v;
             }
         }
@@ -41,7 +41,7 @@ public enum PairwiseIdType {
     @Override
     @JsonValue
     public String toString() {
-        return m_value;
+        return value;
     }
 
 }
