@@ -30,7 +30,7 @@ public abstract class BaseResponseWithErrors<T extends IErrorType> extends BaseR
     private String errorDescription;
     private String errorUri;
 
-    private Map<String, List<String>> claims;
+    private Map<String, List<String>> claimMap;
 
     public BaseResponseWithErrors() {
         super();
@@ -38,24 +38,34 @@ public abstract class BaseResponseWithErrors<T extends IErrorType> extends BaseR
 
     public BaseResponseWithErrors(ClientResponse<String> clientResponse) {
         super(clientResponse);
-        claims = new HashMap<>();
+        claimMap = new HashMap<>();
         final String entity = getEntity();
         if (StringUtils.isNotBlank(entity)) {
             injectErrorIfExistSilently(entity);
         }
     }
 
-    public Map<String, List<String>> getClaims() {
-        return claims;
+    public Map<String, List<String>> getClaimMap() {
+        return claimMap;
+    }
+    public Map<String, String> getClaims() {
+        Map<String, String> result = new HashMap<>();
+        for (Map.Entry<String, List<String>> entry : claimMap.entrySet()) {
+            final boolean hasValue = entry.getValue() != null && !entry.getValue().isEmpty();
+            if (hasValue) {
+                result.put(entry.getKey(), entry.getValue().get(0));
+            }
+        }
+        return result;
     }
 
-    public void setClaims(Map<String, List<String>> claims) {
-        this.claims = claims;
+    public void setClaimMap(Map<String, List<String>> claims) {
+        this.claimMap = claims;
     }
 
     public List<String> getClaim(String claimName) {
-        if (claims.containsKey(claimName)) {
-            return claims.get(claimName);
+        if (claimMap.containsKey(claimName)) {
+            return claimMap.get(claimName);
         }
 
         return null;
@@ -119,7 +129,7 @@ public abstract class BaseResponseWithErrors<T extends IErrorType> extends BaseR
     @Override
     public String toString() {
         return "BaseResponseWithErrors{" +
-                "claims=" + claims +
+                "claimMap=" + claimMap +
                 "errorType=" + errorType +
                 ", errorDescription='" + errorDescription + '\'' +
                 ", errorUri='" + errorUri + '\'' +

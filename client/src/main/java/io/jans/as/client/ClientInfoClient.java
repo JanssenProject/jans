@@ -139,7 +139,7 @@ public class ClientInfoClient extends BaseClient<ClientInfoRequest, ClientInfoRe
                             }
                         }
 
-                        getResponse().getClaims().put(key, values);
+                        getResponse().getClaimMap().put(key, values);
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
