@@ -20,8 +20,6 @@ import org.json.JSONObject;
 
 public abstract class BaseResponseWithErrors<T extends IErrorType> extends BaseResponse {
 
-//    private static final Logger LOG = Logger.getLogger(BaseResponseWithErrors.class);
-
     private T errorType;
     private String errorDescription;
     private String errorUri;
@@ -85,5 +83,14 @@ public abstract class BaseResponseWithErrors<T extends IErrorType> extends BaseR
         } catch (JSONException e) {
             // ignore : it's ok to skip exception because entity string can be json array or just trash
         }
+    }
+
+    @Override
+    public String toString() {
+        return "BaseResponseWithErrors{" +
+                "errorType=" + errorType +
+                ", errorDescription='" + errorDescription + '\'' +
+                ", errorUri='" + errorUri + '\'' +
+                "} " + super.toString();
     }
 }
