@@ -124,7 +124,7 @@ public class RegisterResponse extends BaseResponseWithErrors<RegisterErrorRespon
 
                 for (Iterator<String> it = jsonObj.keys(); it.hasNext(); ) {
                     String key = it.next();
-                    getClaims().put(key, Lists.newArrayList(String.valueOf(jsonObj.get(key))));
+                    getClaimMap().put(key, Lists.newArrayList(String.valueOf(jsonObj.get(key))));
                 }
             } catch (Exception e) {
                 LOG.error(e.getMessage(), e);

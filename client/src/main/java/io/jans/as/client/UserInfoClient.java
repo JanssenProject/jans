@@ -119,7 +119,7 @@ public class UserInfoClient extends BaseClient<UserInfoRequest, UserInfoResponse
                     if (jwtParts.length == 5) {
                         byte[] sharedSymmetricKey = sharedKey != null ? sharedKey.getBytes(StandardCharsets.UTF_8) : null;
                         Jwe jwe = Jwe.parse(entity, privateKey, sharedSymmetricKey);
-                        getResponse().setClaims(jwe.getClaims().toMap());
+                        getResponse().getClaimMap().putAll(jwe.getClaims().toMap());
                     } else {
                         Jwt jwt = Jwt.parse(entity);
 
@@ -133,7 +133,7 @@ public class UserInfoClient extends BaseClient<UserInfoRequest, UserInfoResponse
                                 jwt.getHeader().getSignatureAlgorithm());
 
                         if (signatureVerified) {
-                            getResponse().setClaims(jwt.getClaims().toMap());
+                            getResponse().getClaimMap().putAll(jwt.getClaims().toMap());
                         }
                     }
                 } else {
@@ -159,7 +159,7 @@ public class UserInfoClient extends BaseClient<UserInfoRequest, UserInfoResponse
                                 }
                             }
 
-                            getResponse().getClaims().put(key, values);
+                            getResponse().getClaimMap().put(key, values);
                         }
                     } catch (JSONException e) {
                         LOG.error(e.getMessage(), e);
