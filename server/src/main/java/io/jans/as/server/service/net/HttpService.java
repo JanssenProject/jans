@@ -179,7 +179,7 @@ public class HttpService implements Serializable {
 		return null;
 	}
 
-	public HttpServiceResponse executeGet(HttpClient httpClient, String requestUri) throws IOException {
+	public HttpServiceResponse executeGet(HttpClient httpClient, String requestUri) {
 		return executeGet(httpClient, requestUri, null);
 	}
 
