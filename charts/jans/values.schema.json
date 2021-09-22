@@ -175,6 +175,53 @@
                      "type":"string",
                      "pattern":"^(LOCAL|JCA)$"
                   },
+                  "cnJackrabbitAdminId":{
+                     "description":"Jackrabbit admin uid.",
+                     "type":"string",
+                     "pattern":"^[a-z]+$"
+                  },
+                  "cnJackrabbitAdminIdFile":{
+                     "description":"The location of the Jackrabbit admin uid config.cnJackrabbitAdminId. The file path must end with jackrabbit_admin_id.",
+                     "type":"string",
+                     "pattern":".*jackrabbit_admin_id\\b.*"
+                  },
+                  "cnJackrabbitAdminPassFile":{
+                     "description":"The location of the Jackrabbit admin password jackrabbit.secrets.cnJackrabbitAdminPassword. The file path must end with jackrabbit_admin_password.",
+                     "type":"string",
+                     "pattern":".*jackrabbit_admin_password\\b.*"
+                  },
+                  "cnJackrabbitPostgresDatabaseName":{
+                     "description":"Jackrabbit postgres database name.",
+                     "type":"string",
+                     "pattern":"^[a-z]+$"
+                  },
+                  "cnJackrabbitPostgresHost":{
+                     "description":"Postgres url",
+                     "$ref":"#/definitions/fqdn-pattern"
+                  },
+                  "cnJackrabbitPostgresPasswordFile":{
+                     "description":"The location of the Jackrabbit postgres password file jackrabbit.secrets.cnJackrabbitPostgresPassword. The file path must end with postgres_password.",
+                     "type":"string",
+                     "pattern":".*postgres_password\\b.*"
+                  },
+                  "cnJackrabbitPostgresPort":{
+                     "description":"Jackrabbit Postgres port",
+                     "type":"integer"
+                  },
+                  "cnJackrabbitPostgresUser":{
+                     "description":"Jackrabbit Postgres uid",
+                     "type":"string",
+                     "pattern":"^[a-z]+$"
+                  },
+                  "cnJackrabbitSyncInterval":{
+                     "description":"Interval between files sync (default to 300 seconds).",
+                     "type":"integer"
+                  },
+                  "cnJackrabbitUrl":{
+                     "description":"Jackrabbit internal url. Normally left as default.",
+                     "type":"string",
+                     "pattern":"^(http:\/\/)?[a-z0-9-:]+$"
+                  },
                   "cnGoogleSecretManagerServiceAccount":{
                      "description":"Service account with roles roles/secretmanager.admin base64 encoded string. This is used often inside the services to reach the configuration layer. Used only when global.configAdapterName and global.configSecretAdapter is set to google.",
                      "type":"string",
@@ -227,6 +274,11 @@
                      "description":"Value passed to Java option -XX:MaxRAMPercentage",
                      "type":"string",
                      "pattern":"^(\\d{0,2}(\\.\\d{1,2})?|100(\\.0?)?)$"
+                  },
+                  "cnScimProtectionMode":{
+                     "description":"SCIM protection mode OAUTH|TEST|UMA",
+                     "type":"string",
+                     "pattern":"^(OAUTH|TEST|UMA)$"
                   },
                   "cnPassportEnabled":{
                      "description":"Boolean flag to enable/disable Passport chart",
@@ -2209,7 +2261,7 @@
                               "description":"Enable OpenDJ multiCluster mode. This flag enabbles loading keys under `opendj.multiCluster`",
                               "type":"boolean"
                            },
-                           "serfAdvertiseAddr":{
+                           "serfAdvertiseAddrSuffix":{
                               "description":"OpenDJ Serf advertise address for the cluster",
                               "type":"string"
                            },

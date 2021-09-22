@@ -29,7 +29,7 @@ image:
   # -- Image  to use for deploying.
   repository: janssenproject/scim
   # -- Image  tag to use for deploying.
-  tag: 1.0.0_b11
+  tag: 1.0.0_b9
   # -- Image Pull Secrets
   pullSecrets: [ ]
 # -- Service replica number.
@@ -46,8 +46,6 @@ resources:
     # -- Memory request.
     memory: 1000Mi
 service:
-  # -- Name of the auth-server service. Please keep it as default.
-  scimServiceName: scim
   # -- The name of the scim port within the scim service. Please keep it as default.
   name: http-scim
   # -- Port of the scim service. Please keep it as default.

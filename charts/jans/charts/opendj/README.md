@@ -1,6 +1,6 @@
 # opendj
 
-![Version: 1.0.0-b11](https://img.shields.io/badge/Version-1.0.0--b11-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 5.0.0](https://img.shields.io/badge/AppVersion-5.0.0-informational?style=flat-square)
+![Version: 5.0.0](https://img.shields.io/badge/Version-5.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 5.0.0](https://img.shields.io/badge/AppVersion-5.0.0-informational?style=flat-square)
 
 OpenDJ is a directory server which implements a wide range of Lightweight Directory Access Protocol and related standards, including full compliance with LDAPv3 but also support for Directory Service Markup Language (DSMLv2).Written in Java, OpenDJ offers multi-master replication, access control, and many extensions.
 
@@ -41,7 +41,7 @@ Kubernetes: `>=v1.17.0-0`
 | livenessProbe | object | `{"exec":{"command":["python3","/app/scripts/healthcheck.py"]},"failureThreshold":20,"initialDelaySeconds":30,"periodSeconds":30,"timeoutSeconds":5}` | Configure the liveness healthcheck for OpenDJ if needed. https://github.com/JanssenFederation/docker-opendj/blob/4.3/scripts/healthcheck.py |
 | livenessProbe.exec | object | `{"command":["python3","/app/scripts/healthcheck.py"]}` | Executes the python3 healthcheck. |
 | multiCluster.enabled | bool | `false` | Enable OpenDJ multiCluster mode. This flag enables loading keys under `opendj.multiCluster` |
-| multiCluster.serfAdvertiseAddr | string | `"firstldap.jans.org:30946"` | OpenDJ Serf advertise address for the cluster |
+| multiCluster.serfAdvertiseAddrSuffix | string | `"firstldap.jans.org:30946"` | OpenDJ Serf advertise address for the cluster |
 | multiCluster.serfKey | string | `"Z51b6PgKU1MZ75NCZOTGGoc0LP2OF3qvF6sjxHyQCYk="` | Serf key. This key will automatically sync across clusters. |
 | multiCluster.serfPeers | list | `["firstldap.jans.org:30946","secondldap.jans.org:31946"]` | Serf peer addresses. One per cluster. |
 | nameOverride | string | `""` |  |

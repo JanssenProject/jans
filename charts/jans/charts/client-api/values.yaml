@@ -29,7 +29,7 @@ image:
   # -- Image  to use for deploying.
   repository: janssenproject/client-api
   # -- Image  tag to use for deploying.
-  tag: 1.0.0_b11
+  tag: 1.0.0_b9
   # -- Image Pull Secrets
   pullSecrets: [ ]
 # -- Service replica number.

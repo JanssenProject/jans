@@ -20,7 +20,7 @@ spec:
       uri: /scim/restv1/scim-configuration
     route:
       - destination:
-          host: {{ .Values.service.scimServiceName }}.{{.Release.Namespace}}.svc.cluster.local
+          host: {{ .Values.global.scim.scimServiceName }}.{{.Release.Namespace}}.svc.cluster.local
           port:
             number: 8080
         weight: 100

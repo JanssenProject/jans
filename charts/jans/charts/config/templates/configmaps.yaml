@@ -53,6 +53,10 @@ data:
   CN_CONTAINER_METADATA: {{ .Values.configmap.containerMetadataName | quote }}
   CN_MAX_RAM_PERCENTAGE: {{ .Values.configmap.cnMaxRamPercent | quote }}
   CN_CACHE_TYPE: {{ .Values.configmap.cnCacheType | quote }}
+  CN_DOCUMENT_STORE_TYPE: {{ .Values.configmap.cnDocumentStoreType | quote }}
+  {{- if .Values.configmap.cnJackrabbitUrl }}
+  {{- else }}
+  {{- end }}
   DOMAIN: {{ .Values.global.fqdn | quote }}
   CN_AUTH_SERVER_BACKEND: {{ cat ( index .Values "global" "auth-server" "authServerServiceName" ) ":8080" | quote | nospace }}
   CN_CLIENT_API_SERVER_URL: {{ cat ( index .Values "global" "client-api" "clientApiServerServiceName" ) ":8443" | quote | nospace }}
@@ -90,6 +94,7 @@ data:
   CN_CERT_ALT_NAME: {{ .Values.global.opendj.ldapServiceName }} #{{ template "cn.fullname" . }}-service
   CN_PERSISTENCE_LDAP_MAPPING: {{ .Values.configmap.cnPersistenceLdapMapping | quote }}
   {{- end }}
+  {{- end }}
   # Auto enable installation of some services
   CN_CLIENT_API_APPLICATION_CERT_CN: {{ .Values.configmap.cnClientApiApplicationCertCn | quote }}
   CN_CLIENT_API_ADMIN_CERT_CN: {{ .Values.configmap.cnClientApiAdminCertCn | quote }}
@@ -103,6 +108,10 @@ data:
   {{- if .Values.global.istio.enabled }}
   CN_COUCHBASE_TRUSTSTORE_ENABLE: "false"
   CN_LDAP_USE_SSL: "false"
+  {{- end }}
+  {{- if .Values.global.scim.enabled }}
+  CN_SCIM_ENABLED: {{ .Values.global.scim.enabled | quote }}
+  CN_SCIM_PROTECTION_MODE: {{ .Values.configmap.cnScimProtectionMode | quote }}
   {{- end }}
 
 ---

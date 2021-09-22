@@ -2,8 +2,8 @@
 # https://www.apache.org/licenses/LICENSE-2.0
 apiVersion: v2
 name: fido2
-version: 1.0.0-b11
-kubeVersion: ">=v1.17.0-0"
+version:  5.0.0
+kubeVersion: ">=v1.19.0-0"
 description: FIDO 2.0 (FIDO2) is an open authentication standard that enables leveraging common devices to authenticate to online services in both mobile and desktop environments.
 type: application
 keywords:
@@ -20,4 +20,4 @@ maintainers:
     email: support@jans.io
     url: https://github.com/moabu
 icon: https://jans.io/favicon.ico
-appVersion: "1.0.0-b11"
+appVersion: " 5.0.0"

@@ -30,7 +30,7 @@ image:
   # -- Image  to use for deploying.
   repository: janssenproject/fido2
   # -- Image  tag to use for deploying.
-  tag: 1.0.0_b11
+  tag: 1.0.0_b9
   # -- Image Pull Secrets
   pullSecrets: [ ]
 # -- Service replica number.
@@ -48,8 +48,6 @@ resources:
     # -- Memory request.
     memory: 500Mi
 service:
-  # -- Name of the fido2 service. Please keep it as default.
-  fido2ServiceName: fido2
   # -- The name of the fido2 port within the fido2 service. Please keep it as default.
   name: http-fido2
   # -- Port of the fido2 service. Please keep it as default.

@@ -103,6 +103,11 @@ spec:
             mountPath: /etc/certs/ob-transport-truststore.p12
             subPath: ob-transport-truststore.p12
         {{- end }}
+        {{- if .Values.global.jackrabbit.enabled }}
+          - name: cn-jackrabbit-admin-pass
+            mountPath: /etc/jans/conf/jackrabbit_admin_password
+            subPath: jackrabbit_admin_password
+        {{- end }}
         {{ if or (eq .Values.global.configSecretAdapter "google") (eq .Values.global.cnPersistenceType "spanner") }}
           - mountPath: {{ .Values.global.cnGoogleApplicationCredentials }}
             name: google-sa
@@ -201,6 +206,11 @@ spec:
         - name: cn-ob-transport-truststore
           secret:
             secretName: {{ .Release.Name }}-ob-transport-truststore
+      {{- end }}
+      {{- if .Values.global.jackrabbit.enabled }}
+        - name: cn-jackrabbit-admin-pass
+          secret:
+            secretName: cn-jackrabbit-admin-pass
       {{- end }}
       {{ if or (eq .Values.global.configSecretAdapter "google") (eq .Values.global.cnPersistenceType "spanner") }}
         - name: google-sa
