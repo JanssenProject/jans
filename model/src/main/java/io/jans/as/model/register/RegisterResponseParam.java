@@ -56,7 +56,7 @@ public enum RegisterResponseParam {
      *
      * @param name parameter name
      */
-    private RegisterResponseParam(String name) {
+    RegisterResponseParam(String name) {
         this.name = name;
     }
 

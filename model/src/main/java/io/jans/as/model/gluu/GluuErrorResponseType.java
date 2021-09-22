@@ -20,7 +20,7 @@ public enum GluuErrorResponseType implements IErrorType {
     SERVER_ERROR("server_error");
 
 
-    private static Map<String, GluuErrorResponseType> lookup = new HashMap<>();
+    private static final Map<String, GluuErrorResponseType> lookup = new HashMap<>();
 
     static {
         for (GluuErrorResponseType enumType : values()) {
@@ -30,7 +30,7 @@ public enum GluuErrorResponseType implements IErrorType {
 
     private final String paramName;
 
-    private GluuErrorResponseType(String paramName) {
+    GluuErrorResponseType(String paramName) {
         this.paramName = paramName;
     }
 

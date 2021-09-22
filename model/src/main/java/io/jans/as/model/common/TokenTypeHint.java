@@ -31,7 +31,7 @@ public enum TokenTypeHint implements HasParamName, AttributeEnum {
 
     private final String value;
 
-    private static Map<String, TokenTypeHint> mapByValues = new HashMap<>();
+    private static final Map<String, TokenTypeHint> mapByValues = new HashMap<>();
 
     static {
         for (TokenTypeHint enumType : values()) {

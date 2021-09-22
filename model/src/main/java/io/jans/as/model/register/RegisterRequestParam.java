@@ -357,7 +357,7 @@ public enum RegisterRequestParam {
      *
      * @param name parameter name
      */
-    private RegisterRequestParam(String name) {
+    RegisterRequestParam(String name) {
         this.name = name;
     }
 

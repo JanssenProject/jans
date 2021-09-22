@@ -55,7 +55,7 @@ public enum ResponseType implements HasParamName, AttributeEnum {
     private final String value;
     private final String displayName;
 
-    private static Map<String, ResponseType> mapByValues = new HashMap<>();
+    private static final Map<String, ResponseType> mapByValues = new HashMap<>();
 
     static {
         for (ResponseType enumType : values()) {
@@ -63,7 +63,7 @@ public enum ResponseType implements HasParamName, AttributeEnum {
         }
     }
 
-    private ResponseType(String value, String displayName) {
+    ResponseType(String value, String displayName) {
         this.value = value;
         this.displayName = displayName;
     }

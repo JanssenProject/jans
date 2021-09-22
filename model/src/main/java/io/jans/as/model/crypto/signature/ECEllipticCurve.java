@@ -23,7 +23,7 @@ public enum ECEllipticCurve {
     private final String alias;
     private final String oid;
 
-    private ECEllipticCurve(String name, String alias, String oid) {
+    ECEllipticCurve(String name, String alias, String oid) {
         this.name = name;
         this.alias = alias;
         this.oid = oid;

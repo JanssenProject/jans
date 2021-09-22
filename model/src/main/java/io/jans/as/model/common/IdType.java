@@ -29,7 +29,7 @@ public enum IdType {
     private final String inum;
     private final String htmlText;
 
-    private IdType(String type, String value, String inum, String htmlText) {
+    IdType(String type, String value, String inum, String htmlText) {
         this.type = type;
         this.value = value;
         this.inum = inum;

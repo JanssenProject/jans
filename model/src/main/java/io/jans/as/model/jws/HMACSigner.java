@@ -22,7 +22,7 @@ import java.security.SignatureException;
  */
 public class HMACSigner extends AbstractJwsSigner {
 
-    private String sharedSecret;
+    private final String sharedSecret;
 
     public HMACSigner(SignatureAlgorithm signatureAlgorithm, String sharedSecret) {
         super(signatureAlgorithm);

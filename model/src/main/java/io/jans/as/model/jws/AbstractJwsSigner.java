@@ -24,7 +24,7 @@ public abstract class AbstractJwsSigner implements JwsSigner {
 
     private static final Logger LOG = Logger.getLogger(AbstractJwsSigner.class);
 
-    private SignatureAlgorithm signatureAlgorithm;
+    private final SignatureAlgorithm signatureAlgorithm;
 
     protected AbstractJwsSigner(SignatureAlgorithm signatureAlgorithm) {
         this.signatureAlgorithm = signatureAlgorithm;
