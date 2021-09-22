@@ -26,7 +26,7 @@ public enum Action {
     SESSION_DESTROYED("SESSION_DESTROYED"),
     DEVICE_CODE_AUTHORIZATION("DEVICE_CODE_AUTHORIZATION");
 
-    private String value;
+    private final String value;
 
     Action(String value) {
         this.value = value;
