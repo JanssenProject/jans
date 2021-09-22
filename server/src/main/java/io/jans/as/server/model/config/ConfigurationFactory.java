@@ -52,6 +52,7 @@ import javax.inject.Named;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRegistration;
 import java.io.File;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -514,7 +515,7 @@ public class ConfigurationFactory {
 			jwks = ServerUtil.createJsonMapper().readValue(newWebKeys, io.jans.as.model.config.WebKeysConfiguration.class);
 
 			// Store new JWKS in LDAP
-			Conf conf = loadConfigurationFromLdap();
+			Conf conf = Objects.requireNonNull(loadConfigurationFromLdap());
 			conf.setWebKeys(jwks);
 
 			long nextRevision = conf.getRevision() + 1;
