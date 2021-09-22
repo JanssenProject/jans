@@ -29,10 +29,10 @@ public class CodeVerifier {
         PLAIN("plain", ""),
         S256("s256", "SHA-256");
 
-        private String pkceString;
-        private String messageDigestString;
+        private final String pkceString;
+        private final String messageDigestString;
 
-        private CodeChallengeMethod(String pkceString, String messageDigestString) {
+        CodeChallengeMethod(String pkceString, String messageDigestString) {
             this.pkceString = pkceString;
             this.messageDigestString = messageDigestString;
         }
@@ -55,9 +55,9 @@ public class CodeVerifier {
         }
     }
 
-    private String codeVerifier;
-    private String codeChallenge;
-    private CodeChallengeMethod transformationType;
+    private final String codeVerifier;
+    private final String codeChallenge;
+    private final CodeChallengeMethod transformationType;
 
     public CodeVerifier() {
         this(CodeChallengeMethod.S256);

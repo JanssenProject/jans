@@ -6,6 +6,17 @@
 
 package io.jans.as.model.crypto.signature;
 
+import io.jans.as.model.crypto.Certificate;
+import io.jans.as.model.crypto.KeyFactory;
+import org.apache.commons.lang.StringUtils;
+import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPrivateKey;
+import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
+import org.bouncycastle.jce.ECNamedCurveTable;
+import org.bouncycastle.jce.spec.ECParameterSpec;
+import org.bouncycastle.x509.X509V1CertificateGenerator;
+import org.bouncycastle.x509.X509V3CertificateGenerator;
+
+import javax.security.auth.x500.X500Principal;
 import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -23,19 +34,6 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Random;
 
-import javax.security.auth.x500.X500Principal;
-
-import org.apache.commons.lang.StringUtils;
-import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPrivateKey;
-import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
-import org.bouncycastle.jce.ECNamedCurveTable;
-import org.bouncycastle.jce.spec.ECParameterSpec;
-import org.bouncycastle.x509.X509V1CertificateGenerator;
-import org.bouncycastle.x509.X509V3CertificateGenerator;
-
-import io.jans.as.model.crypto.Certificate;
-import io.jans.as.model.crypto.KeyFactory;
-
 /**
  * Factory to create asymmetric Public and Private Keys for the Elliptic Curve Digital Signature Algorithm (ECDSA)
  *
@@ -44,11 +42,11 @@ import io.jans.as.model.crypto.KeyFactory;
  */
 public class ECDSAKeyFactory extends KeyFactory<ECDSAPrivateKey, ECDSAPublicKey> {
 
-    private SignatureAlgorithm signatureAlgorithm;
-    private KeyPair keyPair;
+    private final SignatureAlgorithm signatureAlgorithm;
+    private final KeyPair keyPair;
 
-    private ECDSAPrivateKey ecdsaPrivateKey;
-    private ECDSAPublicKey ecdsaPublicKey;
+    private final ECDSAPrivateKey ecdsaPrivateKey;
+    private final ECDSAPublicKey ecdsaPublicKey;
     private Certificate certificate;
 
     public ECDSAKeyFactory(SignatureAlgorithm signatureAlgorithm, String dnName)

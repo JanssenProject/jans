@@ -18,7 +18,7 @@ public enum UmaScopeType {
 
     PROTECTION("uma_protection");
 
-    private static Map<String, UmaScopeType> lookup = new HashMap<>();
+    private static final Map<String, UmaScopeType> lookup = new HashMap<>();
 
     static {
         for (UmaScopeType enumType : values()) {
@@ -26,9 +26,9 @@ public enum UmaScopeType {
         }
     }
 
-    private String value;
+    private final String value;
 
-    private UmaScopeType(String value) {
+    UmaScopeType(String value) {
         this.value = value;
     }
 

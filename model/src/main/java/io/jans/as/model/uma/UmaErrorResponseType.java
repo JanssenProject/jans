@@ -171,7 +171,7 @@ public enum UmaErrorResponseType implements IErrorType {
 	 */
 	NEED_CLAIMS("need_claims");
 
-    private static Map<String, UmaErrorResponseType> lookup = new HashMap<>();
+    private static final Map<String, UmaErrorResponseType> lookup = new HashMap<>();
 
     static {
         for (UmaErrorResponseType enumType : values()) {
@@ -181,7 +181,7 @@ public enum UmaErrorResponseType implements IErrorType {
 
 	private final String paramName;
 
-	private UmaErrorResponseType(String paramName) {
+	UmaErrorResponseType(String paramName) {
 		this.paramName = paramName;
 	}
 

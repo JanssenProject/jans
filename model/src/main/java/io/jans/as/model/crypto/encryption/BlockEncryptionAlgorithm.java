@@ -28,7 +28,7 @@ public enum BlockEncryptionAlgorithm {
     private final int initVectorLength;
     private final Integer cekLength;
 
-    private BlockEncryptionAlgorithm(String name, String family, String algorithm, int cmkLength, int initVectorLength) {
+    BlockEncryptionAlgorithm(String name, String family, String algorithm, int cmkLength, int initVectorLength) {
         this.name = name;
         this.family = family;
         this.algorithm = algorithm;
@@ -39,8 +39,8 @@ public enum BlockEncryptionAlgorithm {
         this.cekLength = null;
     }
 
-    private BlockEncryptionAlgorithm(String name, String family, String algorithm, String messageDiggestAlgorithm,
-                                     String integrityValueAlgorithm, int cmkLength, int initVectorLength, int cekLength) {
+    BlockEncryptionAlgorithm(String name, String family, String algorithm, String messageDiggestAlgorithm,
+                             String integrityValueAlgorithm, int cmkLength, int initVectorLength, int cekLength) {
         this.name = name;
         this.family = family;
         this.algorithm = algorithm;
