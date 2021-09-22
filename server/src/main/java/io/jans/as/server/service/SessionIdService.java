@@ -151,18 +151,18 @@ public class SessionIdService {
         final Set<SessionId> sessions = Sets.newHashSet();
         for (String sessionId : ids) {
             if (StringUtils.isBlank(sessionId)) {
-                log.error("Invalid sessionId in current_sessions: " + sessionId);
+                log.error("Invalid sessionId in current_sessions: {}", sessionId);
                 continue;
             }
 
             final SessionId sessionIdObj = getSessionId(sessionId);
             if (sessionIdObj == null) {
-                log.trace("Unable to find session object by id: " + sessionId + " {expired?}");
+                log.trace("Unable to find session object by id: {} (expired?)", sessionId);
                 continue;
             }
 
             if (sessionIdObj.getState() != SessionIdState.AUTHENTICATED) {
-                log.error("Session is not authenticated, id: " + sessionId);
+                log.error("Session is not authenticated, id: {}", sessionId);
                 continue;
             }
             sessions.add(sessionIdObj);
@@ -286,8 +286,8 @@ public class SessionIdService {
         final Map<String, String> sessionAttributes = session.getSessionAttributes();
 
         int currentStep = 1;
-        if (sessionAttributes.containsKey("auth_step")) {
-            currentStep = StringHelper.toInteger(sessionAttributes.get("auth_step"), currentStep);
+        if (sessionAttributes.containsKey(io.jans.as.model.config.Constants.AUTH_STEP)) {
+            currentStep = StringHelper.toInteger(sessionAttributes.get(io.jans.as.model.config.Constants.AUTH_STEP), currentStep);
         }
 
         for (int i = resetToStep; i <= currentStep; i++) {
@@ -295,7 +295,7 @@ public class SessionIdService {
             sessionAttributes.remove(key);
         }
 
-        sessionAttributes.put("auth_step", String.valueOf(resetToStep));
+        sessionAttributes.put(io.jans.as.model.config.Constants.AUTH_STEP, String.valueOf(resetToStep));
 
         boolean updateResult = updateSessionId(session, true, true, true);
         if (!updateResult) {
@@ -318,7 +318,7 @@ public class SessionIdService {
         Map<String, String> newRequestParameterMap = requestParameterService.getAllowedParameters(parameterMap);
         for (Entry<String, String> newRequestParameterMapEntry : newRequestParameterMap.entrySet()) {
             String name = newRequestParameterMapEntry.getKey();
-            if (!StringHelper.equalsIgnoreCase(name, "auth_step")) {
+            if (!StringHelper.equalsIgnoreCase(name, io.jans.as.model.config.Constants.AUTH_STEP)) {
                 currentSessionAttributes.put(name, newRequestParameterMapEntry.getValue());
             }
         }
@@ -354,27 +354,30 @@ public class SessionIdService {
 
     public SessionId generateAuthenticatedSessionId(HttpServletRequest httpRequest, String userDn) throws InvalidSessionStateException {
         Map<String, String> sessionIdAttributes = new HashMap<>();
-        sessionIdAttributes.put("prompt", "");
+        sessionIdAttributes.put(io.jans.as.model.config.Constants.PROMPT, "");
 
         return generateAuthenticatedSessionId(httpRequest, userDn, sessionIdAttributes);
     }
 
     public SessionId generateAuthenticatedSessionId(HttpServletRequest httpRequest, String userDn, String prompt) throws InvalidSessionStateException {
         Map<String, String> sessionIdAttributes = new HashMap<>();
-        sessionIdAttributes.put("prompt", prompt);
+        sessionIdAttributes.put(io.jans.as.model.config.Constants.PROMPT, prompt);
 
         return generateAuthenticatedSessionId(httpRequest, userDn, sessionIdAttributes);
     }
 
     public SessionId generateAuthenticatedSessionId(HttpServletRequest httpRequest, String userDn, Map<String, String> sessionIdAttributes) throws InvalidSessionStateException {
         SessionId sessionId = generateSessionId(userDn, new Date(), SessionIdState.AUTHENTICATED, sessionIdAttributes, true);
+        if (sessionId == null) {
+            throw new InvalidSessionStateException("Failed to generate authenticated session.");
+        }
 
         reportActiveUser(sessionId);
 
         if (externalApplicationSessionService.isEnabled()) {
             String userName = sessionId.getSessionAttributes().get(Constants.AUTHENTICATED_USER);
             boolean externalResult = externalApplicationSessionService.executeExternalStartSessionMethods(httpRequest, sessionId);
-            log.info("Start session result for '{}': '{}'", userName, "start", externalResult);
+            log.info("Start session result for '{}': '{}'", userName, externalResult);
 
             if (!externalResult) {
             	reinitLogin(sessionId, true);
@@ -561,7 +564,7 @@ public class SessionIdService {
         if (externalApplicationSessionService.isEnabled()) {
             String userName = sessionId.getSessionAttributes().get(Constants.AUTHENTICATED_USER);
             boolean externalResult = externalApplicationSessionService.executeExternalStartSessionMethods(httpRequest, sessionId);
-            log.info("Start session result for '{}': '{}'", userName, "start", externalResult);
+            log.info("Start session result for '{}': '{}'", userName, externalResult);
 
             if (!externalResult) {
             	reinitLogin(sessionId, true);
@@ -804,14 +807,9 @@ public class SessionIdService {
         return null;
     }
 
-    @Deprecated
-    public String getSessionIdFromCookie() {
-        return cookieService.getSessionIdFromCookie();
-    }
-
     public SessionId getSessionId(HttpServletRequest request) {
         final String sessionIdFromCookie = cookieService.getSessionIdFromCookie(request);
-        log.trace("SessionId from cookie: " + sessionIdFromCookie);
+        log.trace("SessionId from cookie: {}", sessionIdFromCookie);
         return getSessionId(sessionIdFromCookie);
     }
 
@@ -911,12 +909,12 @@ public class SessionIdService {
             acrs = Util.splittedStringAsList(acrValues, " ");
         }
 
-        HashSet<String> resultAcrs = new HashSet<String>();
+        HashSet<String> resultAcrs = new HashSet<>();
         for (String acr : acrs) {
         	resultAcrs.add(externalAuthenticationService.scriptName(acr));
         }
         
-        return new ArrayList<String>(resultAcrs);
+        return new ArrayList<>(resultAcrs);
     }
 
     private void auditLogging(SessionId sessionId) {

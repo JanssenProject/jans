@@ -37,9 +37,8 @@ import java.util.concurrent.ConcurrentMap;
 public class StatService {
 
     // January - 202001, December - 202012
-    private static final SimpleDateFormat PERIOD_DATE_FORMAT = new SimpleDateFormat("yyyyMM");
-    private static final int regwidth = 5;
-    private static final int log2m = 15;
+    private static final int REGWIDTH = 5;
+    private static final int LOG_2_M = 15;
 
     public static final String ACCESS_TOKEN_KEY = "access_token";
     public static final String ID_TOKEN_KEY = "id_token";
@@ -63,6 +62,7 @@ public class StatService {
     private StatEntry currentEntry;
     private HLL hll;
     private ConcurrentMap<String, Map<String, Long>> tokenCounters;
+    private final SimpleDateFormat periodDateFormat = new SimpleDateFormat("yyyyMM");
 
     private boolean initialized = false;
 
@@ -92,7 +92,7 @@ public class StatService {
             final Date now = new Date();
             prepareMonthlyBranch(now);
 
-            log.trace("Monthly branch created: " + monthlyDn);
+            log.trace("Monthly branch created: {}", monthlyDn);
 
             setupCurrentEntry(now);
             log.info("Initialized Stat Service");
@@ -133,7 +133,7 @@ public class StatService {
     }
 
     private void setupCurrentEntry(Date now) {
-        final String month = PERIOD_DATE_FORMAT.format(now);
+        final String month = periodDateFormat.format(now);
         String dn = String.format("jansId=%s,%s", nodeId, monthlyDn); // jansId=<id>,ou=yyyyMM,ou=stat,o=gluu
 
         if (currentEntry != null && month.equals(currentEntry.getStat().getMonth())) {
@@ -162,14 +162,14 @@ public class StatService {
             currentEntry.setId(nodeId);
             currentEntry.setDn(dn);
             currentEntry.setUserHllData(Base64.getEncoder().encodeToString(hll.toBytes()));
-            currentEntry.getStat().setMonth(PERIOD_DATE_FORMAT.format(new Date()));
+            currentEntry.getStat().setMonth(periodDateFormat.format(new Date()));
             entryManager.persist(currentEntry);
             log.trace("Created stat entry.");
         }
     }
 
     public HLL newHll() {
-        return new HLL(log2m, regwidth);
+        return new HLL(LOG_2_M, REGWIDTH);
     }
 
     private void initNodeId() {
@@ -200,7 +200,7 @@ public class StatService {
 
     private void prepareMonthlyBranch(Date now) {
         final String baseDn = getBaseDn();
-        final String month = PERIOD_DATE_FORMAT.format(now); // yyyyMM
+        final String month = periodDateFormat.format(now); // yyyyMM
         monthlyDn = String.format("ou=%s,%s", month, baseDn); // ou=yyyyMM,ou=stat,o=gluu
 
         if (!entryManager.hasBranchesSupport(baseDn)) {
@@ -212,7 +212,8 @@ public class StatService {
                 createBranch(monthlyDn, month);
             }
         } catch (Exception e) {
-            log.error("Failed to prepare monthly branch: " + monthlyDn, e);
+            if (log.isErrorEnabled())
+                log.error("Failed to prepare monthly branch: " + monthlyDn, e);
             throw e;
         }
     }
