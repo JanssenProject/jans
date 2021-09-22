@@ -20,7 +20,7 @@ import io.jans.scim2.client.rest.provider.ScimResourceProvider;
 import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.util.Optional;
+import java.util.stream.Stream;
 
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
@@ -33,7 +33,7 @@ import javax.ws.rs.client.ClientBuilder;
  * class passed in the constructor.</p>
  * <p>When a service method is invoked through an instance obtained by any of the factory methods of
  * {@link io.jans.scim2.client.factory.ScimClientFactory ScimClientFactory}, the call is dispatched by the {@link #invoke(Object, Method, Object[]) invoke}
- * method of this class, which properly handles the authorization details in conjuction with the filter
+ * method of this class, which properly handles the authorization details in conjunction with the filter
  * {@link io.jans.scim2.client.rest.provider.AuthorizationInjectionFilter AuthorizationInjectionFilter}.</p>
  * <p>Concrete subclasses of this class must provide {@link #getAuthenticationHeader() getAuthenticationHeader} and
  * {@link #authorize(Response) authorize} methods that must implement specific ways to obtain access tokens depending
@@ -108,13 +108,16 @@ public abstract class AbstractScimClient<T> implements CloseableClient, Invocati
      *
      * @return The response associated to the invocation (normally a javax.ws.rs.core.Response instance)
      */
+    @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 
         String methodName = method.getName();
 
-        if (method.getDeclaringClass().equals(CloseableClient.class)) {
-        	// it's a non HTTP-related method
-        	return method.invoke(this, args);
+        if (Stream.of(CloseableClient.class, Object.class).filter(method.getDeclaringClass()::equals)
+                .findFirst().isPresent()) {
+            // it's a non HTTP-related method
+            return method.invoke(this, args);
+
         } else {
             Response response;
             FreelyAccessible unprotected = method.getAnnotation(FreelyAccessible.class);
@@ -141,30 +144,20 @@ public abstract class AbstractScimClient<T> implements CloseableClient, Invocati
 
     }
 
+    @Override
     public void close() {
-		logger.info("Closing RestEasy client");
-		clientMap.remove(client);
+        logger.info("Closing RestEasy client");
+        clientMap.remove(client);
     }
 
+    @Override
     public void setCustomHeaders(MultivaluedMap<String, String> headers) {
         logger.info("Setting custom headers");
-    	clientMap.setCustomHeaders(client, headers);
+        clientMap.setCustomHeaders(client, headers);
     }
 
     abstract String getAuthenticationHeader();
 
     abstract boolean authorize(Response response);
-
-    private Optional<Integer> getIntegerProperty(String name) {
-
-        return Optional.ofNullable(System.getProperty(name)).map(prop -> {
-            try {
-                return new Integer(prop);
-            } catch (Exception e) {
-                return null;
-            }
-        });
-
-    }
 
 }
