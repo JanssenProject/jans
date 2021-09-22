@@ -34,6 +34,7 @@ import io.jans.as.server.model.exception.AcrChangedException;
 import io.jans.as.server.model.exception.InvalidSessionStateException;
 import io.jans.as.server.model.token.JwtSigner;
 import io.jans.as.server.security.Identity;
+import io.jans.as.server.service.exception.FailedComputeSessionStateException;
 import io.jans.as.server.service.external.ExternalApplicationSessionService;
 import io.jans.as.server.service.external.ExternalAuthenticationService;
 import io.jans.as.server.service.external.session.SessionEvent;
@@ -422,8 +423,9 @@ public class SessionIdService {
             return JwtUtil.bytesToHex(JwtUtil.getMessageDigestSHA256(
                     clientId + " " + clientOrigin + " " + opbs + " " + salt)) + "." + salt;
         } catch (NoSuchProviderException | NoSuchAlgorithmException | URISyntaxException e) {
-            log.error("Failed generating session state! " + e.getMessage(), e);
-            throw new RuntimeException(e);
+            if (log.isErrorEnabled())
+                log.error("Failed generating session state! " + e.getMessage(), e);
+            throw new FailedComputeSessionStateException(e.getMessage(), e);
 		}
     }
 
