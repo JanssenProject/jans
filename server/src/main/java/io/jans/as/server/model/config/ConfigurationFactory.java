@@ -515,17 +515,17 @@ public class ConfigurationFactory {
 			jwks = ServerUtil.createJsonMapper().readValue(newWebKeys, io.jans.as.model.config.WebKeysConfiguration.class);
 
 			// Store new JWKS in LDAP
-			Conf conf = Objects.requireNonNull(loadConfigurationFromLdap());
-			conf.setWebKeys(jwks);
+			Conf configuration = Objects.requireNonNull(loadConfigurationFromLdap());
+			configuration.setWebKeys(jwks);
 
-			long nextRevision = conf.getRevision() + 1;
-			conf.setRevision(nextRevision);
+			long nextRevision = configuration.getRevision() + 1;
+			configuration.setRevision(nextRevision);
 
 			final PersistenceEntryManager ldapManager = persistenceEntryManagerInstance.get();
-			ldapManager.merge(conf);
+			ldapManager.merge(configuration);
 
 			log.info("Generated new JWKS successfully.");
-            log.trace("JWKS keys: " + conf.getWebKeys().getKeys().stream().map(JSONWebKey::getKid).collect(Collectors.toList()));
+            log.trace("JWKS keys: " + configuration.getWebKeys().getKeys().stream().map(JSONWebKey::getKid).collect(Collectors.toList()));
 
             log.trace("KeyStore keys: " + cryptoProvider.getKeys());
         } catch (Exception ex2) {
