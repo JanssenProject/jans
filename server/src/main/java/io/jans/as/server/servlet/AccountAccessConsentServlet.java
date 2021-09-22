@@ -73,8 +73,8 @@ public class AccountAccessConsentServlet extends HttpServlet {
         	JSONObject jsonBody = new JSONObject(jsonBodyStr);
 
         	httpResponse.setContentType("application/json");
-        	String xfapiinteractionid=UUID.randomUUID().toString();;
-        	httpResponse.addHeader("x-fapi-interaction-id", xfapiinteractionid);
+        	String xfapiinteractionid=UUID.randomUUID().toString();
+            httpResponse.addHeader("x-fapi-interaction-id", xfapiinteractionid);
         	httpResponse.setCharacterEncoding("UTF-8");
         	JSONObject jsonObj = new JSONObject();
         	
