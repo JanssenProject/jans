@@ -438,7 +438,7 @@ public class SessionIdService {
 	        final URI uri = new URI(redirectUri);
 	        String result = uri.getScheme() + "://" + uri.getHost();
 	        if(uri.getPort() > 0)
-	            result += ":" + Integer.toString(uri.getPort());
+	            result += ":" + uri.getPort();
 	        return result;
     	} else {
     		return appConfiguration.getIssuer();
@@ -886,11 +886,7 @@ public class SessionIdService {
         if (timeSinceLastAccess > sessionInterval && appConfiguration.getSessionIdUnusedLifetime() != -1) {
             return false;
         }
-        if (sessionId.getState() == SessionIdState.UNAUTHENTICATED && timeSinceLastAccess > sessionUnauthenticatedInterval && appConfiguration.getSessionIdUnauthenticatedUnusedLifetime() != -1) {
-            return false;
-        }
-
-        return true;
+        return sessionId.getState() != SessionIdState.UNAUTHENTICATED || timeSinceLastAccess <= sessionUnauthenticatedInterval || appConfiguration.getSessionIdUnauthenticatedUnusedLifetime() == -1;
     }
 
     private List<Prompt> getPromptsFromSessionId(final SessionId sessionId) {

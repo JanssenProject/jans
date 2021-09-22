@@ -14,5 +14,5 @@ public enum ClaimValueType {
     ESSENTIAL_TRUE,
     ESSENTIAL_FALSE,
     VALUE_LIST,
-    SINGLE_VALUE;
+    SINGLE_VALUE
 }

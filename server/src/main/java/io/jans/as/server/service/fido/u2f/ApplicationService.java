@@ -22,7 +22,7 @@ import java.net.URISyntaxException;
 @Named
 public class ApplicationService {
 
-	private boolean validateApplication = true;
+	private final boolean validateApplication = true;
 
 	public boolean isValidateApplication() {
 		return validateApplication;
