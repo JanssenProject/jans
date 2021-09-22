@@ -29,7 +29,7 @@ public enum KeyType {
 
     private final String paramName;
 
-    private KeyType(String paramName) {
+    KeyType(String paramName) {
         this.paramName = paramName;
     }
 

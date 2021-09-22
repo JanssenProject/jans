@@ -43,7 +43,7 @@ public enum TokenRevocationErrorResponseType implements IErrorType {
 
     private final String paramName;
 
-    private static Map<String, TokenRevocationErrorResponseType> mapByValues = new HashMap<>();
+    private static final Map<String, TokenRevocationErrorResponseType> mapByValues = new HashMap<>();
 
     static {
         for (TokenRevocationErrorResponseType enumType : values()) {

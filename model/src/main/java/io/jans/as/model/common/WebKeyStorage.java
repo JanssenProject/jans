@@ -19,7 +19,7 @@ public enum WebKeyStorage {
 
     private final String value;
 
-    private WebKeyStorage(String value) {
+    WebKeyStorage(String value) {
         this.value = value;
     }
 

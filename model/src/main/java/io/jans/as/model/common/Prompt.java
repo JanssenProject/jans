@@ -46,7 +46,7 @@ public enum Prompt implements HasParamName {
 
     private final String paramName;
 
-    private Prompt(String paramName) {
+    Prompt(String paramName) {
         this.paramName = paramName;
     }
 
