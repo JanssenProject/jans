@@ -173,7 +173,7 @@ public class StringUtils {
         }
     }
 
-    public static void addQueryStringParam(StringBuilder queryStringBuilder, String key, Collection value) throws UnsupportedEncodingException {
+    public static void addQueryStringParam(StringBuilder queryStringBuilder, String key, Collection<?> value) throws UnsupportedEncodingException {
         if (queryStringBuilder != null && isNotBlank(key) && value != null && !value.isEmpty()) {
             if (queryStringBuilder.length() > 0) {
                 queryStringBuilder.append("&");
