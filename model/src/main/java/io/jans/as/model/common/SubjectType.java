@@ -6,13 +6,12 @@
 
 package io.jans.as.model.common;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-
 import io.jans.orm.annotation.AttributeEnum;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Javier Rojas Blum Date: 05.11.2012
@@ -21,7 +20,7 @@ public enum SubjectType implements AttributeEnum {
 
     PAIRWISE("pairwise"),
     PUBLIC("public");
-    private static Map<String, SubjectType> mapByValues = new HashMap<>();
+    private static final Map<String, SubjectType> mapByValues = new HashMap<>();
 
     static {
         for (SubjectType enumType : values()) {
@@ -31,7 +30,7 @@ public enum SubjectType implements AttributeEnum {
 
     private final String paramName;
 
-    private SubjectType(String paramName) {
+    SubjectType(String paramName) {
         this.paramName = paramName;
     }
 

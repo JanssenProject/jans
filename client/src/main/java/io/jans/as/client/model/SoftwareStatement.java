@@ -6,16 +6,16 @@
 
 package io.jans.as.client.model;
 
-import org.apache.log4j.Logger;
-import org.json.JSONObject;
-
 import io.jans.as.client.util.ClientUtil;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwt.JwtHeader;
 import io.jans.as.model.util.Base64Util;
-import io.jans.as.model.util.Util;
+import org.apache.log4j.Logger;
+import org.json.JSONObject;
+
+import java.nio.charset.StandardCharsets;
 
 /**
  * @author Javier Rojas Blum
@@ -33,8 +33,8 @@ public class SoftwareStatement {
     private JSONObject claims;
 
     // Signature/Encryption Keys
-    private String sharedKey;
-    private AbstractCryptoProvider cryptoProvider;
+    private final String sharedKey;
+    private final AbstractCryptoProvider cryptoProvider;
 
     public SoftwareStatement(SignatureAlgorithm signatureAlgorithm, AbstractCryptoProvider cryptoProvider) {
         this(signatureAlgorithm, cryptoProvider, null);
@@ -99,8 +99,8 @@ public class SoftwareStatement {
         JSONObject payloadJsonObject = getClaims();
         String headerString = ClientUtil.toPrettyJson(headerJsonObject);
         String payloadString = ClientUtil.toPrettyJson(payloadJsonObject);
-        String encodedHeader = Base64Util.base64urlencode(headerString.getBytes(Util.UTF8_STRING_ENCODING));
-        String encodedPayload = Base64Util.base64urlencode(payloadString.getBytes(Util.UTF8_STRING_ENCODING));
+        String encodedHeader = Base64Util.base64urlencode(headerString.getBytes(StandardCharsets.UTF_8));
+        String encodedPayload = Base64Util.base64urlencode(payloadString.getBytes(StandardCharsets.UTF_8));
         String signingInput = encodedHeader + "." + encodedPayload;
         String encodedSignature = cryptoProvider.sign(signingInput, keyId, sharedKey, signatureAlgorithm);
 

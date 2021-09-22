@@ -20,7 +20,7 @@ public enum ProgrammingLanguage {
 
     private final String value;
 
-    private ProgrammingLanguage(String value) {
+    ProgrammingLanguage(String value) {
         this.value = value;
     }
 

@@ -91,7 +91,7 @@ public enum GrantType implements HasParamName, AttributeEnum {
 
     private final String value;
 
-    private static Map<String, GrantType> mapByValues = new HashMap<>();
+    private static final Map<String, GrantType> mapByValues = new HashMap<>();
 
     static {
         for (GrantType enumType : values()) {
@@ -99,11 +99,11 @@ public enum GrantType implements HasParamName, AttributeEnum {
         }
     }
 
-    private GrantType() {
+    GrantType() {
         this.value = null;
     }
 
-    private GrantType(String value) {
+    GrantType(String value) {
         this.value = value;
     }
 

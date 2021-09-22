@@ -28,7 +28,7 @@ public class TokenBindingMessage {
 
     private static final Logger log = Logger.getLogger(TokenBindingMessage.class);
 
-    private List<TokenBinding> tokenBindings;
+    private final List<TokenBinding> tokenBindings;
 
     public TokenBindingMessage(String base64urlencoded) throws TokenBindingParseException {
         this(TokenBindingMessageParser.parseBase64UrlEncoded(base64urlencoded));

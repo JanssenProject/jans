@@ -26,7 +26,7 @@ public enum Use {
 
     private final String paramName;
 
-    private Use(String paramName) {
+    Use(String paramName) {
         this.paramName = paramName;
     }
 

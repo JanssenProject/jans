@@ -71,7 +71,7 @@ public enum ScopeType implements AttributeEnum {
     private final String value;
     private final String displayName;
 
-    private static Map<String, ScopeType> mapByValues = new HashMap<>();
+    private static final Map<String, ScopeType> mapByValues = new HashMap<>();
 
     static {
         for (ScopeType enumType : values()) {
@@ -79,7 +79,7 @@ public enum ScopeType implements AttributeEnum {
         }
     }
 
-    private ScopeType(String value, String displayName) {
+    ScopeType(String value, String displayName) {
         this.value = value;
         this.displayName = displayName;
     }

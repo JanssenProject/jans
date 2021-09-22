@@ -6,14 +6,9 @@
 
 package io.jans.as.server;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Properties;
-
+import io.jans.as.server.util.Deployments;
+import io.jans.util.StringHelper;
+import io.jans.util.properties.FileConfiguration;
 import org.apache.commons.io.IOUtils;
 import org.eu.ingwar.tools.arquillian.extension.suite.annotations.ArquillianSuiteDeployment;
 import org.jboss.arquillian.container.test.api.Deployment;
@@ -24,9 +19,12 @@ import org.testng.ITestContext;
 import org.testng.Reporter;
 import org.testng.annotations.BeforeSuite;
 
-import io.jans.as.server.util.Deployments;
-import io.jans.util.StringHelper;
-import io.jans.util.properties.FileConfiguration;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Properties;
 
 /**
  * Base class for all seam test which requre external configuration
@@ -46,7 +44,7 @@ public abstract class ConfigurableTest extends Arquillian {
 	}
 
 	@BeforeSuite
-	public void initTestSuite(ITestContext context) throws FileNotFoundException, IOException {
+	public void initTestSuite(ITestContext context) throws IOException {
 		if (initialized) {
 			return;
 		}

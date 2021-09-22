@@ -20,7 +20,7 @@ public enum PairwiseIdType {
 
     private final String value;
 
-    private PairwiseIdType(String value) {
+    PairwiseIdType(String value) {
         this.value = value;
     }
 

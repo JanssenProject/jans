@@ -49,7 +49,7 @@ public enum Display implements HasParamName {
 
     private final String paramName;
 
-    private Display(String paramName) {
+    Display(String paramName) {
         this.paramName = paramName;
     }
 
