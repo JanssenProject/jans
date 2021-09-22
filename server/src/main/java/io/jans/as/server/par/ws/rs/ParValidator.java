@@ -80,7 +80,7 @@ public class ParValidator {
             if (jwtRequest == null) {
                 throw authorizeRestWebServiceValidator.createInvalidJwtRequestException(redirectUriResponse, "Failed to parse jwt.");
             }
-            validateRequestUriIsAbsent(jwtRequest.getJsonPayload().getString("request_uri"), AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT);
+            validateRequestUriIsAbsent(jwtRequest.getJsonPayload().optString("request_uri"), AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT);
             setStateIntoPar(redirectUriResponse, par, jwtRequest);
 
             authorizeRestWebServiceValidator.validateRequestObject(jwtRequest, redirectUriResponse);
