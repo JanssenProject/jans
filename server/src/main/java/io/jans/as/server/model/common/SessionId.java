@@ -6,21 +6,7 @@
 
 package io.jans.as.server.model.common;
 
-import static io.jans.as.server.service.SessionIdService.OP_BROWSER_STATE;
-
-import java.io.Serializable;
-import java.util.Date;
-import java.util.Map;
-import java.util.UUID;
-
-import javax.annotation.Nonnull;
-import javax.inject.Named;
-import javax.persistence.Transient;
-
-import org.apache.commons.lang.StringUtils;
-
 import com.google.common.collect.Maps;
-
 import io.jans.as.common.model.common.User;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DN;
@@ -29,6 +15,17 @@ import io.jans.orm.annotation.Expiration;
 import io.jans.orm.annotation.JsonObject;
 import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.model.base.Deletable;
+import org.apache.commons.lang.StringUtils;
+import org.jetbrains.annotations.NotNull;
+
+import javax.inject.Named;
+import javax.persistence.Transient;
+import java.io.Serializable;
+import java.util.Date;
+import java.util.Map;
+import java.util.UUID;
+
+import static io.jans.as.server.service.SessionIdService.OP_BROWSER_STATE;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -228,7 +225,7 @@ public class SessionId implements Deletable, Serializable {
         permissionGrantedMap.put(clientId, granted);
     }
 
-    @Nonnull
+    @NotNull
     public Map<String, String> getSessionAttributes() {
         if (sessionAttributes == null) {
             sessionAttributes = Maps.newHashMap();
