@@ -15,7 +15,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Alternative;
 import javax.inject.Inject;
 import javax.interceptor.Interceptor;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -37,7 +36,7 @@ public class CustomScriptService extends AbstractCustomScriptService {
         return staticConfiguration.getBaseDn().getScripts();
     }
 
-    public String base64Decode(String encoded) throws IllegalArgumentException, UnsupportedEncodingException {
+    public String base64Decode(String encoded) throws IllegalArgumentException {
         byte[] decoded = Base64Util.base64urldecode(encoded);
         return new String(decoded, StandardCharsets.UTF_8);
     }

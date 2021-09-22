@@ -25,7 +25,6 @@ import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -50,9 +49,6 @@ public class CorsFilter extends AbstractCorsFilter {
 
     @Inject
     private ConfigurationFactory configurationFactory;
-
-    @Inject
-    private AppConfiguration appConfiguration;
 
     @Inject
     private ClientService clientService;
