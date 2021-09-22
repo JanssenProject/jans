@@ -6,28 +6,15 @@
 
 package io.jans.as.server.service.net;
 
-import java.io.IOException;
-import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.Charset;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
-
+import io.jans.as.server.model.net.HttpServiceResponse;
+import io.jans.net.SslDefaultHttpClient;
+import io.jans.util.StringHelper;
+import io.jans.util.Util;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -46,10 +33,21 @@ import org.apache.http.util.EntityUtils;
 import org.jboss.resteasy.util.HttpResponseCodes;
 import org.slf4j.Logger;
 
-import io.jans.as.server.model.net.HttpServiceResponse;
-import io.jans.net.SslDefaultHttpClient;
-import io.jans.util.StringHelper;
-import io.jans.util.Util;
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.Map;
+import java.util.Map.Entry;
 /**
  * Provides operations with http requests
  *
@@ -148,13 +146,7 @@ public class HttpService implements Serializable {
 	}
 
 	public String encodeBase64(String value) {
-		try {
-			return new String(base64.encode((value).getBytes(Util.UTF8)), Util.UTF8);
-		} catch (UnsupportedEncodingException ex) {
-	    	log.error("Failed to convert '{}' to base64", value, ex);
-		}
-
-		return null;
+        return new String(base64.encode((value).getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
 	}
 
 	public String encodeUrl(String value) {
@@ -187,7 +179,7 @@ public class HttpService implements Serializable {
 		return null;
 	}
 
-	public HttpServiceResponse executeGet(HttpClient httpClient, String requestUri) throws ClientProtocolException, IOException {
+	public HttpServiceResponse executeGet(HttpClient httpClient, String requestUri) throws IOException {
 		return executeGet(httpClient, requestUri, null);
 	}
 
@@ -248,12 +240,8 @@ public class HttpService implements Serializable {
 
 	public boolean isResponseStastusCodeOk(HttpResponse httpResponse) {
 		int responseStastusCode = httpResponse.getStatusLine().getStatusCode();
-		if (responseStastusCode == HttpStatus.SC_OK) {
-			return true;
-		}
-		
-		return false;
-	}
+        return responseStastusCode == HttpStatus.SC_OK;
+    }
 	
 
 	public boolean isContentTypeXml(HttpResponse httpResponse) {
@@ -263,12 +251,8 @@ public class HttpService implements Serializable {
 		}
 
 		String contentTypeValue = contentType.getValue();
-		if (StringHelper.equals(contentTypeValue, ContentType.APPLICATION_XML.getMimeType()) || StringHelper.equals(contentTypeValue, ContentType.TEXT_XML.getMimeType())) {
-			return true;
-		}
-		
-		return false;
-	}
+        return StringHelper.equals(contentTypeValue, ContentType.APPLICATION_XML.getMimeType()) || StringHelper.equals(contentTypeValue, ContentType.TEXT_XML.getMimeType());
+    }
 
 	public String constructServerUrl(final HttpServletRequest request) {
     	int serverPort = request.getServerPort();

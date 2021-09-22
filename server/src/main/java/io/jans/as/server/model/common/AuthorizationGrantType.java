@@ -75,7 +75,7 @@ public enum AuthorizationGrantType implements HasParamName {
 
     private final String paramName;
 
-    private AuthorizationGrantType(String paramName) {
+    AuthorizationGrantType(String paramName) {
         this.paramName = paramName;
     }
 
