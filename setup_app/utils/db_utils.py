@@ -371,7 +371,7 @@ class DBUtils:
             else:
                 return row_dict
 
-            return retVal
+        return retVal
 
 
     def search(self, search_base, search_filter='(objectClass=*)', search_scope=ldap3.LEVEL, fetchmany=False):
@@ -449,11 +449,15 @@ class DBUtils:
                 sql_cmd = 'SELECT * FROM {} WHERE ({}) {}'.format(s_table, dn_clause, where_clause)
 
                 data = self.spanner.exec_sql(sql_cmd)
-    
+
                 if not data.get('rows'):
                     return retVal
 
-                return self.spanner_to_dict(data)
+                retVal = self.spanner_to_dict(data)
+                if not fetchmany and isinstance(retVal, list):
+                    retVal = retVal[0]
+
+                return retVal
 
             sqlalchemy_table = self.Base.classes[s_table]
             sqlalchemyQueryObject = self.session.query(sqlalchemy_table)
