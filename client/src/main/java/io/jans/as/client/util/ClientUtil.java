@@ -39,7 +39,10 @@ import java.util.List;
 
 public class ClientUtil {
 
-    private final static Logger log = LoggerFactory.getLogger(ClientUtil.class);
+    private static final Logger log = LoggerFactory.getLogger(ClientUtil.class);
+
+    private ClientUtil() {
+    }
 
     public static String toPrettyJson(JSONObject jsonObject) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
@@ -48,7 +51,7 @@ public class ClientUtil {
     }
 
     public static List<String> extractListByKey(JSONObject jsonObject, String key) {
-        final List<String> result = new ArrayList<String>();
+        final List<String> result = new ArrayList<>();
         if (jsonObject.has(key)) {
             JSONArray arrayOfValues = jsonObject.optJSONArray(key);
             if (arrayOfValues != null) {
@@ -87,13 +90,13 @@ public class ClientUtil {
                     .register("http", new PlainConnectionSocketFactory())
                     .build();
 
-            PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager(registry);
-
-            return HttpClients.custom()
-                    .setSSLContext(sslContext)
-                    .setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
-                    .setConnectionManager(cm)
-                    .build();
+            try (PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager(registry)) {
+                return HttpClients.custom()
+                        .setSSLContext(sslContext)
+                        .setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
+                        .setConnectionManager(cm)
+                        .build();
+            }
         } catch (Exception e) {
             log.error("Error creating HttpClient with a custom TLS version and custom ciphers", e);
             return null;
