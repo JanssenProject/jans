@@ -6,7 +6,7 @@
         </Console>
     </Appenders>
     <Loggers>
-        <Logger name="gluu.scim2" level="DEBUG" additivity="false">
+        <Logger name="io.jans.scim2" level="DEBUG" additivity="false">
             <AppenderRef ref="Console"/>
         </Logger>
         <Root level="error">

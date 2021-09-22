@@ -14,6 +14,7 @@ import io.jans.util.StringHelper;
 import io.jans.scim2.client.exception.ScimInitializationException;
 
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.*;
@@ -37,6 +38,8 @@ import javax.ws.rs.core.Response;
 public class ScimClient<T> extends AbstractScimClient<T> {
 
     private static final long serialVersionUID = 3141592672017122134L;
+
+    private static final Charset utf8 = StandardCharsets.UTF_8;
 
     private static final String SCOPES = Stream.of(
     	"https://jans.io/scim/users.read",
@@ -126,7 +129,7 @@ public class ScimClient<T> extends AbstractScimClient<T> {
         
         if (tokenEndpointAuthnMethod.equals(AuthenticationMethod.CLIENT_SECRET_BASIC)) {
             String authz = clientId + ":" + password;
-            authz = new String(Base64.getEncoder().encode(authz.getBytes("UTF-8")), StandardCharsets.UTF_8);
+            authz = new String(Base64.getEncoder().encode(authz.getBytes(utf8)), utf8);
 
             builder.header("Authorization", "Basic " + authz);
             
