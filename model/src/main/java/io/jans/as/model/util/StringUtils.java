@@ -12,6 +12,7 @@ import org.json.JSONException;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -210,4 +211,7 @@ public class StringUtils {
         return Util.byteArrayToHexString(seed);
     }
 
+    public static String base64urlencode(String string) {
+        return Base64Util.base64urlencode(string.getBytes(StandardCharsets.UTF_8));
+    }
 }
