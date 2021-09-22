@@ -172,8 +172,9 @@ class CollectProperties(SetupUtils, BaseInstaller):
                         search_filter='(objectClass=jansClnt)',
                         search_scope=ldap3.BASE,
                         )
-        Config.oxauthClient_encoded_pw = result['jansClntSecret']
-        Config.oxauthClient_pw = self.unobscure(Config.oxauthClient_encoded_pw)
+        if result.get('jansClntSecret'):
+            Config.oxauthClient_encoded_pw = result['jansClntSecret']
+            Config.oxauthClient_pw = self.unobscure(Config.oxauthClient_encoded_pw)
 
         dn_oxauth, oxAuthConfDynamic = dbUtils.get_oxAuthConfDynamic()
 
