@@ -15,6 +15,7 @@ import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.util.AttributeNames;
 import io.jans.configapi.util.Jackson;
+import io.jans.util.StringHelper;
 import io.jans.util.security.StringEncrypter.EncryptionException;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -26,6 +27,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.List;
+
+import org.apache.commons.lang.RandomStringUtils;
 import org.slf4j.Logger;
 
 /**
@@ -83,15 +86,22 @@ public class ClientsResource extends BaseResource {
             client.setClientId(inum);
         }
         checkNotNull(client.getClientName(), AttributeNames.DISPLAY_NAME);
-        if (client.getClientSecret() != null) {
-            client.setClientSecret(encryptionService.encrypt(client.getClientSecret()));
-        }
+        String clientSecret = client.getClientSecret();
+
+		if (StringHelper.isEmpty(clientSecret)) {
+			log.trace("\n\n Generating clientSecret as empty for " + client.getClientName());
+			clientSecret = generatePassword();
+		}
+		if (clientSecret != null) {
+			client.setClientSecret(encryptionService.encrypt(clientSecret));
+		}
+        
         client.setDn(clientService.getDnForClient(inum));
         client.setDeletable(client.getClientSecretExpiresAt() != null);
         clientService.addClient(client);
         Client result = clientService.getClientByInum(inum);
         if (result.getClientSecret() != null) {
-            result.setClientSecret(encryptionService.encrypt(result.getClientSecret()));
+            result.setClientSecret(encryptionService.decrypt(result.getClientSecret()));
         }
         return Response.status(Response.Status.CREATED).entity(result).build();
     }
@@ -159,4 +169,8 @@ public class ClientsResource extends BaseResource {
         return clients;
     }
 
+    private String generatePassword() throws EncryptionException {
+		String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+		return RandomStringUtils.random(40, characters);
+	}
 }
