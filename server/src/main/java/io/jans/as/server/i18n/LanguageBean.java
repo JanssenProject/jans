@@ -59,12 +59,12 @@ public class LanguageBean implements Serializable {
             Locale locale = getCookieLocale();
             if (locale != null) {
                 setLocale(locale);
+                return locale.toLanguageTag();
             }
-
-            return locale.toLanguageTag();
         } catch (Exception e) {
-            return defaultLocale.getLanguage();
+            // ignore
         }
+        return defaultLocale.getLanguage();
     }
 
     public void setLocaleCode(String requestedLocaleCode) {
