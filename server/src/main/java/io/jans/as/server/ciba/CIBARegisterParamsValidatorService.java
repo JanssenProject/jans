@@ -45,7 +45,7 @@ public class CIBARegisterParamsValidatorService {
 
     public boolean validateParams(
             BackchannelTokenDeliveryMode backchannelTokenDeliveryMode, String backchannelClientNotificationEndpoint,
-            AsymmetricSignatureAlgorithm backchannelAuthenticationRequestSigningAlg, Boolean backchannelUserCodeParameter,
+            AsymmetricSignatureAlgorithm backchannelAuthenticationRequestSigningAlg,
             List<GrantType> grantTypes, SubjectType subjectType, String sectorIdentifierUri, String jwks, String jwksUri) {
         try {
             // Not CIBA Registration
@@ -70,11 +70,6 @@ public class CIBARegisterParamsValidatorService {
                 if (!appConfiguration.getGrantTypesSupported().contains(CIBA) || !grantTypes.contains(CIBA)) {
                     return false;
                 }
-            }
-
-            // If the server does not support backchannel_user_code_parameter_supported, the default value is false.
-            if (appConfiguration.getBackchannelUserCodeParameterSupported() == null || appConfiguration.getBackchannelUserCodeParameterSupported() == false) {
-                backchannelUserCodeParameter = false;
             }
 
             if (subjectType != null && subjectType == SubjectType.PAIRWISE) {
