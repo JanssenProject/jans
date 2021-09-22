@@ -11,7 +11,6 @@ import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwt.JwtHeader;
-import org.apache.log4j.Logger;
 import org.json.JSONObject;
 
 import static io.jans.as.model.util.StringUtils.base64urlencode;
@@ -21,8 +20,6 @@ import static io.jans.as.model.util.StringUtils.base64urlencode;
  * @version December 4, 2018
  */
 public class SoftwareStatement {
-
-    private static final Logger LOG = Logger.getLogger(JwtState.class);
 
     // Header
     private SignatureAlgorithm signatureAlgorithm;
@@ -87,9 +84,7 @@ public class SoftwareStatement {
         this.claims = claims;
     }
 
-    public String getEncodedJwt(JSONObject jwks) throws Exception {
-        String encodedJwt = null;
-
+    public String getEncodedJwt() throws Exception {
         if (cryptoProvider == null) {
             throw new Exception("The Crypto Provider cannot be null.");
         }
@@ -103,13 +98,7 @@ public class SoftwareStatement {
         String signingInput = encodedHeader + "." + encodedPayload;
         String encodedSignature = cryptoProvider.sign(signingInput, keyId, sharedKey, signatureAlgorithm);
 
-        encodedJwt = encodedHeader + "." + encodedPayload + "." + encodedSignature;
-
-        return encodedJwt;
-    }
-
-    public String getEncodedJwt() throws Exception {
-        return getEncodedJwt(null);
+        return encodedHeader + "." + encodedPayload + "." + encodedSignature;
     }
 
     protected JSONObject headerToJSONObject() throws InvalidJwtException {
