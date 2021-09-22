@@ -1,13 +1,12 @@
 package io.jans.as.model.common.converter;
 
+import com.fasterxml.jackson.databind.util.StdConverter;
+import io.jans.as.model.util.StringUtils;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import com.fasterxml.jackson.databind.util.StdConverter;
-
-import io.jans.as.model.util.StringUtils;
 
 /**
  * A class to facilitate two-step deserialization.
@@ -26,7 +25,7 @@ public class ListConverter extends StdConverter<Object,List<String>> {
 		if (obj != null) {
 			if (List.class.isAssignableFrom(obj.getClass())) {
 				// json data already looks like a list...
-				Stream<String> stream = List.class.cast(obj).stream()
+				Stream<String> stream = ((List) obj).stream()
 				    .filter(Objects::nonNull).map(Object::toString);
 				return stream.collect(Collectors.toList());
 				

@@ -31,7 +31,7 @@ import java.util.Set;
  */
 public abstract class JwtClaimSet {
 
-    private Map<String, Object> claims;
+    private final Map<String, Object> claims;
 
     protected JwtClaimSet() {
         claims = new LinkedHashMap<>();

@@ -54,7 +54,7 @@ public enum RegisterErrorResponseType implements IErrorType {
 
     private final String paramName;
 
-    private RegisterErrorResponseType(String paramName) {
+    RegisterErrorResponseType(String paramName) {
         this.paramName = paramName;
     }
 

@@ -29,7 +29,7 @@ public enum ErrorHandlingMethod implements HasParamName, AttributeEnum {
 
     private final String value;
 
-    private static Map<String, ErrorHandlingMethod> mapByValues = new HashMap<>();
+    private static final Map<String, ErrorHandlingMethod> mapByValues = new HashMap<>();
 
     static {
         for (ErrorHandlingMethod enumType : values()) {
@@ -37,11 +37,11 @@ public enum ErrorHandlingMethod implements HasParamName, AttributeEnum {
         }
     }
 
-    private ErrorHandlingMethod() {
+    ErrorHandlingMethod() {
         this.value = null;
     }
 
-    private ErrorHandlingMethod(String value) {
+    ErrorHandlingMethod(String value) {
         this.value = value;
     }
 
