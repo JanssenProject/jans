@@ -16,7 +16,6 @@ import io.jans.as.model.session.EndSessionErrorResponseType;
  */
 public class EndSessionResponse extends BaseResponse {
 
-    private String location;
     private String state;
 
     private EndSessionErrorResponseType errorType;
@@ -30,24 +29,6 @@ public class EndSessionResponse extends BaseResponse {
      */
     public EndSessionResponse(int status) {
         super(status);
-    }
-
-    /**
-     * Returns the location of the response in the header.
-     *
-     * @return The location of the response.
-     */
-    public String getLocation() {
-        return location;
-    }
-
-    /**
-     * Sets the location of the response in the header.
-     *
-     * @param location The location of the response.
-     */
-    public void setLocation(String location) {
-        this.location = location;
     }
 
     /**
