@@ -20,7 +20,7 @@ Configuration parameters for setup and initial configuration secret and config l
 
 ## Requirements
 
-Kubernetes: `>=v1.17.0-0`
+Kubernetes: `>=v1.19.0-0`
 
 ## Values
 

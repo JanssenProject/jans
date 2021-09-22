@@ -7,7 +7,7 @@ metadata:
   name: {{ .Release.Name }}-scim-mtls
   namespace: {{ .Release.Namespace }}
 spec:
-  host: {{ .Values.service.scimServiceName }}.{{ .Release.Namespace }}.svc.cluster.local
+  host: {{ .Values.global.scim.scimServiceName }}.{{ .Release.Namespace }}.svc.cluster.local
   trafficPolicy:
     tls:
       mode: ISTIO_MUTUAL

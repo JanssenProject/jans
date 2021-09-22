@@ -28,7 +28,7 @@ entries:
       artifacthub.io/prerelease: "true"
     apiVersion: v2
     appVersion: 1.0.0-b9
-    created: "2021-09-22T05:05:46.110846-04:00"
+    created: "2021-09-22T06:17:32.055669-04:00"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -116,7 +116,7 @@ entries:
       artifacthub.io/prerelease: "true"
     apiVersion: v2
     appVersion: 1.0.0-b8
-    created: "2021-09-22T05:05:46.102441-04:00"
+    created: "2021-09-22T06:17:32.048784-04:00"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -204,7 +204,7 @@ entries:
       artifacthub.io/prerelease: "true"
     apiVersion: v2
     appVersion: 1.0.0-b7
-    created: "2021-09-22T05:05:46.094538-04:00"
+    created: "2021-09-22T06:17:32.041086-04:00"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -292,7 +292,7 @@ entries:
       artifacthub.io/prerelease: "true"
     apiVersion: v2
     appVersion: 1.0.0-b6
-    created: "2021-09-22T05:05:46.086006-04:00"
+    created: "2021-09-22T06:17:32.033236-04:00"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -379,7 +379,7 @@ entries:
       artifacthub.io/prerelease: "true"
     apiVersion: v2
     appVersion: 1.0.0-b11
-    created: "2021-09-22T05:05:46.077376-04:00"
+    created: "2021-09-22T06:17:32.026269-04:00"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -426,7 +426,7 @@ entries:
       repository: ""
       version: 1.0.0-b11
     description: Janssen Access and Identity Management
-    digest: cb5ac6fc867d350b429abf81dfd15e2ec289692274c75fc6d85ec039996462de
+    digest: 0fec59df9bbcdc57fd9cb194a991f0fb58440c2484fa1807733d0adc89172ed7
     home: https://github.com/JanssenProject/jans-cloud-native
     icon: https://avatars.githubusercontent.com/u/68292770?s=200&v=4
     kubeVersion: '>=v1.17.0-0'
@@ -467,7 +467,7 @@ entries:
       artifacthub.io/prerelease: "true"
     apiVersion: v2
     appVersion: 1.0.0-b10
-    created: "2021-09-22T05:05:46.070273-04:00"
+    created: "2021-09-22T06:17:32.018336-04:00"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -533,7 +533,7 @@ entries:
       artifacthub.io/prerelease: "true"
     apiVersion: v2
     appVersion: 1.0.0-a4
-    created: "2021-09-22T05:05:46.057692-04:00"
+    created: "2021-09-22T06:17:32.008336-04:00"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -593,4 +593,4 @@ entries:
     urls:
     - jans-1.0.0-a4.tgz
     version: 1.0.0-a4
-generated: "2021-09-22T05:05:46.049856-04:00"
+generated: "2021-09-22T06:17:32.003449-04:00"

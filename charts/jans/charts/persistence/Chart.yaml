@@ -3,7 +3,7 @@
 apiVersion: v2
 name: persistence
 version: 1.0.0-b11
-kubeVersion: ">=v1.17.0-0"
+kubeVersion: ">=v1.19.0-0"
 description: Job to generate data and initial config for Janssen Server persistence layer.
 type: application
 keywords:

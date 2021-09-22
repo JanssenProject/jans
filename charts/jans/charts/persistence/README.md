@@ -19,7 +19,7 @@ Job to generate data and initial config for Janssen Server persistence layer.
 
 ## Requirements
 
-Kubernetes: `>=v1.17.0-0`
+Kubernetes: `>=v1.19.0-0`
 
 ## Values
 

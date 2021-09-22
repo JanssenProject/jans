@@ -1,81 +1,88 @@
 {{- if or (eq .Values.global.cnPersistenceType "ldap") (eq .Values.global.cnPersistenceType "hybrid") }}
+{{ range $k, $v := until ( .Values.multiCluster.replicaCount | int ) }}
+---
 # License terms and conditions for Janssen Cloud Native Edition:
 # https://www.apache.org/licenses/LICENSE-2.0
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ include "opendj.fullname" . }}
-  namespace: {{ .Release.Namespace }}
+  {{- if $.Values.multiCluster.enabled }}
+  name: {{ include "opendj.fullname" $ }}-regional-{{$v}}
+  {{- else }}
+  name: {{ include "opendj.fullname" $ }}
+  {{- end }}
+  namespace: {{ $.Release.Namespace }}
   labels:
-{{ include "opendj.labels" . | indent 4}}
+{{ include "opendj.labels" $ | indent 4}}
+    {{- if $.Values.multiCluster.enabled }}
+    appregion: {{ include "opendj.name" $ }}-regional-{{$v}}
+    {{- end }}
 spec:
   selector:
     matchLabels:
-      {{- if .Values.multiCluster.enabled }}
-      app: {{ .Release.Name }}-{{ include "opendj.name" . }}-regional
+      {{- if $.Values.multiCluster.enabled }}
+      app: {{ include "opendj.name" $ }}
+      appregion: {{ include "opendj.name" $ }}-regional-{{$v}}
       {{- else }}
-      app: {{ .Release.Name }}-{{ include "opendj.name" . }}
+      app: {{ include "opendj.name" $ }}
       {{- end }}
-  serviceName: {{ include "opendj.name" . }}
-  replicas: {{ .Values.replicas }}
+  serviceName: {{ include "opendj.name" $ }}
+  {{- if $.Values.multiCluster.enabled }}
+  replicas: 1
+  {{- else }}
+  replicas: {{ $.Values.replicas }}
+  {{- end }}
   template:
     metadata:
       labels:
-        {{- if .Values.multiCluster.enabled }}
-        app: {{ .Release.Name }}-{{ include "opendj.name" . }}-regional
+        {{- if $.Values.multiCluster.enabled }}
+        app: {{ include "opendj.name" $ }}
+        appregion: {{ include "opendj.name" $ }}-regional-{{$v}}
         {{- else }}
-        app: {{ .Release.Name }}-{{ include "opendj.name" . }}
+        app: {{ include "opendj.name" $ }}
         {{- end }}
-      {{- if .Values.global.istio.ingress }}
+      {{- if $.Values.global.istio.ingress }}
       annotations:
         sidecar.istio.io/rewriteAppHTTPProbers: "true"
       {{- end }}
     spec:
-    {{- with .Values.image.pullSecrets }}
+    {{- with $.Values.image.pullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
     {{- end }}
-      dnsPolicy: {{ .Values.dnsPolicy | quote }}
-    {{- with .Values.dnsConfig }}
+      dnsPolicy: {{ $.Values.dnsPolicy | quote }}
+    {{- with $.Values.dnsConfig }}
       dnsConfig:
 {{ toYaml . | indent 8 }}
     {{- end }}
       volumes:
-      {{- with .Values.volumes }}
+      {{- with $.Values.volumes }}
 {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{ if or (eq .Values.global.configSecretAdapter "google") (eq .Values.global.cnPersistenceType "spanner") }}
-        - name: google-sa
-          secret:
-            secretName: {{ .Release.Name }}-google-sa
-      {{- end }}
-      {{- if .Values.multiCluster.enabled }}
+      {{- if $.Values.multiCluster.enabled }}
         - name: serfkey
           secret:
-            secretName: {{ .Release.Name }}-serf-key
+            secretName: {{ $.Release.Name }}-serf-key
         - name: serfpeers
           configMap:
-            name: {{ .Release.Name }}-serf-peers
+            name: {{ $.Release.Name }}-serf-peers
       {{- end }}
       containers:
-      - name: {{ include "opendj.name" . }}
-        imagePullPolicy: {{ .Values.image.pullPolicy }}
-        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-        #securityContext:
-        #  runAsUser: 1000
-        #  runAsNonRoot: true
+      - name: {{ include "opendj.name" $ }}
+        imagePullPolicy: {{ $.Values.image.pullPolicy }}
+        image: "{{ $.Values.image.repository }}:{{ $.Values.image.tag }}"
         env:
-          {{- include "opendj.usr-envs" . | indent 12 }}
-          {{- include "opendj.usr-secret-envs" . | indent 12 }}
-        {{- if .Values.multiCluster.enabled }}
+          {{- include "opendj.usr-envs" $ | indent 12 }}
+          {{- include "opendj.usr-secret-envs" $ | indent 12 }}
+        {{- if $.Values.multiCluster.enabled }}
           - name: JANS_SERF_ADVERTISE_ADDR
-            value: {{ .Values.multiCluster.serfAdvertiseAddr | quote }}
+            value: "{{ $.Release.Name }}-opendj-{{$.Values.multiCluster.clusterId}}-regional-{{$v}}-{{ $.Values.multiCluster.serfAdvertiseAddrSuffix }}:307{{$.Values.multiCluster.namespaceIntId}}{{$v}}"
           - name: JANS_LDAP_ADVERTISE_ADMIN_PORT
-            value: {{ index .Values "ports" "tcp-admin" "nodePort" | quote }}
+            value: "304{{$.Values.multiCluster.namespaceIntId}}{{$v}}"
           - name: JANS_LDAP_ADVERTISE_LDAPS_PORT
-            value: {{ index .Values "ports" "tcp-ldaps" "nodePort" | quote }}
+            value: "306{{$.Values.multiCluster.namespaceIntId}}{{$v}}"
           - name: JANS_LDAP_ADVERTISE_REPLICATION_PORT
-            value: {{ index .Values "ports" "tcp-repl" "nodePort" | quote }}
+            value: "309{{$.Values.multiCluster.namespaceIntId}}{{$v}}"
         {{- end }}
         lifecycle:
           preStop:
@@ -83,206 +90,62 @@ spec:
               command: ["python3", "/app/scripts/deregister_peer.py"]
         envFrom:
         - configMapRef:
-            name: {{ .Release.Name }}-config-cm
-        {{ if .Values.global.usrEnvs.secret }}
+            name: {{ $.Release.Name }}-config-cm
+        {{ if $.Values.global.usrEnvs.secret }}
         - secretRef:
-            name: {{ .Release.Name }}-global-user-custom-envs
+            name: {{ $.Release.Name }}-global-user-custom-envs
         {{- end }}
-        {{ if .Values.global.usrEnvs.normal }}
+        {{ if $.Values.global.usrEnvs.normal }}
         - configMapRef:
-            name: {{ .Release.Name }}-global-user-custom-envs
+            name: {{ $.Release.Name }}-global-user-custom-envs
         {{- end }}
         ports:
-        {{- range $key, $value := .Values.ports }}
+        {{- range $key, $value := $.Values.ports }}
           - containerPort: {{ $value.targetPort }}
             name: {{ $key }}
         {{- end }}
         volumeMounts:
-        {{- with .Values.volumeMounts }}
-{{- toYaml . | nindent 10 }}
-        {{- end }}
-        {{ if or (eq .Values.global.configSecretAdapter "google") (eq .Values.global.cnPersistenceType "spanner") }}
-          - mountPath: {{ .Values.global.cnGoogleApplicationCredentials }}
-            name: google-sa
-            subPath: google-credentials.json
-        {{- end }}
-        {{- range $key, $values := .Values.openDjVolumeMounts }}
+        {{- range $key, $values := $.Values.openDjVolumeMounts }}
           - mountPath: {{$values.mountPath}}
             name: {{$values.name}}
             subPath: {{$key}}
         {{- end }}
-        {{- if .Values.multiCluster.enabled }}
-          - mountPath: "/etc/cn/conf/serf-key"
-            name: serfkey
-            subPath: serf-key
-          - mountPath: "/etc/jans/conf/serf-peers-static.json"
-            name: serfpeers
-            subPath: serf-peers-static.json
-        {{- end }}
-        livenessProbe:
-{{- toYaml .Values.livenessProbe | nindent 10 }}
-        readinessProbe:
-{{- toYaml .Values.readinessProbe | nindent 10 }}
-        {{- if or (eq .Values.global.storageClass.provisioner "microk8s.io/hostpath" ) (eq .Values.global.storageClass.provisioner "k8s.io/minikube-hostpath") }}
-        resources: {}
-        {{- else if .Values.global.cloud.testEnviroment }}
-        resources: {}
-        {{- else }}
-        resources:
-{{- toYaml .Values.resources | nindent 10 }}
-        {{- end }}
-  volumeClaimTemplates:
-  - metadata:
-      name: opendj-volume
-    spec:
-      accessModes:
-      - {{ .Values.persistence.accessModes }}
-      resources:
-        requests:
-          storage: {{ .Values.persistence.size }}
-      {{- if eq .Values.global.storageClass.provisioner "k8s.io/minikube-hostpath" }}
-      storageClassName: standard
-      {{- else }}
-      storageClassName: {{ include "opendj.fullname" . | quote }}
-      {{- end }}
-
-{{- if .Values.multiCluster.enabled }}
----
-apiVersion: apps/v1
-kind: StatefulSet
-metadata:
-  name: local-{{ include "opendj.fullname" . }}
-  namespace: {{ .Release.Namespace }}
-  labels:
-{{ include "opendj.labels" . | indent 4}}
-spec:
-  selector:
-    matchLabels:
-      app: {{ .Release.Name }}-{{ include "opendj.name" . }}
-  serviceName: {{ include "opendj.name" . }}
-  replicas: {{ .Values.replicas }}
-  template:
-    metadata:
-      labels:
-        app: {{ .Release.Name }}-{{ include "opendj.name" . }}
-      {{- if .Values.global.istio.ingress }}
-      annotations:
-        sidecar.istio.io/rewriteAppHTTPProbers: "true"
-      {{- end }}
-    spec:
-    {{- with .Values.image.pullSecrets }}
-      imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
-    {{- end }}
-      dnsPolicy: {{ .Values.dnsPolicy | quote }}
-    {{- with .Values.dnsConfig }}
-      dnsConfig:
-{{ toYaml . | indent 8 }}
-    {{- end }}
-      volumes:
-      {{- with .Values.volumes }}
-{{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{ if or (eq .Values.global.configSecretAdapter "google") (eq .Values.global.cnPersistenceType "spanner") }}
-        - name: google-sa
-          secret:
-            secretName: {{ .Release.Name }}-google-sa
-      {{- end }}
-        - name: serfkey
-          secret:
-            secretName: {{ .Release.Name }}-serf-key
-        - name: serfpeers
-          configMap:
-            name: {{ .Release.Name }}-serf-peers
-      containers:
-      - name: {{ include "opendj.name" . }}
-        imagePullPolicy: {{ .Values.image.pullPolicy }}
-        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-        env:
-          {{- include "opendj.usr-envs" . | indent 12 }}
-          {{- include "opendj.usr-secret-envs" . | indent 12 }}
-        lifecycle:
-          preStop:
-            exec:
-              command: ["python3", "/app/scripts/deregister_peer.py"]
-        envFrom:
-        - configMapRef:
-            name: {{ .Release.Name }}-config-cm
-        {{ if .Values.global.usrEnvs.secret }}
-        - secretRef:
-            name: {{ .Release.Name }}-global-user-custom-envs
-        {{- end }}
-        {{ if .Values.global.usrEnvs.normal }}
-        - configMapRef:
-            name: {{ .Release.Name }}-global-user-custom-envs
-        {{- end }}
-        ports:
-        - name: local-tcp-ldaps
-          containerPort: 1636
-          protocol: TCP
-        - name: local-tcp-ldap
-          containerPort: 1389
-          protocol: TCP
-        - name: local-tcp-repl
-          containerPort: 8989
-          protocol: TCP
-        - name: local-tcp-admin
-          containerPort: 4444
-          protocol: TCP
-        - name: local-tcp-serf
-          containerPort: 7946
-          protocol: TCP
-        - name: local-udp-serf
-          containerPort: 7946
-          protocol: UDP
-        volumeMounts:
-        {{- with .Values.volumeMounts }}
+        {{- with $.Values.volumeMounts }}
 {{- toYaml . | nindent 10 }}
         {{- end }}
-        {{ if or (eq .Values.global.configSecretAdapter "google") (eq .Values.global.cnPersistenceType "spanner") }}
-          - mountPath: {{ .Values.global.cnGoogleApplicationCredentials }}
-            name: google-sa
-            subPath: google-credentials.json
-        {{- end }}
-        {{- range $key, $values := .Values.openDjVolumeMounts }}
-          - mountPath: {{$values.mountPath}}
-            name: {{$values.name}}
-            subPath: {{$key}}
-        {{- end }}
-        {{- with .Values.volumeMounts }}
-{{- toYaml . | nindent 10 }}
-        {{- end }}
+        {{- if $.Values.multiCluster.enabled }}
           - mountPath: "/etc/jans/conf/serf-key"
             name: serfkey
             subPath: serf-key
           - mountPath: "/etc/jans/conf/serf-peers-static.json"
             name: serfpeers
             subPath: serf-peers-static.json
+        {{- end }}
         livenessProbe:
-{{- toYaml .Values.livenessProbe | nindent 10 }}
+{{- toYaml $.Values.livenessProbe | nindent 10 }}
         readinessProbe:
-{{- toYaml .Values.readinessProbe | nindent 10 }}
-        {{- if or (eq .Values.global.storageClass.provisioner "microk8s.io/hostpath" ) (eq .Values.global.storageClass.provisioner "k8s.io/minikube-hostpath") }}
+{{- toYaml $.Values.readinessProbe | nindent 10 }}
+        {{- if or (eq $.Values.global.storageClass.provisioner "microk8s.io/hostpath" ) (eq $.Values.global.storageClass.provisioner "k8s.io/minikube-hostpath") }}
         resources: {}
-        {{- else if .Values.global.cloud.testEnviroment }}
+        {{- else if $.Values.global.cloud.testEnviroment }}
         resources: {}
         {{- else }}
         resources:
-{{- toYaml .Values.resources | nindent 10 }}
+{{- toYaml $.Values.resources | nindent 10 }}
         {{- end }}
   volumeClaimTemplates:
   - metadata:
       name: opendj-volume
     spec:
       accessModes:
-      - {{ .Values.persistence.accessModes }}
+      - {{ $.Values.persistence.accessModes }}
       resources:
         requests:
-          storage: {{ .Values.persistence.size }}
-      {{- if eq .Values.global.storageClass.provisioner "k8s.io/minikube-hostpath" }}
+          storage: {{ $.Values.persistence.size }}
+      {{- if eq $.Values.global.storageClass.provisioner "k8s.io/minikube-hostpath" }}
       storageClassName: standard
       {{- else }}
-      storageClassName: {{ include "opendj.fullname" . | quote }}
+      storageClassName: {{ include "opendj.fullname" $ | quote }}
       {{- end }}
 {{- end }}
 {{- end }}
