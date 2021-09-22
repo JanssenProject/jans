@@ -443,8 +443,7 @@ public abstract class UserService {
         CustomObjectAttribute customAttribute = getCustomAttribute(user, attributeName);
         if (customAttribute != null) {
             List<Object> currentAttributeValues = customAttribute.getValues();
-            List<Object> newAttributeValues = new ArrayList<Object>();
-            newAttributeValues.addAll(currentAttributeValues);
+            List<Object> newAttributeValues = new ArrayList<>(currentAttributeValues);
 
             if (currentAttributeValues.contains(oldAttributeValue)) {
                 newAttributeValues.remove(oldAttributeValue);
@@ -455,12 +454,11 @@ public abstract class UserService {
             }
 
             customAttribute.setValues(newAttributeValues);
-        }
 
-        if (multiValued != null) {
-            customAttribute.setMultiValued(multiValued);
+            if (multiValued != null) {
+                customAttribute.setMultiValued(multiValued);
+            }
         }
-
         return updateUser(user);
     }
 

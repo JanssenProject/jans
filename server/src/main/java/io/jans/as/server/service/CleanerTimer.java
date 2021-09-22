@@ -132,7 +132,7 @@ public class CleanerTimer {
             return false;
         }
 
-        long cleaningInterval = interval * 1000;
+        long cleaningInterval = interval * 1000L;
 
         long timeDiffrence = System.currentTimeMillis() - this.lastFinishedTime;
 
