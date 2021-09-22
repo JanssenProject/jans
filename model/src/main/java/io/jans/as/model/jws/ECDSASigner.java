@@ -6,32 +6,26 @@
 
 package io.jans.as.model.jws;
 
-import java.io.UnsupportedEncodingException;
-import java.security.InvalidKeyException;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.Signature;
-import java.security.SignatureException;
-import java.security.spec.InvalidKeySpecException;
-
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.crypto.impl.ECDSA;
+import io.jans.as.model.crypto.signature.AlgorithmFamily;
+import io.jans.as.model.crypto.signature.ECDSAPrivateKey;
+import io.jans.as.model.crypto.signature.ECDSAPublicKey;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.util.Base64Util;
 import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.jce.spec.ECPrivateKeySpec;
 import org.bouncycastle.jce.spec.ECPublicKeySpec;
 import org.bouncycastle.math.ec.ECPoint;
 
-import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.jose.crypto.impl.ECDSA;
-
-import io.jans.as.model.crypto.signature.AlgorithmFamily;
-import io.jans.as.model.crypto.signature.ECDSAPrivateKey;
-import io.jans.as.model.crypto.signature.ECDSAPublicKey;
-import io.jans.as.model.crypto.signature.SignatureAlgorithm;
-import io.jans.as.model.util.Base64Util;
-import io.jans.as.model.util.Util;
+import java.nio.charset.StandardCharsets;
+import java.security.KeyFactory;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.Signature;
+import java.security.SignatureException;
+import java.security.spec.InvalidKeySpecException;
 
 /**
  * @author Javier Rojas Blum
@@ -78,7 +72,7 @@ public class ECDSASigner extends AbstractJwsSigner {
 
             Signature signer = Signature.getInstance(getSignatureAlgorithm().getAlgorithm(), "BC");
             signer.initSign(privateKey);
-            signer.update(signingInput.getBytes(Util.UTF8_STRING_ENCODING));
+            signer.update(signingInput.getBytes(StandardCharsets.UTF_8));
 
             byte[] signature = signer.sign();
             if (AlgorithmFamily.EC.equals(getSignatureAlgorithm().getFamily())) {
@@ -87,16 +81,6 @@ public class ECDSASigner extends AbstractJwsSigner {
             }
 
             return Base64Util.base64urlencode(signature);
-        } catch (InvalidKeySpecException e) {
-            throw new SignatureException(e);
-        } catch (InvalidKeyException e) {
-            throw new SignatureException(e);
-        } catch (NoSuchAlgorithmException e) {
-            throw new SignatureException(e);
-        } catch (NoSuchProviderException e) {
-            throw new SignatureException(e);
-        } catch (UnsupportedEncodingException e) {
-            throw new SignatureException(e);
         } catch (Exception e) {
             throw new SignatureException(e);
         }
@@ -138,7 +122,7 @@ public class ECDSASigner extends AbstractJwsSigner {
             if (AlgorithmFamily.EC.equals(getSignatureAlgorithm().getFamily())) {
                 sigBytes = ECDSA.transcodeSignatureToDER(sigBytes);
             }
-            byte[] sigInBytes = signingInput.getBytes(Util.UTF8_STRING_ENCODING);
+            byte[] sigInBytes = signingInput.getBytes(StandardCharsets.UTF_8);
 
             ECParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec(curve);
             ECPoint pointQ = ecSpec.getCurve().createPoint(ecdsaPublicKey.getX(), ecdsaPublicKey.getY());
@@ -153,14 +137,6 @@ public class ECDSASigner extends AbstractJwsSigner {
             sig.update(sigInBytes);
             return sig.verify(sigBytes);
         } catch (InvalidKeySpecException e) {
-            throw new SignatureException(e);
-        } catch (InvalidKeyException e) {
-            throw new SignatureException(e);
-        } catch (NoSuchAlgorithmException e) {
-            throw new SignatureException(e);
-        } catch (NoSuchProviderException e) {
-            throw new SignatureException(e);
-        } catch (UnsupportedEncodingException e) {
             throw new SignatureException(e);
         } catch (Exception e) {
             throw new SignatureException(e);

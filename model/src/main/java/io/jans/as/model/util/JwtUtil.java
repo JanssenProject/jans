@@ -27,8 +27,8 @@ import org.slf4j.LoggerFactory;
 import javax.ws.rs.HttpMethod;
 import java.io.IOException;
 import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -56,30 +56,24 @@ public class JwtUtil {
 
     private static final Logger log = LoggerFactory.getLogger(JwtUtil.class);
 
+    private JwtUtil() {
+    }
+
     public static void printAlgorithmsAndProviders() {
-        Set<String> algorithms = Security.getAlgorithms("Signature");
-        for (String algorithm : algorithms) {
-            log.trace("Algorithm (Signature): " + algorithm);
+        printAlgorithms("Signature");
+        printAlgorithms("MessageDigest");
+        printAlgorithms("Cipher");
+        printAlgorithms("Mac");
+        printAlgorithms("KeyStore");
+        for (Provider provider : Security.getProviders()) {
+            log.trace("Provider: {}", provider.getName());
         }
-        algorithms = Security.getAlgorithms("MessageDigest");
+    }
+
+    public static void printAlgorithms(String algorithmType) {
+        Set<String> algorithms = Security.getAlgorithms(algorithmType);
         for (String algorithm : algorithms) {
-            log.trace("Algorithm (MessageDigest): " + algorithm);
-        }
-        algorithms = Security.getAlgorithms("Cipher");
-        for (String algorithm : algorithms) {
-            log.trace("Algorithm (Cipher): " + algorithm);
-        }
-        algorithms = Security.getAlgorithms("Mac");
-        for (String algorithm : algorithms) {
-            log.trace("Algorithm (Mac): " + algorithm);
-        }
-        algorithms = Security.getAlgorithms("KeyStore");
-        for (String algorithm : algorithms) {
-            log.trace("Algorithm (KeyStore): " + algorithm);
-        }
-        Provider[] providers = Security.getProviders();
-        for (Provider provider : providers) {
-            log.trace("Provider: " + provider.getName());
+            log.trace("Algorithm ({}}): {}", algorithmType, algorithm);
         }
     }
 
@@ -94,27 +88,24 @@ public class JwtUtil {
         return new String(hexChars);
     }
 
-    public static byte[] getMessageDigestSHA256(String data)
-            throws NoSuchProviderException, NoSuchAlgorithmException, UnsupportedEncodingException {
-        MessageDigest mda = MessageDigest.getInstance("SHA-256", "BC");
-        return mda.digest(data.getBytes(Util.UTF8_STRING_ENCODING));
+    public static byte[] getMessageDigestSHA256(String data) throws NoSuchProviderException, NoSuchAlgorithmException {
+        return getMessageDigest(data, "SHA-256");
     }
 
-    public static byte[] getMessageDigestSHA384(String data)
-            throws NoSuchProviderException, NoSuchAlgorithmException, UnsupportedEncodingException {
-        MessageDigest mda = MessageDigest.getInstance("SHA-384", "BC");
-        return mda.digest(data.getBytes(Util.UTF8_STRING_ENCODING));
+    public static byte[] getMessageDigestSHA384(String data) throws NoSuchProviderException, NoSuchAlgorithmException {
+        return getMessageDigest(data, "SHA-384");
     }
 
-    public static byte[] getMessageDigestSHA512(String data)
-            throws NoSuchProviderException, NoSuchAlgorithmException, UnsupportedEncodingException {
-        MessageDigest mda = MessageDigest.getInstance("SHA-512", "BC");
-        return mda.digest(data.getBytes(Util.UTF8_STRING_ENCODING));
+    public static byte[] getMessageDigestSHA512(String data) throws NoSuchProviderException, NoSuchAlgorithmException {
+        return getMessageDigest(data, "SHA-512");
+    }
+
+    public static byte[] getMessageDigest(String data, String algorithm) throws NoSuchProviderException, NoSuchAlgorithmException {
+        return MessageDigest.getInstance(algorithm, "BC").digest(data.getBytes(StandardCharsets.UTF_8));
     }
 
     public static io.jans.as.model.crypto.PublicKey getPublicKey(
             String jwksUri, String jwks, SignatureAlgorithm signatureAlgorithm, String keyId) {
-        log.debug("Retrieving JWK...");
 
         JSONObject jsonKeyValue = getJsonKey(jwksUri, jwks, keyId);
 
@@ -141,8 +132,6 @@ public class JwtUtil {
             }
 
             if (signatureAlgorithm == SignatureAlgorithm.RS256 || signatureAlgorithm == SignatureAlgorithm.RS384 || signatureAlgorithm == SignatureAlgorithm.RS512) {
-                //String alg = jsonKeyValue.getString(ALGORITHM);
-                //String use = jsonKeyValue.getString(KEY_USE);
                 String exp = jsonPublicKey.getString(EXPONENT);
                 String mod = jsonPublicKey.getString(MODULUS);
 
@@ -151,9 +140,6 @@ public class JwtUtil {
 
                 publicKey = new RSAPublicKey(modulus, publicExponent);
             } else if (signatureAlgorithm == SignatureAlgorithm.ES256 || signatureAlgorithm == SignatureAlgorithm.ES384 || signatureAlgorithm == SignatureAlgorithm.ES512) {
-                //String alg = jsonKeyValue.getString(ALGORITHM);
-                //String use = jsonKeyValue.getString(KEY_USE);
-                //String crv = jsonKeyValue.getString(CURVE);
                 String xx = jsonPublicKey.getString(X);
                 String yy = jsonPublicKey.getString(Y);
 
@@ -187,8 +173,6 @@ public class JwtUtil {
     }
 
     public static JSONObject getJsonKey(String jwksUri, String jwks, String keyId) {
-        log.debug("Retrieving JWK Key...");
-
         JSONObject jsonKey = null;
         try {
             if (StringHelper.isEmpty(jwks)) {
@@ -201,7 +185,7 @@ public class JwtUtil {
 
                 if (status == 200) {
                     jwks = clientResponse.getEntity(String.class);
-                    log.debug(String.format("JWK: %s", jwks));
+                    logJwks(jwks);
                 }
             }
             if (StringHelper.isNotEmpty(jwks)) {
@@ -228,12 +212,16 @@ public class JwtUtil {
         return jsonKey;
     }
 
+    private static void logJwks(Object jwks) {
+        log.debug("JWK: {}", jwks);
+    }
+
     public static JSONObject getJSONWebKeys(String jwksUri) {
         return getJSONWebKeys(jwksUri, null);
     }
 
     public static JSONObject getJSONWebKeys(String jwksUri, ClientExecutor executor) {
-        log.debug("Retrieving jwks " + jwksUri + "...");
+        log.debug("Retrieving jwks {}...", jwksUri);
 
         JSONObject jwks = null;
         try {
@@ -247,7 +235,7 @@ public class JwtUtil {
 
                 if (status == 200) {
                     jwks = fromJson(clientResponse.getEntity(String.class));
-                    log.debug(String.format("JWK: %s", jwks));
+                    logJwks(jwks);
                 }
             }
         } catch (Exception ex) {

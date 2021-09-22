@@ -12,6 +12,7 @@ import org.json.JSONException;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -27,6 +28,9 @@ public class StringUtils {
     public static final String EMPTY_STRING = "";
     public static final String SPACE = " ";
     public static final String EASY_TO_READ_CHARACTERS = "BCDFGHJKLMNPQRSTVWXZ";
+
+    private StringUtils() {
+    }
 
     public static String nullToEmpty(String str) {
         if (str == null) {
@@ -121,7 +125,7 @@ public class StringUtils {
     }
 
     public static List<String> spaceSeparatedToList(String spaceSeparatedString) {
-        List<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<>();
 
         if (isNotBlank(spaceSeparatedString)) {
             list = Arrays.asList(spaceSeparatedString.split(StringUtils.SPACE));
@@ -141,7 +145,7 @@ public class StringUtils {
     }
 
     public static List<String> toList(JSONArray jsonArray) throws JSONException {
-        List<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<>();
 
         if (jsonArray != null) {
             for (int i = 0; i < jsonArray.length(); i++) {
@@ -151,31 +155,31 @@ public class StringUtils {
         return list;
     }
 
-    public static Date parseSilently(String p_string) {
+    public static Date parseSilently(String string) {
         try {
             SimpleDateFormat parser = new SimpleDateFormat("EEE MMM d HH:mm:ss zzz yyyy");
-            return parser.parse(p_string);
+            return parser.parse(string);
         } catch (Exception e) {
             return null;
         }
     }
 
-    public static void addQueryStringParam(StringBuilder p_queryStringBuilder, String key, Object value) throws UnsupportedEncodingException {
-        if (p_queryStringBuilder != null && isNotBlank(key) && value != null) {
-            if (p_queryStringBuilder.length() > 0) {
-                p_queryStringBuilder.append("&");
+    public static void addQueryStringParam(StringBuilder queryStringBuilder, String key, Object value) throws UnsupportedEncodingException {
+        if (queryStringBuilder != null && isNotBlank(key) && value != null) {
+            if (queryStringBuilder.length() > 0) {
+                queryStringBuilder.append("&");
             }
-            p_queryStringBuilder.append(key).append("=")
+            queryStringBuilder.append(key).append("=")
                     .append(URLEncoder.encode(value.toString(), Util.UTF8_STRING_ENCODING));
         }
     }
 
-    public static void addQueryStringParam(StringBuilder p_queryStringBuilder, String key, Collection value) throws UnsupportedEncodingException {
-        if (p_queryStringBuilder != null && isNotBlank(key) && value != null && !value.isEmpty()) {
-            if (p_queryStringBuilder.length() > 0) {
-                p_queryStringBuilder.append("&");
+    public static void addQueryStringParam(StringBuilder queryStringBuilder, String key, Collection<?> value) throws UnsupportedEncodingException {
+        if (queryStringBuilder != null && isNotBlank(key) && value != null && !value.isEmpty()) {
+            if (queryStringBuilder.length() > 0) {
+                queryStringBuilder.append("&");
             }
-            p_queryStringBuilder.append(key).append("=")
+            queryStringBuilder.append(key).append("=")
                     .append(URLEncoder.encode(value.toString(), Util.UTF8_STRING_ENCODING));
         }
     }
@@ -207,4 +211,7 @@ public class StringUtils {
         return Util.byteArrayToHexString(seed);
     }
 
+    public static String base64urlencode(String string) {
+        return Base64Util.base64urlencode(string.getBytes(StandardCharsets.UTF_8));
+    }
 }

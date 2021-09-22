@@ -29,9 +29,9 @@ import io.jans.as.model.util.Base64Util;
  */
 public class TokenBindingID {
 
-    private TokenBindingKeyParameters keyParameters;
-    private byte[] publicKey;
-    private byte[] raw;
+    private final TokenBindingKeyParameters keyParameters;
+    private final byte[] publicKey;
+    private final byte[] raw;
 
     public TokenBindingID(TokenBindingKeyParameters keyParameters, byte[] publicKey, byte[] raw) {
         this.keyParameters = keyParameters;

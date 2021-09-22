@@ -30,14 +30,14 @@ public enum KeyEncryptionAlgorithm {
     private final String algorithm;
     private final Algorithm alg;
 
-    private KeyEncryptionAlgorithm(String name) {
+    KeyEncryptionAlgorithm(String name) {
         this.name = name;
         this.family = null;
         this.algorithm = null;
         this.alg = Algorithm.fromString(name);
     }
 
-    private KeyEncryptionAlgorithm(String name, String family, String algorithm) {
+    KeyEncryptionAlgorithm(String name, String family, String algorithm) {
         this.name = name;
         this.family = family;
         this.algorithm = algorithm;

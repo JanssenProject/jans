@@ -6,16 +6,19 @@
 
 package io.jans.as.model.util;
 
-import java.security.Security;
-
 import org.apache.log4j.Logger;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
+import java.security.Security;
+
 public class SecurityProviderUtility {
 
-	private static final Logger log = Logger.getLogger(JwtUtil.class);
+	private static final Logger log = Logger.getLogger(SecurityProviderUtility.class);
 
 	private static BouncyCastleProvider bouncyCastleProvider;
+
+	private SecurityProviderUtility() {
+    }
 
 	public static void installBCProvider(boolean silent) {
 		bouncyCastleProvider = (BouncyCastleProvider) Security.getProvider(BouncyCastleProvider.PROVIDER_NAME);
@@ -39,7 +42,5 @@ public class SecurityProviderUtility {
 	
 	public static BouncyCastleProvider getInstance() {
 	    return bouncyCastleProvider;
-	    
 	}
-
 }

@@ -18,5 +18,5 @@ public interface IErrorType {
      *
      * @return error parameter
      */
-    public String getParameter();
+    String getParameter();
 }

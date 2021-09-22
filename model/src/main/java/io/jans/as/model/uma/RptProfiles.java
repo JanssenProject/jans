@@ -15,9 +15,9 @@ public enum RptProfiles {
 
     BEARER("https://docs.kantarainitiative.org/uma/profiles/uma-token-bearer-1.0");
 
-    private String identifyingUri;
+    private final String identifyingUri;
 
-    private RptProfiles(String identifyingUri) {
+    RptProfiles(String identifyingUri) {
         this.identifyingUri = identifyingUri;
     }
 

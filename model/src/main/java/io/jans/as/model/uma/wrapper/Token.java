@@ -37,8 +37,8 @@ public class Token implements Serializable {
         return authorizationCode;
     }
 
-    public Token setAuthorizationCode(String p_authorizationCode) {
-        authorizationCode = p_authorizationCode;
+    public Token setAuthorizationCode(String authorizationCode) {
+        this.authorizationCode = authorizationCode;
         return this;
     }
 
@@ -46,8 +46,8 @@ public class Token implements Serializable {
         return refreshToken;
     }
 
-    public Token setRefreshToken(String p_refreshToken) {
-        refreshToken = p_refreshToken;
+    public Token setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
         return this;
     }
 
@@ -55,8 +55,8 @@ public class Token implements Serializable {
         return accessToken;
     }
 
-    public Token setAccessToken(String p_accessToken) {
-        accessToken = p_accessToken;
+    public Token setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
         return this;
     }
 
@@ -64,8 +64,8 @@ public class Token implements Serializable {
         return scope;
     }
 
-    public Token setScope(String p_scope) {
-        scope = p_scope;
+    public Token setScope(String scope) {
+        this.scope = scope;
         return this;
     }
 
@@ -73,8 +73,8 @@ public class Token implements Serializable {
         return idToken;
     }
 
-    public Token setIdToken(String p_idToken) {
-        idToken = p_idToken;
+    public Token setIdToken(String idToken) {
+        this.idToken = idToken;
         return this;
     }
 

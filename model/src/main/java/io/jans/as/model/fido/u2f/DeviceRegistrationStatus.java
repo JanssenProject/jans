@@ -6,10 +6,10 @@
 
 package io.jans.as.model.fido.u2f;
 
+import io.jans.orm.annotation.AttributeEnum;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import io.jans.orm.annotation.AttributeEnum;
 
 /**
  * Device registration types
@@ -25,7 +25,7 @@ public enum DeviceRegistrationStatus implements AttributeEnum {
     private final String value;
 	private final String displayName;
 
-	private static Map<String, DeviceRegistrationStatus> mapByValues = new HashMap<String, DeviceRegistrationStatus>();
+	private static final Map<String, DeviceRegistrationStatus> mapByValues = new HashMap<>();
 
 	static {
 		for (DeviceRegistrationStatus enumType : values()) {
@@ -33,7 +33,7 @@ public enum DeviceRegistrationStatus implements AttributeEnum {
 		}
 	}
 
-    private DeviceRegistrationStatus(String value, String displayName) {
+    DeviceRegistrationStatus(String value, String displayName) {
         this.value = value;
         this.displayName = displayName;
     }

@@ -134,7 +134,7 @@ public enum AuthorizeErrorResponseType implements IErrorType {
 
     private final String paramName;
 
-    private AuthorizeErrorResponseType(String paramName) {
+    AuthorizeErrorResponseType(String paramName) {
         this.paramName = paramName;
     }
 
