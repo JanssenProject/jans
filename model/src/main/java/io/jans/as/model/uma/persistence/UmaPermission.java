@@ -6,15 +6,7 @@
 
 package io.jans.as.model.uma.persistence;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.google.common.collect.Maps;
-
 import io.jans.as.model.util.Pair;
 import io.jans.as.model.util.Util;
 import io.jans.orm.annotation.AttributeName;
@@ -23,6 +15,13 @@ import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.Expiration;
 import io.jans.orm.annotation.JsonObject;
 import io.jans.orm.annotation.ObjectClass;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * UMA permission
@@ -97,8 +96,8 @@ public class UmaPermission implements Serializable {
         return dn;
     }
 
-    public void setDn(String p_dn) {
-        dn = p_dn;
+    public void setDn(String dn) {
+        this.dn = dn;
     }
 
     public boolean isDeletable() {
@@ -165,13 +164,13 @@ public class UmaPermission implements Serializable {
 
     public List<String> getScopeDns() {
         if (scopeDns == null) {
-            scopeDns = new ArrayList<String>();
+            scopeDns = new ArrayList<>();
         }
         return scopeDns;
     }
 
-    public void setScopeDns(List<String> p_scopeDns) {
-        scopeDns = p_scopeDns;
+    public void setScopeDns(List<String> scopeDns) {
+        this.scopeDns = scopeDns;
     }
 
     public Map<String, String> getAttributes() {
@@ -182,7 +181,7 @@ public class UmaPermission implements Serializable {
     }
 
     public void setAttributes(Map<String, String> attributes) {
-        this.attributes = attributes != null ? attributes : new HashMap<String, String>();
+        this.attributes = attributes != null ? attributes : new HashMap<>();
     }
 
     @Override

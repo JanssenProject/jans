@@ -6,10 +6,10 @@
 
 package io.jans.as.model.token;
 
+import io.jans.as.model.error.IErrorType;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import io.jans.as.model.error.IErrorType;
 
 /**
  * Error codes for token revocation error responses.
@@ -43,7 +43,7 @@ public enum TokenRevocationErrorResponseType implements IErrorType {
 
     private final String paramName;
 
-    private static Map<String, TokenRevocationErrorResponseType> mapByValues = new HashMap<String, TokenRevocationErrorResponseType>();
+    private static final Map<String, TokenRevocationErrorResponseType> mapByValues = new HashMap<>();
 
     static {
         for (TokenRevocationErrorResponseType enumType : values()) {

@@ -88,32 +88,32 @@ public class BaseDnConfiguration {
         return umaBase;
     }
 
-    public void setUmaBase(String p_umaBase) {
-        umaBase = p_umaBase;
+    public void setUmaBase(String umaBase) {
+        this.umaBase = umaBase;
     }
 
     public String getUmaPolicy() {
         return umaPolicy;
     }
 
-    public void setUmaPolicy(String p_umaPolicy) {
-        umaPolicy = p_umaPolicy;
+    public void setUmaPolicy(String umaPolicy) {
+        this.umaPolicy = umaPolicy;
     }
 
     public String getConfiguration() {
         return configuration;
     }
 
-    public void setConfiguration(String p_configuration) {
-    	configuration = p_configuration;
+    public void setConfiguration(String configuration) {
+    	this.configuration = configuration;
     }
 
     public String getAttributes() {
         return attributes;
     }
 
-    public void setAttributes(String p_attributes) {
-        attributes = p_attributes;
+    public void setAttributes(String attributes) {
+        this.attributes = attributes;
     }
 
     public String getScripts() {
@@ -128,8 +128,8 @@ public class BaseDnConfiguration {
         return clients;
     }
 
-    public void setClients(String p_clients) {
-        clients = p_clients;
+    public void setClients(String clients) {
+        this.clients = clients;
     }
 
     public String getSessions() {
@@ -152,8 +152,8 @@ public class BaseDnConfiguration {
         return people;
     }
 
-    public void setPeople(String p_people) {
-        people = p_people;
+    public void setPeople(String people) {
+        this.people = people;
     }
 
     public String getGroups() {
@@ -168,8 +168,8 @@ public class BaseDnConfiguration {
         return scopes;
     }
 
-    public void setScopes(String p_scopes) {
-        scopes = p_scopes;
+    public void setScopes(String scopes) {
+        this.scopes = scopes;
     }
 
     public String getU2fBase() {

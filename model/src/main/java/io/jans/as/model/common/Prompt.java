@@ -6,11 +6,11 @@
 
 package io.jans.as.model.common;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * An ASCII string values that specifies whether the Authorization Server
@@ -46,7 +46,7 @@ public enum Prompt implements HasParamName {
 
     private final String paramName;
 
-    private Prompt(String paramName) {
+    Prompt(String paramName) {
         this.paramName = paramName;
     }
 
@@ -87,16 +87,14 @@ public enum Prompt implements HasParamName {
      */
     @JsonCreator
     public static List<Prompt> fromString(String paramList, String separator) {
-        List<Prompt> prompts = new ArrayList<Prompt>();
+        List<Prompt> prompts = new ArrayList<>();
 
         if (paramList != null && !paramList.isEmpty()) {
             String[] params = paramList.split(separator);
             for (String param : params) {
                 for (Prompt p : Prompt.values()) {
-                    if (param.equals(p.paramName)) {
-                        if (!prompts.contains(p)) {
-                            prompts.add(p);
-                        }
+                    if (param.equals(p.paramName) && !prompts.contains(p)) {
+                        prompts.add(p);
                     }
                 }
             }

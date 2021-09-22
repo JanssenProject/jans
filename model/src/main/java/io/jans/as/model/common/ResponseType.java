@@ -6,18 +6,17 @@
 
 package io.jans.as.model.common;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
+import com.google.common.collect.Lists;
+import io.jans.orm.annotation.AttributeEnum;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonValue;
-import com.google.common.collect.Lists;
-
-import io.jans.orm.annotation.AttributeEnum;
 
 /**
  * <p>
@@ -56,7 +55,7 @@ public enum ResponseType implements HasParamName, AttributeEnum {
     private final String value;
     private final String displayName;
 
-    private static Map<String, ResponseType> mapByValues = new HashMap<String, ResponseType>();
+    private static final Map<String, ResponseType> mapByValues = new HashMap<>();
 
     static {
         for (ResponseType enumType : values()) {
@@ -64,7 +63,7 @@ public enum ResponseType implements HasParamName, AttributeEnum {
         }
     }
 
-    private ResponseType(String value, String displayName) {
+    ResponseType(String value, String displayName) {
         this.value = value;
         this.displayName = displayName;
     }
@@ -120,16 +119,14 @@ public enum ResponseType implements HasParamName, AttributeEnum {
      * @return A list of the recognized response types.
      */
     public static List<ResponseType> fromString(String paramList, String separator) {
-        List<ResponseType> responseTypes = new ArrayList<ResponseType>();
+        List<ResponseType> responseTypes = new ArrayList<>();
 
         if (paramList != null && !paramList.isEmpty()) {
             String[] params = paramList.split(separator);
             for (String param : params) {
                 for (ResponseType rt : ResponseType.values()) {
-                    if (param.equals(rt.value)) {
-                        if (!responseTypes.contains(rt)) {
-                            responseTypes.add(rt);
-                        }
+                    if (param.equals(rt.value) && !responseTypes.contains(rt)) {
+                        responseTypes.add(rt);
                     }
                 }
             }

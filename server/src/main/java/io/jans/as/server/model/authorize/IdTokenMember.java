@@ -6,23 +6,22 @@
 
 package io.jans.as.server.model.authorize;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
+import io.jans.as.model.util.Util;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import io.jans.as.model.util.Util;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * @author Javier Rojas Blum Date: 03.09.2012
  */
 public class IdTokenMember {
 
-    private List<Claim> claims;
+    private final List<Claim> claims;
     private Integer maxAge;
 
     public IdTokenMember(JSONObject jsonObject) throws JSONException {

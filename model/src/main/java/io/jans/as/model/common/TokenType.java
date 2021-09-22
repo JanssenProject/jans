@@ -25,7 +25,7 @@ public enum TokenType {
 
     private final String name;
 
-    private TokenType(String name) {
+    TokenType(String name) {
         this.name = name;
     }
 
