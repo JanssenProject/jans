@@ -19,6 +19,7 @@ import io.jans.jsf2.service.FacesService;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.service.JsonService;
 import io.jans.util.StringHelper;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import javax.enterprise.context.RequestScoped;
@@ -212,7 +213,10 @@ public class LogoutAction {
         }
     }
 
-    private void storeLogoutParametersInSession(SessionId sessionId) throws IOException {
+    private void storeLogoutParametersInSession(@Nullable SessionId sessionId) throws IOException {
+        if (sessionId == null) {
+            return;
+        }
         Map<String, String> sessionAttributes = sessionId.getSessionAttributes();
 
         LogoutParameters logoutParameters = new LogoutParameters(idTokenHint, postLogoutRedirectUri);
