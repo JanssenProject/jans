@@ -6,18 +6,16 @@
 
 package io.jans.as.model.uma;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
-import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.JsonNode;
+import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author yuriyz
@@ -66,9 +64,9 @@ public class JsonLogicNode {
     @JsonIgnore
     public List<String> getDataCopy() {
         if (data == null) {
-            return new ArrayList<String>();
+            return new ArrayList<>();
         }
-        return new ArrayList<String>(data);
+        return new ArrayList<>(data);
     }
 
     @Override

@@ -47,7 +47,7 @@ public enum EndSessionErrorResponseType implements IErrorType {
 
     private final String paramName;
 
-    private EndSessionErrorResponseType(String paramName) {
+    EndSessionErrorResponseType(String paramName) {
         this.paramName = paramName;
     }
 

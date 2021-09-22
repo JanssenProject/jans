@@ -6,24 +6,20 @@
 
 package io.jans.as.client.model;
 
-import org.apache.log4j.Logger;
-import org.json.JSONObject;
-
 import io.jans.as.client.util.ClientUtil;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwt.JwtHeader;
-import io.jans.as.model.util.Base64Util;
-import io.jans.as.model.util.Util;
+import org.json.JSONObject;
+
+import static io.jans.as.model.util.StringUtils.base64urlencode;
 
 /**
  * @author Javier Rojas Blum
  * @version December 4, 2018
  */
 public class SoftwareStatement {
-
-    private static final Logger LOG = Logger.getLogger(JwtState.class);
 
     // Header
     private SignatureAlgorithm signatureAlgorithm;
@@ -33,8 +29,8 @@ public class SoftwareStatement {
     private JSONObject claims;
 
     // Signature/Encryption Keys
-    private String sharedKey;
-    private AbstractCryptoProvider cryptoProvider;
+    private final String sharedKey;
+    private final AbstractCryptoProvider cryptoProvider;
 
     public SoftwareStatement(SignatureAlgorithm signatureAlgorithm, AbstractCryptoProvider cryptoProvider) {
         this(signatureAlgorithm, cryptoProvider, null);
@@ -88,9 +84,7 @@ public class SoftwareStatement {
         this.claims = claims;
     }
 
-    public String getEncodedJwt(JSONObject jwks) throws Exception {
-        String encodedJwt = null;
-
+    public String getEncodedJwt() throws Exception {
         if (cryptoProvider == null) {
             throw new Exception("The Crypto Provider cannot be null.");
         }
@@ -99,18 +93,12 @@ public class SoftwareStatement {
         JSONObject payloadJsonObject = getClaims();
         String headerString = ClientUtil.toPrettyJson(headerJsonObject);
         String payloadString = ClientUtil.toPrettyJson(payloadJsonObject);
-        String encodedHeader = Base64Util.base64urlencode(headerString.getBytes(Util.UTF8_STRING_ENCODING));
-        String encodedPayload = Base64Util.base64urlencode(payloadString.getBytes(Util.UTF8_STRING_ENCODING));
+        String encodedHeader = base64urlencode(headerString);
+        String encodedPayload = base64urlencode(payloadString);
         String signingInput = encodedHeader + "." + encodedPayload;
         String encodedSignature = cryptoProvider.sign(signingInput, keyId, sharedKey, signatureAlgorithm);
 
-        encodedJwt = encodedHeader + "." + encodedPayload + "." + encodedSignature;
-
-        return encodedJwt;
-    }
-
-    public String getEncodedJwt() throws Exception {
-        return getEncodedJwt(null);
+        return encodedHeader + "." + encodedPayload + "." + encodedSignature;
     }
 
     protected JSONObject headerToJSONObject() throws InvalidJwtException {

@@ -6,14 +6,13 @@
 
 package io.jans.as.model.jwk;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-
 import io.jans.as.model.crypto.signature.AlgorithmFamily;
 import io.jans.as.model.util.StringUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Identifies the cryptographic algorithm used with the key.
@@ -79,7 +78,7 @@ public enum Algorithm {
     }
 
     public static List<Algorithm> fromString(String[] params, Use use) {
-        List<Algorithm> algorithms = new ArrayList<Algorithm>();
+        List<Algorithm> algorithms = new ArrayList<>();
 
         for (String param : params) {
             Algorithm algorithm = Algorithm.fromString(param);

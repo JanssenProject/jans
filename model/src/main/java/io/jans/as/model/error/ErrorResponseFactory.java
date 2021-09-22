@@ -61,22 +61,22 @@ public class ErrorResponseFactory implements Configuration {
         return messages;
     }
 
-    public void setMessages(ErrorMessages p_messages) {
-        messages = p_messages;
+    public void setMessages(ErrorMessages messages) {
+        this.messages = messages;
     }
 
     /**
      * Looks for an error message.
      *
-     * @param p_list error list
+     * @param list error list
      * @param type   The type of the error.
      * @return Error message or <code>null</code> if not found.
      */
-    private ErrorMessage getError(List<ErrorMessage> p_list, IErrorType type) {
+    private ErrorMessage getError(List<ErrorMessage> list, IErrorType type) {
         log.debug("Looking for the error with id: {}", type);
 
-        if (p_list != null) {
-            for (ErrorMessage error : p_list) {
+        if (list != null) {
+            for (ErrorMessage error : list) {
                 if (error.getId().equals(type.getParameter())) {
                     log.debug("Found error, id: {}", type);
                     return error;
@@ -88,12 +88,12 @@ public class ErrorResponseFactory implements Configuration {
         return new ErrorMessage(type.getParameter(), type.getParameter(), null);
     }
 
-    public String getErrorAsJson(IErrorType p_type) {
-        return getErrorResponse(p_type).toJSonString();
+    public String getErrorAsJson(IErrorType type) {
+        return getErrorResponse(type).toJSonString();
     }
 
-    public String errorAsJson(IErrorType p_type, String reason) {
-        final DefaultErrorResponse error = getErrorResponse(p_type);
+    public String errorAsJson(IErrorType type, String reason) {
+        final DefaultErrorResponse error = getErrorResponse(type);
         error.setReason(appConfiguration.getErrorReasonEnabled() ? reason : "");
         return error.toJSonString();
     }
@@ -141,21 +141,21 @@ public class ErrorResponseFactory implements Configuration {
                 .build());
     }
 
-    public String getErrorAsJson(IErrorType p_type, String p_state, String reason) {
-        return getErrorResponse(p_type, p_state, reason).toJSonString();
+    public String getErrorAsJson(IErrorType type, String state, String reason) {
+        return getErrorResponse(type, state, reason).toJSonString();
     }
 
-    public String getErrorAsQueryString(IErrorType p_type, String p_state) {
-        return getErrorAsQueryString(p_type, p_state, "");
+    public String getErrorAsQueryString(IErrorType type, String state) {
+        return getErrorAsQueryString(type, state, "");
     }
 
-    public String getErrorAsQueryString(IErrorType p_type, String p_state, String reason) {
-        return getErrorResponse(p_type, p_state, reason).toQueryString();
+    public String getErrorAsQueryString(IErrorType type, String state, String reason) {
+        return getErrorResponse(type, state, reason).toQueryString();
     }
 
-    public DefaultErrorResponse getErrorResponse(IErrorType type, String p_state, String reason) {
+    public DefaultErrorResponse getErrorResponse(IErrorType type, String state, String reason) {
         final DefaultErrorResponse response = getErrorResponse(type);
-        response.setState(p_state);
+        response.setState(state);
         response.setReason(reason);
         return response;
     }

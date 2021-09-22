@@ -12,20 +12,20 @@ package io.jans.as.model.jwk;
  */
 public interface JWKParameter {
 
-    public static final String JSON_WEB_KEY_SET = "keys";
-    public static final String KEY_TYPE = "kty";
-    public static final String KEY_USE = "use";
-    public static final String ALGORITHM = "alg";
-    public static final String KEY_ID = "kid";
-    public static final String EXPIRATION_TIME = "exp";
-    public static final String MODULUS = "n";
-    public static final String EXPONENT = "e";
-    public static final String CURVE = "crv";
-    public static final String X = "x";
-    public static final String Y = "y";
-    public static final String D = "d";
-    public static final String KEY_VALUE = "k";
-    public static final String CERTIFICATE_CHAIN = "x5c";
-    public static final String PRIVATE_KEY = "privateKey";
-    public static final String PUBLIC_KEY = "publicKey";
+    String JSON_WEB_KEY_SET = "keys";
+    String KEY_TYPE = "kty";
+    String KEY_USE = "use";
+    String ALGORITHM = "alg";
+    String KEY_ID = "kid";
+    String EXPIRATION_TIME = "exp";
+    String MODULUS = "n";
+    String EXPONENT = "e";
+    String CURVE = "crv";
+    String X = "x";
+    String Y = "y";
+    String D = "d";
+    String KEY_VALUE = "k";
+    String CERTIFICATE_CHAIN = "x5c";
+    String PRIVATE_KEY = "privateKey";
+    String PUBLIC_KEY = "publicKey";
 }

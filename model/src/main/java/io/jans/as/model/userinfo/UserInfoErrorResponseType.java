@@ -30,7 +30,7 @@ public enum UserInfoErrorResponseType implements IErrorType {
 
     private final String paramName;
 
-    private UserInfoErrorResponseType(String paramName) {
+    UserInfoErrorResponseType(String paramName) {
         this.paramName = paramName;
     }
 

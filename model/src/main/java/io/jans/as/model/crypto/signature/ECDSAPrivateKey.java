@@ -6,18 +6,17 @@
 
 package io.jans.as.model.crypto.signature;
 
-import static io.jans.as.model.jwk.JWKParameter.D;
-import static io.jans.as.model.jwk.JWKParameter.EXPONENT;
-import static io.jans.as.model.jwk.JWKParameter.MODULUS;
-
-import java.math.BigInteger;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import io.jans.as.model.crypto.PrivateKey;
 import io.jans.as.model.util.Base64Util;
 import io.jans.as.model.util.StringUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.math.BigInteger;
+
+import static io.jans.as.model.jwk.JWKParameter.D;
+import static io.jans.as.model.jwk.JWKParameter.EXPONENT;
+import static io.jans.as.model.jwk.JWKParameter.MODULUS;
 
 /**
  * The Private Key for the Elliptic Curve Digital Signature Algorithm (ECDSA)
@@ -59,8 +58,6 @@ public class ECDSAPrivateKey extends PrivateKey {
     public String toString() {
         try {
             return toJSONObject().toString(4);
-        } catch (JSONException e) {
-            return StringUtils.EMPTY_STRING;
         } catch (Exception e) {
             return StringUtils.EMPTY_STRING;
         }

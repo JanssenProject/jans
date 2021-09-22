@@ -23,7 +23,7 @@ public class EndSessionContext extends ExternalScriptContext {
     private CustomScriptConfiguration script;
     private final Set<String> frontchannelLogoutUris;
     private final String postLogoutRedirectUri;
-    private SessionId sessionId;
+    private final SessionId sessionId;
 
     public EndSessionContext(HttpServletRequest httpRequest, Set<String> frontchannelLogoutUris, String postLogoutRedirectUri, SessionId sessionId) {
         super(httpRequest);

@@ -6,6 +6,12 @@
 
 package io.jans.as.model.jwt;
 
+import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
+import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.exception.InvalidJwtException;
+import org.json.JSONObject;
+
 import static io.jans.as.model.jwt.JwtHeaderName.AGREEMENT_PARTY_U_INFO;
 import static io.jans.as.model.jwt.JwtHeaderName.AGREEMENT_PARTY_V_INFO;
 import static io.jans.as.model.jwt.JwtHeaderName.ALGORITHM;
@@ -17,13 +23,6 @@ import static io.jans.as.model.jwt.JwtHeaderName.ENCRYPTION_PARTY_V_INFO;
 import static io.jans.as.model.jwt.JwtHeaderName.EPHEMERAL_PUBLIC_KEY;
 import static io.jans.as.model.jwt.JwtHeaderName.KEY_ID;
 import static io.jans.as.model.jwt.JwtHeaderName.TYPE;
-
-import org.json.JSONObject;
-
-import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
-import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
-import io.jans.as.model.crypto.signature.SignatureAlgorithm;
-import io.jans.as.model.exception.InvalidJwtException;
 
 /**
  * @author Javier Rojas Blum
@@ -95,8 +94,7 @@ public class JwtHeader extends JwtClaimSet {
     }
 
     public String getKeyId() {
-        String keyId = getClaimAsString(KEY_ID);
-        return keyId;
+        return getClaimAsString(KEY_ID);
     }
 
     /**
