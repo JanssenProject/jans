@@ -19,6 +19,7 @@ import io.jans.jsf2.service.FacesService;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.service.JsonService;
 import io.jans.util.StringHelper;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import javax.enterprise.context.RequestScoped;
@@ -174,7 +175,11 @@ public class LogoutAction {
             } else {
                 boolean scriptExternalLogoutResult = externalAuthenticationService.executeExternalLogout(customScriptConfiguration, null);
                 ExternalLogoutResult externalLogoutResult = scriptExternalLogoutResult ? ExternalLogoutResult.SUCCESS : ExternalLogoutResult.FAILURE;
-                log.debug("Logout result is '{}' for session '{}', userDn: '{}'", externalLogoutResult, sessionId.getId(), sessionId.getUserDn());
+
+
+                final String userDn = sessionId != null ? sessionId.getUserDn() : "";
+                final String sId = sessionId != null ? sessionId.getId() : "";
+                log.debug("Logout result is '{}' for session '{}', userDn: '{}'", externalLogoutResult, sId, userDn);
 
                 int apiVersion = externalAuthenticationService.executeExternalGetApiVersion(customScriptConfiguration);
                 if (apiVersion < 3) {
@@ -184,7 +189,7 @@ public class LogoutAction {
 
                 log.trace("According to API version script supports logout redirects");
                 String logoutExternalUrl = externalAuthenticationService.getLogoutExternalUrl(customScriptConfiguration, null);
-                log.debug("External logout result is '{}' for user '{}'", logoutExternalUrl, sessionId.getUserDn());
+                log.debug("External logout result is '{}' for user '{}'", logoutExternalUrl, userDn);
 
                 if (StringHelper.isEmpty(logoutExternalUrl)) {
                     return externalLogoutResult;
@@ -208,7 +213,10 @@ public class LogoutAction {
         }
     }
 
-    private void storeLogoutParametersInSession(SessionId sessionId) throws IOException {
+    private void storeLogoutParametersInSession(@Nullable SessionId sessionId) throws IOException {
+        if (sessionId == null) {
+            return;
+        }
         Map<String, String> sessionAttributes = sessionId.getSessionAttributes();
 
         LogoutParameters logoutParameters = new LogoutParameters(idTokenHint, postLogoutRedirectUri);
