@@ -13,10 +13,10 @@ import io.jans.as.server.service.SpontaneousScopeService;
 
 public class SpontaneousScopeExternalContext extends ExternalScriptContext {
 
-    private Client client;
-    private String scopeRequested;
-    private Set<String> grantedScopes;
-    private SpontaneousScopeService spontaneousScopeService;
+    private final Client client;
+    private final String scopeRequested;
+    private final Set<String> grantedScopes;
+    private final SpontaneousScopeService spontaneousScopeService;
     private boolean allowSpontaneousScopePersistence = true;
 
     public SpontaneousScopeExternalContext(Client client, String scopeRequested, Set<String> grantedScopes, SpontaneousScopeService spontaneousScopeService) {

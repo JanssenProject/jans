@@ -17,4 +17,6 @@ public class U2fConstants {
 
 	public static final String U2F_ENROLLMENT_CODE_ATTRIBUTE = "oxEnrollmentCode";
 
+	private U2fConstants() {
+    }
 }

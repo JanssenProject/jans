@@ -6,10 +6,10 @@
 
 package io.jans.as.server.model.common;
 
+import io.jans.orm.annotation.AttributeEnum;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import io.jans.orm.annotation.AttributeEnum;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -23,7 +23,7 @@ public enum SessionIdState  implements AttributeEnum {
 
     private final String value;
 
-    private static Map<String, SessionIdState> mapByValues = new HashMap<String, SessionIdState>();
+    private static final Map<String, SessionIdState> mapByValues = new HashMap<String, SessionIdState>();
 
 	static {
 		for (SessionIdState enumType : values()) {
@@ -31,7 +31,7 @@ public enum SessionIdState  implements AttributeEnum {
 		}
 	}
 
-    private SessionIdState(String value) {
+    SessionIdState(String value) {
         this.value = value;
     }
 

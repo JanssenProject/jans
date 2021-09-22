@@ -6,17 +6,16 @@
 
 package io.jans.as.server.service.custom;
 
-import java.io.UnsupportedEncodingException;
+import io.jans.as.model.config.StaticConfiguration;
+import io.jans.as.model.util.Base64Util;
+import io.jans.service.custom.script.AbstractCustomScriptService;
 
 import javax.annotation.Priority;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Alternative;
 import javax.inject.Inject;
 import javax.interceptor.Interceptor;
-
-import io.jans.as.model.config.StaticConfiguration;
-import io.jans.as.model.util.Base64Util;
-import io.jans.service.custom.script.AbstractCustomScriptService;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Operations with custom scripts
@@ -37,9 +36,9 @@ public class CustomScriptService extends AbstractCustomScriptService {
         return staticConfiguration.getBaseDn().getScripts();
     }
 
-    public String base64Decode(String encoded) throws IllegalArgumentException, UnsupportedEncodingException {
+    public String base64Decode(String encoded) throws IllegalArgumentException {
         byte[] decoded = Base64Util.base64urldecode(encoded);
-        return new String(decoded, "UTF-8");
+        return new String(decoded, StandardCharsets.UTF_8);
     }
 
 }

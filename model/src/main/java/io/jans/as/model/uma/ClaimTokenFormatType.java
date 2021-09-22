@@ -12,7 +12,7 @@ package io.jans.as.model.uma;
 public enum ClaimTokenFormatType {
     ID_TOKEN("http://openid.net/specs/openid-connect-core-1_0.html#IDToken");
 
-    private String value;
+    private final String value;
 
     ClaimTokenFormatType(String value) {
         if (value == null || value.trim().isEmpty()) {

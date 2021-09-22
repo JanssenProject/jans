@@ -132,7 +132,7 @@ public class RequestParameterService {
         final StringBuilder sb = new StringBuilder();
         final Set<Entry<String, String>> set = parameterMap.entrySet();
         for (Map.Entry<String, String> entry : set) {
-            final String value = (String) entry.getValue();
+            final String value = entry.getValue();
             if (StringUtils.isNotBlank(value)) {
                 sb.append(entry.getKey()).append("=").append(URLEncoder.encode(value, Util.UTF8_STRING_ENCODING)).append("&");
             }

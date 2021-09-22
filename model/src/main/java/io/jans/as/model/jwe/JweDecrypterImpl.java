@@ -12,7 +12,6 @@ import com.nimbusds.jwt.EncryptedJWT;
 import com.nimbusds.jwt.SignedJWT;
 import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
 import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
-import io.jans.as.model.crypto.signature.RSAPrivateKey;
 import io.jans.as.model.exception.InvalidJweException;
 import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwt.Jwt;
@@ -36,17 +35,12 @@ public class JweDecrypterImpl extends AbstractJweDecrypter {
     private static final DefaultJWEDecrypterFactory DECRYPTER_FACTORY = new DefaultJWEDecrypterFactory();
 
     private PrivateKey privateKey;
-    private RSAPrivateKey rsaPrivateKey;
     private byte[] sharedSymmetricKey;
 
     public JweDecrypterImpl(byte[] sharedSymmetricKey) {
         if (sharedSymmetricKey != null) {
             this.sharedSymmetricKey = sharedSymmetricKey.clone();
         }
-    }
-
-    public JweDecrypterImpl(RSAPrivateKey rsaPrivateKey) {
-        this.rsaPrivateKey = rsaPrivateKey;
     }
 
     public JweDecrypterImpl(PrivateKey privateKey) {

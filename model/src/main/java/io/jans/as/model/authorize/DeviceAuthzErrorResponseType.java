@@ -20,7 +20,7 @@ public enum DeviceAuthzErrorResponseType implements IErrorType {
 
     private final String paramName;
 
-    private DeviceAuthzErrorResponseType(String paramName) {
+    DeviceAuthzErrorResponseType(String paramName) {
         this.paramName = paramName;
     }
 

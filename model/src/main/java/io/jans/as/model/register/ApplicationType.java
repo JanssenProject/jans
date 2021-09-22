@@ -6,13 +6,12 @@
 
 package io.jans.as.model.register;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-
 import io.jans.orm.annotation.AttributeEnum;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Javier Rojas Blum Date: 01.12.2012
@@ -35,7 +34,7 @@ public enum ApplicationType implements AttributeEnum {
      */
     WEB("web");
 
-    private static Map<String, ApplicationType> mapByValues = new HashMap<>();
+    private static final Map<String, ApplicationType> mapByValues = new HashMap<>();
 
     static {
         for (ApplicationType enumType : values()) {
@@ -45,7 +44,7 @@ public enum ApplicationType implements AttributeEnum {
 
     private final String paramName;
 
-    private ApplicationType(String paramName) {
+    ApplicationType(String paramName) {
         this.paramName = paramName;
     }
 
