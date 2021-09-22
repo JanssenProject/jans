@@ -31,7 +31,7 @@ public class UncaughtException extends Throwable implements ExceptionMapper<Thro
 
     private static final String ERROR_PAGE = "/error_service.htm";
 
-    private Logger log = LoggerFactory.getLogger(UncaughtException.class);
+    private final Logger log = LoggerFactory.getLogger(UncaughtException.class);
 
     @Context
     private HttpServletRequest httpRequest;

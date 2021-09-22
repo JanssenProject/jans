@@ -68,15 +68,15 @@ public class JwtAuthorizationRequest {
     private String keyId;
 
     // Payload
-    private List<ResponseType> responseTypes;
+    private final List<ResponseType> responseTypes;
     private String clientId;
-    private List<String> scopes;
+    private final List<String> scopes;
     private String redirectUri;
     private String nonce;
     private String state;
     private List<String> aud = Lists.newArrayList();
     private Display display;
-    private List<Prompt> prompts;
+    private final List<Prompt> prompts;
     private UserInfoMember userInfoMember;
     private IdTokenMember idTokenMember;
     private Integer exp;
@@ -96,11 +96,11 @@ public class JwtAuthorizationRequest {
     private Integer requestedExpiry;
     private ResponseMode responseMode;
 
-    private String encodedJwt;
+    private final String encodedJwt;
     private String payload;
     private JSONObject jsonPayload;
 
-    private AppConfiguration appConfiguration;
+    private final AppConfiguration appConfiguration;
 
     public JwtAuthorizationRequest(AppConfiguration appConfiguration, AbstractCryptoProvider cryptoProvider, String encodedJwt, Client client) throws InvalidJwtException {
         try {

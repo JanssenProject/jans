@@ -34,12 +34,12 @@ public class JwtSigner {
     private final static Logger log = LoggerFactory.getLogger(JwtSigner.class);
 
     private AbstractCryptoProvider cryptoProvider;
-    private SignatureAlgorithm signatureAlgorithm;
-    private String audience;
-    private String hmacSharedSecret;
+    private final SignatureAlgorithm signatureAlgorithm;
+    private final String audience;
+    private final String hmacSharedSecret;
 
-    private AppConfiguration appConfiguration;
-    private JSONWebKeySet webKeys;
+    private final AppConfiguration appConfiguration;
+    private final JSONWebKeySet webKeys;
 
     private Jwt jwt;
 

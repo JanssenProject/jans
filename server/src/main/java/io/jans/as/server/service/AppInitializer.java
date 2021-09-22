@@ -376,8 +376,8 @@ public class AppInitializer {
 		PersistenceEntryManager persistenceEntryManager = applicationFactory.getPersistenceEntryManagerFactory()
 				.createEntryManager(connectionProperties);
 		log.info("Created {}: {} with operation service: {}",
-				new Object[] { ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME, persistenceEntryManager,
-						persistenceEntryManager.getOperationService() });
+                ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME, persistenceEntryManager,
+                persistenceEntryManager.getOperationService());
 
 		externalPersistenceExtensionService.executePersistenceExtensionAfterCreate(connectionProperties, persistenceEntryManager);
 
@@ -395,8 +395,8 @@ public class AppInitializer {
 		PersistenceEntryManager persistenceEntryManager = applicationFactory.getPersistenceEntryManagerFactory()
 				.createEntryManager(connectionProperties);
 		log.info("Created {}: {} with operation service: {}",
-				new Object[] { ApplicationFactory.PERSISTENCE_METRIC_ENTRY_MANAGER_NAME, persistenceEntryManager,
-						persistenceEntryManager.getOperationService() });
+                ApplicationFactory.PERSISTENCE_METRIC_ENTRY_MANAGER_NAME, persistenceEntryManager,
+                persistenceEntryManager.getOperationService());
 
 		externalPersistenceExtensionService.executePersistenceExtensionAfterCreate(connectionProperties, persistenceEntryManager);
 
@@ -427,8 +427,8 @@ public class AppInitializer {
 		for (int i = 0; i < persistenceAuthProperties.size(); i++) {
 			PersistenceEntryManager persistenceAuthEntryManager = 
 					persistenceEntryManagerFactory.createEntryManager(persistenceAuthProperties.get(i));
-			log.debug("Created {}#{}: {}", new Object[] { ApplicationFactory.PERSISTENCE_AUTH_ENTRY_MANAGER_NAME, i,
-					persistenceAuthEntryManager });
+			log.debug("Created {}#{}: {}", ApplicationFactory.PERSISTENCE_AUTH_ENTRY_MANAGER_NAME, i,
+                    persistenceAuthEntryManager);
 
 			persistenceAuthEntryManagers.add(persistenceAuthEntryManager);
 

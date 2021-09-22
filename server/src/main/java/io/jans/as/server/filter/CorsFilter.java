@@ -123,7 +123,7 @@ public class CorsFilter extends AbstractCorsFilter {
     }
 
     protected Collection<String> doFilterImpl(ServletRequest servletRequest)
-            throws UnsupportedEncodingException, IOException, ServletException {
+            throws IOException, ServletException {
         Collection<String> globalAllowedOrigins = getAllowedOrigins();
 
         if (StringHelper.isNotEmpty(servletRequest.getParameter("client_id"))) {

@@ -6,26 +6,6 @@
 
 package io.jans.as.server.model.registration;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
-import org.apache.commons.lang.StringUtils;
-import org.jboss.resteasy.client.ClientRequest;
-import org.jboss.resteasy.client.ClientResponse;
-import org.json.JSONArray;
-import org.slf4j.Logger;
-
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
@@ -39,6 +19,24 @@ import io.jans.as.model.util.Pair;
 import io.jans.as.model.util.URLPatternList;
 import io.jans.as.model.util.Util;
 import io.jans.as.server.util.ServerUtil;
+import org.apache.commons.lang.StringUtils;
+import org.jboss.resteasy.client.ClientRequest;
+import org.jboss.resteasy.client.ClientResponse;
+import org.json.JSONArray;
+import org.slf4j.Logger;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Validates the parameters received for the register web service.
@@ -245,6 +243,7 @@ public class RegisterParamsValidator {
         boolean valid = true;
         Set<String> redirectUriHosts = new HashSet<String>();
 
+        // It is valid for grant types: password, client_credentials, urn:ietf:params:oauth:grant-type:uma-ticket and urn:openid:params:grant-type:ciba
         if (redirectUris != null && !redirectUris.isEmpty()) {
             for (String redirectUri : redirectUris) {
                 if (redirectUri == null || redirectUri.contains("#")) {
@@ -282,14 +281,9 @@ public class RegisterParamsValidator {
                     }
                 }
             }
-        } else if (!grantTypes.contains(GrantType.AUTHORIZATION_CODE) && !grantTypes.contains(GrantType.IMPLICIT) &&
+        } else valid = !grantTypes.contains(GrantType.AUTHORIZATION_CODE) && !grantTypes.contains(GrantType.IMPLICIT) &&
                 (!responseTypes.contains(ResponseType.CODE) || grantTypes.contains(GrantType.DEVICE_CODE))
-                && !responseTypes.contains(ResponseType.TOKEN) && !responseTypes.contains(ResponseType.ID_TOKEN)) {
-            // It is valid for grant types: password, client_credentials, urn:ietf:params:oauth:grant-type:uma-ticket and urn:openid:params:grant-type:ciba
-            valid = true;
-        } else {
-            valid = false;
-        }
+                && !responseTypes.contains(ResponseType.TOKEN) && !responseTypes.contains(ResponseType.ID_TOKEN);
 
 
         /*
