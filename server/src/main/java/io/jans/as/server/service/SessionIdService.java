@@ -368,6 +368,9 @@ public class SessionIdService {
 
     public SessionId generateAuthenticatedSessionId(HttpServletRequest httpRequest, String userDn, Map<String, String> sessionIdAttributes) throws InvalidSessionStateException {
         SessionId sessionId = generateSessionId(userDn, new Date(), SessionIdState.AUTHENTICATED, sessionIdAttributes, true);
+        if (sessionId == null) {
+            throw new InvalidSessionStateException("Failed to generate authenticated session.");
+        }
 
         reportActiveUser(sessionId);
 
