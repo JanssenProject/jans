@@ -6,13 +6,12 @@
 
 package io.jans.as.model.uma;
 
-import java.io.Serializable;
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import io.jans.model.uma.ClaimDefinition;
+
+import java.io.Serializable;
+import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -31,6 +30,7 @@ public class UmaNeedInfoResponse implements Serializable {
     private String ticket;
 
     public UmaNeedInfoResponse() {
+        // empty
     }
 
     public String getError() {

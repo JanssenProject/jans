@@ -62,7 +62,7 @@ public enum ComponentType {
 
         for (String v : values) {
             final ComponentType t = fromValue(v);
-            if (t != null && t != UNKNOWN) {
+            if (t != UNKNOWN) {
                 result.add(t);
             }
         }

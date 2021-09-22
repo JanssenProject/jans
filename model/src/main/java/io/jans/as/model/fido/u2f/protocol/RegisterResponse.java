@@ -6,15 +6,13 @@
 
 package io.jans.as.model.fido.u2f.protocol;
 
-import java.io.Serializable;
-
-import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import io.jans.as.model.fido.u2f.exception.BadInputException;
+import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
+
+import java.io.Serializable;
 
 /**
  * FIDO U2F device registration response
@@ -48,7 +46,7 @@ public class RegisterResponse implements Serializable {
 	private final String deviceData;
 
 	@JsonIgnore
-	private transient ClientData clientDataRef;
+	private final transient ClientData clientDataRef;
 
 	public RegisterResponse(@JsonProperty("registrationData") String registrationData, @JsonProperty("clientData") String clientData, @JsonProperty("deviceData") String deviceData) throws BadInputException {
 		this.registrationData = registrationData;

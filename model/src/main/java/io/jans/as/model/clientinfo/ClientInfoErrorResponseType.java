@@ -18,7 +18,7 @@ public enum ClientInfoErrorResponseType implements IErrorType {
 
     private final String paramName;
 
-    private ClientInfoErrorResponseType(String paramName) {
+    ClientInfoErrorResponseType(String paramName) {
         this.paramName = paramName;
     }
 

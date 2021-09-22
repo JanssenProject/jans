@@ -486,12 +486,8 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 			return true;
 		}
 
-		if (AuthenticationScriptUsageType.SERVICE.equals(usageType) && AuthenticationScriptUsageType.SERVICE.equals(externalAuthenticatorUsageType)) {
-			return true;
-		}
-
-		return false;
-	}
+        return AuthenticationScriptUsageType.SERVICE.equals(usageType) && AuthenticationScriptUsageType.SERVICE.equals(externalAuthenticatorUsageType);
+    }
 
 	public Map<Integer, Set<String>> levelToAcrMapping() {
 		Map<Integer, Set<String>> map = Maps.newHashMap();

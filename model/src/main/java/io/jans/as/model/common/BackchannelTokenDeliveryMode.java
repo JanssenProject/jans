@@ -6,13 +6,12 @@
 
 package io.jans.as.model.common;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-
 import io.jans.orm.annotation.AttributeEnum;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Javier Rojas Blum
@@ -26,7 +25,7 @@ public enum BackchannelTokenDeliveryMode implements HasParamName, AttributeEnum 
 
     private final String value;
 
-    private static Map<String, BackchannelTokenDeliveryMode> mapByValues = new HashMap<>();
+    private static final Map<String, BackchannelTokenDeliveryMode> mapByValues = new HashMap<>();
 
     static {
         for (BackchannelTokenDeliveryMode enumType : values()) {
