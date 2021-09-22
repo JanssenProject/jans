@@ -201,7 +201,7 @@ public class FapiOpenIdConfiguration extends HttpServlet {
             }
 
             if (cert == null) {
-                log.debug("Failed to parse client certificate, client_id: {}.", cl.getClientId());
+                log.debug("Failed to parse client certificate, client_dn: {}.", clientDn);
             }
             PublicKey publicKey = cert.getPublicKey();
             byte[] encodedKey = publicKey.getEncoded();
