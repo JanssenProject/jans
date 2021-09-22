@@ -77,7 +77,7 @@ public class AuthorizationCode extends AbstractToken {
      *
      * @return <code>true</code> if the authorization code has been used.
      */
-    public boolean isUsed() {
+    public synchronized boolean isUsed() {
         return used;
     }
 

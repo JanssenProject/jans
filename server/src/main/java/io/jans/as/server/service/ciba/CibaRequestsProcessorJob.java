@@ -6,20 +6,6 @@
 
 package io.jans.as.server.service.ciba;
 
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.ejb.DependsOn;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
-import javax.inject.Named;
-
-import org.slf4j.Logger;
-
 import io.jans.as.model.ciba.PushErrorResponseType;
 import io.jans.as.model.common.BackchannelTokenDeliveryMode;
 import io.jans.as.model.configuration.AppConfiguration;
@@ -34,6 +20,18 @@ import io.jans.service.cdi.event.CibaRequestsProcessorEvent;
 import io.jans.service.cdi.event.Scheduled;
 import io.jans.service.timer.event.TimerEvent;
 import io.jans.service.timer.schedule.TimerSchedule;
+import org.slf4j.Logger;
+
+import javax.ejb.DependsOn;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Job responsible to process all expired CIBA requests and update their status.
@@ -122,7 +120,7 @@ public class CibaRequestsProcessorJob {
         }
 
         long timeDiffrence = System.currentTimeMillis() - this.lastFinishedTime;
-        return timeDiffrence >= interval * 1000;
+        return timeDiffrence >= interval * 1000L;
     }
 
     /**
