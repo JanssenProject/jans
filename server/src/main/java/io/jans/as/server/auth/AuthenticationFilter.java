@@ -75,7 +75,7 @@ import static io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType.I
         displayName = "oxAuth")
 public class AuthenticationFilter implements Filter {
 
-    private static final String REALM = "oxAuth";
+    private static final String REALM_CONSTANT = "jans-auth";
 
     @Inject
     private Logger log;
@@ -514,7 +514,7 @@ public class AuthenticationFilter implements Filter {
         if (realm != null) {
             return realm;
         } else {
-            return REALM;
+            return REALM_CONSTANT;
         }
     }
 

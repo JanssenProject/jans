@@ -6,7 +6,6 @@
 
 package io.jans.as.server.model.token;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import io.jans.as.common.claims.Audience;
 import io.jans.as.common.model.common.User;
@@ -60,6 +59,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 
 import static io.jans.as.model.common.ScopeType.DYNAMIC;
 
@@ -105,7 +105,7 @@ public class IdTokenFactory {
     @Inject
     private SessionIdService sessionIdService;
 
-    private void setAmrClaim(io.jans.as.model.token.JsonWebResponse jwt, String acrValues) {
+    private void setAmrClaim(JsonWebResponse jwt, String acrValues) {
         List<String> amrList = Lists.newArrayList();
 
         CustomScriptConfiguration script = externalAuthenticationService.getCustomScriptConfigurationByName(acrValues);
@@ -128,10 +128,10 @@ public class IdTokenFactory {
         jwt.getClaims().setClaim(JwtClaimName.AUTHENTICATION_METHOD_REFERENCES, amrList);
     }
 
-    private void fillClaims(io.jans.as.model.token.JsonWebResponse jwr,
+    private void fillClaims(JsonWebResponse jwr,
                             IAuthorizationGrant authorizationGrant, String nonce,
                             AuthorizationCode authorizationCode, AccessToken accessToken, RefreshToken refreshToken,
-                            String state, Set<String> scopes, boolean includeIdTokenClaims, Function<io.jans.as.model.token.JsonWebResponse,
+                            String state, Set<String> scopes, boolean includeIdTokenClaims, Function<JsonWebResponse,
                             Void> preProcessing, Function<JsonWebResponse, Void> postProcessing, String requestedClaims) throws Exception {
 
         jwr.getClaims().setIssuer(appConfiguration.getIssuer());
@@ -259,7 +259,7 @@ public class IdTokenFactory {
      * @param accessToken Access token issued for this authorization.
      * @param authorizationCode Code issued for this authorization.
      */
-    private void filterClaimsBasedOnAccessToken(io.jans.as.model.token.JsonWebResponse jwr, AccessToken accessToken, AuthorizationCode authorizationCode) {
+    private void filterClaimsBasedOnAccessToken(JsonWebResponse jwr, AccessToken accessToken, AuthorizationCode authorizationCode) {
         if ((accessToken != null || authorizationCode != null) && appConfiguration.getIdTokenFilterClaimsBasedOnAccessToken()) {
             JwtClaims claims = jwr.getClaims();
             claims.removeClaim(JwtClaimName.PROFILE);
@@ -275,7 +275,7 @@ public class IdTokenFactory {
      * @param jwr Json that contains all claims that should go in id_token.
      * @param user Authenticated user.
      */
-    private void setClaimsFromRequestedClaims(String requestedClaims, io.jans.as.model.token.JsonWebResponse jwr, User user)
+    private void setClaimsFromRequestedClaims(String requestedClaims, JsonWebResponse jwr, User user)
             throws InvalidClaimException {
         if (requestedClaims != null) {
             JSONObject claimsObj = new JSONObject(requestedClaims);
@@ -305,7 +305,7 @@ public class IdTokenFactory {
         }
     }
 
-    private void processCiba(io.jans.as.model.token.JsonWebResponse jwr, IAuthorizationGrant authorizationGrant, RefreshToken refreshToken) {
+    private void processCiba(JsonWebResponse jwr, IAuthorizationGrant authorizationGrant, RefreshToken refreshToken) {
         if (!(authorizationGrant instanceof CIBAGrant)) {
             return;
         }
@@ -317,7 +317,7 @@ public class IdTokenFactory {
         jwr.setClaim(JwtClaimName.AUTH_REQ_ID, cibaGrant.getAuthReqId());
     }
 
-    private void setClaimsFromJwtAuthorizationRequest(io.jans.as.model.token.JsonWebResponse jwr, IAuthorizationGrant authorizationGrant, Set<String> scopes) throws InvalidClaimException {
+    private void setClaimsFromJwtAuthorizationRequest(JsonWebResponse jwr, IAuthorizationGrant authorizationGrant, Set<String> scopes) throws InvalidClaimException {
         final JwtAuthorizationRequest requestObject = authorizationGrant.getJwtAuthorizationRequest();
         if (requestObject == null || requestObject.getIdTokenMember() == null) {
             return;
@@ -341,10 +341,10 @@ public class IdTokenFactory {
         }
     }
 
-    public io.jans.as.model.token.JsonWebResponse createJwr(
+    public JsonWebResponse createJwr(
             IAuthorizationGrant grant, String nonce,
             AuthorizationCode authorizationCode, AccessToken accessToken, RefreshToken refreshToken,
-            String state, Set<String> scopes, boolean includeIdTokenClaims, Function<io.jans.as.model.token.JsonWebResponse,
+            String state, Set<String> scopes, boolean includeIdTokenClaims, Function<JsonWebResponse,
             Void> preProcessing, Function<JsonWebResponse, Void> postProcessing, String claims) throws Exception {
 
         final Client client = grant.getClient();
