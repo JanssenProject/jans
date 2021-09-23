@@ -158,9 +158,7 @@ public class LanguageBean implements Serializable {
             return null;
         }
 
-        Locale locale = Locale.forLanguageTag(cookieValue);
-
-        return locale;
+        return Locale.forLanguageTag(cookieValue);
     }
 
     private Cookie getCookie() {

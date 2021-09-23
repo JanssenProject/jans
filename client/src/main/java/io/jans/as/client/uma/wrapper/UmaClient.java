@@ -227,9 +227,7 @@ public class UmaClient {
             tokenRequest.setKeyId(tmpKeyId);
             tokenRequest.setAudience(tokenUrl);
 
-            Token umaPat = UmaClient.request(tokenUrl, tokenRequest);
-
-            return umaPat;
+            return UmaClient.request(tokenUrl, tokenRequest);
         } catch (Exception ex) {
             throw new UmaException("Failed to obtain valid UMA PAT token", ex);
         }

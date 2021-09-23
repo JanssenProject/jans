@@ -559,9 +559,7 @@ public class AppInitializer {
 		}
 
 		EncryptionService securityService = encryptionServiceInstance.get();
-		Properties decrypytedProperties = securityService.decryptAllProperties(properties);
-
-		return decrypytedProperties;
+		return securityService.decryptAllProperties(properties);
 	}
 
 	private String buildServersString(List<?> servers) {

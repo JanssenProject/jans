@@ -70,8 +70,7 @@ public class ExternalScriptContext extends io.jans.service.external.context.Exte
     protected String getEntryAttributeValue(String dn, String attributeName) {
         final CustomEntry entry = getEntryByDn(dn, attributeName);
         if (entry != null) {
-            final String attributeValue = entry.getCustomAttributeValue(attributeName);
-            return attributeValue;
+            return entry.getCustomAttributeValue(attributeName);
         }
 
         return "";
