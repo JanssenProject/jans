@@ -7,6 +7,7 @@
 package io.jans.as.server.servlet;
 
 import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.util.Util;
 import io.jans.as.server.model.discovery.OpenIdConnectDiscoveryParamsValidator;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -28,6 +29,7 @@ import static io.jans.as.model.discovery.WebFingerParam.REL;
 import static io.jans.as.model.discovery.WebFingerParam.REL_VALUE;
 import static io.jans.as.model.discovery.WebFingerParam.RESOURCE;
 import static io.jans.as.model.discovery.WebFingerParam.SUBJECT;
+import static io.jans.as.model.util.Util.escapeLog;
 
 /**
  * @author Javier Rojas Blum Date: 01.28.2013
@@ -57,7 +59,7 @@ public class WebFinger extends HttpServlet {
         String resource = request.getParameter(RESOURCE);
         String rel = request.getParameter(REL);
 
-        log.debug("Attempting to request OpenID Connect Discovery: {}, {}, Is Secure = {}", resource, rel, request.isSecure());
+        log.debug("Attempting to request OpenID Connect Discovery: {}, {}", escapeLog(resource), escapeLog(rel));
 
         try (PrintWriter out = response.getWriter()) {
             if (!OpenIdConnectDiscoveryParamsValidator.validateParams(resource, rel)) {
