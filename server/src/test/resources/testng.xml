@@ -158,13 +158,6 @@
 		</classes>
 	</test>
 
-	<!-- Encryption test -->
-	<test name="Encryption test (embedded)" enabled="true">
-		<classes>
-			<class name="io.jans.as.server.comp.EncryptionTest" />
-		</classes>
-	</test>
-
 	<test name="Utility methods test" enabled="true">
 		<classes>
 			<class name="io.jans.as.server.comp.UtilityMethodsTest" />
