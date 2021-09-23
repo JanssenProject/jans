@@ -46,8 +46,6 @@ public class ExternalUmaRptPolicyService extends ExternalScriptService {
 	public static final boolean HOTSWAP_UMA_SCRIPT = Boolean.parseBoolean(System.getProperty("uma.hotswap.script"));
 
 	@Inject
-	private Logger log;
-	@Inject
 	private LookupService lookupService;
 	@Inject
 	private CustomScriptManager scriptManager;
