@@ -89,31 +89,13 @@ public class GrantService {
         }
     }
 
-    private boolean shouldPutInCache(TokenType tokenType) {
-        if (cacheConfiguration.getCacheProviderType() == CacheProviderType.NATIVE_PERSISTENCE) {
-            return false;
-        }
-
-        switch (tokenType) {
-            case ID_TOKEN:
-                if (!isTrue(appConfiguration.getPersistIdTokenInLdap())) {
-                    return true;
-                }
-            case REFRESH_TOKEN:
-                if (!isTrue(appConfiguration.getPersistRefreshTokenInLdap())) {
-                    return true;
-                }
-        }
-        return false;
-    }
-
     public void persist(TokenLdap token) {
         persistenceEntryManager.persist(token);
     }
 
-    public void remove(TokenLdap p_token) {
-        persistenceEntryManager.remove(p_token);
-        log.trace("Removed token from LDAP, code: " + p_token.getTokenCode());
+    public void remove(TokenLdap token) {
+        persistenceEntryManager.remove(token);
+        log.trace("Removed token from LDAP, code: {}", token.getTokenCode());
     }
 
     public void removeSilently(TokenLdap token) {

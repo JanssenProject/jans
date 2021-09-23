@@ -6,19 +6,15 @@
 
 package io.jans.as.server.service.external;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-
-import com.google.common.base.Function;
-
 import io.jans.as.model.token.JsonWebResponse;
 import io.jans.as.server.service.external.context.ExternalUpdateTokenContext;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.custom.script.type.token.UpdateTokenType;
 import io.jans.service.custom.script.ExternalScriptService;
+
+import javax.enterprise.context.ApplicationScoped;
+import java.util.function.Function;
 
 /**
  * @author Yuriy Movchan
@@ -27,9 +23,6 @@ import io.jans.service.custom.script.ExternalScriptService;
 public class ExternalUpdateTokenService extends ExternalScriptService {
 
 	private static final long serialVersionUID = -1033475075863270249L;
-
-	@Inject
-    private Logger log;
 
     public ExternalUpdateTokenService() {
         super(CustomScriptType.UPDATE_TOKEN);
@@ -69,14 +62,11 @@ public class ExternalUpdateTokenService extends ExternalScriptService {
     }
     
 	public Function<JsonWebResponse, Void> buildModifyIdTokenProcessor(final ExternalUpdateTokenContext context) {
-		return new Function<JsonWebResponse, Void>() {
-			@Override
-			public Void apply(JsonWebResponse jsonWebResponse) {
-				modifyIdTokenMethods(jsonWebResponse, context);
+		return jsonWebResponse -> {
+            modifyIdTokenMethods(jsonWebResponse, context);
 
-				return null;
-			}
-		};
+            return null;
+        };
 	}
 
 }

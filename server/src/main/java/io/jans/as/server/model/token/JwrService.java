@@ -6,7 +6,6 @@
 
 package io.jans.as.server.model.token;
 
-import com.google.common.base.Function;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
@@ -37,6 +36,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import java.nio.charset.StandardCharsets;
 import java.security.PublicKey;
+import java.util.function.Function;
 
 import static io.jans.as.model.jwt.JwtHeaderName.ALGORITHM;
 
@@ -151,7 +151,7 @@ public class JwrService {
         jwr.getClaims().setSubjectIdentifier(authorizationGrant.getSub());
     }
 
-    public static Function<io.jans.as.model.token.JsonWebResponse, Void> wrapWithSidFunction(Function<JsonWebResponse, Void> input, String outsideSid) {
+    public static Function<JsonWebResponse, Void> wrapWithSidFunction(Function<JsonWebResponse, Void> input, String outsideSid) {
         return jwr -> {
             if (jwr == null) {
                 return null;
