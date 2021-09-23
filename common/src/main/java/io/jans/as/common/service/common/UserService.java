@@ -8,6 +8,7 @@ package io.jans.as.common.service.common;
 
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.util.AttributeConstants;
+import io.jans.as.model.config.Constants;
 import io.jans.as.model.util.Util;
 import io.jans.model.GluuStatus;
 import io.jans.orm.PersistenceEntryManager;
@@ -23,6 +24,7 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -198,7 +200,7 @@ public abstract class UserService {
 
                 try {
                     List<User> entries = persistenceEntryManager.findEntries(searchUser);
-                    log.debug("Found '{}' entries", entries.size());
+                    log.debug(Constants.LOG_FOUND, entries.size());
 
                     if (entries.size() == 0) {
                         continue;
@@ -218,10 +220,11 @@ public abstract class UserService {
     }
 
     public List<User> getUsersByAttribute(String attributeName, Object attributeValue, Boolean multiValued, int limit) {
-        log.debug("Getting user information from LDAP: attributeName = '{}', attributeValue = '{}'", escapeLog(attributeName), escapeLog(attributeValue));
+        if (log.isDebugEnabled())
+            log.debug("Getting user information from LDAP: attributeName = '{}', attributeValue = '{}'", escapeLog(attributeName), escapeLog(attributeValue));
 
         if (StringHelper.isEmpty(attributeName) || (attributeValue == null)) {
-            return null;
+            return Collections.emptyList();
         }
 
         Filter filter = Filter.createEqualityFilter(attributeName, attributeValue);
@@ -244,7 +247,8 @@ public abstract class UserService {
             return null;
         }
 
-        log.debug("Getting user information from DB: {} = {}", ArrayHelper.toString(attributeNames), attributeValue);
+        if (log.isDebugEnabled())
+            log.debug("Getting user information from DB: {} = {}", ArrayHelper.toString(attributeNames), attributeValue);
 
         String peopleBaseDn = getPeopleBaseDn();
 
@@ -271,13 +275,10 @@ public abstract class UserService {
         }
 
         List<User> entries = persistenceEntryManager.findEntries(getPeopleBaseDn(), User.class, searchFiler, returnAttributes, 1);
-        log.debug("Found {} entries for user {} = {}", entries.size(), ArrayHelper.toString(attributeNames), attributeValue);
+        if (log.isDebugEnabled())
+            log.debug("Found {} entries for user {} = {}", entries.size(), ArrayHelper.toString(attributeNames), attributeValue);
 
-        if (entries.size() > 0) {
-            return entries.get(0);
-        } else {
-            return null;
-        }
+        return entries.isEmpty() ? null : entries.get(0);
     }
 
     public User getUserByAttributes(List<CustomAttribute> attributes, boolean andFilter, String... returnAttributes) {
