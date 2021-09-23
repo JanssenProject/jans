@@ -31,7 +31,6 @@ import org.bouncycastle.cert.ocsp.OCSPRespBuilder;
 import org.bouncycastle.cert.ocsp.RevokedStatus;
 import org.bouncycastle.cert.ocsp.SingleResp;
 import org.bouncycastle.operator.DigestCalculator;
-import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,10 +39,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.Principal;
-import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.List;
@@ -157,13 +154,12 @@ public class OCSPCertificateVerifier implements CertificateVerifier {
         return status;
     }
 
-    private OCSPReq generateOCSPRequest(CertificateID certificateId) throws OCSPException, OperatorCreationException, CertificateEncodingException {
+    private OCSPReq generateOCSPRequest(CertificateID certificateId) throws OCSPException {
         OCSPReqBuilder ocspReqGenerator = new OCSPReqBuilder();
 
         ocspReqGenerator.addRequest(certificateId);
 
-        OCSPReq ocspReq = ocspReqGenerator.build();
-        return ocspReq;
+        return ocspReqGenerator.build();
     }
 
     @SuppressWarnings({"deprecation", "resource"})

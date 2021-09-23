@@ -147,12 +147,12 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
 
     private void saveImpl() {
         String grantId = getGrantId();
-        if (grantId != null && StringUtils.isNotBlank(grantId)) {
+        if (StringUtils.isNotBlank(grantId)) {
             final List<TokenLdap> grants = grantService.getGrantsByGrantId(grantId);
             if (grants != null && !grants.isEmpty()) {
                 for (TokenLdap t : grants) {
                     initTokenFromGrant(t);
-                    log.debug("Saving grant: " + grantId + ", code_challenge: " + getCodeChallenge());
+                    log.debug("Saving grant: {}, code_challenge: {}", grantId, getCodeChallenge());
                     grantService.mergeSilently(t);
                 }
             }

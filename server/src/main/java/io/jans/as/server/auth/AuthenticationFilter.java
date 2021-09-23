@@ -366,9 +366,6 @@ public class AuthenticationFilter implements Filter {
         try {
             String header = servletRequest.getHeader("Authorization");
             if (tokenService.isBearerAuthToken(header)) {
-                // Immutable object
-                // servletRequest.getParameterMap().put("access_token", new
-                // String[]{accessToken});
                 filterChain.doFilter(servletRequest, servletResponse);
             }
         } catch (Exception ex) {
