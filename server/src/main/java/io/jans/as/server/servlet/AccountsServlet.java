@@ -121,12 +121,8 @@ public class AccountsServlet extends HttpServlet {
 
             AuthorizationGrant authorizationGrant = tokenService.getBearerAuthorizationGrant(authFromReq);
 
-            if (authorizationGrant == null) {
-                sendError(httpResponse, "Unable to find authorization grant.");
-                return;
-            }
-            if (cert == null) {
-                sendError(httpResponse, "Failed to parse client certificate.");
+            if (authorizationGrant == null || cert == null) {
+                sendError(httpResponse, authorizationGrant == null ? "Unable to find authorization grant." : "Failed to parse client certificate.");
                 return;
             }
 
