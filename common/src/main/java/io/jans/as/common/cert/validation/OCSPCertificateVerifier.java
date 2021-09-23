@@ -157,13 +157,12 @@ public class OCSPCertificateVerifier implements CertificateVerifier {
         return status;
     }
 
-    private OCSPReq generateOCSPRequest(CertificateID certificateId) throws OCSPException, OperatorCreationException, CertificateEncodingException {
+    private OCSPReq generateOCSPRequest(CertificateID certificateId) throws OCSPException {
         OCSPReqBuilder ocspReqGenerator = new OCSPReqBuilder();
 
         ocspReqGenerator.addRequest(certificateId);
 
-        OCSPReq ocspReq = ocspReqGenerator.build();
-        return ocspReq;
+        return ocspReqGenerator.build();
     }
 
     @SuppressWarnings({"deprecation", "resource"})

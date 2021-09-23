@@ -280,9 +280,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
             grantedScopesSb.append(" ").append(scope);
         }
 
-        final String grantedScopesSt = grantedScopesSb.toString().trim();
-
-        return grantedScopesSt;
+        return grantedScopesSb.toString().trim();
     }
 
     @Override
