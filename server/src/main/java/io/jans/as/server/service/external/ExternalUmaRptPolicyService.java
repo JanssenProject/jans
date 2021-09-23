@@ -18,7 +18,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.apache.commons.io.FileUtils;
-import org.slf4j.Logger;
 
 import io.jans.as.server.uma.authorization.UmaAuthorizationContext;
 import io.jans.model.custom.script.CustomScriptType;
