@@ -455,11 +455,10 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 
 	public List<CustomScriptConfiguration> getCustomScriptConfigurationsMap() {
 		if (this.customScriptConfigurationsNameMap == null) {
-			return new ArrayList<CustomScriptConfiguration>(0);
+			return new ArrayList<>(0);
 		}
 
-		List<CustomScriptConfiguration> configurations = new ArrayList<CustomScriptConfiguration>(this.customScriptConfigurationsNameMap.values());
-		return configurations;
+		return new ArrayList<>(this.customScriptConfigurationsNameMap.values());
 	}
 
 	public  List<String> getAcrValuesList() {
@@ -536,10 +535,6 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 		customScript.setLevel(-1);
 		customScript.setInternal(true);
 
-		CustomScriptConfiguration customScriptConfiguration = new CustomScriptConfiguration(customScript, internalDefaultPersonAuthenticationType,
-				new HashMap<String, SimpleCustomProperty>(0));
-		
-		return customScriptConfiguration;
+		return new CustomScriptConfiguration(customScript, internalDefaultPersonAuthenticationType, new HashMap<>(0));
 	}
-
 }

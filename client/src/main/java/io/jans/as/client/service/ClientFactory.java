@@ -58,12 +58,10 @@ public class ClientFactory {
         return ProxyFactory.create(IntrospectionService.class, p_url, clientExecutor);
     }
     
-    public IntrospectionService createIntrospectionService(String p_url, ClientHttpEngine engine) {
+    public IntrospectionService createIntrospectionService(String url, ClientHttpEngine engine) {
         ResteasyClient client = new ResteasyClientBuilder().httpEngine(engine).build();
-        ResteasyWebTarget target = client.target(UriBuilder.fromPath(p_url));
-        IntrospectionService proxy = target.proxy(IntrospectionService.class);
-
-        return proxy;
+        ResteasyWebTarget target = client.target(UriBuilder.fromPath(url));
+        return target.proxy(IntrospectionService.class);
     }
 
     public ApacheHttpClient4Engine createEngine() {
