@@ -16,6 +16,7 @@ import io.jans.as.model.crypto.signature.RSAPublicKey;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.jwk.JSONWebKey;
+import io.jans.as.model.jwk.KeyType;
 import io.jans.as.model.jws.RSASigner;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
@@ -293,8 +294,6 @@ public class UmaValidationService {
     public boolean isIdTokenValid(Jwt idToken) {
         try {
             final String issuer = idToken.getClaims().getClaimAsString(JwtClaimName.ISSUER);
-            //final String nonceFromToken = idToken.getClaims().getClaimAsString(JwtClaimName.NONCE);
-            //final String audienceFromToken = idToken.getClaims().getClaimAsString(JwtClaimName.AUDIENCE);
 
             final Date expiresAt = idToken.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME);
             final Date now = new Date();
@@ -333,13 +332,8 @@ public class UmaValidationService {
 
     private RSAPublicKey getPublicKey(String kid) {
         JSONWebKey key = webKeysConfiguration.getKey(kid);
-        if (key != null) {
-            switch (key.getKty()) {
-                case RSA:
-                    return new RSAPublicKey(
-                            key.getN(),
-                            key.getE());
-            }
+        if (key != null && key.getKty() == KeyType.RSA) {
+            return new RSAPublicKey(key.getN(), key.getE());
         }
         return null;
     }

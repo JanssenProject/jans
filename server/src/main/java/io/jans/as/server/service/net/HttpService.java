@@ -92,23 +92,16 @@ public class HttpService implements Serializable {
 	}
 
 	public HttpClient getHttpsClient() {
-		HttpClient httpClient = new SslDefaultHttpClient();
-
-		return httpClient;
+		return new SslDefaultHttpClient();
 	}
 
 	public HttpClient getHttpsClient(String trustStoreType, String trustStorePath, String trustStorePassword) {
-		HttpClient httpClient = new SslDefaultHttpClient(trustStoreType, trustStorePath, trustStorePassword);
-
-		return httpClient;
+		return new SslDefaultHttpClient(trustStoreType, trustStorePath, trustStorePassword);
 	}
 
 	public HttpClient getHttpsClient(String trustStoreType, String trustStorePath, String trustStorePassword,
 			String keyStoreType, String keyStorePath, String keyStorePassword) {
-		HttpClient httpClient = new SslDefaultHttpClient(trustStoreType, trustStorePath, trustStorePassword,
-				keyStoreType, keyStorePath, keyStorePassword);
-
-		return httpClient;
+		return new SslDefaultHttpClient(trustStoreType, trustStorePath, trustStorePassword, keyStoreType, keyStorePath, keyStorePassword);
 	}
 	
 	public HttpServiceResponse executePost(HttpClient httpClient, String uri, String authData, Map<String, String> headers, String postData, ContentType contentType) {

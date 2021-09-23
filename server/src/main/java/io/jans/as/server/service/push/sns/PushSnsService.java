@@ -55,9 +55,7 @@ public class PushSnsService {
 		String decryptedSecretKey = encryptionService.decrypt(secretKey, true);
 
 		BasicAWSCredentials credentials = new BasicAWSCredentials(decryptedAccessKey, decryptedSecretKey);
-	    AmazonSNS snsClient = AmazonSNSClientBuilder.standard().withRegion(Regions.fromName(region)).withCredentials(new AWSStaticCredentialsProvider(credentials)).build();
-	    
-	    return snsClient;
+	    return AmazonSNSClientBuilder.standard().withRegion(Regions.fromName(region)).withCredentials(new AWSStaticCredentialsProvider(credentials)).build();
 	}
 
 	public String createPlatformArn(AmazonSNS snsClient, String platformApplicationArn, String token, User user) {
@@ -74,9 +72,8 @@ public class PushSnsService {
 	}
 
 	public String getCustomUserData(User user) {
-		String customUserData = String.format("Issuer: %s, user: %s, date: %s", appConfiguration.getIssuer(), user.getUserId(),
+		return String.format("Issuer: %s, user: %s, date: %s", appConfiguration.getIssuer(), user.getUserId(),
 				ldapEntryManager.encodeTime(user.getDn(), new Date()));
-		return customUserData;
 	}
 
 	public PublishResult sendPushMessage(AmazonSNS snsClient, PushPlatform platform, String targetArn, Map<String, Object> customAppMessageMap, Map<String, MessageAttributeValue> messageAttributes) throws IOException {
@@ -114,8 +111,6 @@ public class PushSnsService {
 		publishRequest.setTargetArn(targetArn);
 		publishRequest.setMessage(message);
 
-		PublishResult publishResult = snsClient.publish(publishRequest);
-
-		return publishResult;
+		return snsClient.publish(publishRequest);
 	}
 }

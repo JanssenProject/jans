@@ -167,15 +167,12 @@ public class UmaRptIntrospectionWS {
     }
 
     private boolean isValid(UmaPermission permission) {
-        if (permission != null) {
-            permission.checkExpired();
-            return permission.isValid();
-        }
-        return false;
+        permission.checkExpired();
+        return permission.isValid();
     }
 
     private List<io.jans.as.model.uma.UmaPermission> buildStatusResponsePermissions(UmaRPT rpt) {
-        final List<io.jans.as.model.uma.UmaPermission> result = new ArrayList<io.jans.as.model.uma.UmaPermission>();
+        final List<io.jans.as.model.uma.UmaPermission> result = new ArrayList<>();
         if (rpt != null) {
             final List<UmaPermission> rptPermissions = rptService.getRptPermissions(rpt);
             if (rptPermissions != null && !rptPermissions.isEmpty()) {

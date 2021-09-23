@@ -189,6 +189,11 @@ public class UmaGatherer {
             }
 
             CustomScriptConfiguration script = getScript(session);
+            if (script == null) {
+                log.error("Failed to load script, session: '{}'", session.getId());
+                return result(Constants.RESULT_FAILURE);
+            }
+
             UmaGatherContext context = new UmaGatherContext(script.getConfigurationAttributes(), httpRequest, session, umaSessionService, umaPermissionService,
                     umaPctService, pageClaims, userService, facesService, appConfiguration);
 
@@ -196,10 +201,6 @@ public class UmaGatherer {
             if (step < 1) {
                 log.error("Invalid step: {}", step);
                 return result(Constants.RESULT_INVALID_STEP);
-            }
-            if (script == null) {
-                log.error("Failed to load script, step: '{}'", step);
-                return result(Constants.RESULT_FAILURE);
             }
 
             if (!umaSessionService.isPassedPreviousSteps(session, step)) {
@@ -253,9 +254,7 @@ public class UmaGatherer {
 
     protected CustomScriptConfiguration getScript(final SessionId session) {
         String scriptName = umaSessionService.getScriptName(session);
-        CustomScriptConfiguration script = external.getCustomScriptConfigurationByName(scriptName);
-
-        return script;
+        return external.getCustomScriptConfigurationByName(scriptName);
     }
 
 }

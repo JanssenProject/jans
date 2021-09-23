@@ -57,6 +57,10 @@ public class Util {
     private Util() {
     }
 
+    public static String escapeLog(String param) {
+        return param.replaceAll("[\n\r\t]", "_");
+    }
+
     public static ObjectMapper createJsonMapper() {
         final AnnotationIntrospector jaxb = new JaxbAnnotationIntrospector();
         final AnnotationIntrospector jackson = new JacksonAnnotationIntrospector();

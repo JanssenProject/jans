@@ -66,9 +66,7 @@ public abstract class UserService {
         }
 
         String userDn = getDnForUser(inum);
-        User user = getUserByDn(userDn, returnAttributes);
-
-        return user;
+        return getUserByDn(userDn, returnAttributes);
     }
 
     public User getUser(String userId, String... returnAttributes) {
@@ -101,9 +99,7 @@ public abstract class UserService {
             return null;
         }
 
-        String inum = user.getAttribute("inum");
-
-        return inum;
+        return user.getAttribute("inum");
     }
 
     public String getUserInum(String userId) {
@@ -482,34 +478,6 @@ public abstract class UserService {
 
         customAttribute.setValue(attributeValue);
     }
-//
-//    // this method must be called only if app mode = MEMORY, in ldap case it's anyway persisted in ldap.
-//    public boolean saveLongLivedToken(String userId, PersistentJwt longLivedToken) {
-//        log.debug("Saving long-lived access token: userId = {}", userId);
-//        boolean succeed = false;
-//
-//        User user = getUser(userId);
-//        if (user != null) {
-//            int nTokens = 0;
-//            if (user.getOxAuthPersistentJwt() != null) {
-//                nTokens = user.getOxAuthPersistentJwt().length;
-//            }
-//            nTokens++;
-//            String[] persistentJwts = new String[nTokens];
-//            if (user.getOxAuthPersistentJwt() != null) {
-//                for (int i = 0; i < user.getOxAuthPersistentJwt().length; i++) {
-//                    persistentJwts[i] = user.getOxAuthPersistentJwt()[i];
-//                }
-//            }
-//            persistentJwts[nTokens - 1] = longLivedToken.toString();
-//
-//            user.setOxAuthPersistentJwt(persistentJwts);
-//            ldapEntryManager.merge(user);
-//            succeed = true;
-//        }
-//
-//        return succeed;
-//    }
 
     public List<User> getUsersWithPersistentJwts() {
         String baseDN = getPeopleBaseDn();
