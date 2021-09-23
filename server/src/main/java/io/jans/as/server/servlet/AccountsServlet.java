@@ -121,14 +121,17 @@ public class AccountsServlet extends HttpServlet {
 
             AuthorizationGrant authorizationGrant = tokenService.getBearerAuthorizationGrant(authFromReq);
             if (authorizationGrant == null) {
-                log.error("FAPI Account: Authorization grant is null.*********************************************");
-                httpResponse.sendError(httpResponse.SC_UNAUTHORIZED, "Authorization grant is null.");
+                log.error("Unable to find authorization grant.");
+                httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization grant is null.");
+                return;
             }
 
             if (cert == null) {
-                log.debug("FAPI Account: Failed to parse client certificate, client_dn: {}.", clientDn);
+                log.error("Failed to parse client certificate, client_dn: {}.", clientDn);
+                httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization grant is null.");
                 return;
             }
+
             PublicKey publicKey = cert.getPublicKey();
             byte[] encodedKey = publicKey.getEncoded();
 
