@@ -31,7 +31,7 @@ import static org.testng.Assert.assertTrue;
 /**
  * @author Yuriy Zabrovarnyy
  */
-public class MTSLClientAuthenticationTest {
+public class MTSLClientAuthenticationMain {
 
     public static void main(String[] args) throws Exception {
 

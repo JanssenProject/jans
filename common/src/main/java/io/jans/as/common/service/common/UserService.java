@@ -28,6 +28,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static io.jans.as.model.util.Util.escapeLog;
+
 /**
  * Provides operations with users.
  *
@@ -70,7 +72,8 @@ public abstract class UserService {
     }
 
     public User getUser(String userId, String... returnAttributes) {
-        log.debug("Getting user information from LDAP: userId = {}", userId);
+        final String escapedUserId = escapeLog(userId);
+        log.debug("Getting user information from LDAP: userId = {}", escapedUserId);
 
         if (StringHelper.isEmpty(userId)) {
             return null;
@@ -85,13 +88,9 @@ public abstract class UserService {
         }
 
         List<User> entries = persistenceEntryManager.findEntries(peopleBaseDn, User.class, userUidFilter, returnAttributes);
-        log.debug("Found {} entries for user id = {}", entries.size(), userId);
+        log.debug("Found {} entries for user id = {}", entries.size(), escapedUserId);
 
-        if (entries.size() > 0) {
-            return entries.get(0);
-        } else {
-            return null;
-        }
+        return entries.isEmpty() ? null : entries.get(0);
     }
 
     public String getUserInum(User user) {
@@ -219,7 +218,7 @@ public abstract class UserService {
     }
 
     public List<User> getUsersByAttribute(String attributeName, Object attributeValue, Boolean multiValued, int limit) {
-        log.debug("Getting user information from LDAP: attributeName = '{}', attributeValue = '{}'", attributeName, attributeValue);
+        log.debug("Getting user information from LDAP: attributeName = '{}', attributeValue = '{}'", escapeLog(attributeName), escapeLog(attributeValue));
 
         if (StringHelper.isEmpty(attributeName) || (attributeValue == null)) {
             return null;
