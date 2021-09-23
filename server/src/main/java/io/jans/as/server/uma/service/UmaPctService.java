@@ -171,9 +171,7 @@ public class UmaPctService {
     }
 
     private String generateCode() {
-        String code = UUID.randomUUID().toString();
-
-        return code;
+        return UUID.randomUUID().toString();
     }
 
     public String dn(String pctCode) {

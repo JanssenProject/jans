@@ -81,7 +81,6 @@ public class CIBAEndUserNotificationService {
         String url = appConfiguration.getCibaEndUserNotificationConfig().getNotificationUrl();
         String key = cibaEncryptionService.decrypt(appConfiguration.getCibaEndUserNotificationConfig()
                 .getNotificationKey(), true);
-        String to = deviceRegistrationToken;
         String title = "Jans Auth Authentication Request";
         String body = "Client Initiated Backchannel Authentication (CIBA)";
 
@@ -98,12 +97,12 @@ public class CIBAEndUserNotificationService {
 
         String clickAction = authorizationRequestUri.toString();
 
-        FirebaseCloudMessagingRequest firebaseCloudMessagingRequest = new FirebaseCloudMessagingRequest(key, to, title, body, clickAction);
+        FirebaseCloudMessagingRequest firebaseCloudMessagingRequest = new FirebaseCloudMessagingRequest(key, deviceRegistrationToken, title, body, clickAction);
         FirebaseCloudMessagingClient firebaseCloudMessagingClient = new FirebaseCloudMessagingClient(url);
         firebaseCloudMessagingClient.setRequest(firebaseCloudMessagingRequest);
         FirebaseCloudMessagingResponse firebaseCloudMessagingResponse = firebaseCloudMessagingClient.exec();
 
-        log.debug("CIBA: firebase cloud messaging result status " + firebaseCloudMessagingResponse.getStatus());
+        log.debug("CIBA: firebase cloud messaging result status {}", firebaseCloudMessagingResponse.getStatus());
     }
 
 }

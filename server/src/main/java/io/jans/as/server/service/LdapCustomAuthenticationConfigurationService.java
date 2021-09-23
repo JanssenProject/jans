@@ -108,8 +108,7 @@ public class LdapCustomAuthenticationConfigurationService implements Serializabl
 
 	private Object jsonToObject(String json, Class<?> clazz) throws Exception {
 		ObjectMapper mapper = new ObjectMapper();
-		Object clazzObject = mapper.readValue(json, clazz);
-		return clazzObject;
+		return mapper.readValue(json, clazz);
 	}
 
 }
