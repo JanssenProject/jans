@@ -9,7 +9,7 @@ import io.jans.scim2.client.ScimClient;
 import io.jans.scim2.client.rest.ClientSideService;
 
 /**
- * A factory class to obtain objects that allow direct interaction with the SCIM API. Usage
+ * A factory class to obtain "client" objects that allow interaction with the SCIM service. Usage
  * examples can be found at https://github.com/JanssenProject/jans-scim/tree/master/README.md
  * <p>Common parameters of methods here include:
  * <ul>
@@ -76,15 +76,14 @@ public class ScimClientFactory {
     }
 
     /**
-     * The object returned by this method belongs to interface {@link io.jans.scim2.client.rest.ClientSideService ClientSideService}
-     * which has all methods available to interact with User, Group, and FidoDevice SCIM resources. It also has some support to
-     * call service provider configuration endpoints (sect 4 of RFC 7644)
+     * See {@link #getClient(java.lang.Class, java.lang.String, java.lang.String, java.lang.String, java.lang.String, boolean) }
      * @param domain See class description
      * @param OIDCMetadataUrl See class description
      * @param clientId See class description. It is assumed the client uses client_secret_basic mechanism to
      *                 authenticate against the token endpoint
      * @param clientSecret Secret of the OAuth2 client
-     * @return An object that allows to invoke service methods
+     * @return An object that allows calling User, Group, and FidoDevices operations. It also has some support to
+     * call service provider configuration endpoints (see section 4 of RFC 7644)
      * @throws Exception In case of initialization problem
      */
     public static ClientSideService getClient(String domain, String OIDCMetadataUrl, 
@@ -93,16 +92,15 @@ public class ScimClientFactory {
     }
 
     /**
-     * The object returned by this method belongs to interface {@link io.jans.scim2.client.rest.ClientSideService ClientSideService}
-     * which has all methods available to interact with User, Group, and FidoDevice SCIM resources. It also has some support to
-     * call service provider configuration endpoints (sect 4 of RFC 7644)
+     * See {@link #getClient(java.lang.Class, java.lang.String, java.lang.String, java.lang.String, java.lang.String, boolean) }
      * @param domain See class description
      * @param OIDCMetadataUrl See class description
      * @param clientId See class description
      * @param clientSecret Secret of the OAuth2 client
      * @param secretPostAuthnMethod Whether the client uses client_secret_post or client_secret_basic
      *                              to authenticate against the token endpoint
-     * @return An object that allows to invoke service methods
+     * @return An object that allows calling User, Group, and FidoDevices operations. It also has some support to
+     * call service provider configuration endpoints (see section 4 of RFC 7644)
      * @throws Exception In case of initialization problem
      */
     public static ClientSideService getClient(String domain, String OIDCMetadataUrl, 
@@ -111,27 +109,25 @@ public class ScimClientFactory {
     }
     
     /**
-     * The object returned by this method belongs to interface {@link io.jans.scim2.client.rest.ClientSideService ClientSideService}
-     * which has all methods available to interact with User, Group, and FidoDevice SCIM resources. It also has some support to
-     * call service provider configuration endpoints (sect 4 of RFC 7644)
+     * See {@link #getClient(java.lang.Class, java.lang.String, java.lang.String, java.lang.String, java.nio.file.Path, java.lang.String, java.lang.String) }
      * @param domain See class description
      * @param OIDCMetadataUrl See class description
      * @param clientId See class description. It is assumed the client uses private_key_jwt mechanism to
      *                 authenticate against the token endpoint
      * @param keyStorePath A path to a keystore whose first key may be employed to generate a client_assertion  
      * @param keyStorePassword Password associated to the keystore 
-     * @return An object that allows to invoke service methods
+     * @return An object that allows calling User, Group, and FidoDevices operations. It also has some support to
+     * call service provider configuration endpoints (see section 4 of RFC 7644)
      * @throws Exception In case of initialization problem
      */
     public static ClientSideService getClient(String domain, String OIDCMetadataUrl, 
     	String clientId, Path keyStorePath, String keyStorePassword) throws Exception {
-        return getClient(defaultInterface, domain, OIDCMetadataUrl, clientId, keyStorePath, keyStorePassword, null);
+        return getClient(defaultInterface, domain, OIDCMetadataUrl, clientId, keyStorePath,
+                keyStorePassword, null);
     }
 
     /**
-     * The object returned by this method belongs to interface {@link io.jans.scim2.client.rest.ClientSideService ClientSideService}
-     * which has all methods available to interact with User, Group, and FidoDevice SCIM resources. It also has some support to
-     * call service provider configuration endpoints (sect 4 of RFC 7644)
+     * See {@link #getClient(java.lang.Class, java.lang.String, java.lang.String, java.lang.String, java.nio.file.Path, java.lang.String, java.lang.String) }
      * @param domain See class description
      * @param OIDCMetadataUrl See class description
      * @param clientId See class description. It is assumed the client uses private_key_jwt mechanism to
@@ -140,16 +136,19 @@ public class ScimClientFactory {
      * @param keyStorePassword Password associated to the keystore
      * @param keyId Identifier of one of the keys. Its corresponding private key will be extracted to generate the
      *              assertion. If null is passed, the first key of the keystore will be used
-     * @return An object that allows to invoke service methods
+     * @return An object that allows calling User, Group, and FidoDevices operations. It also has some support to
+     * call service provider configuration endpoints (see section 4 of RFC 7644)
      * @throws Exception In case of initialization problem
      */
     public static ClientSideService getClient(String domain, String OIDCMetadataUrl, 
     	String clientId, Path keyStorePath, String keyStorePassword, String keyId) throws Exception {
-        return getClient(defaultInterface, domain, OIDCMetadataUrl, clientId, keyStorePath, keyStorePassword, keyId);
+        return getClient(defaultInterface, domain, OIDCMetadataUrl, clientId, keyStorePath,
+                keyStorePassword, keyId);
     }
 	
     private static <T> T typedProxy(Class <T> interfaceClass, InvocationHandler handler) {
-        return interfaceClass.cast(Proxy.newProxyInstance(interfaceClass.getClassLoader(), new Class<?>[]{interfaceClass}, handler));
+        return interfaceClass.cast(Proxy.newProxyInstance(interfaceClass.getClassLoader(),
+                new Class<?>[]{interfaceClass}, handler));
     }
 
 }
