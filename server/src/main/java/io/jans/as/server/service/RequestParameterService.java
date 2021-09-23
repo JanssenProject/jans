@@ -179,13 +179,12 @@ public class RequestParameterService {
         return valueWithType.getFirst();
     }
 
-    public Pair<String, String> getParameterValueWithType(String p_name) {
+    public Pair<String, String> getParameterValueWithType(String name) {
         String value = null;
         String clazz = null;
-        final Object o = identity.getWorkingParameter(p_name);
+        final Object o = identity.getWorkingParameter(name);
         if (o instanceof String) {
-            final String s = (String) o;
-            value = s;
+            value = (String) o;
             clazz = String.class.getName();
         } else if (o instanceof Integer) {
             final Integer i = (Integer) o;
@@ -197,7 +196,7 @@ public class RequestParameterService {
             clazz = Boolean.class.getName();
         }
 
-        return new Pair<String, String>(value, clazz);
+        return new Pair<>(value, clazz);
     }
 
     public Object getTypedValue(String stringValue, String type) {

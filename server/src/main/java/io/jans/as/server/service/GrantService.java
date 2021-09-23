@@ -177,28 +177,27 @@ public class GrantService {
         }
     }
 
-    private TokenLdap load(String p_tokenDn) {
+    private TokenLdap load(String tokenDn) {
         try {
-            final TokenLdap entry = persistenceEntryManager.find(TokenLdap.class, p_tokenDn);
-            return entry;
+            return persistenceEntryManager.find(TokenLdap.class, tokenDn);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
         return null;
     }
 
-    public List<TokenLdap> getGrantsByGrantId(String p_grantId) {
+    public List<TokenLdap> getGrantsByGrantId(String grantId) {
         try {
-            return persistenceEntryManager.findEntries(tokenBaseDn(), TokenLdap.class, Filter.createEqualityFilter("grtId", p_grantId));
+            return persistenceEntryManager.findEntries(tokenBaseDn(), TokenLdap.class, Filter.createEqualityFilter("grtId", grantId));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
         return Collections.emptyList();
     }
 
-    public List<TokenLdap> getGrantsByAuthorizationCode(String p_authorizationCode) {
+    public List<TokenLdap> getGrantsByAuthorizationCode(String authorizationCode) {
         try {
-            return persistenceEntryManager.findEntries(tokenBaseDn(), TokenLdap.class, Filter.createEqualityFilter("authzCode", TokenHashUtil.hash(p_authorizationCode)));
+            return persistenceEntryManager.findEntries(tokenBaseDn(), TokenLdap.class, Filter.createEqualityFilter("authzCode", TokenHashUtil.hash(authorizationCode)));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
