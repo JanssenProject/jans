@@ -26,10 +26,10 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.List;
 
-import org.apache.commons.lang.RandomStringUtils;
 import org.slf4j.Logger;
 
 /**
@@ -79,7 +79,7 @@ public class ClientsResource extends BaseResource {
 
     @POST
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS })
-    public Response createOpenIdConnect(@Valid Client client) throws EncryptionException, Exception {
+    public Response createOpenIdConnect(@Valid Client client) throws NoSuchAlgorithmException,EncryptionException {
         log.debug("Client details to be added - client = " + client);
         String inum = client.getClientId();
         if (inum == null || inum.isEmpty() || inum.isBlank()) {
@@ -90,7 +90,6 @@ public class ClientsResource extends BaseResource {
         String clientSecret = client.getClientSecret();
 
         if (StringHelper.isEmpty(clientSecret)) {
-            log.trace("Generating clientSecret as empty for " + client.getClientName());
             clientSecret = generatePassword();
         }
         if (clientSecret != null) {
@@ -170,10 +169,10 @@ public class ClientsResource extends BaseResource {
         return clients;
     }
 
-    private String generatePassword() throws Exception {
+    private String generatePassword() throws NoSuchAlgorithmException {
         String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz";
         SecureRandom secureRandom = SecureRandom.getInstanceStrong();
-        return secureRandom.ints(12, 0, characters.length()).mapToObj(i -> characters.charAt(i))
+        return secureRandom.ints(12, 0, characters.length()).mapToObj(characters::charAt)
                 .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append).toString();
 
     }
