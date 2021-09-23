@@ -57,8 +57,10 @@ public class Util {
     private Util() {
     }
 
-    public static String escapeLog(String param) {
-        return param.replaceAll("[\n\r\t]", "_");
+    public static String escapeLog(Object param) {
+        if (param == null)
+            return "";
+        return param.toString().replaceAll("[\n\r\t]", "_");
     }
 
     public static ObjectMapper createJsonMapper() {

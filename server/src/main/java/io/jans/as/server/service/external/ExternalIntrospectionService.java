@@ -15,7 +15,6 @@ import javax.inject.Named;
 
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
-import org.slf4j.Logger;
 
 import com.google.common.collect.Lists;
 
@@ -36,8 +35,6 @@ public class ExternalIntrospectionService extends ExternalScriptService {
 
     private static final long serialVersionUID = -8609727759114795446L;
 
-    @Inject
-    private Logger log;
     @Inject
     private AppConfiguration appConfiguration;
 
