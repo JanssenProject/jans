@@ -6,8 +6,6 @@
 
 package io.jans.as.server.service;
 
-import static io.jans.as.server.util.ServerUtil.isTrue;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -33,7 +31,6 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.search.filter.Filter;
 import io.jans.service.CacheService;
 import io.jans.service.cache.CacheConfiguration;
-import io.jans.service.cache.CacheProviderType;
 
 /**
  * @author Yuriy Zabrovarnyy
