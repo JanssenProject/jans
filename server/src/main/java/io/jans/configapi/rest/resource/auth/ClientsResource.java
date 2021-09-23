@@ -26,6 +26,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
+import java.security.SecureRandom;
 import java.util.List;
 
 import org.apache.commons.lang.RandomStringUtils;
@@ -78,7 +79,7 @@ public class ClientsResource extends BaseResource {
 
     @POST
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS })
-    public Response createOpenIdConnect(@Valid Client client) throws EncryptionException {
+    public Response createOpenIdConnect(@Valid Client client) throws EncryptionException, Exception {
         log.debug("Client details to be added - client = " + client);
         String inum = client.getClientId();
         if (inum == null || inum.isEmpty() || inum.isBlank()) {
@@ -88,14 +89,14 @@ public class ClientsResource extends BaseResource {
         checkNotNull(client.getClientName(), AttributeNames.DISPLAY_NAME);
         String clientSecret = client.getClientSecret();
 
-		if (StringHelper.isEmpty(clientSecret)) {
-			log.trace("\n\n Generating clientSecret as empty for " + client.getClientName());
-			clientSecret = generatePassword();
-		}
-		if (clientSecret != null) {
-			client.setClientSecret(encryptionService.encrypt(clientSecret));
-		}
-        
+        if (StringHelper.isEmpty(clientSecret)) {
+            log.trace("Generating clientSecret as empty for " + client.getClientName());
+            clientSecret = generatePassword();
+        }
+        if (clientSecret != null) {
+            client.setClientSecret(encryptionService.encrypt(clientSecret));
+        }
+
         client.setDn(clientService.getDnForClient(inum));
         client.setDeletable(client.getClientSecretExpiresAt() != null);
         clientService.addClient(client);
@@ -169,8 +170,11 @@ public class ClientsResource extends BaseResource {
         return clients;
     }
 
-    private String generatePassword() throws EncryptionException {
-		String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-		return RandomStringUtils.random(40, characters);
-	}
+    private String generatePassword() throws Exception {
+        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz";
+        SecureRandom secureRandom = SecureRandom.getInstanceStrong();
+        return secureRandom.ints(12, 0, characters.length()).mapToObj(i -> characters.charAt(i))
+                .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append).toString();
+
+    }
 }
