@@ -6,15 +6,12 @@
 
 package io.jans.as.server.servlet;
 
-import static io.jans.as.model.discovery.WebFingerParam.HREF;
-import static io.jans.as.model.discovery.WebFingerParam.LINKS;
-import static io.jans.as.model.discovery.WebFingerParam.REL;
-import static io.jans.as.model.discovery.WebFingerParam.REL_VALUE;
-import static io.jans.as.model.discovery.WebFingerParam.RESOURCE;
-import static io.jans.as.model.discovery.WebFingerParam.SUBJECT;
-
-import java.io.IOException;
-import java.io.PrintWriter;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.server.model.discovery.OpenIdConnectDiscoveryParamsValidator;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import javax.servlet.ServletException;
@@ -22,14 +19,15 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-
-import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.server.model.discovery.OpenIdConnectDiscoveryParamsValidator;
+import static io.jans.as.model.discovery.WebFingerParam.HREF;
+import static io.jans.as.model.discovery.WebFingerParam.LINKS;
+import static io.jans.as.model.discovery.WebFingerParam.REL;
+import static io.jans.as.model.discovery.WebFingerParam.REL_VALUE;
+import static io.jans.as.model.discovery.WebFingerParam.RESOURCE;
+import static io.jans.as.model.discovery.WebFingerParam.SUBJECT;
 
 /**
  * @author Javier Rojas Blum Date: 01.28.2013
@@ -50,44 +48,39 @@ public class WebFinger extends HttpServlet {
      *
      * @param request  servlet request
      * @param response servlet response
-     * @throws javax.servlet.ServletException if a servlet-specific error occurs
      * @throws java.io.IOException            if an I/O error occurs
      */
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        final HttpServletRequest httpRequest = request;
-        final HttpServletResponse httpResponse = response;
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
-        httpResponse.setContentType("application/jrd+json");
-        PrintWriter out = httpResponse.getWriter();
+        response.setContentType("application/jrd+json");
 
-        String resource = httpRequest.getParameter(RESOURCE);
-        String rel = httpRequest.getParameter(REL);
+        String resource = request.getParameter(RESOURCE);
+        String rel = request.getParameter(REL);
 
-        log.debug("Attempting to request OpenID Connect Discovery: " + resource + ", " + rel + ", Is Secure = " + httpRequest.isSecure());
+        log.debug("Attempting to request OpenID Connect Discovery: {}, {}, Is Secure = {}", resource, rel, request.isSecure());
 
-        try {
-            if (OpenIdConnectDiscoveryParamsValidator.validateParams(resource, rel)) {
-                if (rel == null || rel.equals(REL_VALUE)) {
-                    JSONObject jsonObj = new JSONObject();
-                    jsonObj.put(SUBJECT, resource);
+        try (PrintWriter out = response.getWriter()) {
+            if (!OpenIdConnectDiscoveryParamsValidator.validateParams(resource, rel)) {
+                return;
+            }
 
-                    JSONArray linksJsonArray = new JSONArray();
-                    JSONObject linkJsonObject = new JSONObject();
-                    linkJsonObject.put(REL, REL_VALUE);
-                    linkJsonObject.put(HREF, appConfiguration.getIssuer());
+            if (rel == null || rel.equals(REL_VALUE)) {
+                JSONObject jsonObj = new JSONObject();
+                jsonObj.put(SUBJECT, resource);
 
-                    linksJsonArray.put(linkJsonObject);
-                    jsonObj.put(LINKS, linksJsonArray);
+                JSONArray linksJsonArray = new JSONArray();
+                JSONObject linkJsonObject = new JSONObject();
+                linkJsonObject.put(REL, REL_VALUE);
+                linkJsonObject.put(HREF, appConfiguration.getIssuer());
 
-                    out.println(jsonObj.toString(4).replace("\\/", "/"));
-                }
+                linksJsonArray.put(linkJsonObject);
+                jsonObj.put(LINKS, linksJsonArray);
+
+                out.println(jsonObj.toString(4).replace("\\/", "/"));
             }
         } catch (JSONException e) {
-        	log.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
-
-        out.close();
     }
 
     /**
