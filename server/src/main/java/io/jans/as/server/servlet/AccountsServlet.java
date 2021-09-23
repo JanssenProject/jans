@@ -120,15 +120,13 @@ public class AccountsServlet extends HttpServlet {
             X509Certificate cert = CertUtils.x509CertificateFromPem(clientCertAsPem);
 
             AuthorizationGrant authorizationGrant = tokenService.getBearerAuthorizationGrant(authFromReq);
+
             if (authorizationGrant == null) {
-                log.error("Unable to find authorization grant.");
-                httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization grant is null.");
+                sendError(httpResponse, "Unable to find authorization grant.");
                 return;
             }
-
             if (cert == null) {
-                log.error("Failed to parse client certificate, client_dn: {}.", clientDn);
-                httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization grant is null.");
+                sendError(httpResponse, "Failed to parse client certificate.");
                 return;
             }
 
@@ -190,6 +188,11 @@ public class AccountsServlet extends HttpServlet {
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void sendError(HttpServletResponse response, String error) throws IOException {
+        log.error(error);
+        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, error);
     }
 
     /**
