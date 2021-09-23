@@ -148,7 +148,7 @@ public class OpClientFactoryMockImpl implements OpClientFactory {
         if (!userInfoClient.isPresent()) {
             client = mock(UserInfoClient.class);
 
-            UserInfoResponse response = new UserInfoResponse(0);
+            UserInfoResponse response = new UserInfoResponse(null);
             response.setEntity("{ \"name\":\"John\", \"age\":30, \"sub\":\"present\" }");
 
             when(client.exec()).thenReturn(response);
