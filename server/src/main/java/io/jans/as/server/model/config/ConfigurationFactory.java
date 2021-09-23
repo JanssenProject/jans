@@ -327,10 +327,7 @@ public class ConfigurationFactory {
 	}
 
 	private boolean createFromFile() {
-		boolean result = reloadConfFromFile() && reloadErrorsFromFile() && reloadStaticConfFromFile()
-				&& reloadWebkeyFromFile();
-
-		return result;
+		return reloadConfFromFile() && reloadErrorsFromFile() && reloadStaticConfFromFile() && reloadWebkeyFromFile();
 	}
 
 	private boolean reloadWebkeyFromFile() {
@@ -448,9 +445,7 @@ public class ConfigurationFactory {
 		final PersistenceEntryManager ldapManager = persistenceEntryManagerInstance.get();
 		final String dn = this.baseConfiguration.getString(SERVER_KEY_OF_CONFIGURATION_ENTRY);
 		try {
-			final Conf conf = ldapManager.find(dn, io.jans.as.model.config.Conf.class, returnAttributes);
-
-			return conf;
+			return ldapManager.find(dn, io.jans.as.model.config.Conf.class, returnAttributes);
 		} catch (BasePersistenceException ex) {
 			if (!dn.contains("_test")) {
 				ex.printStackTrace();
@@ -589,9 +584,7 @@ public class ConfigurationFactory {
 
 	private FileConfiguration createFileConfiguration(String fileName, boolean isMandatory) {
 		try {
-			FileConfiguration fileConfiguration = new FileConfiguration(fileName);
-
-			return fileConfiguration;
+			return new FileConfiguration(fileName);
 		} catch (Exception ex) {
 			if (isMandatory) {
 				log.error("Failed to load configuration from {}", fileName, ex);

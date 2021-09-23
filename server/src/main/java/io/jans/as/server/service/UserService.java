@@ -76,9 +76,7 @@ public class UserService extends io.jans.as.common.service.common.UserService {
         Filter registeredFilter = Filter.createEqualityFilter("jansStatus", "registered");
         Filter filter = Filter.createANDFilter(userInumFilter, registeredFilter);
 
-        long countEntries = persistenceEntryManager.countEntries(baseDn, CustomEntry.class, filter);
-
-        return countEntries;
+        return persistenceEntryManager.countEntries(baseDn, CustomEntry.class, filter);
     }
 
 	public long countFidoRegisteredDevices(String username, String domain) {
@@ -101,10 +99,7 @@ public class UserService extends io.jans.as.common.service.common.UserService {
 			return fidoRegistrations.size();
 		}
 
-		long deviceCount = fidoRegistrations.parallelStream()
-                .filter(f -> StringHelper.equals(domain, networkService.getHost(f.getApplication()))).count();
-
-		return deviceCount;
+		return fidoRegistrations.parallelStream().filter(f -> StringHelper.equals(domain, networkService.getHost(f.getApplication()))).count();
 	}
 	
 	public long countFidoAndFido2Devices(String username, String domain) {

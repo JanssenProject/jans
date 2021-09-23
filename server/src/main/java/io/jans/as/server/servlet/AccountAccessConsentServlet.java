@@ -82,11 +82,6 @@ public class AccountAccessConsentServlet extends HttpServlet {
         	JSONArray permissionValue=new JSONArray();
         	
         	for (String keyStr : jsonBody.keySet()) {
-    	    	Object keyvalue = jsonBody.get(keyStr);
-    	    	/*jsonObj.put(keyStr, keyvalue);
-    		    if (keyStr.equals("Risk"))
-        	   	{
-        	   	}*/
     	    	if (keyStr.equals("data")) {
     	    		JSONObject keyvalueTemp = (JSONObject)jsonBody.get(keyStr);
     		    	for (String keyStr1 : keyvalueTemp.keySet()) {

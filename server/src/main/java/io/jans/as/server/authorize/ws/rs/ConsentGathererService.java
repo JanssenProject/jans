@@ -287,9 +287,7 @@ public class ConsentGathererService {
 
     protected CustomScriptConfiguration getScript(final SessionId session) {
 		String scriptName = sessionService.getScriptName(session);
-		CustomScriptConfiguration script = external.getCustomScriptConfigurationByName(scriptName);
-
-		return script;
+		return external.getCustomScriptConfigurationByName(scriptName);
 	}
 
 	public boolean isConsentGathered() {
