@@ -33,9 +33,7 @@ public class CertificateParser {
 				return null;
 			}
 
-			X509Certificate cert = new JcaX509CertificateConverter().setProvider(BouncyCastleProvider.PROVIDER_NAME).getCertificate(certificateHolder);
-
-			return cert;
+			return new JcaX509CertificateConverter().setProvider(BouncyCastleProvider.PROVIDER_NAME).getCertificate(certificateHolder);
 		} catch (IOException ex) {
 			throw new CertificateException(ex);
 		} finally {

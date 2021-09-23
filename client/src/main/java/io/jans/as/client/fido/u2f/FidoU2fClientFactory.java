@@ -37,24 +37,18 @@ public class FidoU2fClientFactory {
     public U2fConfigurationService createMetaDataConfigurationService(String u2fMetaDataUri) {
         ResteasyClient client = new ResteasyClientBuilder().httpEngine(engine).build();
         ResteasyWebTarget target = client.target(UriBuilder.fromPath(u2fMetaDataUri));
-        U2fConfigurationService proxy = target.proxy(U2fConfigurationService.class);
-
-        return proxy;
+        return target.proxy(U2fConfigurationService.class);
     }
 
     public AuthenticationRequestService createAuthenticationRequestService(U2fConfiguration metadataConfiguration) {
         ResteasyClient client = new ResteasyClientBuilder().httpEngine(engine).build();
         ResteasyWebTarget target = client.target(UriBuilder.fromPath(metadataConfiguration.getAuthenticationEndpoint()));
-        AuthenticationRequestService proxy = target.proxy(AuthenticationRequestService.class);
-
-        return proxy;
+        return target.proxy(AuthenticationRequestService.class);
     }
 
     public RegistrationRequestService createRegistrationRequestService(U2fConfiguration metadataConfiguration) {
         ResteasyClient client = new ResteasyClientBuilder().httpEngine(engine).build();
         ResteasyWebTarget target = client.target(UriBuilder.fromPath(metadataConfiguration.getRegistrationEndpoint()));
-        RegistrationRequestService proxy = target.proxy(RegistrationRequestService.class);
-
-        return proxy;
+        return target.proxy(RegistrationRequestService.class);
     }
 }
