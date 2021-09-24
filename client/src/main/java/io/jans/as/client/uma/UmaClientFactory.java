@@ -23,7 +23,7 @@ import org.jboss.resteasy.specimpl.ResteasyUriBuilder;
  */
 public class UmaClientFactory {
 
-    private final static UmaClientFactory instance = new UmaClientFactory();
+    private static final UmaClientFactory instance = new UmaClientFactory();
 
     private final ApacheHttpClient4Engine engine;
 
