@@ -39,7 +39,7 @@ import static org.testng.Assert.fail;
  * @version September 3, 2018
  */
 @Deprecated
-public class TokenEncryptionHttpTest extends BaseTest {
+public class TokenEncryptionHttpDeprecated extends BaseTest {
 
     @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri",
             "RS256_enc_keyId", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})

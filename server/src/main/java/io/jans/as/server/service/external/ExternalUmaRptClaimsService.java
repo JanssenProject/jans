@@ -10,11 +10,9 @@ import java.util.List;
 
 import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.json.JSONObject;
-import org.slf4j.Logger;
 
 import io.jans.as.server.service.external.context.ExternalUmaRptClaimsContext;
 import io.jans.model.custom.script.CustomScriptType;
@@ -29,9 +27,6 @@ import io.jans.service.custom.script.ExternalScriptService;
 @DependsOn("appInitializer")
 @Named
 public class ExternalUmaRptClaimsService extends ExternalScriptService {
-
-    @Inject
-    private Logger log;
 
     public ExternalUmaRptClaimsService() {
         super(CustomScriptType.UMA_RPT_CLAIMS);

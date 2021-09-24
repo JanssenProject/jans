@@ -30,4 +30,6 @@ public class Constants {
     public static final String REDIRECT = "redirect";
     public static final String AUTH_STEP = "auth_step";
     public static final String PROMPT = "prompt";
+
+    public static final String LOG_FOUND = "Found '{}' entries";
 }
