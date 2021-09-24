@@ -19,7 +19,6 @@ import io.jans.as.model.jwt.JwtHeader;
 import io.jans.as.model.jwt.JwtType;
 import io.jans.as.model.util.Base64Util;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -46,8 +45,6 @@ import static io.jans.as.model.jwt.JwtStateClaimName.TARGET_LINK_URI;
  * @version November 20, 2018
  */
 public class JwtState {
-
-    private static final Logger LOG = Logger.getLogger(JwtState.class);
 
     // Header
     private JwtType type;
@@ -430,10 +427,6 @@ public class JwtState {
 
             encodedJwt = jwe.toString();
         } else {
-            if (cryptoProvider == null) {
-                throw new Exception("The Crypto Provider cannot be null.");
-            }
-
             JSONObject headerJsonObject = headerToJSONObject();
             JSONObject payloadJsonObject = payloadToJSONObject();
             String headerString = ClientUtil.toPrettyJson(headerJsonObject);
