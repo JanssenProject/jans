@@ -32,4 +32,7 @@ public class Constants {
     public static final String PROMPT = "prompt";
 
     public static final String LOG_FOUND = "Found '{}' entries";
+
+    public static final String MONTH = "month";
+    public static final String GRANTTYPE = "grantType";
 }
