@@ -8,10 +8,7 @@ package io.jans.as.server.service.external;
 
 import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 import javax.inject.Named;
-
-import org.slf4j.Logger;
 
 import io.jans.as.server.service.external.context.ExternalResourceOwnerPasswordCredentialsContext;
 import io.jans.model.custom.script.CustomScriptType;
@@ -28,9 +25,6 @@ import io.jans.service.custom.script.ExternalScriptService;
 public class ExternalResourceOwnerPasswordCredentialsService extends ExternalScriptService {
 
     private static final long serialVersionUID = -1070021905117551202L;
-
-    @Inject
-    private Logger log;
 
     public ExternalResourceOwnerPasswordCredentialsService() {
         super(CustomScriptType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);

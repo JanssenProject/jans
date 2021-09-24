@@ -15,8 +15,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.slf4j.Logger;
-
 import io.jans.as.server.service.external.context.ConsentGatheringContext;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
@@ -34,9 +32,6 @@ import io.jans.util.StringHelper;
 public class ExternalConsentGatheringService extends ExternalScriptService {
 
 	private static final long serialVersionUID = 1741073794567832914L;
-
-	@Inject
-    private Logger log;
 
     @Inject
     private LookupService lookupService;
