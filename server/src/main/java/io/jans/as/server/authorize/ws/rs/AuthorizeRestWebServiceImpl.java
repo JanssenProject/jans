@@ -6,15 +6,20 @@
 
 package io.jans.as.server.authorize.ws.rs;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.util.RedirectUri;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
+import io.jans.as.model.authorize.AuthorizeRequestParam;
 import io.jans.as.model.authorize.AuthorizeResponseParam;
-import io.jans.as.model.common.*;
+import io.jans.as.model.common.BackchannelTokenDeliveryMode;
+import io.jans.as.model.common.GrantType;
+import io.jans.as.model.common.Prompt;
+import io.jans.as.model.common.ResponseMode;
+import io.jans.as.model.common.ResponseType;
+import io.jans.as.model.common.ScopeConstants;
 import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
@@ -36,8 +41,26 @@ import io.jans.as.server.ciba.CIBAPingCallbackService;
 import io.jans.as.server.ciba.CIBAPushTokenDeliveryService;
 import io.jans.as.server.model.audit.Action;
 import io.jans.as.server.model.audit.OAuth2AuditLog;
-import io.jans.as.server.model.authorize.*;
-import io.jans.as.server.model.common.*;
+import io.jans.as.server.model.authorize.AuthorizeParamsValidator;
+import io.jans.as.server.model.authorize.Claim;
+import io.jans.as.server.model.authorize.IdTokenMember;
+import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
+import io.jans.as.server.model.authorize.ScopeChecker;
+import io.jans.as.server.model.common.AccessToken;
+import io.jans.as.server.model.common.AuthorizationCode;
+import io.jans.as.server.model.common.AuthorizationGrant;
+import io.jans.as.server.model.common.AuthorizationGrantList;
+import io.jans.as.server.model.common.CIBAGrant;
+import io.jans.as.server.model.common.CibaRequestCacheControl;
+import io.jans.as.server.model.common.CibaRequestStatus;
+import io.jans.as.server.model.common.DeviceAuthorizationCacheControl;
+import io.jans.as.server.model.common.DeviceAuthorizationStatus;
+import io.jans.as.server.model.common.DeviceCodeGrant;
+import io.jans.as.server.model.common.ExecutionContext;
+import io.jans.as.server.model.common.IdToken;
+import io.jans.as.server.model.common.RefreshToken;
+import io.jans.as.server.model.common.SessionId;
+import io.jans.as.server.model.common.SessionIdState;
 import io.jans.as.server.model.config.ConfigurationFactory;
 import io.jans.as.server.model.config.Constants;
 import io.jans.as.server.model.exception.AcrChangedException;
@@ -46,7 +69,17 @@ import io.jans.as.server.model.ldap.ClientAuthorization;
 import io.jans.as.server.model.token.JwrService;
 import io.jans.as.server.par.ws.rs.ParService;
 import io.jans.as.server.security.Identity;
-import io.jans.as.server.service.*;
+import io.jans.as.server.service.AttributeService;
+import io.jans.as.server.service.AuthenticationFilterService;
+import io.jans.as.server.service.ClientAuthorizationsService;
+import io.jans.as.server.service.ClientService;
+import io.jans.as.server.service.CookieService;
+import io.jans.as.server.service.DeviceAuthorizationService;
+import io.jans.as.server.service.RedirectUriResponse;
+import io.jans.as.server.service.RequestParameterService;
+import io.jans.as.server.service.ServerCryptoProvider;
+import io.jans.as.server.service.SessionIdService;
+import io.jans.as.server.service.UserService;
 import io.jans.as.server.service.ciba.CibaRequestService;
 import io.jans.as.server.service.external.ExternalPostAuthnService;
 import io.jans.as.server.service.external.ExternalUpdateTokenService;
@@ -78,8 +111,13 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.SecurityContext;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.function.Function;
 
 import static io.jans.as.model.util.StringUtils.implode;
 import static io.jans.as.server.util.ServerUtil.isTrue;
@@ -285,7 +323,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         List<Prompt> prompts = Prompt.fromString(prompt, " ");
         List<String> acrValues = Util.splittedStringAsList(acrValuesStr, " ");
         List<String> amrValues = Util.splittedStringAsList(amrValuesStr, " ");
-        io.jans.as.model.common.ResponseMode responseMode = io.jans.as.model.common.ResponseMode.getByValue(respMode);
+        ResponseMode responseMode = ResponseMode.getByValue(respMode);
 
         SessionId sessionUser = identity.getSessionId();
         User user = sessionIdService.getUser(sessionUser);
@@ -337,7 +375,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                         if (!scopes.contains("openid")) { // spec: Even if a scope parameter is present in the Request Object value, a scope parameter MUST always be passed using the OAuth 2.0 request syntax containing the openid scope value
                             throw new WebApplicationException(Response
                                     .status(Response.Status.BAD_REQUEST)
-                                    .entity(errorResponseFactory.getErrorAsJson(io.jans.as.model.authorize.AuthorizeErrorResponseType.INVALID_SCOPE, state, "scope parameter does not contain openid value which is required."))
+                                    .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_SCOPE, state, "scope parameter does not contain openid value which is required."))
                                     .build());
                         }
                         scopes = scopeChecker.checkScopesPolicy(client, Lists.newArrayList(jwtRequest.getScopes()));
@@ -385,7 +423,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                 String userId = user.getUserId();
 
                                 if (!userId.equalsIgnoreCase(userIdClaimValue)) {
-                                    builder = redirectUriResponse.createErrorBuilder(io.jans.as.model.authorize.AuthorizeErrorResponseType.USER_MISMATCHED);
+                                    builder = redirectUriResponse.createErrorBuilder(AuthorizeErrorResponseType.USER_MISMATCHED);
                                     applicationAuditLogger.sendMessage(oAuth2AuditLog);
                                     return builder.build();
                                 }
@@ -402,7 +440,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             }
             if (!cibaRequestService.hasCibaCompatibility(client) && !isPar) {
                 if (appConfiguration.isFapi() && jwtRequest == null) {
-                    throw redirectUriResponse.createWebException(io.jans.as.model.authorize.AuthorizeErrorResponseType.INVALID_REQUEST);
+                    throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST);
                 }
                 authorizeRestWebServiceValidator.validateRequestJwt(request, requestUri, redirectUriResponse);
             }
@@ -430,7 +468,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             if (!isResponseTypeValid) {
                 throw new WebApplicationException(Response
                         .status(Response.Status.BAD_REQUEST)
-                        .entity(errorResponseFactory.getErrorAsJson(io.jans.as.model.authorize.AuthorizeErrorResponseType.UNSUPPORTED_RESPONSE_TYPE, state, ""))
+                        .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.UNSUPPORTED_RESPONSE_TYPE, state, ""))
                         .build());
             }
 
@@ -438,7 +476,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
             if (user == null) {
                 identity.logout();
-                if (prompts.contains(io.jans.as.model.common.Prompt.NONE)) {
+                if (prompts.contains(Prompt.NONE)) {
                     if (authenticationFilterService.isEnabled()) {
                         Map<String, String> params;
                         if (method.equals(HttpMethod.GET)) {
@@ -461,20 +499,20 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                             sessionIdService.updateSessionId(sessionUser);
                             user = userService.getUserByDn(sessionUser.getUserDn());
                         } else {
-                            builder = redirectUriResponse.createErrorBuilder(io.jans.as.model.authorize.AuthorizeErrorResponseType.LOGIN_REQUIRED);
+                            builder = redirectUriResponse.createErrorBuilder(AuthorizeErrorResponseType.LOGIN_REQUIRED);
                             applicationAuditLogger.sendMessage(oAuth2AuditLog);
                             return builder.build();
                         }
                     } else {
-                        builder = redirectUriResponse.createErrorBuilder(io.jans.as.model.authorize.AuthorizeErrorResponseType.LOGIN_REQUIRED);
+                        builder = redirectUriResponse.createErrorBuilder(AuthorizeErrorResponseType.LOGIN_REQUIRED);
                         applicationAuditLogger.sendMessage(oAuth2AuditLog);
                         return builder.build();
                     }
                 } else {
-                    if (prompts.contains(io.jans.as.model.common.Prompt.LOGIN)) {
+                    if (prompts.contains(Prompt.LOGIN)) {
                         unauthenticateSession(sessionId, httpRequest);
                         sessionId = null;
-                        prompts.remove(io.jans.as.model.common.Prompt.LOGIN);
+                        prompts.remove(Prompt.LOGIN);
                     }
 
                     return redirectToAuthorizationPage(redirectUriResponse.getRedirectUri(), responseTypes, scope, clientId,
@@ -520,7 +558,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             ClientAuthorization clientAuthorization = null;
             boolean clientAuthorizationFetched = false;
             if (scopes.size() > 0) {
-                if (prompts.contains(io.jans.as.model.common.Prompt.CONSENT)) {
+                if (prompts.contains(Prompt.CONSENT)) {
                     return redirectToAuthorizationPage(redirectUriResponse.getRedirectUri(), responseTypes, scope, clientId,
                             redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales,
                             idTokenHint, loginHint, acrValues, amrValues, request, requestUri, originHeaders,
@@ -547,14 +585,14 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 }
             }
 
-            if (prompts.contains(io.jans.as.model.common.Prompt.LOGIN)) {
+            if (prompts.contains(Prompt.LOGIN)) {
 
                 //  workaround for #1030 - remove only authenticated session, for set up acr we set it unauthenticated and then drop in AuthorizeAction
                 if (identity.getSessionId().getState() == SessionIdState.AUTHENTICATED) {
                     unauthenticateSession(sessionId, httpRequest);
                 }
                 sessionId = null;
-                prompts.remove(io.jans.as.model.common.Prompt.LOGIN);
+                prompts.remove(Prompt.LOGIN);
 
                 return redirectToAuthorizationPage(redirectUriResponse.getRedirectUri(), responseTypes, scope, clientId,
                         redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales,
@@ -562,13 +600,13 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                         codeChallenge, codeChallengeMethod, sessionId, claims, authReqId, customParameters, oAuth2AuditLog, httpRequest);
             }
 
-            if (prompts.contains(io.jans.as.model.common.Prompt.CONSENT) || !isTrue(sessionUser.isPermissionGrantedForClient(clientId))) {
+            if (prompts.contains(Prompt.CONSENT) || !isTrue(sessionUser.isPermissionGrantedForClient(clientId))) {
                 if (!clientAuthorizationFetched) {
                     clientAuthorization = clientAuthorizationsService.find(user.getAttribute("inum"), client.getClientId());
                 }
                 clientAuthorizationsService.clearAuthorizations(clientAuthorization, client.getPersistClientAuthorizations());
 
-                prompts.remove(io.jans.as.model.common.Prompt.CONSENT);
+                prompts.remove(Prompt.CONSENT);
 
                 return redirectToAuthorizationPage(redirectUriResponse.getRedirectUri(), responseTypes, scope, clientId,
                         redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales,
@@ -576,7 +614,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                         codeChallenge, codeChallengeMethod, sessionId, claims, authReqId, customParameters, oAuth2AuditLog, httpRequest);
             }
 
-            if (prompts.contains(io.jans.as.model.common.Prompt.SELECT_ACCOUNT)) {
+            if (prompts.contains(Prompt.SELECT_ACCOUNT)) {
                 return redirectToSelectAccountPage(redirectUriResponse.getRedirectUri(), responseTypes, scope, clientId,
                         redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales,
                         idTokenHint, loginHint, acrValues, amrValues, request, requestUri, originHeaders,
@@ -584,7 +622,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             }
 
             AuthorizationCode authorizationCode = null;
-            if (responseTypes.contains(io.jans.as.model.common.ResponseType.CODE)) {
+            if (responseTypes.contains(ResponseType.CODE)) {
                 authorizationGrant = authorizationGrantList.createAuthorizationCodeGrant(user, client,
                         sessionUser.getAuthenticationTime());
                 authorizationGrant.setNonce(nonce);
@@ -606,7 +644,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             }
 
             AccessToken newAccessToken = null;
-            if (responseTypes.contains(io.jans.as.model.common.ResponseType.TOKEN)) {
+            if (responseTypes.contains(ResponseType.TOKEN)) {
                 if (authorizationGrant == null) {
                     authorizationGrant = authorizationGrantList.createImplicitGrant(user, client,
                             sessionUser.getAuthenticationTime());
@@ -627,7 +665,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 redirectUriResponse.getRedirectUri().addResponseParameter(AuthorizeResponseParam.EXPIRES_IN, newAccessToken.getExpiresIn() + "");
             }
 
-            if (responseTypes.contains(io.jans.as.model.common.ResponseType.ID_TOKEN)) {
+            if (responseTypes.contains(ResponseType.ID_TOKEN)) {
                 boolean includeIdTokenClaims = Boolean.TRUE.equals(appConfiguration.getLegacyIdTokenClaims());
                 if (authorizationGrant == null) {
                     includeIdTokenClaims = true;
@@ -743,7 +781,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse.getRedirectUri(), httpRequest);
 
             if (isTrue(appConfiguration.getCustomHeadersWithAuthorizationResponse())) {
-                for (Map.Entry<String, String> entry : customResponseHeaders.entrySet()) {
+                for (Entry<String, String> entry : customResponseHeaders.entrySet()) {
                     builder.header(entry.getKey(), entry.getValue());
                 }
             }
@@ -765,13 +803,13 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
             RedirectUri redirectUriResponse = new RedirectUri(redirectUri, responseTypes, responseMode);
             redirectUriResponse.parseQueryString(errorResponseFactory.getErrorAsQueryString(
-                    io.jans.as.model.authorize.AuthorizeErrorResponseType.SESSION_SELECTION_REQUIRED, state));
+                    AuthorizeErrorResponseType.SESSION_SELECTION_REQUIRED, state));
             redirectUriResponse.addResponseParameter("hint", "Use prompt=login in order to alter existing session.");
             applicationAuditLogger.sendMessage(oAuth2AuditLog);
             return RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest).build();
         } catch (EntryPersistenceException e) { // Invalid clientId
             builder = Response.status(Response.Status.UNAUTHORIZED.getStatusCode())
-                    .entity(errorResponseFactory.getErrorAsJson(io.jans.as.model.authorize.AuthorizeErrorResponseType.UNAUTHORIZED_CLIENT, state, ""))
+                    .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.UNAUTHORIZED_CLIENT, state, ""))
                     .type(MediaType.APPLICATION_JSON_TYPE);
             log.error(e.getMessage(), e);
         } catch (InvalidSessionStateException ex) { // Allow to handle it via GlobalExceptionHandler
@@ -817,7 +855,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         cibaGrant.setTokensDelivered(true);
         cibaGrant.save();
 
-        if (cibaRequest.getClient().getBackchannelTokenDeliveryMode() == io.jans.as.model.common.BackchannelTokenDeliveryMode.PUSH) {
+        if (cibaRequest.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.PUSH) {
             cibaPushTokenDeliveryService.pushTokenDelivery(
                     cibaGrant.getAuthReqId(),
                     cibaGrant.getClient().getBackchannelClientNotificationEndpoint(),
@@ -827,7 +865,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     idToken.getCode(),
                     accessToken.getExpiresIn()
             );
-        } else if (cibaGrant.getClient().getBackchannelTokenDeliveryMode() == io.jans.as.model.common.BackchannelTokenDeliveryMode.PING) {
+        } else if (cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.PING) {
             cibaGrant.setTokensDelivered(false);
             cibaGrant.save();
 
@@ -836,7 +874,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     cibaGrant.getClient().getBackchannelClientNotificationEndpoint(),
                     cibaRequest.getClientNotificationToken()
             );
-        } else if (cibaGrant.getClient().getBackchannelTokenDeliveryMode() == io.jans.as.model.common.BackchannelTokenDeliveryMode.POLL) {
+        } else if (cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.POLL) {
             cibaGrant.setTokensDelivered(false);
             cibaGrant.save();
         }
@@ -849,7 +887,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
         Map<String, String> sessionAttributes = sessionUser.getSessionAttributes();
         String authorizedGrant = sessionUser.getSessionAttributes().get(Constants.AUTHORIZED_GRANT);
-        if (StringHelper.isNotEmpty(authorizedGrant) && io.jans.as.model.common.GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS == GrantType.fromString(authorizedGrant)) {
+        if (StringHelper.isNotEmpty(authorizedGrant) && GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS == GrantType.fromString(authorizedGrant)) {
             // Remove from session to avoid execution on next AuthZ request
             sessionAttributes.remove(Constants.AUTHORIZED_GRANT);
 
@@ -861,18 +899,18 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         }
     }
 
-    private void checkAcrChanged(String acrValuesStr, List<io.jans.as.model.common.Prompt> prompts, SessionId sessionUser) throws AcrChangedException {
+    private void checkAcrChanged(String acrValuesStr, List<Prompt> prompts, SessionId sessionUser) throws AcrChangedException {
         try {
             sessionIdService.assertAuthenticatedSessionCorrespondsToNewRequest(sessionUser, acrValuesStr);
         } catch (AcrChangedException e) { // Acr changed
             //See https://github.com/GluuFederation/oxTrust/issues/797
             if (e.isForceReAuthentication()) {
-                if (!prompts.contains(io.jans.as.model.common.Prompt.LOGIN)) {
+                if (!prompts.contains(Prompt.LOGIN)) {
                     log.info("ACR is changed, adding prompt=login to prompts");
-                    prompts.add(io.jans.as.model.common.Prompt.LOGIN);
+                    prompts.add(Prompt.LOGIN);
 
                     sessionUser.setState(SessionIdState.UNAUTHENTICATED);
-                    sessionUser.getSessionAttributes().put("prompt", io.jans.as.model.util.StringUtils.implode(prompts, " "));
+                    sessionUser.getSessionAttributes().put("prompt", implode(prompts, " "));
                     if (!sessionIdService.persistSessionId(sessionUser)) {
                         log.trace("Unable persist session_id, trying to update it.");
                         sessionIdService.updateSessionId(sessionUser);
@@ -894,9 +932,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         return result;
     }
 
-    private Response redirectToAuthorizationPage(RedirectUri redirectUriResponse, List<io.jans.as.model.common.ResponseType> responseTypes, String scope, String clientId,
-                                                 String redirectUri, String state, io.jans.as.model.common.ResponseMode responseMode, String nonce, String display,
-                                                 List<io.jans.as.model.common.Prompt> prompts, Integer maxAge, List<String> uiLocales, String idTokenHint, String loginHint,
+    private Response redirectToAuthorizationPage(RedirectUri redirectUriResponse, List<ResponseType> responseTypes, String scope, String clientId,
+                                                 String redirectUri, String state, ResponseMode responseMode, String nonce, String display,
+                                                 List<Prompt> prompts, Integer maxAge, List<String> uiLocales, String idTokenHint, String loginHint,
                                                  List<String> acrValues, List<String> amrValues, String request, String requestUri, String originHeaders,
                                                  String codeChallenge, String codeChallengeMethod, String sessionId, String claims, String authReqId,
                                                  Map<String, String> customParameters, OAuth2AuditLog oAuth2AuditLog, HttpServletRequest httpRequest) {
@@ -905,9 +943,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 codeChallenge, codeChallengeMethod, sessionId, claims, authReqId, customParameters, oAuth2AuditLog, httpRequest);
     }
 
-    private Response redirectToSelectAccountPage(RedirectUri redirectUriResponse, List<io.jans.as.model.common.ResponseType> responseTypes, String scope, String clientId,
-                                                 String redirectUri, String state, io.jans.as.model.common.ResponseMode responseMode, String nonce, String display,
-                                                 List<io.jans.as.model.common.Prompt> prompts, Integer maxAge, List<String> uiLocales, String idTokenHint, String loginHint,
+    private Response redirectToSelectAccountPage(RedirectUri redirectUriResponse, List<ResponseType> responseTypes, String scope, String clientId,
+                                                 String redirectUri, String state, ResponseMode responseMode, String nonce, String display,
+                                                 List<Prompt> prompts, Integer maxAge, List<String> uiLocales, String idTokenHint, String loginHint,
                                                  List<String> acrValues, List<String> amrValues, String request, String requestUri, String originHeaders,
                                                  String codeChallenge, String codeChallengeMethod, String sessionId, String claims, String authReqId,
                                                  Map<String, String> customParameters, OAuth2AuditLog oAuth2AuditLog, HttpServletRequest httpRequest) {
@@ -917,9 +955,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     }
 
     private Response redirectTo(String pathToRedirect,
-                                RedirectUri redirectUriResponse, List<io.jans.as.model.common.ResponseType> responseTypes, String scope, String clientId,
-                                String redirectUri, String state, io.jans.as.model.common.ResponseMode responseMode, String nonce, String display,
-                                List<io.jans.as.model.common.Prompt> prompts, Integer maxAge, List<String> uiLocales, String idTokenHint, String loginHint,
+                                RedirectUri redirectUriResponse, List<ResponseType> responseTypes, String scope, String clientId,
+                                String redirectUri, String state, ResponseMode responseMode, String nonce, String display,
+                                List<Prompt> prompts, Integer maxAge, List<String> uiLocales, String idTokenHint, String loginHint,
                                 List<String> acrValues, List<String> amrValues, String request, String requestUri, String originHeaders,
                                 String codeChallenge, String codeChallengeMethod, String sessionId, String claims, String authReqId,
                                 Map<String, String> customParameters, OAuth2AuditLog oAuth2AuditLog, HttpServletRequest httpRequest) {
@@ -927,92 +965,92 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         final URI contextUri = URI.create(appConfiguration.getIssuer()).resolve(servletRequest.getContextPath() + pathToRedirect + сonfigurationFactory.getFacesMapping());
 
         redirectUriResponse.setBaseRedirectUri(contextUri.toString());
-        redirectUriResponse.setResponseMode(io.jans.as.model.common.ResponseMode.QUERY);
+        redirectUriResponse.setResponseMode(ResponseMode.QUERY);
 
         // oAuth parameters
         String responseType = implode(responseTypes, " ");
         if (StringUtils.isNotBlank(responseType)) {
-            redirectUriResponse.addResponseParameter(io.jans.as.model.authorize.AuthorizeRequestParam.RESPONSE_TYPE, responseType);
+            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.RESPONSE_TYPE, responseType);
         }
         if (StringUtils.isNotBlank(scope)) {
-            redirectUriResponse.addResponseParameter(io.jans.as.model.authorize.AuthorizeRequestParam.SCOPE, scope);
+            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.SCOPE, scope);
         }
         if (StringUtils.isNotBlank(clientId)) {
-            redirectUriResponse.addResponseParameter(io.jans.as.model.authorize.AuthorizeRequestParam.CLIENT_ID, clientId);
+            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.CLIENT_ID, clientId);
         }
         if (StringUtils.isNotBlank(redirectUri)) {
-            redirectUriResponse.addResponseParameter(io.jans.as.model.authorize.AuthorizeRequestParam.REDIRECT_URI, redirectUri);
+            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.REDIRECT_URI, redirectUri);
         }
         if (StringUtils.isNotBlank(state)) {
-            redirectUriResponse.addResponseParameter(io.jans.as.model.authorize.AuthorizeRequestParam.STATE, state);
+            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.STATE, state);
         }
         if (responseMode != null) {
-            redirectUriResponse.addResponseParameter(io.jans.as.model.authorize.AuthorizeRequestParam.RESPONSE_MODE, responseMode.getParamName());
+            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.RESPONSE_MODE, responseMode.getParamName());
         }
 
         // OIC parameters
         if (StringUtils.isNotBlank(nonce)) {
-            redirectUriResponse.addResponseParameter(io.jans.as.model.authorize.AuthorizeRequestParam.NONCE, nonce);
+            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.NONCE, nonce);
         }
         if (StringUtils.isNotBlank(display)) {
-            redirectUriResponse.addResponseParameter(io.jans.as.model.authorize.AuthorizeRequestParam.DISPLAY, display);
+            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.DISPLAY, display);
         }
         String prompt = implode(prompts, " ");
         if (StringUtils.isNotBlank(prompt)) {
-            redirectUriResponse.addResponseParameter(io.jans.as.model.authorize.AuthorizeRequestParam.PROMPT, prompt);
+            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.PROMPT, prompt);
         }
         if (maxAge != null) {
-            redirectUriResponse.addResponseParameter(io.jans.as.model.authorize.AuthorizeRequestParam.MAX_AGE, maxAge.toString());
+            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.MAX_AGE, maxAge.toString());
         }
         String uiLocalesStr = implode(uiLocales, " ");
         if (StringUtils.isNotBlank(uiLocalesStr)) {
-            redirectUriResponse.addResponseParameter(io.jans.as.model.authorize.AuthorizeRequestParam.UI_LOCALES, uiLocalesStr);
+            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.UI_LOCALES, uiLocalesStr);
         }
         if (StringUtils.isNotBlank(idTokenHint)) {
-            redirectUriResponse.addResponseParameter(io.jans.as.model.authorize.AuthorizeRequestParam.ID_TOKEN_HINT, idTokenHint);
+            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.ID_TOKEN_HINT, idTokenHint);
         }
         if (StringUtils.isNotBlank(loginHint)) {
-            redirectUriResponse.addResponseParameter(io.jans.as.model.authorize.AuthorizeRequestParam.LOGIN_HINT, loginHint);
+            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.LOGIN_HINT, loginHint);
         }
         String acrValuesStr = implode(acrValues, " ");
         if (StringUtils.isNotBlank(acrValuesStr)) {
-            redirectUriResponse.addResponseParameter(io.jans.as.model.authorize.AuthorizeRequestParam.ACR_VALUES, acrValuesStr);
+            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.ACR_VALUES, acrValuesStr);
         }
         String amrValuesStr = implode(amrValues, " ");
         if (StringUtils.isNotBlank(amrValuesStr)) {
-            redirectUriResponse.addResponseParameter(io.jans.as.model.authorize.AuthorizeRequestParam.AMR_VALUES, amrValuesStr);
+            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.AMR_VALUES, amrValuesStr);
         }
         if (StringUtils.isNotBlank(request)) {
-            redirectUriResponse.addResponseParameter(io.jans.as.model.authorize.AuthorizeRequestParam.REQUEST, request);
+            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.REQUEST, request);
         }
         if (StringUtils.isNotBlank(requestUri)) {
-            redirectUriResponse.addResponseParameter(io.jans.as.model.authorize.AuthorizeRequestParam.REQUEST_URI, requestUri);
+            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.REQUEST_URI, requestUri);
         }
         if (StringUtils.isNotBlank(codeChallenge)) {
-            redirectUriResponse.addResponseParameter(io.jans.as.model.authorize.AuthorizeRequestParam.CODE_CHALLENGE, codeChallenge);
+            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.CODE_CHALLENGE, codeChallenge);
         }
         if (StringUtils.isNotBlank(codeChallengeMethod)) {
-            redirectUriResponse.addResponseParameter(io.jans.as.model.authorize.AuthorizeRequestParam.CODE_CHALLENGE_METHOD, codeChallengeMethod);
+            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.CODE_CHALLENGE_METHOD, codeChallengeMethod);
         }
         if (StringUtils.isNotBlank(sessionId) && isTrue(appConfiguration.getSessionIdRequestParameterEnabled())) {
-            redirectUriResponse.addResponseParameter(io.jans.as.model.authorize.AuthorizeRequestParam.SESSION_ID, sessionId);
+            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.SESSION_ID, sessionId);
         }
         if (StringUtils.isNotBlank(claims)) {
-            redirectUriResponse.addResponseParameter(io.jans.as.model.authorize.AuthorizeRequestParam.CLAIMS, claims);
+            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.CLAIMS, claims);
         }
 
         // CIBA param
         if (StringUtils.isNotBlank(authReqId)) {
-            redirectUriResponse.addResponseParameter(io.jans.as.model.authorize.AuthorizeRequestParam.AUTH_REQ_ID, authReqId);
+            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.AUTH_REQ_ID, authReqId);
         }
 
         // mod_ox param
         if (StringUtils.isNotBlank(originHeaders)) {
-            redirectUriResponse.addResponseParameter(io.jans.as.model.authorize.AuthorizeRequestParam.ORIGIN_HEADERS, originHeaders);
+            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.ORIGIN_HEADERS, originHeaders);
         }
 
         if (customParameters != null && customParameters.size() > 0) {
-            for (Map.Entry<String, String> entry : customParameters.entrySet()) {
+            for (Entry<String, String> entry : customParameters.entrySet()) {
                 redirectUriResponse.addResponseParameter(entry.getKey(), entry.getValue());
             }
         }

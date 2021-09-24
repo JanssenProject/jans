@@ -274,13 +274,6 @@
         </classes>
     </test>
 
-    <!-- Token Encryption test -->
-    <test name="Token Encryption test (HTTP)" enabled="true">
-        <classes>
-            <class name="io.jans.as.client.ws.rs.TokenEncryptionHttpTest"/>
-        </classes>
-    </test>
-
     <!-- User Authentication Filter test -->
     <test name="User Authentication Filter test (HTTP)" enabled="true">
         <classes>

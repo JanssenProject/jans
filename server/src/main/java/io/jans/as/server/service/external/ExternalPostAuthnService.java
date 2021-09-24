@@ -10,10 +10,7 @@ import java.util.List;
 
 import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 import javax.inject.Named;
-
-import org.slf4j.Logger;
 
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.server.service.external.context.ExternalPostAuthnContext;
@@ -29,9 +26,6 @@ import io.jans.service.custom.script.ExternalScriptService;
 @DependsOn("appInitializer")
 @Named
 public class ExternalPostAuthnService  extends ExternalScriptService {
-
-    @Inject
-    private Logger log;
 
     public ExternalPostAuthnService() {
         super(CustomScriptType.POST_AUTHN);
