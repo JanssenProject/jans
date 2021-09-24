@@ -15,6 +15,7 @@ import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.util.AttributeNames;
 import io.jans.configapi.util.Jackson;
+import io.jans.util.StringHelper;
 import io.jans.util.security.StringEncrypter.EncryptionException;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -25,7 +26,10 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.List;
+
 import org.slf4j.Logger;
 
 /**
@@ -75,7 +79,7 @@ public class ClientsResource extends BaseResource {
 
     @POST
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS })
-    public Response createOpenIdConnect(@Valid Client client) throws EncryptionException {
+    public Response createOpenIdConnect(@Valid Client client) throws NoSuchAlgorithmException, EncryptionException {
         log.debug("Client details to be added - client = " + client);
         String inum = client.getClientId();
         if (inum == null || inum.isEmpty() || inum.isBlank()) {
@@ -83,16 +87,19 @@ public class ClientsResource extends BaseResource {
             client.setClientId(inum);
         }
         checkNotNull(client.getClientName(), AttributeNames.DISPLAY_NAME);
-        if (client.getClientSecret() != null) {
-            client.setClientSecret(encryptionService.encrypt(client.getClientSecret()));
+        String clientSecret = client.getClientSecret();
+
+        if (StringHelper.isEmpty(clientSecret)) {
+            clientSecret = generatePassword();
         }
+
+        client.setClientSecret(encryptionService.encrypt(clientSecret));
         client.setDn(clientService.getDnForClient(inum));
         client.setDeletable(client.getClientSecretExpiresAt() != null);
         clientService.addClient(client);
         Client result = clientService.getClientByInum(inum);
-        if (result.getClientSecret() != null) {
-            result.setClientSecret(encryptionService.encrypt(result.getClientSecret()));
-        }
+        result.setClientSecret(encryptionService.decrypt(result.getClientSecret()));
+
         return Response.status(Response.Status.CREATED).entity(result).build();
     }
 
@@ -113,9 +120,8 @@ public class ClientsResource extends BaseResource {
         }
         clientService.updateClient(client);
         Client result = clientService.getClientByInum(existingClient.getClientId());
-        if (result.getClientSecret() != null) {
-            result.setClientSecret(encryptionService.decrypt(client.getClientSecret()));
-        }
+        result.setClientSecret(encryptionService.decrypt(client.getClientSecret()));
+
         return Response.ok(result).build();
     }
 
@@ -145,18 +151,20 @@ public class ClientsResource extends BaseResource {
         return Response.noContent().build();
     }
 
-    private List<Client> getClients(List<Client> clients) throws Exception {
+    private List<Client> getClients(List<Client> clients) throws EncryptionException {
         if (clients != null && !clients.isEmpty()) {
-            for (Client client : clients)
-                if (client.getClientSecret() != null) {
-                    try {
-                        client.setClientSecret(encryptionService.decrypt(client.getClientSecret()));
-                    } catch (EncryptionException exp) {
-                        log.error("Error while client([" + client + "]) secret decryption - " + exp + "!");
-                    }
-                }
+            for (Client client : clients) {
+                client.setClientSecret(encryptionService.decrypt(client.getClientSecret()));
+            }
         }
         return clients;
     }
 
+    private String generatePassword() throws NoSuchAlgorithmException {
+        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz";
+        SecureRandom secureRandom = SecureRandom.getInstanceStrong();
+        return secureRandom.ints(12, 0, characters.length()).mapToObj(characters::charAt)
+                .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append).toString();
+
+    }
 }
