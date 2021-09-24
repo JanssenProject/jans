@@ -2,6 +2,7 @@ package io.jans.as.server.ws.rs.stat;
 
 import io.jans.as.common.model.stat.StatEntry;
 import io.jans.as.model.common.ComponentType;
+import io.jans.as.model.config.Constants;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.token.TokenErrorResponseType;
@@ -79,31 +80,31 @@ public class StatWS {
 
         final Counter usersCounter = Counter.build()
                 .name("monthly_active_users")
-                .labelNames("month")
+                .labelNames(Constants.MONTH)
                 .help("Monthly active users")
                 .register(registry);
 
         final Counter accessTokenCounter = Counter.build()
                 .name(StatService.ACCESS_TOKEN_KEY)
-                .labelNames("month", "grantType")
+                .labelNames(Constants.MONTH, Constants.GRANTTYPE)
                 .help("Access Token")
                 .register(registry);
 
         final Counter idTokenCounter = Counter.build()
                 .name(StatService.ID_TOKEN_KEY)
-                .labelNames("month", "grantType")
+                .labelNames(Constants.MONTH, Constants.GRANTTYPE)
                 .help("Id Token")
                 .register(registry);
 
         final Counter refreshTokenCounter = Counter.build()
                 .name(StatService.REFRESH_TOKEN_KEY)
-                .labelNames("month", "grantType")
+                .labelNames(Constants.MONTH, Constants.GRANTTYPE)
                 .help("Refresh Token")
                 .register(registry);
 
         final Counter umaTokenCounter = Counter.build()
                 .name(StatService.UMA_TOKEN_KEY)
-                .labelNames("month", "grantType")
+                .labelNames(Constants.MONTH, Constants.GRANTTYPE)
                 .help("UMA Token")
                 .register(registry);
 
@@ -159,21 +160,21 @@ public class StatWS {
     }
 
     public Response stat(String authorization, String month, String format) {
-        log.debug("Attempting to request stat, month: " + month + ", format: " + format);
+        log.debug("Attempting to request stat, month: {}, format: {}", month, format);
 
         errorResponseFactory.validateComponentEnabled(ComponentType.STAT);
         validateAuthorization(authorization);
         final List<String> months = validateMonth(month);
 
         if (!allowToRun()) {
-            log.trace("Interval request limit exceeded. Request is rejected. Current interval limit: " + appConfiguration.getStatWebServiceIntervalLimitInSeconds() + " (or 60 seconds if not set).");
+            log.trace("Interval request limit exceeded. Request is rejected. Current interval limit: {} (or 60 seconds if not set).", appConfiguration.getStatWebServiceIntervalLimitInSeconds());
             throw errorResponseFactory.createWebApplicationException(Response.Status.FORBIDDEN, TokenErrorResponseType.ACCESS_DENIED, "Interval request limit exceeded.");
         }
 
         lastProcessedAt = System.currentTimeMillis();
 
         try {
-            log.trace("Recognized months: " + months);
+            log.trace("Recognized months: {}", months);
             final StatResponse statResponse = buildResponse(months);
 
             final String responseAsStr;
@@ -184,10 +185,11 @@ public class StatWS {
             } else {
                 responseAsStr = ServerUtil.asJson(new FlatStatResponse(new ArrayList<>(statResponse.getResponse().values())));
             }
-            log.trace("Stat: " + responseAsStr);
+            log.trace("Stat: {}", responseAsStr);
             return Response.ok().entity(responseAsStr).build();
         } catch (WebApplicationException e) {
-            log.error(e.getMessage(), e);
+            if (log.isErrorEnabled())
+                log.error(e.getMessage(), e);
             throw e;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -213,7 +215,7 @@ public class StatWS {
 
             final List<StatEntry> entries = entryManager.findEntries(monthlyDn, StatEntry.class, Filter.createPresenceFilter("jansId"));
             if (entries == null || entries.isEmpty()) {
-                log.trace("Can't find stat entries for month: " + monthlyDn);
+                log.trace("Can't find stat entries for month: {}", monthlyDn);
                 return null;
             }
 
@@ -232,17 +234,12 @@ public class StatWS {
 
     private void unionTokenMapIntoResponseItem(List<StatEntry> entries, StatResponseItem responseItem) {
         for (StatEntry entry : entries) {
-            for (Map.Entry<String, Map<String, Long>> en : entry.getStat().getTokenCountPerGrantType().entrySet()) {
-                if (en.getValue() == null) {
-                    continue;
-                }
-
+            entry.getStat().getTokenCountPerGrantType().entrySet().stream().filter(en -> en.getValue() != null).forEach(en -> {
                 final Map<String, Long> tokenMap = responseItem.getTokenCountPerGrantType().get(en.getKey());
                 if (tokenMap == null) {
                     responseItem.getTokenCountPerGrantType().put(en.getKey(), en.getValue());
-                    continue;
+                    return;
                 }
-
                 for (Map.Entry<String, Long> tokenEntry : en.getValue().entrySet()) {
                     final Long counter = tokenMap.get(tokenEntry.getKey());
                     if (counter == null) {
@@ -252,7 +249,7 @@ public class StatWS {
 
                     tokenMap.put(tokenEntry.getKey(), counter + tokenEntry.getValue());
                 }
-            }
+            });
         }
     }
 
@@ -272,33 +269,33 @@ public class StatWS {
         try {
             return HLL.fromBytes(Base64.getDecoder().decode(entry.getUserHllData()));
         } catch (Exception e) {
-            log.error("Failed to decode HLL data, entry dn: " + entry.getDn() + ", data: " + entry.getUserHllData());
+            log.error("Failed to decode HLL data, entry dn: {}, data: {}", entry.getDn(), entry.getUserHllData());
             return statService.newHll();
         }
     }
 
     private void validateAuthorization(String authorization) {
-        log.trace("Validating authorization: " + authorization);
+        log.trace("Validating authorization: {}", authorization);
 
         AuthorizationGrant grant = tokenService.getAuthorizationGrant(authorization);
         if (grant == null) {
-            log.trace("Unable to find token by authorization: " + authorization);
+            log.trace("Unable to find token by authorization: {}", authorization);
             throw errorResponseFactory.createWebApplicationException(Response.Status.UNAUTHORIZED, TokenErrorResponseType.ACCESS_DENIED, "Can't find grant for authorization.");
         }
 
         final AbstractToken accessToken = grant.getAccessToken(tokenService.getToken(authorization));
         if (accessToken == null) {
-            log.trace("Unable to find token by authorization: " + authorization);
+            log.trace("Unable to find token by authorization: {}", authorization);
             throw errorResponseFactory.createWebApplicationException(Response.Status.UNAUTHORIZED, TokenErrorResponseType.ACCESS_DENIED, "Can't find access token.");
         }
 
         if (accessToken.isExpired()) {
-            log.trace("Access Token is expired: " + accessToken.getCode());
+            log.trace("Access Token is expired: {}", accessToken.getCode());
             throw errorResponseFactory.createWebApplicationException(Response.Status.UNAUTHORIZED, TokenErrorResponseType.ACCESS_DENIED, "Token expired.");
         }
 
         if (!grant.getScopesAsString().contains(appConfiguration.getStatAuthorizationScope())) {
-            log.trace("Access Token does NOT have '" + appConfiguration.getStatAuthorizationScope() + "' scope which is required to call Statistic Endpoint.");
+            log.trace("Access Token does NOT have '{}' scope which is required to call Statistic Endpoint.", appConfiguration.getStatAuthorizationScope());
             throw errorResponseFactory.createWebApplicationException(Response.Status.UNAUTHORIZED, TokenErrorResponseType.ACCESS_DENIED, appConfiguration.getStatAuthorizationScope() + " scope is required for token.");
         }
     }
