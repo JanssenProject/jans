@@ -2,10 +2,7 @@ package io.jans.as.server.service.external;
 
 import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 import javax.inject.Named;
-
-import org.slf4j.Logger;
 
 import io.jans.as.server.service.external.context.RevokeTokenContext;
 import io.jans.model.custom.script.CustomScriptType;
@@ -20,9 +17,6 @@ import io.jans.service.custom.script.ExternalScriptService;
 @DependsOn("appInitializer")
 @Named
 public class ExternalRevokeTokenService extends ExternalScriptService {
-
-    @Inject
-    private Logger log;
 
     public ExternalRevokeTokenService() {
         super(CustomScriptType.REVOKE_TOKEN);
