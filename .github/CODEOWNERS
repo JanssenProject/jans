@@ -4,5 +4,5 @@
 # These owners will be the default owners for everything in this branch of
 # the repo. Unless a later match takes precedence
 
-* @duttarnab
+* @duttarnab @yuriyz
 /.github/ @moabu @ossdhaval
