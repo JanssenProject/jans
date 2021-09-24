@@ -79,7 +79,7 @@ public class ClientsResource extends BaseResource {
 
     @POST
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS })
-    public Response createOpenIdConnect(@Valid Client client) throws NoSuchAlgorithmException,EncryptionException {
+    public Response createOpenIdConnect(@Valid Client client) throws NoSuchAlgorithmException, EncryptionException {
         log.debug("Client details to be added - client = " + client);
         String inum = client.getClientId();
         if (inum == null || inum.isEmpty() || inum.isBlank()) {
@@ -92,17 +92,14 @@ public class ClientsResource extends BaseResource {
         if (StringHelper.isEmpty(clientSecret)) {
             clientSecret = generatePassword();
         }
-        if (clientSecret != null) {
-            client.setClientSecret(encryptionService.encrypt(clientSecret));
-        }
 
+        client.setClientSecret(encryptionService.encrypt(clientSecret));
         client.setDn(clientService.getDnForClient(inum));
         client.setDeletable(client.getClientSecretExpiresAt() != null);
         clientService.addClient(client);
         Client result = clientService.getClientByInum(inum);
-        if (result.getClientSecret() != null) {
-            result.setClientSecret(encryptionService.decrypt(result.getClientSecret()));
-        }
+        result.setClientSecret(encryptionService.decrypt(result.getClientSecret()));
+
         return Response.status(Response.Status.CREATED).entity(result).build();
     }
 
@@ -123,9 +120,8 @@ public class ClientsResource extends BaseResource {
         }
         clientService.updateClient(client);
         Client result = clientService.getClientByInum(existingClient.getClientId());
-        if (result.getClientSecret() != null) {
-            result.setClientSecret(encryptionService.decrypt(client.getClientSecret()));
-        }
+        result.setClientSecret(encryptionService.decrypt(client.getClientSecret()));
+
         return Response.ok(result).build();
     }
 
@@ -155,16 +151,11 @@ public class ClientsResource extends BaseResource {
         return Response.noContent().build();
     }
 
-    private List<Client> getClients(List<Client> clients) throws Exception {
+    private List<Client> getClients(List<Client> clients) throws EncryptionException {
         if (clients != null && !clients.isEmpty()) {
-            for (Client client : clients)
-                if (client.getClientSecret() != null) {
-                    try {
-                        client.setClientSecret(encryptionService.decrypt(client.getClientSecret()));
-                    } catch (EncryptionException exp) {
-                        log.error("Error while client([" + client + "]) secret decryption - " + exp + "!");
-                    }
-                }
+            for (Client client : clients) {
+                client.setClientSecret(encryptionService.decrypt(client.getClientSecret()));
+            }
         }
         return clients;
     }
