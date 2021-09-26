@@ -69,6 +69,12 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<argLine>-Xms1024m -Xmx2048m -XX:MaxMetaspaceSize=512m -XX:+DisableExplicitGC
+							-Djavax.net.ssl.trustStore=${basedir}/profiles/${cfg}/cacerts
+							-Djavax.net.ssl.trustStorePassword=changeit
+					</argLine>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
