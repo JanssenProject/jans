@@ -13,7 +13,8 @@ import com.fasterxml.jackson.annotation.JsonValue;
  * Identifies the cryptographic algorithm family used with the key.
  *
  * @author Javier Rojas Blum
- * @version June 15, 2016
+ * @author Sergey Manoylo
+ * @version September 13, 2021 
  */
 public enum KeyType {
 
@@ -25,7 +26,25 @@ public enum KeyType {
     /**
      * The RSA algorithm is defined by RFC 3447.
      */
-    RSA("RSA");
+    RSA("RSA"),
+
+    /**
+     * Octet Key Pair.
+     *
+     * A new key type (kty) value "OKP" (Octet Key Pair) is defined for public key
+     * algorithms that use octet strings as private and public keys. Defined by RFC
+     * 8037 (CFRG Elliptic Curve Diffie-Hellman (ECDH) and Signatures in JSON Object
+     * Signing and Encryption (JOSE)).
+     * 
+     * The Edwards Curve Digital Signature Algorithm (EDDSA) is defined by RFC 8032.
+     */
+    OKP("OKP"),
+
+    /**
+     * Octet sequence (used to represent symmetric keys), according to RFC 7518
+     * (JSON Web Algorithms (JWA))
+     */
+    OCT("oct");
 
     private final String paramName;
 
