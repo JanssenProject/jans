@@ -139,7 +139,7 @@ public class KeyGenerator {
                 }
 
                 int expiration = StringHelper.toInt(cmd.getOptionValue(EXPIRATION), 0);
-                int expiration_hours = StringHelper.toInt(cmd.getOptionValue(EXPIRATION_HOURS), 0);
+                int expirationHours = StringHelper.toInt(cmd.getOptionValue(EXPIRATION_HOURS), 0);
 
                 String testPropFile = null;
                 if (cmd.hasOption(TEST_PROP_FILE)) {
@@ -154,7 +154,7 @@ public class KeyGenerator {
                         ElevenCryptoProvider cryptoProvider = new ElevenCryptoProvider(generateKeyEndpoint,
                                 null, null, null, accessToken);
 
-                        generateKeys(cryptoProvider, signatureAlgorithms, encryptionAlgorithms, expiration, expiration_hours, testPropFile);
+                        generateKeys(cryptoProvider, signatureAlgorithms, encryptionAlgorithms, expiration, expirationHours, testPropFile);
                     } catch (Exception e) {
                         log.error("Failed to generate keys", e);
                         help();
@@ -170,7 +170,7 @@ public class KeyGenerator {
                         SecurityProviderUtility.installBCProvider(true);
 
                         AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keystore, keypasswd, dnName);
-                        generateKeys(cryptoProvider, signatureAlgorithms, encryptionAlgorithms, expiration, expiration_hours, testPropFile);
+                        generateKeys(cryptoProvider, signatureAlgorithms, encryptionAlgorithms, expiration, expirationHours, testPropFile);
                     } catch (Exception e) {
                         e.printStackTrace();
                         log.error("Failed to generate keys", e);
@@ -186,12 +186,12 @@ public class KeyGenerator {
         }
 
         private void generateKeys(AbstractCryptoProvider cryptoProvider, List<Algorithm> signatureAlgorithms,
-                                  List<Algorithm> encryptionAlgorithms, int expiration, int expiration_hours, String testPropFile) throws Exception {
+                                  List<Algorithm> encryptionAlgorithms, int expiration, int expirationHours, String testPropFile) throws Exception {
             JSONWebKeySet jwks = new JSONWebKeySet();
 
             Calendar calendar = new GregorianCalendar();
             calendar.add(Calendar.DATE, expiration);
-            calendar.add(Calendar.HOUR, expiration_hours);
+            calendar.add(Calendar.HOUR, expirationHours);
 
             boolean genTestPropFile = (testPropFile != null && testPropFile.length() > 0);
 
