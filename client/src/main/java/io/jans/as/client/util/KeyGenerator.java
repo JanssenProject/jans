@@ -14,7 +14,6 @@ import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.jwk.JSONWebKey;
 import io.jans.as.model.jwk.JSONWebKeySet;
-import io.jans.as.model.jwk.KeyType;
 import io.jans.as.model.jwk.Use;
 import io.jans.as.model.util.SecurityProviderUtility;
 import io.jans.as.model.util.StringUtils;
