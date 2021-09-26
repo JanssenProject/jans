@@ -9,7 +9,7 @@ package io.jans.as.model.crypto;
 import com.google.common.collect.Lists;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.signature.AlgorithmFamily;
-import io.jans.as.model.crypto.signature.ECEllipticCurve;
+import io.jans.as.model.crypto.signature.EllipticEdvardsCurve;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.jwk.JSONWebKey;
@@ -183,7 +183,7 @@ public abstract class AbstractCryptoProvider {
                     new BigInteger(1, Base64Util.base64urldecode(key.getString(JWKParameter.EXPONENT))));
             publicKey = keyFactory.generatePublic(pubKeySpec);
         } else if (AlgorithmFamily.EC.equals(family)) {
-            ECEllipticCurve curve = ECEllipticCurve.fromString(key.optString(JWKParameter.CURVE));
+            EllipticEdvardsCurve curve = EllipticEdvardsCurve.fromString(key.optString(JWKParameter.CURVE));
             AlgorithmParameters parameters = AlgorithmParameters.getInstance(AlgorithmFamily.EC.toString());
             parameters.init(new ECGenParameterSpec(curve.getAlias()));
             ECParameterSpec ecParameters = parameters.getParameterSpec(ECParameterSpec.class);
