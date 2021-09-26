@@ -16,7 +16,7 @@ import io.jans.as.model.jwk.KeyType;
  * @author Sergey Manoylo
  * @version September 24, 2021
  */
-public abstract class JwkUtil {
+public class JwkUtil {
 
 	/**
 	 * 
