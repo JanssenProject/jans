@@ -142,12 +142,6 @@ public class BaseScimWebService {
 
     }
 
-    String getUserInumFromDN(String deviceDn){
-        String baseDn=personService.getDnForPerson(null).replaceAll("\\s*","");
-        deviceDn=deviceDn.replaceAll("\\s*","").replaceAll("," + baseDn, "");
-        return deviceDn.substring(deviceDn.indexOf("inum=")+5);
-    }
-
     int getMaxCount(){
         return appConfiguration.getMaxCount();
     }
@@ -182,17 +176,17 @@ public class BaseScimWebService {
 
     }
 
-    protected void executeDefaultValidation(BaseScimResource resource) throws SCIMException {
+    protected void executeValidation(BaseScimResource resource) throws SCIMException {
         executeValidation(resource, false);
     }
 
-    protected void executeValidation(BaseScimResource resource, boolean skipRequired) throws SCIMException {
+    protected void executeValidation(BaseScimResource resource, boolean laxRequiredness) throws SCIMException {
 
         ResourceValidator rv=new ResourceValidator(resource, extService.getResourceExtensions(resource.getClass()));
-        if (!skipRequired){
-            rv.validateRequiredAttributes();
+        if (!laxRequiredness){
             rv.validateSchemasAttribute();
         }
+        rv.validateRequiredAttributes(laxRequiredness);
         rv.validateValidableAttributes();
         //By section 7 of RFC 7643, we are not forced to constrain attribute values when they have a list of canonical values associated
         //rv.validateCanonicalizedAttributes();

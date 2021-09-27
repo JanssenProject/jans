@@ -161,7 +161,7 @@ public class ExtensionService {
             if (val != null) {
                 Object value;
 
-                //See org.gluu.oxtrust.model.scim2.util.DateUtil.gluuCouchbaseISODate()
+                //See io.jans.scim.model.scim2.util.DateUtil.gluuCouchbaseISODate()
                 if (!ldapBackend && field.getType().equals(AttributeDataType.DATE)) {
                     try {
                         DateTimeFormatter.ISO_DATE_TIME.parse(val);
