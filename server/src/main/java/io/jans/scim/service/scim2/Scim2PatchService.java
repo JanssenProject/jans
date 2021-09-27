@@ -15,17 +15,19 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.lang.model.type.NullType;
 import javax.management.InvalidAttributeValueException;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.apache.commons.lang.StringUtils;
+
 import io.jans.scim.model.exception.SCIMException;
 import io.jans.scim.model.scim2.AttributeDefinition;
 import io.jans.scim.model.scim2.BaseScimResource;
@@ -38,11 +40,9 @@ import io.jans.scim.model.scim2.util.ScimResourceUtil;
 import io.jans.scim.service.antlr.scimFilter.ScimFilterParserService;
 import io.jans.scim.service.antlr.scimFilter.util.FilterUtil;
 import io.jans.util.Pair;
+
 import org.slf4j.Logger;
 
-/**
- * Created by jgomer on 2017-12-17.
- */
 @ApplicationScoped
 public class Scim2PatchService {
 
@@ -55,7 +55,13 @@ public class Scim2PatchService {
     @Inject
     private ExtensionService extService;
 
-    public BaseScimResource applyPatchOperation(BaseScimResource resource, PatchOperation operation) throws Exception {
+    public BaseScimResource applyPatchOperation(BaseScimResource resource, PatchOperation operation)
+            throws Exception {
+        return applyPatchOperation(resource, operation, filter -> false);
+    }
+
+    public BaseScimResource applyPatchOperation(BaseScimResource resource, PatchOperation operation,    
+            Predicate<String> selectionFilterSkipPredicate) throws Exception {
 
         BaseScimResource result = null;
         Map<String, Object> genericMap = null;
@@ -79,8 +85,16 @@ public class Scim2PatchService {
 
                     i = path.lastIndexOf("].");
                     String subAttribute = i == -1 ? "" : path.substring(i + 2);
+
                     //Abort earlier
-                    return applyPatchOperationWithValueFilter(resource, operation, valSelFilter, attribute, subAttribute);
+                    if (selectionFilterSkipPredicate.test(valSelFilter)) {
+                        log.info("Patch operation will be skipped");
+                        return resource;
+                        
+                    } else {
+                        return applyPatchOperationWithValueFilter(resource, operation, 
+                                valSelFilter, attribute, subAttribute);
+                    }
                 }
             }
         }
@@ -214,7 +228,7 @@ public class Scim2PatchService {
                 }
 
                 log.trace("New {} list is:\n{}", attribute, mapper.writeValueAsString(list));
-                resourceAsMap.put(attribute, list.size() == 0 ? null : list);
+                resourceAsMap.put(attribute, list.isEmpty() ? null : list);
                 resource = mapper.convertValue(resourceAsMap, cls);
             } catch (InvalidAttributeValueException ei) {
                 throw ei;
@@ -271,7 +285,7 @@ public class Scim2PatchService {
             Map<String, Object> map = IntrospectUtil.strObjMap(value);
 
             for (String subAttr : map.keySet()) {
-                assertMutability(attribute, list.get(index).get(subAttr), map.get(subAttr), cls);
+                assertMutability(attribute + "." + subAttr, list.get(index).get(subAttr), map.get(subAttr), cls);
             }
             list.set(index, map);
         } else {
@@ -283,7 +297,11 @@ public class Scim2PatchService {
     }
 
     private void assertMutability(String path, Object currentVal, Object value, Class<? extends BaseScimResource> cls) throws InvalidAttributeValueException {
-
+        /*
+        log.debug("path: {}, currentVal null: {}, value null: {}, classes: {} and {}",
+            path, currentVal == null, value == null, currentVal == null ? "": currentVal.getClass().getName(),
+            value == null ? "": value.getClass().getName());
+        */
         Attribute attrAnnot = IntrospectUtil.getFieldAnnotation(path, cls, Attribute.class);
         if (attrAnnot != null) {
             if (attrAnnot.mutability().equals(IMMUTABLE) && currentVal != null && !value.equals(currentVal)) {

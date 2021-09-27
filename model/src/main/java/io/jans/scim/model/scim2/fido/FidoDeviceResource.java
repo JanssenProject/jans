@@ -12,14 +12,11 @@ import io.jans.scim.model.scim2.annotations.*;
 
 /**
  * Fido device SCIM resource. An object of this class is used to represent a device like an U2F security key or a
- * Super Gluu device. See the <i>oxDeviceRegistration</i> objectclass of your Gluu's LDAP.
+ * Super Gluu device. See the <i>jansDeviceRegistration</i> objectclass of your Gluu's LDAP.
  */
 /*
- * Created by jgomer on 2017-10-09.
- * Based on former Val Pecaoco's org.gluu.oxtrust.model.scim2.fido.FidoDevice
- *
  * Notes: Other classes may depend on this one via reflection. Do not add members whose names are already at parent
- * org.gluu.oxtrust.model.scim2.BaseScimResource
+ * io.jans.scim.model.scim2.BaseScimResource
  */
 @Schema(id = "urn:ietf:params:scim:schemas:core:2.0:FidoDevice", name = "FidoDevice", description = "Fido Device")
 public class FidoDeviceResource extends BaseScimResource {

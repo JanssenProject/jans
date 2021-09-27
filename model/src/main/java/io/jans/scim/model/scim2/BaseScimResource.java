@@ -16,8 +16,6 @@ import io.jans.scim.model.scim2.util.ScimResourceUtil;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.*;
 
@@ -25,13 +23,9 @@ import java.util.*;
  * This class represents the root hierarchy of SCIM resources. All of them: user, group, etc. are subclasses of this class.
  */
 /*
- * Created by jgomer on 2017-09-04.
- *
  * Notes: Property names (member names) MUST match exactly as in the spec, so do not change!. Add a new item to the list
- * found in the static block of code at org.gluu.oxtrust.model.scim2.util.IntrospectUtil when a new subclass (SCIM resource)
- * is added. StoreReference annotations are used by LdapFilterListener to convert SCIM filter queries into LDAP queries
- * Adapted from https://github.com/pingidentity/scim2/blob/master/scim2-sdk-common/src/main/java/com/unboundid/scim2/common/BaseScimResource.java
- * Based on former org.gluu.oxtrust.model.scim2.Resource class
+ * found in the static block of code at io.jans.scim.model.scim2.util.IntrospectUtil when a new subclass (SCIM resource)
+ * is added. StoreReference annotations are used to convert SCIM filter queries into database queries 
  */
 public class BaseScimResource {
 

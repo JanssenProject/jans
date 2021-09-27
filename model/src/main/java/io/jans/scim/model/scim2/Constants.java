@@ -100,6 +100,8 @@ public interface Constants {
      */
     String QUERY_PARAM_COUNT = "count";
 
+    String GROUP_OVERHEAD_BYPASS_PARAM = "Group-Overhead-Bypass";
+
     int MAX_COUNT = 200;    //Do not remove till Gluu 4 release. This is used in SCIM-client project
 
     int MAX_BULK_OPERATIONS = 30;
