@@ -54,7 +54,11 @@ public class AuthUtil {
 
     @Inject
     EncryptionService encryptionService;
-
+    
+    public String getAuthOpenidConfigurationUrl() {
+        return this.configurationFactory.getApiAppConfiguration().getAuthOpenidConfigurationUrl();
+    }
+    
     public String getIssuer() {
         return this.configurationService.find().getIssuer();
     }
