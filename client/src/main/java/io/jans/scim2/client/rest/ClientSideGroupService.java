@@ -69,7 +69,7 @@ public interface ClientSideGroupService extends IGroupWebService, CloseableClien
      * operation instead. PUT is intended to do replacements using the (not-null) values supplied in <code>fidoDeviceResource</code>
      * parameter.</p>
      * <p>To learn more about how the update works, read the replacement rules found at method
-     * <code>org.gluu.oxtrust.model.scim2.util.ScimResourceUtil#transferToResourceReplace.</code></p>
+     * <code>io.jans.scim.model.scim2.util.ScimResourceUtil#transferToResourceReplace.</code></p>
      * @param jsonGroup A String with the payload for the operation. It represents an object that contains the data to
      *                  update on a destination resource. There is no need to supply a full resource, just provide one
      *                  with the attributes which are intended to be replaced in the destination.

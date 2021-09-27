@@ -49,6 +49,7 @@ import io.jans.scim.service.Fido2DeviceService;
 import io.jans.scim.service.antlr.scimFilter.ScimFilterParserService;
 import io.jans.scim.service.filter.ProtectedApi;
 import io.jans.scim.service.scim2.interceptor.RefAdjusted;
+import io.jans.scim.service.scim2.UserPersistenceHelper;
 import io.jans.scim.ws.rs.scim2.IFido2DeviceWebService;
 import io.jans.scim.ws.rs.scim2.PATCH;
 import io.jans.orm.PersistenceEntryManager;
@@ -58,11 +59,14 @@ import io.jans.orm.search.filter.Filter;
 
 /**
  * Implementation of /Fido2Devices endpoint. Methods here are intercepted.
- * Filter org.gluu.oxtrust.ws.rs.scim2.AuthorizationProcessingFilter secures invocations
+ * Filter io.jans.scim.service.filter.AuthorizationProcessingFilter secures invocations
  */
 @Named("scim2Fido2DeviceEndpoint")
 @Path("/v2/Fido2Devices")
 public class Fido2DeviceWebService extends BaseScimWebService implements IFido2DeviceWebService {
+
+    @Inject
+    private UserPersistenceHelper userPersistenceHelper;
 
     @Inject
     private Fido2DeviceService fidoDeviceService;
@@ -148,7 +152,8 @@ public class Fido2DeviceWebService extends BaseScimWebService implements IFido2D
             if (response != null) return response;
             
             Fido2DeviceResource fidoResource = new Fido2DeviceResource();
-            transferAttributesToFido2Resource(device, fidoResource, endpointUrl, getUserInumFromDN(device.getDn()));
+            transferAttributesToFido2Resource(device, fidoResource, endpointUrl,
+                userPersistenceHelper.getUserInumFromDN(device.getDn()));
 
             String json = resourceSerializer.serialize(fidoResource, attrsList, excludedAttrsList);
             response = Response.ok(new URI(fidoResource.getMeta().getLocation())).entity(json).build();
@@ -355,7 +360,7 @@ public class Fido2DeviceWebService extends BaseScimWebService implements IFido2D
 
         for (GluuFido2Device device : list.getEntries()){
             Fido2DeviceResource scimDev=new Fido2DeviceResource();
-            transferAttributesToFido2Resource(device, scimDev, endpointUrl, getUserInumFromDN(device.getDn()));
+            transferAttributesToFido2Resource(device, scimDev, endpointUrl, userPersistenceHelper.getUserInumFromDN(device.getDn()));
             resources.add(scimDev);
         }
         log.info ("Found {} matching entries - returning {}", list.getTotalEntriesCount(), list.getEntries().size());

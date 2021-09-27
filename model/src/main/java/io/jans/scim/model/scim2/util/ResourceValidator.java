@@ -56,22 +56,43 @@ public class ResourceValidator {
     /**
      * Inspects the resource passed in the constructor and determines if the attributes annotated as {@link Attribute#isRequired()
      * required} in the <code>Class</code> of the resource were all provided (not null).
-     * <p>If an attribute was marked as "required" and is part of a multi-valued complex attribute, no validation takes
-     * place if the involved list is null or empty.</p>
+     * In lax mode, if an attribute was marked as "required" and is part of a multi-valued complex attribute, no validation takes
+     * place if the involved list is null or empty.
+     * @param laxRequiredness True denotes lax mode, False normal validation mode (strict)
      * @throws SCIMException When a validation does not pass (there is a missing value in a required attribute)
      */
-    public void validateRequiredAttributes() throws SCIMException {
+    public void validateRequiredAttributes(boolean laxRequiredness) throws SCIMException {
 
-        Map<String, List<Method>> map=IntrospectUtil.requiredCoreAttrs.get(resourceClass);
+        Map<String, List<Method>> map= IntrospectUtil.requiredCoreAttrs.get(resourceClass);
+        
+        for (String attributePath : map.keySet()) {
+            boolean checkValues = !laxRequiredness;
+            List<Method> methods = map.get(attributePath);
 
-        for (String attributePath : map.keySet()){
-            log.debug("Validating existence of required attribute '{}'", attributePath);
+            if (laxRequiredness) {
+                int len = methods.size();
 
-            for (Object val : IntrospectUtil.getAttributeValues(resource, map.get(attributePath)))
-                if (val == null) {
-                    log.error("Error getting value of required attribute '{}'", attributePath);
-                    throw new SCIMException(String.format(REQUIRED_ATTR_NOTFOUND, attributePath));
+                if (len > 1) {
+                    Method parentMethod = methods.get(len - 2);
+
+                    if (IntrospectUtil.isCollection(parentMethod.getReturnType())) {
+                        List<Object> items = IntrospectUtil.getAttributeValues(resource, 
+                                methods.subList(0, len - 1));            
+                        checkValues = !items.isEmpty();
+                    }
                 }
+            }
+
+            if (checkValues) {
+                log.debug("Validating existence of required attribute '{}'", attributePath);
+
+                for (Object val : IntrospectUtil.getAttributeValues(resource, methods)) {
+                    if (val == null) {
+                        log.error("Error getting value of required attribute '{}'", attributePath);
+                        throw new SCIMException(String.format(REQUIRED_ATTR_NOTFOUND, attributePath));
+                    }
+                }
+            }
         }
 
     }
@@ -82,7 +103,7 @@ public class ResourceValidator {
      * @throws SCIMException When a validation does not pass (the {@link Validations#apply(Validations, Object) apply}
      * method returns false)
      */
-    public void validateValidableAttributes() throws SCIMException{
+    public void validateValidableAttributes() throws SCIMException {
 
         Map<String, List<Method>> map=IntrospectUtil.validableCoreAttrs.get(resourceClass);
 
@@ -140,7 +161,7 @@ public class ResourceValidator {
     public void validateSchemasAttribute() throws SCIMException {
 
         Set<String> schemaList = new HashSet<>(resource.getSchemas());
-        if (schemaList.size()==0)
+        if (schemaList.isEmpty())
             throw new SCIMException(WRONG_SCHEMAS_ATTR);
 
         Set<String> allSchemas=new HashSet<>();

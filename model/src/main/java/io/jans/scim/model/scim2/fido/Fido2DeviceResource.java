@@ -13,7 +13,7 @@ import io.jans.scim.model.scim2.annotations.Schema;
 import io.jans.scim.model.scim2.annotations.StoreReference;
 
 /**
- * Fido 2.0 device SCIM resource. See the <i>oxFido2RegistrationEntry</i> objectclass of your Gluu's LDAP.
+ * Fido 2.0 device SCIM resource. See the <i>jansFido2RegistrationEntry</i> objectclass of your Gluu's LDAP.
  */
 @Schema(id = "urn:ietf:params:scim:schemas:core:2.0:Fido2Device", name = "Fido2Device", description = "Fido 2 Device")
 public class Fido2DeviceResource extends BaseScimResource {

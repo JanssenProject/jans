@@ -50,7 +50,7 @@ class traversalClass {
     private Map<String, Object> smallerMap(String prefix, Map<String, Object> source, Object destination, boolean replacing){
         Map<String, Object> smallMap = (destination==null) ? new HashMap<>() : IntrospectUtil.strObjMap(destination);
         traverse(prefix, source, smallMap, replacing);
-        return smallMap.size()==0 ? null : smallMap;
+        return smallMap.isEmpty() ? null : smallMap;
     }
 
     void traverse(String prefix, Map<String, Object> source, Map<String, Object> destination, boolean replacing){
@@ -64,10 +64,9 @@ class traversalClass {
                 Attribute attrAnnot=IntrospectUtil.getFieldAnnotation(getNewPrefix(prefix, key), base, Attribute.class);
 
                 if (attrAnnot != null && !attrAnnot.mutability().equals(READ_ONLY)) {
-                    if (value instanceof Map)
+                    if (value instanceof Map) {
                         value = smallerMap(getNewPrefix(prefix, key), IntrospectUtil.strObjMap(value), destValue, replacing);
-                    else
-                    if (attrAnnot.mutability().equals(IMMUTABLE) && destValue != null && !value.equals(destValue)) {
+                    } else if (attrAnnot.mutability().equals(IMMUTABLE) && destValue != null && !value.equals(destValue)) {
                         //provokes no more traversals
                         error = "Invalid value passed for immutable attribute " + key;
                         value = null;
@@ -82,14 +81,14 @@ class traversalClass {
                             if (!replacing) {    //we need to add to the existing collection
                                 if (destValue!=null) {
 
-                                    if (!IntrospectUtil.isCollection(destValue.getClass()))
-                                        log.warn("Value {} was expected to be a collection", destValue);
-                                    else
+                                    if (IntrospectUtil.isCollection(destValue.getClass()))
                                         col.addAll((Collection) destValue);
+                                    else
+                                        log.warn("Value {} was expected to be a collection", destValue);
                                 }
                             }
                             //Do the arrangement so that only one primary="true" can stay in data
-                            value = col.size()==0 ? null : adjustPrimarySubAttributes(col, size);
+                            value = col.isEmpty() ? null : adjustPrimarySubAttributes(col, size);
                         }
                         destination.put(key, value);
                     }
@@ -135,7 +134,7 @@ class traversalClass {
         for (i=0; i<nFreshEntries; i++){
             Object item=array[i];
             if (item!=null && item instanceof Map){
-                Map<String, Object> map=(Map<String, Object>) item;
+                Map<String, Object> map = IntrospectUtil.strObjMap(item);
                 Object primaryObj=map.get("primary");
                 if (primaryObj!=null && primaryObj.toString().equals("true"))
                     break;
@@ -162,7 +161,7 @@ class traversalClass {
 
 /**
  * This class contains methods to facilitate transformation, and manipulation of data inside SCIM resource objects, as
- * well as some miscelaneous routines.
+ * well as some miscellaneous routines.
  */
 /*
  * Created by jgomer on 2017-09-25.
@@ -275,8 +274,8 @@ public class ScimResourceUtil {
      * <code>originalDataSource</code> is retained, that is, the replacement is not partial but thorough: it's not an
      * item-by-item replacement</li>
      * </ul>
-     * @param replacementDataSource Object with the information to be incorporated. Only non-null attributes of this o
-     *                                bject end up being transfered to the result
+     * @param replacementDataSource Object with the information to be incorporated. Only non-null attributes of this
+     *                              object end up being transfered to the result
      * @param originalDataSource Object (SCIM resource) that provides the original data
      * @param extensions A list of <code>Extensions</code> associated to parameter <code>originalDataSource</code>.
      *                   This helps to manipulate the transference of custom attributes values.
@@ -300,7 +299,7 @@ public class ScimResourceUtil {
      * existing collection.</li>
      * </ul>
      * @param replacementDataSource Object with the information to be incorporated. Only non-null attributes of this
-     *                                object end up being transfered to the result
+     *                                object end up being transferred to the result
      * @param originalDataSource Object (SCIM resource) that provides the original data
      * @param extensions A list of <code>Extensions</code> associated to parameter <code>originalDataSource</code>.
      *                   This helps to manipulate the transference of custom attributes values.
@@ -499,6 +498,11 @@ public class ScimResourceUtil {
             }
         }
 
+    }
+
+    public static BaseScimResource clone(BaseScimResource object) {
+        Map<String, Object> map = mapper.convertValue(object, new TypeReference<Map<String,Object>>(){});
+        return mapper.convertValue(map, object.getClass());
     }
 
 }

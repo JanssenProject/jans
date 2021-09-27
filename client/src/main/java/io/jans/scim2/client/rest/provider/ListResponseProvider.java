@@ -33,9 +33,9 @@ import java.nio.charset.Charset;
 import java.util.*;
 
 /**
- * A custom provider for deserialization of {@link io.jans.scim.model.scim2.ListResponse org.gluu.oxtrust.model.scim2.ListResponse}
+ * A custom provider for deserialization of {@link io.jans.scim.model.scim2.ListResponse io.jans.scim.model.scim2.ListResponse}
  * objects.
- * This allows reading (deserializing) subclasses of {@link io.jans.scim.model.scim2.BaseScimResource org.gluu.oxtrust.model.scim2.BaseScimResource}
+ * This allows reading (deserializing) subclasses of {@link io.jans.scim.model.scim2.BaseScimResource io.jans.scim.model.scim2.BaseScimResource}
  * correctly.
  * <p>Developers do not need to manipulate this class for their SCIM applications.</p>
  */

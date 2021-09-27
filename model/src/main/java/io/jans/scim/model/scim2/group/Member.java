@@ -86,9 +86,6 @@ public class Member {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((value == null) ? 0 : value.hashCode());
-        result = prime * result + ((ref == null) ? 0 : ref.hashCode());
-        result = prime * result + ((type == null) ? 0 : type.hashCode());
-        result = prime * result + ((display == null) ? 0 : display.hashCode());
         return result;
     }
 
@@ -109,27 +106,6 @@ public class Member {
                 return false;
             }
         } else if (!value.equals(other.value)) {
-            return false;
-        }
-        if (ref == null) {
-            if (other.ref != null) {
-                return false;
-            }
-        } else if (!ref.equals(other.ref)) {
-            return false;
-        }
-        if (type == null) {
-            if (other.type != null) {
-                return false;
-            }
-        } else if (!type.equals(other.type)) {
-            return false;
-        }
-        if (display == null) {
-            if (other.display != null) {
-                return false;
-            }
-        } else if (!display.equals(other.display)) {
             return false;
         }
         return true;
