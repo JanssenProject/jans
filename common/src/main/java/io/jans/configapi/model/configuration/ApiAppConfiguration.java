@@ -140,7 +140,6 @@ public class ApiAppConfiguration implements Configuration {
         }
     }
 
-
     public List<String> getExclusiveAuthScopes() {
         if (exclusiveAuthScopes == null) {
             exclusiveAuthScopes = new ArrayList<String>();

@@ -50,6 +50,17 @@
 			<groupId>io.jans</groupId>
 			<artifactId>jans-config-api-common</artifactId>
 		</dependency>
+		
+		 <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-scim-model</artifactId>
+            <version>${jans.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-scim-client</artifactId>
+            <version>${jans.version}</version>
+        </dependency>
 
 		<!-- Weld -->
 		<dependency>

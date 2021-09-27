@@ -8,6 +8,7 @@ package io.jans.configapi.rest;
 
 import io.jans.configapi.configuration.ObjectMapperContextResolver;
 import io.jans.configapi.rest.resource.auth.*;
+import io.jans.configapi.rest.resource.scim.*;
 import io.jans.configapi.rest.health.ApiHealthCheck;
 import java.util.HashSet;
 import java.util.Set;
@@ -45,6 +46,9 @@ public class ApiApplication extends Application {
         classes.add(ScopesResource.class);
         classes.add(UmaResourcesResource.class);
         classes.add(StatResource.class);
+        
+        //scim
+        classes.add(ScimResource.class);
 
         return classes;
     }
