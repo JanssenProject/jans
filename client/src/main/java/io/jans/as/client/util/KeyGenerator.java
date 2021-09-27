@@ -17,7 +17,6 @@ import io.jans.as.model.jwk.JSONWebKeySet;
 import io.jans.as.model.jwk.Use;
 import io.jans.as.model.util.SecurityProviderUtility;
 import io.jans.as.model.util.StringUtils;
-import io.jans.as.model.util.JwkUtil;
 import io.jans.util.StringHelper;
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
@@ -205,7 +204,7 @@ public class KeyGenerator {
                 key.setKid(result.getString(KEY_ID));
                 key.setUse(Use.SIGNATURE);
                 key.setAlg(algorithm);
-                key.setKty(JwkUtil.getKeyTypeFromAlgFamily(signatureAlgorithm.getFamily()));
+                key.setKty(signatureAlgorithm.getFamily().getKeyType());
                 key.setExp(result.optLong(EXPIRATION_TIME));
                 key.setCrv(signatureAlgorithm.getCurve());
                 key.setN(result.optString(MODULUS));
@@ -231,7 +230,7 @@ public class KeyGenerator {
                 key.setKid(result.getString(KEY_ID));
                 key.setUse(Use.ENCRYPTION);
                 key.setAlg(algorithm);
-                key.setKty(JwkUtil.getKeyTypeFromAlgFamily(encryptionAlgorithm.getFamily()));
+                key.setKty(encryptionAlgorithm.getFamily().getKeyType());
                 key.setExp(result.optLong(EXPIRATION_TIME));
                 key.setCrv(encryptionAlgorithm.getCurve());
                 key.setN(result.optString(MODULUS));
