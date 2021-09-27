@@ -7,7 +7,6 @@
 package io.jans.scim.service.scim2;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -103,7 +102,7 @@ public class UserPersistenceHelper {
      * @param person The person in question
      * @throws Exception
      */
-    public void removeUserFromGroups(ScimCustomPerson person) throws Exception {
+    public void removeUserFromGroups(ScimCustomPerson person) {
 
         String dn = person.getDn();
         List<String> groups = person.getMemberOf();

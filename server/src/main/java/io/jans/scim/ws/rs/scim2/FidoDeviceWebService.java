@@ -65,9 +65,6 @@ import io.jans.scim.service.scim2.UserPersistenceHelper;
 public class FidoDeviceWebService extends BaseScimWebService implements IFidoDeviceWebService {
 
     @Inject
-    private UserPersistenceHelper userPersistenceHelper;
-
-    @Inject
 	private FidoDeviceService fidoDeviceService;
 
     @Inject
