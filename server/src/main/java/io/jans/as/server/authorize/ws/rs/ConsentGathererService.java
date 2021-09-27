@@ -11,6 +11,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
@@ -24,17 +25,22 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 
 import io.jans.as.common.service.common.UserService;
+import io.jans.as.model.authorize.AuthorizeRequestParam;
 import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.util.StringUtils;
 import io.jans.as.server.i18n.LanguageBean;
+import io.jans.as.server.model.authorize.ScopeChecker;
 import io.jans.as.server.model.common.SessionId;
 import io.jans.as.server.model.config.Constants;
 import io.jans.as.server.service.AuthorizeService;
 import io.jans.as.server.service.ClientService;
+import io.jans.as.server.service.SessionIdService;
 import io.jans.as.server.service.external.ExternalConsentGatheringService;
 import io.jans.as.server.service.external.context.ConsentGatheringContext;
 import io.jans.jsf2.service.FacesService;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.util.StringHelper;
+import io.jans.as.persistence.model.Scope;
 
 /**
  * @author Yuriy Movchan Date: 10/30/2017
@@ -75,6 +81,12 @@ public class ConsentGathererService {
 
     @Inject
     private ClientService clientService;
+
+    @Inject
+    private SessionIdService sessionIdService;
+
+    @Inject
+    private ScopeChecker scopeChecker;
 
     private final Map<String, String> pageAttributes = new HashMap<String, String>();
     private ConsentGatheringContext context;
@@ -298,5 +310,18 @@ public class ConsentGathererService {
 	public ConsentGatheringContext getContext() {
 		return context;
 	}
+
+	public List<Scope> getScopes() {
+    	if (context == null) {
+    		return Collections.emptyList();
+    	}
+
+    	SessionId authenticatedSessionId = sessionIdService.getSessionId();
+        // Fix the list of scopes in the authorization page. oxAuth #739
+        Set<String> grantedScopes = scopeChecker.checkScopesPolicy(context.getClient(), authenticatedSessionId.getSessionAttributes().get(AuthorizeRequestParam.SCOPE));
+        String allowedScope = StringUtils.implode(grantedScopes, " ");
+
+        return authorizeService.getScopes(allowedScope);
+    }
 
 }
