@@ -54,7 +54,6 @@ import io.jans.scim.service.FidoDeviceService;
 import io.jans.scim.service.antlr.scimFilter.ScimFilterParserService;
 import io.jans.scim.service.filter.ProtectedApi;
 import io.jans.scim.service.scim2.interceptor.RefAdjusted;
-import io.jans.scim.service.scim2.UserPersistenceHelper;
 
 /**
  * Implementation of /FidoDevices endpoint. Methods here are intercepted.
