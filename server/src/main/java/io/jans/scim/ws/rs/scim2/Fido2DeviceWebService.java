@@ -66,9 +66,6 @@ import io.jans.orm.search.filter.Filter;
 public class Fido2DeviceWebService extends BaseScimWebService implements IFido2DeviceWebService {
 
     @Inject
-    private UserPersistenceHelper userPersistenceHelper;
-
-    @Inject
     private Fido2DeviceService fidoDeviceService;
 
     @Inject
