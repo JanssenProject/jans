@@ -420,8 +420,7 @@ public class Scim2GroupService implements Serializable {
         String parent = "members";
         String path = parent + ".display";
         
-        return Stream.of(parent, path, prefix + parent, prefix + path)
-                .filter(paths::contains).findFirst().isPresent();
+        return Stream.of(parent, path, prefix + parent, prefix + path).anyMatch(paths::contains);
 
     }
 
