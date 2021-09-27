@@ -33,6 +33,7 @@ tags:
   - name: OAuth - Scopes
   - name: Statistics - User
   - name: Health - Check
+  - name: SCIM - User Management 
 paths:
   /jans-config-api/api/v1/jans-auth-server/config:
     get:
@@ -2349,6 +2350,46 @@ paths:
                 $ref: '#/components/schemas/HealthStatusItem'
         '500':
           description: Internal Server Error
+  /jans-config-api/api/v1/scim/user:
+    get:
+      tags:
+        - SCIM - User Management
+      summary: Gets list of users
+      description: Gets list of users
+      operationId: get-scim-users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: List Users.
+                description: List all Users.
+                items:
+                 $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          description: Internal Server Error
+      security:
+        - oauth2: [https://jans.io/oauth/config/scim/user.readonly]
+      parameters:
+        - schema:
+            type: integer
+            default: 50
+          in: query
+          name: limit
+          description: Search size - max size of the results to return.
+        - schema:
+            type: string
+          in: query
+          name: pattern
+          description: Search pattern.
 components:
   securitySchemes:
     oauth2:
@@ -2398,6 +2439,7 @@ components:
             https://jans.io/oauth/config/database/sql.write: Manage SQL database related information
             https://jans.io/oauth/config/database/sql.delete: Delete SQL database related information
             https://jans.io/oauth/config/stats.readonly: Vew server with basic statistic
+            https://jans.io/oauth/config/scim/user.readonly: View Users related information.
   responses:
     Found:
       description: Resource Found.
@@ -5059,6 +5101,277 @@ components:
         status:
           type: string
           description: Health parameter status
+		  
+    SearchRequest:
+      type: object
+      description: Search Parameters.
+      properties:
+        schemas: 
+          type: array
+          items:
+            type: string
+          description: schema details
+        attributes:
+          type: array
+          items:
+            type: string
+          description: attribute details
+        excludedAttributes:
+          type: array
+          items:
+            type: string
+          description: attribute to be excluded details
+        filter:
+          type: string
+          description: search filter
+        sortBy:
+          type: string
+          description: attribute to be used for sorting
+        sortOrder:
+          type: string
+          description: sorting order
+        startIndex:
+          type: integer
+          format: int32
+          description: result start index
+        count:
+          type: integer
+          format: int32
+          description: total count of records
+   SearchRequest:
+      type: object
+      description: Search Parameters.
+      properties:
+        schemas: 
+          type: array
+          items:
+            type: string
+          description: schema details
+        attributes:
+          type: array
+          items:
+            type: string
+          description: attribute details
+        excludedAttributes:
+          type: array
+          items:
+            type: string
+          description: attribute to be excluded details
+        filter:
+          type: string
+          description: search filter
+        sortBy:
+          type: string
+          description: attribute to be used for sorting
+        sortOrder:
+          type: string
+          description: sorting order
+        startIndex:
+          type: integer
+          format: int32
+          description: result start index
+        count:
+          type: integer
+          format: int32
+          description: total count of records
+   User:
+      type: object
+      description: User details.
+      required:
+        - id
+        - extendedAttrss
+      properties:
+        schemas: 
+          type: array
+          items:
+            type: string
+          description: list of URIs indicating SCIM schema namespaces that define the attributes.
+        id:
+          type: string
+          description: A unique identifier for a SCIM resource as defined by the service provider.
+        externalId:
+          type: string
+          description: A String that is an identifier for the resource as defined by the provisioning client.
+       meta:
+          $ref: '#/components/schemas/Meta'
+          description: A complex attribute containing resource metadata.
+      extendedAttrs:
+          type: object
+          additionalProperties:
+            type: object
+      userName:
+        type: string
+        description: Unique identifier for the User typically used by the user to directly authenticate to the service provider.
+			
+    Meta:
+      type: object
+      description: Represents the common resource attribute "meta" that contains metadata about the resource being described..
+      properties:
+        resourceType: 
+          type: string
+          description: The resource Type.
+        created:
+          type: string
+          description: Date and time the resource was created.
+        lastModified:
+          type: string
+          description: Date and time the resource was last modified.
+        location:
+          type: string
+          description: The location (URI) of the resource.
+        version:
+          type: string
+          description: The version of the resource.
+        name:
+          $ref: '#/components/schemas/Name'
+          description: The components of the user's real name.
+        displayName:
+          type: string
+          description: The name of the User, suitable for display to end-users. The name SHOULD be the full name of the User being described if known.
+        nickName:
+          type: string
+          description: The casual way to address the user in real life, e.g.'Bob' or 'Bobby' instead of 'Robert'. This attribute SHOULD NOT be used to represent a User's username.
+        profileUrl:
+          type: string
+          description: A fully qualified URL to a page representing the User's online profile.
+        title:
+          type: string
+          description: The user's title, such as 'Vice President'.
+        userType:
+          type: string
+          description: Used to identify the organization to user relationship. Typical values used might be 'Contractor', 'Employee', 'Intern', etc.
+        preferredLanguage:
+          type: string
+          description: Indicates the User's preferred written or spoken language.Generally used for selecting alocalized User interface. e.g. 'en_US' specifies the language English and country US.
+        locale:
+          type: string
+          description: Used to indicate the User's default  location for purposes of localizing items such as currency, date time format, numerical representations, etc.
+        timezone:
+          type: string
+          description: The User's time zone in the 'Olson' timezone database format; e.g.,'America/Los_Angeles'
+        active:
+          type: boolean
+          description: A Boolean value indicating the User's status.
+        password:
+          type: string
+          description: The User's clear text password. This attribute is intended to be used as a means to specify an initial password when creating a new User or to reset an existing User's password.
+        emails:
+          type: array
+          items:
+            type: string
+          description: E-mail addresses for the user. The value SHOULD be canonicalized by the Service Provider,e.g. bjensen@example.com instead of bjensen@EXAMPLE.COM. Canonical Type values of work, home, and other.
+        phoneNumbers:
+          type: array
+          items:
+            type: string
+          description: Phone numbers for the User.  The value SHOULD be canonicalized by the Service Provider according to format in RFC3966 e.g., 'tel:+1-201-555-0123'.  Canonical Type values of work, home, mobile,fax, pager and other.
+        ims:
+          type: array
+          items:
+            $ref: '#/components/schemas/InstantMessagingAddress'
+          description: Instant messaging addresses for the User.
+        photos:
+          type: array
+          items:
+            $ref: '#/components/schemas/Photo'
+          description: URIs of photos of the User.
+        addresses:
+          type: array
+          items:
+            $ref: '#/components/schemas/Address'
+          description: Physical mailing addresses for this User.
+        groups:
+          type: array
+          items:
+            $ref: '#/components/schemas/Group'
+          description: A list of groups that the user belongs to, either thorough direct membership, nested groups, or dynamically calculated.
+        entitlements:
+          type: array
+          items:
+            $ref: '#/components/schemas/Entitlement'
+          description: A list of entitlements for the User that represent a thing the User has.
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/Role'
+          description: A list of roles for the User that collectively represent who the User is; e.g., 'Student','Faculty'.
+        x509Certificates:
+          type: array
+          items:
+            $ref: '#/components/schemas/X509Certificate'
+          description: A list of certificates issued to the User.
+        pairwiseIdentifiers:
+          type: array
+          items:
+            type: string
+          description: Pairwise IDs.
+
+    Name:
+      type: object
+      description: Represents the common resource attribute "meta" that contains metadata about the resource being described..
+      properties:
+        resourceType: 
+          type: string
+          description: The resource Type.
+    InstantMessagingAddress:
+      type: object
+      description: Represents the common resource attribute "meta" that contains metadata about the resource being described..
+      properties:
+        resourceType: 
+          type: string
+          description: The resource Type.	
+    Photo:
+      type: object
+      description: Represents the common resource attribute "meta" that contains metadata about the resource being described..
+      properties:
+        resourceType: 
+          type: string
+          description: The resource Type.
+    Address:
+      type: object
+      description: Represents the common resource attribute "meta" that contains metadata about the resource being described..
+      properties:
+        resourceType: 
+          type: string
+          description: The resource Type.	
+    Group:
+      type: object
+      description: Represents the common resource attribute "meta" that contains metadata about the resource being described..
+      properties:
+        resourceType: 
+          type: string
+          description: The resource Type.	
+    Entitlement:
+      type: object
+      description: Represents the common resource attribute "meta" that contains metadata about the resource being described..
+      properties:
+        resourceType: 
+          type: string
+          description: The resource Type.		  
+    Role:
+      type: object
+      description: Represents the common resource attribute "meta" that contains metadata about the resource being described..
+      properties:
+        resourceType: 
+          type: string
+          description: The resource Type.		  
+    X509Certificate:
+      type: object
+      description: Represents the common resource attribute "meta" that contains metadata about the resource being described..
+      properties:
+        resourceType: 
+          type: string
+          description: The resource Type.		  		  
+    X509Certificate:
+      type: object
+      description: Represents the common resource attribute "meta" that contains metadata about the resource being described..
+      properties:
+        resourceType: 
+          type: string
+          description: The resource Type.				  		  	  
+		  
+			  		  
+
 
           
     
