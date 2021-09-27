@@ -49,7 +49,6 @@ import io.jans.scim.service.Fido2DeviceService;
 import io.jans.scim.service.antlr.scimFilter.ScimFilterParserService;
 import io.jans.scim.service.filter.ProtectedApi;
 import io.jans.scim.service.scim2.interceptor.RefAdjusted;
-import io.jans.scim.service.scim2.UserPersistenceHelper;
 import io.jans.scim.ws.rs.scim2.IFido2DeviceWebService;
 import io.jans.scim.ws.rs.scim2.PATCH;
 import io.jans.orm.PersistenceEntryManager;
