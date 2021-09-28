@@ -19,8 +19,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.slf4j.Logger;
-
 import io.jans.as.server.uma.authorization.UmaGatherContext;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
@@ -38,8 +36,6 @@ import io.jans.util.StringHelper;
 @Named
 public class ExternalUmaClaimsGatheringService extends ExternalScriptService {
 
-    @Inject
-    private Logger log;
     @Inject
     private LookupService lookupService;
     @Inject

@@ -15,8 +15,8 @@ import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
  */
 public abstract class AbstractJweEncrypter implements JweEncrypter {
 
-    private KeyEncryptionAlgorithm keyEncryptionAlgorithm;
-    private BlockEncryptionAlgorithm blockEncryptionAlgorithm;
+    private final KeyEncryptionAlgorithm keyEncryptionAlgorithm;
+    private final BlockEncryptionAlgorithm blockEncryptionAlgorithm;
 
     protected AbstractJweEncrypter(KeyEncryptionAlgorithm keyEncryptionAlgorithm, BlockEncryptionAlgorithm blockEncryptionAlgorithm) {
         this.keyEncryptionAlgorithm = keyEncryptionAlgorithm;

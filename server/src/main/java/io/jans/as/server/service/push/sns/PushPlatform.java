@@ -26,6 +26,6 @@ public enum PushPlatform {
 	// Windows Notification Service
 	WNS,
 	// Microsoft Push Notificaion Service
-	MPNS;
+	MPNS
 
 }

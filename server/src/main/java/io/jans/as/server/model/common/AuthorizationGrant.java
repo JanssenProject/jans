@@ -6,7 +6,6 @@
 
 package io.jans.as.server.model.common;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import io.jans.as.common.claims.Audience;
 import io.jans.as.common.model.common.User;
@@ -43,6 +42,7 @@ import javax.inject.Inject;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 
 /**
  * Base class for all the types of authorization grant.
@@ -147,12 +147,12 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
 
     private void saveImpl() {
         String grantId = getGrantId();
-        if (grantId != null && StringUtils.isNotBlank(grantId)) {
+        if (StringUtils.isNotBlank(grantId)) {
             final List<TokenLdap> grants = grantService.getGrantsByGrantId(grantId);
             if (grants != null && !grants.isEmpty()) {
                 for (TokenLdap t : grants) {
                     initTokenFromGrant(t);
-                    log.debug("Saving grant: " + grantId + ", code_challenge: " + getCodeChallenge());
+                    log.debug("Saving grant: {}, code_challenge: {}", grantId, getCodeChallenge());
                     grantService.mergeSilently(t);
                 }
             }

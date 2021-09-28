@@ -6,22 +6,20 @@
 
 package io.jans.as.model.uma.persistence;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import javax.validation.constraints.NotNull;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.Lists;
-
 import io.jans.as.model.util.Util;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DN;
 import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.Expiration;
 import io.jans.orm.annotation.ObjectClass;
+
+import javax.validation.constraints.NotNull;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Resource description.
@@ -149,13 +147,13 @@ public class UmaResource implements Serializable {
 
     public List<String> getClients() {
         if (clients == null) {
-            clients = new ArrayList<String>();
+            clients = new ArrayList<>();
         }
         return clients;
     }
 
-    public void setClients(List<String> p_clients) {
-        clients = p_clients;
+    public void setClients(List<String> clients) {
+        this.clients = clients;
     }
 
     public String getType() {

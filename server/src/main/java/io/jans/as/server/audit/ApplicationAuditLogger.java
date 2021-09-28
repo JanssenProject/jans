@@ -26,7 +26,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.jms.JMSException;
 import javax.jms.MessageProducer;
 import javax.jms.QueueConnection;
 import javax.jms.QueueSession;
@@ -135,7 +134,7 @@ public class ApplicationAuditLogger {
             return false;
         }
 
-        this.jmsBrokerURISet = new HashSet<String>(jmsBrokerURISet);
+        this.jmsBrokerURISet = new HashSet<>(jmsBrokerURISet);
         this.jmsUserName = appConfiguration.getJmsUserName();
         this.jmsPassword = appConfiguration.getJmsPassword();
 
@@ -164,37 +163,20 @@ public class ApplicationAuditLogger {
     }
 
     private boolean loggingThroughJMS(OAuth2AuditLog oAuth2AuditLog) {
-        QueueConnection connection = null;
-        try {
-            connection = pooledConnectionFactory.createQueueConnection();
+        try (QueueConnection connection = pooledConnectionFactory.createQueueConnection()) {
             connection.start();
 
-            QueueSession session = connection.createQueueSession(transacted, ACK_MODE);
-            MessageProducer producer = session.createProducer(session.createQueue(CLIENT_QUEUE_NAME));
-
-            TextMessage txtMessage = session.createTextMessage();
-            txtMessage.setText(ServerUtil.asPrettyJson(oAuth2AuditLog));
-            producer.send(txtMessage);
+            try (QueueSession session = connection.createQueueSession(transacted, ACK_MODE);
+                 MessageProducer producer = session.createProducer(session.createQueue(CLIENT_QUEUE_NAME))) {
+                TextMessage txtMessage = session.createTextMessage();
+                txtMessage.setText(ServerUtil.asPrettyJson(oAuth2AuditLog));
+                producer.send(txtMessage);
+            }
 
             return true;
-        } catch (JMSException e) {
-            log.error("Can't send message", e);
-        } catch (IOException e) {
-            log.error("Can't serialize the audit log", e);
         } catch (Exception e) {
             log.error("Can't send message, please check your activeMQ configuration.", e);
-        } finally {
-            if (connection == null) {
-                return false;
-            }
-
-            try {
-                connection.close();
-            } catch (JMSException e) {
-                log.error("Can't close connection.");
-            }
         }
-
         return false;
     }
 

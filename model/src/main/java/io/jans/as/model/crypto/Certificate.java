@@ -6,21 +6,19 @@
 
 package io.jans.as.model.crypto;
 
-import java.io.IOException;
-import java.io.StringWriter;
-import java.security.cert.X509Certificate;
-import java.util.Arrays;
-
+import io.jans.as.model.crypto.signature.ECDSAPublicKey;
+import io.jans.as.model.crypto.signature.RSAPublicKey;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.util.StringUtils;
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
 import org.bouncycastle.jcajce.provider.asymmetric.rsa.BCRSAPublicKey;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.json.JSONArray;
 import org.json.JSONException;
 
-import io.jans.as.model.crypto.signature.ECDSAPublicKey;
-import io.jans.as.model.crypto.signature.RSAPublicKey;
-import io.jans.as.model.crypto.signature.SignatureAlgorithm;
-import io.jans.as.model.util.StringUtils;
+import java.io.StringWriter;
+import java.security.cert.X509Certificate;
+import java.util.Arrays;
 
 /**
  * @author Javier Rojas Blum
@@ -28,8 +26,8 @@ import io.jans.as.model.util.StringUtils;
  */
 public class Certificate {
 
-    private SignatureAlgorithm signatureAlgorithm;
-    private X509Certificate x509Certificate;
+    private final SignatureAlgorithm signatureAlgorithm;
+    private final X509Certificate x509Certificate;
 
     public Certificate(SignatureAlgorithm signatureAlgorithm, X509Certificate x509Certificate) {
         this.signatureAlgorithm = signatureAlgorithm;
@@ -92,16 +90,11 @@ public class Certificate {
     public String toString() {
         try {
             StringWriter stringWriter = new StringWriter();
-            JcaPEMWriter pemWriter = new JcaPEMWriter(stringWriter);
-            try {
+            try (JcaPEMWriter pemWriter = new JcaPEMWriter(stringWriter)) {
                 pemWriter.writeObject(x509Certificate);
                 pemWriter.flush();
                 return stringWriter.toString();
-            } finally {
-                pemWriter.close();
             }
-        } catch (IOException e) {
-            return StringUtils.EMPTY_STRING;
         } catch (Exception e) {
             return StringUtils.EMPTY_STRING;
         }

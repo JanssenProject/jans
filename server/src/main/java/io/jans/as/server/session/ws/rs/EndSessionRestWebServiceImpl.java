@@ -185,7 +185,8 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
             }
             throw e;
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+            if (log.isErrorEnabled())
+                log.error(e.getMessage(), e);
             throw new WebApplicationException(Response
                     .status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity(errorResponseFactory.getJsonErrorResponse(GluuErrorResponseType.SERVER_ERROR))
@@ -218,7 +219,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         }
     }
 
-    private void backChannel(Map<String, Client> backchannelUris, AuthorizationGrant grant, SessionId session) throws InterruptedException {
+    private void backChannel(Map<String, Client> backchannelUris, AuthorizationGrant grant, SessionId session) {
         if (backchannelUris.isEmpty()) {
             return;
         }
@@ -240,8 +241,18 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
             executorService.execute(() -> EndSessionUtils.callRpWithBackchannelUri(entry.getKey(), logoutToken.toString()));
         }
         executorService.shutdown();
-        executorService.awaitTermination(30, TimeUnit.SECONDS);
-        log.trace("Finished backchannel calls.");
+        try {
+            executorService.awaitTermination(30, TimeUnit.SECONDS);
+            log.trace("Finished backchannel calls.");
+        } catch (InterruptedException e) {
+            log.error("Thread is interrupted.");
+            Thread.currentThread().interrupt();
+            throw new WebApplicationException(Response
+                    .status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(errorResponseFactory.getJsonErrorResponse(GluuErrorResponseType.SERVER_ERROR))
+                    .build());
+        }
+
     }
 
     private Response createErrorResponse(String postLogoutRedirectUri, EndSessionErrorResponseType error, String reason) {

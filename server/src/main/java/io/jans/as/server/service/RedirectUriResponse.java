@@ -6,17 +6,16 @@
 
 package io.jans.as.server.service;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.jans.as.common.util.RedirectUri;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.error.IErrorType;
 import io.jans.as.server.util.RedirectUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -25,10 +24,10 @@ public class RedirectUriResponse {
 
     private final static Logger log = LoggerFactory.getLogger(RedirectUriResponse.class);
 
-    private RedirectUri redirectUri;
+    private final RedirectUri redirectUri;
     private String state;
-    private HttpServletRequest httpRequest;
-    private ErrorResponseFactory errorFactory;
+    private final HttpServletRequest httpRequest;
+    private final ErrorResponseFactory errorFactory;
     private boolean fapiCompatible = false;
 
     public RedirectUriResponse(RedirectUri redirectUri, String state, HttpServletRequest httpRequest, ErrorResponseFactory errorFactory) {

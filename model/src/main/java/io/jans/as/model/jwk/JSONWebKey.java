@@ -6,7 +6,7 @@
 
 package io.jans.as.model.jwk;
 
-import io.jans.as.model.crypto.signature.ECEllipticCurve;
+import io.jans.as.model.crypto.signature.EllipticEdvardsCurve;
 import io.jans.as.model.util.StringUtils;
 import io.jans.as.model.util.Util;
 import org.json.JSONException;
@@ -25,7 +25,7 @@ public class JSONWebKey implements Comparable<JSONWebKey> {
     private Use use;
     private Algorithm alg;
     private Long exp;
-    private ECEllipticCurve crv;
+    private EllipticEdvardsCurve crv;
     private List<String> x5c;
 
     /**
@@ -107,7 +107,7 @@ public class JSONWebKey implements Comparable<JSONWebKey> {
      *
      * @return The curve member that identifies the cryptographic curve used with the key.
      */
-    public ECEllipticCurve getCrv() {
+    public EllipticEdvardsCurve getCrv() {
         return crv;
     }
 
@@ -116,7 +116,7 @@ public class JSONWebKey implements Comparable<JSONWebKey> {
      *
      * @param crv The curve member that identifies the cryptographic curve used with the key.
      */
-    public void setCrv(ECEllipticCurve crv) {
+    public void setCrv(EllipticEdvardsCurve crv) {
         this.crv = crv;
     }
 
@@ -250,7 +250,7 @@ public class JSONWebKey implements Comparable<JSONWebKey> {
         if (jwkJSONObject.has(JWKParameter.EXPIRATION_TIME)) {
             jwk.setExp(jwkJSONObject.optLong(JWKParameter.EXPIRATION_TIME));
         }
-        jwk.setCrv(ECEllipticCurve.fromString(jwkJSONObject.optString(JWKParameter.CURVE)));
+        jwk.setCrv(EllipticEdvardsCurve.fromString(jwkJSONObject.optString(JWKParameter.CURVE)));
         if (jwkJSONObject.has(JWKParameter.MODULUS)) {
             jwk.setN(jwkJSONObject.optString(JWKParameter.MODULUS));
         }

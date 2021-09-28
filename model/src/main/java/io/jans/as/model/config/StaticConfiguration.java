@@ -6,14 +6,13 @@
 
 package io.jans.as.model.config;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import io.jans.as.model.configuration.Configuration;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-import io.jans.as.model.configuration.Configuration;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -32,7 +31,7 @@ public class StaticConfiguration implements Configuration {
         return baseDn;
     }
 
-    public void setBaseDn(BaseDnConfiguration p_baseDn) {
-        baseDn = p_baseDn;
+    public void setBaseDn(BaseDnConfiguration baseDn) {
+        this.baseDn = baseDn;
     }
 }

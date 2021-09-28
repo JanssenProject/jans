@@ -6,22 +6,21 @@
 
 package io.jans.as.server.uma.ws.rs;
 
-import static org.testng.Assert.assertTrue;
-
-import java.net.URI;
-import java.util.Arrays;
-import java.util.List;
-
-import org.jboss.arquillian.test.api.ArquillianResource;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-
 import io.jans.as.model.uma.UmaResource;
 import io.jans.as.model.uma.UmaResourceResponse;
 import io.jans.as.model.uma.UmaTestUtil;
 import io.jans.as.model.uma.wrapper.Token;
 import io.jans.as.server.BaseTest;
 import io.jans.as.server.model.uma.TUma;
+import org.jboss.arquillian.test.api.ArquillianResource;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
+import java.net.URI;
+import java.util.Arrays;
+import java.util.List;
+
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -44,7 +43,7 @@ public class UmaRegisterResourceWSTest extends BaseTest {
 			String umaPatClientId, String umaPatClientSecret, String umaRedirectUri, String umaRegisterResourcePath) {
 		pat = TUma.requestPat(url, authorizePath, tokenPath, umaUserId, umaUserSecret, umaPatClientId,
 				umaPatClientSecret, umaRedirectUri);
-		this.umaRegisterResourcePath = umaRegisterResourcePath;
+		UmaRegisterResourceWSTest.umaRegisterResourcePath = umaRegisterResourcePath;
 	}
 
 	@Test(dependsOnMethods = { "init" })

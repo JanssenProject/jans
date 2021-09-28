@@ -6,10 +6,10 @@
 
 package io.jans.as.model.uma;
 
+import io.jans.as.model.error.IErrorType;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import io.jans.as.model.error.IErrorType;
 
 /**
  * Error codes for UMA error responses.
@@ -171,7 +171,7 @@ public enum UmaErrorResponseType implements IErrorType {
 	 */
 	NEED_CLAIMS("need_claims");
 
-    private static Map<String, UmaErrorResponseType> lookup = new HashMap<String, UmaErrorResponseType>();
+    private static final Map<String, UmaErrorResponseType> lookup = new HashMap<>();
 
     static {
         for (UmaErrorResponseType enumType : values()) {
@@ -181,7 +181,7 @@ public enum UmaErrorResponseType implements IErrorType {
 
 	private final String paramName;
 
-	private UmaErrorResponseType(String paramName) {
+	UmaErrorResponseType(String paramName) {
 		this.paramName = paramName;
 	}
 

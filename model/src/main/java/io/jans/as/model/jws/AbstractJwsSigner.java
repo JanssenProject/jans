@@ -6,16 +6,15 @@
 
 package io.jans.as.model.jws;
 
-import java.security.SignatureException;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
-
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.util.HashUtil;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+
+import java.security.SignatureException;
 
 /**
  * @author Javier Rojas Blum
@@ -25,9 +24,9 @@ public abstract class AbstractJwsSigner implements JwsSigner {
 
     private static final Logger LOG = Logger.getLogger(AbstractJwsSigner.class);
 
-    private SignatureAlgorithm signatureAlgorithm;
+    private final SignatureAlgorithm signatureAlgorithm;
 
-    public AbstractJwsSigner(SignatureAlgorithm signatureAlgorithm) {
+    protected AbstractJwsSigner(SignatureAlgorithm signatureAlgorithm) {
         this.signatureAlgorithm = signatureAlgorithm;
     }
 
@@ -50,12 +49,6 @@ public abstract class AbstractJwsSigner implements JwsSigner {
             String signature = jwt.getEncodedSignature();
 
             return validateSignature(signingInput, signature);
-        } catch (InvalidJwtException e) {
-            LOG.error(e.getMessage(), e);
-            return false;
-        } catch (SignatureException e) {
-            LOG.error(e.getMessage(), e);
-            return false;
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
             return false;

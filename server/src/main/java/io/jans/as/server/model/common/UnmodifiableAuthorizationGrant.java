@@ -6,19 +6,18 @@
 
 package io.jans.as.server.model.common;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-
-import com.google.common.base.Function;
-
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.token.JsonWebResponse;
 import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.server.model.ldap.TokenLdap;
+
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+import java.util.function.Function;
 
 /**
  * Gives ability to use authorization grant in read-only mode.

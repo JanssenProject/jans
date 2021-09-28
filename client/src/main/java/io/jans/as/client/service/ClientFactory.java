@@ -6,8 +6,6 @@
 
 package io.jans.as.client.service;
 
-import javax.ws.rs.core.UriBuilder;
-
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -21,6 +19,8 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
 
+import javax.ws.rs.core.UriBuilder;
+
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 26/06/2013
@@ -30,7 +30,7 @@ public class ClientFactory {
 
     private final static ClientFactory INSTANCE = new ClientFactory();
 
-    private ApacheHttpClient4Engine engine;
+    private final ApacheHttpClient4Engine engine;
 
     private ClientFactory() {
         this.engine = createEngine();
@@ -58,12 +58,10 @@ public class ClientFactory {
         return ProxyFactory.create(IntrospectionService.class, p_url, clientExecutor);
     }
     
-    public IntrospectionService createIntrospectionService(String p_url, ClientHttpEngine engine) {
+    public IntrospectionService createIntrospectionService(String url, ClientHttpEngine engine) {
         ResteasyClient client = new ResteasyClientBuilder().httpEngine(engine).build();
-        ResteasyWebTarget target = client.target(UriBuilder.fromPath(p_url));
-        IntrospectionService proxy = target.proxy(IntrospectionService.class);
-
-        return proxy;
+        ResteasyWebTarget target = client.target(UriBuilder.fromPath(url));
+        return target.proxy(IntrospectionService.class);
     }
 
     public ApacheHttpClient4Engine createEngine() {
