@@ -92,7 +92,7 @@ public class StatTimer {
         if (interval == 0)
             interval = TIMER_INTERVAL_IN_SECONDS;
 
-        long timerInterval = interval * 1000;
+        long timerInterval = interval * 1000L;
 
         long timeDiff = System.currentTimeMillis() - this.lastFinishedTime;
 

@@ -195,17 +195,14 @@ public class CRLCertificateVerifier implements CertificateVerifier {
 
     }
 
-    private X509CRL getCrl(String url) throws CertificateException, CRLException, NoSuchProviderException, NoSuchParserException, StreamParsingException,
-            IOException, ExecutionException {
+    private X509CRL getCrl(String url) throws ExecutionException {
         if (!(url.startsWith("http://") || url.startsWith("https://"))) {
             log.error("It's possible to download CRL via HTTP and HTTPS only");
             return null;
         }
 
         String cacheKey = url.toLowerCase();
-        X509CRL crl = crlCache.get(cacheKey);
-
-        return crl;
+        return crlCache.get(cacheKey);
     }
 
     public X509CRL requestCRL(String url) throws IOException, CertificateException, CRLException {
@@ -244,9 +241,7 @@ public class CRLCertificateVerifier implements CertificateVerifier {
         ASN1OctetString octetString = (ASN1OctetString) (new ASN1InputStream(new ByteArrayInputStream(crlNumberExtensionValue)).readObject());
         byte[] octets = octetString.getOctets();
         ASN1Integer integer = (ASN1Integer) new ASN1InputStream(octets).readObject();
-        BigInteger crlNumber = integer.getPositiveValue();
-
-        return crlNumber;
+        return integer.getPositiveValue();
     }
 
     public String getCrlUri(X509Certificate certificate) throws IOException {

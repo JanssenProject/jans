@@ -15,7 +15,7 @@ public enum ClientAssertionType {
 
     private final String paramName;
 
-    private ClientAssertionType(String paramName) {
+    ClientAssertionType(String paramName) {
         this.paramName = paramName;
     }
 

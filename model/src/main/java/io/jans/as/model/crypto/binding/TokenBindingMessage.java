@@ -6,17 +6,14 @@
 
 package io.jans.as.model.crypto.binding;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import com.google.common.base.Function;
+import io.jans.as.model.token.JsonWebResponse;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.google.common.base.Function;
-
-import io.jans.as.model.token.JsonWebResponse;
+import java.util.List;
 
 /**
  * <pre>
@@ -31,7 +28,7 @@ public class TokenBindingMessage {
 
     private static final Logger log = Logger.getLogger(TokenBindingMessage.class);
 
-    private List<TokenBinding> tokenBindings = new ArrayList<TokenBinding>();
+    private final List<TokenBinding> tokenBindings;
 
     public TokenBindingMessage(String base64urlencoded) throws TokenBindingParseException {
         this(TokenBindingMessageParser.parseBase64UrlEncoded(base64urlencoded));
@@ -67,12 +64,9 @@ public class TokenBindingMessage {
         if (tokenBindingMessagePresent && rpKeyPresent) {
             TokenBindingMessage message = new TokenBindingMessage(tokenBindingMessageAsString);
             final TokenBinding referredBinding = message.getFirstTokenBindingByType(TokenBindingType.REFERRED_TOKEN_BINDING);
-            return new Function<JsonWebResponse, Void>() {
-                @Override
-                public Void apply(JsonWebResponse jsonWebResponse) {
-                    setCnfClaim(jsonWebResponse, referredBinding.getTokenBindingID().sha256base64url(), rpTokenBindingMessageHashClaimKey);
-                    return null;
-                }
+            return jsonWebResponse -> {
+                setCnfClaim(jsonWebResponse, referredBinding.getTokenBindingID().sha256base64url(), rpTokenBindingMessageHashClaimKey);
+                return null;
             };
         }
         return null;

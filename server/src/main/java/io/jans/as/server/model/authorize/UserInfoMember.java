@@ -6,26 +6,25 @@
 
 package io.jans.as.server.model.authorize;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
+import io.jans.as.model.util.Util;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import io.jans.as.model.util.Util;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * @author Javier Rojas Blum Date: 03.09.2012
  */
 public class UserInfoMember {
 
-    private List<Claim> claims;
-    private List<String> preferredLocales;
+    private final List<Claim> claims;
+    private final List<String> preferredLocales;
 
     public UserInfoMember(JSONObject jsonObject) throws JSONException {
-        claims = new ArrayList<Claim>();
+        claims = new ArrayList<>();
 
         for (Iterator<String> iterator = jsonObject.keys(); iterator.hasNext(); ) {
             String claimName = iterator.next();

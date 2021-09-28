@@ -36,16 +36,11 @@ public class SectorIdentifier extends HttpServlet {
     @Inject
     private SectorIdentifierService sectorIdentifierService;
 
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        final HttpServletRequest httpRequest = request;
-        final HttpServletResponse httpResponse = response;
-
-        httpResponse.setContentType("application/json");
-        PrintWriter out = httpResponse.getWriter();
-        try {
-            String urlPath = httpRequest.getPathInfo();
-            String jsId = urlPath.substring(urlPath.lastIndexOf("/") + 1, urlPath.length());
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response) {
+        response.setContentType("application/json");
+        try (PrintWriter out = response.getWriter()) {
+            String urlPath = request.getPathInfo();
+            String jsId = urlPath.substring(urlPath.lastIndexOf("/") + 1);
 
             io.jans.as.persistence.model.SectorIdentifier sectorIdentifier = sectorIdentifierService.getSectorIdentifierById(jsId);
 
@@ -58,8 +53,6 @@ public class SectorIdentifier extends HttpServlet {
             out.println(jsonArray.toString(4).replace("\\/", "/"));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-        } finally {
-            out.close();
         }
     }
 

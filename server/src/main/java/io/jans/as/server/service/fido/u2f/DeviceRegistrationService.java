@@ -179,9 +179,7 @@ public class DeviceRegistrationService {
 		final String u2fBaseDn = getDnForOneStepU2fDevice(null);
 		Filter expirationFilter = Filter.createLessOrEqualFilter("creationDate", ldapEntryManager.encodeTime(u2fBaseDn, expirationDate));
 
-		List<DeviceRegistration> deviceRegistrations = ldapEntryManager.findEntries(u2fBaseDn, DeviceRegistration.class, expirationFilter, SearchScope.SUB, returnAttributes, batchOperation, 0, sizeLimit, chunkSize);
-
-		return deviceRegistrations;
+		return ldapEntryManager.findEntries(u2fBaseDn, DeviceRegistration.class, expirationFilter, SearchScope.SUB, returnAttributes, batchOperation, 0, sizeLimit, chunkSize);
 	}
 
     public int getCountDeviceRegistrations(String appId) {

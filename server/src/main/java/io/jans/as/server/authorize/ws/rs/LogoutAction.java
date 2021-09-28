@@ -6,25 +6,9 @@
 
 package io.jans.as.server.authorize.ws.rs;
 
-import java.io.IOException;
-import java.util.Map;
-
-import javax.enterprise.context.RequestScoped;
-import javax.faces.application.FacesMessage;
-import javax.faces.context.FacesContext;
-import javax.inject.Inject;
-import javax.inject.Named;
-
-import org.slf4j.Logger;
-
-import com.fasterxml.jackson.core.JsonGenerationException;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.session.EndSessionRequestParam;
 import io.jans.as.model.util.Base64Util;
-import io.jans.as.model.util.Util;
 import io.jans.as.server.i18n.LanguageBean;
 import io.jans.as.server.model.common.AuthorizationGrant;
 import io.jans.as.server.model.common.AuthorizationGrantList;
@@ -35,6 +19,17 @@ import io.jans.jsf2.service.FacesService;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.service.JsonService;
 import io.jans.util.StringHelper;
+import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+
+import javax.enterprise.context.RequestScoped;
+import javax.faces.application.FacesMessage;
+import javax.faces.context.FacesContext;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 /**
  * @author Javier Rojas Blum
@@ -180,7 +175,11 @@ public class LogoutAction {
             } else {
                 boolean scriptExternalLogoutResult = externalAuthenticationService.executeExternalLogout(customScriptConfiguration, null);
                 ExternalLogoutResult externalLogoutResult = scriptExternalLogoutResult ? ExternalLogoutResult.SUCCESS : ExternalLogoutResult.FAILURE;
-                log.debug("Logout result is '{}' for session '{}', userDn: '{}'", externalLogoutResult, sessionId.getId(), sessionId.getUserDn());
+
+
+                final String userDn = sessionId != null ? sessionId.getUserDn() : "";
+                final String sId = sessionId != null ? sessionId.getId() : "";
+                log.debug("Logout result is '{}' for session '{}', userDn: '{}'", externalLogoutResult, sId, userDn);
 
                 int apiVersion = externalAuthenticationService.executeExternalGetApiVersion(customScriptConfiguration);
                 if (apiVersion < 3) {
@@ -190,7 +189,7 @@ public class LogoutAction {
 
                 log.trace("According to API version script supports logout redirects");
                 String logoutExternalUrl = externalAuthenticationService.getLogoutExternalUrl(customScriptConfiguration, null);
-                log.debug("External logout result is '{}' for user '{}'", logoutExternalUrl, sessionId.getUserDn());
+                log.debug("External logout result is '{}' for user '{}'", logoutExternalUrl, userDn);
 
                 if (StringHelper.isEmpty(logoutExternalUrl)) {
                     return externalLogoutResult;
@@ -214,13 +213,16 @@ public class LogoutAction {
         }
     }
 
-    private void storeLogoutParametersInSession(SessionId sessionId) throws JsonGenerationException, JsonMappingException, IOException {
+    private void storeLogoutParametersInSession(@Nullable SessionId sessionId) throws IOException {
+        if (sessionId == null) {
+            return;
+        }
         Map<String, String> sessionAttributes = sessionId.getSessionAttributes();
 
         LogoutParameters logoutParameters = new LogoutParameters(idTokenHint, postLogoutRedirectUri);
 
         String logoutParametersJson = jsonService.objectToJson(logoutParameters);
-        String logoutParametersBase64 = Base64Util.base64urlencode(logoutParametersJson.getBytes(Util.UTF8_STRING_ENCODING));
+        String logoutParametersBase64 = Base64Util.base64urlencode(logoutParametersJson.getBytes(StandardCharsets.UTF_8));
 
         sessionAttributes.put(EXTERNAL_LOGOUT, Boolean.toString(true));
         sessionAttributes.put(EXTERNAL_LOGOUT_DATA, logoutParametersBase64);
@@ -228,7 +230,7 @@ public class LogoutAction {
         sessionIdService.updateSessionId(sessionId);
     }
 
-    private boolean restoreLogoutParametersFromSession(SessionId sessionId) throws IllegalArgumentException, JsonParseException, JsonMappingException, IOException {
+    private boolean restoreLogoutParametersFromSession(SessionId sessionId) throws IllegalArgumentException, IOException {
         if (sessionId == null) {
             return false;
         }
@@ -242,7 +244,7 @@ public class LogoutAction {
         }
 
         String logoutParametersBase64 = sessionAttributes.get(EXTERNAL_LOGOUT_DATA);
-        String logoutParametersJson = new String(Base64Util.base64urldecode(logoutParametersBase64), Util.UTF8_STRING_ENCODING);
+        String logoutParametersJson = new String(Base64Util.base64urldecode(logoutParametersBase64), StandardCharsets.UTF_8);
 
         LogoutParameters logoutParameters = jsonService.jsonToObject(logoutParametersJson, LogoutParameters.class);
 

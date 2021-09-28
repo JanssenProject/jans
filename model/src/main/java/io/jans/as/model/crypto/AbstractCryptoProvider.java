@@ -9,7 +9,7 @@ package io.jans.as.model.crypto;
 import com.google.common.collect.Lists;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.signature.AlgorithmFamily;
-import io.jans.as.model.crypto.signature.ECEllipticCurve;
+import io.jans.as.model.crypto.signature.EllipticEdvardsCurve;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.jwk.JSONWebKey;
@@ -27,15 +27,19 @@ import org.json.JSONObject;
 import java.math.BigInteger;
 import java.security.AlgorithmParameters;
 import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.spec.ECGenParameterSpec;
 import java.security.spec.ECParameterSpec;
 import java.security.spec.ECPoint;
 import java.security.spec.ECPublicKeySpec;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.InvalidParameterSpecException;
 import java.security.spec.RSAPublicKeySpec;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -107,9 +111,9 @@ public abstract class AbstractCryptoProvider {
     }
 
     public static JSONObject generateJwks(AbstractCryptoProvider cryptoProvider, AppConfiguration configuration) {
-        GregorianCalendar expirationTime = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
-        expirationTime.add(GregorianCalendar.HOUR, configuration.getKeyRegenerationInterval());
-        expirationTime.add(GregorianCalendar.SECOND, configuration.getIdTokenLifetime());
+        Calendar expirationTime = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+        expirationTime.add(Calendar.HOUR, configuration.getKeyRegenerationInterval());
+        expirationTime.add(Calendar.SECOND, configuration.getIdTokenLifetime());
 
         long expiration = expirationTime.getTimeInMillis();
 
@@ -157,7 +161,7 @@ public abstract class AbstractCryptoProvider {
         return null;
     }
 
-    private PublicKey processKey(Algorithm requestedAlgorithm, String alias, JSONObject key) throws Exception {
+    private PublicKey processKey(Algorithm requestedAlgorithm, String alias, JSONObject key) throws InvalidKeySpecException, NoSuchAlgorithmException, InvalidParameterSpecException {
         PublicKey publicKey = null;
         AlgorithmFamily family = null;
         if (key.has(JWKParameter.ALGORITHM)) {
@@ -179,7 +183,7 @@ public abstract class AbstractCryptoProvider {
                     new BigInteger(1, Base64Util.base64urldecode(key.getString(JWKParameter.EXPONENT))));
             publicKey = keyFactory.generatePublic(pubKeySpec);
         } else if (AlgorithmFamily.EC.equals(family)) {
-            ECEllipticCurve curve = ECEllipticCurve.fromString(key.optString(JWKParameter.CURVE));
+            EllipticEdvardsCurve curve = EllipticEdvardsCurve.fromString(key.optString(JWKParameter.CURVE));
             AlgorithmParameters parameters = AlgorithmParameters.getInstance(AlgorithmFamily.EC.toString());
             parameters.init(new ECGenParameterSpec(curve.getAlias()));
             ECParameterSpec ecParameters = parameters.getParameterSpec(ECParameterSpec.class);
@@ -205,33 +209,26 @@ public abstract class AbstractCryptoProvider {
             Date today = new Date();
             long expiresInDays = (expirationTime - today.getTime()) / (24 * 60 * 60 * 1000);
             if (expiresInDays == 0) {
-                LOG.warn("\nWARNING! Key will expire soon, alias: " + alias
-                        + "\n\tExpires On: " + ft.format(expirationDate)
-                        + "\n\tToday's Date: " + ft.format(today));
+                LOG.warn(String.format("%nWARNING! Key will expire soon, alias: %s%nExpires On: %s%nToday's Date: %s",
+                        alias, ft.format(expirationDate), ft.format(today)));
                 return;
             }
             if (expiresInDays < 0) {
-                LOG.warn("\nWARNING! Expired Key is used, alias: " + alias
-                        + "\n\tExpires On: " + ft.format(expirationDate)
-                        + "\n\tToday's Date: " + ft.format(today));
+                LOG.warn(String.format("%nWARNING! Expired Key is used, alias: %s%nExpires On: %s%nToday's Date: %s",
+                        alias, ft.format(expirationDate), ft.format(today)));
                 return;
             }
 
             // re-generation interval is unknown, therefore we default to 30 days period warning
             if (keyRegenerationIntervalInDays <= 0 && expiresInDays < 30) {
-                LOG.warn("\nWARNING! Key with alias: " + alias
-                        + "\n\tExpires In: " + expiresInDays + " days"
-                        + "\n\tExpires On: " + ft.format(expirationDate)
-                        + "\n\tToday's Date: " + ft.format(today));
+                LOG.warn(String.format("%nWARNING! Key with alias: %s%nExpires In: %s days%nExpires On: %s%nToday's Date: %s",
+                        alias, expiresInDays, ft.format(expirationDate), ft.format(today)));
                 return;
             }
 
             if (expiresInDays < keyRegenerationIntervalInDays) {
-                LOG.warn("\nWARNING! Key with alias: " + alias
-                        + "\n\tExpires In: " + expiresInDays + " days"
-                        + "\n\tExpires On: " + ft.format(expirationDate)
-                        + "\n\tKey Regeneration In: " + keyRegenerationIntervalInDays + " days"
-                        + "\n\tToday's Date: " + ft.format(today));
+                LOG.warn(String.format("%nWARNING! Key with alias: %s%nExpires In: %s days%nExpires On: %s%nKey Regeneration In: %s days%nToday's Date: %s",
+                        alias, expiresInDays, ft.format(expirationDate), keyRegenerationIntervalInDays, ft.format(today)));
             }
         } catch (Exception e) {
             LOG.error("Failed to check key expiration.", e);

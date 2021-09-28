@@ -6,11 +6,6 @@
 
 package io.jans.as.model.crypto;
 
-import java.security.PrivateKey;
-
-import org.apache.http.HttpStatus;
-import org.json.JSONObject;
-
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.jwk.Use;
@@ -26,6 +21,10 @@ import io.jans.eleven.client.SignResponse;
 import io.jans.eleven.client.VerifySignatureClient;
 import io.jans.eleven.client.VerifySignatureRequest;
 import io.jans.eleven.client.VerifySignatureResponse;
+import org.apache.http.HttpStatus;
+import org.json.JSONObject;
+
+import java.security.PrivateKey;
 
 /**
  * @author Javier Rojas Blum
@@ -33,11 +32,11 @@ import io.jans.eleven.client.VerifySignatureResponse;
  */
 public class ElevenCryptoProvider extends AbstractCryptoProvider {
 
-    private String generateKeyEndpoint;
-    private String signEndpoint;
-    private String verifySignatureEndpoint;
-    private String deleteKeyEndpoint;
-    private String accessToken;
+    private final String generateKeyEndpoint;
+    private final String signEndpoint;
+    private final String verifySignatureEndpoint;
+    private final String deleteKeyEndpoint;
+    private final String accessToken;
 
     public ElevenCryptoProvider(String generateKeyEndpoint, String signEndpoint, String verifySignatureEndpoint,
                                 String deleteKeyEndpoint, String accessToken) {

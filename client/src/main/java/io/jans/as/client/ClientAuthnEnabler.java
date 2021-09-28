@@ -20,7 +20,7 @@ public class ClientAuthnEnabler {
 
     private static final Logger LOG = Logger.getLogger(ClientAuthnEnabler.class);
 
-    private ClientRequest clientRequest;
+    private final ClientRequest clientRequest;
 
     public ClientAuthnEnabler(ClientRequest clientRequest) {
         this.clientRequest = clientRequest;

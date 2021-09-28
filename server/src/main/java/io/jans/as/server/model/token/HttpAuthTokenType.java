@@ -14,7 +14,7 @@ public enum  HttpAuthTokenType {
 
     private final String prefix;
 
-    private HttpAuthTokenType(String prefix) {
+    HttpAuthTokenType(String prefix) {
         this.prefix = prefix;
     }
 

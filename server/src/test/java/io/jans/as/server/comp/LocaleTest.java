@@ -6,24 +6,23 @@
 
 package io.jans.as.server.comp;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
+import io.jans.as.server.BaseTest;
+import io.jans.util.ilocale.LocaleUtil;
+import org.testng.annotations.Test;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
-import org.testng.annotations.Test;
-
-import io.jans.as.server.BaseTest;
-import io.jans.util.ilocale.LocaleUtil;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 
 /**
  * @author Javier Rojas Blum Date: 11.27.2013
  */
 public class LocaleTest extends BaseTest {
 
-	private List<Locale> availableLocales = Arrays.asList(new Locale("fr", "CA"), new Locale("fr"),
+	private final List<Locale> availableLocales = Arrays.asList(new Locale("fr", "CA"), new Locale("fr"),
 			new Locale("en", "CA"), new Locale("en", "US"), new Locale("en", "GB"), new Locale("es", "BO"),
 			new Locale("en"), new Locale("zh", "HK"), new Locale("ja"));
 

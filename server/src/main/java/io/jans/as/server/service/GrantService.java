@@ -6,8 +6,6 @@
 
 package io.jans.as.server.service;
 
-import static io.jans.as.server.util.ServerUtil.isTrue;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -33,7 +31,6 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.search.filter.Filter;
 import io.jans.service.CacheService;
 import io.jans.service.cache.CacheConfiguration;
-import io.jans.service.cache.CacheProviderType;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -89,31 +86,13 @@ public class GrantService {
         }
     }
 
-    private boolean shouldPutInCache(TokenType tokenType) {
-        if (cacheConfiguration.getCacheProviderType() == CacheProviderType.NATIVE_PERSISTENCE) {
-            return false;
-        }
-
-        switch (tokenType) {
-            case ID_TOKEN:
-                if (!isTrue(appConfiguration.getPersistIdTokenInLdap())) {
-                    return true;
-                }
-            case REFRESH_TOKEN:
-                if (!isTrue(appConfiguration.getPersistRefreshTokenInLdap())) {
-                    return true;
-                }
-        }
-        return false;
-    }
-
     public void persist(TokenLdap token) {
         persistenceEntryManager.persist(token);
     }
 
-    public void remove(TokenLdap p_token) {
-        persistenceEntryManager.remove(p_token);
-        log.trace("Removed token from LDAP, code: " + p_token.getTokenCode());
+    public void remove(TokenLdap token) {
+        persistenceEntryManager.remove(token);
+        log.trace("Removed token from LDAP, code: {}", token.getTokenCode());
     }
 
     public void removeSilently(TokenLdap token) {
@@ -177,28 +156,27 @@ public class GrantService {
         }
     }
 
-    private TokenLdap load(String p_tokenDn) {
+    private TokenLdap load(String tokenDn) {
         try {
-            final TokenLdap entry = persistenceEntryManager.find(TokenLdap.class, p_tokenDn);
-            return entry;
+            return persistenceEntryManager.find(TokenLdap.class, tokenDn);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
         return null;
     }
 
-    public List<TokenLdap> getGrantsByGrantId(String p_grantId) {
+    public List<TokenLdap> getGrantsByGrantId(String grantId) {
         try {
-            return persistenceEntryManager.findEntries(tokenBaseDn(), TokenLdap.class, Filter.createEqualityFilter("grtId", p_grantId));
+            return persistenceEntryManager.findEntries(tokenBaseDn(), TokenLdap.class, Filter.createEqualityFilter("grtId", grantId));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
         return Collections.emptyList();
     }
 
-    public List<TokenLdap> getGrantsByAuthorizationCode(String p_authorizationCode) {
+    public List<TokenLdap> getGrantsByAuthorizationCode(String authorizationCode) {
         try {
-            return persistenceEntryManager.findEntries(tokenBaseDn(), TokenLdap.class, Filter.createEqualityFilter("authzCode", TokenHashUtil.hash(p_authorizationCode)));
+            return persistenceEntryManager.findEntries(tokenBaseDn(), TokenLdap.class, Filter.createEqualityFilter("authzCode", TokenHashUtil.hash(authorizationCode)));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }

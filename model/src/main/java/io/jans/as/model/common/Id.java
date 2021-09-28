@@ -6,14 +6,12 @@
 
 package io.jans.as.model.common;
 
-import java.io.Serializable;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-
-import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
+import java.io.Serializable;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -28,8 +26,8 @@ public class Id implements Serializable {
     public Id() {
     }
 
-    public Id(String p_id) {
-        id = p_id;
+    public Id(String id) {
+        this.id = id;
     }
 
     @JsonProperty(value = "id")
@@ -38,16 +36,14 @@ public class Id implements Serializable {
         return id;
     }
 
-    public void setId(String p_id) {
-        id = p_id;
+    public void setId(String id) {
+        this.id = id;
     }
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("Id");
-        sb.append("{id='").append(id).append('\'');
-        sb.append('}');
-        return sb.toString();
+        return "Id" +
+                "{id='" + id + '\'' +
+                '}';
     }
 }

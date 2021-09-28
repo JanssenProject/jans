@@ -224,22 +224,18 @@ public class ClientService {
 	public List<Client> getAllClients(String[] returnAttributes) {
 		String baseDn = staticConfiguration.getBaseDn().getClients();
 
-		List<Client> result = ldapEntryManager.findEntries(baseDn, Client.class, null, returnAttributes);
-
-		return result;
+		return ldapEntryManager.findEntries(baseDn, Client.class, null, returnAttributes);
 	}
 
 	public List<Client> getAllClients(String[] returnAttributes, int size) {
 		String baseDn = staticConfiguration.getBaseDn().getClients();
 
-		List<Client> result = ldapEntryManager.findEntries(baseDn, Client.class, null, returnAttributes, size);
-
-		return result;
+		return ldapEntryManager.findEntries(baseDn, Client.class, null, returnAttributes, size);
 	}
 
-	public String buildClientDn(String p_clientId) {
+	public String buildClientDn(String clientId) {
 		final StringBuilder dn = new StringBuilder();
-		dn.append(String.format("inum=%s,", p_clientId));
+		dn.append(String.format("inum=%s,", clientId));
 		dn.append(staticConfiguration.getBaseDn().getClients()); // ou=clients,o=jans
 		return dn.toString();
 	}

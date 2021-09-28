@@ -6,23 +6,18 @@
 
 package io.jans.as.model.jwk;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
-
-import io.jans.as.model.crypto.signature.AlgorithmFamily;
-import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Javier Rojas Blum
@@ -36,7 +31,7 @@ public class JSONWebKeySet {
     private List<JSONWebKey> keys;
 
     public JSONWebKeySet() {
-        keys = new ArrayList<JSONWebKey>();
+        keys = new ArrayList<>();
     }
 
     public List<JSONWebKey> getKeys() {
@@ -57,39 +52,17 @@ public class JSONWebKeySet {
         return null;
     }
 
-    @Deprecated
-    public List<JSONWebKey> getKeys(SignatureAlgorithm algorithm) {
-        List<JSONWebKey> jsonWebKeys = new ArrayList<JSONWebKey>();
-
-        if (AlgorithmFamily.RSA.equals(algorithm.getFamily())) {
-            for (JSONWebKey jsonWebKey : keys) {
-                if (jsonWebKey.getAlg().equals(algorithm.getName())) {
-                    jsonWebKeys.add(jsonWebKey);
-                }
-            }
-        } else if (AlgorithmFamily.EC.equals(algorithm.getFamily())) {
-            for (JSONWebKey jsonWebKey : keys) {
-                if (jsonWebKey.getAlg().equals(algorithm.getName())) {
-                    jsonWebKeys.add(jsonWebKey);
-                }
-            }
-        }
-
-        Collections.sort(jsonWebKeys);
-        return jsonWebKeys;
-    }
-
     public JSONObject toJSONObject() throws JSONException {
         JSONObject jsonObj = new JSONObject();
-        JSONArray keys = new JSONArray();
+        JSONArray keyArray = new JSONArray();
 
         for (JSONWebKey key : getKeys()) {
             JSONObject jsonKeyValue = key.toJSONObject();
 
-            keys.put(jsonKeyValue);
+            keyArray.put(jsonKeyValue);
         }
 
-        jsonObj.put(JWKParameter.JSON_WEB_KEY_SET, keys);
+        jsonObj.put(JWKParameter.JSON_WEB_KEY_SET, keyArray);
         return jsonObj;
     }
 
@@ -98,13 +71,10 @@ public class JSONWebKeySet {
         try {
             JSONObject jwks = toJSONObject();
             return toPrettyJson(jwks).replace("\\/", "/");
-        } catch (JSONException e) {
+        } catch (JSONException | JsonProcessingException e) {
             LOG.error(e.getMessage(), e);
-            return null;
-        } catch (JsonProcessingException e) {
-            LOG.error(e.getMessage(), e);
-            return null;
-		}
+            return "";
+        }
     }
 
 	private String toPrettyJson(JSONObject jsonObject) throws JsonProcessingException {

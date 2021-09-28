@@ -6,15 +6,14 @@
 
 package io.jans.as.model.error;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.HasParamName;
 import io.jans.orm.annotation.AttributeEnum;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This class define error handling methods
@@ -30,7 +29,7 @@ public enum ErrorHandlingMethod implements HasParamName, AttributeEnum {
 
     private final String value;
 
-    private static Map<String, ErrorHandlingMethod> mapByValues = new HashMap<String, ErrorHandlingMethod>();
+    private static final Map<String, ErrorHandlingMethod> mapByValues = new HashMap<>();
 
     static {
         for (ErrorHandlingMethod enumType : values()) {
@@ -38,11 +37,11 @@ public enum ErrorHandlingMethod implements HasParamName, AttributeEnum {
         }
     }
 
-    private ErrorHandlingMethod() {
+    ErrorHandlingMethod() {
         this.value = null;
     }
 
-    private ErrorHandlingMethod(String value) {
+    ErrorHandlingMethod(String value) {
         this.value = value;
     }
 
@@ -84,7 +83,7 @@ public enum ErrorHandlingMethod implements HasParamName, AttributeEnum {
 
     public static String[] toStringArray(ErrorHandlingMethod[] grantTypes) {
         if (grantTypes == null) {
-            return null;
+            return new String[0];
         }
 
         String[] resultGrantTypes = new String[grantTypes.length];

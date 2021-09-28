@@ -22,9 +22,9 @@ import io.jans.as.server.model.common.IAuthorizationGrant;
 
 public class DynamicScopeExternalContext extends ExternalScriptContext {
 
-	private List<Scope> dynamicScopes;
-	private JsonWebResponse jsonWebResponse;
-	private IAuthorizationGrant authorizationGrant;
+	private final List<Scope> dynamicScopes;
+	private final JsonWebResponse jsonWebResponse;
+	private final IAuthorizationGrant authorizationGrant;
 
     public DynamicScopeExternalContext(List<Scope> dynamicScopes, JsonWebResponse jsonWebResponse, IAuthorizationGrant authorizationGrant) {
     	super(null);
