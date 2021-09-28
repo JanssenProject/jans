@@ -16,6 +16,8 @@ from jans.pycloudlib.cli.encoding import decode_string
     context_settings={"help_option_names": ["-h", "--help"]}
 )
 def cli():
+    """Entrypoint of CLI commands.
+    """
     pass
 
 

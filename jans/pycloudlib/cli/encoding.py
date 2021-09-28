@@ -6,8 +6,6 @@ This module contains CLI commands for encoding/decoding text.
 
 """
 
-from binascii import Error as AsciiError
-
 import click
 
 from jans.pycloudlib import get_manager
@@ -49,7 +47,7 @@ def decode_file(path, salt_file, salt_literal):
         try:
             txt = decode_text(f.read(), salt)
             click.echo(txt)
-        except (AsciiError, ValueError) as exc:
+        except ValueError as exc:
             click.echo(f"Unable to decode file {path}; reason={exc}")
 
 
@@ -84,5 +82,5 @@ def decode_string(text, salt_file, salt_literal):
     try:
         txt = decode_text(text, salt)
         click.echo(txt)
-    except (AsciiError, ValueError) as exc:
+    except ValueError as exc:
         click.echo(f"Unable to decode given string; reason={exc}")
