@@ -33,7 +33,7 @@ public class ScimService {
 
     public Response serachScimUser(String filter, Integer startIndex, Integer count,
             String sortBy, String sortOrder, String attrsList, String excludedAttrsList) throws Exception {
-        log.debug("Search User param passed to service -  filter:{}, startIndex:{}, sortBy:{}, sortOrder:{}, attrsList:{}, excludedAttrsList:{}", filter, startIndex, sortBy, sortOrder, attrsList, excludedAttrsList);
+        log.info("Search User param passed to service -  filter:{}, startIndex:{}, sortBy:{}, sortOrder:{}, attrsList:{}, excludedAttrsList:{}", filter, startIndex, sortBy, sortOrder, attrsList, excludedAttrsList);
         try {
             ClientSideService client = this.getClientSideService();           
             return client.searchUsers(filter, startIndex, count, sortBy, sortOrder, attrsList, excludedAttrsList);
@@ -45,7 +45,7 @@ public class ScimService {
     }
     
     public Response serachScimUserPost(SearchRequest searchRequest) throws Exception {
-        log.debug("Post search User param passed to service -  searchRequest:{}", searchRequest);
+        log.info("Post search User param passed to service -  searchRequest:{}", searchRequest);
         try {
             ClientSideService client = this.getClientSideService();           
             return client.searchUsersPost(searchRequest);
@@ -57,7 +57,7 @@ public class ScimService {
     }
         
     public Response createScimUser(UserResource user, String attrsList, String excludedAttrsList) throws Exception {
-        log.debug("To create Scim user param passed to service -  user:{}, attrsList:{}, excludedAttrsList:{}", user, attrsList, excludedAttrsList);
+        log.info("To create Scim user param passed to service -  user:{}, attrsList:{}, excludedAttrsList:{}", user, attrsList, excludedAttrsList);
         try {
             ClientSideService client = this.getClientSideService();           
             return client.createUser(user, attrsList, excludedAttrsList);
@@ -69,7 +69,7 @@ public class ScimService {
     }
     
     public Response getScimUserById(String id, String attrsList, String excludedAttrsList) throws Exception {
-        log.debug("To search Scim user by id param passed to service -  id:{}, attrsList:{}, excludedAttrsList:{}", id, attrsList, excludedAttrsList);
+        log.info("To search Scim user by id param passed to service -  id:{}, attrsList:{}, excludedAttrsList:{}", id, attrsList, excludedAttrsList);
         try {
             ClientSideService client = this.getClientSideService();           
             return client.getUserById(id, attrsList, excludedAttrsList);
@@ -81,7 +81,7 @@ public class ScimService {
     }
     
     public Response updateScimUser(UserResource user, String id,String attrsList, String excludedAttrsList) throws Exception {
-        log.debug("To update Scim user param passed to service -  user:{}, id:{}, attrsList:{}, excludedAttrsList:{}", user, id, attrsList, excludedAttrsList);
+        log.info("To update Scim user param passed to service -  user:{}, id:{}, attrsList:{}, excludedAttrsList:{}", user, id, attrsList, excludedAttrsList);
         try {
             ClientSideService client = this.getClientSideService();           
             return client.updateUser(user, id, attrsList, excludedAttrsList);
@@ -93,7 +93,7 @@ public class ScimService {
     }
     
     public Response deleteScimUser(String id) throws Exception {
-        log.debug("To delete Scim user id passed to service -  id:{}", id);
+        log.info("To delete Scim user id passed to service -  id:{}", id);
         try {
             ClientSideService client = this.getClientSideService();           
             return client.deleteUser(id);
@@ -105,7 +105,7 @@ public class ScimService {
     }
     
     public Response patchScimUser(PatchRequest patchRequest, String id,String attrsList, String excludedAttrsList) throws Exception {
-        log.debug("To patch Scim user param passed to service -  patchRequest:{}, id:{}, attrsList:{}, excludedAttrsList:{}", patchRequest, id, attrsList, excludedAttrsList);
+        log.info("To patch Scim user param passed to service -  patchRequest:{}, id:{}, attrsList:{}, excludedAttrsList:{}", patchRequest, id, attrsList, excludedAttrsList);
         try {
             ClientSideService client = this.getClientSideService();           
             return client.patchUser(patchRequest, id, attrsList, excludedAttrsList);
