@@ -48,7 +48,7 @@ public class ApiApplication extends Application {
         classes.add(StatResource.class);
         
         //scim
-        classes.add(ScimResource.class);
+        //classes.add(ScimResource.class);
 
         return classes;
     }
