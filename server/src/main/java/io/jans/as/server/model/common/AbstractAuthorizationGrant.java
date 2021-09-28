@@ -6,6 +6,18 @@
 
 package io.jans.as.server.model.common;
 
+import io.jans.as.common.model.common.User;
+import io.jans.as.common.model.registration.Client;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.util.CertUtils;
+import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
+import io.jans.as.server.model.authorize.ScopeChecker;
+import io.jans.as.server.model.ldap.TokenLdap;
+import io.jans.as.server.util.TokenHashUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -15,20 +27,6 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArraySet;
-
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import io.jans.as.common.model.common.User;
-import io.jans.as.common.model.registration.Client;
-import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.model.util.CertUtils;
-import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
-import io.jans.as.server.model.authorize.ScopeChecker;
-import io.jans.as.server.model.ldap.TokenLdap;
-import io.jans.as.server.util.TokenHashUtil;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -69,8 +67,8 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
     private String acrValues;
     private String sessionDn;
 
-    protected final ConcurrentMap<String, AccessToken> accessTokens = new ConcurrentHashMap<String, AccessToken>();
-    protected final ConcurrentMap<String, RefreshToken> refreshTokens = new ConcurrentHashMap<String, RefreshToken>();
+    protected final ConcurrentMap<String, AccessToken> accessTokens = new ConcurrentHashMap<>();
+    protected final ConcurrentMap<String, RefreshToken> refreshTokens = new ConcurrentHashMap<>();
 
     public AbstractAuthorizationGrant() {
     }
@@ -86,7 +84,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
         this.user = user;
         this.authorizationGrantType = authorizationGrantType;
         this.client = client;
-        this.scopes = new CopyOnWriteArraySet<String>();
+        this.scopes = new CopyOnWriteArraySet<>();
         this.grantId = UUID.randomUUID().toString();
     }
 
@@ -197,7 +195,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
      */
     @Override
     public List<AccessToken> getAccessTokens() {
-        return new ArrayList<AccessToken>(accessTokens.values());
+        return new ArrayList<>(accessTokens.values());
     }
 
     @Override
@@ -232,8 +230,8 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
     }
 
     @Override
-    public void setTokenLdap(TokenLdap p_tokenLdap) {
-        this.tokenLdap = p_tokenLdap;
+    public void setTokenLdap(TokenLdap tokenLdap) {
+        this.tokenLdap = tokenLdap;
     }
 
     /**
@@ -282,9 +280,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
             grantedScopesSb.append(" ").append(scope);
         }
 
-        final String grantedScopesSt = grantedScopesSb.toString().trim();
-
-        return grantedScopesSt;
+        return grantedScopesSb.toString().trim();
     }
 
     @Override
@@ -399,8 +395,8 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
     }
 
     @Override
-    public void setJwtAuthorizationRequest(JwtAuthorizationRequest p_jwtAuthorizationRequest) {
-        jwtAuthorizationRequest = p_jwtAuthorizationRequest;
+    public void setJwtAuthorizationRequest(JwtAuthorizationRequest jwtAuthorizationRequest) {
+        this.jwtAuthorizationRequest = jwtAuthorizationRequest;
     }
 
     @Override
@@ -408,11 +404,11 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
         put(this.accessTokens, accessTokens);
     }
 
-    private static <T extends AbstractToken> void put(ConcurrentMap<String, T> p_map, List<T> p_list) {
-        p_map.clear();
-        if (p_list != null && !p_list.isEmpty()) {
-            for (T t : p_list) {
-                p_map.put(t.getCode(), t);
+    private static <T extends AbstractToken> void put(ConcurrentMap<String, T> map, List<T> list) {
+        map.clear();
+        if (list != null && !list.isEmpty()) {
+            for (T t : list) {
+                map.put(t.getCode(), t);
             }
         }
     }
@@ -424,7 +420,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
      */
     @Override
     public List<RefreshToken> getRefreshTokens() {
-        return new ArrayList<RefreshToken>(refreshTokens.values());
+        return new ArrayList<>(refreshTokens.values());
     }
 
     @Override

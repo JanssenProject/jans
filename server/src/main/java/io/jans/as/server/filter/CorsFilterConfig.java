@@ -24,8 +24,8 @@ import io.jans.as.model.configuration.CorsConfigurationFilter;
  */
 public class CorsFilterConfig implements FilterConfig {
 
-    private String filterName;
-    private Map<String, String> initParameters;
+    private final String filterName;
+    private final Map<String, String> initParameters;
 
     /**
      * Key to retrieve if filter enabled from {@link CorsConfigurationFilter}.

@@ -54,26 +54,27 @@ public class IntrospectionResponse {
     private String acrValues;
 
     public IntrospectionResponse() {
+        // default constructor
     }
 
-    public IntrospectionResponse(boolean p_active) {
-        active = p_active;
+    public IntrospectionResponse(boolean active) {
+        this.active = active;
     }
 
     public String getAcrValues() {
         return acrValues;
     }
 
-    public void setAcrValues(String p_authMode) {
-        acrValues = p_authMode;
+    public void setAcrValues(String acrValues) {
+        this.acrValues = acrValues;
     }
 
     public boolean isActive() {
         return active;
     }
 
-    public void setActive(boolean p_active) {
-        active = p_active;
+    public void setActive(boolean active) {
+        this.active = active;
     }
 
     public List<String> getScope() {
@@ -81,7 +82,7 @@ public class IntrospectionResponse {
     }
 
     public void setScope(Collection<String> scope) {
-        this.scope = scope != null ? new ArrayList<String>(scope) : new ArrayList<String>();
+        this.scope = scope != null ? new ArrayList<>(scope) : new ArrayList<>();
     }
 
     public Integer getExpiresAt() {

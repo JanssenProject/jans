@@ -6,10 +6,10 @@
 
 package io.jans.as.model.fido.u2f;
 
+import io.jans.as.model.error.IErrorType;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import io.jans.as.model.error.IErrorType;
 
 /**
  * Error codes for FIDO U2F server
@@ -50,7 +50,7 @@ public enum U2fErrorResponseType implements IErrorType {
 	REGISTRATION_NOT_ALLOWED("registration_not_allowed");
 	
 
-	private static Map<String, U2fErrorResponseType> lookup = new HashMap<String, U2fErrorResponseType>();
+	private static final Map<String, U2fErrorResponseType> lookup = new HashMap<>();
 
 	static {
 		for (U2fErrorResponseType enumType : values()) {
@@ -60,7 +60,7 @@ public enum U2fErrorResponseType implements IErrorType {
 
 	private final String paramName;
 
-	private U2fErrorResponseType(String paramName) {
+	U2fErrorResponseType(String paramName) {
 		this.paramName = paramName;
 	}
 

@@ -73,8 +73,8 @@ public class AccountAccessConsentServlet extends HttpServlet {
         	JSONObject jsonBody = new JSONObject(jsonBodyStr);
 
         	httpResponse.setContentType("application/json");
-        	String xfapiinteractionid=UUID.randomUUID().toString();;
-        	httpResponse.addHeader("x-fapi-interaction-id", xfapiinteractionid);
+        	String xfapiinteractionid=UUID.randomUUID().toString();
+            httpResponse.addHeader("x-fapi-interaction-id", xfapiinteractionid);
         	httpResponse.setCharacterEncoding("UTF-8");
         	JSONObject jsonObj = new JSONObject();
         	
@@ -82,11 +82,6 @@ public class AccountAccessConsentServlet extends HttpServlet {
         	JSONArray permissionValue=new JSONArray();
         	
         	for (String keyStr : jsonBody.keySet()) {
-    	    	Object keyvalue = jsonBody.get(keyStr);
-    	    	/*jsonObj.put(keyStr, keyvalue);
-    		    if (keyStr.equals("Risk"))
-        	   	{
-        	   	}*/
     	    	if (keyStr.equals("data")) {
     	    		JSONObject keyvalueTemp = (JSONObject)jsonBody.get(keyStr);
     		    	for (String keyStr1 : keyvalueTemp.keySet()) {

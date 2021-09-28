@@ -12,7 +12,7 @@ package io.jans.as.model.crypto.signature;
  */
 public interface Signer {
 
-    public String sign(String signingInput) throws Exception;
+    String sign(String signingInput) throws Exception;
 
-    public boolean verifySignature(String signingInput, String signature) throws Exception;
+    boolean verifySignature(String signingInput, String signature) throws Exception;
 }

@@ -52,6 +52,7 @@ import javax.inject.Named;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRegistration;
 import java.io.File;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -326,10 +327,7 @@ public class ConfigurationFactory {
 	}
 
 	private boolean createFromFile() {
-		boolean result = reloadConfFromFile() && reloadErrorsFromFile() && reloadStaticConfFromFile()
-				&& reloadWebkeyFromFile();
-
-		return result;
+		return reloadConfFromFile() && reloadErrorsFromFile() && reloadStaticConfFromFile() && reloadWebkeyFromFile();
 	}
 
 	private boolean reloadWebkeyFromFile() {
@@ -447,9 +445,7 @@ public class ConfigurationFactory {
 		final PersistenceEntryManager ldapManager = persistenceEntryManagerInstance.get();
 		final String dn = this.baseConfiguration.getString(SERVER_KEY_OF_CONFIGURATION_ENTRY);
 		try {
-			final Conf conf = ldapManager.find(dn, io.jans.as.model.config.Conf.class, returnAttributes);
-
-			return conf;
+			return ldapManager.find(dn, io.jans.as.model.config.Conf.class, returnAttributes);
 		} catch (BasePersistenceException ex) {
 			if (!dn.contains("_test")) {
 				ex.printStackTrace();
@@ -514,17 +510,17 @@ public class ConfigurationFactory {
 			jwks = ServerUtil.createJsonMapper().readValue(newWebKeys, io.jans.as.model.config.WebKeysConfiguration.class);
 
 			// Store new JWKS in LDAP
-			Conf conf = loadConfigurationFromLdap();
-			conf.setWebKeys(jwks);
+			Conf configuration = Objects.requireNonNull(loadConfigurationFromLdap());
+			configuration.setWebKeys(jwks);
 
-			long nextRevision = conf.getRevision() + 1;
-			conf.setRevision(nextRevision);
+			long nextRevision = configuration.getRevision() + 1;
+			configuration.setRevision(nextRevision);
 
 			final PersistenceEntryManager ldapManager = persistenceEntryManagerInstance.get();
-			ldapManager.merge(conf);
+			ldapManager.merge(configuration);
 
 			log.info("Generated new JWKS successfully.");
-            log.trace("JWKS keys: " + conf.getWebKeys().getKeys().stream().map(JSONWebKey::getKid).collect(Collectors.toList()));
+            log.trace("JWKS keys: " + configuration.getWebKeys().getKeys().stream().map(JSONWebKey::getKid).collect(Collectors.toList()));
 
             log.trace("KeyStore keys: " + cryptoProvider.getKeys());
         } catch (Exception ex2) {
@@ -588,9 +584,7 @@ public class ConfigurationFactory {
 
 	private FileConfiguration createFileConfiguration(String fileName, boolean isMandatory) {
 		try {
-			FileConfiguration fileConfiguration = new FileConfiguration(fileName);
-
-			return fileConfiguration;
+			return new FileConfiguration(fileName);
 		} catch (Exception ex) {
 			if (isMandatory) {
 				log.error("Failed to load configuration from {}", fileName, ex);

@@ -6,17 +6,15 @@
 
 package io.jans.as.model.uma;
 
-import java.util.List;
-import java.util.Map;
-
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
-import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Token status response according to RPT introspection profile:
@@ -139,8 +137,8 @@ public class RptIntrospectionResponse {
         return issuedAt;
     }
 
-    public void setIssuedAt(Integer p_issuedAt) {
-        issuedAt = p_issuedAt;
+    public void setIssuedAt(Integer issuedAt) {
+        this.issuedAt = issuedAt;
     }
 
     @JsonProperty(value = "permissions")
@@ -149,8 +147,8 @@ public class RptIntrospectionResponse {
         return permissions;
     }
 
-    public void setPermissions(List<UmaPermission> p_permissions) {
-        permissions = p_permissions;
+    public void setPermissions(List<UmaPermission> permissions) {
+        this.permissions = permissions;
     }
 
     @JsonProperty(value = "pct_claims")

@@ -6,12 +6,18 @@
 
 package io.jans.as.client;
 
+import io.jans.as.model.config.Constants;
+import io.jans.as.model.error.IErrorType;
 import org.apache.commons.lang.StringUtils;
 import org.jboss.resteasy.client.ClientResponse;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import io.jans.as.model.error.IErrorType;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -20,11 +26,11 @@ import io.jans.as.model.error.IErrorType;
 
 public abstract class BaseResponseWithErrors<T extends IErrorType> extends BaseResponse {
 
-//    private static final Logger LOG = Logger.getLogger(BaseResponseWithErrors.class);
-
     private T errorType;
     private String errorDescription;
     private String errorUri;
+
+    private Map<String, List<String>> claimMap;
 
     public BaseResponseWithErrors() {
         super();
@@ -32,10 +38,43 @@ public abstract class BaseResponseWithErrors<T extends IErrorType> extends BaseR
 
     public BaseResponseWithErrors(ClientResponse<String> clientResponse) {
         super(clientResponse);
+        claimMap = new HashMap<>();
         final String entity = getEntity();
         if (StringUtils.isNotBlank(entity)) {
             injectErrorIfExistSilently(entity);
         }
+    }
+
+    public Map<String, List<String>> getClaimMap() {
+        return claimMap;
+    }
+    public Map<String, String> getClaims() {
+        Map<String, String> result = new HashMap<>();
+        for (Map.Entry<String, List<String>> entry : claimMap.entrySet()) {
+            final boolean hasValue = entry.getValue() != null && !entry.getValue().isEmpty();
+            if (hasValue) {
+                result.put(entry.getKey(), entry.getValue().get(0));
+            }
+        }
+        return result;
+    }
+
+    public void setClaimMap(Map<String, List<String>> claims) {
+        this.claimMap = claims;
+    }
+
+    public List<String> getClaim(String claimName) {
+        if (claimMap.containsKey(claimName)) {
+            return claimMap.get(claimName);
+        }
+
+        return null;
+    }
+
+    @Nullable
+    public String getFirstClaim(@NotNull String claimName) {
+        final List<String> values = getClaim(claimName);
+        return !values.isEmpty() ? values.get(0) : null;
     }
 
     public String getErrorDescription() {
@@ -68,14 +107,14 @@ public abstract class BaseResponseWithErrors<T extends IErrorType> extends BaseR
     }
 
     public void injectErrorIfExistSilently(JSONObject jsonObj) throws JSONException {
-        if (jsonObj.has("error")) {
-            errorType = fromString(jsonObj.getString("error"));
+        if (jsonObj.has(Constants.ERROR)) {
+            errorType = fromString(jsonObj.getString(Constants.ERROR));
         }
-        if (jsonObj.has("error_description")) {
-            errorDescription = jsonObj.getString("error_description");
+        if (jsonObj.has(Constants.ERROR_DESCRIPTION)) {
+            errorDescription = jsonObj.getString(Constants.ERROR_DESCRIPTION);
         }
-        if (jsonObj.has("error_uri")) {
-            errorUri = jsonObj.getString("error_uri");
+        if (jsonObj.has(Constants.ERROR_URI)) {
+            errorUri = jsonObj.getString(Constants.ERROR_URI);
         }
     }
 
@@ -85,5 +124,15 @@ public abstract class BaseResponseWithErrors<T extends IErrorType> extends BaseR
         } catch (JSONException e) {
             // ignore : it's ok to skip exception because entity string can be json array or just trash
         }
+    }
+
+    @Override
+    public String toString() {
+        return "BaseResponseWithErrors{" +
+                "claimMap=" + claimMap +
+                "errorType=" + errorType +
+                ", errorDescription='" + errorDescription + '\'' +
+                ", errorUri='" + errorUri + '\'' +
+                "} " + super.toString();
     }
 }

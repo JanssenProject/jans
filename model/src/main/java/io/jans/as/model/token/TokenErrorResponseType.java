@@ -82,7 +82,7 @@ public enum TokenErrorResponseType implements IErrorType {
 
     private final String paramName;
 
-    private TokenErrorResponseType(String paramName) {
+    TokenErrorResponseType(String paramName) {
         this.paramName = paramName;
     }
 

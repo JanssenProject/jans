@@ -192,33 +192,4 @@ public class UmaAuthorizationContext extends ExternalScriptContext {
         }
         return permissionService.getPermissionsByTicket(sessionService.getTicket(session));
     }
-
-
-    //    public String getClientClaim(String p_claimName) {
-//        return getEntryAttributeValue(getGrant().getClientDn(), p_claimName);
-//    }
-//
-//    public String getUserClaim(String p_claimName) {
-//        GluuAttribute gluuAttribute = attributeService.getByClaimName(p_claimName);
-//
-//        if (gluuAttribute != null) {
-//            String ldapClaimName = gluuAttribute.getName();
-//            return getEntryAttributeValue(getGrant().getUserDn(), ldapClaimName);
-//        }
-//
-//        return null;
-//    }
-//
-//    public String getUserClaimByLdapName(String p_ldapName) {
-//        return getEntryAttributeValue(getGrant().getUserDn(), p_ldapName);
-//    }
-//
-//    public CustomEntry getUserClaimEntryByLdapName(String ldapName) {
-//        return getEntryByDn(getGrant().getUserDn(), ldapName);
-//    }
-//
-//    public CustomEntry getClientClaimEntry(String ldapName) {
-//        return getEntryByDn(getGrant().getClientDn(), ldapName);
-//    }
-
 }

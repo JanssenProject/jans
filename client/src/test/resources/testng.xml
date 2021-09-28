@@ -221,7 +221,7 @@
     <!-- Registration test with Software Statement -->
     <test name="Registration test with Software Statement" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.RegistrationWithSoftwareStatement"/>
+            <class name="io.jans.as.client.ws.rs.RegistrationWithSoftwareStatementTest"/>
         </classes>
     </test>
 
@@ -271,13 +271,6 @@
     <test name="Token Signatures test (HTTP)" enabled="true">
         <classes>
             <class name="io.jans.as.client.ws.rs.TokenSignaturesHttpTest"/>
-        </classes>
-    </test>
-
-    <!-- Token Encryption test -->
-    <test name="Token Encryption test (HTTP)" enabled="true">
-        <classes>
-            <class name="io.jans.as.client.ws.rs.TokenEncryptionHttpTest"/>
         </classes>
     </test>
 

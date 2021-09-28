@@ -6,44 +6,11 @@
 
 package io.jans.as.server.authorize.ws.rs;
 
-import static io.jans.as.server.service.DeviceAuthorizationService.SESSION_USER_CODE;
-
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-
-import javax.enterprise.context.RequestScoped;
-import javax.faces.application.FacesMessage;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.logging.log4j.util.Strings;
-import org.jboss.resteasy.client.ClientRequest;
-import org.jboss.resteasy.client.ClientResponse;
-import org.slf4j.Logger;
-
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.common.Prompt;
+import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.error.ErrorResponseFactory;
@@ -80,7 +47,6 @@ import io.jans.as.server.service.external.ExternalAuthenticationService;
 import io.jans.as.server.service.external.ExternalConsentGatheringService;
 import io.jans.as.server.service.external.ExternalPostAuthnService;
 import io.jans.as.server.service.external.context.ExternalPostAuthnContext;
-import io.jans.as.server.util.ServerUtil;
 import io.jans.jsf2.message.FacesMessages;
 import io.jans.jsf2.service.FacesService;
 import io.jans.model.AuthenticationScriptUsageType;
@@ -89,6 +55,39 @@ import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.service.net.NetworkService;
 import io.jans.util.StringHelper;
 import io.jans.util.ilocale.LocaleUtil;
+import org.apache.commons.lang.StringUtils;
+import org.apache.logging.log4j.util.Strings;
+import org.jboss.resteasy.client.ClientRequest;
+import org.jboss.resteasy.client.ClientResponse;
+import org.slf4j.Logger;
+
+import javax.enterprise.context.RequestScoped;
+import javax.faces.application.FacesMessage;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+
+import static io.jans.as.server.service.DeviceAuthorizationService.SESSION_USER_CODE;
+import static io.jans.as.server.util.ServerUtil.isTrue;
 
 /**
  * @author Javier Rojas Blum
@@ -413,13 +412,10 @@ public class AuthorizeAction {
 
         final boolean hasConsentPrompt = prompts.contains(io.jans.as.model.common.Prompt.CONSENT);
         if (!hasConsentPrompt && !forceAuthorization) {
-            if (appConfiguration.getTrustedClientEnabled() && client.getTrustedClient()) {
-                // if trusted client = true, then skip authorization page and grant access directly
-                permissionGranted(session);
-                return;
-            } else if (ServerUtil.isTrue(appConfiguration.getSkipAuthorizationForOpenIdScopeAndPairwiseId())
-                    && io.jans.as.model.common.SubjectType.PAIRWISE.toString().equals(client.getSubjectType()) && hasOnlyOpenidScope()) {
-                // If a client has only openid scope and pairwise id, person should not have to authorize. oxAuth-743
+            final boolean isTrusted = isTrue(appConfiguration.getTrustedClientEnabled()) && client.getTrustedClient();
+            final boolean canGrantAccess = isTrue(appConfiguration.getSkipAuthorizationForOpenIdScopeAndPairwiseId())
+                    && SubjectType.PAIRWISE.equals(client.getSubjectType()) && hasOnlyOpenidScope();
+            if (isTrusted || canGrantAccess) {
                 permissionGranted(session);
                 return;
             }

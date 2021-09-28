@@ -6,15 +6,14 @@
 
 package io.jans.as.model.crypto.signature;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.nimbusds.jose.JWSAlgorithm;
-
 import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.jwt.JwtType;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Javier Rojas Blum
@@ -29,9 +28,9 @@ public enum SignatureAlgorithm {
     RS256("RS256", AlgorithmFamily.RSA, "SHA256WITHRSA", JWSAlgorithm.RS256),
     RS384("RS384", AlgorithmFamily.RSA, "SHA384WITHRSA", JWSAlgorithm.RS384),
     RS512("RS512", AlgorithmFamily.RSA, "SHA512WITHRSA", JWSAlgorithm.RS512),
-    ES256("ES256", AlgorithmFamily.EC, "SHA256WITHECDSA", ECEllipticCurve.P_256, JWSAlgorithm.ES256),
-    ES384("ES384", AlgorithmFamily.EC, "SHA384WITHECDSA", ECEllipticCurve.P_384, JWSAlgorithm.ES384),
-    ES512("ES512", AlgorithmFamily.EC, "SHA512WITHECDSA", ECEllipticCurve.P_521, JWSAlgorithm.ES512),
+    ES256("ES256", AlgorithmFamily.EC, "SHA256WITHECDSA", EllipticEdvardsCurve.P_256, JWSAlgorithm.ES256),
+    ES384("ES384", AlgorithmFamily.EC, "SHA384WITHECDSA", EllipticEdvardsCurve.P_384, JWSAlgorithm.ES384),
+    ES512("ES512", AlgorithmFamily.EC, "SHA512WITHECDSA", EllipticEdvardsCurve.P_521, JWSAlgorithm.ES512),
     PS256("PS256", AlgorithmFamily.RSA, "SHA256withRSAandMGF1", JWSAlgorithm.PS256),
     PS384("PS384", AlgorithmFamily.RSA, "SHA384withRSAandMGF1", JWSAlgorithm.PS384),
     PS512("PS512", AlgorithmFamily.RSA, "SHA512withRSAandMGF1", JWSAlgorithm.PS512);
@@ -39,12 +38,12 @@ public enum SignatureAlgorithm {
     private final String name;
     private final AlgorithmFamily family;
     private final String algorithm;
-    private final ECEllipticCurve curve;
+    private final EllipticEdvardsCurve curve;
     private final JwtType jwtType;
     private final JWSAlgorithm jwsAlgorithm;
     private final Algorithm alg;
 
-    SignatureAlgorithm(String name, AlgorithmFamily family, String algorithm, ECEllipticCurve curve, JWSAlgorithm jwsAlgorithm) {
+    SignatureAlgorithm(String name, AlgorithmFamily family, String algorithm, EllipticEdvardsCurve curve, JWSAlgorithm jwsAlgorithm) {
         this.name = name;
         this.family = family;
         this.algorithm = algorithm;
@@ -78,7 +77,7 @@ public enum SignatureAlgorithm {
         return algorithm;
     }
 
-    public ECEllipticCurve getCurve() {
+    public EllipticEdvardsCurve getCurve() {
         return curve;
     }
 
@@ -87,7 +86,7 @@ public enum SignatureAlgorithm {
     }
 
     public static List<SignatureAlgorithm> fromString(String[] params) {
-        List<SignatureAlgorithm> signatureAlgorithms = new ArrayList<SignatureAlgorithm>();
+        List<SignatureAlgorithm> signatureAlgorithms = new ArrayList<>();
 
         for (String param : params) {
             SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(param);

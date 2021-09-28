@@ -67,7 +67,7 @@ public enum AuthenticationMethod {
 
     private final String paramName;
 
-    private AuthenticationMethod(String paramName) {
+    AuthenticationMethod(String paramName) {
         this.paramName = paramName;
     }
 
