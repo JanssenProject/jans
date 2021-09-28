@@ -12,7 +12,7 @@ package io.jans.as.model.crypto.signature;
  */
 public abstract class AbstractSigner implements Signer {
 
-    private SignatureAlgorithm signatureAlgorithm;
+    private final SignatureAlgorithm signatureAlgorithm;
 
     protected AbstractSigner(SignatureAlgorithm signatureAlgorithm) {
         this.signatureAlgorithm = signatureAlgorithm;

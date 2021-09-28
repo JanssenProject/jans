@@ -6,14 +6,12 @@
 
 package io.jans.as.server.service.fido.u2f;
 
-import java.net.URI;
-import java.net.URISyntaxException;
+import io.jans.as.server.exception.fido.u2f.BadConfigurationException;
 
 import javax.ejb.Stateless;
 import javax.inject.Named;
-
-import io.jans.as.server.exception.fido.u2f.BadConfigurationException;
-import io.jans.net.InetAddressUtility;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 /**
  * Provides operations with U2F applications
@@ -24,10 +22,10 @@ import io.jans.net.InetAddressUtility;
 @Named
 public class ApplicationService {
 
-	private boolean validateApplication = true;
+	private static final boolean VALIDATE_APPLICATION = true;
 
 	public boolean isValidateApplication() {
-		return validateApplication;
+		return VALIDATE_APPLICATION;
 	}
 
 	/**
@@ -50,7 +48,6 @@ public class ApplicationService {
 		if (appId.startsWith("https://")) {
 			URI url = checkValidUrl(appId);
 			checkPathIsNotSlash(url);
-//			checkNotIpAddress(url);
 		}
 	}
 
@@ -69,11 +66,5 @@ public class ApplicationService {
 			throw new BadConfigurationException("App ID looks like a HTTPS URL, but has syntax errors.", e);
 		}
 		return url;
-	}
-
-	private void checkNotIpAddress(URI url) {
-		if (InetAddressUtility.isIpAddress(url.getAuthority()) || (url.getHost() != null && InetAddressUtility.isIpAddress(url.getHost()))) {
-			throw new BadConfigurationException("App ID must not be an IP-address, since it is not supported. Use a host name instead.");
-		}
 	}
 }

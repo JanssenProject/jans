@@ -15,6 +15,7 @@ public class BCStyleExtended extends BCStyle {
         defaultLookUp.put("jurisdictioncountryname", JURISDICTION_COUNTRY_NAME);
     }
 
+    @Override
     public String oidToDisplayName(ASN1ObjectIdentifier oid) {
         return (String) defaultSymbols.get(oid);
     }

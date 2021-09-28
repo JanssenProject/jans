@@ -29,6 +29,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -101,16 +102,16 @@ public class SelectAccountAction {
     public void prepare() {
         currentSessions = Lists.newArrayList();
         Set<String> uids = Sets.newHashSet();
-        for (SessionId sessionId : sessionIdService.getCurrentSessions()) {
-            final User user = sessionIdService.getUser(sessionId);
+        for (SessionId session : sessionIdService.getCurrentSessions()) {
+            final User user = sessionIdService.getUser(session);
             if (user == null) {
-                log.error("Failed to get user for session. Skipping it from current_sessions, id: " + sessionId.getId());
+                log.error("Failed to get user for session. Skipping it from current_sessions, id: {}", session.getId());
                 continue;
             }
             final String uid = StringUtils.isNotBlank(user.getUserId()) ? user.getUserId() : user.getDn();
-            if (!currentSessions.contains(sessionId) && !uids.contains(uid)) {
-                log.trace("User: {}, sessionId: {}", uid, sessionId.getId());
-                currentSessions.add(sessionId);
+            if (!currentSessions.contains(session) && !uids.contains(uid)) {
+                log.trace("User: {}, sessionId: {}", uid, session.getId());
+                currentSessions.add(session);
                 uids.add(uid);
             }
         }
@@ -123,11 +124,15 @@ public class SelectAccountAction {
 
     public void select() {
         try {
-            log.debug("Selected account: " + selectedSessionId);
+            log.debug("Selected account: {}", selectedSessionId);
             clearSessionIdCookie();
-            SessionId selectedSession = currentSessions.stream().filter(s -> s.getId().equals(selectedSessionId)).findAny().get();
-            cookieService.createSessionIdCookie(selectedSession, false);
-            identity.setSessionId(selectedSession);
+            Optional<SessionId> selectedSession = currentSessions.stream().filter(s -> s.getId().equals(selectedSessionId)).findAny();
+            if (!selectedSession.isPresent()) {
+                log.debug("Unable to find session.");
+                return;
+            }
+            cookieService.createSessionIdCookie(selectedSession.get(), false);
+            identity.setSessionId(selectedSession.get());
             authenticator.authenticateBySessionId(selectedSessionId);
             String uri = buildAuthorizationUrl();
             log.trace("RedirectTo: {}", uri);

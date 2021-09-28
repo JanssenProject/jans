@@ -70,12 +70,11 @@ import static io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType.I
                 "/restv1/revoke_session",
                 "/restv1/bc-authorize",
                 "/restv1/par",
-                "/restv1/internal/*",
                 "/restv1/device_authorization"},
         displayName = "oxAuth")
 public class AuthenticationFilter implements Filter {
 
-    private static final String REALM = "oxAuth";
+    private static final String REALM_CONSTANT = "jans-auth";
 
     @Inject
     private Logger log;
@@ -366,9 +365,6 @@ public class AuthenticationFilter implements Filter {
         try {
             String header = servletRequest.getHeader("Authorization");
             if (tokenService.isBearerAuthToken(header)) {
-                // Immutable object
-                // servletRequest.getParameterMap().put("access_token", new
-                // String[]{accessToken});
                 filterChain.doFilter(servletRequest, servletResponse);
             }
         } catch (Exception ex) {
@@ -517,7 +513,7 @@ public class AuthenticationFilter implements Filter {
         if (realm != null) {
             return realm;
         } else {
-            return REALM;
+            return REALM_CONSTANT;
         }
     }
 

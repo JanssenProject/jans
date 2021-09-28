@@ -18,7 +18,7 @@ public enum DefaultScope {
 
     private final String paramName;
 
-    private DefaultScope(String paramName) {
+    DefaultScope(String paramName) {
         this.paramName = paramName;
     }
 

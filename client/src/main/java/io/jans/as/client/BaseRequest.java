@@ -34,7 +34,7 @@ public abstract class BaseRequest {
     private String authPassword;
     private AuthenticationMethod authenticationMethod;
     private AuthorizationMethod authorizationMethod;
-    private Map<String, String> customParameters;
+    private final Map<String, String> customParameters;
 
     protected BaseRequest() {
         customParameters = new HashMap<String, String>();

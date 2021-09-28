@@ -6,6 +6,15 @@
 
 package io.jans.as.model.crypto.signature;
 
+import io.jans.as.model.crypto.Certificate;
+import io.jans.as.model.crypto.KeyFactory;
+import io.jans.as.model.jwk.JSONWebKey;
+import org.apache.commons.lang.StringUtils;
+import org.bouncycastle.jcajce.provider.asymmetric.rsa.BCRSAPrivateCrtKey;
+import org.bouncycastle.jcajce.provider.asymmetric.rsa.BCRSAPublicKey;
+import org.bouncycastle.x509.X509V1CertificateGenerator;
+
+import javax.security.auth.x500.X500Principal;
 import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.security.InvalidParameterException;
@@ -21,17 +30,6 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Random;
 
-import javax.security.auth.x500.X500Principal;
-
-import org.apache.commons.lang.StringUtils;
-import org.bouncycastle.jcajce.provider.asymmetric.rsa.BCRSAPrivateCrtKey;
-import org.bouncycastle.jcajce.provider.asymmetric.rsa.BCRSAPublicKey;
-import org.bouncycastle.x509.X509V1CertificateGenerator;
-
-import io.jans.as.model.crypto.Certificate;
-import io.jans.as.model.crypto.KeyFactory;
-import io.jans.as.model.jwk.JSONWebKey;
-
 /**
  * Factory to create asymmetric Public and Private Keys for the RSA algorithm
  *
@@ -41,8 +39,8 @@ import io.jans.as.model.jwk.JSONWebKey;
 @Deprecated
 public class RSAKeyFactory extends KeyFactory<RSAPrivateKey, RSAPublicKey> {
 
-    private RSAPrivateKey rsaPrivateKey;
-    private RSAPublicKey rsaPublicKey;
+    private final RSAPrivateKey rsaPrivateKey;
+    private final RSAPublicKey rsaPublicKey;
     private Certificate certificate;
 
     @Deprecated
@@ -91,22 +89,22 @@ public class RSAKeyFactory extends KeyFactory<RSAPrivateKey, RSAPublicKey> {
     }
 
     @Deprecated
-    public RSAKeyFactory(JSONWebKey p_key) {
-        if (p_key == null) {
+    public RSAKeyFactory(JSONWebKey key) {
+        if (key == null) {
             throw new IllegalArgumentException("Key value must not be null.");
         }
 
         rsaPrivateKey = new RSAPrivateKey(
-                p_key.getN(),
-                p_key.getE());
+                key.getN(),
+                key.getE());
         rsaPublicKey = new RSAPublicKey(
-                p_key.getN(),
-                p_key.getE());
+                key.getN(),
+                key.getE());
         certificate = null;
     }
 
-    public static RSAKeyFactory valueOf(JSONWebKey p_key) {
-        return new RSAKeyFactory(p_key);
+    public static RSAKeyFactory valueOf(JSONWebKey key) {
+        return new RSAKeyFactory(key);
     }
 
     @Override

@@ -13,8 +13,8 @@ import java.util.Objects;
  */
 class ExpId {
 
-    private String key;
-    private ExpType type;
+    private final String key;
+    private final ExpType type;
 
     public ExpId(String key, ExpType type) {
         this.key = key;

@@ -18,6 +18,7 @@ import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
 import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
+import io.jans.as.model.crypto.signature.AlgorithmFamily;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwe.Jwe;
@@ -68,15 +69,15 @@ public class JwtAuthorizationRequest {
     private String keyId;
 
     // Payload
-    private List<ResponseType> responseTypes;
+    private final List<ResponseType> responseTypes;
     private String clientId;
-    private List<String> scopes;
+    private final List<String> scopes;
     private String redirectUri;
     private String nonce;
     private String state;
     private List<String> aud = Lists.newArrayList();
     private Display display;
-    private List<Prompt> prompts;
+    private final List<Prompt> prompts;
     private UserInfoMember userInfoMember;
     private IdTokenMember idTokenMember;
     private Integer exp;
@@ -96,11 +97,11 @@ public class JwtAuthorizationRequest {
     private Integer requestedExpiry;
     private ResponseMode responseMode;
 
-    private String encodedJwt;
+    private final String encodedJwt;
     private String payload;
     private JSONObject jsonPayload;
 
-    private AppConfiguration appConfiguration;
+    private final AppConfiguration appConfiguration;
 
     public JwtAuthorizationRequest(AppConfiguration appConfiguration, AbstractCryptoProvider cryptoProvider, String encodedJwt, Client client) throws InvalidJwtException {
         try {
@@ -132,7 +133,7 @@ public class JwtAuthorizationRequest {
                         jwtHeader.getClaimAsString(JwtHeaderName.ENCRYPTION_METHOD));
 
                 JweDecrypterImpl jweDecrypter = null;
-                if ("RSA".equals(keyEncryptionAlgorithm.getFamily())) {
+                if (AlgorithmFamily.RSA.equals(keyEncryptionAlgorithm.getFamily())) {
                     PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
                     if (privateKey == null && StringUtils.isNotBlank(appConfiguration.getStaticDecryptionKid())) {
                         privateKey = cryptoProvider.getPrivateKey(appConfiguration.getStaticDecryptionKid());

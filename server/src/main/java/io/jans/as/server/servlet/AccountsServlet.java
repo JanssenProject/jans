@@ -117,20 +117,15 @@ public class AccountsServlet extends HttpServlet {
             String clientDn = null;
             Client cl = null;
             clientDn = tokenService.getClientDn(authFromReq);
-            String bearerToken = tokenService.getBearerToken(authFromReq);
             X509Certificate cert = CertUtils.x509CertificateFromPem(clientCertAsPem);
 
             AuthorizationGrant authorizationGrant = tokenService.getBearerAuthorizationGrant(authFromReq);
-            if (authorizationGrant == null) {
-                log.error("FAPI Account: Authorization grant is null.*********************************************");
-                httpResponse.sendError(httpResponse.SC_UNAUTHORIZED, "Authorization grant is null.");
 
-                //Response.status(Response.Status.UNAUTHORIZED).type(MediaType.APPLICATION_JSON_TYPE).entity(errorResponseFactory.errorAsJson(AuthorizeErrorResponseType.ACCESS_DENIED, "Authorization grant is null.")).build();
+            if (authorizationGrant == null || cert == null) {
+                sendError(httpResponse, authorizationGrant == null ? "Unable to find authorization grant." : "Failed to parse client certificate.");
+                return;
             }
 
-            if (cert == null) {
-                log.debug("FAPI Account: Failed to parse client certificate, client_id: {}.", cl.getClientId());
-            }
             PublicKey publicKey = cert.getPublicKey();
             byte[] encodedKey = publicKey.getEncoded();
 
@@ -189,6 +184,11 @@ public class AccountsServlet extends HttpServlet {
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void sendError(HttpServletResponse response, String error) throws IOException {
+        log.error(error);
+        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, error);
     }
 
     /**

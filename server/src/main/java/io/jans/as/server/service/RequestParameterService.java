@@ -132,7 +132,7 @@ public class RequestParameterService {
         final StringBuilder sb = new StringBuilder();
         final Set<Entry<String, String>> set = parameterMap.entrySet();
         for (Map.Entry<String, String> entry : set) {
-            final String value = (String) entry.getValue();
+            final String value = entry.getValue();
             if (StringUtils.isNotBlank(value)) {
                 sb.append(entry.getKey()).append("=").append(URLEncoder.encode(value, Util.UTF8_STRING_ENCODING)).append("&");
             }
@@ -179,13 +179,12 @@ public class RequestParameterService {
         return valueWithType.getFirst();
     }
 
-    public Pair<String, String> getParameterValueWithType(String p_name) {
+    public Pair<String, String> getParameterValueWithType(String name) {
         String value = null;
         String clazz = null;
-        final Object o = identity.getWorkingParameter(p_name);
+        final Object o = identity.getWorkingParameter(name);
         if (o instanceof String) {
-            final String s = (String) o;
-            value = s;
+            value = (String) o;
             clazz = String.class.getName();
         } else if (o instanceof Integer) {
             final Integer i = (Integer) o;
@@ -197,7 +196,7 @@ public class RequestParameterService {
             clazz = Boolean.class.getName();
         }
 
-        return new Pair<String, String>(value, clazz);
+        return new Pair<>(value, clazz);
     }
 
     public Object getTypedValue(String stringValue, String type) {

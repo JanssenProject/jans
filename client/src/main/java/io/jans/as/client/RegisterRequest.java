@@ -136,7 +136,7 @@ public class RegisterRequest extends BaseRequest {
      */
     private List<String> claims;
 
-    private Map<String, String> customAttributes;
+    private final Map<String, String> customAttributes;
 
     // internal state
     private JSONObject jsonObject;

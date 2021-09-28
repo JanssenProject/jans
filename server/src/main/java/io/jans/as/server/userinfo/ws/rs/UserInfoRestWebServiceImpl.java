@@ -35,13 +35,17 @@ import io.jans.as.model.jwt.JwtType;
 import io.jans.as.model.token.JsonWebResponse;
 import io.jans.as.model.userinfo.UserInfoErrorResponseType;
 import io.jans.as.model.util.JwtUtil;
-import io.jans.as.model.util.Util;
 import io.jans.as.persistence.model.Scope;
 import io.jans.as.server.audit.ApplicationAuditLogger;
 import io.jans.as.server.model.audit.Action;
 import io.jans.as.server.model.audit.OAuth2AuditLog;
 import io.jans.as.server.model.authorize.Claim;
-import io.jans.as.server.model.common.*;
+import io.jans.as.server.model.common.AbstractToken;
+import io.jans.as.server.model.common.AuthorizationGrant;
+import io.jans.as.server.model.common.AuthorizationGrantList;
+import io.jans.as.server.model.common.AuthorizationGrantType;
+import io.jans.as.server.model.common.DefaultScope;
+import io.jans.as.server.model.common.UnmodifiableAuthorizationGrant;
 import io.jans.as.server.model.userinfo.UserInfoParamsValidator;
 import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.ScopeService;
@@ -66,9 +70,16 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
+import java.nio.charset.StandardCharsets;
 import java.security.PublicKey;
 import java.text.ParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Provides interface for User Info REST web services
@@ -151,7 +162,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
             AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByAccessToken(accessToken);
 
             if (authorizationGrant == null) {
-                log.trace("Failed to find authorization grant by access_token: " + accessToken);
+                log.trace("Failed to find authorization grant by access_token: {}", accessToken);
                 return response(401, UserInfoErrorResponseType.INVALID_TOKEN);
             }
             oAuth2AuditLog.updateOAuth2AuditLog(authorizationGrant, false);
@@ -260,7 +271,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         return jwt.toString();
     }
 
-    private JwtClaims createJwtClaims(User user, AuthorizationGrant authorizationGrant, Collection<String> scopes) throws Exception {
+    private JwtClaims createJwtClaims(User user, AuthorizationGrant authorizationGrant, Collection<String> scopes) throws ParseException, InvalidClaimException {
         String claimsString = getJSonResponse(user, authorizationGrant, scopes);
         JwtClaims claims = new JwtClaims(new JSONObject(claimsString));
 
@@ -302,7 +313,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         } else if (keyEncryptionAlgorithm == KeyEncryptionAlgorithm.A128KW
                 || keyEncryptionAlgorithm == KeyEncryptionAlgorithm.A256KW) {
             try {
-                byte[] sharedSymmetricKey = clientService.decryptSecret(authorizationGrant.getClient().getClientSecret()).getBytes(Util.UTF8_STRING_ENCODING);
+                byte[] sharedSymmetricKey = clientService.decryptSecret(authorizationGrant.getClient().getClientSecret()).getBytes(StandardCharsets.UTF_8);
                 JweEncrypter jweEncrypter = new JweEncrypterImpl(keyEncryptionAlgorithm, blockEncryptionAlgorithm, sharedSymmetricKey);
                 jwe = jweEncrypter.encrypt(jwe);
             } catch (Exception e) {
@@ -316,14 +327,13 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
     /**
      * Builds a JSon String with the response parameters.
      */
-    public String getJSonResponse(User user, AuthorizationGrant authorizationGrant, Collection<String> scopes)
-            throws Exception {
-        log.trace("Building JSON reponse with next scopes {0} for user {1} and user custom attributes {0}", scopes, user.getUserId(), user.getCustomAttributes());
+    public String getJSonResponse(User user, AuthorizationGrant authorizationGrant, Collection<String> scopes) throws InvalidClaimException, ParseException {
+        log.trace("Building JSON reponse with next scopes {} for user {} and user custom attributes {}", scopes, user.getUserId(), user.getCustomAttributes());
 
         JsonWebResponse jsonWebResponse = new JsonWebResponse();
 
         // Claims
-        List<Scope> dynamicScopes = new ArrayList<Scope>();
+        List<Scope> dynamicScopes = new ArrayList<>();
         for (String scopeName : scopes) {
             Scope scope = scopeService.getScopeById(scopeName);
             if ((scope != null) && (ScopeType.DYNAMIC == scope.getScopeType())) {
@@ -336,7 +346,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                 continue;
             }
             if (scope == null) {
-                log.trace("Unable to find scope in persistence. Is it removed? Scope name: " + scopeName);
+                log.trace("Unable to find scope in persistence. Is it removed? Scope name: {}", scopeName);
             }
 
             if (scope != null && Boolean.TRUE.equals(scope.isGroupClaims())) {
