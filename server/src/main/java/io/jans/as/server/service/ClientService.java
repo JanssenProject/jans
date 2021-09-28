@@ -28,7 +28,6 @@ import io.jans.as.common.service.common.EncryptionService;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.model.exception.InvalidClaimException;
 import io.jans.as.persistence.model.Scope;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
@@ -41,6 +40,9 @@ import io.jans.util.StringHelper;
 import io.jans.util.security.StringEncrypter;
 import io.jans.util.security.StringEncrypter.EncryptionException;
 
+import static org.apache.commons.lang3.BooleanUtils.isFalse;
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
+
 /**
  * Provides operations with clients.
  *
@@ -52,7 +54,7 @@ import io.jans.util.security.StringEncrypter.EncryptionException;
 @Named
 public class ClientService {
 
-	public static final String[] CLIENT_OBJECT_CLASSES = new String[] { "jansClnt" };
+	protected static final String[] CLIENT_OBJECT_CLASSES = new String[] { "jansClnt" };
 
 	@Inject
 	private Logger log;
@@ -107,7 +109,7 @@ public class ClientService {
 				return authenticated;
 			}
 			String decryptedClientSecret = decryptSecret(client.getClientSecret());
-			authenticated = client != null && decryptedClientSecret != null && decryptedClientSecret.equals(password);
+			authenticated = decryptedClientSecret != null && decryptedClientSecret.equals(password);
 		} catch (StringEncrypter.EncryptionException e) {
 			log.error(e.getMessage(), e);
 		}
@@ -259,7 +261,7 @@ public class ClientService {
 	}
 
 	public void updateAccessTime(Client client, boolean isUpdateLogonTime) {
-		if (!appConfiguration.getUpdateClientAccessTime()) {
+		if (isFalse(appConfiguration.getUpdateClientAccessTime())) {
 			return;
 		}
 
@@ -290,7 +292,7 @@ public class ClientService {
 		removeFromCache(client);
 	}
 
-	public Object getAttribute(Client client, String clientAttribute) throws InvalidClaimException {
+	public Object getAttribute(Client client, String clientAttribute) {
 		Object attribute = null;
 
 		if (clientAttribute != null) {
@@ -352,11 +354,10 @@ public class ClientService {
 	}
 
     private BaseCacheService getCacheService() {
-    	if (appConfiguration.getUseLocalCache()) {
+    	if (isTrue(appConfiguration.getUseLocalCache())) {
     		return localCacheService;
     	}
     	
     	return cacheService;
     }
-
 }
