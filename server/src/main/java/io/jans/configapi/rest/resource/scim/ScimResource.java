@@ -23,7 +23,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-@Path("/user")
+@Path("/user-old")
 public class ScimResource {
 
     public static final String SEARCH_SUFFIX = ".search";
