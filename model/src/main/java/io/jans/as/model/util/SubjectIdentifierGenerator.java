@@ -17,6 +17,9 @@ import io.jans.as.model.crypto.signature.SignatureAlgorithm;
  */
 public class SubjectIdentifierGenerator {
 
+    private SubjectIdentifierGenerator() {
+    }
+
     public static String generatePairwiseSubjectIdentifier(String sectorIdentifier, String localAccountId, String key,
                                                            String salt, AppConfiguration configuration) throws Exception {
         AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(configuration);

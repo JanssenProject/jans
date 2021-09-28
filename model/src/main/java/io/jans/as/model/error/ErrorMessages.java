@@ -6,15 +6,14 @@
 
 package io.jans.as.model.error;
 
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -63,64 +62,64 @@ public class ErrorMessages {
         return authorize;
     }
 
-    public void setAuthorize(List<ErrorMessage> p_authorize) {
-        authorize = p_authorize;
+    public void setAuthorize(List<ErrorMessage> authorize) {
+        this.authorize = authorize;
     }
 
     public List<ErrorMessage> getClientInfo() {
         return clientInfo;
     }
 
-    public void setClientInfo(List<ErrorMessage> p_clientInfo) {
-        clientInfo = p_clientInfo;
+    public void setClientInfo(List<ErrorMessage> clientInfo) {
+        this.clientInfo = clientInfo;
     }
 
     public List<ErrorMessage> getEndSession() {
         return endSession;
     }
 
-    public void setEndSession(List<ErrorMessage> p_endSession) {
-        endSession = p_endSession;
+    public void setEndSession(List<ErrorMessage> endSession) {
+        this.endSession = endSession;
     }
 
     public List<ErrorMessage> getRegister() {
         return register;
     }
 
-    public void setRegister(List<ErrorMessage> p_register) {
-        register = p_register;
+    public void setRegister(List<ErrorMessage> register) {
+        this.register = register;
     }
 
     public List<ErrorMessage> getToken() {
         return token;
     }
 
-    public void setToken(List<ErrorMessage> p_token) {
-        token = p_token;
+    public void setToken(List<ErrorMessage> token) {
+        this.token = token;
     }
 
     public List<ErrorMessage> getRevoke() {
         return revoke;
     }
 
-    public void setRevoke(List<ErrorMessage> p_revoke) {
-        revoke = p_revoke;
+    public void setRevoke(List<ErrorMessage> revoke) {
+        this.revoke = revoke;
     }
 
     public List<ErrorMessage> getUma() {
         return uma;
     }
 
-    public void setUma(List<ErrorMessage> p_uma) {
-        uma = p_uma;
+    public void setUma(List<ErrorMessage> uma) {
+        this.uma = uma;
     }
 
     public List<ErrorMessage> getUserInfo() {
         return userInfo;
     }
 
-    public void setUserInfo(List<ErrorMessage> p_userInfo) {
-        userInfo = p_userInfo;
+    public void setUserInfo(List<ErrorMessage> userInfo) {
+        this.userInfo = userInfo;
     }
 
     public List<ErrorMessage> getFido() {

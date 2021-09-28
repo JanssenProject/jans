@@ -410,8 +410,10 @@ public class AppConfiguration implements Configuration {
     }
 
     public String getSoftwareStatementValidationType() {
-        if (softwareStatementValidationType == null)
-            return softwareStatementValidationType = SoftwareStatementValidationType.DEFAULT.getValue();
+        if (softwareStatementValidationType == null) {
+            softwareStatementValidationType = SoftwareStatementValidationType.DEFAULT.getValue();
+            return softwareStatementValidationType;
+        }
         return softwareStatementValidationType;
     }
 
@@ -722,8 +724,8 @@ public class AppConfiguration implements Configuration {
         return umaAddScopesAutomatically;
     }
 
-    public void setUmaAddScopesAutomatically(Boolean p_umaAddScopesAutomatically) {
-        umaAddScopesAutomatically = p_umaAddScopesAutomatically;
+    public void setUmaAddScopesAutomatically(Boolean umaAddScopesAutomatically) {
+        this.umaAddScopesAutomatically = umaAddScopesAutomatically;
     }
 
     public Boolean getUmaValidateClaimToken() {
@@ -968,8 +970,8 @@ public class AppConfiguration implements Configuration {
         return umaConfigurationEndpoint;
     }
 
-    public void setUmaConfigurationEndpoint(String p_umaConfigurationEndpoint) {
-        umaConfigurationEndpoint = p_umaConfigurationEndpoint;
+    public void setUmaConfigurationEndpoint(String umaConfigurationEndpoint) {
+        this.umaConfigurationEndpoint = umaConfigurationEndpoint;
     }
 
     public String getOpenidSubAttribute() {
@@ -984,16 +986,16 @@ public class AppConfiguration implements Configuration {
         return idGenerationEndpoint;
     }
 
-    public void setIdGenerationEndpoint(String p_idGenerationEndpoint) {
-        idGenerationEndpoint = p_idGenerationEndpoint;
+    public void setIdGenerationEndpoint(String idGenerationEndpoint) {
+        this.idGenerationEndpoint = idGenerationEndpoint;
     }
 
     public String getIntrospectionEndpoint() {
         return introspectionEndpoint;
     }
 
-    public void setIntrospectionEndpoint(String p_introspectionEndpoint) {
-        introspectionEndpoint = p_introspectionEndpoint;
+    public void setIntrospectionEndpoint(String introspectionEndpoint) {
+        this.introspectionEndpoint = introspectionEndpoint;
     }
 
     public String getParEndpoint() {
@@ -1212,8 +1214,8 @@ public class AppConfiguration implements Configuration {
         return dynamicRegistrationCustomAttributes;
     }
 
-    public void setDynamicRegistrationCustomAttributes(List<String> p_dynamicRegistrationCustomAttributes) {
-        dynamicRegistrationCustomAttributes = p_dynamicRegistrationCustomAttributes;
+    public void setDynamicRegistrationCustomAttributes(List<String> dynamicRegistrationCustomAttributes) {
+        this.dynamicRegistrationCustomAttributes = dynamicRegistrationCustomAttributes;
     }
 
     public List<String> getDisplayValuesSupported() {
@@ -1258,7 +1260,7 @@ public class AppConfiguration implements Configuration {
 
     public List<String> getIdTokenTokenBindingCnfValuesSupported() {
         if (idTokenTokenBindingCnfValuesSupported == null) {
-            idTokenTokenBindingCnfValuesSupported = new ArrayList<String>();
+            idTokenTokenBindingCnfValuesSupported = new ArrayList<>();
         }
         return idTokenTokenBindingCnfValuesSupported;
     }
@@ -1399,8 +1401,8 @@ public class AppConfiguration implements Configuration {
         return cleanServiceInterval;
     }
 
-    public void setCleanServiceInterval(int p_cleanServiceInterval) {
-        cleanServiceInterval = p_cleanServiceInterval;
+    public void setCleanServiceInterval(int cleanServiceInterval) {
+        this.cleanServiceInterval = cleanServiceInterval;
     }
 
     public int getCleanServiceBatchChunkSize() {
@@ -1531,8 +1533,8 @@ public class AppConfiguration implements Configuration {
         return dynamicRegistrationCustomObjectClass;
     }
 
-    public void setDynamicRegistrationCustomObjectClass(String p_dynamicRegistrationCustomObjectClass) {
-        dynamicRegistrationCustomObjectClass = p_dynamicRegistrationCustomObjectClass;
+    public void setDynamicRegistrationCustomObjectClass(String dynamicRegistrationCustomObjectClass) {
+        this.dynamicRegistrationCustomObjectClass = dynamicRegistrationCustomObjectClass;
     }
 
     public List<String> getPersonCustomObjectClassList() {
@@ -1555,13 +1557,13 @@ public class AppConfiguration implements Configuration {
         return clientAuthenticationFiltersEnabled;
     }
 
-    public void setClientAuthenticationFiltersEnabled(Boolean p_clientAuthenticationFiltersEnabled) {
-        clientAuthenticationFiltersEnabled = p_clientAuthenticationFiltersEnabled;
+    public void setClientAuthenticationFiltersEnabled(Boolean clientAuthenticationFiltersEnabled) {
+        this.clientAuthenticationFiltersEnabled = clientAuthenticationFiltersEnabled;
     }
 
     public List<AuthenticationFilter> getAuthenticationFilters() {
         if (authenticationFilters == null) {
-            authenticationFilters = new ArrayList<AuthenticationFilter>();
+            authenticationFilters = new ArrayList<>();
         }
 
         return authenticationFilters;
@@ -1569,7 +1571,7 @@ public class AppConfiguration implements Configuration {
 
     public List<ClientAuthenticationFilter> getClientAuthenticationFilters() {
         if (clientAuthenticationFilters == null) {
-            clientAuthenticationFilters = new ArrayList<ClientAuthenticationFilter>();
+            clientAuthenticationFilters = new ArrayList<>();
         }
 
         return clientAuthenticationFilters;
@@ -1578,7 +1580,7 @@ public class AppConfiguration implements Configuration {
 
     public List<CorsConfigurationFilter> getCorsConfigurationFilters() {
         if (corsConfigurationFilters == null) {
-            corsConfigurationFilters = new ArrayList<CorsConfigurationFilter>();
+            corsConfigurationFilters = new ArrayList<>();
         }
 
         return corsConfigurationFilters;
@@ -1588,8 +1590,8 @@ public class AppConfiguration implements Configuration {
         return sessionIdUnusedLifetime;
     }
 
-    public void setSessionIdUnusedLifetime(int p_sessionIdUnusedLifetime) {
-        sessionIdUnusedLifetime = p_sessionIdUnusedLifetime;
+    public void setSessionIdUnusedLifetime(int sessionIdUnusedLifetime) {
+        this.sessionIdUnusedLifetime = sessionIdUnusedLifetime;
     }
 
     public int getSessionIdUnauthenticatedUnusedLifetime() {
@@ -1623,16 +1625,16 @@ public class AppConfiguration implements Configuration {
         return sessionIdEnabled;
     }
 
-    public void setSessionIdEnabled(Boolean p_sessionIdEnabled) {
-        sessionIdEnabled = p_sessionIdEnabled;
+    public void setSessionIdEnabled(Boolean sessionIdEnabled) {
+        this.sessionIdEnabled = sessionIdEnabled;
     }
 
     public int getConfigurationUpdateInterval() {
         return configurationUpdateInterval;
     }
 
-    public void setConfigurationUpdateInterval(int p_configurationUpdateInterval) {
-        configurationUpdateInterval = p_configurationUpdateInterval;
+    public void setConfigurationUpdateInterval(int configurationUpdateInterval) {
+        this.configurationUpdateInterval = configurationUpdateInterval;
     }
 
     public String getJsLocation() {

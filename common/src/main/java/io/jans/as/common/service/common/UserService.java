@@ -8,6 +8,7 @@ package io.jans.as.common.service.common;
 
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.util.AttributeConstants;
+import io.jans.as.model.config.Constants;
 import io.jans.as.model.util.Util;
 import io.jans.model.GluuStatus;
 import io.jans.orm.PersistenceEntryManager;
@@ -23,10 +24,13 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import static io.jans.as.model.util.Util.escapeLog;
 
 /**
  * Provides operations with users.
@@ -66,13 +70,12 @@ public abstract class UserService {
         }
 
         String userDn = getDnForUser(inum);
-        User user = getUserByDn(userDn, returnAttributes);
-
-        return user;
+        return getUserByDn(userDn, returnAttributes);
     }
 
     public User getUser(String userId, String... returnAttributes) {
-        log.debug("Getting user information from LDAP: userId = {}", userId);
+        final String escapedUserId = escapeLog(userId);
+        log.debug("Getting user information from LDAP: userId = {}", escapedUserId);
 
         if (StringHelper.isEmpty(userId)) {
             return null;
@@ -87,13 +90,9 @@ public abstract class UserService {
         }
 
         List<User> entries = persistenceEntryManager.findEntries(peopleBaseDn, User.class, userUidFilter, returnAttributes);
-        log.debug("Found {} entries for user id = {}", entries.size(), userId);
+        log.debug("Found {} entries for user id = {}", entries.size(), escapedUserId);
 
-        if (entries.size() > 0) {
-            return entries.get(0);
-        } else {
-            return null;
-        }
+        return entries.isEmpty() ? null : entries.get(0);
     }
 
     public String getUserInum(User user) {
@@ -101,9 +100,7 @@ public abstract class UserService {
             return null;
         }
 
-        String inum = user.getAttribute("inum");
-
-        return inum;
+        return user.getAttribute("inum");
     }
 
     public String getUserInum(String userId) {
@@ -203,7 +200,7 @@ public abstract class UserService {
 
                 try {
                     List<User> entries = persistenceEntryManager.findEntries(searchUser);
-                    log.debug("Found '{}' entries", entries.size());
+                    log.debug(Constants.LOG_FOUND, entries.size());
 
                     if (entries.size() == 0) {
                         continue;
@@ -223,10 +220,11 @@ public abstract class UserService {
     }
 
     public List<User> getUsersByAttribute(String attributeName, Object attributeValue, Boolean multiValued, int limit) {
-        log.debug("Getting user information from LDAP: attributeName = '{}', attributeValue = '{}'", attributeName, attributeValue);
+        if (log.isDebugEnabled())
+            log.debug("Getting user information from LDAP: attributeName = '{}', attributeValue = '{}'", escapeLog(attributeName), escapeLog(attributeValue));
 
         if (StringHelper.isEmpty(attributeName) || (attributeValue == null)) {
-            return null;
+            return Collections.emptyList();
         }
 
         Filter filter = Filter.createEqualityFilter(attributeName, attributeValue);
@@ -249,7 +247,8 @@ public abstract class UserService {
             return null;
         }
 
-        log.debug("Getting user information from DB: {} = {}", ArrayHelper.toString(attributeNames), attributeValue);
+        if (log.isDebugEnabled())
+            log.debug("Getting user information from DB: {} = {}", ArrayHelper.toString(attributeNames), attributeValue);
 
         String peopleBaseDn = getPeopleBaseDn();
 
@@ -276,13 +275,10 @@ public abstract class UserService {
         }
 
         List<User> entries = persistenceEntryManager.findEntries(getPeopleBaseDn(), User.class, searchFiler, returnAttributes, 1);
-        log.debug("Found {} entries for user {} = {}", entries.size(), ArrayHelper.toString(attributeNames), attributeValue);
+        if (log.isDebugEnabled())
+            log.debug("Found {} entries for user {} = {}", entries.size(), ArrayHelper.toString(attributeNames), attributeValue);
 
-        if (entries.size() > 0) {
-            return entries.get(0);
-        } else {
-            return null;
-        }
+        return entries.isEmpty() ? null : entries.get(0);
     }
 
     public User getUserByAttributes(List<CustomAttribute> attributes, boolean andFilter, String... returnAttributes) {
@@ -443,8 +439,7 @@ public abstract class UserService {
         CustomObjectAttribute customAttribute = getCustomAttribute(user, attributeName);
         if (customAttribute != null) {
             List<Object> currentAttributeValues = customAttribute.getValues();
-            List<Object> newAttributeValues = new ArrayList<Object>();
-            newAttributeValues.addAll(currentAttributeValues);
+            List<Object> newAttributeValues = new ArrayList<>(currentAttributeValues);
 
             if (currentAttributeValues.contains(oldAttributeValue)) {
                 newAttributeValues.remove(oldAttributeValue);
@@ -455,12 +450,11 @@ public abstract class UserService {
             }
 
             customAttribute.setValues(newAttributeValues);
-        }
 
-        if (multiValued != null) {
-            customAttribute.setMultiValued(multiValued);
+            if (multiValued != null) {
+                customAttribute.setMultiValued(multiValued);
+            }
         }
-
         return updateUser(user);
     }
 
@@ -484,34 +478,6 @@ public abstract class UserService {
 
         customAttribute.setValue(attributeValue);
     }
-//
-//    // this method must be called only if app mode = MEMORY, in ldap case it's anyway persisted in ldap.
-//    public boolean saveLongLivedToken(String userId, PersistentJwt longLivedToken) {
-//        log.debug("Saving long-lived access token: userId = {}", userId);
-//        boolean succeed = false;
-//
-//        User user = getUser(userId);
-//        if (user != null) {
-//            int nTokens = 0;
-//            if (user.getOxAuthPersistentJwt() != null) {
-//                nTokens = user.getOxAuthPersistentJwt().length;
-//            }
-//            nTokens++;
-//            String[] persistentJwts = new String[nTokens];
-//            if (user.getOxAuthPersistentJwt() != null) {
-//                for (int i = 0; i < user.getOxAuthPersistentJwt().length; i++) {
-//                    persistentJwts[i] = user.getOxAuthPersistentJwt()[i];
-//                }
-//            }
-//            persistentJwts[nTokens - 1] = longLivedToken.toString();
-//
-//            user.setOxAuthPersistentJwt(persistentJwts);
-//            ldapEntryManager.merge(user);
-//            succeed = true;
-//        }
-//
-//        return succeed;
-//    }
 
     public List<User> getUsersWithPersistentJwts() {
         String baseDN = getPeopleBaseDn();

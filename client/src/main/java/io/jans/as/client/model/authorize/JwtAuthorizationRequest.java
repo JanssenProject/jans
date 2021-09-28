@@ -13,6 +13,7 @@ import io.jans.as.model.common.Display;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseMode;
 import io.jans.as.model.common.ResponseType;
+import io.jans.as.model.config.Constants;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
 import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
@@ -24,8 +25,6 @@ import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaims;
 import io.jans.as.model.jwt.JwtHeader;
 import io.jans.as.model.jwt.JwtType;
-import io.jans.as.model.util.Base64Util;
-import io.jans.as.model.util.Util;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
@@ -34,8 +33,11 @@ import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.security.PublicKey;
 import java.util.List;
+
+import static io.jans.as.model.util.StringUtils.base64urlencode;
 
 /**
  * @author Javier Rojas Blum
@@ -87,8 +89,8 @@ public class JwtAuthorizationRequest {
     private Jwt nestedPayload;
 
     // Signature/Encryption Keys
-    private String sharedKey;
-    private AbstractCryptoProvider cryptoProvider;
+    private final String sharedKey;
+    private final AbstractCryptoProvider cryptoProvider;
 
     public JwtAuthorizationRequest(AuthorizationRequest authorizationRequest, SignatureAlgorithm signatureAlgorithm,
                                    AbstractCryptoProvider cryptoProvider) {
@@ -456,18 +458,18 @@ public class JwtAuthorizationRequest {
                 PublicKey publicKey = cryptoProvider.getPublicKey(keyId, jwks, null);
                 jweEncrypter = new JweEncrypterImpl(keyEncryptionAlgorithm, blockEncryptionAlgorithm, publicKey);
             } else {
-                jweEncrypter = new JweEncrypterImpl(keyEncryptionAlgorithm, blockEncryptionAlgorithm, sharedKey.getBytes(Util.UTF8_STRING_ENCODING));
+                jweEncrypter = new JweEncrypterImpl(keyEncryptionAlgorithm, blockEncryptionAlgorithm, sharedKey.getBytes(StandardCharsets.UTF_8));
             }
 
             String header = ClientUtil.toPrettyJson(headerToJSONObject());
-            String encodedHeader = Base64Util.base64urlencode(header.getBytes(Util.UTF8_STRING_ENCODING));
+            String encodedHeader = base64urlencode(header);
 
             Jwe jwe = new Jwe();
             jwe.setHeader(new JwtHeader(encodedHeader));
 
             if (nestedPayload == null) {
                 String claims = ClientUtil.toPrettyJson(payloadToJSONObject());
-                String encodedClaims = Base64Util.base64urlencode(claims.getBytes(Util.UTF8_STRING_ENCODING));
+                String encodedClaims = base64urlencode(claims);
                 jwe.setClaims(new JwtClaims(encodedClaims));
             } else {
                 jwe.setSignedJWTPayload(nestedPayload);
@@ -485,8 +487,8 @@ public class JwtAuthorizationRequest {
             JSONObject payloadJsonObject = payloadToJSONObject();
             String headerString = ClientUtil.toPrettyJson(headerJsonObject);
             String payloadString = ClientUtil.toPrettyJson(payloadJsonObject);
-            String encodedHeader = Base64Util.base64urlencode(headerString.getBytes(Util.UTF8_STRING_ENCODING));
-            String encodedPayload = Base64Util.base64urlencode(payloadString.getBytes(Util.UTF8_STRING_ENCODING));
+            String encodedHeader = base64urlencode(headerString);
+            String encodedPayload = base64urlencode(payloadString);
             String signingInput = encodedHeader + "." + encodedPayload;
             String encodedSignature = cryptoProvider.sign(signingInput, keyId, sharedKey, signatureAlgorithm);
 
@@ -504,10 +506,8 @@ public class JwtAuthorizationRequest {
         String decodedJwt = null;
         try {
             decodedJwt = ClientUtil.toPrettyJson(payloadToJSONObject());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
+        } catch (JSONException | JsonProcessingException e) {
+            LOG.error(e.getMessage(), e);
         }
 
         return decodedJwt;
@@ -566,7 +566,7 @@ public class JwtAuthorizationRequest {
                 obj.put("redirect_uri", URLEncoder.encode(redirectUri, "UTF-8"));
             }
             if (StringUtils.isNotBlank(state)) {
-                obj.put("state", state);
+                obj.put(Constants.STATE, state);
             }
             if (StringUtils.isNotBlank(nonce)) {
                 obj.put("nonce", nonce);

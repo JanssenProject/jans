@@ -6,14 +6,14 @@
 
 package io.jans.as.model.util;
 
+import org.apache.log4j.Logger;
+
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.apache.log4j.Logger;
 
 /**
  * @author Javier Rojas Blum
@@ -26,7 +26,7 @@ public class URLPatternList {
     private List<URLPattern> urlPatternList;
 
     public URLPatternList() {
-        this.urlPatternList = new ArrayList<URLPattern>();
+        this.urlPatternList = new ArrayList<>();
     }
 
     public URLPatternList(List<String> urlPatternList) {
@@ -86,10 +86,10 @@ public class URLPatternList {
     }
 
     private static class URLPattern {
-        public Pattern scheme;
-        public Pattern host;
-        public Integer port;
-        public Pattern path;
+        Pattern scheme;
+        Pattern host;
+        Integer port;
+        Pattern path;
 
         public URLPattern(String scheme, String host, String port, String path) throws MalformedURLException {
             try {

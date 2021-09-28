@@ -83,7 +83,7 @@ public enum ResponseMode implements HasParamName, AttributeEnum {
 
     private final String value;
 
-    private static Map<String, ResponseMode> mapByValues = new HashMap<String, ResponseMode>();
+    private static final Map<String, ResponseMode> mapByValues = new HashMap<>();
 
     static {
         for (ResponseMode enumType : values()) {

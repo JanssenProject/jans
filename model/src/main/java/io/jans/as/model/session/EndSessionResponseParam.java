@@ -17,5 +17,5 @@ public interface EndSessionResponseParam {
      * specified by the post_logout_redirect_uri parameter. If included in the logout request, the OP passes this
      * value back to the RP using the state query parameter when redirecting the User Agent back to the RP.
      */
-    public static final String STATE = "state";
+    String STATE = "state";
 }

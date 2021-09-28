@@ -24,7 +24,7 @@ import com.google.common.base.Preconditions;
  */
 public class JsonLogic {
 
-    private final static Logger LOG = Logger.getLogger(JsonLogic.class);
+    private static final Logger LOG = Logger.getLogger(JsonLogic.class);
 
     private static final JsonLogic INSTANCE = new JsonLogic();
 

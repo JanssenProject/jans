@@ -64,5 +64,5 @@ public enum AuthorizationMethod {
      * "Authorization" request header field or the HTTP request entity-body.
      * Resource servers MAY support this method.
      */
-    URL_QUERY_PARAMETER;
+    URL_QUERY_PARAMETER
 }

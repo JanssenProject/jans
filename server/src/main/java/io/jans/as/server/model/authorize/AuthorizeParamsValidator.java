@@ -90,9 +90,7 @@ public class AuthorizeParamsValidator {
         }
         if (responseTypes.contains(ResponseType.TOKEN) || (responseTypes.contains(ResponseType.ID_TOKEN) && !appConfiguration.getAllowIdTokenWithoutImplicitGrantType())) {
             GrantType requestedGrantType = GrantType.IMPLICIT;
-            if (!clientGrantTypes.contains(requestedGrantType) || !grantTypesSupported.contains(requestedGrantType)) {
-                return false;
-            }
+            return clientGrantTypes.contains(requestedGrantType) && grantTypesSupported.contains(requestedGrantType);
         }
 
         return true;

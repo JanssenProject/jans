@@ -44,19 +44,22 @@ import javax.crypto.spec.SecretKeySpec;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Signature;
-import java.security.SignatureException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
@@ -88,19 +91,19 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
     private final boolean rejectNoneAlg;
     private final KeySelectionStrategy keySelectionStrategy;
 
-    public AuthCryptoProvider() throws Exception {
+    public AuthCryptoProvider() throws KeyStoreException {
         this(null, null, null);
     }
 
-    public AuthCryptoProvider(String keyStoreFile, String keyStoreSecret, String dnName) throws Exception {
+    public AuthCryptoProvider(String keyStoreFile, String keyStoreSecret, String dnName) throws KeyStoreException {
         this(keyStoreFile, keyStoreSecret, dnName, false);
     }
 
-    public AuthCryptoProvider(String keyStoreFile, String keyStoreSecret, String dnName, boolean rejectNoneAlg) throws Exception {
+    public AuthCryptoProvider(String keyStoreFile, String keyStoreSecret, String dnName, boolean rejectNoneAlg) throws KeyStoreException {
         this(keyStoreFile, keyStoreSecret, dnName, rejectNoneAlg, AppConfiguration.DEFAULT_KEY_SELECTION_STRATEGY);
     }
 
-    public AuthCryptoProvider(String keyStoreFile, String keyStoreSecret, String dnName, boolean rejectNoneAlg, KeySelectionStrategy keySelectionStrategy) throws Exception {
+    public AuthCryptoProvider(String keyStoreFile, String keyStoreSecret, String dnName, boolean rejectNoneAlg, KeySelectionStrategy keySelectionStrategy) throws KeyStoreException {
         this.rejectNoneAlg = rejectNoneAlg;
         this.keySelectionStrategy = keySelectionStrategy != null ? keySelectionStrategy : AppConfiguration.DEFAULT_KEY_SELECTION_STRATEGY;
         if (!Util.isNullOrEmpty(keyStoreFile) && !Util.isNullOrEmpty(keyStoreSecret) /* && !Util.isNullOrEmpty(dnName) */) {
@@ -109,16 +112,18 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
             this.dnName = dnName;
 
             keyStore = KeyStore.getInstance("JKS");
+
             try {
                 File f = new File(keyStoreFile);
                 if (!f.exists()) {
                     keyStore.load(null, keyStoreSecret.toCharArray());
-                    FileOutputStream fos = new FileOutputStream(keyStoreFile);
-                    keyStore.store(fos, keyStoreSecret.toCharArray());
-                    fos.close();
+                    try (FileOutputStream fos = new FileOutputStream(keyStoreFile)) {
+                        keyStore.store(fos, keyStoreSecret.toCharArray());
+                    }
                 }
-                final InputStream is = new FileInputStream(keyStoreFile);
-                keyStore.load(is, keyStoreSecret.toCharArray());
+                try (InputStream is = new FileInputStream(keyStoreFile)) {
+                    keyStore.load(is, keyStoreSecret.toCharArray());
+                }
             } catch (Exception e) {
                 LOG.error(e.getMessage(), e);
             }
@@ -150,18 +155,14 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
     }
 
     @Override
-    public JSONObject generateKey(Algorithm algorithm, Long expirationTime, Use use) throws Exception {
-
-        KeyPairGenerator keyGen = null;
-
+    public JSONObject generateKey(Algorithm algorithm, Long expirationTime, Use use) throws NoSuchProviderException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, CertificateException, IOException, OperatorCreationException, KeyStoreException {
         SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(algorithm.getParamName());
         if (signatureAlgorithm == null) {
             signatureAlgorithm = SignatureAlgorithm.RS256;
         }
 
-        if (algorithm == null) {
-            throw new RuntimeException("The signature algorithm parameter cannot be null");
-        } else if (AlgorithmFamily.RSA.equals(algorithm.getFamily())) {
+        KeyPairGenerator keyGen;
+        if (AlgorithmFamily.RSA.equals(algorithm.getFamily())) {
             keyGen = KeyPairGenerator.getInstance(algorithm.getFamily().toString(), "BC");
             keyGen.initialize(2048, new SecureRandom());
         } else if (AlgorithmFamily.EC.equals(algorithm.getFamily())) {
@@ -169,7 +170,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
             keyGen = KeyPairGenerator.getInstance(algorithm.getFamily().toString(), "BC");
             keyGen.initialize(eccgen, new SecureRandom());
         } else {
-            throw new RuntimeException("The provided signature algorithm parameter is not supported");
+            throw new UnknownAlgorithmException("The provided signature algorithm parameter is not supported");
         }
 
         // Generate the key
@@ -255,7 +256,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
         if (signatureAlgorithm == SignatureAlgorithm.NONE) {
             return "";
         } else if (AlgorithmFamily.HMAC.equals(signatureAlgorithm.getFamily())) {
-            SecretKey secretKey = new SecretKeySpec(sharedSecret.getBytes(Util.UTF8_STRING_ENCODING), signatureAlgorithm.getAlgorithm());
+            SecretKey secretKey = new SecretKeySpec(sharedSecret.getBytes(StandardCharsets.UTF_8), signatureAlgorithm.getAlgorithm());
             Mac mac = Mac.getInstance(signatureAlgorithm.getAlgorithm());
             mac.init(secretKey);
             byte[] sig = mac.doFinal(signingInput.getBytes());
@@ -297,7 +298,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
             String expectedSignature = sign(signingInput, null, sharedSecret, signatureAlgorithm);
             return expectedSignature.equals(encodedSignature);
         } else { // EC or RSA
-            PublicKey publicKey = null;
+            PublicKey publicKey;
 
             try {
                 if (jwks == null) {
@@ -309,8 +310,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
                     return false;
                 }
 
-                byte[] signature = Base64Util.base64urldecode(encodedSignature);
-                byte[] signatureDer = signature;
+                byte[] signatureDer = Base64Util.base64urldecode(encodedSignature);
                 if (AlgorithmFamily.EC.equals(signatureAlgorithm.getFamily())) {
                 	signatureDer = ECDSA.transcodeSignatureToDER(signatureDer);
                 }
@@ -318,13 +318,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
                 Signature verifier = Signature.getInstance(signatureAlgorithm.getAlgorithm(), "BC");
                 verifier.initVerify(publicKey);
                 verifier.update(signingInput.getBytes());
-                try {
-                	return verifier.verify(signatureDer);
-                } catch (SignatureException e) {
-                	// Fall back to old format
-                	// TODO: remove in Gluu 5.0
-                	return verifier.verify(signature);
-                }
+                return verifier.verify(signatureDer);
             } catch (Exception e) {
                 LOG.error(e.getMessage(), e);
                 return false;
@@ -362,6 +356,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
         return publicKey;
     }
 
+    @Override
     public String getKeyId(JSONWebKeySet jsonWebKeySet, Algorithm algorithm, Use use) throws Exception {
         if (algorithm == null || AlgorithmFamily.HMAC.equals(algorithm.getFamily())) {
             return null;
@@ -442,11 +437,10 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
 
         ContentSigner signer = new JcaContentSignerBuilder(signatureAlgorithm).setProvider("BC").build(privateKey);
         X509CertificateHolder holder = builder.build(signer);
-        X509Certificate cert = new JcaX509CertificateConverter().setProvider("BC").getCertificate(holder);
-
-        return cert;
+        return new JcaX509CertificateConverter().setProvider("BC").getCertificate(holder);
     }
 
+    @Override
     public List<String> getKeys() {
         try {
             return Collections.list(this.keyStore.aliases());

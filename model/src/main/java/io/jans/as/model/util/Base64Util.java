@@ -6,11 +6,10 @@
 
 package io.jans.as.model.util;
 
-import java.io.UnsupportedEncodingException;
-import java.math.BigInteger;
-
 import org.apache.commons.codec.binary.Base64;
-import org.apache.log4j.Logger;
+
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 
 /**
  * @author Javier Rojas Blum
@@ -18,7 +17,8 @@ import org.apache.log4j.Logger;
  */
 public class Base64Util {
 
-    private static final Logger log = Logger.getLogger(Base64Util.class);
+    private Base64Util() {
+    }
 
     public static String base64urlencode(byte[] arg) {
         String s = Base64.encodeBase64String(arg); // Standard base64 encoder
@@ -33,9 +33,9 @@ public class Base64Util {
         return Base64.decodeBase64(s); // Standard base64 decoder
     }
 
-    public static String base64urldecodeToString(String arg) throws IllegalArgumentException, UnsupportedEncodingException {
+    public static String base64urldecodeToString(String arg) throws IllegalArgumentException {
         byte[] decoded = base64urldecode(arg);
-        return new String(decoded, "UTF-8");
+        return new String(decoded, StandardCharsets.UTF_8);
     }
 
     public static String removePadding(String base64UrlEncoded) {

@@ -6,10 +6,10 @@
 
 package io.jans.as.model.error;
 
-import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import io.jans.as.model.config.Constants;
+import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
 
 /**
  * JSON error response
@@ -23,13 +23,13 @@ public class JsonErrorResponse {
     @JsonProperty(value = "status")
     private String status;
 
-    @JsonProperty(value = "error")
+    @JsonProperty(value = Constants.ERROR)
     private String error;
 
-    @JsonProperty(value = "error_description")
+    @JsonProperty(value = Constants.ERROR_DESCRIPTION)
 	private String errorDescription;
 
-    @JsonProperty(value = "error_uri")
+    @JsonProperty(value = Constants.ERROR_URI)
 	private String errorUri;
 
 	public JsonErrorResponse() {

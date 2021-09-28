@@ -43,15 +43,12 @@ public class Conf {
     @AttributeName(name = "jansRevision")
     private long revision;
 
-    public Conf() {
-    }
-
     public String getDn() {
         return dn;
     }
 
-    public void setDn(String p_dn) {
-        dn = p_dn;
+    public void setDn(String dn) {
+        this.dn = dn;
     }
 
     public AppConfiguration getDynamic() {

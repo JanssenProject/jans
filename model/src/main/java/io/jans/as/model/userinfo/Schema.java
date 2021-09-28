@@ -15,7 +15,7 @@ public enum Schema {
 
     private final String paramName;
 
-    private Schema(String paramName) {
+    Schema(String paramName) {
         this.paramName = paramName;
     }
 
