@@ -669,7 +669,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         if (!CodeVerifier.matched(grant.getCodeChallenge(), grant.getCodeChallengeMethod(), codeVerifier)) {
             log.error("PKCE check fails. Code challenge does not match to request code verifier, " +
                     "grantId:" + grant.getGrantId() + ", codeVerifier: " + codeVerifier);
-            throw new WebApplicationException(response(error(401, TokenErrorResponseType.INVALID_GRANT, "PKCE check fails. Code challenge does not match to request code verifier."), oAuth2AuditLog));
+            throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_GRANT, "PKCE check fails. Code challenge does not match to request code verifier."), oAuth2AuditLog));
         }
     }
 
