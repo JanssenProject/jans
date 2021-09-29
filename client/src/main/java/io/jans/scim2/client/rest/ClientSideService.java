@@ -20,7 +20,7 @@ import javax.ws.rs.core.Response;
  * Device resources via the SCIM API. It also has support to call service metadata endpoints (see section 4 of RFC 7644).
  *
  * <p>The <i>ClientSide*</i> super interfaces add methods to actual interfaces used in server side implementation (those
- * in package {@link io.jans.scim.ws.rs.scim2 org.gluu.oxtrust.ws.rs.scim2}) enabling a more straightforward
+ * in package {@link io.jans.scim.ws.rs.scim2 io.jans.scim.ws.rs.scim2}) enabling a more straightforward
  * interaction with the service by supplying Json payloads directly. This brings developers an alternative to the
  * objectual approach.</p>
  */
@@ -75,7 +75,7 @@ public interface ClientSideService extends ClientSideUserService, ClientSideGrou
      * Executes a system-wide query using HTTP POST. The results obtained can be of different resource types.
      * See section 3.4.3 of RFC 7644.
      * @param searchRequest An object containing the parameters for the query to execute. These are the same parameters
-     *                      passed via URL for searches, for example in org.gluu.oxtrust.ws.rs.scim2.IUserWebService#searchUsers
+     *                      passed via URL for searches, for example in io.jans.scim.ws.rs.scim2.IUserWebService#searchUsers
      * @return An object abstracting the response obtained from the server to this request.
      * A successful response for this request should contain a status code of 200 and a ListResponse in the entity body
      * (holding a collection of SCIM resource objects)
@@ -90,7 +90,7 @@ public interface ClientSideService extends ClientSideUserService, ClientSideGrou
     /**
      * Executes a system-wide query using HTTP POST. This is analog to {@link #searchResourcesPost(SearchRequest) searchResourcesPost(SearchRequest)}
      * using a Json String to supply the payload.
-     * @param searchRequestJson A String with the payload for the operation. It represents a <code>org.gluu.oxtrust.model.scim2.SearchRequest</code> object
+     * @param searchRequestJson A String with the payload for the operation. It represents a <code>io.jans.scim.model.scim2.SearchRequest</code> object
      * @return An object abstracting the response obtained from the server to this request.
      * A successful response for this request should contain a status code of 200 and a ListResponse in the entity body
      * (holding a collection of SCIM resource objects)
@@ -106,12 +106,12 @@ public interface ClientSideService extends ClientSideUserService, ClientSideGrou
      * Sends a bulk request as per section 3.7 of RFC 7644. This operation enables clients to send a potentially large
      * collection of resource operations in a single request.
      * @param request The object describing the request. Depending on the use case, constructing an instance of
-     *                org.gluu.oxtrust.model.scim2.bulk.BulkRequest might be cumbersome. A more agile approach is using a
+     *                io.jans.scim.model.scim2.bulk.BulkRequest might be cumbersome. A more agile approach is using a
      *                Json string by calling {@link #processBulkOperations(String) processBulkOperations(String)}
      * @return An object abstracting the response obtained from the server to this request.
      * A successful response for this request should contain a status code of 200 and a BulkResponse object in the entity
      * body (holding the results of every processed operation). The number of results is constrained by parameters such as
-     * org.gluu.oxtrust.model.scim2.bulk.BulkRequest#failOnErrors.
+     * io.jans.scim.model.scim2.bulk.BulkRequest#failOnErrors.
      */
     @Path("/v2/Bulk")
     @POST
@@ -126,7 +126,7 @@ public interface ClientSideService extends ClientSideUserService, ClientSideGrou
      * @return An object abstracting the response obtained from the server to this request.
      * A successful response for this request should contain a status code of 200 and a BulkResponse object in the entity
      * body (holding the results of every processed operation). The number of results is constrained by parameters such as
-     * org.gluu.oxtrust.model.scim2.bulk.BulkRequest#failOnErrors
+     * io.jans.scim.model.scim2.bulk.BulkRequest#failOnErrors
      */
     @Path("/v2/Bulk")
     @POST
@@ -137,7 +137,7 @@ public interface ClientSideService extends ClientSideUserService, ClientSideGrou
 
     /**
      * Obtains user entries that have been updated or added in the local Gluu database after a specified 
-     * timestamp. This is NOT part of SCIM spec. See class org.gluu.oxtrust.ws.rs.scim2.ScimResourcesUpdatedWebService
+     * timestamp. This is NOT part of SCIM spec. See class io.jans.scim.ws.rs.scim2.ScimResourcesUpdatedWebService
      * See the doc <a href="https://www.gluu.org/docs/gluu-server/user-management/idm-sync/">page</a>.
      * @param isoDate Represents a timestamp in ISO format (eg. 2019-12-24T12:00:03-05:00) 
      * @param start Integer offset from which results are output

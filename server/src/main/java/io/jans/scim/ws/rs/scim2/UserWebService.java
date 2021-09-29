@@ -61,7 +61,7 @@ import io.jans.scim.ws.rs.scim2.PATCH;
 
 /**
  * Implementation of /Users endpoint. Methods here are intercepted.
- * Filter org.gluu.oxtrust.filter.AuthorizationProcessingFilter secures invocations
+ * Filter io.jans.scim.service.filter.AuthorizationProcessingFilter secures invocations
  */
 @Named
 @Path("/v2/Users")
@@ -148,7 +148,7 @@ public class UserWebService extends BaseScimWebService implements IUserWebServic
         try {
             log.debug("Executing web service method. createUser");
 
-            executeDefaultValidation(user);
+            executeValidation(user);
             checkUidExistence(user.getUserName());
             assignMetaInformation(user);
             ScimResourceUtil.adjustPrimarySubAttributes(user);
@@ -387,7 +387,7 @@ public class UserWebService extends BaseScimWebService implements IUserWebServic
 
             //Throws exception if final representation does not pass overall validation
             log.debug("patchUser. Revising final resource representation still passes validations");
-            executeDefaultValidation(user);
+            executeValidation(user);
             ScimResourceUtil.adjustPrimarySubAttributes(user);
 
             //Update timestamp
