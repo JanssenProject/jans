@@ -21,7 +21,7 @@ import java.util.Set;
  * Created by jgomer on 2017-09-12.
  *
  * Notes: Property names (member names) MUST match exactly as in the spec, so do not change!. Other classes may depend on
- * this one via reflection. Do not add members whose names are already at org.gluu.oxtrust.model.scim2.BaseScimResource.
+ * this one via reflection. Do not add members whose names are already at io.jans.scim.model.scim2.BaseScimResource.
  * Annotations applied at every member resemble what the spec states
  */
 @Schema(id="urn:ietf:params:scim:schemas:core:2.0:Group", name="Group", description="Group")

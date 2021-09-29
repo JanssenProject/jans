@@ -39,7 +39,7 @@ public class FullUserTest extends UserBaseTest {
         user=createUserFromJson(json);
 
         //Confirm extended attrs info is there
-        //For help on usage of org.gluu.oxtrust.model.scim2.CustomAttributes class, read its api docs (oxtrust-scim maven project)
+        //For help on usage of io.jans.scim.model.scim2.CustomAttributes class, read its api docs (oxtrust-scim maven project)
         CustomAttributes custAttrs=user.getCustomAttributes(USER_EXT_SCHEMA_ID);
 
         assertNotNull(custAttrs.getValue("scimCustomFirst", String.class));

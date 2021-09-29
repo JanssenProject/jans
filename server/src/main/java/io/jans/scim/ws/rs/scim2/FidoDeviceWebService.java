@@ -57,7 +57,7 @@ import io.jans.scim.service.scim2.interceptor.RefAdjusted;
 
 /**
  * Implementation of /FidoDevices endpoint. Methods here are intercepted.
- * Filter org.gluu.oxtrust.ws.rs.scim2.AuthorizationProcessingFilter secures invocations
+ * Filter io.jans.scim.service.filter.AuthorizationProcessingFilter secures invocations
  */
 @Named("scim2FidoDeviceEndpoint")
 @Path("/v2/FidoDevices")
@@ -149,7 +149,8 @@ public class FidoDeviceWebService extends BaseScimWebService implements IFidoDev
             if (response != null) return response;
 
             FidoDeviceResource fidoResource = new FidoDeviceResource();
-            transferAttributesToFidoResource(device, fidoResource, endpointUrl, getUserInumFromDN(device.getDn()));
+            transferAttributesToFidoResource(device, fidoResource, endpointUrl,
+                userPersistenceHelper.getUserInumFromDN(device.getDn()));
 
             String json = resourceSerializer.serialize(fidoResource, attrsList, excludedAttrsList);
             response = Response.ok(new URI(fidoResource.getMeta().getLocation())).entity(json).build();
@@ -393,7 +394,7 @@ public class FidoDeviceWebService extends BaseScimWebService implements IFidoDev
 
         for (GluuCustomFidoDevice device : list.getEntries()){
             FidoDeviceResource scimDev=new FidoDeviceResource();
-            transferAttributesToFidoResource(device, scimDev, endpointUrl, getUserInumFromDN(device.getDn()));
+            transferAttributesToFidoResource(device, scimDev, endpointUrl, userPersistenceHelper.getUserInumFromDN(device.getDn()));
             resources.add(scimDev);
         }
         log.info ("Found {} matching entries - returning {}", list.getTotalEntriesCount(), list.getEntries().size());

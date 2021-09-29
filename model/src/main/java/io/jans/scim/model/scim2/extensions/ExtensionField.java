@@ -30,7 +30,6 @@ import java.util.regex.Pattern;
  *     <li>multivalued: true/false</li>
  *     <li>type: reference, string, datetime, decimal, and boolean (only).</li>
  * </ul>
- * <p>These can be tweaked via oxTrust admin web console.</p>
  *
  * <p>See also: {@link Extension} class.</p>
  */

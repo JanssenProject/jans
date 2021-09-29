@@ -7,7 +7,6 @@
 package io.jans.scim.service.scim2;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -52,6 +51,12 @@ public class UserPersistenceHelper {
     @Inject
     private GroupService groupService;
 
+    public String getUserInumFromDN(String deviceDn){
+        String baseDn = personService.getDnForPerson(null).replaceAll("\\s*", "");
+        deviceDn = deviceDn.replaceAll("\\s*", "").replaceAll("," + baseDn, "");
+        return deviceDn.substring(deviceDn.indexOf("inum=") + 5);
+    }
+
     public void addCustomObjectClass(ScimCustomPerson person) {
 		if (LdapEntryManagerFactory.PERSISTENCE_TYPE.equals(persistenceEntryManager.getPersistenceType())) {
 	        String[] customObjectClasses = Optional.ofNullable(person.getCustomObjectClasses()).orElse(new String[0]);
@@ -93,23 +98,31 @@ public class UserPersistenceHelper {
     }
 
     /**
-     * Delete a person from a group
-     *
+     * "Detaches" a person from all groups he is currently member of
+     * @param person The person in question
      * @throws Exception
      */
-    public void deleteUserFromGroup(ScimCustomPerson person, String dn) throws Exception {
+    public void removeUserFromGroups(ScimCustomPerson person) {
 
+        String dn = person.getDn();
         List<String> groups = person.getMemberOf();
+        
         for (String oneGroup : groups) {
-
-            GluuGroup aGroup = groupService.getGroupByDn(oneGroup);
-            List<String> tempGroupMembers = new ArrayList<>(
-                    Optional.ofNullable(aGroup.getMembers()).orElse(Collections.emptyList()));
-
-            if (tempGroupMembers.contains(dn)) {
-                tempGroupMembers.remove(dn);
-                aGroup.setMembers(tempGroupMembers.isEmpty() ? null : tempGroupMembers);
-                groupService.updateGroup(aGroup);
+            try {
+                GluuGroup aGroup = groupService.getGroupByDn(oneGroup);
+                List<String> groupMembers = aGroup.getMembers();
+                int idx = Optional.ofNullable(groupMembers).map(l -> l.indexOf(dn)).orElse(-1);
+                
+                if (idx >= 0) {
+                    List<String> newMembers = new ArrayList<>();
+                    newMembers.addAll(groupMembers.subList(0, idx));
+                    newMembers.addAll(groupMembers.subList(idx + 1, groupMembers.size()));
+                    
+                    aGroup.setMembers(newMembers.isEmpty() ? null : newMembers);
+                    groupService.updateGroup(aGroup);
+                }
+            } catch (Exception e) {
+                log.error(e.getMessage());
             }
         }
 

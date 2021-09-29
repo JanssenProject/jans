@@ -113,8 +113,7 @@ public abstract class AbstractScimClient<T> implements CloseableClient, Invocati
 
         String methodName = method.getName();
 
-        if (Stream.of(CloseableClient.class, Object.class).filter(method.getDeclaringClass()::equals)
-                .findFirst().isPresent()) {
+        if (Stream.of(CloseableClient.class, Object.class).anyMatch(method.getDeclaringClass()::equals)) {
             // it's a non HTTP-related method
             return method.invoke(this, args);
 
