@@ -1,48 +1,59 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <parent>
-        <artifactId>plugins</artifactId>
-        <groupId>io.jans</groupId>
-        <version>1.0.0-SNAPSHOT</version>
-    </parent>
-    <modelVersion>4.0.0</modelVersion>
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<parent>
+		<artifactId>plugins</artifactId>
+		<groupId>io.jans</groupId>
+		<version>1.0.0-SNAPSHOT</version>
+	</parent>
+	<modelVersion>4.0.0</modelVersion>
 
-    <groupId>io.jans</groupId>
-    <artifactId>scim-plugin</artifactId>
+	<groupId>io.jans</groupId>
+	<artifactId>scim-plugin</artifactId>
 	<properties>
-		<!-- Later 3.x versions ignore the registered classes annotated with @Provider :-/ -->
-        <httpcore.version>4.4.14</httpcore.version>
+		<!-- Later 3.x versions ignore the registered classes annotated with @Provider 
+			:-/ -->
+		<httpcore.version>4.4.14</httpcore.version>
 		<httpclient.version>4.5.13</httpclient.version>
 	</properties>
-    
 
-    <dependencies>
-        <!-- config api -->
-        <dependency>
-            <groupId>io.jans</groupId>
-            <artifactId>jans-config-api-server</artifactId>
-           <version>${jans.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.jans</groupId>
-            <artifactId>jans-scim-model</artifactId>
-            <version>${jans.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.jans</groupId>
-            <artifactId>jans-scim-client</artifactId>
-            <version>${jans.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-collections</groupId>
-            <artifactId>commons-collections</artifactId>
-            <version>3.2.2</version>
-        </dependency>
-        
-		        
-        <dependency>
+
+
+	<dependencies>
+
+		<!-- config api -->
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-config-api-server</artifactId>
+			<version>${jans.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-scim-model</artifactId>
+			<version>${jans.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-scim-client</artifactId>
+			<version>${jans.version}</version>
+		</dependency>
+
+		<!-- Microprofile -->
+		<dependency>
+			<groupId>io.smallrye</groupId>
+			<artifactId>smallrye-config</artifactId>
+			<version>1.5.0</version>
+		</dependency>
+
+
+		<!-- Others -->
+		<dependency>
+			<groupId>commons-collections</groupId>
+			<artifactId>commons-collections</artifactId>
+			<version>3.2.2</version>
+		</dependency>
+		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
 			<version>${httpclient.version}</version>
@@ -62,7 +73,7 @@
 			<artifactId>commons-httpclient</artifactId>
 			<version>3.1</version>
 		</dependency>
-		
+
 		<!-- Testing -->
 		<dependency>
 			<groupId>io.rest-assured</groupId>
@@ -94,15 +105,13 @@
 			<artifactId>cucumber-reporting</artifactId>
 			<scope>test</scope>
 		</dependency>
-		
-    </dependencies>
-    
 
-    <build>
- <!--    
-    <filters>
-			<filter>profiles/${cfg}/config-api-test.properties</filter>
-		</filters> -->
+	</dependencies>
+
+
+	<build>
+		<!-- <filters> <filter>profiles/${cfg}/config-api-test.properties</filter> 
+			</filters> -->
 
 		<testResources>
 			<testResource>
@@ -129,28 +138,28 @@
 				</includes>
 			</resource>
 		</resources>
-    
-    
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <configuration>
-                            <descriptors>
-                                <descriptor>src/main/assembly/assembly.xml</descriptor>
-                            </descriptors>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            
-            <plugin>
+
+
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<descriptors>
+								<descriptor>src/main/assembly/assembly.xml</descriptor>
+							</descriptors>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<systemPropertyVariables>
@@ -175,6 +184,6 @@
 					</execution>
 				</executions>
 			</plugin>
-        </plugins>
-    </build>
+		</plugins>
+	</build>
 </project>

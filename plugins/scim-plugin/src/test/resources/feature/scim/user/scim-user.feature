@@ -89,7 +89,7 @@ Scenario: Patch scim user
     Then def inum = result.id 
     And print result.displayName
     And def patched_displayName = (result.displayName == null ? 'Patched displayName' : result.displayName)
-    And def request_body = (result.displayName == null ? "[ {\"op\":\"add\", \"path\": \"/displayName\", \"value\":"+patched_displayName+" } ]" : "[ {\"op\":\"replace\", \"path\": \"/displayName\", \"value\":"+patched_displayName+" } ]")
+    And def request_body = (result.displayName == null ? "{ \"Operations\": [ {\"op\":\"add\", \"path\": \"/displayName\", \"value\":"+patched_displayName+" } ] }" : "{\"Operations\":[ {\"op\":\"replace\", \"path\": \"/displayName\", \"value\":"+patched_displayName+" } ] }")
     And print 'Patching displayName' 
 	Given url mainUrl + '/' +inum
 	And header Authorization = 'Bearer ' + accessToken 
