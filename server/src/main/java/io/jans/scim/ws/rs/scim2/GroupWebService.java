@@ -492,7 +492,7 @@ public class GroupWebService extends BaseScimWebService implements IGroupWebServ
         //an expression involving display attribute
         selectionFilterSkipPredicate = filter -> {
             String filth = filter.replaceAll(ScimResourceUtil.getDefaultSchemaUrn(GroupResource.class) + ":", "");
-            return filth.matches(".*display\\s+(eq|ne|co|sw|ew|gt|lt|ge|le|pr).*");
+            return filth.matches(".*display\\s++(eq|ne|co|sw|ew|gt|lt|ge|le|pr).*");
         };
     }
 
