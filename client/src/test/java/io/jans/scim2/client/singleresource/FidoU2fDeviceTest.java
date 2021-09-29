@@ -101,7 +101,7 @@ public class FidoU2fDeviceTest extends BaseTest {
         assertNotNull(updated.getDeviceData());
 
         //NOTE: if you don't see device data attribute for this device in LDAP is because the attribute is marked as being
-        //ignored upon update (see org.gluu.oxtrust.model.fido.GluuCustomFidoDevice)
+        //ignored upon update (see io.jans.scim.model.fido.GluuCustomFidoDevice)
 
     }
 

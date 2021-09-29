@@ -79,7 +79,7 @@ public class QueryParamCreateUpdateTest extends UserBaseTest {
         cheapClone.setNickName("Cloned");
 
         String rndString=Double.toString(Math.random());
-        //For help on usage of org.gluu.oxtrust.model.scim2.CustomAttributes class, read its api docs (oxtrust-scim maven project)
+        //For help on usage of io.jans.scim.model.scim2.CustomAttributes class, read its api docs (oxtrust-scim maven project)
         CustomAttributes custAttrs=cheapClone.getCustomAttributes(USER_EXT_SCHEMA_ID);
         custAttrs.setAttribute("scimCustomFirst", rndString);
 

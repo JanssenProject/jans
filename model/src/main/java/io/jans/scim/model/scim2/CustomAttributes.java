@@ -26,12 +26,7 @@ import java.util.*;
  * <p>For <code>photo</code>
  * or <code>text</code>, you may use {@link String}, for <code>numeric</code> sensible choices are {@link Integer} or
  * {@link Double}, for <code>boolean</code> use {@link Boolean}, and for <code>date</code> you may use {@link Date}.</p>
- * <p>Remember that custom attributes can be managed via Gluu Server oxTrust admin web console. For instructions, please
- * see the <a href="https://www.gluu.org/docs/ce/user-management/scim2/">SCIM docs page</a>.</p>
  * <p>See also: {@link BaseScimResource#addCustomAttributes(CustomAttributes)} and {@link BaseScimResource#getCustomAttributes(String)}.</p>
- */
-/*
- * Created by jgomer on 2017-12-29.
  */
 public class CustomAttributes {
 

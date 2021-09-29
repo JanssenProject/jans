@@ -49,7 +49,7 @@ public class PatchUserExtTest extends UserBaseTest {
         assertEquals(response.getStatus(), OK.getStatusCode());
 
         UserResource other=response.readEntity(usrClass);
-        //For help on usage of org.gluu.oxtrust.model.scim2.CustomAttributes class, read its api docs (oxtrust-scim maven project)
+        //For help on usage of io.jans.scim.model.scim2.CustomAttributes class, read its api docs (oxtrust-scim maven project)
         CustomAttributes custAttrs=other.getCustomAttributes(USER_EXT_SCHEMA_ID);
 
         //Verify new items appeared in scimCustomSecond
