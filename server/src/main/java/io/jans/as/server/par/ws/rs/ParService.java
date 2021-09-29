@@ -108,7 +108,7 @@ public class ParService {
             log.debug("PAR is expired, id: {}, exp: {}, now: {}", id, par.getExpirationDate(), now);
             throw new WebApplicationException(Response
                     .status(Response.Status.BAD_REQUEST)
-                    .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST, state, "client_id does not match to PAR's client_id"))
+                    .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST_URI, state, "PAR is expired"))
                     .type(MediaType.APPLICATION_JSON_TYPE)
                     .build());
         }
