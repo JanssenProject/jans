@@ -6,9 +6,9 @@
 
 package io.jans.as.server.model.common;
 
-import java.util.Date;
-
 import io.jans.as.model.common.TokenType;
+
+import java.util.Date;
 
 /**
  * <p>
@@ -32,9 +32,10 @@ import io.jans.as.model.common.TokenType;
  * issue an access token with a less rights than requested.
  * </p>
  *
- * @author Javier Rojas Blum Date: 09.29.2011
+ * @author Javier Rojas Blum
+ * @version September 30, 2021
  */
-public class    AccessToken extends AbstractToken {
+public class AccessToken extends AbstractToken {
 
     private TokenType tokenType;
 
@@ -51,7 +52,7 @@ public class    AccessToken extends AbstractToken {
      * When required, the token can be marked as revoked.
      * </p>
      *
-     * @param lifeTime  The life time of the token.
+     * @param lifeTime The life time of the token.
      */
     public AccessToken(int lifeTime) {
         super(lifeTime);
@@ -69,5 +70,14 @@ public class    AccessToken extends AbstractToken {
      */
     public TokenType getTokenType() {
         return tokenType;
+    }
+
+    /**
+     * Sets the {@link TokenType}
+     *
+     * @param tokenType The token type.
+     */
+    public void setTokenType(TokenType tokenType) {
+        this.tokenType = tokenType;
     }
 }

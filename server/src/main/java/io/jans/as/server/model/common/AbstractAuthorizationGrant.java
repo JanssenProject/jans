@@ -8,22 +8,19 @@ package io.jans.as.server.model.common;
 
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.model.common.TokenType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.util.CertUtils;
 import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.server.model.authorize.ScopeChecker;
 import io.jans.as.server.model.ldap.TokenLdap;
 import io.jans.as.server.util.TokenHashUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -32,7 +29,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version November 28, 2018
+ * @version September 30, 2021
  */
 
 public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant {
@@ -284,7 +281,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
     }
 
     @Override
-    public AccessToken createAccessToken(String certAsPem, ExecutionContext executionContext) {
+    public AccessToken createAccessToken(String dpop, String certAsPem, ExecutionContext executionContext) {
         int lifetime = appConfiguration.getAccessTokenLifetime();
         // Jans Auth #830 Client-specific access token expiration
         if (client != null && client.getAccessTokenLifetime() != null && client.getAccessTokenLifetime() > 0) {
@@ -295,11 +292,16 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
         accessToken.setSessionDn(getSessionDn());
         accessToken.setX5ts256(CertUtils.confirmationMethodHashS256(certAsPem));
 
+        if (StringUtils.isNoneBlank(dpop)) {
+            accessToken.setDpop(dpop);
+            accessToken.setTokenType(TokenType.DPOP);
+        }
+
         return accessToken;
     }
 
     @Override
-    public RefreshToken createRefreshToken() {
+    public RefreshToken createRefreshToken(String dpop) {
         int lifetime = appConfiguration.getRefreshTokenLifetime();
         if (client.getRefreshTokenLifetime() != null && client.getRefreshTokenLifetime() > 0) {
             lifetime = client.getRefreshTokenLifetime();
@@ -308,6 +310,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
         RefreshToken refreshToken = new RefreshToken(lifetime);
 
         refreshToken.setSessionDn(getSessionDn());
+        refreshToken.setDpop(dpop);
 
         return refreshToken;
     }
