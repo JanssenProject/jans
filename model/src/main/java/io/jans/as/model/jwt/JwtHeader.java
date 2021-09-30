@@ -12,21 +12,11 @@ import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.exception.InvalidJwtException;
 import org.json.JSONObject;
 
-import static io.jans.as.model.jwt.JwtHeaderName.AGREEMENT_PARTY_U_INFO;
-import static io.jans.as.model.jwt.JwtHeaderName.AGREEMENT_PARTY_V_INFO;
-import static io.jans.as.model.jwt.JwtHeaderName.ALGORITHM;
-import static io.jans.as.model.jwt.JwtHeaderName.COMPRESSION_ALGORITHM;
-import static io.jans.as.model.jwt.JwtHeaderName.CONTENT_TYPE;
-import static io.jans.as.model.jwt.JwtHeaderName.ENCRYPTION_METHOD;
-import static io.jans.as.model.jwt.JwtHeaderName.ENCRYPTION_PARTY_U_INFO;
-import static io.jans.as.model.jwt.JwtHeaderName.ENCRYPTION_PARTY_V_INFO;
-import static io.jans.as.model.jwt.JwtHeaderName.EPHEMERAL_PUBLIC_KEY;
-import static io.jans.as.model.jwt.JwtHeaderName.KEY_ID;
-import static io.jans.as.model.jwt.JwtHeaderName.TYPE;
+import static io.jans.as.model.jwt.JwtHeaderName.*;
 
 /**
  * @author Javier Rojas Blum
- * @version June 15, 2016
+ * @version September 30, 2021
  */
 public class JwtHeader extends JwtClaimSet {
 
@@ -58,6 +48,11 @@ public class JwtHeader extends JwtClaimSet {
             setClaim(TYPE, type.toString());
         }
         return this;
+    }
+
+    public JwtType getType() {
+        String typ = getClaimAsString(TYPE);
+        return JwtType.fromString(typ);
     }
 
     public SignatureAlgorithm getSignatureAlgorithm() {
@@ -104,6 +99,15 @@ public class JwtHeader extends JwtClaimSet {
      */
     public JwtHeader setKeyId(String keyId) {
         setClaim(KEY_ID, keyId);
+        return this;
+    }
+
+    public JSONObject getJwk() {
+        return getClaimAsJSON(JWK);
+    }
+
+    public JwtHeader setJwk(JSONObject jwk) {
+        setClaim(JWK, jwk);
         return this;
     }
 
