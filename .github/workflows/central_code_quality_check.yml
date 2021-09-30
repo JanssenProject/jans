@@ -46,7 +46,7 @@ jobs:
       - name: Set up JDK 11
         # JanssenProject/jans-cli is too similar to JanssenProject/jans-client-api as the contains function is returning it belonging to the JVM_PROJECT
         if: contains(env.JVM_PROJECTS, github.repository) && github.repository != 'JanssenProject/jans-cli'
-        uses: actions/setup-java@v2.3.0
+        uses: actions/setup-java@v2.3.1
         with:
           java-version: '11'
           distribution: 'adopt'
