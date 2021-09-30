@@ -48,7 +48,7 @@ def decode_file(path, salt_file, salt_literal):
             txt = decode_text(f.read(), salt)
             click.echo(txt)
         except ValueError as exc:
-            click.echo(f"Unable to decode file {path}; reason={exc}")
+            raise click.ClickException(f"Unable to decode file {path}; reason={exc}")
 
 
 @click.command(help="Decode text string")
@@ -83,4 +83,4 @@ def decode_string(text, salt_file, salt_literal):
         txt = decode_text(text, salt)
         click.echo(txt)
     except ValueError as exc:
-        click.echo(f"Unable to decode given string; reason={exc}")
+        raise click.ClickException(f"Unable to decode given string; reason={exc}")
