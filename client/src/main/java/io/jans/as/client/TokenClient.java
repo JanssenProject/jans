@@ -6,19 +6,20 @@
 
 package io.jans.as.client;
 
-import javax.ws.rs.HttpMethod;
-
+import io.jans.as.model.common.GrantType;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
-import io.jans.as.model.common.GrantType;
+import javax.ws.rs.HttpMethod;
+
+import static io.jans.as.model.token.TokenRequestParam.*;
 
 /**
  * Encapsulates functionality to make token request calls to an authorization
  * server via REST Services.
  *
  * @author Javier Rojas Blum
- * @version February 25, 2020
+ * @version September 30, 2021
  */
 public class TokenClient extends BaseClient<TokenRequest, TokenResponse> {
 
@@ -222,39 +223,48 @@ public class TokenClient extends BaseClient<TokenRequest, TokenResponse> {
         clientRequest.header("Content-Type", request.getContentType());
         clientRequest.setHttpMethod(getHttpMethod());
 
+        if (getRequest().getDpop() != null) {
+            try {
+                clientRequest.header(DPOP, getRequest().getDpop().getEncodedJwt());
+            } catch (Exception e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+
         if (getRequest().getGrantType() != null) {
-            clientRequest.formParameter("grant_type", getRequest().getGrantType());
+            clientRequest.formParameter(GRANT_TYPE, getRequest().getGrantType());
         }
         if (StringUtils.isNotBlank(getRequest().getCode())) {
-            clientRequest.formParameter("code", getRequest().getCode());
+            clientRequest.formParameter(CODE, getRequest().getCode());
         }
         if (StringUtils.isNotBlank(getRequest().getCodeVerifier())) {
-            clientRequest.formParameter("code_verifier", getRequest().getCodeVerifier());
+            clientRequest.formParameter(CODE_VERIFIER, getRequest().getCodeVerifier());
         }
         if (StringUtils.isNotBlank(getRequest().getRedirectUri())) {
-            clientRequest.formParameter("redirect_uri", getRequest().getRedirectUri());
+            clientRequest.formParameter(REDIRECT_URI, getRequest().getRedirectUri());
         }
         if (StringUtils.isNotBlank(getRequest().getUsername())) {
-            clientRequest.formParameter("username", getRequest().getUsername());
+            clientRequest.formParameter(USERNAME, getRequest().getUsername());
         }
         if (StringUtils.isNotBlank(getRequest().getPassword())) {
-            clientRequest.formParameter("password", getRequest().getPassword());
+            clientRequest.formParameter(PASSWORD, getRequest().getPassword());
         }
         if (StringUtils.isNotBlank(getRequest().getScope())) {
-            clientRequest.formParameter("scope", getRequest().getScope());
+            clientRequest.formParameter(SCOPE, getRequest().getScope());
         }
         if (StringUtils.isNotBlank(getRequest().getAssertion())) {
-            clientRequest.formParameter("assertion", getRequest().getAssertion());
+            clientRequest.formParameter(ASSERTION, getRequest().getAssertion());
         }
         if (StringUtils.isNotBlank(getRequest().getRefreshToken())) {
-            clientRequest.formParameter("refresh_token", getRequest().getRefreshToken());
+            clientRequest.formParameter(REFRESH_TOKEN, getRequest().getRefreshToken());
         }
 
         for (String key : getRequest().getCustomParameters().keySet()) {
             clientRequest.formParameter(key, getRequest().getCustomParameters().get(key));
         }
+
         if (StringUtils.isNotBlank(getRequest().getAuthReqId())) {
-            clientRequest.formParameter("auth_req_id", getRequest().getAuthReqId());
+            clientRequest.formParameter(AUTH_REQ_ID, getRequest().getAuthReqId());
         }
         if (StringUtils.isNotBlank(getRequest().getDeviceCode())) {
             clientRequest.formParameter("device_code", getRequest().getDeviceCode());
