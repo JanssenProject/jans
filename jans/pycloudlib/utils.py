@@ -8,6 +8,7 @@ This module contains various helpers.
 import base64
 import contextlib
 import json
+import logging
 import pathlib
 import random
 import re
@@ -36,6 +37,8 @@ from jans.pycloudlib.pki import sign_csr
 
 # Default charset
 _DEFAULT_CHARS = "".join([string.ascii_letters, string.digits])
+
+logger = logging.getLogger(__name__)
 
 
 def as_boolean(val: Any) -> bool:
@@ -434,3 +437,40 @@ def generate_signed_ssl_certkey(suffix, ca_key_fn, ca_cert_fn, email, hostname, 
 
     sign_csr(cert_fn, csr, ca_key, ca_cert)
     return cert_fn, key_fn
+
+
+def secure_password_file(password_file, salt):
+    """Secure password file by encoding the contents (if required).
+
+    :param password_file: Path to password file.
+    :param salt: Salt string.
+    :returns: Contents of password file (in plaintext format).
+    """
+    password = ""
+
+    # get password
+    with open(password_file) as f:
+        password = f.read().strip()
+
+    # check if password is encoded; non-encoded and empty password will throw incorrect
+    # padding/bytes which will be handled by encoding the password;
+    # other errors will be thrown automatically by interpreter
+    should_encode = False
+
+    try:
+        password = decode_text(password, salt).decode()
+    except ValueError:
+        if not password:
+            msg = f"Got empty password in {password_file}"
+        else:
+            msg = f"Current password in {password_file} is not encoded"
+        logger.warning(msg)
+        should_encode = True
+
+    if should_encode:
+        logger.warning(f"Attempting to encode the password in {password_file}")
+        with open(password_file, "w") as f:
+            f.write(encode_text(password, salt).decode())
+
+    # returns plain password for compatibility
+    return password

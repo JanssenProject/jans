@@ -253,3 +253,19 @@ def test_generate_signed_ssl_certkey(tmpdir):
     assert os.path.isfile(str(base_dir.join("my-suffix.crt")))
     assert os.path.isfile(str(base_dir.join("my-suffix.csr")))
     assert os.path.isfile(str(base_dir.join("my-suffix.key")))
+
+
+@pytest.mark.parametrize("password, encoded_password", [
+    ("secret", "fHL54sT5qHk="),
+    ("", "U7niJiK7IV8="),
+])
+def test_secure_password_file(tmpdir, password, encoded_password):
+    from jans.pycloudlib.utils import secure_password_file
+
+    src = tmpdir.join("password_file")
+    src.write(password)
+    salt = "7MEDWVFAG3DmakHRyjMqp5EE"
+    assert secure_password_file(str(src), salt) == password
+
+    with open(str(src)) as f:
+        assert f.read() == encoded_password

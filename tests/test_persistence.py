@@ -141,13 +141,8 @@ def test_get_couchbase_password(monkeypatch, tmpdir, gmanager):
 
     passwd_file = tmpdir.join("couchbase_password")
     passwd_file.write("secret")
-
     monkeypatch.setenv("CN_COUCHBASE_PASSWORD_FILE", str(passwd_file))
     assert get_couchbase_password(gmanager) == "secret"
-
-    # ensure the password file is modified (having encoded password)
-    with open(str(passwd_file)) as f:
-        assert f.read() == "fHL54sT5qHk="
 
 
 def test_get_couchbase_superuser(monkeypatch, gmanager):
@@ -511,12 +506,7 @@ def test_get_sql_password(monkeypatch, tmpdir, gmanager):
     src = tmpdir.join("sql_password")
     src.write("secret")
     monkeypatch.setenv("CN_SQL_PASSWORD_FILE", str(src))
-
     assert get_sql_password(gmanager) == "secret"
-
-    # ensure the password file is modified (having encoded password)
-    with open(str(src)) as f:
-        assert f.read() == "fHL54sT5qHk="
 
 
 def test_render_sql_properties(monkeypatch, tmpdir, gmanager):

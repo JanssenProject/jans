@@ -8,17 +8,16 @@ This module contains various helpers related to Couchbase persistence.
 import json
 import logging
 import os
-from binascii import Error as AsciiError
 from functools import partial
 from typing import NoReturn
 
 import requests
 from requests_toolbelt.adapters.host_header_ssl import HostHeaderSSLAdapter
 
-from jans.pycloudlib.utils import decode_text
 from jans.pycloudlib.utils import encode_text
 from jans.pycloudlib.utils import cert_to_truststore
 from jans.pycloudlib.utils import as_boolean
+from jans.pycloudlib.utils import secure_password_file
 
 CN_COUCHBASE_TRUSTSTORE_PASSWORD = "newsecret"
 
@@ -42,38 +41,11 @@ def get_couchbase_password(manager) -> str:
     To change the location, simply pass ``CN_COUCHBASE_PASSWORD_FILE`` environment variable.
 
     :params manager: An instance of :class:`~jans.pycloudlib.manager._Manager`.
-    :returns: Plaintext or encoded password.
+    :returns: Plaintext password.
     """
-    password_file = os.environ.get(
-        "CN_COUCHBASE_PASSWORD_FILE", "/etc/jans/conf/couchbase_password"
-    )
-
-    # get password
-    with open(password_file) as f:
-        password = f.read().strip()
-
-    # check if password is encoded; non-encoded and empty password will throw incorrect
-    # padding/bytes which will be handled by encoding the password;
-    # other errors will be thrown automatically by interpreter
+    password_file = os.environ.get("CN_COUCHBASE_PASSWORD_FILE", "/etc/jans/conf/couchbase_password")
     salt = manager.secret.get("encoded_salt")
-    should_encode = False
-
-    try:
-        password = decode_text(password, salt).decode()
-    except AsciiError:
-        logger.warning(f"Current password in {password_file} is not encoded")
-        should_encode = True
-    except ValueError:
-        logger.warning(f"Got empty password in {password_file}")
-        should_encode = True
-
-    if should_encode:
-        logger.warning(f"Attempting to encode the password in {password_file}")
-        with open(password_file, "w") as f:
-            f.write(encode_text(password, salt).decode())
-
-    # returns plain password for compatibility
-    return password
+    return secure_password_file(password_file, salt)
 
 
 def get_couchbase_superuser(manager=None) -> str:
@@ -93,38 +65,11 @@ def get_couchbase_superuser_password(manager) -> str:
     To change the location, simply pass ``CN_COUCHBASE_SUPERUSER_PASSWORD_FILE`` environment variable.
 
     :params manager: An instance of :class:`~jans.pycloudlib.manager._Manager`.
-    :params plaintext: Whether to return plaintext or encoded password.
-    :returns: Plaintext or encoded password.
+    :returns: Plaintext password.
     """
-    password_file = os.environ.get(
-        "CN_COUCHBASE_SUPERUSER_PASSWORD_FILE", "/etc/jans/conf/couchbase_superuser_password"
-    )
-
-    with open(password_file) as f:
-        password = f.read().strip()
-
-    # check if password is encoded; non-encoded and empty password will throw incorrect
-    # padding/bytes which will be handled by encoding the password;
-    # other errors will be thrown automatically by interpreter
+    password_file = os.environ.get("CN_COUCHBASE_SUPERUSER_PASSWORD_FILE", "/etc/jans/conf/couchbase_superuser_password")
     salt = manager.secret.get("encoded_salt")
-    should_encode = False
-
-    try:
-        password = decode_text(password, salt).decode()
-    except AsciiError:
-        logger.warning(f"Current password in {password_file} is not encoded")
-        should_encode = True
-    except ValueError:
-        logger.warning(f"Got empty password in {password_file}")
-        should_encode = True
-
-    if should_encode:
-        logger.warning(f"Attempting to encode the password in {password_file}")
-        with open(password_file, "w") as f:
-            f.write(encode_text(password, salt).decode())
-
-    # returns plain password for compatibility
-    return password
+    return secure_password_file(password_file, salt)
 
 
 def prefixed_couchbase_mappings():

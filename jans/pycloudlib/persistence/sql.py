@@ -5,10 +5,8 @@ jans.pycloudlib.persistence.sql
 This module contains various helpers related to SQL persistence.
 """
 
-# import contextlib
 import logging
 import os
-from binascii import Error as AsciiError
 
 from sqlalchemy import create_engine
 from sqlalchemy import MetaData
@@ -16,8 +14,8 @@ from sqlalchemy import func
 from sqlalchemy import select
 
 from jans.pycloudlib import get_manager
-from jans.pycloudlib.utils import decode_text
 from jans.pycloudlib.utils import encode_text
+from jans.pycloudlib.utils import secure_password_file
 
 logger = logging.getLogger(__name__)
 
@@ -28,34 +26,8 @@ def get_sql_password(manager) -> str:
     :returns: Plaintext password.
     """
     password_file = os.environ.get("CN_SQL_PASSWORD_FILE", "/etc/jans/conf/sql_password")
-    password = ""
-
-    # get password
-    with open(password_file) as f:
-        password = f.read().strip()
-
-    # check if password is encoded; non-encoded and empty password will throw incorrect
-    # padding/bytes which will be handled by encoding the password;
-    # other errors will be thrown automatically by interpreter
     salt = manager.secret.get("encoded_salt")
-    should_encode = False
-
-    try:
-        password = decode_text(password, salt).decode()
-    except AsciiError:
-        logger.warning(f"Current password in {password_file} is not encoded")
-        should_encode = True
-    except ValueError:
-        logger.warning(f"Got empty password in {password_file}")
-        should_encode = True
-
-    if should_encode:
-        logger.warning(f"Attempting to encode the password in {password_file}")
-        with open(password_file, "w") as f:
-            f.write(encode_text(password, salt).decode())
-
-    # returns plain password for compatibility
-    return password
+    return secure_password_file(password_file, salt)
 
 
 class BaseClient:
