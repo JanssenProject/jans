@@ -21,7 +21,7 @@ System for Cross-domain Identity Management (SCIM) version 2.0
 
 ## Requirements
 
-Kubernetes: `>=v1.17.0-0`
+Kubernetes: `>=v1.19.0-0`
 
 ## Values
 
@@ -50,7 +50,6 @@ Kubernetes: `>=v1.17.0-0`
 | resources.requests.memory | string | `"1000Mi"` | Memory request. |
 | service.name | string | `"http-scim"` | The name of the scim port within the scim service. Please keep it as default. |
 | service.port | int | `8080` | Port of the scim service. Please keep it as default. |
-| service.scimServiceName | string | `"scim"` | Name of the auth-server service. Please keep it as default. |
 | usrEnvs | object | `{"normal":{},"secret":{}}` | Add custom normal and secret envs to the service |
 | usrEnvs.normal | object | `{}` | Add custom normal envs to the service variable1: value1 |
 | usrEnvs.secret | object | `{}` | Add custom secret envs to the service variable1: value1 |

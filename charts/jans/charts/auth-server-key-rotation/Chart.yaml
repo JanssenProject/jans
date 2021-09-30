@@ -3,7 +3,7 @@
 apiVersion: v2
 name: auth-server-key-rotation
 version: 1.0.0-b11
-kubeVersion: ">=v1.17.0-0"
+kubeVersion: ">=v1.19.0-0"
 description: Responsible for regenerating auth-keys per x hours
 type: application
 keywords:
