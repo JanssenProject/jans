@@ -2350,6 +2350,7 @@ paths:
                 $ref: '#/components/schemas/HealthStatusItem'
         '500':
           description: Internal Server Error
+		  
   /jans-config-api/scim/user:
     get:
       tags:
@@ -2434,9 +2435,10 @@ paths:
       tags:
       - SCIM - User Management
       operationId: post-create-user
+      summary: Create a SCIM user.
       description: Allows creating a User resource via POST (see section 3.3 of RFC 7644)
       security:
-        - scim_oauth: [https://jans.io/scim/users.write]
+        - oauth2: [https://jans.io/scim/users.write]
       parameters:
       - name: attributes
         in: query
@@ -2502,9 +2504,10 @@ paths:
       tags:
       - SCIM - User Management
       operationId: get-user-by-id
+      summary: Retrieves SCIM user by Id.
       description: Retrieves a User resource by Id (see section 3.4.1 of RFC 7644)
       security:
-        - scim_oauth: [https://jans.io/scim/users.read]
+        - oauth2: [https://jans.io/scim/users.read]
       parameters:
       - name: attributes
         in: query
@@ -2553,12 +2556,13 @@ paths:
       tags:
       - SCIM - User Management
       operationId: put-update-user-by-id
+      summary: Updates an SCIM user.
       description: "Updates a User resource (see section 3.5.1 of RFC 7644). Update\
         \ works in a replacement fashion&amp;#58; every\nattribute value found in the\
         \ payload sent will replace the one in the existing resource representation.\
         \ Attributes \nnot passed in the payload will be left intact.\n"
       security:
-        - scim_oauth: [https://jans.io/scim/users.write]
+        - oauth2: [https://jans.io/scim/users.write]
       parameters:
       - name: attributes
         in: query
@@ -2638,9 +2642,10 @@ paths:
       tags:
       - SCIM - User Management
       operationId: delete-user-by-id
+      summary: Deletes a SCIM user.
       description: Deletes a user resource
       security:
-        - scim_oauth: [https://jans.io/scim/users.write]
+        - oauth2: [https://jans.io/scim/users.write]
       parameters:
       - name: id
         in: path
@@ -2674,11 +2679,12 @@ paths:
       tags:
       - SCIM - User Management
       operationId: patch-user-by-id
+      summary: Patches SCIM User attributes.
       description: "Updates one or more attributes of a User resource using a sequence\
         \ of additions, removals, and \nreplacements operations. See section 3.5.2\
         \ of RFC 7644\n"
       security:
-        - scim_oauth: [https://jans.io/scim/users.write]
+        - oauth2: [https://jans.io/scim/users.write]
       parameters:
       - name: attributes
         in: query
@@ -2701,10 +2707,10 @@ paths:
         content:
           application/scim+json:
             schema:
-              $ref: '#/components/schemas/PatchRequest'
+              $ref: '#/components/schemas/ScimPatchRequest'
           application/json:
             schema:
-              $ref: '#/components/schemas/PatchRequest'
+              $ref: '#/components/schemas/ScimPatchRequest'
         required: true
       responses:
         200:
@@ -2741,7 +2747,7 @@ paths:
     post:
       tags:
         - SCIM - User Management
-      summary: Saerch users
+      summary: Search SCIM user.
       description: Gets list of users
       operationId: post-search-scim-users
       requestBody:
@@ -5828,3 +5834,36 @@ components:
         location:
           type: string
       description: See section 3.1 of RFC 7643
+	  
+    ScimPatchOperation:
+      required:
+      - operation
+      type: object
+      properties:
+        operation:
+          type: string
+          enum:
+          - add
+          - remove
+          - replace
+        path:
+          type: string
+          description: Required when type is remove, optional otherwise
+        value:
+          $ref: '#/components/schemas/AnyValue'
+          description: Only required when type is add or replace
+      description: See section 3.5.2 of RFC 7644
+    ScimPatchRequest:
+      required:
+      - Operations
+      type: object
+      properties:
+        schemas:
+          type: array
+          items:
+            type: string
+            example: urn:ietf:params:scim:api:messages:2.0:PatchOp
+        Operations:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScimPatchOperation'
