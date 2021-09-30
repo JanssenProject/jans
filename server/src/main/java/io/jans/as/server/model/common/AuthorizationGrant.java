@@ -49,7 +49,7 @@ import java.util.function.Function;
  *
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version April 10, 2020
+ * @version September 30, 2021
  */
 public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
 
@@ -79,8 +79,8 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
     @Inject
     private SectorIdentifierService sectorIdentifierService;
 
-	@Inject
-	private MetricService metricService;
+    @Inject
+    private MetricService metricService;
 
     @Inject
     private StatService statService;
@@ -109,7 +109,7 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
         final IdToken idToken = new IdToken(jwr.toString(), jwr.getClaims().getClaimAsDate(JwtClaimName.ISSUED_AT),
                 jwr.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME));
         if (log.isTraceEnabled())
-            log.trace("Created id_token:" + idToken.getCode() );
+            log.trace("Created id_token:" + idToken.getCode());
         return idToken;
     }
 
@@ -179,11 +179,11 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
     }
 
     @Override
-    public AccessToken createAccessToken(String certAsPem, ExecutionContext context) {
+    public AccessToken createAccessToken(String dpop, String certAsPem, ExecutionContext context) {
         try {
-            final AccessToken accessToken = super.createAccessToken(certAsPem, context);
+            final AccessToken accessToken = super.createAccessToken(dpop, certAsPem, context);
             if (getClient().isAccessTokenAsJwt()) {
-                accessToken.setCode(createAccessTokenAsJwt(accessToken, context));
+                accessToken.setCode(createAccessTokenAsJwt(accessToken, dpop, context));
             }
             if (accessToken.getExpiresIn() > 0) {
                 persist(asToken(accessToken));
@@ -202,7 +202,7 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
         }
     }
 
-    private String createAccessTokenAsJwt(AccessToken accessToken, ExecutionContext context) throws Exception {
+    private String createAccessTokenAsJwt(AccessToken accessToken, String dpop, ExecutionContext context) throws Exception {
         final User user = getUser();
         final Client client = getClient();
 
@@ -225,6 +225,15 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
         jwt.getClaims().setIssuedAt(accessToken.getCreationDate());
         jwt.getClaims().setSubjectIdentifier(getSub());
         jwt.getClaims().setClaim("x5t#S256", accessToken.getX5ts256());
+
+        // DPoP
+        if (StringUtils.isNotBlank(dpop)) {
+            jwt.getClaims().setNotBefore(accessToken.getCreationDate());
+            JSONObject cnf = new JSONObject();
+            cnf.put("jkt", dpop);
+            jwt.getClaims().setClaim("cnf", cnf);
+        }
+
         Audience.setAudience(jwt.getClaims(), getClient());
 
         if (client.getAttributes().getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims()) {
@@ -255,9 +264,9 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
     }
 
     @Override
-    public RefreshToken createRefreshToken() {
+    public RefreshToken createRefreshToken(String dpop) {
         try {
-            final RefreshToken refreshToken = super.createRefreshToken();
+            final RefreshToken refreshToken = super.createRefreshToken(dpop);
             if (refreshToken.getExpiresIn() > 0) {
                 persist(asToken(refreshToken));
             }
@@ -275,11 +284,12 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
         }
     }
 
-    public RefreshToken createRefreshToken(Date expirationDate) {
+    public RefreshToken createRefreshToken(String dpop, Date expirationDate) {
         try {
             RefreshToken refreshToken = new RefreshToken(HandleTokenFactory.generateHandleToken(), new Date(), expirationDate);
 
             refreshToken.setSessionDn(getSessionDn());
+            refreshToken.setDpop(dpop);
 
             if (refreshToken.getExpiresIn() > 0) {
                 persist(asToken(refreshToken));
@@ -384,6 +394,8 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
         result.setClientId(getClientId());
 
         result.getAttributes().setX5cs256(p_token.getX5ts256());
+
+        result.setDpop(p_token.getDpop());
 
         final AuthorizationGrantType grantType = getAuthorizationGrantType();
         if (grantType != null) {
