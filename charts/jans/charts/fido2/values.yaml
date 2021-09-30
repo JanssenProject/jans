@@ -48,8 +48,6 @@ resources:
     # -- Memory request.
     memory: 500Mi
 service:
-  # -- Name of the fido2 service. Please keep it as default.
-  fido2ServiceName: fido2
   # -- The name of the fido2 port within the fido2 service. Please keep it as default.
   name: http-fido2
   # -- Port of the fido2 service. Please keep it as default.

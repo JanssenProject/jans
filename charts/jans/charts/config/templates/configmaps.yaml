@@ -104,6 +104,10 @@ data:
   CN_COUCHBASE_TRUSTSTORE_ENABLE: "false"
   CN_LDAP_USE_SSL: "false"
   {{- end }}
+  {{- if .Values.global.scim.enabled }}
+  CN_SCIM_ENABLED: {{ .Values.global.scim.enabled | quote }}
+  CN_SCIM_PROTECTION_MODE: {{ .Values.configmap.cnScimProtectionMode | quote }}
+  {{- end }}
 
 ---
 

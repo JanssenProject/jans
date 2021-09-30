@@ -21,7 +21,7 @@ FIDO 2.0 (FIDO2) is an open authentication standard that enables leveraging comm
 
 ## Requirements
 
-Kubernetes: `>=v1.17.0-0`
+Kubernetes: `>=v1.19.0-0`
 
 ## Values
 
@@ -45,7 +45,6 @@ Kubernetes: `>=v1.17.0-0`
 | resources.limits.memory | string | `"500Mi"` | Memory limit. |
 | resources.requests.cpu | string | `"500m"` | CPU request. |
 | resources.requests.memory | string | `"500Mi"` | Memory request. |
-| service.fido2ServiceName | string | `"fido2"` | Name of the fido2 service. Please keep it as default. |
 | service.name | string | `"http-fido2"` | The name of the fido2 port within the fido2 service. Please keep it as default. |
 | service.port | int | `8080` | Port of the fido2 service. Please keep it as default. |
 | usrEnvs | object | `{"normal":{},"secret":{}}` | Add custom normal and secret envs to the service |
