@@ -8,7 +8,7 @@ package io.jans.as.model.jwk;
 
 /**
  * @author Javier Rojas Blum
- * @version February 17, 2016
+ * @version September 30, 2021
  */
 public interface JWKParameter {
 
