@@ -14,12 +14,7 @@ import io.jans.as.common.util.RedirectUri;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.authorize.AuthorizeRequestParam;
 import io.jans.as.model.authorize.AuthorizeResponseParam;
-import io.jans.as.model.common.BackchannelTokenDeliveryMode;
-import io.jans.as.model.common.GrantType;
-import io.jans.as.model.common.Prompt;
-import io.jans.as.model.common.ResponseMode;
-import io.jans.as.model.common.ResponseType;
-import io.jans.as.model.common.ScopeConstants;
+import io.jans.as.model.common.*;
 import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
@@ -41,26 +36,8 @@ import io.jans.as.server.ciba.CIBAPingCallbackService;
 import io.jans.as.server.ciba.CIBAPushTokenDeliveryService;
 import io.jans.as.server.model.audit.Action;
 import io.jans.as.server.model.audit.OAuth2AuditLog;
-import io.jans.as.server.model.authorize.AuthorizeParamsValidator;
-import io.jans.as.server.model.authorize.Claim;
-import io.jans.as.server.model.authorize.IdTokenMember;
-import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
-import io.jans.as.server.model.authorize.ScopeChecker;
-import io.jans.as.server.model.common.AccessToken;
-import io.jans.as.server.model.common.AuthorizationCode;
-import io.jans.as.server.model.common.AuthorizationGrant;
-import io.jans.as.server.model.common.AuthorizationGrantList;
-import io.jans.as.server.model.common.CIBAGrant;
-import io.jans.as.server.model.common.CibaRequestCacheControl;
-import io.jans.as.server.model.common.CibaRequestStatus;
-import io.jans.as.server.model.common.DeviceAuthorizationCacheControl;
-import io.jans.as.server.model.common.DeviceAuthorizationStatus;
-import io.jans.as.server.model.common.DeviceCodeGrant;
-import io.jans.as.server.model.common.ExecutionContext;
-import io.jans.as.server.model.common.IdToken;
-import io.jans.as.server.model.common.RefreshToken;
-import io.jans.as.server.model.common.SessionId;
-import io.jans.as.server.model.common.SessionIdState;
+import io.jans.as.server.model.authorize.*;
+import io.jans.as.server.model.common.*;
 import io.jans.as.server.model.config.ConfigurationFactory;
 import io.jans.as.server.model.config.Constants;
 import io.jans.as.server.model.exception.AcrChangedException;
@@ -69,17 +46,7 @@ import io.jans.as.server.model.ldap.ClientAuthorization;
 import io.jans.as.server.model.token.JwrService;
 import io.jans.as.server.par.ws.rs.ParService;
 import io.jans.as.server.security.Identity;
-import io.jans.as.server.service.AttributeService;
-import io.jans.as.server.service.AuthenticationFilterService;
-import io.jans.as.server.service.ClientAuthorizationsService;
-import io.jans.as.server.service.ClientService;
-import io.jans.as.server.service.CookieService;
-import io.jans.as.server.service.DeviceAuthorizationService;
-import io.jans.as.server.service.RedirectUriResponse;
-import io.jans.as.server.service.RequestParameterService;
-import io.jans.as.server.service.ServerCryptoProvider;
-import io.jans.as.server.service.SessionIdService;
-import io.jans.as.server.service.UserService;
+import io.jans.as.server.service.*;
 import io.jans.as.server.service.ciba.CibaRequestService;
 import io.jans.as.server.service.external.ExternalPostAuthnService;
 import io.jans.as.server.service.external.ExternalUpdateTokenService;
@@ -111,12 +78,8 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.SecurityContext;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.function.Function;
 
 import static io.jans.as.model.util.StringUtils.implode;
@@ -126,7 +89,7 @@ import static io.jans.as.server.util.ServerUtil.isTrue;
  * Implementation for request authorization through REST web services.
  *
  * @author Javier Rojas Blum
- * @version September 9, 2021
+ * @version September 30, 2021
  */
 @Path("/")
 public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
@@ -658,7 +621,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     authorizationGrant.setSessionDn(sessionUser.getDn());
                     authorizationGrant.save(); // call save after object modification!!!
                 }
-                newAccessToken = authorizationGrant.createAccessToken(httpRequest.getHeader("X-ClientCert"), new ExecutionContext(httpRequest, httpResponse));
+                newAccessToken = authorizationGrant.createAccessToken(null, httpRequest.getHeader("X-ClientCert"), new ExecutionContext(httpRequest, httpResponse));
 
                 redirectUriResponse.getRedirectUri().addResponseParameter(AuthorizeResponseParam.ACCESS_TOKEN, newAccessToken.getCode());
                 redirectUriResponse.getRedirectUri().addResponseParameter(AuthorizeResponseParam.TOKEN_TYPE, newAccessToken.getTokenType().toString());
@@ -839,10 +802,10 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         cibaRequestService.removeCibaRequest(authReqId);
         CIBAGrant cibaGrant = authorizationGrantList.createCIBAGrant(cibaRequest);
 
-        RefreshToken refreshToken = cibaGrant.createRefreshToken();
+        RefreshToken refreshToken = cibaGrant.createRefreshToken(null);
         log.debug("Issuing refresh token: {}", refreshToken.getCode());
 
-        AccessToken accessToken = cibaGrant.createAccessToken(httpRequest.getHeader("X-ClientCert"), new ExecutionContext(httpRequest, httpResponse));
+        AccessToken accessToken = cibaGrant.createAccessToken(null, httpRequest.getHeader("X-ClientCert"), new ExecutionContext(httpRequest, httpResponse));
         log.debug("Issuing access token: {}", accessToken.getCode());
 
         ExternalUpdateTokenContext context = new ExternalUpdateTokenContext(httpRequest, cibaGrant, client, appConfiguration, attributeService);
