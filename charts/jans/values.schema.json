@@ -228,6 +228,11 @@
                      "type":"string",
                      "pattern":"^(\\d{0,2}(\\.\\d{1,2})?|100(\\.0?)?)$"
                   },
+                  "cnScimProtectionMode":{
+                     "description":"SCIM protection mode OAUTH|TEST|UMA",
+                     "type":"string",
+                     "pattern":"^(OAUTH|TEST|UMA)$"
+                  },
                   "cnPassportEnabled":{
                      "description":"Boolean flag to enable/disable Passport chart",
                      "type":"boolean"
@@ -2209,7 +2214,7 @@
                               "description":"Enable OpenDJ multiCluster mode. This flag enabbles loading keys under `opendj.multiCluster`",
                               "type":"boolean"
                            },
-                           "serfAdvertiseAddr":{
+                           "serfAdvertiseAddrSuffix":{
                               "description":"OpenDJ Serf advertise address for the cluster",
                               "type":"string"
                            },

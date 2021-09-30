@@ -3,7 +3,7 @@
 apiVersion: v2
 name: client-api
 version: 1.0.0-b11
-kubeVersion: ">=v1.17.0-0"
+kubeVersion: ">=v1.19.0-0"
 description: Middleware API to help application developers call an OAuth, OpenID or UMA server. You may wonder why this is necessary. It makes it easier for client developers to use OpenID signing and encryption features, without becoming crypto experts. This API provides some high level endpoints to do some of the heavy lifting.
 type: application
 keywords:
