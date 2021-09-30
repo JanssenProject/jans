@@ -2350,12 +2350,12 @@ paths:
                 $ref: '#/components/schemas/HealthStatusItem'
         '500':
           description: Internal Server Error
-  /jans-config-api/api/v1/scim/user:
+  /jans-config-api/scim/user:
     get:
       tags:
         - SCIM - User Management
-      summary: Gets list of users
-      description: Gets list of users
+      summary: Gets list of SCIM users
+      description: Gets list of SCIM users
       operationId: get-scim-users
       responses:
         '200':
@@ -2432,10 +2432,9 @@ paths:
 		  
     post:
       tags:
-      - user
+      - SCIM - User Management
       operationId: post-create-user
-      description: Allows creating a User resource via POST (see section 3.3 of RFC
-        7644)
+      description: Allows creating a User resource via POST (see section 3.3 of RFC 7644)
       security:
         - scim_oauth: [https://jans.io/scim/users.write]
       parameters:
@@ -2497,12 +2496,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-      x-codegen-request-body-name: user
 	  
-  /jans-config-api/api/v1/scim/user/{id}:
+  /jans-config-api/scim/user/{id}:
     get:
       tags:
-      - user
+      - SCIM - User Management
       operationId: get-user-by-id
       description: Retrieves a User resource by Id (see section 3.4.1 of RFC 7644)
       security:
@@ -2553,7 +2551,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
     put:
       tags:
-      - user
+      - SCIM - User Management
       operationId: put-update-user-by-id
       description: "Updates a User resource (see section 3.5.1 of RFC 7644). Update\
         \ works in a replacement fashion&amp;#58; every\nattribute value found in the\
@@ -2636,10 +2634,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-      x-codegen-request-body-name: user
     delete:
       tags:
-      - user
+      - SCIM - User Management
       operationId: delete-user-by-id
       description: Deletes a user resource
       security:
@@ -2675,7 +2672,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
     patch:
       tags:
-      - user
+      - SCIM - User Management
       operationId: patch-user-by-id
       description: "Updates one or more attributes of a User resource using a sequence\
         \ of additions, removals, and \nreplacements operations. See section 3.5.2\
@@ -2739,9 +2736,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-      x-codegen-request-body-name: request
 
-  /jans-config-api/api/v1/scim/user/.search:
+  /jans-config-api/scim/user/.search:
     post:
       tags:
         - SCIM - User Management
@@ -5820,3 +5816,15 @@ components:
           type: boolean
           description: Denotes if this is the preferred certificate among others, if any
       description: A certificate associated with the user. See section 4.1.2 of RFC 7643
+    Meta:
+      type: object
+      properties:
+        resourceType:
+          type: string
+        created:
+          type: string
+        lastModified:
+          type: string
+        location:
+          type: string
+      description: See section 3.1 of RFC 7643
