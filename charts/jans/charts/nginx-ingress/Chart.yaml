@@ -3,7 +3,7 @@
 apiVersion: v2
 name: nginx-ingress
 version: 1.0.0-b11
-kubeVersion: ">=v1.17.0-0"
+kubeVersion: ">=v1.19.0-0"
 description: Nginx ingress definitions chart
 type: application
 keywords:

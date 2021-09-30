@@ -20,7 +20,7 @@ OAuth Authorization Server, the OpenID Connect Provider, the UMA Authorization S
 
 ## Requirements
 
-Kubernetes: `>=v1.17.0-0`
+Kubernetes: `>=v1.19.0-0`
 
 ## Values
 

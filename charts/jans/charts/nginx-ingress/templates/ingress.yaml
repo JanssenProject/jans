@@ -3,7 +3,7 @@
 {{ if .Values.ingress.openidConfigEnabled -}}
 {{ $fullName := include "nginx-ingress.fullname" . -}}
 {{- $ingressPath := .Values.ingress.path -}}
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ $fullName }}-openid-config
@@ -37,14 +37,19 @@ spec:
 {{- end }}
   rules:
   {{- range .Values.ingress.hosts }}
-    - host: {{ . | quote }}
+  {{- $host := . -}}
+  {{- with $ }}
+    - host: {{ $host | quote }}
       http:
         paths:
           - path: /.well-known/openid-configuration
             pathType: Exact
             backend:
-              serviceName: auth-server
-              servicePort: 8080
+              service:
+                name: {{ index .Values "global" "auth-server" "authServerServiceName" }}
+                port:
+                  number: 8080
+  {{- end }}
   {{- end }}
 {{- end }}
 
@@ -53,7 +58,7 @@ spec:
 {{ if .Values.ingress.uma2ConfigEnabled -}}
 {{ $fullName := include "nginx-ingress.fullname" . -}}
 {{- $ingressPath := .Values.ingress.path -}}
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ $fullName }}-uma2-config
@@ -87,14 +92,19 @@ spec:
 {{- end }}
   rules:
   {{- range .Values.ingress.hosts }}
-    - host: {{ . | quote }}
+  {{- $host := . -}}
+  {{- with $ }}
+    - host: {{ $host | quote }}
       http:
         paths:
           - path: /.well-known/uma2-configuration
             pathType: Exact
             backend:
-              serviceName: auth-server
-              servicePort: 8080
+              service:
+                name: {{ index .Values "global" "auth-server" "authServerServiceName" }}
+                port:
+                  number: 8080
+  {{- end }}
   {{- end }}
 {{- end }}
 
@@ -103,7 +113,7 @@ spec:
 {{ if .Values.ingress.webfingerEnabled -}}
 {{ $fullName := include "nginx-ingress.fullname" . -}}
 {{- $ingressPath := .Values.ingress.path -}}
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ $fullName }}-webfinger
@@ -137,14 +147,19 @@ spec:
 {{- end }}
   rules:
   {{- range .Values.ingress.hosts }}
-    - host: {{ . | quote }}
+  {{- $host := . -}}
+  {{- with $ }}
+    - host: {{ $host | quote }}
       http:
         paths:
           - path: /.well-known/webfinger
             pathType: Exact
             backend:
-              serviceName: auth-server
-              servicePort: 8080
+              service:
+                name: {{ index .Values "global" "auth-server" "authServerServiceName" }}
+                port:
+                  number: 8080
+  {{- end }}
   {{- end }}
 {{- end }}
 
@@ -153,7 +168,7 @@ spec:
 {{ if .Values.ingress.webdiscoveryEnabled -}}
 {{ $fullName := include "nginx-ingress.fullname" . -}}
 {{- $ingressPath := .Values.ingress.path -}}
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ $fullName }}-webdiscovery
@@ -187,14 +202,19 @@ spec:
 {{- end }}
   rules:
   {{- range .Values.ingress.hosts }}
-    - host: {{ . | quote }}
+  {{- $host := . -}}
+  {{- with $ }}
+    - host: {{ $host | quote }}
       http:
         paths:
           - path: /.well-known/simple-web-discovery
             pathType: Exact
             backend:
-              serviceName: auth-server
-              servicePort: 8080
+              service:
+                name: {{ index .Values "global" "auth-server" "authServerServiceName" }}
+                port:
+                  number: 8080
+  {{- end }}
   {{- end }}
 {{- end }}
 
@@ -203,7 +223,7 @@ spec:
 {{ if .Values.ingress.scimConfigEnabled -}}
 {{ $fullName := include "nginx-ingress.fullname" . -}}
 {{- $ingressPath := .Values.ingress.path -}}
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ $fullName }}-scim-config
@@ -237,14 +257,19 @@ spec:
 {{- end }}
   rules:
   {{- range .Values.ingress.hosts }}
-    - host: {{ . | quote }}
+  {{- $host := . -}}
+  {{- with $ }}
+    - host: {{ $host | quote }}
       http:
         paths:
           - path: /.well-known/scim-configuration
             pathType: Exact
             backend:
-              serviceName: scim
-              servicePort: 8080
+              service:
+                name: {{ .Values.global.scim.scimServiceName }}
+                port:
+                  number: 8080
+  {{- end }}
   {{- end }}
 {{- end }}
 
@@ -253,7 +278,7 @@ spec:
 {{ if .Values.ingress.scimEnabled -}}
 {{ $fullName := include "nginx-ingress.fullname" . -}}
 {{- $ingressPath := .Values.ingress.path -}}
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ $fullName }}-jans-scim
@@ -285,14 +310,19 @@ spec:
 {{- end }}
   rules:
   {{- range .Values.ingress.hosts }}
-    - host: {{ . | quote }}
+  {{- $host := . -}}
+  {{- with $ }}
+    - host: {{ $host | quote }}
       http:
         paths:
           - path: /jans-scim
             pathType: Prefix
             backend:
-              serviceName: scim
-              servicePort: 8080
+              service:
+                name: {{ .Values.global.scim.scimServiceName }}
+                port:
+                  number: 8080
+  {{- end }}
   {{- end }}
 {{- end }}
 
@@ -301,7 +331,7 @@ spec:
 {{ if .Values.ingress.configApiEnabled -}}
 {{ $fullName := include "nginx-ingress.fullname" . -}}
 {{- $ingressPath := .Values.ingress.path -}}
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ $fullName }}-jans-config-api
@@ -333,14 +363,19 @@ spec:
 {{- end }}
   rules:
   {{- range .Values.ingress.hosts }}
-    - host: {{ . | quote }}
+  {{- $host := . -}}
+  {{- with $ }}
+    - host: {{ $host | quote }}
       http:
         paths:
           - path: /jans-config-api
             pathType: Prefix
             backend:
-              serviceName: config-api
-              servicePort: 8074
+              service:
+                name: {{ index .Values "global" "config-api" "configApiServerServiceName" }}
+                port:
+                  number: 8074
+  {{- end }}
   {{- end }}
 {{- end }}
 
@@ -349,7 +384,7 @@ spec:
 {{ if .Values.ingress.u2fConfigEnabled -}}
 {{ $fullName := include "nginx-ingress.fullname" . -}}
 {{- $ingressPath := .Values.ingress.path -}}
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ $fullName }}-u2f-config
@@ -383,14 +418,19 @@ spec:
 {{- end }}
   rules:
   {{- range .Values.ingress.hosts }}
-    - host: {{ . | quote }}
+  {{- $host := . -}}
+  {{- with $ }}
+    - host: {{ $host | quote }}
       http:
         paths:
           - path: /.well-known/fido-configuration
             pathType: Exact
             backend:
-              serviceName: auth-server
-              servicePort: 8080
+              service:
+                name: {{ index .Values "global" "auth-server" "authServerServiceName" }}
+                port:
+                  number: 8080
+  {{- end }}
   {{- end }}
 {{- end }}
 
@@ -399,7 +439,7 @@ spec:
 {{ if .Values.ingress.fido2ConfigEnabled -}}
 {{ $fullName := include "nginx-ingress.fullname" . -}}
 {{- $ingressPath := .Values.ingress.path -}}
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ $fullName }}-fido2-configuration
@@ -433,14 +473,19 @@ spec:
 {{- end }}
   rules:
   {{- range .Values.ingress.hosts }}
-    - host: {{ . | quote }}
+  {{- $host := . -}}
+  {{- with $ }}
+    - host: {{ $host | quote }}
       http:
         paths:
           - path: /.well-known/fido2-configuration
             pathType: Exact
             backend:
-              serviceName: fido2
-              servicePort: 8080
+              service:
+                name: {{ .Values.global.fido2.fido2ServiceName }}
+                port:
+                  number: 8080
+  {{- end }}
   {{- end }}
 {{- end }}
 
@@ -449,7 +494,7 @@ spec:
 {{ if .Values.ingress.authServerEnabled -}}
 {{ $fullName := include "nginx-ingress.fullname" . -}}
 {{- $ingressPath := .Values.ingress.path -}}
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ $fullName }}-auth-server
@@ -481,14 +526,19 @@ spec:
 {{- end }}
   rules:
   {{- range .Values.ingress.hosts }}
-    - host: {{ . | quote }}
+  {{- $host := . -}}
+  {{- with $ }}
+    - host: {{ $host | quote }}
       http:
         paths:
           - path: /jans-auth
             pathType: Prefix
             backend:
-              serviceName: auth-server
-              servicePort: 8080
+              service:
+                name: {{ index .Values "global" "auth-server" "authServerServiceName" }}
+                port:
+                  number: 8080
+  {{- end }}
   {{- end }}
 {{- end }}
 
@@ -497,7 +547,7 @@ spec:
 {{ if .Values.ingress.authServerProtectedToken -}}
 {{ $fullName := include "nginx-ingress.fullname" . -}}
 {{- $ingressPath := .Values.ingress.path -}}
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ $fullName }}-auth-server-protected-token
@@ -532,14 +582,19 @@ spec:
 {{- end }}
   rules:
   {{- range .Values.ingress.hosts }}
-    - host: {{ . | quote }}
+  {{- $host := . -}}
+  {{- with $ }}
+    - host: {{ $host | quote }}
       http:
         paths:
           - path: /jans-auth/restv1/token
             pathType: Exact
             backend:
-              serviceName: auth-server
-              servicePort: 8080
+              service:
+                name: {{ index .Values "global" "auth-server" "authServerServiceName" }}
+                port:
+                  number: 8080
+  {{- end }}
   {{- end }}
 {{- end }}
 
@@ -548,7 +603,7 @@ spec:
 {{ if .Values.ingress.authServerProtectedRegister -}}
 {{ $fullName := include "nginx-ingress.fullname" . -}}
 {{- $ingressPath := .Values.ingress.path -}}
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ $fullName }}-auth-server-protected-register
@@ -583,13 +638,18 @@ spec:
 {{- end }}
   rules:
   {{- range .Values.ingress.hosts }}
-    - host: {{ . | quote }}
+  {{- $host := . -}}
+  {{- with $ }}
+    - host: {{ $host | quote }}
       http:
         paths:
           - path: /jans-auth/restv1/register
             pathType: Exact
             backend:
-              serviceName: auth-server
-              servicePort: 8080
+              service:
+                name: {{ index .Values "global" "auth-server" "authServerServiceName" }}
+                port:
+                  number: 8080
+  {{- end }}
   {{- end }}
 {{- end }}

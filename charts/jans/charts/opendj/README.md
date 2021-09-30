@@ -1,6 +1,6 @@
 # opendj
 
-![Version: 1.0.0-b11](https://img.shields.io/badge/Version-1.0.0--b11-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 5.0.0](https://img.shields.io/badge/AppVersion-5.0.0-informational?style=flat-square)
+![Version: 1.0.0-b11](https://img.shields.io/badge/Version-1.0.0--b11-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.0.0-b11](https://img.shields.io/badge/AppVersion-1.0.0--b11-informational?style=flat-square)
 
 OpenDJ is a directory server which implements a wide range of Lightweight Directory Access Protocol and related standards, including full compliance with LDAPv3 but also support for Directory Service Markup Language (DSMLv2).Written in Java, OpenDJ offers multi-master replication, access control, and many extensions.
 
@@ -19,7 +19,7 @@ OpenDJ is a directory server which implements a wide range of Lightweight Direct
 
 ## Requirements
 
-Kubernetes: `>=v1.17.0-0`
+Kubernetes: `>=v1.19.0-0`
 
 ## Values
 
@@ -40,10 +40,13 @@ Kubernetes: `>=v1.17.0-0`
 | image.tag | string | `"5.0.0_dev"` | Image  tag to use for deploying. |
 | livenessProbe | object | `{"exec":{"command":["python3","/app/scripts/healthcheck.py"]},"failureThreshold":20,"initialDelaySeconds":30,"periodSeconds":30,"timeoutSeconds":5}` | Configure the liveness healthcheck for OpenDJ if needed. https://github.com/JanssenFederation/docker-opendj/blob/4.3/scripts/healthcheck.py |
 | livenessProbe.exec | object | `{"command":["python3","/app/scripts/healthcheck.py"]}` | Executes the python3 healthcheck. |
+| multiCluster.clusterId | string | `""` | This id needs to be unique to each kubernetes cluster in a multi cluster setup west, east, south, north, region ...etc If left empty it will be randomly generated. |
 | multiCluster.enabled | bool | `false` | Enable OpenDJ multiCluster mode. This flag enables loading keys under `opendj.multiCluster` |
-| multiCluster.serfAdvertiseAddr | string | `"firstldap.jans.org:30946"` | OpenDJ Serf advertise address for the cluster |
+| multiCluster.namespaceIntId | int | `0` | Namespace int id. This id needs to be a unique number 0-9 per jans installation per namespace. Used when jans is installed in the same kubernetes cluster more than once. |
+| multiCluster.replicaCount | int | `1` | The number of opendj non scalabble statefulsets to create. Each pod created must be resolvable as it follows the patterm RELEASE-NAME-opendj-CLUSTERID-regional-{{statefulset pod number}}-{{ $.Values.multiCluster.serfAdvertiseAddrSuffix }} If set to 1, with a release name of jans,  the address of the pod would be jans-opendj-regional-0-regional.jans.org |
+| multiCluster.serfAdvertiseAddrSuffix | string | `"regional.jans.org:30946"` | OpenDJ Serf advertise address suffix that will be added to each opendj replica. i.e RELEASE-NAME-opendj-regional-{{statefulset pod number}}-{{ $.Values.multiCluster.serfAdvertiseAddrSuffix }} |
 | multiCluster.serfKey | string | `"Z51b6PgKU1MZ75NCZOTGGoc0LP2OF3qvF6sjxHyQCYk="` | Serf key. This key will automatically sync across clusters. |
-| multiCluster.serfPeers | list | `["firstldap.jans.org:30946","secondldap.jans.org:31946"]` | Serf peer addresses. One per cluster. |
+| multiCluster.serfPeers | list | `["jans-opendj-regional-0-regional.jans.org:30946","jans-opendj-regional-0-regional.jans.org:31946"]` | Serf peer addresses. One per cluster. |
 | nameOverride | string | `""` |  |
 | openDjVolumeMounts.config.mountPath | string | `"/opt/opendj/config"` |  |
 | openDjVolumeMounts.config.name | string | `"opendj-volume"` |  |
