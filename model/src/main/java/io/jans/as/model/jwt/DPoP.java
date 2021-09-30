@@ -260,8 +260,6 @@ public class DPoP extends Jwt {
             throw new InvalidJwtException("The issued at (iat) is required");
         }
 
-        // TODO: Validate JWK format
-
         if (cryptoProvider == null) {
             throw new Exception("The Crypto Provider cannot be null.");
         }
