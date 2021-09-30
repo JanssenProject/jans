@@ -8,12 +8,7 @@ package io.jans.as.model.configuration;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.common.collect.Lists;
-import io.jans.as.model.common.ComponentType;
-import io.jans.as.model.common.GrantType;
-import io.jans.as.model.common.ResponseMode;
-import io.jans.as.model.common.ResponseType;
-import io.jans.as.model.common.SoftwareStatementValidationType;
-import io.jans.as.model.common.WebKeyStorage;
+import io.jans.as.model.common.*;
 import io.jans.as.model.error.ErrorHandlingMethod;
 import io.jans.as.model.jwk.KeySelectionStrategy;
 
@@ -28,7 +23,7 @@ import java.util.Set;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version July 28, 2021
+ * @version September 30, 2021
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AppConfiguration implements Configuration {
@@ -111,6 +106,7 @@ public class AppConfiguration implements Configuration {
     private List<String> requestObjectEncryptionEncValuesSupported;
     private List<String> tokenEndpointAuthMethodsSupported;
     private List<String> tokenEndpointAuthSigningAlgValuesSupported;
+    private List<String> dpopSigningAlgValuesSupported;
     private List<String> dynamicRegistrationCustomAttributes;
     private List<String> displayValuesSupported;
     private List<String> claimTypesSupported;
@@ -1208,6 +1204,14 @@ public class AppConfiguration implements Configuration {
 
     public void setTokenEndpointAuthSigningAlgValuesSupported(List<String> tokenEndpointAuthSigningAlgValuesSupported) {
         this.tokenEndpointAuthSigningAlgValuesSupported = tokenEndpointAuthSigningAlgValuesSupported;
+    }
+
+    public List<String> getDpopSigningAlgValuesSupported() {
+        return dpopSigningAlgValuesSupported;
+    }
+
+    public void setDpopSigningAlgValuesSupported(List<String> dpopSigningAlgValuesSupported) {
+        this.dpopSigningAlgValuesSupported = dpopSigningAlgValuesSupported;
     }
 
     public List<String> getDynamicRegistrationCustomAttributes() {
