@@ -199,7 +199,7 @@ public class PkceHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
+        assertEquals(tokenResponse.getStatus(), 400, "Unexpected response code: " + tokenResponse.getStatus());
         assertNull(tokenResponse.getAccessToken(), "The access token is null");
 
         // 5. Get Access Token without code verifier
@@ -209,7 +209,7 @@ public class PkceHttpTest extends BaseTest {
         tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
+        assertEquals(tokenResponse.getStatus(), 400, "Unexpected response code: " + tokenResponse.getStatus());
         assertNull(tokenResponse.getAccessToken(), "The access token is null");
 
     }
