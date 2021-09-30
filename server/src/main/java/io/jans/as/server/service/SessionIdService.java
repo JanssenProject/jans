@@ -195,7 +195,7 @@ public class SessionIdService {
             String sessionAcr = getAcr(session);
 
             if (StringUtils.isBlank(sessionAcr)) {
-                log.trace("Failed to fetch acr from session, attributes: " + sessionAttributes);
+                log.trace("Failed to fetch acr from session, attributes: {}", sessionAttributes);
                 return session;
             }
 
@@ -329,10 +329,8 @@ public class SessionIdService {
     public SessionId getSessionId() {
         String sessionId = cookieService.getSessionIdFromCookie();
 
-        if (StringHelper.isEmpty(sessionId)) {
-        	if (identity.getSessionId() != null) {
-        		sessionId = identity.getSessionId().getId();
-        	}
+        if (StringHelper.isEmpty(sessionId) && identity.getSessionId() != null) {
+      		sessionId = identity.getSessionId().getId();
         }
 
         if (StringHelper.isNotEmpty(sessionId)) {
