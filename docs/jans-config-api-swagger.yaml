@@ -2357,39 +2357,423 @@ paths:
       summary: Gets list of users
       description: Gets list of users
       operationId: get-scim-users
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/UserListResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserListResponse'
+        '400':
+          description: Parameter count exceeds the maximum allowed value or the filter
+            supplied was unparsable
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: There was an unexpected failure executing the operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - oauth2: [https://jans.io/oauth/config/scim/user.readonly]
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: filter
+          description: Search filter pattern. For more details refer section 3.4.2.2 of RFC 7644
+          example: userName co \"mi\", userName eq \"admin\", displayName co \"1111\" or displayName co \"Group\"
+        - schema:
+            type: integer
+            default: 1
+          in: query
+          name: startIndex
+          description: The 1-based index of the first query result.
+        - schema:
+            type: integer
+          in: query
+          name: count
+          description: Search size - max size of the results to return.
+        - schema:
+            type: string
+          in: query
+          name: sortBy
+          description: The attribute whose value will be used to order the returned responses
+        - schema:
+            type: string
+            enum:
+              - '- ascending'
+              - '- descending'
+          in: query
+          name: sortOrder
+          description: Order in which the sortBy param is applied. Allowed values are "ascending" and "descending"
+        - schema:
+            type: string
+          in: query
+          name: attributes
+          description: A comma-separated list of attribute names to return in the response
+        - schema:
+            type: string
+          in: query
+          name: excludedAttributes
+          description: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list).
+		  
+    post:
+      tags:
+      - user
+      operationId: post-create-user
+      description: Allows creating a User resource via POST (see section 3.3 of RFC
+        7644)
+      security:
+        - scim_oauth: [https://jans.io/scim/users.write]
+      parameters:
+      - name: attributes
+        in: query
+        description: A comma-separated list of attribute names to return in the response
+        schema:
+          type: string
+      - name: excludedAttributes
+        in: query
+        description: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list)
+        schema:
+          type: string
+      requestBody:
+        description: Payload that represents the Group to create
+        content:
+          application/scim+json:
+            schema:
+              $ref: '#/components/schemas/UserResource'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserResource'
+        required: true
+      responses:
+        '201':
+          description: Successful operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/UserResource'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResource'
+        '400':
+          description: An invalid value was passed in the payload
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: There is a conflict with an already existing user. Uniqueness
+            is assumed over userName
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: There was an unexpected failure executing the operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-codegen-request-body-name: user
+	  
+  /jans-config-api/api/v1/scim/user/{id}:
+    get:
+      tags:
+      - user
+      operationId: get-user-by-id
+      description: Retrieves a User resource by Id (see section 3.4.1 of RFC 7644)
+      security:
+        - scim_oauth: [https://jans.io/scim/users.read]
+      parameters:
+      - name: attributes
+        in: query
+        description: A comma-separated list of attribute names to return in the response
+        schema:
+          type: string
+      - name: excludedAttributes
+        in: query
+        description: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list)
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/UserResource'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResource'
+        404:
+          description: Id passed unknown
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        500:
+          description: There was an unexpected failure executing the operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      tags:
+      - user
+      operationId: put-update-user-by-id
+      description: "Updates a User resource (see section 3.5.1 of RFC 7644). Update\
+        \ works in a replacement fashion&amp;#58; every\nattribute value found in the\
+        \ payload sent will replace the one in the existing resource representation.\
+        \ Attributes \nnot passed in the payload will be left intact.\n"
+      security:
+        - scim_oauth: [https://jans.io/scim/users.write]
+      parameters:
+      - name: attributes
+        in: query
+        description: A comma-separated list of attribute names to return in the response
+        schema:
+          type: string
+      - name: excludedAttributes
+        in: query
+        description: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list)
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: Payload with the data to replace in the existing user identified
+          by the id param
+        content:
+          application/scim+json:
+            schema:
+              $ref: '#/components/schemas/UserResource'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserResource'
+        required: true
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/UserResource'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResource'
+        400:
+          description: |
+            An invalid value was passed in the payload or there was an attempt to update an immutable attribute
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        404:
+          description: Id passed unknown
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        409:
+          description: There is a conflict with an already existing group. Uniqueness
+            is assumed over displayName
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        500:
+          description: There was an unexpected failure executing the operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-codegen-request-body-name: user
+    delete:
+      tags:
+      - user
+      operationId: delete-user-by-id
+      description: Deletes a user resource
+      security:
+        - scim_oauth: [https://jans.io/scim/users.write]
+      parameters:
+      - name: id
+        in: path
+        description: Identifier of the resource to delete
+        required: true
+        schema:
+          type: string
+      responses:
+        204:
+          description: Successful operation. Empty response
+          content: {}
+        404:
+          description: Id passed unknown
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        500:
+          description: There was an unexpected failure executing the operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    patch:
+      tags:
+      - user
+      operationId: patch-user-by-id
+      description: "Updates one or more attributes of a User resource using a sequence\
+        \ of additions, removals, and \nreplacements operations. See section 3.5.2\
+        \ of RFC 7644\n"
+      security:
+        - scim_oauth: [https://jans.io/scim/users.write]
+      parameters:
+      - name: attributes
+        in: query
+        description: A comma-separated list of attribute names to return in the response
+        schema:
+          type: string
+      - name: excludedAttributes
+        in: query
+        description: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list)
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: Payload describing the patch operations to apply upon the resource
+          identified by param id
+        content:
+          application/scim+json:
+            schema:
+              $ref: '#/components/schemas/PatchRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchRequest'
+        required: true
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/UserResource'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResource'
+        400:
+          description: |
+            One or more operations supplied in the request are specified incorrectly, there were attempts to
+            modify immutable attributes, or the resulting resource cannot pass intrinsic validations
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        500:
+          description: There was an unexpected failure executing the operation
+          content:
+            application/scim+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-codegen-request-body-name: request
+
+  /jans-config-api/api/v1/scim/user/.search:
+    post:
+      tags:
+        - SCIM - User Management
+      summary: Saerch users
+      description: Gets list of users
+      operationId: post-search-scim-users
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SearchRequest'
+              $ref: 'https://github.com/JanssenProject/jans-scim/blob/master/server/src/main/resources/jans-scim-openapi.yaml#/components/schemas/SearchRequest'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                title: List Users.
-                description: List all Users.
-                items:
-                 $ref: '#/components/schemas/User'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
+                $ref: '#/components/schemas/HealthStatusItem'
+        '400':
+          description: Parameter count exceeds the maximum allowed value or the filter supplied was unparsable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '500':
-          description: Internal Server Error
+          description: There was an unexpected failure executing the operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
       security:
-        - oauth2: [https://jans.io/oauth/config/scim/user.readonly]
-      parameters:
-        - schema:
-            type: integer
-            default: 50
-          in: query
-          name: limit
-          description: Search size - max size of the results to return.
-        - schema:
-            type: string
-          in: query
-          name: pattern
-          description: Search pattern.
+        - oauth2: [https://jans.io/oauth/config/scim/user.readonly]		  
 components:
   securitySchemes:
     oauth2:
@@ -2439,7 +2823,7 @@ components:
             https://jans.io/oauth/config/database/sql.write: Manage SQL database related information
             https://jans.io/oauth/config/database/sql.delete: Delete SQL database related information
             https://jans.io/oauth/config/stats.readonly: Vew server with basic statistic
-            https://jans.io/oauth/config/scim/user.readonly: View Users related information.
+
   responses:
     Found:
       description: Resource Found.
@@ -5138,241 +5522,301 @@ components:
           type: integer
           format: int32
           description: total count of records
-   SearchRequest:
+    
+    UserListResponse:
+      description: Results for users search. See section 3.4.2.4 of RFC 7644
+      allOf:
+      - $ref: '#/components/schemas/BasicListResponse'
+      - type: object
+      - type: object
+        properties:
+          Resources:
+            type: array
+            items:
+              $ref: '#/components/schemas/UserResource'
+    BasicListResponse:
       type: object
-      description: Search Parameters.
       properties:
-        schemas: 
+        schemas:
           type: array
           items:
             type: string
-          description: schema details
-        attributes:
-          type: array
-          items:
-            type: string
-          description: attribute details
-        excludedAttributes:
-          type: array
-          items:
-            type: string
-          description: attribute to be excluded details
-        filter:
-          type: string
-          description: search filter
-        sortBy:
-          type: string
-          description: attribute to be used for sorting
-        sortOrder:
-          type: string
-          description: sorting order
+            example: urn:ietf:params:scim:api:messages:2.0:ListResponse
+        totalResults:
+          type: integer
+          description: Total number of results returned by the search. The value may be larger than the number of resources returned due to pagination
         startIndex:
           type: integer
-          format: int32
-          description: result start index
-        count:
+          description: The 1-based index of the first result in the current set of search results
+        itemsPerPage:
           type: integer
-          format: int32
-          description: total count of records
-   User:
-      type: object
-      description: User details.
-      required:
-        - id
-        - extendedAttrss
-      properties:
-        schemas: 
-          type: array
-          items:
+          description: The number of resources returned in a results page
+
+    UserResource:
+      description: Represents a user resource. See section 4.1 of RFC 7643
+      allOf:
+      - $ref: '#/components/schemas/BaseResource'
+      - type: object
+      - type: object
+        properties:
+          externalId:
             type: string
-          description: list of URIs indicating SCIM schema namespaces that define the attributes.
-        id:
-          type: string
-          description: A unique identifier for a SCIM resource as defined by the service provider.
-        externalId:
-          type: string
-          description: A String that is an identifier for the resource as defined by the provisioning client.
-       meta:
-          $ref: '#/components/schemas/Meta'
-          description: A complex attribute containing resource metadata.
-      extendedAttrs:
-          type: object
-          additionalProperties:
+            description: Identifier of the resource useful from the perspective of the provisioning client. See section 3.1 of RFC 7643
+          userName:
+            type: string
+            description: Identifier for the user, typically used by the user to directly authenticate (id and externalId are opaque identifiers generally not known by users)
+          name:
+            $ref: '#/components/schemas/Name'
+          displayName:
+            type: string
+            description: Name of the user suitable for display to end-users
+          nickName:
+            type: string
+            description: Casual way to address the user in real life
+          profileUrl:
+            type: string
+            description: URI pointing to a location representing the User's online profile
+          title:
+            type: string
+            example: Vice President
+          userType:
+            type: string
+            description: Used to identify the relationship between the organization and the user
+            example: Contractor
+          preferredLanguage:
+            type: string
+            description: Preferred language as used in the Accept-Language HTTP header
+            example: en
+          locale:
+            type: string
+            description: Used for purposes of localizing items such as currency and dates
+            example: en-US
+          timezone:
+            type: string
+            example: America/Los_Angeles
+          active:
+            type: boolean
+          password:
+            type: string
+          emails:
+            type: array
+            items:
+              $ref: '#/components/schemas/Email'
+          phoneNumbers:
+            type: array
+            items:
+              $ref: '#/components/schemas/PhoneNumber'
+          ims:
+            type: array
+            items:
+              $ref: '#/components/schemas/InstantMessagingAddress'
+          photos:
+            type: array
+            items:
+              $ref: '#/components/schemas/Photo'
+          addresses:
+            type: array
+            items:
+              $ref: '#/components/schemas/Address'
+          groups:
+            type: array
+            items:
+              $ref: '#/components/schemas/Group'
+          entitlements:
+            type: array
+            items:
+              $ref: '#/components/schemas/Entitlement'
+          roles:
+            type: array
+            items:
+              $ref: '#/components/schemas/Role'
+          x509Certificates:
+            type: array
+            items:
+              $ref: '#/components/schemas/X509Certificate'
+          urn:ietf:params:scim:schemas:extension:gluu:2.0:User:
             type: object
-      userName:
-        type: string
-        description: Unique identifier for the User typically used by the user to directly authenticate to the service provider.
-			
-    Meta:
-      type: object
-      description: Represents the common resource attribute "meta" that contains metadata about the resource being described..
-      properties:
-        resourceType: 
-          type: string
-          description: The resource Type.
-        created:
-          type: string
-          description: Date and time the resource was created.
-        lastModified:
-          type: string
-          description: Date and time the resource was last modified.
-        location:
-          type: string
-          description: The location (URI) of the resource.
-        version:
-          type: string
-          description: The version of the resource.
-        name:
-          $ref: '#/components/schemas/Name'
-          description: The components of the user's real name.
-        displayName:
-          type: string
-          description: The name of the User, suitable for display to end-users. The name SHOULD be the full name of the User being described if known.
-        nickName:
-          type: string
-          description: The casual way to address the user in real life, e.g.'Bob' or 'Bobby' instead of 'Robert'. This attribute SHOULD NOT be used to represent a User's username.
-        profileUrl:
-          type: string
-          description: A fully qualified URL to a page representing the User's online profile.
-        title:
-          type: string
-          description: The user's title, such as 'Vice President'.
-        userType:
-          type: string
-          description: Used to identify the organization to user relationship. Typical values used might be 'Contractor', 'Employee', 'Intern', etc.
-        preferredLanguage:
-          type: string
-          description: Indicates the User's preferred written or spoken language.Generally used for selecting alocalized User interface. e.g. 'en_US' specifies the language English and country US.
-        locale:
-          type: string
-          description: Used to indicate the User's default  location for purposes of localizing items such as currency, date time format, numerical representations, etc.
-        timezone:
-          type: string
-          description: The User's time zone in the 'Olson' timezone database format; e.g.,'America/Los_Angeles'
-        active:
-          type: boolean
-          description: A Boolean value indicating the User's status.
-        password:
-          type: string
-          description: The User's clear text password. This attribute is intended to be used as a means to specify an initial password when creating a new User or to reset an existing User's password.
-        emails:
-          type: array
-          items:
-            type: string
-          description: E-mail addresses for the user. The value SHOULD be canonicalized by the Service Provider,e.g. bjensen@example.com instead of bjensen@EXAMPLE.COM. Canonical Type values of work, home, and other.
-        phoneNumbers:
-          type: array
-          items:
-            type: string
-          description: Phone numbers for the User.  The value SHOULD be canonicalized by the Service Provider according to format in RFC3966 e.g., 'tel:+1-201-555-0123'.  Canonical Type values of work, home, mobile,fax, pager and other.
-        ims:
-          type: array
-          items:
-            $ref: '#/components/schemas/InstantMessagingAddress'
-          description: Instant messaging addresses for the User.
-        photos:
-          type: array
-          items:
-            $ref: '#/components/schemas/Photo'
-          description: URIs of photos of the User.
-        addresses:
-          type: array
-          items:
-            $ref: '#/components/schemas/Address'
-          description: Physical mailing addresses for this User.
-        groups:
-          type: array
-          items:
-            $ref: '#/components/schemas/Group'
-          description: A list of groups that the user belongs to, either thorough direct membership, nested groups, or dynamically calculated.
-        entitlements:
-          type: array
-          items:
-            $ref: '#/components/schemas/Entitlement'
-          description: A list of entitlements for the User that represent a thing the User has.
-        roles:
-          type: array
-          items:
-            $ref: '#/components/schemas/Role'
-          description: A list of roles for the User that collectively represent who the User is; e.g., 'Student','Faculty'.
-        x509Certificates:
-          type: array
-          items:
-            $ref: '#/components/schemas/X509Certificate'
-          description: A list of certificates issued to the User.
-        pairwiseIdentifiers:
-          type: array
-          items:
-            type: string
-          description: Pairwise IDs.
+            properties: {}
+            description: Extended attributes	
 
     Name:
       type: object
-      description: Represents the common resource attribute "meta" that contains metadata about the resource being described..
       properties:
-        resourceType: 
+        familyName:
           type: string
-          description: The resource Type.
+        givenName:
+          type: string
+        middleName:
+          type: string
+        honorificPrefix:
+          type: string
+          description: A "title" like "Ms.", "Mrs."
+        honorificSuffix:
+          type: string
+          description: Name suffix, like "Junior", "The great", "III"
+        formatted:
+          type: string
+          description: Full name, including all middle names, titles, and suffixes as appropriate
+      description: See section 4.1.1 of RFC 7643
+    Email:
+      type: object
+      properties:
+        value:
+          type: string
+          example: gossow@nsfw.com
+        display:
+          type: string
+        type:
+          type: string
+          example: work
+        primary:
+          type: boolean
+          description: Denotes if this is the preferred e-mail among others, if any
+      description: See section 4.1.2 of RFC 7643
+    PhoneNumber:
+      type: object
+      properties:
+        value:
+          type: string
+          example: +1-555-555-8377
+        display:
+          type: string
+        type:
+          type: string
+          example: fax
+        primary:
+          type: boolean
+          description: Denotes if this is the preferred phone number among others, if any 
+      description: See section 4.1.2 of RFC 7643
     InstantMessagingAddress:
       type: object
-      description: Represents the common resource attribute "meta" that contains metadata about the resource being described..
       properties:
-        resourceType: 
+        value:
           type: string
-          description: The resource Type.	
+        display:
+          type: string
+        type:
+          type: string
+          example: gtalk
+        primary:
+          type: boolean
+          description: Denotes if this is the preferred messaging addressed among others, if any
+      description: See section 4.1.2 of RFC 7643
     Photo:
       type: object
-      description: Represents the common resource attribute "meta" that contains metadata about the resource being described..
       properties:
-        resourceType: 
+        value:
           type: string
-          description: The resource Type.
+          example: https://pics.nsfw.com/gossow.png
+        display:
+          type: string
+        type:
+          type: string
+          example: thumbnail
+        primary:
+          type: boolean
+          description: Denotes if this is the preferred photo among others, if any
+      description: Points to a resource location representing the user's image. See section 4.1.2 of RFC 7643
     Address:
       type: object
-      description: Represents the common resource attribute "meta" that contains metadata about the resource being described..
       properties:
-        resourceType: 
+        formatted:
           type: string
-          description: The resource Type.	
-    Group:
-      type: object
-      description: Represents the common resource attribute "meta" that contains metadata about the resource being described..
-      properties:
-        resourceType: 
+          description: Full mailing address, formatted for display or use with a mailing label
+        streetAddress:
           type: string
-          description: The resource Type.	
-    Entitlement:
-      type: object
-      description: Represents the common resource attribute "meta" that contains metadata about the resource being described..
-      properties:
-        resourceType: 
+          example: 56 Acacia Avenue
+        locality:
           type: string
-          description: The resource Type.		  
+          description: City or locality of the address
+        region:
+          type: string
+          description: State or region of the address
+        postalCode:
+          type: string
+          description: Zip code
+        country:
+          type: string
+          description: Country expressed in ISO 3166-1 "alpha-2" code format
+          example: UK
+        type:
+          type: string
+          example: home
+        primary:
+          type: boolean
+          description: Denotes if this is the preferred address among others, if any
+      description: Physical mailing address for this user. See section 4.1.2 of RFC 7643	  
     Role:
       type: object
-      description: Represents the common resource attribute "meta" that contains metadata about the resource being described..
       properties:
-        resourceType: 
+        value:
           type: string
-          description: The resource Type.		  
+          example: Project manager
+        display:
+          type: string
+        type:
+          type: string
+        primary:
+          type: boolean
+          description: Denotes if this is the preferred role among others, if any
+      description: See section 4.1.2 of RFC 7643
+    BaseResource:
+      type: object
+      properties:
+        schemas:
+          type: array
+          description: URIs that are used to indicate the namespaces of the SCIM schemas that define the attributes present in the current structure
+          items:
+            type: string
+        id:
+          type: string
+          description: A unique identifier for a SCIM resource. See section 3.1 of RFC 7643
+        meta:
+          $ref: '#/components/schemas/Meta'
+    Group:
+      type: object
+      properties:
+        value:
+          type: string
+          description: Group identifier
+          example: 180ee84f0671b1
+        $ref:
+          type: string
+          description: URI associated to the group
+          example: https://nsfw.com/scim/restv1/v2/Groups/180ee84f0671b1
+        display:
+          type: string
+          example: Cult managers
+        type:
+          type: string
+          description: Describes how the group membership was derived
+          example: direct
+      description: See section 4.1.2 of RFC 7643
+    Entitlement:
+      type: object
+      properties:
+        value:
+          type: string
+          example: Stakeholder
+        display:
+          type: string
+        type:
+          type: string
+        primary:
+          type: boolean
+          description: Denotes if this is the preferred entitlement among others, if any
+      description: Entitlements represent things a user has, like rights. See section 4.1.2 of RFC 7643
     X509Certificate:
       type: object
-      description: Represents the common resource attribute "meta" that contains metadata about the resource being described..
       properties:
-        resourceType: 
+        value:
           type: string
-          description: The resource Type.		  		  
-    X509Certificate:
-      type: object
-      description: Represents the common resource attribute "meta" that contains metadata about the resource being described..
-      properties:
-        resourceType: 
+          description: DER-encoded X.509 certificate
+        display:
           type: string
-          description: The resource Type.				  		  	  
-		  
-			  		  
-
-
-          
-    
-	
+        type:
+          type: string
+        primary:
+          type: boolean
+          description: Denotes if this is the preferred certificate among others, if any
+      description: A certificate associated with the user. See section 4.1.2 of RFC 7643
