@@ -20,7 +20,7 @@ Jans Config Api endpoints can be used to configure jans-auth-server, which is an
 
 ## Requirements
 
-Kubernetes: `>=v1.17.0-0`
+Kubernetes: `>=v1.19.0-0`
 
 ## Values
 

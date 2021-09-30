@@ -7,7 +7,7 @@ metadata:
   name: {{ .Release.Name }}-fido2-mtls
   namespace: {{.Release.Namespace}}
 spec:
-  host: {{ .Values.service.fido2ServiceName }}.{{ .Release.Namespace }}.svc.cluster.local
+  host: {{ .Values.global.fido2.fido2ServiceName }}.{{ .Release.Namespace }}.svc.cluster.local
   trafficPolicy:
     tls:
       mode: ISTIO_MUTUAL
