@@ -33,7 +33,7 @@ import java.util.concurrent.TimeUnit;
  * </p>
  *
  * @author Javier Rojas Blum
- * @version March 14, 2019
+ * @version September 30, 2021
  */
 public abstract class AbstractToken implements Serializable, Deletable {
 
@@ -51,6 +51,9 @@ public abstract class AbstractToken implements Serializable, Deletable {
     @AttributeName(name = "ssnId")
     private String sessionDn;
     private String x5ts256;
+
+    @AttributeName(name = "dpop")
+    private String dpop;
 
     @Expiration
     private int ttl;
@@ -232,6 +235,14 @@ public abstract class AbstractToken implements Serializable, Deletable {
 
     public void setX5ts256(String x5ts256) {
         this.x5ts256 = x5ts256;
+    }
+
+    public String getDpop() {
+        return dpop;
+    }
+
+    public void setDpop(String dpop) {
+        this.dpop = dpop;
     }
 
     public String getSessionDn() {
