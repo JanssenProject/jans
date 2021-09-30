@@ -22,7 +22,7 @@ import java.util.function.Function;
 /**
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version September 4, 2019
+ * @version September 30, 2021
  */
 
 public interface IAuthorizationGrant {
@@ -43,9 +43,9 @@ public interface IAuthorizationGrant {
 
     String getSub();
 
-    AccessToken createAccessToken(String certAsPem, ExecutionContext executionContext);
+    AccessToken createAccessToken(String dpop, String certAsPem, ExecutionContext executionContext);
 
-    RefreshToken createRefreshToken();
+    RefreshToken createRefreshToken(String dpop);
 
     IdToken createIdToken(
             String nonce, AuthorizationCode authorizationCode, AccessToken accessToken, RefreshToken refreshToken,
