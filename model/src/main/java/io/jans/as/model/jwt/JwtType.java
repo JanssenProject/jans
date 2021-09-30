@@ -8,11 +8,18 @@ package io.jans.as.model.jwt;
 
 /**
  * @author Javier Rojas Blum
- * @version December 17, 2015
+ * @version September 30, 2021
  */
 public enum JwtType {
 
-    JWT;
+    JWT("jwt"),
+    DPOP_PLUS_JWT("dpop+jwt");
+
+    private final String paramName;
+
+    JwtType(String paramName) {
+        this.paramName = paramName;
+    }
 
     /**
      * Returns the corresponding {@link JwtType} for a parameter.
@@ -23,11 +30,16 @@ public enum JwtType {
     public static JwtType fromString(String param) {
         if (param != null) {
             for (JwtType t : JwtType.values()) {
-                if (param.equals(t.toString())) {
+                if (param.equals(t.paramName)) {
                     return t;
                 }
             }
         }
         return null;
+    }
+
+    @Override
+    public String toString() {
+        return paramName;
     }
 }
