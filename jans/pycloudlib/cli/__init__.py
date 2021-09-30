@@ -15,7 +15,7 @@ from jans.pycloudlib.cli.encoding import decode_string
 @click.group(
     context_settings={"help_option_names": ["-h", "--help"]}
 )
-def cli():
+def cli():  # pragma: no cover
     """Entrypoint of CLI commands.
     """
     pass
