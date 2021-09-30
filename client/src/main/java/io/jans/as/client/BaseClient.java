@@ -6,6 +6,18 @@
 
 package io.jans.as.client;
 
+import io.jans.as.model.common.AuthenticationMethod;
+import io.jans.as.model.common.AuthorizationMethod;
+import io.jans.as.model.common.HasParamName;
+import io.jans.as.model.util.Util;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+import org.jboss.resteasy.client.ClientExecutor;
+import org.jboss.resteasy.client.ClientRequest;
+import org.jboss.resteasy.client.ClientResponse;
+
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.core.Cookie;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -13,25 +25,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.core.Cookie;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
-import org.jboss.resteasy.client.ClientExecutor;
-import org.jboss.resteasy.client.ClientRequest;
-import org.jboss.resteasy.client.ClientResponse;
-
-import io.jans.as.model.common.AuthenticationMethod;
-import io.jans.as.model.common.AuthorizationMethod;
-import io.jans.as.model.common.HasParamName;
-import io.jans.as.model.util.Util;
-
 /**
  * Allows to retrieve HTTP requests to the authorization server and responses from it for display purposes.
  *
  * @author Javier Rojas Blum
- * @version May 28, 2020
+ * @version September 30, 2021
  */
 public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> {
 
@@ -122,6 +120,8 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
 
             if (getHttpMethod().equals(HttpMethod.POST) || getHttpMethod().equals(HttpMethod.PUT) || getHttpMethod().equals(HttpMethod.DELETE)) {
                 sb.append(getHttpMethod()).append(" ").append(theUrl.getPath()).append(" HTTP/1.1");
+                sb.append("\n");
+                sb.append("Host: ").append(theUrl.getHost());
                 if (StringUtils.isNotBlank(request.getContentType())) {
                     sb.append("\n");
                     sb.append("Content-Type: ").append(request.getContentType());
@@ -130,8 +130,13 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
                     sb.append("\n");
                     sb.append("Accept: ").append(request.getMediaType());
                 }
-                sb.append("\n");
-                sb.append("Host: ").append(theUrl.getHost());
+                if (request instanceof TokenRequest) {
+                    TokenRequest tokenRequest = (TokenRequest) request;
+                    if (tokenRequest.getDpop() != null) {
+                        sb.append("\n");
+                        sb.append("DPoP: ").append(tokenRequest.getDpop().toString());
+                    }
+                }
 
                 if (request instanceof AuthorizationRequest) {
                     AuthorizationRequest authorizationRequest = (AuthorizationRequest) request;
@@ -159,8 +164,8 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
 
                 sb.append("\n");
                 sb.append("\n");
-                if (request instanceof RegisterRequest && ((RegisterRequest)request).hasJwtRequestAsString()) {
-                    sb.append(((RegisterRequest)request).getJwtRequestAsString());
+                if (request instanceof RegisterRequest && ((RegisterRequest) request).hasJwtRequestAsString()) {
+                    sb.append(((RegisterRequest) request).getJwtRequestAsString());
                 } else {
                     sb.append(request.getQueryString());
                 }
@@ -172,7 +177,17 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
                 sb.append(" HTTP/1.1");
                 sb.append("\n");
                 sb.append("Host: ").append(theUrl.getHost());
-
+                if (StringUtils.isNotBlank(request.getContentType())) {
+                    sb.append("\n");
+                    sb.append("Content-Type: ").append(request.getContentType());
+                }
+                if (request instanceof TokenRequest) {
+                    TokenRequest tokenRequest = (TokenRequest) request;
+                    if (tokenRequest.getDpop() != null) {
+                        sb.append("\n");
+                        sb.append("DPoP: ").append(tokenRequest.getDpop().toString());
+                    }
+                }
                 if (request instanceof AuthorizationRequest) {
                     AuthorizationRequest authorizationRequest = (AuthorizationRequest) request;
                     if (authorizationRequest.isUseNoRedirectHeader()) {
