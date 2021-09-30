@@ -502,6 +502,8 @@ public class AuthenticationFilter implements Filter {
         boolean authorized = false;
         String errorReason = null;
 
+        // test
+
         try {
             String dpopStr = servletRequest.getHeader(TokenRequestParam.DPOP);
             Jwt dpop = DPoP.parseOrThrow(dpopStr);
