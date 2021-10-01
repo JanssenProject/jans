@@ -2692,6 +2692,17 @@
       "x_origin": "Jans created attribute"
     },
     {
+      "desc": "DPoP Proof",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "dpop"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
       "desc": "Jans Casa - List of unlinked social accounts (ie disabled jansExtUids)",
       "equality": "caseIgnoreMatch",
       "names": [
@@ -3595,7 +3606,8 @@
         "clms",
         "ssnId",
         "attr",
-        "tknBndCnf"
+        "tknBndCnf",
+        "dpop"
       ],
       "must": [
         "objectclass"
