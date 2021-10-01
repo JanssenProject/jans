@@ -121,9 +121,12 @@ public class ParRestWebService {
             List<ResponseType> responseTypes = ResponseType.fromString(responseType, " ");
             ResponseMode responseModeObj = ResponseMode.getByValue(responseMode);
 
+            Jwt requestObject = Jwt.parseSilently(request);
+            clientId = getClientId(clientId, requestObject);
+
             Client client = authorizeRestWebServiceValidator.validateClient(clientId, state, true);
 
-            redirectUri = getRedirectUri(redirectUri, request);
+            redirectUri = getRedirectUri(redirectUri, requestObject);
             redirectUri = authorizeRestWebServiceValidator.validateRedirectUri(client, redirectUri, state, null, httpRequest, AuthorizeErrorResponseType.INVALID_REQUEST);
 
             RedirectUriResponse redirectUriResponse = new RedirectUriResponse(new RedirectUri(redirectUri, responseTypes, responseModeObj), state, httpRequest, errorResponseFactory);
@@ -200,18 +203,22 @@ public class ParRestWebService {
         return response;
     }
 
-    private String getRedirectUri(String redirectUri, String request) {
-        if (StringUtils.isNotBlank(redirectUri) || StringUtils.isBlank(request))
+    private String getRedirectUri(String redirectUri, Jwt requestJwt) {
+        if (StringUtils.isNotBlank(redirectUri) || requestJwt == null)
             return redirectUri;
 
-        Jwt jwt = Jwt.parseSilently(request);
-        if (jwt != null) {
-            final String redirectUriFromJwt = jwt.getClaims().getClaimAsString("redirect_uri");
-            log.trace("redirectUriFromJwt: {}", redirectUriFromJwt);
-            return redirectUriFromJwt;
-        }
+        final String valueFromJwt = requestJwt.getClaims().getClaimAsString("redirect_uri");
+        log.trace("redirectUriFromJwt: {}", valueFromJwt);
+        return valueFromJwt;
+    }
 
-        return null;
+    private String getClientId(String clientId, Jwt requestJwt) {
+        if (StringUtils.isNotBlank(clientId) || requestJwt == null)
+            return clientId;
+
+        final String valueFromJwt = requestJwt.getClaims().getClaimAsString("client_id");
+        log.trace("clientIdFromJwt: {}", valueFromJwt);
+        return valueFromJwt;
     }
 
     @PUT
