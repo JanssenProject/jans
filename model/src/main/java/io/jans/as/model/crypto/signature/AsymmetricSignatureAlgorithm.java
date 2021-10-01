@@ -26,9 +26,9 @@ public enum  AsymmetricSignatureAlgorithm implements HasParamName, AttributeEnum
     RS256("RS256", AlgorithmFamily.RSA, "SHA256WITHRSA"),
     RS384("RS384", AlgorithmFamily.RSA, "SHA384WITHRSA"),
     RS512("RS512", AlgorithmFamily.RSA, "SHA512WITHRSA"),
-    ES256("ES256", AlgorithmFamily.EC, "SHA256WITHECDSA", ECEllipticCurve.P_256),
-    ES384("ES384", AlgorithmFamily.EC, "SHA384WITHECDSA", ECEllipticCurve.P_384),
-    ES512("ES512", AlgorithmFamily.EC, "SHA512WITHECDSA", ECEllipticCurve.P_521),
+    ES256("ES256", AlgorithmFamily.EC, "SHA256WITHECDSA", EllipticEdvardsCurve.P_256),
+    ES384("ES384", AlgorithmFamily.EC, "SHA384WITHECDSA", EllipticEdvardsCurve.P_384),
+    ES512("ES512", AlgorithmFamily.EC, "SHA512WITHECDSA", EllipticEdvardsCurve.P_521),
     PS256("PS256", AlgorithmFamily.RSA, "SHA256withRSAandMGF1"),
     PS384("PS384", AlgorithmFamily.RSA, "SHA384withRSAandMGF1"),
     PS512("PS512", AlgorithmFamily.RSA, "SHA512withRSAandMGF1");
@@ -36,7 +36,7 @@ public enum  AsymmetricSignatureAlgorithm implements HasParamName, AttributeEnum
     private final String name;
     private final AlgorithmFamily family;
     private final String algorithm;
-    private final ECEllipticCurve curve;
+    private final EllipticEdvardsCurve curve;
     private final JwtType jwtType;
 
     private static final Map<String, AsymmetricSignatureAlgorithm> mapByValues = new HashMap<>();
@@ -47,7 +47,7 @@ public enum  AsymmetricSignatureAlgorithm implements HasParamName, AttributeEnum
         }
     }
 
-    AsymmetricSignatureAlgorithm(String name, AlgorithmFamily family, String algorithm, ECEllipticCurve curve) {
+    AsymmetricSignatureAlgorithm(String name, AlgorithmFamily family, String algorithm, EllipticEdvardsCurve curve) {
         this.name = name;
         this.family = family;
         this.algorithm = algorithm;
@@ -77,7 +77,7 @@ public enum  AsymmetricSignatureAlgorithm implements HasParamName, AttributeEnum
         return algorithm;
     }
 
-    public ECEllipticCurve getCurve() {
+    public EllipticEdvardsCurve getCurve() {
         return curve;
     }
 
