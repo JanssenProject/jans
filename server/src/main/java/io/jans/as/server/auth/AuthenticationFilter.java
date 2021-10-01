@@ -52,6 +52,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Date;
 import java.util.List;
 
 import static io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType.INVALID_REQUEST;
@@ -519,10 +520,6 @@ public class AuthenticationFilter implements Filter {
             }
 
             // Validate Payload
-            if (StringUtils.isBlank(dpop.getClaims().getClaimAsString(DPoPJwtPayloadParam.JTI))) {
-                throw new InvalidJwtException("Invalid DPoP Proof Payload. The jti param is required");
-            }
-            // TODO: Validate jti
             if (StringUtils.isBlank(dpop.getClaims().getClaimAsString(DPoPJwtPayloadParam.HTM))) {
                 throw new InvalidJwtException("Invalid DPoP Proof Payload. The htm param is required.");
             }
@@ -532,10 +529,29 @@ public class AuthenticationFilter implements Filter {
             if (dpop.getClaims().getClaimAsLong(DPoPJwtPayloadParam.IAT) == null) {
                 throw new InvalidJwtException("Invalid DPoP Proof Payload. The iat param is required.");
             }
-            // TODO: Validate hash of the access token
-//            if (StringUtils.isBlank(dpop.getClaims().getClaimAsString(DPoPJwtPayloadParam.ATH))) {
-//                throw new InvalidJwtException("Invalid DPoP Proof Payload. The ath param is required with the presentation of an access token.");
-//            }
+            if (StringUtils.isBlank(dpop.getClaims().getClaimAsString(DPoPJwtPayloadParam.JTI))) {
+                throw new InvalidJwtException("Invalid DPoP Proof Payload. The jti param is required");
+            } else {
+                String jti = dpop.getClaims().getClaimAsString(DPoPJwtPayloadParam.JTI);
+                Long iat = dpop.getClaims().getClaimAsLong(DPoPJwtPayloadParam.IAT);
+                String htu = dpop.getClaims().getClaimAsString(DPoPJwtPayloadParam.HTU);
+                String cacheKey = "dpop_jti_" + jti;
+                DPoPJti dPoPJti = (DPoPJti) cacheService.get(cacheKey);
+
+                // Validate the token was issued within an acceptable timeframe.
+                int seconds = appConfiguration.getDpopTimeframe();
+                long diff = (new Date().getTime() - iat) / 1000;
+                if (diff > seconds) {
+                    throw new InvalidJwtException("The DPoP token has expired.");
+                }
+
+                if (dPoPJti == null) {
+                    dPoPJti = new DPoPJti(jti, iat, htu);
+                    cacheService.put(appConfiguration.getDpopJtiCacheTime(), cacheKey, dPoPJti);
+                } else {
+                    throw new InvalidJwtException("Invalid DPoP Proof. The jti param is has been used before.");
+                }
+            }
 
             // Validate Signature
             JSONWebKey jwk = JSONWebKey.fromJSONObject(dpop.getHeader().getJwk());
