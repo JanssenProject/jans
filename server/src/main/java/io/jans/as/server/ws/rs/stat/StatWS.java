@@ -162,7 +162,8 @@ public class StatWS {
     }
 
     public Response stat(String authorization, String month, String format) {
-        log.debug("Attempting to request stat, month: {}, format: {}", escapeLog(month), escapeLog(format));
+        if (log.isDebugEnabled())
+            log.debug("Attempting to request stat, month: {}, format: {}", escapeLog(month), escapeLog(format));
 
         errorResponseFactory.validateComponentEnabled(ComponentType.STAT);
         validateAuthorization(authorization);
@@ -176,7 +177,8 @@ public class StatWS {
         lastProcessedAt = System.currentTimeMillis();
 
         try {
-            log.trace("Recognized months: {}", escapeLog(months));
+            if (log.isTraceEnabled())
+                log.trace("Recognized months: {}", escapeLog(months));
             final StatResponse statResponse = buildResponse(months);
 
             final String responseAsStr;
@@ -187,7 +189,8 @@ public class StatWS {
             } else {
                 responseAsStr = ServerUtil.asJson(new FlatStatResponse(new ArrayList<>(statResponse.getResponse().values())));
             }
-            log.trace("Stat: {}", responseAsStr);
+            if (log.isTraceEnabled())
+                log.trace("Stat: {}", responseAsStr);
             return Response.ok().entity(responseAsStr).build();
         } catch (WebApplicationException e) {
             if (log.isErrorEnabled())
