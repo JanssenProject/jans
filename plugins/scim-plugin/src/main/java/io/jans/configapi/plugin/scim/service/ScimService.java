@@ -53,7 +53,7 @@ public class ScimService {
             return client.searchUsersPost(searchRequest);
 
         } catch (Exception ex) {
-            log.error("Problems processing user-info call", ex);
+            log.error("Problems processing user-info search call", ex);
             throw ex;
         }
     }
@@ -79,7 +79,7 @@ public class ScimService {
             return client.getUserById(id, attrsList, excludedAttrsList);
 
         } catch (Exception ex) {
-            log.error("Problems while processing create-scim-user call", ex);
+            log.error("Problems while processing get-scim-user-by-id call", ex);
             throw ex;
         }
     }
@@ -93,7 +93,7 @@ public class ScimService {
             return client.updateUser(user, id, attrsList, excludedAttrsList);
 
         } catch (Exception ex) {
-            log.error("Problems while processing create-scim-user call", ex);
+            log.error("Problems while processing update-scim-user call", ex);
             throw ex;
         }
     }
@@ -105,7 +105,7 @@ public class ScimService {
             return client.deleteUser(id);
 
         } catch (Exception ex) {
-            log.error("Problems while processing create-scim-user call", ex);
+            log.error("Problems while processing delete-scim-user call", ex);
             throw ex;
         }
     }
@@ -120,7 +120,7 @@ public class ScimService {
             return client.patchUser(patchRequest, id, attrsList, excludedAttrsList);
 
         } catch (Exception ex) {
-            log.error("Problems while processing create-scim-user call", ex);
+            log.error("Problems while processing patch-scim-user call", ex);
             throw ex;
         }
     }
@@ -128,7 +128,8 @@ public class ScimService {
     private ClientSideService getClientSideService() throws Exception {
         String domainURL = authUtil.getIssuer() + scimConfiguration.getScimRelativePath();
         String oidcMetadataUrl = authUtil.getOpenIdConfigurationEndpoint();
-        log.error("Scim Client param - domainURL = " + domainURL + " , oidcMetadataUrl = " + oidcMetadataUrl);
+        log.trace("Scim Client param - domainURL:{}, oidcMetadataUrl:{} ",domainURL, oidcMetadataUrl);
+        
         return ScimClientFactory.getClient(domainURL, oidcMetadataUrl, authUtil.getClientId(),
                 authUtil.getClientDecryptPassword(authUtil.getClientId()));
     }

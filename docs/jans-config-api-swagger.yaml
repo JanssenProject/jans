@@ -2707,10 +2707,10 @@ paths:
         content:
           application/scim+json:
             schema:
-              $ref: '#/components/schemas/PatchRequest'
+              $ref: '#/components/schemas/ScimPatchRequest'
           application/json:
             schema:
-              $ref: '#/components/schemas/PatchRequest'
+              $ref: '#/components/schemas/ScimPatchRequest'
         required: true
       responses:
         200:
@@ -5835,4 +5835,40 @@ components:
           type: string
       description: See section 3.1 of RFC 7643
 	  
-  
+    ScimPatchOperation:
+      required:
+      - op
+      type: object
+      properties:
+        op:
+          type: string
+          description: The kind of operation to perform
+          enum:
+          - add
+          - remove
+          - replace
+        path:
+          type: string
+          description: Required when op is remove, optional otherwise
+        value:
+          $ref: '#/components/schemas/AnyValue'
+          description: Only required when op is add or replace
+      description: See section 3.5.2 of RFC 7644
+    
+    ScimPatchRequest:
+      description: Stores one or more patch operations
+      required:
+      - Operations
+      type: object
+      properties:
+        schemas:
+          type: array
+          items:
+            type: string
+            example: urn:ietf:params:scim:api:messages:2.0:PatchOp
+        Operations:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScimPatchOperation'
+    AnyValue:
+      description: Can be any value - string, number, boolean, array or object
