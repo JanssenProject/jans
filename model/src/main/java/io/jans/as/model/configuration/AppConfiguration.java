@@ -106,7 +106,6 @@ public class AppConfiguration implements Configuration {
     private List<String> requestObjectEncryptionEncValuesSupported;
     private List<String> tokenEndpointAuthMethodsSupported;
     private List<String> tokenEndpointAuthSigningAlgValuesSupported;
-    private List<String> dpopSigningAlgValuesSupported;
     private List<String> dynamicRegistrationCustomAttributes;
     private List<String> displayValuesSupported;
     private List<String> claimTypesSupported;
@@ -285,6 +284,11 @@ public class AppConfiguration implements Configuration {
     private int backchannelRequestsProcessorJobChunkSize;
     private int cibaGrantLifeExtraTimeSec;
     private int cibaMaxExpirationTimeAllowedSec;
+
+    // DPoP
+    private List<String> dpopSigningAlgValuesSupported;
+    private int dpopTimeframe = 5;
+    private int dpopJtiCacheTime = 3600;
 
     private Boolean allowIdTokenWithoutImplicitGrantType;
 
@@ -1204,14 +1208,6 @@ public class AppConfiguration implements Configuration {
 
     public void setTokenEndpointAuthSigningAlgValuesSupported(List<String> tokenEndpointAuthSigningAlgValuesSupported) {
         this.tokenEndpointAuthSigningAlgValuesSupported = tokenEndpointAuthSigningAlgValuesSupported;
-    }
-
-    public List<String> getDpopSigningAlgValuesSupported() {
-        return dpopSigningAlgValuesSupported;
-    }
-
-    public void setDpopSigningAlgValuesSupported(List<String> dpopSigningAlgValuesSupported) {
-        this.dpopSigningAlgValuesSupported = dpopSigningAlgValuesSupported;
     }
 
     public List<String> getDynamicRegistrationCustomAttributes() {
@@ -2369,5 +2365,29 @@ public class AppConfiguration implements Configuration {
 
     public void setMtlsDeviceAuthzEndpoint(String mtlsDeviceAuthzEndpoint) {
         this.mtlsDeviceAuthzEndpoint = mtlsDeviceAuthzEndpoint;
+    }
+
+    public List<String> getDpopSigningAlgValuesSupported() {
+        return dpopSigningAlgValuesSupported;
+    }
+
+    public void setDpopSigningAlgValuesSupported(List<String> dpopSigningAlgValuesSupported) {
+        this.dpopSigningAlgValuesSupported = dpopSigningAlgValuesSupported;
+    }
+
+    public int getDpopTimeframe() {
+        return dpopTimeframe;
+    }
+
+    public void setDpopTimeframe(int dpopTimeframe) {
+        this.dpopTimeframe = dpopTimeframe;
+    }
+
+    public int getDpopJtiCacheTime() {
+        return dpopJtiCacheTime;
+    }
+
+    public void setDpopJtiCacheTime(int dpopJtiCacheTime) {
+        this.dpopJtiCacheTime = dpopJtiCacheTime;
     }
 }
