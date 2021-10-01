@@ -19,9 +19,6 @@ public class ParResponse {
     @JsonProperty(value = "expires_in")
     private Integer expiresIn;
 
-    public ParResponse() {
-    }
-
     public String getRequestUri() {
         return requestUri;
     }

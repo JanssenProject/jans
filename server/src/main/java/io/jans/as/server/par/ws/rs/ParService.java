@@ -14,6 +14,7 @@ import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.Date;
 import java.util.UUID;
 
 /**
@@ -98,6 +99,16 @@ public class ParService {
             throw new WebApplicationException(Response
                     .status(Response.Status.BAD_REQUEST)
                     .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST, state, "client_id does not match to PAR's client_id"))
+                    .type(MediaType.APPLICATION_JSON_TYPE)
+                    .build());
+        }
+
+        Date now = new Date();
+        if (par.isExpired(now)) {
+            log.debug("PAR is expired, id: {}, exp: {}, now: {}", id, par.getExpirationDate(), now);
+            throw new WebApplicationException(Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST_URI, state, "PAR is expired"))
                     .type(MediaType.APPLICATION_JSON_TYPE)
                     .build());
         }
