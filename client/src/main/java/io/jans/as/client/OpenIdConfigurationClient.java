@@ -9,8 +9,6 @@ package io.jans.as.client;
 import io.jans.as.model.util.Util;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.jboss.resteasy.client.ClientExecutor;
-import org.jboss.resteasy.client.ClientRequest;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -30,7 +28,7 @@ public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationReq
 
     private static final Logger LOG = Logger.getLogger(OpenIdConfigurationClient.class);
 
-    private static final String mediaTypes = String.join(",", MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON);
+    private static final String MEDIA_TYPES = String.join(",", MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON);
 
     /**
      * Constructs an OpenID Configuration Client by providing an url where the REST service is located.
@@ -49,14 +47,7 @@ public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationReq
     public OpenIdConfigurationResponse execOpenIdConfiguration() throws IOException {
         initClientRequest();
 
-        return _execOpenIdConfiguration();
-    }
-
-    @Deprecated
-    public OpenIdConfigurationResponse execOpenIdConfiguration(ClientExecutor executor) throws IOException {
-        this.clientRequest = new ClientRequest(getUrl(), executor);
-
-        return _execOpenIdConfiguration();
+        return exec();
     }
 
     /**
@@ -64,11 +55,11 @@ public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationReq
      *
      * @return The service response.
      */
-    private OpenIdConfigurationResponse _execOpenIdConfiguration() throws IOException {
+    private OpenIdConfigurationResponse exec() throws IOException {
         setRequest(new OpenIdConfigurationRequest());
 
         // Prepare request parameters
-        clientRequest.accept(mediaTypes);
+        clientRequest.accept(MEDIA_TYPES);
         clientRequest.setHttpMethod(getHttpMethod());
 
         // Support AWS LB

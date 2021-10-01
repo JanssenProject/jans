@@ -32,4 +32,13 @@ public class Constants {
     public static final String PROMPT = "prompt";
 
     public static final String LOG_FOUND = "Found '{}' entries";
+
+    public static final String MONTH = "month";
+    public static final String GRANTTYPE = "grantType";
+
+    public static final String HTTP_11 = "HTTP/1.1";
+    public static final String SPACE_HTTP_11 = " " + HTTP_11;
+
+    public static final String AUTHORIZATION_BEARER = "Authorization: Bearer ";
+    public static final String AUTHORIZATION_BASIC = "Authorization: Basic ";
 }
