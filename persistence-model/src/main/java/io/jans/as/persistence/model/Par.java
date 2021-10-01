@@ -9,6 +9,7 @@ import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.model.base.DeletableEntity;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * Pushed authorization request.
@@ -45,6 +46,15 @@ public class Par extends DeletableEntity implements Serializable {
 
     public void setAttributes(ParAttributes attributes) {
         this.attributes = attributes;
+    }
+
+    public boolean isExpired() {
+        return isExpired(new Date());
+    }
+
+    public boolean isExpired(Date now) {
+        final Date exp = getExpirationDate();
+        return exp == null || exp.before(now);
     }
 
     @Override
