@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Created by jgomer on 2018-02-13.
+ * Use this annotation to annotate classes implementing JansRestService interface
  */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)

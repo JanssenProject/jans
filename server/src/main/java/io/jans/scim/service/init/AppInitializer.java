@@ -41,7 +41,7 @@ public class AppInitializer {
 
     private static final int RETRIES = 15;
     private static final int RETRY_INTERVAL = 15;
-    private static final String DEFAULT_CONF_BASE = "/etc/gluu/conf";
+    private static final String DEFAULT_CONF_BASE = "/etc/jans/conf";
 
     @Inject
     private Logger logger;
