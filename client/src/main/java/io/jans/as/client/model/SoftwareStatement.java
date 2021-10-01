@@ -85,10 +85,6 @@ public class SoftwareStatement {
     }
 
     public String getEncodedJwt() throws Exception {
-        if (cryptoProvider == null) {
-            throw new Exception("The Crypto Provider cannot be null.");
-        }
-
         JSONObject headerJsonObject = headerToJSONObject();
         JSONObject payloadJsonObject = getClaims();
         String headerString = ClientUtil.toPrettyJson(headerJsonObject);
