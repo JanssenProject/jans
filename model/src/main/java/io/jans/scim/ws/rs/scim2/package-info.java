@@ -10,8 +10,7 @@
  * Important: do not use @Inject in these classes (the client is not a weld project)
  */
 /**
- * Interfaces and annotations shared by both the server side code and the Java client
- * (<a href="https://github.com/GluuFederation/SCIM-Client">SCIM-Client</a>).
+ * Interfaces and annotations shared by both the server side code and the Java client..
  * Client code uses the Resteasy Proxy Framework and thus we are sharing the same interface for client and server.
  */
 package io.jans.scim.ws.rs.scim2;

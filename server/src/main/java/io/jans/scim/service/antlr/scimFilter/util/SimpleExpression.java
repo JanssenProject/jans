@@ -44,7 +44,7 @@ public class SimpleExpression {
         this.attributeValue=attributeValue;
         this.type=type;
         //Extension service is not needed since this class deals with evaluating subatributes living inside complex attributes
-        //but Gluu server does not support complex custom attributes
+        //but the server does not support complex custom attributes
         //extService= CdiUtil.bean(ExtensionService.class);
     }
 

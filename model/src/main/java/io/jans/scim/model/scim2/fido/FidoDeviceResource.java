@@ -12,7 +12,7 @@ import io.jans.scim.model.scim2.annotations.*;
 
 /**
  * Fido device SCIM resource. An object of this class is used to represent a device like an U2F security key or a
- * Super Gluu device. See the <i>jansDeviceRegistration</i> objectclass of your Gluu's LDAP.
+ * Super  device. See the <i>jansDeviceRegistration</i> objectclass of your LDAP.
  */
 /*
  * Notes: Other classes may depend on this one via reflection. Do not add members whose names are already at parent
