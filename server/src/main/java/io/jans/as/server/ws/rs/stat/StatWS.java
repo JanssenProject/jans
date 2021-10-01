@@ -40,6 +40,8 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
+import static io.jans.as.model.util.Util.escapeLog;
+
 /**
  * Provides server with basic statistic.
  * <p>
@@ -160,7 +162,7 @@ public class StatWS {
     }
 
     public Response stat(String authorization, String month, String format) {
-        log.debug("Attempting to request stat, month: {}, format: {}", month, format);
+        log.debug("Attempting to request stat, month: {}, format: {}", escapeLog(month), escapeLog(format));
 
         errorResponseFactory.validateComponentEnabled(ComponentType.STAT);
         validateAuthorization(authorization);
@@ -174,7 +176,7 @@ public class StatWS {
         lastProcessedAt = System.currentTimeMillis();
 
         try {
-            log.trace("Recognized months: {}", months);
+            log.trace("Recognized months: {}", escapeLog(months));
             final StatResponse statResponse = buildResponse(months);
 
             final String responseAsStr;
@@ -211,7 +213,7 @@ public class StatWS {
 
     private StatResponseItem buildItem(String month) {
         try {
-            String monthlyDn = String.format("ou=%s,%s", month, statService.getBaseDn());
+            String monthlyDn = String.format("ou=%s,%s", escapeLog(month), statService.getBaseDn());
 
             final List<StatEntry> entries = entryManager.findEntries(monthlyDn, StatEntry.class, Filter.createPresenceFilter("jansId"));
             if (entries == null || entries.isEmpty()) {
