@@ -10,6 +10,7 @@ import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.AttributeService;
 import io.jans.as.model.clientinfo.ClientInfoErrorResponseType;
 import io.jans.as.model.common.ComponentType;
+import io.jans.as.model.config.Constants;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.persistence.model.Scope;
 import io.jans.as.server.model.clientinfo.ClientInfoParamsValidator;
@@ -98,7 +99,7 @@ public class ClientInfoRestWebServiceImpl implements ClientInfoRestWebService {
             }
 
             builder.cacheControl(ServerUtil.cacheControlWithNoStoreTransformAndPrivate());
-            builder.header("Pragma", "no-cache");
+            builder.header(Constants.PRAGMA, "no-cache");
             builder.entity(getJSonResponse(authorizationGrant.getClient(), authorizationGrant.getScopes()));
         }
 

@@ -13,6 +13,7 @@ import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.AttributeService;
 import io.jans.as.common.service.common.InumService;
 import io.jans.as.model.common.*;
+import io.jans.as.model.config.Constants;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
@@ -50,6 +51,7 @@ import io.jans.model.metric.MetricType;
 import io.jans.orm.model.base.CustomAttribute;
 import io.jans.util.StringHelper;
 import io.jans.util.security.StringEncrypter;
+import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
@@ -73,6 +75,7 @@ import static io.jans.as.model.register.RegisterRequestParam.*;
 import static io.jans.as.model.register.RegisterResponseParam.*;
 import static io.jans.as.model.util.StringUtils.implode;
 import static io.jans.as.model.util.StringUtils.toList;
+import static org.apache.commons.lang.BooleanUtils.isFalse;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 /**
@@ -208,27 +211,25 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             if (r.getClaimsRedirectUris() != null && !r.getClaimsRedirectUris().isEmpty()) {
                 if (!registerParamsValidator.validateRedirectUris(r.getGrantTypes(), r.getResponseTypes(),
                         r.getApplicationType(), r.getSubjectType(), r.getClaimsRedirectUris(), r.getSectorIdentifierUri())) {
-                    log.debug("Value of one or more claims_redirect_uris is invalid, claims_redirect_uris: " + r.getClaimsRedirectUris());
+                    log.debug("Value of one or more claims_redirect_uris is invalid, claims_redirect_uris: {}", r.getClaimsRedirectUris());
                     throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_CLAIMS_REDIRECT_URI, "Value of one or more claims_redirect_uris is invalid");
                 }
             }
 
-            if (!Strings.isNullOrEmpty(r.getInitiateLoginUri())) {
-                if (!registerParamsValidator.validateInitiateLoginUri(r.getInitiateLoginUri())) {
-                    log.debug("The Initiate Login Uri is invalid. The initiate_login_uri must use the https schema: " + r.getInitiateLoginUri());
-                    throw errorResponseFactory.createWebApplicationException(
+            if (!Strings.isNullOrEmpty(r.getInitiateLoginUri()) && !registerParamsValidator.validateInitiateLoginUri(r.getInitiateLoginUri())) {
+                log.debug("The Initiate Login Uri is invalid. The initiate_login_uri must use the https schema: {}", r.getInitiateLoginUri());
+                throw errorResponseFactory.createWebApplicationException(
                             Response.Status.BAD_REQUEST,
                             RegisterErrorResponseType.INVALID_CLIENT_METADATA,
                             "The Initiate Login Uri is invalid. The initiate_login_uri must use the https schema.");
-                }
             }
 
             final Pair<Boolean, String> validateResult = registerParamsValidator.validateParamsClientRegister(
                     r.getApplicationType(), r.getSubjectType(),
                     r.getGrantTypes(), r.getResponseTypes(),
                     r.getRedirectUris());
-            if (!validateResult.getFirst()) {
-                log.trace("Client parameters are invalid, returns invalid_request error. Reason: " + validateResult.getSecond());
+            if (isFalse(validateResult.getFirst())) {
+                log.trace("Client parameters are invalid, returns invalid_request error. Reason: {}", validateResult.getSecond());
                 throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_CLIENT_METADATA, validateResult.getSecond());
             }
 
@@ -287,7 +288,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                 } catch (Exception e) {
                     //ignore
                     log.error(e.getMessage(), e);
-                    client.setClientName("Unknown");
+                    client.setClientName(Constants.UNKNOWN);
                 }
             }
 
@@ -328,15 +329,16 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             builder = internalErrorResponse("Failed to parse JSON.");
             log.error(e.getMessage(), e);
         } catch (WebApplicationException e) {
-            log.error(e.getMessage(), e);
+            if (log.isErrorEnabled())
+                log.error(e.getMessage(), e);
             throw e;
         } catch (Exception e) {
-            builder = internalErrorResponse("Unknown.");
+            builder = internalErrorResponse(Constants.UNKNOWN_DOT);
             log.error(e.getMessage(), e);
         }
 
         builder.cacheControl(ServerUtil.cacheControl(true, false));
-        builder.header("Pragma", "no-cache");
+        builder.header(Constants.PRAGMA, "no-cache");
         builder.type(MediaType.APPLICATION_JSON_TYPE);
         applicationAuditLogger.sendMessage(oAuth2AuditLog);
         return builder.build();
@@ -366,7 +368,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                 }
 
                 boolean validSignature = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), null, null, hmacSecret, signatureAlgorithm);
-                log.trace("Request object validation result: " + validSignature);
+                log.trace("Request object validation result: {}", validSignature);
                 if (!validSignature) {
                     throw new InvalidJwtException("Invalid cryptographic segment in the request object.");
                 }
@@ -407,12 +409,12 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                 }
             }
 
-            log.trace("Validating request object with jwks: " + jwks + " ...");
+            log.trace("Validating request object with jwks: {} ...", jwks);
 
             boolean validSignature = cryptoProvider.verifySignature(jwt.getSigningInput(),
                     jwt.getEncodedSignature(), jwt.getHeader().getKeyId(), jwks, null, signatureAlgorithm);
 
-            log.trace("Request object validation result: " + validSignature);
+            log.trace("Request object validation result: {}", validSignature);
             if (!validSignature) {
                 throw new InvalidJwtException("Invalid cryptographic segment in the request object.");
             }
@@ -898,7 +900,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             log.debug("Client UPDATE : parameters are invalid. Returns BAD_REQUEST response.");
             applicationAuditLogger.sendMessage(oAuth2AuditLog);
             return Response.status(Response.Status.BAD_REQUEST).
-                    entity(errorResponseFactory.errorAsJson(RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Unknown.")).build();
+                    entity(errorResponseFactory.errorAsJson(RegisterErrorResponseType.INVALID_CLIENT_METADATA, Constants.UNKNOWN_DOT)).build();
 
         } catch (WebApplicationException e) {
             log.error(e.getMessage(), e);
@@ -907,7 +909,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             log.error(e.getMessage(), e);
         }
         applicationAuditLogger.sendMessage(oAuth2AuditLog);
-        return internalErrorResponse("Unknown.").build();
+        return internalErrorResponse(Constants.UNKNOWN_DOT).build();
     }
 
     private void validateAuthorizationAccessToken(String accessToken, String clientId) {
@@ -995,7 +997,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         }
 
         builder.cacheControl(ServerUtil.cacheControl(true, false));
-        builder.header("Pragma", "no-cache");
+        builder.header(Constants.PRAGMA, "no-cache");
         applicationAuditLogger.sendMessage(oAuth2AuditLog);
         return builder.build();
     }
@@ -1210,7 +1212,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             return Response
                     .status(Response.Status.NO_CONTENT)
                     .cacheControl(ServerUtil.cacheControl(true, false))
-                    .header("Pragma", "no-cache").build();
+                    .header(Constants.PRAGMA, "no-cache").build();
         } catch (WebApplicationException e) {
             if (e.getResponse() != null) {
                 return e.getResponse();
