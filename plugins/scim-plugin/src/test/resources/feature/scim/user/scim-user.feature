@@ -70,34 +70,15 @@ Scenario: Create new user, update and delete
 	And assert response.displayName == updated_displayName
 	And assert response.id == inum
     And print 'Successfully updated displayName'
+    Given url mainUrl + '/' +inum
+	And header Authorization = 'Bearer ' + accessToken 
+	And request read('scim-user-patch.json') 
+	When method PATCH 
+	Then status 200
+    And print response    
+	Then def result = response 
 	Given url mainUrl + '/' +inum
 	And header Authorization = 'Bearer ' + accessToken 
 	When method DELETE 
 	Then status 204 
-     And print 'User successfully deleted'
-
-
-@PatchUser
-Scenario: Patch scim user
-	Given url mainUrl
-	And header Authorization = 'Bearer ' + accessToken 
-	When method GET 
-	Then status 200 
-    And print response
-    And print response.Resources[0].id
-	Then def result = response.Resources[0] 
-    Then def inum = result.id 
-    And print result.displayName
-    And def patched_displayName = (result.displayName == null ? 'Patched displayName' : result.displayName)
-    And def request_body = (result.displayName == null ? "{ \"Operations\": [ {\"op\":\"add\", \"path\": \"/displayName\", \"value\":"+patched_displayName+" } ] }" : "{\"Operations\":[ {\"op\":\"replace\", \"path\": \"/displayName\", \"value\":"+patched_displayName+" } ] }")
-    And print 'Patching displayName' 
-	Given url mainUrl + '/' +inum
-	And header Authorization = 'Bearer ' + accessToken 
-    And header Accept = 'application/json'
-    And request request_body
-	Then print request
-    When method PATCH
-    Then status 200
-    And print response
-  
-	
+    And print 'User successfully deleted'

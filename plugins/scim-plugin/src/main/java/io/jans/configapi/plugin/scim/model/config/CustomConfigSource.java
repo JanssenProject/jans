@@ -6,9 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 
 import org.eclipse.microprofile.config.spi.ConfigSource;
 import org.slf4j.Logger;
@@ -18,9 +16,9 @@ import org.slf4j.LoggerFactory;
 public class CustomConfigSource implements ConfigSource {
 
     private static Logger log = LoggerFactory.getLogger(CustomConfigSource.class);
-
     private static final String FILE_CONFIG = "scimConfiguration.properties";
     private Properties properties = null;
+    Map<String, String> propertiesMap = new HashMap<>();
 
     public CustomConfigSource() {
         this.loadProperties();
@@ -28,40 +26,19 @@ public class CustomConfigSource implements ConfigSource {
 
     @Override
     public Map<String, String> getProperties() {
-        log.debug("\n\n\n\n **************** CustomConfigSource()::getProperties() - Entry  **************** \n\n\n");
-        try {
-
-            if (properties == null) {
-                this.loadProperties();
-            }
-
-            Map<String, String> map = new HashMap<>();
-            properties.stringPropertyNames().stream().forEach(key -> map.put(key, properties.getProperty(key)));
-            return map;
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            log.error("Unable to read properties from file: " + FILE_CONFIG, e);
-        }
-
-        return null;
+        log.debug("Getting properties");
+        return propertiesMap;
     }
 
     @Override
     public Set<String> getPropertyNames() {
-        log.debug(
-                "\n\n\n\n **************** CustomConfigSource()::getPropertyNames() - Entry  **************** \n\n\n");
+        log.debug("Getting Property Names");
         try {
-            if (properties == null) {
-                this.loadProperties();
-            }
             return properties.stringPropertyNames();
 
         } catch (Exception e) {
-            e.printStackTrace();
             log.error("Unable to read properties from file: " + FILE_CONFIG, e);
         }
-
         return null;
     }
 
@@ -71,17 +48,11 @@ public class CustomConfigSource implements ConfigSource {
     }
 
     @Override
-    public String getValue(String s) {
-        log.debug(
-                "\n\n\n\n **************** CustomConfigSource()::getValue() - s = " + s + "  **************** \n\n\n");
+    public String getValue(String name) {
+        log.debug("CustomConfigSource()::getValue() - name:{}", name);
         try {
-            if (properties == null) {
-                this.loadProperties();
-            }
-            return properties.getProperty(s);
-
+            return properties.getProperty(name);
         } catch (Exception e) {
-            e.printStackTrace();
             log.error("Unable to read properties from file: " + FILE_CONFIG, e);
         }
 
@@ -94,12 +65,12 @@ public class CustomConfigSource implements ConfigSource {
     }
 
     private Properties loadProperties() {
-        try {
-            // Load the properties file
-            ClassLoader loader = Thread.currentThread().getContextClassLoader();
-            InputStream inputStream = loader.getResourceAsStream(FILE_CONFIG);
+        // Load the properties file
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        try ( InputStream inputStream = loader.getResourceAsStream(FILE_CONFIG)) { 
             properties = new Properties();
             properties.load(inputStream);
+            properties.stringPropertyNames().stream().forEach(key -> propertiesMap.put(key, properties.getProperty(key)));
             return properties;
         } catch (Exception e) {
             log.error("Failed to load configuration from {}", FILE_CONFIG, e);

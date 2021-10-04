@@ -2711,6 +2711,9 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ScimPatchRequest'
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/ScimPatchRequest'
         required: true
       responses:
         200:
