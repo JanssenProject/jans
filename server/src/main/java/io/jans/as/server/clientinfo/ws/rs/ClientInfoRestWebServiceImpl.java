@@ -99,7 +99,7 @@ public class ClientInfoRestWebServiceImpl implements ClientInfoRestWebService {
             }
 
             builder.cacheControl(ServerUtil.cacheControlWithNoStoreTransformAndPrivate());
-            builder.header(Constants.PRAGMA, "no-cache");
+            builder.header(Constants.PRAGMA, Constants.NO_CACHE);
             builder.entity(getJSonResponse(authorizationGrant.getClient(), authorizationGrant.getScopes()));
         }
 

@@ -65,7 +65,7 @@ public class RedirectUtil {
             builder.status(Response.Status.OK);
             builder.type(MediaType.TEXT_HTML_TYPE);
             builder.cacheControl(CacheControl.valueOf("no-cache, no-store"));
-            builder.header(Constants.PRAGMA, "no-cache");
+            builder.header(Constants.PRAGMA, Constants.NO_CACHE);
             builder.entity(redirectUriResponse.toString());
         } else {
             URI redirectURI = URI.create(redirectUriResponse.toString());

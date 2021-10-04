@@ -146,7 +146,7 @@ public class RevokeRestWebServiceImpl implements RevokeRestWebService {
 
     private Response response(Response.ResponseBuilder builder, OAuth2AuditLog oAuth2AuditLog) {
         builder.cacheControl(ServerUtil.cacheControl(true, false));
-        builder.header(Constants.PRAGMA, "no-cache");
+        builder.header(Constants.PRAGMA, Constants.NO_CACHE);
 
         applicationAuditLogger.sendMessage(oAuth2AuditLog);
 
