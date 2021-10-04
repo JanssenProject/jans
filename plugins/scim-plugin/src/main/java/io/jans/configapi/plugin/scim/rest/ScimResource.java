@@ -5,7 +5,6 @@ import io.jans.configapi.plugin.scim.service.ScimService;
 import io.jans.scim.model.scim2.SearchRequest;
 import io.jans.scim.model.scim2.patch.PatchRequest;
 import io.jans.scim.model.scim2.user.UserResource;
-
 import org.slf4j.Logger;
 
 import static io.jans.scim.model.scim2.Constants.MEDIA_TYPE_SCIM_JSON;
@@ -112,17 +111,18 @@ public class ScimResource {
         return scimService.deleteScimUser(id);
     }
 
+
     @Path("{id}")
     @PATCH
-    @Consumes({ MEDIA_TYPE_SCIM_JSON, MediaType.APPLICATION_JSON })
-    @Produces({ MEDIA_TYPE_SCIM_JSON + UTF8_CHARSET_FRAGMENT, MediaType.APPLICATION_JSON + UTF8_CHARSET_FRAGMENT })
-    @HeaderParam("Accept")
-    @DefaultValue(MEDIA_TYPE_SCIM_JSON)
-    @ProtectedApi(scopes = { "https://jans.io/scim/users.write" })
-    public Response patchUser(PatchRequest patchRequest, @PathParam("id") String id,
+    @Consumes({MEDIA_TYPE_SCIM_JSON, MediaType.APPLICATION_JSON,MediaType.APPLICATION_JSON_PATCH_JSON})
+    @Produces({MEDIA_TYPE_SCIM_JSON + UTF8_CHARSET_FRAGMENT, MediaType.APPLICATION_JSON + UTF8_CHARSET_FRAGMENT})
+    @HeaderParam("Accept") @DefaultValue(MEDIA_TYPE_SCIM_JSON)
+    @ProtectedApi(scopes = {"https://jans.io/scim/users.write"})
+    public Response patchUser(
+            PatchRequest patchRequest,
+            @PathParam("id") String id,
             @QueryParam(QUERY_PARAM_ATTRIBUTES) String attrsList,
             @QueryParam(QUERY_PARAM_EXCLUDED_ATTRS) String excludedAttrsList) throws Exception {
-
         log.info(" Request to patch User with patchRequest:{}, id:{}, attrsList:{}, excludedAttrsList:{}", patchRequest, id , attrsList, excludedAttrsList);
         return scimService.patchScimUser(patchRequest, id, attrsList, excludedAttrsList);
 
