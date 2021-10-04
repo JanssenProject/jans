@@ -1,43 +1,31 @@
 <assembly xmlns="http://maven.apache.org/ASSEMBLY/2.1.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.1.0 http://maven.apache.org/xsd/assembly-2.1.0.xsd">
-  
-     <id>distribution</id>
-    <formats>
-        <format>jar</format>
-    </formats>
-    <includeBaseDirectory>false</includeBaseDirectory>
-    <dependencySets>
-        <dependencySet>
-            <unpack>true</unpack>
-            <outputDirectory>/</outputDirectory>
-            <useProjectArtifact>false</useProjectArtifact>
-            <includes>
-                <include>io.jans:jans-scim-model</include>
-                <include>io.jans:jans-scim-client</include>
-                
-             <!--    <include>org.jboss.resteasy:resteasy-cdi</include> -->
-               <!--  <include>org.jboss.resteasy:resteasy-client</include> -->
-               <!-- <include>org.jboss.resteasy:resteasy-servlet-initializer</include>
-                <include>org.jboss.resteasy:resteasy-jaxb-provider</include>
-                <include>org.jboss.resteasy:resteasy-jackson2-provider</include>
-                <include>org.jboss.resteasy:resteasy-json-p-provider</include> -->
-                
-              <!-- <include>org.apache.httpcomponents:httpclient</include>
-                <include>org.apache.httpcomponents:httpcore</include> -->
-               <!--  <include>org.apache.httpcomponents:httpcore-nio</include> -->
-                <!-- <include>commons-httpclient:commons-httpclient</include> -->
-            </includes>
-            <scope>runtime</scope>
-        </dependencySet>
-    </dependencySets>
-    <fileSets>
-        <fileSet>
-            <directory>${project.build.directory}/classes</directory>
-            <outputDirectory>/</outputDirectory>
-            <includes>
-                <include>**/*</include>
-            </includes>
-        </fileSet>
-    </fileSets>
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.1.0 http://maven.apache.org/xsd/assembly-2.1.0.xsd">
+
+	<id>distribution</id>
+	<formats>
+		<format>jar</format>
+	</formats>
+	<includeBaseDirectory>false</includeBaseDirectory>
+	<dependencySets>
+		<dependencySet>
+			<unpack>true</unpack>
+			<outputDirectory>/</outputDirectory>
+			<useProjectArtifact>false</useProjectArtifact>
+			<includes>
+				<include>io.jans:jans-scim-model</include>
+				<include>io.jans:jans-scim-client</include>
+			</includes>
+			<scope>runtime</scope>
+		</dependencySet>
+	</dependencySets>
+	<fileSets>
+		<fileSet>
+			<directory>${project.build.directory}/classes</directory>
+			<outputDirectory>/</outputDirectory>
+			<includes>
+				<include>**/*</include>
+			</includes>
+		</fileSet>
+	</fileSets>
 </assembly>

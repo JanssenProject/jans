@@ -8,16 +8,11 @@
 		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
-
-	<groupId>io.jans</groupId>
 	<artifactId>scim-plugin</artifactId>
 	<properties>
-		<!-- Later 3.x versions ignore the registered classes annotated with @Provider 
-			:-/ -->
 		<httpcore.version>4.4.14</httpcore.version>
 		<httpclient.version>4.5.13</httpclient.version>
 	</properties>
-
 
 
 	<dependencies>
@@ -51,17 +46,14 @@
 		<dependency>
 			<groupId>commons-collections</groupId>
 			<artifactId>commons-collections</artifactId>
-			<version>3.2.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
-			<version>${httpclient.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpcore</artifactId>
-			<version>${httpcore.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
@@ -71,7 +63,6 @@
 		<dependency>
 			<groupId>commons-httpclient</groupId>
 			<artifactId>commons-httpclient</artifactId>
-			<version>3.1</version>
 		</dependency>
 
 		<!-- Testing -->
@@ -110,8 +101,9 @@
 
 
 	<build>
-		<!-- <filters> <filter>profiles/${cfg}/config-api-test.properties</filter> 
-			</filters> -->
+		<filters>
+			<filter>../../server/profiles/${cfg}/config-api-test.properties</filter>
+		</filters>
 
 		<testResources>
 			<testResource>
