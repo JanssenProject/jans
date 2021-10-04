@@ -15,13 +15,12 @@ import java.util.*;
 
 /**
  * A class used to store the values of custom attributes associated to a resource extension. This class is mainly targeted
- * at users of Java <a href="https://github.com/GluuFederation/SCIM-Client">SCIM-Client</a> in order to specify/retrieve
- * custom attributes.
+ * at users of Java client in order to specify/retrieve custom attributes.
  * <p>Use the <code>setAttribute</code> methods to associate one (or several) values to an attribute, and use the
  * <code>getValue</code>/<code>getValues</code> methods to retrive those values when coming directly from service
  * invocations.</p>
  * <p>For both kind of operations (set/get) the data types used should ideally be consistent with the previously
- * configured custom attributes at Gluu Server. This allows your custom data to be successfully validated when sent to
+ * configured custom attributes at the Server. This allows your custom data to be successfully validated when sent to
  * server, or to be correctly retrieved when reading a response.</p>
  * <p>For <code>photo</code>
  * or <code>text</code>, you may use {@link String}, for <code>numeric</code> sensible choices are {@link Integer} or

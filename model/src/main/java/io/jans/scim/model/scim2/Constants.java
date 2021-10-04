@@ -24,12 +24,12 @@ public interface Constants {
     /**
      * Human-readable name of the schema used to extend the User resource type
      */
-    String USER_EXT_SCHEMA_NAME = "GluuUserCustomExtension";
+    String USER_EXT_SCHEMA_NAME = "JansUserCustomExtension";
 
     /**
      * Description of the schema used to extend the User resource type
      */
-    String USER_EXT_SCHEMA_DESCRIPTION = "Gluu User Custom Extension";
+    String USER_EXT_SCHEMA_DESCRIPTION = "Jans User Custom Extension";
 
     /**
      * Schema URI utilized in bulk requests. See section 8.2 of RFC 7644
@@ -102,7 +102,7 @@ public interface Constants {
 
     String GROUP_OVERHEAD_BYPASS_PARAM = "Group-Overhead-Bypass";
 
-    int MAX_COUNT = 200;    //Do not remove till Gluu 4 release. This is used in SCIM-client project
+    int MAX_COUNT = 200;    //This is used in jans scim-client project
 
     int MAX_BULK_OPERATIONS = 30;
     int MAX_BULK_PAYLOAD_SIZE = 3072000;  // 3 MB

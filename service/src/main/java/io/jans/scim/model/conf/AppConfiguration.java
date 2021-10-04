@@ -32,6 +32,7 @@ public class AppConfiguration implements Configuration, Serializable {
 
     private String oxAuthIssuer;
     
+    private ScimMode protectionMode;
     private int maxCount;
     private String userExtensionSchemaURI;
 
@@ -84,6 +85,14 @@ public class AppConfiguration implements Configuration, Serializable {
 
     public void setOxAuthIssuer(String oxAuthIssuer) {
         this.oxAuthIssuer = oxAuthIssuer;
+    }
+
+    public ScimMode getProtectionMode() {
+        return protectionMode;
+    }
+
+    public void setProtectionMode(ScimMode protectionMode) {
+        this.protectionMode = protectionMode;
     }
 
     public int getMaxCount() {
