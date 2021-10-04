@@ -41,6 +41,7 @@ public class Constants {
     public static final String UNKNOWN = "Unknown";
     public static final String UNKNOWN_DOT = UNKNOWN + ".";
     public static final String PRAGMA = "Pragma";
+    public static final String NO_CACHE = "no-cache";
 
     public static final String AUTHORIZATION_BEARER = "Authorization: Bearer ";
     public static final String AUTHORIZATION_BASIC = "Authorization: Basic ";
