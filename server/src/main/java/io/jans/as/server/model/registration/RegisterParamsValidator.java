@@ -426,7 +426,7 @@ public class RegisterParamsValidator {
                         type(MediaType.APPLICATION_JSON_TYPE).
                         entity(errorResponseFactory.errorAsJson(RegisterErrorResponseType.INVALID_LOGOUT_URI, "Failed to valide logout uri.")).
                         cacheControl(ServerUtil.cacheControl(true, false)).
-                        header(Constants.PRAGMA, "no-cache").
+                        header(Constants.PRAGMA, Constants.NO_CACHE).
                         build());
     }
 

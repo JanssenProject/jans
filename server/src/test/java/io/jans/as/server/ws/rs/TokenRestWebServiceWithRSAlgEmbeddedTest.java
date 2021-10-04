@@ -145,7 +145,7 @@ public class TokenRestWebServiceWithRSAlgEmbeddedTest extends BaseTest {
                 response.getHeaderString("Cache-Control") != null
                         && response.getHeaderString("Cache-Control").equals("no-store"),
                 "Unexpected result: " + response.getHeaderString("Cache-Control"));
-        assertTrue(response.getHeaderString(Constants.PRAGMA) != null && response.getHeaderString(Constants.PRAGMA).equals("no-cache"),
+        assertTrue(response.getHeaderString(Constants.PRAGMA) != null && response.getHeaderString(Constants.PRAGMA).equals(Constants.NO_CACHE),
                 "Unexpected result: " + response.getHeaderString(Constants.PRAGMA));
         assertNotNull(entity, "Unexpected result: " + entity);
         try {
@@ -237,7 +237,7 @@ public class TokenRestWebServiceWithRSAlgEmbeddedTest extends BaseTest {
                 response.getHeaderString("Cache-Control") != null
                         && response.getHeaderString("Cache-Control").equals("no-store"),
                 "Unexpected result: " + response.getHeaderString("Cache-Control"));
-        assertTrue(response.getHeaderString(Constants.PRAGMA) != null && response.getHeaderString(Constants.PRAGMA).equals("no-cache"),
+        assertTrue(response.getHeaderString(Constants.PRAGMA) != null && response.getHeaderString(Constants.PRAGMA).equals(Constants.NO_CACHE),
                 "Unexpected result: " + response.getHeaderString(Constants.PRAGMA));
         assertNotNull(entity, "Unexpected result: " + entity);
         try {
@@ -330,7 +330,7 @@ public class TokenRestWebServiceWithRSAlgEmbeddedTest extends BaseTest {
                 response.getHeaderString("Cache-Control") != null
                         && response.getHeaderString("Cache-Control").equals("no-store"),
                 "Unexpected result: " + response.getHeaderString("Cache-Control"));
-        assertTrue(response.getHeaderString(Constants.PRAGMA) != null && response.getHeaderString(Constants.PRAGMA).equals("no-cache"),
+        assertTrue(response.getHeaderString(Constants.PRAGMA) != null && response.getHeaderString(Constants.PRAGMA).equals(Constants.NO_CACHE),
                 "Unexpected result: " + response.getHeaderString(Constants.PRAGMA));
         assertNotNull(entity, "Unexpected result: " + entity);
         try {
@@ -423,7 +423,7 @@ public class TokenRestWebServiceWithRSAlgEmbeddedTest extends BaseTest {
                 response.getHeaderString("Cache-Control") != null
                         && response.getHeaderString("Cache-Control").equals("no-store"),
                 "Unexpected result: " + response.getHeaderString("Cache-Control"));
-        assertTrue(response.getHeaderString(Constants.PRAGMA) != null && response.getHeaderString(Constants.PRAGMA).equals("no-cache"),
+        assertTrue(response.getHeaderString(Constants.PRAGMA) != null && response.getHeaderString(Constants.PRAGMA).equals(Constants.NO_CACHE),
                 "Unexpected result: " + response.getHeaderString(Constants.PRAGMA));
         assertNotNull(entity, "Unexpected result: " + entity);
         try {
@@ -516,7 +516,7 @@ public class TokenRestWebServiceWithRSAlgEmbeddedTest extends BaseTest {
                 response.getHeaderString("Cache-Control") != null
                         && response.getHeaderString("Cache-Control").equals("no-store"),
                 "Unexpected result: " + response.getHeaderString("Cache-Control"));
-        assertTrue(response.getHeaderString(Constants.PRAGMA) != null && response.getHeaderString(Constants.PRAGMA).equals("no-cache"),
+        assertTrue(response.getHeaderString(Constants.PRAGMA) != null && response.getHeaderString(Constants.PRAGMA).equals(Constants.NO_CACHE),
                 "Unexpected result: " + response.getHeaderString(Constants.PRAGMA));
         assertNotNull(entity, "Unexpected result: " + entity);
         try {
@@ -608,7 +608,7 @@ public class TokenRestWebServiceWithRSAlgEmbeddedTest extends BaseTest {
                 response.getHeaderString("Cache-Control") != null
                         && response.getHeaderString("Cache-Control").equals("no-store"),
                 "Unexpected result: " + response.getHeaderString("Cache-Control"));
-        assertTrue(response.getHeaderString(Constants.PRAGMA) != null && response.getHeaderString(Constants.PRAGMA).equals("no-cache"),
+        assertTrue(response.getHeaderString(Constants.PRAGMA) != null && response.getHeaderString(Constants.PRAGMA).equals(Constants.NO_CACHE),
                 "Unexpected result: " + response.getHeaderString(Constants.PRAGMA));
         assertNotNull(entity, "Unexpected result: " + entity);
         try {
