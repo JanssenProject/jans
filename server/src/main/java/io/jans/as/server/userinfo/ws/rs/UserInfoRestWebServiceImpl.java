@@ -189,7 +189,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
             oAuth2AuditLog.updateOAuth2AuditLog(authorizationGrant, true);
 
             builder.cacheControl(ServerUtil.cacheControlWithNoStoreTransformAndPrivate());
-            builder.header(Constants.PRAGMA, "no-cache");
+            builder.header(Constants.PRAGMA, Constants.NO_CACHE);
 
             User currentUser = authorizationGrant.getUser();
             try {
