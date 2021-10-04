@@ -75,7 +75,7 @@ import static io.jans.as.model.register.RegisterRequestParam.*;
 import static io.jans.as.model.register.RegisterResponseParam.*;
 import static io.jans.as.model.util.StringUtils.implode;
 import static io.jans.as.model.util.StringUtils.toList;
-import static org.apache.commons.lang.BooleanUtils.isFalse;
+import static org.apache.commons.lang3.BooleanUtils.isFalse;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 /**
@@ -163,7 +163,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                     requestObject.putOpt(key, softwareStatement.get(key));
                 }
             }
-            if (appConfiguration.getDcrSignatureValidationEnabled()) {
+            if (isTrue(appConfiguration.getDcrSignatureValidationEnabled())) {
                 validateRequestObject(requestParams, softwareStatement, httpRequest);
             }
 
@@ -176,13 +176,13 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                     r.getApplicationType(), r.getClientName(), r.getRedirectUris(), securityContext.isSecure(), r.getSectorIdentifierUri(), r.getDefaultAcrValues());
             log.trace("Registration request = {}", requestParams);
 
-            if (!appConfiguration.getDynamicRegistrationPasswordGrantTypeEnabled()
+            if (isFalse(appConfiguration.getDynamicRegistrationPasswordGrantTypeEnabled())
                     && registerParamsValidator.checkIfThereIsPasswordGrantType(r.getGrantTypes())) {
                 log.info("Password Grant Type is not allowed for Dynamic Client Registration.");
                 throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.ACCESS_DENIED, "Password Grant Type is not allowed for Dynamic Client Registration.");
             }
 
-            if (appConfiguration.getDcrAuthorizationWithClientCredentials() && !r.getGrantTypes().contains(GrantType.CLIENT_CREDENTIALS)) {
+            if (isTrue(appConfiguration.getDcrAuthorizationWithClientCredentials()) && !r.getGrantTypes().contains(GrantType.CLIENT_CREDENTIALS)) {
                 log.info("Register request does not contain grant_type=client_credentials, however dcrAuthorizationWithClientCredentials=true which is forbidden.");
                 throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.ACCESS_DENIED, "Client Credentials Grant Type is not present in Dynamic Client Registration request.");
             }
@@ -208,12 +208,11 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                 r.setAccessTokenSigningAlg(SignatureAlgorithm.fromString(appConfiguration.getDefaultSignatureAlgorithm()));
             }
 
-            if (r.getClaimsRedirectUris() != null && !r.getClaimsRedirectUris().isEmpty()) {
-                if (!registerParamsValidator.validateRedirectUris(r.getGrantTypes(), r.getResponseTypes(),
-                        r.getApplicationType(), r.getSubjectType(), r.getClaimsRedirectUris(), r.getSectorIdentifierUri())) {
-                    log.debug("Value of one or more claims_redirect_uris is invalid, claims_redirect_uris: {}", r.getClaimsRedirectUris());
-                    throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_CLAIMS_REDIRECT_URI, "Value of one or more claims_redirect_uris is invalid");
-                }
+            if (r.getClaimsRedirectUris() != null &&
+                    !r.getClaimsRedirectUris().isEmpty() &&
+                    !registerParamsValidator.validateRedirectUris(r.getGrantTypes(), r.getResponseTypes(), r.getApplicationType(), r.getSubjectType(), r.getClaimsRedirectUris(), r.getSectorIdentifierUri())) {
+                log.debug("Value of one or more claims_redirect_uris is invalid, claims_redirect_uris: {}", r.getClaimsRedirectUris());
+                throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_CLAIMS_REDIRECT_URI, "Value of one or more claims_redirect_uris is invalid");
             }
 
             if (!Strings.isNullOrEmpty(r.getInitiateLoginUri()) && !registerParamsValidator.validateInitiateLoginUri(r.getInitiateLoginUri())) {
@@ -281,16 +280,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             }
             client.setDeletable(client.getClientSecretExpiresAt() != null);
 
-            if (StringUtils.isBlank(r.getClientName()) && r.getRedirectUris() != null && !r.getRedirectUris().isEmpty()) {
-                try {
-                    URI redUri = new URI(r.getRedirectUris().get(0));
-                    client.setClientName(redUri.getHost());
-                } catch (Exception e) {
-                    //ignore
-                    log.error(e.getMessage(), e);
-                    client.setClientName(Constants.UNKNOWN);
-                }
-            }
+            setClientName(r, client);
 
             updateClientFromRequestObject(client, r, false);
 
@@ -338,15 +328,28 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         }
 
         builder.cacheControl(ServerUtil.cacheControl(true, false));
-        builder.header(Constants.PRAGMA, "no-cache");
+        builder.header(Constants.PRAGMA, Constants.NO_CACHE);
         builder.type(MediaType.APPLICATION_JSON_TYPE);
         applicationAuditLogger.sendMessage(oAuth2AuditLog);
         return builder.build();
     }
 
+    private void setClientName(RegisterRequest r, Client client) {
+        if (StringUtils.isBlank(r.getClientName()) && r.getRedirectUris() != null && !r.getRedirectUris().isEmpty()) {
+            try {
+                URI redUri = new URI(r.getRedirectUris().get(0));
+                client.setClientName(redUri.getHost());
+            } catch (Exception e) {
+                //ignore
+                log.error(e.getMessage(), e);
+                client.setClientName(Constants.UNKNOWN);
+            }
+        }
+    }
+
     private void validateRequestObject(String requestParams, JSONObject softwareStatement, HttpServletRequest httpRequest) {
         try {
-            if (!appConfiguration.getDcrSignatureValidationEnabled()) {
+            if (isFalse(appConfiguration.getDcrSignatureValidationEnabled())) {
                 return;
             }
             if (ServerUtil.isTrue(appConfiguration.getDcrSkipSignatureValidation())) {
@@ -571,8 +574,8 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         Set<ResponseType> responseTypeSet = new HashSet<>(requestObject.getResponseTypes());
         Set<GrantType> grantTypeSet = new HashSet<>(requestObject.getGrantTypes());
 
-        if (appConfiguration.getClientRegDefaultToCodeFlowWithRefresh()) {
-            if (responseTypeSet.size() == 0 && grantTypeSet.size() == 0) {
+        if (isTrue(appConfiguration.getClientRegDefaultToCodeFlowWithRefresh())) {
+            if (responseTypeSet.isEmpty() && grantTypeSet.isEmpty()) {
                 responseTypeSet.add(ResponseType.CODE);
             }
             if (responseTypeSet.contains(ResponseType.CODE)) {
@@ -597,12 +600,12 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         Set<GrantType> dynamicGrantTypeDefault = appConfiguration.getDynamicGrantTypeDefault();
         grantTypeSet.retainAll(dynamicGrantTypeDefault);
 
-        if (!update || requestObject.getResponseTypes().size() > 0) {
-            p_client.setResponseTypes(responseTypeSet.toArray(new ResponseType[responseTypeSet.size()]));
+        if (!update || !requestObject.getResponseTypes().isEmpty()) {
+            p_client.setResponseTypes(responseTypeSet.toArray(new ResponseType[0]));
         }
         if (!update) {
             p_client.setGrantTypes(grantTypeSet.toArray(new GrantType[grantTypeSet.size()]));
-        } else if (appConfiguration.getEnableClientGrantTypeUpdate() && requestObject.getGrantTypes().size() > 0) {
+        } else if (isTrue(appConfiguration.getEnableClientGrantTypeUpdate()) && !requestObject.getGrantTypes().isEmpty()) {
             p_client.setGrantTypes(grantTypeSet.toArray(new GrantType[grantTypeSet.size()]));
         }
 
@@ -748,12 +751,10 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             scopes.retainAll(appConfiguration.getDynamicRegistrationAllowedPasswordGrantScopes());
         }
         List<String> scopesDn;
-        if (scopes != null && !scopes.isEmpty()
-                && appConfiguration.getDynamicRegistrationScopesParamEnabled() != null
-                && appConfiguration.getDynamicRegistrationScopesParamEnabled()) {
+        if (scopes != null && !scopes.isEmpty() && isTrue(appConfiguration.getDynamicRegistrationScopesParamEnabled())) {
             List<String> defaultScopes = scopeService.getDefaultScopesDn();
             List<String> requestedScopes = scopeService.getScopesDn(scopes);
-            Set<String> allowedScopes = new HashSet<String>();
+            Set<String> allowedScopes = new HashSet<>();
 
             for (String requestedScope : requestedScopes) {
                 if (defaultScopes.contains(requestedScope)) {
@@ -880,7 +881,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                                 applicationAuditLogger.sendMessage(oAuth2AuditLog);
                                 return Response.ok().entity(clientAsEntity(client)).build();
                             } else {
-                                log.trace("The Access Token is not valid for the Client ID, returns invalid_token error.");
+                                log.trace("The Access Token is not valid for the Client ID, returns invalid_token error, client_id: {}", clientId);
                                 applicationAuditLogger.sendMessage(oAuth2AuditLog);
                                 return Response.status(Response.Status.BAD_REQUEST).
                                         type(MediaType.APPLICATION_JSON_TYPE).
@@ -903,7 +904,8 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                     entity(errorResponseFactory.errorAsJson(RegisterErrorResponseType.INVALID_CLIENT_METADATA, Constants.UNKNOWN_DOT)).build();
 
         } catch (WebApplicationException e) {
-            log.error(e.getMessage(), e);
+            if (log.isErrorEnabled())
+                log.error(e.getMessage(), e);
             throw e;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -913,7 +915,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
     }
 
     private void validateAuthorizationAccessToken(String accessToken, String clientId) {
-        if (!appConfiguration.getDcrAuthorizationWithClientCredentials()) {
+        if (isFalse(appConfiguration.getDcrAuthorizationWithClientCredentials())) {
             return;
         }
         if (StringUtils.isBlank(accessToken) || StringUtils.isBlank(clientId)) {
@@ -927,7 +929,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
 
         final AuthorizationGrant grant = authorizationGrantList.getAuthorizationGrantByAccessToken(accessToken);
         if (grant == null) {
-            log.trace("Unable to find grant by access token:" + accessToken);
+            log.trace("Unable to find grant by access token: {}", accessToken);
             throw new WebApplicationException(Response.
                     status(Response.Status.BAD_REQUEST).
                     type(MediaType.APPLICATION_JSON_TYPE).
@@ -997,13 +999,13 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         }
 
         builder.cacheControl(ServerUtil.cacheControl(true, false));
-        builder.header(Constants.PRAGMA, "no-cache");
+        builder.header(Constants.PRAGMA, Constants.NO_CACHE);
         applicationAuditLogger.sendMessage(oAuth2AuditLog);
         return builder.build();
     }
 
-    private String clientAsEntity(Client p_client) throws JSONException, StringEncrypter.EncryptionException {
-        final JSONObject jsonObject = getJSONObject(p_client);
+    private String clientAsEntity(Client client) throws JSONException, StringEncrypter.EncryptionException {
+        final JSONObject jsonObject = getJSONObject(client);
         return jsonObject.toString(4).replace("\\/", "/");
     }
 
@@ -1014,7 +1016,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         JsonApplier.getInstance().apply(client.getAttributes(), responseJsonObject);
 
         Util.addToJSONObjectIfNotNull(responseJsonObject, RegisterResponseParam.CLIENT_ID.toString(), client.getClientId());
-        if (appConfiguration.getReturnClientSecretOnRead()) {
+        if (isTrue(appConfiguration.getReturnClientSecretOnRead())) {
             Util.addToJSONObjectIfNotNull(responseJsonObject, CLIENT_SECRET.toString(), clientService.decryptSecret(client.getClientSecret()));
         }
         Util.addToJSONObjectIfNotNull(responseJsonObject, RegisterResponseParam.REGISTRATION_ACCESS_TOKEN.toString(), client.getRegistrationAccessToken());
@@ -1198,7 +1200,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                 throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_CLIENT_METADATA, "");
             }
 
-            if (appConfiguration.getDcrAuthorizationWithClientCredentials()) {
+            if (isTrue(appConfiguration.getDcrAuthorizationWithClientCredentials())) {
                 validateAuthorizationAccessToken(accessToken, clientId);
             }
 
@@ -1212,7 +1214,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             return Response
                     .status(Response.Status.NO_CONTENT)
                     .cacheControl(ServerUtil.cacheControl(true, false))
-                    .header(Constants.PRAGMA, "no-cache").build();
+                    .header(Constants.PRAGMA, Constants.NO_CACHE).build();
         } catch (WebApplicationException e) {
             if (e.getResponse() != null) {
                 return e.getResponse();
