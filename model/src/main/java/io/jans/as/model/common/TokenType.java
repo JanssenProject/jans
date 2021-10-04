@@ -15,13 +15,16 @@ import com.fasterxml.jackson.annotation.JsonValue;
  * (along with type-specific attributes). The client MUST NOT use an access
  * token if it does not understand or does not trust the token type.
  *
- * @author Javier Rojas Blum Date: 09.20.2011
+ * @author Javier Rojas Blum
+ * @version September 30, 2021
  */
 public enum TokenType {
     /**
      * The bearer token type is defined in [ietf-oauth-v2-bearer]
      */
-    BEARER("Bearer");
+    BEARER("Bearer"),
+
+    DPOP("DPoP");
 
     private final String name;
 
@@ -38,7 +41,7 @@ public enum TokenType {
      *
      * @param param The token_type parameter.
      * @return The corresponding token type if found, otherwise
-     *         <code>null</code>.
+     * <code>null</code>.
      */
     @JsonCreator
     public static TokenType fromString(String param) {
