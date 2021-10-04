@@ -7,6 +7,7 @@
 package io.jans.as.server.uma.service;
 
 import com.google.common.collect.Lists;
+import io.jans.as.model.config.Constants;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.uma.JsonLogic;
 import io.jans.as.model.uma.JsonLogicNode;
@@ -156,7 +157,7 @@ public class UmaExpressionService {
             throw errorResponseFactory.createWebApplicationException(Response.Status.FORBIDDEN, UmaErrorResponseType.FORBIDDEN_BY_POLICY, "Failed to parse JsonLogic object, invalid expression: " + scopeExpression);
         }
 
-        throw errorResponseFactory.createWebApplicationException(Response.Status.FORBIDDEN, UmaErrorResponseType.FORBIDDEN_BY_POLICY, "Unknown");
+        throw errorResponseFactory.createWebApplicationException(Response.Status.FORBIDDEN, UmaErrorResponseType.FORBIDDEN_BY_POLICY, Constants.UNKNOWN);
     }
 
     private void removeFalseScopesFromPermission(UmaPermission permission, List<String> dataScopes, Map<String, String> scopeIdToDnMap, List<Boolean> evaluatedResults) {

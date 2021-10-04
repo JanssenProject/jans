@@ -10,6 +10,7 @@ import io.jans.as.client.RegisterRequest;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.common.SubjectType;
+import io.jans.as.model.config.Constants;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.error.ErrorResponseFactory;
@@ -425,7 +426,7 @@ public class RegisterParamsValidator {
                         type(MediaType.APPLICATION_JSON_TYPE).
                         entity(errorResponseFactory.errorAsJson(RegisterErrorResponseType.INVALID_LOGOUT_URI, "Failed to valide logout uri.")).
                         cacheControl(ServerUtil.cacheControl(true, false)).
-                        header("Pragma", "no-cache").
+                        header(Constants.PRAGMA, "no-cache").
                         build());
     }
 
