@@ -151,9 +151,9 @@ public class ExtensionField {
     }
 
     /**
-     * <p>Maps the org.gluu.model.AttributeDataType associated to this ExtensionField (see {@link #getType() getType}) to
+     * <p>Maps the io.jans.model.attribute.AttributeDataType associated to this ExtensionField (see {@link #getType() getType}) to
      * a member of the enum {@link io.jans.scim.model.scim2.AttributeDefinition.Type AttributeDefinition.Type}.</p>
-     * <p>The mapping is straightforward. Special case is org.gluu.model.AttributeDataType.NUMERIC mapped to
+     * <p>The mapping is straightforward. Special case is io.jans.model.attribute.AttributeDataType.NUMERIC mapped to
      * {@link io.jans.scim.model.scim2.AttributeDefinition.Type#DECIMAL Type.DECIMAL}.</p>
      * @return An enum value of AttributeDefinition.Type
      */

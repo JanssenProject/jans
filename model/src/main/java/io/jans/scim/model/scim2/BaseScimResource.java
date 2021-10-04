@@ -66,7 +66,7 @@ public class BaseScimResource {
      * parameter with the attribute/value pairs supplied in the <code>Map</code>. Developers are highly encouraged not
      * to use this method but {@link #addCustomAttributes(CustomAttributes)} instead which adds type-safety.
      * <p>Note that this method does not apply any sort of validation. Whether the <code>uri</code> and attributes are
-     * recognized or the values are consistent with data types registered in Gluu Server, is something that is performed
+     * recognized or the values are consistent with data types registered in the Server, is something that is performed
      * only when the resource is passed in a service method invocation.</p>
      * @param uri A string with URI that identifies an extension
      * @param map A Map holding attribute names (Strings) and values (Objects).
@@ -82,7 +82,7 @@ public class BaseScimResource {
      * added attributes are replaced if they are linked to the same <code>uri</code> that <code>customAttributes</code>
      * parameter is associated to.
      * <p>Note that this method does not apply any sort of validation. Whether the <code>uri</code> and attributes are
-     * recognized or the values are consistent with data types registered in Gluu Server, is something that is performed
+     * recognized or the values are consistent with data types registered in the Server, is something that is performed
      * only when the resource is passed in a service method invocation.</p>
      * @param customAttributes An object that comprised of attribute/value pairs
      */
