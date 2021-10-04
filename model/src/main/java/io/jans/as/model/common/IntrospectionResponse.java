@@ -16,10 +16,11 @@ import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 17/09/2013
+ * @version September 30, 2021
  */
 @JsonPropertyOrder({"active", "scope", "client_id", "username", "token_type", "exp", "iat", "sub", "aud", "iss", "jti", "acr_values"})
 // ignore jettison as it's recommended here: http://docs.jboss.org/resteasy/docs/2.3.4.Final/userguide/html/json.html
@@ -30,7 +31,8 @@ public class IntrospectionResponse {
     @JsonProperty(value = "active")
     private boolean active;   // according spec, must be "active" http://tools.ietf.org/html/draft-richer-oauth-introspection-03#section-2.2
     @JsonProperty(value = "scope")
-    @JsonDeserialize(converter = ListConverter.class)	// Force use of List even when value in actual json content is String 
+    @JsonDeserialize(converter = ListConverter.class)
+    // Force use of List even when value in actual json content is String
     private List<String> scope;
     @JsonProperty(value = "client_id")
     private String clientId;
@@ -52,6 +54,12 @@ public class IntrospectionResponse {
     private String jti;
     @JsonProperty(value = "acr_values")
     private String acrValues;
+
+    // DPoP
+    @JsonProperty(value = "nbf")
+    private Long notBefore;
+    @JsonProperty(value = "cnf")
+    private Map<String, String> cnf;
 
     public IntrospectionResponse() {
         // default constructor
@@ -155,6 +163,22 @@ public class IntrospectionResponse {
 
     public void setJti(String jti) {
         this.jti = jti;
+    }
+
+    public Long getNotBefore() {
+        return notBefore;
+    }
+
+    public void setNotBefore(Long notBefore) {
+        this.notBefore = notBefore;
+    }
+
+    public Map<String, String> getCnf() {
+        return cnf;
+    }
+
+    public void setCnf(Map<String, String> cnf) {
+        this.cnf = cnf;
     }
 
     @Override
