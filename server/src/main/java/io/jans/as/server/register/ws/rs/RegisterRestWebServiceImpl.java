@@ -73,6 +73,7 @@ import static io.jans.as.model.register.RegisterRequestParam.*;
 import static io.jans.as.model.register.RegisterResponseParam.*;
 import static io.jans.as.model.util.StringUtils.implode;
 import static io.jans.as.model.util.StringUtils.toList;
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 /**
  * Implementation for register REST web services.
@@ -425,10 +426,14 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
     @NotNull
     private JSONObject parseRequestObjectWithoutValidation(String requestParams) throws JSONException {
         try {
-            if (appConfiguration.getDcrSignatureValidationEnabled()) {
+            if (isTrue(appConfiguration.getDcrSignatureValidationEnabled())) {
                 return Jwt.parseOrThrow(requestParams).getClaims().toJsonObject();
             }
             return new JSONObject(requestParams);
+        } catch (InvalidJwtException e) {
+            if (log.isTraceEnabled())
+                log.trace("Invalid JWT, trying to parse it as plain unencoded json", e);
+            return new JSONObject(requestParams); // #241 plain unencoded request object
         } catch (Exception e) {
             final String msg = "Unable to parse request object.";
             log.error(msg, e);
