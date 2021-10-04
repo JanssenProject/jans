@@ -8,6 +8,7 @@ package io.jans.as.server.util;
 
 import io.jans.as.common.util.RedirectUri;
 import io.jans.as.model.common.ResponseMode;
+import io.jans.as.model.config.Constants;
 import org.jboss.resteasy.specimpl.ResponseBuilderImpl;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -64,7 +65,7 @@ public class RedirectUtil {
             builder.status(Response.Status.OK);
             builder.type(MediaType.TEXT_HTML_TYPE);
             builder.cacheControl(CacheControl.valueOf("no-cache, no-store"));
-            builder.header("Pragma", "no-cache");
+            builder.header(Constants.PRAGMA, "no-cache");
             builder.entity(redirectUriResponse.toString());
         } else {
             URI redirectURI = URI.create(redirectUriResponse.toString());
