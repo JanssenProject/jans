@@ -12,6 +12,7 @@ import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.AttributeService;
 import io.jans.as.model.common.ComponentType;
 import io.jans.as.model.common.ScopeType;
+import io.jans.as.model.config.Constants;
 import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
@@ -188,7 +189,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
             oAuth2AuditLog.updateOAuth2AuditLog(authorizationGrant, true);
 
             builder.cacheControl(ServerUtil.cacheControlWithNoStoreTransformAndPrivate());
-            builder.header("Pragma", "no-cache");
+            builder.header(Constants.PRAGMA, Constants.NO_CACHE);
 
             User currentUser = authorizationGrant.getUser();
             try {

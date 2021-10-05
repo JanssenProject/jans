@@ -682,8 +682,8 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         return builder.build();
     }
 
-    private ResponseBuilder error(int p_status, TokenErrorResponseType p_type, String reason) {
-        return Response.status(p_status).type(MediaType.APPLICATION_JSON_TYPE).entity(errorResponseFactory.errorAsJson(p_type, reason));
+    private ResponseBuilder error(int status, TokenErrorResponseType type, String reason) {
+        return Response.status(status).type(MediaType.APPLICATION_JSON_TYPE).entity(errorResponseFactory.errorAsJson(type, reason));
     }
 
     /**
