@@ -14,4 +14,6 @@ import io.jans.model.custom.script.type.BaseExternalType;
 public interface UpdateTokenType extends BaseExternalType {
 
     boolean modifyIdToken(Object jsonWebResponse, Object tokenContext);
+
+    int getRefreshTokenLifetimeInSeconds();
 }
