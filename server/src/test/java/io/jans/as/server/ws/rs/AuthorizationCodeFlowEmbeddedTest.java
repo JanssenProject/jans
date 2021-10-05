@@ -12,6 +12,7 @@ import io.jans.as.model.authorize.AuthorizeResponseParam;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseType;
+import io.jans.as.model.config.Constants;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
@@ -186,8 +187,8 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
                 response.getHeaderString("Cache-Control") != null
                         && response.getHeaderString("Cache-Control").equals("no-store"),
                 "Unexpected result: " + response.getHeaderString("Cache-Control"));
-        assertTrue(response.getHeaderString("Pragma") != null && response.getHeaderString("Pragma").equals("no-cache"),
-                "Unexpected result: " + response.getHeaderString("Pragma"));
+        assertTrue(response.getHeaderString(Constants.PRAGMA) != null && response.getHeaderString(Constants.PRAGMA).equals(Constants.NO_CACHE),
+                "Unexpected result: " + response.getHeaderString(Constants.PRAGMA));
         assertNotNull(entity, "Unexpected result: " + entity);
         try {
             JSONObject jsonObj = new JSONObject(entity);
@@ -231,8 +232,8 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
                 response.getHeaderString("Cache-Control") != null
                         && response.getHeaderString("Cache-Control").equals("no-store"),
                 "Unexpected result: " + response.getHeaderString("Cache-Control"));
-        assertTrue(response.getHeaderString("Pragma") != null && response.getHeaderString("Pragma").equals("no-cache"),
-                "Unexpected result: " + response.getHeaderString("Pragma"));
+        assertTrue(response.getHeaderString(Constants.PRAGMA) != null && response.getHeaderString(Constants.PRAGMA).equals(Constants.NO_CACHE),
+                "Unexpected result: " + response.getHeaderString(Constants.PRAGMA));
         assertNotNull(entity, "Unexpected result: " + entity);
         try {
             JSONObject jsonObj = new JSONObject(entity);
@@ -326,8 +327,8 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
                 response.getHeaderString("Cache-Control") != null
                         && response.getHeaderString("Cache-Control").equals("no-store"),
                 "Unexpected result: " + response.getHeaderString("Cache-Control"));
-        assertTrue(response.getHeaderString("Pragma") != null && response.getHeaderString("Pragma").equals("no-cache"),
-                "Unexpected result: " + response.getHeaderString("Pragma"));
+        assertTrue(response.getHeaderString(Constants.PRAGMA) != null && response.getHeaderString(Constants.PRAGMA).equals(Constants.NO_CACHE),
+                "Unexpected result: " + response.getHeaderString(Constants.PRAGMA));
         assertNotNull(entity, "Unexpected result: " + entity);
         try {
             JSONObject jsonObj = new JSONObject(entity);
@@ -374,8 +375,8 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
                 response.getHeaderString("Cache-Control") != null
                         && response.getHeaderString("Cache-Control").equals("no-store"),
                 "Unexpected result: " + response.getHeaderString("Cache-Control"));
-        assertTrue(response.getHeaderString("Pragma") != null && response.getHeaderString("Pragma").equals("no-cache"),
-                "Unexpected result: " + response.getHeaderString("Pragma"));
+        assertTrue(response.getHeaderString(Constants.PRAGMA) != null && response.getHeaderString(Constants.PRAGMA).equals(Constants.NO_CACHE),
+                "Unexpected result: " + response.getHeaderString(Constants.PRAGMA));
         assertNotNull(entity, "Unexpected result: " + entity);
         try {
             JSONObject jsonObj = new JSONObject(entity);
@@ -476,8 +477,8 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
                 response.getHeaderString("Cache-Control") != null
                         && response.getHeaderString("Cache-Control").equals("no-store"),
                 "Unexpected result: " + response.getHeaderString("Cache-Control"));
-        assertTrue(response.getHeaderString("Pragma") != null && response.getHeaderString("Pragma").equals("no-cache"),
-                "Unexpected result: " + response.getHeaderString("Pragma"));
+        assertTrue(response.getHeaderString(Constants.PRAGMA) != null && response.getHeaderString(Constants.PRAGMA).equals(Constants.NO_CACHE),
+                "Unexpected result: " + response.getHeaderString(Constants.PRAGMA));
         assertNotNull(entity, "Unexpected result: " + entity);
         try {
             JSONObject jsonObj = new JSONObject(entity);

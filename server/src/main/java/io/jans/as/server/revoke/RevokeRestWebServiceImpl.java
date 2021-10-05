@@ -9,6 +9,7 @@ package io.jans.as.server.revoke;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.common.ComponentType;
 import io.jans.as.model.common.TokenTypeHint;
+import io.jans.as.model.config.Constants;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.token.TokenRevocationErrorResponseType;
 import io.jans.as.server.audit.ApplicationAuditLogger;
@@ -145,7 +146,7 @@ public class RevokeRestWebServiceImpl implements RevokeRestWebService {
 
     private Response response(Response.ResponseBuilder builder, OAuth2AuditLog oAuth2AuditLog) {
         builder.cacheControl(ServerUtil.cacheControl(true, false));
-        builder.header("Pragma", "no-cache");
+        builder.header(Constants.PRAGMA, Constants.NO_CACHE);
 
         applicationAuditLogger.sendMessage(oAuth2AuditLog);
 
