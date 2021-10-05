@@ -15,5 +15,5 @@ public interface UpdateTokenType extends BaseExternalType {
 
     boolean modifyIdToken(Object jsonWebResponse, Object tokenContext);
 
-    int getRefreshTokenLifetimeInSeconds();
+    int getRefreshTokenLifetimeInSeconds(Object tokenContext);
 }
