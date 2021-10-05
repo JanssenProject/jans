@@ -1393,12 +1393,12 @@ public class RegisterRequest extends BaseRequest {
         return parameters;
     }
 
-    public static RegisterRequest fromJson(String p_json) throws JSONException {
-        return fromJson(new JSONObject(p_json));
+    public static RegisterRequest fromJson(String json) throws JSONException {
+        return fromJson(new JSONObject(json));
     }
 
     public static RegisterRequest fromJson(JSONObject requestObject) throws JSONException {
-        final List<String> redirectUris = new ArrayList<String>();
+        final List<String> redirectUris = new ArrayList<>();
         if (requestObject.has(REDIRECT_URIS.toString())) {
             JSONArray redirectUrisJsonArray = requestObject.getJSONArray(REDIRECT_URIS.toString());
             for (int i = 0; i < redirectUrisJsonArray.length(); i++) {
@@ -1559,8 +1559,8 @@ public class RegisterRequest extends BaseRequest {
         result.setRedirectUris(redirectUris);
         result.setScope(scope);
         result.setClaims(claims);
-        result.setResponseTypesStrings(new ArrayList<String>(responseTypes));
-        result.setGrantTypes(new ArrayList<GrantType>(grantTypes));
+        result.setResponseTypesStrings(new ArrayList<>(responseTypes));
+        result.setGrantTypes(new ArrayList<>(grantTypes));
         result.setApplicationType(requestObject.has(APPLICATION_TYPE.toString()) ?
                 ApplicationType.fromString(requestObject.getString(APPLICATION_TYPE.toString())) : ApplicationType.WEB);
         result.setContacts(contacts);
