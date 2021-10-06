@@ -247,7 +247,6 @@ public class TTokenRequest {
 
 			token.setAccessToken(accessToken);
 			token.setRefreshToken(refreshToken);
-			// m_token.setIdToken(idToken);
 		} catch (JSONException e) {
 			e.printStackTrace();
 			fail(e.getMessage() + "\nResponse was: " + entity);

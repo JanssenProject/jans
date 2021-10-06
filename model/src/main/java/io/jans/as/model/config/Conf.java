@@ -95,11 +95,11 @@ public class Conf {
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         sb.append("Conf");
-        sb.append("{m_dn='").append(dn).append('\'');
-        sb.append(", m_dynamic='").append(dynamic).append('\'');
-        sb.append(", m_static='").append(statics).append('\'');
-        sb.append(", m_errors='").append(errors).append('\'');
-        sb.append(", m_webKeys='").append(webKeys).append('\'');
+        sb.append("{dn='").append(dn).append('\'');
+        sb.append(", dynamic='").append(dynamic).append('\'');
+        sb.append(", static='").append(statics).append('\'');
+        sb.append(", errors='").append(errors).append('\'');
+        sb.append(", webKeys='").append(webKeys).append('\'');
         sb.append('}');
         return sb.toString();
     }
