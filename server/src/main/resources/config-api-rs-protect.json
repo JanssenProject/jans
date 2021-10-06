@@ -562,6 +562,113 @@
                 ]
             }
         ]
+    },
+    {
+        "path":"/jans-config-api/scim/user",
+        "conditions":[
+            {
+                "httpMethods":["GET"],
+                "scopes":[
+                    "https://jans.io/scim/users.read"
+                ]
+            },
+            {
+               "httpMethods":["POST"],
+                "scopes":[
+                    "https://jans.io/scim/users.write"
+                ]
+            }
+            
+        ]
+    },
+    {
+        "path":"/jans-config-api/scim/user/{id}",
+        "conditions":[
+            {
+                "httpMethods":["GET"],
+                "scopes":[
+                    "https://jans.io/scim/users.read"
+                ]
+            },
+            {
+               "httpMethods":["PUT"],
+                "scopes":[
+                    "https://jans.io/scim/users.write"
+                ]
+            },
+            {
+               "httpMethods":["DELETE"],
+                "scopes":[
+                    "https://jans.io/scim/users.write"
+                ]
+            },
+            {
+               "httpMethods":["PATCH"],
+                "scopes":[
+                    "https://jans.io/scim/users.write"
+                ]
+            }
+            
+        ]
+    },
+    {
+        "path":"/jans-config-api/scim/user/.search",
+        "conditions":[
+            {
+                "httpMethods":["GET"],
+                "scopes":[
+                    "https://jans.io/scim/users.read"
+                ]
+            }            
+        ]
+    },
+    {
+        "path":"/jans-config-api/api/v1/stat",
+        "conditions":[
+            {
+                "httpMethods":["GET"],
+                "scopes":[
+                    "https://jans.io/oauth/config/stats.readonly",
+                    "jans_stat"
+                ]
+            }            
+        ]
+    },
+    {
+        "path":"/jans-config-api/api/v1/health",
+        "conditions":[
+            {
+                "httpMethods":["GET"],
+                "scopes":[ ]
+            }            
+        ]
+    },
+    {
+        "path":"/jans-config-api/api/v1/health/live",
+        "conditions":[
+            {
+                "httpMethods":["GET"],
+                "scopes":[ ]
+            }            
+        ]
+    },
+    {
+        "path":"/jans-config-api/api/v1/health/ready",
+        "conditions":[
+            {
+                "httpMethods":["GET"],
+                "scopes":[ ]
+            }            
+        ]
+    },
+    {
+        "path":"/jans-config-api/api/v1/jans-auth-server/health",
+        "conditions":[
+            {
+                "httpMethods":["GET"],
+                "scopes":[ ]
+            }            
+        ]
     }
 ]
 }
