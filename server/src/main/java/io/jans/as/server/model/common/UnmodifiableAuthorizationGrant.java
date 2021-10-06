@@ -29,6 +29,8 @@ import java.util.function.Function;
 
 public class UnmodifiableAuthorizationGrant implements IAuthorizationGrant {
 
+    public static final String NOT_ALLOWED_FOR_UNMODIFIABLE_AUTHORIZATION_GRANT = "Not allowed for UnmodifiableAuthorizationGrant.";
+    
     private final IAuthorizationGrant grant;
 
     public UnmodifiableAuthorizationGrant(IAuthorizationGrant grant) {
@@ -46,8 +48,8 @@ public class UnmodifiableAuthorizationGrant implements IAuthorizationGrant {
     }
 
     @Override
-    public void setGrantId(String p_grantId) {
-        throw new UnsupportedOperationException("Not allowed for UnmodifiableAuthorizationGrant.");
+    public void setGrantId(String grantId) {
+        throw new UnsupportedOperationException(NOT_ALLOWED_FOR_UNMODIFIABLE_AUTHORIZATION_GRANT);
     }
 
     @Override
@@ -57,7 +59,7 @@ public class UnmodifiableAuthorizationGrant implements IAuthorizationGrant {
 
     @Override
     public void setAuthorizationCode(AuthorizationCode authorizationCode) {
-        throw new UnsupportedOperationException("Not allowed for UnmodifiableAuthorizationGrant.");
+        throw new UnsupportedOperationException(NOT_ALLOWED_FOR_UNMODIFIABLE_AUTHORIZATION_GRANT);
     }
 
     @Override
@@ -67,7 +69,7 @@ public class UnmodifiableAuthorizationGrant implements IAuthorizationGrant {
 
     @Override
     public void setNonce(String nonce) {
-        throw new UnsupportedOperationException("Not allowed for UnmodifiableAuthorizationGrant.");
+        throw new UnsupportedOperationException(NOT_ALLOWED_FOR_UNMODIFIABLE_AUTHORIZATION_GRANT);
     }
 
     @Override
@@ -77,12 +79,17 @@ public class UnmodifiableAuthorizationGrant implements IAuthorizationGrant {
 
     @Override
     public AccessToken createAccessToken(String certAsPem, ExecutionContext executionContext) {
-        throw new UnsupportedOperationException("Not allowed for UnmodifiableAuthorizationGrant.");
+        throw new UnsupportedOperationException(NOT_ALLOWED_FOR_UNMODIFIABLE_AUTHORIZATION_GRANT);
     }
 
     @Override
     public RefreshToken createRefreshToken() {
-        throw new UnsupportedOperationException("Not allowed for UnmodifiableAuthorizationGrant.");
+        throw new UnsupportedOperationException(NOT_ALLOWED_FOR_UNMODIFIABLE_AUTHORIZATION_GRANT);
+    }
+
+    @Override
+    public RefreshToken createRefreshToken(int lifetime) {
+        throw new UnsupportedOperationException(NOT_ALLOWED_FOR_UNMODIFIABLE_AUTHORIZATION_GRANT);
     }
 
     @Override
@@ -90,7 +97,7 @@ public class UnmodifiableAuthorizationGrant implements IAuthorizationGrant {
             String nonce, AuthorizationCode authorizationCode, AccessToken accessToken, RefreshToken refreshToken,
             String state, AuthorizationGrant authorizationGrant, boolean includeIdTokenClaims, Function<JsonWebResponse, Void> preProcessing,
             Function<JsonWebResponse, Void> postProcessing) {
-        throw new UnsupportedOperationException("Not allowed for UnmodifiableAuthorizationGrant.");
+        throw new UnsupportedOperationException(NOT_ALLOWED_FOR_UNMODIFIABLE_AUTHORIZATION_GRANT);
     }
 
     @Override
@@ -105,17 +112,17 @@ public class UnmodifiableAuthorizationGrant implements IAuthorizationGrant {
 
     @Override
     public void revokeAllTokens() {
-        throw new UnsupportedOperationException("Not allowed for UnmodifiableAuthorizationGrant.");
+        throw new UnsupportedOperationException(NOT_ALLOWED_FOR_UNMODIFIABLE_AUTHORIZATION_GRANT);
     }
 
     @Override
     public void checkExpiredTokens() {
-        throw new UnsupportedOperationException("Not allowed for UnmodifiableAuthorizationGrant.");
+        throw new UnsupportedOperationException(NOT_ALLOWED_FOR_UNMODIFIABLE_AUTHORIZATION_GRANT);
     }
 
     @Override
     public String checkScopesPolicy(String scope) {
-        throw new UnsupportedOperationException("Not allowed for UnmodifiableAuthorizationGrant.");
+        throw new UnsupportedOperationException(NOT_ALLOWED_FOR_UNMODIFIABLE_AUTHORIZATION_GRANT);
     }
 
     @Override
@@ -180,7 +187,7 @@ public class UnmodifiableAuthorizationGrant implements IAuthorizationGrant {
 
     @Override
     public void setRefreshTokens(List<RefreshToken> refreshTokens) {
-        throw new UnsupportedOperationException("Not allowed for UnmodifiableAuthorizationGrant.");
+        throw new UnsupportedOperationException(NOT_ALLOWED_FOR_UNMODIFIABLE_AUTHORIZATION_GRANT);
     }
 
     @Override
@@ -199,8 +206,8 @@ public class UnmodifiableAuthorizationGrant implements IAuthorizationGrant {
     }
 
     @Override
-    public void setJwtAuthorizationRequest(JwtAuthorizationRequest p_jwtAuthorizationRequest) {
-        throw new UnsupportedOperationException("Not allowed for UnmodifiableAuthorizationGrant.");
+    public void setJwtAuthorizationRequest(JwtAuthorizationRequest jwtAuthorizationRequest) {
+        throw new UnsupportedOperationException(NOT_ALLOWED_FOR_UNMODIFIABLE_AUTHORIZATION_GRANT);
     }
 
     @Override
@@ -214,28 +221,28 @@ public class UnmodifiableAuthorizationGrant implements IAuthorizationGrant {
     }
 
     @Override
-    public void setTokenLdap(TokenLdap p_tokenLdap) {
-        throw new UnsupportedOperationException("Not allowed for UnmodifiableAuthorizationGrant.");
+    public void setTokenLdap(TokenLdap token) {
+        throw new UnsupportedOperationException(NOT_ALLOWED_FOR_UNMODIFIABLE_AUTHORIZATION_GRANT);
     }
 
     @Override
     public void setLongLivedAccessToken(AccessToken longLivedAccessToken) {
-        throw new UnsupportedOperationException("Not allowed for UnmodifiableAuthorizationGrant.");
+        throw new UnsupportedOperationException(NOT_ALLOWED_FOR_UNMODIFIABLE_AUTHORIZATION_GRANT);
     }
 
     @Override
     public void setIdToken(IdToken idToken) {
-        throw new UnsupportedOperationException("Not allowed for UnmodifiableAuthorizationGrant.");
+        throw new UnsupportedOperationException(NOT_ALLOWED_FOR_UNMODIFIABLE_AUTHORIZATION_GRANT);
     }
 
     @Override
     public void setScopes(Collection<String> scopes) {
-        throw new UnsupportedOperationException("Not allowed for UnmodifiableAuthorizationGrant.");
+        throw new UnsupportedOperationException(NOT_ALLOWED_FOR_UNMODIFIABLE_AUTHORIZATION_GRANT);
     }
 
     @Override
     public void setAccessTokens(List<AccessToken> accessTokens) {
-        throw new UnsupportedOperationException("Not allowed for UnmodifiableAuthorizationGrant.");
+        throw new UnsupportedOperationException(NOT_ALLOWED_FOR_UNMODIFIABLE_AUTHORIZATION_GRANT);
     }
 
     @Override
@@ -245,7 +252,7 @@ public class UnmodifiableAuthorizationGrant implements IAuthorizationGrant {
 
     @Override
     public void setAcrValues(String authMode) {
-        throw new UnsupportedOperationException("Not allowed for UnmodifiableAuthorizationGrant.");
+        throw new UnsupportedOperationException(NOT_ALLOWED_FOR_UNMODIFIABLE_AUTHORIZATION_GRANT);
     }
 
     @Override
@@ -255,11 +262,11 @@ public class UnmodifiableAuthorizationGrant implements IAuthorizationGrant {
 
     @Override
     public void setSessionDn(String sessionDn) {
-        throw new UnsupportedOperationException("Not allowed for UnmodifiableAuthorizationGrant.");
+        throw new UnsupportedOperationException(NOT_ALLOWED_FOR_UNMODIFIABLE_AUTHORIZATION_GRANT);
     }
 
     @Override
     public void save() {
-        throw new UnsupportedOperationException("Not allowed for UnmodifiableAuthorizationGrant.");
+        throw new UnsupportedOperationException(NOT_ALLOWED_FOR_UNMODIFIABLE_AUTHORIZATION_GRANT);
     }
 }
