@@ -93,7 +93,7 @@ public class UmaRptService {
     private boolean containsBranch = false;
 
     public static List<String> getPermissionDns(Collection<UmaPermission> permissions) {
-        final List<String> result = new ArrayList<String>();
+        final List<String> result = new ArrayList<>();
         if (permissions != null) {
             for (UmaPermission p : permissions) {
                 result.add(p.getDn());
@@ -129,7 +129,7 @@ public class UmaRptService {
             if (entry != null) {
                 return entry;
             } else {
-                log.error("Failed to find RPT by code: " + rptCode);
+                log.error("Failed to find RPT by code: {}", rptCode);
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -167,7 +167,7 @@ public class UmaRptService {
         try {
             rpt.resetTtlFromExpirationDate();
             ldapEntryManager.merge(rpt);
-            log.trace("Persisted RPT: " + rpt);
+            log.trace("Persisted RPT: {}", rpt);
             return true;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -175,11 +175,11 @@ public class UmaRptService {
         }
     }
 
-    public List<UmaPermission> getRptPermissions(UmaRPT p_rpt) {
-        final List<UmaPermission> result = new ArrayList<UmaPermission>();
+    public List<UmaPermission> getRptPermissions(UmaRPT rpt) {
+        final List<UmaPermission> result = new ArrayList<>();
         try {
-            if (p_rpt != null && p_rpt.getPermissions() != null) {
-                final List<String> permissionDns = p_rpt.getPermissions();
+            if (rpt != null && rpt.getPermissions() != null) {
+                final List<String> permissionDns = rpt.getPermissions();
                 for (String permissionDn : permissionDns) {
                     final UmaPermission permissionObject = ldapEntryManager.find(UmaPermission.class, permissionDn);
                     if (permissionObject != null) {
@@ -223,7 +223,9 @@ public class UmaRptService {
             statService.reportUmaToken(GrantType.OXAUTH_UMA_TICKET);
             return rpt;
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+            if (log.isErrorEnabled()) {
+                log.error(e.getMessage(), e);
+            }
             throw new RuntimeException("Failed to generate RPT, clientId: " + executionContext.getClient().getClientId(), e);
         }
     }
@@ -254,7 +256,7 @@ public class UmaRptService {
                 if (pct != null) {
                     jwt.getClaims().setClaim("pct_claims", pct.getClaims().toJsonObject());
                 } else {
-                    log.error("Failed to find PCT with code: " + pctCode + " which is taken from permission object: " + permissions.iterator().next().getDn());
+                    log.error("Failed to find PCT with code: {} which is taken from permission object: {}", pctCode, permissions.iterator().next().getDn());
                 }
             }
 

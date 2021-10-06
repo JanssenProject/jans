@@ -28,7 +28,7 @@ import java.util.Date;
 @ObjectClass(value = "jansUmaPCT")
 public class UmaPCT extends AbstractToken {
 
-    private final static Logger log = LoggerFactory.getLogger(UmaPCT.class);
+    private static final Logger log = LoggerFactory.getLogger(UmaPCT.class);
 
     @DN
     private String dn;
