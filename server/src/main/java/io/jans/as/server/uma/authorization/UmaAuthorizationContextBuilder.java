@@ -29,7 +29,6 @@ import java.util.Set;
  */
 public class UmaAuthorizationContextBuilder {
 
-    private final AttributeService attributeService;
     private final UmaResourceService resourceService;
     private final List<UmaPermission> permissions;
     private final Map<Scope, Boolean> scopes;
@@ -37,16 +36,14 @@ public class UmaAuthorizationContextBuilder {
     private final HttpServletRequest httpRequest;
     private final AppConfiguration configuration;
     private final UmaSessionService sessionService;
-    private final UserService userService;
     private final UmaPermissionService permissionService;
     private final Client client;
 
-    public UmaAuthorizationContextBuilder(AppConfiguration configuration, AttributeService attributeService, UmaResourceService resourceService,
+    public UmaAuthorizationContextBuilder(AppConfiguration configuration, UmaResourceService resourceService,
                                           List<UmaPermission> permissions, Map<Scope, Boolean> scopes,
                                           Claims claims, HttpServletRequest httpRequest,
-                                          UmaSessionService sessionService, UserService userService, UmaPermissionService permissionService, Client client) {
+                                          UmaSessionService sessionService, UmaPermissionService permissionService, Client client) {
         this.configuration = configuration;
-        this.attributeService = attributeService;
         this.resourceService = resourceService;
         this.permissions = permissions;
         this.client = client;
@@ -54,7 +51,6 @@ public class UmaAuthorizationContextBuilder {
         this.claims = claims;
         this.httpRequest = httpRequest;
         this.sessionService = sessionService;
-        this.userService = userService;
         this.permissionService = permissionService;
     }
 
