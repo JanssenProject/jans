@@ -9,6 +9,7 @@ package io.jans.as.client;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.AuthorizationMethod;
 import io.jans.as.model.common.HasParamName;
+import io.jans.as.model.config.Constants;
 import io.jans.as.model.util.Util;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -29,7 +30,7 @@ import java.util.Map;
  * Allows to retrieve HTTP requests to the authorization server and responses from it for display purposes.
  *
  * @author Javier Rojas Blum
- * @version September 30, 2021
+ * @version October 5, 2021
  */
 public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> {
 
@@ -41,15 +42,15 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
     protected V response;
     protected ClientRequest clientRequest = null;
     protected ClientResponse<String> clientResponse = null;
-    private final List<Cookie> cookies = new ArrayList<Cookie>();
-    private final Map<String, String> headers = new HashMap<String, String>();
+    private final List<Cookie> cookies = new ArrayList<>();
+    private final Map<String, String> headers = new HashMap<>();
 
     protected ClientExecutor executor = null;
 
-    public BaseClient() {
+    protected BaseClient() {
     }
 
-    public BaseClient(String url) {
+    protected BaseClient(String url) {
         this.url = url;
     }
 
@@ -85,18 +86,18 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
         this.executor = executor;
     }
 
-    protected void addReqParam(String p_key, HasParamName p_value) {
-        if (p_value != null) {
-            addReqParam(p_key, p_value.getParamName());
+    protected void addReqParam(String key, HasParamName value) {
+        if (value != null) {
+            addReqParam(key, value.getParamName());
         }
     }
 
-    protected void addReqParam(String p_key, String p_value) {
-        if (Util.allNotBlank(p_key, p_value)) {
+    protected void addReqParam(String key, String value) {
+        if (Util.allNotBlank(key, value)) {
             if (request.getAuthorizationMethod() == AuthorizationMethod.FORM_ENCODED_BODY_PARAMETER) {
-                clientRequest.formParameter(p_key, p_value);
+                clientRequest.formParameter(key, value);
             } else {
-                clientRequest.queryParameter(p_key, p_value);
+                clientRequest.queryParameter(key, value);
             }
         }
     }
@@ -119,7 +120,7 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
             URL theUrl = new URL(url);
 
             if (getHttpMethod().equals(HttpMethod.POST) || getHttpMethod().equals(HttpMethod.PUT) || getHttpMethod().equals(HttpMethod.DELETE)) {
-                sb.append(getHttpMethod()).append(" ").append(theUrl.getPath()).append(" HTTP/1.1");
+                sb.append(getHttpMethod()).append(" ").append(theUrl.getPath()).append(Constants.SPACE_HTTP_11);
                 sb.append("\n");
                 sb.append("Host: ").append(theUrl.getHost());
                 if (StringUtils.isNotBlank(request.getContentType())) {
@@ -146,20 +147,15 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
                     }
                 }
                 if (request.getAuthorizationMethod() == null) {
-                    if (request.getAuthenticationMethod() == null
-                            || request.getAuthenticationMethod() == AuthenticationMethod.CLIENT_SECRET_BASIC) {
-                        if (request.hasCredentials()) {
-                            String encodedCredentials = request.getEncodedCredentials();
-                            sb.append("\n");
-                            sb.append("Authorization: Basic ").append(encodedCredentials);
-                        }
-                    }
-                } else if (request.getAuthorizationMethod() == AuthorizationMethod.AUTHORIZATION_REQUEST_HEADER_FIELD) {
-                    if (request instanceof UserInfoRequest) {
-                        String accessToken = ((UserInfoRequest) request).getAccessToken();
+                    if ((request.getAuthenticationMethod() == null || request.getAuthenticationMethod() == AuthenticationMethod.CLIENT_SECRET_BASIC) && request.hasCredentials()) {
+                        String encodedCredentials = request.getEncodedCredentials();
                         sb.append("\n");
-                        sb.append("Authorization: Bearer ").append(accessToken);
+                        sb.append(Constants.AUTHORIZATION_BASIC).append(encodedCredentials);
                     }
+                } else if (request.getAuthorizationMethod() == AuthorizationMethod.AUTHORIZATION_REQUEST_HEADER_FIELD && request instanceof UserInfoRequest) {
+                    String accessToken = ((UserInfoRequest) request).getAccessToken();
+                    sb.append("\n");
+                    sb.append(Constants.AUTHORIZATION_BEARER).append(accessToken);
                 }
 
                 sb.append("\n");
@@ -170,11 +166,11 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
                     sb.append(request.getQueryString());
                 }
             } else if (getHttpMethod().equals(HttpMethod.GET)) {
-                sb.append(getHttpMethod()).append(" ").append(theUrl.getPath()).append(" HTTP/1.1");
+                sb.append(getHttpMethod()).append(" ").append(theUrl.getPath()).append(Constants.SPACE_HTTP_11);
                 if (StringUtils.isNotBlank(request.getQueryString())) {
                     sb.append("?").append(request.getQueryString());
                 }
-                sb.append(" HTTP/1.1");
+                sb.append(Constants.SPACE_HTTP_11);
                 sb.append("\n");
                 sb.append("Host: ").append(theUrl.getHost());
                 if (StringUtils.isNotBlank(request.getContentType())) {
@@ -199,19 +195,17 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
                     if (request.hasCredentials()) {
                         String encodedCredentials = request.getEncodedCredentials();
                         sb.append("\n");
-                        sb.append("Authorization: Basic ").append(encodedCredentials);
+                        sb.append(Constants.AUTHORIZATION_BASIC).append(encodedCredentials);
                     } else if (request instanceof RegisterRequest) {
                         RegisterRequest r = (RegisterRequest) request;
                         String registrationAccessToken = r.getRegistrationAccessToken();
                         sb.append("\n");
-                        sb.append("Authorization: Bearer ").append(registrationAccessToken);
+                        sb.append(Constants.AUTHORIZATION_BEARER).append(registrationAccessToken);
                     }
-                } else if (request.getAuthorizationMethod() == AuthorizationMethod.AUTHORIZATION_REQUEST_HEADER_FIELD) {
-                    if (request instanceof UserInfoRequest) {
-                        String accessToken = ((UserInfoRequest) request).getAccessToken();
-                        sb.append("\n");
-                        sb.append("Authorization: Bearer ").append(accessToken);
-                    }
+                } else if (request.getAuthorizationMethod() == AuthorizationMethod.AUTHORIZATION_REQUEST_HEADER_FIELD && request instanceof UserInfoRequest) {
+                    String accessToken = ((UserInfoRequest) request).getAccessToken();
+                    sb.append("\n");
+                    sb.append(Constants.AUTHORIZATION_BEARER).append(accessToken);
                 }
             }
         } catch (MalformedURLException e) {
