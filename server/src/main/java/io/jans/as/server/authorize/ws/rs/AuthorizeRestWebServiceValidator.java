@@ -134,7 +134,7 @@ public class AuthorizeRestWebServiceValidator {
     }
 
     public void validateRequestJwt(String request, String requestUri, RedirectUriResponse redirectUriResponse) {
-        if (appConfiguration.getFapiCompatibility() && StringUtils.isBlank(request) && StringUtils.isBlank(requestUri)) {
+        if (appConfiguration.isFapi() && StringUtils.isBlank(request) && StringUtils.isBlank(requestUri)) {
             throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST, "request and request_uri are both not specified which is forbidden for FAPI.");
         }
         if (StringUtils.isNotBlank(request) && StringUtils.isNotBlank(requestUri)) {
@@ -143,7 +143,7 @@ public class AuthorizeRestWebServiceValidator {
     }
 
     public void validate(List<io.jans.as.model.common.ResponseType> responseTypes, List<Prompt> prompts, String nonce, String state, String redirectUri, HttpServletRequest httpRequest, Client client, io.jans.as.model.common.ResponseMode responseMode) {
-        if (!AuthorizeParamsValidator.validateParams(responseTypes, prompts, nonce, appConfiguration.getFapiCompatibility(), responseMode)) {
+        if (!AuthorizeParamsValidator.validateParams(responseTypes, prompts, nonce, appConfiguration.isFapi(), responseMode)) {
             if (redirectUri != null && redirectionUriService.validateRedirectionUri(client, redirectUri) != null) {
                 RedirectUri redirectUriResponse = new RedirectUri(redirectUri, responseTypes, responseMode);
                 redirectUriResponse.parseQueryString(errorResponseFactory.getErrorAsQueryString(
@@ -161,11 +161,11 @@ public class AuthorizeRestWebServiceValidator {
 
     public void validateRequestObject(JwtAuthorizationRequest jwtRequest, RedirectUriResponse redirectUriResponse) {
         if (!jwtRequest.getAud().isEmpty() && !jwtRequest.getAud().contains(appConfiguration.getIssuer())) {
-            log.error("Failed to match aud to AS, aud: " + jwtRequest.getAud());
+            log.error("Failed to match aud to AS, aud: {}", jwtRequest.getAud());
             throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT);
         }
 
-        if (!appConfiguration.getFapiCompatibility()) {
+        if (!appConfiguration.isFapi()) {
             return;
         }
 
@@ -177,7 +177,7 @@ public class AuthorizeRestWebServiceValidator {
         final long expInMillis = jwtRequest.getExp() * 1000L;
         final long now = new Date().getTime();
         if (expInMillis < now) {
-            log.error("Request object expired. Exp:" + expInMillis + ", now: " + now);
+            log.error("Request object expired. Exp: {}, now: {}", expInMillis, now);
             throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT);
         }
         if (jwtRequest.getScopes() == null || jwtRequest.getScopes().isEmpty()) {
@@ -200,14 +200,14 @@ public class AuthorizeRestWebServiceValidator {
      */
     public void validateCibaRequestObject(JwtAuthorizationRequest jwtRequest, String clientId) {
         if (jwtRequest.getAud().isEmpty() || !jwtRequest.getAud().contains(appConfiguration.getIssuer())) {
-            log.error("Failed to match aud to AS, aud: " + jwtRequest.getAud());
+            log.error("Failed to match aud to AS, aud: {}", jwtRequest.getAud());
             throw new WebApplicationException(Response
                     .status(Response.Status.BAD_REQUEST)
                     .entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST))
                     .build());
         }
 
-        if (!appConfiguration.getFapiCompatibility()) {
+        if (!appConfiguration.isFapi()) {
             return;
         }
 
@@ -300,7 +300,7 @@ public class AuthorizeRestWebServiceValidator {
     }
 
     public WebApplicationException createInvalidJwtRequestException(RedirectUriResponse redirectUriResponse, String reason) {
-        if (appConfiguration.getFapiCompatibility()) {
+        if (appConfiguration.isFapi()) {
             log.debug(reason); // in FAPI case log reason but don't send it since it's `reason` is not known.
             return redirectUriResponse.createWebException(io.jans.as.model.authorize.AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT);
         }
