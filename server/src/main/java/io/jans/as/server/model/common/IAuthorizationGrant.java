@@ -31,7 +31,7 @@ public interface IAuthorizationGrant {
 
     String getGrantId();
 
-    void setGrantId(String p_grantId);
+    void setGrantId(String grantId);
 
     AuthorizationCode getAuthorizationCode();
 
@@ -46,6 +46,8 @@ public interface IAuthorizationGrant {
     AccessToken createAccessToken(String certAsPem, ExecutionContext executionContext);
 
     RefreshToken createRefreshToken();
+
+    RefreshToken createRefreshToken(int lifetime);
 
     IdToken createIdToken(
             String nonce, AuthorizationCode authorizationCode, AccessToken accessToken, RefreshToken refreshToken,
@@ -93,13 +95,13 @@ public interface IAuthorizationGrant {
 
     JwtAuthorizationRequest getJwtAuthorizationRequest();
 
-    void setJwtAuthorizationRequest(JwtAuthorizationRequest p_jwtAuthorizationRequest);
+    void setJwtAuthorizationRequest(JwtAuthorizationRequest jwtAuthorizationRequest);
 
     Date getAuthenticationTime();
 
     TokenLdap getTokenLdap();
 
-    void setTokenLdap(TokenLdap p_tokenLdap);
+    void setTokenLdap(TokenLdap tokenLdap);
 
     void setLongLivedAccessToken(AccessToken longLivedAccessToken);
 
