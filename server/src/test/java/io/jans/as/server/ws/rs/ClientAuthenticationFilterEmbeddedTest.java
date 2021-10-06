@@ -13,6 +13,7 @@ import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseType;
+import io.jans.as.model.config.Constants;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.register.RegisterResponseParam;
 import io.jans.as.model.util.StringUtils;
@@ -171,8 +172,8 @@ public class ClientAuthenticationFilterEmbeddedTest extends BaseTest {
                 response.getHeaderString("Cache-Control") != null
                         && response.getHeaderString("Cache-Control").equals("no-store"),
                 "Unexpected result: " + response.getHeaderString("Cache-Control"));
-        assertTrue(response.getHeaderString("Pragma") != null && response.getHeaderString("Pragma").equals("no-cache"),
-                "Unexpected result: " + response.getHeaderString("Pragma"));
+        assertTrue(response.getHeaderString(Constants.PRAGMA) != null && response.getHeaderString(Constants.PRAGMA).equals(Constants.NO_CACHE),
+                "Unexpected result: " + response.getHeaderString(Constants.PRAGMA));
         assertNotNull(entity, "Unexpected result: " + entity);
         try {
             JSONObject jsonObj = new JSONObject(entity);
@@ -213,8 +214,8 @@ public class ClientAuthenticationFilterEmbeddedTest extends BaseTest {
                 response.getHeaderString("Cache-Control") != null
                         && response.getHeaderString("Cache-Control").equals("no-store"),
                 "Unexpected result: " + response.getHeaderString("Cache-Control"));
-        assertTrue(response.getHeaderString("Pragma") != null && response.getHeaderString("Pragma").equals("no-cache"),
-                "Unexpected result: " + response.getHeaderString("Pragma"));
+        assertTrue(response.getHeaderString(Constants.PRAGMA) != null && response.getHeaderString(Constants.PRAGMA).equals(Constants.NO_CACHE),
+                "Unexpected result: " + response.getHeaderString(Constants.PRAGMA));
         assertTrue(!entity.equals(null), "Unexpected result: " + entity);
         try {
             JSONObject jsonObj = new JSONObject(entity);

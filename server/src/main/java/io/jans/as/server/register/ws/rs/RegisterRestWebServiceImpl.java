@@ -12,7 +12,13 @@ import io.jans.as.client.RegisterRequest;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.AttributeService;
 import io.jans.as.common.service.common.InumService;
-import io.jans.as.model.common.*;
+import io.jans.as.model.common.AuthenticationMethod;
+import io.jans.as.model.common.ComponentType;
+import io.jans.as.model.common.GrantType;
+import io.jans.as.model.common.ResponseType;
+import io.jans.as.model.common.SoftwareStatementValidationType;
+import io.jans.as.model.common.SubjectType;
+import io.jans.as.model.config.Constants;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
@@ -67,12 +73,81 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import java.net.URI;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.TimeZone;
+import java.util.UUID;
 
-import static io.jans.as.model.register.RegisterRequestParam.*;
-import static io.jans.as.model.register.RegisterResponseParam.*;
+import static io.jans.as.model.register.RegisterRequestParam.ACCESS_TOKEN_AS_JWT;
+import static io.jans.as.model.register.RegisterRequestParam.ACCESS_TOKEN_LIFETIME;
+import static io.jans.as.model.register.RegisterRequestParam.ACCESS_TOKEN_SIGNING_ALG;
+import static io.jans.as.model.register.RegisterRequestParam.ALLOW_SPONTANEOUS_SCOPES;
+import static io.jans.as.model.register.RegisterRequestParam.APPLICATION_TYPE;
+import static io.jans.as.model.register.RegisterRequestParam.AUTHORIZATION_ENCRYPTED_RESPONSE_ALG;
+import static io.jans.as.model.register.RegisterRequestParam.AUTHORIZATION_ENCRYPTED_RESPONSE_ENC;
+import static io.jans.as.model.register.RegisterRequestParam.AUTHORIZATION_SIGNED_RESPONSE_ALG;
+import static io.jans.as.model.register.RegisterRequestParam.AUTHORIZED_ORIGINS;
+import static io.jans.as.model.register.RegisterRequestParam.BACKCHANNEL_LOGOUT_SESSION_REQUIRED;
+import static io.jans.as.model.register.RegisterRequestParam.BACKCHANNEL_LOGOUT_URI;
+import static io.jans.as.model.register.RegisterRequestParam.CLAIMS;
+import static io.jans.as.model.register.RegisterRequestParam.CLAIMS_REDIRECT_URIS;
+import static io.jans.as.model.register.RegisterRequestParam.CLIENT_NAME;
+import static io.jans.as.model.register.RegisterRequestParam.CLIENT_URI;
+import static io.jans.as.model.register.RegisterRequestParam.CONTACTS;
+import static io.jans.as.model.register.RegisterRequestParam.DEFAULT_ACR_VALUES;
+import static io.jans.as.model.register.RegisterRequestParam.DEFAULT_MAX_AGE;
+import static io.jans.as.model.register.RegisterRequestParam.FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED;
+import static io.jans.as.model.register.RegisterRequestParam.FRONT_CHANNEL_LOGOUT_URI;
+import static io.jans.as.model.register.RegisterRequestParam.GRANT_TYPES;
+import static io.jans.as.model.register.RegisterRequestParam.ID_TOKEN_ENCRYPTED_RESPONSE_ALG;
+import static io.jans.as.model.register.RegisterRequestParam.ID_TOKEN_ENCRYPTED_RESPONSE_ENC;
+import static io.jans.as.model.register.RegisterRequestParam.ID_TOKEN_SIGNED_RESPONSE_ALG;
+import static io.jans.as.model.register.RegisterRequestParam.INITIATE_LOGIN_URI;
+import static io.jans.as.model.register.RegisterRequestParam.JWKS;
+import static io.jans.as.model.register.RegisterRequestParam.JWKS_URI;
+import static io.jans.as.model.register.RegisterRequestParam.KEEP_CLIENT_AUTHORIZATION_AFTER_EXPIRATION;
+import static io.jans.as.model.register.RegisterRequestParam.LOGO_URI;
+import static io.jans.as.model.register.RegisterRequestParam.PAR_LIFETIME;
+import static io.jans.as.model.register.RegisterRequestParam.POLICY_URI;
+import static io.jans.as.model.register.RegisterRequestParam.POST_LOGOUT_REDIRECT_URIS;
+import static io.jans.as.model.register.RegisterRequestParam.REDIRECT_URIS;
+import static io.jans.as.model.register.RegisterRequestParam.REQUEST_OBJECT_ENCRYPTION_ALG;
+import static io.jans.as.model.register.RegisterRequestParam.REQUEST_OBJECT_ENCRYPTION_ENC;
+import static io.jans.as.model.register.RegisterRequestParam.REQUEST_OBJECT_SIGNING_ALG;
+import static io.jans.as.model.register.RegisterRequestParam.REQUEST_URIS;
+import static io.jans.as.model.register.RegisterRequestParam.REQUIRE_AUTH_TIME;
+import static io.jans.as.model.register.RegisterRequestParam.REQUIRE_PAR;
+import static io.jans.as.model.register.RegisterRequestParam.RESPONSE_TYPES;
+import static io.jans.as.model.register.RegisterRequestParam.RPT_AS_JWT;
+import static io.jans.as.model.register.RegisterRequestParam.RUN_INTROSPECTION_SCRIPT_BEFORE_ACCESS_TOKEN_CREATION_AS_JWT_AND_INCLUDE_CLAIMS;
+import static io.jans.as.model.register.RegisterRequestParam.SCOPE;
+import static io.jans.as.model.register.RegisterRequestParam.SECTOR_IDENTIFIER_URI;
+import static io.jans.as.model.register.RegisterRequestParam.SOFTWARE_ID;
+import static io.jans.as.model.register.RegisterRequestParam.SOFTWARE_STATEMENT;
+import static io.jans.as.model.register.RegisterRequestParam.SOFTWARE_VERSION;
+import static io.jans.as.model.register.RegisterRequestParam.SPONTANEOUS_SCOPES;
+import static io.jans.as.model.register.RegisterRequestParam.SUBJECT_TYPE;
+import static io.jans.as.model.register.RegisterRequestParam.TLS_CLIENT_AUTH_SUBJECT_DN;
+import static io.jans.as.model.register.RegisterRequestParam.TOKEN_ENDPOINT_AUTH_METHOD;
+import static io.jans.as.model.register.RegisterRequestParam.TOKEN_ENDPOINT_AUTH_SIGNING_ALG;
+import static io.jans.as.model.register.RegisterRequestParam.TOS_URI;
+import static io.jans.as.model.register.RegisterRequestParam.USERINFO_ENCRYPTED_RESPONSE_ALG;
+import static io.jans.as.model.register.RegisterRequestParam.USERINFO_ENCRYPTED_RESPONSE_ENC;
+import static io.jans.as.model.register.RegisterRequestParam.USERINFO_SIGNED_RESPONSE_ALG;
+import static io.jans.as.model.register.RegisterResponseParam.CLIENT_ID_ISSUED_AT;
+import static io.jans.as.model.register.RegisterResponseParam.CLIENT_SECRET;
+import static io.jans.as.model.register.RegisterResponseParam.CLIENT_SECRET_EXPIRES_AT;
+import static io.jans.as.model.register.RegisterResponseParam.REGISTRATION_CLIENT_URI;
 import static io.jans.as.model.util.StringUtils.implode;
 import static io.jans.as.model.util.StringUtils.toList;
+import static org.apache.commons.lang3.BooleanUtils.isFalse;
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 /**
  * Implementation for register REST web services.
@@ -159,7 +234,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                     requestObject.putOpt(key, softwareStatement.get(key));
                 }
             }
-            if (appConfiguration.getDcrSignatureValidationEnabled()) {
+            if (isTrue(appConfiguration.getDcrSignatureValidationEnabled())) {
                 validateRequestObject(requestParams, softwareStatement, httpRequest);
             }
 
@@ -172,13 +247,13 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                     r.getApplicationType(), r.getClientName(), r.getRedirectUris(), securityContext.isSecure(), r.getSectorIdentifierUri(), r.getDefaultAcrValues());
             log.trace("Registration request = {}", requestParams);
 
-            if (!appConfiguration.getDynamicRegistrationPasswordGrantTypeEnabled()
+            if (isFalse(appConfiguration.getDynamicRegistrationPasswordGrantTypeEnabled())
                     && registerParamsValidator.checkIfThereIsPasswordGrantType(r.getGrantTypes())) {
                 log.info("Password Grant Type is not allowed for Dynamic Client Registration.");
                 throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.ACCESS_DENIED, "Password Grant Type is not allowed for Dynamic Client Registration.");
             }
 
-            if (appConfiguration.getDcrAuthorizationWithClientCredentials() && !r.getGrantTypes().contains(GrantType.CLIENT_CREDENTIALS)) {
+            if (isTrue(appConfiguration.getDcrAuthorizationWithClientCredentials()) && !r.getGrantTypes().contains(GrantType.CLIENT_CREDENTIALS)) {
                 log.info("Register request does not contain grant_type=client_credentials, however dcrAuthorizationWithClientCredentials=true which is forbidden.");
                 throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.ACCESS_DENIED, "Client Credentials Grant Type is not present in Dynamic Client Registration request.");
             }
@@ -204,30 +279,27 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                 r.setAccessTokenSigningAlg(SignatureAlgorithm.fromString(appConfiguration.getDefaultSignatureAlgorithm()));
             }
 
-            if (r.getClaimsRedirectUris() != null && !r.getClaimsRedirectUris().isEmpty()) {
-                if (!registerParamsValidator.validateRedirectUris(r.getGrantTypes(), r.getResponseTypes(),
-                        r.getApplicationType(), r.getSubjectType(), r.getClaimsRedirectUris(), r.getSectorIdentifierUri())) {
-                    log.debug("Value of one or more claims_redirect_uris is invalid, claims_redirect_uris: " + r.getClaimsRedirectUris());
-                    throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_CLAIMS_REDIRECT_URI, "Value of one or more claims_redirect_uris is invalid");
-                }
+            if (r.getClaimsRedirectUris() != null &&
+                    !r.getClaimsRedirectUris().isEmpty() &&
+                    !registerParamsValidator.validateRedirectUris(r.getGrantTypes(), r.getResponseTypes(), r.getApplicationType(), r.getSubjectType(), r.getClaimsRedirectUris(), r.getSectorIdentifierUri())) {
+                log.debug("Value of one or more claims_redirect_uris is invalid, claims_redirect_uris: {}", r.getClaimsRedirectUris());
+                throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_CLAIMS_REDIRECT_URI, "Value of one or more claims_redirect_uris is invalid");
             }
 
-            if (!Strings.isNullOrEmpty(r.getInitiateLoginUri())) {
-                if (!registerParamsValidator.validateInitiateLoginUri(r.getInitiateLoginUri())) {
-                    log.debug("The Initiate Login Uri is invalid. The initiate_login_uri must use the https schema: " + r.getInitiateLoginUri());
-                    throw errorResponseFactory.createWebApplicationException(
-                            Response.Status.BAD_REQUEST,
-                            RegisterErrorResponseType.INVALID_CLIENT_METADATA,
-                            "The Initiate Login Uri is invalid. The initiate_login_uri must use the https schema.");
-                }
+            if (!Strings.isNullOrEmpty(r.getInitiateLoginUri()) && !registerParamsValidator.validateInitiateLoginUri(r.getInitiateLoginUri())) {
+                log.debug("The Initiate Login Uri is invalid. The initiate_login_uri must use the https schema: {}", r.getInitiateLoginUri());
+                throw errorResponseFactory.createWebApplicationException(
+                        Response.Status.BAD_REQUEST,
+                        RegisterErrorResponseType.INVALID_CLIENT_METADATA,
+                        "The Initiate Login Uri is invalid. The initiate_login_uri must use the https schema.");
             }
 
             final Pair<Boolean, String> validateResult = registerParamsValidator.validateParamsClientRegister(
                     r.getApplicationType(), r.getSubjectType(),
                     r.getGrantTypes(), r.getResponseTypes(),
                     r.getRedirectUris());
-            if (!validateResult.getFirst()) {
-                log.trace("Client parameters are invalid, returns invalid_request error. Reason: " + validateResult.getSecond());
+            if (isFalse(validateResult.getFirst())) {
+                log.trace("Client parameters are invalid, returns invalid_request error. Reason: {}", validateResult.getSecond());
                 throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_CLIENT_METADATA, validateResult.getSecond());
             }
 
@@ -279,16 +351,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             }
             client.setDeletable(client.getClientSecretExpiresAt() != null);
 
-            if (StringUtils.isBlank(r.getClientName()) && r.getRedirectUris() != null && !r.getRedirectUris().isEmpty()) {
-                try {
-                    URI redUri = new URI(r.getRedirectUris().get(0));
-                    client.setClientName(redUri.getHost());
-                } catch (Exception e) {
-                    //ignore
-                    log.error(e.getMessage(), e);
-                    client.setClientName("Unknown");
-                }
-            }
+            setClientName(r, client);
 
             updateClientFromRequestObject(client, r, false);
 
@@ -305,9 +368,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             Date currentTime = Calendar.getInstance().getTime();
             client.setLastAccessTime(currentTime);
             client.setLastLogonTime(currentTime);
-
-            Boolean persistClientAuthorizations = appConfiguration.getDynamicRegistrationPersistClientAuthorizations();
-            client.setPersistClientAuthorizations(persistClientAuthorizations != null ? persistClientAuthorizations : false);
+            client.setPersistClientAuthorizations(isTrue(appConfiguration.getDynamicRegistrationPersistClientAuthorizations()));
 
             clientService.persist(client);
 
@@ -327,23 +388,37 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             builder = internalErrorResponse("Failed to parse JSON.");
             log.error(e.getMessage(), e);
         } catch (WebApplicationException e) {
-            log.error(e.getMessage(), e);
+            if (log.isErrorEnabled())
+                log.error(e.getMessage(), e);
             throw e;
         } catch (Exception e) {
-            builder = internalErrorResponse("Unknown.");
+            builder = internalErrorResponse(Constants.UNKNOWN_DOT);
             log.error(e.getMessage(), e);
         }
 
         builder.cacheControl(ServerUtil.cacheControl(true, false));
-        builder.header("Pragma", "no-cache");
+        builder.header(Constants.PRAGMA, Constants.NO_CACHE);
         builder.type(MediaType.APPLICATION_JSON_TYPE);
         applicationAuditLogger.sendMessage(oAuth2AuditLog);
         return builder.build();
     }
 
+    private void setClientName(RegisterRequest r, Client client) {
+        if (StringUtils.isBlank(r.getClientName()) && r.getRedirectUris() != null && !r.getRedirectUris().isEmpty()) {
+            try {
+                URI redUri = new URI(r.getRedirectUris().get(0));
+                client.setClientName(redUri.getHost());
+            } catch (Exception e) {
+                //ignore
+                log.error(e.getMessage(), e);
+                client.setClientName(Constants.UNKNOWN);
+            }
+        }
+    }
+
     private void validateRequestObject(String requestParams, JSONObject softwareStatement, HttpServletRequest httpRequest) {
         try {
-            if (!appConfiguration.getDcrSignatureValidationEnabled()) {
+            if (isFalse(appConfiguration.getDcrSignatureValidationEnabled())) {
                 return;
             }
             if (ServerUtil.isTrue(appConfiguration.getDcrSkipSignatureValidation())) {
@@ -365,7 +440,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                 }
 
                 boolean validSignature = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), null, null, hmacSecret, signatureAlgorithm);
-                log.trace("Request object validation result: " + validSignature);
+                log.trace("Request object validation result: {}", validSignature);
                 if (!validSignature) {
                     throw new InvalidJwtException("Invalid cryptographic segment in the request object.");
                 }
@@ -406,12 +481,12 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                 }
             }
 
-            log.trace("Validating request object with jwks: " + jwks + " ...");
+            log.trace("Validating request object with jwks: {} ...", jwks);
 
             boolean validSignature = cryptoProvider.verifySignature(jwt.getSigningInput(),
                     jwt.getEncodedSignature(), jwt.getHeader().getKeyId(), jwks, null, signatureAlgorithm);
 
-            log.trace("Request object validation result: " + validSignature);
+            log.trace("Request object validation result: {}", validSignature);
             if (!validSignature) {
                 throw new InvalidJwtException("Invalid cryptographic segment in the request object.");
             }
@@ -425,10 +500,14 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
     @NotNull
     private JSONObject parseRequestObjectWithoutValidation(String requestParams) throws JSONException {
         try {
-            if (appConfiguration.getDcrSignatureValidationEnabled()) {
+            if (isTrue(appConfiguration.getDcrSignatureValidationEnabled())) {
                 return Jwt.parseOrThrow(requestParams).getClaims().toJsonObject();
             }
             return new JSONObject(requestParams);
+        } catch (InvalidJwtException e) {
+            if (log.isTraceEnabled())
+                log.trace("Invalid JWT, trying to parse it as plain unencoded json", e);
+            return new JSONObject(requestParams); // #241 plain unencoded request object
         } catch (Exception e) {
             final String msg = "Unable to parse request object.";
             log.error(msg, e);
@@ -536,36 +615,36 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
 
     // yuriyz - ATTENTION : this method is used for both registration and update client metadata cases, therefore any logic here
     // will be applied for both cases.
-    private void updateClientFromRequestObject(Client p_client, RegisterRequest requestObject, boolean update) throws JSONException {
+    private void updateClientFromRequestObject(Client client, RegisterRequest requestObject, boolean update) throws JSONException {
 
-        JsonApplier.getInstance().transfer(requestObject, p_client);
-        JsonApplier.getInstance().transfer(requestObject, p_client.getAttributes());
+        JsonApplier.getInstance().transfer(requestObject, client);
+        JsonApplier.getInstance().transfer(requestObject, client.getAttributes());
 
         List<String> redirectUris = requestObject.getRedirectUris();
         if (redirectUris != null && !redirectUris.isEmpty()) {
             redirectUris = new ArrayList<>(new HashSet<>(redirectUris)); // Remove repeated elements
-            p_client.setRedirectUris(redirectUris.toArray(new String[0]));
+            client.setRedirectUris(redirectUris.toArray(new String[0]));
         }
         List<String> claimsRedirectUris = requestObject.getClaimsRedirectUris();
         if (claimsRedirectUris != null && !claimsRedirectUris.isEmpty()) {
             claimsRedirectUris = new ArrayList<>(new HashSet<>(claimsRedirectUris)); // Remove repeated elements
-            p_client.setClaimRedirectUris(claimsRedirectUris.toArray(new String[0]));
+            client.setClaimRedirectUris(claimsRedirectUris.toArray(new String[0]));
         }
         if (requestObject.getApplicationType() != null) {
-            p_client.setApplicationType(requestObject.getApplicationType());
+            client.setApplicationType(requestObject.getApplicationType());
         }
         if (StringUtils.isNotBlank(requestObject.getClientName())) {
-            p_client.setClientName(requestObject.getClientName());
+            client.setClientName(requestObject.getClientName());
         }
         if (StringUtils.isNotBlank(requestObject.getSectorIdentifierUri())) {
-            p_client.setSectorIdentifierUri(requestObject.getSectorIdentifierUri());
+            client.setSectorIdentifierUri(requestObject.getSectorIdentifierUri());
         }
 
         Set<ResponseType> responseTypeSet = new HashSet<>(requestObject.getResponseTypes());
         Set<GrantType> grantTypeSet = new HashSet<>(requestObject.getGrantTypes());
 
-        if (appConfiguration.getClientRegDefaultToCodeFlowWithRefresh()) {
-            if (responseTypeSet.size() == 0 && grantTypeSet.size() == 0) {
+        if (isTrue(appConfiguration.getClientRegDefaultToCodeFlowWithRefresh())) {
+            if (responseTypeSet.isEmpty() && grantTypeSet.isEmpty()) {
                 responseTypeSet.add(ResponseType.CODE);
             }
             if (responseTypeSet.contains(ResponseType.CODE)) {
@@ -590,149 +669,147 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         Set<GrantType> dynamicGrantTypeDefault = appConfiguration.getDynamicGrantTypeDefault();
         grantTypeSet.retainAll(dynamicGrantTypeDefault);
 
-        if (!update || requestObject.getResponseTypes().size() > 0) {
-            p_client.setResponseTypes(responseTypeSet.toArray(new ResponseType[responseTypeSet.size()]));
+        if (!update || !requestObject.getResponseTypes().isEmpty()) {
+            client.setResponseTypes(responseTypeSet.toArray(new ResponseType[0]));
         }
-        if (!update) {
-            p_client.setGrantTypes(grantTypeSet.toArray(new GrantType[grantTypeSet.size()]));
-        } else if (appConfiguration.getEnableClientGrantTypeUpdate() && requestObject.getGrantTypes().size() > 0) {
-            p_client.setGrantTypes(grantTypeSet.toArray(new GrantType[grantTypeSet.size()]));
+        if (!update || (isTrue(appConfiguration.getEnableClientGrantTypeUpdate()) && !requestObject.getGrantTypes().isEmpty())) {
+            client.setGrantTypes(grantTypeSet.toArray(new GrantType[0]));
         }
 
         List<String> contacts = requestObject.getContacts();
         if (contacts != null && !contacts.isEmpty()) {
             contacts = new ArrayList<>(new HashSet<>(contacts)); // Remove repeated elements
-            p_client.setContacts(contacts.toArray(new String[contacts.size()]));
+            client.setContacts(contacts.toArray(new String[0]));
         }
         if (StringUtils.isNotBlank(requestObject.getLogoUri())) {
-            p_client.setLogoUri(requestObject.getLogoUri());
+            client.setLogoUri(requestObject.getLogoUri());
         }
         if (StringUtils.isNotBlank(requestObject.getClientUri())) {
-            p_client.setClientUri(requestObject.getClientUri());
+            client.setClientUri(requestObject.getClientUri());
         }
         if (StringUtils.isNotBlank(requestObject.getPolicyUri())) {
-            p_client.setPolicyUri(requestObject.getPolicyUri());
+            client.setPolicyUri(requestObject.getPolicyUri());
         }
         if (StringUtils.isNotBlank(requestObject.getTosUri())) {
-            p_client.setTosUri(requestObject.getTosUri());
+            client.setTosUri(requestObject.getTosUri());
         }
         if (StringUtils.isNotBlank(requestObject.getJwksUri())) {
-            p_client.setJwksUri(requestObject.getJwksUri());
+            client.setJwksUri(requestObject.getJwksUri());
         }
         if (StringUtils.isNotBlank(requestObject.getJwks())) {
-            p_client.setJwks(requestObject.getJwks());
+            client.setJwks(requestObject.getJwks());
         }
         if (requestObject.getSubjectType() != null) {
-            p_client.setSubjectType(requestObject.getSubjectType());
+            client.setSubjectType(requestObject.getSubjectType());
         }
         if (requestObject.getRptAsJwt() != null) {
-            p_client.setRptAsJwt(requestObject.getRptAsJwt());
+            client.setRptAsJwt(requestObject.getRptAsJwt());
         }
         if (requestObject.getAccessTokenAsJwt() != null) {
-            p_client.setAccessTokenAsJwt(requestObject.getAccessTokenAsJwt());
+            client.setAccessTokenAsJwt(requestObject.getAccessTokenAsJwt());
         }
         if (requestObject.getTlsClientAuthSubjectDn() != null) {
-            p_client.getAttributes().setTlsClientAuthSubjectDn(requestObject.getTlsClientAuthSubjectDn());
+            client.getAttributes().setTlsClientAuthSubjectDn(requestObject.getTlsClientAuthSubjectDn());
         }
         if (requestObject.getAllowSpontaneousScopes() != null) {
-            p_client.getAttributes().setAllowSpontaneousScopes(requestObject.getAllowSpontaneousScopes());
+            client.getAttributes().setAllowSpontaneousScopes(requestObject.getAllowSpontaneousScopes());
         }
         if (requestObject.getSpontaneousScopes() != null) {
-            p_client.getAttributes().setSpontaneousScopes(requestObject.getSpontaneousScopes());
+            client.getAttributes().setSpontaneousScopes(requestObject.getSpontaneousScopes());
         }
         if (requestObject.getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims() != null) {
-            p_client.getAttributes().setRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims(requestObject.getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims());
+            client.getAttributes().setRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims(requestObject.getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims());
         }
         if (requestObject.getKeepClientAuthorizationAfterExpiration() != null) {
-            p_client.getAttributes().setKeepClientAuthorizationAfterExpiration(requestObject.getKeepClientAuthorizationAfterExpiration());
+            client.getAttributes().setKeepClientAuthorizationAfterExpiration(requestObject.getKeepClientAuthorizationAfterExpiration());
         }
         if (requestObject.getAccessTokenSigningAlg() != null) {
-            p_client.setAccessTokenSigningAlg(requestObject.getAccessTokenSigningAlg().toString());
+            client.setAccessTokenSigningAlg(requestObject.getAccessTokenSigningAlg().toString());
         }
         if (requestObject.getAuthorizationSignedResponseAlg() != null) {
-            p_client.getAttributes().setAuthorizationSignedResponseAlg(requestObject.getAuthorizationSignedResponseAlg().toString());
+            client.getAttributes().setAuthorizationSignedResponseAlg(requestObject.getAuthorizationSignedResponseAlg().toString());
         }
         if (requestObject.getAuthorizationEncryptedResponseAlg() != null) {
-            p_client.getAttributes().setAuthorizationEncryptedResponseAlg(requestObject.getAuthorizationEncryptedResponseAlg().toString());
+            client.getAttributes().setAuthorizationEncryptedResponseAlg(requestObject.getAuthorizationEncryptedResponseAlg().toString());
         }
         if (requestObject.getAuthorizationEncryptedResponseEnc() != null) {
-            p_client.getAttributes().setAuthorizationEncryptedResponseEnc(requestObject.getAuthorizationEncryptedResponseEnc().toString());
+            client.getAttributes().setAuthorizationEncryptedResponseEnc(requestObject.getAuthorizationEncryptedResponseEnc().toString());
         }
         if (requestObject.getIdTokenSignedResponseAlg() != null) {
-            p_client.setIdTokenSignedResponseAlg(requestObject.getIdTokenSignedResponseAlg().toString());
+            client.setIdTokenSignedResponseAlg(requestObject.getIdTokenSignedResponseAlg().toString());
         }
         if (requestObject.getIdTokenEncryptedResponseAlg() != null) {
-            p_client.setIdTokenEncryptedResponseAlg(requestObject.getIdTokenEncryptedResponseAlg().toString());
+            client.setIdTokenEncryptedResponseAlg(requestObject.getIdTokenEncryptedResponseAlg().toString());
         }
         if (requestObject.getIdTokenEncryptedResponseEnc() != null) {
-            p_client.setIdTokenEncryptedResponseEnc(requestObject.getIdTokenEncryptedResponseEnc().toString());
+            client.setIdTokenEncryptedResponseEnc(requestObject.getIdTokenEncryptedResponseEnc().toString());
         }
         if (requestObject.getUserInfoSignedResponseAlg() != null) {
-            p_client.setUserInfoSignedResponseAlg(requestObject.getUserInfoSignedResponseAlg().toString());
+            client.setUserInfoSignedResponseAlg(requestObject.getUserInfoSignedResponseAlg().toString());
         }
         if (requestObject.getUserInfoEncryptedResponseAlg() != null) {
-            p_client.setUserInfoEncryptedResponseAlg(requestObject.getUserInfoEncryptedResponseAlg().toString());
+            client.setUserInfoEncryptedResponseAlg(requestObject.getUserInfoEncryptedResponseAlg().toString());
         }
         if (requestObject.getUserInfoEncryptedResponseEnc() != null) {
-            p_client.setUserInfoEncryptedResponseEnc(requestObject.getUserInfoEncryptedResponseEnc().toString());
+            client.setUserInfoEncryptedResponseEnc(requestObject.getUserInfoEncryptedResponseEnc().toString());
         }
         if (requestObject.getRequestObjectSigningAlg() != null) {
-            p_client.setRequestObjectSigningAlg(requestObject.getRequestObjectSigningAlg().toString());
+            client.setRequestObjectSigningAlg(requestObject.getRequestObjectSigningAlg().toString());
         }
         if (requestObject.getRequestObjectEncryptionAlg() != null) {
-            p_client.setRequestObjectEncryptionAlg(requestObject.getRequestObjectEncryptionAlg().toString());
+            client.setRequestObjectEncryptionAlg(requestObject.getRequestObjectEncryptionAlg().toString());
         }
         if (requestObject.getRequestObjectEncryptionEnc() != null) {
-            p_client.setRequestObjectEncryptionEnc(requestObject.getRequestObjectEncryptionEnc().toString());
+            client.setRequestObjectEncryptionEnc(requestObject.getRequestObjectEncryptionEnc().toString());
         }
         if (requestObject.getTokenEndpointAuthMethod() != null) {
-            p_client.setTokenEndpointAuthMethod(requestObject.getTokenEndpointAuthMethod().toString());
+            client.setTokenEndpointAuthMethod(requestObject.getTokenEndpointAuthMethod().toString());
         } else { // If omitted, the default is client_secret_basic
-            p_client.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_BASIC.toString());
+            client.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_BASIC.toString());
         }
         if (requestObject.getTokenEndpointAuthSigningAlg() != null) {
-            p_client.setTokenEndpointAuthSigningAlg(requestObject.getTokenEndpointAuthSigningAlg().toString());
+            client.setTokenEndpointAuthSigningAlg(requestObject.getTokenEndpointAuthSigningAlg().toString());
         }
         if (requestObject.getDefaultMaxAge() != null) {
-            p_client.setDefaultMaxAge(requestObject.getDefaultMaxAge());
+            client.setDefaultMaxAge(requestObject.getDefaultMaxAge());
         }
         if (requestObject.getRequireAuthTime() != null) {
-            p_client.setRequireAuthTime(requestObject.getRequireAuthTime());
+            client.setRequireAuthTime(requestObject.getRequireAuthTime());
         }
         List<String> defaultAcrValues = requestObject.getDefaultAcrValues();
         if (defaultAcrValues != null && !defaultAcrValues.isEmpty()) {
             defaultAcrValues = new ArrayList<>(new HashSet<>(defaultAcrValues)); // Remove repeated elements
-            p_client.setDefaultAcrValues(defaultAcrValues.toArray(new String[defaultAcrValues.size()]));
+            client.setDefaultAcrValues(defaultAcrValues.toArray(new String[defaultAcrValues.size()]));
         }
         if (StringUtils.isNotBlank(requestObject.getInitiateLoginUri())) {
-            p_client.setInitiateLoginUri(requestObject.getInitiateLoginUri());
+            client.setInitiateLoginUri(requestObject.getInitiateLoginUri());
         }
         List<String> postLogoutRedirectUris = requestObject.getPostLogoutRedirectUris();
         if (postLogoutRedirectUris != null && !postLogoutRedirectUris.isEmpty()) {
             postLogoutRedirectUris = new ArrayList<>(new HashSet<>(postLogoutRedirectUris)); // Remove repeated elements
-            p_client.setPostLogoutRedirectUris(postLogoutRedirectUris.toArray(new String[postLogoutRedirectUris.size()]));
+            client.setPostLogoutRedirectUris(postLogoutRedirectUris.toArray(new String[postLogoutRedirectUris.size()]));
         }
 
         if (StringUtils.isNotBlank(requestObject.getFrontChannelLogoutUri())) {
-            p_client.setFrontChannelLogoutUri(requestObject.getFrontChannelLogoutUri());
+            client.setFrontChannelLogoutUri(requestObject.getFrontChannelLogoutUri());
         }
-        p_client.setFrontChannelLogoutSessionRequired(requestObject.getFrontChannelLogoutSessionRequired());
+        client.setFrontChannelLogoutSessionRequired(requestObject.getFrontChannelLogoutSessionRequired());
 
         if (requestObject.getBackchannelLogoutUris() != null && !requestObject.getBackchannelLogoutUris().isEmpty()) {
-            p_client.getAttributes().setBackchannelLogoutUri(requestObject.getBackchannelLogoutUris());
+            client.getAttributes().setBackchannelLogoutUri(requestObject.getBackchannelLogoutUris());
         }
-        p_client.getAttributes().setBackchannelLogoutSessionRequired(requestObject.getBackchannelLogoutSessionRequired());
+        client.getAttributes().setBackchannelLogoutSessionRequired(requestObject.getBackchannelLogoutSessionRequired());
 
         List<String> requestUris = requestObject.getRequestUris();
         if (requestUris != null && !requestUris.isEmpty()) {
             requestUris = new ArrayList<>(new HashSet<>(requestUris)); // Remove repeated elements
-            p_client.setRequestUris(requestUris.toArray(new String[requestUris.size()]));
+            client.setRequestUris(requestUris.toArray(new String[requestUris.size()]));
         }
 
         List<String> authorizedOrigins = requestObject.getAuthorizedOrigins();
         if (authorizedOrigins != null && !authorizedOrigins.isEmpty()) {
             authorizedOrigins = new ArrayList<>(new HashSet<>(authorizedOrigins)); // Remove repeated elements
-            p_client.setAuthorizedOrigins(authorizedOrigins.toArray(new String[authorizedOrigins.size()]));
+            client.setAuthorizedOrigins(authorizedOrigins.toArray(new String[authorizedOrigins.size()]));
         }
 
         List<String> scopes = requestObject.getScope();
@@ -741,12 +818,10 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             scopes.retainAll(appConfiguration.getDynamicRegistrationAllowedPasswordGrantScopes());
         }
         List<String> scopesDn;
-        if (scopes != null && !scopes.isEmpty()
-                && appConfiguration.getDynamicRegistrationScopesParamEnabled() != null
-                && appConfiguration.getDynamicRegistrationScopesParamEnabled()) {
+        if (scopes != null && !scopes.isEmpty() && isTrue(appConfiguration.getDynamicRegistrationScopesParamEnabled())) {
             List<String> defaultScopes = scopeService.getDefaultScopesDn();
             List<String> requestedScopes = scopeService.getScopesDn(scopes);
-            Set<String> allowedScopes = new HashSet<String>();
+            Set<String> allowedScopes = new HashSet<>();
 
             for (String requestedScope : requestedScopes) {
                 if (defaultScopes.contains(requestedScope)) {
@@ -755,44 +830,44 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             }
 
             scopesDn = new ArrayList<>(allowedScopes);
-            p_client.setScopes(scopesDn.toArray(new String[scopesDn.size()]));
+            client.setScopes(scopesDn.toArray(new String[scopesDn.size()]));
         } else {
             scopesDn = scopeService.getDefaultScopesDn();
-            p_client.setScopes(scopesDn.toArray(new String[scopesDn.size()]));
+            client.setScopes(scopesDn.toArray(new String[scopesDn.size()]));
         }
 
         List<String> claims = requestObject.getClaims();
         if (claims != null && !claims.isEmpty()) {
             List<String> claimsDn = attributeService.getAttributesDn(claims);
-            p_client.setClaims(claimsDn.toArray(new String[claimsDn.size()]));
+            client.setClaims(claimsDn.toArray(new String[claimsDn.size()]));
         }
 
         if (requestObject.getJsonObject() != null) {
             // Custom params
-            putCustomStuffIntoObject(p_client, requestObject.getJsonObject());
+            putCustomStuffIntoObject(client, requestObject.getJsonObject());
         }
 
         if (requestObject.getAccessTokenLifetime() != null) {
-            p_client.setAccessTokenLifetime(requestObject.getAccessTokenLifetime());
+            client.setAccessTokenLifetime(requestObject.getAccessTokenLifetime());
         }
         if (requestObject.getParLifetime() != null) {
-            p_client.getAttributes().setParLifetime(requestObject.getParLifetime());
+            client.getAttributes().setParLifetime(requestObject.getParLifetime());
         }
         if (requestObject.getRequirePar() != null) {
-            p_client.getAttributes().setRequirePar(requestObject.getRequirePar());
+            client.getAttributes().setRequirePar(requestObject.getRequirePar());
         }
 
         if (StringUtils.isNotBlank(requestObject.getSoftwareId())) {
-            p_client.setSoftwareId(requestObject.getSoftwareId());
+            client.setSoftwareId(requestObject.getSoftwareId());
         }
         if (StringUtils.isNotBlank(requestObject.getSoftwareVersion())) {
-            p_client.setSoftwareVersion(requestObject.getSoftwareVersion());
+            client.setSoftwareVersion(requestObject.getSoftwareVersion());
         }
         if (StringUtils.isNotBlank(requestObject.getSoftwareStatement())) {
-            p_client.setSoftwareStatement(requestObject.getSoftwareStatement());
+            client.setSoftwareStatement(requestObject.getSoftwareStatement());
         }
 
-        cibaRegisterClientMetadataService.updateClient(p_client, requestObject.getBackchannelTokenDeliveryMode(),
+        cibaRegisterClientMetadataService.updateClient(client, requestObject.getBackchannelTokenDeliveryMode(),
                 requestObject.getBackchannelClientNotificationEndpoint(), requestObject.getBackchannelAuthenticationRequestSigningAlg(),
                 requestObject.getBackchannelUserCodeParameter());
     }
@@ -818,95 +893,96 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                         requestObject.putOpt(key, softwareStatement.get(key));
                     }
                 }
-                if (appConfiguration.getDcrSignatureValidationEnabled()) {
+                if (isTrue(appConfiguration.getDcrSignatureValidationEnabled())) {
                     validateRequestObject(requestParams, softwareStatement, httpRequest);
                 }
 
                 final RegisterRequest request = RegisterRequest.fromJson(requestParams);
-                if (request != null) {
-                    boolean redirectUrisValidated = true;
-                    if (request.getRedirectUris() != null && !request.getRedirectUris().isEmpty()) {
-                        redirectUrisValidated = registerParamsValidator.validateRedirectUris(
-                                request.getGrantTypes(), request.getResponseTypes(),
-                                request.getApplicationType(), request.getSubjectType(),
-                                request.getRedirectUris(), request.getSectorIdentifierUri());
+
+                boolean redirectUrisValidated = true;
+                if (request.getRedirectUris() != null && !request.getRedirectUris().isEmpty()) {
+                    redirectUrisValidated = registerParamsValidator.validateRedirectUris(
+                            request.getGrantTypes(), request.getResponseTypes(),
+                            request.getApplicationType(), request.getSubjectType(),
+                            request.getRedirectUris(), request.getSectorIdentifierUri());
+                }
+
+                if (redirectUrisValidated) {
+                    if (!cibaRegisterParamsValidatorService.validateParams(
+                            request.getBackchannelTokenDeliveryMode(),
+                            request.getBackchannelClientNotificationEndpoint(),
+                            request.getBackchannelAuthenticationRequestSigningAlg(),
+                            request.getGrantTypes(),
+                            request.getSubjectType(),
+                            request.getSectorIdentifierUri(),
+                            request.getJwks(),
+                            request.getJwksUri()
+                    )) {
+                        return Response.status(Response.Status.BAD_REQUEST).
+                                entity(errorResponseFactory.errorAsJson(RegisterErrorResponseType.INVALID_CLIENT_METADATA,
+                                        "Invalid Client Metadata registering to use CIBA.")).build();
                     }
 
-                    if (redirectUrisValidated) {
-                        if (!cibaRegisterParamsValidatorService.validateParams(
-                                request.getBackchannelTokenDeliveryMode(),
-                                request.getBackchannelClientNotificationEndpoint(),
-                                request.getBackchannelAuthenticationRequestSigningAlg(),
-                                request.getGrantTypes(),
-                                request.getSubjectType(),
-                                request.getSectorIdentifierUri(),
-                                request.getJwks(),
-                                request.getJwksUri()
-                        )) {
-                            return Response.status(Response.Status.BAD_REQUEST).
-                                    entity(errorResponseFactory.errorAsJson(RegisterErrorResponseType.INVALID_CLIENT_METADATA,
-                                            "Invalid Client Metadata registering to use CIBA.")).build();
+                    if (request.getSubjectType() != null
+                            && !appConfiguration.getSubjectTypesSupported().contains(request.getSubjectType().toString())) {
+                        log.debug("Client UPDATE : parameter subject_type is invalid. Returns BAD_REQUEST response.");
+                        applicationAuditLogger.sendMessage(oAuth2AuditLog);
+                        return Response.status(Response.Status.BAD_REQUEST).
+                                entity(errorResponseFactory.errorAsJson(RegisterErrorResponseType.INVALID_CLIENT_METADATA, "subject_type is invalid.")).build();
+                    }
+
+                    final Client client = clientService.getClient(clientId, accessToken);
+                    if (client != null) {
+                        updateClientFromRequestObject(client, request, true);
+
+                        boolean updateClient = true;
+                        if (externalDynamicClientRegistrationService.isEnabled()) {
+                            updateClient = externalDynamicClientRegistrationService.executeExternalUpdateClientMethods(httpRequest, request, client);
                         }
 
-                        if (request.getSubjectType() != null
-                                && !appConfiguration.getSubjectTypesSupported().contains(request.getSubjectType().toString())) {
-                            log.debug("Client UPDATE : parameter subject_type is invalid. Returns BAD_REQUEST response.");
+                        if (updateClient) {
+                            clientService.merge(client);
+
+                            oAuth2AuditLog.setScope(clientScopesToString(client));
+                            oAuth2AuditLog.setSuccess(true);
                             applicationAuditLogger.sendMessage(oAuth2AuditLog);
-                            return Response.status(Response.Status.BAD_REQUEST).
-                                    entity(errorResponseFactory.errorAsJson(RegisterErrorResponseType.INVALID_CLIENT_METADATA, "subject_type is invalid.")).build();
-                        }
-
-                        final Client client = clientService.getClient(clientId, accessToken);
-                        if (client != null) {
-                            updateClientFromRequestObject(client, request, true);
-
-                            boolean updateClient = true;
-                            if (externalDynamicClientRegistrationService.isEnabled()) {
-                                updateClient = externalDynamicClientRegistrationService.executeExternalUpdateClientMethods(httpRequest, request, client);
-                            }
-
-                            if (updateClient) {
-                                clientService.merge(client);
-
-                                oAuth2AuditLog.setScope(clientScopesToString(client));
-                                oAuth2AuditLog.setSuccess(true);
-                                applicationAuditLogger.sendMessage(oAuth2AuditLog);
-                                return Response.ok().entity(clientAsEntity(client)).build();
-                            } else {
-                                log.trace("The Access Token is not valid for the Client ID, returns invalid_token error.");
-                                applicationAuditLogger.sendMessage(oAuth2AuditLog);
-                                return Response.status(Response.Status.BAD_REQUEST).
-                                        type(MediaType.APPLICATION_JSON_TYPE).
-                                        entity(errorResponseFactory.errorAsJson(RegisterErrorResponseType.INVALID_TOKEN, "External registration script returned false.")).build();
-                            }
+                            return Response.ok().entity(clientAsEntity(client)).build();
                         } else {
-                            log.trace("The Access Token is not valid for the Client ID, returns invalid_token error.");
+                            log.trace("The Access Token is not valid for the Client ID, returns invalid_token error, client_id: {}", clientId);
                             applicationAuditLogger.sendMessage(oAuth2AuditLog);
                             return Response.status(Response.Status.BAD_REQUEST).
                                     type(MediaType.APPLICATION_JSON_TYPE).
-                                    entity(errorResponseFactory.errorAsJson(RegisterErrorResponseType.INVALID_TOKEN, "The Access Token is not valid for the Client ID.")).build();
+                                    entity(errorResponseFactory.errorAsJson(RegisterErrorResponseType.INVALID_TOKEN, "External registration script returned false.")).build();
                         }
+                    } else {
+                        log.trace("The Access Token is not valid for the Client ID, returns invalid_token error.");
+                        applicationAuditLogger.sendMessage(oAuth2AuditLog);
+                        return Response.status(Response.Status.BAD_REQUEST).
+                                type(MediaType.APPLICATION_JSON_TYPE).
+                                entity(errorResponseFactory.errorAsJson(RegisterErrorResponseType.INVALID_TOKEN, "The Access Token is not valid for the Client ID.")).build();
                     }
                 }
+
             }
 
             log.debug("Client UPDATE : parameters are invalid. Returns BAD_REQUEST response.");
             applicationAuditLogger.sendMessage(oAuth2AuditLog);
             return Response.status(Response.Status.BAD_REQUEST).
-                    entity(errorResponseFactory.errorAsJson(RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Unknown.")).build();
+                    entity(errorResponseFactory.errorAsJson(RegisterErrorResponseType.INVALID_CLIENT_METADATA, Constants.UNKNOWN_DOT)).build();
 
         } catch (WebApplicationException e) {
-            log.error(e.getMessage(), e);
+            if (log.isErrorEnabled())
+                log.error(e.getMessage(), e);
             throw e;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
         applicationAuditLogger.sendMessage(oAuth2AuditLog);
-        return internalErrorResponse("Unknown.").build();
+        return internalErrorResponse(Constants.UNKNOWN_DOT).build();
     }
 
     private void validateAuthorizationAccessToken(String accessToken, String clientId) {
-        if (!appConfiguration.getDcrAuthorizationWithClientCredentials()) {
+        if (isFalse(appConfiguration.getDcrAuthorizationWithClientCredentials())) {
             return;
         }
         if (StringUtils.isBlank(accessToken) || StringUtils.isBlank(clientId)) {
@@ -920,7 +996,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
 
         final AuthorizationGrant grant = authorizationGrantList.getAuthorizationGrantByAccessToken(accessToken);
         if (grant == null) {
-            log.trace("Unable to find grant by access token:" + accessToken);
+            log.trace("Unable to find grant by access token: {}", accessToken);
             throw new WebApplicationException(Response.
                     status(Response.Status.BAD_REQUEST).
                     type(MediaType.APPLICATION_JSON_TYPE).
@@ -963,7 +1039,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         oAuth2AuditLog.setClientId(clientId);
         try {
             if (registerParamsValidator.validateParamsClientRead(clientId, accessToken)) {
-                if (appConfiguration.getDcrAuthorizationWithClientCredentials()) {
+                if (isTrue(appConfiguration.getDcrAuthorizationWithClientCredentials())) {
                     validateAuthorizationAccessToken(accessToken, clientId);
                 }
 
@@ -990,13 +1066,13 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         }
 
         builder.cacheControl(ServerUtil.cacheControl(true, false));
-        builder.header("Pragma", "no-cache");
+        builder.header(Constants.PRAGMA, Constants.NO_CACHE);
         applicationAuditLogger.sendMessage(oAuth2AuditLog);
         return builder.build();
     }
 
-    private String clientAsEntity(Client p_client) throws JSONException, StringEncrypter.EncryptionException {
-        final JSONObject jsonObject = getJSONObject(p_client);
+    private String clientAsEntity(Client client) throws JSONException, StringEncrypter.EncryptionException {
+        final JSONObject jsonObject = getJSONObject(client);
         return jsonObject.toString(4).replace("\\/", "/");
     }
 
@@ -1007,7 +1083,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         JsonApplier.getInstance().apply(client.getAttributes(), responseJsonObject);
 
         Util.addToJSONObjectIfNotNull(responseJsonObject, RegisterResponseParam.CLIENT_ID.toString(), client.getClientId());
-        if (appConfiguration.getReturnClientSecretOnRead()) {
+        if (isTrue(appConfiguration.getReturnClientSecretOnRead())) {
             Util.addToJSONObjectIfNotNull(responseJsonObject, CLIENT_SECRET.toString(), clientService.decryptSecret(client.getClientSecret()));
         }
         Util.addToJSONObjectIfNotNull(responseJsonObject, RegisterResponseParam.REGISTRATION_ACCESS_TOKEN.toString(), client.getRegistrationAccessToken());
@@ -1115,49 +1191,51 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
     /**
      * Puts custom object class and custom attributes in client object for persistence.
      *
-     * @param p_client        client object
-     * @param p_requestObject request object
+     * @param client        client object
+     * @param requestObject request object
      */
-    private void putCustomStuffIntoObject(Client p_client, JSONObject p_requestObject) throws JSONException {
+    private void putCustomStuffIntoObject(Client client, JSONObject requestObject) throws JSONException {
         // custom object class
         final String customOC = appConfiguration.getDynamicRegistrationCustomObjectClass();
         if (StringUtils.isNotBlank(customOC)) {
-            p_client.setCustomObjectClasses(new String[]{customOC});
+            client.setCustomObjectClasses(new String[]{customOC});
         }
 
         // custom attributes (custom attributes must be in custom object class)
         final List<String> attrList = appConfiguration.getDynamicRegistrationCustomAttributes();
-        if (attrList != null && !attrList.isEmpty()) {
-            for (String attr : attrList) {
-                if (p_requestObject.has(attr)) {
-                    final JSONArray parameterValuesJsonArray = p_requestObject.optJSONArray(attr);
-                    final List<String> parameterValues = parameterValuesJsonArray != null ?
-                            toList(parameterValuesJsonArray) :
-                            Arrays.asList(p_requestObject.getString(attr));
-                    if (parameterValues != null && !parameterValues.isEmpty()) {
-                        try {
-                            boolean processed = processApplicationAttributes(p_client, attr, parameterValues);
-                            if (!processed) {
-                                p_client.getCustomAttributes().add(new CustomAttribute(attr, parameterValues));
-                            }
-                        } catch (Exception e) {
-                            log.debug(e.getMessage(), e);
+        if (attrList == null || attrList.isEmpty()) {
+            return;
+        }
+
+        for (String attr : attrList) {
+            if (requestObject.has(attr)) {
+                final JSONArray parameterValuesJsonArray = requestObject.optJSONArray(attr);
+                final List<String> parameterValues = parameterValuesJsonArray != null ?
+                        toList(parameterValuesJsonArray) :
+                        Arrays.asList(requestObject.getString(attr));
+                if (!parameterValues.isEmpty()) {
+                    try {
+                        boolean processed = processApplicationAttributes(client, attr, parameterValues);
+                        if (!processed) {
+                            client.getCustomAttributes().add(new CustomAttribute(attr, parameterValues));
                         }
+                    } catch (Exception e) {
+                        log.debug(e.getMessage(), e);
                     }
                 }
             }
         }
     }
 
-    private boolean processApplicationAttributes(Client p_client, String attr, final List<String> parameterValues) {
+    private boolean processApplicationAttributes(Client client, String attr, final List<String> parameterValues) {
         if (StringHelper.equalsIgnoreCase("jansTrustedClnt", attr)) {
             boolean trustedClient = StringHelper.toBoolean(parameterValues.get(0), false);
-            p_client.setTrustedClient(trustedClient);
+            client.setTrustedClient(trustedClient);
 
             return true;
         } else if (StringHelper.equalsIgnoreCase("jansInclClaimsInIdTkn", attr)) {
             boolean includeClaimsInIdToken = StringHelper.toBoolean(parameterValues.get(0), false);
-            p_client.setIncludeClaimsInIdToken(includeClaimsInIdToken);
+            client.setIncludeClaimsInIdToken(includeClaimsInIdToken);
 
             return true;
         }
@@ -1184,14 +1262,14 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             errorResponseFactory.validateComponentEnabled(ComponentType.REGISTRATION);
             String accessToken = tokenService.getToken(authorization);
 
-            log.debug("Attempting to delete client: clientId = {0}, registrationAccessToken = {1} isSecure = {2}", clientId, accessToken, securityContext.isSecure());
+            log.debug("Attempting to delete client: clientId = {}, registrationAccessToken = {} isSecure = {}", clientId, accessToken, securityContext.isSecure());
 
             if (!registerParamsValidator.validateParamsClientRead(clientId, accessToken)) {
                 log.trace("Client parameters are invalid.");
                 throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_CLIENT_METADATA, "");
             }
 
-            if (appConfiguration.getDcrAuthorizationWithClientCredentials()) {
+            if (isTrue(appConfiguration.getDcrAuthorizationWithClientCredentials())) {
                 validateAuthorizationAccessToken(accessToken, clientId);
             }
 
@@ -1205,7 +1283,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             return Response
                     .status(Response.Status.NO_CONTENT)
                     .cacheControl(ServerUtil.cacheControl(true, false))
-                    .header("Pragma", "no-cache").build();
+                    .header(Constants.PRAGMA, Constants.NO_CACHE).build();
         } catch (WebApplicationException e) {
             if (e.getResponse() != null) {
                 return e.getResponse();

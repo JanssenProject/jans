@@ -7,6 +7,7 @@
 package io.jans.as.server.ws.rs.fido.u2f;
 
 import io.jans.as.model.common.ComponentType;
+import io.jans.as.model.config.Constants;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.fido.u2f.U2fConfiguration;
@@ -63,7 +64,7 @@ public class U2fConfigurationWS {
         } catch (Throwable ex) {
             log.error(ex.getMessage(), ex);
             throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(errorResponseFactory.errorAsJson(U2fErrorResponseType.SERVER_ERROR, "Unknown.")).build());
+                    .entity(errorResponseFactory.errorAsJson(U2fErrorResponseType.SERVER_ERROR, Constants.UNKNOWN)).build());
         }
     }
 
