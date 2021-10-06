@@ -7,8 +7,6 @@
 package io.jans.as.server.uma.authorization;
 
 import io.jans.as.common.model.registration.Client;
-import io.jans.as.common.service.AttributeService;
-import io.jans.as.common.service.common.UserService;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.uma.persistence.UmaPermission;
 import io.jans.as.model.uma.persistence.UmaResource;

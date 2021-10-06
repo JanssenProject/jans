@@ -449,7 +449,9 @@ public class UmaValidationService {
         }
 
         if (StringUtils.isBlank(claimsRedirectUri)) {
-            log.error("claims_redirect_uri is blank and there is none or more then one registered claims_redirect_uri for clientId: {}", clientId);
+            if (log.isErrorEnabled()) {
+                log.error("claims_redirect_uri is blank and there is none or more then one registered claims_redirect_uri for clientId: {}", escapeLog(clientId));
+            }
             throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, UmaErrorResponseType.INVALID_CLAIMS_REDIRECT_URI, "claims_redirect_uri is blank and there is none or more then one registered claims_redirect_uri for clientId: " + clientId);
         }
 
