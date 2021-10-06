@@ -24,7 +24,7 @@ import javax.inject.Named;
 @Named
 public class CIBAPushTokenDeliveryService {
 
-    private final static Logger log = LoggerFactory.getLogger(CIBAPushTokenDeliveryService.class);
+    private static final Logger log = LoggerFactory.getLogger(CIBAPushTokenDeliveryService.class);
 
     public void pushTokenDelivery(String authReqId, String clientNotificationEndpoint, String clientNotificationToken,
                                   String accessToken, String refreshToken, String idToken, Integer expiresIn) {
@@ -42,6 +42,6 @@ public class CIBAPushTokenDeliveryService {
         pushTokenDeliveryClient.setRequest(pushTokenDeliveryRequest);
         PushTokenDeliveryResponse pushTokenDeliveryResponse = pushTokenDeliveryClient.exec();
 
-        log.debug("CIBA: push token delivery result status " + pushTokenDeliveryResponse.getStatus());
+        log.debug("CIBA: push token delivery result status {}", pushTokenDeliveryResponse.getStatus());
     }
 }
