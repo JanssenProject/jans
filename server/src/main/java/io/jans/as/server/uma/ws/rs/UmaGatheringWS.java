@@ -45,6 +45,7 @@ import java.util.List;
 
 import static io.jans.as.model.uma.UmaErrorResponseType.INVALID_CLAIMS_GATHERING_SCRIPT_NAME;
 import static io.jans.as.model.uma.UmaErrorResponseType.INVALID_SESSION;
+import static io.jans.as.model.util.Util.escapeLog;
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 import static javax.ws.rs.core.Response.Status.FOUND;
 
@@ -80,11 +81,13 @@ public class UmaGatheringWS {
         return permissions.get(0).getAttributes().get(UmaConstants.GATHERING_ID);
     }
 
-    public Response gatherClaims(String clientId, String ticket, String claimRedirectUri, String state, Boolean reset,
+    public Response gatherClaims(String clientId, String ticket, String claimRedirectUri, String state,
                                  Boolean authenticationRedirect, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
         try {
-            log.trace("gatherClaims client_id: {}, ticket: {}, claims_redirect_uri: {}, state: {}, authenticationRedirect: {}, queryString: {}",
-                    clientId, ticket, claimRedirectUri, state, authenticationRedirect, httpRequest.getQueryString());
+            if (log.isTraceEnabled()) {
+                log.trace("gatherClaims client_id: {}, ticket: {}, claims_redirect_uri: {}, state: {}, authenticationRedirect: {}, queryString: {}",
+                        escapeLog(clientId), escapeLog(ticket), escapeLog(claimRedirectUri), escapeLog(state), escapeLog(authenticationRedirect), httpRequest.getQueryString());
+            }
 
             errorResponseFactory.validateComponentEnabled(ComponentType.UMA);
 
@@ -100,8 +103,11 @@ public class UmaGatheringWS {
                 ticket = sessionService.getTicket(session);
                 claimRedirectUri = sessionService.getClaimsRedirectUri(session);
                 state = sessionService.getState(session);
-                log.debug("Restored parameters from session, clientId: {}, ticket: {}, claims_redirect_uri: {}, state: {}",
-                        clientId, ticket, claimRedirectUri, state);
+
+                if (log.isDebugEnabled()) {
+                    log.debug("Restored parameters from session, clientId: {}, ticket: {}, claims_redirect_uri: {}, state: {}",
+                            escapeLog(clientId), escapeLog(ticket), escapeLog(claimRedirectUri), escapeLog(state));
+                }
             }
 
             validationService.validateClientAndClaimsRedirectUri(clientId, claimRedirectUri, state);
@@ -168,7 +174,7 @@ public class UmaGatheringWS {
                     Boolean authenticationRedirect,
             @Context HttpServletRequest httpRequest,
             @Context HttpServletResponse httpResponse) {
-        return gatherClaims(clientId, ticket, claimRedirectUri, state, reset, authenticationRedirect, httpRequest, httpResponse);
+        return gatherClaims(clientId, ticket, claimRedirectUri, state, authenticationRedirect, httpRequest, httpResponse);
     }
 
     @POST
@@ -189,6 +195,6 @@ public class UmaGatheringWS {
                     Boolean authenticationRedirect,
             @Context HttpServletRequest httpRequest,
             @Context HttpServletResponse httpResponse) {
-        return gatherClaims(clientId, ticket, claimRedirectUri, state, reset, authenticationRedirect, httpRequest, httpResponse);
+        return gatherClaims(clientId, ticket, claimRedirectUri, state, authenticationRedirect, httpRequest, httpResponse);
     }
 }

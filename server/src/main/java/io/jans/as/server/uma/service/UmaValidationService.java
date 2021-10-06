@@ -69,6 +69,7 @@ import static io.jans.as.model.uma.UmaErrorResponseType.INVALID_RPT;
 import static io.jans.as.model.uma.UmaErrorResponseType.INVALID_SCOPE;
 import static io.jans.as.model.uma.UmaErrorResponseType.INVALID_TICKET;
 import static io.jans.as.model.uma.UmaErrorResponseType.UNAUTHORIZED_CLIENT;
+import static io.jans.as.model.util.Util.escapeLog;
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
 
@@ -241,7 +242,9 @@ public class UmaValidationService {
 
         List<UmaPermission> permissions = permissionService.getPermissionsByTicket(ticket);
         if (permissions == null || permissions.isEmpty()) {
-            log.error("Unable to find permissions registered for given ticket: {}", ticket);
+            if (log.isErrorEnabled()) {
+                log.error("Unable to find permissions registered for given ticket: {}", escapeLog(ticket));
+            }
             throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, INVALID_TICKET, "Unable to find permissions registered for given ticket:" + ticket);
         }
         return permissions;
@@ -255,7 +258,9 @@ public class UmaValidationService {
 
         List<UmaPermission> permissions = permissionService.getPermissionsByTicket(ticket);
         if (permissions == null || permissions.isEmpty()) {
-            log.error("Unable to find permissions registered for given ticket:{}", ticket);
+            if (log.isErrorEnabled()) {
+                log.error("Unable to find permissions registered for given ticket:{}", escapeLog(ticket));
+            }
             throw new UmaWebException(claimsRedirectUri, errorResponseFactory, INVALID_TICKET, state);
         }
         return permissions;
@@ -397,25 +402,33 @@ public class UmaValidationService {
 
     public void validateScopeExpression(String scopeExpression) {
         if (StringUtils.isNotBlank(scopeExpression) && !expressionService.isExpressionValid(scopeExpression)) {
-            log.error("Scope expression is invalid. Expression: {}", scopeExpression);
+            if (log.isErrorEnabled()) {
+                log.error("Scope expression is invalid. Expression: {}", escapeLog(scopeExpression));
+            }
             throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, UmaErrorResponseType.INVALID_SCOPE, "Scope expression is invalid. Expression: " + scopeExpression);
         }
     }
 
     public Client validateClientAndClaimsRedirectUri(String clientId, String claimsRedirectUri, String state) {
         if (StringUtils.isBlank(clientId)) {
-            log.error("Invalid clientId: {}", clientId);
+            if (log.isErrorEnabled()) {
+                log.error("Invalid clientId: {}", escapeLog(clientId));
+            }
             throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, UmaErrorResponseType.INVALID_CLIENT_ID, "Invalid clientId: " + clientId);
         }
         Client client = clientService.getClient(clientId);
         if (client == null) {
-            log.error("Failed to find client with client_id: {}", clientId);
+            if (log.isErrorEnabled()) {
+                log.error("Failed to find client with client_id: {}", escapeLog(clientId));
+            }
             throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, UmaErrorResponseType.INVALID_CLIENT_ID, "Failed to find client with client_id:" + clientId);
         }
 
         if (StringUtils.isNotBlank(claimsRedirectUri)) {
             if (ArrayUtils.isEmpty(client.getClaimRedirectUris())) {
-                log.error("Client does not have claims_redirect_uri specified, clientId: {}", clientId);
+                if (log.isErrorEnabled()) {
+                    log.error("Client does not have claims_redirect_uri specified, clientId: {}", escapeLog(clientId));
+                }
                 throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, UmaErrorResponseType.INVALID_CLAIMS_REDIRECT_URI, "Client does not have claims_redirect_uri specified, clientId: " + clientId);
             }
 
@@ -424,7 +437,7 @@ public class UmaValidationService {
                 log.trace("Found match for claims_redirect_uri : {}", equalRedirectUri);
                 return client;
             } else if (log.isTraceEnabled()) {
-                log.trace("Failed to find match for claims_redirect_uri : {}, client claimRedirectUris: {}", claimsRedirectUri, Arrays.toString(client.getClaimRedirectUris()));
+                log.trace("Failed to find match for claims_redirect_uri : {}, client claimRedirectUris: {}", escapeLog(claimsRedirectUri), Arrays.toString(client.getClaimRedirectUris()));
             }
 
         } else {

@@ -7,8 +7,6 @@
 package io.jans.as.server.uma.service;
 
 import io.jans.as.common.model.registration.Client;
-import io.jans.as.common.service.AttributeService;
-import io.jans.as.common.service.common.UserService;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.uma.UmaConstants;
 import io.jans.as.model.uma.UmaNeedInfoResponse;
@@ -54,15 +52,11 @@ public class UmaNeedsInfoService {
     @Inject
     private UmaPermissionService permissionService;
     @Inject
-    private AttributeService attributeService;
-    @Inject
     private UmaResourceService resourceService;
     @Inject
     private ExternalUmaRptPolicyService policyService;
     @Inject
     private UmaSessionService sessionService;
-    @Inject
-    private UserService userService;
 
     public static Set<String> getScriptDNs(List<Scope> scopes) {
         HashSet<String> result = new HashSet<>();
@@ -87,8 +81,8 @@ public class UmaNeedsInfoService {
         List<ClaimDefinition> missedClaims = new ArrayList<>();
 
         UmaAuthorizationContextBuilder contextBuilder = new UmaAuthorizationContextBuilder(appConfiguration,
-                attributeService, resourceService, permissions, requestedScopes, claims, httpRequest,
-                sessionService, userService, permissionService, client);
+                resourceService, permissions, requestedScopes, claims, httpRequest,
+                sessionService, permissionService, client);
 
 
         for (Scope scope : requestedScopes.keySet()) {
