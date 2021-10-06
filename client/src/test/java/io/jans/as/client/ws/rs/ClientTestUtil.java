@@ -21,13 +21,13 @@ public class ClientTestUtil {
     private ClientTestUtil() {
     }
 
-    public static void assert_(RegisterResponse p_response) {
-        assertNotNull(p_response);
-        assertNotBlank(p_response.getClientId());
-        assertNotBlank(p_response.getClientSecret());
-        assertNotBlank(p_response.getRegistrationAccessToken());
-        assertNotBlank(p_response.getRegistrationClientUri());
-        assertNotNull(p_response.getClientIdIssuedAt());
-        assertNotNull(p_response.getClientSecretExpiresAt());
+    public static void assert_(RegisterResponse response) {
+        assertNotNull(response);
+        assertNotBlank(response.getClientId());
+        assertNotBlank(response.getClientSecret());
+        assertNotBlank(response.getRegistrationAccessToken());
+        assertNotBlank(response.getRegistrationClientUri());
+        assertNotNull(response.getClientIdIssuedAt());
+        assertNotNull(response.getClientSecretExpiresAt());
     }
 }
