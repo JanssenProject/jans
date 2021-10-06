@@ -339,7 +339,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             checkAcrChanged(acrValuesStr, prompts, sessionUser); // check after redirect uri is validated
 
             RedirectUriResponse redirectUriResponse = new RedirectUriResponse(new RedirectUri(redirectUri, responseTypes, responseMode), state, httpRequest, errorResponseFactory);
-            redirectUriResponse.setFapiCompatible(appConfiguration.getFapiCompatibility());
+            redirectUriResponse.setFapiCompatible(appConfiguration.isFapi());
 
             Set<String> scopes = scopeChecker.checkScopesPolicy(client, scope);
 
@@ -355,7 +355,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                         state = jwtRequest.getState();
                         redirectUriResponse.setState(state);
                     }
-                    if (appConfiguration.getFapiCompatibility() && StringUtils.isBlank(jwtRequest.getState())) {
+                    if (appConfiguration.isFapi() && StringUtils.isBlank(jwtRequest.getState())) {
                         state = ""; // #1250 - FAPI : discard state if in JWT we don't have state
                         redirectUriResponse.setState("");
                     }
