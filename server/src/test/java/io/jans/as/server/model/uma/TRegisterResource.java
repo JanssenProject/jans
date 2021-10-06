@@ -56,10 +56,9 @@ class TRegisterResource {
 		return registerStatus;
 	}
 
-	public UmaResourceResponse modifyResource(final Token p_pat, String umaRegisterResourcePath, final String p_rsId,
-											  UmaResource resource) {
+	public UmaResourceResponse modifyResource(final Token pat, String umaRegisterResourcePath, final String rsId, UmaResource resource) {
 		try {
-			modifyStatus = modifyResourceInternal(p_pat, umaRegisterResourcePath, p_rsId, resource);
+			modifyStatus = modifyResourceInternal(pat, umaRegisterResourcePath, rsId, resource);
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail();
@@ -68,8 +67,7 @@ class TRegisterResource {
 		return modifyStatus;
 	}
 
-	private UmaResourceResponse registerResourceInternal(final Token pat, String umaRegisterResourcePath,
-														 final UmaResource resource) throws Exception {
+	private UmaResourceResponse registerResourceInternal(final Token pat, String umaRegisterResourcePath, final UmaResource resource) {
 		String path = umaRegisterResourcePath;
 		System.out.println("Path: " + path);
 
@@ -104,13 +102,12 @@ class TRegisterResource {
 		return registerStatus;
 	}
 
-	private UmaResourceResponse modifyResourceInternal(final Token p_pat, String umaRegisterResourcePath,
-													   final String p_rsId, final UmaResource resource) throws Exception {
-		String path = umaRegisterResourcePath + "/" + p_rsId + "/";
+	private UmaResourceResponse modifyResourceInternal(final Token pat, String umaRegisterResourcePath, final String rsId, final UmaResource resource) {
+		String path = umaRegisterResourcePath + "/" + rsId + "/";
 
 		Builder request = ResteasyClientBuilder.newClient().target(baseUri.toString() + path).request();
 		request.header("Accept", UmaConstants.JSON_MEDIA_TYPE);
-		request.header("Authorization", "Bearer " + p_pat.getAccessToken());
+		request.header("Authorization", "Bearer " + pat.getAccessToken());
 
 		String json = null;
 		try {

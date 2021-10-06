@@ -55,9 +55,9 @@ public abstract class BaseAuthFilterService {
 
         private BaseFilter authenticationFilter;
         private List<String> variableNames;
-        private List<AuthenticationFilterService.IndexedParameter> indexedVariables;
+        private List<IndexedParameter> indexedVariables;
 
-        public AuthenticationFilterWithParameters(BaseFilter authenticationFilter, List<String> variableNames, List<AuthenticationFilterService.IndexedParameter> indexedVariables) {
+        public AuthenticationFilterWithParameters(BaseFilter authenticationFilter, List<String> variableNames, List<IndexedParameter> indexedVariables) {
             this.authenticationFilter = authenticationFilter;
             this.variableNames = variableNames;
             this.indexedVariables = indexedVariables;
@@ -79,11 +79,11 @@ public abstract class BaseAuthFilterService {
             this.variableNames = variableNames;
         }
 
-        public List<AuthenticationFilterService.IndexedParameter> getIndexedVariables() {
+        public List<IndexedParameter> getIndexedVariables() {
             return indexedVariables;
         }
 
-        public void setIndexedVariables(List<AuthenticationFilterService.IndexedParameter> indexedVariables) {
+        public void setIndexedVariables(List<IndexedParameter> indexedVariables) {
             this.indexedVariables = indexedVariables;
         }
 
@@ -125,27 +125,27 @@ public abstract class BaseAuthFilterService {
         }
     }
 
-    public void init(List<? extends BaseFilter> p_filterList, boolean p_enabled, boolean p_filterAttributes) {
-        this.enabled = p_enabled;
-        this.filterWithParameters = prepareAuthenticationFilterWithParameters(p_filterList);
-        this.filterAttributes = p_filterAttributes;
+    public void init(List<? extends BaseFilter> filterList, boolean enabled, boolean filterAttributes) {
+        this.enabled = enabled;
+        this.filterWithParameters = prepareAuthenticationFilterWithParameters(filterList);
+        this.filterAttributes = filterAttributes;
     }
 
-    private List<AuthenticationFilterWithParameters> prepareAuthenticationFilterWithParameters(List<? extends BaseFilter> p_filterList) {
-        final List<AuthenticationFilterWithParameters> tmpAuthenticationFilterWithParameters = new ArrayList<AuthenticationFilterWithParameters>();
+    private List<AuthenticationFilterWithParameters> prepareAuthenticationFilterWithParameters(List<? extends BaseFilter> filterList) {
+        final List<AuthenticationFilterWithParameters> tmpAuthenticationFilterWithParameters = new ArrayList<>();
 
-        if (!this.enabled || p_filterList == null) {
+        if (!this.enabled || filterList == null) {
             return tmpAuthenticationFilterWithParameters;
         }
 
-        for (BaseFilter authenticationFilter : p_filterList) {
+        for (BaseFilter authenticationFilter : filterList) {
             if (Boolean.TRUE.equals(authenticationFilter.getBind()) && StringHelper.isEmpty(authenticationFilter.getBindPasswordAttribute())) {
                 log.error("Skipping authentication filter:\n '{}'\n. It should contains not empty bind-password-attribute attribute. ", authenticationFilter);
                 continue;
             }
 
-            List<String> variableNames = new ArrayList<String>();
-            List<BaseAuthFilterService.IndexedParameter> indexedParameters = new ArrayList<BaseAuthFilterService.IndexedParameter>();
+            List<String> variableNames = new ArrayList<>();
+            List<BaseAuthFilterService.IndexedParameter> indexedParameters = new ArrayList<>();
 
             Matcher matcher = BaseAuthFilterService.PARAM_VALUE_PATTERN.matcher(authenticationFilter.getFilter());
             while (matcher.find()) {
@@ -165,18 +165,18 @@ public abstract class BaseAuthFilterService {
         return tmpAuthenticationFilterWithParameters;
     }
 
-    public static List<AuthenticationFilterWithParameters> getAllowedAuthenticationFilters(Collection<?> attributeNames, List<AuthenticationFilterWithParameters> p_filterList) {
-        List<AuthenticationFilterWithParameters> tmpAuthenticationFilterWithParameters = new ArrayList<AuthenticationFilterWithParameters>();
+    public static List<AuthenticationFilterWithParameters> getAllowedAuthenticationFilters(Collection<?> attributeNames, List<AuthenticationFilterWithParameters> filterList) {
+        List<AuthenticationFilterWithParameters> tmpAuthenticationFilterWithParameters = new ArrayList<>();
         if (attributeNames == null) {
             return tmpAuthenticationFilterWithParameters;
         }
 
-        Set<String> normalizedAttributeNames = new HashSet<String>();
+        Set<String> normalizedAttributeNames = new HashSet<>();
         for (Object attributeName : attributeNames) {
             normalizedAttributeNames.add(normalizeAttributeName(attributeName.toString()));
         }
 
-        for (AuthenticationFilterWithParameters autheticationFilterWithParameters : p_filterList) {
+        for (AuthenticationFilterWithParameters autheticationFilterWithParameters : filterList) {
             if (normalizedAttributeNames.containsAll(autheticationFilterWithParameters.getVariableNames())) {
                 tmpAuthenticationFilterWithParameters.add(autheticationFilterWithParameters);
             }
@@ -186,7 +186,7 @@ public abstract class BaseAuthFilterService {
     }
 
     public static Map<String, String> normalizeAttributeMap(Map<?, ?> attributeValues) {
-        Map<String, String> normalizedAttributeValues = new HashMap<String, String>();
+        Map<String, String> normalizedAttributeValues = new HashMap<>();
         for (Map.Entry<?, ?> attributeValueEntry : attributeValues.entrySet()) {
             String attributeValue = null;
 
@@ -208,10 +208,10 @@ public abstract class BaseAuthFilterService {
         return normalizedAttributeValues;
     }
 
-    public static String buildFilter(AuthenticationFilterWithParameters authenticationFilterWithParameters, Map<String, String> p_normalizedAttributeValues) {
+    public static String buildFilter(AuthenticationFilterWithParameters authenticationFilterWithParameters, Map<String, String> normalizedAttributeValues) {
         String filter = authenticationFilterWithParameters.getAuthenticationFilter().getFilter();
         for (IndexedParameter indexedParameter : authenticationFilterWithParameters.getIndexedVariables()) {
-            String attributeValue = p_normalizedAttributeValues.get(indexedParameter.getParamName());
+            String attributeValue = normalizedAttributeValues.get(indexedParameter.getParamName());
             if (attributeValue != null) {
                 filter = filter.replace(indexedParameter.getParamIndex(), attributeValue);
             }
@@ -219,21 +219,21 @@ public abstract class BaseAuthFilterService {
         return filter;
     }
 
-    public <T> String loadEntryDN(PersistenceEntryManager p_manager, Class<T> entryClass, AuthenticationFilterWithParameters authenticationFilterWithParameters, Map<String, String> normalizedAttributeValues) throws SearchException {
+    public <T> String loadEntryDN(PersistenceEntryManager manager, Class<T> entryClass, AuthenticationFilterWithParameters authenticationFilterWithParameters, Map<String, String> normalizedAttributeValues) throws SearchException {
         final String filter = buildFilter(authenticationFilterWithParameters, normalizedAttributeValues);
 
         Filter ldapFilter = ldapFilterConverter.convertRawLdapFilterToFilter(filter).multiValued(false);
         log.debug("Using filter: '{}'", ldapFilter);
-        List<T> foundEntries = p_manager.findEntries(authenticationFilterWithParameters.getAuthenticationFilter().getBaseDn(), entryClass, ldapFilter, new String[0]);
+        List<T> foundEntries = manager.findEntries(authenticationFilterWithParameters.getAuthenticationFilter().getBaseDn(), entryClass, ldapFilter, new String[0]);
 
         if (foundEntries.size() > 1) {
-            log.error("Found more than one entry by filter: '{}'. Entries:\n", ldapFilter, foundEntries);
+            log.error("Found more than one entry by filter: '{}'. Entries: {}\n", ldapFilter, foundEntries);
             return null;
         }
 
         log.debug("Found entries: {}", foundEntries.size());
 
-        if (!(foundEntries.size() == 1)) {
+        if (foundEntries.size() != 1) {
             return null;
         }
 
@@ -259,7 +259,7 @@ public abstract class BaseAuthFilterService {
         return null;
     }
 
-    public abstract String processAuthenticationFilter(AuthenticationFilterWithParameters p_allowed, Map<?, ?> p_attributeValues) throws SearchException;
+    public abstract String processAuthenticationFilter(AuthenticationFilterWithParameters allowed, Map<?, ?> attributeValues) throws SearchException;
 
     public List<AuthenticationFilterWithParameters> getFilterWithParameters() {
         return filterWithParameters;
@@ -269,16 +269,16 @@ public abstract class BaseAuthFilterService {
         return enabled;
     }
 
-    public void setEnabled(boolean p_enabled) {
-        enabled = p_enabled;
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 
     public boolean isFilterAttributes() {
         return filterAttributes;
     }
 
-    public void setFilterAttributes(boolean p_filterAttributes) {
-        filterAttributes = p_filterAttributes;
+    public void setFilterAttributes(boolean filterAttributes) {
+        this.filterAttributes = filterAttributes;
     }
 
     public static String normalizeAttributeName(String attributeName) {
