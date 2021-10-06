@@ -14,6 +14,8 @@ import io.jans.as.model.util.Base64Util;
 import io.jans.as.model.util.JwtUtil;
 import io.jans.as.model.util.Util;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -28,6 +30,8 @@ import static io.jans.as.model.jwt.JwtType.DPOP_PLUS_JWT;
  * @version September 30, 2021
  */
 public class DPoP extends Jwt {
+
+    private static final Logger LOG = LoggerFactory.getLogger(DPoP.class);
 
     private String keyId;
     private String encodedJwt;
@@ -62,7 +66,7 @@ public class DPoP extends Jwt {
     }
 
     public static String generateJti() {
-        String jti = null;
+        String jti;
 
         String guid = UUID.randomUUID().toString();
         byte[] sig = Util.getBytes(guid);
@@ -80,10 +84,8 @@ public class DPoP extends Jwt {
             if (digest != null) {
                 accessTokenHash = Base64Util.base64urlencode(digest);
             }
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (NoSuchProviderException e) {
-            e.printStackTrace();
+        } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+            LOG.error(e.getMessage(), e);
         }
 
         return accessTokenHash;
