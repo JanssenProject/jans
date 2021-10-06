@@ -69,4 +69,37 @@ public class ExternalUpdateTokenService extends ExternalScriptService {
         };
 	}
 
+    public int getRefreshTokenLifetimeInSeconds(CustomScriptConfiguration script, ExternalUpdateTokenContext context) {
+        try {
+            log.trace("Executing python 'getRefreshTokenLifetimeInSeconds' method, script name: {}, context: {}", script.getName(), context);
+            context.setScript(script);
+
+            UpdateTokenType updateTokenType = (UpdateTokenType) script.getExternalType();
+            final int result = updateTokenType.getRefreshTokenLifetimeInSeconds(context);
+            log.trace("Finished 'getRefreshTokenLifetimeInSeconds' method, script name: {}, context: {}, result: {}", script.getName(), context, result);
+
+            return result;
+        } catch (Exception ex) {
+            log.error(ex.getMessage(), ex);
+            saveScriptError(script.getCustomScript(), ex);
+        }
+        return 0;
+    }
+
+    public int getRefreshTokenLifetimeInSeconds(ExternalUpdateTokenContext context) {
+        if (this.customScriptConfigurations.isEmpty()) {
+            return 0;
+        }
+        log.trace("Executing {} 'getRefreshTokenLifetimeInSeconds' scripts.", this.customScriptConfigurations.size());
+
+        for (CustomScriptConfiguration script : this.customScriptConfigurations) {
+            final int lifetime = getRefreshTokenLifetimeInSeconds(script, context);
+            if (lifetime > 0) {
+                log.trace("Finished 'getRefreshTokenLifetimeInSeconds' methods, lifetime: {}", lifetime);
+                return lifetime;
+            }
+        }
+        return 0;
+    }
+
 }
