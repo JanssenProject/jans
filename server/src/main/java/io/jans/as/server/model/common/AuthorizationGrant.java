@@ -115,6 +115,10 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
 
     @Override
     public String checkScopesPolicy(String scope) {
+        if (StringUtils.isBlank(scope)) {
+            return scope;
+        }
+
         final String result = super.checkScopesPolicy(scope);
         save();
         return result;
@@ -265,8 +269,9 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
             statService.reportRefreshToken(getGrantType());
             metricService.incCounter(MetricType.TOKEN_REFRESH_TOKEN_COUNT);
 
-            if (log.isTraceEnabled())
-                log.trace("Created refresh token: " + refreshToken.getCode());
+            if (log.isTraceEnabled()) {
+                log.trace("Created refresh token: {}", refreshToken.getCode());
+            }
 
             return refreshToken;
         } catch (Exception e) {
