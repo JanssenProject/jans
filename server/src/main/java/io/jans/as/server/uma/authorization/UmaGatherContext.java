@@ -67,7 +67,7 @@ public class UmaGatherContext extends ExternalScriptContext {
     }
 
     public User getUser(String... returnAttributes) {
-        return sessionService.getUser(httpRequest, returnAttributes);
+        return sessionService.getUser(httpRequest);
     }
 
     public String getUserDn() {
