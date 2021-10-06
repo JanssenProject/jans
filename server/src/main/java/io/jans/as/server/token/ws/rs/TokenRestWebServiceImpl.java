@@ -65,7 +65,7 @@ import java.util.function.Function;
  *
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version September 30, 2021
+ * @version October 5, 2021
  */
 @Path("/")
 public class TokenRestWebServiceImpl implements TokenRestWebService {
@@ -153,8 +153,6 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         String dpopStr;
         try {
             dpopStr = runDPoP(request);
-        } catch (InvalidJwtException e) {
-            return response(error(400, TokenErrorResponseType.INVALID_DPOP_PROOF, e.getMessage()), oAuth2AuditLog);
         } catch (Exception e) {
             return response(error(400, TokenErrorResponseType.INVALID_DPOP_PROOF, e.getMessage()), oAuth2AuditLog);
         }
@@ -280,7 +278,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                     return response(error(400, TokenErrorResponseType.INVALID_GRANT, "Unable to find refresh token or otherwise token type or client does not match."), oAuth2AuditLog);
                 }
 
-                if (refreshTokenObject.getDpop() != null && refreshTokenObject.getDpop() != dpopStr) {
+                if (refreshTokenObject.getDpop() != null && !refreshTokenObject.getDpop().equals(dpopStr)) {
                     return response(error(400, TokenErrorResponseType.INVALID_DPOP_PROOF, "The refresh token is DPoP bound."), oAuth2AuditLog);
                 }
 
@@ -678,21 +676,6 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
     private ResponseBuilder error(int status, TokenErrorResponseType type, String reason) {
         return Response.status(status).type(MediaType.APPLICATION_JSON_TYPE).entity(errorResponseFactory.errorAsJson(type, reason));
-    }
-
-    private String runDPoP(HttpServletRequest httpRequest) throws Exception {
-        String dpopStr = httpRequest.getHeader(TokenRequestParam.DPOP);
-        if (StringUtils.isBlank(dpopStr)) return null;
-
-        Jwt dpop = DPoP.parseOrThrow(dpopStr);
-
-        JSONWebKey jwk = JSONWebKey.fromJSONObject(dpop.getHeader().getJwk());
-        String dpopJwkThumbprint = jwk.getJwkThumbprint();
-
-        if (dpopJwkThumbprint == null)
-            throw new InvalidJwtException("Invalid DPoP Proof Header. The jwk header is not valid.");
-
-        return dpopJwkThumbprint;
     }
 
     private String runDPoP(HttpServletRequest httpRequest) throws Exception {
