@@ -4,10 +4,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import io.jans.configapi.security.client.AuthClientFactory;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.ws.rs.core.Response;
+
 import org.slf4j.Logger;
 
 @ApplicationScoped
-public class StatisticService {
+public class AuthService {
 
     @Inject
     Logger logger;
@@ -17,6 +19,10 @@ public class StatisticService {
 
     public JsonNode getStat(String url, String token, String month, String format) {
         return AuthClientFactory.getStatResponse(url, token, month, format);
+    }
+    
+    public Response getHealthCheckResponse(String url) {
+        return AuthClientFactory.getHealthCheckResponse(url);
     }
 
 }

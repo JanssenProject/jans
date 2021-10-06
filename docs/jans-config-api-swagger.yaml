@@ -33,6 +33,7 @@ tags:
   - name: OAuth - Scopes
   - name: Statistics - User
   - name: Health - Check
+  - name: Auth Server Health - Check
 paths:
   /jans-config-api/api/v1/jans-auth-server/config:
     get:
@@ -2347,6 +2348,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HealthStatusItem'
+        '500':
+          description: Internal Server Error
+  /jans-config-api/api/v1/jans-auth-server/health:
+    get:
+      summary: Returns auth server health status.
+      description: Returns auth server health status.
+      operationId: get-config-health-ready
+      tags:
+        - Auth Server Health - Check
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthHealthStatus'
         '500':
           description: Internal Server Error
 components:
@@ -5060,6 +5077,11 @@ components:
           type: string
           description: Health parameter status
 
+    AuthHealthStatus:
+      type: object
+      description: Auth Server health data
+        additionalProperties:
+          type: string
           
     
 	
