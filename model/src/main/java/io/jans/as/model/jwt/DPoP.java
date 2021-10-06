@@ -9,6 +9,7 @@ import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.crypto.signature.AsymmetricSignatureAlgorithm;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.exception.InvalidJwtException;
+import io.jans.as.model.exception.InvalidParameterException;
 import io.jans.as.model.jwk.JSONWebKey;
 import io.jans.as.model.util.Base64Util;
 import io.jans.as.model.util.JwtUtil;
@@ -263,7 +264,7 @@ public class DPoP extends Jwt {
         }
 
         if (cryptoProvider == null) {
-            throw new Exception("The Crypto Provider cannot be null.");
+            throw new InvalidParameterException("The Crypto Provider cannot be null.");
         }
 
         String encodedHeader = getHeader().toBase64JsonObject();
