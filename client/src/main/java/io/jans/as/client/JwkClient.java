@@ -29,8 +29,6 @@ import io.jans.as.model.jwk.JSONWebKeySet;
  */
 public class JwkClient extends BaseClient<JwkRequest, JwkResponse> {
 
-    private static final String mediaType = MediaType.APPLICATION_JSON;
-
     /**
      * Constructs a JSON Web Key (JWK) client by providing a REST url where the
      * validate token service is located.
@@ -63,7 +61,7 @@ public class JwkClient extends BaseClient<JwkRequest, JwkResponse> {
             String encodedCredentials = getRequest().getEncodedCredentials();
             clientRequest.header("Authorization", "Basic " + encodedCredentials);
         }
-        clientRequest.accept(mediaType);
+        clientRequest.accept(MediaType.APPLICATION_JSON);
         clientRequest.setHttpMethod(getHttpMethod());
 
         // Call REST Service and handle response
