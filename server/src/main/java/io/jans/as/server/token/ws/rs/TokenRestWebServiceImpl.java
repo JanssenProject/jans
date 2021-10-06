@@ -695,6 +695,21 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         return dpopJwkThumbprint;
     }
 
+    private String runDPoP(HttpServletRequest httpRequest) throws Exception {
+        String dpopStr = httpRequest.getHeader(TokenRequestParam.DPOP);
+        if (StringUtils.isBlank(dpopStr)) return null;
+
+        Jwt dpop = DPoP.parseOrThrow(dpopStr);
+
+        JSONWebKey jwk = JSONWebKey.fromJSONObject(dpop.getHeader().getJwk());
+        String dpopJwkThumbprint = jwk.getJwkThumbprint();
+
+        if (dpopJwkThumbprint == null)
+            throw new InvalidJwtException("Invalid DPoP Proof Header. The jwk header is not valid.");
+
+        return dpopJwkThumbprint;
+    }
+
     /**
      * Builds a JSon String with the structure for token issues.
      */
