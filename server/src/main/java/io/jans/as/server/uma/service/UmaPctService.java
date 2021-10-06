@@ -75,7 +75,7 @@ public class UmaPctService {
             }
 
             pct.setClaims(pctClaims);
-            log.trace("PCT code: " + pct.getCode() + ", claims: " + pct.getClaimValuesAsJson());
+            log.trace("PCT code: {}, claims: {}", pct.getCode(), pct.getClaimValuesAsJson());
 
             pct.resetTtlFromExpirationDate();
             ldapEntryManager.merge(pct);
@@ -95,7 +95,7 @@ public class UmaPctService {
             if (entries != null && !entries.isEmpty()) {
                 return entries.get(0);
             } else {
-                log.error("Failed to find PCT by code: " + pctCode);
+                log.error("Failed to find PCT by code: {}", pctCode);
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);

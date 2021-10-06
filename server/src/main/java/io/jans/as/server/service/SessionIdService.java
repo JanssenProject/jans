@@ -76,6 +76,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import static org.apache.commons.lang.BooleanUtils.isTrue;
+
 /**
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
@@ -958,7 +960,7 @@ public class SessionIdService {
     }
 
     public List<SessionId> findByUser(String userDn) {
-        if (appConfiguration.getSessionIdPersistInCache()) {
+        if (isTrue(appConfiguration.getSessionIdPersistInCache())) {
             throw new UnsupportedOperationException("Operation is not supported with sessionIdPersistInCache=true. Set it to false to avoid this exception.");
         }
         Filter filter = Filter.createEqualityFilter("jansUsrDN", userDn);

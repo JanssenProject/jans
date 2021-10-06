@@ -25,7 +25,7 @@ import static org.testng.Assert.assertNotNull;
  */
 public class ObtainPatTokenFlowHttpTest extends BaseTest {
 
-    protected Token m_pat;
+    protected Token pat;
 
     /**
      * Test for the obtaining UMA PAT token
@@ -35,8 +35,8 @@ public class ObtainPatTokenFlowHttpTest extends BaseTest {
     public void testObtainPatTokenFlow(final String umaPatClientId, final String umaPatClientSecret) throws Exception {
         showTitle("testObtainPatTokenFlow");
 
-        m_pat = UmaClient.requestPat(tokenEndpoint, umaPatClientId, umaPatClientSecret);
-        UmaTestUtil.assertIt(m_pat);
+        pat = UmaClient.requestPat(tokenEndpoint, umaPatClientId, umaPatClientSecret);
+        UmaTestUtil.assertIt(pat);
     }
 
     /**
@@ -49,7 +49,7 @@ public class ObtainPatTokenFlowHttpTest extends BaseTest {
 
         // Request new access token using the refresh token.
         TokenClient tokenClient1 = new TokenClient(tokenEndpoint);
-        TokenResponse response1 = tokenClient1.execRefreshToken(m_pat.getScope(), m_pat.getRefreshToken(), umaPatClientId, umaPatClientSecret);
+        TokenResponse response1 = tokenClient1.execRefreshToken(pat.getScope(), pat.getRefreshToken(), umaPatClientId, umaPatClientSecret);
 
         showClient(tokenClient1);
         assertEquals(response1.getStatus(), 200, "Unexpected response code: " + response1.getStatus());

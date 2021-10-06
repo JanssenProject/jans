@@ -144,14 +144,14 @@ public class UmaResourceService {
     }
 
     public Set<UmaResource> getResources(Set<String> ids) {
-        Set<UmaResource> result = new HashSet<UmaResource>();
+        Set<UmaResource> result = new HashSet<>();
         if (ids != null) {
             for (String id : ids) {
                 UmaResource resource = getResourceById(id);
                 if (resource != null) {
                     result.add(resource);
                 } else {
-                    log.error("Failed to find resource by id: " + id);
+                    log.error("Failed to find resource by id: {}", id);
                 }
             }
         }
@@ -168,9 +168,9 @@ public class UmaResourceService {
                 return resource;
             }
         } catch (Exception e) {
-            log.error("Failed to find resource set with id: " + id, e);
+            log.error(String.format("Failed to find resource set with id: %s", id), e);
         }
-        log.error("Failed to find resource set with id: " + id);
+        log.error("Failed to find resource set with id: {}", id);
         throw errorResponseFactory.createWebApplicationException(Response.Status.NOT_FOUND, UmaErrorResponseType.NOT_FOUND, "Failed to find resource set with id: " + id);
     }
 
