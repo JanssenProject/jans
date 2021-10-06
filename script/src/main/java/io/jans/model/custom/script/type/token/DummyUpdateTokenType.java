@@ -40,4 +40,8 @@ public class DummyUpdateTokenType implements UpdateTokenType {
 		return false;
 	}
 
+    @Override
+    public int getRefreshTokenLifetimeInSeconds(Object tokenContext) {
+        return 0;
+    }
 }
