@@ -26,7 +26,7 @@ import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
  */
 public class UmaWebException extends WebApplicationException {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(UmaWebException.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(UmaWebException.class);
 
     private UmaWebException() {
     }

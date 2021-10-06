@@ -130,7 +130,7 @@ public class ParRestWebService {
             redirectUri = authorizeRestWebServiceValidator.validateRedirectUri(client, redirectUri, state, null, httpRequest, AuthorizeErrorResponseType.INVALID_REQUEST);
 
             RedirectUriResponse redirectUriResponse = new RedirectUriResponse(new RedirectUri(redirectUri, responseTypes, responseModeObj), state, httpRequest, errorResponseFactory);
-            redirectUriResponse.setFapiCompatible(appConfiguration.getFapiCompatibility());
+            redirectUriResponse.setFapiCompatible(appConfiguration.isFapi());
 
             parValidator.validateRequestUriIsAbsent(requestUri);
 

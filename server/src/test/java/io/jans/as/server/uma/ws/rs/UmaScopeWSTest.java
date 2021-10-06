@@ -34,15 +34,6 @@ public class UmaScopeWSTest extends BaseTest {
 	@ArquillianResource
 	private URI url;
 
-	// private MetadataConfiguration m_configuration;
-	//
-	// @Parameters({"umaConfigurationPath"})
-	// @Test
-	// public void init(final String umaConfigurationPath) {
-	// m_configuration = TUma.requestConfiguration(this, umaConfigurationPath);
-	// UmaTestUtil.assert_(m_configuration);
-	// }
-
 	@Parameters({ "umaScopePath" })
 	@Test
 	public void scopePresence(final String umaScopePath) throws Exception {
