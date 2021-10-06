@@ -7,6 +7,7 @@ import io.jans.ca.rs.protect.Condition;
 import io.jans.ca.rs.protect.RsResource;
 import io.jans.ca.rs.protect.RsResourceList;
 import io.jans.as.persistence.model.Scope;
+import io.jans.configapi.configuration.ConfigurationFactory;
 import io.jans.configapi.service.auth.ClientService;
 import io.jans.configapi.service.auth.ScopeService;
 import io.jans.configapi.util.Jackson;
@@ -44,6 +45,9 @@ public class ApiProtectionService {
 
     @Inject
     ClientService clientService;
+    
+    @Inject
+    ConfigurationFactory configurationFactory;
 
     Collection<RsResource> rsResourceList;
 
@@ -52,8 +56,7 @@ public class ApiProtectionService {
     }
 
     public void verifyResources(String apiProtectionType, String clientId) throws Exception {
-        log.info("\n ApiProtectionService::verifyResources() - apiProtectionType = " + apiProtectionType
-                + " , clientId = " + clientId + "\n");
+        log.info("ApiProtectionService::verifyResources() - apiProtectionType:{}, clientId:{}, configurationFactory:{} ",apiProtectionType, clientId,configurationFactory);
 
         // Load the resource json
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
@@ -74,8 +77,8 @@ public class ApiProtectionService {
     }
 
     private void createScopeIfNeeded(String apiProtectionType) {
-        log.info("ApiProtectionService:::createScopeIfNeeded() - apiProtectionType = " + apiProtectionType
-                + "\n ***********");
+        log.info("ApiProtectionService:::createScopeIfNeeded() - apiProtectionType:{}", apiProtectionType);
+
         List<String> rsScopes = null;
         List<Scope> scopeList = null;
         for (RsResource rsResource : rsResourceList) {
@@ -83,15 +86,16 @@ public class ApiProtectionService {
                 String resourceName = condition.getHttpMethods() + ":::" + rsResource.getPath();
                 scopeList = new ArrayList<Scope>();
                 rsScopes = condition.getScopes();
-                log.trace("ApiProtectionService:::createScopeIfNeeded() - resourceName = " + resourceName
-                        + " ,rsScopes = " + rsScopes + "\n\n");
+                log.trace("ApiProtectionService:::createScopeIfNeeded() - resourceName:{}, rsScopes:{} ",resourceName, rsScopes);
 
+              /*  if(rsScopes==null || rsScopes.size()==0) {
+                    return;
+                }*/
                 for (String scopeName : rsScopes) {
-                    log.trace("ApiProtectionService:::createScopeIfNeeded() - scopeName = " + scopeName);
+                    log.trace("ApiProtectionService:::createScopeIfNeeded() - scopeName:{} ",scopeName);
                     // Check in cache
                     Scope scope = apiProtectionCache.getScope(scopeName);
-                    log.trace("ApiProtectionService:::createScopeIfNeeded() -apiProtectionCache.getScope(scopeName) = "
-                            + apiProtectionCache.getScope(scopeName));
+                    log.trace("ApiProtectionService:::createScopeIfNeeded() -apiProtectionCache.getScope(scopeName):{}", apiProtectionCache.getScope(scopeName));
 
                     if (scope != null) {
                         log.trace("Scope - '" + scopeName + "' exists in cache.");
@@ -117,7 +121,10 @@ public class ApiProtectionService {
                     }
 
                     ScopeType scopeType = ScopeType.OAUTH;
-                    log.info("Scope details from DB - '" + scopes);
+                    log.info("Scope details - scopes:{}, scopeName:{}, exclusiveAuthScopes:{} - '",scopes, scopeName, configurationFactory.getApiAppConfiguration().getExclusiveAuthScopes());
+
+                    //Create/Update scope only if they are config-api-resource scopes
+                    if(configurationFactory.getApiAppConfiguration().getExclusiveAuthScopes()!=null && !configurationFactory.getApiAppConfiguration().getExclusiveAuthScopes().contains(scopeName)) {
                     if (scopes == null || scopes.isEmpty()) {
                         log.info("Scope - '" + scopeName + "' does not exist, hence creating it.");
                         // Scope does not exists hence create Scope
@@ -138,6 +145,7 @@ public class ApiProtectionService {
                         scope.setScopeType(scopeType);
                         scopeService.updateScope(scope);
                     }
+                    }
 
                     // Add to scope cache
                     scopeList.add(scope);
@@ -146,14 +154,13 @@ public class ApiProtectionService {
 
                 // Add to resource cache
                 apiProtectionCache.putResource(resourceName, scopeList);
-                log.trace("ApiProtectionService:::createScopeIfNeeded() - resourceName = " + resourceName
-                        + " ,scopeList = " + scopeList);
+                log.trace("ApiProtectionService:::createScopeIfNeeded() - resourceName:{}, scopeList:{}",resourceName,scopeList);
             } // condition
         }
     }
 
     private void updateScopeForClientIfNeeded(String clientId) throws Exception {
-        log.info(" Internal clientId = " + clientId);
+        log.info(" Internal clientId:{} ",clientId);
 
         if (StringUtils.isBlank(clientId)) {
             return;
@@ -161,34 +168,32 @@ public class ApiProtectionService {
 
         try {
             Client client = this.clientService.getClientByInum(clientId);
-            log.debug(" \n\n updateScopeForClientIfNeeded() - Verify client = " + client + "\n\n");
+            log.debug("updateScopeForClientIfNeeded() - Verify client:{} ", client);
 
             if (client != null) {
                 // Assign scope
                 // Prepare scope array
                 List<String> scopes = getScopeWithDn(getAllScopes());
-                log.trace(" \n\n updateScopeForClientIfNeeded() - All scopes = " + scopes + "\n\n");
+                log.trace("updateScopeForClientIfNeeded() - All scopes:{}", scopes);
 
                 if (client.getScopes() != null) {
                     List<String> existingScopes = Arrays.asList(client.getScopes());
-                    log.trace(" \n\n updateScopeForClientIfNeeded() - Clients existing scopes = " + existingScopes
-                            + "\n\n");
+                    log.trace("updateScopeForClientIfNeeded() - Clients existing scopes:{} ",existingScopes);
                     scopes.addAll(existingScopes);
                 }
 
                 // Distinct scopes
                 List<String> distinctScopes = scopes.stream().distinct().collect(Collectors.toList());
-                log.trace(" \n\n updateScopeForClientIfNeeded() - Distinct scopes to add = " + distinctScopes + "\n\n");
+                log.trace(" \n\n updateScopeForClientIfNeeded() - Distinct scopes to add:{} ",distinctScopes);
 
                 String[] scopeArray = this.getAllScopesArray(distinctScopes);
-                log.trace(" All Scope to assign to client = " + Arrays.asList(scopeArray) + "\n");
+                log.trace("All Scope to assign to client:{}", Arrays.asList(scopeArray));
 
                 client.setScopes(scopeArray);
                 this.clientService.updateClient(client);
             }
             client = this.clientService.getClientByInum(clientId);
-            log.trace(" Verify scopes post assignment, clientId =" + clientId + " ,scopes = "
-                    + Arrays.asList(client.getScopes()));
+            log.trace(" Verify scopes post assignment, clientId:{}, scopes:{}",clientId, Arrays.asList(client.getScopes()));
         } catch (Exception ex) {
             log.error("Error while searching internal client " + ex);
         }
