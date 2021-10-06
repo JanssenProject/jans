@@ -8,7 +8,6 @@ package io.jans.as.server.uma.authorization;
 
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
-import io.jans.as.common.service.common.UserService;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwt.JwtClaims;
@@ -20,7 +19,6 @@ import io.jans.as.server.uma.service.UmaPctService;
 import io.jans.as.server.uma.service.UmaPermissionService;
 import io.jans.as.server.uma.service.UmaSessionService;
 import io.jans.as.server.uma.ws.rs.UmaMetadataWS;
-import io.jans.jsf2.service.FacesService;
 import io.jans.model.SimpleCustomProperty;
 
 import javax.servlet.http.HttpServletRequest;
@@ -66,7 +64,7 @@ public class UmaGatherContext extends ExternalScriptContext {
         return configurationAttributes;
     }
 
-    public User getUser(String... returnAttributes) {
+    public User getUser() {
         return sessionService.getUser(httpRequest);
     }
 
@@ -82,9 +80,9 @@ public class UmaGatherContext extends ExternalScriptContext {
     public Map<String, String> getConnectSessionAttributes() {
         SessionId connectSession = sessionService.getConnectSession(httpRequest);
         if (connectSession != null) {
-            return new HashMap<String, String>(connectSession.getSessionAttributes());
+            return new HashMap<>(connectSession.getSessionAttributes());
         }
-        return new HashMap<String, String>();
+        return new HashMap<>();
     }
 
     public boolean isAuthenticated() {

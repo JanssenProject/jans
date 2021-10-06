@@ -95,7 +95,9 @@ public class UmaResourceRegistrationWS {
 
             return putResourceImpl(Response.Status.CREATED, authorization, id, resource);
         } catch (Exception ex) {
-            log.error("Exception during resource creation", ex);
+            if (log.isErrorEnabled()) {
+                log.error("Exception during resource creation", ex);
+            }
 
             if (ex instanceof WebApplicationException) {
                 throw (WebApplicationException) ex;
@@ -115,7 +117,9 @@ public class UmaResourceRegistrationWS {
         try {
             return putResourceImpl(Response.Status.OK, authorization, rsid, resource);
         } catch (Exception ex) {
-            log.error("Exception during resource update, rsId: " + rsid + ", message: " + ex.getMessage(), ex);
+            if (log.isErrorEnabled()) {
+                log.error("Exception during resource update, rsId: " + rsid + ", message: " + ex.getMessage(), ex);
+            }
 
             if (ex instanceof WebApplicationException) {
                 throw (WebApplicationException) ex;
@@ -159,7 +163,9 @@ public class UmaResourceRegistrationWS {
 
             return builder.build();
         } catch (Exception ex) {
-            log.error("Exception happened", ex);
+            if (log.isErrorEnabled()) {
+                log.error("Exception happened", ex);
+            }
             if (ex instanceof WebApplicationException) {
                 throw (WebApplicationException) ex;
             }
@@ -195,7 +201,7 @@ public class UmaResourceRegistrationWS {
             final List<io.jans.as.model.uma.persistence.UmaResource> ldapResources = resourceService
                     .getResourcesByAssociatedClient(clientDn);
 
-            final List<String> result = new ArrayList<String>(ldapResources.size());
+            final List<String> result = new ArrayList<>(ldapResources.size());
             for (io.jans.as.model.uma.persistence.UmaResource ldapResource : ldapResources) {
 
                 // if scope parameter is not null then filter by it, otherwise just add to result
@@ -239,7 +245,9 @@ public class UmaResourceRegistrationWS {
 
             return Response.status(Response.Status.NO_CONTENT).build();
         } catch (Exception ex) {
-            log.error("Error on DELETE Resource - " + ex.getMessage(), ex);
+            if (log.isErrorEnabled()) {
+                log.error("Error on DELETE Resource - " + ex.getMessage(), ex);
+            }
 
             if (ex instanceof WebApplicationException) {
                 throw (WebApplicationException) ex;
@@ -250,7 +258,9 @@ public class UmaResourceRegistrationWS {
     }
 
     private Response putResourceImpl(Response.Status status, String authorization, String rsid, io.jans.as.model.uma.UmaResource resource) throws IOException {
-        log.trace("putResourceImpl, rsid: {}, status: {}", rsid, status.name());
+        if (log.isTraceEnabled()) {
+            log.trace("putResourceImpl, rsid: {}, status: {}", rsid, status.name());
+        }
 
         errorResponseFactory.validateComponentEnabled(ComponentType.UMA);
 
@@ -306,7 +316,7 @@ public class UmaResourceRegistrationWS {
         ldapResource.setDn(resourceDn);
         ldapResource.setScopes(scopeDNs);
         ldapResource.setScopeExpression(resource.getScopeExpression());
-        ldapResource.setClients(new ArrayList<String>(Collections.singletonList(clientDn)));
+        ldapResource.setClients(new ArrayList<>(Collections.singletonList(clientDn)));
         ldapResource.setType(resource.getType());
         ldapResource.setCreationDate(iat);
         ldapResource.setExpirationDate(exp);
@@ -361,7 +371,7 @@ public class UmaResourceRegistrationWS {
     }
 
     private <T> T throwNotFoundException(String rsid) {
-        log.error("Specified resource description doesn't exist, id: " + rsid);
+        log.error("Specified resource description doesn't exist, id: {}", rsid);
         throw errorResponseFactory.createWebApplicationException(Response.Status.NOT_FOUND, io.jans.as.model.uma.UmaErrorResponseType.NOT_FOUND, "Resource does not exists.");
     }
 
