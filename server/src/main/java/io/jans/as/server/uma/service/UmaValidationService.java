@@ -41,7 +41,6 @@ import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.util.StringHelper;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
-import org.python.google.common.base.Function;
 import org.python.google.common.collect.Iterables;
 import org.slf4j.Logger;
 
@@ -156,11 +155,11 @@ public class UmaValidationService {
                 if (rpt.isValid()) {
                     return rpt;
                 } else {
-                    log.error("RPT is not valid. Revoked: " + rpt.isRevoked() + ", Expired: " + rpt.isExpired() + ", rptCode: " + rptCode);
-                    throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, INVALID_RPT, "RPT is not valid. Revoked: " + rpt.isRevoked() + ", Expired: " + rpt.isExpired() + ", rptCode: " + rptCode);
+                    log.error("RPT is not valid. Revoked: {}, Expired: {}, rptCode: {}", rpt.isRevoked(), rpt.isExpired(), rptCode);
+                    throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, INVALID_RPT, String.format("RPT is not valid. Revoked: %s, Expired: %s, rptCode: %s", rpt.isRevoked(), rpt.isExpired(), rptCode));
                 }
             } else {
-                log.error("RPT is null, rptCode: " + rptCode);
+                log.error("RPT is null, rptCode: {}", rptCode);
                 throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, INVALID_RPT, "RPT is null, rptCode: " + rptCode);
             }
         }
@@ -175,7 +174,7 @@ public class UmaValidationService {
 
     public void validatePermission(UmaPermission permission) {
         if (permission == null || "invalidated".equalsIgnoreCase(permission.getStatus())) {
-            log.error("Permission is null or otherwise invalidated. Status: " + (permission != null ? permission.getStatus() : "No permissions."));
+            log.error("Permission is null or otherwise invalidated. Status: {}", (permission != null ? permission.getStatus() : "No permissions."));
             throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, INVALID_TICKET, "Permission is null or otherwise invalidated. Status: " + (permission != null ? permission.getStatus() : "No permissions."));
         }
 
@@ -213,7 +212,7 @@ public class UmaValidationService {
 
                 final Scope spontaneousScope = umaScopeService.getOrCreate(client, s, Sets.newHashSet(umaScopeService.getScopeIdsByDns(resource.getScopes())));
                 if (spontaneousScope == null) {
-                    log.error("Scope isn't registered and is not allowed by spontaneous scopes. Scope: " + s);
+                    log.error("Scope isn't registered and is not allowed by spontaneous scopes. Scope: {}", s);
                     throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, INVALID_SCOPE, "At least one of the scopes isn't registered");
                 }
             }
@@ -236,13 +235,13 @@ public class UmaValidationService {
 
     public List<UmaPermission> validateTicket(String ticket) {
         if (StringUtils.isBlank(ticket)) {
-            log.error("Ticket is null or blank.");
+            log.error("Ticket is blank.");
             throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, INVALID_TICKET, "Ticket is null or blank.");
         }
 
         List<UmaPermission> permissions = permissionService.getPermissionsByTicket(ticket);
         if (permissions == null || permissions.isEmpty()) {
-            log.error("Unable to find permissions registered for given ticket:" + ticket);
+            log.error("Unable to find permissions registered for given ticket: {}", ticket);
             throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, INVALID_TICKET, "Unable to find permissions registered for given ticket:" + ticket);
         }
         return permissions;
@@ -256,7 +255,7 @@ public class UmaValidationService {
 
         List<UmaPermission> permissions = permissionService.getPermissionsByTicket(ticket);
         if (permissions == null || permissions.isEmpty()) {
-            log.error("Unable to find permissions registered for given ticket:" + ticket);
+            log.error("Unable to find permissions registered for given ticket:{}", ticket);
             throw new UmaWebException(claimsRedirectUri, errorResponseFactory, INVALID_TICKET, state);
         }
         return permissions;
@@ -298,13 +297,13 @@ public class UmaValidationService {
             final Date expiresAt = idToken.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME);
             final Date now = new Date();
             if (now.after(expiresAt)) {
-                log.error("ID Token is expired. (It is after " + now + ").");
+                log.error("ID Token is expired. (It is after {}).", now);
                 return false;
             }
 
             // 1. validate issuer
             if (!issuer.equals(appConfiguration.getIssuer())) {
-                log.error("ID Token issuer is invalid. Token issuer: " + issuer + ", server issuer: " + appConfiguration.getIssuer());
+                log.error("ID Token issuer is invalid. Token issuer: {}, server issuer: {}", issuer, appConfiguration.getIssuer());
                 return false;
             }
 
@@ -345,14 +344,14 @@ public class UmaValidationService {
             if (pct != null) {
                 pct.checkExpired();
                 if (pct.isValid()) {
-                    log.trace("PCT is validated successfully, pct: " + pctCode);
+                    log.trace("PCT is validated successfully, pct: {}", pctCode);
                     return pct;
                 } else {
-                    log.error("PCT is not valid. Revoked: " + pct.isRevoked() + ", Expired: " + pct.isExpired() + ", pctCode: " + pctCode);
+                    log.error("PCT is not valid. Revoked: {}, Expired: {}, pctCode: {}", pct.isRevoked(), pct.isExpired(), pctCode);
                     throw errorResponseFactory.createWebApplicationException(UNAUTHORIZED, INVALID_PCT, "PCT is not valid. Revoked: " + pct.isRevoked() + ", Expired: " + pct.isExpired() + ", pctCode: " + pctCode);
                 }
             } else {
-                log.error("Failed to find PCT with pctCode: " + pctCode);
+                log.error("Failed to find PCT with pctCode: {}", pctCode);
                 throw errorResponseFactory.createWebApplicationException(UNAUTHORIZED, INVALID_PCT, "Failed to find PCT with pctCode: " + pctCode);
             }
         }
@@ -368,7 +367,7 @@ public class UmaValidationService {
         scope = ServerUtil.urlDecode(scope);
         final String[] scopesRequested = StringUtils.isNotBlank(scope) ? scope.split(" ") : new String[0];
 
-        final Map<Scope, Boolean> result = new HashMap<Scope, Boolean>();
+        final Map<Scope, Boolean> result = new HashMap<>();
 
         if (ArrayUtils.isNotEmpty(scopesRequested)) {
             final Set<String> resourceScopes = resourceService.getResourceScopes(permissions.stream().map(UmaPermission::getResourceId).collect(Collectors.toSet()));
@@ -377,7 +376,7 @@ public class UmaValidationService {
                 if (ldapScope != null) {
                     result.put(ldapScope, true);
                 } else {
-                    log.trace("Skip requested scope because it's not allowed, scope: " + scopeId);
+                    log.trace("Skip requested scope because it's not allowed, scope: {}", scopeId);
                 }
             }
         }
@@ -390,18 +389,15 @@ public class UmaValidationService {
             log.error("There are no any scopes requested in the request.");
             throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, UmaErrorResponseType.INVALID_SCOPE, "There are no any scopes requested in give request.");
         }
-        log.trace("CandidateGrantedScopes: " + Joiner.on(", ").join(Iterables.transform(result.keySet(), new Function<Scope, String>() {
-            @Override
-            public String apply(Scope scope) {
-                return scope.getId();
-            }
-        })));
+        if (log.isTraceEnabled()) {
+            log.trace("CandidateGrantedScopes: {}", Joiner.on(", ").join(Iterables.transform(result.keySet(), Scope::getId)));
+        }
         return result;
     }
 
     public void validateScopeExpression(String scopeExpression) {
         if (StringUtils.isNotBlank(scopeExpression) && !expressionService.isExpressionValid(scopeExpression)) {
-            log.error("Scope expression is invalid. Expression: " + scopeExpression);
+            log.error("Scope expression is invalid. Expression: {}", scopeExpression);
             throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, UmaErrorResponseType.INVALID_SCOPE, "Scope expression is invalid. Expression: " + scopeExpression);
         }
     }
@@ -419,17 +415,18 @@ public class UmaValidationService {
 
         if (StringUtils.isNotBlank(claimsRedirectUri)) {
             if (ArrayUtils.isEmpty(client.getClaimRedirectUris())) {
-                log.error("Client does not have claims_redirect_uri specified, clientId: " + clientId);
+                log.error("Client does not have claims_redirect_uri specified, clientId: {}", clientId);
                 throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, UmaErrorResponseType.INVALID_CLAIMS_REDIRECT_URI, "Client does not have claims_redirect_uri specified, clientId: " + clientId);
             }
 
             String equalRedirectUri = getEqualRedirectUri(claimsRedirectUri, client.getClaimRedirectUris());
             if (equalRedirectUri != null) {
-                log.trace("Found match for claims_redirect_uri : " + equalRedirectUri);
+                log.trace("Found match for claims_redirect_uri : {}", equalRedirectUri);
                 return client;
-            } else {
-                log.trace("Failed to find match for claims_redirect_uri : " + claimsRedirectUri + ", client claimRedirectUris: " + Arrays.toString(client.getClaimRedirectUris()));
+            } else if (log.isTraceEnabled()) {
+                log.trace("Failed to find match for claims_redirect_uri : {}, client claimRedirectUris: {}", claimsRedirectUri, Arrays.toString(client.getClaimRedirectUris()));
             }
+
         } else {
             log.trace("claims_redirect_uri is blank");
             if (client.getClaimRedirectUris() != null && client.getClaimRedirectUris().length == 1) {
@@ -439,7 +436,7 @@ public class UmaValidationService {
         }
 
         if (StringUtils.isBlank(claimsRedirectUri)) {
-            log.error("claims_redirect_uri is blank and there is none or more then one registered claims_redirect_uri for clientId: " + clientId);
+            log.error("claims_redirect_uri is blank and there is none or more then one registered claims_redirect_uri for clientId: {}", clientId);
             throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, UmaErrorResponseType.INVALID_CLAIMS_REDIRECT_URI, "claims_redirect_uri is blank and there is none or more then one registered claims_redirect_uri for clientId: " + clientId);
         }
 
@@ -480,7 +477,7 @@ public class UmaValidationService {
         if (ServerUtil.isTrue(appConfiguration.getUmaRestrictResourceToAssociatedClient())) {
             final List<String> clients = resourceService.getResourceById(rsId).getClients();
             if (!clients.contains(patClientDn)) {
-                log.error("Access to resource is denied because resource associated client does not match PAT client (it can be switched off if set umaRestrictResourceToAssociatedClient oxauth configuration property to false). Associated clients: " + clients + ", PAT client: " + patClientDn);
+                log.error("Access to resource is denied because resource associated client does not match PAT client (it can be switched off if set umaRestrictResourceToAssociatedClient oxauth configuration property to false). Associated clients: {}, PAT client: {}", clients, patClientDn);
                 throw errorResponseFactory.createWebApplicationException(Response.Status.FORBIDDEN, ACCESS_DENIED, "Access to resource is denied because resource associated client does not match PAT client (it can be switched off if set umaRestrictResourceToAssociatedClient oxauth configuration property to false).");
             }
         }
