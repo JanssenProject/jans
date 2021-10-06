@@ -88,9 +88,9 @@ public class ConfigurationTest extends ConfigurableTest {
 		ldapEntryManager.persist(c);
 	}
 
-	private static AppConfiguration loadConfFromFile(String p_filePath) throws JAXBException {
+	private static AppConfiguration loadConfFromFile(String filePath) throws JAXBException {
 		final JAXBContext jc = JAXBContext.newInstance(AppConfiguration.class);
 		final Unmarshaller u = jc.createUnmarshaller();
-		return (AppConfiguration) u.unmarshal(new File(p_filePath));
+		return (AppConfiguration) u.unmarshal(new File(filePath));
 	}
 }

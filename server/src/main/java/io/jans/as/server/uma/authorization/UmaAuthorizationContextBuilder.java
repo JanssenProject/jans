@@ -59,9 +59,9 @@ public class UmaAuthorizationContextBuilder {
     }
 
     public UmaAuthorizationContext build(CustomScriptConfiguration script) {
-        return new UmaAuthorizationContext(configuration, attributeService, scopes, getResources(), claims,
+        return new UmaAuthorizationContext(configuration, scopes, getResources(), claims,
                 script.getCustomScript().getDn(), httpRequest, script.getConfigurationAttributes(),
-                sessionService, userService, permissionService, client);
+                sessionService, permissionService, client);
     }
 
     public Set<String> getResourceIds() {

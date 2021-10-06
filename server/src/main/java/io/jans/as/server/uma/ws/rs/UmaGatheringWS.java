@@ -110,14 +110,16 @@ public class UmaGatheringWS {
 
             CustomScriptConfiguration script = external.determineScript(scriptNames);
             if (script == null) {
-                log.error("Failed to determine claims-gathering script for names: " + Arrays.toString(scriptNames));
+                if (log.isErrorEnabled()) {
+                    log.error("Failed to determine claims-gathering script for names: {}", Arrays.toString(scriptNames));
+                }
                 throw new UmaWebException(claimRedirectUri, errorResponseFactory, INVALID_CLAIMS_GATHERING_SCRIPT_NAME, state);
             }
 
-            sessionService.configure(session, script.getName(), reset, permissions, clientId, claimRedirectUri, state);
+            sessionService.configure(session, script.getName(), permissions, clientId, claimRedirectUri, state);
 
             UmaGatherContext context = new UmaGatherContext(script.getConfigurationAttributes(), httpRequest, session, sessionService, permissionService,
-                    pctService, new HashMap<String, String>(), userService, null, appConfiguration);
+                    pctService, new HashMap<>(), appConfiguration);
 
             int step = sessionService.getStep(session);
             int stepsCount = external.getStepsCount(script, context);
@@ -136,7 +138,7 @@ public class UmaGatheringWS {
                 log.trace("Redirecting to page: '{}', fullUri: {}", page, fullUri);
                 return Response.status(FOUND).location(new URI(fullUri)).build();
             } else {
-                log.error("Step '{}' is more or equal to stepCount: '{}'", stepsCount);
+                log.error("Step '{}' is more or equal to stepCount: '{}'", step, stepsCount);
             }
         } catch (Exception ex) {
             log.error("Exception happened", ex);
