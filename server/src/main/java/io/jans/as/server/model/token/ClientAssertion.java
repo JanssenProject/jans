@@ -83,8 +83,9 @@ public class ClientAssertion {
 
                     // Validate audience
                     String tokenUrl = appConfiguration.getTokenEndpoint();
+                    String parUrl = StringUtils.isNotBlank(appConfiguration.getParEndpoint()) ? appConfiguration.getParEndpoint() : "";
                     String cibaAuthUrl = appConfiguration.getBackchannelAuthenticationEndpoint();
-                    if (audience != null && (audience.contains(appConfiguration.getIssuer()) || audience.contains(tokenUrl) || audience.contains(cibaAuthUrl))) {
+                    if (audience != null && (audience.contains(appConfiguration.getIssuer()) || audience.contains(tokenUrl) || audience.contains(parUrl) || audience.contains(cibaAuthUrl))) {
 
                         // Validate expiration
                         if (expirationTime.after(new Date())) {

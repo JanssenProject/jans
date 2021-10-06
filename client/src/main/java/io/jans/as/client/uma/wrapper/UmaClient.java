@@ -36,7 +36,11 @@ import java.util.UUID;
 
 public class UmaClient {
 
-    public static Token requestPat(final String tokenUrl, final String clientKeyStoreFile, final String clientKeyStorePassword, final String clientId, final String keyId) throws UmaException {
+    private UmaClient() {
+    }
+
+    public static Token requestPat(final String tokenUrl, final String clientKeyStoreFile, final String clientKeyStorePassword,
+                                   final String clientId, final String keyId) throws UmaException {
         TokenRequest tokenRequest = TokenRequest.builder().pat().grantType(GrantType.CLIENT_CREDENTIALS).build();
 
         return request(tokenUrl, clientKeyStoreFile, clientKeyStorePassword, clientId, keyId, tokenRequest);
@@ -64,11 +68,11 @@ public class UmaClient {
                                 final String umaClientId, final String umaClientSecret,
                                 final String umaRedirectUri, UmaScopeType p_type, String... scopeArray) throws Exception {
         // 1. Request authorization and receive the authorization code.
-        List<ResponseType> responseTypes = new ArrayList<ResponseType>();
+        List<ResponseType> responseTypes = new ArrayList<>();
         responseTypes.add(ResponseType.CODE);
         responseTypes.add(ResponseType.ID_TOKEN);
 
-        List<String> scopes = new ArrayList<String>();
+        List<String> scopes = new ArrayList<>();
         scopes.add(p_type.getValue());
         if (scopeArray != null && scopeArray.length > 0) {
             scopes.addAll(Arrays.asList(scopeArray));
