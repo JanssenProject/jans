@@ -78,11 +78,11 @@ jobs:
                     ;&
             "JanssenProject/jans-config-api")
                   echo "Run Sonar analysis without test execution"
-                  mvn -B -DskipTests=true verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+                  mvn -B -DskipTests=true install org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
                 ;;
             *)
             echo "Run Sonar analysis with test execution"
-            mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+            mvn -B install org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
             ;;
           esac
 
