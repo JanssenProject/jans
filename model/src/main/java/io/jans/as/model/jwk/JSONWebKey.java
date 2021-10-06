@@ -12,10 +12,10 @@ import io.jans.as.model.util.Base64Util;
 import io.jans.as.model.util.JwtUtil;
 import io.jans.as.model.util.StringUtils;
 import io.jans.as.model.util.Util;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.List;
@@ -224,8 +224,8 @@ public class JSONWebKey implements Comparable<JSONWebKey> {
      * @return The thumbprint of a JSON Web Key (JWK)
      * @see <a href="https://datatracker.ietf.org/doc/html/rfc7638">JSON Web Key (JWK) Thumbprint</a>
      */
-    public String getJwkThumbprint() throws UnsupportedEncodingException, NoSuchAlgorithmException, NoSuchProviderException, JWKException {
-        String result = null;
+    public String getJwkThumbprint() throws NoSuchAlgorithmException, NoSuchProviderException, JWKException {
+        String result;
 
         if (kty == null) throw new JWKException("The kty param is required");
 
@@ -297,7 +297,7 @@ public class JSONWebKey implements Comparable<JSONWebKey> {
     }
 
     @Override
-    public int compareTo(JSONWebKey o) {
+    public int compareTo(@NotNull JSONWebKey o) {
         if (this.getExp() == null || o.getExp() == null) {
             return 0;
         }
