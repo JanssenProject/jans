@@ -26,26 +26,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.core.Cookie;
-
-import io.jans.as.model.config.Constants;
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
-import org.jboss.resteasy.client.ClientExecutor;
-import org.jboss.resteasy.client.ClientRequest;
-import org.jboss.resteasy.client.ClientResponse;
-
-import io.jans.as.model.common.AuthenticationMethod;
-import io.jans.as.model.common.AuthorizationMethod;
-import io.jans.as.model.common.HasParamName;
-import io.jans.as.model.util.Util;
-
 /**
  * Allows to retrieve HTTP requests to the authorization server and responses from it for display purposes.
  *
  * @author Javier Rojas Blum
- * @version September 30, 2021
+ * @version October 5, 2021
  */
 public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> {
 
