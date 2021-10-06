@@ -21,7 +21,7 @@ public class Claims {
     private final Jwt claimsToken;
     private final String claimsTokenAsString;
     private final UmaPCT pct;
-    private final Map<String, Object> claims = new ConcurrentHashMap<String, Object>();
+    private final Map<String, Object> claimMap = new ConcurrentHashMap<>();
 
     public Claims(Jwt claimsToken, UmaPCT pct, String claimsTokenAsString) {
         this.claimsToken = claimsToken;
@@ -34,7 +34,7 @@ public class Claims {
     }
 
     public Set<String> keys() {
-        return claims.keySet();
+        return claimMap.keySet();
     }
 
     public Object get(String key) {
@@ -42,8 +42,8 @@ public class Claims {
             return null;
         }
 
-        if (claims.containsKey(key)) {
-            return claims.get(key);
+        if (claimMap.containsKey(key)) {
+            return claimMap.get(key);
         } else if (claimsToken != null && claimsToken.getClaims() != null && claimsToken.getClaims().hasClaim(key)) {
             return claimsToken.getClaims().getClaim(key);
         } else if (pct != null && pct.getClaims() != null && pct.getClaims().hasClaim(key)) {
@@ -71,10 +71,10 @@ public class Claims {
     }
 
     public void put(String key, Object value) {
-        claims.put(key, value);
+        claimMap.put(key, value);
     }
 
     public void removeClaim(String key) {
-        claims.remove(key);
+        claimMap.remove(key);
     }
 }
