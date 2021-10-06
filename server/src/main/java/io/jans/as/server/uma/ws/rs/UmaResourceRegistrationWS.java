@@ -43,6 +43,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import static io.jans.as.model.util.Util.escapeLog;
+
 /**
  * The API available at the resource registration endpoint enables the resource server to put resources under
  * the protection of an authorization server on behalf of the resource owner and manage them over time.
@@ -118,7 +120,7 @@ public class UmaResourceRegistrationWS {
             return putResourceImpl(Response.Status.OK, authorization, rsid, resource);
         } catch (Exception ex) {
             if (log.isErrorEnabled()) {
-                log.error("Exception during resource update, rsId: " + rsid + ", message: " + ex.getMessage(), ex);
+                log.error("Exception during resource update, rsId: " + escapeLog(rsid) + ", message: " + ex.getMessage(), ex);
             }
 
             if (ex instanceof WebApplicationException) {
@@ -142,7 +144,9 @@ public class UmaResourceRegistrationWS {
 
             final AuthorizationGrant authorizationGrant = umaValidationService.assertHasProtectionScope(authorization);
             umaValidationService.validateRestrictedByClient(authorizationGrant.getClientDn(), rsid);
-            log.debug("Getting resource description: '{}'", rsid);
+            if (log.isDebugEnabled()) {
+                log.debug("Getting resource description: '{}'", escapeLog(rsid));
+            }
 
             final io.jans.as.model.uma.persistence.UmaResource ldapResource = resourceService.getResourceById(rsid);
 
@@ -259,7 +263,7 @@ public class UmaResourceRegistrationWS {
 
     private Response putResourceImpl(Response.Status status, String authorization, String rsid, io.jans.as.model.uma.UmaResource resource) throws IOException {
         if (log.isTraceEnabled()) {
-            log.trace("putResourceImpl, rsid: {}, status: {}", rsid, status.name());
+            log.trace("putResourceImpl, rsid: {}, status: {}", escapeLog(rsid), status.name());
         }
 
         errorResponseFactory.validateComponentEnabled(ComponentType.UMA);
@@ -289,7 +293,9 @@ public class UmaResourceRegistrationWS {
     }
 
     private io.jans.as.model.uma.persistence.UmaResource addResource(String rsid, io.jans.as.model.uma.UmaResource resource, String userDn, String clientDn) {
-        log.debug("Adding new resource: '{}'", rsid);
+        if (log.isDebugEnabled()) {
+            log.debug("Adding new resource: '{}'", escapeLog(rsid));
+        }
 
         final String resourceDn = resourceService.getDnForResource(rsid);
         final List<String> scopeDNs = umaScopeService.getScopeDNsByIdsAndAddToLdapIfNeeded(resource.getScopes());
@@ -337,7 +343,9 @@ public class UmaResourceRegistrationWS {
     }
 
     private io.jans.as.model.uma.persistence.UmaResource updateResource(String rsid, io.jans.as.model.uma.UmaResource resource) {
-        log.debug("Updating resource description: '{}'.", rsid);
+        if (log.isDebugEnabled()) {
+            log.debug("Updating resource description: '{}'.", escapeLog(rsid));
+        }
 
         io.jans.as.model.uma.persistence.UmaResource ldapResource = resourceService.getResourceById(rsid);
         if (ldapResource == null) {
@@ -371,7 +379,9 @@ public class UmaResourceRegistrationWS {
     }
 
     private <T> T throwNotFoundException(String rsid) {
-        log.error("Specified resource description doesn't exist, id: {}", rsid);
+        if (log.isErrorEnabled()) {
+            log.error("Specified resource description doesn't exist, id: {}", escapeLog(rsid));
+        }
         throw errorResponseFactory.createWebApplicationException(Response.Status.NOT_FOUND, io.jans.as.model.uma.UmaErrorResponseType.NOT_FOUND, "Resource does not exists.");
     }
 
