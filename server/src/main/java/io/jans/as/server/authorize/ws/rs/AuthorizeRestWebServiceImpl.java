@@ -839,14 +839,20 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         cibaRequestService.removeCibaRequest(authReqId);
         CIBAGrant cibaGrant = authorizationGrantList.createCIBAGrant(cibaRequest);
 
-        RefreshToken refreshToken = cibaGrant.createRefreshToken();
-        log.debug("Issuing refresh token: {}", refreshToken.getCode());
-
         AccessToken accessToken = cibaGrant.createAccessToken(httpRequest.getHeader("X-ClientCert"), new ExecutionContext(httpRequest, httpResponse));
         log.debug("Issuing access token: {}", accessToken.getCode());
 
         ExternalUpdateTokenContext context = new ExternalUpdateTokenContext(httpRequest, cibaGrant, client, appConfiguration, attributeService);
         Function<JsonWebResponse, Void> postProcessor = externalUpdateTokenService.buildModifyIdTokenProcessor(context);
+
+        final int refreshTokenLifetimeInSeconds = externalUpdateTokenService.getRefreshTokenLifetimeInSeconds(context);
+        final RefreshToken refreshToken;
+        if (refreshTokenLifetimeInSeconds > 0) {
+            refreshToken = cibaGrant.createRefreshToken(refreshTokenLifetimeInSeconds);
+        } else {
+            refreshToken = cibaGrant.createRefreshToken();
+        }
+        log.debug("Issuing refresh token: {}", (refreshToken != null ? refreshToken.getCode() : ""));
 
         IdToken idToken = cibaGrant.createIdToken(
                 null, null, accessToken, refreshToken,
@@ -861,7 +867,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     cibaGrant.getClient().getBackchannelClientNotificationEndpoint(),
                     cibaRequest.getClientNotificationToken(),
                     accessToken.getCode(),
-                    refreshToken.getCode(),
+                    refreshToken != null ? refreshToken.getCode() : null,
                     idToken.getCode(),
                     accessToken.getExpiresIn()
             );
