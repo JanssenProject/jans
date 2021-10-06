@@ -867,7 +867,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     cibaGrant.getClient().getBackchannelClientNotificationEndpoint(),
                     cibaRequest.getClientNotificationToken(),
                     accessToken.getCode(),
-                    refreshToken.getCode(),
+                    refreshToken != null ? refreshToken.getCode() : null,
                     idToken.getCode(),
                     accessToken.getExpiresIn()
             );
