@@ -21,7 +21,7 @@ public class AuthService {
         return AuthClientFactory.getStatResponse(url, token, month, format);
     }
     
-    public Response getHealthCheckResponse(String url) {
+    public JsonNode getHealthCheckResponse(String url) {
         return AuthClientFactory.getHealthCheckResponse(url);
     }
 
