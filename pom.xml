@@ -13,8 +13,8 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.min-version>3.0.3</maven.min-version>
 
-		<resteasy.version>3.15.1.Final</resteasy.version>
-		<resteasy.jaxrs.version>3.15.1.Final</resteasy.jaxrs.version>
+		<resteasy.version>3.15.2.Final</resteasy.version>
+		<resteasy.jaxrs.version>3.15.2.Final</resteasy.jaxrs.version>
 
 		<httpcore.version>4.4.14</httpcore.version>
 		<httpclient.version>4.5.13</httpclient.version>
@@ -59,6 +59,11 @@
 			<name>Bouncy Castle</name>
 			<url>https://repo2.maven.org/maven2/org/bouncycastle</url>
 		</repository>
+        <repository>
+            <id>mulesoft</id>
+            <name>mulesoft</name>
+            <url>https://repository.mulesoft.org/nexus/content/repositories/releases</url>
+        </repository>
 	</repositories>
 
 	<dependencyManagement>
@@ -604,6 +609,16 @@
 				<artifactId>opensaml</artifactId>
 				<version>2.6.4</version>
 			</dependency>
+            <dependency>
+                <groupId>org.owasp.esapi</groupId>
+                <artifactId>esapi</artifactId>
+                <version>2.1.0.1</version>
+            </dependency>
+            <dependency>
+                <groupId>ca.juliusdavies</groupId>
+                <artifactId>not-yet-commons-ssl</artifactId>
+                <version>0.3.17</version>
+            </dependency>
 			<dependency>
 			    <groupId>org.apache.santuario</groupId>
 			    <artifactId>xmlsec</artifactId>
