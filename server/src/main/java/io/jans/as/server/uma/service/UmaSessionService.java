@@ -44,7 +44,7 @@ public class UmaSessionService {
 
     public SessionId getConnectSession(HttpServletRequest httpRequest) {
         String cookieId = cookieService.getSessionIdFromCookie(httpRequest);
-        log.trace("Cookie - session_id: " + cookieId);
+        log.trace("Cookie - session_id: {}", cookieId);
         if (StringUtils.isNotBlank(cookieId)) {
             return sessionIdService.getSessionId(cookieId);
         }
@@ -53,24 +53,26 @@ public class UmaSessionService {
 
     public SessionId getSession(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
         String cookieId = cookieService.getUmaSessionIdFromCookie(httpRequest);
-        log.trace("Cookie - uma_session_id: " + cookieId);
+        log.trace("Cookie - uma_session_id: {}", cookieId);
 
         if (StringUtils.isNotBlank(cookieId)) {
             SessionId sessionId = sessionIdService.getSessionId(cookieId);
             if (sessionId != null) {
-                log.trace("Loaded uma_session_id from cookie, session: " + sessionId);
+                log.trace("Loaded uma_session_id from cookie, session: {}", sessionId);
                 return sessionId;
             } else {
-                log.error("Failed to load uma_session_id from cookie: " + cookieId);
+                log.error("Failed to load uma_session_id from cookie: {}", cookieId);
             }
         } else {
             log.error("uma_session_id cookie is not set.");
         }
 
         log.trace("Generating new uma_session_id ...");
-        SessionId session = sessionIdService.generateAuthenticatedSessionId(httpRequest, "", new HashMap<String, String>() {{
-            put("uma", "true");
-        }});
+
+        final HashMap<String, String> sessionIdAttributes = new HashMap<>();
+        sessionIdAttributes.put("uma", "true");
+
+        SessionId session = sessionIdService.generateAuthenticatedSessionId(httpRequest, "", sessionIdAttributes);
 
         cookieService.createSessionIdCookie(session, httpRequest, httpResponse, true);
         log.trace("uma_session_id cookie created.");
@@ -81,7 +83,7 @@ public class UmaSessionService {
         try {
 
             if (sessionIdService.updateSessionId(session, true, true, true)) {
-                log.trace("Session persisted successfully. Session: " + session);
+                log.trace("Session persisted successfully. Session: {}", session);
                 return true;
             }
         } catch (Exception e) {
@@ -104,7 +106,7 @@ public class UmaSessionService {
         session.getSessionAttributes().put("step", Integer.toString(step));
     }
 
-    public void configure(SessionId session, String scriptName, Boolean reset, List<UmaPermission> permissions,
+    public void configure(SessionId session, String scriptName, List<UmaPermission> permissions,
                           String clientId, String claimRedirectUri, String state) {
         setStep(1, session);
         setState(session, state);
@@ -202,7 +204,7 @@ public class UmaSessionService {
         setStep(overridenNextStep, session);
     }
 
-    public User getUser(HttpServletRequest httpRequest, String... returnAttributes) {
+    public User getUser(HttpServletRequest httpRequest) {
         return sessionIdService.getUser(getConnectSession(httpRequest));
     }
 

@@ -10,8 +10,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
-import io.jans.as.common.service.AttributeService;
-import io.jans.as.common.service.common.UserService;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.uma.persistence.UmaPermission;
 import io.jans.as.model.uma.persistence.UmaResource;
@@ -46,29 +44,25 @@ public class UmaAuthorizationContext extends ExternalScriptContext {
     private final RedirectParameters redirectUserParameters = new RedirectParameters();
     private final AppConfiguration configuration;
 
-    private final AttributeService attributeService;
     private final UmaSessionService sessionService;
-    private final UserService userService;
     private final UmaPermissionService permissionService;
     private final Client client;
 
-    public UmaAuthorizationContext(AppConfiguration configuration, AttributeService attributeService, Map<Scope, Boolean> scopes,
+    public UmaAuthorizationContext(AppConfiguration configuration, Map<Scope, Boolean> scopes,
                                    Set<UmaResource> resources, Claims claims, String scriptDn, HttpServletRequest httpRequest,
                                    Map<String, SimpleCustomProperty> configurationAttributes, UmaSessionService sessionService,
-                                   UserService userService, UmaPermissionService permissionService, Client client) {
+                                   UmaPermissionService permissionService, Client client) {
         super(httpRequest);
 
         this.configuration = configuration;
-        this.attributeService = attributeService;
         this.sessionService = sessionService;
-        this.userService = userService;
         this.permissionService = permissionService;
         this.client = client;
-        this.scopes = new HashMap<Scope, Boolean>(scopes);
+        this.scopes = new HashMap<>(scopes);
         this.resources = resources;
         this.claims = claims;
         this.scriptDn = scriptDn;
-        this.configurationAttributes = configurationAttributes != null ? configurationAttributes : new HashMap<String, SimpleCustomProperty>();
+        this.configurationAttributes = configurationAttributes != null ? configurationAttributes : new HashMap<>();
     }
 
     public String getClaimToken() {
@@ -96,7 +90,7 @@ public class UmaAuthorizationContext extends ExternalScriptContext {
     }
 
     public Set<String> getScopes() {
-        Set<String> result = new HashSet<String>();
+        Set<String> result = new HashSet<>();
         for (Scope scope : getScopeMap().keySet()) {
             result.add(scope.getId());
         }
@@ -107,7 +101,7 @@ public class UmaAuthorizationContext extends ExternalScriptContext {
      * @return scopes that are bound to currently executed script
      */
     public Set<String> getScriptScopes() {
-        Set<String> result = new HashSet<String>();
+        Set<String> result = new HashSet<>();
         for (Scope scope : getScopeMap().keySet()) {
             if (scope.getUmaAuthorizationPolicies() != null && scope.getUmaAuthorizationPolicies().contains(scriptDn)) {
                 result.add(scope.getId());
@@ -125,7 +119,7 @@ public class UmaAuthorizationContext extends ExternalScriptContext {
     }
 
     public Set<String> getResourceIds() {
-        Set<String> result = new HashSet<String>();
+        Set<String> result = new HashSet<>();
         for (UmaResource resource : resources) {
             result.add(resource.getId());
         }
@@ -168,8 +162,8 @@ public class UmaAuthorizationContext extends ExternalScriptContext {
         return redirectUserParameters.map();
     }
 
-    public User getUser(String... returnAttributes) {
-        return sessionService.getUser(httpRequest, returnAttributes);
+    public User getUser() {
+        return sessionService.getUser(httpRequest);
     }
 
     public boolean isAuthenticated() {

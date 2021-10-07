@@ -169,8 +169,8 @@ public class JwtAuthorizationRequest {
 
                 String signingInput = encodedHeader + "." + encodedClaim;
                 String header = new String(Base64Util.base64urldecode(encodedHeader), StandardCharsets.UTF_8);
-                String payload = new String(Base64Util.base64urldecode(encodedClaim), StandardCharsets.UTF_8);
-                payload = payload.replace("\\", "");
+                String payloadString = new String(Base64Util.base64urldecode(encodedClaim), StandardCharsets.UTF_8);
+                payloadString = payloadString.replace("\\", "");
 
                 loadHeader(header);
 
@@ -178,14 +178,14 @@ public class JwtAuthorizationRequest {
                 if (sigAlg == null) {
                     throw new InvalidJwtException("The JWT algorithm is not supported");
                 }
-                if (sigAlg == SignatureAlgorithm.NONE && appConfiguration.getFapiCompatibility()) {
+                if (sigAlg == SignatureAlgorithm.NONE && appConfiguration.isFapi()) {
                     throw new InvalidJwtException("None algorithm is not allowed for FAPI");
                 }
                 if (!validateSignature(cryptoProvider, sigAlg, client, signingInput, encodedSignature)) {
                     throw new InvalidJwtException("The JWT signature is not valid");
                 }
 
-                loadPayload(payload);
+                loadPayload(payloadString);
             } else {
                 throw new InvalidJwtException("The JWT is not well formed");
             }
@@ -528,28 +528,27 @@ public class JwtAuthorizationRequest {
     }
 
     private void validate() throws InvalidJwtException {
-        if (appConfiguration.getFapiCompatibility()) {
+        if (appConfiguration.isFapi()) {
             validateFapi();
         }
     }
 
     private void validateFapi() throws InvalidJwtException {
-        final Integer nbf = getNbf();
         if (nbf == null || nbf <= 0) { // https://github.com/JanssenProject/jans-auth-server/issues/164 fapi1-advanced-final-ensure-request-object-without-nbf-fails
-            log.error("nbf claim is not set, nbf: " + nbf);
+            log.error("nbf claim is not set, nbf: {}", nbf);
             throw new InvalidJwtException("nbf claim is not set");
         }
         final long nowSeconds = System.currentTimeMillis() / 1000;
         final long nbfDiff = nowSeconds - nbf;
         if (nbfDiff > SIXTY_MINUTES_AS_SECONDS) { // https://github.com/JanssenProject/jans-auth-server/issues/166
-            log.error("nbf claim is more then 60 Minutes in the past, nbf: " + nbf + ", nowSeconds: " + nowSeconds);
+            log.error("nbf claim is more then 60 Minutes in the past, nbf: {}, nowSeconds: {}", nbf, nowSeconds);
             throw new InvalidJwtException("nbf claim is more then 60 in the past");
         }
-        final Integer exp = getExp();
+
         final long nowSecondsExp = System.currentTimeMillis() / 1000;
         final long expDiff = exp - nowSecondsExp;
         if (expDiff > SIXTY_MINUTES_AS_SECONDS) {  //https://github.com/JanssenProject/jans-auth-server/issues/165
-            log.error("exp claim is more then 60 minutes in the future, exp: " + exp + ", nowSecondsExp: " + nowSecondsExp);
+            log.error("exp claim is more then 60 minutes in the future, exp: {}, nowSecondsExp: {}", exp, nowSecondsExp);
             throw new InvalidJwtException("exp claim is more then 60 in the future");
         }
 
