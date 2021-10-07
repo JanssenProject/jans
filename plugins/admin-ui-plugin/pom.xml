@@ -95,6 +95,7 @@
     </dependencies>
 
     <build>
+        <finalName>admin-ui-plugin</finalName>
         <testResources>
             <testResource>
                 <directory>src/test/resources</directory>
@@ -143,6 +144,30 @@
                             <failIfNoTests>false</failIfNoTests>
                             <excludedGroups>!integration</excludedGroups>
                             <groups>integration</groups>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <id>deploy-to-local-folder</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>../target/plugins</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.build.directory}</directory>
+                                    <include>*-distribution.jar</include>
+                                    <filtering>false</filtering>
+                                </resource>
+                            </resources>
                         </configuration>
                     </execution>
                 </executions>
