@@ -50,7 +50,8 @@ logging:
 
   # Logger-specific levels.
   loggers:
-    io.jans: TRACE
+    io.jans: INFO
+    org.reflections.Reflections: ERROR
 
 # Logback's Time Based Rolling Policy - archivedLogFilenamePattern: /tmp/application-%d{yyyy-MM-dd}.log.gz
 # Logback's Size and Time Based Rolling Policy -  archivedLogFilenamePattern: /tmp/application-%d{yyyy-MM-dd}-%i.log.gz
@@ -83,7 +84,7 @@ defaultSiteConfig:
   token_endpoint_auth_method: ''
   token_endpoint_auth_signing_alg: ''
   request_uris: []
-  front_channel_logout_uri: []
+  front_channel_logout_uri: ''
   sector_identifier_uri: ''
   claims_redirect_uri: []
   client_id: ''
