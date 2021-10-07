@@ -14,14 +14,14 @@ package io.jans.as.server.uma.authorization;
 public enum PolicyExternalAuthorizationEnum implements IPolicyExternalAuthorization {
     TRUE(true), FALSE(false);
 
-    private final boolean m_result;
+    private final boolean result;
 
-    PolicyExternalAuthorizationEnum(boolean p_result) {
-        m_result = p_result;
+    PolicyExternalAuthorizationEnum(boolean result) {
+        this.result = result;
     }
 
     @Override
-    public boolean authorize(UmaAuthorizationContext p_authorizationContext) {
-        return m_result;
+    public boolean authorize(UmaAuthorizationContext authorizationContext) {
+        return result;
     }
 }

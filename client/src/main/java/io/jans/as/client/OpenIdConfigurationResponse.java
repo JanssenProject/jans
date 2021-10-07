@@ -79,7 +79,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
     private Boolean backchannelLogoutSessionSupported;
     private String opPolicyUri;
     private String opTosUri;
-    private Map<String, List<String>> scopeToClaimsMapping = new HashMap<String, List<String>>();
+    private Map<String, List<String>> scopeToClaimsMapping = new HashMap<>();
     private Map<String, Object> mltsAliases = new HashMap<>();
 
     // CIBA
@@ -99,48 +99,48 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
     public OpenIdConfigurationResponse(int status) {
         super(status);
 
-        scopesSupported = new ArrayList<String>();
-        responseTypesSupported = new ArrayList<String>();
+        scopesSupported = new ArrayList<>();
+        responseTypesSupported = new ArrayList<>();
         responseModesSupported = new ArrayList<>();
-        grantTypesSupported = new ArrayList<String>();
-        acrValuesSupported = new ArrayList<String>();
-        subjectTypesSupported = new ArrayList<String>();
+        grantTypesSupported = new ArrayList<>();
+        acrValuesSupported = new ArrayList<>();
+        subjectTypesSupported = new ArrayList<>();
         authorizationSigningAlgValuesSupported = new ArrayList<>();
         authorizationEncryptionAlgValuesSupported = new ArrayList<>();
         authorizationEncryptionEncValuesSupported = new ArrayList<>();
-        userInfoSigningAlgValuesSupported = new ArrayList<String>();
-        userInfoEncryptionAlgValuesSupported = new ArrayList<String>();
-        userInfoEncryptionEncValuesSupported = new ArrayList<String>();
-        idTokenSigningAlgValuesSupported = new ArrayList<String>();
-        idTokenEncryptionAlgValuesSupported = new ArrayList<String>();
-        idTokenEncryptionEncValuesSupported = new ArrayList<String>();
-        requestObjectSigningAlgValuesSupported = new ArrayList<String>();
-        requestObjectEncryptionAlgValuesSupported = new ArrayList<String>();
-        requestObjectEncryptionEncValuesSupported = new ArrayList<String>();
-        tokenEndpointAuthMethodsSupported = new ArrayList<String>();
-        tokenEndpointAuthSigningAlgValuesSupported = new ArrayList<String>();
-        displayValuesSupported = new ArrayList<String>();
-        claimTypesSupported = new ArrayList<String>();
-        claimsSupported = new ArrayList<String>();
-        idTokenTokenBindingCnfValuesSupported = new ArrayList<String>();
-        claimsLocalesSupported = new ArrayList<String>();
-        uiLocalesSupported = new ArrayList<String>();
+        userInfoSigningAlgValuesSupported = new ArrayList<>();
+        userInfoEncryptionAlgValuesSupported = new ArrayList<>();
+        userInfoEncryptionEncValuesSupported = new ArrayList<>();
+        idTokenSigningAlgValuesSupported = new ArrayList<>();
+        idTokenEncryptionAlgValuesSupported = new ArrayList<>();
+        idTokenEncryptionEncValuesSupported = new ArrayList<>();
+        requestObjectSigningAlgValuesSupported = new ArrayList<>();
+        requestObjectEncryptionAlgValuesSupported = new ArrayList<>();
+        requestObjectEncryptionEncValuesSupported = new ArrayList<>();
+        tokenEndpointAuthMethodsSupported = new ArrayList<>();
+        tokenEndpointAuthSigningAlgValuesSupported = new ArrayList<>();
+        displayValuesSupported = new ArrayList<>();
+        claimTypesSupported = new ArrayList<>();
+        claimsSupported = new ArrayList<>();
+        idTokenTokenBindingCnfValuesSupported = new ArrayList<>();
+        claimsLocalesSupported = new ArrayList<>();
+        uiLocalesSupported = new ArrayList<>();
         backchannelTokenDeliveryModesSupported = new ArrayList<>();
         backchannelAuthenticationRequestSigningAlgValuesSupported = new ArrayList<>();
     }
 
-    public static Map<String, List<String>> parseScopeToClaimsMapping(String p_scopeToClaimsJson) throws JSONException {
-        return parseScopeToClaimsMapping(new JSONArray(p_scopeToClaimsJson));
+    public static Map<String, List<String>> parseScopeToClaimsMapping(String scopeToClaimsJson) throws JSONException {
+        return parseScopeToClaimsMapping(new JSONArray(scopeToClaimsJson));
     }
 
-    public static Map<String, List<String>> parseScopeToClaimsMapping(JSONArray p_jsonArray) throws JSONException {
-        final Map<String, List<String>> map = new HashMap<String, List<String>>();
-        if (p_jsonArray != null) {
-            for (int i = 0; i < p_jsonArray.length(); i++) {
-                final JSONObject obj = p_jsonArray.getJSONObject(i);
+    public static Map<String, List<String>> parseScopeToClaimsMapping(JSONArray jsonArray) throws JSONException {
+        final Map<String, List<String>> map = new HashMap<>();
+        if (jsonArray != null) {
+            for (int i = 0; i < jsonArray.length(); i++) {
+                final JSONObject obj = jsonArray.getJSONObject(i);
                 final String scope = obj.names().getString(0);
                 final JSONArray claimsArray = obj.getJSONArray(scope);
-                final List<String> claimsList = new ArrayList<String>();
+                final List<String> claimsList = new ArrayList<>();
                 for (int j = 0; j < claimsArray.length(); j++) {
                     final String claim = claimsArray.getString(j);
                     if (StringUtils.isNotBlank(claim)) {
@@ -168,12 +168,12 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
     /**
      * Sets scope to claim map.
      *
-     * @param p_scopeToClaimsMapping scope to claim map
+     * @param scopeToClaimsMapping scope to claim map
      * @deprecated this parameter will be moved from /.well-known/openid-configuration to /.well-known/gluu-configuration
      */
     @Deprecated
-    public void setScopeToClaimsMapping(Map<String, List<String>> p_scopeToClaimsMapping) {
-        scopeToClaimsMapping = p_scopeToClaimsMapping;
+    public void setScopeToClaimsMapping(Map<String, List<String>> scopeToClaimsMapping) {
+        this.scopeToClaimsMapping = scopeToClaimsMapping;
     }
 
     /**
@@ -386,8 +386,8 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
      * @deprecated this parameter will be moved from /.well-known/openid-configuration to /.well-known/gluu-configuration
      */
     @Deprecated
-    public void setIdGenerationEndpoint(String p_idGenerationEndpoint) {
-        idGenerationEndpoint = p_idGenerationEndpoint;
+    public void setIdGenerationEndpoint(String idGenerationEndpoint) {
+        this.idGenerationEndpoint = idGenerationEndpoint;
     }
 
     /**
@@ -402,8 +402,8 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
      * @deprecated this parameter will be moved from /.well-known/openid-configuration to /.well-known/gluu-configuration
      */
     @Deprecated
-    public void setIntrospectionEndpoint(String p_introspectionEndpoint) {
-        introspectionEndpoint = p_introspectionEndpoint;
+    public void setIntrospectionEndpoint(String introspectionEndpoint) {
+        this.introspectionEndpoint = introspectionEndpoint;
     }
 
     public String getParEndpoint() {
