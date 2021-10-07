@@ -35,7 +35,7 @@ public class HealthCheckResource extends BaseResource {
     public Response getHealthCheckStatus() {      
         String url = getIssuer() + HEALTH_CHECK_URL;
         JsonNode jsonNode = authService.getHealthCheckResponse(url);
-        logger.error("StatResource::getUserStatistics() - jsonNode:{} ",jsonNode);
+        logger.debug("StatResource::getUserStatistics() - jsonNode:{} ",jsonNode);
         return Response.ok(jsonNode).build();
     }
 

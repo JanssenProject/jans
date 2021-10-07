@@ -38,9 +38,6 @@ public class ApiProtectionService {
     Logger log;
 
     @Inject
-    ApiProtectionCache apiProtectionCache;
-
-    @Inject
     ScopeService scopeService;
 
     @Inject
@@ -70,7 +67,7 @@ public class ApiProtectionService {
 
         createScopeIfNeeded(apiProtectionType);
         log.trace("ApiProtectionService:::verifyResources() - allScopes:{}, allResources:{} ",
-                apiProtectionCache.getAllScopes(), apiProtectionCache.getAllResources());
+                ApiProtectionCache.getAllScopes(), ApiProtectionCache.getAllResources());
 
         updateScopeForClientIfNeeded(clientId);
 
@@ -88,14 +85,14 @@ public class ApiProtectionService {
                 rsScopes = condition.getScopes();
                 log.trace("ApiProtectionService:::createScopeIfNeeded() - resourceName:{}, rsScopes:{} ",resourceName, rsScopes);
 
-              /*  if(rsScopes==null || rsScopes.size()==0) {
+               if(rsScopes==null || rsScopes.size()==0) {
                     return;
-                }*/
+                }
                 for (String scopeName : rsScopes) {
                     log.trace("ApiProtectionService:::createScopeIfNeeded() - scopeName:{} ",scopeName);
                     // Check in cache
-                    Scope scope = apiProtectionCache.getScope(scopeName);
-                    log.trace("ApiProtectionService:::createScopeIfNeeded() -apiProtectionCache.getScope(scopeName):{}", apiProtectionCache.getScope(scopeName));
+                    Scope scope = ApiProtectionCache.getScope(scopeName);
+                    log.trace("ApiProtectionService:::createScopeIfNeeded() -apiProtectionCache.getScope(scopeName):{}", ApiProtectionCache.getScope(scopeName));
 
                     if (scope != null) {
                         log.trace("Scope - '" + scopeName + "' exists in cache.");
@@ -149,11 +146,11 @@ public class ApiProtectionService {
 
                     // Add to scope cache
                     scopeList.add(scope);
-                    apiProtectionCache.putScope(scope);
+                    ApiProtectionCache.putScope(scope);
                 } // for scopes
 
                 // Add to resource cache
-                apiProtectionCache.putResource(resourceName, scopeList);
+                ApiProtectionCache.putResource(resourceName, scopeList);
                 log.trace("ApiProtectionService:::createScopeIfNeeded() - resourceName:{}, scopeList:{}",resourceName,scopeList);
             } // condition
         }
