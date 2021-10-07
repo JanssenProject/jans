@@ -1,6 +1,6 @@
 package io.jans.configapi.plugin.adminui.rest.logging;
 
-import io.jans.configapi.plugin.adminui.service.config.AUIConfigurationService;
+import io.jans.configapi.plugin.adminui.utils.ErrorResponse;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
@@ -21,18 +21,15 @@ public class AuditLoggerResource {
     @Inject
     Logger log;
 
-    @Inject
-    AUIConfigurationService auiConfigurationService;
-
     @POST
     @Path(AUDIT)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response auditLogging(@Valid @NotNull Map<String, Object> loggingRequest) throws Exception {
+    public Response auditLogging(@Valid @NotNull Map<String, Object> loggingRequest) {
         try {
             log.info(loggingRequest.toString());
             return Response.ok("{'status': 'success'}").build();
         } catch (Exception e) {
-            log.error("Problems in audit logging", e);
+            log.error(ErrorResponse.AUDIT_LOGGING_ERROR.getDescription(), e);
             return Response.serverError().entity(e.getMessage()).build();
         }
     }
