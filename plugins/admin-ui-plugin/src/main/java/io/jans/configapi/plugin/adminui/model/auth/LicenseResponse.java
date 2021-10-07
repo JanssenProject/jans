@@ -109,4 +109,22 @@ public class LicenseResponse {
     public void setCustomerLastName(String customerLastName) {
         this.customerLastName = customerLastName;
     }
+
+    @Override
+    public String toString() {
+        return "LicenseResponse{" +
+                "isLicenseEnable=" + isLicenseEnable +
+                ", productName='" + productName + '\'' +
+                ", productCode='" + productCode + '\'' +
+                ", licenseType='" + licenseType + '\'' +
+                ", maxActivations=" + maxActivations +
+                ", licenseKey='" + licenseKey + '\'' +
+                ", isLicenseActive=" + isLicenseActive +
+                ", validityPeriod='" + validityPeriod + '\'' +
+                ", companyName='" + companyName + '\'' +
+                ", customerEmail='" + customerEmail + '\'' +
+                ", customerFirstName='" + customerFirstName + '\'' +
+                ", customerLastName='" + customerLastName + '\'' +
+                '}';
+    }
 }

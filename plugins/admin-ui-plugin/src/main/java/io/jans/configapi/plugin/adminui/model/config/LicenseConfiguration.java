@@ -15,17 +15,19 @@ public class LicenseConfiguration {
     private String apiKey;
     private String productCode;
     private String sharedKey;
+    private String managementKey;
     private Boolean enabled = Boolean.FALSE;
     LicenseSpringConfiguration licenseSpringConfiguration;
     LicenseManager licenseManager;
 
     public LicenseConfiguration() {
     }
-    public LicenseConfiguration(String apiKey, String productCode, String sharedKey, Boolean enabled) {
+    public LicenseConfiguration(String apiKey, String productCode, String sharedKey, String managementKey, Boolean enabled) {
         this.apiKey = apiKey;
         this.productCode = productCode;
         this.sharedKey = sharedKey;
         this.enabled = enabled;
+        this.managementKey = managementKey;
 
         if(this.enabled) {
             initializeLicenseManager();
@@ -96,5 +98,13 @@ public class LicenseConfiguration {
 
     public void setLicenseManager(LicenseManager licenseManager) {
         this.licenseManager = licenseManager;
+    }
+
+    public String getManagementKey() {
+        return managementKey;
+    }
+
+    public void setManagementKey(String managementKey) {
+        this.managementKey = managementKey;
     }
 }
