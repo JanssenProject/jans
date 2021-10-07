@@ -3,6 +3,7 @@ package io.jans.configapi.plugin.adminui.service.config;
 import io.jans.configapi.plugin.adminui.model.config.AUIConfiguration;
 import io.jans.configapi.plugin.adminui.model.config.LicenseConfiguration;
 import io.jans.configapi.plugin.adminui.rest.auth.OAuth2Resource;
+import io.jans.configapi.plugin.adminui.utils.ErrorResponse;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
@@ -10,6 +11,7 @@ import javax.inject.Singleton;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
 @Singleton
@@ -30,7 +32,7 @@ public class AUIConfigurationService {
 
             return auiConfiguration;
         } catch (Exception e) {
-            log.error("Error in reading auiConfiguration : ", e);
+            log.error(ErrorResponse.ERROR_READING_CONFIG.getDescription(), e);
             return null;
         }
     }
@@ -67,6 +69,7 @@ public class AUIConfigurationService {
         licenseConfiguration.setProductCode(props.getProperty("licenseSpring.productCode"));
         licenseConfiguration.setSharedKey(props.getProperty("licenseSpring.sharedKey"));
         licenseConfiguration.setEnabled(Boolean.valueOf(props.getProperty("licenseSpring.enabled")));
+        licenseConfiguration.setManagementKey(props.getProperty("licenseSpring.managementKey"));
         licenseConfiguration.initializeLicenseManager();
 
         auiConfiguration.setLicenseConfiguration(licenseConfiguration);
@@ -74,16 +77,16 @@ public class AUIConfigurationService {
         return auiConfiguration;
     }
 
-    private Properties loadPropertiesFromFile() throws Exception {
+    private Properties loadPropertiesFromFile() throws IOException {
 
         Properties props = new Properties();
-        try {
-            File jarPath = new File(OAuth2Resource.class.getProtectionDomain().getCodeSource().getLocation().getPath());
-            String propertiesPath = jarPath.getParentFile().getAbsolutePath() + "/../config";
-            props.load(new FileInputStream(propertiesPath + "/auiConfiguration.properties"));
+        File jarPath = new File(OAuth2Resource.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+        String propertiesPath = jarPath.getParentFile().getAbsolutePath() + "/../config";
+        try (InputStream in = new FileInputStream(propertiesPath + "/auiConfiguration.properties")) {
+            props.load(in);
             return props;
         } catch (IOException e) {
-            log.error("Error in reading auiConfiguration.properties : ", e);
+            log.error(ErrorResponse.ERROR_READING_CONFIG.getDescription(), e);
             throw e;
         }
     }

@@ -12,6 +12,7 @@ import io.jans.configapi.plugin.adminui.model.auth.UserInfoResponse;
 import io.jans.configapi.plugin.adminui.model.config.AUIConfiguration;
 import io.jans.configapi.plugin.adminui.model.exception.ApplicationException;
 import io.jans.configapi.plugin.adminui.service.config.AUIConfigurationService;
+import io.jans.configapi.plugin.adminui.utils.ErrorResponse;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
@@ -22,7 +23,6 @@ import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MultivaluedHashMap;
@@ -45,16 +45,16 @@ public class OAuth2Service {
     /**
      * Calls token endpoint from the Identity Provider and returns a valid Access Token.
      */
-    public TokenResponse getAccessToken(String code) throws Exception {
+    public TokenResponse getAccessToken(String code) throws ApplicationException {
         try {
-            log.info("Getting access token with code: {}", code);
-            if(Strings.isNullOrEmpty(code)) {
-                log.error("Bad Request: Authourization `code` blank or empty.");
-                throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), "Bad Request: Authourization `code` blank or empty.");
+            log.debug("Getting access token with code: {}", code);
+            if (Strings.isNullOrEmpty(code)) {
+                log.error(ErrorResponse.AUTHORIZATION_CODE_BLANK.getDescription());
+                throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.AUTHORIZATION_CODE_BLANK.getDescription());
             }
             AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
 
-            io.jans.as.client.TokenRequest tokenRequest = new io.jans.as.client.TokenRequest(GrantType.AUTHORIZATION_CODE);
+            TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
             tokenRequest.setCode(code);
 
             tokenRequest.setAuthUsername(auiConfiguration.getAuthServerClientId());
@@ -71,27 +71,27 @@ public class OAuth2Service {
 
             return tokenResp;
         } catch (ApplicationException e) {
-            log.error("Problems processing access token call", e);
+            log.error(ErrorResponse.GET_ACCESS_TOKEN_ERROR.getDescription(), e);
             throw e;
         } catch (Exception e) {
-            log.error("Problems processing access token call", e);
-            throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Problems processing access token call. Check logs for details.");
+            log.error(ErrorResponse.GET_ACCESS_TOKEN_ERROR.getDescription(), e);
+            throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), ErrorResponse.GET_ACCESS_TOKEN_ERROR.getDescription());
         }
     }
 
     /**
      * Calls token endpoint from the Identity Provider and returns a valid Access Token.
      */
-    public TokenResponse getApiProtectionToken(String userInfoJwt) throws Exception {
+    public TokenResponse getApiProtectionToken(String userInfoJwt) throws ApplicationException {
         try {
-            log.info("Getting api-protection token with userInfoJwt: {}", userInfoJwt);
-            if(Strings.isNullOrEmpty(userInfoJwt)) {
-                log.error("Bad Request: User-Info jwt is blank or empty.");
-                throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), "Bad Request: User-Info jwt is blank or empty.");
+            log.debug("Getting api-protection token with userInfoJwt: {}", userInfoJwt);
+            if (Strings.isNullOrEmpty(userInfoJwt)) {
+                log.error(ErrorResponse.USER_INFO_JWT_BLANK.getDescription());
+                throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.USER_INFO_JWT_BLANK.getDescription());
             }
             AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
 
-            io.jans.as.client.TokenRequest tokenRequest = new io.jans.as.client.TokenRequest(GrantType.CLIENT_CREDENTIALS);
+            TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
             tokenRequest.setAuthUsername(auiConfiguration.getTokenServerClientId());
             tokenRequest.setAuthPassword(auiConfiguration.getTokenServerClientSecret());
             tokenRequest.setGrantType(GrantType.CLIENT_CREDENTIALS);
@@ -125,18 +125,18 @@ public class OAuth2Service {
             return tokenResp;
 
         } catch (ApplicationException e) {
-            log.error("Problems processing api-protection token call", e);
+            log.error(ErrorResponse.GET_API_PROTECTION_TOKEN_ERROR.getDescription(), e);
             throw e;
         } catch (Exception e) {
-            log.error("Problems processing api-protection token call", e);
-            throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Problems processing api-protection token call. Check logs for details.");
+            log.error(ErrorResponse.GET_API_PROTECTION_TOKEN_ERROR.getDescription(), e);
+            throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), ErrorResponse.GET_API_PROTECTION_TOKEN_ERROR.getDescription());
         }
     }
 
-    public UserInfoResponse getUserInfo(UserInfoRequest userInfoRequest) throws Exception {
+    public UserInfoResponse getUserInfo(UserInfoRequest userInfoRequest) throws ApplicationException {
         ApacheHttpClient43Engine engine = new ApacheHttpClient43Engine();
         try {
-            log.info("Getting User-Info from auth-server: {}", userInfoRequest.getAccessToken());
+            log.debug("Getting User-Info from auth-server: {}", userInfoRequest.getAccessToken());
             AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
 
             final URI userInfoUri = new URI(auiConfiguration.getAuthServerUserInfoEndpoint());
@@ -144,15 +144,15 @@ public class OAuth2Service {
             String accessToken = org.apache.logging.log4j.util.Strings.isNotBlank(userInfoRequest.getAccessToken()) ? userInfoRequest.getAccessToken() : null;
 
             if (Strings.isNullOrEmpty(userInfoRequest.getCode()) && Strings.isNullOrEmpty(accessToken)) {
-                log.error("Bad Request: Either `code` or `access_token` is required.");
-                throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), "Bad Request: Either `code` or `access_token` is required.");
+                log.error(ErrorResponse.CODE_OR_TOKEN_REQUIRED.getDescription());
+                throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.CODE_OR_TOKEN_REQUIRED.getDescription());
             }
 
             if (org.apache.logging.log4j.util.Strings.isNotBlank(userInfoRequest.getCode()) && org.apache.logging.log4j.util.Strings.isBlank(accessToken)) {
                 TokenResponse tokenResponse = getAccessToken(userInfoRequest.getCode());
                 accessToken = tokenResponse.getAccessToken();
             }
-            log.info("Access Token : {}", accessToken);
+            log.debug("Access Token : {}", accessToken);
             MultivaluedMap<String, String> body = new MultivaluedHashMap<>();
             body.putSingle("access_token", accessToken);
 
@@ -163,30 +163,30 @@ public class OAuth2Service {
                     .header("Authorization", "Bearer " + accessToken)
                     .post(Entity.form(body));
 
-            log.info("User-Info response status code: {}", response.getStatus());
+            log.debug("User-Info response status code: {}", response.getStatus());
 
             if (response.getStatus() == 200) {
                 String entity = response.readEntity(String.class);
-                log.info("User-Info response entity: {}", entity);
+                log.debug("User-Info response entity: {}", entity);
                 final Jwt jwtUserInfo = Jwt.parse(entity);
 
-                log.info("User-Info response jwtUserInfo: {}", jwtUserInfo.toString());
+                log.debug("User-Info response jwtUserInfo: {}", jwtUserInfo);
 
                 UserInfoResponse userInfoResponse = new UserInfoResponse();
                 userInfoResponse.setClaims(getClaims(jwtUserInfo));
                 userInfoResponse.setJwtUserInfo(entity);
 
-                log.info("User-Info response userInfoResponse: {}", userInfoResponse.toString());
+                log.debug("User-Info response userInfoResponse: {}", userInfoResponse);
 
                 return userInfoResponse;
             }
 
         } catch (ApplicationException e) {
-            log.error("Problems processing user-info call", e);
+            log.error(ErrorResponse.GET_USER_INFO_ERROR.getDescription(), e);
             throw e;
         } catch (Exception e) {
-            log.error("Problems processing user-info call", e);
-            throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Problems processing user-info call. Check logs for details.");
+            log.error(ErrorResponse.GET_USER_INFO_ERROR.getDescription(), e);
+            throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), ErrorResponse.GET_USER_INFO_ERROR.getDescription());
         } finally {
             if (engine != null) {
                 engine.close();
@@ -199,11 +199,11 @@ public class OAuth2Service {
      * Calls token endpoint from the Identity Provider and returns a valid Token.
      */
 
-    public io.jans.as.client.TokenResponse getToken(TokenRequest tokenRequest, String tokenEndpoint) throws Exception {
+    public io.jans.as.client.TokenResponse getToken(TokenRequest tokenRequest, String tokenEndpoint) {
         return getToken(tokenRequest, tokenEndpoint, null);
     }
 
-    public io.jans.as.client.TokenResponse getToken(TokenRequest tokenRequest, String tokenEndpoint, String userInfoJwt) throws Exception {
+    public io.jans.as.client.TokenResponse getToken(TokenRequest tokenRequest, String tokenEndpoint, String userInfoJwt) {
         ApacheHttpClient43Engine engine = new ApacheHttpClient43Engine();
         try {
             engine.setFollowRedirects(false);
@@ -232,7 +232,7 @@ public class OAuth2Service {
                     .header("Authorization", "Basic " + tokenRequest.getEncodedCredentials())
                     .post(Entity.form(body));
 
-            log.info("Get Access Token status code: {}", response.getStatus());
+            log.debug("Get Access Token status code: {}", response.getStatus());
             if (response.getStatus() == 200) {
                 String entity = response.readEntity(String.class);
 
@@ -243,8 +243,8 @@ public class OAuth2Service {
                 return tokenResponse;
             }
 
-        } catch(Exception e) {
-            log.error("Problems processing IdP token call", e);
+        } catch (Exception e) {
+            log.error("Problems processing token call", e);
             throw e;
 
         } finally {
