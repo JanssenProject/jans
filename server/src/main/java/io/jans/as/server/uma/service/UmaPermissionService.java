@@ -23,6 +23,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -67,7 +68,7 @@ public class UmaPermissionService {
         final String configurationCode = INumGenerator.generate(8) + "." + System.currentTimeMillis();
 
         final String ticket = generateNewTicket();
-        List<UmaPermission> result = new ArrayList<UmaPermission>();
+        List<UmaPermission> result = new ArrayList<>();
         for (io.jans.as.model.uma.UmaPermission permission : permissions) {
             UmaPermission p = new UmaPermission(permission.getResourceId(), scopeService.getScopeDNsByIdsAndAddToLdapIfNeeded(permission.getScopes()), ticket, configurationCode, expirationDate);
             if (permission.getParams() != null && !permission.getParams().isEmpty()) {
@@ -91,7 +92,9 @@ public class UmaPermissionService {
             }
             return created.get(0).getTicket();
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+            if (log.isErrorEnabled()) {
+                log.error(e.getMessage(), e);
+            }
             throw e;
         }
     }
@@ -139,7 +142,7 @@ public class UmaPermissionService {
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
-        return null;
+        return Collections.emptyList();
     }
 
     public void deletePermission(String ticket) {
@@ -161,10 +164,8 @@ public class UmaPermissionService {
     }
 
     public void addBranchIfNeeded(String clientDn) {
-        if (ldapEntryManager.hasBranchesSupport(clientDn)) {
-            if (!containsBranch(clientDn)) {
-                addBranch(clientDn);
-            }
+        if (ldapEntryManager.hasBranchesSupport(clientDn) && !containsBranch(clientDn)) {
+            addBranch(clientDn);
         }
     }
 
@@ -183,7 +184,7 @@ public class UmaPermissionService {
             permission.setDn(dn);
             permission.setAttributes(attributes);
             ldapEntryManager.persist(permission);
-            log.trace("New ticket: " + newTicket + ", old permission: " + dn);
+            log.trace("New ticket: {}, old permission: {}", newTicket, dn);
         }
 
         return newTicket;

@@ -70,8 +70,8 @@ public class ClientInfoClient extends BaseClient<ClientInfoRequest, ClientInfoRe
 
 
     @Deprecated
-    public ClientInfoResponse exec(ClientExecutor p_executor) {
-        clientRequest = new ClientRequest(getUrl(), p_executor);
+    public ClientInfoResponse exec(ClientExecutor executor) {
+        clientRequest = new ClientRequest(getUrl(), executor);
         return _exec();
     }
 

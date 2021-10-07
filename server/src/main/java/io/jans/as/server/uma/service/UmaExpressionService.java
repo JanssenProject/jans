@@ -31,6 +31,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.apache.commons.lang.BooleanUtils.isFalse;
+
 /**
  * @author yuriyz
  */
@@ -40,18 +42,21 @@ public class UmaExpressionService {
 
     @Inject
     private Logger log;
+
     @Inject
     private ExternalUmaRptPolicyService policyService;
+
     @Inject
     private ErrorResponseFactory errorResponseFactory;
+
     @Inject
     private UmaResourceService resourceService;
-    @Inject
 
+    @Inject
     private UmaPermissionService permissionService;
 
     private static Map<String, String> scopeIdToDnMap(Map<UmaScriptByScope, UmaAuthorizationContext> scriptMap, List<String> scriptDNs) {
-        Map<String, String> result = new HashMap<String, String>();
+        Map<String, String> result = new HashMap<>();
         for (Map.Entry<UmaScriptByScope, UmaAuthorizationContext> entry : scriptMap.entrySet()) {
             if (scriptDNs.contains(entry.getKey().getScope().getDn())) {
                 result.put(entry.getKey().getScope().getId(), entry.getKey().getScope().getDn());
@@ -61,19 +66,9 @@ public class UmaExpressionService {
     }
 
     private static Map<UmaScriptByScope, UmaAuthorizationContext> filterByScopeDns(Map<UmaScriptByScope, UmaAuthorizationContext> scriptMap, List<String> scopeDNs) {
-        Map<UmaScriptByScope, UmaAuthorizationContext> result = new HashMap<UmaScriptByScope, UmaAuthorizationContext>();
+        Map<UmaScriptByScope, UmaAuthorizationContext> result = new HashMap<>();
         for (Map.Entry<UmaScriptByScope, UmaAuthorizationContext> entry : scriptMap.entrySet()) {
             if (scopeDNs.contains(entry.getKey().getScope().getDn())) {
-                result.put(entry.getKey(), entry.getValue());
-            }
-        }
-        return result;
-    }
-
-    private static Map<UmaScriptByScope, UmaAuthorizationContext> filterByScopeId(Map<UmaScriptByScope, UmaAuthorizationContext> scriptMap, String scopeId) {
-        Map<UmaScriptByScope, UmaAuthorizationContext> result = new HashMap<UmaScriptByScope, UmaAuthorizationContext>();
-        for (Map.Entry<UmaScriptByScope, UmaAuthorizationContext> entry : scriptMap.entrySet()) {
-            if (entry.getKey().getScope().getId().equals(scopeId)) {
                 result.put(entry.getKey(), entry.getValue());
             }
         }
@@ -103,7 +98,7 @@ public class UmaExpressionService {
             final boolean result = policyService.authorize(entry.getKey().getScript(), entry.getValue());
             log.trace("Policy script inum: '{}' result: '{}'", entry.getKey().getScript().getInum(), result);
             if (!result) {
-                log.trace("Stop authorization scriptMap execution, current script returns false, script inum: " + entry.getKey().getScript().getInum() + ", scope: " + entry.getKey().getScope());
+                log.trace("Stop authorization scriptMap execution, current script returns false, script inum: {}, scope: {}", entry.getKey().getScript().getInum(), entry.getKey().getScope());
                 return false;
             }
         }
@@ -120,53 +115,62 @@ public class UmaExpressionService {
             List<String> dataScopes = node.getDataCopy();
             Map<String, String> scopeIdToDnMap = scopeIdToDnMap(scriptMap, permission.getScopeDns());
             if (dataScopes.size() == scopeIdToDnMap.size()) {
-                try {
-                    List<Boolean> evaluatedResults = new ArrayList<Boolean>();
-                    for (String scopeId : dataScopes) {
-                        log.trace("Evaluating scope result for scope: " + scopeId + " ...");
-                        boolean b = evaluateByScopes(filterByScopeDns(scriptMap, Lists.newArrayList(scopeIdToDnMap.get(scopeId))));
-                        log.trace("Evaluated scope result: " + b + ", scope: " + scopeId);
-                        evaluatedResults.add(b);
-                    }
-
-                    String rule = node.getRule().toString();
-                    final boolean result;
-                    if (evaluatedResults.isEmpty()) {
-                        result = JsonLogic.apply(rule);
-                    } else {
-                        result = JsonLogic.apply(rule, Util.asJsonSilently(evaluatedResults));
-                    }
-
-                    log.trace("JsonLogic evaluation result: " + result + ", rule: " + rule + ", data:" + Util.asJsonSilently(evaluatedResults));
-                    if (result) {
-                        // access granted at this point but we have to remove scopes from permissions for which we got 'false' result
-                        removeFalseScopesFromPermission(permission, dataScopes, scopeIdToDnMap, evaluatedResults);
-                        return; // expression returned true;
-                    }
-                } catch (Exception e) {
-                    log.error("Failed to evaluate jsonlogic expression. Expression: " + scopeExpression + ", resourceDn: " + resource.getDn(), e);
-                    throw errorResponseFactory.createWebApplicationException(Response.Status.FORBIDDEN, UmaErrorResponseType.FORBIDDEN_BY_POLICY, "Failed to evaluate jsonlogic expression.");
+                if (evaluateScopeExpressionInternal(scriptMap, permission, resource, scopeExpression, node, dataScopes, scopeIdToDnMap)) {
+                    return; // expression returned true
                 }
             } else {
-                log.error("Scope size in JsonLogic object 'data' and in permission differs which is forbidden. Node data: " + node +
-                        ", permissionDns: " + permission.getScopeDns() + ", result scopeIds: " + scopeIdToDnMap);
+                log.error("Scope size in JsonLogic object 'data' and in permission differs which is forbidden. Node data: {}, permissionDns: {}, result scopeIds: {}",
+                        node, permission.getScopeDns() ,scopeIdToDnMap);
                 throw errorResponseFactory.createWebApplicationException(Response.Status.FORBIDDEN, UmaErrorResponseType.FORBIDDEN_BY_POLICY, "Scope size in JsonLogic object 'data' and in permission differs which is forbidden.");
             }
         } else {
-            log.error("Failed to parse JsonLogic object, invalid expression: " + scopeExpression);
+            log.error("Failed to parse JsonLogic object, invalid expression: {}", scopeExpression);
             throw errorResponseFactory.createWebApplicationException(Response.Status.FORBIDDEN, UmaErrorResponseType.FORBIDDEN_BY_POLICY, "Failed to parse JsonLogic object, invalid expression: " + scopeExpression);
         }
 
         throw errorResponseFactory.createWebApplicationException(Response.Status.FORBIDDEN, UmaErrorResponseType.FORBIDDEN_BY_POLICY, Constants.UNKNOWN);
     }
 
+    private boolean evaluateScopeExpressionInternal(Map<UmaScriptByScope, UmaAuthorizationContext> scriptMap, UmaPermission permission, UmaResource resource, String scopeExpression, JsonLogicNode node, List<String> dataScopes, Map<String, String> scopeIdToDnMap) {
+        try {
+            List<Boolean> evaluatedResults = new ArrayList<>();
+            for (String scopeId : dataScopes) {
+                log.trace("Evaluating scope result for scope: {}...", scopeId);
+                boolean b = evaluateByScopes(filterByScopeDns(scriptMap, Lists.newArrayList(scopeIdToDnMap.get(scopeId))));
+                log.trace("Evaluated scope result: {}, scope: {}", b, scopeId);
+                evaluatedResults.add(b);
+            }
+
+            String rule = node.getRule().toString();
+            final boolean result;
+            if (evaluatedResults.isEmpty()) {
+                result = JsonLogic.apply(rule);
+            } else {
+                result = JsonLogic.apply(rule, Util.asJsonSilently(evaluatedResults));
+            }
+
+            if (log.isTraceEnabled()) {
+                log.trace("JsonLogic evaluation result: {}, rule: {}, data: {}", result, rule, Util.asJsonSilently(evaluatedResults));
+            }
+            if (result) {
+                // access granted at this point but we have to remove scopes from permissions for which we got 'false' result
+                removeFalseScopesFromPermission(permission, dataScopes, scopeIdToDnMap, evaluatedResults);
+                return true;
+            }
+        } catch (Exception e) {
+            log.error("Failed to evaluate jsonlogic expression. Expression: " + scopeExpression + ", resourceDn: " + resource.getDn(), e);
+            throw errorResponseFactory.createWebApplicationException(Response.Status.FORBIDDEN, UmaErrorResponseType.FORBIDDEN_BY_POLICY, "Failed to evaluate jsonlogic expression.");
+        }
+        return false;
+    }
+
     private void removeFalseScopesFromPermission(UmaPermission permission, List<String> dataScopes, Map<String, String> scopeIdToDnMap, List<Boolean> evaluatedResults) {
         if (!evaluatedResults.isEmpty() && permission.getScopeDns() != null) {
 
-            List<String> newPermissionScopes = new ArrayList<String>(permission.getScopeDns());
+            List<String> newPermissionScopes = new ArrayList<>(permission.getScopeDns());
 
             for (int i = 0; i < evaluatedResults.size(); i++) {
-                if (!evaluatedResults.get(i)) {
+                if (isFalse(evaluatedResults.get(i))) {
                     String dnToRemove = scopeIdToDnMap.get(dataScopes.get(i));
                     newPermissionScopes.remove(dnToRemove);
                 }
