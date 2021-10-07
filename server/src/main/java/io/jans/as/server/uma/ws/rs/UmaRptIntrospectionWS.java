@@ -78,7 +78,7 @@ public class UmaRptIntrospectionWS {
                                   @QueryParam("token_type_hint") String tokenTypeHint,
                                   @Context HttpServletRequest httpRequest,
                                   @Context HttpServletResponse httpResponse) {
-        return introspect(authorization, token, tokenTypeHint, httpRequest, httpResponse);
+        return introspect(authorization, token, httpRequest, httpResponse);
     }
 
     @POST
@@ -88,10 +88,10 @@ public class UmaRptIntrospectionWS {
                                    @FormParam("token_type_hint") String tokenTypeHint,
                                    @Context HttpServletRequest httpRequest,
                                    @Context HttpServletResponse httpResponse) {
-        return introspect(authorization, token, tokenTypeHint, httpRequest, httpResponse);
+        return introspect(authorization, token, httpRequest, httpResponse);
     }
 
-    private Response introspect(String authorization, String token, String tokenTypeHint, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
+    private Response introspect(String authorization, String token, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
         try {
             errorResponseFactory.validateComponentEnabled(ComponentType.UMA);
             umaValidationService.assertHasProtectionScope(authorization);
@@ -126,10 +126,10 @@ public class UmaRptIntrospectionWS {
                     if (pct != null) {
                         statusResponse.setPctClaims(pct.getClaims().toMap());
                     } else {
-                        log.error("Failed to find PCT with code: " + pctCode + " which is taken from permission object: " + permission.getDn());
+                        log.error("Failed to find PCT with code: {} which is taken from permission object: {}", pctCode, permission.getDn());
                     }
                 } else {
-                    log.trace("PCT code is blank for RPT: " + rpt.getCode());
+                    log.trace("PCT code is blank for RPT: {}", rpt.getCode());
                 }
             }
 
@@ -158,10 +158,10 @@ public class UmaRptIntrospectionWS {
         }
     }
 
-    private boolean isValid(UmaRPT p_rpt) {
-        if (p_rpt != null) {
-            p_rpt.checkExpired();
-            return p_rpt.isValid();
+    private boolean isValid(UmaRPT rpt) {
+        if (rpt != null) {
+            rpt.checkExpired();
+            return rpt.isValid();
         }
         return false;
     }

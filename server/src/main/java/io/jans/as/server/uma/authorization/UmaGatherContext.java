@@ -8,7 +8,6 @@ package io.jans.as.server.uma.authorization;
 
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
-import io.jans.as.common.service.common.UserService;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwt.JwtClaims;
@@ -20,7 +19,6 @@ import io.jans.as.server.uma.service.UmaPctService;
 import io.jans.as.server.uma.service.UmaPermissionService;
 import io.jans.as.server.uma.service.UmaSessionService;
 import io.jans.as.server.uma.ws.rs.UmaMetadataWS;
-import io.jans.jsf2.service.FacesService;
 import io.jans.model.SimpleCustomProperty;
 
 import javax.servlet.http.HttpServletRequest;
@@ -38,8 +36,6 @@ public class UmaGatherContext extends ExternalScriptContext {
     private final UmaSessionService sessionService;
     private final UmaPermissionService permissionService;
     private final UmaPctService pctService;
-    private final UserService userService;
-    private final FacesService facesService;
 
     private final Map<String, SimpleCustomProperty> configurationAttributes;
     private final AppConfiguration appConfiguration;
@@ -51,16 +47,13 @@ public class UmaGatherContext extends ExternalScriptContext {
     private String redirectToExternalUrl = null;
 
     public UmaGatherContext(Map<String, SimpleCustomProperty> configurationAttributes, HttpServletRequest httpRequest, SessionId session, UmaSessionService sessionService,
-                            UmaPermissionService permissionService, UmaPctService pctService, Map<String, String> pageClaims,
-                            UserService userService, FacesService facesService, AppConfiguration appConfiguration) {
+                            UmaPermissionService permissionService, UmaPctService pctService, Map<String, String> pageClaims, AppConfiguration appConfiguration) {
         super(httpRequest);
         this.configurationAttributes = configurationAttributes;
         this.session = session;
         this.sessionService = sessionService;
         this.permissionService = permissionService;
-        this.userService = userService;
         this.pctService = pctService;
-        this.facesService = facesService;
         this.pct = pctService.getByCode(sessionService.getPct(session));
         this.claims = pct.getClaims();
         this.pageClaims = pageClaims;
@@ -71,8 +64,8 @@ public class UmaGatherContext extends ExternalScriptContext {
         return configurationAttributes;
     }
 
-    public User getUser(String... returnAttributes) {
-        return sessionService.getUser(httpRequest, returnAttributes);
+    public User getUser() {
+        return sessionService.getUser(httpRequest);
     }
 
     public String getUserDn() {
@@ -87,9 +80,9 @@ public class UmaGatherContext extends ExternalScriptContext {
     public Map<String, String> getConnectSessionAttributes() {
         SessionId connectSession = sessionService.getConnectSession(httpRequest);
         if (connectSession != null) {
-            return new HashMap<String, String>(connectSession.getSessionAttributes());
+            return new HashMap<>(connectSession.getSessionAttributes());
         }
-        return new HashMap<String, String>();
+        return new HashMap<>();
     }
 
     public boolean isAuthenticated() {

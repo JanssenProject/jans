@@ -7,8 +7,6 @@
 package io.jans.as.server.uma.authorization;
 
 import io.jans.as.common.model.registration.Client;
-import io.jans.as.common.service.AttributeService;
-import io.jans.as.common.service.common.UserService;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.uma.persistence.UmaPermission;
 import io.jans.as.model.uma.persistence.UmaResource;
@@ -29,7 +27,6 @@ import java.util.Set;
  */
 public class UmaAuthorizationContextBuilder {
 
-    private final AttributeService attributeService;
     private final UmaResourceService resourceService;
     private final List<UmaPermission> permissions;
     private final Map<Scope, Boolean> scopes;
@@ -37,16 +34,14 @@ public class UmaAuthorizationContextBuilder {
     private final HttpServletRequest httpRequest;
     private final AppConfiguration configuration;
     private final UmaSessionService sessionService;
-    private final UserService userService;
     private final UmaPermissionService permissionService;
     private final Client client;
 
-    public UmaAuthorizationContextBuilder(AppConfiguration configuration, AttributeService attributeService, UmaResourceService resourceService,
+    public UmaAuthorizationContextBuilder(AppConfiguration configuration, UmaResourceService resourceService,
                                           List<UmaPermission> permissions, Map<Scope, Boolean> scopes,
                                           Claims claims, HttpServletRequest httpRequest,
-                                          UmaSessionService sessionService, UserService userService, UmaPermissionService permissionService, Client client) {
+                                          UmaSessionService sessionService, UmaPermissionService permissionService, Client client) {
         this.configuration = configuration;
-        this.attributeService = attributeService;
         this.resourceService = resourceService;
         this.permissions = permissions;
         this.client = client;
@@ -54,14 +49,13 @@ public class UmaAuthorizationContextBuilder {
         this.claims = claims;
         this.httpRequest = httpRequest;
         this.sessionService = sessionService;
-        this.userService = userService;
         this.permissionService = permissionService;
     }
 
     public UmaAuthorizationContext build(CustomScriptConfiguration script) {
-        return new UmaAuthorizationContext(configuration, attributeService, scopes, getResources(), claims,
+        return new UmaAuthorizationContext(configuration, scopes, getResources(), claims,
                 script.getCustomScript().getDn(), httpRequest, script.getConfigurationAttributes(),
-                sessionService, userService, permissionService, client);
+                sessionService, permissionService, client);
     }
 
     public Set<String> getResourceIds() {

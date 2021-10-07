@@ -77,12 +77,12 @@ public class PythonToLdapString /* extends BaseComponentTest */ {
         }
     }
 
-    private CustomProperty createAttribute(String p_name, String p_value) {
-        final List<String> v = new ArrayList<String>();
-        v.add(p_value);
+    private CustomProperty createAttribute(String name, String value) {
+        final List<String> v = new ArrayList<>();
+        v.add(value);
 
         final CustomProperty result = new CustomProperty();
-        result.setName(p_name);
+        result.setName(name);
         result.setValues(v);
         return result;
     }
@@ -94,8 +94,8 @@ public class PythonToLdapString /* extends BaseComponentTest */ {
         return sw.toString();
     }
 
-    private IDPAuthConf fromJSON(String p_json) throws IOException {
+    private IDPAuthConf fromJSON(String json) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
-        return mapper.readValue(p_json, IDPAuthConf.class);
+        return mapper.readValue(json, IDPAuthConf.class);
     }
 }

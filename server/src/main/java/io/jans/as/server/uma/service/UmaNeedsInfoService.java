@@ -7,8 +7,6 @@
 package io.jans.as.server.uma.service;
 
 import io.jans.as.common.model.registration.Client;
-import io.jans.as.common.service.AttributeService;
-import io.jans.as.common.service.common.UserService;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.uma.UmaConstants;
 import io.jans.as.model.uma.UmaNeedInfoResponse;
@@ -54,18 +52,14 @@ public class UmaNeedsInfoService {
     @Inject
     private UmaPermissionService permissionService;
     @Inject
-    private AttributeService attributeService;
-    @Inject
     private UmaResourceService resourceService;
     @Inject
     private ExternalUmaRptPolicyService policyService;
     @Inject
     private UmaSessionService sessionService;
-    @Inject
-    private UserService userService;
 
     public static Set<String> getScriptDNs(List<Scope> scopes) {
-        HashSet<String> result = new HashSet<String>();
+        HashSet<String> result = new HashSet<>();
 
         for (Scope scope : scopes) {
             List<String> authorizationPolicies = scope.getUmaAuthorizationPolicies();
@@ -81,20 +75,20 @@ public class UmaNeedsInfoService {
                                                                          List<UmaPermission> permissions, UmaPCT pct, HttpServletRequest httpRequest,
                                                                          Client client) {
 
-        Map<UmaScriptByScope, UmaAuthorizationContext> scriptMap = new HashMap<UmaScriptByScope, UmaAuthorizationContext>();
-        Map<String, String> ticketAttributes = new HashMap<String, String>();
+        Map<UmaScriptByScope, UmaAuthorizationContext> scriptMap = new HashMap<>();
+        Map<String, String> ticketAttributes = new HashMap<>();
 
-        List<ClaimDefinition> missedClaims = new ArrayList<ClaimDefinition>();
+        List<ClaimDefinition> missedClaims = new ArrayList<>();
 
         UmaAuthorizationContextBuilder contextBuilder = new UmaAuthorizationContextBuilder(appConfiguration,
-                attributeService, resourceService, permissions, requestedScopes, claims, httpRequest,
-                sessionService, userService, permissionService, client);
+                resourceService, permissions, requestedScopes, claims, httpRequest,
+                sessionService, permissionService, client);
 
 
         for (Scope scope : requestedScopes.keySet()) {
             List<String> authorizationPolicies = scope.getUmaAuthorizationPolicies();
             if (authorizationPolicies != null && !authorizationPolicies.isEmpty()) {
-                for (String scriptDN : authorizationPolicies) { //log.trace("Loading UMA script: " + scriptDN + ", scope: " + scope + " ...");
+                for (String scriptDN : authorizationPolicies) {
                     CustomScriptConfiguration script = policyService.getScriptByDn(scriptDN);
                     if (script != null) {
                         UmaAuthorizationContext context = contextBuilder.build(script);
@@ -113,14 +107,14 @@ public class UmaNeedsInfoService {
                         if (StringUtils.isNotBlank(claimsGatheringScriptName)) {
                             ticketAttributes.put(UmaConstants.GATHERING_ID, constructGatheringScriptNameValue(ticketAttributes.get(UmaConstants.GATHERING_ID), claimsGatheringScriptName));
                         } else {
-                            log.debug("External 'getClaimsGatheringScriptName' script method return null or blank value, script: " + script.getName());
+                            log.debug("External 'getClaimsGatheringScriptName' script method return null or blank value, script: {}", script.getName());
                         }
                     } else {
                         log.error("Unable to load UMA script dn: '{}'", scriptDN);
                     }
                 }
             } else {
-                log.trace("No policies defined for scope: " + scope.getId() + ", scopeDn: " + scope.getDn());
+                log.trace("No policies defined for scope: {}, scopeDn: {}", scope.getId(), scope.getDn());
             }
         }
 
@@ -148,11 +142,11 @@ public class UmaNeedsInfoService {
     }
 
     private String buildClaimsGatheringRedirectUri(Collection<UmaAuthorizationContext> contexts, Client client, String newTicket) {
-        String queryParameters = "";
-
+        StringBuilder queryParametersBuilder = new StringBuilder();
         for (UmaAuthorizationContext context : contexts) {
-            queryParameters += context.getRedirectUserParameters().buildQueryString() + "&";
+            queryParametersBuilder.append(context.getRedirectUserParameters().buildQueryString()).append("&");
         }
+        String queryParameters = queryParametersBuilder.toString();
         queryParameters = StringUtils.removeEnd(queryParameters, "&");
 
         String result = appConfiguration.getBaseEndpoint() + "/uma/gather_claims";
