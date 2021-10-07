@@ -2,10 +2,8 @@ package io.jans.configapi.rest.resource.auth;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import io.jans.configapi.filters.ProtectedApi;
 import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.service.auth.AuthService;
-import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 
 import javax.inject.Inject;
@@ -13,7 +11,6 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
 @Path(ApiConstants.JANS_AUTH + ApiConstants.HEALTH)
