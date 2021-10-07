@@ -12,6 +12,7 @@ import io.jans.configapi.service.auth.ClientService;
 import io.jans.configapi.service.auth.ScopeService;
 import io.jans.configapi.util.Jackson;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.ArrayList;
@@ -42,7 +43,7 @@ public class ApiProtectionService {
 
     @Inject
     ClientService clientService;
-    
+
     @Inject
     ConfigurationFactory configurationFactory;
 
@@ -52,8 +53,10 @@ public class ApiProtectionService {
         return rsResourceList;
     }
 
-    public void verifyResources(String apiProtectionType, String clientId) throws Exception {
-        log.info("ApiProtectionService::verifyResources() - apiProtectionType:{}, clientId:{}, configurationFactory:{} ",apiProtectionType, clientId,configurationFactory);
+    public void verifyResources(String apiProtectionType, String clientId) throws IOException {
+        log.info(
+                "ApiProtectionService::verifyResources() - apiProtectionType:{}, clientId:{}, configurationFactory:{} ",
+                apiProtectionType, clientId, configurationFactory);
 
         // Load the resource json
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
@@ -81,83 +84,101 @@ public class ApiProtectionService {
         for (RsResource rsResource : rsResourceList) {
             for (Condition condition : rsResource.getConditions()) {
                 String resourceName = condition.getHttpMethods() + ":::" + rsResource.getPath();
-                scopeList = new ArrayList<Scope>();
                 rsScopes = condition.getScopes();
-                log.trace("ApiProtectionService:::createScopeIfNeeded() - resourceName:{}, rsScopes:{} ",resourceName, rsScopes);
+                log.trace("ApiProtectionService:::createScopeIfNeeded() - resourceName:{}, rsScopes:{} ", resourceName,
+                        rsScopes);
 
-               if(rsScopes==null || rsScopes.size()==0) {
+                // validate scope
+                if (rsScopes == null || rsScopes.isEmpty()) {
                     return;
                 }
+
                 for (String scopeName : rsScopes) {
-                    log.trace("ApiProtectionService:::createScopeIfNeeded() - scopeName:{} ",scopeName);
+                    log.trace("ApiProtectionService:::createScopeIfNeeded() - scopeName:{} ", scopeName);
                     // Check in cache
                     Scope scope = ApiProtectionCache.getScope(scopeName);
-                    log.trace("ApiProtectionService:::createScopeIfNeeded() -apiProtectionCache.getScope(scopeName):{}", ApiProtectionCache.getScope(scopeName));
+                    log.trace("ApiProtectionService:::createScopeIfNeeded() -apiProtectionCache.getScope(scopeName):{}",
+                            ApiProtectionCache.getScope(scopeName));
 
                     if (scope != null) {
-                        log.trace("Scope - '" + scopeName + "' exists in cache.");
+                        log.trace("Scope - '{}' exists in cache.", scopeName);
                         scopeList.add(scope);
                         break;
                     }
 
-                    // Check in DB
-                    log.trace("Verify Scope in DB - '" + scopeName);
-                    List<Scope> scopes = scopeService.searchScopesById(scopeName);
-                    log.trace("Scopes from DB - '" + scopes);
+                    scopeList = validateScope(rsScopes, scope, scopeName);
 
-                    if (scopes != null && !scopes.isEmpty()) {
-                        // Fetch existing scope to store in cache
-                        scope = scopes.get(0);
-                        log.trace("Scope from DB is - '" + scope.getDisplayName() + " from DB");
-                        scopeList.add(scope);
-                        if (scopes.size() > 1) {
-                            log.error(scopes.size() + " Scope with same name - " + scopeName + "!");
-                            throw new WebApplicationException("Multiple Scope with same name - " + scopeName,
-                                    Response.status(Response.Status.INTERNAL_SERVER_ERROR).build());
-                        }
-                    }
-
-                    ScopeType scopeType = ScopeType.OAUTH;
-                    log.info("Scope details - scopes:{}, scopeName:{}, exclusiveAuthScopes:{} - '",scopes, scopeName, configurationFactory.getApiAppConfiguration().getExclusiveAuthScopes());
-
-                    //Create/Update scope only if they are config-api-resource scopes
-                    if(configurationFactory.getApiAppConfiguration().getExclusiveAuthScopes()!=null && !configurationFactory.getApiAppConfiguration().getExclusiveAuthScopes().contains(scopeName)) {
-                    if (scopes == null || scopes.isEmpty()) {
-                        log.info("Scope - '" + scopeName + "' does not exist, hence creating it.");
-                        // Scope does not exists hence create Scope
-                        scope = new Scope();
-                        String inum = UUID.randomUUID().toString();
-                        scope.setId(scopeName);
-                        scope.setDisplayName(scopeName);
-                        scope.setInum(inum);
-                        scope.setDn(scopeService.getDnForScope(inum));
-                        scope.setScopeType(scopeType);
-                        scopeService.addScope(scope);
-                    } else {
-                        // Update resource
-                        log.info("Scope - '" + scopeName + "' already exists, hence updating it.");
-                        scope.setId(scopeName);
-                        // scope.setDisplayName(scopeName);
-                        // scope.setDn(scopeService.getDnForScope(scope.getInum()));
-                        scope.setScopeType(scopeType);
-                        scopeService.updateScope(scope);
-                    }
-                    }
-
-                    // Add to scope cache
-                    scopeList.add(scope);
-                    ApiProtectionCache.putScope(scope);
                 } // for scopes
 
                 // Add to resource cache
                 ApiProtectionCache.putResource(resourceName, scopeList);
-                log.trace("ApiProtectionService:::createScopeIfNeeded() - resourceName:{}, scopeList:{}",resourceName,scopeList);
+                log.trace("ApiProtectionService:::createScopeIfNeeded() - resourceName:{}, scopeList:{}", resourceName,
+                        scopeList);
+
             } // condition
         }
     }
 
-    private void updateScopeForClientIfNeeded(String clientId) throws Exception {
-        log.info(" Internal clientId:{} ",clientId);
+    private List<Scope> validateScope(List<String> rsScopes, Scope scope, String scopeName) {
+        List<Scope> scopeList = new ArrayList<>();
+
+        // Check in DB
+        log.trace("Verify Scope in DB - {} ", scopeName);
+        List<Scope> scopes = scopeService.searchScopesById(scopeName);
+        log.trace("Scopes from DB - {}'", scopes);
+
+        if (scopes != null && !scopes.isEmpty()) {
+            // Fetch existing scope to store in cache
+            scope = scopes.get(0);
+            log.trace("Scope from DB is - {} from DB", scope.getDisplayName());
+            scopeList.add(scope);
+            if (scopes.size() > 1) {
+                log.error("{} Scope with same name - {} ", scopes.size(), scopeName);
+                throw new WebApplicationException("Multiple Scope with same name - " + scopeName,
+                        Response.status(Response.Status.INTERNAL_SERVER_ERROR).build());
+            }
+        }
+
+        ScopeType scopeType = ScopeType.OAUTH;
+        log.info("Scope details - scopes:{}, scopeName:{}, exclusiveAuthScopes:{} - '", scopes, scopeName,
+                configurationFactory.getApiAppConfiguration().getExclusiveAuthScopes());
+
+        // Create/Update scope only if they are config-api-resource scopes
+        if (isConfigApiScope(scopeName)) {
+
+            if (scopes == null || scopes.isEmpty()) {
+                log.info("Scope - '{}' does not exist, hence creating it.", scopeName);
+                // Scope does not exists hence create Scope
+                scope = new Scope();
+                String inum = UUID.randomUUID().toString();
+                scope.setId(scopeName);
+                scope.setDisplayName(scopeName);
+                scope.setInum(inum);
+                scope.setDn(scopeService.getDnForScope(inum));
+                scope.setScopeType(scopeType);
+                scopeService.addScope(scope);
+            } else {
+                // Update resource
+                log.info("Scope - '{}' already exists, hence updating it.", scopeName);
+                scope.setId(scopeName);
+                scope.setScopeType(scopeType);
+                scopeService.updateScope(scope);
+            }
+        }
+
+        // Add to scope cache anyways
+        scopeList.add(scope);
+        ApiProtectionCache.putScope(scope);
+        return scopeList;
+    }
+
+    private boolean isConfigApiScope(String scopeName) {
+        return (configurationFactory.getApiAppConfiguration().getExclusiveAuthScopes() == null
+                || !configurationFactory.getApiAppConfiguration().getExclusiveAuthScopes().contains(scopeName));
+    }
+
+    private void updateScopeForClientIfNeeded(String clientId) {
+        log.info(" Internal clientId:{} ", clientId);
 
         if (StringUtils.isBlank(clientId)) {
             return;
@@ -175,13 +196,13 @@ public class ApiProtectionService {
 
                 if (client.getScopes() != null) {
                     List<String> existingScopes = Arrays.asList(client.getScopes());
-                    log.trace("updateScopeForClientIfNeeded() - Clients existing scopes:{} ",existingScopes);
+                    log.trace("updateScopeForClientIfNeeded() - Clients existing scopes:{} ", existingScopes);
                     scopes.addAll(existingScopes);
                 }
 
                 // Distinct scopes
                 List<String> distinctScopes = scopes.stream().distinct().collect(Collectors.toList());
-                log.trace(" \n\n updateScopeForClientIfNeeded() - Distinct scopes to add:{} ",distinctScopes);
+                log.trace(" \n\n updateScopeForClientIfNeeded() - Distinct scopes to add:{} ", distinctScopes);
 
                 String[] scopeArray = this.getAllScopesArray(distinctScopes);
                 log.trace("All Scope to assign to client:{}", Arrays.asList(scopeArray));
@@ -190,15 +211,16 @@ public class ApiProtectionService {
                 this.clientService.updateClient(client);
             }
             client = this.clientService.getClientByInum(clientId);
-            log.trace(" Verify scopes post assignment, clientId:{}, scopes:{}",clientId, Arrays.asList(client.getScopes()));
+            log.trace(" Verify scopes post assignment, clientId:{}, scopes:{}", clientId,
+                    Arrays.asList(client.getScopes()));
         } catch (Exception ex) {
-            log.error("Error while searching internal client " + ex);
+            log.error("Error while searching internal client", ex);
         }
 
     }
 
     private List<String> getAllScopes() {
-        List<String> scopes = new ArrayList<String>();
+        List<String> scopes = new ArrayList<>();
 
         // Verify in cache
         Map<String, Scope> scopeMap = ApiProtectionCache.getAllScopes();
@@ -226,7 +248,7 @@ public class ApiProtectionService {
     private List<String> getScopeWithDn(List<String> scopes) {
         List<String> scopeList = null;
         if (scopes != null && !scopes.isEmpty()) {
-            scopeList = new ArrayList<String>();
+            scopeList = new ArrayList<>();
             for (String id : scopes) {
                 scopeList.add(this.scopeService.getDnForScope(id));
             }
