@@ -6,6 +6,7 @@
 
 package io.jans.configapi.security.client;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import io.jans.as.client.service.StatService;
 import io.jans.as.client.JwkResponse;
 import io.jans.as.client.TokenRequest;
@@ -90,7 +91,7 @@ public class AuthClientFactory {
         return statService.stat(token, month, format);
     }
 
-    public static Response getHealthCheckResponse(String url) {
+    public static JsonNode getHealthCheckResponse(String url) {
         log.error("HealthCheck - , url:{} ", url);
         Builder request = ClientBuilder.newClient().target(url).request();
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
@@ -98,9 +99,9 @@ public class AuthClientFactory {
         log.error("AuthClientFactory::getHealthCheckResponse() - response:{}", response);
 
         if (response.getStatus() == 200) {
-            String entity = response.readEntity(String.class);
-            log.error("AuthClientFactory::getHealthCheckResponse() - entity:{}", entity);
-            return response;
+            JsonNode jsonNode = response.readEntity(JsonNode.class);
+            log.error("AuthClientFactory::getHealthCheckResponse() - entity:{}", jsonNode);
+            return jsonNode;
         }
         return null;
     }

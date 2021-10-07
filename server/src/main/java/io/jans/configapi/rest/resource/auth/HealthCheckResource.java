@@ -34,9 +34,9 @@ public class HealthCheckResource extends BaseResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getHealthCheckStatus() {      
         String url = getIssuer() + HEALTH_CHECK_URL;
-        Response response = authService.getHealthCheckResponse(url);
-        logger.error("StatResource::getUserStatistics() - response:{} ",response);
-        return Response.ok(response).build();
+        JsonNode jsonNode = authService.getHealthCheckResponse(url);
+        logger.error("StatResource::getUserStatistics() - jsonNode:{} ",jsonNode);
+        return Response.ok(jsonNode).build();
     }
 
     private String getIssuer() {
