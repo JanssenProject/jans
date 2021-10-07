@@ -998,6 +998,18 @@
 					<groupId>io.jans</groupId>
 					<artifactId>jans-core-saml</artifactId>
 				</dependency>
+                <dependency>
+                    <groupId>org.owasp.esapi</groupId>
+                    <artifactId>esapi</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>ca.juliusdavies</groupId>
+                    <artifactId>not-yet-commons-ssl</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.santuario</groupId>
+                    <artifactId>xmlsec</artifactId>
+                </dependency>
 			</dependencies>
 		</profile>
 
