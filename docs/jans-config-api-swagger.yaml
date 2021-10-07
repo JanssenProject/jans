@@ -5080,8 +5080,8 @@ components:
     AuthHealthStatus:
       type: object
       description: Auth Server health data
-        additionalProperties:
-          type: string
+      additionalProperties:
+        type: string
           
     
 	

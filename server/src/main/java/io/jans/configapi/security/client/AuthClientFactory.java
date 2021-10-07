@@ -92,15 +92,13 @@ public class AuthClientFactory {
     }
 
     public static JsonNode getHealthCheckResponse(String url) {
-        log.error("HealthCheck - , url:{} ", url);
+        log.debug("HealthCheck - , url:{} ", url);
         Builder request = ClientBuilder.newClient().target(url).request();
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
         Response response = request.get();
-        log.error("AuthClientFactory::getHealthCheckResponse() - response:{}", response);
-
         if (response.getStatus() == 200) {
             JsonNode jsonNode = response.readEntity(JsonNode.class);
-            log.error("AuthClientFactory::getHealthCheckResponse() - entity:{}", jsonNode);
+            log.debug("AuthClientFactory::getHealthCheckResponse() - entity:{}", jsonNode);
             return jsonNode;
         }
         return null;
