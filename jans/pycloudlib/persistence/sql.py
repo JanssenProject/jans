@@ -5,7 +5,6 @@ jans.pycloudlib.persistence.sql
 This module contains various helpers related to SQL persistence.
 """
 
-import contextlib
 import logging
 import os
 
@@ -14,30 +13,29 @@ from sqlalchemy import MetaData
 from sqlalchemy import func
 from sqlalchemy import select
 
+from jans.pycloudlib import get_manager
 from jans.pycloudlib.utils import encode_text
+from jans.pycloudlib.utils import secure_password_file
 
 logger = logging.getLogger(__name__)
 
 
-def get_sql_password() -> str:
+def get_sql_password(manager) -> str:
     """Get password used for SQL database user.
 
     :returns: Plaintext password.
     """
     password_file = os.environ.get("CN_SQL_PASSWORD_FILE", "/etc/jans/conf/sql_password")
-
-    password = ""
-    with contextlib.suppress(FileNotFoundError):
-        with open(password_file) as f:
-            password = f.read().strip()
-    return password
+    salt = manager.secret.get("encoded_salt")
+    return secure_password_file(password_file, salt)
 
 
 class BaseClient:
     """Base class for SQL client adapter.
     """
 
-    def __init__(self):
+    def __init__(self, manager):
+        self.manager = manager
         self.engine = create_engine(
             self.engine_url,
             pool_pre_ping=True,
@@ -254,7 +252,7 @@ class PostgresqlClient(BaseClient):
         port = os.environ.get("CN_SQL_DB_PORT", 5432)
         database = os.environ.get("CN_SQL_DB_NAME", "jans")
         user = os.environ.get("CN_SQL_DB_USER", "jans")
-        password = get_sql_password()
+        password = get_sql_password(self.manager)
         return f"{self.connector}://{user}:{password}@{host}:{port}/{database}"
 
     def on_create_table_error(self, exc):
@@ -311,7 +309,7 @@ class MysqlClient(BaseClient):
         port = os.environ.get("CN_SQL_DB_PORT", 3306)
         database = os.environ.get("CN_SQL_DB_NAME", "jans")
         user = os.environ.get("CN_SQL_DB_USER", "jans")
-        password = get_sql_password()
+        password = get_sql_password(self.manager)
         return f"{self.connector}://{user}:{password}@{host}:{port}/{database}"
 
     def on_create_table_error(self, exc):
@@ -363,12 +361,13 @@ class SQLClient:
         "server_version",
     )
 
-    def __init__(self):
+    def __init__(self, manager=None):
+        manager = manager or get_manager()
         dialect = os.environ.get("CN_SQL_DB_DIALECT", "mysql")
         if dialect in ("pgsql", "postgresql"):
-            self.adapter = PostgresqlClient()
+            self.adapter = PostgresqlClient(manager)
         elif dialect == "mysql":
-            self.adapter = MysqlClient()
+            self.adapter = MysqlClient(manager)
 
         self._adapter_methods = [
             method for method in dir(self.adapter)
@@ -404,7 +403,7 @@ def render_sql_properties(manager, src: str, dest: str) -> None:
             "rdbm_port": os.environ.get("CN_SQL_DB_PORT", 3306),
             "rdbm_user": os.environ.get("CN_SQL_DB_USER", "jans"),
             "rdbm_password_enc": encode_text(
-                get_sql_password(),
+                get_sql_password(manager),
                 manager.secret.get("encoded_salt"),
             ).decode(),
             "server_time_zone": os.environ.get("CN_SQL_DB_TIMEZONE", "UTC"),

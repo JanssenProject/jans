@@ -44,6 +44,7 @@ setup(
         "sqlalchemy>=1.3,<1.4",
         "psycopg2>=2.8.6",
         "google-cloud-spanner>=3.3.0",
+        "Click>=6.7",
     ],
     classifiers=[
         "Intended Audience :: Developers",
@@ -56,4 +57,7 @@ setup(
         "Programming Language :: Python :: 3.8",
     ],
     include_package_data=True,
+    entry_points={
+        "console_scripts": ["jans-pycloudlib=jans.pycloudlib.cli:cli"],
+    },
 )

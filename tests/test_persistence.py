@@ -141,19 +141,8 @@ def test_get_couchbase_password(monkeypatch, tmpdir, gmanager):
 
     passwd_file = tmpdir.join("couchbase_password")
     passwd_file.write("secret")
-
     monkeypatch.setenv("CN_COUCHBASE_PASSWORD_FILE", str(passwd_file))
     assert get_couchbase_password(gmanager) == "secret"
-
-
-def test_get_encoded_couchbase_password(monkeypatch, tmpdir, gmanager):
-    from jans.pycloudlib.persistence.couchbase import get_encoded_couchbase_password
-
-    passwd_file = tmpdir.join("couchbase_password")
-    passwd_file.write("secret")
-
-    monkeypatch.setenv("CN_COUCHBASE_PASSWORD_FILE", str(passwd_file))
-    assert get_encoded_couchbase_password(gmanager) != "secret"
 
 
 def test_get_couchbase_superuser(monkeypatch, gmanager):
@@ -171,16 +160,6 @@ def test_get_couchbase_superuser_password(monkeypatch, tmpdir, gmanager):
 
     monkeypatch.setenv("CN_COUCHBASE_SUPERUSER_PASSWORD_FILE", str(passwd_file))
     assert get_couchbase_superuser_password(gmanager) == "secret"
-
-
-def test_get_encoded_couchbase_superuser_password(monkeypatch, tmpdir, gmanager):
-    from jans.pycloudlib.persistence.couchbase import get_encoded_couchbase_superuser_password
-
-    passwd_file = tmpdir.join("couchbase_superuser_password")
-    passwd_file.write("secret")
-
-    monkeypatch.setenv("CN_COUCHBASE_SUPERUSER_PASSWORD_FILE", str(passwd_file))
-    assert get_encoded_couchbase_superuser_password(gmanager) != "secret"
 
 
 @pytest.mark.skipif(
@@ -521,15 +500,13 @@ storage.couchbase.mapping: people, groups, authorizations, cache, tokens, sessio
 # ===
 
 
-def test_get_sql_password(monkeypatch, tmpdir):
+def test_get_sql_password(monkeypatch, tmpdir, gmanager):
     from jans.pycloudlib.persistence.sql import get_sql_password
 
     src = tmpdir.join("sql_password")
     src.write("secret")
-
     monkeypatch.setenv("CN_SQL_PASSWORD_FILE", str(src))
-
-    assert get_sql_password() == "secret"
+    assert get_sql_password(gmanager) == "secret"
 
 
 def test_render_sql_properties(monkeypatch, tmpdir, gmanager):
@@ -568,30 +545,42 @@ auth.userPassword=fHL54sT5qHk=
     "mysql",
     "pgsql",
 ])
-def test_sql_client_init(monkeypatch, dialect):
+def test_sql_client_init(monkeypatch, dialect, gmanager, tmpdir):
     from jans.pycloudlib.persistence.sql import SQLClient
 
     monkeypatch.setenv("CN_SQL_DB_DIALECT", dialect)
 
-    client = SQLClient()
+    src = tmpdir.join("sql_password")
+    src.write("secret")
+    monkeypatch.setenv("CN_SQL_PASSWORD_FILE", str(src))
+
+    client = SQLClient(gmanager)
     assert client.adapter.dialect == dialect
 
 
-def test_sql_client_getattr(monkeypatch):
+def test_sql_client_getattr(monkeypatch, gmanager, tmpdir):
     from jans.pycloudlib.persistence.sql import SQLClient
 
     monkeypatch.setenv("CN_SQL_DB_DIALECT", "mysql")
 
-    client = SQLClient()
+    src = tmpdir.join("sql_password")
+    src.write("secret")
+    monkeypatch.setenv("CN_SQL_PASSWORD_FILE", str(src))
+
+    client = SQLClient(gmanager)
     assert client.__getattr__("create_table")
 
 
-def test_sql_client_getattr_error(monkeypatch):
+def test_sql_client_getattr_error(monkeypatch, gmanager, tmpdir):
     from jans.pycloudlib.persistence.sql import SQLClient
 
     monkeypatch.setenv("CN_SQL_DB_DIALECT", "mysql")
 
-    client = SQLClient()
+    src = tmpdir.join("sql_password")
+    src.write("secret")
+    monkeypatch.setenv("CN_SQL_PASSWORD_FILE", str(src))
+
+    client = SQLClient(gmanager)
     with pytest.raises(AttributeError):
         assert client.__getattr__("random_attr")
 
