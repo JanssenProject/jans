@@ -14,6 +14,7 @@
             <includes>
                 <include>com.licensespring:licensespring-license-client</include>
                 <include>com.licensespring:licensespring-core</include>
+                <include>com.licensespring:licensespring-license-management</include>
                 <include>io.github.openfeign:feign-core</include>
                 <include>io.github.openfeign:feign-gson</include>
                 <include>io.github.openfeign:feign-okhttp</include>
