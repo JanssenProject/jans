@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import io.jans.configapi.security.client.AuthClientFactory;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.ws.rs.core.Response;
 
 import org.slf4j.Logger;
 
