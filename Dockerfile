@@ -1,4 +1,4 @@
-FROM alpine:3.13
+FROM alpine:3.13.6
 
 # ===============
 # Alpine packages
@@ -33,8 +33,8 @@ EXPOSE 8080
 # Jython
 # ======
 
-ARG JYTHON_VERSION=2.7.2
-RUN wget -q https://repo1.maven.org/maven2/org/python/jython-installer/${JYTHON_VERSION}/jython-installer-${JYTHON_VERSION}.jar -O /tmp/jython-installer.jar \
+ARG JYTHON_VERSION=2.7.3
+RUN wget -q https://ox.gluu.org/maven/org/gluufederation/jython-installer/${JYTHON_VERSION}/jython-installer-${JYTHON_VERSION}.jar -O /tmp/jython-installer.jar \
     && mkdir -p /opt/jython \
     && java -jar /tmp/jython-installer.jar -v -s -d /opt/jython \
     && rm -f /tmp/jython-installer.jar /tmp/*.properties
@@ -44,7 +44,7 @@ RUN wget -q https://repo1.maven.org/maven2/org/python/jython-installer/${JYTHON_
 # ====
 
 ENV CN_VERSION=1.0.0-SNAPSHOT
-ENV CN_BUILD_DATE='2021-09-02 13:16'
+ENV CN_BUILD_DATE='2021-10-08 04:20'
 ENV CN_SOURCE_URL=https://maven.jans.io/maven/io/jans/jans-scim-server/${CN_VERSION}/jans-scim-server-${CN_VERSION}.war
 
 # Install SCIM
@@ -160,7 +160,7 @@ LABEL name="SCIM" \
     maintainer="Janssen Project <support@jans.io>" \
     vendor="Janssen Project" \
     version="1.0.0" \
-    release="b10" \
+    release="b11" \
     summary="Janssen SCIM" \
     description="SCIM server"
 
