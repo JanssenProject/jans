@@ -36,78 +36,43 @@ public class ScimService {
         log.info(
                 "Search User param passed to service -  filter:{}, startIndex:{}, sortBy:{}, sortOrder:{}, attrsList:{}, excludedAttrsList:{}",
                 filter, startIndex, sortBy, sortOrder, attrsList, excludedAttrsList);
-        try {
-            ClientSideService client = getClientSideService();
-            return client.searchUsers(filter, startIndex, count, sortBy, sortOrder, attrsList, excludedAttrsList);
-
-        } catch (Exception ex) {
-            log.error("Problems processing user-info call", ex);
-            throw ex;
-        }
+        ClientSideService client = getClientSideService();
+        return client.searchUsers(filter, startIndex, count, sortBy, sortOrder, attrsList, excludedAttrsList);
     }
 
     public Response serachScimUserPost(SearchRequest searchRequest) throws Exception {
         log.info("Post search User param passed to service -  searchRequest:{}", searchRequest);
-        try {
-            ClientSideService client = getClientSideService();
-            return client.searchUsersPost(searchRequest);
-
-        } catch (Exception ex) {
-            log.error("Problems processing user-info search call", ex);
-            throw ex;
-        }
+        ClientSideService client = getClientSideService();
+        return client.searchUsersPost(searchRequest);
     }
 
     public Response createScimUser(UserResource user, String attrsList, String excludedAttrsList) throws Exception {
         log.info("To create Scim user param passed to service -  user:{}, attrsList:{}, excludedAttrsList:{}", user,
                 attrsList, excludedAttrsList);
-        try {
-            ClientSideService client = getClientSideService();
-            return client.createUser(user, attrsList, excludedAttrsList);
-
-        } catch (Exception ex) {
-            log.error("Problems while processing create-scim-user call", ex);
-            throw ex;
-        }
+        ClientSideService client = getClientSideService();
+        return client.createUser(user, attrsList, excludedAttrsList);
     }
 
     public Response getScimUserById(String id, String attrsList, String excludedAttrsList) throws Exception {
         log.info("To search Scim user by id param passed to service -  id:{}, attrsList:{}, excludedAttrsList:{}", id,
                 attrsList, excludedAttrsList);
-        try {
-            ClientSideService client = getClientSideService();
-            return client.getUserById(id, attrsList, excludedAttrsList);
+        ClientSideService client = getClientSideService();
+        return client.getUserById(id, attrsList, excludedAttrsList);
 
-        } catch (Exception ex) {
-            log.error("Problems while processing get-scim-user-by-id call", ex);
-            throw ex;
-        }
     }
 
     public Response updateScimUser(UserResource user, String id, String attrsList, String excludedAttrsList)
             throws Exception {
         log.info("To update Scim user param passed to service -  user:{}, id:{}, attrsList:{}, excludedAttrsList:{}",
                 user, id, attrsList, excludedAttrsList);
-        try {
-            ClientSideService client = getClientSideService();
-            return client.updateUser(user, id, attrsList, excludedAttrsList);
-
-        } catch (Exception ex) {
-            log.error("Problems while processing update-scim-user call", ex);
-            throw ex;
-        }
+        ClientSideService client = getClientSideService();
+        return client.updateUser(user, id, attrsList, excludedAttrsList);
     }
 
     public Response deleteScimUser(String id) throws Exception {
         log.info("To delete Scim user id passed to service -  id:{}", id);
-        try {
-            ClientSideService client = getClientSideService();
-            return client.deleteUser(id);
-
-        } catch (Exception ex) {
-            log.error("Problems while processing delete-scim-user call", ex);
-            throw ex;
-        }
+        ClientSideService client = getClientSideService();
+        return client.deleteUser(id);
     }
 
     public Response patchScimUser(PatchRequest patchRequest, String id, String attrsList, String excludedAttrsList)
@@ -115,21 +80,15 @@ public class ScimService {
         log.info(
                 "To patch Scim user param passed to service -  patchRequest:{}, id:{}, attrsList:{}, excludedAttrsList:{}",
                 patchRequest, id, attrsList, excludedAttrsList);
-        try {
-            ClientSideService client = getClientSideService();
-            return client.patchUser(patchRequest, id, attrsList, excludedAttrsList);
-
-        } catch (Exception ex) {
-            log.error("Problems while processing patch-scim-user call", ex);
-            throw ex;
-        }
+        ClientSideService client = getClientSideService();
+        return client.patchUser(patchRequest, id, attrsList, excludedAttrsList);
     }
 
     private ClientSideService getClientSideService() throws Exception {
         String domainURL = authUtil.getIssuer() + scimConfiguration.getScimRelativePath();
         String oidcMetadataUrl = authUtil.getOpenIdConfigurationEndpoint();
-        log.trace("Scim Client param - domainURL:{}, oidcMetadataUrl:{} ",domainURL, oidcMetadataUrl);
-        
+        log.trace("Scim Client param - domainURL:{}, oidcMetadataUrl:{} ", domainURL, oidcMetadataUrl);
+
         return ScimClientFactory.getClient(domainURL, oidcMetadataUrl, authUtil.getClientId(),
                 authUtil.getClientDecryptPassword(authUtil.getClientId()));
     }

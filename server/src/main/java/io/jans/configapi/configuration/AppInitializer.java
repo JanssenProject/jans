@@ -71,9 +71,8 @@ public class AppInitializer {
     private QuartzSchedulerManager quartzSchedulerManager;
 
     public void onStart(@Observes @Initialized(ApplicationScoped.class) Object init) {
-        log.info("=================================================================");
+        log.info("========================== Initializing - App =======================================");
         log.info("=============  STARTING API APPLICATION  ========================");
-        log.info("=================================================================");
         System.setProperty(ResteasyContextParameters.RESTEASY_PATCH_FILTER_DISABLED, "true");
         this.configurationFactory.create();
         persistenceEntryManagerInstance.get();
@@ -89,9 +88,8 @@ public class AppInitializer {
         RegisterBuiltin.register(instance);
         instance.registerProvider(ResteasyJackson2Provider.class);
 
-        log.info("=================================================================");
         log.info("==============  APPLICATION IS UP AND RUNNING ===================");
-        log.info("=================================================================");
+        log.info("========================== App - Initialized =======================================");
     }
 
     public void destroy(@Observes @BeforeDestroyed(ApplicationScoped.class) ServletContext init) {
@@ -136,7 +134,6 @@ public class AppInitializer {
                     configurationFactory.getApiClientId());
             return authorizationServiceInstance.select(OpenIdAuthorizationService.class).get();
         } catch (Exception ex) {
-            log.error("Failed to create AuthorizationService instance", ex);
             throw new ConfigurationException("Failed to create AuthorizationService instance", ex);
         }
     }
