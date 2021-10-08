@@ -210,24 +210,16 @@ public class FapiOpenIdConfiguration extends HttpServlet {
             if (clientDn != null) {
                 log.info("FAPI: ClientDn from Authoirization(tokenService) *********************************************" + clientDn);
                 cl = clientService.getClientByDn(clientDn);
-                String tempjwks=cl.getJwks();
-                if (tempjwks==null)
+                String tempjwks = cl.getJwks();
+                if (tempjwks == null)
                 	log.debug("********************FAPIRS JWKS not defined for the client");     
-                else 
-                {
+                else {
 	                JSONObject jsonWebKeys = new JSONObject(tempjwks);
-	                if (jsonWebKeys == null) {
-	                    log.debug("********************Unable to load json web keys for client: {}, jwks_uri: {}, jks: {}", cl.getClientId(), cl.getJwksUri(), cl.getJwks());
-	                }
-	
 	                int matchctr = 0;
 	                final JSONWebKeySet keySet = JSONWebKeySet.fromJSONObject(jsonWebKeys);
-	
-	                try {
-	
+	                try {	
 	                    for (JSONWebKey key : keySet.getKeys()) {
-	                        if (ArrayUtils.isEquals(encodedKey,
-	                                cryptoProvider.getPublicKey(key.getKid(), jsonWebKeys, null).getEncoded())) {
+	                        if (ArrayUtils.isEquals(encodedKey, cryptoProvider.getPublicKey(key.getKid(), jsonWebKeys, null).getEncoded())) {
 	                            matchctr += 1;
 	                            log.debug("********************************Client {} authenticated via `self_signed_tls_client_auth`, matched kid: {}.",
 	                                    cl.getClientId(), key.getKid());
@@ -236,7 +228,6 @@ public class FapiOpenIdConfiguration extends HttpServlet {
 	
 	                    if (matchctr == 0) {
 	                        log.error("Client certificate does not match clientId. clientId: " + cl.getClientId() + "*********************************************");
-	
 	                        httpResponse.setStatus(401, "The resource owner or authorization server denied the request");
 	                        return;
 	                    }
