@@ -210,8 +210,8 @@ public class SessionIdService {
                 for (String acrValue : acrValuesList) {
                     Integer currentAcrLevel = acrToLevel.get(externalAuthenticationService.scriptName(acrValue));
 
-                    log.info("Acr is changed. Session acr: " + sessionAcr + "(level: " + sessionAcrLevel + "), " +
-                            "current acr: " + acrValue + "(level: " + currentAcrLevel + ")");
+                    log.info("Acr is changed. Session acr: {} (level: {}), current acr: {} (level: {})",
+                            sessionAcr, sessionAcrLevel, acrValue, currentAcrLevel);
 
                     // Requested acr method not enabled
                     if (currentAcrLevel == null) {
@@ -484,7 +484,7 @@ public class SessionIdService {
         sessionId.setSessionAttributes(sessionIdAttributes);
         sessionId.setLastUsedAt(new Date());
 
-        if (sessionId.getIsJwt()) {
+        if (isTrue(sessionId.getIsJwt())) {
             sessionId.setJwt(generateJwt(sessionId, userDn).asString());
         }
 
@@ -521,13 +521,14 @@ public class SessionIdService {
             // sign
             return jwtSigner.sign();
         } catch (Exception e) {
-            log.error("Failed to sign session jwt! " + e.getMessage(), e);
+            if (log.isErrorEnabled())
+                log.error("Failed to sign session jwt! " + e.getMessage(), e);
             throw new RuntimeException(e);
         }
     }
 
-    public SessionId setSessionIdStateAuthenticated(HttpServletRequest httpRequest, HttpServletResponse httpResponse, SessionId sessionId, String p_userDn) {
-        sessionId.setUserDn(p_userDn);
+    public SessionId setSessionIdStateAuthenticated(HttpServletRequest httpRequest, HttpServletResponse httpResponse, SessionId sessionId, String userDn) {
+        sessionId.setUserDn(userDn);
         sessionId.setAuthenticationTime(new Date());
         sessionId.setState(SessionIdState.AUTHENTICATED);
 
@@ -537,7 +538,7 @@ public class SessionIdService {
         }
 
         final boolean persisted;
-        if (appConfiguration.getChangeSessionIdOnAuthentication() && httpResponse != null) {
+        if (isTrue(appConfiguration.getChangeSessionIdOnAuthentication()) && httpResponse != null) {
             final String oldSessionId = sessionId.getId();
             final String newSessionId = UUID.randomUUID().toString();
 
@@ -547,7 +548,7 @@ public class SessionIdService {
             sessionId.setId(newSessionId);
             sessionId.setDn(buildDn(newSessionId));
             sessionId.getSessionAttributes().put(SessionId.OLD_SESSION_ID_ATTR_KEY, oldSessionId);
-            if (sessionId.getIsJwt()) {
+            if (isTrue(sessionId.getIsJwt())) {
                 sessionId.setJwt(generateJwt(sessionId, sessionId.getUserDn()).asString());
             }
 
@@ -592,8 +593,8 @@ public class SessionIdService {
                 sessionId.setPersisted(true);
                 sessionId.setExpirationDate(expiration.getFirst());
                 sessionId.setTtl(expiration.getSecond());
-                log.trace("sessionIdAttributes: " + sessionId.getPermissionGrantedMap());
-                if (appConfiguration.getSessionIdPersistInCache()) {
+                log.trace("sessionIdAttributes: {}", sessionId.getPermissionGrantedMap());
+                if (isTrue(appConfiguration.getSessionIdPersistInCache())) {
                     cacheService.put(expiration.getSecond(), sessionId.getDn(), sessionId);
                 } else {
                     persistenceEntryManager.persist(sessionId);
@@ -712,7 +713,7 @@ public class SessionIdService {
         EntryPersistenceException lastException = null;
         for (int i = 1; i <= MAX_MERGE_ATTEMPTS; i++) {
             try {
-                if (appConfiguration.getSessionIdPersistInCache()) {
+                if (isTrue(appConfiguration.getSessionIdPersistInCache())) {
                     cacheService.put(expiration.getSecond(), sessionId.getDn(), sessionId);
                 } else {
                     persistenceEntryManager.merge(sessionId);
@@ -792,7 +793,7 @@ public class SessionIdService {
 
         try {
             final SessionId sessionId;
-            if (appConfiguration.getSessionIdPersistInCache()) {
+            if (isTrue(appConfiguration.getSessionIdPersistInCache())) {
                 sessionId = (SessionId) cacheService.get(dn);
             } else {
                 sessionId = persistenceEntryManager.find(SessionId.class, dn);
@@ -844,7 +845,7 @@ public class SessionIdService {
 
     public boolean remove(SessionId sessionId) {
         try {
-            if (appConfiguration.getSessionIdPersistInCache()) {
+            if (isTrue(appConfiguration.getSessionIdPersistInCache())) {
                 cacheService.remove(sessionId.getDn());
             } else {
                 persistenceEntryManager.remove(sessionId.getDn(), SessionId.class);
