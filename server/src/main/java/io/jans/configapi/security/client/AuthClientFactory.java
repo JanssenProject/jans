@@ -6,7 +6,9 @@
 
 package io.jans.configapi.security.client;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+
 import io.jans.as.client.service.StatService;
 import io.jans.as.client.JwkResponse;
 import io.jans.as.client.TokenRequest;
@@ -36,8 +38,6 @@ import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
 
 @RegisterProvider(OpenIdClientService.class)
 public class AuthClientFactory {
