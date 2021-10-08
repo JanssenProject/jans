@@ -27,6 +27,11 @@ public class ApiAppConfiguration implements Configuration {
 
     private List<CorsConfigurationFilter> corsConfigurationFilters;
 
+    private String loggingLevel;
+    private String loggingLayout;
+    private String externalLoggerConfiguration;
+    private Boolean disableJdkLogger = true;
+
     public boolean isConfigOauthEnabled() {
         return configOauthEnabled;
     }
@@ -125,7 +130,7 @@ public class ApiAppConfiguration implements Configuration {
 
     public List<CorsConfigurationFilter> getCorsConfigurationFilters() {
         if (corsConfigurationFilters == null) {
-            corsConfigurationFilters = new ArrayList<CorsConfigurationFilter>();
+            corsConfigurationFilters = new ArrayList<>();
         }
 
         return corsConfigurationFilters;
@@ -133,16 +138,16 @@ public class ApiAppConfiguration implements Configuration {
 
     public void setCorsConfigurationFilters(List<CorsConfigurationFilter> corsConfigurationFilters) {
         if (corsConfigurationFilters == null) {
-            this.corsConfigurationFilters = new ArrayList<CorsConfigurationFilter>();
+            this.corsConfigurationFilters = new ArrayList<>();
         } else {
-            this.corsConfigurationFilters = new ArrayList<CorsConfigurationFilter>();
+            this.corsConfigurationFilters = new ArrayList<>();
             this.corsConfigurationFilters.addAll(corsConfigurationFilters);
         }
     }
 
     public List<String> getExclusiveAuthScopes() {
         if (exclusiveAuthScopes == null) {
-            exclusiveAuthScopes = new ArrayList<String>();
+            exclusiveAuthScopes = new ArrayList<>();
         }
         return exclusiveAuthScopes;
     }
@@ -150,11 +155,43 @@ public class ApiAppConfiguration implements Configuration {
     public void setExclusiveAuthScopes(List<String> exclusiveAuthScopes) {
         this.exclusiveAuthScopes = exclusiveAuthScopes;
         if (exclusiveAuthScopes == null) {
-            this.exclusiveAuthScopes = new ArrayList<String>();
+            this.exclusiveAuthScopes = new ArrayList<>();
         } else {
-            this.exclusiveAuthScopes = new ArrayList<String>();
+            this.exclusiveAuthScopes = new ArrayList<>();
             this.exclusiveAuthScopes.addAll(exclusiveAuthScopes);
         }
+    }
+
+    public String getLoggingLevel() {
+        return loggingLevel;
+    }
+
+    public void setLoggingLevel(String loggingLevel) {
+        this.loggingLevel = loggingLevel;
+    }
+
+    public String getLoggingLayout() {
+        return loggingLayout;
+    }
+
+    public void setLoggingLayout(String loggingLayout) {
+        this.loggingLayout = loggingLayout;
+    }
+
+    public String getExternalLoggerConfiguration() {
+        return externalLoggerConfiguration;
+    }
+
+    public void setExternalLoggerConfiguration(String externalLoggerConfiguration) {
+        this.externalLoggerConfiguration = externalLoggerConfiguration;
+    }
+
+    public Boolean getDisableJdkLogger() {
+        return disableJdkLogger;
+    }
+
+    public void setDisableJdkLogger(Boolean disableJdkLogger) {
+        this.disableJdkLogger = disableJdkLogger;
     }
 
     @Override
@@ -166,7 +203,9 @@ public class ApiAppConfiguration implements Configuration {
                 + authOpenidIntrospectionUrl + ", authOpenidTokenUrl=" + authOpenidTokenUrl + ", authOpenidRevokeUrl="
                 + authOpenidRevokeUrl + ", smallryeHealthRootPath=" + smallryeHealthRootPath
                 + ", corsConfigurationFilters=" + corsConfigurationFilters + ", exclusiveAuthScopes="
-                + exclusiveAuthScopes + "]";
+                + exclusiveAuthScopes + ", loggingLevel=" + loggingLevel + " , loggingLayout=" + loggingLayout
+                + " , externalLoggerConfiguration=" + externalLoggerConfiguration + " , disableJdkLogger="
+                + disableJdkLogger + "]";
     }
 
 }
