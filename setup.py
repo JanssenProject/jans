@@ -117,9 +117,12 @@ jansInstaller = JansInstaller()
 jansInstaller.initialize()
 
 print()
+detected_os = '{} {}'.format(base.os_type, base.os_version)
+if base.snap:
+    detected_os = 'snap ' + detected_os
 print("Installing Janssen Server...\n\nFor more info see:\n  {}  \n  {}\n".format(paths.LOG_FILE, paths.LOG_ERROR_FILE))
 print("Profile         :  {}".format(Config.profile))
-print("Detected OS     :  {} {} {}".format('snap' if base.snap else '', base.os_type, base.os_version))
+print("Detected OS     :  {}".format(detected_os))
 print("Janssen Version :  {}".format(Config.oxVersion))
 print("Detected init   :  {}".format(base.os_initdaemon))
 print("Detected Apache :  {}".format(base.determineApacheVersion()))
