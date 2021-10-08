@@ -21,7 +21,7 @@ import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import io.jans.as.model.configuration.AppConfiguration;
+
 import io.jans.fido2.ctap.AttestationFormat;
 import io.jans.fido2.exception.AttestationException;
 import io.jans.fido2.exception.Fido2MissingAttestationCertException;
@@ -48,9 +48,6 @@ import io.jans.fido2.service.verifier.UserVerificationVerifier;
 public class AppleAttestationProcessor implements AttestationFormatProcessor {
 	@Inject
 	private Logger log;
-
-	@Inject
-	private AppConfiguration appConfiguration;
 
 	@Inject
 	private CommonVerifiers commonVerifiers;
