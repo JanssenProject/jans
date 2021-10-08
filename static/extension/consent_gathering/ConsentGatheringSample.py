@@ -73,7 +73,7 @@ class ConsentGathering(ConsentGatheringType):
         return True
 
     def getStepsCount(self, context):
-        return 11
+        return 2
 
     def getPageForStep(self, step, context):
         if step == 1:
