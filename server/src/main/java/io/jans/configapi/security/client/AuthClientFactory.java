@@ -74,8 +74,6 @@ public class AuthClientFactory {
     }
 
     public static JsonNode getStatResponse(String url, String token, String month, String format) {
-        log.debug("Stat Report - url:{}, token:{}, month:{}, format:{}", url, token, month, format);
-
         Builder request = ClientBuilder.newClient().target(url).request();
         request.header("Authorization", "Basic " + token);
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
