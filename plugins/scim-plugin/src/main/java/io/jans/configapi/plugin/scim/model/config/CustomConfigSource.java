@@ -2,6 +2,7 @@ package io.jans.configapi.plugin.scim.model.config;
 
 import io.jans.exception.ConfigurationException;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -39,7 +40,7 @@ public class CustomConfigSource implements ConfigSource {
         } catch (Exception e) {
             log.error("Unable to read properties from file: " + FILE_CONFIG, e);
         }
-        return null;
+        return Collections.emptySet();
     }
 
     @Override
@@ -73,8 +74,7 @@ public class CustomConfigSource implements ConfigSource {
             properties.stringPropertyNames().stream().forEach(key -> propertiesMap.put(key, properties.getProperty(key)));
             return properties;
         } catch (Exception e) {
-            log.error("Failed to load configuration from {}", FILE_CONFIG, e);
-            throw new ConfigurationException("Failed to load configuration from " + FILE_CONFIG, e);
+            throw new ConfigurationException("Failed to load configuration from "+ FILE_CONFIG, e);
         }
     }
 
