@@ -35,13 +35,12 @@ public class StatResource extends BaseResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getStatistics(@HeaderParam("Authorization") String authorization,
             @QueryParam(value = "month") String month, @QueryParam(value = "format") String format) {
-        logger.debug("StatResource:::getUserStatistics() - authorization:{}, month {}, format:{}  " + authorization, month,format);
         if (StringUtils.isBlank(format)) {
             format = "";
         }
         String url = getIssuer() + this.statUrl;
         JsonNode jsonNode = this.authService.getStat(url, authorization, month, format);
-        logger.trace("StatResource::getUserStatistics() - jsonNode:{}, jsonNode.get(response) " + jsonNode, jsonNode.get("response"));
+        logger.trace("StatResource::getUserStatistics() - jsonNode:{}, jsonNode.get(response) ",jsonNode, jsonNode.get("response"));
         return Response.ok(jsonNode.get("response")).build();
     }
 
