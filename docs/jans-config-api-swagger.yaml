@@ -2388,7 +2388,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
       security:
-        - oauth2: [https://jans.io/oauth/config/scim/user.readonly]
+        - oauth2: [https://jans.io/oauth/config/scim/users.read https://jans.io/scim/users.read]
       parameters:
         - schema:
             type: string
@@ -2438,7 +2438,7 @@ paths:
       summary: Create a SCIM user.
       description: Allows creating a User resource via POST (see section 3.3 of RFC 7644)
       security:
-        - oauth2: [https://jans.io/scim/users.write]
+        - oauth2: [https://jans.io/oauth/config/scim/users.write https://jans.io/scim/users.write]
       parameters:
       - name: attributes
         in: query
@@ -2507,7 +2507,7 @@ paths:
       summary: Retrieves SCIM user by Id.
       description: Retrieves a User resource by Id (see section 3.4.1 of RFC 7644)
       security:
-        - oauth2: [https://jans.io/scim/users.read]
+        - oauth2: [https://jans.io/oauth/config/scim/users.read https://jans.io/scim/users.read]
       parameters:
       - name: attributes
         in: query
@@ -2562,7 +2562,7 @@ paths:
         \ payload sent will replace the one in the existing resource representation.\
         \ Attributes \nnot passed in the payload will be left intact.\n"
       security:
-        - oauth2: [https://jans.io/scim/users.write]
+        - oauth2: [https://jans.io/oauth/config/scim/users.write https://jans.io/scim/users.write]
       parameters:
       - name: attributes
         in: query
@@ -2645,7 +2645,7 @@ paths:
       summary: Deletes a SCIM user.
       description: Deletes a user resource
       security:
-        - oauth2: [https://jans.io/scim/users.write]
+        - oauth2: [https://jans.io/oauth/config/scim/users.write https://jans.io/scim/users.write]
       parameters:
       - name: id
         in: path
@@ -2684,7 +2684,7 @@ paths:
         \ of additions, removals, and \nreplacements operations. See section 3.5.2\
         \ of RFC 7644\n"
       security:
-        - oauth2: [https://jans.io/scim/users.write]
+        - oauth2: [https://jans.io/oauth/config/scim/users.write https://jans.io/scim/users.write]
       parameters:
       - name: attributes
         in: query
@@ -2778,7 +2778,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
       security:
-        - oauth2: [https://jans.io/oauth/config/scim/user.readonly]		  
+        - oauth2: [https://jans.io/oauth/config/scim/users.read https://jans.io/scim/users.read]		  
 components:
   securitySchemes:
     oauth2:
@@ -2828,6 +2828,8 @@ components:
             https://jans.io/oauth/config/database/sql.write: Manage SQL database related information
             https://jans.io/oauth/config/database/sql.delete: Delete SQL database related information
             https://jans.io/oauth/config/stats.readonly: Vew server with basic statistic
+            https://jans.io/oauth/config/scim/users.read: Vew scim user related information
+            https://jans.io/oauth/config/scim/users.write: Manage scim user related information
 
   responses:
     Found:
