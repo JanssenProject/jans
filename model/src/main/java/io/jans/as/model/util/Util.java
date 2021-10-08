@@ -113,15 +113,15 @@ public class Util {
         return result;
     }
 
-    public static <T extends AttributeEnum> List<T> asEnumList(JSONArray p_array, Class<T> clazz)
+    public static <T extends AttributeEnum> List<T> asEnumList(JSONArray array, Class<T> clazz)
             throws JSONException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         final List<T> result = new ArrayList<>();
-        if (p_array != null) {
-            final int length = p_array.length();
+        if (array != null) {
+            final int length = array.length();
             if (length > 0) {
                 for (int i = 0; i < length; i++) {
                     Method method = clazz.getMethod("getByValue", String.class);
-                    result.add((T) method.invoke(null, new Object[]{p_array.getString(i)}));
+                    result.add((T) method.invoke(null, array.getString(i)));
                 }
             }
         }
