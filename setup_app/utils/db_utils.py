@@ -450,7 +450,7 @@ class DBUtils:
                 sql_cmd = 'SELECT * FROM {} WHERE ({}) {}'.format(s_table, dn_clause, where_clause)
 
                 data = self.spanner.exec_sql(sql_cmd)
-    
+
                 if not data.get('rows'):
                     return retVal
 
