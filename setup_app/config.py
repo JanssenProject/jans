@@ -30,6 +30,7 @@ class Config:
     jetty_home = '/opt/jetty'
     jetty_base = os.path.join(jansOptFolder, 'jetty')
     installed_instance = False
+    profile = 'jans'
 
     @classmethod
     def get(self, attr, default=None):
