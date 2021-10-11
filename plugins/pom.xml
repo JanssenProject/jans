@@ -19,5 +19,6 @@
 
     <modules>
         <module>admin-ui-plugin</module>
+        <module>scim-plugin</module>
     </modules>
 </project>
