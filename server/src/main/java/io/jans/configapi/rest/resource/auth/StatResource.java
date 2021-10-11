@@ -40,7 +40,7 @@ public class StatResource extends BaseResource {
         }
         String url = getIssuer() + this.statUrl;
         JsonNode jsonNode = this.authService.getStat(url, authorization, month, format);
-        logger.trace("StatResource::getUserStatistics() - jsonNode:{}, jsonNode.get(response) ",jsonNode, jsonNode.get("response"));
+        logger.trace("StatResource::getUserStatistics() - jsonNode:{} ",jsonNode);
         return Response.ok(jsonNode.get("response")).build();
     }
 
