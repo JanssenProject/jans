@@ -6,10 +6,11 @@
 
 package io.jans.configapi.configuration;
 
+import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.configapi.security.api.ApiProtectionService;
 import io.jans.configapi.security.service.AuthorizationService;
 import io.jans.configapi.security.service.OpenIdAuthorizationService;
-import io.jans.as.common.service.common.ApplicationFactory;
+import io.jans.configapi.service.logger.LoggerService;
 import io.jans.exception.ConfigurationException;
 import io.jans.exception.OxIntializationException;
 import io.jans.orm.PersistenceEntryManager;
@@ -17,6 +18,7 @@ import io.jans.orm.PersistenceEntryManagerFactory;
 import io.jans.orm.service.PersistanceFactoryService;
 import io.jans.service.cdi.event.LdapConfigurationReload;
 import io.jans.service.cdi.util.CdiUtil;
+import io.jans.service.timer.QuartzSchedulerManager;
 import io.jans.util.StringHelper;
 import org.jboss.resteasy.plugins.server.servlet.ResteasyContextParameters;
 import org.slf4j.Logger;
@@ -62,22 +64,32 @@ public class AppInitializer {
     @Inject
     private Instance<AuthorizationService> authorizationServiceInstance;
 
+    @Inject
+    private LoggerService loggerService;
+
+    @Inject
+    private QuartzSchedulerManager quartzSchedulerManager;
+
     public void onStart(@Observes @Initialized(ApplicationScoped.class) Object init) {
-        log.info("=================================================================");
+        log.info("========================== Initializing - App =======================================");
         log.info("=============  STARTING API APPLICATION  ========================");
-        log.info("=================================================================");
         System.setProperty(ResteasyContextParameters.RESTEASY_PATCH_FILTER_DISABLED, "true");
         this.configurationFactory.create();
         persistenceEntryManagerInstance.get();
         this.createAuthorizationService();
 
+        // Start timer
+        initSchedulerService();
+
+        // Schedule timer tasks
+        loggerService.initTimer();
+
         ResteasyProviderFactory instance = ResteasyProviderFactory.getInstance();
         RegisterBuiltin.register(instance);
         instance.registerProvider(ResteasyJackson2Provider.class);
 
-        log.info("=================================================================");
         log.info("==============  APPLICATION IS UP AND RUNNING ===================");
-        log.info("=================================================================");
+        log.info("========================== App - Initialized =======================================");
     }
 
     public void destroy(@Observes @BeforeDestroyed(ApplicationScoped.class) ServletContext init) {
@@ -110,8 +122,8 @@ public class AppInitializer {
     @Named("authorizationService")
     private AuthorizationService createAuthorizationService() {
         log.info(
-                "=============  AppInitializer::createAuthorizationService() - configurationFactory.getApiProtectionType() = "
-                        + configurationFactory.getApiProtectionType());
+                "=============  AppInitializer::createAuthorizationService() - configurationFactory.getApiProtectionType():{} ",
+                configurationFactory.getApiProtectionType());
 
         if (StringHelper.isEmpty(configurationFactory.getApiProtectionType())) {
             throw new ConfigurationException("API Protection Type not defined");
@@ -122,7 +134,6 @@ public class AppInitializer {
                     configurationFactory.getApiClientId());
             return authorizationServiceInstance.select(OpenIdAuthorizationService.class).get();
         } catch (Exception ex) {
-            log.error("Failed to create AuthorizationService instance", ex);
             throw new ConfigurationException("Failed to create AuthorizationService instance", ex);
         }
     }
@@ -145,5 +156,15 @@ public class AppInitializer {
                 oldInstance.getOperationService());
         oldInstance.destroy();
         log.debug("Destroyed {} with operation service: {}", oldInstance, oldInstance.getOperationService());
+    }
+
+    protected void initSchedulerService() {
+        quartzSchedulerManager.start();
+
+        String disableScheduler = System.getProperties().getProperty("gluu.disable.scheduler");
+        if (Boolean.parseBoolean(disableScheduler)) {
+            this.log.warn("Suspending Quartz Scheduler Service...");
+            quartzSchedulerManager.standby();
+        }
     }
 }
