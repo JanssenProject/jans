@@ -10,7 +10,6 @@ import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.configapi.security.api.ApiProtectionService;
 import io.jans.configapi.security.service.AuthorizationService;
 import io.jans.configapi.security.service.OpenIdAuthorizationService;
-import io.jans.configapi.service.logger.LoggerService;
 import io.jans.exception.ConfigurationException;
 import io.jans.exception.OxIntializationException;
 import io.jans.orm.PersistenceEntryManager;
@@ -64,8 +63,6 @@ public class AppInitializer {
     @Inject
     private Instance<AuthorizationService> authorizationServiceInstance;
 
-    @Inject
-    private LoggerService loggerService;
 
     @Inject
     private QuartzSchedulerManager quartzSchedulerManager;
@@ -80,9 +77,6 @@ public class AppInitializer {
 
         // Start timer
         initSchedulerService();
-
-        // Schedule timer tasks
-        loggerService.initTimer();
 
         ResteasyProviderFactory instance = ResteasyProviderFactory.getInstance();
         RegisterBuiltin.register(instance);
