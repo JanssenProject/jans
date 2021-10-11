@@ -1,6 +1,6 @@
 function() {
-	
-	var stream = read('classpath:karate.properties');
+
+	var stream = read('classpath:karate_jenkins.properties');
 	var props = new java.util.Properties();
 	props.load(stream);
 
@@ -15,10 +15,10 @@ function() {
     var port = props.get('karate.test.port');
     var baseUrl = url + (port ? ':' + port : '');
     
-    karate.log('karate env :', env);
-    karate.log('karate url :', url);
-    karate.log('karate port :', port);
-    karate.log('karate baseUrl :', baseUrl);
+    karate.log('karate_jenkins env :', env);
+    karate.log('karate_jenkins url :', url);
+    karate.log('karate_jenkins port :', port);    
+    karate.log('karate_jenkins baseUrl :', baseUrl);
     
     var testStream = read('classpath:test.properties');
     var testProps = new java.util.Properties();
@@ -42,23 +42,9 @@ function() {
         testProps: testProps,
         issuer: issuer,
         accessToken: '123',
-        statUrl: baseUrl + '/jans-config-api/api/v1/stat',
-        healthUrl: baseUrl + '/jans-config-api/api/v1/health',
-        fido2Url: baseUrl + '/jans-config-api/api/v1/fido2/config',
-        acrsUrl: baseUrl + '/jans-config-api/api/v1/acrs',
-        authConfigurationUrl: baseUrl + '/jans-config-api/api/v1/jans-auth-server/config',
-        scriptsUrl: baseUrl + '/jans-config-api/api/v1/config/scripts',
-        cacheUrl: baseUrl + '/jans-config-api/api/v1/config/cache',
-        jwksUrl: baseUrl + '/jans-config-api/api/v1/config/jwks',
-        ldapUrl: baseUrl + '/jans-config-api/api/v1/config/database/ldap',
-        couchbaseUrl: baseUrl + '/jans-config-api/api/v1/config/database/couchbase',
-        openidclients_url: baseUrl + '/jans-config-api/api/v1/openid/clients',
-        scopes_url: baseUrl + '/jans-config-api/api/v1/scopes',
-        umaresources_url: baseUrl + '/jans-config-api/api/v1/uma/resources',
-        attributes_url: baseUrl + '/jans-config-api/api/v1/attributes',
-        smtp_url: baseUrl + '/jans-config-api/api/v1/config/smtp', 
-        logging_url: baseUrl + '/jans-config-api/api/v1/logging',
-
+       
+        //scim
+        scim_url: baseUrl + '/jans-config-api/scim/user',
     };
 
     karate.configure('connectTimeout', 30000);
