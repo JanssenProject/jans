@@ -67,7 +67,8 @@ class HttpdInstaller(BaseInstaller, SetupUtils):
 
         # we only need these modules
         mods_enabled = ['env', 'proxy_http', 'access_compat', 'alias', 'authn_core', 'authz_core', 'authz_host', 'headers', 'mime', 'mpm_event', 'proxy', 'proxy_ajp', 'security2', 'reqtimeout', 'setenvif', 'socache_shmcb', 'ssl', 'unique_id']
-
+        if Config.profile == 'openbanking':
+            mods_enabled.append('rewrite')
 
         if base.snap:
             mods_enabled_dir = os.path.join(base.snap_common, 'etc/apache2/mods-enabled')

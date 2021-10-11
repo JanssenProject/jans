@@ -21,7 +21,8 @@ from setup_app.utils import base
 from setup_app.utils.cbm import CBM
 from setup_app.utils import ldif_utils
 from setup_app.utils.attributes import attribDataTypes
-from setup_app.utils.spanner import Spanner
+if Config.profile == 'jans':
+    from setup_app.utils.spanner import Spanner
 
 my_path = PurePath(os.path.dirname(os.path.realpath(__file__)))
 sys.path.append(my_path.parent.joinpath('pylib/sqlalchemy'))
@@ -90,7 +91,7 @@ class DBUtils:
                         break
 
         self.set_cbm()
-        self.default_bucket = Config.couchbase_bucket_prefix
+        self.default_bucket = Config.get('couchbase_bucket_prefix', 'jans')
 
 
     def sqlconnection(self, log=True):
@@ -825,7 +826,7 @@ class DBUtils:
                             self.session.commit()
 
                         else:
-                            base.logIt("Can't find current value for repmacement of {}".replace(str(entry)), True)
+                            base.logIt("Can't find current value for replacement of {}".format(str(entry)), True)
                             continue
 
                     elif 'replace' in entry and 'changetype' in entry:
@@ -837,7 +838,7 @@ class DBUtils:
                             setattr(sqlalchObj, attribute, new_val)
                             self.session.commit()
                         else:
-                            base.logIt("Can't find current value for repmacement of {}".replace(str(entry)), True)
+                            base.logIt("Can't find current value for replacement of {}".format(str(entry)), True)
                             continue
 
                     else:
@@ -1011,6 +1012,93 @@ class DBUtils:
                     for q in n1ql_list:
                         self.cbm.exec_query(q)
 
+    def import_templates(self, templates):
+
+        base.logIt("Importing templates file(s): {} ".format(', '.join(templates)))
+
+        sql_data_fn = os.path.join(Config.outputFolder, Config.rdbm_type, 'jans_data.sql')
+
+        for template in templates:
+            base.logIt("Importing entries from " + template)
+            entries = base.readJsonFile(template)
+            for entry in entries:
+                dn = entry['dn']
+                if self.Base is None:
+                    self.rdm_automapper()
+
+                if 'add' in  entry and 'changetype' in entry:
+                    attribute = entry['add']
+                    new_val = entry[attribute]
+                    sqlalchObj = self.get_sqlalchObj_for_dn(dn)
+
+                    if sqlalchObj:
+                        if isinstance(sqlalchObj.__table__.columns[attribute].type, self.json_dialects_instance):
+                            cur_val = copy.deepcopy(getattr(sqlalchObj, attribute))
+                            for val_ in new_val:
+                                cur_val['v'].append(val_)
+                            setattr(sqlalchObj, attribute, cur_val)
+                        else:
+                            setattr(sqlalchObj, attribute, new_val)
+
+                        self.session.commit()
+
+                    else:
+                        base.logIt("Can't find current value for replacement of {}".format(str(entry)), True)
+                        continue
+
+                elif 'replace' in entry and 'changetype' in entry:
+                    attribute = entry['replace']
+                    sqlalchObj = self.get_sqlalchObj_for_dn(dn)
+
+                    if sqlalchObj:
+                        setattr(sqlalchObj, attribute, entry[attribute])
+                        self.session.commit()
+                    else:
+                        base.logIt("Can't find current value for replacement of {}".format(str(entry)), True)
+                        continue
+
+                else:
+                    vals = {}
+                    dn_parsed = dnutils.parse_dn(dn)
+                    rdn_name = dn_parsed[0][0]
+                    objectClass = entry.get('objectClass') or entry.get('objectclass')
+
+                    if objectClass and objectClass.lower() == 'organizationalunit':
+                        continue
+
+                    vals['doc_id'] = dn_parsed[0][1]
+                    vals['objectClass'] = objectClass
+
+                    #entry.pop(rdn_name)
+                    if 'objectClass' in entry:
+                        entry.pop('objectClass')
+                    elif 'objectclass' in entry:
+                        entry.pop('objectclass')
+
+                    table_name = objectClass
+
+                    if self.dn_exists_rdbm(dn, table_name):
+                        base.logIt("DN {} exsits in {} skipping".format(dn, Config.rdbm_type))
+                        continue
+
+                    for lkey in entry:
+                        vals[lkey] = entry[lkey]
+
+                    sqlalchCls = self.Base.classes[table_name]
+
+                    for col in sqlalchCls.__table__.columns:
+                        if isinstance(col.type, self.json_dialects_instance) and not col.name in vals:
+                            vals[col.name] = {'v': []}
+
+                    sqlalchObj = sqlalchCls()
+
+                    for v in vals:
+                        setattr(sqlalchObj, v, vals[v])
+
+                    base.logIt("Adding {}".format(sqlalchObj.doc_id))
+                    self.session.add(sqlalchObj)
+                    self.session.commit()
+
     def import_schema(self, schema_file):
         if self.moddb == BackendTypes.LDAP:
             base.logIt("Importing schema {}".format(schema_file))
@@ -1031,7 +1119,7 @@ class DBUtils:
 
     def get_group_for_key(self, key):
         key_prefix = self.get_key_prefix(key)
-        for group in Config.couchbaseBucketDict:
+        for group in Config.get('couchbaseBucketDict', {}):
             if key_prefix in Config.couchbaseBucketDict[group]['document_key_prefix']:
                 break
         else:

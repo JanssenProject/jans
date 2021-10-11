@@ -210,8 +210,8 @@ class JettyInstaller(BaseInstaller, SetupUtils):
                 self.copyFile(jetty_tmpfiles_src, jetty_tmpfiles_dst)
                 self.run([paths.cmd_chown, 'root:root', jetty_tmpfiles_dst])
                 self.run([paths.cmd_chmod, '644', jetty_tmpfiles_dst])
-            
-            self.copyFile(os.path.join(self.jetty_home, 'bin/jetty.sh'), os.path.join(Config.distAppFolder, serviceName))
+
+            self.copyFile(os.path.join(self.jetty_home, 'bin/jetty.sh'), os.path.join(Config.distFolder, 'scripts', serviceName), backup=False)
 
         serviceConfiguration['installed'] = True
 
@@ -321,7 +321,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
                                     ('installConfigApi', 'jans-config-api'),
                                     ('installEleven', 'jans-eleven')]:
 
-            if Config.get(config_var):
+            if Config.get(config_var) and service in self.jetty_app_configuration:
                 installedComponents.append(self.jetty_app_configuration[service])
 
         return self.calculate_aplications_memory(Config.application_max_ram, self.jetty_app_configuration, installedComponents)

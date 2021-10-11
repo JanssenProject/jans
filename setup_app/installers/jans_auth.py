@@ -3,6 +3,8 @@ import glob
 import random
 import string
 import uuid
+import shutil
+from urllib.parse import urlparse
 
 from setup_app import paths
 from setup_app.utils import base
@@ -45,6 +47,7 @@ class JansAuthInstaller(JettyInstaller):
         jettyServiceWebapps = os.path.join(self.jetty_base, self.service_name, 'webapps')
         self.copyFile(self.source_files[0][0], jettyServiceWebapps)
         self.war_for_jetty10(os.path.join(jettyServiceWebapps, os.path.basename(self.source_files[0][0])))
+
         self.enable()
 
     def generate_configuration(self):
@@ -54,7 +57,8 @@ class JansAuthInstaller(JettyInstaller):
         if not Config.get('admin_inum'):
             Config.admin_inum = str(uuid.uuid4())
 
-        Config.encoded_admin_password = self.ldap_encode(Config.admin_password)
+        if Config.profile == 'jans':
+            Config.encoded_admin_password = self.ldap_encode(Config.admin_password)
 
         self.logIt("Generating OAuth openid keys", pbar=self.service_name)
         sig_keys = 'RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512'
@@ -62,9 +66,16 @@ class JansAuthInstaller(JettyInstaller):
         jwks = self.gen_openid_jwks_jks_keys(self.oxauth_openid_jks_fn, Config.oxauth_openid_jks_pass, key_expiration=2, key_algs=sig_keys, enc_keys=enc_keys)
         self.write_openid_keys(self.oxauth_openid_jwks_fn, jwks)
 
+        if Config.get('use_external_key'):
+            self.import_openbanking_key()
+
     def render_import_templates(self):
 
-        for tmp in (self.oxauth_config_json, self.ldif_people, self.ldif_groups):
+        templates = [self.oxauth_config_json]
+        if Config.profile == 'jans':
+            templates += [self.ldif_people, self.ldif_groups]
+
+        for tmp in templates:
             self.renderTemplateInOut(tmp, self.templates_folder, self.output_folder)
 
         Config.templateRenderingDict['oxauth_config_base64'] = self.generate_base64_ldap_file(self.oxauth_config_json)
@@ -76,8 +87,11 @@ class JansAuthInstaller(JettyInstaller):
         self.renderTemplateInOut(self.ldif_scripts, Config.templateFolder, Config.outputFolder)
         self.renderTemplateInOut(self.ldif_config, self.templates_folder, self.output_folder)
 
-        self.dbUtils.import_ldif([self.ldif_config, self.ldif_scripts, self.ldif_people, self.ldif_groups])
-
+        self.dbUtils.import_ldif([self.ldif_config, self.ldif_scripts])
+        if Config.profile == 'jans':
+            self.dbUtils.import_ldif([self.ldif_people, self.ldif_groups])
+        if Config.profile == 'openbanking':
+            self.import_openbanking_certificate()
 
     def install_oxauth_rp(self):
         self.download_files(downloads=[self.source_files[1][0]])
@@ -109,12 +123,35 @@ class JansAuthInstaller(JettyInstaller):
                 os.path.join(Config.install_dir, 'static/auth/lib/duo_web.py'),
                 os.path.join(Config.jansOptPythonFolder, 'libs' )
             )
-        
+
         for conf_fn in ('duo_creds.json', 'gplus_client_secrets.json', 'super_gluu_creds.json',
                         'vericloud_jans_creds.json', 'cert_creds.json', 'otp_configuration.json'):
-            
+
             src_fn = os.path.join(Config.install_dir, 'static/auth/conf', conf_fn)
             self.copyFile(src_fn, Config.certFolder)
-    
+
+    def import_openbanking_certificate(self):
+        self.logIt("Importing openbanking ssl certificate")
+        oxauth_config_json = base.readJsonFile(self.oxauth_config_json)
+        jwksUri = oxauth_config_json['jwksUri']
+        o = urlparse(jwksUri)
+        jwks_addr = o.netloc
+        ssl_cmd = shutil.which('openssl')
+        random_crt_fn = os.path.join(output_folder, '{}.crt'.format(os.urandom(3).hex()))
+        cmd = "echo -n | {} s_client -connect {}:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > {}".format(ssl_cmd, jwks_addr, random_crt_fn)
+        self.run(cmd, shell=True)
+        alias = jwks_addr.replace('.', '_')
+
+        self.run([Config.cmd_keytool, '-import', '-trustcacerts', '-keystore', 
+                            Config.defaultTrustStoreFN, '-storepass', 'changeit', 
+                            '-noprompt', '-alias', alias, '-file', random_crt_fn])
+
+        #os.remove(random_crt_fn)
+
+    def import_openbanking_key(self):
+        if os.path.isfile(Config.ob_key_fn) and os.path.isfile(Config.ob_cert_fn):
+            self.gen_keystore('obsigning', self.oxauth_openid_jks_fn, Config.oxauth_openid_jks_pass, Config.ob_key_fn, Config.ob_cert_fn, Config.ob_alias)
+
+
     def installed(self):
         return os.path.exists(os.path.join(Config.jetty_base, self.service_name, 'start.ini'))

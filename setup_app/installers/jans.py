@@ -37,18 +37,18 @@ class JansInstaller(BaseInstaller, SetupUtils):
                 txt += 'countryCode'.ljust(30) + Config.countryCode.rjust(35) + "\n"
                 txt += 'Applications max ram (MB)'.ljust(30) + str(Config.application_max_ram).rjust(35) + "\n"
 
-                if Config.wrends_install:
+                if Config.get('wrends_install') and Config.get('opendj_max_ram'):
                     txt += 'OpenDJ max ram (MB)'.ljust(30) + str(Config.opendj_max_ram).rjust(35) + "\n"
 
                 bc = []
 
-                if Config.wrends_install:
+                if Config.get('wrends_install'):
                     t_ = 'opendj'
                     if Config.wrends_install == InstallTypes.REMOTE:
                         t_ += '[R]'
                     bc.append(t_)
 
-                if Config.cb_install:
+                if Config.get('cb_install'):
                     t_ = 'couchbase'
                     if Config.cb_install == InstallTypes.REMOTE:
                         t_ += '[R]'
@@ -59,7 +59,6 @@ class JansInstaller(BaseInstaller, SetupUtils):
                     if Config.rdbm_install_type == InstallTypes.REMOTE:
                         t_ += '[R]'
                     bc.append(t_)
-
 
                 if bc:
                     bct = ', '.join(bc)
@@ -72,13 +71,15 @@ class JansInstaller(BaseInstaller, SetupUtils):
             txt += 'Install Auth Server'.ljust(30) + repr(Config.installOxAuth).rjust(35) + "\n"
             txt += 'Install Jans Auth Config Api'.ljust(30) + repr(Config.installConfigApi).rjust(35) + "\n"
             #txt += 'Install Gluu Admin UI'.ljust(30) + repr(Config.installAdminUI).rjust(35) + "\n"            
-            txt += 'Install Fido2 Server'.ljust(30) + repr(Config.installFido2).rjust(35) + (' *' if 'installFido2' in Config.addPostSetupService else '') + "\n"
-            txt += 'Install Scim Server'.ljust(30) + repr(Config.installScimServer).rjust(35) + (' *' if 'installScimServer' in Config.addPostSetupService else '') + "\n"
-            txt += 'Install Eleven Server'.ljust(30) + repr(Config.installEleven).rjust(35) + (' *' if 'installEleven' in Config.addPostSetupService else '') + "\n"
-            #txt += 'Install Oxd '.ljust(30) + repr(Config.installOxd).rjust(35) + (' *' if 'installOxd' in Config.addPostSetupService else '') + "\n"
+            if Config.profile == 'jans':
+                txt += 'Install Fido2 Server'.ljust(30) + repr(Config.installFido2).rjust(35) + (' *' if 'installFido2' in Config.addPostSetupService else '') + "\n"
+                txt += 'Install Scim Server'.ljust(30) + repr(Config.installScimServer).rjust(35) + (' *' if 'installScimServer' in Config.addPostSetupService else '') + "\n"
+                txt += 'Install Eleven Server'.ljust(30) + repr(Config.installEleven).rjust(35) + (' *' if 'installEleven' in Config.addPostSetupService else '') + "\n"
+                #txt += 'Install Oxd '.ljust(30) + repr(Config.installOxd).rjust(35) + (' *' if 'installOxd' in Config.addPostSetupService else '') + "\n"
             return txt
 
-        except:
+        except Exception as e:
+            self.logIt("ERROR: " + str(e), True)
             s = ""
             for key in list(Config.__dict__):
                 if not key in ('__dict__',):
@@ -188,7 +189,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
         if not templates:
             templates = Config.ce_templates
 
-        if Config.persistence_type in ('couchbase', 'sql', 'spanner'):
+        if Config.persistence_type in ('couchbase', 'sql', 'spanner') and Config.get('ox_ldap_properties'):
             Config.ce_templates[Config.ox_ldap_properties] = False
 
         for fullPath in templates:
