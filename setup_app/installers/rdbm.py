@@ -313,10 +313,10 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
         for group in ldap_mappings:
             ldif_files +=  Config.couchbaseBucketDict[group]['ldif']
 
-        if Config.ldif_metric in ldif_files:
+        if Config.get('ldif_metric') in ldif_files:
             ldif_files.remove(Config.ldif_metric)
 
-        if Config.ldif_site in ldif_files:
+        if Config.get('ldif_site') in ldif_files:
             ldif_files.remove(Config.ldif_site)
 
         Config.pbar.progress(self.service_name, "Importing ldif files to {}".format(Config.rdbm_type), False)
@@ -328,7 +328,6 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
             elif Config.rdbm_type == 'spanner':
                 force = BackendTypes.SPANNER
             self.dbUtils.import_ldif([Config.ldif_base], force=force)
-
 
         self.dbUtils.import_ldif(ldif_files)
 
