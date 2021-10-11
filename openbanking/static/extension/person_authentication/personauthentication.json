@@ -1,0 +1,44 @@
+{
+  "dn": "inum=A51E-76DA,ou=scripts,o=jans",
+  "inum": "A51E-76DA",
+  "name": "urn:openbanking:psd2:sca",
+  "aliases": null,
+  "description": "Openbanking authentication module",
+  "script": "_file OpenBanking.py",
+  "scriptType": "PERSON_AUTHENTICATION",
+  "programmingLanguage": "PYTHON",
+  "moduleProperties": [
+    {
+      "value1": "usage_type",
+      "value2": "interactive",
+      "description": null
+    },
+    {
+      "value1": "location_type",
+      "value2": "ldap",
+      "description": null
+    }
+  ],
+  "configurationProperties": [
+    {
+		"value1":"redirect_url",
+		"value2":"https://bank-op.gluu.org/oxauth/authorize.htm?scope=openid+profile+email+user_name&acr_values=basic&response_type=code&redirect_uri=https%3A%2F%2Fbank.testingluuk8.org%2Fjans-auth%2Fpostlogin.htm&nonce=72fc1a52-25a7-4293-929d-b61b8a05c9c4&client_id=29c7a980-a223-4f5e-b598-2b99e093d328",
+		"hide":false,
+		"description":"redirect to consent app"
+	},
+    {	
+		"value1":"tpp_jwks_url",
+		"value2":"https://keystore.openbankingtest.org.uk/0014H00001lFE7dQAG/0014H00001lFE7dQAG.jwks",
+		"hide":false,
+		"description":"This Set of Certificate are to be used for TPP/Oauth Client usage"
+	}
+  ],
+  
+  "level": 10,
+  "revision": 1,
+  "enabled": true,
+  "scriptError": null,
+  "modified": false,
+  "internal": false
+}
+
