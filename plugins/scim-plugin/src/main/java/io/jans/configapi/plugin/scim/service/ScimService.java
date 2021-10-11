@@ -1,5 +1,6 @@
 package io.jans.configapi.plugin.scim.service;
 
+import static io.jans.as.model.util.Util.escapeLog;
 import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.util.AuthUtil;
 import io.jans.configapi.plugin.scim.model.config.ScimConfiguration;
@@ -33,29 +34,21 @@ public class ScimService {
 
     public Response serachScimUser(String filter, Integer startIndex, Integer count, String sortBy, String sortOrder,
             String attrsList, String excludedAttrsList) throws Exception {
-        log.info(
-                "Search User param passed to service -  filter:{}, startIndex:{}, sortBy:{}, sortOrder:{}, attrsList:{}, excludedAttrsList:{}",
-                filter, startIndex, sortBy, sortOrder, attrsList, excludedAttrsList);
-        ClientSideService client = getClientSideService();
+              ClientSideService client = getClientSideService();
         return client.searchUsers(filter, startIndex, count, sortBy, sortOrder, attrsList, excludedAttrsList);
     }
 
     public Response serachScimUserPost(SearchRequest searchRequest) throws Exception {
-        log.info("Post search User param passed to service -  searchRequest:{}", searchRequest);
         ClientSideService client = getClientSideService();
         return client.searchUsersPost(searchRequest);
     }
 
     public Response createScimUser(UserResource user, String attrsList, String excludedAttrsList) throws Exception {
-        log.info("To create Scim user param passed to service -  user:{}, attrsList:{}, excludedAttrsList:{}", user,
-                attrsList, excludedAttrsList);
         ClientSideService client = getClientSideService();
         return client.createUser(user, attrsList, excludedAttrsList);
     }
 
     public Response getScimUserById(String id, String attrsList, String excludedAttrsList) throws Exception {
-        log.info("To search Scim user by id param passed to service -  id:{}, attrsList:{}, excludedAttrsList:{}", id,
-                attrsList, excludedAttrsList);
         ClientSideService client = getClientSideService();
         return client.getUserById(id, attrsList, excludedAttrsList);
 
@@ -63,23 +56,17 @@ public class ScimService {
 
     public Response updateScimUser(UserResource user, String id, String attrsList, String excludedAttrsList)
             throws Exception {
-        log.info("To update Scim user param passed to service -  user:{}, id:{}, attrsList:{}, excludedAttrsList:{}",
-                user, id, attrsList, excludedAttrsList);
         ClientSideService client = getClientSideService();
         return client.updateUser(user, id, attrsList, excludedAttrsList);
     }
 
     public Response deleteScimUser(String id) throws Exception {
-        log.info("To delete Scim user id passed to service -  id:{}", id);
         ClientSideService client = getClientSideService();
         return client.deleteUser(id);
     }
 
     public Response patchScimUser(PatchRequest patchRequest, String id, String attrsList, String excludedAttrsList)
             throws Exception {
-        log.info(
-                "To patch Scim user param passed to service -  patchRequest:{}, id:{}, attrsList:{}, excludedAttrsList:{}",
-                patchRequest, id, attrsList, excludedAttrsList);
         ClientSideService client = getClientSideService();
         return client.patchUser(patchRequest, id, attrsList, excludedAttrsList);
     }
@@ -87,7 +74,7 @@ public class ScimService {
     private ClientSideService getClientSideService() throws Exception {
         String domainURL = authUtil.getIssuer() + scimConfiguration.getScimRelativePath();
         String oidcMetadataUrl = authUtil.getOpenIdConfigurationEndpoint();
-        log.trace("Scim Client param - domainURL:{}, oidcMetadataUrl:{} ", domainURL, oidcMetadataUrl);
+        log.debug("Scim Client param - domainURL:{}, oidcMetadataUrl:{} ", domainURL, oidcMetadataUrl);
 
         return ScimClientFactory.getClient(domainURL, oidcMetadataUrl, authUtil.getClientId(),
                 authUtil.getClientDecryptPassword(authUtil.getClientId()));

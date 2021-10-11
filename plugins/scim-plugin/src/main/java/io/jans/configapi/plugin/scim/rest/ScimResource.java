@@ -1,5 +1,6 @@
 package io.jans.configapi.plugin.scim.rest;
 
+import static io.jans.as.model.util.Util.escapeLog;
 import io.jans.configapi.filters.ProtectedApi;
 import io.jans.configapi.plugin.scim.service.ScimService;
 import io.jans.scim.model.scim2.SearchRequest;
@@ -42,8 +43,14 @@ public class ScimResource {
             @QueryParam(QUERY_PARAM_SORT_BY) String sortBy, @QueryParam(QUERY_PARAM_SORT_ORDER) String sortOrder,
             @QueryParam(QUERY_PARAM_ATTRIBUTES) String attrsList,
             @QueryParam(QUERY_PARAM_EXCLUDED_ATTRS) String excludedAttrsList) throws Exception {
-        log.info(" Request to search User with filter:{}, startIndex:{}, sortBy:{}, sortOrder:{}, attrsList{},  excludedAttrsList:{}", filter, startIndex, sortBy, sortOrder, attrsList,excludedAttrsList);
+        if (log.isTraceEnabled()) {
+            log.trace(
+                    " Request to search User with filter:{}, startIndex:{}, sortBy:{}, sortOrder:{}, attrsList{},  excludedAttrsList:{}",
+                    escapeLog(filter), escapeLog(startIndex), escapeLog(sortBy), escapeLog(sortOrder),
+                    escapeLog(attrsList), escapeLog(excludedAttrsList));
+        }
         return scimService.serachScimUser(filter, startIndex, count, sortBy, sortOrder, attrsList, excludedAttrsList);
+
     }
 
     @Path(SEARCH_SUFFIX)
@@ -54,8 +61,9 @@ public class ScimResource {
     @DefaultValue(MEDIA_TYPE_SCIM_JSON)
     @ProtectedApi(scopes = { "https://jans.io/scim/users.read" })
     public Response searchUsersPost(SearchRequest searchRequest) throws Exception {
-
-        log.info(" Request to search User with SearchRequest object  searchRequest:{}", searchRequest);
+        if (log.isTraceEnabled()) {
+            log.trace(" Request to search User with SearchRequest object  searchRequest:{}", escapeLog(searchRequest));
+        }
         return scimService.serachScimUserPost(searchRequest);
     }
 
@@ -67,7 +75,10 @@ public class ScimResource {
     @ProtectedApi(scopes = { "https://jans.io/scim/users.write" })
     public Response createUser(UserResource user, @QueryParam(QUERY_PARAM_ATTRIBUTES) String attrsList,
             @QueryParam(QUERY_PARAM_EXCLUDED_ATTRS) String excludedAttrsList) throws Exception {
-        log.info(" Request to create User with user:{}, attrsList:{}, excludedAttrsList:{}", user , attrsList, excludedAttrsList);
+        if (log.isTraceEnabled()) {
+            log.trace(" Request to create User with user:{}, attrsList:{}, excludedAttrsList:{}", escapeLog(user),
+                    escapeLog(attrsList), escapeLog(excludedAttrsList));
+        }
         return scimService.createScimUser(user, attrsList, excludedAttrsList);
     }
 
@@ -79,8 +90,10 @@ public class ScimResource {
     @ProtectedApi(scopes = { "https://jans.io/scim/users.read" })
     public Response getUserById(@PathParam("id") String id, @QueryParam(QUERY_PARAM_ATTRIBUTES) String attrsList,
             @QueryParam(QUERY_PARAM_EXCLUDED_ATTRS) String excludedAttrsList) throws Exception {
-
-        log.info(" Request to search User with id:{}, attrsList:{}, excludedAttrsList:{}",id, attrsList, excludedAttrsList);
+        if (log.isTraceEnabled()) {
+            log.trace(" Request to search User with id:{}, attrsList:{}, excludedAttrsList:{}", escapeLog(id),
+                    escapeLog(attrsList), escapeLog(excludedAttrsList));
+        }
         return scimService.getScimUserById(id, attrsList, excludedAttrsList);
     }
 
@@ -94,8 +107,10 @@ public class ScimResource {
     public Response updateUser(UserResource user, @PathParam("id") String id,
             @QueryParam(QUERY_PARAM_ATTRIBUTES) String attrsList,
             @QueryParam(QUERY_PARAM_EXCLUDED_ATTRS) String excludedAttrsList) throws Exception {
-
-        log.info(" Request to update User with user:{}, id:{}, attrsList:{}, excludedAttrsList:{} ", user, id, attrsList, excludedAttrsList);
+        if (log.isTraceEnabled()) {
+            log.trace(" Request to update User with user:{}, id:{}, attrsList:{}, excludedAttrsList:{} ",
+                    escapeLog(user), escapeLog(id), escapeLog(attrsList), escapeLog(excludedAttrsList));
+        }
         return scimService.updateScimUser(user, id, attrsList, excludedAttrsList);
 
     }
@@ -107,23 +122,26 @@ public class ScimResource {
     @DefaultValue(MEDIA_TYPE_SCIM_JSON)
     @ProtectedApi(scopes = { "https://jans.io/scim/users.write" })
     public Response deleteUser(@PathParam("id") String id) throws Exception {
-        log.info(" Request to delete User with id:{} ", id );
+        if (log.isTraceEnabled()) {
+            log.trace(" Request to delete User with id:{} ", escapeLog(id));
+        }
         return scimService.deleteScimUser(id);
     }
 
-
     @Path("{id}")
     @PATCH
-    @Consumes({MEDIA_TYPE_SCIM_JSON, MediaType.APPLICATION_JSON,MediaType.APPLICATION_JSON_PATCH_JSON})
-    @Produces({MEDIA_TYPE_SCIM_JSON + UTF8_CHARSET_FRAGMENT, MediaType.APPLICATION_JSON + UTF8_CHARSET_FRAGMENT})
-    @HeaderParam("Accept") @DefaultValue(MEDIA_TYPE_SCIM_JSON)
-    @ProtectedApi(scopes = {"https://jans.io/scim/users.write"})
-    public Response patchUser(
-            PatchRequest patchRequest,
-            @PathParam("id") String id,
+    @Consumes({ MEDIA_TYPE_SCIM_JSON, MediaType.APPLICATION_JSON, MediaType.APPLICATION_JSON_PATCH_JSON })
+    @Produces({ MEDIA_TYPE_SCIM_JSON + UTF8_CHARSET_FRAGMENT, MediaType.APPLICATION_JSON + UTF8_CHARSET_FRAGMENT })
+    @HeaderParam("Accept")
+    @DefaultValue(MEDIA_TYPE_SCIM_JSON)
+    @ProtectedApi(scopes = { "https://jans.io/scim/users.write" })
+    public Response patchUser(PatchRequest patchRequest, @PathParam("id") String id,
             @QueryParam(QUERY_PARAM_ATTRIBUTES) String attrsList,
             @QueryParam(QUERY_PARAM_EXCLUDED_ATTRS) String excludedAttrsList) throws Exception {
-        log.info(" Request to patch User with patchRequest:{}, id:{}, attrsList:{}, excludedAttrsList:{}", patchRequest, id , attrsList, excludedAttrsList);
+        if (log.isTraceEnabled()) {
+            log.trace(" Request to patch User with patchRequest:{}, id:{}, attrsList:{}, excludedAttrsList:{}",
+                    escapeLog(patchRequest), escapeLog(id), escapeLog(attrsList), escapeLog(excludedAttrsList));
+        }
         return scimService.patchScimUser(patchRequest, id, attrsList, excludedAttrsList);
 
     }
