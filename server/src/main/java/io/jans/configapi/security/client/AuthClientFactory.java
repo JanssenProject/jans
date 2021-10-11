@@ -60,42 +60,29 @@ public class AuthClientFactory {
 
     public static IntrospectionResponse getIntrospectionResponse(String url, String header, String token,
             boolean followRedirects) {
-
         log.debug("Introspect Token - url:{}, header:{}, token:{} ,followRedirects:{} ", url, header, token, followRedirects);
-
-        RestClientBuilder restClient = RestClientBuilder.newBuilder().baseUri(UriBuilder.fromPath(url).build());
-        ResteasyWebTarget target = (ResteasyWebTarget) ClientBuilder.newClient(restClient.getConfiguration())
+        RestClientBuilder client = getRestClientBuilder(url);
+        ResteasyWebTarget target = (ResteasyWebTarget) ClientBuilder.newClient(client.getConfiguration())
                 .property(CONTENT_TYPE, MediaType.APPLICATION_JSON).target(url);
-
         IntrospectionService proxy = target.proxy(IntrospectionService.class);
         return proxy.introspectToken(header, token);
-
     }
 
     public static JsonNode getStatResponse(String url, String token, String month, String format) {
-        log.debug("Stat Response Token - url:{}, token:{}, month:{} ,format:{} ", url, token, month, format);
-        
-        Builder request = ClientBuilder.newClient().target(url).request();
-        request.header("Authorization", "Basic " + token);
-        request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
-        final MultivaluedHashMap<String, String> multivaluedHashMap = new MultivaluedHashMap<>();
-        multivaluedHashMap.add("month", month);
-        multivaluedHashMap.add("format", format);
-
-        RestClientBuilder restClient = RestClientBuilder.newBuilder().baseUri(UriBuilder.fromPath(url).build());
-        ResteasyWebTarget target = (ResteasyWebTarget) ClientBuilder.newClient(restClient.getConfiguration())
-                .target(url);
-        StatService statService = target.proxy(StatService.class);
+        log.debug("Stat Response Token - url:{}, token:{}, month:{} ,format:{} ", url, token, month, format);        
+        RestClientBuilder restClientBuilder = getRestClientBuilder(url);
+        ResteasyWebTarget webTarget = (ResteasyWebTarget) ClientBuilder.newClient(restClientBuilder.getConfiguration()).target(url);
+        StatService statService = webTarget.proxy(StatService.class);
         return statService.stat(token, month, format);
     }
 
     public static JsonNode getHealthCheckResponse(String url) {
         log.debug("HealthCheck - , url:{} ", url);
-        Builder request = ClientBuilder.newClient().target(url).request();
-        request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
-        Response response = request.get();
-        if (response.getStatus() == 200) {
-            JsonNode jsonNode = response.readEntity(JsonNode.class);
+        Builder clientRequest = getClientBuilder(url);
+        clientRequest.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
+        Response healthResponse = clientRequest.get();
+        if (healthResponse.getStatus() == 200) {
+            JsonNode jsonNode = healthResponse.readEntity(JsonNode.class);
             log.trace("Health Check Response is - jsonNode:{}", jsonNode);
             return jsonNode;
         }
@@ -107,27 +94,23 @@ public class AuthClientFactory {
         log.debug("Request for Access Token -  tokenUrl:{}, clientId:{}, clientSecret:{}, scope:{} ", tokenUrl,
                 clientId, clientSecret, scope);
         Response response = null;
-        try {
-            Builder request = ClientBuilder.newClient().target(tokenUrl).request();
+        try {            
             TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
             tokenRequest.setScope(scope);
             tokenRequest.setAuthUsername(clientId);
-            tokenRequest.setAuthPassword(clientSecret);
-
-            final MultivaluedHashMap<String, String> multivaluedHashMap = new MultivaluedHashMap<>(
-                    tokenRequest.getParameters());
+            tokenRequest.setAuthPassword(clientSecret);           
+            Builder request = getClientBuilder(tokenUrl); 
             request.header("Authorization", "Basic " + tokenRequest.getEncodedCredentials());
-            request.header(CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED);
-
+            request.header(CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED);            
+            final MultivaluedHashMap<String, String> multivaluedHashMap = new MultivaluedHashMap<>(
+                    tokenRequest.getParameters());  
             response = request.post(Entity.form(multivaluedHashMap));
             log.trace("Response for Access Token -  response:{}", response);
             if (response.getStatus() == 200) {
                 String entity = response.readEntity(String.class);
-
                 TokenResponse tokenResponse = new TokenResponse();
                 tokenResponse.setEntity(entity);
                 tokenResponse.injectDataFromJson(entity);
-
                 return tokenResponse;
             }
         } finally {
@@ -142,16 +125,14 @@ public class AuthClientFactory {
     public static String getIntrospectionEndpoint(String issuer) throws JsonProcessingException {
         log.debug(" Get Introspection Endpoint - issuer:{}", issuer);
         String configurationEndpoint = issuer + "/.well-known/openid-configuration";
-
-        Builder request = ClientBuilder.newClient().target(configurationEndpoint).request();
-        request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
-        Response response = request.get();
-        log.trace("AuthClientFactory::getIntrospectionEndpoint() - response:{}", response);
-
-        if (response.getStatus() == 200) {
-            String entity = response.readEntity(String.class);
-            log.trace("AuthClientFactory::getIntrospectionEndpoint() - entity:{}", entity);
-            return Jackson.getElement(entity, "introspection_endpoint");
+        Builder introspectionClient = getClientBuilder(configurationEndpoint);        
+        introspectionClient.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
+        Response introspectionResponse = introspectionClient.get();
+        log.trace("AuthClientFactory::getIntrospectionEndpoint() - introspectionResponse:{}", introspectionResponse);
+        if (introspectionResponse.getStatus() == 200) {
+            String introspectionEntity = introspectionResponse.readEntity(String.class);
+            log.trace("AuthClientFactory::getIntrospectionEndpoint() - introspectionEntity:{}", introspectionEntity);
+            return Jackson.getElement(introspectionEntity, "introspection_endpoint");
         }
         return null;
     }
@@ -160,11 +141,10 @@ public class AuthClientFactory {
         ApacheHttpClient43Engine engine = null;
         try {
             engine = ClientFactoryUtil.createEngine(followRedirects);
-            RestClientBuilder restClient = RestClientBuilder.newBuilder().baseUri(UriBuilder.fromPath(url).build())
-                    .register(engine);
-            ResteasyWebTarget target = (ResteasyWebTarget) ClientBuilder.newClient(restClient.getConfiguration())
+            RestClientBuilder restClient = getRestClientBuilder(url).register(engine);
+            ResteasyWebTarget resteasyWebTarget = (ResteasyWebTarget) ClientBuilder.newClient(restClient.getConfiguration())
                     .target(url);
-            return target.proxy(IntrospectionService.class);
+            return resteasyWebTarget.proxy(IntrospectionService.class);
         } finally {
             if (engine != null) {
                 engine.close();
@@ -173,37 +153,33 @@ public class AuthClientFactory {
     }
 
     public static String getJwksUri(String issuer) throws JsonProcessingException {
-        log.trace(" AuthClientFactory::getJwksUri() - issuer:{}", issuer);
+        log.trace(" Jwks Uri - issuer:{}", issuer);
         String configurationEndpoint = issuer + "/.well-known/openid-configuration";
-
-        Builder request = ClientBuilder.newClient().target(configurationEndpoint).request();
-        request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
-        Response response = request.get();
-        log.trace("\n\n AuthClientFactory::getJwksUri() - response:{}", response);
-
-        if (response.getStatus() == 200) {
-            String entity = response.readEntity(String.class);
-            log.trace("\n\n AuthClientFactory::getJwksUri() - entity:{}", entity);
-            return Jackson.getElement(entity, "jwks_uri");
+        Builder jwksUriClient = getClientBuilder(configurationEndpoint);
+        jwksUriClient.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
+        Response jwksUriResponse = jwksUriClient.get();
+        log.trace("AuthClientFactory::getJwksUri() - jwksUriResponse:{}", jwksUriResponse);
+        if (jwksUriResponse.getStatus() == 200) {
+            String jwksEntity = jwksUriResponse.readEntity(String.class);
+            log.trace("AuthClientFactory::getJwksUri() - jwksEntity:{}", jwksEntity);
+            return Jackson.getElement(jwksEntity, "jwks_uri");
         }
         return null;
     }
 
     public static JSONWebKeySet getJSONWebKeys(String jwksUri) {
-        log.trace(" AuthClientFactory::getJSONWebKeys() - jwksUri:{}", jwksUri);
-
-        Builder request = ClientBuilder.newClient().target(jwksUri).request();
-        request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
-        Response response = request.get();
-        log.trace("AuthClientFactory::getJSONWebKeys() - response:{}", response);
-
-        if (response.getStatus() == 200) {
-            String entity = response.readEntity(String.class);
-            log.trace("AuthClientFactory::getJSONWebKeys() - entity:{}", entity);
+        log.debug("JSONWebKeys - jwksUri:{}", jwksUri);
+        Builder clientBuilder = getClientBuilder(jwksUri);
+        clientBuilder.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
+        Response webKeyResponse = clientBuilder.get();
+        log.trace("AuthClientFactory::getJSONWebKeys() - webKeyResponse:{}", webKeyResponse);
+        if (webKeyResponse.getStatus() == 200) {
+            String jsonWebKeySetEntity = webKeyResponse.readEntity(String.class);
+            log.trace("AuthClientFactory::getJSONWebKeys() - jsonWebKeySetEntity:{}", jsonWebKeySetEntity);
             JwkResponse jwkResponse = new JwkResponse(200);
             JSONWebKeySet jwks = null;
-            if (StringUtils.isNotBlank(entity)) {
-                JSONObject jsonObj = new JSONObject(entity);
+            if (StringUtils.isNotBlank(jsonWebKeySetEntity)) {
+                JSONObject jsonObj = new JSONObject(jsonWebKeySetEntity);
                 if (jsonObj.has(JSON_WEB_KEY_SET)) {
                     jwks = JSONWebKeySet.fromJSONObject(jsonObj);
                     jwkResponse.setJwks(jwks);
@@ -211,9 +187,16 @@ public class AuthClientFactory {
                 log.trace("AuthClientFactory::getJSONWebKeys() - jwkResponse:{}, jwks:{}", jwkResponse, jwks);
                 return jwks;
             }
-
         }
         return null;
+    }
+    
+    private static RestClientBuilder getRestClientBuilder(String clientUrl) {
+        return RestClientBuilder.newBuilder().baseUri(UriBuilder.fromPath(clientUrl).build());
+    }
+    
+    private static Builder getClientBuilder(String url) {
+        return ClientBuilder.newClient().target(url).request();
     }
 
 }
