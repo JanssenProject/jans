@@ -981,53 +981,6 @@
 		</profile>
 
 		<profile>
-			<id>saml</id>
-			<activation>
-				<property>
-					<name>!saml-disabled</name>
-				</property>
-			</activation>
-			<properties>
-			</properties>
-			<build>
-				<plugins>
-				</plugins>
-			</build>
-			<dependencies>
-				<dependency>
-					<groupId>io.jans</groupId>
-					<artifactId>jans-core-saml</artifactId>
-				</dependency>
-                <dependency>
-                    <groupId>org.owasp.esapi</groupId>
-                    <artifactId>esapi</artifactId>
-                    <exclusions>
-                        <exclusion>
-                            <groupId>log4j</groupId>
-                            <artifactId>log4j</artifactId>
-                        </exclusion>
-                    </exclusions>
-                </dependency>
-                <dependency>
-                    <groupId>ca.juliusdavies</groupId>
-                    <artifactId>not-yet-commons-ssl</artifactId>
-                </dependency>
-                <dependency>
-                    <groupId>org.apache.santuario</groupId>
-                    <artifactId>xmlsec</artifactId>
-                </dependency>
-                <dependency>
-                    <groupId>commons-fileupload</groupId>
-                    <artifactId>commons-fileupload</artifactId>
-                </dependency>
-                <dependency>
-                    <groupId>xerces</groupId>
-                    <artifactId>xercesImpl</artifactId>
-                </dependency>
-			</dependencies>
-		</profile>
-
-		<profile>
 			<id>push_sender</id>
 			<activation>
 				<activeByDefault>true</activeByDefault>
