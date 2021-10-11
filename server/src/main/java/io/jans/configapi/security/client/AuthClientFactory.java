@@ -61,8 +61,7 @@ public class AuthClientFactory {
     public static IntrospectionResponse getIntrospectionResponse(String url, String header, String token,
             boolean followRedirects) {
 
-        log.info("AuthClientFactory - getIntrospectionResponse() - url:{}, header:{}, token:{} ,followRedirects:{} ",
-                url, header, token, followRedirects);
+        log.debug("Introspect Token - url:{}, header:{}, token:{} ,followRedirects:{} ", url, header, token, followRedirects);
 
         RestClientBuilder restClient = RestClientBuilder.newBuilder().baseUri(UriBuilder.fromPath(url).build());
         ResteasyWebTarget target = (ResteasyWebTarget) ClientBuilder.newClient(restClient.getConfiguration())
@@ -74,6 +73,8 @@ public class AuthClientFactory {
     }
 
     public static JsonNode getStatResponse(String url, String token, String month, String format) {
+        log.debug("Stat Response Token - url:{}, token:{}, month:{} ,format:{} ", url, token, month, format);
+        
         Builder request = ClientBuilder.newClient().target(url).request();
         request.header("Authorization", "Basic " + token);
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
@@ -95,7 +96,7 @@ public class AuthClientFactory {
         Response response = request.get();
         if (response.getStatus() == 200) {
             JsonNode jsonNode = response.readEntity(JsonNode.class);
-            log.debug("AuthClientFactory::getHealthCheckResponse() - entity:{}", jsonNode);
+            log.trace("Health Check Response is - jsonNode:{}", jsonNode);
             return jsonNode;
         }
         return null;
@@ -119,7 +120,7 @@ public class AuthClientFactory {
             request.header(CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED);
 
             response = request.post(Entity.form(multivaluedHashMap));
-            log.debug("Response for Access Token -  response:{}", response);
+            log.trace("Response for Access Token -  response:{}", response);
             if (response.getStatus() == 200) {
                 String entity = response.readEntity(String.class);
 
@@ -139,7 +140,7 @@ public class AuthClientFactory {
     }
 
     public static String getIntrospectionEndpoint(String issuer) throws JsonProcessingException {
-        log.trace(" AuthClientFactory::getIntrospectionEndpoint() - issuer:{}", issuer);
+        log.debug(" Get Introspection Endpoint - issuer:{}", issuer);
         String configurationEndpoint = issuer + "/.well-known/openid-configuration";
 
         Builder request = ClientBuilder.newClient().target(configurationEndpoint).request();
