@@ -826,7 +826,7 @@ class DBUtils:
                             self.session.commit()
 
                         else:
-                            base.logIt("Can't find current value for repmacement of {}".replace(str(entry)), True)
+                            base.logIt("Can't find current value for replacement of {}".format(str(entry)), True)
                             continue
 
                     elif 'replace' in entry and 'changetype' in entry:
@@ -838,7 +838,7 @@ class DBUtils:
                             setattr(sqlalchObj, attribute, new_val)
                             self.session.commit()
                         else:
-                            base.logIt("Can't find current value for repmacement of {}".replace(str(entry)), True)
+                            base.logIt("Can't find current value for replacement of {}".format(str(entry)), True)
                             continue
 
                     else:
@@ -1043,7 +1043,7 @@ class DBUtils:
                         self.session.commit()
 
                     else:
-                        base.logIt("Can't find current value for repmacement of {}".replace(str(entry)), True)
+                        base.logIt("Can't find current value for replacement of {}".format(str(entry)), True)
                         continue
 
                 elif 'replace' in entry and 'changetype' in entry:
@@ -1054,7 +1054,7 @@ class DBUtils:
                         setattr(sqlalchObj, attribute, entry[attribute])
                         self.session.commit()
                     else:
-                        base.logIt("Can't find current value for repmacement of {}".replace(str(entry)), True)
+                        base.logIt("Can't find current value for replacement of {}".format(str(entry)), True)
                         continue
 
                 else:
