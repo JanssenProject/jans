@@ -1001,6 +1001,12 @@
                 <dependency>
                     <groupId>org.owasp.esapi</groupId>
                     <artifactId>esapi</artifactId>
+                    <exclusions>
+                        <exclusion>
+                            <groupId>log4j</groupId>
+                            <artifactId>log4j</artifactId>
+                        </exclusion>
+                    </exclusions>
                 </dependency>
                 <dependency>
                     <groupId>ca.juliusdavies</groupId>
@@ -1009,6 +1015,14 @@
                 <dependency>
                     <groupId>org.apache.santuario</groupId>
                     <artifactId>xmlsec</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>commons-fileupload</groupId>
+                    <artifactId>commons-fileupload</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>xerces</groupId>
+                    <artifactId>xercesImpl</artifactId>
                 </dependency>
 			</dependencies>
 		</profile>
