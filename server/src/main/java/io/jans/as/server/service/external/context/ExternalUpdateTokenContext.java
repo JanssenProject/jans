@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.AttributeService;
 import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.server.model.common.AuthorizationGrant;
+import io.jans.as.server.model.common.AbstractAuthorizationGrant;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 
 /**
@@ -20,14 +20,14 @@ import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 public class ExternalUpdateTokenContext extends ExternalScriptContext {
 
 	private final Client client;
-	private final AuthorizationGrant grant;
+	private final AbstractAuthorizationGrant grant;
 
 	private CustomScriptConfiguration script;
 
 	private final AppConfiguration appConfiguration;
 	private final AttributeService attributeService;
 
-	public ExternalUpdateTokenContext(HttpServletRequest httpRequest, AuthorizationGrant grant,
+	public ExternalUpdateTokenContext(HttpServletRequest httpRequest, AbstractAuthorizationGrant grant,
 			Client client, AppConfiguration appConfiguration, AttributeService attributeService) {
 		super(httpRequest);
 		this.client = client;
@@ -48,7 +48,7 @@ public class ExternalUpdateTokenContext extends ExternalScriptContext {
 		return client;
 	}
 
-	public AuthorizationGrant getGrant() {
+	public AbstractAuthorizationGrant getGrant() {
 		return grant;
 	}
 

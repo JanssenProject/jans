@@ -29,6 +29,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import static org.apache.commons.lang3.BooleanUtils.isFalse;
+
 /**
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
@@ -60,11 +62,11 @@ public class UmaScopeService {
     private SpontaneousScopeService spontaneousScopeService;
 
     public static String asString(Collection<Scope> scopes) {
-        String result = "";
+        StringBuilder result = new StringBuilder();
         for (Scope scope : scopes) {
-            result += scope.getId() + " ";
+            result.append(scope.getId()).append(" ");
         }
-        return result.trim();
+        return result.toString().trim();
     }
 
     public Scope getOrCreate(Client client, String scopeId, Set<String> regExps) {
@@ -73,7 +75,7 @@ public class UmaScopeService {
             return fromLdap;
         }
 
-        if (!client.getAttributes().getAllowSpontaneousScopes()) {
+        if (isFalse(client.getAttributes().getAllowSpontaneousScopes())) {
             return null;
         }
 
@@ -119,7 +121,7 @@ public class UmaScopeService {
     }
 
     public List<String> getScopeDNsByIdsAndAddToLdapIfNeeded(List<String> scopeIds) {
-        List<String> result = new ArrayList<String>();
+        List<String> result = new ArrayList<>();
         for (Scope scope : getScopesByIds(scopeIds)) {
             result.add(scope.getDn());
         }
@@ -127,7 +129,7 @@ public class UmaScopeService {
     }
 
     public List<Scope> getScopesByDns(List<String> scopeDns) {
-        final List<Scope> result = new ArrayList<Scope>();
+        final List<Scope> result = new ArrayList<>();
         try {
             if (scopeDns != null && !scopeDns.isEmpty()) {
                 for (String dn : scopeDns) {
@@ -150,7 +152,7 @@ public class UmaScopeService {
     }
 
     public List<String> getScopeIds(List<Scope> scopes) {
-        final List<String> result = new ArrayList<String>();
+        final List<String> result = new ArrayList<>();
         if (scopes != null && !scopes.isEmpty()) {
             for (Scope scope : scopes) {
                 result.add(scope.getId());
@@ -160,9 +162,9 @@ public class UmaScopeService {
     }
 
     public List<Scope> getScopesByIds(List<String> scopeIds) {
-        List<Scope> result = new ArrayList<Scope>();
+        List<Scope> result = new ArrayList<>();
         if (scopeIds != null && !scopeIds.isEmpty()) {
-            List<String> notInLdap = new ArrayList<String>(scopeIds);
+            List<String> notInLdap = new ArrayList<>(scopeIds);
 
             final List<Scope> entries = ldapEntryManager.findEntries(baseDn(), Scope.class, createAnyFilterByIds(scopeIds));
             if (entries != null) {
@@ -196,7 +198,7 @@ public class UmaScopeService {
             if (persisted) {
                 return newScope;
             } else {
-                log.error("Failed to persist scope, id:{}" + scopeId);
+                log.error("Failed to persist scope, id: {}", scopeId);
             }
         }
 
@@ -205,13 +207,13 @@ public class UmaScopeService {
 
     private Filter createAnyFilterByIds(List<String> scopeIds) {
         if (scopeIds != null && !scopeIds.isEmpty()) {
-            List<Filter> filters = new ArrayList<Filter>();
+            List<Filter> filters = new ArrayList<>();
             for (String url : scopeIds) {
                 Filter filter = Filter.createEqualityFilter("jansId", url);
                 filters.add(filter);
             }
             Filter filter = Filter.createORFilter(filters.toArray(new Filter[0]));
-            log.trace("Uma scope ids: " + scopeIds + ", ldapFilter: " + filter);
+            log.trace("Uma scope ids: {}, ldapFilter: {}", scopeIds, filter);
             return filter;
         }
 
