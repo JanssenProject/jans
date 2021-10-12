@@ -25,7 +25,7 @@ import javax.inject.Named;
 @Named
 public class CIBAPingCallbackService {
 
-    private final static Logger log = LoggerFactory.getLogger(CIBAPingCallbackService.class);
+    private static final Logger log = LoggerFactory.getLogger(CIBAPingCallbackService.class);
 
     @Inject
     private AppConfiguration appConfiguration;
@@ -36,10 +36,10 @@ public class CIBAPingCallbackService {
         pingCallbackRequest.setClientNotificationToken(clientNotificationToken);
         pingCallbackRequest.setAuthReqId(authReqId);
 
-        PingCallbackClient pingCallbackClient = new PingCallbackClient(clientNotificationEndpoint, appConfiguration.getFapiCompatibility());
+        PingCallbackClient pingCallbackClient = new PingCallbackClient(clientNotificationEndpoint, appConfiguration.isFapi());
         pingCallbackClient.setRequest(pingCallbackRequest);
         PingCallbackResponse pingCallbackResponse = pingCallbackClient.exec();
 
-        log.debug("CIBA: ping callback result status " + pingCallbackResponse.getStatus());
+        log.debug("CIBA: ping callback result status {}", pingCallbackResponse.getStatus());
     }
 }
