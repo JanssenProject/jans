@@ -6,6 +6,10 @@
 
 package io.jans.configapi.security.client;
 
+import static io.jans.as.model.util.Util.escapeLog;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+
 import io.jans.as.client.service.StatService;
 import io.jans.as.client.JwkResponse;
 import io.jans.as.client.TokenRequest;
@@ -20,6 +24,7 @@ import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
+import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.MediaType;
@@ -30,16 +35,15 @@ import javax.ws.rs.core.UriBuilder;
 import org.eclipse.microprofile.rest.client.annotation.RegisterProvider;
 import org.eclipse.microprofile.rest.client.RestClientBuilder;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
 @RegisterProvider(OpenIdClientService.class)
 public class AuthClientFactory {
+
+    private static final String CONTENT_TYPE = "Content-Type";
 
     @Inject
     @RestClient
@@ -57,37 +61,38 @@ public class AuthClientFactory {
 
     public static IntrospectionResponse getIntrospectionResponse(String url, String header, String token,
             boolean followRedirects) {
-
-        log.info("\n\n AuthClientFactory:::getIntrospectionResponse() - url = " + url + " , header = " + header
-                + " , token = " + token + " , followRedirects = " + followRedirects);
-
-        RestClientBuilder restClient = RestClientBuilder.newBuilder().baseUri(UriBuilder.fromPath(url).build());
-
-        ResteasyWebTarget target = (ResteasyWebTarget) ResteasyClientBuilder.newClient(restClient.getConfiguration())
-                .property("Content-Type", MediaType.APPLICATION_JSON).target(url);
-
+        log.debug("Introspect Token - url:{}, header:{}, token:{} ,followRedirects:{} ", url, header, token,
+                followRedirects);
+        RestClientBuilder client = getRestClientBuilder(url);
+        ResteasyWebTarget target = (ResteasyWebTarget) ClientBuilder.newClient(client.getConfiguration())
+                .property(CONTENT_TYPE, MediaType.APPLICATION_JSON).target(url);
         IntrospectionService proxy = target.proxy(IntrospectionService.class);
-
         return proxy.introspectToken(header, token);
-
     }
 
     public static JsonNode getStatResponse(String url, String token, String month, String format) {
-        log.debug("Stat Report - , url = " + url + " , token = " + token + " , month = " + month + " , format = "
-                + format);
-
-        Builder request = ResteasyClientBuilder.newClient().target(url).request();
-        request.header("Authorization", "Basic " + token);
-        request.header("Content-Type", MediaType.APPLICATION_JSON);
-        final MultivaluedHashMap<String, String> multivaluedHashMap = new MultivaluedHashMap();
-        multivaluedHashMap.add("month", month);
-        multivaluedHashMap.add("format", format);
-
-        RestClientBuilder restClient = RestClientBuilder.newBuilder().baseUri(UriBuilder.fromPath(url).build());
-        ResteasyWebTarget target = (ResteasyWebTarget) ResteasyClientBuilder.newClient(restClient.getConfiguration())
+        if (log.isDebugEnabled()) {
+            log.debug("Stat Response Token - url:{}, token:{}, month:{} ,format:{} ", escapeLog(url), escapeLog(token),
+                    escapeLog(month), escapeLog(format));
+        }
+        RestClientBuilder restClientBuilder = getRestClientBuilder(url);
+        ResteasyWebTarget webTarget = (ResteasyWebTarget) ClientBuilder.newClient(restClientBuilder.getConfiguration())
                 .target(url);
-        StatService statService = target.proxy(StatService.class);
+        StatService statService = webTarget.proxy(StatService.class);
         return statService.stat(token, month, format);
+    }
+
+    public static JsonNode getHealthCheckResponse(String url) {
+        log.debug("HealthCheck - , url:{} ", url);
+        Builder clientRequest = getClientBuilder(url);
+        clientRequest.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
+        Response healthResponse = clientRequest.get();
+        if (healthResponse.getStatus() == 200) {
+            JsonNode jsonNode = healthResponse.readEntity(JsonNode.class);
+            log.trace("Health Check Response is - jsonNode:{}", jsonNode);
+            return jsonNode;
+        }
+        return null;
     }
 
     public static TokenResponse requestAccessToken(final String tokenUrl, final String clientId,
@@ -96,31 +101,22 @@ public class AuthClientFactory {
                 clientId, clientSecret, scope);
         Response response = null;
         try {
-            Builder request = ResteasyClientBuilder.newClient().target(tokenUrl).request();
             TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
             tokenRequest.setScope(scope);
             tokenRequest.setAuthUsername(clientId);
             tokenRequest.setAuthPassword(clientSecret);
-
-            final MultivaluedHashMap<String, String> multivaluedHashMap = new MultivaluedHashMap(
-                    tokenRequest.getParameters());
+            Builder request = getClientBuilder(tokenUrl);
             request.header("Authorization", "Basic " + tokenRequest.getEncodedCredentials());
-            request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
-
-            RestClientBuilder restClient = RestClientBuilder.newBuilder()
-                    .baseUri(UriBuilder.fromPath(tokenUrl).build());
-
-            ResteasyWebTarget target = (ResteasyWebTarget) ResteasyClientBuilder
-                    .newClient(restClient.getConfiguration()).target(tokenUrl);
+            request.header(CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED);
+            final MultivaluedHashMap<String, String> multivaluedHashMap = new MultivaluedHashMap<>(
+                    tokenRequest.getParameters());
             response = request.post(Entity.form(multivaluedHashMap));
-            log.debug("Response for Access Token -  response = " + response);
+            log.trace("Response for Access Token -  response:{}", response);
             if (response.getStatus() == 200) {
                 String entity = response.readEntity(String.class);
-
                 TokenResponse tokenResponse = new TokenResponse();
                 tokenResponse.setEntity(entity);
                 tokenResponse.injectDataFromJson(entity);
-
                 return tokenResponse;
             }
         } finally {
@@ -132,21 +128,17 @@ public class AuthClientFactory {
         return null;
     }
 
-    public static String getIntrospectionEndpoint(String issuer) throws Exception {
-        log.trace("\n\n AuthClientFactory::getIntrospectionEndpoint() - issuer = " + issuer);
+    public static String getIntrospectionEndpoint(String issuer) throws JsonProcessingException {
+        log.debug(" Get Introspection Endpoint - issuer:{}", issuer);
         String configurationEndpoint = issuer + "/.well-known/openid-configuration";
-        log.trace("\n\n AuthClientFactory::getIntrospectionEndpoint() - configurationEndpoint = "
-                + configurationEndpoint);
-
-        Builder request = ResteasyClientBuilder.newClient().target(configurationEndpoint).request();
-        request.header("Content-Type", MediaType.APPLICATION_JSON);
-        Response response = request.get();
-        log.trace("\n\n AuthClientFactory::getIntrospectionEndpoint() - response = " + response);
-
-        if (response.getStatus() == 200) {
-            String entity = response.readEntity(String.class);
-            log.trace("\n\n AuthClientFactory::getIntrospectionEndpoint() - entity = " + entity);
-            return Jackson.getElement(entity, "introspection_endpoint");
+        Builder introspectionClient = getClientBuilder(configurationEndpoint);
+        introspectionClient.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
+        Response introspectionResponse = introspectionClient.get();
+        log.trace("AuthClientFactory::getIntrospectionEndpoint() - introspectionResponse:{}", introspectionResponse);
+        if (introspectionResponse.getStatus() == 200) {
+            String introspectionEntity = introspectionResponse.readEntity(String.class);
+            log.trace("AuthClientFactory::getIntrospectionEndpoint() - introspectionEntity:{}", introspectionEntity);
+            return Jackson.getElement(introspectionEntity, "introspection_endpoint");
         }
         return null;
     }
@@ -155,12 +147,10 @@ public class AuthClientFactory {
         ApacheHttpClient43Engine engine = null;
         try {
             engine = ClientFactoryUtil.createEngine(followRedirects);
-            RestClientBuilder restClient = RestClientBuilder.newBuilder().baseUri(UriBuilder.fromPath(url).build())
-                    .register(engine);
-            ResteasyWebTarget target = (ResteasyWebTarget) ResteasyClientBuilder
+            RestClientBuilder restClient = getRestClientBuilder(url).register(engine);
+            ResteasyWebTarget resteasyWebTarget = (ResteasyWebTarget) ClientBuilder
                     .newClient(restClient.getConfiguration()).target(url);
-            IntrospectionService proxy = target.proxy(IntrospectionService.class);
-            return proxy;
+            return resteasyWebTarget.proxy(IntrospectionService.class);
         } finally {
             if (engine != null) {
                 engine.close();
@@ -168,50 +158,51 @@ public class AuthClientFactory {
         }
     }
 
-    public static String getJwksUri(String issuer) throws Exception {
-        log.trace("\n\n AuthClientFactory::getJwksUri() - issuer = " + issuer);
+    public static String getJwksUri(String issuer) throws JsonProcessingException {
+        log.trace(" Jwks Uri - issuer:{}", issuer);
         String configurationEndpoint = issuer + "/.well-known/openid-configuration";
-        log.trace("\n\n AuthClientFactory::getJwksUri() - configurationEndpoint = " + configurationEndpoint);
-
-        Builder request = ResteasyClientBuilder.newClient().target(configurationEndpoint).request();
-        request.header("Content-Type", MediaType.APPLICATION_JSON);
-        Response response = request.get();
-        log.trace("\n\n AuthClientFactory::getJwksUri() - response = " + response);
-
-        if (response.getStatus() == 200) {
-            String entity = response.readEntity(String.class);
-            log.trace("\n\n AuthClientFactory::getJwksUri() - entity = " + entity);
-            return Jackson.getElement(entity, "jwks_uri");
+        Builder jwksUriClient = getClientBuilder(configurationEndpoint);
+        jwksUriClient.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
+        Response jwksUriResponse = jwksUriClient.get();
+        log.trace("AuthClientFactory::getJwksUri() - jwksUriResponse:{}", jwksUriResponse);
+        if (jwksUriResponse.getStatus() == 200) {
+            String jwksEntity = jwksUriResponse.readEntity(String.class);
+            log.trace("AuthClientFactory::getJwksUri() - jwksEntity:{}", jwksEntity);
+            return Jackson.getElement(jwksEntity, "jwks_uri");
         }
         return null;
     }
 
-    public static JSONWebKeySet getJSONWebKeys(String jwksUri) throws Exception {
-        log.trace("\n\n AuthClientFactory::getJSONWebKeys() - jwksUri = " + jwksUri);
-
-        Builder request = ResteasyClientBuilder.newClient().target(jwksUri).request();
-        request.header("Content-Type", MediaType.APPLICATION_JSON);
-        Response response = request.get();
-        log.trace("\n\n AuthClientFactory::getJSONWebKeys() - response = " + response);
-
-        if (response.getStatus() == 200) {
-            String entity = response.readEntity(String.class);
-            log.trace("\n\n AuthClientFactory::getJSONWebKeys() - entity = " + entity);
+    public static JSONWebKeySet getJSONWebKeys(String jwksUri) {
+        log.debug("JSONWebKeys - jwksUri:{}", jwksUri);
+        Builder clientBuilder = getClientBuilder(jwksUri);
+        clientBuilder.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
+        Response webKeyResponse = clientBuilder.get();
+        log.trace("AuthClientFactory::getJSONWebKeys() - webKeyResponse:{}", webKeyResponse);
+        if (webKeyResponse.getStatus() == 200) {
+            String jsonWebKeySetEntity = webKeyResponse.readEntity(String.class);
+            log.trace("AuthClientFactory::getJSONWebKeys() - jsonWebKeySetEntity:{}", jsonWebKeySetEntity);
             JwkResponse jwkResponse = new JwkResponse(200);
             JSONWebKeySet jwks = null;
-            if (StringUtils.isNotBlank(entity)) {
-                JSONObject jsonObj = new JSONObject(entity);
+            if (StringUtils.isNotBlank(jsonWebKeySetEntity)) {
+                JSONObject jsonObj = new JSONObject(jsonWebKeySetEntity);
                 if (jsonObj.has(JSON_WEB_KEY_SET)) {
                     jwks = JSONWebKeySet.fromJSONObject(jsonObj);
                     jwkResponse.setJwks(jwks);
                 }
-                log.trace("\n\n AuthClientFactory::getJSONWebKeys() - jwkResponse = " + jwkResponse + " , jwks = "
-                        + jwks);
+                log.trace("AuthClientFactory::getJSONWebKeys() - jwkResponse:{}, jwks:{}", jwkResponse, jwks);
                 return jwks;
             }
-
         }
         return null;
+    }
+
+    private static RestClientBuilder getRestClientBuilder(String clientUrl) {
+        return RestClientBuilder.newBuilder().baseUri(UriBuilder.fromPath(clientUrl).build());
+    }
+
+    private static Builder getClientBuilder(String url) {
+        return ClientBuilder.newClient().target(url).request();
     }
 
 }

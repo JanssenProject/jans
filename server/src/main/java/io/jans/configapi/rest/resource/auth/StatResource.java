@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import io.jans.configapi.filters.ProtectedApi;
 import io.jans.configapi.service.auth.ConfigurationService;
-import io.jans.configapi.service.auth.StatisticService;
+import io.jans.configapi.service.auth.AuthService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 
@@ -28,22 +28,19 @@ public class StatResource extends BaseResource {
     ConfigurationService configurationService;
 
     @Inject
-    StatisticService statisticService;
+    AuthService authService;
 
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.STATS_USER_READ_ACCESS, ApiAccessConstants.JANS_STAT })
     @Produces(MediaType.APPLICATION_JSON)
     public Response getStatistics(@HeaderParam("Authorization") String authorization,
             @QueryParam(value = "month") String month, @QueryParam(value = "format") String format) {
-        logger.debug("StatResource:::getUserStatistics() - authorization = " + authorization + " , month = " + month
-                + " , format = " + format);
         if (StringUtils.isBlank(format)) {
             format = "";
         }
         String url = getIssuer() + this.statUrl;
-        JsonNode jsonNode = this.statisticService.getStat(url, authorization, month, format);
-        logger.info("StatResource::getUserStatistics() - jsonNode = " + jsonNode);
-        logger.info("StatResource::getUserStatistics() - jsonNode.get(response) = " + jsonNode.get("response"));
+        JsonNode jsonNode = this.authService.getStat(url, authorization, month, format);
+        logger.trace("StatResource::getUserStatistics() - jsonNode:{} ",jsonNode);
         return Response.ok(jsonNode.get("response")).build();
     }
 

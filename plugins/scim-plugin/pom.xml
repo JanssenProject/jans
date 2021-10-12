@@ -60,10 +60,6 @@
 			<artifactId>httpcore-nio</artifactId>
 			<version>${httpcore.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>commons-httpclient</groupId>
-			<artifactId>commons-httpclient</artifactId>
-		</dependency>
 
 		<!-- Testing -->
 		<dependency>

@@ -108,10 +108,6 @@
 			<artifactId>hibernate-validator</artifactId>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.glassfish</groupId>
-			<artifactId>jakarta.el</artifactId>
-		</dependency>
 
 		<!-- RestEasy -->
 		<dependency>
