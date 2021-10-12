@@ -6,6 +6,7 @@
 
 package io.jans.configapi.security.client;
 
+import static io.jans.as.model.util.Util.escapeLog;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -60,7 +61,8 @@ public class AuthClientFactory {
 
     public static IntrospectionResponse getIntrospectionResponse(String url, String header, String token,
             boolean followRedirects) {
-        log.debug("Introspect Token - url:{}, header:{}, token:{} ,followRedirects:{} ", url, header, token, followRedirects);
+        log.debug("Introspect Token - url:{}, header:{}, token:{} ,followRedirects:{} ", url, header, token,
+                followRedirects);
         RestClientBuilder client = getRestClientBuilder(url);
         ResteasyWebTarget target = (ResteasyWebTarget) ClientBuilder.newClient(client.getConfiguration())
                 .property(CONTENT_TYPE, MediaType.APPLICATION_JSON).target(url);
@@ -69,9 +71,13 @@ public class AuthClientFactory {
     }
 
     public static JsonNode getStatResponse(String url, String token, String month, String format) {
-        log.debug("Stat Response Token - url:{}, token:{}, month:{} ,format:{} ", url, token, month, format);        
+        if (log.isDebugEnabled()) {
+            log.debug("Stat Response Token - url:{}, token:{}, month:{} ,format:{} ", escapeLog(url), escapeLog(token),
+                    escapeLog(month), escapeLog(format));
+        }
         RestClientBuilder restClientBuilder = getRestClientBuilder(url);
-        ResteasyWebTarget webTarget = (ResteasyWebTarget) ClientBuilder.newClient(restClientBuilder.getConfiguration()).target(url);
+        ResteasyWebTarget webTarget = (ResteasyWebTarget) ClientBuilder.newClient(restClientBuilder.getConfiguration())
+                .target(url);
         StatService statService = webTarget.proxy(StatService.class);
         return statService.stat(token, month, format);
     }
@@ -94,16 +100,16 @@ public class AuthClientFactory {
         log.debug("Request for Access Token -  tokenUrl:{}, clientId:{}, clientSecret:{}, scope:{} ", tokenUrl,
                 clientId, clientSecret, scope);
         Response response = null;
-        try {            
+        try {
             TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
             tokenRequest.setScope(scope);
             tokenRequest.setAuthUsername(clientId);
-            tokenRequest.setAuthPassword(clientSecret);           
-            Builder request = getClientBuilder(tokenUrl); 
+            tokenRequest.setAuthPassword(clientSecret);
+            Builder request = getClientBuilder(tokenUrl);
             request.header("Authorization", "Basic " + tokenRequest.getEncodedCredentials());
-            request.header(CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED);            
+            request.header(CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED);
             final MultivaluedHashMap<String, String> multivaluedHashMap = new MultivaluedHashMap<>(
-                    tokenRequest.getParameters());  
+                    tokenRequest.getParameters());
             response = request.post(Entity.form(multivaluedHashMap));
             log.trace("Response for Access Token -  response:{}", response);
             if (response.getStatus() == 200) {
@@ -125,7 +131,7 @@ public class AuthClientFactory {
     public static String getIntrospectionEndpoint(String issuer) throws JsonProcessingException {
         log.debug(" Get Introspection Endpoint - issuer:{}", issuer);
         String configurationEndpoint = issuer + "/.well-known/openid-configuration";
-        Builder introspectionClient = getClientBuilder(configurationEndpoint);        
+        Builder introspectionClient = getClientBuilder(configurationEndpoint);
         introspectionClient.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
         Response introspectionResponse = introspectionClient.get();
         log.trace("AuthClientFactory::getIntrospectionEndpoint() - introspectionResponse:{}", introspectionResponse);
@@ -142,8 +148,8 @@ public class AuthClientFactory {
         try {
             engine = ClientFactoryUtil.createEngine(followRedirects);
             RestClientBuilder restClient = getRestClientBuilder(url).register(engine);
-            ResteasyWebTarget resteasyWebTarget = (ResteasyWebTarget) ClientBuilder.newClient(restClient.getConfiguration())
-                    .target(url);
+            ResteasyWebTarget resteasyWebTarget = (ResteasyWebTarget) ClientBuilder
+                    .newClient(restClient.getConfiguration()).target(url);
             return resteasyWebTarget.proxy(IntrospectionService.class);
         } finally {
             if (engine != null) {
@@ -190,11 +196,11 @@ public class AuthClientFactory {
         }
         return null;
     }
-    
+
     private static RestClientBuilder getRestClientBuilder(String clientUrl) {
         return RestClientBuilder.newBuilder().baseUri(UriBuilder.fromPath(clientUrl).build());
     }
-    
+
     private static Builder getClientBuilder(String url) {
         return ClientBuilder.newClient().target(url).request();
     }
