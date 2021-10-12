@@ -34,6 +34,7 @@ tags:
   - name: Statistics - User
   - name: Health - Check
   - name: SCIM - User Management 
+  - name: Auth Server Health - Check
 paths:
   /jans-config-api/api/v1/jans-auth-server/config:
     get:
@@ -2778,7 +2779,23 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
       security:
-        - oauth2: [https://jans.io/oauth/config/scim/users.read https://jans.io/scim/users.read]		  
+        - oauth2: [https://jans.io/oauth/config/scim/users.read https://jans.io/scim/users.read]
+  /jans-config-api/api/v1/jans-auth-server/health:
+    get:
+      summary: Returns auth server health status.
+      description: Returns auth server health status.
+      operationId: get-config-health-ready
+      tags:
+        - Auth Server Health - Check
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthHealthStatus'
+        '500':
+          description: Internal Server Error
 components:
   securitySchemes:
     oauth2:
@@ -5877,3 +5894,9 @@ components:
             $ref: '#/components/schemas/ScimPatchOperation'
     AnyValue:
       description: Can be any value - string, number, boolean, array or object
+	  
+    AuthHealthStatus:
+      type: object
+      description: Auth Server health data
+      additionalProperties:
+        type: string
