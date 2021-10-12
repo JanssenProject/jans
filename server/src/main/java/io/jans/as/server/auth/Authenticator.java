@@ -46,6 +46,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import static io.jans.as.model.config.Constants.AUTH_STEP;
+import static org.apache.commons.lang3.BooleanUtils.isFalse;
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
+
 /**
  * Authenticator component
  *
@@ -143,7 +147,7 @@ public class Authenticator {
         } else if (Constants.RESULT_AUTHENTICATION_FAILED.equals(lastResult)) {
             // Do nothing to keep compatibility with older versions
             if (facesMessages.getMessages().size() == 0) {
-                addMessage(FacesMessage.SEVERITY_ERROR, "login.failedToAuthenticate");
+                addMessage(FacesMessage.SEVERITY_ERROR, AUTHENTICATION_ERROR_MESSAGE);
             }
         }
 
@@ -165,7 +169,7 @@ public class Authenticator {
         } else if (Constants.RESULT_AUTHENTICATION_FAILED.equals(lastResult)) {
             // Do nothing to keep compatibility with older versions
             if (facesMessages.getMessages().size() == 0) {
-                addMessage(FacesMessage.SEVERITY_ERROR, "login.failedToAuthenticate");
+                addMessage(FacesMessage.SEVERITY_ERROR, AUTHENTICATION_ERROR_MESSAGE);
             }
             handleLoginError(null);
         }
@@ -192,8 +196,7 @@ public class Authenticator {
                                    boolean service) {
         String result = Constants.RESULT_FAILURE;
         try {
-            logger.trace("Authenticating ... (interactive: " + interactive + ", skipPassword: " + skipPassword
-                    + ", credentials.username: " + credentials.getUsername() + ")");
+            logger.trace("Authenticating ... (interactive: {}, skipPassword: {}, credentials.username: {})", interactive, skipPassword, credentials.getUsername());
             if (service && (StringHelper.isNotEmpty(credentials.getUsername())
                     && (skipPassword || StringHelper.isNotEmpty(credentials.getPassword())) && servletRequest != null
                     && (servletRequest.getRequestURI().endsWith("/token")
@@ -275,21 +278,22 @@ public class Authenticator {
         if (StringHelper.toBoolean(appConfiguration.getLogClientIdOnClientAuthentication(), false)
                 || StringHelper.toBoolean(appConfiguration.getLogClientNameOnClientAuthentication(), false)) {
             sb.append(":");
-            if (appConfiguration.getLogClientIdOnClientAuthentication()) {
+            if (isTrue(appConfiguration.getLogClientIdOnClientAuthentication())) {
                 sb.append(" ").append("'").append(client.getClientId()).append("'");
             }
-            if (appConfiguration.getLogClientNameOnClientAuthentication()) {
+            if (isTrue(appConfiguration.getLogClientNameOnClientAuthentication())) {
                 sb.append(" ").append("('").append(client.getClientName()).append("')");
             }
         }
-        logger.info(sb.toString());
+        if (logger.isInfoEnabled())
+            logger.info(sb.toString());
     }
 
     private String userAuthenticationInteractive(HttpServletRequest servletRequest) {
         SessionId sessionId = getSessionId(servletRequest);
         Map<String, String> sessionIdAttributes = sessionIdService.getSessionAttributes(sessionId);
         if (sessionIdAttributes == null) {
-            logger.debug("Unable to get session attributes. SessionId: " + (sessionId != null ? sessionId.getId() : null));
+            logger.debug("Unable to get session attributes. SessionId: {}", (sessionId != null ? sessionId.getId() : null));
             return Constants.RESULT_EXPIRED;
         }
 
@@ -342,9 +346,8 @@ public class Authenticator {
             }
 
             int overridenNextStep = -1;
-            logger.trace("#########################################################################");
-            logger.trace("++++++++++++++++++++++++++++++++++++++++++CURRENT ACR:" + this.authAcr);
-            logger.trace("++++++++++++++++++++++++++++++++++++++++++CURRENT STEP:" + this.authStep);
+            logger.trace("################## acr: {}, step: {}", authAcr, authStep);
+
             int apiVersion = externalAuthenticationService.executeExternalGetApiVersion(customScriptConfiguration);
             if (apiVersion > 1) {
                 logger.trace("According to API version script supports steps overriding");
@@ -362,11 +365,6 @@ public class Authenticator {
             boolean overrideCurrentStep = false;
             if (overridenNextStep > -1) {
                 overrideCurrentStep = true;
-                // Reload session id
-/*
- * TODO: Remove after 6.0. Check if this will not led to external script problems.
-				sessionId = sessionIdService.getSessionId();
-*/
 
                 // Reset to specified step
                 sessionId = sessionIdService.resetToStep(sessionId, overridenNextStep);
@@ -383,14 +381,8 @@ public class Authenticator {
             updateExtraParameters(customScriptConfiguration, this.authStep + 1, sessionIdAttributes);
 
             // Determine count authentication methods
-            int countAuthenticationSteps = externalAuthenticationService
-                    .executeExternalGetCountAuthenticationSteps(customScriptConfiguration);
-/*
- * TODO: Remove after 6.0. Check if this will not led to external script problems.
-			// Reload from LDAP to make sure that we are updating latest session
-			// attributes
-			sessionId = sessionIdService.getSessionId();
-*/
+            int countAuthenticationSteps = externalAuthenticationService.executeExternalGetCountAuthenticationSteps(customScriptConfiguration);
+
             sessionIdAttributes = sessionIdService.getSessionAttributes(sessionId);
 
             // Prepare for next step
@@ -415,7 +407,7 @@ public class Authenticator {
 
                 if (!overrideCurrentStep) {
                     // Update auth_step
-                    sessionIdAttributes.put("auth_step", Integer.toString(nextStep));
+                    sessionIdAttributes.put(AUTH_STEP, Integer.toString(nextStep));
 
                     // Mark step as passed
                     markAuthStepAsPassed(sessionIdAttributes, this.authStep);
@@ -661,10 +653,10 @@ public class Authenticator {
 
                 sessionIdAttributes.put("acr", determinedauthAcr);
                 sessionIdAttributes.put("auth_level", determinedAuthLevel);
-                sessionIdAttributes.put("auth_step", Integer.toString(1));
+                sessionIdAttributes.put(AUTH_STEP, Integer.toString(1));
 
                 // Remove old session parameters from session
-                if (!appConfiguration.getKeepAuthenticatorAttributesOnAcrChange()) {
+                if (isFalse(appConfiguration.getKeepAuthenticatorAttributesOnAcrChange())) {
                     authenticationService.clearExternalScriptExtraParameters(sessionIdAttributes);
                 }
 
@@ -700,10 +692,10 @@ public class Authenticator {
         }
     }
 
-    public boolean authenticateBySessionId(String p_sessionId) {
-        if (StringUtils.isNotBlank(p_sessionId) && appConfiguration.getSessionIdEnabled()) {
+    public boolean authenticateBySessionId(String sessionIdentifier) {
+        if (StringUtils.isNotBlank(sessionIdentifier) && isTrue(appConfiguration.getSessionIdEnabled())) {
             try {
-                SessionId sessionId = sessionIdService.getSessionId(p_sessionId);
+                SessionId sessionId = sessionIdService.getSessionId(sessionIdentifier);
                 return authenticateBySessionId(sessionId);
             } catch (Exception e) {
                 logger.trace(e.getMessage(), e);
@@ -717,9 +709,9 @@ public class Authenticator {
         if (sessionId == null) {
             return false;
         }
-        String p_sessionId = sessionId.getId();
+        String sessionIdentifier = sessionId.getId();
 
-        logger.trace("authenticateBySessionId, sessionId = '{}', session = '{}', state= '{}'", p_sessionId, sessionId,
+        logger.trace("authenticateBySessionId, sessionId = '{}', session = '{}', state= '{}'", sessionIdentifier, sessionId,
                 sessionId.getState());
         // IMPORTANT : authenticate by session id only if state of session is authenticated!
         if (SessionIdState.AUTHENTICATED == sessionId.getState()) {
@@ -746,7 +738,7 @@ public class Authenticator {
             return;
         }
 
-        this.authStep = StringHelper.toInteger(sessionIdAttributes.get("auth_step"), null);
+        this.authStep = StringHelper.toInteger(sessionIdAttributes.get(AUTH_STEP), null);
         this.authAcr = sessionIdAttributes.get(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE);
     }
 
@@ -795,7 +787,8 @@ public class Authenticator {
 
     private SessionId getSessionId(HttpServletRequest servletRequest) {
         if (this.curentSessionId == null && identity.getSessionId() != null) {
-            return curentSessionId = identity.getSessionId();
+            curentSessionId = identity.getSessionId();
+            return curentSessionId;
         }
         if (this.curentSessionId == null) {
             this.curentSessionId = sessionIdService.getSessionId(servletRequest);
