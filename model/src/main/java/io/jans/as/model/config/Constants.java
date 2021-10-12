@@ -31,6 +31,9 @@ public class Constants {
     public static final String AUTH_STEP = "auth_step";
     public static final String PROMPT = "prompt";
     public static final String OPENID = "openid";
+    public static final String CLIENT_ASSERTION = "client_assertion";
+    public static final String CLIENT_ASSERTION_TYPE = "client_assertion_type";
+    public static final String CLIENT_ID = "client_id";
 
     public static final String LOG_FOUND = "Found '{}' entries";
 
@@ -44,7 +47,9 @@ public class Constants {
     public static final String PRAGMA = "Pragma";
     public static final String NO_CACHE = "no-cache";
     public static final String X_CLIENTCERT = "X-ClientCert";
+    public static final String WWW_AUTHENTICATE = "WWW-Authenticate";
 
+    public static final String AUTHORIZATION = "Authorization";
     public static final String AUTHORIZATION_BEARER = "Authorization: Bearer ";
     public static final String AUTHORIZATION_BASIC = "Authorization: Basic ";
 
