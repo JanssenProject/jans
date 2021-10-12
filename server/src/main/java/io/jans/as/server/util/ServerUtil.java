@@ -53,7 +53,20 @@ import java.util.concurrent.ThreadFactory;
 
 public class ServerUtil {
 
-    private final static Logger log = LoggerFactory.getLogger(ServerUtil.class);
+    private static final Logger log = LoggerFactory.getLogger(ServerUtil.class);
+    private static final String[] HEADERS_TO_TRY = new String[]{
+            "X-Forwarded-For",
+            "Proxy-Client-IP",
+            "WL-Proxy-Client-IP",
+            "HTTP_X_FORWARDED_FOR",
+            "HTTP_X_FORWARDED",
+            "HTTP_X_CLUSTER_CLIENT_IP",
+            "HTTP_CLIENT_IP",
+            "HTTP_FORWARDED_FOR",
+            "HTTP_FORWARDED",
+            "HTTP_VIA",
+            "REMOTE_ADDR"
+    };
 
     private ServerUtil() {
     }
@@ -69,9 +82,9 @@ public class ServerUtil {
         return 0;
     }
 
-    public static String asJsonSilently(Object p_object) {
+    public static String asJsonSilently(Object obj) {
         try {
-            return asJson(p_object);
+            return asJson(obj);
         } catch (IOException e) {
             log.trace(e.getMessage(), e);
             return "";
@@ -94,26 +107,26 @@ public class ServerUtil {
         return !isTrue(booleanObject);
     }
 
-    public static String asPrettyJson(Object p_object) throws IOException {
+    public static String asPrettyJson(Object obj) throws IOException {
         final ObjectMapper mapper = ServerUtil.createJsonMapper().configure(SerializationFeature.WRAP_ROOT_VALUE, false);
-        return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(p_object);
+        return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
     }
 
-    public static String asJson(Object p_object) throws IOException {
+    public static String asJson(Object obj) throws IOException {
         final ObjectMapper mapper = ServerUtil.createJsonMapper().configure(SerializationFeature.WRAP_ROOT_VALUE, false);
-        return mapper.writeValueAsString(p_object);
+        return mapper.writeValueAsString(obj);
     }
 
-    public static CacheControl cacheControl(boolean p_noStore) {
+    public static CacheControl cacheControl(boolean noStore) {
         final CacheControl cacheControl = new CacheControl();
-        cacheControl.setNoStore(p_noStore);
+        cacheControl.setNoStore(noStore);
         return cacheControl;
     }
 
-    public static CacheControl cacheControl(boolean p_noStore, boolean p_noTransform) {
+    public static CacheControl cacheControl(boolean noStore, boolean noTransform) {
         final CacheControl cacheControl = new CacheControl();
-        cacheControl.setNoStore(p_noStore);
-        cacheControl.setNoTransform(p_noTransform);
+        cacheControl.setNoStore(noStore);
+        cacheControl.setNoTransform(noTransform);
         return cacheControl;
     }
 
@@ -153,10 +166,10 @@ public class ServerUtil {
         return CdiUtil.bean(PersistenceEntryManager.class, ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME);
     }
 
-    public static CustomAttribute getAttributeByName(List<CustomAttribute> p_list, String p_attributeName) {
-        if (p_list != null && !p_list.isEmpty() && StringUtils.isNotEmpty(p_attributeName)) {
-            for (CustomAttribute attr : p_list) {
-                if (p_attributeName.equals(attr.getName())) {
+    public static CustomAttribute getAttributeByName(List<CustomAttribute> list, String attributeName) {
+        if (list != null && !list.isEmpty() && StringUtils.isNotEmpty(attributeName)) {
+            for (CustomAttribute attr : list) {
+                if (attributeName.equals(attr.getName())) {
                     return attr;
                 }
             }
@@ -164,32 +177,30 @@ public class ServerUtil {
         return null;
     }
 
-    public static String getAttributeValueByName(List<CustomAttribute> p_list, String p_attributeName) {
-        final CustomAttribute attr = getAttributeByName(p_list, p_attributeName);
+    public static String getAttributeValueByName(List<CustomAttribute> list, String attributeName) {
+        final CustomAttribute attr = getAttributeByName(list, attributeName);
         if (attr != null) {
             return attr.getValue();
         }
         return "";
     }
 
-    public static String urlDecode(String p_str) {
-        if (StringUtils.isNotBlank(p_str)) {
+    public static String urlDecode(String str) {
+        if (StringUtils.isNotBlank(str)) {
             try {
-                return URLDecoder.decode(p_str, Util.UTF8);
+                return URLDecoder.decode(str, Util.UTF8);
             } catch (UnsupportedEncodingException e) {
                 log.trace(e.getMessage(), e);
             }
         }
-        return p_str;
+        return str;
     }
 
     public static ScheduledExecutorService createExecutor() {
-        return Executors.newSingleThreadScheduledExecutor(new ThreadFactory() {
-            public Thread newThread(Runnable p_r) {
-                Thread thread = new Thread(p_r);
-                thread.setDaemon(true);
-                return thread;
-            }
+        return Executors.newSingleThreadScheduledExecutor(runnable -> {
+            Thread thread = new Thread(runnable);
+            thread.setDaemon(true);
+            return thread;
         });
     }
 
@@ -221,19 +232,6 @@ public class ServerUtil {
      * @see <a href="http://stackoverflow.com/a/21884642/5202500">Getting IP address of client</a>
      */
     public static String getIpAddress(HttpServletRequest httpRequest) {
-        final String[] HEADERS_TO_TRY = {
-                "X-Forwarded-For",
-                "Proxy-Client-IP",
-                "WL-Proxy-Client-IP",
-                "HTTP_X_FORWARDED_FOR",
-                "HTTP_X_FORWARDED",
-                "HTTP_X_CLUSTER_CLIENT_IP",
-                "HTTP_CLIENT_IP",
-                "HTTP_FORWARDED_FOR",
-                "HTTP_FORWARDED",
-                "HTTP_VIA",
-                "REMOTE_ADDR"
-        };
         for (String header : HEADERS_TO_TRY) {
             String ip = httpRequest.getHeader(header);
             if (ip != null && ip.length() != 0 && !"unknown".equalsIgnoreCase(ip)) {
@@ -257,7 +255,7 @@ public class ServerUtil {
         if (externalContext == null)
             return null;
         Object request = externalContext.getRequest();
-        if (request == null || !(request instanceof HttpServletRequest))
+        if (!(request instanceof HttpServletRequest))
             return null;
         return (HttpServletRequest) request;
     }
