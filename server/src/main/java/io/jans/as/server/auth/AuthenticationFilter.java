@@ -57,6 +57,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType.INVALID_REQUEST;
+import static io.jans.as.model.util.Util.escapeLog;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 /**
@@ -291,7 +292,8 @@ public class AuthenticationFilter implements Filter {
         boolean requireAuth;
 
         requireAuth = !authenticator.authenticateBySessionId(sessionId);
-        log.trace("Process Session Auth, sessionId = {}, requireAuth = {}", sessionId, requireAuth);
+        if (log.isTraceEnabled())
+            log.trace("Process Session Auth, sessionId = {}, requireAuth = {}", escapeLog(sessionId), requireAuth);
 
         if (!requireAuth) {
             try {
