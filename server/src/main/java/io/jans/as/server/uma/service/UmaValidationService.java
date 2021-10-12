@@ -72,6 +72,7 @@ import static io.jans.as.model.uma.UmaErrorResponseType.UNAUTHORIZED_CLIENT;
 import static io.jans.as.model.util.Util.escapeLog;
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -276,7 +277,7 @@ public class UmaValidationService {
             try {
                 final Jwt idToken = Jwt.parse(claimToken);
                 if (idToken != null) {
-                    if (ServerUtil.isTrue(appConfiguration.getUmaValidateClaimToken()) && !isIdTokenValid(idToken)) {
+                    if (isTrue(appConfiguration.getUmaValidateClaimToken()) && !isIdTokenValid(idToken)) {
                         log.error("claim_token validation failed.");
                         throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, INVALID_CLAIM_TOKEN, "claim_token validation failed.");
                     }
@@ -489,7 +490,7 @@ public class UmaValidationService {
     }
 
     public void validateRestrictedByClient(String patClientDn, String rsId) {
-        if (ServerUtil.isTrue(appConfiguration.getUmaRestrictResourceToAssociatedClient())) {
+        if (isTrue(appConfiguration.getUmaRestrictResourceToAssociatedClient())) {
             final List<String> clients = resourceService.getResourceById(rsId).getClients();
             if (!clients.contains(patClientDn)) {
                 log.error("Access to resource is denied because resource associated client does not match PAT client (it can be switched off if set umaRestrictResourceToAssociatedClient oxauth configuration property to false). Associated clients: {}, PAT client: {}", clients, patClientDn);

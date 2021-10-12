@@ -100,9 +100,6 @@ public class SessionId implements Deletable, Serializable {
     @Expiration
     private int ttl;
 
-    public SessionId() {
-    }
-
     public int getTtl() {
         return ttl;
     }
@@ -115,8 +112,8 @@ public class SessionId implements Deletable, Serializable {
         return dn;
     }
 
-    public void setDn(String p_dn) {
-        dn = p_dn;
+    public void setDn(String dn) {
+        this.dn = dn;
     }
 
     public String getJwt() {
@@ -159,24 +156,24 @@ public class SessionId implements Deletable, Serializable {
         return id;
     }
 
-    public void setId(String p_id) {
-        id = p_id;
+    public void setId(String id) {
+        this.id = id;
     }
 
     public Date getLastUsedAt() {
         return lastUsedAt;
     }
 
-    public void setLastUsedAt(Date p_lastUsedAt) {
-        lastUsedAt = p_lastUsedAt;
+    public void setLastUsedAt(Date lastUsedAt) {
+        this.lastUsedAt = lastUsedAt;
     }
 
     public String getUserDn() {
         return userDn;
     }
 
-    public void setUserDn(String p_userDn) {
-        userDn = p_userDn != null ? p_userDn : "";
+    public void setUserDn(String userDn) {
+        this.userDn = userDn != null ? userDn : "";
     }
 
     public User getUser() {
