@@ -12,7 +12,7 @@ import re
 
 from urllib import request
 from urllib.parse import urljoin
-
+from pathlib import Path
 
 setup_package_name = 'master.zip'
 maven_base_url = 'https://maven.jans.io/maven/io/jans/'
@@ -22,7 +22,7 @@ app_versions = {
   "JANS_BUILD": "-SNAPSHOT", 
   "JETTY_VERSION": "9.4.35.v20201120", 
   "AMAZON_CORRETTO_VERSION": "11.0.8.10.1", 
-  "JYTHON_VERSION": "2.7.2",
+  "JYTHON_VERSION": "2.7.3",
   "OPENDJ_VERSION": "4.4.12",
   "SETUP_BRANCH": "master",
 }
@@ -45,6 +45,8 @@ parser.add_argument('-uninstall', help="Uninstall Jans server and removes all fi
 parser.add_argument('--args', help="Arguments to be passed to setup.py")
 parser.add_argument('-n', help="No prompt", action='store_true')
 parser.add_argument('--keep-downloads', help="Keep downloaded files (applicable for uninstallation only)", action='store_true')
+parser.add_argument('--profile', help="Setup profile", choices=['jans', 'openbanking'], default='jans')
+
 if '-a' in sys.argv:
     parser.add_argument('--jetty-version', help="Jetty verison. For example 11.0.6")
 
@@ -128,25 +130,71 @@ if not (argsp.u or argsp.uninstall):
 
     download('https://corretto.aws/downloads/resources/{0}/amazon-corretto-{0}-linux-x64.tar.gz'.format(app_versions['AMAZON_CORRETTO_VERSION']), os.path.join(app_dir, 'amazon-corretto-{0}-linux-x64.tar.gz'.format(app_versions['AMAZON_CORRETTO_VERSION'])))
     download('https://repo1.maven.org/maven2/org/eclipse/jetty/{1}/{0}/{1}-{0}.tar.gz'.format(app_versions['JETTY_VERSION'], jetty_dist_string), os.path.join(app_dir,'{1}-{0}.tar.gz'.format(app_versions['JETTY_VERSION'], jetty_dist_string)))
-    download('https://repo1.maven.org/maven2/org/python/jython-installer/{0}/jython-installer-{0}.jar'.format(app_versions['JYTHON_VERSION']), os.path.join(app_dir, 'jython-installer-{0}.jar'.format(app_versions['JYTHON_VERSION'])))
-    download('https://ox.gluu.org/maven/org/gluufederation/opendj/opendj-server-legacy/{0}/opendj-server-legacy-{0}.zip'.format(app_versions['OPENDJ_VERSION']), os.path.join(app_dir, 'opendj-server-legacy-{0}.zip'.format(app_versions['OPENDJ_VERSION'])))
+    download('https://ox.gluu.org/maven/org/gluufederation/jython-installer/{0}/jython-installer-{0}.jar'.format(app_versions['JYTHON_VERSION']), os.path.join(app_dir, 'jython-installer-{0}.jar'.format(app_versions['JYTHON_VERSION'])))
     download(urljoin(maven_base_url, 'jans-auth-server/{0}{1}/jans-auth-server-{0}{1}.war'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD'])), os.path.join(jans_app_dir, 'jans-auth.war'))
     download(urljoin(maven_base_url, 'jans-auth-client/{0}{1}/jans-auth-client-{0}{1}-jar-with-dependencies.jar'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD'])), os.path.join(jans_app_dir, 'jans-auth-client-jar-with-dependencies.jar'))
     download(urljoin(maven_base_url, 'jans-config-api-server/{0}{1}/jans-config-api-server-{0}{1}.war'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD'])), os.path.join(jans_app_dir, 'jans-config-api.war'))
-    download(urljoin(maven_base_url, 'jans-fido2-server/{0}{1}/jans-fido2-server-{0}{1}.war'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD'])), os.path.join(jans_app_dir, 'jans-fido2.war'))
-    download(urljoin(maven_base_url, 'jans-scim-server/{0}{1}/jans-scim-server-{0}{1}.war'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD'])), os.path.join(jans_app_dir, 'jans-scim.war'))
-    download('https://jenkins.jans.io/maven/io/jans/jans-eleven-server/{0}{1}/jans-eleven-server-{0}{1}.war'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD']), os.path.join(jans_app_dir, 'jans-eleven.war'))
     download('https://api.github.com/repos/JanssenProject/jans-cli/tarball/main', os.path.join(jans_app_dir, 'jans-cli.tgz'))
     download('https://github.com/sqlalchemy/sqlalchemy/archive/rel_1_3_23.zip', os.path.join(jans_app_dir, 'sqlalchemy.zip'))
-    download('https://www.apple.com/certificateauthority/Apple_WebAuthn_Root_CA.pem', os.path.join(app_dir, 'Apple_WebAuthn_Root_CA.pem'))
+
+    if argsp.profile == 'jans':
+        download('https://ox.gluu.org/maven/org/gluufederation/opendj/opendj-server-legacy/{0}/opendj-server-legacy-{0}.zip'.format(app_versions['OPENDJ_VERSION']), os.path.join(app_dir, 'opendj-server-legacy-{0}.zip'.format(app_versions['OPENDJ_VERSION'])))
+        download(urljoin(maven_base_url, 'jans-fido2-server/{0}{1}/jans-fido2-server-{0}{1}.war'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD'])), os.path.join(jans_app_dir, 'jans-fido2.war'))
+        download(urljoin(maven_base_url, 'jans-scim-server/{0}{1}/jans-scim-server-{0}{1}.war'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD'])), os.path.join(jans_app_dir, 'jans-scim.war'))
+        download('https://jenkins.jans.io/maven/io/jans/jans-eleven-server/{0}{1}/jans-eleven-server-{0}{1}.war'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD']), os.path.join(jans_app_dir, 'jans-eleven.war'))
+        download('https://www.apple.com/certificateauthority/Apple_WebAuthn_Root_CA.pem', os.path.join(app_dir, 'Apple_WebAuthn_Root_CA.pem'))
 
 jetty_home = '/opt/jans/jetty'
-jetty_services = ('jans-auth', 'jans-fido2', 'jans-scim', 'jans-eleven')
+jetty_services = ['jans-auth', 'jans-config-api']
+if argsp.profile == 'jans':
+    jetty_services += ['jans-fido2', 'jans-scim', 'jans-eleven']
 
 def check_installation():
     if not (os.path.exists(jetty_home) and os.path.join('/opt/jans/jans-setup/setup_app') and ('/etc/jans/conf/jans.properties')):
         print("Jans server seems not installed")
         sys.exit()
+
+
+def profile_setup():
+    print("Preparing Setup for profile {}".format(argsp.profile))
+    profile_dir = os.path.join(setup_dir, argsp.profile)
+    replace_dirs = []
+    if not os.path.exists(profile_dir):
+        print("Profile directory {} does not exist. Exiting ...".format(profile_dir))
+    replace_dirs_fn = os.path.join(profile_dir, '.profiledirs')
+
+    if os.path.exists(replace_dirs_fn):
+        with open(replace_dirs_fn) as f:
+            fcontent = f.read()
+        for l in fcontent.splitlines():
+            ls = l.strip()
+            if ls:
+                replace_dirs.append(ls)
+
+    replaced_dirs = []
+    for pdir in replace_dirs:
+        source_dir = os.path.join(profile_dir, pdir)
+        target_dir = os.path.join(setup_dir, pdir)
+        replaced_dirs.append(source_dir)
+        if os.path.exists(source_dir) and os.path.exists(target_dir):
+            shutil.rmtree(target_dir)
+            copy_target = os.path.join(setup_dir, os.path.sep.join(os.path.split(pdir)[:-1]))
+            print(target_dir)
+            shutil.copytree(source_dir, target_dir)
+
+    for root, dirs, files in os.walk(profile_dir):
+        if root.startswith(tuple(replaced_dirs)):
+            continue
+        if files:
+            target_dir = Path(setup_dir).joinpath(Path(root).relative_to(Path(profile_dir)))
+            for f in files:
+                if f in ['.profiledirs']:
+                    continue
+                source_file = os.path.join(root, f)
+                print("Copying", source_file, target_dir)
+                shutil.copy(source_file, target_dir)
+
+
 
 if argsp.upgrade:
 
@@ -191,9 +239,6 @@ elif argsp.uninstall:
             print("Please type \033[1m yes \033[0m to uninstall")
 
     print("Uninstalling Jannsen Server...")
-
-    print("Stopping OpenDj Server")
-    os.system('/opt/opendj/bin/stop-ds')
     for service in jetty_services:
         if os.path.exists(os.path.join(jetty_home, service)):
             default_fn = os.path.join('/etc/default/', service)
@@ -203,7 +248,13 @@ elif argsp.uninstall:
             print("Stopping", service)
             os.system('systemctl stop ' + service)
 
-    remove_list = ['/etc/certs', '/etc/jans', '/opt/jans', '/opt/amazon-corretto*', '/opt/jre', '/opt/jetty*', '/opt/jython*', '/opt/opendj']
+    if argsp.profile == 'jans':
+        print("Stopping OpenDj Server")
+        os.system('/opt/opendj/bin/stop-ds')
+
+    remove_list = ['/etc/certs', '/etc/jans', '/opt/jans', '/opt/amazon-corretto*', '/opt/jre', '/opt/jetty*', '/opt/jython*']
+    if argsp.profile == 'jans':
+        remove_list.append('/opt/opendj')
     if not argsp.keep_downloads:
         remove_list.append('/opt/dist')
 
@@ -237,11 +288,17 @@ else:
             )
     shutil.rmtree(tmp_dir)
 
-    download_gcs()
-
     download('https://raw.githubusercontent.com/JanssenProject/jans-config-api/master/docs/jans-config-api-swagger.yaml', os.path.join(setup_dir, 'setup_app/data/jans-config-api-swagger.yaml'))
-    download('https://raw.githubusercontent.com/JanssenProject/jans-scim/master/server/src/main/resources/jans-scim-openapi.yaml'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD']), os.path.join(setup_dir, 'setup_app/data/jans-scim-openapi.yaml'))
+
+    if argsp.profile == 'jans':
+        download_gcs()
+        download('https://raw.githubusercontent.com/JanssenProject/jans-scim/master/server/src/main/resources/jans-scim-openapi.yaml'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD']), os.path.join(setup_dir, 'setup_app/data/jans-scim-openapi.yaml'))
+
+    if argsp.profile != 'jans':
+        profile_setup()
+
     print("Launching Janssen Setup")
+
     setup_cmd = 'python3 {}/setup.py'.format(setup_dir)
 
     if argsp.args:
