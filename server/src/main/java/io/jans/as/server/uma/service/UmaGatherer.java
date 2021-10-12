@@ -39,7 +39,7 @@ import java.util.Map;
 @Named(value = "gatherer")
 public class UmaGatherer {
 
-    private final Map<String, String> pageClaims = new HashMap<String, String>();
+    private final Map<String, String> pageClaims = new HashMap<>();
     @Inject
     private Logger log;
     @Inject
@@ -96,7 +96,7 @@ public class UmaGatherer {
 
             CustomScriptConfiguration script = getScript(session);
             UmaGatherContext context = new UmaGatherContext(script.getConfigurationAttributes(), httpRequest, session, umaSessionService, umaPermissionService,
-                    umaPctService, pageClaims, userService, facesService, appConfiguration);
+                    umaPctService, pageClaims, appConfiguration);
 
             int step = umaSessionService.getStep(session);
             if (!umaSessionService.isPassedPreviousSteps(session, step)) {
@@ -167,7 +167,7 @@ public class UmaGatherer {
     private String constructRedirectUri(SessionId session, UmaGatherContext context, String newTicket) {
         String claimsRedirectUri = umaSessionService.getClaimsRedirectUri(session);
         if (StringUtils.isBlank(claimsRedirectUri)) {
-            log.debug("claims_redirect_uri is blank, session: " + session);
+            log.debug("claims_redirect_uri is blank, session: {}", session);
             return "";
         }
 
@@ -195,7 +195,7 @@ public class UmaGatherer {
             }
 
             UmaGatherContext context = new UmaGatherContext(script.getConfigurationAttributes(), httpRequest, session, umaSessionService, umaPermissionService,
-                    umaPctService, pageClaims, userService, facesService, appConfiguration);
+                    umaPctService, pageClaims, appConfiguration);
 
             int step = umaSessionService.getStep(session);
             if (step < 1) {
@@ -215,7 +215,7 @@ public class UmaGatherer {
             } else {
                 String redirectToExternalUrl = context.getRedirectToExternalUrl();
                 if (StringUtils.isNotBlank(redirectToExternalUrl)) {
-                    log.debug("Redirect to : " + redirectToExternalUrl);
+                    log.debug("Redirect to : {}", redirectToExternalUrl);
                     facesService.redirectToExternalURL(redirectToExternalUrl);
                     return redirectToExternalUrl;
                 }
@@ -224,11 +224,6 @@ public class UmaGatherer {
             log.error("Failed to prepareForStep()", e);
         }
         return result(Constants.RESULT_FAILURE);
-    }
-
-    private void errorPage(String errorKey) {
-        addMessage(FacesMessage.SEVERITY_ERROR, errorKey);
-        facesService.redirect("/error.xhtml");
     }
 
     public String result(String resultCode) {

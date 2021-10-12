@@ -22,19 +22,16 @@ import java.util.Set;
  */
 public class RedirectParameters {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(RedirectParameters.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RedirectParameters.class);
 
-    private final Map<String, Set<String>> map = new HashMap<String, Set<String>>();
-
-    public RedirectParameters() {
-    }
+    private final Map<String, Set<String>> map = new HashMap<>();
 
     public void add(String paramName, String paramValue) {
         Set<String> valueSet = map.get(paramName);
         if (valueSet != null) {
             valueSet.add(paramValue);
         } else {
-            Set<String> value = new HashSet<String>();
+            Set<String> value = new HashSet<>();
             value.add(paramValue);
             map.put(paramName, value);
         }
@@ -49,23 +46,28 @@ public class RedirectParameters {
     }
 
     public String buildQueryString() {
-        String queryString = "";
+        StringBuilder queryStringBuilder = new StringBuilder();
         for (Map.Entry<String, Set<String>> param : map.entrySet()) {
             Set<String> values = param.getValue();
             if (StringUtils.isNotBlank(param.getKey()) && values != null && !values.isEmpty()) {
-                for (String value : values) {
-                    if (StringUtils.isNotBlank(value)) {
-                        try {
-                            queryString += param.getKey() + "=" + URLEncoder.encode(value, "UTF-8") + "&";
-                        } catch (UnsupportedEncodingException e) {
-                            LOGGER.error("Failed to encode value: " + value, e);
-                        }
-                    }
+                appendValues(queryStringBuilder, param, values);
+            }
+        }
+        String queryString = queryStringBuilder.toString();
+        queryString = StringUtils.removeEnd(queryString, "&");
+        return queryString;
+    }
+
+    private void appendValues(StringBuilder queryStringBuilder, Map.Entry<String, Set<String>> param, Set<String> values) {
+        for (String value : values) {
+            if (StringUtils.isNotBlank(value)) {
+                try {
+                    queryStringBuilder.append(param.getKey()).append("=").append(URLEncoder.encode(value, "UTF-8")).append("&");
+                } catch (UnsupportedEncodingException e) {
+                    LOGGER.error("Failed to encode value: " + value, e);
                 }
             }
         }
-        queryString = StringUtils.removeEnd(queryString, "&");
-        return queryString;
     }
 
 }

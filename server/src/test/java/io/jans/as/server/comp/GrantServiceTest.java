@@ -31,16 +31,16 @@ public class GrantServiceTest extends BaseComponentTest {
 	@Inject
 	private GrantService grantService;
 
-	private static String m_clientId;
+	private static String clientId;
 
-	private static TokenLdap m_tokenLdap;
+	private static TokenLdap tokenLdap;
 
 	@Parameters(value = "clientId")
 	@Test
 	public void createTestToken(String clientId) {
-		m_clientId = clientId;
-		m_tokenLdap = createTestToken();
-		grantService.persist(m_tokenLdap);
+		GrantServiceTest.clientId = clientId;
+		tokenLdap = createTestToken();
+		grantService.persist(tokenLdap);
 	}
 
 	@Test(dependsOnMethods = "createTestToken")
@@ -58,7 +58,7 @@ public class GrantServiceTest extends BaseComponentTest {
 		final TokenLdap t = new TokenLdap();
 		t.setDn(dn);
 		t.setGrantId(grantId);
-		t.setClientId(m_clientId);
+		t.setClientId(clientId);
 		t.setTokenCode(TokenHashUtil.hash(TEST_TOKEN_CODE));
 		t.setTokenType(TokenType.ACCESS_TOKEN.getValue());
 		t.setCreationDate(new Date());
