@@ -362,7 +362,7 @@ class SetupUtils(Crypto64):
             self.logIt("Error writing temporary LDAP password.")
 
     def deleteLdapPw(self):
-        if os.path.isfile(Config.ldapPassFn):
+        if Config.get('ldapPassFn') and os.path.isfile(Config.ldapPassFn):
             os.remove(Config.ldapPassFn)
 
     def getMappingType(self, mtype):
@@ -470,35 +470,36 @@ class SetupUtils(Crypto64):
         if Config.persistence_type == 'couchbase' or 'default' in couchbase_mappings:
             changeTo = 'couchbase-server'
 
-        if Config.wrends_install == InstallTypes.REMOTE or Config.cb_install == InstallTypes.REMOTE:
+        if Config.get('wrends_install') == InstallTypes.REMOTE or Config.get('cb_install') == InstallTypes.REMOTE:
             changeTo = ''
 
-        if changeTo != None:
-            for service in Config.service_requirements:
-                Config.service_requirements[service][0] = Config.service_requirements[service][0].replace('opendj', changeTo)
+        if serviceName in Config.service_requirements:
+            if changeTo != None:
+                for service in Config.service_requirements:
+                    Config.service_requirements[service][0] = Config.service_requirements[service][0].replace('opendj', changeTo)
 
-        with open(initscript_fn) as f:
-            initscript = f.readlines()
+            with open(initscript_fn) as f:
+                initscript = f.readlines()
 
-        for i,l in enumerate(initscript):
-            if l.startswith('# Provides:'):
-                initscript[i] = '# Provides:          {0}\n'.format(serviceName)
-            elif l.startswith('# description:'):
-                initscript[i] = '# description: Jetty 9 {0}\n'.format(serviceName)
-            elif l.startswith('# Required-Start:'):
-                initscript[i] = '# Required-Start:    $local_fs $network {0}\n'.format(Config.service_requirements[serviceName][0])
-            elif l.startswith('# chkconfig:'):
-                initscript[i] = '# chkconfig: 345 {0} {1}\n'.format(Config.service_requirements[serviceName][1], 100 - Config.service_requirements[serviceName][1])
+            for i,l in enumerate(initscript):
+                if l.startswith('# Provides:'):
+                    initscript[i] = '# Provides:          {0}\n'.format(serviceName)
+                elif l.startswith('# description:'):
+                    initscript[i] = '# description: Jetty 9 {0}\n'.format(serviceName)
+                elif l.startswith('# Required-Start:'):
+                    initscript[i] = '# Required-Start:    $local_fs $network {0}\n'.format(Config.service_requirements[serviceName][0])
+                elif l.startswith('# chkconfig:'):
+                    initscript[i] = '# chkconfig: 345 {0} {1}\n'.format(Config.service_requirements[serviceName][1], 100 - Config.service_requirements[serviceName][1])
 
-        if (base.clone_type == 'rpm' and base.os_initdaemon == 'systemd') or base.deb_sysd_clone:
-            service_init_script_fn = os.path.join(Config.distFolder, 'scripts', serviceName)
-        else:
-            service_init_script_fn = os.path.join('/etc/init.d', serviceName)
+            if (base.clone_type == 'rpm' and base.os_initdaemon == 'systemd') or base.deb_sysd_clone:
+                service_init_script_fn = os.path.join(Config.distFolder, 'scripts', serviceName)
+            else:
+                service_init_script_fn = os.path.join('/etc/init.d', serviceName)
 
-        with open(service_init_script_fn, 'w') as W:
-            W.write(''.join(initscript))
+            with open(service_init_script_fn, 'w') as W:
+                W.write(''.join(initscript))
 
-        self.run([paths.cmd_chmod, '+x', service_init_script_fn])
+            self.run([paths.cmd_chmod, '+x', service_init_script_fn])
 
     def load_certificate_text(self, filePath):
         self.logIt("Load certificate %s" % filePath)
