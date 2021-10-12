@@ -36,22 +36,21 @@ import io.jans.as.server.service.SessionIdService;
 public class SessionIdServiceTest extends BaseComponentTest {
 
     @Inject
-    private SessionIdService m_service;
+    private SessionIdService service;
 
     @Inject
     private UserService userService;
 
     private SessionId generateSession(String userInum) {
         String userDn = userService.getDnForUser(userInum);
-        return m_service.generateUnauthenticatedSessionId(userDn, new Date(), SessionIdState.UNAUTHENTICATED,
-                new HashMap<String, String>(), true);
+        return service.generateUnauthenticatedSessionId(userDn, new Date(), SessionIdState.UNAUTHENTICATED, new HashMap<>(), true);
     }
 
     @Parameters({"userInum"})
     @Test
     public void statePersistence(String userInum) {
         String userDn = userService.getDnForUser(userInum);
-        SessionId newId = m_service.generateAuthenticatedSessionId(null, userDn);
+        SessionId newId = service.generateAuthenticatedSessionId(null, userDn);
 
         Assert.assertEquals(newId.getState(), SessionIdState.AUTHENTICATED);
 
@@ -59,9 +58,9 @@ public class SessionIdServiceTest extends BaseComponentTest {
         sessionAttributes.put("k1", "v1");
         newId.setSessionAttributes(sessionAttributes);
 
-        m_service.updateSessionId(newId);
+        service.updateSessionId(newId);
 
-        final SessionId fresh = m_service.getSessionId(newId.getId());
+        final SessionId fresh = service.getSessionId(newId.getId());
         Assert.assertEquals(fresh.getState(), SessionIdState.AUTHENTICATED);
         Assert.assertTrue(fresh.getSessionAttributes().containsKey("k1"));
         Assert.assertTrue(fresh.getSessionAttributes().containsValue("v1"));
@@ -70,16 +69,16 @@ public class SessionIdServiceTest extends BaseComponentTest {
     @Parameters({"userInum"})
     @Test
     public void testUpdateLastUsedDate(String userInum) {
-        SessionId m_sessionId = generateSession(userInum);
-        final SessionId fromLdap1 = m_service.getSessionId(m_sessionId.getId());
-        final Date createdDate = m_sessionId.getLastUsedAt();
+        SessionId sessionId = generateSession(userInum);
+        final SessionId fromLdap1 = service.getSessionId(sessionId.getId());
+        final Date createdDate = sessionId.getLastUsedAt();
         System.out.println("Created date = " + createdDate);
         Assert.assertEquals(createdDate, fromLdap1.getLastUsedAt());
 
         sleepSeconds(1);
-        m_service.updateSessionId(m_sessionId);
+        service.updateSessionId(sessionId);
 
-        final SessionId fromLdap2 = m_service.getSessionId(m_sessionId.getId());
+        final SessionId fromLdap2 = service.getSessionId(sessionId.getId());
         System.out.println("Updated date = " + fromLdap2.getLastUsedAt());
         Assert.assertTrue(createdDate.before(fromLdap2.getLastUsedAt()));
     }
@@ -87,19 +86,19 @@ public class SessionIdServiceTest extends BaseComponentTest {
     @Parameters({"userInum"})
     @Test
     public void testUpdateAttributes(String userInum) {
-        SessionId m_sessionId = generateSession(userInum);
+        SessionId sessionId = generateSession(userInum);
         final String clientId = "testClientId";
-        final SessionId fromLdap1 = m_service.getSessionId(m_sessionId.getId());
-        final Date createdDate = m_sessionId.getLastUsedAt();
+        final SessionId fromLdap1 = service.getSessionId(sessionId.getId());
+        final Date createdDate = sessionId.getLastUsedAt();
         assertEquals(createdDate, fromLdap1.getLastUsedAt());
         assertFalse(fromLdap1.isPermissionGrantedForClient(clientId));
 
         sleepSeconds(1);
-        m_sessionId.setAuthenticationTime(new Date());
-        m_sessionId.addPermission(clientId, true);
-        m_service.updateSessionId(m_sessionId);
+        sessionId.setAuthenticationTime(new Date());
+        sessionId.addPermission(clientId, true);
+        service.updateSessionId(sessionId);
 
-        final SessionId fromLdap2 = m_service.getSessionId(m_sessionId.getId());
+        final SessionId fromLdap2 = service.getSessionId(sessionId.getId());
         assertTrue(createdDate.before(fromLdap2.getLastUsedAt()));
         assertNotNull(fromLdap2.getAuthenticationTime());
         assertTrue(fromLdap2.isPermissionGrantedForClient(clientId));

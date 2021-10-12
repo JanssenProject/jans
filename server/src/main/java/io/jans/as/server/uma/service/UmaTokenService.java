@@ -94,7 +94,8 @@ public class UmaTokenService {
             if (!scriptMap.isEmpty()) {
                 expressionService.evaluate(scriptMap, permissions);
             } else {
-                log.warn("There are no any policies that protects scopes. Scopes: " + UmaScopeService.asString(scopes.keySet()) + ". Configuration property umaGrantAccessIfNoPolicies: " + appConfiguration.getUmaGrantAccessIfNoPolicies());
+                if (log.isWarnEnabled())
+                    log.warn("There are no any policies that protects scopes. Scopes: {}. Configuration property umaGrantAccessIfNoPolicies: {}", UmaScopeService.asString(scopes.keySet()), appConfiguration.getUmaGrantAccessIfNoPolicies());
 
                 if (appConfiguration.getUmaGrantAccessIfNoPolicies() != null && appConfiguration.getUmaGrantAccessIfNoPolicies()) {
                     log.warn("Access granted because there are no any protection. Make sure it is intentional behavior.");
@@ -150,7 +151,7 @@ public class UmaTokenService {
             Set<String> scopeDns = new HashSet<>(permission.getScopeDns());
 
             for (Map.Entry<Scope, Boolean> entry : scopes.entrySet()) {
-                log.trace("Updating permissions with scope: " + entry.getKey().getId() + ", isRequestedScope: " + entry.getValue() + ", permisson: " + permission.getDn());
+                log.trace("Updating permissions with scope: {}, isRequestedScope: {}, permisson: {}", entry.getKey().getId(), entry.getValue(), permission.getDn());
                 scopeDns.add(entry.getKey().getDn());
             }
 

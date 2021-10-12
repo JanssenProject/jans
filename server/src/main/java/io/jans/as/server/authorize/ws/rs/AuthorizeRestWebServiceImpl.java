@@ -80,6 +80,7 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.function.Function;
 
 import static io.jans.as.model.util.StringUtils.implode;
@@ -302,7 +303,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             checkAcrChanged(acrValuesStr, prompts, sessionUser); // check after redirect uri is validated
 
             RedirectUriResponse redirectUriResponse = new RedirectUriResponse(new RedirectUri(redirectUri, responseTypes, responseMode), state, httpRequest, errorResponseFactory);
-            redirectUriResponse.setFapiCompatible(appConfiguration.getFapiCompatibility());
+            redirectUriResponse.setFapiCompatible(appConfiguration.isFapi());
 
             Set<String> scopes = scopeChecker.checkScopesPolicy(client, scope);
 
@@ -318,7 +319,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                         state = jwtRequest.getState();
                         redirectUriResponse.setState(state);
                     }
-                    if (appConfiguration.getFapiCompatibility() && StringUtils.isBlank(jwtRequest.getState())) {
+                    if (appConfiguration.isFapi() && StringUtils.isBlank(jwtRequest.getState())) {
                         state = ""; // #1250 - FAPI : discard state if in JWT we don't have state
                         redirectUriResponse.setState("");
                     }
@@ -802,14 +803,20 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         cibaRequestService.removeCibaRequest(authReqId);
         CIBAGrant cibaGrant = authorizationGrantList.createCIBAGrant(cibaRequest);
 
-        RefreshToken refreshToken = cibaGrant.createRefreshToken(null);
-        log.debug("Issuing refresh token: {}", refreshToken.getCode());
-
         AccessToken accessToken = cibaGrant.createAccessToken(null, httpRequest.getHeader("X-ClientCert"), new ExecutionContext(httpRequest, httpResponse));
         log.debug("Issuing access token: {}", accessToken.getCode());
 
         ExternalUpdateTokenContext context = new ExternalUpdateTokenContext(httpRequest, cibaGrant, client, appConfiguration, attributeService);
         Function<JsonWebResponse, Void> postProcessor = externalUpdateTokenService.buildModifyIdTokenProcessor(context);
+
+        final int refreshTokenLifetimeInSeconds = externalUpdateTokenService.getRefreshTokenLifetimeInSeconds(context);
+        final RefreshToken refreshToken;
+        if (refreshTokenLifetimeInSeconds > 0) {
+            refreshToken = cibaGrant.createRefreshToken(null, refreshTokenLifetimeInSeconds);
+        } else {
+            refreshToken = cibaGrant.createRefreshToken(null);
+        }
+        log.debug("Issuing refresh token: {}", (refreshToken != null ? refreshToken.getCode() : ""));
 
         IdToken idToken = cibaGrant.createIdToken(
                 null, null, accessToken, refreshToken,
@@ -824,7 +831,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     cibaGrant.getClient().getBackchannelClientNotificationEndpoint(),
                     cibaRequest.getClientNotificationToken(),
                     accessToken.getCode(),
-                    refreshToken.getCode(),
+                    refreshToken != null ? refreshToken.getCode() : null,
                     idToken.getCode(),
                     accessToken.getExpiresIn()
             );
