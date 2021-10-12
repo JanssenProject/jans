@@ -54,6 +54,8 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 
+import static org.apache.commons.lang.BooleanUtils.isTrue;
+
 /**
  * @author Yuriy Zabrovarnyy
  * @version June 30, 2018
@@ -106,7 +108,7 @@ public class IntrospectionWebService {
     }
 
     private AuthorizationGrant validateAuthorization(String p_authorization, String p_token) throws UnsupportedEncodingException {
-        final boolean skipAuthorization = ServerUtil.isTrue(appConfiguration.getIntrospectionSkipAuthorization());
+        final boolean skipAuthorization = isTrue(appConfiguration.getIntrospectionSkipAuthorization());
         log.trace("skipAuthorization: {}", skipAuthorization);
         if (skipAuthorization) {
             return null;
@@ -131,7 +133,7 @@ public class IntrospectionWebService {
             throw new WebApplicationException(Response.status(Response.Status.UNAUTHORIZED).type(MediaType.APPLICATION_JSON_TYPE).entity(errorResponseFactory.errorAsJson(AuthorizeErrorResponseType.ACCESS_DENIED, "Access token is not valid")).build());
         }
 
-        if (ServerUtil.isTrue(appConfiguration.getIntrospectionAccessTokenMustHaveUmaProtectionScope()) &&
+        if (isTrue(appConfiguration.getIntrospectionAccessTokenMustHaveUmaProtectionScope()) &&
                 !authorizationGrant.getScopesAsString().contains(UmaScopeType.PROTECTION.getValue())) { // #562 - make uma_protection optional
             final String reason = "access_token used to access introspection endpoint does not have uma_protection scope, however in oxauth configuration `checkUmaProtectionScopePresenceDuringIntrospection` is true";
             log.trace(reason);

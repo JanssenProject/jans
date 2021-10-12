@@ -99,14 +99,6 @@ public class ServerUtil {
         };
     }
 
-    public static boolean isTrue(Boolean booleanObject) {
-        return booleanObject != null && booleanObject;
-    }
-
-    public static boolean isFalse(Boolean booleanObject) {
-        return !isTrue(booleanObject);
-    }
-
     public static String asPrettyJson(Object obj) throws IOException {
         final ObjectMapper mapper = ServerUtil.createJsonMapper().configure(SerializationFeature.WRAP_ROOT_VALUE, false);
         return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
