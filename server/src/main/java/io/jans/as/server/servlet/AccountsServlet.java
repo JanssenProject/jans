@@ -1,6 +1,7 @@
 package io.jans.as.server.servlet;
 
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.model.config.Constants;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.jwk.JSONWebKey;
 import io.jans.as.model.jwk.JSONWebKeySet;
@@ -80,7 +81,7 @@ public class AccountsServlet extends HttpServlet {
         String xfapiinteractionid = null;
         String tempaccess_token = null;
         httpResponse.setCharacterEncoding("UTF-8");
-        httpResponse.setContentType("application/json;charset=utf-8");
+        httpResponse.setContentType(Constants.CONTENT_TYPE_APPLICATION_JSON_UTF_8);
 
         try (PrintWriter out = httpResponse.getWriter()) {
 
