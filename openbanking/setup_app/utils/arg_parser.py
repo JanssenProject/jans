@@ -11,6 +11,7 @@ def arg_parser():
     parser.add_argument('-d', help="Installation directory")
     parser.add_argument('-n', help="No interactive prompt before install starts", action='store_true')
     parser.add_argument('-N', '--no-httpd', help="No apache httpd server", action='store_true')
+    parser.add_argument('-csx', help="Collect setup properties, save and exit", action='store_true')
 
     rdbm_group = parser.add_mutually_exclusive_group()
     rdbm_group.add_argument('-remote-rdbm', choices=['mysql', 'pgsql'], help="Enables using remote RDBM server")

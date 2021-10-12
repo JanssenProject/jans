@@ -80,7 +80,7 @@ class CollectProperties(SetupUtils, BaseInstaller):
             Config.rdbm_password = self.unobscure(Config.rdbm_password_enc)
             Config.rdbm_db = jans_sql_prop['db.schema.name']
 
-        if not Config.persistence_type in ('couchbase', 'ldap') and os.path.exists(Config.jansSpannerProperties):
+        if not Config.persistence_type in ('couchbase', 'ldap') and Config.get('jansSpannerProperties') and os.path.exists(Config.jansSpannerProperties):
             Config.rdbm_type = 'spanner'
             jans_spanner_prop = base.read_properties_file(Config.jansSpannerProperties)
 
@@ -200,7 +200,7 @@ class CollectProperties(SetupUtils, BaseInstaller):
         Config.state = ssl_subj['ST']
         Config.city = ssl_subj['L']
         Config.city = ssl_subj['L']
-         
+
          #this is not good, but there is no way to retreive password from ldap
         if not Config.get('admin_password'):
             if Config.get('ldapPass'):
