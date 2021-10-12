@@ -47,29 +47,29 @@ public class InumGenerator {
     @Inject
     private StaticConfiguration staticConfiguration;
 
-    public String generateId(String p_idType, String p_idPrefix) {
-        final IdType idType = IdType.fromString(p_idType);
+    public String generateId(String idTypeStr, String idPrefix) {
+        final IdType idType = IdType.fromString(idTypeStr);
         if (idType != null) {
-            return generateId(idType, p_idPrefix);
+            return generateId(idType, idPrefix);
         } else {
-            log.error("Unable to identify id type: {}", p_idType);
+            log.error("Unable to identify id type: {}", idTypeStr);
         }
         return "";
     }
 
-    public String generateId(IdType p_idType, String p_idPrefix) {
+    public String generateId(IdType idType, String idPrefix) {
         String inum;
         int counter = 0;
 
         try {
             while (true) {
                 final StringBuilder sb = new StringBuilder();
-                sb.append(p_idPrefix).
+                sb.append(idPrefix).
                         append(InumGenerator.SEPARATOR).
-                        append(p_idType.getInum()).
+                        append(idType.getInum()).
                         append(InumGenerator.SEPARATOR);
 
-                if ((IdType.CLIENTS == p_idType) || (IdType.PEOPLE == p_idType)) {
+                if ((IdType.CLIENTS == idType) || (IdType.PEOPLE == idType)) {
                     sb.append(INumGenerator.generate(4));
                 } else {
                     sb.append(INumGenerator.generate(2));
@@ -81,7 +81,7 @@ public class InumGenerator {
                     break;
                 }
 
-                if (!contains(inum, p_idType)) {
+                if (!contains(inum, idType)) {
                     break;
                 }
 
@@ -107,9 +107,9 @@ public class InumGenerator {
         return entries != null && !entries.isEmpty();
     }
 
-    public String baseDn(IdType p_type) {
+    public String baseDn(IdType type) {
         final BaseDnConfiguration baseDn = staticConfiguration.getBaseDn();
-        switch (p_type) {
+        switch (type) {
             case CLIENTS:
                 return baseDn.getClients();
             case CONFIGURATION:
