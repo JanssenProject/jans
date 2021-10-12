@@ -30,6 +30,7 @@ class Config:
     jetty_home = '/opt/jetty'
     jetty_base = os.path.join(jansOptFolder, 'jetty')
     installed_instance = False
+    profile = 'jans'
 
     @classmethod
     def get(self, attr, default=None):
@@ -322,16 +323,16 @@ class Config:
                         'opendj': ['', 70],
                         'jans-auth': ['opendj', 72],
                         'jans-fido2': ['opendj', 73],
-                        'identity': ['opendj oxauth', 74],
-                        'jans-scim': ['opendj oxauth', 75],
-                        'idp': ['opendj oxauth', 76],
-                        'casa': ['opendj oxauth', 78],
-                        'oxd-server': ['opendj oxauth', 80],
-                        'passport': ['opendj oxauth', 82],
-                        'jans-auth-rp': ['opendj oxauth', 84],
-                        'jans-radius': ['opendj oxauth', 86],
-                        'jans-eleven': ['opendj oxauth', 79],
-                        'jans-config-api': ['opendj oxauth', 85],
+                        'identity': ['opendj jans-auth', 74],
+                        'jans-scim': ['opendj jans-auth', 75],
+                        'idp': ['opendj jans-auth', 76],
+                        'casa': ['opendj jans-auth', 78],
+                        'oxd-server': ['opendj jans-auth', 80],
+                        'passport': ['opendj jans-auth', 82],
+                        'jans-auth-rp': ['opendj jans-auth', 84],
+                        'jans-radius': ['opendj jans-auth', 86],
+                        'jans-eleven': ['opendj jans-auth', 79],
+                        'jans-config-api': ['opendj jans-auth', 85],
                         }
 
         self.install_time_ldap = None

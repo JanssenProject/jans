@@ -38,3 +38,6 @@ class UpdateToken(UpdateTokenType):
 
         print "Update token script. After modify idToken: %s" % jsonWebResponse
         return True
+
+    def getRefreshTokenLifetimeInSeconds(self, context):
+        return 0
