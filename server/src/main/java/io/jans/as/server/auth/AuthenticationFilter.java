@@ -17,7 +17,6 @@ import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwk.JSONWebKey;
 import io.jans.as.model.jwk.JSONWebKeySet;
-import io.jans.as.model.jwt.DPoP;
 import io.jans.as.model.jwt.DPoPJwtPayloadParam;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtType;
@@ -513,7 +512,7 @@ public class AuthenticationFilter implements Filter {
 
         try {
             String dpopStr = servletRequest.getHeader(TokenRequestParam.DPOP);
-            Jwt dpop = DPoP.parseOrThrow(dpopStr);
+            Jwt dpop = Jwt.parseOrThrow(dpopStr);
             GrantType grantType = GrantType.fromString(servletRequest.getParameter("grant_type"));
 
             // Validate Header
@@ -629,7 +628,7 @@ public class AuthenticationFilter implements Filter {
     private void sendBadRequestError(HttpServletResponse servletResponse, String reason) {
         try (PrintWriter out = servletResponse.getWriter()) {
             servletResponse.setStatus(400);
-            servletResponse.setContentType("application/json;charset=UTF-8");
+            servletResponse.setContentType(Constants.CONTENT_TYPE_APPLICATION_JSON_UTF_8);
             out.write(errorResponseFactory.errorAsJson(TokenErrorResponseType.INVALID_DPOP_PROOF, reason));
         } catch (IOException ex) {
             log.error(ex.getMessage(), ex);
@@ -640,7 +639,7 @@ public class AuthenticationFilter implements Filter {
         try (PrintWriter out = servletResponse.getWriter()) {
             servletResponse.setStatus(401);
             servletResponse.addHeader(Constants.WWW_AUTHENTICATE, "Basic realm=\"" + getRealm() + "\"");
-            servletResponse.setContentType("application/json;charset=UTF-8");
+            servletResponse.setContentType(Constants.CONTENT_TYPE_APPLICATION_JSON_UTF_8);
             out.write(errorResponseFactory.errorAsJson(TokenErrorResponseType.INVALID_CLIENT, "Unable to authenticate client."));
         } catch (IOException ex) {
             log.error(ex.getMessage(), ex);
@@ -651,7 +650,7 @@ public class AuthenticationFilter implements Filter {
         try (PrintWriter out = servletResponse.getWriter()) {
             servletResponse.setStatus(e.getResponse().getStatus());
             servletResponse.addHeader(Constants.WWW_AUTHENTICATE, "Basic realm=\"" + getRealm() + "\"");
-            servletResponse.setContentType("application/json;charset=UTF-8");
+            servletResponse.setContentType(Constants.CONTENT_TYPE_APPLICATION_JSON_UTF_8);
             out.write(e.getResponse().getEntity().toString());
         } catch (IOException ex) {
             log.error(ex.getMessage(), ex);
