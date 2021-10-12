@@ -28,7 +28,7 @@ import javax.ws.rs.core.UriBuilder;
 
 public class ClientFactory {
 
-    private final static ClientFactory INSTANCE = new ClientFactory();
+    private static final ClientFactory INSTANCE = new ClientFactory();
 
     private final ApacheHttpClient4Engine engine;
 
@@ -50,12 +50,12 @@ public class ClientFactory {
         return target.proxy(StatService.class);
     }
 
-    public IntrospectionService createIntrospectionService(String p_url) {
-        return createIntrospectionService(p_url, engine);
+    public IntrospectionService createIntrospectionService(String url) {
+        return createIntrospectionService(url, engine);
     }
 
-    public IntrospectionService createIntrospectionService(String p_url, ClientExecutor clientExecutor) {
-        return ProxyFactory.create(IntrospectionService.class, p_url, clientExecutor);
+    public IntrospectionService createIntrospectionService(String url, ClientExecutor clientExecutor) {
+        return ProxyFactory.create(IntrospectionService.class, url, clientExecutor);
     }
     
     public IntrospectionService createIntrospectionService(String url, ClientHttpEngine engine) {
@@ -79,8 +79,8 @@ public class ClientFactory {
 	    		.setConnectionManager(cm).build();
 	    cm.setMaxTotal(maxTotal);
 	    cm.setDefaultMaxPerRoute(defaultMaxPerRoute);
-        final ApacheHttpClient4Engine engine = new ApacheHttpClient4Engine(httpClient);
-        engine.setFollowRedirects(followRedirects);
-        return engine;
+        final ApacheHttpClient4Engine client4Engine = new ApacheHttpClient4Engine(httpClient);
+        client4Engine.setFollowRedirects(followRedirects);
+        return client4Engine;
 	}
 }
