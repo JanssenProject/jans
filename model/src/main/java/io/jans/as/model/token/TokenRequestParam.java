@@ -10,20 +10,20 @@ package io.jans.as.model.token;
  * @author Javier Rojas Blum
  * @version September 30, 2021
  */
-public interface TokenRequestParam {
+public final class TokenRequestParam {
 
-    String GRANT_TYPE = "grant_type";
-    String CODE = "code";
-    String CODE_VERIFIER = "code_verifier";
-    String REDIRECT_URI = "redirect_uri";
-    String USERNAME = "username";
-    String PASSWORD = "password";
-    String SCOPE = "scope";
-    String ASSERTION = "assertion";
-    String REFRESH_TOKEN = "refresh_token";
-    String AUTH_REQ_ID = "auth_req_id";
-    String DEVICE_CODE = "device_code";
+    public static final String GRANT_TYPE = "grant_type";
+    public static final String CODE = "code";
+    public static final String CODE_VERIFIER = "code_verifier";
+    public static final String REDIRECT_URI = "redirect_uri";
+    public static final String USERNAME = "username";
+    public static final String PASSWORD = "password";
+    public static final String SCOPE = "scope";
+    public static final String ASSERTION = "assertion";
+    public static final String REFRESH_TOKEN = "refresh_token";
+    public static final String AUTH_REQ_ID = "auth_req_id";
+    public static final String DEVICE_CODE = "device_code";
 
     // Demonstrating Proof-of-Possession
-    String DPOP = "DPoP";
+    public static final String DPOP = "DPoP";
 }
