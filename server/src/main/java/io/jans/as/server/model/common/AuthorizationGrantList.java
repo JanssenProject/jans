@@ -30,10 +30,11 @@ import io.jans.as.server.model.ldap.TokenType;
 import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.GrantService;
 import io.jans.as.server.service.MetricService;
-import io.jans.as.server.util.ServerUtil;
 import io.jans.as.server.util.TokenHashUtil;
 import io.jans.model.metric.MetricType;
 import io.jans.service.CacheService;
+
+import static org.apache.commons.lang.BooleanUtils.isFalse;
 
 /**
  * Component to hold in memory authorization grant objects.
@@ -175,14 +176,14 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
         if (cachedGrant == null) {
             // retry one time : sometimes during high load cache client may be not fast enough
             cachedGrant = cacheService.get(CacheGrant.cacheKey(authorizationCode, null));
-            log.trace("Failed to fetch authorization grant from cache, code: " + authorizationCode);
+            log.trace("Failed to fetch authorization grant from cache, code: {}", authorizationCode);
         }
         return cachedGrant instanceof CacheGrant ? ((CacheGrant) cachedGrant).asCodeGrant(grantInstance) : null;
     }
 
     @Override
     public AuthorizationGrant getAuthorizationGrantByRefreshToken(String clientId, String refreshTokenCode) {
-        if (!ServerUtil.isTrue(appConfiguration.getPersistRefreshTokenInLdap())) {
+        if (isFalse(appConfiguration.getPersistRefreshTokenInLdap())) {
             return assertTokenType((TokenLdap) cacheService.get(TokenHashUtil.hash(refreshTokenCode)), io.jans.as.server.model.ldap.TokenType.REFRESH_TOKEN, clientId);
         }
         return assertTokenType(grantService.getGrantByCode(refreshTokenCode), io.jans.as.server.model.ldap.TokenType.REFRESH_TOKEN, clientId);
