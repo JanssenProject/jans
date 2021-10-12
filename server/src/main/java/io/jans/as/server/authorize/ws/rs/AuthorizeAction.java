@@ -87,7 +87,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static io.jans.as.server.service.DeviceAuthorizationService.SESSION_USER_CODE;
-import static io.jans.as.server.util.ServerUtil.isTrue;
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 /**
  * @author Javier Rojas Blum

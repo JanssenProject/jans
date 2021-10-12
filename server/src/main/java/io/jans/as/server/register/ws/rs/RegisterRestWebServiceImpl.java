@@ -57,6 +57,7 @@ import io.jans.orm.model.base.CustomAttribute;
 import io.jans.util.StringHelper;
 import io.jans.util.security.StringEncrypter;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -421,7 +422,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             if (isFalse(appConfiguration.getDcrSignatureValidationEnabled())) {
                 return;
             }
-            if (ServerUtil.isTrue(appConfiguration.getDcrSkipSignatureValidation())) {
+            if (isTrue(appConfiguration.getDcrSkipSignatureValidation())) {
                 return;
             }
 
