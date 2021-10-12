@@ -66,7 +66,7 @@ public class SessionIdAccessMap implements Serializable {
 
     private void ensureInitialized() {
         if (permissionGranted == null) {
-            permissionGranted = new HashMap<String, Boolean>();
+            permissionGranted = new HashMap<>();
         }
     }
 
@@ -76,9 +76,7 @@ public class SessionIdAccessMap implements Serializable {
 
     public void putIfAbsent(String clientId) {
         ensureInitialized();
-        if (permissionGranted.get(clientId) == null) {
-            permissionGranted.put(clientId, false);
-        }
+        permissionGranted.putIfAbsent(clientId, false);
     }
 
     @Override
