@@ -54,8 +54,8 @@ public class UmaRPT extends AbstractToken {
         return dn;
     }
 
-    public void setDn(String p_dn) {
-        dn = p_dn;
+    public void setDn(String dn) {
+        this.dn = dn;
     }
 
     public String getUserId() {
@@ -78,8 +78,8 @@ public class UmaRPT extends AbstractToken {
         return permissions;
     }
 
-    public void setPermissions(List<String> p_permissions) {
-        permissions = p_permissions;
+    public void setPermissions(List<String> permissions) {
+        this.permissions = permissions;
     }
 
     @Override

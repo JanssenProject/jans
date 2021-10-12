@@ -30,6 +30,7 @@ public class Constants {
     public static final String REDIRECT = "redirect";
     public static final String AUTH_STEP = "auth_step";
     public static final String PROMPT = "prompt";
+    public static final String OPENID = "openid";
 
     public static final String LOG_FOUND = "Found '{}' entries";
 
@@ -42,7 +43,10 @@ public class Constants {
     public static final String UNKNOWN_DOT = UNKNOWN + ".";
     public static final String PRAGMA = "Pragma";
     public static final String NO_CACHE = "no-cache";
+    public static final String X_CLIENTCERT = "X-ClientCert";
 
     public static final String AUTHORIZATION_BEARER = "Authorization: Bearer ";
     public static final String AUTHORIZATION_BASIC = "Authorization: Basic ";
+
+    public static final String REASON_CLIENT_NOT_AUTHORIZED = "The client is not authorized.";
 }
