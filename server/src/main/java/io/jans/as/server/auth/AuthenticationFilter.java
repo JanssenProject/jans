@@ -9,6 +9,7 @@ package io.jans.as.server.auth;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.authorize.AuthorizeRequestParam;
 import io.jans.as.model.common.AuthenticationMethod;
+import io.jans.as.model.config.Constants;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.error.ErrorResponseFactory;
@@ -35,6 +36,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.apache.http.entity.ContentType;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
@@ -55,6 +57,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType.INVALID_REQUEST;
+import static io.jans.as.model.util.Util.escapeLog;
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 /**
  * @author Javier Rojas Blum
@@ -119,6 +123,7 @@ public class AuthenticationFilter implements Filter {
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
+        // nothing
     }
 
     @Override
@@ -136,13 +141,13 @@ public class AuthenticationFilter implements Filter {
             boolean deviceAuthorizationEndpoint = requestUrl.endsWith("/device_authorization");
             boolean revokeSessionEndpoint = requestUrl.endsWith("/revoke_session");
             boolean isParEndpoint = requestUrl.endsWith("/par");
-            String authorizationHeader = httpRequest.getHeader("Authorization");
+            String authorizationHeader = httpRequest.getHeader(Constants.AUTHORIZATION);
 
             if (processMTLS(httpRequest, httpResponse, filterChain)) {
                 return;
             }
 
-            if ((tokenRevocationEndpoint || deviceAuthorizationEndpoint) && clientService.isPublic(httpRequest.getParameter("client_id"))) {
+            if ((tokenRevocationEndpoint || deviceAuthorizationEndpoint) && clientService.isPublic(httpRequest.getParameter(Constants.CLIENT_ID))) {
                 log.trace("Skipped authentication for {} for public client.", tokenRevocationEndpoint ? "Token Revocation" : "Device Authorization");
                 filterChain.doFilter(httpRequest, httpResponse);
                 return;
@@ -159,8 +164,8 @@ public class AuthenticationFilter implements Filter {
                     return;
                 }
 
-                if (httpRequest.getParameter("client_assertion") != null
-                        && httpRequest.getParameter("client_assertion_type") != null) {
+                if (httpRequest.getParameter(Constants.CLIENT_ASSERTION) != null
+                        && httpRequest.getParameter(Constants.CLIENT_ASSERTION_TYPE) != null) {
                     log.debug("Starting JWT token endpoint authentication");
                     processJwtAuth(httpRequest, httpResponse, filterChain);
                 } else if (tokenService.isBasicAuthToken(authorizationHeader)) {
@@ -171,8 +176,8 @@ public class AuthenticationFilter implements Filter {
                     processPostAuth(clientFilterService, httpRequest, httpResponse, filterChain, tokenEndpoint);
                 }
             } else if (backchannelAuthenticationEnpoint) {
-                if (httpRequest.getParameter("client_assertion") != null
-                        && httpRequest.getParameter("client_assertion_type") != null) {
+                if (httpRequest.getParameter(Constants.CLIENT_ASSERTION) != null
+                        && httpRequest.getParameter(Constants.CLIENT_ASSERTION_TYPE) != null) {
                     log.debug("Starting JWT token endpoint authentication");
                     processJwtAuth(httpRequest, httpResponse, filterChain);
                 } else if (tokenService.isBasicAuthToken(authorizationHeader)) {
@@ -180,7 +185,7 @@ public class AuthenticationFilter implements Filter {
                 } else {
                     String entity = errorResponseFactory.getErrorAsJson(INVALID_REQUEST);
                     httpResponse.setStatus(HttpStatus.SC_BAD_REQUEST);
-                    httpResponse.addHeader("WWW-Authenticate", "Basic realm=\"" + getRealm() + "\"");
+                    httpResponse.addHeader(Constants.WWW_AUTHENTICATE, getRealmHeaderValue());
                     httpResponse.setContentType(ContentType.APPLICATION_JSON.toString());
                     httpResponse.setHeader(HttpHeaders.CONTENT_LENGTH, String.valueOf(entity.length()));
                     PrintWriter out = httpResponse.getWriter();
@@ -193,14 +198,14 @@ public class AuthenticationFilter implements Filter {
                 } else if (tokenService.isBasicAuthToken(authorizationHeader)) {
                     processBasicAuth(httpRequest, httpResponse, filterChain);
                 } else {
-                    httpResponse.addHeader("WWW-Authenticate", "Basic realm=\"" + getRealm() + "\"");
+                    httpResponse.addHeader(Constants.WWW_AUTHENTICATE, getRealmHeaderValue());
                     httpResponse.sendError(401, "Not authorized");
                 }
             } else {
                 String sessionId = cookieService.getSessionIdFromCookie(httpRequest);
                 List<io.jans.as.model.common.Prompt> prompts = io.jans.as.model.common.Prompt.fromString(httpRequest.getParameter(AuthorizeRequestParam.PROMPT), " ");
 
-                if (StringUtils.isBlank(sessionId) && appConfiguration.getSessionIdRequestParameterEnabled()) {
+                if (StringUtils.isBlank(sessionId) && isTrue(appConfiguration.getSessionIdRequestParameterEnabled())) {
                     sessionId = httpRequest.getParameter(AuthorizeRequestParam.SESSION_ID);
                 }
 
@@ -227,6 +232,11 @@ public class AuthenticationFilter implements Filter {
         }
     }
 
+    @NotNull
+    public String getRealmHeaderValue() {
+        return String.format("Basic realm=\"%s\"", getRealm());
+    }
+
     /**
      * @return whether successful or not
      */
@@ -236,7 +246,7 @@ public class AuthenticationFilter implements Filter {
             return false;
         }
 
-        final String clientId = httpRequest.getParameter("client_id");
+        final String clientId = httpRequest.getParameter(Constants.CLIENT_ID);
         if (StringUtils.isNotBlank(clientId)) {
             final Client client = clientService.getClient(clientId);
             if (client != null &&
@@ -278,15 +288,16 @@ public class AuthenticationFilter implements Filter {
         sendError(httpResponse);
     }
 
-    private void processSessionAuth(String p_sessionId, HttpServletRequest p_httpRequest, HttpServletResponse p_httpResponse, FilterChain p_filterChain) {
+    private void processSessionAuth(String sessionId, HttpServletRequest httpRequest, HttpServletResponse httpResponse, FilterChain filterChain) {
         boolean requireAuth;
 
-        requireAuth = !authenticator.authenticateBySessionId(p_sessionId);
-        log.trace("Process Session Auth, sessionId = {}, requireAuth = {}", p_sessionId, requireAuth);
+        requireAuth = !authenticator.authenticateBySessionId(sessionId);
+        if (log.isTraceEnabled())
+            log.trace("Process Session Auth, sessionId = {}, requireAuth = {}", escapeLog(sessionId), requireAuth);
 
         if (!requireAuth) {
             try {
-                p_filterChain.doFilter(p_httpRequest, p_httpResponse);
+                filterChain.doFilter(httpRequest, httpResponse);
             } catch (Exception ex) {
                 log.error("Failed to process session authentication", ex);
                 requireAuth = true;
@@ -294,7 +305,7 @@ public class AuthenticationFilter implements Filter {
         }
 
         if (requireAuth) {
-            sendError(p_httpResponse);
+            sendError(httpResponse);
         }
     }
 
@@ -302,7 +313,7 @@ public class AuthenticationFilter implements Filter {
         boolean requireAuth = true;
 
         try {
-            String header = servletRequest.getHeader("Authorization");
+            String header = servletRequest.getHeader(Constants.AUTHORIZATION);
             if (tokenService.isBasicAuthToken(header)) {
                 String base64Token = tokenService.getBasicToken(header);
                 String token = new String(Base64.decodeBase64(base64Token), StandardCharsets.UTF_8);
@@ -322,27 +333,25 @@ public class AuthenticationFilter implements Filter {
 
                 // Only authenticate if username doesn't match Identity.username
                 // and user isn't authenticated
-                if (requireAuth) {
-                    if (!username.equals(identity.getCredentials().getUsername()) || !identity.isLoggedIn()) {
-                        identity.getCredentials().setUsername(username);
-                        identity.getCredentials().setPassword(password);
+                if (requireAuth && !username.equals(identity.getCredentials().getUsername()) || !identity.isLoggedIn()) {
+                    identity.getCredentials().setUsername(username);
+                    identity.getCredentials().setPassword(password);
 
-                        if (servletRequest.getRequestURI().endsWith("/token")
-                                || servletRequest.getRequestURI().endsWith("/revoke")
-                                || servletRequest.getRequestURI().endsWith("/revoke_session")
-                                || servletRequest.getRequestURI().endsWith("/userinfo")
-                                || servletRequest.getRequestURI().endsWith("/bc-authorize")
-                                || servletRequest.getRequestURI().endsWith("/par")
-                                || servletRequest.getRequestURI().endsWith("/device_authorization")) {
-                            Client client = clientService.getClient(username);
-                            if (client == null
-                                    || io.jans.as.model.common.AuthenticationMethod.CLIENT_SECRET_BASIC != client.getAuthenticationMethod()) {
-                                throw new Exception("The Token Authentication Method is not valid.");
-                            }
-                            requireAuth = !authenticator.authenticateClient(servletRequest);
-                        } else {
-                            requireAuth = !authenticator.authenticateUser(servletRequest);
+                    if (servletRequest.getRequestURI().endsWith("/token")
+                            || servletRequest.getRequestURI().endsWith("/revoke")
+                            || servletRequest.getRequestURI().endsWith("/revoke_session")
+                            || servletRequest.getRequestURI().endsWith("/userinfo")
+                            || servletRequest.getRequestURI().endsWith("/bc-authorize")
+                            || servletRequest.getRequestURI().endsWith("/par")
+                            || servletRequest.getRequestURI().endsWith("/device_authorization")) {
+                        Client client = clientService.getClient(username);
+                        if (client == null
+                                || io.jans.as.model.common.AuthenticationMethod.CLIENT_SECRET_BASIC != client.getAuthenticationMethod()) {
+                            throw new Exception("The Token Authentication Method is not valid.");
                         }
+                        requireAuth = !authenticator.authenticateClient(servletRequest);
+                    } else {
+                        requireAuth = !authenticator.authenticateUser(servletRequest);
                     }
                 }
             }
@@ -363,7 +372,7 @@ public class AuthenticationFilter implements Filter {
     private void processBearerAuth(HttpServletRequest servletRequest, HttpServletResponse servletResponse,
                                    FilterChain filterChain) {
         try {
-            String header = servletRequest.getHeader("Authorization");
+            String header = servletRequest.getHeader(Constants.AUTHORIZATION);
             if (tokenService.isBearerAuthToken(header)) {
                 filterChain.doFilter(servletRequest, servletResponse);
             }
@@ -378,9 +387,9 @@ public class AuthenticationFilter implements Filter {
             String clientId = "";
             String clientSecret = "";
             boolean isExistUserPassword = false;
-            if (StringHelper.isNotEmpty(servletRequest.getParameter("client_id"))
+            if (StringHelper.isNotEmpty(servletRequest.getParameter(Constants.CLIENT_ID))
                     && StringHelper.isNotEmpty(servletRequest.getParameter("client_secret"))) {
-                clientId = servletRequest.getParameter("client_id");
+                clientId = servletRequest.getParameter(Constants.CLIENT_ID);
                 clientSecret = servletRequest.getParameter("client_secret");
                 isExistUserPassword = true;
             }
@@ -421,7 +430,7 @@ public class AuthenticationFilter implements Filter {
                         requireAuth = !authenticator.authenticateClient(servletRequest, true);
                     }
                 } else if (tokenEndpoint) {
-                    Client client = clientService.getClient(servletRequest.getParameter("client_id"));
+                    Client client = clientService.getClient(servletRequest.getParameter(Constants.CLIENT_ID));
                     if (client != null && client.getAuthenticationMethod() == AuthenticationMethod.NONE) {
                         identity.logout();
 
@@ -451,12 +460,12 @@ public class AuthenticationFilter implements Filter {
         boolean authorized = false;
 
         try {
-            if (servletRequest.getParameter("client_assertion") != null
-                    && servletRequest.getParameter("client_assertion_type") != null) {
-                String clientId = servletRequest.getParameter("client_id");
+            if (servletRequest.getParameter(Constants.CLIENT_ASSERTION) != null
+                    && servletRequest.getParameter(Constants.CLIENT_ASSERTION_TYPE) != null) {
+                String clientId = servletRequest.getParameter(Constants.CLIENT_ID);
                 ClientAssertionType clientAssertionType = ClientAssertionType
-                        .fromString(servletRequest.getParameter("client_assertion_type"));
-                String encodedAssertion = servletRequest.getParameter("client_assertion");
+                        .fromString(servletRequest.getParameter(Constants.CLIENT_ASSERTION_TYPE));
+                String encodedAssertion = servletRequest.getParameter(Constants.CLIENT_ASSERTION);
 
                 if (clientAssertionType == ClientAssertionType.JWT_BEARER) {
                     ClientAssertion clientAssertion = new ClientAssertion(appConfiguration, cryptoProvider, clientId,
@@ -490,7 +499,7 @@ public class AuthenticationFilter implements Filter {
     private void sendError(HttpServletResponse servletResponse) {
         try (PrintWriter out = servletResponse.getWriter()) {
             servletResponse.setStatus(401);
-            servletResponse.addHeader("WWW-Authenticate", "Basic realm=\"" + getRealm() + "\"");
+            servletResponse.addHeader(Constants.WWW_AUTHENTICATE, "Basic realm=\"" + getRealm() + "\"");
             servletResponse.setContentType("application/json;charset=UTF-8");
             out.write(errorResponseFactory.errorAsJson(TokenErrorResponseType.INVALID_CLIENT, "Unable to authenticate client."));
         } catch (IOException ex) {
@@ -501,7 +510,7 @@ public class AuthenticationFilter implements Filter {
     private void sendResponse(HttpServletResponse servletResponse, WebApplicationException e) {
         try (PrintWriter out = servletResponse.getWriter()) {
             servletResponse.setStatus(e.getResponse().getStatus());
-            servletResponse.addHeader("WWW-Authenticate", "Basic realm=\"" + getRealm() + "\"");
+            servletResponse.addHeader(Constants.WWW_AUTHENTICATE, "Basic realm=\"" + getRealm() + "\"");
             servletResponse.setContentType("application/json;charset=UTF-8");
             out.write(e.getResponse().getEntity().toString());
         } catch (IOException ex) {
@@ -523,6 +532,7 @@ public class AuthenticationFilter implements Filter {
 
     @Override
     public void destroy() {
+        // nothing
     }
 
 }

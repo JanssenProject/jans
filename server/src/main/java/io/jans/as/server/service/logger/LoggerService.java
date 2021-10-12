@@ -11,7 +11,8 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.server.util.ServerUtil;
+
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 /**
  * Logger service
@@ -27,7 +28,7 @@ public class LoggerService extends io.jans.service.logger.LoggerService {
 
     @Override
     public boolean isDisableJdkLogger() {
-        return ServerUtil.isTrue(appConfiguration.getDisableJdkLogger());
+        return isTrue(appConfiguration.getDisableJdkLogger());
     }
 
     @Override

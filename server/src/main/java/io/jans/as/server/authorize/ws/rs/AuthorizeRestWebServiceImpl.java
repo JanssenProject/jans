@@ -120,7 +120,7 @@ import java.util.Set;
 import java.util.function.Function;
 
 import static io.jans.as.model.util.StringUtils.implode;
-import static io.jans.as.server.util.ServerUtil.isTrue;
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 /**
  * Implementation for request authorization through REST web services.
