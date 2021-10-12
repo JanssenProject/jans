@@ -16,7 +16,6 @@ import io.jans.util.Pair;
 import io.jans.util.StringHelper;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
-import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
 import javax.ejb.Stateless;
@@ -32,6 +31,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 /**
  * @author Yuriy Movchan
@@ -71,9 +72,6 @@ public class RequestParameterService {
             DeviceAuthorizationService.SESSION_USER_CODE));
 
     @Inject
-    private Logger log;
-
-    @Inject
     private Identity identity;
 
     @Inject
@@ -81,7 +79,7 @@ public class RequestParameterService {
 
     private List<String> getAllAllowedParameters() {
         List<String> allowedParameters = Lists.newArrayList(ALLOWED_PARAMETER);
-        if (appConfiguration.getSessionIdRequestParameterEnabled()) {
+        if (isTrue(appConfiguration.getSessionIdRequestParameterEnabled())) {
             allowedParameters.add(AuthorizeRequestParam.SESSION_ID);
         }
         return allowedParameters;
@@ -90,10 +88,10 @@ public class RequestParameterService {
     public Map<String, String> getAllowedParameters(@Nonnull final Map<String, String> requestParameterMap) {
         Set<String> authorizationRequestCustomAllowedParameters = appConfiguration.getAuthorizationRequestCustomAllowedParameters();
         if (authorizationRequestCustomAllowedParameters == null) {
-        	authorizationRequestCustomAllowedParameters = new HashSet<String>(0);
+        	authorizationRequestCustomAllowedParameters = new HashSet<>(0);
         }
 
-        final Map<String, String> result = new HashMap<String, String>();
+        final Map<String, String> result = new HashMap<>();
         if (requestParameterMap.isEmpty()) {
             return result;
         }
@@ -111,7 +109,7 @@ public class RequestParameterService {
     public Map<String, String> getCustomParameters(@Nonnull final Map<String, String> requestParameterMap) {
         Set<String> authorizationRequestCustomAllowedParameters = appConfiguration.getAuthorizationRequestCustomAllowedParameters();
 
-        final Map<String, String> result = new HashMap<String, String>();
+        final Map<String, String> result = new HashMap<>();
         if (authorizationRequestCustomAllowedParameters == null) {
         	return result;
         }
@@ -160,18 +158,18 @@ public class RequestParameterService {
         return parameterMap;
     }
 
-    private void putInMap(Map<String, String> map, String p_name) {
+    private void putInMap(Map<String, String> map, String name) {
         if (map == null) {
             return;
         }
 
-        String value = getParameterValue(p_name);
+        String value = getParameterValue(name);
 
-        map.put(p_name, value);
+        map.put(name, value);
     }
 
-    public String getParameterValue(String p_name) {
-        Pair<String, String> valueWithType = getParameterValueWithType(p_name);
+    public String getParameterValue(String name) {
+        Pair<String, String> valueWithType = getParameterValueWithType(name);
         if (valueWithType == null) {
             return null;
         }
