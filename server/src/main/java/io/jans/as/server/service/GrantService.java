@@ -15,6 +15,7 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
@@ -66,21 +67,21 @@ public class GrantService {
         return UUID.randomUUID().toString();
     }
 
-    public String buildDn(String p_hashedToken) {
-        return String.format("tknCde=%s,", p_hashedToken) + tokenBaseDn();
+    public String buildDn(String hashedToken) {
+        return String.format("tknCde=%s,", hashedToken) + tokenBaseDn();
     }
 
     private String tokenBaseDn() {
         return staticConfiguration.getBaseDn().getTokens();  // ou=tokens,o=jans
     }
 
-    public void merge(TokenLdap p_token) {
-        persistenceEntryManager.merge(p_token);
+    public void merge(TokenLdap token) {
+        persistenceEntryManager.merge(token);
     }
 
-    public void mergeSilently(TokenLdap p_token) {
+    public void mergeSilently(TokenLdap token) {
         try {
-            persistenceEntryManager.merge(p_token);
+            persistenceEntryManager.merge(token);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
@@ -107,9 +108,9 @@ public class GrantService {
         }
     }
 
-    public void remove(List<TokenLdap> p_entries) {
-        if (p_entries != null && !p_entries.isEmpty()) {
-            for (TokenLdap t : p_entries) {
+    public void remove(List<TokenLdap> entries) {
+        if (entries != null && !entries.isEmpty()) {
+            for (TokenLdap t : entries) {
                 try {
                     remove(t);
                 } catch (Exception e) {
@@ -119,27 +120,27 @@ public class GrantService {
         }
     }
 
-    public void removeSilently(List<TokenLdap> p_entries) {
-        if (p_entries != null && !p_entries.isEmpty()) {
-            for (TokenLdap t : p_entries) {
+    public void removeSilently(List<TokenLdap> entries) {
+        if (entries != null && !entries.isEmpty()) {
+            for (TokenLdap t : entries) {
                 removeSilently(t);
             }
         }
     }
 
-    public void remove(AuthorizationGrant p_grant) {
-        if (p_grant != null && p_grant.getTokenLdap() != null) {
+    public void remove(AuthorizationGrant grant) {
+        if (grant != null && grant.getTokenLdap() != null) {
             try {
-                remove(p_grant.getTokenLdap());
+                remove(grant.getTokenLdap());
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
             }
         }
     }
 
-    public List<TokenLdap> getGrantsOfClient(String p_clientId) {
+    public List<TokenLdap> getGrantsOfClient(String clientId) {
         try {
-            final String baseDn = clientService.buildClientDn(p_clientId);
+            final String baseDn = clientService.buildClientDn(clientId);
             return persistenceEntryManager.findEntries(baseDn, TokenLdap.class, Filter.createPresenceFilter("tknCde"));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -147,12 +148,12 @@ public class GrantService {
         return Collections.emptyList();
     }
 
-    public TokenLdap getGrantByCode(String p_code) {
-        Object grant = cacheService.get(TokenHashUtil.hash(p_code));
+    public TokenLdap getGrantByCode(String code) {
+        Object grant = cacheService.get(TokenHashUtil.hash(code));
         if (grant instanceof TokenLdap) {
             return (TokenLdap) grant;
         } else {
-            return load(buildDn(TokenHashUtil.hash(p_code)));
+            return load(buildDn(TokenHashUtil.hash(code)));
         }
     }
 
@@ -198,7 +199,7 @@ public class GrantService {
 
     public void logout(String sessionDn) {
         final List<TokenLdap> tokens = getGrantsBySessionDn(sessionDn);
-        if (!appConfiguration.getRemoveRefreshTokensForClientOnLogout()) {
+        if (BooleanUtils.isFalse(appConfiguration.getRemoveRefreshTokensForClientOnLogout())) {
             List<TokenLdap> refreshTokens = Lists.newArrayList();
             for (TokenLdap token : tokens) {
                 if (token.getTokenTypeEnum() == TokenType.REFRESH_TOKEN) {
@@ -213,7 +214,7 @@ public class GrantService {
         removeSilently(tokens);
     }
 
-    public void removeAllTokensBySession(String sessionDn, boolean logout) {
+    public void removeAllTokensBySession(String sessionDn) {
         removeSilently(getGrantsBySessionDn(sessionDn));
     }
 
@@ -235,12 +236,12 @@ public class GrantService {
         cacheService.remove(CacheGrant.cacheKey(code, null));
     }
 
-    public void removeAllByAuthorizationCode(String p_authorizationCode) {
-        removeSilently(getGrantsByAuthorizationCode(p_authorizationCode));
+    public void removeAllByAuthorizationCode(String authorizationCode) {
+        removeSilently(getGrantsByAuthorizationCode(authorizationCode));
     }
 
-    public void removeAllByGrantId(String p_grantId) {
-        removeSilently(getGrantsByGrantId(p_grantId));
+    public void removeAllByGrantId(String grantId) {
+        removeSilently(getGrantsByGrantId(grantId));
     }
 
 }

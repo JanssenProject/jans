@@ -84,7 +84,7 @@ public class UmaMetadataWS {
             log.trace("Uma metadata: {}", entity);
 
             return Response.ok(entity).build();
-        } catch (Throwable ex) {
+        } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
             throw errorResponseFactory.createWebApplicationException(Response.Status.INTERNAL_SERVER_ERROR, UmaErrorResponseType.SERVER_ERROR, "Internal error.");
         }
