@@ -178,7 +178,6 @@ rdbmInstaller.packageUtils = packageUtils
 
 if Config.installed_instance:
     for service in jansProgress.services:
-        print("Checking if {} installed".format(service['object'].install_var))
         setattr(Config, service['object'].install_var, service['object'].installed())
 
     if not argsp.shell:
