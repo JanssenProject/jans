@@ -24,7 +24,7 @@ import java.util.Set;
  * Validates the parameters received for the authorize web service.
  *
  * @author Javier Rojas Blum
- * @version July 19, 2017
+ * @version October 6, 2021
  */
 public class AuthorizeParamsValidator {
 
@@ -40,7 +40,10 @@ public class AuthorizeParamsValidator {
                                          boolean fapiCompatibility, ResponseMode responseMode) {
         if (fapiCompatibility) {
             if (responseTypes.size() == 1 && responseTypes.contains(ResponseType.CODE)) {
-                return false;
+                // The authorization server shall require the response_type value code in conjunction with the response_mode value jwt
+                if (responseMode != ResponseMode.JWT) {
+                    return false;
+                }
             }
             if (responseMode == ResponseMode.QUERY) {
                 log.trace("ResponseMode=query is not allowed for FAPI.");
