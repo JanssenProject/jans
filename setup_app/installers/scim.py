@@ -163,7 +163,5 @@ class ScimInstaller(JettyInstaller):
 
         self.dbUtils.import_ldif([self.ldif_config_fn, self.ldif_scopes_fn, self.ldif_clients_fn])
 
-        self.write_webapps_xml()
-
     def update_backend(self):
         self.dbUtils.enable_service('jansScimEnabled')
