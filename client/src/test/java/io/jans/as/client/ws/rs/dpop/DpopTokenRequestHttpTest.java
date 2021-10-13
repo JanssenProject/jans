@@ -92,7 +92,8 @@ public class DpopTokenRequestHttpTest extends BaseTest {
         String accessTokenHash = Base64Util.base64urlencode(JwtUtil.getMessageDigestSHA256(accessToken));
         String jti2 = DPoP.generateJti();
         DPoP dpop2 = new DPoP(AsymmetricSignatureAlgorithm.RS256, jsonWebKey, jti2, HttpMethod.POST,
-                tokenEndpoint, accessTokenHash, keyId, cryptoProvider);
+                tokenEndpoint, keyId, cryptoProvider);
+        dpop2.setAth(accessTokenHash);
 
         requestAccessTokenWithRefreshToken(refreshToken, dpop2);
     }
@@ -143,7 +144,8 @@ public class DpopTokenRequestHttpTest extends BaseTest {
         String accessTokenHash = Base64Util.base64urlencode(JwtUtil.getMessageDigestSHA256(accessToken));
         String jti2 = DPoP.generateJti();
         DPoP dpop2 = new DPoP(AsymmetricSignatureAlgorithm.RS384, jsonWebKey, jti2, HttpMethod.POST,
-                tokenEndpoint, accessTokenHash, keyId, cryptoProvider);
+                tokenEndpoint, keyId, cryptoProvider);
+        dpop2.setAth(accessTokenHash);
 
         requestAccessTokenWithRefreshToken(refreshToken, dpop2);
     }
@@ -194,7 +196,8 @@ public class DpopTokenRequestHttpTest extends BaseTest {
         String accessTokenHash = Base64Util.base64urlencode(JwtUtil.getMessageDigestSHA256(accessToken));
         String jti2 = DPoP.generateJti();
         DPoP dpop2 = new DPoP(AsymmetricSignatureAlgorithm.RS512, jsonWebKey, jti2, HttpMethod.POST,
-                tokenEndpoint, accessTokenHash, keyId, cryptoProvider);
+                tokenEndpoint, keyId, cryptoProvider);
+        dpop2.setAth(accessTokenHash);
 
         requestAccessTokenWithRefreshToken(refreshToken, dpop2);
     }
@@ -246,7 +249,8 @@ public class DpopTokenRequestHttpTest extends BaseTest {
         String accessTokenHash = Base64Util.base64urlencode(JwtUtil.getMessageDigestSHA256(accessToken));
         String jti2 = DPoP.generateJti();
         DPoP dpop2 = new DPoP(AsymmetricSignatureAlgorithm.ES256, jsonWebKey, jti2, HttpMethod.POST,
-                tokenEndpoint, accessTokenHash, keyId, cryptoProvider);
+                tokenEndpoint, keyId, cryptoProvider);
+        dpop2.setAth(accessTokenHash);
 
         requestAccessTokenWithRefreshToken(refreshToken, dpop2);
     }
@@ -298,7 +302,8 @@ public class DpopTokenRequestHttpTest extends BaseTest {
         String accessTokenHash = Base64Util.base64urlencode(JwtUtil.getMessageDigestSHA256(accessToken));
         String jti2 = DPoP.generateJti();
         DPoP dpop2 = new DPoP(AsymmetricSignatureAlgorithm.ES384, jsonWebKey, jti2, HttpMethod.POST,
-                tokenEndpoint, accessTokenHash, keyId, cryptoProvider);
+                tokenEndpoint, keyId, cryptoProvider);
+        dpop2.setAth(accessTokenHash);
 
         requestAccessTokenWithRefreshToken(refreshToken, dpop2);
     }
@@ -350,7 +355,8 @@ public class DpopTokenRequestHttpTest extends BaseTest {
         String accessTokenHash = Base64Util.base64urlencode(JwtUtil.getMessageDigestSHA256(accessToken));
         String jti2 = DPoP.generateJti();
         DPoP dpop2 = new DPoP(AsymmetricSignatureAlgorithm.ES512, jsonWebKey, jti2, HttpMethod.POST,
-                tokenEndpoint, accessTokenHash, keyId, cryptoProvider);
+                tokenEndpoint, keyId, cryptoProvider);
+        dpop2.setAth(accessTokenHash);
 
         requestAccessTokenWithRefreshToken(refreshToken, dpop2);
     }
@@ -401,7 +407,8 @@ public class DpopTokenRequestHttpTest extends BaseTest {
         String accessTokenHash = Base64Util.base64urlencode(JwtUtil.getMessageDigestSHA256(accessToken));
         String jti2 = DPoP.generateJti();
         DPoP dpop2 = new DPoP(AsymmetricSignatureAlgorithm.PS256, jsonWebKey, jti2, HttpMethod.POST,
-                tokenEndpoint, accessTokenHash, keyId, cryptoProvider);
+                tokenEndpoint, keyId, cryptoProvider);
+        dpop2.setAth(accessTokenHash);
 
         requestAccessTokenWithRefreshToken(refreshToken, dpop2);
     }
@@ -452,7 +459,8 @@ public class DpopTokenRequestHttpTest extends BaseTest {
         String accessTokenHash = Base64Util.base64urlencode(JwtUtil.getMessageDigestSHA256(accessToken));
         String jti2 = DPoP.generateJti();
         DPoP dpop2 = new DPoP(AsymmetricSignatureAlgorithm.PS384, jsonWebKey, jti2, HttpMethod.POST,
-                tokenEndpoint, accessTokenHash, keyId, cryptoProvider);
+                tokenEndpoint, keyId, cryptoProvider);
+        dpop2.setAth(accessTokenHash);
 
         requestAccessTokenWithRefreshToken(refreshToken, dpop2);
     }
@@ -503,7 +511,8 @@ public class DpopTokenRequestHttpTest extends BaseTest {
         String accessTokenHash = Base64Util.base64urlencode(JwtUtil.getMessageDigestSHA256(accessToken));
         String jti2 = DPoP.generateJti();
         DPoP dpop2 = new DPoP(AsymmetricSignatureAlgorithm.PS512, jsonWebKey, jti2, HttpMethod.POST,
-                tokenEndpoint, accessTokenHash, keyId, cryptoProvider);
+                tokenEndpoint, keyId, cryptoProvider);
+        dpop2.setAth(accessTokenHash);
 
         requestAccessTokenWithRefreshToken(refreshToken, dpop2);
     }
