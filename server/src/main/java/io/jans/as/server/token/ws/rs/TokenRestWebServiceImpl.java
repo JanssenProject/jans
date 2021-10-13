@@ -18,7 +18,6 @@ import io.jans.as.model.crypto.binding.TokenBindingMessage;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwk.JSONWebKey;
-import io.jans.as.model.jwt.DPoP;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.token.JsonWebResponse;
 import io.jans.as.model.token.TokenErrorResponseType;
@@ -679,7 +678,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         String dpopStr = httpRequest.getHeader(TokenRequestParam.DPOP);
         if (StringUtils.isBlank(dpopStr)) return null;
 
-        Jwt dpop = DPoP.parseOrThrow(dpopStr);
+        Jwt dpop = Jwt.parseOrThrow(dpopStr);
 
         JSONWebKey jwk = JSONWebKey.fromJSONObject(dpop.getHeader().getJwk());
         String dpopJwkThumbprint = jwk.getJwkThumbprint();

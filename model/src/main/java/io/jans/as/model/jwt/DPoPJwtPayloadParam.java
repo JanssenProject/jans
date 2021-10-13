@@ -11,6 +11,10 @@ package io.jans.as.model.jwt;
  */
 public final class DPoPJwtPayloadParam {
 
+    private DPoPJwtPayloadParam() {
+        throw new IllegalStateException("Utility class");
+    }
+
     /**
      * Unique identifier for the DPoP proof JWT.
      * The value must be assigned such that there is a negligible probability that the same value will be assigned
