@@ -369,9 +369,8 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         root = tree.getroot()
 
         for app_set in root.findall("Set"):
-            if app_set.get('name') == 'extraClasspath':
-                if app_set.text.endswith(os.path.basename(class_path)):
-                    break
+            if app_set.get('name') == 'extraClasspath' and app_set.text.endswith(os.path.basename(class_path)):
+                break
         else:
             child = ET.Element("Set")
             child.set('name', 'extraClasspath')
