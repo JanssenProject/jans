@@ -515,66 +515,17 @@ public class AuthenticationFilter implements Filter {
             Jwt dpop = Jwt.parseOrThrow(dpopStr);
             GrantType grantType = GrantType.fromString(servletRequest.getParameter("grant_type"));
 
-            // Validate Header
-            if (dpop.getHeader().getType() != JwtType.DPOP_PLUS_JWT) {
-                throw new InvalidJwtException("Invalid DPoP Proof Header. The typ header must be dpop+jwt.");
-            }
-            if (dpop.getHeader().getSignatureAlgorithm() == null) {
-                throw new InvalidJwtException("Invalid DPoP Proof Header. The typ header must be dpop+jwt.");
-            }
-            if (dpop.getHeader().getJwk() == null) {
-                throw new InvalidJwtException("Invalid DPoP Proof Header. The jwk header is required.");
-            }
+            validateDpopHeader(dpop);
 
-            // Validate Payload
-            if (StringUtils.isBlank(dpop.getClaims().getClaimAsString(DPoPJwtPayloadParam.HTM))) {
-                throw new InvalidJwtException("Invalid DPoP Proof Payload. The htm param is required.");
-            }
-            if (StringUtils.isBlank(dpop.getClaims().getClaimAsString(DPoPJwtPayloadParam.HTU))) {
-                throw new InvalidJwtException("Invalid DPoP Proof Payload. The htu param is required");
-            }
-            if (dpop.getClaims().getClaimAsLong(DPoPJwtPayloadParam.IAT) == null) {
-                throw new InvalidJwtException("Invalid DPoP Proof Payload. The iat param is required.");
-            }
-            if (StringUtils.isBlank(dpop.getClaims().getClaimAsString(DPoPJwtPayloadParam.JTI))) {
-                throw new InvalidJwtException("Invalid DPoP Proof Payload. The jti param is required");
-            } else {
-                String jti = dpop.getClaims().getClaimAsString(DPoPJwtPayloadParam.JTI);
-                Long iat = dpop.getClaims().getClaimAsLong(DPoPJwtPayloadParam.IAT);
-                String htu = dpop.getClaims().getClaimAsString(DPoPJwtPayloadParam.HTU);
-                String cacheKey = "dpop_jti_" + jti;
-                DPoPJti dPoPJti = (DPoPJti) cacheService.get(cacheKey);
+            validateDpopPayload(dpop);
 
-                // Validate the token was issued within an acceptable timeframe.
-                int seconds = appConfiguration.getDpopTimeframe();
-                long diff = (new Date().getTime() - iat) / 1000;
-                if (diff > seconds) {
-                    throw new InvalidJwtException("The DPoP token has expired.");
-                }
-
-                if (dPoPJti == null) {
-                    dPoPJti = new DPoPJti(jti, iat, htu);
-                    cacheService.put(appConfiguration.getDpopJtiCacheTime(), cacheKey, dPoPJti);
-                } else {
-                    throw new InvalidJwtException("Invalid DPoP Proof. The jti param is has been used before.");
-                }
-            }
-
-            // Validate Signature
             JSONWebKey jwk = JSONWebKey.fromJSONObject(dpop.getHeader().getJwk());
             String dpopJwkThumbprint = jwk.getJwkThumbprint();
-
-            if (dpopJwkThumbprint == null) {
-                throw new InvalidJwtException("Invalid DPoP Proof Header. The jwk header is not valid.");
+            if (validateDpopSignature(dpop, jwk, dpopJwkThumbprint)) {
+                validDPoPProof = true;
+            } else {
+                validDPoPProof = false;
             }
-
-            JSONWebKeySet jwks = new JSONWebKeySet();
-            jwks.getKeys().add(jwk);
-            if (!cryptoProvider.verifySignature(dpop.getSigningInput(),
-                    dpop.getEncodedSignature(), null, jwks.toJSONObject(), null, dpop.getHeader().getSignatureAlgorithm())) {
-                throw new InvalidJwtException("Invalid DPoP Proof signature.");
-            }
-            validDPoPProof = true;
 
             if (grantType == GrantType.AUTHORIZATION_CODE) {
                 final String code = servletRequest.getParameter("code");
@@ -622,6 +573,68 @@ public class AuthenticationFilter implements Filter {
 
         if (!authorized) {
             sendError(servletResponse);
+        }
+    }
+
+    private boolean validateDpopSignature(Jwt dpop, JSONWebKey jwk, String dpopJwkThumbprint) throws Exception {
+        if (dpopJwkThumbprint == null) {
+            throw new InvalidJwtException("Invalid DPoP Proof Header. The jwk header is not valid.");
+        }
+
+        JSONWebKeySet jwks = new JSONWebKeySet();
+        jwks.getKeys().add(jwk);
+        if (!cryptoProvider.verifySignature(dpop.getSigningInput(),
+                dpop.getEncodedSignature(), null, jwks.toJSONObject(), null, dpop.getHeader().getSignatureAlgorithm())) {
+            throw new InvalidJwtException("Invalid DPoP Proof signature.");
+        }
+
+        return true;
+    }
+
+    private void validateDpopPayload(Jwt dpop) throws InvalidJwtException {
+        if (StringUtils.isBlank(dpop.getClaims().getClaimAsString(DPoPJwtPayloadParam.HTM))) {
+            throw new InvalidJwtException("Invalid DPoP Proof Payload. The htm param is required.");
+        }
+        if (StringUtils.isBlank(dpop.getClaims().getClaimAsString(DPoPJwtPayloadParam.HTU))) {
+            throw new InvalidJwtException("Invalid DPoP Proof Payload. The htu param is required");
+        }
+        if (dpop.getClaims().getClaimAsLong(DPoPJwtPayloadParam.IAT) == null) {
+            throw new InvalidJwtException("Invalid DPoP Proof Payload. The iat param is required.");
+        }
+        if (StringUtils.isBlank(dpop.getClaims().getClaimAsString(DPoPJwtPayloadParam.JTI))) {
+            throw new InvalidJwtException("Invalid DPoP Proof Payload. The jti param is required");
+        } else {
+            String jti = dpop.getClaims().getClaimAsString(DPoPJwtPayloadParam.JTI);
+            Long iat = dpop.getClaims().getClaimAsLong(DPoPJwtPayloadParam.IAT);
+            String htu = dpop.getClaims().getClaimAsString(DPoPJwtPayloadParam.HTU);
+            String cacheKey = "dpop_jti_" + jti;
+            DPoPJti dPoPJti = (DPoPJti) cacheService.get(cacheKey);
+
+            // Validate the token was issued within an acceptable timeframe.
+            int seconds = appConfiguration.getDpopTimeframe();
+            long diff = (new Date().getTime() - iat) / 1000;
+            if (diff > seconds) {
+                throw new InvalidJwtException("The DPoP token has expired.");
+            }
+
+            if (dPoPJti == null) {
+                dPoPJti = new DPoPJti(jti, iat, htu);
+                cacheService.put(appConfiguration.getDpopJtiCacheTime(), cacheKey, dPoPJti);
+            } else {
+                throw new InvalidJwtException("Invalid DPoP Proof. The jti param is has been used before.");
+            }
+        }
+    }
+
+    private void validateDpopHeader(Jwt dpop) throws InvalidJwtException {
+        if (dpop.getHeader().getType() != JwtType.DPOP_PLUS_JWT) {
+            throw new InvalidJwtException("Invalid DPoP Proof Header. The typ header must be dpop+jwt.");
+        }
+        if (dpop.getHeader().getSignatureAlgorithm() == null) {
+            throw new InvalidJwtException("Invalid DPoP Proof Header. The typ header must be dpop+jwt.");
+        }
+        if (dpop.getHeader().getJwk() == null) {
+            throw new InvalidJwtException("Invalid DPoP Proof Header. The jwk header is required.");
         }
     }
 

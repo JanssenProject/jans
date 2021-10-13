@@ -38,20 +38,10 @@ public class DPoP extends Jwt {
     private String encodedJwt;
 
     // Signature Key
-    private AbstractCryptoProvider cryptoProvider;
+    private transient AbstractCryptoProvider cryptoProvider;
 
     public DPoP(AsymmetricSignatureAlgorithm asymmetricSignatureAlgorithm, JSONWebKey jwk, String jti, String htm, String htu,
                 String keyId, AbstractCryptoProvider cryptoProvider) {
-        this(asymmetricSignatureAlgorithm, jwk, jti, htm, htu, new Date(), null, keyId, cryptoProvider);
-    }
-
-    public DPoP(AsymmetricSignatureAlgorithm asymmetricSignatureAlgorithm, JSONWebKey jwk, String jti, String htm, String htu,
-                String accessTokenHash, String keyId, AbstractCryptoProvider cryptoProvider) {
-        this(asymmetricSignatureAlgorithm, jwk, jti, htm, htu, new Date(), accessTokenHash, keyId, cryptoProvider);
-    }
-
-    public DPoP(AsymmetricSignatureAlgorithm asymmetricSignatureAlgorithm, JSONWebKey jwk, String jti, String htm, String htu,
-                Date issuedAt, String accessTokenHash, String keyId, AbstractCryptoProvider cryptoProvider) {
         getHeader().setType(DPOP_PLUS_JWT);
         this.keyId = keyId;
         setSignatureAlgorithm(asymmetricSignatureAlgorithm);
@@ -60,8 +50,7 @@ public class DPoP extends Jwt {
         setJti(jti);
         setHtm(htm);
         setHtu(htu);
-        setIat(issuedAt != null ? issuedAt.getTime() : new Date().getTime());
-        setAth(accessTokenHash);
+        setIat(new Date().getTime());
 
         this.cryptoProvider = cryptoProvider;
     }
