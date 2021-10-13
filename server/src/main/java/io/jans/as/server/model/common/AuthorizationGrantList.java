@@ -163,7 +163,10 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
 
         CacheGrant memcachedGrant = new CacheGrant(grant, appConfiguration);
         cacheService.put(data.getExpiresIn(), memcachedGrant.getDeviceCode(), memcachedGrant);
-        log.trace("Device code grant saved in cache, deviceCode: {}, grantId: {}", escapeLog(grant.getDeviceCode()), escapeLog(grant.getGrantId()));
+
+        final String escapedDeviceCode = escapeLog(grant.getDeviceCode());
+        final String escapedGrantId = escapeLog(grant.getGrantId());
+        log.trace("Device code grant saved in cache, deviceCode: {}, grantId: {}", escapedDeviceCode, escapedGrantId);
         return grant;
     }
 
@@ -173,7 +176,9 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
         if (cachedGrant == null) {
             // retry one time : sometimes during high load cache client may be not fast enough
             cachedGrant = cacheService.get(deviceCode);
-            log.trace("Failed to fetch Device code grant from cache, deviceCode: {}", escapeLog(deviceCode));
+
+            final String escapedDeviceCode = escapeLog(deviceCode);
+            log.trace("Failed to fetch Device code grant from cache, deviceCode: {}", escapedDeviceCode);
         }
         return cachedGrant instanceof CacheGrant ? ((CacheGrant) cachedGrant).asDeviceCodeGrant(grantInstance) : null;
     }
@@ -184,7 +189,9 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
         if (cachedGrant == null) {
             // retry one time : sometimes during high load cache client may be not fast enough
             cachedGrant = cacheService.get(CacheGrant.cacheKey(authorizationCode, null));
-            log.trace("Failed to fetch authorization grant from cache, code: {}", escapeLog(authorizationCode));
+
+            final String escapedAuthorizationCode = escapeLog(authorizationCode);
+            log.trace("Failed to fetch authorization grant from cache, code: {}", escapedAuthorizationCode);
         }
         return cachedGrant instanceof CacheGrant ? ((CacheGrant) cachedGrant).asCodeGrant(grantInstance) : null;
     }
