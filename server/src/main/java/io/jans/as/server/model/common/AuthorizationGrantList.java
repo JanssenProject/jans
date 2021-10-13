@@ -27,7 +27,10 @@ import org.slf4j.Logger;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 
 import static io.jans.as.model.util.Util.escapeLog;
 import static org.apache.commons.lang.BooleanUtils.isFalse;
@@ -92,7 +95,10 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
 
         CacheGrant memcachedGrant = new CacheGrant(grant, appConfiguration);
         cacheService.put(grant.getAuthorizationCode().getExpiresIn(), memcachedGrant.cacheKey(), memcachedGrant);
-        log.trace("Put authorization grant in cache, code: " + escapeLog(grant.getAuthorizationCode().getCode()) + ", clientId: " + escapeLog(grant.getClientId()));
+
+        final String escapedCode = escapeLog(grant.getAuthorizationCode().getCode());
+        final String escapedClientId = escapeLog(grant.getClientId());
+        log.trace("Put authorization grant in cache, code: {}, clientId: {}", escapedCode, escapedClientId);
 
         metricService.incCounter(MetricType.TOKEN_AUTHORIZATION_CODE_COUNT);
         return grant;
@@ -129,7 +135,11 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
 
         CacheGrant memcachedGrant = new CacheGrant(grant, appConfiguration);
         cacheService.put(request.getExpiresIn(), memcachedGrant.getAuthReqId(), memcachedGrant);
-        log.trace("Ciba grant saved in cache, authReqId: {}, grantId: {}", escapeLog(grant.getAuthReqId()), escapeLog(grant.getGrantId()));
+
+        final String escapedAuthReqId = escapeLog(grant.getAuthReqId());
+        final String escapedGrantId = escapeLog(grant.getGrantId());
+        log.trace("Ciba grant saved in cache, authReqId: {}, grantId: {}", escapedAuthReqId, escapedGrantId);
+
         return grant;
     }
 
@@ -139,7 +149,9 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
         if (cachedGrant == null) {
             // retry one time : sometimes during high load cache client may be not fast enough
             cachedGrant = cacheService.get(authReqId);
-            log.trace("Failed to fetch CIBA grant from cache, authReqId: {}", escapeLog(authReqId));
+
+            final String escapedAuthReqId = escapeLog(authReqId);
+            log.trace("Failed to fetch CIBA grant from cache, authReqId: {}", escapedAuthReqId);
         }
         return cachedGrant instanceof CacheGrant ? ((CacheGrant) cachedGrant).asCibaGrant(grantInstance) : null;
     }
