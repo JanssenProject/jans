@@ -12,6 +12,10 @@ package io.jans.as.model.token;
  */
 public final class TokenRequestParam {
 
+    private TokenRequestParam() {
+        throw new IllegalStateException("Utility class");
+    }
+
     public static final String GRANT_TYPE = "grant_type";
     public static final String CODE = "code";
     public static final String CODE_VERIFIER = "code_verifier";
