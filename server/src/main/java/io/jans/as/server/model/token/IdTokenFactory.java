@@ -20,26 +20,17 @@ import io.jans.as.model.token.JsonWebResponse;
 import io.jans.as.persistence.model.Scope;
 import io.jans.as.server.model.authorize.Claim;
 import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
-import io.jans.as.server.model.common.AbstractToken;
-import io.jans.as.server.model.common.AccessToken;
-import io.jans.as.server.model.common.AuthorizationCode;
-import io.jans.as.server.model.common.CIBAGrant;
-import io.jans.as.server.model.common.IAuthorizationGrant;
-import io.jans.as.server.model.common.RefreshToken;
-import io.jans.as.server.model.common.SessionId;
-import io.jans.as.server.model.common.UnmodifiableAuthorizationGrant;
+import io.jans.as.server.model.common.*;
 import io.jans.as.server.service.ScopeService;
 import io.jans.as.server.service.SessionIdService;
 import io.jans.as.server.service.external.ExternalAuthenticationService;
 import io.jans.as.server.service.external.ExternalDynamicScopeService;
 import io.jans.as.server.service.external.context.DynamicScopeExternalContext;
 import io.jans.model.GluuAttribute;
-import io.jans.model.attribute.AttributeDataType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.custom.script.type.auth.PersonAuthenticationType;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.util.Strings;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
@@ -47,18 +38,7 @@ import javax.ejb.Stateless;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Function;
 
 import static io.jans.as.model.common.ScopeType.DYNAMIC;
@@ -196,7 +176,7 @@ public class IdTokenFactory {
                     continue;
                 }
 
-                Map<String, Object> claims = getClaims(user, scope);
+                Map<String, Object> claims = scopeService.getClaims(user, scope);
 
                 if (Boolean.TRUE.equals(scope.isGroupClaims())) {
                     JwtSubClaimObject groupClaim = new JwtSubClaimObject();
@@ -223,7 +203,7 @@ public class IdTokenFactory {
                         } else if (value instanceof Boolean) {
                             jwr.getClaims().setClaim(key, (Boolean) value);
                         } else if (value instanceof Date) {
-                            jwr.getClaims().setClaim(key, ((Date) value).getTime());
+                            jwr.getClaims().setClaim(key, ((Date) value).getTime() / 1000);
                         } else {
                             jwr.setClaim(key, (String) value);
                         }
@@ -295,7 +275,7 @@ public class IdTokenFactory {
                         } else if (attribute instanceof Boolean) {
                             jwr.getClaims().setClaim(claimName, (Boolean) attribute);
                         } else if (attribute instanceof Date) {
-                            jwr.getClaims().setClaim(claimName, ((Date) attribute).getTime());
+                            jwr.getClaims().setClaim(claimName, ((Date) attribute).getTime() / 1000);
                         } else {
                             jwr.setClaim(claimName, (String) attribute);
                         }
@@ -382,57 +362,5 @@ public class IdTokenFactory {
             }
         }
         return false;
-    }
-
-    public Map<String, Object> getClaims(User user, Scope scope) throws InvalidClaimException, ParseException {
-        Map<String, Object> claims = new HashMap<>();
-
-        if (scope == null || scope.getClaims() == null) {
-            return claims;
-        }
-
-        for (String claimDn : scope.getClaims()) {
-            GluuAttribute gluuAttribute = attributeService.getAttributeByDn(claimDn);
-
-            String claimName = gluuAttribute.getClaimName();
-            String ldapName = gluuAttribute.getName();
-            Object attribute = null;
-
-            if (StringUtils.isNotBlank(claimName) && StringUtils.isNotBlank(ldapName)) {
-                if (ldapName.equals("uid")) {
-                    attribute = user.getUserId();
-                } else if (ldapName.equals("updatedAt")) {
-                    attribute = user.getUpdatedAt();
-                } if (AttributeDataType.BOOLEAN.equals(gluuAttribute.getDataType())) {
-                    attribute = Boolean.parseBoolean(String.valueOf(user.getAttribute(gluuAttribute.getName(), true, gluuAttribute.getOxMultiValuedAttribute())));
-                } else if (AttributeDataType.DATE.equals(gluuAttribute.getDataType())) {
-                    SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss.SSS'Z'");
-                    Object attributeValue = user.getAttribute(gluuAttribute.getName(), true, gluuAttribute.getOxMultiValuedAttribute());
-                    if (attributeValue != null) {
-                        attribute = format.parse(attributeValue.toString());
-                    }
-                } else {
-                    attribute = user.getAttribute(gluuAttribute.getName(), true, gluuAttribute.getOxMultiValuedAttribute());
-                }
-
-                if (attribute != null) {
-                    if (attribute instanceof JSONArray) {
-                        JSONArray jsonArray = (JSONArray) attribute;
-                        List<String> values = new ArrayList<>();
-                        for (int i = 0; i < jsonArray.length(); i++) {
-                            String value = jsonArray.optString(i);
-                            if (value != null) {
-                                values.add(value);
-                            }
-                        }
-                        claims.put(claimName, values);
-                    } else {
-                        claims.put(claimName, attribute);
-                    }
-                }
-            }
-        }
-
-        return claims;
     }
 }
