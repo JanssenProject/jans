@@ -72,6 +72,7 @@ public class AppConfiguration implements Configuration {
 
     private Boolean sessionAsJwt = false;
     private Boolean requireRequestObjectEncryption = false;
+    private Boolean requirePkce = false;
 
     private int sectorIdentifierCacheLifetimeInMinutes = 1440;
 
@@ -308,6 +309,15 @@ public class AppConfiguration implements Configuration {
 
     public void setRequireRequestObjectEncryption(Boolean requireRequestObjectEncryption) {
         this.requireRequestObjectEncryption = requireRequestObjectEncryption;
+    }
+
+    public Boolean getRequirePkce() {
+        if (requirePkce == null) requirePkce = false;
+        return requirePkce;
+    }
+
+    public void setRequirePkce(Boolean requirePkce) {
+        this.requirePkce = requirePkce;
     }
 
     public Boolean getAllowIdTokenWithoutImplicitGrantType() {
@@ -1866,7 +1876,7 @@ public class AppConfiguration implements Configuration {
     }
 
     public Boolean getUpdateUserLastLogonTime() {
-        return updateUserLastLogonTime != null ? updateUserLastLogonTime : false;
+        return updateUserLastLogonTime != null && updateUserLastLogonTime;
     }
 
     public void setUpdateUserLastLogonTime(Boolean updateUserLastLogonTime) {
@@ -1874,7 +1884,7 @@ public class AppConfiguration implements Configuration {
     }
 
     public Boolean getUpdateClientAccessTime() {
-        return updateClientAccessTime != null ? updateClientAccessTime : false;
+        return updateClientAccessTime != null && updateClientAccessTime;
     }
 
     public void setUpdateClientAccessTime(Boolean updateClientAccessTime) {
@@ -2248,7 +2258,7 @@ public class AppConfiguration implements Configuration {
     }
 
     public Boolean getRequestUriHashVerificationEnabled() {
-        return requestUriHashVerificationEnabled != null ? requestUriHashVerificationEnabled : false;
+        return requestUriHashVerificationEnabled != null && requestUriHashVerificationEnabled;
     }
 
     public void setRequestUriHashVerificationEnabled(Boolean requestUriHashVerificationEnabled) {
@@ -2256,7 +2266,7 @@ public class AppConfiguration implements Configuration {
     }
 
     public Boolean getIdTokenFilterClaimsBasedOnAccessToken() {
-        return idTokenFilterClaimsBasedOnAccessToken != null ? idTokenFilterClaimsBasedOnAccessToken : false;
+        return idTokenFilterClaimsBasedOnAccessToken != null && idTokenFilterClaimsBasedOnAccessToken;
     }
 
     public void setIdTokenFilterClaimsBasedOnAccessToken(Boolean idTokenFilterClaimsBasedOnAccessToken) {

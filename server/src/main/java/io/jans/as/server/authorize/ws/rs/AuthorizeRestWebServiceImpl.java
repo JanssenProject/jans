@@ -268,7 +268,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                         + "customRespHeaders = {}, claims = {}, tokenBindingHeader = {}",
                 acrValuesStr, amrValuesStr, originHeaders, codeChallenge, codeChallengeMethod, customRespHeaders, claims, tokenBindingHeader);
 
-        ResponseBuilder builder = Response.ok();
+        ResponseBuilder builder = null;
 
         Map<String, String> customParameters = requestParameterService.getCustomParameters(QueryStringDecoder.decode(httpRequest.getQueryString()));
 
@@ -444,7 +444,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 }
                 authorizeRestWebServiceValidator.validateRequestJwt(request, requestUri, redirectUriResponse);
             }
+
             authorizeRestWebServiceValidator.validate(responseTypes, prompts, nonce, state, redirectUri, httpRequest, client, responseMode);
+            authorizeRestWebServiceValidator.validatePkce(codeChallenge, redirectUriResponse);
 
             if (CollectionUtils.isEmpty(acrValues) && !ArrayUtils.isEmpty(client.getDefaultAcrValues())) {
                 acrValues = Lists.newArrayList(client.getDefaultAcrValues());
@@ -557,7 +559,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
             ClientAuthorization clientAuthorization = null;
             boolean clientAuthorizationFetched = false;
-            if (scopes.size() > 0) {
+            if (!scopes.isEmpty()) {
                 if (prompts.contains(Prompt.CONSENT)) {
                     return redirectToAuthorizationPage(redirectUriResponse.getRedirectUri(), responseTypes, scope, clientId,
                             redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales,
@@ -571,7 +573,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     clientAuthorization = clientAuthorizationsService.find(user.getAttribute("inum"), client.getClientId());
                     clientAuthorizationFetched = true;
                     if (clientAuthorization != null && clientAuthorization.getScopes() != null) {
-                        log.trace("ClientAuthorization - scope: " + scope + ", dn: " + clientAuthorization.getDn() + ", requestedScope: " + scopes);
+                        if (log.isTraceEnabled())
+                            log.trace("ClientAuthorization - scope: {}, dn: {}, requestedScope: {}", scope, clientAuthorization.getDn(),  scopes);
                         if (Arrays.asList(clientAuthorization.getScopes()).containsAll(scopes)) {
                             sessionUser.addPermission(clientId, true);
                             sessionIdService.updateSessionId(sessionUser);
