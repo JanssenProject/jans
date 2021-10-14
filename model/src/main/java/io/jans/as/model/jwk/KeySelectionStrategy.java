@@ -48,7 +48,7 @@ public enum KeySelectionStrategy implements AttributeEnum {
     }
 
     @NotNull
-    private Comparator<JSONWebKey> compareExp() {
+    public static Comparator<JSONWebKey> compareExp() {
         return (o1, o2) -> {
             if (o1.getExp() == null || o2.getExp() == null) {
                 return 0;
