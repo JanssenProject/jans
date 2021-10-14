@@ -20,12 +20,14 @@ import io.jans.as.model.common.GrantType;
  * requesting access to protected resources based on an authorization previously
  * arranged with the authorization server.
  *
- * @author Javier Rojas Blum Date: 09.29.2011
+ * @author Javier Rojas Blum
  * @author Yuriy Movchan
+ * @version September 30, 2021
  */
 public class ClientCredentialsGrant extends AuthorizationGrant {
 
-    public ClientCredentialsGrant() {}
+    public ClientCredentialsGrant() {
+    }
 
     /**
      * Construct a client credentials grant.
@@ -51,7 +53,7 @@ public class ClientCredentialsGrant extends AuthorizationGrant {
      * The authorization server MUST NOT issue a refresh token.
      */
     @Override
-    public RefreshToken createRefreshToken() {
+    public RefreshToken createRefreshToken(String dpop) {
         throw new UnsupportedOperationException(
                 "The authorization server MUST NOT issue a refresh token.");
     }
