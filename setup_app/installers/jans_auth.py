@@ -39,6 +39,9 @@ class JansAuthInstaller(JettyInstaller):
         self.ldif_people = os.path.join(self.output_folder, 'people.ldif')
         self.ldif_groups = os.path.join(self.output_folder, 'groups.ldif')
 
+        if Config.profile == 'openbanking':
+            Config.jwksUri = base.argsp.jwks_uri
+
     def install(self):
         self.logIt("Copying auth.war into jetty webapps folder...")
 
