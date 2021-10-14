@@ -8,7 +8,7 @@
     "clientInfoEndpoint":"https://%(hostname)s/jans-auth/restv1/clientinfo",
     "checkSessionIFrame":"https://%(hostname)s/jans-auth/opiframe.htm",
     "endSessionEndpoint":"https://%(hostname)s/jans-auth/restv1/end_session",
-    "jwksUri":"https://keystore.openbankingtest.org.uk/0014H00001lFE7dQAG/axV5umCvTMBMjPwjFQgEvb.jwks",
+    "jwksUri":"%(jwksUri)s",
     "registrationEndpoint":"https://%(hostname)s/jans-auth/restv1/register",
     "openIdDiscoveryEndpoint":"https://%(hostname)s/.well-known/webfinger",
     "openIdConfigurationEndpoint":"https://%(hostname)s/.well-known/openid-configuration",
