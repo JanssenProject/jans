@@ -7,7 +7,8 @@
 package io.jans.as.model.jwt;
 
 /**
- * @author Javier Rojas Blum Date: 11.09.2012
+ * @author Javier Rojas Blum
+ * @version September 30, 2021
  */
 public final class JwtHeaderName {
 
@@ -22,6 +23,7 @@ public final class JwtHeaderName {
     public static final String AGREEMENT_PARTY_V_INFO = "apv";
     public static final String ENCRYPTION_PARTY_U_INFO = "epu";
     public static final String ENCRYPTION_PARTY_V_INFO = "epv";
+    public static final String JWK = "jwk";
 
     /**
      * The caller references the constants using <tt>JwtClaimName.TYPE</tt>,
