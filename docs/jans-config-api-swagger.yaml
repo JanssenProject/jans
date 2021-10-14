@@ -2297,12 +2297,12 @@ paths:
             type: string
             enum: 
               - json
-              - openmetrics			
+              - openmetrics
             default: json
           in: query
           name: format
           description: Report format
-		  
+
   /jans-config-api/api/v1/health:
     get:
       summary: Returns application health status.
@@ -2351,7 +2351,7 @@ paths:
                 $ref: '#/components/schemas/HealthStatusItem'
         '500':
           description: Internal Server Error
-		  
+
   /jans-config-api/scim/user:
     get:
       tags:
@@ -2431,7 +2431,7 @@ paths:
           in: query
           name: excludedAttributes
           description: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list).
-		  
+
     post:
       tags:
       - SCIM - User Management
@@ -2499,7 +2499,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-	  
+  
   /jans-config-api/scim/user/{id}:
     get:
       tags:
@@ -3000,7 +3000,7 @@ components:
           type: boolean
           description: boolean value indicating if the script is internal.
           default: false
-		  
+  
     LdapConfiguration:
       type: object
       required:
@@ -3066,7 +3066,7 @@ components:
         level:
           type: integer
           description: A string that indicates the level.
-		  
+
     CouchbaseConfiguration:
       type: object
       required:
@@ -3162,7 +3162,7 @@ components:
           description: List of certificate attributes.
           items:
             type: string
-			
+
     SqlConfiguration:
       type: object
       required:
@@ -3284,7 +3284,7 @@ components:
           - sql
           - spanner
           - hybrid
-		  
+
     AppConfiguration:
       title: AppConfiguration
       description: App configuration properties.
@@ -5456,8 +5456,8 @@ components:
         publicVapidKey:
           type: string
           description: Public Vapid Key
-		  
-		
+
+
     StatResponseItem:
       type: object
       description: Server statistics data
@@ -5473,14 +5473,14 @@ components:
           type: object
           additionalProperties:
             $ref: '#/components/schemas/TokenMapObject'
-			  
+
     TokenMapObject:
       type: object
       description: A hashmap with statistical item as a key and the value as statistical value.
       additionalProperties:
         type: integer
         format: int64
-		
+
     HealthStatus:
       type: object
       description: Server health data
@@ -5497,7 +5497,7 @@ components:
             $ref: '#/components/schemas/HealthStatusItem'
             description: health check status details.
             example: '"checks": [{"name": "jans-config-api liveness","status": "UP"},{"name": "jans-config-api readiness","status": "UP"}],"status": "UP"}'
-		
+
 
     HealthStatusItem:
       type: object
@@ -5509,7 +5509,7 @@ components:
         status:
           type: string
           description: Health parameter status
-		  
+
     SearchRequest:
       type: object
       description: Search Parameters.
@@ -5661,7 +5661,7 @@ components:
           urn:ietf:params:scim:schemas:extension:gluu:2.0:User:
             type: object
             properties: {}
-            description: Extended attributes	
+            description: Extended attributes
 
     Name:
       type: object
@@ -5769,7 +5769,7 @@ components:
         primary:
           type: boolean
           description: Denotes if this is the preferred address among others, if any
-      description: Physical mailing address for this user. See section 4.1.2 of RFC 7643	  
+      description: Physical mailing address for this user. See section 4.1.2 of RFC 7643  
     Role:
       type: object
       properties:
@@ -5856,7 +5856,7 @@ components:
         location:
           type: string
       description: See section 3.1 of RFC 7643
-	  
+  
     ScimPatchOperation:
       required:
       - op
@@ -5894,7 +5894,7 @@ components:
             $ref: '#/components/schemas/ScimPatchOperation'
     AnyValue:
       description: Can be any value - string, number, boolean, array or object
-	  
+  
     AuthHealthStatus:
       type: object
       description: Auth Server health data
