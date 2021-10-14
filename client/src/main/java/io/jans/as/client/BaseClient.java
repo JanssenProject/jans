@@ -131,21 +131,10 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
                     sb.append("\n");
                     sb.append("Accept: ").append(request.getMediaType());
                 }
-                if (request instanceof TokenRequest) {
-                    TokenRequest tokenRequest = (TokenRequest) request;
-                    if (tokenRequest.getDpop() != null) {
-                        sb.append("\n");
-                        sb.append("DPoP: ").append(tokenRequest.getDpop().toString());
-                    }
-                }
 
-                if (request instanceof AuthorizationRequest) {
-                    AuthorizationRequest authorizationRequest = (AuthorizationRequest) request;
-                    if (authorizationRequest.isUseNoRedirectHeader()) {
-                        sb.append("\n");
-                        sb.append(AuthorizationRequest.NO_REDIRECT_HEADER + ": true");
-                    }
-                }
+                appendDpopHeader(sb);
+                appendNoRedirectHeader(sb);
+
                 if (request.getAuthorizationMethod() == null) {
                     if ((request.getAuthenticationMethod() == null || request.getAuthenticationMethod() == AuthenticationMethod.CLIENT_SECRET_BASIC) && request.hasCredentials()) {
                         String encodedCredentials = request.getEncodedCredentials();
@@ -177,20 +166,10 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
                     sb.append("\n");
                     sb.append("Content-Type: ").append(request.getContentType());
                 }
-                if (request instanceof TokenRequest) {
-                    TokenRequest tokenRequest = (TokenRequest) request;
-                    if (tokenRequest.getDpop() != null) {
-                        sb.append("\n");
-                        sb.append("DPoP: ").append(tokenRequest.getDpop().toString());
-                    }
-                }
-                if (request instanceof AuthorizationRequest) {
-                    AuthorizationRequest authorizationRequest = (AuthorizationRequest) request;
-                    if (authorizationRequest.isUseNoRedirectHeader()) {
-                        sb.append("\n");
-                        sb.append(AuthorizationRequest.NO_REDIRECT_HEADER + ": true");
-                    }
-                }
+
+                appendDpopHeader(sb);
+                appendNoRedirectHeader(sb);
+
                 if (request.getAuthorizationMethod() == null) {
                     if (request.hasCredentials()) {
                         String encodedCredentials = request.getEncodedCredentials();
@@ -213,6 +192,26 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
         }
 
         return sb.toString();
+    }
+
+    private void appendDpopHeader(StringBuilder sb) {
+        if (request instanceof TokenRequest) {
+            TokenRequest tokenRequest = (TokenRequest) request;
+            if (tokenRequest.getDpop() != null) {
+                sb.append("\n");
+                sb.append("DPoP: ").append(tokenRequest.getDpop().toString());
+            }
+        }
+    }
+
+    private void appendNoRedirectHeader(StringBuilder sb) {
+        if (request instanceof AuthorizationRequest) {
+            AuthorizationRequest authorizationRequest = (AuthorizationRequest) request;
+            if (authorizationRequest.isUseNoRedirectHeader()) {
+                sb.append("\n");
+                sb.append(AuthorizationRequest.NO_REDIRECT_HEADER + ": true");
+            }
+        }
     }
 
     public String getResponseAsString() {
@@ -273,5 +272,4 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
     public Map<String, String> getHeaders() {
         return headers;
     }
-
 }
