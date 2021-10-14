@@ -216,62 +216,35 @@ public class TokenClient extends BaseClient<TokenRequest, TokenResponse> {
      * @return The token response.
      */
     public TokenResponse exec() {
-        // Prepare request parameters
-        initClientRequest();
-        new ClientAuthnEnabler(clientRequest).exec(request);
-
-        clientRequest.header("Content-Type", request.getContentType());
-        clientRequest.setHttpMethod(getHttpMethod());
-
-        if (getRequest().getDpop() != null) {
-            try {
-                clientRequest.header(DPOP, getRequest().getDpop().getEncodedJwt());
-            } catch (Exception e) {
-                LOG.error(e.getMessage(), e);
-            }
-        }
-
-        if (getRequest().getGrantType() != null) {
-            clientRequest.formParameter(GRANT_TYPE, getRequest().getGrantType());
-        }
-        if (StringUtils.isNotBlank(getRequest().getCode())) {
-            clientRequest.formParameter(CODE, getRequest().getCode());
-        }
-        if (StringUtils.isNotBlank(getRequest().getCodeVerifier())) {
-            clientRequest.formParameter(CODE_VERIFIER, getRequest().getCodeVerifier());
-        }
-        if (StringUtils.isNotBlank(getRequest().getRedirectUri())) {
-            clientRequest.formParameter(REDIRECT_URI, getRequest().getRedirectUri());
-        }
-        if (StringUtils.isNotBlank(getRequest().getUsername())) {
-            clientRequest.formParameter(USERNAME, getRequest().getUsername());
-        }
-        if (StringUtils.isNotBlank(getRequest().getPassword())) {
-            clientRequest.formParameter(PASSWORD, getRequest().getPassword());
-        }
-        if (StringUtils.isNotBlank(getRequest().getScope())) {
-            clientRequest.formParameter(SCOPE, getRequest().getScope());
-        }
-        if (StringUtils.isNotBlank(getRequest().getAssertion())) {
-            clientRequest.formParameter(ASSERTION, getRequest().getAssertion());
-        }
-        if (StringUtils.isNotBlank(getRequest().getRefreshToken())) {
-            clientRequest.formParameter(REFRESH_TOKEN, getRequest().getRefreshToken());
-        }
-
-        for (String key : getRequest().getCustomParameters().keySet()) {
-            clientRequest.formParameter(key, getRequest().getCustomParameters().get(key));
-        }
-
-        if (StringUtils.isNotBlank(getRequest().getAuthReqId())) {
-            clientRequest.formParameter(AUTH_REQ_ID, getRequest().getAuthReqId());
-        }
-        if (StringUtils.isNotBlank(getRequest().getDeviceCode())) {
-            clientRequest.formParameter("device_code", getRequest().getDeviceCode());
-        }
-
-        // Call REST Service and handle response
         try {
+            // Prepare request parameters
+            initClientRequest();
+            new ClientAuthnEnabler(clientRequest).exec(request);
+
+            clientRequest.header("Content-Type", request.getContentType());
+            clientRequest.setHttpMethod(getHttpMethod());
+
+            if (getRequest().getDpop() != null) {
+                clientRequest.header(DPOP, getRequest().getDpop().getEncodedJwt());
+            }
+
+            addFormParameterIfNotNull(GRANT_TYPE, getRequest().getGrantType());
+            addFormParameterIfNotBlank(CODE, getRequest().getCode());
+            addFormParameterIfNotBlank(CODE_VERIFIER, getRequest().getCodeVerifier());
+            addFormParameterIfNotBlank(REDIRECT_URI, getRequest().getRedirectUri());
+            addFormParameterIfNotBlank(USERNAME, getRequest().getUsername());
+            addFormParameterIfNotBlank(PASSWORD, getRequest().getPassword());
+            addFormParameterIfNotBlank(SCOPE, getRequest().getScope());
+            addFormParameterIfNotBlank(ASSERTION, getRequest().getAssertion());
+            addFormParameterIfNotBlank(REFRESH_TOKEN, getRequest().getRefreshToken());
+            addFormParameterIfNotBlank(AUTH_REQ_ID, getRequest().getAuthReqId());
+            addFormParameterIfNotBlank(DEVICE_CODE, getRequest().getDeviceCode());
+
+            for (String key : getRequest().getCustomParameters().keySet()) {
+                addFormParameterIfNotBlank(key, getRequest().getCustomParameters().get(key));
+            }
+
+            // Call REST Service and handle response
             clientResponse = clientRequest.post(String.class);
 
             final TokenResponse tokenResponse = new TokenResponse(clientResponse);
@@ -284,5 +257,17 @@ public class TokenClient extends BaseClient<TokenRequest, TokenResponse> {
         }
 
         return getResponse();
+    }
+
+    private void addFormParameterIfNotBlank(String paramName, String value) {
+        if (StringUtils.isNotBlank(value)) {
+            addFormParameterIfNotNull(paramName, value);
+        }
+    }
+
+    private void addFormParameterIfNotNull(String paramName, Object value) {
+        if (value != null) {
+            clientRequest.formParameter(paramName, value);
+        }
     }
 }
