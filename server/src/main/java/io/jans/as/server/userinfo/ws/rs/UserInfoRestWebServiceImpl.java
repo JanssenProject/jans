@@ -22,7 +22,6 @@ import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.exception.InvalidClaimException;
 import io.jans.as.model.exception.InvalidJweException;
-import io.jans.as.model.json.JsonApplier;
 import io.jans.as.model.jwe.Jwe;
 import io.jans.as.model.jwe.JweEncrypter;
 import io.jans.as.model.jwe.JweEncrypterImpl;
@@ -41,12 +40,7 @@ import io.jans.as.server.audit.ApplicationAuditLogger;
 import io.jans.as.server.model.audit.Action;
 import io.jans.as.server.model.audit.OAuth2AuditLog;
 import io.jans.as.server.model.authorize.Claim;
-import io.jans.as.server.model.common.AbstractToken;
-import io.jans.as.server.model.common.AuthorizationGrant;
-import io.jans.as.server.model.common.AuthorizationGrantList;
-import io.jans.as.server.model.common.AuthorizationGrantType;
-import io.jans.as.server.model.common.DefaultScope;
-import io.jans.as.server.model.common.UnmodifiableAuthorizationGrant;
+import io.jans.as.server.model.common.*;
 import io.jans.as.server.model.userinfo.UserInfoParamsValidator;
 import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.ScopeService;
@@ -57,11 +51,7 @@ import io.jans.as.server.service.external.context.DynamicScopeExternalContext;
 import io.jans.as.server.service.token.TokenService;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.model.GluuAttribute;
-import io.jans.model.attribute.AttributeDataType;
-import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
-import org.apache.commons.lang.StringUtils;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
@@ -74,13 +64,7 @@ import javax.ws.rs.core.SecurityContext;
 import java.nio.charset.StandardCharsets;
 import java.security.PublicKey;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Provides interface for User Info REST web services
@@ -126,9 +110,6 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
 
     @Inject
     private AbstractCryptoProvider cryptoProvider;
-
-    @Inject
-    private PersistenceEntryManager entryManager;
 
     @Inject
     private TokenService tokenService;
@@ -342,7 +323,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                 continue;
             }
 
-            Map<String, Object> claims = getClaims(user, scope);
+            Map<String, Object> claims = scopeService.getClaims(user, scope);
             if (claims == null) {
                 continue;
             }
@@ -457,70 +438,5 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         }
 
         return false;
-    }
-
-    public Map<String, Object> getClaims(User user, Scope scope) throws InvalidClaimException, ParseException {
-        Map<String, Object> claims = new HashMap<String, Object>();
-
-        if (scope == null) {
-            log.trace("Scope is null.");
-            return claims;
-        }
-
-        final List<String> scopeClaims = scope.getClaims();
-        if (scopeClaims == null) {
-            log.trace("No claims set for scope: " + scope.getId());
-            return claims;
-        }
-
-        for (String claimDn : scopeClaims) {
-            GluuAttribute gluuAttribute = attributeService.getAttributeByDn(claimDn);
-
-            String claimName = gluuAttribute.getClaimName();
-            String ldapName = gluuAttribute.getName();
-            Object attribute = null;
-
-            if (StringUtils.isBlank(claimName)) {
-                log.error("Failed to get claim because claim name is not set for attribute, id: " + gluuAttribute.getDn());
-                continue;
-            }
-            if (StringUtils.isBlank(ldapName)) {
-                log.error("Failed to get claim because name is not set for attribute, id: " + gluuAttribute.getDn());
-                continue;
-            }
-
-
-            if (ldapName.equals("uid")) {
-                attribute = user.getUserId();
-            } else if (ldapName.equals("updatedAt")) {
-                attribute = user.getUpdatedAt();
-            } else if (AttributeDataType.BOOLEAN.equals(gluuAttribute.getDataType())) {
-                final Object value = user.getAttribute(gluuAttribute.getName(), true, gluuAttribute.getOxMultiValuedAttribute());
-                if (value instanceof String) {
-                    attribute = Boolean.parseBoolean(String.valueOf(value));
-                } else {
-                    attribute = value;
-                }
-            } else if (AttributeDataType.DATE.equals(gluuAttribute.getDataType())) {
-                Object value = user.getAttribute(gluuAttribute.getName(), true, gluuAttribute.getOxMultiValuedAttribute());
-                if (value instanceof Date) {
-                    attribute = value;
-                } else if (value != null) {
-                    attribute = entryManager.decodeTime(user.getDn(), value.toString());
-                }
-            } else {
-                attribute = user.getAttribute(gluuAttribute.getName(), true, gluuAttribute.getOxMultiValuedAttribute());
-            }
-
-            if (attribute != null) {
-                if (attribute instanceof JSONArray) {
-                    claims.put(claimName, JsonApplier.getStringList((JSONArray) attribute));
-                } else {
-                    claims.put(claimName, attribute);
-                }
-            }
-        }
-
-        return claims;
     }
 }
