@@ -11,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
  * @author Javier Rojas Blum
- * @version June 15, 2016
+ * @version September 30, 2021
  */
 public enum Use {
 
@@ -26,7 +26,7 @@ public enum Use {
 
     private final String paramName;
 
-    Use(String paramName) {
+    private Use(String paramName) {
         this.paramName = paramName;
     }
 

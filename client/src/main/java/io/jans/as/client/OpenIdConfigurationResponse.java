@@ -21,7 +21,7 @@ import java.util.Map;
  * Represents an OpenId Configuration received from the authorization server.
  *
  * @author Javier Rojas Blum
- * @version July 28, 2021
+ * @version September 30, 2021
  */
 public class OpenIdConfigurationResponse extends BaseResponse implements Serializable {
 
@@ -61,6 +61,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
     private List<String> requestObjectEncryptionEncValuesSupported;
     private List<String> tokenEndpointAuthMethodsSupported;
     private List<String> tokenEndpointAuthSigningAlgValuesSupported;
+    private List<String> dpopSigningAlgValuesSupported;
     private List<String> displayValuesSupported;
     private List<String> claimTypesSupported;
     private List<String> claimsSupported;
@@ -119,6 +120,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
         requestObjectEncryptionEncValuesSupported = new ArrayList<>();
         tokenEndpointAuthMethodsSupported = new ArrayList<>();
         tokenEndpointAuthSigningAlgValuesSupported = new ArrayList<>();
+        dpopSigningAlgValuesSupported = new ArrayList<>();
         displayValuesSupported = new ArrayList<>();
         claimTypesSupported = new ArrayList<>();
         claimsSupported = new ArrayList<>();
@@ -814,6 +816,24 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
      */
     public void setTokenEndpointAuthSigningAlgValuesSupported(List<String> tokenEndpointAuthSigningAlgValuesSupported) {
         this.tokenEndpointAuthSigningAlgValuesSupported = tokenEndpointAuthSigningAlgValuesSupported;
+    }
+
+    /**
+     * Returns a list of JWS alg values supported by the authorization server for DPoP proof JWTs.
+     *
+     * @return A list of JWS alg values supported by the authorization server for DPoP proof JWTs.
+     */
+    public List<String> getDpopSigningAlgValuesSupported() {
+        return dpopSigningAlgValuesSupported;
+    }
+
+    /**
+     * Sets a list of JWS alg values supported by the authorization server for DPoP proof JWTs.
+     *
+     * @param dpopSigningAlgValuesSupported A list of JWS alg values supported by the authorization server for DPoP proof JWTs.
+     */
+    public void setDpopSigningAlgValuesSupported(List<String> dpopSigningAlgValuesSupported) {
+        this.dpopSigningAlgValuesSupported = dpopSigningAlgValuesSupported;
     }
 
     /**

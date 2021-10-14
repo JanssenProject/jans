@@ -6,19 +6,24 @@
 
 package io.jans.as.model.jwk;
 
+import com.nimbusds.jose.jwk.JWKException;
 import io.jans.as.model.crypto.signature.EllipticEdvardsCurve;
+import io.jans.as.model.util.Base64Util;
+import io.jans.as.model.util.JwtUtil;
 import io.jans.as.model.util.StringUtils;
 import io.jans.as.model.util.Util;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.util.List;
 
 /**
  * @author Javier Rojas Blum
- * @version February 12, 2019
+ * @version September 30, 2021
  */
-public class JSONWebKey implements Comparable<JSONWebKey> {
+public class JSONWebKey {
 
     private String kid;
     private KeyType kty;
@@ -203,15 +208,74 @@ public class JSONWebKey implements Comparable<JSONWebKey> {
         this.y = y;
     }
 
+    /**
+     * Steps:
+     * <p>
+     * 1. Construct a JSON object containing only the required members of a JWK representing the key and with no
+     * whitespace or line breaks before or after any syntactic elements and with the required members ordered
+     * lexicographically by the Unicode points of the member names. (This JSON object is itself a legal JWK
+     * representation of the key.
+     * <p>
+     * 2. Hash the octets of the UTF-8 representation of this JSON object with a cryptographic hash function SHA-256.
+     * <p>
+     * 3. Encode the JKW SHA-256 Thumbprint with base64url encoding.
+     *
+     * @return The thumbprint of a JSON Web Key (JWK)
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc7638">JSON Web Key (JWK) Thumbprint</a>
+     */
+    public String getJwkThumbprint() throws NoSuchAlgorithmException, NoSuchProviderException, JWKException {
+        String result;
+
+        if (kty == null) throw new JWKException("The kty param is required");
+
+        if (kty == KeyType.RSA) {
+            if (e == null) throw new JWKException("The e param is required");
+            if (n == null) throw new JWKException("The n param is required");
+
+            String jwkStr = new StringBuilder()
+                    .append("{")
+                    .append("\"e\":").append("\"").append(e).append("\",")
+                    .append("\"kty\":").append("\"").append(kty).append("\",")
+                    .append("\"n\":").append("\"").append(n).append("\"")
+                    .append("}")
+                    .toString();
+
+            byte[] hash = JwtUtil.getMessageDigestSHA256(jwkStr);
+            result = Base64Util.base64urlencode(hash);
+        } else if (kty == KeyType.EC) {
+            if (crv == null) throw new JWKException("The crv is required");
+            if (x == null) throw new JWKException("The x is required");
+            if (y == null) throw new JWKException("The y is required");
+
+            String jwkStr = new StringBuilder()
+                    .append("{")
+                    .append("\"crv\":").append("\"").append(crv).append("\",")
+                    .append("\"kty\":").append("\"").append(kty).append("\",")
+                    .append("\"x\":").append("\"").append(x).append("\",")
+                    .append("\"y\":").append("\"").append(y).append("\"")
+                    .append("}")
+                    .toString();
+
+            byte[] hash = JwtUtil.getMessageDigestSHA256(jwkStr);
+            result = Base64Util.base64urlencode(hash);
+        } else throw new JWKException("Thumbprint not supported for the kty");
+
+        return result;
+    }
+
     public JSONObject toJSONObject() throws JSONException {
         JSONObject jsonObj = new JSONObject();
 
         jsonObj.put(JWKParameter.KEY_ID, kid);
         jsonObj.put(JWKParameter.KEY_TYPE, kty);
-        jsonObj.put(JWKParameter.KEY_USE, use != null ? use.getParamName() : "");
+        if (use != null) {
+            jsonObj.put(JWKParameter.KEY_USE, use.getParamName());
+        }
         jsonObj.put(JWKParameter.ALGORITHM, alg);
         jsonObj.put(JWKParameter.EXPIRATION_TIME, exp);
-        jsonObj.put(JWKParameter.CURVE, crv != null ? crv.getName() : "");
+        if (crv != null) {
+            jsonObj.put(JWKParameter.CURVE, crv.getName());
+        }
         if (!Util.isNullOrEmpty(n)) {
             jsonObj.put(JWKParameter.MODULUS, n);
         }
@@ -229,15 +293,6 @@ public class JSONWebKey implements Comparable<JSONWebKey> {
         }
 
         return jsonObj;
-    }
-
-    @Override
-    public int compareTo(JSONWebKey o) {
-        if (this.getExp() == null || o.getExp() == null) {
-            return 0;
-        }
-
-        return getExp().compareTo(o.getExp());
     }
 
     public static JSONWebKey fromJSONObject(JSONObject jwkJSONObject) throws JSONException {

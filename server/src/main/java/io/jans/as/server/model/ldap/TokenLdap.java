@@ -7,12 +7,7 @@
 package io.jans.as.server.model.ldap;
 
 import io.jans.as.model.common.GrantType;
-import io.jans.orm.annotation.AttributeName;
-import io.jans.orm.annotation.DN;
-import io.jans.orm.annotation.DataEntry;
-import io.jans.orm.annotation.Expiration;
-import io.jans.orm.annotation.JsonObject;
-import io.jans.orm.annotation.ObjectClass;
+import io.jans.orm.annotation.*;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.Serializable;
@@ -21,7 +16,7 @@ import java.util.Date;
 /**
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version September 6, 2017
+ * @version September 30, 2021
  */
 
 @DataEntry
@@ -78,6 +73,9 @@ public class TokenLdap implements Serializable {
     @AttributeName(name = "attr")
     @JsonObject
     private TokenAttributes attributes;
+
+    @AttributeName(name = "dpop")
+    private String dpop;
 
     public TokenLdap() {
     }
@@ -281,6 +279,14 @@ public class TokenLdap implements Serializable {
 
     public boolean isImplicitFlow() {
         return StringUtils.isBlank(grantType) || grantType.equals(GrantType.IMPLICIT.getValue());
+    }
+
+    public String getDpop() {
+        return dpop;
+    }
+
+    public void setDpop(String dpop) {
+        this.dpop = dpop;
     }
 
     @Override
