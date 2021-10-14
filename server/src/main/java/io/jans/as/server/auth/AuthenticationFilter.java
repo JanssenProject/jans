@@ -521,11 +521,7 @@ public class AuthenticationFilter implements Filter {
 
             JSONWebKey jwk = JSONWebKey.fromJSONObject(dpop.getHeader().getJwk());
             String dpopJwkThumbprint = jwk.getJwkThumbprint();
-            if (validateDpopSignature(dpop, jwk, dpopJwkThumbprint)) {
-                validDPoPProof = true;
-            } else {
-                validDPoPProof = false;
-            }
+            validDPoPProof = validateDpopSignature(dpop, jwk, dpopJwkThumbprint);
 
             if (grantType == GrantType.AUTHORIZATION_CODE) {
                 final String code = servletRequest.getParameter("code");
@@ -585,7 +581,7 @@ public class AuthenticationFilter implements Filter {
         jwks.getKeys().add(jwk);
         if (!cryptoProvider.verifySignature(dpop.getSigningInput(),
                 dpop.getEncodedSignature(), null, jwks.toJSONObject(), null, dpop.getHeader().getSignatureAlgorithm())) {
-            throw new InvalidJwtException("Invalid DPoP Proof signature.");
+            return false;
         }
 
         return true;
