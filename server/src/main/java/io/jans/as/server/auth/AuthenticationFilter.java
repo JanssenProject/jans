@@ -580,15 +580,13 @@ public class AuthenticationFilter implements Filter {
         JSONWebKeySet jwks = new JSONWebKeySet();
         jwks.getKeys().add(jwk);
 
-        boolean isValid = cryptoProvider.verifySignature(
+        return cryptoProvider.verifySignature(
                 dpop.getSigningInput(),
                 dpop.getEncodedSignature(),
                 null,
                 jwks.toJSONObject(),
                 null,
                 dpop.getHeader().getSignatureAlgorithm());
-
-        return isValid;
     }
 
     private void validateDpopPayload(Jwt dpop) throws InvalidJwtException {
