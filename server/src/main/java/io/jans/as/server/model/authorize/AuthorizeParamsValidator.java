@@ -39,11 +39,9 @@ public class AuthorizeParamsValidator {
     public static boolean validateParams(List<ResponseType> responseTypes, List<Prompt> prompts, String nonce,
                                          boolean fapiCompatibility, ResponseMode responseMode) {
         if (fapiCompatibility) {
-            if (responseTypes.size() == 1 && responseTypes.contains(ResponseType.CODE)) {
-                // The authorization server shall require the response_type value code in conjunction with the response_mode value jwt
-                if (responseMode != ResponseMode.JWT) {
-                    return false;
-                }
+            // The authorization server shall require the response_type value code in conjunction with the response_mode value jwt
+            if (responseTypes.size() == 1 && responseTypes.contains(ResponseType.CODE) && responseMode != ResponseMode.JWT) {
+                return false;
             }
             if (responseMode == ResponseMode.QUERY) {
                 log.trace("ResponseMode=query is not allowed for FAPI.");
@@ -54,9 +52,9 @@ public class AuthorizeParamsValidator {
         boolean existsNonce = StringUtils.isNotBlank(nonce);
 
         if (!existsNonce && ((responseTypes.contains(ResponseType.CODE) && responseTypes.contains(ResponseType.ID_TOKEN))
-            || (responseTypes.contains(ResponseType.ID_TOKEN) && responseTypes.size() == 1)
-            || (responseTypes.contains(ResponseType.ID_TOKEN) && responseTypes.contains(ResponseType.TOKEN))
-            || (responseTypes.contains(ResponseType.TOKEN) && responseTypes.size() == 1))) {
+                || (responseTypes.contains(ResponseType.ID_TOKEN) && responseTypes.size() == 1)
+                || (responseTypes.contains(ResponseType.ID_TOKEN) && responseTypes.contains(ResponseType.TOKEN))
+                || (responseTypes.contains(ResponseType.TOKEN) && responseTypes.size() == 1))) {
             return false;
         }
 

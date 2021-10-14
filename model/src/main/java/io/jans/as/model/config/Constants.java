@@ -49,6 +49,8 @@ public class Constants {
     public static final String X_CLIENTCERT = "X-ClientCert";
     public static final String WWW_AUTHENTICATE = "WWW-Authenticate";
 
+    public static final String CONTENT_TYPE_APPLICATION_JSON_UTF_8 = "application/json;charset=UTF-8";
+
     public static final String AUTHORIZATION = "Authorization";
     public static final String AUTHORIZATION_BEARER = "Authorization: Bearer ";
     public static final String AUTHORIZATION_BASIC = "Authorization: Basic ";

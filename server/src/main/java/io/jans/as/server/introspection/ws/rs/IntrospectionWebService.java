@@ -37,14 +37,7 @@ import org.slf4j.Logger;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -52,13 +45,14 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.Iterator;
 
 import static org.apache.commons.lang.BooleanUtils.isTrue;
 
 /**
  * @author Yuriy Zabrovarnyy
- * @version June 30, 2018
+ * @version September 30, 2021
  */
 @Path("/introspection")
 public class IntrospectionWebService {
@@ -175,6 +169,14 @@ public class IntrospectionWebService {
                 if (tokenToIntrospect instanceof AccessToken) {
                     AccessToken accessToken = (AccessToken) tokenToIntrospect;
                     response.setTokenType(accessToken.getTokenType() != null ? accessToken.getTokenType().getName() : io.jans.as.model.common.TokenType.BEARER.getName());
+
+                    // DPoP
+                    if (StringUtils.isNotBlank(accessToken.getDpop())) {
+                        response.setNotBefore(accessToken.getCreationDate().getTime());
+                        HashMap<String, String> cnf = new HashMap<>();
+                        cnf.put("jkt", accessToken.getDpop());
+                        response.setCnf(cnf);
+                    }
                 }
             } else {
                 log.debug("Failed to find grant for access_token: " + p_token + ". Return 200 with active=false.");
@@ -191,9 +193,9 @@ public class IntrospectionWebService {
             }
 
             // Make scopes conform as required by spec, see #1499
-            if (response.getScope()!= null && !appConfiguration.getIntrospectionResponseScopesBackwardCompatibility()) {
-            	String scopes = StringUtils.join(response.getScope().toArray(), " ");
-            	responseAsJsonObject.put("scope", scopes);
+            if (response.getScope() != null && !appConfiguration.getIntrospectionResponseScopesBackwardCompatibility()) {
+                String scopes = StringUtils.join(response.getScope().toArray(), " ");
+                responseAsJsonObject.put("scope", scopes);
             }
             if (Boolean.TRUE.toString().equalsIgnoreCase(responseAsJwt)) {
                 return Response.status(Response.Status.OK).entity(createResponseAsJwt(responseAsJsonObject, grantOfIntrospectionToken)).build();
@@ -264,7 +266,7 @@ public class IntrospectionWebService {
             return new Pair<>(grant, false);
         }
         if (tokenService.isBasicAuthToken(authorization)) {
-            
+
             String encodedCredentials = tokenService.getBasicToken(authorization);
 
             String token = new String(Base64.decodeBase64(encodedCredentials), StandardCharsets.UTF_8);

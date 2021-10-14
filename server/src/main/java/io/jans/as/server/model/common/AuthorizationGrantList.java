@@ -6,18 +6,6 @@
 
 package io.jans.as.server.model.common;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-
-import javax.enterprise.context.Dependent;
-import javax.enterprise.inject.Instance;
-import javax.inject.Inject;
-
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.common.UserService;
@@ -33,14 +21,25 @@ import io.jans.as.server.service.MetricService;
 import io.jans.as.server.util.TokenHashUtil;
 import io.jans.model.metric.MetricType;
 import io.jans.service.CacheService;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
 
+import javax.enterprise.context.Dependent;
+import javax.enterprise.inject.Instance;
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+
+import static io.jans.as.model.util.Util.escapeLog;
 import static org.apache.commons.lang.BooleanUtils.isFalse;
 
 /**
  * Component to hold in memory authorization grant objects.
  *
  * @author Javier Rojas Blum
- * @version February 25, 2020
+ * @version October 12, 2021
  */
 @Dependent
 public class AuthorizationGrantList implements IAuthorizationGrantList {
@@ -69,8 +68,8 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
     @Inject
     private AbstractCryptoProvider cryptoProvider;
 
-	@Inject
-	private MetricService metricService;
+    @Inject
+    private MetricService metricService;
 
     @Override
     public void removeAuthorizationGrants(List<AuthorizationGrant> authorizationGrants) {
@@ -96,8 +95,11 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
 
         CacheGrant memcachedGrant = new CacheGrant(grant, appConfiguration);
         cacheService.put(grant.getAuthorizationCode().getExpiresIn(), memcachedGrant.cacheKey(), memcachedGrant);
-        log.trace("Put authorization grant in cache, code: " + grant.getAuthorizationCode().getCode() + ", clientId: " + grant.getClientId());
-        
+
+        final String escapedCode = escapeLog(grant.getAuthorizationCode().getCode());
+        final String escapedClientId = escapeLog(grant.getClientId());
+        log.trace("Put authorization grant in cache, code: {}, clientId: {}", escapedCode, escapedClientId);
+
         metricService.incCounter(MetricType.TOKEN_AUTHORIZATION_CODE_COUNT);
         return grant;
     }
@@ -133,7 +135,11 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
 
         CacheGrant memcachedGrant = new CacheGrant(grant, appConfiguration);
         cacheService.put(request.getExpiresIn(), memcachedGrant.getAuthReqId(), memcachedGrant);
-        log.trace("Ciba grant saved in cache, authReqId: {}, grantId: {}", grant.getAuthReqId(), grant.getGrantId());
+
+        final String escapedAuthReqId = escapeLog(grant.getAuthReqId());
+        final String escapedGrantId = escapeLog(grant.getGrantId());
+        log.trace("Ciba grant saved in cache, authReqId: {}, grantId: {}", escapedAuthReqId, escapedGrantId);
+
         return grant;
     }
 
@@ -143,7 +149,9 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
         if (cachedGrant == null) {
             // retry one time : sometimes during high load cache client may be not fast enough
             cachedGrant = cacheService.get(authReqId);
-            log.trace("Failed to fetch CIBA grant from cache, authReqId: {}", authReqId);
+
+            final String escapedAuthReqId = escapeLog(authReqId);
+            log.trace("Failed to fetch CIBA grant from cache, authReqId: {}", escapedAuthReqId);
         }
         return cachedGrant instanceof CacheGrant ? ((CacheGrant) cachedGrant).asCibaGrant(grantInstance) : null;
     }
@@ -155,7 +163,10 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
 
         CacheGrant memcachedGrant = new CacheGrant(grant, appConfiguration);
         cacheService.put(data.getExpiresIn(), memcachedGrant.getDeviceCode(), memcachedGrant);
-        log.trace("Device code grant saved in cache, deviceCode: {}, grantId: {}", grant.getDeviceCode(), grant.getGrantId());
+
+        final String escapedDeviceCode = escapeLog(grant.getDeviceCode());
+        final String escapedGrantId = escapeLog(grant.getGrantId());
+        log.trace("Device code grant saved in cache, deviceCode: {}, grantId: {}", escapedDeviceCode, escapedGrantId);
         return grant;
     }
 
@@ -165,7 +176,9 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
         if (cachedGrant == null) {
             // retry one time : sometimes during high load cache client may be not fast enough
             cachedGrant = cacheService.get(deviceCode);
-            log.trace("Failed to fetch Device code grant from cache, deviceCode: {}", deviceCode);
+
+            final String escapedDeviceCode = escapeLog(deviceCode);
+            log.trace("Failed to fetch Device code grant from cache, deviceCode: {}", escapedDeviceCode);
         }
         return cachedGrant instanceof CacheGrant ? ((CacheGrant) cachedGrant).asDeviceCodeGrant(grantInstance) : null;
     }
@@ -176,7 +189,9 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
         if (cachedGrant == null) {
             // retry one time : sometimes during high load cache client may be not fast enough
             cachedGrant = cacheService.get(CacheGrant.cacheKey(authorizationCode, null));
-            log.trace("Failed to fetch authorization grant from cache, code: {}", authorizationCode);
+
+            final String escapedAuthorizationCode = escapeLog(authorizationCode);
+            log.trace("Failed to fetch authorization grant from cache, code: {}", escapedAuthorizationCode);
         }
         return cachedGrant instanceof CacheGrant ? ((CacheGrant) cachedGrant).asCodeGrant(grantInstance) : null;
     }
@@ -332,11 +347,12 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
                             break;
                         case REFRESH_TOKEN:
                             final RefreshToken refreshToken = new RefreshToken(tokenLdap.getTokenCode(), tokenLdap.getCreationDate(), tokenLdap.getExpirationDate());
-                            result.setRefreshTokens(Arrays.asList(refreshToken));
+                            result.setRefreshTokens(Collections.singletonList(refreshToken));
                             break;
                         case ACCESS_TOKEN:
                             final AccessToken accessToken = new AccessToken(tokenLdap.getTokenCode(), tokenLdap.getCreationDate(), tokenLdap.getExpirationDate());
-                            result.setAccessTokens(Arrays.asList(accessToken));
+                            accessToken.setDpop(tokenLdap.getDpop());
+                            result.setAccessTokens(Collections.singletonList(accessToken));
                             break;
                         case ID_TOKEN:
                             final IdToken idToken = new IdToken(tokenLdap.getTokenCode(), tokenLdap.getCreationDate(), tokenLdap.getExpirationDate());

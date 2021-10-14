@@ -7,51 +7,31 @@
 package io.jans.as.server.token.ws.rs;
 
 import com.google.common.base.Strings;
+import com.nimbusds.jose.jwk.JWKException;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.AttributeService;
 import io.jans.as.model.authorize.CodeVerifier;
-import io.jans.as.model.common.BackchannelTokenDeliveryMode;
-import io.jans.as.model.common.ComponentType;
-import io.jans.as.model.common.GrantType;
-import io.jans.as.model.common.ScopeConstants;
-import io.jans.as.model.common.TokenType;
+import io.jans.as.model.common.*;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.binding.TokenBindingMessage;
 import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.as.model.exception.InvalidJwtException;
+import io.jans.as.model.jwk.JSONWebKey;
+import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.token.JsonWebResponse;
 import io.jans.as.model.token.TokenErrorResponseType;
+import io.jans.as.model.token.TokenRequestParam;
 import io.jans.as.server.audit.ApplicationAuditLogger;
 import io.jans.as.server.model.audit.Action;
 import io.jans.as.server.model.audit.OAuth2AuditLog;
-import io.jans.as.server.model.common.AbstractAuthorizationGrant;
-import io.jans.as.server.model.common.AccessToken;
-import io.jans.as.server.model.common.AuthorizationCodeGrant;
-import io.jans.as.server.model.common.AuthorizationGrant;
-import io.jans.as.server.model.common.AuthorizationGrantList;
-import io.jans.as.server.model.common.CIBAGrant;
-import io.jans.as.server.model.common.CibaRequestCacheControl;
-import io.jans.as.server.model.common.CibaRequestStatus;
-import io.jans.as.server.model.common.ClientCredentialsGrant;
-import io.jans.as.server.model.common.DeviceAuthorizationCacheControl;
-import io.jans.as.server.model.common.DeviceAuthorizationStatus;
-import io.jans.as.server.model.common.DeviceCodeGrant;
-import io.jans.as.server.model.common.ExecutionContext;
-import io.jans.as.server.model.common.IdToken;
-import io.jans.as.server.model.common.RefreshToken;
-import io.jans.as.server.model.common.ResourceOwnerPasswordCredentialsGrant;
-import io.jans.as.server.model.common.SessionId;
+import io.jans.as.server.model.common.*;
 import io.jans.as.server.model.config.Constants;
 import io.jans.as.server.model.session.SessionClient;
 import io.jans.as.server.model.token.JwrService;
 import io.jans.as.server.model.token.TokenParamsValidator;
 import io.jans.as.server.security.Identity;
-import io.jans.as.server.service.AuthenticationFilterService;
-import io.jans.as.server.service.AuthenticationService;
-import io.jans.as.server.service.DeviceAuthorizationService;
-import io.jans.as.server.service.GrantService;
-import io.jans.as.server.service.SessionIdService;
-import io.jans.as.server.service.UserService;
+import io.jans.as.server.service.*;
 import io.jans.as.server.service.ciba.CibaRequestService;
 import io.jans.as.server.service.external.ExternalResourceOwnerPasswordCredentialsService;
 import io.jans.as.server.service.external.ExternalUpdateTokenService;
@@ -78,13 +58,13 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.SecurityContext;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.function.Function;
 
-import static io.jans.as.model.config.Constants.OPENID;
-import static io.jans.as.model.config.Constants.X_CLIENTCERT;
-import static io.jans.as.model.config.Constants.REASON_CLIENT_NOT_AUTHORIZED;
+import static io.jans.as.model.config.Constants.*;
 import static org.apache.commons.lang.BooleanUtils.isFalse;
 import static org.apache.commons.lang.BooleanUtils.isTrue;
 
@@ -93,7 +73,7 @@ import static org.apache.commons.lang.BooleanUtils.isTrue;
  *
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version May 5, 2020
+ * @version October 5, 2021
  */
 @Path("/")
 public class TokenRestWebServiceImpl implements TokenRestWebService {
@@ -145,7 +125,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
     @Inject
     private DeviceAuthorizationService deviceAuthorizationService;
-    
+
     @Inject
     private ExternalUpdateTokenService externalUpdateTokenService;
 
@@ -177,6 +157,13 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
         scope = ServerUtil.urlDecode(scope); // it may be encoded in uma case
         ResponseBuilder builder = Response.ok();
+
+        String dpopStr;
+        try {
+            dpopStr = runDPoP(request);
+        } catch (InvalidJwtException | JWKException | NoSuchAlgorithmException | NoSuchProviderException e) {
+            return response(error(400, TokenErrorResponseType.INVALID_DPOP_PROOF, e.getMessage()), oAuth2AuditLog);
+        }
 
         try {
             log.debug("Starting to validate request parameters");
@@ -239,11 +226,11 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                 authorizationCodeGrant.setIsCachedWithNoPersistence(false);
                 authorizationCodeGrant.save();
 
-                RefreshToken reToken = createRefreshToken(request, client, scope, authorizationCodeGrant);
+                RefreshToken reToken = createRefreshToken(request, client, scope, authorizationCodeGrant, dpopStr);
 
                 scope = authorizationCodeGrant.checkScopesPolicy(scope);
 
-                AccessToken accToken = authorizationCodeGrant.createAccessToken(request.getHeader(X_CLIENTCERT), new ExecutionContext(request, response)); // create token after scopes are checked
+                AccessToken accToken = authorizationCodeGrant.createAccessToken(dpopStr, request.getHeader(X_CLIENTCERT), new ExecutionContext(request, response)); // create token after scopes are checked
 
                 IdToken idToken = null;
                 if (authorizationCodeGrant.getScopes().contains(OPENID)) {
@@ -257,7 +244,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         }
                         return null;
                     };
-                    
+
                     ExternalUpdateTokenContext context = new ExternalUpdateTokenContext(request, authorizationCodeGrant, client, appConfiguration, attributeService);
                     Function<JsonWebResponse, Void> postProcessor = externalUpdateTokenService.buildModifyIdTokenProcessor(context);
 
@@ -298,16 +285,16 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                 RefreshToken reToken = null;
                 if (isFalse(appConfiguration.getSkipRefreshTokenDuringRefreshing())) {
                     if (isTrue(appConfiguration.getRefreshTokenExtendLifetimeOnRotation())) {
-                        reToken = createRefreshToken(request, client, scope, authorizationGrant); // extend lifetime
+                        reToken = createRefreshToken(request, client, scope, authorizationGrant, dpopStr); // extend lifetime
                     } else {
                         log.trace("Create refresh token with fixed (not extended) lifetime taken from previous refresh token.");
-                        reToken = authorizationGrant.createRefreshToken(refreshTokenObject.getExpirationDate()); // do not extend lifetime
+                        reToken = authorizationGrant.createRefreshToken(dpopStr, refreshTokenObject.getExpirationDate()); // do not extend lifetime
                     }
                 }
 
                 scope = authorizationGrant.checkScopesPolicy(scope);
 
-                AccessToken accToken = authorizationGrant.createAccessToken(request.getHeader(X_CLIENTCERT), new ExecutionContext(request, response)); // create token after scopes are checked
+                AccessToken accToken = authorizationGrant.createAccessToken(dpopStr, request.getHeader(X_CLIENTCERT), new ExecutionContext(request, response)); // create token after scopes are checked
 
                 IdToken idToken = null;
                 if (isTrue(appConfiguration.getOpenidScopeBackwardCompatibility()) && authorizationGrant.getScopes().contains(OPENID)) {
@@ -342,7 +329,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
                 scope = clientCredentialsGrant.checkScopesPolicy(scope);
 
-                AccessToken accessToken = clientCredentialsGrant.createAccessToken(request.getHeader(X_CLIENTCERT), new ExecutionContext(request, response)); // create token after scopes are checked
+                AccessToken accessToken = clientCredentialsGrant.createAccessToken(null, request.getHeader(X_CLIENTCERT), new ExecutionContext(request, response)); // create token after scopes are checked
 
                 IdToken idToken = null;
                 if (isTrue(appConfiguration.getOpenidScopeBackwardCompatibility()) && clientCredentialsGrant.getScopes().contains(OPENID)) {
@@ -416,11 +403,11 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                     }
 
 
-                    RefreshToken reToken = createRefreshToken(request, client, scope, resourceOwnerPasswordCredentialsGrant);
+                    RefreshToken reToken = createRefreshToken(request, client, scope, resourceOwnerPasswordCredentialsGrant, null);
 
                     scope = resourceOwnerPasswordCredentialsGrant.checkScopesPolicy(scope);
 
-                    AccessToken accessToken = resourceOwnerPasswordCredentialsGrant.createAccessToken(request.getHeader(X_CLIENTCERT), new ExecutionContext(request, response)); // create token after scopes are checked
+                    AccessToken accessToken = resourceOwnerPasswordCredentialsGrant.createAccessToken(null, request.getHeader(X_CLIENTCERT), new ExecutionContext(request, response)); // create token after scopes are checked
 
                     IdToken idToken = null;
                     if (isTrue(appConfiguration.getOpenidScopeBackwardCompatibility()) && resourceOwnerPasswordCredentialsGrant.getScopes().contains("openid")) {
@@ -466,8 +453,8 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                     if (cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.PING ||
                             cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.POLL) {
                         if (!cibaGrant.isTokensDelivered()) {
-                            RefreshToken refToken = createRefreshToken(request, client, scope, cibaGrant);
-                            AccessToken accessToken = cibaGrant.createAccessToken(request.getHeader(X_CLIENTCERT), new ExecutionContext(request, response));
+                            RefreshToken refToken = createRefreshToken(request, client, scope, cibaGrant, null);
+                            AccessToken accessToken = cibaGrant.createAccessToken(null, request.getHeader(X_CLIENTCERT), new ExecutionContext(request, response));
 
                             ExternalUpdateTokenContext context = new ExternalUpdateTokenContext(request, cibaGrant, client, appConfiguration, attributeService);
                             Function<JsonWebResponse, Void> postProcessor = externalUpdateTokenService.buildModifyIdTokenProcessor(context);
@@ -554,7 +541,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
     }
 
     @Nullable
-    private RefreshToken createRefreshToken(@NotNull HttpServletRequest request, @NotNull Client client, @NotNull String scope, @NotNull AbstractAuthorizationGrant grant) {
+    private RefreshToken createRefreshToken(@NotNull HttpServletRequest request, @NotNull Client client, @NotNull String scope, @NotNull AbstractAuthorizationGrant grant, String dpop) {
         if (!isRefreshTokenAllowed(client, scope, grant)) {
             return null;
         }
@@ -562,19 +549,20 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         final ExternalUpdateTokenContext context = new ExternalUpdateTokenContext(request, grant, client, appConfiguration, attributeService);
         final int refreshTokenLifetimeInSeconds = externalUpdateTokenService.getRefreshTokenLifetimeInSeconds(context);
         if (refreshTokenLifetimeInSeconds > 0) {
-            return grant.createRefreshToken(refreshTokenLifetimeInSeconds);
+            return grant.createRefreshToken(dpop, refreshTokenLifetimeInSeconds);
         }
-        return grant.createRefreshToken();
+        return grant.createRefreshToken(dpop);
     }
 
     /**
      * Processes token request for device code grant type.
-     * @param grantType Grant type used, should be device code.
-     * @param client Client in process.
-     * @param deviceCode Device code generated in device authn request.
-     * @param scope Scope registered in device authn request.
-     * @param request HttpServletRequest
-     * @param response HttpServletResponse
+     *
+     * @param grantType      Grant type used, should be device code.
+     * @param client         Client in process.
+     * @param deviceCode     Device code generated in device authn request.
+     * @param scope          Scope registered in device authn request.
+     * @param request        HttpServletRequest
+     * @param response       HttpServletResponse
      * @param oAuth2AuditLog OAuth2AuditLog
      */
     private Response processDeviceCodeGrantType(final GrantType grantType, final Client client, final String deviceCode,
@@ -593,8 +581,8 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
             if (!deviceCodeGrant.getClientId().equals(client.getClientId())) {
                 throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_GRANT, REASON_CLIENT_NOT_AUTHORIZED), oAuth2AuditLog));
             }
-            RefreshToken refToken = createRefreshToken(request, client, scope, deviceCodeGrant);
-            AccessToken accessToken = deviceCodeGrant.createAccessToken(request.getHeader(X_CLIENTCERT), new ExecutionContext(request, response));
+            RefreshToken refToken = createRefreshToken(request, client, scope, deviceCodeGrant, null);
+            AccessToken accessToken = deviceCodeGrant.createAccessToken(null, request.getHeader(X_CLIENTCERT), new ExecutionContext(request, response));
 
             ExternalUpdateTokenContext context = new ExternalUpdateTokenContext(request, deviceCodeGrant, client, appConfiguration, attributeService);
             Function<JsonWebResponse, Void> postProcessor = externalUpdateTokenService.buildModifyIdTokenProcessor(context);
@@ -684,6 +672,21 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
     private ResponseBuilder error(int status, TokenErrorResponseType type, String reason) {
         return Response.status(status).type(MediaType.APPLICATION_JSON_TYPE).entity(errorResponseFactory.errorAsJson(type, reason));
+    }
+
+    private String runDPoP(HttpServletRequest httpRequest) throws InvalidJwtException, JWKException, NoSuchAlgorithmException, NoSuchProviderException {
+        String dpopStr = httpRequest.getHeader(TokenRequestParam.DPOP);
+        if (StringUtils.isBlank(dpopStr)) return null;
+
+        Jwt dpop = Jwt.parseOrThrow(dpopStr);
+
+        JSONWebKey jwk = JSONWebKey.fromJSONObject(dpop.getHeader().getJwk());
+        String dpopJwkThumbprint = jwk.getJwkThumbprint();
+
+        if (dpopJwkThumbprint == null)
+            throw new InvalidJwtException("Invalid DPoP Proof Header. The jwk header is not valid.");
+
+        return dpopJwkThumbprint;
     }
 
     /**
