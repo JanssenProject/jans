@@ -12,7 +12,6 @@ import io.jans.as.model.util.Base64Util;
 import io.jans.as.model.util.JwtUtil;
 import io.jans.as.model.util.StringUtils;
 import io.jans.as.model.util.Util;
-import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -24,7 +23,7 @@ import java.util.List;
  * @author Javier Rojas Blum
  * @version September 30, 2021
  */
-public class JSONWebKey implements Comparable<JSONWebKey> {
+public class JSONWebKey {
 
     private String kid;
     private KeyType kty;
@@ -294,15 +293,6 @@ public class JSONWebKey implements Comparable<JSONWebKey> {
         }
 
         return jsonObj;
-    }
-
-    @Override
-    public int compareTo(@NotNull JSONWebKey o) {
-        if (this.getExp() == null || o.getExp() == null) {
-            return 0;
-        }
-
-        return getExp().compareTo(o.getExp());
     }
 
     public static JSONWebKey fromJSONObject(JSONObject jwkJSONObject) throws JSONException {
