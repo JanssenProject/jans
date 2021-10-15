@@ -11,7 +11,7 @@ from io.jans.as.server.model.common import AuthorizationGrantList
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.as.server.service import GrantService
 from io.jans.as.model.common import TokenType
-from io.jans.as.server.model.ldap import TokenLdap
+from io.jans.as.server.model.ldap import TokenEntity
 from io.jans.as.server.service import SessionIdService
 
 class Introspection(IntrospectionType):
