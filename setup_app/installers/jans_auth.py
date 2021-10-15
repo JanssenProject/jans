@@ -39,6 +39,9 @@ class JansAuthInstaller(JettyInstaller):
         self.ldif_people = os.path.join(self.output_folder, 'people.ldif')
         self.ldif_groups = os.path.join(self.output_folder, 'groups.ldif')
 
+        if Config.profile == 'openbanking':
+            Config.jwksUri = base.argsp.jwks_uri
+
     def install(self):
         self.logIt("Copying auth.war into jetty webapps folder...")
 
@@ -137,7 +140,7 @@ class JansAuthInstaller(JettyInstaller):
         o = urlparse(jwksUri)
         jwks_addr = o.netloc
         ssl_cmd = shutil.which('openssl')
-        random_crt_fn = os.path.join(output_folder, '{}.crt'.format(os.urandom(3).hex()))
+        random_crt_fn = os.path.join(self.output_folder, '{}.crt'.format(os.urandom(3).hex()))
         cmd = "echo -n | {} s_client -connect {}:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > {}".format(ssl_cmd, jwks_addr, random_crt_fn)
         self.run(cmd, shell=True)
         alias = jwks_addr.replace('.', '_')

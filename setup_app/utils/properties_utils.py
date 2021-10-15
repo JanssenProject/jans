@@ -71,7 +71,6 @@ class PropertiesUtils(SetupUtils):
             return None
 
     def check_properties(self):
-        print("Checking Properties")
         self.logIt('Checking properties')
         while not Config.hostname:
             testhost = input('Hostname of this server: ').strip()

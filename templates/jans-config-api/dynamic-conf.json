@@ -11,7 +11,15 @@
   "authOpenidTokenUrl": "${tokenEndpoint}",
   "authOpenidRevokeUrl": "${tokenRevocationEndpoint}",
   "smallryeHealthRootPath": "/health-check",
-  "exclusiveAuthScopes": ["jans_stat"],
+  "disableJdkLogger":true,
+  "loggingLevel":"INFO",
+  "loggingLayout":"text",
+  "externalLoggerConfiguration":"",
+  "exclusiveAuthScopes": [
+    "jans_stat",
+    "https://jans.io/scim/users.read",
+    "https://jans.io/scim/users.write"
+  ],
   "corsConfigurationFilters": [
     {
       "filterName": "CorsFilter",

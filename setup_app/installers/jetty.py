@@ -130,6 +130,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         jettyServiceBase = '%s/%s' % (self.jetty_base, serviceName)
         jettyModules = serviceConfiguration['jetty']['modules']
         jettyModulesList = jettyModules.split(',')
+        self.web_app_xml_fn = os.path.join(self.jetty_base, serviceName, 'webapps', serviceName+'.xml')
 
         jettyModulesList = [m.strip() for m in jettyModules.split(',')]
         if self.jetty_dist_string == 'jetty-home':
@@ -224,6 +225,9 @@ class JettyInstaller(BaseInstaller, SetupUtils):
             if not os.path.exists(run_dir):
                 self.run([paths.cmd_mkdir, '-p', run_dir])
 
+        self.write_webapps_xml()
+
+
     def set_jetty_param(self, jettyServiceName, jetty_param, jetty_val, inifile='start.ini'):
 
         self.logIt("Seeting jetty parameter {0}={1} for service {2}".format(jetty_param, jetty_val, jettyServiceName))
@@ -297,17 +301,18 @@ class JettyInstaller(BaseInstaller, SetupUtils):
 
         return retVal
 
+
     def write_webapps_xml(self, jans_app_path=None, jans_apps=None):
         if not jans_app_path:
             jans_app_path = '/'+self.service_name
         if not jans_apps:
             jans_apps = self.service_name+'.war'
 
-        web_apps_xml_fn = os.path.join(Config.templateFolder, 'jans-app.xml')
+        web_apps_xml_fn = os.path.join(Config.templateFolder, 'jetty/jans-app.xml')
         web_apps_xml = self.readFile(web_apps_xml_fn)
         web_apps_xml = self.fomatWithDict(web_apps_xml, {'jans_app_path': jans_app_path, 'jans_apps': jans_apps})
-        out_filename = os.path.join(self.jetty_base, self.service_name, 'webapps', self.service_name+'.xml')
-        self.writeFile(out_filename, web_apps_xml)
+
+        self.writeFile(self.web_app_xml_fn, web_apps_xml)
 
     def calculate_selected_aplications_memory(self):
         Config.pbar.progress("jans", "Calculating application memory")
@@ -356,3 +361,23 @@ class JettyInstaller(BaseInstaller, SetupUtils):
             shutil.rmtree(tmp_dir)
             os.remove(war_file)
             shutil.move(tmp_war_fn+'.zip', war_file)
+
+
+    def add_extra_class(self, class_path):
+
+        tree = ET.parse(self.web_app_xml_fn)
+        root = tree.getroot()
+
+        for app_set in root.findall("Set"):
+            if app_set.get('name') == 'extraClasspath' and app_set.text.endswith(os.path.basename(class_path)):
+                break
+        else:
+            child = ET.Element("Set")
+            child.set('name', 'extraClasspath')
+            child.text = class_path
+            root.append(child)
+
+            with open(self.web_app_xml_fn, 'wb') as f:
+                f.write(b'<?xml version="1.0"  encoding="ISO-8859-1"?>\n')
+                f.write(b'<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "http://www.eclipse.org/jetty/configure_9_0.dtd">\n')
+                f.write(ET.tostring(root, method='xml'))
