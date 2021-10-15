@@ -49,6 +49,49 @@ class ScimInstaller(JettyInstaller):
     def installed(self):
         return os.path.exists(os.path.join(Config.jetty_base, self.service_name, 'start.ini'))
 
+
+    def create_scope(self, scope, inum_base='0001.'):
+        result = self.check_scope(scope['jansId'][0])
+        if result:
+            return result
+
+        if not os.path.exists(self.output_folder):
+            os.makedirs(self.output_folder)
+
+        scope['inum'] = [inum_base + '.' + os.urandom(3).hex().upper()]
+        ldif_scope_fn = os.path.join(self.output_folder, '{}.ldif'.format(scope['inum'][0]))
+        scope_ldif_fd = open(ldif_scope_fn, 'wb')
+        scope_dn = 'inum={},ou=scopes,o=jans'.format(scope['inum'][0])
+        ldif_scopes_writer = LDIFWriter(scope_ldif_fd, cols=1000)
+        ldif_scopes_writer.unparse(scope_dn, scope)
+        scope_ldif_fd.close()
+        self.dbUtils.import_ldif([ldif_scope_fn])
+        return scope_dn
+
+
+    def create_user_scopes(self):
+        # user read
+        read_dn = self.create_scope({
+                'objectClass': ['top', 'jansScope'],
+                'jansId': ['https://jans.io/scim/users.read'],
+                'jansScopeTyp': ['oauth'],
+                'jansAttrs': ['{"spontaneousClientId":null,"spontaneousClientScopes":null,"showInConfigurationEndpoint":true}'], 
+                'description': ['Query user resources'], 
+                    'displayName': ['Scim users.read']
+                }, '1200')
+
+        # user write
+        write_dn = self.create_scope({
+                'objectClass': ['top', 'jansScope'],
+                'jansId': ['https://jans.io/scim/users.write'],
+                'jansScopeTyp': ['oauth'],
+                'jansAttrs': ['{"spontaneousClientId":null,"spontaneousClientScopes":null,"showInConfigurationEndpoint":true}'], 
+                'description': ['Modify user resources'], 
+                    'displayName': ['Scim users.write']
+                }, '1200')
+
+        return [read_dn, write_dn]
+
     def generate_configuration(self):
         self.logIt("Generating {} configuration".format(self.service_name))
         yml_str = self.readFile(os.path.join(self.source_files[1][0]))
@@ -59,10 +102,10 @@ class ScimInstaller(JettyInstaller):
         scope_ldif_fd = open(self.ldif_scopes_fn, 'wb')
         ldif_scopes_writer = LDIFWriter(scope_ldif_fd, cols=1000)
 
-        scopes_dn = []
+        scopes_dn = self.create_user_scopes()
         for scope in config_scopes:
-            #print(scopes[scope])
-
+            if scope in ('https://jans.io/scim/users.read', 'https://jans.io/scim/users.write'):
+                continue
             inum = '1200.' + os.urandom(3).hex().upper()
             scope_dn = 'inum={},ou=scopes,o=jans'.format(inum)
             scopes_dn.append(scope_dn)
@@ -119,8 +162,6 @@ class ScimInstaller(JettyInstaller):
         self.renderTemplateInOut(self.ldif_config_fn, self.templates_folder, self.output_folder)
 
         self.dbUtils.import_ldif([self.ldif_config_fn, self.ldif_scopes_fn, self.ldif_clients_fn])
-
-        self.write_webapps_xml()
 
     def update_backend(self):
         self.dbUtils.enable_service('jansScimEnabled')

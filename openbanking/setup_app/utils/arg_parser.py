@@ -11,6 +11,7 @@ def arg_parser():
     parser.add_argument('-d', help="Installation directory")
     parser.add_argument('-n', help="No interactive prompt before install starts", action='store_true')
     parser.add_argument('-N', '--no-httpd', help="No apache httpd server", action='store_true')
+    parser.add_argument('-csx', help="Collect setup properties, save and exit", action='store_true')
 
     rdbm_group = parser.add_mutually_exclusive_group()
     rdbm_group.add_argument('-remote-rdbm', choices=['mysql', 'pgsql'], help="Enables using remote RDBM server")
@@ -43,6 +44,7 @@ def arg_parser():
     parser.add_argument('-ob-cert-fn', help="Openbanking certificate filename")
     parser.add_argument('-ob-alias', help="Openbanking key alias")
     parser.add_argument('-static-kid', help="Openbanking static kid")
+    parser.add_argument('-jwks-uri', help="Openbanking jwksUri", default="https://keystore.openbankingtest.org.uk/0014H00001lFE7dQAG/axV5umCvTMBMjPwjFQgEvb.jwks")
 
     argsp = parser.parse_args()
 
