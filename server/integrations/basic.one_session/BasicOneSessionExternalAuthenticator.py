@@ -9,7 +9,7 @@ from io.jans.as.server.security import Identity
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from io.jans.as.server.service import AuthenticationService
 from io.jans.orm import PersistenceEntryManager
-from org.gluu.oxauth.model.ldap import TokenLdap
+from org.gluu.oxauth.model.ldap import TokenEntity
 from io.jans.util import StringHelper
 from javax.faces.application import FacesMessage
 from io.jans.jsf2.message import FacesMessages
@@ -103,14 +103,14 @@ class PersonAuthentication(PersonAuthenticationType):
         return True
 
     def isFirstSession(self, user_name):
-        tokenLdap = TokenLdap()
-        tokenLdap.setDn(self.staticConfiguration.getBaseDn().getClients())
-        tokenLdap.setUserId(user_name)
+        tokenEntity = TokenEntity()
+        tokenEntity.setDn(self.staticConfiguration.getBaseDn().getClients())
+        tokenEntity.setUserId(user_name)
 
-        tokenLdapList = self.entryManager.findEntries(tokenLdap, 1)
-        print "Basic (one session). isFirstSession. Get result: '%s'" % tokenLdapList
+        tokenEntityList = self.entryManager.findEntries(tokenEntity, 1)
+        print "Basic (one session). isFirstSession. Get result: '%s'" % tokenEntityList
 
-        if (tokenLdapList != None) and (tokenLdapList.size() > 0):
+        if (tokenEntityList != None) and (tokenEntityList.size() > 0):
             print "Basic (one session). isFirstSession: False"
             return False
 

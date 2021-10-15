@@ -21,7 +21,7 @@ import java.util.Date;
 
 @DataEntry
 @ObjectClass(value = "jansToken")
-public class TokenLdap implements Serializable {
+public class TokenEntity implements Serializable {
 
     @DN
     private String dn;
@@ -77,7 +77,7 @@ public class TokenLdap implements Serializable {
     @AttributeName(name = "dpop")
     private String dpop;
 
-    public TokenLdap() {
+    public TokenEntity() {
     }
 
     public TokenAttributes getAttributes() {
@@ -294,10 +294,10 @@ public class TokenLdap implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        TokenLdap tokenLdap = (TokenLdap) o;
+        TokenEntity tokenEntity = (TokenEntity) o;
 
-        if (tokenCode != null ? !tokenCode.equals(tokenLdap.tokenCode) : tokenLdap.tokenCode != null) return false;
-        return tokenType != null ? tokenType.equals(tokenLdap.tokenType) : tokenLdap.tokenType == null;
+        if (tokenCode != null ? !tokenCode.equals(tokenEntity.tokenCode) : tokenEntity.tokenCode != null) return false;
+        return tokenType != null ? tokenType.equals(tokenEntity.tokenType) : tokenEntity.tokenType == null;
     }
 
     @Override
