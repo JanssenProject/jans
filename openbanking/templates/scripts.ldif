@@ -10,7 +10,7 @@ jansModuleProperty: {"value1":"usage_type","value2":"interactive","description":
 jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
 jansProgLng: python
 jansRevision: 1
-jansScr: %(person_authentication_openbanking)s
+jansScr:: %(person_authentication_openbanking)s
 jansScrTyp: person_authentication
 objectClass: top
 objectClass: jansCustomScr
@@ -39,7 +39,7 @@ jansLevel: 100
 jansModuleProperty: {"value1":"v1","value2":"v2","description":""}
 jansProgLng: python
 jansRevision: 1
-jansScr: %(client_registration_registration)s
+jansScr:: %(client_registration_registration)s
 jansScrTyp: client_registration
 objectClass: top
 objectClass: jansCustomScr
@@ -53,7 +53,7 @@ jansLevel: 100
 jansModuleProperty: {"value1":"v1","value2":"v2","description":""}
 jansProgLng: python
 jansRevision: 1
-jansScr: %(update_token_updatetoken)s
+jansScr:: %(update_token_updatetoken)s
 jansScrTyp: update_token
 objectClass: top
 objectClass: jansCustomScr
@@ -67,7 +67,7 @@ jansLevel: 102
 jansModuleProperty: {"value1":"v1","value2":"v2","description":""}
 jansProgLng: python
 jansRevision: 1
-jansScr: %(introspection_introspectionscript)s
+jansScr:: %(introspection_introspectionscript)s
 jansScrTyp: introspection
 objectClass: top
 objectClass: jansCustomScr
