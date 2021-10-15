@@ -87,8 +87,8 @@ def download(url, target_fn):
 def download_gcs():
     if not os.path.exists(os.path.join(app_dir, 'gcs')):
         print("Downloading Spanner modules")
-        gcs_download_url = 'http://162.243.99.240/icrby8xcvbcv/spanner/gcs.tgz'
-        tmp_dir = '/tmp/' + os.urandom(5).hex()
+        gcs_download_url = 'https://ox.gluu.org/icrby8xcvbcv/spanner/gcs.tgz'
+        tmp_dir = os.path.join(app_dir, 'gcs-' + os.urandom(5).hex())
         target_fn = os.path.join(tmp_dir, 'gcs.tgz')
         download(gcs_download_url, target_fn)
         shutil.unpack_archive(target_fn, app_dir)
@@ -137,6 +137,8 @@ if not (argsp.u or argsp.uninstall):
     download('https://api.github.com/repos/JanssenProject/jans-cli/tarball/main', os.path.join(jans_app_dir, 'jans-cli.tgz'))
     download('https://github.com/sqlalchemy/sqlalchemy/archive/rel_1_3_23.zip', os.path.join(jans_app_dir, 'sqlalchemy.zip'))
     download(urljoin(maven_base_url, 'scim-plugin/{0}{1}/scim-plugin-{0}{1}-distribution.jar'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD'])), os.path.join(jans_app_dir, 'scim-plugin.jar'))
+    download('https://ox.gluu.org/icrby8xcvbcv/cli-swagger/jca.tgz', os.path.join(jans_app_dir, 'jca-swagger-client.tgz'))
+    download('https://ox.gluu.org/icrby8xcvbcv/cli-swagger/scim.tgz', os.path.join(jans_app_dir, 'scim-swagger-client.tgz'))
 
     if argsp.profile == 'jans':
         download('https://ox.gluu.org/maven/org/gluufederation/opendj/opendj-server-legacy/{0}/opendj-server-legacy-{0}.zip'.format(app_versions['OPENDJ_VERSION']), os.path.join(app_dir, 'opendj-server-legacy-{0}.zip'.format(app_versions['OPENDJ_VERSION'])))
