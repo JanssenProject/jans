@@ -74,7 +74,7 @@ public class CleanerTimer {
     private UmaResourceService umaResourceService;
 
     @Inject
-    private CacheProvider<?> cacheProvider;
+    private CacheProvider cacheProvider;
 
     @Inject
     @Named("u2fRequestService")
