@@ -18,7 +18,7 @@ import io.jans.as.server.model.common.SessionId;
 import io.jans.as.server.model.fido.u2f.DeviceRegistration;
 import io.jans.as.server.model.fido.u2f.RegisterRequestMessageLdap;
 import io.jans.as.server.model.ldap.ClientAuthorization;
-import io.jans.as.server.model.ldap.TokenLdap;
+import io.jans.as.server.model.ldap.TokenEntity;
 import io.jans.as.server.service.fido.u2f.RequestService;
 import io.jans.as.server.uma.authorization.UmaPCT;
 import io.jans.as.server.uma.service.UmaPctService;
@@ -58,8 +58,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Named
 public class CleanerTimer {
 
-    public final static int BATCH_SIZE = 1000;
-    private final static int DEFAULT_INTERVAL = 30; // 30 seconds
+    public static final int BATCH_SIZE = 1000;
+    private static final int DEFAULT_INTERVAL = 30; // 30 seconds
 
     @Inject
     private Logger log;
@@ -74,7 +74,7 @@ public class CleanerTimer {
     private UmaResourceService umaResourceService;
 
     @Inject
-    private CacheProvider cacheProvider;
+    private CacheProvider<?> cacheProvider;
 
     @Inject
     @Named("u2fRequestService")
@@ -154,28 +154,23 @@ public class CleanerTimer {
 
             final Set<String> processedBaseDns = new HashSet<>();
             for (Map.Entry<String, Class<?>> baseDn : createCleanServiceBaseDns().entrySet()) {
-                try {
-                    if (entryManager.hasExpirationSupport(baseDn.getKey())) {
-                        continue;
-                    }
 
-                    String processedBaseDn = baseDn.getKey() + "_" + (baseDn.getValue() == null ? "" : baseDn.getValue().getSimpleName());
-                    if (processedBaseDns.contains(processedBaseDn)) {
-                        log.warn("baseDn: {}, already processed. Please fix cleaner configuration! Skipping second run...", baseDn);
-                        continue;
-                    }
-
-                    processedBaseDns.add(processedBaseDn);
-
-                    log.debug("Start clean up for baseDn: " + baseDn.getValue() + ", class: " + baseDn.getValue());
-                    final Stopwatch started = Stopwatch.createStarted();
-
-                    int removed = cleanup(baseDn, now, chunkSize);
-
-                    log.debug("Finished clean up for baseDn: {}, takes: {}ms, removed items: {}", baseDn, started.elapsed(TimeUnit.MILLISECONDS), removed);
-                } catch (Exception e) {
-                    log.error("Failed to process clean up for baseDn: " + baseDn + ", class: " + baseDn.getValue(), e);
+                final String processedKey = createProcessedKey(baseDn);
+                if (entryManager.hasExpirationSupport(baseDn.getKey()) || processedBaseDns.contains(processedKey)) {
+                    continue;
                 }
+
+                processedBaseDns.add(processedKey);
+
+                if (log.isDebugEnabled())
+                    log.debug("Start clean up for baseDn: {}, class: {}", baseDn.getValue(), baseDn.getValue());
+
+                final Stopwatch started = Stopwatch.createStarted();
+
+                int removed = cleanup(baseDn, now, chunkSize);
+
+                if (log.isDebugEnabled())
+                    log.debug("Finished clean up for baseDn: {}, takes: {}ms, removed items: {}", baseDn, started.elapsed(TimeUnit.MILLISECONDS), removed);
             }
 
             processCache(now);
@@ -184,6 +179,10 @@ public class CleanerTimer {
         } catch (Exception e) {
             log.error("Failed to process clean up.", e);
         }
+    }
+
+    private static String createProcessedKey(Map.Entry<String, Class<?>> baseDn) {
+        return baseDn.getKey() + "_" + (baseDn.getValue() == null ? "" : baseDn.getValue().getSimpleName());
     }
 
     private Map<String, Class<?>> createCleanServiceBaseDns() {
@@ -196,9 +195,8 @@ public class CleanerTimer {
         cleanServiceBaseDns.put(umaResourceService.getBaseDnForResource(), UmaResource.class);
         cleanServiceBaseDns.put(String.format("ou=registration_requests,%s", u2fBase), RegisterRequestMessageLdap.class);
         cleanServiceBaseDns.put(String.format("ou=registered_devices,%s", u2fBase), DeviceRegistration.class);
-        // cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getPeople(), User.class);
         cleanServiceBaseDns.put(metricService.buildDn(null, null, ApplicationType.OX_AUTH), MetricEntry.class);
-        cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getTokens(), TokenLdap.class);
+        cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getTokens(), TokenEntity.class);
         cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getAuthorizations(), ClientAuthorization.class);
         cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getScopes(), Scope.class);
         cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getSessions(), SessionId.class);
@@ -214,7 +212,7 @@ public class CleanerTimer {
                     Filter.createLessOrEqualFilter("exp", entryManager.encodeTime(baseDn.getKey(), now)));
 
             int removedCount = entryManager.remove(baseDn.getKey(), baseDn.getValue(), filter, batchSize);
-            log.trace("Removed " + removedCount + " entries from " + baseDn.getKey());
+            log.trace("Removed {} entries from {}", removedCount, baseDn.getKey());
             return removedCount;
         } catch (Exception e) {
             log.error("Failed to perform clean up.", e);

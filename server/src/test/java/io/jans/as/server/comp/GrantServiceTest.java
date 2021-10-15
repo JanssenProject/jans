@@ -7,7 +7,7 @@
 package io.jans.as.server.comp;
 
 import io.jans.as.server.BaseComponentTest;
-import io.jans.as.server.model.ldap.TokenLdap;
+import io.jans.as.server.model.ldap.TokenEntity;
 import io.jans.as.server.model.ldap.TokenType;
 import io.jans.as.server.service.GrantService;
 import io.jans.as.server.util.TokenHashUtil;
@@ -33,29 +33,29 @@ public class GrantServiceTest extends BaseComponentTest {
 
 	private static String clientId;
 
-	private static TokenLdap tokenLdap;
+	private static TokenEntity tokenEntity;
 
 	@Parameters(value = "clientId")
 	@Test
 	public void createTestToken(String clientId) {
 		GrantServiceTest.clientId = clientId;
-		tokenLdap = createTestToken();
-		grantService.persist(tokenLdap);
+		tokenEntity = createTestToken();
+		grantService.persist(tokenEntity);
 	}
 
 	@Test(dependsOnMethods = "createTestToken")
 	public void removeTestTokens() {
-		final TokenLdap t = grantService.getGrantByCode(TEST_TOKEN_CODE);
+		final TokenEntity t = grantService.getGrantByCode(TEST_TOKEN_CODE);
 		if (t != null) {
 			grantService.remove(t);
 		}
 	}
 
-	private TokenLdap createTestToken() {
+	private TokenEntity createTestToken() {
 		final String grantId = GrantService.generateGrantId();
 		final String dn = grantService.buildDn(TokenHashUtil.hash(TEST_TOKEN_CODE));
 
-		final TokenLdap t = new TokenLdap();
+		final TokenEntity t = new TokenEntity();
 		t.setDn(dn);
 		t.setGrantId(grantId);
 		t.setClientId(clientId);
