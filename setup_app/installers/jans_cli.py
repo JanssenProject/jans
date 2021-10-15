@@ -35,6 +35,8 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
 
         self.source_files = [
                 (os.path.join(Config.distJansFolder, 'jans-cli.tgz'), 'https://api.github.com/repos/JanssenProject/jans-cli/tarball/main'.format(Config.oxVersion)),
+                (os.path.join(Config.distJansFolder, 'jca-swagger-client.tgz'), 'https://ox.gluu.org/icrby8xcvbcv/cli-swagger/jca.tgz'),
+                (os.path.join(Config.distJansFolder, 'scim-swagger-client.tgz'), 'https://ox.gluu.org/icrby8xcvbcv/cli-swagger/scim.tgz'),
                 ]
 
     def install(self):
@@ -44,7 +46,7 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
         #extract jans-cli tgz archieve
         cli_tar = tarfile.open(self.source_files[0][0])
         par_dir = cli_tar.firstmember.name
-        tmp_dir = '/tmp/' + os.urandom(5).hex()
+        tmp_dir = os.path.join(Config.outputFolder, 'jans-cli-' + os.urandom(5).hex())
         cli_tar.extractall(tmp_dir)
         shutil.move(os.path.join(tmp_dir, par_dir, 'cli'), self.jans_cli_install_dir)
         cli_tar.close()
@@ -52,6 +54,13 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
         self.run([paths.cmd_ln, '-s', os.path.join(self.jans_cli_install_dir, 'config_cli.py'), os.path.join(self.jans_cli_install_dir, 'config-cli.py')])
         self.run([paths.cmd_ln, '-s', os.path.join(self.jans_cli_install_dir, 'config_cli.py'), os.path.join(self.jans_cli_install_dir, 'scim-cli.py')])
         self.run([paths.cmd_chmod, '+x', os.path.join(self.jans_cli_install_dir, 'config_cli.py')])
+
+        for i, app_mod in enumerate(('jca', 'scim')):
+            swagger_cli_dir = os.path.join(self.jans_cli_install_dir, app_mod)
+            self.createDirs(swagger_cli_dir)
+            init_fn = os.path.join(swagger_cli_dir, '__init__.py')
+            self.writeFile(init_fn, '')
+            shutil.unpack_archive(self.source_files[i+1][0], swagger_cli_dir)
 
     def configure(self, options={}):
         config = configparser.ConfigParser()
