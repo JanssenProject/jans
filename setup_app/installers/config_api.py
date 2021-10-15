@@ -36,9 +36,11 @@ class ConfigApiInstaller(JettyInstaller):
         self.dynamic_conf_json = os.path.join(self.output_folder, 'dynamic-conf.json')
         self.config_ldif_fn = os.path.join(self.output_folder, 'config.ldif')
         self.load_ldif_files = [self.config_ldif_fn, self.scope_ldif_fn]
+        self.libDir = os.path.join(self.jetty_base, self.service_name, 'custom/libs/')
 
         self.source_files = [
-                (os.path.join(Config.distJansFolder, 'jans-config-api.war'), 'https://maven.jans.io/maven/io/jans/jans-config-api-server/{0}/jans-config-api-server-{0}.war'.format(Config.oxVersion))
+                (os.path.join(Config.distJansFolder, 'jans-config-api.war'), 'https://maven.jans.io/maven/io/jans/jans-config-api-server/{0}/jans-config-api-server-{0}.war'.format(Config.oxVersion)),
+                (os.path.join(Config.distJansFolder, 'scim-plugin.jar'), 'https://maven.jans.io/maven/io/jans/scim-plugin/{0}/scim-plugin-{0}-distribution.jar'.format(Config.oxVersion))
                 ]
 
     def install(self):
@@ -47,6 +49,9 @@ class ConfigApiInstaller(JettyInstaller):
         jettyServiceWebapps = os.path.join(self.jetty_base, self.service_name, 'webapps')
         self.copyFile(self.source_files[0][0], jettyServiceWebapps)
         self.war_for_jetty10(os.path.join(jettyServiceWebapps, os.path.basename(self.source_files[0][0])))
+        self.copyFile(self.source_files[1][0], self.libDir)
+        scim_plugin_path = os.path.join(self.libDir, os.path.basename(self.source_files[1][0]))
+        self.add_extra_class(scim_plugin_path)
         self.enable()
 
     def installed(self):
@@ -85,6 +90,10 @@ class ConfigApiInstaller(JettyInstaller):
         ldif_scopes_writer = LDIFWriter(scope_ldif_fd, cols=1000)
         scopes = {}
         jansUmaScopes_all = [ 'inum=C4F7,ou=scopes,o=jans' ]
+
+        if hasattr(base, 'ScimInstaller'):
+            scim_scopes = base.current_app.ScimInstaller.create_user_scopes()
+            jansUmaScopes_all += scim_scopes
 
         for scope in scopes_def:
 
@@ -172,7 +181,6 @@ class ConfigApiInstaller(JettyInstaller):
         Config.templateRenderingDict['config_api_dynamic_conf_base64'] = self.generate_base64_file(self.dynamic_conf_json, 1)
         self.renderTemplateInOut(self.config_ldif_fn, self.templates_folder, self.output_folder)
 
-        self.write_webapps_xml()
         self.dbUtils.import_ldif(self.load_ldif_files)
 
 
