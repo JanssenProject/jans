@@ -8,7 +8,7 @@ from io.jans.model.custom.script.type.session import ApplicationSessionType
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.persist import PersistenceEntryManager
 from io.jans.as.model.config import StaticConfiguration
-from io.jans.as.model.ldap import TokenLdap
+from io.jans.as.model.ldap import TokenEntity
 from javax.faces.application import FacesMessage
 from io.jans.jsf2.message import FacesMessages
 from io.jans.util import StringHelper, ArrayHelper
@@ -76,7 +76,7 @@ class ApplicationSession(ApplicationSessionType):
         return True
 
     def isFirstSession(self, user_name):
-        tokenLdap = TokenLdap()
+        tokenLdap = TokenEntity()
         tokenLdap.setDn(self.staticConfiguration.getBaseDn().getClients())
         tokenLdap.setUserId(user_name)
 
