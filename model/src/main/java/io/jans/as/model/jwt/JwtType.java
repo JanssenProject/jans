@@ -30,7 +30,7 @@ public enum JwtType {
     public static JwtType fromString(String param) {
         if (param != null) {
             for (JwtType t : JwtType.values()) {
-                if (param.equals(t.paramName)) {
+                if (param.equalsIgnoreCase(t.paramName)) {
                     return t;
                 }
             }
