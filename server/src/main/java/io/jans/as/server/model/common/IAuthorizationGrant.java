@@ -11,7 +11,7 @@ import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.token.JsonWebResponse;
 import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
-import io.jans.as.server.model.ldap.TokenLdap;
+import io.jans.as.server.model.ldap.TokenEntity;
 
 import java.util.Collection;
 import java.util.Date;
@@ -99,9 +99,9 @@ public interface IAuthorizationGrant {
 
     Date getAuthenticationTime();
 
-    TokenLdap getTokenLdap();
+    TokenEntity getTokenEntity();
 
-    void setTokenLdap(TokenLdap tokenLdap);
+    void setTokenEntity(TokenEntity tokenEntity);
 
     void setLongLivedAccessToken(AccessToken longLivedAccessToken);
 
