@@ -90,6 +90,13 @@ class BaseInstaller:
                 setattr(Config, client_var_name, client_id_prefix + str(uuid.uuid4()))
                 self.logIt("Client ID for {} was created as {}".format(client_var_name, Config.get(client_var_name)))
 
+
+    def check_scope(self, scope_id):
+        result = self.dbUtils.search('ou=scopes,o=jans', '(jansId={})'.format(scope_id))
+        if result:
+            return result['dn']
+
+
     def run_service_command(self, operation, service):
         if not service:
             service = self.service_name
