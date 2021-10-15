@@ -20,7 +20,7 @@ import io.jans.as.server.model.common.ClientCredentialsGrant;
 import io.jans.as.server.model.common.ExecutionContext;
 import io.jans.as.server.model.fido.u2f.DeviceRegistration;
 import io.jans.as.server.model.fido.u2f.RequestMessageLdap;
-import io.jans.as.server.model.ldap.TokenLdap;
+import io.jans.as.server.model.ldap.TokenEntity;
 import io.jans.as.server.model.token.HandleTokenFactory;
 import io.jans.as.server.service.CleanerTimer;
 import io.jans.as.server.service.ClientService;
@@ -252,7 +252,7 @@ public class CleanerTimerTest extends BaseComponentTest {
         cacheService.clear();
 
         // 4. token exists
-        final TokenLdap grantLdap = grantService.getGrantByCode(accessToken.getCode());
+        final TokenEntity grantLdap = grantService.getGrantByCode(accessToken.getCode());
         assertNotNull(grantLdap);
 
         final Calendar calendar = Calendar.getInstance();
@@ -348,7 +348,7 @@ public class CleanerTimerTest extends BaseComponentTest {
             throw new AssertionError("Test failed, no 404 exception");
         } catch (WebApplicationException e) {
             // we expect WebApplicationException 404 here
-            assertEquals(404, e.getResponse().getStatus());
+            assertEquals(e.getResponse().getStatus(), 404);
         }
     }
 
