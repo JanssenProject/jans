@@ -11,7 +11,7 @@ import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.token.JsonWebResponse;
 import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
-import io.jans.as.server.model.ldap.TokenLdap;
+import io.jans.as.server.model.ldap.TokenEntity;
 
 import java.util.Collection;
 import java.util.Date;
@@ -216,12 +216,12 @@ public class UnmodifiableAuthorizationGrant implements IAuthorizationGrant {
     }
 
     @Override
-    public TokenLdap getTokenLdap() {
-        return grant.getTokenLdap();
+    public TokenEntity getTokenEntity() {
+        return grant.getTokenEntity();
     }
 
     @Override
-    public void setTokenLdap(TokenLdap token) {
+    public void setTokenEntity(TokenEntity token) {
         throw new UnsupportedOperationException(NOT_ALLOWED_FOR_UNMODIFIABLE_AUTHORIZATION_GRANT);
     }
 
