@@ -369,8 +369,8 @@ public class CrossEncryptionTest {
 
         final String jweString = jweObject.serialize();
 
-        decryptAndValidateSignatureWithGluu(jweString);
         decryptAndValidateSignatureWithNimbus(jweString);
+        decryptAndValidateSignatureWithGluu(jweString);
     }
 
     @Test
@@ -461,7 +461,7 @@ public class CrossEncryptionTest {
         decrypter.setBlockEncryptionAlgorithm(BlockEncryptionAlgorithm.A128GCM);
 
         final Jwe jwe = decrypter.decrypt(jweString);
-        assertEquals(JwtType.JWT, jwe.getHeader().getContentType());
+        assertEquals(jwe.getHeader().getContentType(), JwtType.JWT);
 
         final Jwt jwt = jwe.getSignedJWTPayload();
 
