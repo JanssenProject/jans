@@ -25,7 +25,7 @@ import io.jans.as.model.token.TokenErrorResponseType;
 import io.jans.as.model.token.TokenRequestParam;
 import io.jans.as.model.util.Util;
 import io.jans.as.server.model.common.*;
-import io.jans.as.server.model.ldap.TokenLdap;
+import io.jans.as.server.model.ldap.TokenEntity;
 import io.jans.as.server.model.token.ClientAssertion;
 import io.jans.as.server.model.token.HttpAuthTokenType;
 import io.jans.as.server.service.*;
@@ -536,18 +536,18 @@ public class AuthenticationFilter implements Filter {
                 filterChain.doFilter(servletRequest, servletResponse);
             } else if (grantType == GrantType.REFRESH_TOKEN) {
                 final String refreshTokenCode = servletRequest.getParameter("refresh_token");
-                TokenLdap tokenLdap;
+                TokenEntity tokenEntity;
                 if (!isTrue(appConfiguration.getPersistRefreshTokenInLdap())) {
-                    tokenLdap = (TokenLdap) cacheService.get(TokenHashUtil.hash(refreshTokenCode));
+                    tokenEntity = (TokenEntity) cacheService.get(TokenHashUtil.hash(refreshTokenCode));
                 } else {
-                    tokenLdap = grantService.getGrantByCode(refreshTokenCode);
+                    tokenEntity = grantService.getGrantByCode(refreshTokenCode);
                 }
 
-                if (!dpopJwkThumbprint.equals(tokenLdap.getDpop())) {
+                if (!dpopJwkThumbprint.equals(tokenEntity.getDpop())) {
                     throw new InvalidJwtException("Invalid DPoP Proof Header. The jwk header is not valid.");
                 }
 
-                AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByRefreshToken(tokenLdap.getClientId(), refreshTokenCode);
+                AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByRefreshToken(tokenEntity.getClientId(), refreshTokenCode);
 
                 identity.logout();
 
