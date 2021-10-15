@@ -2378,6 +2378,7 @@ public class AppConfiguration implements Configuration {
     }
 
     public List<String> getDpopSigningAlgValuesSupported() {
+        if (dpopSigningAlgValuesSupported == null) dpopSigningAlgValuesSupported = new ArrayList<>();
         return dpopSigningAlgValuesSupported;
     }
 
