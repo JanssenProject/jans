@@ -77,9 +77,6 @@ public class TokenEntity implements Serializable {
     @AttributeName(name = "dpop")
     private String dpop;
 
-    public TokenEntity() {
-    }
-
     public TokenAttributes getAttributes() {
         if (attributes == null) {
             attributes = new TokenAttributes();
@@ -111,8 +108,8 @@ public class TokenEntity implements Serializable {
         return authorizationCode;
     }
 
-    public void setAuthorizationCode(String p_authorizationCode) {
-        authorizationCode = p_authorizationCode;
+    public void setAuthorizationCode(String authorizationCode) {
+        this.authorizationCode = authorizationCode;
     }
 
     public String getTokenBindingHash() {
@@ -135,81 +132,81 @@ public class TokenEntity implements Serializable {
         return grantId;
     }
 
-    public void setGrantId(String p_grantId) {
-        grantId = p_grantId;
+    public void setGrantId(String grantId) {
+        this.grantId = grantId;
     }
 
     public Date getAuthenticationTime() {
         return authenticationTime;
     }
 
-    public void setAuthenticationTime(Date p_authenticationTime) {
-        authenticationTime = p_authenticationTime;
+    public void setAuthenticationTime(Date authenticationTime) {
+        this.authenticationTime = authenticationTime;
     }
 
     public Date getCreationDate() {
         return creationDate;
     }
 
-    public void setCreationDate(Date p_creationDate) {
-        creationDate = p_creationDate;
+    public void setCreationDate(Date creationDate) {
+        this.creationDate = creationDate;
     }
 
     public String getDn() {
         return dn;
     }
 
-    public void setDn(String p_dn) {
-        dn = p_dn;
+    public void setDn(String dn) {
+        this.dn = dn;
     }
 
     public Date getExpirationDate() {
         return expirationDate;
     }
 
-    public void setExpirationDate(Date p_expirationDate) {
-        expirationDate = p_expirationDate;
+    public void setExpirationDate(Date expirationDate) {
+        this.expirationDate = expirationDate;
     }
 
     public String getGrantType() {
         return grantType;
     }
 
-    public void setGrantType(String p_grantType) {
-        grantType = p_grantType;
+    public void setGrantType(String grantType) {
+        this.grantType = grantType;
     }
 
     public String getScope() {
         return scope;
     }
 
-    public void setScope(String p_scope) {
-        scope = p_scope;
+    public void setScope(String scope) {
+        this.scope = scope;
     }
 
     public String getTokenCode() {
         return tokenCode;
     }
 
-    public void setTokenCode(String p_tokenCode) {
-        tokenCode = p_tokenCode;
+    public void setTokenCode(String tokenCode) {
+        this.tokenCode = tokenCode;
     }
 
     public String getTokenType() {
         return tokenType;
     }
 
-    public void setTokenType(String p_tokenType) {
-        tokenType = p_tokenType;
+    public void setTokenType(String tokenType) {
+        this.tokenType = tokenType;
     }
 
     public TokenType getTokenTypeEnum() {
         return TokenType.fromValue(tokenType);
     }
 
-    public void setTokenTypeEnum(TokenType p_tokenType) {
-        if (p_tokenType != null) {
-            tokenType = p_tokenType.getValue();
+    public void setTokenTypeEnum(TokenType tokenType) {
+        if (tokenType != null) {
+            this.tokenType = tokenType.getValue();
         }
     }
 
@@ -217,8 +214,8 @@ public class TokenEntity implements Serializable {
         return userId;
     }
 
-    public void setUserId(String p_userId) {
-        userId = p_userId;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public String getClientId() {
@@ -233,8 +230,8 @@ public class TokenEntity implements Serializable {
         return jwtRequest;
     }
 
-    public void setJwtRequest(String p_jwtRequest) {
-        jwtRequest = p_jwtRequest;
+    public void setJwtRequest(String jwtRequest) {
+        this.jwtRequest = jwtRequest;
     }
 
     public String getAuthMode() {
