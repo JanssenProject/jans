@@ -17,7 +17,7 @@
 	</parent>
 
 	<properties>
-        <resteasy.version>4.5.8.Final</resteasy.version>
+        <resteasy.version>4.7.2.Final</resteasy.version>
 	</properties>
     <build>
         <finalName>SCIM-Client</finalName>
