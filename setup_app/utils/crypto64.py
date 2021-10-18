@@ -4,6 +4,7 @@ import base64
 import json
 
 from collections import OrderedDict
+from pathlib import Path
 
 from setup_app.pylib.pyDes import triple_des, ECB, PAD_PKCS5
 
@@ -103,30 +104,19 @@ class Crypto64:
 
     def prepare_base64_extension_scripts(self, extensions=[]):
         self.logIt("Preparing scripts")
-        try:
-            if not os.path.exists(Config.extensionFolder):
-                return None
+        extension_path = Path(Config.extensionFolder)
+        for ep in extension_path.glob("**/*"):
+            if ep.is_file() and ep.suffix in ('.py'):
+                extensionType = ep.parent.name.lower()
+                extensionName = ep.stem.lower()
+                extensionScriptName = '{}_{}'.format(extensionType, extensionName)
 
-            for extensionType in os.listdir(Config.extensionFolder):
-                extensionTypeFolder = os.path.join(Config.extensionFolder, extensionType)
-                if not os.path.isdir(extensionTypeFolder):
+                if extensions and extensionScriptName in extensions:
                     continue
 
-                for scriptFile in os.listdir(extensionTypeFolder):
-                    scriptFilePath = os.path.join(extensionTypeFolder, scriptFile)
-                    if not scriptFile.lower().endswith('.py'):
-                        continue
-                    extensionScriptName = '%s_%s' % (extensionType, os.path.splitext(scriptFile)[0])
-                    extensionScriptName = extensionScriptName.lower()
-
-                    if (False if extensions and not extensionScriptName in extensions else True):
-                        # Prepare key for dictionary
-                        base64ScriptFile = self.generate_base64_file(scriptFilePath, 1)
-                        Config.templateRenderingDict[extensionScriptName] = base64ScriptFile
-                        self.logIt("Loaded script %s with type %s into %s" % (scriptFile, extensionType, extensionScriptName))
-
-        except:
-            self.logIt("Error loading scripts from %s" % Config.extensionFolder, True)
+                # Prepare key for dictionary
+                base64ScriptFile = self.generate_base64_file(ep.as_posix(), 1)
+                Config.templateRenderingDict[extensionScriptName] = base64ScriptFile
 
 
     def generate_base64_file(self, fn, num_spaces):
