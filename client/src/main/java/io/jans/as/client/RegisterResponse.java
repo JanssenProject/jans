@@ -79,10 +79,10 @@ public class RegisterResponse extends BaseResponseWithErrors<RegisterErrorRespon
         return r;
     }
 
-    public void injectDataFromJson(String p_json) {
-        if (StringUtils.isNotBlank(p_json)) {
+    public void injectDataFromJson(String json) {
+        if (StringUtils.isNotBlank(json)) {
             try {
-                JSONObject jsonObj = new JSONObject(p_json);
+                JSONObject jsonObj = new JSONObject(json);
                 if (jsonObj.has(RegisterResponseParam.CLIENT_ID.toString())) {
                     setClientId(jsonObj.getString(RegisterResponseParam.CLIENT_ID.toString()));
                     jsonObj.remove(RegisterResponseParam.CLIENT_ID.toString());
