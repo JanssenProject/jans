@@ -63,6 +63,7 @@ public class Authenticator {
 
     public static final String INVALID_SESSION_MESSAGE = "login.errorSessionInvalidMessage";
     public static final String AUTHENTICATION_ERROR_MESSAGE = "login.failedToAuthenticate";
+    public static final String AUTHENTICATION_SUCCESS_FOR_USER = "Authentication success for User: '{}'";
 
     @Inject
     private Logger logger;
@@ -145,13 +146,17 @@ public class Authenticator {
         } else if (Constants.RESULT_EXPIRED.equals(lastResult)) {
             handleSessionInvalid();
         } else if (Constants.RESULT_AUTHENTICATION_FAILED.equals(lastResult)) {
-            // Do nothing to keep compatibility with older versions
-            if (facesMessages.getMessages().size() == 0) {
-                addMessage(FacesMessage.SEVERITY_ERROR, AUTHENTICATION_ERROR_MESSAGE);
-            }
+            addSeverityMessages();
         }
 
         return false;
+    }
+
+    private void addSeverityMessages() {
+        // Do nothing to keep compatibility with older versions
+        if (facesMessages.getMessages().size() == 0) {
+            addMessage(FacesMessage.SEVERITY_ERROR, AUTHENTICATION_ERROR_MESSAGE);
+        }
     }
 
     public String authenticateWithOutcome() {
@@ -168,9 +173,7 @@ public class Authenticator {
             handleSessionInvalid();
         } else if (Constants.RESULT_AUTHENTICATION_FAILED.equals(lastResult)) {
             // Do nothing to keep compatibility with older versions
-            if (facesMessages.getMessages().size() == 0) {
-                addMessage(FacesMessage.SEVERITY_ERROR, AUTHENTICATION_ERROR_MESSAGE);
-            }
+            addSeverityMessages();
             handleLoginError(null);
         }
 
@@ -192,20 +195,27 @@ public class Authenticator {
         return Constants.RESULT_SUCCESS.equals(result);
     }
 
+    public boolean isServiceAuthentication(boolean service, boolean skipPassword, HttpServletRequest servletRequest) {
+        if (!service) {
+            return false;
+        }
+        return StringHelper.isNotEmpty(credentials.getUsername())
+                && (skipPassword || StringHelper.isNotEmpty(credentials.getPassword())) && servletRequest != null
+                && (servletRequest.getRequestURI().endsWith("/token")
+                || servletRequest.getRequestURI().endsWith("/revoke")
+                || servletRequest.getRequestURI().endsWith("/revoke_session")
+                || servletRequest.getRequestURI().endsWith("/userinfo")
+                || servletRequest.getRequestURI().endsWith("/bc-authorize")
+                || servletRequest.getRequestURI().endsWith("/par")
+                || servletRequest.getRequestURI().endsWith("/device_authorization"));
+    }
+
     public String authenticateImpl(HttpServletRequest servletRequest, boolean interactive, boolean skipPassword,
                                    boolean service) {
         String result = Constants.RESULT_FAILURE;
         try {
             logger.trace("Authenticating ... (interactive: {}, skipPassword: {}, credentials.username: {})", interactive, skipPassword, credentials.getUsername());
-            if (service && (StringHelper.isNotEmpty(credentials.getUsername())
-                    && (skipPassword || StringHelper.isNotEmpty(credentials.getPassword())) && servletRequest != null
-                    && (servletRequest.getRequestURI().endsWith("/token")
-                    || servletRequest.getRequestURI().endsWith("/revoke")
-                    || servletRequest.getRequestURI().endsWith("/revoke_session")
-                    || servletRequest.getRequestURI().endsWith("/userinfo")
-                    || servletRequest.getRequestURI().endsWith("/bc-authorize")
-                    || servletRequest.getRequestURI().endsWith("/par")
-                    || servletRequest.getRequestURI().endsWith("/device_authorization")))) {
+            if (isServiceAuthentication(service, skipPassword, servletRequest)) {
                 boolean authenticated = clientAuthentication(credentials, interactive, skipPassword);
                 if (authenticated) {
                     result = Constants.RESULT_SUCCESS;
@@ -438,7 +448,7 @@ public class Authenticator {
                 logger.debug("Sending event to trigger user redirection: '{}'", credentials.getUsername());
                 authenticationService.onSuccessfulLogin(eventSessionId);
 
-                logger.info("Authentication success for User: '{}'", credentials.getUsername());
+                logger.info(AUTHENTICATION_SUCCESS_FOR_USER, credentials.getUsername());
                 return Constants.RESULT_SUCCESS;
             }
         } else {
@@ -457,7 +467,7 @@ public class Authenticator {
                     sessionIdService.updateSessionId(sessionId);
                 }
 
-                logger.info("Authentication success for User: '{}'", credentials.getUsername());
+                logger.info(AUTHENTICATION_SUCCESS_FOR_USER, credentials.getUsername());
                 return Constants.RESULT_SUCCESS;
             }
         }
@@ -520,7 +530,7 @@ public class Authenticator {
                 if (result) {
                     authenticationService.configureEventUser();
 
-                    logger.info("Authentication success for User: '{}'", credentials.getUsername());
+                    logger.info(AUTHENTICATION_SUCCESS_FOR_USER, credentials.getUsername());
                     return true;
                 }
                 logger.info("Authentication failed for User: '{}'", credentials.getUsername());
@@ -533,7 +543,7 @@ public class Authenticator {
             if (authenticated) {
                 authenticationService.configureEventUser();
 
-                logger.info("Authentication success for User: '{}'", credentials.getUsername());
+                logger.info(AUTHENTICATION_SUCCESS_FOR_USER, credentials.getUsername());
                 return true;
             }
             logger.info("Authentication failed for User: '{}'", credentials.getUsername());
@@ -627,52 +637,57 @@ public class Authenticator {
                 AuthenticationScriptUsageType.INTERACTIVE, customScriptConfiguration);
         if (customScriptConfiguration == null) {
             return Constants.RESULT_FAILURE;
-        } else {
-            String determinedauthAcr = customScriptConfiguration.getName();
-            if (!StringHelper.equalsIgnoreCase(currentauthAcr, determinedauthAcr)) {
-                // Redirect user to alternative login workflow
-                String redirectTo = externalAuthenticationService
-                        .executeExternalGetPageForStep(customScriptConfiguration, this.authStep);
-
-                if (StringHelper.isEmpty(redirectTo)) {
-                    redirectTo = "/login.xhtml";
-                }
-
-                CustomScriptConfiguration determinedCustomScriptConfiguration = externalAuthenticationService
-                        .getCustomScriptConfiguration(AuthenticationScriptUsageType.INTERACTIVE, determinedauthAcr);
-                if (determinedCustomScriptConfiguration == null) {
-                    logger.error("Failed to get determined CustomScriptConfiguration. auth_step: '{}', acr: '{}'",
-                            this.authStep, this.authAcr);
-                    return Constants.RESULT_FAILURE;
-                }
-
-                logger.debug("Redirect to page: '{}'. Force to use acr: '{}'", redirectTo, determinedauthAcr);
-
-                determinedauthAcr = determinedCustomScriptConfiguration.getName();
-                String determinedAuthLevel = Integer.toString(determinedCustomScriptConfiguration.getLevel());
-
-                sessionIdAttributes.put("acr", determinedauthAcr);
-                sessionIdAttributes.put("auth_level", determinedAuthLevel);
-                sessionIdAttributes.put(AUTH_STEP, Integer.toString(1));
-
-                // Remove old session parameters from session
-                if (isFalse(appConfiguration.getKeepAuthenticatorAttributesOnAcrChange())) {
-                    authenticationService.clearExternalScriptExtraParameters(sessionIdAttributes);
-                }
-
-                if (sessionId != null) {
-                    boolean updateResult = updateSession(sessionId, sessionIdAttributes);
-                    if (!updateResult) {
-                        return Constants.RESULT_EXPIRED;
-                    }
-                }
-
-                facesService.redirectWithExternal(redirectTo, null);
-
-                return Constants.RESULT_SUCCESS;
-            }
         }
 
+        String determinedauthAcr = customScriptConfiguration.getName();
+        if (!StringHelper.equalsIgnoreCase(currentauthAcr, determinedauthAcr)) {
+            // Redirect user to alternative login workflow
+            String redirectTo = externalAuthenticationService
+                    .executeExternalGetPageForStep(customScriptConfiguration, this.authStep);
+
+            if (StringHelper.isEmpty(redirectTo)) {
+                redirectTo = "/login.xhtml";
+            }
+
+            CustomScriptConfiguration determinedCustomScriptConfiguration = externalAuthenticationService
+                    .getCustomScriptConfiguration(AuthenticationScriptUsageType.INTERACTIVE, determinedauthAcr);
+            if (determinedCustomScriptConfiguration == null) {
+                logger.error("Failed to get determined CustomScriptConfiguration. auth_step: '{}', acr: '{}'",
+                        this.authStep, this.authAcr);
+                return Constants.RESULT_FAILURE;
+            }
+
+            logger.debug("Redirect to page: '{}'. Force to use acr: '{}'", redirectTo, determinedauthAcr);
+
+            determinedauthAcr = determinedCustomScriptConfiguration.getName();
+            String determinedAuthLevel = Integer.toString(determinedCustomScriptConfiguration.getLevel());
+
+            sessionIdAttributes.put("acr", determinedauthAcr);
+            sessionIdAttributes.put("auth_level", determinedAuthLevel);
+            sessionIdAttributes.put(AUTH_STEP, Integer.toString(1));
+
+            // Remove old session parameters from session
+            if (isFalse(appConfiguration.getKeepAuthenticatorAttributesOnAcrChange())) {
+                authenticationService.clearExternalScriptExtraParameters(sessionIdAttributes);
+            }
+
+            if (sessionId != null) {
+                boolean updateResult = updateSession(sessionId, sessionIdAttributes);
+                if (!updateResult) {
+                    return Constants.RESULT_EXPIRED;
+                }
+            }
+
+            facesService.redirectWithExternal(redirectTo, null);
+
+            return Constants.RESULT_SUCCESS;
+        }
+
+        return executeExternalPrepareForStep(sessionId, sessionIdAttributes, customScriptConfiguration);
+    }
+
+    @NotNull
+    private String executeExternalPrepareForStep(SessionId sessionId, Map<String, String> sessionIdAttributes, CustomScriptConfiguration customScriptConfiguration) {
         boolean result = externalAuthenticationService.executeExternalPrepareForStep(customScriptConfiguration,
                 externalContext.getRequestParameterValuesMap(), this.authStep);
         if (result) {
