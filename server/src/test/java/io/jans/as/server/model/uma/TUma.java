@@ -42,9 +42,9 @@ public class TUma {
 		return r.newTokenByRefreshToken(tokenPath, oldToken, umaClientId, umaClientSecret);
 	}
 
-	public static RPTResponse requestRpt(URI baseUri, String p_rptPath) {
+	public static RPTResponse requestRpt(URI baseUri, String rptPath) {
 		final TTokenRequest r = new TTokenRequest(baseUri);
-		return r.requestRpt(p_rptPath);
+		return r.requestRpt(rptPath);
 	}
 
 	public static UmaMetadata requestConfiguration(URI baseUri, final String configurationPath) {
@@ -52,36 +52,36 @@ public class TUma {
 		return c.getConfiguration(configurationPath);
 	}
 
-	public static UmaResourceResponse registerResource(URI baseUri, Token p_pat, String p_umaRegisterResourcePath,
+	public static UmaResourceResponse registerResource(URI baseUri, Token pat, String umaRegisterResourcePath,
 													   UmaResource resource) {
 		final TRegisterResource s = new TRegisterResource(baseUri);
-		return s.registerResource(p_pat, p_umaRegisterResourcePath, resource);
+		return s.registerResource(pat, umaRegisterResourcePath, resource);
 	}
 
-	public static UmaResourceResponse modifyResource(URI baseUri, Token p_pat, String p_umaRegisterResourcePath,
-													 final String p_rsid, UmaResource resource) {
+	public static UmaResourceResponse modifyResource(URI baseUri, Token pat, String umaRegisterResourcePath,
+													 final String rsid, UmaResource resource) {
 		final TRegisterResource s = new TRegisterResource(baseUri);
-		return s.modifyResource(p_pat, p_umaRegisterResourcePath, p_rsid, resource);
+		return s.modifyResource(pat, umaRegisterResourcePath, rsid, resource);
 	}
 
-	public static List<String> getResourceList(URI baseUri, Token p_pat, String p_umaRegisterResourcePath) {
+	public static List<String> getResourceList(URI baseUri, Token pat, String umaRegisterResourcePath) {
 		final TRegisterResource s = new TRegisterResource(baseUri);
-		return s.getResourceList(p_pat, p_umaRegisterResourcePath);
+		return s.getResourceList(pat, umaRegisterResourcePath);
 	}
 
-	public static void deleteResource(URI baseUri, Token p_pat, String p_umaRegisterResourcePath, String p_id) {
+	public static void deleteResource(URI baseUri, Token pat, String umaRegisterResourcePath, String id) {
 		final TRegisterResource s = new TRegisterResource(baseUri);
-		s.deleteResource(p_pat, p_umaRegisterResourcePath, p_id);
+		s.deleteResource(pat, umaRegisterResourcePath, id);
 	}
 
-	public static PermissionTicket registerPermission(URI baseUri, Token p_pat, UmaPermission p_request, String p_umaPermissionPath) {
+	public static PermissionTicket registerPermission(URI baseUri, Token pat, UmaPermission request, String umaPermissionPath) {
 		final TRegisterPermission p = new TRegisterPermission(baseUri);
-		return p.registerPermission(p_pat, p_request, p_umaPermissionPath);
+		return p.registerPermission(pat, request, umaPermissionPath);
 	}
 
-	public static RptIntrospectionResponse requestRptStatus(URI baseUri, String p_umaRptStatusPath,	String rpt) {
+	public static RptIntrospectionResponse requestRptStatus(URI baseUri, String umaRptStatusPath,	String rpt) {
 		final TTokenRequest r = new TTokenRequest(baseUri);
-		return r.requestRptStatus(p_umaRptStatusPath, rpt);
+		return r.requestRptStatus(umaRptStatusPath, rpt);
 	}
 
 	public static <T> T readJsonValue(String p_json, Class<T> p_clazz) {
