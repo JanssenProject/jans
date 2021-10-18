@@ -376,25 +376,24 @@ def get_ldif_mappings(optional_scopes=None):
     def default_files():
         files = [
             "base.ldif",
-            "attributes.ldif",
             "jans-config-api/scopes.ldif",
         ]
 
         if dist == "openbanking":
             files += [
+                "attributes.ob.ldif",
                 "scopes.ob.ldif",
                 "scripts.ob.ldif",
                 "configuration.ob.ldif",
-                # "jans-config-api/scopes.ob.ldif",
                 "jans-config-api/clients.ob.ldif",
             ]
         else:
             files += [
+                "attributes.ldif",
                 "scopes.ldif",
                 "scripts.ldif",
                 "configuration.ldif",
                 "o_metric.ldif",
-                # "jans-config-api/scopes.ldif",
                 "jans-config-api/clients.ldif",
             ]
 

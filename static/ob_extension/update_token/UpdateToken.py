@@ -13,6 +13,7 @@ class UpdateToken(UpdateTokenType):
     def init(self, customScript, configurationAttributes):
         print "Update token script. Initializing ..."
         print "Update token script. Initialized successfully"
+
         return True
 
     def destroy(self, configurationAttributes):
@@ -50,7 +51,6 @@ class UpdateToken(UpdateTokenType):
             refresh_token_expires_at = CdiUtil.bean(ConfigurationFactory).getAppConfiguration().getRefreshTokenLifetime()
             jsonWebResponse.getClaims().setClaim("refresh_token_expires_at", refresh_token_expires_at)
 
-
             # this claim is currently commented and should have the unique id of the user for whom consent was passed
             # please fill it as per the implementation
             jsonWebResponse.getClaims().setClaim("sub", openbanking_intent_id)
@@ -58,6 +58,7 @@ class UpdateToken(UpdateTokenType):
             print "Update token script. After modify idToken: %s" % jsonWebResponse
 
             # Use this blog to implement how RT claims can be retained. https://github.com/GluuFederation/oxAuth/wiki/Retain-access-token-claim
+
             return True
         except:
             print "update token failure" , sys.exc_info()[1]

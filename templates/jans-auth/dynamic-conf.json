@@ -94,7 +94,10 @@
         "RS512",
         "ES256",
         "ES384",
-        "ES512"
+        "ES512",
+        "PS256",
+        "PS384",
+        "PS512"
     ],
     "userInfoEncryptionAlgValuesSupported":[
         "RSA1_5",
@@ -118,7 +121,10 @@
         "RS512",
         "ES256",
         "ES384",
-        "ES512"
+        "ES512",
+        "PS256",
+        "PS384",
+        "PS512"
     ],
     "idTokenEncryptionAlgValuesSupported":[
         "RSA1_5",
@@ -142,7 +148,10 @@
         "RS512",
         "ES256",
         "ES384",
-        "ES512"
+        "ES512",
+        "PS256",
+        "PS384",
+        "PS512"
     ],
     "jwksAlgorithmsSupported":[
         "RS256",
@@ -186,8 +195,24 @@
         "RS512",
         "ES256",
         "ES384",
-        "ES512"
+        "ES512",
+        "PS256",
+        "PS384",
+        "PS512"
     ],
+    "dpopSigningAlgValuesSupported":[
+        "RS256",
+        "RS384",
+        "RS512",
+        "ES256",
+        "ES384",
+        "ES512",
+        "PS256",
+        "PS384",
+        "PS512"
+    ],
+    "dpopTimeframe": 5,
+    "dpopJtiCacheTime": 3600,
     "dynamicRegistrationCustomAttributes":[
     ],
     "displayValuesSupported":[
