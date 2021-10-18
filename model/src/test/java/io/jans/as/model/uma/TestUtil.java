@@ -27,19 +27,19 @@ public class TestUtil {
     private TestUtil() {
     }
 
-    public static void assertNotBlank(String p_str) {
-        assertTrue(StringUtils.isNotBlank(p_str));
+    public static void assertNotBlank(String str) {
+        assertTrue(StringUtils.isNotBlank(str));
     }
 
-    public static void assertErrorResponse(String p_entity) {
-        assertNotNull(p_entity, "Unexpected result: " + p_entity);
+    public static void assertErrorResponse(String entity) {
+        assertNotNull(entity, "Unexpected result: " + entity);
         try {
-            JSONObject jsonObj = new JSONObject(p_entity);
+            JSONObject jsonObj = new JSONObject(entity);
             assertTrue(jsonObj.has("error"), "The error type is null");
             assertTrue(jsonObj.has("error_description"), "The error description is null");
         } catch (JSONException e) {
             LOG.error(e.getMessage(), e);
-            fail(e.getMessage() + "\nResponse was: " + p_entity);
+            fail(e.getMessage() + "\nResponse was: " + entity);
         }
     }
 }
