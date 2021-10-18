@@ -6,7 +6,6 @@
 
 package io.jans.as.client;
 
-import org.apache.log4j.Logger;
 import org.jboss.resteasy.client.ClientRequest;
 
 import io.jans.as.model.common.AuthenticationMethod;
@@ -17,8 +16,6 @@ import io.jans.as.model.token.ClientAssertionType;
  * @author Yuriy Zabrovarnyy
  */
 public class ClientAuthnEnabler {
-
-    private static final Logger LOG = Logger.getLogger(ClientAuthnEnabler.class);
 
     private final ClientRequest clientRequest;
 
