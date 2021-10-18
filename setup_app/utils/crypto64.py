@@ -107,16 +107,16 @@ class Crypto64:
         extension_path = Path(Config.extensionFolder)
         for ep in extension_path.glob("**/*"):
             if ep.is_file() and ep.suffix in ('.py'):
-                extensionType = ep.parent.name.lower()
-                extensionName = ep.stem.lower()
-                extensionScriptName = '{}_{}'.format(extensionType, extensionName)
+                extension_type = ep.parent.name.lower()
+                extension_name = ep.stem.lower()
+                extension_script_name = '{}_{}'.format(extension_type, extension_name)
 
-                if extensions and extensionScriptName in extensions:
+                if extensions and extension_script_name in extensions:
                     continue
 
                 # Prepare key for dictionary
-                base64ScriptFile = self.generate_base64_file(ep.as_posix(), 1)
-                Config.templateRenderingDict[extensionScriptName] = base64ScriptFile
+                base64_script_file = self.generate_base64_file(ep.as_posix(), 1)
+                Config.templateRenderingDict[extension_script_name] = base64_script_file
 
 
     def generate_base64_file(self, fn, num_spaces):
