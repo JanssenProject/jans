@@ -55,7 +55,7 @@ public class BackchannelAuthenticationResponse extends BaseResponseWithErrors<Ba
     }
 
     @Override
-    public void injectDataFromJson(String p_json) {
+    public void injectDataFromJson(String json) {
         if (StringUtils.isNotBlank(entity)) {
             try {
                 JSONObject jsonObj = new JSONObject(entity);

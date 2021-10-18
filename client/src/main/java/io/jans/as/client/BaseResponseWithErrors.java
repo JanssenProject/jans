@@ -15,6 +15,7 @@ import org.jetbrains.annotations.Nullable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,11 +33,12 @@ public abstract class BaseResponseWithErrors<T extends IErrorType> extends BaseR
 
     private Map<String, List<String>> claimMap;
 
-    public BaseResponseWithErrors() {
+    protected BaseResponseWithErrors() {
         super();
     }
 
-    public BaseResponseWithErrors(ClientResponse<String> clientResponse) {
+    @SuppressWarnings("java:S1874")
+    protected BaseResponseWithErrors(ClientResponse<String> clientResponse) {
         super(clientResponse);
         claimMap = new HashMap<>();
         final String entity = getEntity();
@@ -68,7 +70,7 @@ public abstract class BaseResponseWithErrors<T extends IErrorType> extends BaseR
             return claimMap.get(claimName);
         }
 
-        return null;
+        return Collections.emptyList();
     }
 
     @Nullable
@@ -81,29 +83,29 @@ public abstract class BaseResponseWithErrors<T extends IErrorType> extends BaseR
         return errorDescription;
     }
 
-    public void setErrorDescription(String p_errorDescription) {
-        errorDescription = p_errorDescription;
+    public void setErrorDescription(String errorDescription) {
+        this.errorDescription = errorDescription;
     }
 
     public T getErrorType() {
         return errorType;
     }
 
-    public void setErrorType(T p_errorType) {
-        errorType = p_errorType;
+    public void setErrorType(T errorType) {
+        this.errorType = errorType;
     }
 
     public String getErrorUri() {
         return errorUri;
     }
 
-    public void setErrorUri(String p_errorUri) {
-        errorUri = p_errorUri;
+    public void setErrorUri(String errorUri) {
+        this.errorUri = errorUri;
     }
 
-    public abstract T fromString(String p_str);
+    public abstract T fromString(String str);
 
-    public void injectDataFromJson(String p_json) {
+    public void injectDataFromJson(String json) {
     }
 
     public void injectErrorIfExistSilently(JSONObject jsonObj) throws JSONException {
@@ -118,9 +120,9 @@ public abstract class BaseResponseWithErrors<T extends IErrorType> extends BaseR
         }
     }
 
-    public void injectErrorIfExistSilently(String p_entity) {
+    public void injectErrorIfExistSilently(String entity) {
         try {
-            injectErrorIfExistSilently(new JSONObject(p_entity));
+            injectErrorIfExistSilently(new JSONObject(entity));
         } catch (JSONException e) {
             // ignore : it's ok to skip exception because entity string can be json array or just trash
         }
