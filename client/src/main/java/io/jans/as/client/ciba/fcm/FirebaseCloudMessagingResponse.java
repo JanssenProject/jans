@@ -45,36 +45,37 @@ public class FirebaseCloudMessagingResponse extends BaseResponse {
         injectDataFromJson(entity);
     }
 
-    public void injectDataFromJson(String p_json) {
-        if (StringUtils.isNotBlank(p_json)) {
-            try {
-                JSONObject jsonObj = new JSONObject(p_json);
+    public void injectDataFromJson(String json) {
+        if (StringUtils.isBlank(json)) {
+            return;
+        }
+        try {
+            JSONObject jsonObj = new JSONObject(json);
 
-                if (jsonObj.has(MULTICAST_ID)) {
-                    multicastId = jsonObj.getLong(MULTICAST_ID);
-                }
-                if (jsonObj.has(SUCCESS)) {
-                    success = jsonObj.getInt(SUCCESS);
-                }
-                if (jsonObj.has(FAILURE)) {
-                    failure = jsonObj.getInt(FAILURE);
-                }
-                if (jsonObj.has(RESULTS)) {
-                    results = new ArrayList<>();
-                    JSONArray resultsJsonArray = jsonObj.getJSONArray(RESULTS);
+            if (jsonObj.has(MULTICAST_ID)) {
+                multicastId = jsonObj.getLong(MULTICAST_ID);
+            }
+            if (jsonObj.has(SUCCESS)) {
+                success = jsonObj.getInt(SUCCESS);
+            }
+            if (jsonObj.has(FAILURE)) {
+                failure = jsonObj.getInt(FAILURE);
+            }
+            if (jsonObj.has(RESULTS)) {
+                results = new ArrayList<>();
+                JSONArray resultsJsonArray = jsonObj.getJSONArray(RESULTS);
 
-                    for (int i = 0; i < resultsJsonArray.length(); i++) {
-                        JSONObject resultJsonObject = resultsJsonArray.getJSONObject(i);
+                for (int i = 0; i < resultsJsonArray.length(); i++) {
+                    JSONObject resultJsonObject = resultsJsonArray.getJSONObject(i);
 
-                        if (resultJsonObject.has(MESSAGE_ID)) {
-                            Result result = new Result(resultJsonObject.getString(MESSAGE_ID));
-                            results.add(result);
-                        }
+                    if (resultJsonObject.has(MESSAGE_ID)) {
+                        Result result = new Result(resultJsonObject.getString(MESSAGE_ID));
+                        results.add(result);
                     }
                 }
-            } catch (JSONException e) {
-                LOG.error(e.getMessage(), e);
             }
+        } catch (JSONException e) {
+            LOG.error(e.getMessage(), e);
         }
     }
 

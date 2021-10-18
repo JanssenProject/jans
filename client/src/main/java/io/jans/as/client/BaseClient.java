@@ -102,12 +102,13 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
         }
     }
 
-    public static void putAllFormParameters(ClientRequest p_clientRequest, BaseRequest p_request) {
-        if (p_clientRequest != null && p_request != null) {
-            final Map<String, String> parameters = p_request.getParameters();
+    @SuppressWarnings("java:S1874")
+    public static void putAllFormParameters(ClientRequest clientRequest, BaseRequest request) {
+        if (clientRequest != null && request != null) {
+            final Map<String, String> parameters = request.getParameters();
             if (parameters != null && !parameters.isEmpty()) {
                 for (Map.Entry<String, String> e : parameters.entrySet()) {
-                    p_clientRequest.formParameter(e.getKey(), e.getValue());
+                    clientRequest.formParameter(e.getKey(), e.getValue());
                 }
             }
         }
