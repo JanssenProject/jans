@@ -6,14 +6,13 @@
 
 package io.jans.as.client;
 
+import io.jans.as.model.authorize.DeviceAuthorizationResponseParam;
+import io.jans.as.model.authorize.DeviceAuthzErrorResponseType;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.jboss.resteasy.client.ClientResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import io.jans.as.model.authorize.DeviceAuthorizationResponseParam;
-import io.jans.as.model.authorize.DeviceAuthzErrorResponseType;
 
 /**
  * Represents a device authz response received from the authorization server.
@@ -34,41 +33,44 @@ public class DeviceAuthzResponse extends BaseResponseWithErrors<DeviceAuthzError
     }
 
     @Override
-    public DeviceAuthzErrorResponseType fromString(String p_string) {
-        return DeviceAuthzErrorResponseType.fromString(p_string);
+    public DeviceAuthzErrorResponseType fromString(String string) {
+        return DeviceAuthzErrorResponseType.fromString(string);
     }
 
+    @Override
     public void injectDataFromJson(String json) {
-        if (StringUtils.isNotBlank(json)) {
-            try {
-                JSONObject jsonObj = new JSONObject(json);
-                if (jsonObj.has(DeviceAuthorizationResponseParam.USER_CODE)) {
-                    setUserCode(jsonObj.getString(DeviceAuthorizationResponseParam.USER_CODE));
-                    jsonObj.remove(DeviceAuthorizationResponseParam.USER_CODE);
-                }
-                if (jsonObj.has(DeviceAuthorizationResponseParam.DEVICE_CODE)) {
-                    setDeviceCode(jsonObj.getString(DeviceAuthorizationResponseParam.DEVICE_CODE));
-                    jsonObj.remove(DeviceAuthorizationResponseParam.DEVICE_CODE);
-                }
-                if (jsonObj.has(DeviceAuthorizationResponseParam.INTERVAL)) {
-                    setInterval(jsonObj.getInt(DeviceAuthorizationResponseParam.INTERVAL));
-                    jsonObj.remove(DeviceAuthorizationResponseParam.INTERVAL);
-                }
-                if (jsonObj.has(DeviceAuthorizationResponseParam.VERIFICATION_URI)) {
-                    setVerificationUri(jsonObj.getString(DeviceAuthorizationResponseParam.VERIFICATION_URI));
-                    jsonObj.remove(DeviceAuthorizationResponseParam.VERIFICATION_URI);
-                }
-                if (jsonObj.has(DeviceAuthorizationResponseParam.VERIFICATION_URI_COMPLETE)) {
-                    setVerificationUriComplete(jsonObj.getString(DeviceAuthorizationResponseParam.VERIFICATION_URI_COMPLETE));
-                    jsonObj.remove(DeviceAuthorizationResponseParam.VERIFICATION_URI_COMPLETE);
-                }
-                if (jsonObj.has(DeviceAuthorizationResponseParam.EXPIRES_IN)) {
-                    setExpiresIn(jsonObj.getInt(DeviceAuthorizationResponseParam.EXPIRES_IN));
-                    jsonObj.remove(DeviceAuthorizationResponseParam.EXPIRES_IN);
-                }
-            } catch (JSONException e) {
-                LOG.error(e.getMessage(), e);
+        if (StringUtils.isBlank(json)) {
+            return;
+        }
+
+        try {
+            JSONObject jsonObj = new JSONObject(json);
+            if (jsonObj.has(DeviceAuthorizationResponseParam.USER_CODE)) {
+                setUserCode(jsonObj.getString(DeviceAuthorizationResponseParam.USER_CODE));
+                jsonObj.remove(DeviceAuthorizationResponseParam.USER_CODE);
             }
+            if (jsonObj.has(DeviceAuthorizationResponseParam.DEVICE_CODE)) {
+                setDeviceCode(jsonObj.getString(DeviceAuthorizationResponseParam.DEVICE_CODE));
+                jsonObj.remove(DeviceAuthorizationResponseParam.DEVICE_CODE);
+            }
+            if (jsonObj.has(DeviceAuthorizationResponseParam.INTERVAL)) {
+                setInterval(jsonObj.getInt(DeviceAuthorizationResponseParam.INTERVAL));
+                jsonObj.remove(DeviceAuthorizationResponseParam.INTERVAL);
+            }
+            if (jsonObj.has(DeviceAuthorizationResponseParam.VERIFICATION_URI)) {
+                setVerificationUri(jsonObj.getString(DeviceAuthorizationResponseParam.VERIFICATION_URI));
+                jsonObj.remove(DeviceAuthorizationResponseParam.VERIFICATION_URI);
+            }
+            if (jsonObj.has(DeviceAuthorizationResponseParam.VERIFICATION_URI_COMPLETE)) {
+                setVerificationUriComplete(jsonObj.getString(DeviceAuthorizationResponseParam.VERIFICATION_URI_COMPLETE));
+                jsonObj.remove(DeviceAuthorizationResponseParam.VERIFICATION_URI_COMPLETE);
+            }
+            if (jsonObj.has(DeviceAuthorizationResponseParam.EXPIRES_IN)) {
+                setExpiresIn(jsonObj.getInt(DeviceAuthorizationResponseParam.EXPIRES_IN));
+                jsonObj.remove(DeviceAuthorizationResponseParam.EXPIRES_IN);
+            }
+        } catch (JSONException e) {
+            LOG.error(e.getMessage(), e);
         }
     }
 
