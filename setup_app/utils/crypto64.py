@@ -114,7 +114,8 @@ class Crypto64:
 
                 for scriptFile in os.listdir(extensionTypeFolder):
                     scriptFilePath = os.path.join(extensionTypeFolder, scriptFile)
-
+                    if not scriptFile.lower().endswith('.py'):
+                        continue
                     extensionScriptName = '%s_%s' % (extensionType, os.path.splitext(scriptFile)[0])
                     extensionScriptName = extensionScriptName.lower()
 
