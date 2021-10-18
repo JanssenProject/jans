@@ -36,10 +36,10 @@ public class TUma {
 		return r.pat(authorizePath, tokenPath, userId, userSecret, umaClientId, umaClientSecret, umaRedirectUri);
 	}
 
-	public static Token newTokenByRefreshToken(URI baseUri, final String tokenPath, final Token p_oldToken,
+	public static Token newTokenByRefreshToken(URI baseUri, final String tokenPath, final Token oldToken,
 			final String umaClientId, final String umaClientSecret) {
 		final TTokenRequest r = new TTokenRequest(baseUri);
-		return r.newTokenByRefreshToken(tokenPath, p_oldToken, umaClientId, umaClientSecret);
+		return r.newTokenByRefreshToken(tokenPath, oldToken, umaClientId, umaClientSecret);
 	}
 
 	public static RPTResponse requestRpt(URI baseUri, String p_rptPath) {
