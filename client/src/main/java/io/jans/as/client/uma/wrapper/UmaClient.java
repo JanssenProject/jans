@@ -46,34 +46,44 @@ public class UmaClient {
         return request(tokenUrl, clientKeyStoreFile, clientKeyStorePassword, clientId, keyId, tokenRequest);
     }
 
+
+    /**
+     * @deprecated use request() method directly
+     */
+    @SuppressWarnings("java:S107")
     @Deprecated
     public static Token requestPat(final String authorizeUrl, final String tokenUrl,
                                    final String umaUserId, final String umaUserSecret,
                                    final String umaClientId, final String umaClientSecret,
-                                   final String umaRedirectUri, String... scopeArray) throws Exception {
+                                   final String umaRedirectUri, String... scopeArray) {
         return request(authorizeUrl, tokenUrl, umaUserId, umaUserSecret, umaClientId, umaClientSecret, umaRedirectUri, UmaScopeType.PROTECTION, scopeArray);
     }
 
-    public static Token requestPat(final String tokenUrl, final String umaClientId, final String umaClientSecret, String... scopeArray) throws Exception {
+    public static Token requestPat(final String tokenUrl, final String umaClientId, final String umaClientSecret, String... scopeArray) {
         return requestPat(tokenUrl, umaClientId, umaClientSecret, null, scopeArray);
     }
 
-    public static Token requestPat(final String tokenUrl, final String umaClientId, final String umaClientSecret, ClientExecutor clientExecutor, String... scopeArray) throws Exception {
+    @SuppressWarnings("java:S1874")
+    public static Token requestPat(final String tokenUrl, final String umaClientId, final String umaClientSecret, ClientExecutor clientExecutor, String... scopeArray) {
         return request(tokenUrl, umaClientId, umaClientSecret, UmaScopeType.PROTECTION, clientExecutor, scopeArray);
     }
 
+    /**
+     * @deprecated use request() method directly
+     */
+    @SuppressWarnings("java:S107")
     @Deprecated
     public static Token request(final String authorizeUrl, final String tokenUrl,
                                 final String umaUserId, final String umaUserSecret,
                                 final String umaClientId, final String umaClientSecret,
-                                final String umaRedirectUri, UmaScopeType p_type, String... scopeArray) throws Exception {
+                                final String umaRedirectUri, UmaScopeType type, String... scopeArray) {
         // 1. Request authorization and receive the authorization code.
         List<ResponseType> responseTypes = new ArrayList<>();
         responseTypes.add(ResponseType.CODE);
         responseTypes.add(ResponseType.ID_TOKEN);
 
         List<String> scopes = new ArrayList<>();
-        scopes.add(p_type.getValue());
+        scopes.add(type.getValue());
         if (scopeArray != null && scopeArray.length > 0) {
             scopes.addAll(Arrays.asList(scopeArray));
         }
@@ -121,13 +131,14 @@ public class UmaClient {
         return null;
     }
 
+    @SuppressWarnings("java:S1874")
     public static Token request(final String tokenUrl, final String umaClientId, final String umaClientSecret, UmaScopeType scopeType,
-                                ClientExecutor clientExecutor, String... scopeArray) throws Exception {
+                                ClientExecutor clientExecutor, String... scopeArray) {
 
-        String scope = scopeType.getValue();
+        StringBuilder scope = new StringBuilder(scopeType.getValue());
         if (scopeArray != null && scopeArray.length > 0) {
             for (String s : scopeArray) {
-                scope = scope + " " + s;
+                scope.append(" ").append(s);
             }
         }
 
@@ -135,7 +146,7 @@ public class UmaClient {
         if (clientExecutor != null) {
             tokenClient.setExecutor(clientExecutor);
         }
-        TokenResponse response = tokenClient.execClientCredentialsGrant(scope, umaClientId, umaClientSecret);
+        TokenResponse response = tokenClient.execClientCredentialsGrant(scope.toString(), umaClientId, umaClientSecret);
 
         if (response.getStatus() == 200) {
             final String patToken = response.getAccessToken();
@@ -148,6 +159,7 @@ public class UmaClient {
         return null;
     }
 
+    @SuppressWarnings("java:S107")
     public static Token requestWithClientSecretJwt(final String tokenUrl,
                                                    final String umaClientId,
                                                    final String umaClientSecret,
@@ -155,19 +167,19 @@ public class UmaClient {
                                                    SignatureAlgorithm signatureAlgorithm,
                                                    String audience,
                                                    UmaScopeType scopeType,
-                                                   String... scopeArray) throws Exception {
+                                                   String... scopeArray) {
 
-        String scope = scopeType.getValue();
+        StringBuilder scope = new StringBuilder(scopeType.getValue());
         if (scopeArray != null && scopeArray.length > 0) {
             for (String s : scopeArray) {
-                scope = scope + " " + s;
+                scope.append(" ").append(s);
             }
         }
 
         TokenRequest request = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
         request.setAuthUsername(umaClientId);
         request.setAuthPassword(umaClientSecret);
-        request.setScope(scope);
+        request.setScope(scope.toString());
         request.setAuthenticationMethod(authenticationMethod);
         request.setAlgorithm(signatureAlgorithm);
         request.setAudience(audience);
@@ -175,7 +187,7 @@ public class UmaClient {
         return request(tokenUrl, request);
     }
 
-    public static Token request(final String tokenUrl, final TokenRequest tokenRequest) throws Exception {
+    public static Token request(final String tokenUrl, final TokenRequest tokenRequest) {
         if (tokenRequest.getGrantType() != GrantType.CLIENT_CREDENTIALS) {
             return null;
         }
@@ -212,7 +224,7 @@ public class UmaClient {
             if (StringHelper.isEmpty(tmpKeyId)) {
                 // Get first key
                 List<String> aliases = cryptoProvider.getKeys();
-                if (aliases.size() > 0) {
+                if (!aliases.isEmpty()) {
                     tmpKeyId = aliases.get(0);
                 }
             }

@@ -70,19 +70,19 @@ public class TTokenRequest {
 				umaRedirectUri, UmaScopeType.PROTECTION);
 	}
 
-	public Token newTokenByRefreshToken(final String tokenPath, final Token p_oldToken, final String umaClientId,
+	public Token newTokenByRefreshToken(final String tokenPath, final Token oldToken, final String umaClientId,
 			final String umaClientSecret) {
-		if (p_oldToken == null || StringUtils.isBlank(p_oldToken.getRefreshToken()) || StringUtils.isBlank(tokenPath)) {
+		if (oldToken == null || StringUtils.isBlank(oldToken.getRefreshToken()) || StringUtils.isBlank(tokenPath)) {
 			throw new IllegalArgumentException("Refresh token or tokenPath is empty.");
 		}
 
-		final Holder<Token> t = new Holder<Token>();
+		final Holder<Token> t = new Holder<>();
 		try {
 			TokenRequest tokenRequest = new TokenRequest(GrantType.REFRESH_TOKEN);
 			tokenRequest.setAuthUsername(umaClientId);
 			tokenRequest.setAuthPassword(umaClientSecret);
-			tokenRequest.setRefreshToken(p_oldToken.getRefreshToken());
-			tokenRequest.setScope(p_oldToken.getScope());
+			tokenRequest.setRefreshToken(oldToken.getRefreshToken());
+			tokenRequest.setScope(oldToken.getScope());
 
 			Builder request = ResteasyClientBuilder.newClient().target(baseUri.toString() + tokenPath).request();
 			request.header("Authorization", "Basic " + tokenRequest.getEncodedCredentials());
