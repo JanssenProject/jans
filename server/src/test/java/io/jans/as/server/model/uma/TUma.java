@@ -84,14 +84,14 @@ public class TUma {
 		return r.requestRptStatus(umaRptStatusPath, rpt);
 	}
 
-	public static <T> T readJsonValue(String p_json, Class<T> p_clazz) {
+	public static <T> T readJsonValue(String json, Class<T> clazz) {
 		try {
-			return ServerUtil.createJsonMapper().readValue(p_json, p_clazz);
+			return ServerUtil.createJsonMapper().readValue(json, clazz);
 		} catch (Exception e) {
 			e.printStackTrace();
 			try {
 				System.out.println("TUMA: Exception happends, try falback");
-				return ServerUtil.jsonMapperWithUnwrapRoot().readValue(p_json, p_clazz);
+				return ServerUtil.jsonMapperWithUnwrapRoot().readValue(json, clazz);
 			} catch (IOException e1) {
 				e1.printStackTrace();
 				return null;
