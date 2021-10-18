@@ -131,14 +131,14 @@ class TRegisterResource {
 		return modifyStatus;
 	}
 
-	public List<String> getResourceList(final Token p_pat, String p_umaRegisterResourcePath) {
-		final List<String> result = new ArrayList<String>();
+	public List<String> getResourceList(final Token pat, String umaRegisterResourcePath) {
+		final List<String> result = new ArrayList<>();
 
 		try {
-			Builder request = ResteasyClientBuilder.newClient().target(baseUri.toString() + p_umaRegisterResourcePath)
+			Builder request = ResteasyClientBuilder.newClient().target(baseUri.toString() + umaRegisterResourcePath)
 					.request();
 			request.header("Accept", UmaConstants.JSON_MEDIA_TYPE);
-			request.header("Authorization", "Bearer " + p_pat.getAccessToken());
+			request.header("Authorization", "Bearer " + pat.getAccessToken());
 			Response response = request.get();
 			String entity = response.readEntity(String.class);
 
@@ -157,14 +157,14 @@ class TRegisterResource {
 		return result;
 	}
 
-	public void deleteResource(final Token p_pat, String p_umaRegisterResourcePath, String p_id) {
-		String path = p_umaRegisterResourcePath + "/" + p_id + "/";
+	public void deleteResource(final Token pat, String p_umaRegisterResourcePath, String id) {
+		String path = p_umaRegisterResourcePath + "/" + id + "/";
 		try {
 
 			Builder request = ResteasyClientBuilder.newClient().target(baseUri.toString() + path).request();
 			// request.addHeader("Accept",
 			// UmaConstants.RESOURCE_SET_STATUS_MEDIA_TYPE);
-			request.header("Authorization", "Bearer " + p_pat.getAccessToken());
+			request.header("Authorization", "Bearer " + pat.getAccessToken());
 
 			Response response = request.delete();
 			String entity = response.readEntity(String.class);
