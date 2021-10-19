@@ -1419,7 +1419,7 @@ public class RegisterRequest extends BaseRequest {
         result.setBackchannelLogoutSessionRequired(requestObject.optBoolean(BACKCHANNEL_LOGOUT_SESSION_REQUIRED.toString()));
         result.setAccessTokenLifetime(integerOrNull(requestObject, ACCESS_TOKEN_LIFETIME.toString()));
         result.setParLifetime(integerOrNull(requestObject, PAR_LIFETIME.toString()));
-        result.setRequirePar(requestObject.has(REQUIRE_PAR.toString()) ? requestObject.getBoolean(REQUIRE_PAR.toString()) : null);
+        result.setRequirePar(booleanOrNull(requestObject, REQUIRE_PAR.toString()));
         result.setDefaultMaxAge(integerOrNull(requestObject, DEFAULT_MAX_AGE.toString()));
         result.setTlsClientAuthSubjectDn(requestObject.optString(TLS_CLIENT_AUTH_SUBJECT_DN.toString()));
         result.setAllowSpontaneousScopes(requestObject.optBoolean(ALLOW_SPONTANEOUS_SCOPES.toString()));
@@ -1448,7 +1448,7 @@ public class RegisterRequest extends BaseRequest {
         result.setClaims(extractListByKey(requestObject, CLAIMS.toString()));
         result.setResponseTypesStrings(extractListByKey(requestObject, RESPONSE_TYPES.toString()));
         result.setGrantTypes(extractGrantTypes(requestObject));
-        result.setApplicationType(ApplicationType.fromString(requestObject.getString(APPLICATION_TYPE.toString())));
+        result.setApplicationType(ApplicationType.fromString(requestObject.optString(APPLICATION_TYPE.toString())));
         result.setContacts(extractListByKey(requestObject, CONTACTS.toString()));
         result.setClientName(requestObject.optString(CLIENT_NAME.toString()));
         result.setIdTokenTokenBindingCnf(requestObject.optString(ID_TOKEN_TOKEN_BINDING_CNF.toString(), ""));
@@ -1459,13 +1459,13 @@ public class RegisterRequest extends BaseRequest {
         result.setJwksUri(requestObject.optString(JWKS_URI.toString()));
         result.setJwks(requestObject.optString(JWKS.toString()));
         result.setSectorIdentifierUri(requestObject.optString(SECTOR_IDENTIFIER_URI.toString()));
-        result.setSubjectType(SubjectType.fromString(requestObject.getString(SUBJECT_TYPE.toString())));
+        result.setSubjectType(SubjectType.fromString(requestObject.optString(SUBJECT_TYPE.toString())));
         result.setSoftwareId(requestObject.optString(SOFTWARE_ID.toString()));
         result.setSoftwareVersion(requestObject.optString(SOFTWARE_VERSION.toString()));
         result.setSoftwareStatement(requestObject.optString(SOFTWARE_STATEMENT.toString()));
-        result.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.fromString(requestObject.getString(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString())));
+        result.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.fromString(requestObject.optString(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString())));
         result.setBackchannelClientNotificationEndpoint(requestObject.optString(BACKCHANNEL_CLIENT_NOTIFICATION_ENDPOINT.toString()));
-        result.setBackchannelAuthenticationRequestSigningAlg(AsymmetricSignatureAlgorithm.fromString(requestObject.getString(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString())));
+        result.setBackchannelAuthenticationRequestSigningAlg(AsymmetricSignatureAlgorithm.fromString(requestObject.optString(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString())));
         result.setBackchannelUserCodeParameter(booleanOrNull(requestObject, BACKCHANNEL_USER_CODE_PARAMETER.toString()));
 
         return result;
