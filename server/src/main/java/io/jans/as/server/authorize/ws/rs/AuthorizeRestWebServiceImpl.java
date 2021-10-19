@@ -264,10 +264,14 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             codeChallenge = par.getAttributes().getCodeChallenge();
             codeChallengeMethod = par.getAttributes().getCodeChallengeMethod();
 
+            if (StringUtils.isNotBlank(par.getAttributes().getState())) {
+                state = par.getAttributes().getState();
+            } else {
+                state = "";
+            }
+
             if (StringUtils.isNotBlank(par.getAttributes().getNonce()))
                 nonce = par.getAttributes().getNonce();
-            if (StringUtils.isNotBlank(par.getAttributes().getState()))
-                state = par.getAttributes().getState();
             if (StringUtils.isNotBlank(par.getAttributes().getSessionId()))
                 sessionId = par.getAttributes().getSessionId();
             if (StringUtils.isNotBlank(par.getAttributes().getCustomResponseHeaders()))
