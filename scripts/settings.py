@@ -17,6 +17,11 @@ LOGGING_CONFIG = {
             "level": "INFO",
             "propagate": True,
         },
+        "entrypoint": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
         # "wait": {
         #     "handlers": ["console"],
         #     "level": "INFO",

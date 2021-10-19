@@ -1,3 +1,5 @@
+import json
+import logging.config
 import os
 
 from ruamel.yaml import safe_load
@@ -17,6 +19,10 @@ from jans.pycloudlib.utils import get_random_chars
 from jans.pycloudlib.utils import exec_cmd
 from jans.pycloudlib.utils import generate_ssl_certkey
 
+from settings import LOGGING_CONFIG
+
+logging.config.dictConfig(LOGGING_CONFIG)
+logger = logging.getLogger("entrypoint")
 
 manager = get_manager()
 
@@ -152,6 +158,23 @@ def render_client_api_config():
         if addr
     ]
 
+    log_config = configure_logging()
+    data["logging"]["loggers"]["io.jans"] = log_config["client_api_log_level"]
+
+    if log_config["client_api_log_target"] == "FILE":
+        data["logging"]["appenders"] = [
+            {
+                "type": "file",
+                "threshold": log_config["client_api_log_level"],
+                "logFormat": "%-6level [%d{HH:mm:ss.SSS}] [%t] %logger{5} - %X{code} %msg %n",
+                "currentLogFilename": "/opt/client-api/logs/client-api.log",
+                "archivedLogFilenamePattern": "/opt/client-api/logs/client-api-%d{yyyy-MM-dd}-%i.log.gz",
+                "archivedFileCount": 7,
+                "timeZone": "UTC",
+                "maxFileSize": "10MB",
+            },
+        ]
+
     # write config
     with open("/opt/client-api/conf/client-api-server.yml", "w") as f:
         f.write(safe_dump(data))
@@ -193,6 +216,50 @@ def main():
 
     # if not os.path.isfile("/opt/client-api/client-api-server.yml"):
     render_client_api_config()
+
+
+def configure_logging():
+    # defaults
+    config = {
+        "client_api_log_target": "STDOUT",
+        "client_api_log_level": "INFO",
+    }
+
+    # pre-populate custom config; format is JSON string of ``dict``
+    try:
+        custom_config = json.loads(os.environ.get("CN_CLIENT_API_APP_LOGGERS", "{}"))
+    except json.decoder.JSONDecodeError as exc:
+        logger.warning(f"Unable to load logging configuration from environment variable; reason={exc}; fallback to defaults")
+        custom_config = {}
+
+    # ensure custom config is ``dict`` type
+    if not isinstance(custom_config, dict):
+        logger.warning("Invalid data type for CN_CLIENT_API_APP_LOGGERS; fallback to defaults")
+        custom_config = {}
+
+    # list of supported levels; OFF is not supported
+    log_levels = ("FATAL", "ERROR", "WARN", "INFO", "DEBUG", "TRACE",)
+
+    # list of supported outputs
+    log_targets = ("STDOUT", "FILE",)
+
+    for k, v in custom_config.items():
+        if k not in config:
+            continue
+
+        if k.endswith("_log_level") and v not in log_levels:
+            logger.warning(f"Invalid {v} log level for {k}; fallback to defaults")
+            v = config[k]
+
+        if k.endswith("_log_target") and v not in log_targets:
+            logger.warning(f"Invalid {v} log output for {k}; fallback to defaults")
+            v = config[k]
+
+        # update the config
+        config[k] = v
+
+    # finalize
+    return config
 
 
 if __name__ == "__main__":

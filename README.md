@@ -68,3 +68,31 @@ The following environment variables are supported by the container:
 - `CN_JAVA_OPTIONS`: Java options passed to entrypoint, i.e. `-Xmx1024m` (default to empty-string).
 - `GOOGLE_PROJECT_ID`: Google Project ID (default to empty string). Used when `CN_CONFIG_ADAPTER` or `CN_SECRET_ADAPTER` set to `google`.
 - `GOOGLE_APPLICATION_CREDENTIALS`: Path to Google credentials JSON file (default to `/etc/jans/conf/google-credentials.json`). Used when `CN_CONFIG_ADAPTER` or `CN_SECRET_ADAPTER` set to `google`.
+- `CN_CLIENT_API_APP_LOGGERS`: Custom logging configuration in JSON-string format with hash type (see [Configure app loggers](#configure-app-loggers) section for details).
+
+### Configure app loggers
+
+App loggers can be configured to define where the logs will be redirected and what is the level the logs should be displayed.
+
+Supported redirect target:
+
+- `STDOUT`
+- `FILE`
+
+Supported level:
+
+- `FATAL`
+- `ERROR`
+- `WARN`
+- `INFO`
+- `DEBUG`
+- `TRACE`
+
+The following key-value pairs are the defaults:
+
+```json
+{
+    "client_api_log_target": "STDOUT",
+    "client_api_log_level": "INFO"
+}
+```

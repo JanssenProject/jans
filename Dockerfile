@@ -139,11 +139,11 @@ LABEL name="Client API" \
     maintainer="Janssen Project <support@jans.io>" \
     vendor="Janssen" \
     version="1.0.0" \
-    release="b10" \
+    release="b11" \
     summary="Janssen Client API" \
     description="Client software to secure apps with OAuth 2.0, OpenID Connect, and UMA"
 
-RUN mkdir -p /etc/certs /app/templates/ /deploy /etc/jans/conf
+RUN mkdir -p /etc/certs /app/templates/ /deploy /etc/jans/conf /opt/client-api/logs
 COPY scripts /app/scripts
 COPY templates/*.tmpl /app/templates/
 RUN chmod +x /app/scripts/entrypoint.sh
@@ -156,10 +156,12 @@ RUN chown -R 1000:1000 /app/templates \
     && chown -R 1000:1000 /etc/jans \
     && chown -R 1000:1000 /deploy \
     && chown -R 1000:1000 /tmp \
+    && chown -R 1000:1000 /opt/client-api \
     && chgrp -R 0 /tmp && chmod -R g=u /tmp \
     && chgrp -R 0 /deploy && chmod -R g=u /deploy \
     && chgrp -R 0 /etc/certs && chmod -R g=u /etc/certs \
     && chgrp -R 0 /etc/jans && chmod -R g=u /etc/jans \
+    && chgrp -R 0 /opt/client-api && chmod -R g=u /opt/client-api \
     && chmod -R +w /etc/ssl/certs/java/cacerts && chgrp -R 0 /etc/ssl/certs/java/cacerts && chmod -R g=u /etc/ssl/certs/java/cacerts
 
 USER 1000
