@@ -133,7 +133,6 @@ public class ParRestWebService {
             redirectUriResponse.setFapiCompatible(appConfiguration.isFapi());
 
             parValidator.validateRequestUriIsAbsent(requestUri);
-            authorizeRestWebServiceValidator.validatePkce(codeChallenge, redirectUriResponse);
 
             final Integer parLifetime = client.getAttributes().getParLifetime();
 
@@ -167,6 +166,7 @@ public class ParRestWebService {
             par.getAttributes().setCustomParameters(requestParameterService.getCustomParameters(QueryStringDecoder.decode(httpRequest.getQueryString())));
 
             parValidator.validateRequestObject(redirectUriResponse, par, client);
+            authorizeRestWebServiceValidator.validatePkce(codeChallenge, redirectUriResponse);
 
             parService.persist(par);
 
