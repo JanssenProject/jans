@@ -23,5 +23,6 @@ exec java \
     -Dserver.base=/opt/jans/jetty/jans-config-api \
     -Dlog.base=/opt/jans/jetty/jans-config-api \
     -Djava.io.tmpdir=/opt/jetty/temp \
+    -Dlog4j2.configurationFile=resources/log4j2.xml \
     ${CN_JAVA_OPTIONS} \
     -jar /opt/jetty/start.jar jetty.http.port=8074

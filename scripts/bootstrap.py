@@ -1,5 +1,8 @@
+import json
+import logging.config
 import os
 import re
+from string import Template
 
 from jans.pycloudlib import get_manager
 from jans.pycloudlib.persistence import render_couchbase_properties
@@ -15,6 +18,10 @@ from jans.pycloudlib.utils import cert_to_truststore
 from jans.pycloudlib.utils import safe_render
 
 from utils import get_injected_urls
+from settings import LOGGING_CONFIG
+
+logging.config.dictConfig(LOGGING_CONFIG)
+logger = logging.getLogger("entrypoint")
 
 
 def render_app_properties(manager):
@@ -99,6 +106,7 @@ def main():
     modify_jetty_xml()
     modify_webdefault_xml()
     modify_server_ini()
+    configure_logging()
 
 
 def modify_jetty_xml():
@@ -142,6 +150,63 @@ def modify_server_ini():
             "jetty.httpConfig.sendServerVersion=false",
         ])
         f.write(updates)
+
+
+def configure_logging():
+    # default config
+    config = {
+        "config_api_log_target": "STDOUT",
+        "config_api_log_level": "INFO",
+    }
+
+    # pre-populate custom config; format is JSON string of ``dict``
+    try:
+        custom_config = json.loads(os.environ.get("CN_CONFIG_API_APP_LOGGERS", "{}"))
+    except json.decoder.JSONDecodeError as exc:
+        logger.warning(f"Unable to load logging configuration from environment variable; reason={exc}; fallback to defaults")
+        custom_config = {}
+
+    # ensure custom config is ``dict`` type
+    if not isinstance(custom_config, dict):
+        logger.warning("Invalid data type for CN_CONFIG_API_APP_LOGGERS; fallback to defaults")
+        custom_config = {}
+
+    # list of supported levels; OFF is not supported
+    log_levels = ("FATAL", "ERROR", "WARN", "INFO", "DEBUG", "TRACE",)
+
+    # list of supported outputs
+    log_targets = ("STDOUT", "FILE",)
+
+    for k, v in custom_config.items():
+        if k not in config:
+            continue
+
+        if k.endswith("_log_level") and v not in log_levels:
+            logger.warning(f"Invalid {v} log level for {k}; fallback to defaults")
+            v = config[k]
+
+        if k.endswith("_log_target") and v not in log_targets:
+            logger.warning(f"Invalid {v} log output for {k}; fallback to defaults")
+            v = config[k]
+
+        # update the config
+        config[k] = v
+
+    # mapping between the ``log_target`` value and their appenders
+    file_aliases = {
+        "config_api_log_target": "FILE",
+    }
+    for key, value in file_aliases.items():
+        if config[key] == "FILE":
+            config[key] = value
+
+    logfile = "/opt/jans/jetty/jans-config-api/resources/log4j2.xml"
+    with open(logfile) as f:
+        txt = f.read()
+
+    tmpl = Template(txt)
+    with open(logfile, "w") as f:
+        f.write(tmpl.safe_substitute(config))
 
 
 if __name__ == "__main__":

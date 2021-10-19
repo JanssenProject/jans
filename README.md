@@ -69,3 +69,31 @@ The following environment variables are supported by the container:
 - `GOOGLE_APPLICATION_CREDENTIALS`: Path to Google credentials JSON file (default to `/etc/jans/conf/google-credentials.json`). Used when `CN_CONFIG_ADAPTER` or `CN_SECRET_ADAPTER` set to `google`.
 - `CN_GOOGLE_SPANNER_INSTANCE_ID`: Google Spanner instance ID.
 - `CN_GOOGLE_SPANNER_DATABASE_ID`: Google Spanner database ID.
+- `CN_CONFIG_API_APP_LOGGERS`: Custom logging configuration in JSON-string format with hash type (see [Configure app loggers](#configure-app-loggers) section for details).
+
+### Configure app loggers
+
+App loggers can be configured to define where the logs will be redirected and what is the level the logs should be displayed.
+
+Supported redirect target:
+
+- `STDOUT`
+- `FILE`
+
+Supported level:
+
+- `FATAL`
+- `ERROR`
+- `WARN`
+- `INFO`
+- `DEBUG`
+- `TRACE`
+
+The following key-value pairs are the defaults:
+
+```json
+{
+    "config_api_log_target": "STDOUT",
+    "config_api_log_level": "INFO"
+}
+```
