@@ -20,5 +20,6 @@ exec java \
     -Dlog.base=/opt/jans/jetty/jans-scim \
     -Djava.io.tmpdir=/tmp \
     -Dpython.home=/opt/jython \
+    -Dlog4j2.configurationFile=resources/log4j2.xml \
     ${CN_JAVA_OPTIONS} \
     -jar /opt/jetty/start.jar

@@ -65,3 +65,39 @@ The following environment variables are supported by the container:
 - `CN_JAVA_OPTIONS`: Java options passed to entrypoint, i.e. `-Xmx1024m` (default to empty-string).
 - `GOOGLE_PROJECT_ID`: Google Project ID (default to empty string). Used when `CN_CONFIG_ADAPTER` or `CN_SECRET_ADAPTER` set to `google`.
 - `GOOGLE_APPLICATION_CREDENTIALS`: Path to Google credentials JSON file (default to `/etc/jans/conf/google-credentials.json`). Used when `CN_CONFIG_ADAPTER` or `CN_SECRET_ADAPTER` set to `google`.
+- `CN_SCIM_APP_LOGGERS`: Custom logging configuration in JSON-string format with hash type (see [Configure app loggers](#configure-app-loggers) section for details).
+
+### Configure app loggers
+
+App loggers can be configured to define where the logs will be redirected and what is the level the logs should be displayed.
+
+Supported redirect target:
+
+- `STDOUT`
+- `FILE`
+
+Supported level:
+
+- `FATAL`
+- `ERROR`
+- `WARN`
+- `INFO`
+- `DEBUG`
+- `TRACE`
+
+The following key-value pairs are the defaults:
+
+```json
+{
+    "scim_log_target": "STDOUT",
+    "scim_log_level": "INFO",
+    "persistence_log_target": "FILE",
+    "persistence_log_level": "INFO",
+    "persistence_duration_log_target": "FILE",
+    "persistence_duration_log_level": "INFO",
+    "ldap_stats_log_target": "FILE",
+    "ldap_stats_log_level": "INFO",
+    "script_log_target": "FILE",
+    "script_log_level": "INFO",
+}
+```

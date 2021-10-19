@@ -44,7 +44,7 @@ RUN wget -q https://ox.gluu.org/maven/org/gluufederation/jython-installer/${JYTH
 # ====
 
 ENV CN_VERSION=1.0.0-SNAPSHOT
-ENV CN_BUILD_DATE='2021-10-08 04:20'
+ENV CN_BUILD_DATE='2021-10-14 12:53'
 ENV CN_SOURCE_URL=https://maven.jans.io/maven/io/jans/jans-scim-server/${CN_VERSION}/jans-scim-server-${CN_VERSION}.war
 
 # Install SCIM
@@ -170,6 +170,7 @@ RUN mkdir -p /etc/certs /deploy \
 
 COPY jetty/jans-scim.xml ${JETTY_BASE}/jans-scim/webapps/
 COPY jetty/jetty-env.xml ${JETTY_BASE}/jans-scim/webapps/jans-scim/WEB-INF/
+COPY jetty/log4j2.xml ${JETTY_BASE}/jans-scim/resources/
 COPY conf/*.tmpl /app/templates/
 
 COPY scripts /app/scripts
