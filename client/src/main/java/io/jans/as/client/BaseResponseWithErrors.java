@@ -70,7 +70,7 @@ public abstract class BaseResponseWithErrors<T extends IErrorType> extends BaseR
             return claimMap.get(claimName);
         }
 
-        return Collections.emptyList();
+        return null;
     }
 
     @Nullable
