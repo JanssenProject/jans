@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<Configuration packages="org.gluu.log">
+    <Appenders>
+        <Console name="STDOUT" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{dd-MM HH:mm:ss.SSS} %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
+        </Console>
+
+        <RollingFile name="FILE" fileName="${sys:log.base}/logs/fido2.log" filePattern="${sys:log.base}/logs/fido2-%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout pattern="%d{dd-MM HH:mm:ss.SSS} %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
+
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true" />
+                <SizeBasedTriggeringPolicy size="250 MB" />
+            </Policies>
+
+            <DefaultRolloverStrategy max="15" />
+        </RollingFile>
+
+		<RollingFile name="PERSISTENCE_FILE" fileName="${sys:log.base}/logs/fido2_persistence.log" filePattern="${sys:log.base}/logs/fido2_persistence-%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout pattern="%d{dd-MM HH:mm:ss.SSS} %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
+
+			<Policies>
+				<TimeBasedTriggeringPolicy interval="1" modulate="true" />
+				<SizeBasedTriggeringPolicy size="250 MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="15" />
+		</RollingFile>
+    </Appenders>
+
+    <Loggers>
+		<!-- ############### Gluu ################# -->
+		<Logger name="io.jans" level="INFO" />
+
+        <Logger name="io.jans.fido2" level="$fido2_log_level">
+            <AppenderRef ref="$fido2_log_target" />
+        </Logger>
+
+		<Logger name="io.jans.orm" level="$persistence_log_level" additivity="false">
+			<AppenderRef ref="$persistence_log_target" />
+		</Logger>
+
+		<Logger name="com.unboundid.ldap.sdk.LDAPConnection" level="$persistence_log_level" additivity="false">
+			<AppenderRef ref="$persistence_log_target" />
+		</Logger>
+
+		<logger name="com.couchbase.client" level="$persistence_log_level" additivity="false">
+			<AppenderRef ref="$persistence_log_target" />
+		</logger>
+
+        <Root level="INFO">
+			<AppenderRef ref="STDOUT" />
+        </Root>
+    </Loggers>
+
+</Configuration>

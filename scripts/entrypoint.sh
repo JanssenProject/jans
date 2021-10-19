@@ -19,5 +19,6 @@ exec java \
     -Dserver.base=/opt/jans/jetty/jans-fido2 \
     -Dlog.base=/opt/jans/jetty/jans-fido2 \
     -Djava.io.tmpdir=/tmp \
+    -Dlog4j2.configurationFile=resources/log4j2.xml \
     ${CN_JAVA_OPTIONS} \
     -jar /opt/jetty/start.jar

@@ -34,7 +34,7 @@ EXPOSE 8080
 # =====
 
 ENV CN_VERSION=1.0.0-SNAPSHOT
-ENV CN_BUILD_DATE='2021-10-08 09:14'
+ENV CN_BUILD_DATE='2021-10-15 14:42'
 ENV CN_SOURCE_URL=https://maven.jans.io/maven/io/jans/jans-fido2-server/${CN_VERSION}/jans-fido2-server-${CN_VERSION}.war
 
 # Install FIDO2
@@ -160,6 +160,7 @@ RUN mkdir -p /etc/certs /deploy \
 
 COPY jetty/jans-fido2.xml ${JETTY_BASE}/jans-fido2/webapps/
 COPY jetty/jetty-env.xml ${JETTY_BASE}/jans-fido2/webapps/jans-fido2/WEB-INF/
+COPY jetty/log4j2.xml ${JETTY_BASE}/jans-fido2/resources/
 COPY conf/*.tmpl /app/templates/
 COPY conf/fido2 /etc/jans/conf/fido2
 RUN mkdir -p /etc/jans/conf/fido2/mds/cert \
