@@ -39,6 +39,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static io.jans.as.client.util.ClientUtil.booleanOrNull;
+import static io.jans.as.client.util.ClientUtil.extractListByKey;
+import static io.jans.as.client.util.ClientUtil.integerOrNull;
 import static io.jans.as.model.register.RegisterRequestParam.*;
 import static io.jans.as.model.util.StringUtils.*;
 
@@ -150,18 +153,18 @@ public class RegisterRequest extends BaseRequest {
         setContentType(MediaType.APPLICATION_JSON);
         setMediaType(MediaType.APPLICATION_JSON);
 
-        this.redirectUris = new ArrayList<String>();
-        this.claimsRedirectUris = new ArrayList<String>();
-        this.responseTypes = new ArrayList<String>();
-        this.grantTypes = new ArrayList<GrantType>();
-        this.contacts = new ArrayList<String>();
-        this.defaultAcrValues = new ArrayList<String>();
-        this.postLogoutRedirectUris = new ArrayList<String>();
-        this.requestUris = new ArrayList<String>();
-        this.authorizedOrigins = new ArrayList<String>();
-        this.scope = new ArrayList<String>();
-        this.claims = new ArrayList<String>();
-        this.customAttributes = new HashMap<String, String>();
+        this.redirectUris = new ArrayList<>();
+        this.claimsRedirectUris = new ArrayList<>();
+        this.responseTypes = new ArrayList<>();
+        this.grantTypes = new ArrayList<>();
+        this.contacts = new ArrayList<>();
+        this.defaultAcrValues = new ArrayList<>();
+        this.postLogoutRedirectUris = new ArrayList<>();
+        this.requestUris = new ArrayList<>();
+        this.authorizedOrigins = new ArrayList<>();
+        this.scope = new ArrayList<>();
+        this.claims = new ArrayList<>();
+        this.customAttributes = new HashMap<>();
     }
 
     /**
@@ -1164,8 +1167,8 @@ public class RegisterRequest extends BaseRequest {
         return httpMethod;
     }
 
-    public void setHttpMethod(String p_httpMethod) {
-        httpMethod = p_httpMethod;
+    public void setHttpMethod(String httpMethod) {
+        this.httpMethod = httpMethod;
     }
 
     /**
@@ -1178,9 +1181,9 @@ public class RegisterRequest extends BaseRequest {
         return Collections.unmodifiableMap(this.customAttributes);
     }
 
-    public void addCustomAttribute(String p_name, String p_value) {
-        if (RegisterRequestParam.isCustomParameterValid(p_name)) {
-            this.customAttributes.put(p_name, p_value);
+    public void addCustomAttribute(String name, String value) {
+        if (RegisterRequestParam.isCustomParameterValid(name)) {
+            this.customAttributes.put(name, value);
         }
     }
 
@@ -1398,172 +1401,55 @@ public class RegisterRequest extends BaseRequest {
     }
 
     public static RegisterRequest fromJson(JSONObject requestObject) throws JSONException {
-        final List<String> redirectUris = new ArrayList<>();
-        if (requestObject.has(REDIRECT_URIS.toString())) {
-            JSONArray redirectUrisJsonArray = requestObject.getJSONArray(REDIRECT_URIS.toString());
-            for (int i = 0; i < redirectUrisJsonArray.length(); i++) {
-                String redirectionUri = redirectUrisJsonArray.getString(i);
-                redirectUris.add(redirectionUri);
-            }
-        }
-
-        final List<String> claimRedirectUris = new ArrayList<String>();
-        if (requestObject.has(CLAIMS_REDIRECT_URIS.toString())) {
-            JSONArray jsonArray = requestObject.getJSONArray(CLAIMS_REDIRECT_URIS.toString());
-            for (int i = 0; i < jsonArray.length(); i++) {
-                String uri = jsonArray.getString(i);
-                claimRedirectUris.add(uri);
-            }
-        }
-
-        final Set<String> responseTypes = new HashSet<String>();
-        if (requestObject.has(RESPONSE_TYPES.toString())) {
-            JSONArray responseTypesJsonArray = requestObject.getJSONArray(RESPONSE_TYPES.toString());
-            for (int i = 0; i < responseTypesJsonArray.length(); i++) {
-                responseTypes.add(responseTypesJsonArray.getString(i));
-            }
-        }
-
-        final Set<GrantType> grantTypes = new HashSet<GrantType>();
-        if (requestObject.has(GRANT_TYPES.toString())) {
-            JSONArray grantTypesJsonArray = requestObject.getJSONArray(GRANT_TYPES.toString());
-            for (int i = 0; i < grantTypesJsonArray.length(); i++) {
-                GrantType gt = GrantType.fromString(grantTypesJsonArray.getString(i));
-                if (gt != null) {
-                    grantTypes.add(gt);
-                }
-            }
-        }
-
-        final List<String> contacts = new ArrayList<String>();
-        if (requestObject.has(CONTACTS.toString())) {
-            JSONArray contactsJsonArray = requestObject.getJSONArray(CONTACTS.toString());
-            for (int i = 0; i < contactsJsonArray.length(); i++) {
-                contacts.add(contactsJsonArray.getString(i));
-            }
-        }
-
-        final List<String> defaultAcrValues = new ArrayList<String>();
-        if (requestObject.has(DEFAULT_ACR_VALUES.toString())) {
-            JSONArray defaultAcrValuesJsonArray = requestObject.getJSONArray(DEFAULT_ACR_VALUES.toString());
-            for (int i = 0; i < defaultAcrValuesJsonArray.length(); i++) {
-                defaultAcrValues.add(defaultAcrValuesJsonArray.getString(i));
-            }
-        }
-
-        final List<String> postLogoutRedirectUris = new ArrayList<String>();
-        if (requestObject.has(POST_LOGOUT_REDIRECT_URIS.toString())) {
-            JSONArray postLogoutRedirectUrisJsonArray = requestObject.getJSONArray(POST_LOGOUT_REDIRECT_URIS.toString());
-            for (int i = 0; i < postLogoutRedirectUrisJsonArray.length(); i++) {
-                postLogoutRedirectUris.add(postLogoutRedirectUrisJsonArray.getString(i));
-            }
-        }
-
-        final List<String> requestUris = new ArrayList<String>();
-        if (requestObject.has(REQUEST_URIS.toString())) {
-            JSONArray requestUrisJsonArray = requestObject.getJSONArray(REQUEST_URIS.toString());
-            for (int i = 0; i < requestUrisJsonArray.length(); i++) {
-                requestUris.add(requestUrisJsonArray.getString(i));
-            }
-        }
-
-        final List<String> authorizedOrigins = new ArrayList<String>();
-        if (requestObject.has(AUTHORIZED_ORIGINS.toString())) {
-            JSONArray authorizedOriginsJsonArray = requestObject.getJSONArray((AUTHORIZED_ORIGINS.toString()));
-            for (int i = 0; i < authorizedOriginsJsonArray.length(); i++) {
-                authorizedOrigins.add(authorizedOriginsJsonArray.getString(i));
-            }
-        }
-
-        final List<String> scope = new ArrayList<String>();
-        if (requestObject.has(SCOPE.toString())) {
-            String scopeString = requestObject.getString(SCOPE.toString());
-            String[] scopeArray = scopeString.split(" ");
-            for (String s : scopeArray) {
-                if (StringUtils.isNotBlank(s)) {
-                    scope.add(s);
-                }
-            }
-        }
-
-        final List<String> claims = new ArrayList<String>();
-        if (requestObject.has(CLAIMS.toString())) {
-            String claimsString = requestObject.getString(CLAIMS.toString());
-            String[] claimsArray = claimsString.split(" ");
-            for (String c : claimsArray) {
-                if (StringUtils.isNotBlank(c)) {
-                    claims.add(c);
-                }
-            }
-        }
-
-
         final RegisterRequest result = new RegisterRequest();
 
         JsonApplier.getInstance().apply(requestObject, result);
 
         result.setJsonObject(requestObject);
-        result.setRequestUris(requestUris);
-        result.setAuthorizedOrigins(authorizedOrigins);
-        result.setClaimsRedirectUris(claimRedirectUris);
+        result.setRequestUris(extractListByKey(requestObject, REQUEST_URIS.toString()));
+        result.setAuthorizedOrigins(extractListByKey(requestObject, AUTHORIZED_ORIGINS.toString()));
+        result.setClaimsRedirectUris(extractListByKey(requestObject, CLAIMS_REDIRECT_URIS.toString()));
         result.setInitiateLoginUri(requestObject.optString(INITIATE_LOGIN_URI.toString()));
-        result.setPostLogoutRedirectUris(postLogoutRedirectUris);
-        result.setDefaultAcrValues(defaultAcrValues);
-        result.setRequireAuthTime(requestObject.has(REQUIRE_AUTH_TIME.toString()) && requestObject.getBoolean(REQUIRE_AUTH_TIME.toString()));
+        result.setPostLogoutRedirectUris(extractListByKey(requestObject, POST_LOGOUT_REDIRECT_URIS.toString()));
+        result.setDefaultAcrValues(extractListByKey(requestObject, DEFAULT_ACR_VALUES.toString()));
+        result.setRequireAuthTime(requestObject.optBoolean(REQUIRE_AUTH_TIME.toString()));
         result.setFrontChannelLogoutUri(requestObject.optString(FRONT_CHANNEL_LOGOUT_URI.toString()));
         result.setFrontChannelLogoutSessionRequired(requestObject.optBoolean(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString()));
-        result.setBackchannelLogoutUris(extractList(requestObject, BACKCHANNEL_LOGOUT_URI.toString()));
+        result.setBackchannelLogoutUris(extractListByKey(requestObject, BACKCHANNEL_LOGOUT_URI.toString()));
         result.setBackchannelLogoutSessionRequired(requestObject.optBoolean(BACKCHANNEL_LOGOUT_SESSION_REQUIRED.toString()));
-        result.setAccessTokenLifetime(requestObject.has(ACCESS_TOKEN_LIFETIME.toString()) ?
-                requestObject.getInt(ACCESS_TOKEN_LIFETIME.toString()) : null);
-        result.setParLifetime(requestObject.has(PAR_LIFETIME.toString()) ? requestObject.getInt(PAR_LIFETIME.toString()) : null);
+        result.setAccessTokenLifetime(integerOrNull(requestObject, ACCESS_TOKEN_LIFETIME.toString()));
+        result.setParLifetime(integerOrNull(requestObject, PAR_LIFETIME.toString()));
         result.setRequirePar(requestObject.has(REQUIRE_PAR.toString()) ? requestObject.getBoolean(REQUIRE_PAR.toString()) : null);
-        result.setDefaultMaxAge(requestObject.has(DEFAULT_MAX_AGE.toString()) ?
-                requestObject.getInt(DEFAULT_MAX_AGE.toString()) : null);
+        result.setDefaultMaxAge(integerOrNull(requestObject, DEFAULT_MAX_AGE.toString()));
         result.setTlsClientAuthSubjectDn(requestObject.optString(TLS_CLIENT_AUTH_SUBJECT_DN.toString()));
         result.setAllowSpontaneousScopes(requestObject.optBoolean(ALLOW_SPONTANEOUS_SCOPES.toString()));
-        result.setSpontaneousScopes(ClientUtil.extractListByKey(requestObject, SPONTANEOUS_SCOPES.toString()));
+        result.setSpontaneousScopes(extractListByKey(requestObject, SPONTANEOUS_SCOPES.toString()));
         result.setRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims(requestObject.optBoolean(RUN_INTROSPECTION_SCRIPT_BEFORE_ACCESS_TOKEN_CREATION_AS_JWT_AND_INCLUDE_CLAIMS.toString()));
         result.setKeepClientAuthorizationAfterExpiration(requestObject.optBoolean(KEEP_CLIENT_AUTHORIZATION_AFTER_EXPIRATION.toString()));
         result.setRptAsJwt(requestObject.optBoolean(RPT_AS_JWT.toString()));
         result.setAccessTokenAsJwt(requestObject.optBoolean(ACCESS_TOKEN_AS_JWT.toString()));
         result.setAccessTokenSigningAlg(SignatureAlgorithm.fromString(requestObject.optString(ACCESS_TOKEN_SIGNING_ALG.toString())));
-        result.setAuthorizationSignedResponseAlg(requestObject.has(AUTHORIZATION_SIGNED_RESPONSE_ALG.toString()) ?
-                SignatureAlgorithm.fromString(requestObject.optString(AUTHORIZATION_SIGNED_RESPONSE_ALG.toString())) : null);
-        result.setAuthorizationEncryptedResponseAlg(requestObject.has(AUTHORIZATION_ENCRYPTED_RESPONSE_ALG.toString()) ?
-                KeyEncryptionAlgorithm.fromName(requestObject.optString(AUTHORIZATION_ENCRYPTED_RESPONSE_ALG.toString())) : null);
-        result.setAuthorizationEncryptedResponseEnc(requestObject.has(AUTHORIZATION_ENCRYPTED_RESPONSE_ENC.toString()) ?
-                BlockEncryptionAlgorithm.fromName(requestObject.optString(AUTHORIZATION_ENCRYPTED_RESPONSE_ENC.toString())) : null);
-        result.setIdTokenSignedResponseAlg(requestObject.has(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()) ?
-                SignatureAlgorithm.fromString(requestObject.optString(ID_TOKEN_SIGNED_RESPONSE_ALG.toString())) : null);
-        result.setIdTokenEncryptedResponseAlg(requestObject.has(ID_TOKEN_ENCRYPTED_RESPONSE_ALG.toString()) ?
-                KeyEncryptionAlgorithm.fromName(requestObject.optString(ID_TOKEN_ENCRYPTED_RESPONSE_ALG.toString())) : null);
-        result.setIdTokenEncryptedResponseEnc(requestObject.has(ID_TOKEN_ENCRYPTED_RESPONSE_ENC.toString()) ?
-                BlockEncryptionAlgorithm.fromName(requestObject.optString(ID_TOKEN_ENCRYPTED_RESPONSE_ENC.toString())) : null);
-        result.setUserInfoSignedResponseAlg(requestObject.has(USERINFO_SIGNED_RESPONSE_ALG.toString()) ?
-                SignatureAlgorithm.fromString(requestObject.optString(USERINFO_SIGNED_RESPONSE_ALG.toString())) : null);
-        result.setUserInfoEncryptedResponseAlg(requestObject.has(USERINFO_ENCRYPTED_RESPONSE_ALG.toString()) ?
-                KeyEncryptionAlgorithm.fromName(requestObject.optString(USERINFO_ENCRYPTED_RESPONSE_ALG.toString())) : null);
-        result.setUserInfoEncryptedResponseEnc(requestObject.has(USERINFO_ENCRYPTED_RESPONSE_ENC.toString()) ?
-                BlockEncryptionAlgorithm.fromName(requestObject.optString(USERINFO_ENCRYPTED_RESPONSE_ENC.toString())) : null);
-        result.setRequestObjectSigningAlg(requestObject.has(REQUEST_OBJECT_SIGNING_ALG.toString()) ?
-                SignatureAlgorithm.fromString(requestObject.optString(REQUEST_OBJECT_SIGNING_ALG.toString())) : null);
-        result.setRequestObjectEncryptionAlg(requestObject.has(REQUEST_OBJECT_ENCRYPTION_ALG.toString()) ?
-                KeyEncryptionAlgorithm.fromName(requestObject.optString(REQUEST_OBJECT_ENCRYPTION_ALG.toString())) : null);
-        result.setRequestObjectEncryptionEnc(requestObject.has(REQUEST_OBJECT_ENCRYPTION_ENC.toString()) ?
-                BlockEncryptionAlgorithm.fromName(requestObject.optString(REQUEST_OBJECT_ENCRYPTION_ENC.toString())) : null);
-        result.setTokenEndpointAuthMethod(requestObject.has(TOKEN_ENDPOINT_AUTH_METHOD.toString()) ?
-                AuthenticationMethod.fromString(requestObject.optString(TOKEN_ENDPOINT_AUTH_METHOD.toString())) : null);
-        result.setTokenEndpointAuthSigningAlg(requestObject.has(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()) ?
-                SignatureAlgorithm.fromString(requestObject.optString(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString())) : null);
-        result.setRedirectUris(redirectUris);
-        result.setScope(scope);
-        result.setClaims(claims);
-        result.setResponseTypesStrings(new ArrayList<>(responseTypes));
-        result.setGrantTypes(new ArrayList<>(grantTypes));
-        result.setApplicationType(requestObject.has(APPLICATION_TYPE.toString()) ?
-                ApplicationType.fromString(requestObject.getString(APPLICATION_TYPE.toString())) : ApplicationType.WEB);
-        result.setContacts(contacts);
+        result.setAuthorizationSignedResponseAlg(SignatureAlgorithm.fromString(requestObject.optString(AUTHORIZATION_SIGNED_RESPONSE_ALG.toString())));
+        result.setAuthorizationEncryptedResponseAlg(KeyEncryptionAlgorithm.fromName(requestObject.optString(AUTHORIZATION_ENCRYPTED_RESPONSE_ALG.toString())));
+        result.setAuthorizationEncryptedResponseEnc(BlockEncryptionAlgorithm.fromName(requestObject.optString(AUTHORIZATION_ENCRYPTED_RESPONSE_ENC.toString())));
+        result.setIdTokenSignedResponseAlg(SignatureAlgorithm.fromString(requestObject.optString(ID_TOKEN_SIGNED_RESPONSE_ALG.toString())));
+        result.setIdTokenEncryptedResponseAlg(KeyEncryptionAlgorithm.fromName(requestObject.optString(ID_TOKEN_ENCRYPTED_RESPONSE_ALG.toString())));
+        result.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.fromName(requestObject.optString(ID_TOKEN_ENCRYPTED_RESPONSE_ENC.toString())));
+        result.setUserInfoSignedResponseAlg(SignatureAlgorithm.fromString(requestObject.optString(USERINFO_SIGNED_RESPONSE_ALG.toString())));
+        result.setUserInfoEncryptedResponseAlg(KeyEncryptionAlgorithm.fromName(requestObject.optString(USERINFO_ENCRYPTED_RESPONSE_ALG.toString())));
+        result.setUserInfoEncryptedResponseEnc(BlockEncryptionAlgorithm.fromName(requestObject.optString(USERINFO_ENCRYPTED_RESPONSE_ENC.toString())));
+        result.setRequestObjectSigningAlg(SignatureAlgorithm.fromString(requestObject.optString(REQUEST_OBJECT_SIGNING_ALG.toString())));
+        result.setRequestObjectEncryptionAlg(KeyEncryptionAlgorithm.fromName(requestObject.optString(REQUEST_OBJECT_ENCRYPTION_ALG.toString())));
+        result.setRequestObjectEncryptionEnc(BlockEncryptionAlgorithm.fromName(requestObject.optString(REQUEST_OBJECT_ENCRYPTION_ENC.toString())));
+        result.setTokenEndpointAuthMethod(AuthenticationMethod.fromString(requestObject.optString(TOKEN_ENDPOINT_AUTH_METHOD.toString())));
+        result.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.fromString(requestObject.optString(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString())));
+        result.setRedirectUris(extractListByKey(requestObject, REDIRECT_URIS.toString()));
+        result.setScope(extractListByKey(requestObject, SCOPE.toString()));
+        result.setClaims(extractListByKey(requestObject, CLAIMS.toString()));
+        result.setResponseTypesStrings(extractListByKey(requestObject, RESPONSE_TYPES.toString()));
+        result.setGrantTypes(extractGrantTypes(requestObject));
+        result.setApplicationType(ApplicationType.fromString(requestObject.getString(APPLICATION_TYPE.toString())));
+        result.setContacts(extractListByKey(requestObject, CONTACTS.toString()));
         result.setClientName(requestObject.optString(CLIENT_NAME.toString()));
         result.setIdTokenTokenBindingCnf(requestObject.optString(ID_TOKEN_TOKEN_BINDING_CNF.toString(), ""));
         result.setLogoUri(requestObject.optString(LOGO_URI.toString()));
@@ -1573,36 +1459,32 @@ public class RegisterRequest extends BaseRequest {
         result.setJwksUri(requestObject.optString(JWKS_URI.toString()));
         result.setJwks(requestObject.optString(JWKS.toString()));
         result.setSectorIdentifierUri(requestObject.optString(SECTOR_IDENTIFIER_URI.toString()));
-        result.setSubjectType(requestObject.has(SUBJECT_TYPE.toString()) ?
-                SubjectType.fromString(requestObject.getString(SUBJECT_TYPE.toString())) : null);
+        result.setSubjectType(SubjectType.fromString(requestObject.getString(SUBJECT_TYPE.toString())));
         result.setSoftwareId(requestObject.optString(SOFTWARE_ID.toString()));
         result.setSoftwareVersion(requestObject.optString(SOFTWARE_VERSION.toString()));
         result.setSoftwareStatement(requestObject.optString(SOFTWARE_STATEMENT.toString()));
-        result.setBackchannelTokenDeliveryMode(requestObject.has(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()) ?
-                BackchannelTokenDeliveryMode.fromString(requestObject.getString(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString())) : null);
+        result.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.fromString(requestObject.getString(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString())));
         result.setBackchannelClientNotificationEndpoint(requestObject.optString(BACKCHANNEL_CLIENT_NOTIFICATION_ENDPOINT.toString()));
-        result.setBackchannelAuthenticationRequestSigningAlg(requestObject.has(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()) ?
-                AsymmetricSignatureAlgorithm.fromString(requestObject.getString(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString())) : null);
-        result.setBackchannelUserCodeParameter(requestObject.has(BACKCHANNEL_USER_CODE_PARAMETER.toString()) ?
-                requestObject.getBoolean(BACKCHANNEL_USER_CODE_PARAMETER.toString()) : null);
+        result.setBackchannelAuthenticationRequestSigningAlg(AsymmetricSignatureAlgorithm.fromString(requestObject.getString(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString())));
+        result.setBackchannelUserCodeParameter(booleanOrNull(requestObject, BACKCHANNEL_USER_CODE_PARAMETER.toString()));
 
         return result;
     }
 
-    private static List<String> extractList(JSONObject requestObject, String key) {
-        final List<String> result = new ArrayList<>();
-        if (requestObject.has(key)) {
-            try {
-                JSONArray jsonArray = requestObject.getJSONArray(key);
-                for (int i = 0; i < jsonArray.length(); i++) {
-                    result.add(jsonArray.getString(i));
+    public static List<GrantType> extractGrantTypes(JSONObject requestObject) {
+        final Set<GrantType> grantTypes = new HashSet<>();
+        if (requestObject.has(GRANT_TYPES.toString())) {
+            JSONArray grantTypesJsonArray = requestObject.getJSONArray(GRANT_TYPES.toString());
+            for (int i = 0; i < grantTypesJsonArray.length(); i++) {
+                GrantType gt = GrantType.fromString(grantTypesJsonArray.getString(i));
+                if (gt != null) {
+                    grantTypes.add(gt);
                 }
-            } catch (JSONException e) {
-                result.add(requestObject.optString(key));
             }
         }
-        return result;
+        return new ArrayList<>(grantTypes);
     }
+
 
     @Override
     public JSONObject getJSONParameters() throws JSONException {
@@ -1810,8 +1692,8 @@ public class RegisterRequest extends BaseRequest {
         return jsonObject;
     }
 
-    public void setJsonObject(JSONObject p_jsonObject) {
-        jsonObject = p_jsonObject;
+    public void setJsonObject(JSONObject jsonObject) {
+        this.jsonObject = jsonObject;
     }
 
     @Override
@@ -1825,9 +1707,9 @@ public class RegisterRequest extends BaseRequest {
     }
 
     public RegisterRequest sign(SignatureAlgorithm signatureAlgorithm, String kid, AuthCryptoProvider cryptoProvider) throws Exception {
-        final SoftwareStatement softwareStatement = new SoftwareStatement(signatureAlgorithm, cryptoProvider);
-        softwareStatement.setKeyId(kid);
-        return sign(softwareStatement);
+        final SoftwareStatement ssa = new SoftwareStatement(signatureAlgorithm, cryptoProvider);
+        ssa.setKeyId(kid);
+        return sign(ssa);
     }
 
     public RegisterRequest signWithSharedKey(SignatureAlgorithm signatureAlgorithm, String sharedKey, AuthCryptoProvider cryptoProvider) throws Exception {
