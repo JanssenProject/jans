@@ -1,8 +1,10 @@
 import base64
+import json
 import os
 import re
 from urllib.parse import urlparse
 from contextlib import suppress
+from string import Template
 
 from jans.pycloudlib import get_manager
 from jans.pycloudlib.persistence import render_couchbase_properties
@@ -20,6 +22,12 @@ from jans.pycloudlib.utils import get_server_certificate
 from jans.pycloudlib.utils import generate_keystore
 
 from keystore_mod import modify_keystore_path
+
+import logging.config
+from settings import LOGGING_CONFIG
+
+logging.config.dictConfig(LOGGING_CONFIG)
+logger = logging.getLogger("entrypoint")
 
 manager = get_manager()
 
@@ -115,23 +123,10 @@ def main():
     # manager.secret.to_file("passport_rp_jks_base64", "/etc/certs/passport-rp.jks",
     #                        decode=True, binary_mode=True)
 
-    # manager.secret.to_file("api_rp_jks_base64", "/etc/certs/api-rp.jks",
-    #                        decode=True, binary_mode=True)
-    # with open(manager.config.get("api_rp_client_jwks_fn"), "w") as f:
-    #     f.write(
-    #         base64.b64decode(manager.secret.get("api_rp_client_base64_jwks")).decode(),
-    #     )
-
-    # manager.secret.to_file("api_rs_jks_base64", "/etc/certs/api-rs.jks",
-    #                        decode=True, binary_mode=True)
-    # with open(manager.config.get("api_rs_client_jwks_fn"), "w") as f:
-    #     f.write(
-    #         base64.b64decode(manager.secret.get("api_rs_client_base64_jwks")).decode(),
-    #     )
-
     modify_jetty_xml()
     modify_server_ini()
     modify_webdefault_xml()
+    configure_logging()
 
     ext_jwks_uri = os.environ.get("CN_OB_EXT_SIGNING_JWKS_URI", "")
 
@@ -247,6 +242,81 @@ def modify_server_ini():
             f"jetty.httpConfig.requestHeaderSize={req_header_size}",
         ])
         f.write(updates)
+
+
+def configure_logging():
+    # default config
+    config = {
+        "auth_log_target": "STDOUT",
+        "auth_log_level": "INFO",
+        "http_log_target": "FILE",
+        "http_log_level": "INFO",
+        "persistence_log_target": "FILE",
+        "persistence_log_level": "INFO",
+        "persistence_duration_log_target": "FILE",
+        "persistence_duration_log_level": "INFO",
+        "ldap_stats_log_target": "FILE",
+        "ldap_stats_log_level": "INFO",
+        "script_log_target": "FILE",
+        "script_log_level": "INFO",
+        "audit_log_target": "FILE",
+        "audit_log_level": "INFO",
+    }
+
+    # pre-populate custom config; format is JSON string of ``dict``
+    try:
+        custom_config = json.loads(os.environ.get("CN_AUTH_APP_LOGGERS", "{}"))
+    except json.decoder.JSONDecodeError as exc:
+        logger.warning(f"Unable to load logging configuration from environment variable; reason={exc}; fallback to defaults")
+        custom_config = {}
+
+    # ensure custom config is ``dict`` type
+    if not isinstance(custom_config, dict):
+        logger.warning("Invalid data type for CN_AUTH_APP_LOGGERS; fallback to defaults")
+        custom_config = {}
+
+    # list of supported levels; OFF is not supported
+    log_levels = ("FATAL", "ERROR", "WARN", "INFO", "DEBUG", "TRACE",)
+
+    # list of supported outputs
+    log_targets = ("STDOUT", "FILE",)
+
+    for k, v in custom_config.items():
+        if k not in config:
+            continue
+
+        if k.endswith("_log_level") and v not in log_levels:
+            logger.warning(f"Invalid {v} log level for {k}; fallback to defaults")
+            v = config[k]
+
+        if k.endswith("_log_target") and v not in log_targets:
+            logger.warning(f"Invalid {v} log output for {k}; fallback to defaults")
+            v = config[k]
+
+        # update the config
+        config[k] = v
+
+    # mapping between the ``log_target`` value and their appenders
+    file_aliases = {
+        "auth_log_target": "FILE",
+        "http_log_target": "JANS_AUTH_HTTP_REQUEST_RESPONSE_FILE",
+        "persistence_log_target": "JANS_AUTH_PERSISTENCE_FILE",
+        "persistence_duration_log_target": "JANS_AUTH_PERSISTENCE_DURATION_FILE",
+        "ldap_stats_log_target": "JANS_AUTH_PERSISTENCE_LDAP_STATISTICS_FILE",
+        "script_log_target": "JANS_AUTH_SCRIPT_LOG_FILE",
+        "audit_log_target": "JANS_AUTH_AUDIT_LOG_FILE",
+    }
+    for key, value in file_aliases.items():
+        if config[key] == "FILE":
+            config[key] = value
+
+    logfile = "/opt/jans/jetty/jans-auth/resources/log4j2.xml"
+    with open(logfile) as f:
+        txt = f.read()
+
+    tmpl = Template(txt)
+    with open(logfile, "w") as f:
+        f.write(tmpl.safe_substitute(config))
 
 
 if __name__ == "__main__":

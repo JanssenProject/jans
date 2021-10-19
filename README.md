@@ -76,3 +76,43 @@ The following environment variables are supported by the container:
 - `CN_GOOGLE_SPANNER_INSTANCE_ID`: Google Spanner instance ID.
 - `CN_GOOGLE_SPANNER_DATABASE_ID`: Google Spanner database ID.
 - `CN_JETTY_REQUEST_HEADER_SIZE`: Maximum size of request header accepted by Jetty (default to `8192`).
+- `CN_AUTH_APP_LOGGERS`: Custom logging configuration in JSON-string format with hash type (see [Configure app loggers](#configure-app-loggers) section for details).
+
+### Configure app loggers
+
+App loggers can be configured to define where the logs will be redirected and what is the level the logs should be displayed.
+
+Supported redirect target:
+
+- `STDOUT`
+- `FILE`
+
+Supported level:
+
+- `FATAL`
+- `ERROR`
+- `WARN`
+- `INFO`
+- `DEBUG`
+- `TRACE`
+
+The following key-value pairs are the defaults:
+
+```json
+{
+    "auth_log_target": "STDOUT",
+    "auth_log_level": "INFO",
+    "http_log_target": "FILE",
+    "http_log_level": "INFO",
+    "persistence_log_target": "FILE",
+    "persistence_log_level": "INFO",
+    "persistence_duration_log_target": "FILE",
+    "persistence_duration_log_level": "INFO",
+    "ldap_stats_log_target": "FILE",
+    "ldap_stats_log_level": "INFO",
+    "script_log_target": "FILE",
+    "script_log_level": "INFO",
+    "audit_log_target": "FILE",
+    "audit_log_level": "INFO"
+}
+```

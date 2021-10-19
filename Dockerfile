@@ -51,7 +51,7 @@ RUN wget -q https://github.com/fabioz/PyDev.Debugger/archive/refs/tags/pydev_deb
 # ===========
 
 ENV CN_VERSION=1.0.0-SNAPSHOT
-ENV CN_BUILD_DATE='2021-10-08 04:18'
+ENV CN_BUILD_DATE='2021-10-14 12:51'
 ENV CN_SOURCE_URL=https://maven.jans.io/maven/io/jans/jans-auth-server/${CN_VERSION}/jans-auth-server-${CN_VERSION}.war
 
 # Install Jans Auth
@@ -204,6 +204,7 @@ COPY certs /etc/certs
 COPY jetty/jans-auth_web_resources.xml ${JETTY_BASE}/jans-auth/webapps/
 COPY jetty/jans-auth.xml ${JETTY_BASE}/jans-auth/webapps/
 COPY jetty/jetty-env.xml ${JETTY_BASE}/jans-auth/webapps/jans-auth/WEB-INF/
+COPY jetty/log4j2.xml ${JETTY_BASE}/jans-auth/resources/
 COPY conf/*.tmpl /app/templates/
 COPY scripts /app/scripts
 RUN chmod +x /app/scripts/entrypoint.sh
