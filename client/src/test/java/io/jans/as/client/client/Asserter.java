@@ -65,11 +65,17 @@ public class Asserter {
     }
 
     public static void assertAuthorizationResponse(AuthorizationResponse response) {
+        assertAuthorizationResponse(response, true);
+    }
+
+    public static void assertAuthorizationResponse(AuthorizationResponse response, boolean checkState) {
         assertNotNull(response);
         assertNotNull(response.getLocation(), "The location is null");
         assertNotNull(response.getCode(), "The authorization code is null");
-        assertNotNull(response.getState(), "The state is null");
         assertNotNull(response.getScope(), "The scope is null");
+        if (checkState) {
+            assertNotNull(response.getState(), "The state is null");
+        }
     }
 
     public static void validateIdToken(String idToken, String jwksUri, SignatureAlgorithm alg) throws InvalidJwtException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
