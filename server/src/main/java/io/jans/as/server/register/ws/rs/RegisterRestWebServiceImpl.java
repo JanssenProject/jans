@@ -1051,7 +1051,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                     builder.entity(clientAsEntity(client));
                 } else {
                     log.trace("The Access Token is not valid for the Client ID, returns invalid_token error.");
-                    builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode()).type(MediaType.APPLICATION_JSON_TYPE);
+                    builder = Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).type(MediaType.APPLICATION_JSON_TYPE);
                     builder.entity(errorResponseFactory.errorAsJson(RegisterErrorResponseType.INVALID_TOKEN, "The Access Token is not valid for the Client"));
                 }
             } else {
