@@ -43,6 +43,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
@@ -269,42 +270,16 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
         }
     }
 
-    @Override
-    public RefreshToken createRefreshToken(String dpop) {
+    private RefreshToken saveRefreshToken(RefreshToken refreshToken) {
         try {
-            final RefreshToken refreshToken = super.createRefreshToken(dpop);
-            if (refreshToken.getExpiresIn() > 0) {
-                persist(asToken(refreshToken));
-            }
-
-            statService.reportRefreshToken(getGrantType());
-            metricService.incCounter(MetricType.TOKEN_REFRESH_TOKEN_COUNT);
-
-            if (log.isTraceEnabled()) {
-                log.trace("Created refresh token: {}", refreshToken.getCode());
-            }
-
-            return refreshToken;
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            return null;
-        }
-    }
-
-    public RefreshToken createRefreshToken(String dpop, Date expirationDate) {
-        try {
-            RefreshToken refreshToken = new RefreshToken(HandleTokenFactory.generateHandleToken(), new Date(), expirationDate);
-
-            refreshToken.setSessionDn(getSessionDn());
-            refreshToken.setDpop(dpop);
-
             if (refreshToken.getExpiresIn() > 0) {
                 persist(asToken(refreshToken));
                 statService.reportRefreshToken(getGrantType());
                 metricService.incCounter(MetricType.TOKEN_REFRESH_TOKEN_COUNT);
 
-                if (log.isTraceEnabled())
+                if (log.isTraceEnabled()) {
                     log.trace("Created refresh token: {}", refreshToken.getCode());
+                }
 
                 return refreshToken;
             }
@@ -315,6 +290,34 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
             log.error(e.getMessage(), e);
             return null;
         }
+    }
+
+    private RefreshToken saveRefreshToken(Supplier<RefreshToken> supplier) {
+        try {
+            return saveRefreshToken(supplier.get());
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return null;
+        }
+    }
+
+    @Override
+    public RefreshToken createRefreshToken(String dpop) {
+        return saveRefreshToken(() -> super.createRefreshToken(dpop));
+    }
+
+    @Override
+    public RefreshToken createRefreshToken(String dpop, int lifetime) {
+        return saveRefreshToken(() -> super.createRefreshToken(dpop, lifetime));
+    }
+
+    public RefreshToken createRefreshToken(String dpop, Date expirationDate) {
+        return saveRefreshToken(() -> {
+            RefreshToken refreshToken = new RefreshToken(HandleTokenFactory.generateHandleToken(), new Date(), expirationDate);
+            refreshToken.setSessionDn(getSessionDn());
+            refreshToken.setDpop(dpop);
+            return refreshToken;
+        });
     }
 
     @Override
