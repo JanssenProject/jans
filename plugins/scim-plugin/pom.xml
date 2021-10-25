@@ -98,7 +98,7 @@
 
 	<build>
 		<filters>
-			<filter>../../server/profiles/${cfg}/config-api-test.properties</filter>
+			<filter>../../profiles/${cfg}/config-api-test.properties</filter>
 		</filters>
 
 		<testResources>
