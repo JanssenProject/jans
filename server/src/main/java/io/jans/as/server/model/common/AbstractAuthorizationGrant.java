@@ -311,7 +311,12 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
         if (client.getRefreshTokenLifetime() != null && client.getRefreshTokenLifetime() > 0) {
             lifetime = client.getRefreshTokenLifetime();
         }
-        return createRefreshToken(dpop, lifetime);
+
+        RefreshToken refreshToken = new RefreshToken(lifetime);
+
+        refreshToken.setSessionDn(getSessionDn());
+        refreshToken.setDpop(dpop);
+        return refreshToken;
     }
 
     @Override
