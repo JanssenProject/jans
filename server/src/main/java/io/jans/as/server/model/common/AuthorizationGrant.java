@@ -277,8 +277,8 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
                 statService.reportRefreshToken(getGrantType());
                 metricService.incCounter(MetricType.TOKEN_REFRESH_TOKEN_COUNT);
 
-                if (log.isInfoEnabled()) {
-                    log.info("Created refresh token: {}", refreshToken.getCode());
+                if (log.isTraceEnabled()) {
+                    log.trace("Created refresh token: {}", refreshToken.getCode());
                 }
 
                 return refreshToken;
