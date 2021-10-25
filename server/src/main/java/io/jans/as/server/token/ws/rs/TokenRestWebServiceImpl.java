@@ -541,7 +541,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
     }
 
     @Nullable
-    private RefreshToken createRefreshToken(@NotNull HttpServletRequest request, @NotNull Client client, @NotNull String scope, @NotNull AbstractAuthorizationGrant grant, String dpop) {
+    private RefreshToken createRefreshToken(@NotNull HttpServletRequest request, @NotNull Client client, @NotNull String scope, @NotNull AuthorizationGrant grant, String dpop) {
         if (!isRefreshTokenAllowed(client, scope, grant)) {
             return null;
         }
