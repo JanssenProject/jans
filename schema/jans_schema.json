@@ -3598,6 +3598,7 @@
         "tknCde",
         "tknTyp",
         "usrId",
+        "jansUsrDN",
         "clnId",
         "acr",
         "uuid",
