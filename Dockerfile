@@ -44,7 +44,7 @@ RUN wget -q https://ox.gluu.org/maven/org/gluufederation/jython-installer/${JYTH
 # ====
 
 ENV CN_VERSION=1.0.0-SNAPSHOT
-ENV CN_BUILD_DATE='2021-10-14 12:53'
+ENV CN_BUILD_DATE='2021-10-25 03:32'
 ENV CN_SOURCE_URL=https://maven.jans.io/maven/io/jans/jans-scim-server/${CN_VERSION}/jans-scim-server-${CN_VERSION}.war
 
 # Install SCIM
@@ -160,7 +160,7 @@ LABEL name="SCIM" \
     maintainer="Janssen Project <support@jans.io>" \
     vendor="Janssen Project" \
     version="1.0.0" \
-    release="b11" \
+    release="b12" \
     summary="Janssen SCIM" \
     description="SCIM server"
 
