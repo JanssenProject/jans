@@ -482,5 +482,209 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
     public KeyStore getKeyStore() {
         return keyStore;
     }
+    
+    private JSONObject generateKeySignature(Algorithm algorithm, Long expirationTime, Use use)
+            throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException, OperatorCreationException,
+            CertificateException, KeyStoreException, IOException {
+
+        JSONObject jsonObject = null;
+
+        SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(algorithm.getParamName());
+        if (signatureAlgorithm == null) {
+            algorithm = Algorithm.ES384;
+            signatureAlgorithm = SignatureAlgorithm.ES384;
+        }
+        KeyPairGenerator keyGen = null;
+        final AlgorithmFamily algorithmFamily = algorithm.getFamily();
+        switch (algorithmFamily) {
+        case RSA: {
+            keyGen = KeyPairGenerator.getInstance(algorithmFamily.toString(), "BC");
+            keyGen.initialize(2048, new SecureRandom());
+            break;
+        }
+        case EC: {
+            ECGenParameterSpec eccgen = new ECGenParameterSpec(signatureAlgorithm.getCurve().getAlias());
+            keyGen = KeyPairGenerator.getInstance(algorithmFamily.toString(), "BC");
+            keyGen.initialize(eccgen, new SecureRandom());
+            break;
+        }
+        case ED: {
+            EdDSAParameterSpec edSpec = new EdDSAParameterSpec(signatureAlgorithm.getName());
+            keyGen = KeyPairGenerator.getInstance(signatureAlgorithm.getName(), "BC");
+            keyGen.initialize(edSpec, new SecureRandom());
+            break;
+        }
+        default: {
+            throw new RuntimeException("The provided signature algorithm parameter is not supported: algorithmFamily = " + algorithmFamily);
+        }
+        }
+
+        // Generate the key
+        KeyPair keyPair = keyGen.generateKeyPair();
+        PrivateKey pk = keyPair.getPrivate();
+
+        // Java API requires a certificate chain
+        X509Certificate cert = generateV3Certificate(keyPair, dnName, signatureAlgorithm.getAlgorithm(), expirationTime);
+        X509Certificate[] chain = new X509Certificate[1];
+        chain[0] = cert;
+
+        String alias = UUID.randomUUID().toString() + getKidSuffix(use, algorithm);
+        keyStore.setKeyEntry(alias, pk, keyStoreSecret.toCharArray(), chain);
+
+        final String oldAliasByAlgorithm = getAliasByAlgorithmForDeletion(algorithm, alias, use);
+        if (StringUtils.isNotBlank(oldAliasByAlgorithm)) {
+            keyStore.deleteEntry(oldAliasByAlgorithm);
+            LOG.trace("New key: " + alias + ", deleted key: " + oldAliasByAlgorithm);
+        }
+
+        FileOutputStream stream = new FileOutputStream(keyStoreFile);
+        keyStore.store(stream, keyStoreSecret.toCharArray());
+        stream.close();
+
+        PublicKey publicKey = keyPair.getPublic();
+
+        jsonObject = new JSONObject();
+        jsonObject.put(JWKParameter.KEY_TYPE, algorithm.getFamily());
+        jsonObject.put(JWKParameter.KEY_ID, alias);
+        jsonObject.put(JWKParameter.KEY_USE, use.getParamName());
+        jsonObject.put(JWKParameter.ALGORITHM, algorithm.getParamName());
+        jsonObject.put(JWKParameter.EXPIRATION_TIME, expirationTime);
+        if (publicKey instanceof RSAPublicKey) {
+            RSAPublicKey rsaPublicKey = (RSAPublicKey) publicKey;
+            jsonObject.put(JWKParameter.MODULUS, Base64Util.base64urlencodeUnsignedBigInt(rsaPublicKey.getModulus()));
+            jsonObject.put(JWKParameter.EXPONENT, Base64Util.base64urlencodeUnsignedBigInt(rsaPublicKey.getPublicExponent()));
+        } else if (publicKey instanceof ECPublicKey) {
+            ECPublicKey ecPublicKey = (ECPublicKey) publicKey;
+            jsonObject.put(JWKParameter.CURVE, signatureAlgorithm.getCurve().getName());
+            jsonObject.put(JWKParameter.X, Base64Util.base64urlencode(ecPublicKey.getW().getAffineX().toByteArray()));
+            jsonObject.put(JWKParameter.Y, Base64Util.base64urlencode(ecPublicKey.getW().getAffineY().toByteArray()));
+        } else if (publicKey instanceof EdDSAPublicKey) {
+            EdDSAPublicKey edDSAPublicKey = (EdDSAPublicKey) publicKey;
+            jsonObject.put(JWKParameter.CURVE, signatureAlgorithm.getCurve().getName());
+            jsonObject.put(JWKParameter.X, Base64Util.base64urlencode(edDSAPublicKey.getEncoded()));
+        }
+
+        JSONArray x5c = new JSONArray();
+        x5c.put(Base64.encodeBase64String(cert.getEncoded()));
+        jsonObject.put(JWKParameter.CERTIFICATE_CHAIN, x5c);
+
+        return jsonObject;
+    }
+
+    private JSONObject generateKeyEncryption(Algorithm algorithm, Long expirationTime, Use use) throws Exception {
+
+        JSONObject jsonObject = null;
+
+        KeyEncryptionAlgorithm keyEncryptionAlgorithm = KeyEncryptionAlgorithm.fromName(algorithm.getParamName());
+        if (keyEncryptionAlgorithm == null) {
+            algorithm = Algorithm.RS256;
+            keyEncryptionAlgorithm = KeyEncryptionAlgorithm.RSA1_5;
+        }
+        KeyPairGenerator keyGen = null;
+        String signatureAlgorithm = null;
+        final AlgorithmFamily algorithmFamily = algorithm.getFamily();
+        switch (algorithmFamily) {
+        case RSA: {
+            keyGen = KeyPairGenerator.getInstance(algorithmFamily.toString(), "BC");
+            keyGen.initialize(2048, new SecureRandom());
+            signatureAlgorithm = "SHA256WITHRSA";
+            break;
+        }
+        case EC: {
+            ECGenParameterSpec eccgen = new ECGenParameterSpec(keyEncryptionAlgorithm.getCurve().getAlias());
+            keyGen = KeyPairGenerator.getInstance(algorithmFamily.toString(), "BC");
+            keyGen.initialize(eccgen, new SecureRandom());
+            signatureAlgorithm = "SHA256WITHECDSA";
+            break;
+        }
+        default: {
+            throw new RuntimeException(
+                    "The provided key encryption algorithm parameter is not supported: algorithmFamily = " + algorithmFamily);
+        }
+        }
+
+        // Generate the key
+        KeyPair keyPair = keyGen.generateKeyPair();
+        PrivateKey pk = keyPair.getPrivate();
+
+        // Java API requires a certificate chain
+        X509Certificate cert = generateV3Certificate(keyPair, dnName, signatureAlgorithm, expirationTime);
+
+        X509Certificate[] chain = new X509Certificate[1];
+        chain[0] = cert;
+
+        String alias = UUID.randomUUID().toString() + getKidSuffix(use, algorithm);
+        keyStore.setKeyEntry(alias, pk, keyStoreSecret.toCharArray(), chain);
+
+        final String oldAliasByAlgorithm = getAliasByAlgorithmForDeletion(algorithm, alias, use);
+        if (StringUtils.isNotBlank(oldAliasByAlgorithm)) {
+            keyStore.deleteEntry(oldAliasByAlgorithm);
+            LOG.trace("New key: " + alias + ", deleted key: " + oldAliasByAlgorithm);
+        }
+
+        FileOutputStream stream = new FileOutputStream(keyStoreFile);
+        keyStore.store(stream, keyStoreSecret.toCharArray());
+        stream.close();
+
+        PublicKey publicKey = keyPair.getPublic();
+
+        jsonObject = new JSONObject();
+        jsonObject.put(JWKParameter.KEY_TYPE, algorithm.getFamily());
+        jsonObject.put(JWKParameter.KEY_ID, alias);
+        jsonObject.put(JWKParameter.KEY_USE, use.getParamName());
+        jsonObject.put(JWKParameter.ALGORITHM, algorithm.getParamName());
+        jsonObject.put(JWKParameter.EXPIRATION_TIME, expirationTime);
+        if (publicKey instanceof RSAPublicKey) {
+            RSAPublicKey rsaPublicKey = (RSAPublicKey) publicKey;
+            jsonObject.put(JWKParameter.MODULUS, Base64Util.base64urlencodeUnsignedBigInt(rsaPublicKey.getModulus()));
+            jsonObject.put(JWKParameter.EXPONENT, Base64Util.base64urlencodeUnsignedBigInt(rsaPublicKey.getPublicExponent()));
+        } else if (publicKey instanceof ECPublicKey) {
+            ECPublicKey ecPublicKey = (ECPublicKey) publicKey;
+            jsonObject.put(JWKParameter.CURVE, keyEncryptionAlgorithm.getCurve().getAlias());
+            jsonObject.put(JWKParameter.X, Base64Util.base64urlencode(ecPublicKey.getW().getAffineX().toByteArray()));
+            jsonObject.put(JWKParameter.Y, Base64Util.base64urlencode(ecPublicKey.getW().getAffineY().toByteArray()));
+        }
+
+        JSONArray x5c = new JSONArray();
+        x5c.put(Base64.encodeBase64String(cert.getEncoded()));
+        jsonObject.put(JWKParameter.CERTIFICATE_CHAIN, x5c);
+
+        return jsonObject;
+    }
+
+    private boolean verifySignatureEcEdRSA(String signingInput, String encodedSignature, String alias, JSONObject jwks,
+            SignatureAlgorithm signatureAlgorithm) {
+        PublicKey publicKey = null;
+        try {
+            if (jwks == null) {
+                publicKey = getPublicKey(alias);
+            } else {
+                publicKey = getPublicKey(alias, jwks, signatureAlgorithm.getAlg());
+            }
+            if (publicKey == null) {
+                return false;
+            }
+            return verifySignatureEcEdRSA(signingInput, encodedSignature, signatureAlgorithm, publicKey);
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            return false;
+        }
+    }
+    
+    private boolean verifySignatureEcEdRSA(String signingInput, String encodedSignature, SignatureAlgorithm signatureAlgorithm, PublicKey publicKey) throws JOSEException, NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, SignatureException {
+        byte[] signature = Base64Util.base64urldecode(encodedSignature);
+        byte[] signatureDer = signature;
+        if (AlgorithmFamily.EC.equals(signatureAlgorithm.getFamily())) {
+            signatureDer = ECDSA.transcodeSignatureToDER(signatureDer);
+        }
+        Signature verifier = Signature.getInstance(signatureAlgorithm.getAlgorithm(), "BC");
+        verifier.initVerify(publicKey);
+        verifier.update(signingInput.getBytes());
+        try {
+            return verifier.verify(signatureDer);
+        } catch (SignatureException e) {
+            return verifier.verify(signature);
+        }        
+    }    
 
 }
