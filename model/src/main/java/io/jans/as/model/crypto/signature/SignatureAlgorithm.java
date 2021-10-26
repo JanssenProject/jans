@@ -17,7 +17,8 @@ import java.util.List;
 
 /**
  * @author Javier Rojas Blum
- * @version February 12, 2019
+ * @author Sergey Manoylo
+ * @version October 26, 2021
  */
 public enum SignatureAlgorithm {
 
@@ -29,11 +30,15 @@ public enum SignatureAlgorithm {
     RS384("RS384", AlgorithmFamily.RSA, "SHA384WITHRSA", JWSAlgorithm.RS384),
     RS512("RS512", AlgorithmFamily.RSA, "SHA512WITHRSA", JWSAlgorithm.RS512),
     ES256("ES256", AlgorithmFamily.EC, "SHA256WITHECDSA", EllipticEdvardsCurve.P_256, JWSAlgorithm.ES256),
+    ES256K("ES256K", AlgorithmFamily.EC, "SHA256WITHECDSA", EllipticEdvardsCurve.P_256K, JWSAlgorithm.ES256K),
     ES384("ES384", AlgorithmFamily.EC, "SHA384WITHECDSA", EllipticEdvardsCurve.P_384, JWSAlgorithm.ES384),
     ES512("ES512", AlgorithmFamily.EC, "SHA512WITHECDSA", EllipticEdvardsCurve.P_521, JWSAlgorithm.ES512),
     PS256("PS256", AlgorithmFamily.RSA, "SHA256withRSAandMGF1", JWSAlgorithm.PS256),
     PS384("PS384", AlgorithmFamily.RSA, "SHA384withRSAandMGF1", JWSAlgorithm.PS384),
-    PS512("PS512", AlgorithmFamily.RSA, "SHA512withRSAandMGF1", JWSAlgorithm.PS512);
+    PS512("PS512", AlgorithmFamily.RSA, "SHA512withRSAandMGF1", JWSAlgorithm.PS512),
+    ED25519("Ed25519", AlgorithmFamily.ED, "Ed25519", EllipticEdvardsCurve.ED_25519, JWSAlgorithm.EdDSA),
+    ED448("Ed448", AlgorithmFamily.ED, "Ed448", EllipticEdvardsCurve.ED_448, JWSAlgorithm.EdDSA),
+    EDDSA("EdDSA", AlgorithmFamily.ED, "Ed25519", EllipticEdvardsCurve.ED_25519, JWSAlgorithm.EdDSA);
 
     private final String name;
     private final AlgorithmFamily family;
