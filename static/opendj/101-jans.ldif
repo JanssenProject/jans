@@ -1699,7 +1699,7 @@ objectClasses: ( 1.3.6.1.4.1.48710.1.4.15 NAME 'jansToken'
   SUP ( top )
   STRUCTURAL
   MUST ( objectclass )
-  MAY ( authnTime $ authzCode $ iat $ exp $ del $ grtId $ grtTyp $ jwtReq $ nnc $ scp $ tknCde $ tknTyp $ usrId $ clnId $ acr $ uuid $ chlng $ chlngMth $ clms $ ssnId $ attr $ tknBndCnf $ dpop )
+  MAY ( authnTime $ authzCode $ iat $ exp $ del $ grtId $ grtTyp $ jwtReq $ nnc $ scp $ tknCde $ tknTyp $ usrId $ jansUsrDN $ clnId $ acr $ uuid $ chlng $ chlngMth $ clms $ ssnId $ attr $ tknBndCnf $ dpop )
   X-ORIGIN 'Jans created objectclass' )
 objectClasses: ( 1.3.6.1.4.1.48710.1.4.16 NAME 'jansUmaRPT'
   SUP ( top )
