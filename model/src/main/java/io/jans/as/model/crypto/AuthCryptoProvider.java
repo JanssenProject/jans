@@ -159,7 +159,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
     @Override
     public JSONObject generateKey(Algorithm algorithm, Long expirationTime, Use use) throws Exception {
         if (algorithm == null) {
-            throw new RuntimeException("The signature algorithm parameter cannot be null");
+            throw new IllegalArgumentException("The signature algorithm parameter cannot be null");
         }
         JSONObject jsonObject = null;
         Use algUse = algorithm.getUse();
@@ -263,26 +263,20 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
     }
 
     @Override
-    public PublicKey getPublicKey(String alias) {
-        PublicKey publicKey = null;
+    public PublicKey getPublicKey(String alias) throws KeyStoreException {
 
-        try {
-            if (Util.isNullOrEmpty(alias)) {
-                return null;
-            }
-
-            java.security.cert.Certificate certificate = keyStore.getCertificate(alias);
-            if (certificate == null) {
-                return null;
-            }
-            publicKey = certificate.getPublicKey();
-
-            checkKeyExpiration(alias);
-        } catch (KeyStoreException e) {
-            e.printStackTrace();
+        if (Util.isNullOrEmpty(alias)) {
+            return null;
         }
 
-        return publicKey;
+        java.security.cert.Certificate certificate = keyStore.getCertificate(alias);
+        if (certificate == null) {
+            return null;
+        }
+
+        checkKeyExpiration(alias);
+
+        return certificate.getPublicKey();
     }
 
     @Override
