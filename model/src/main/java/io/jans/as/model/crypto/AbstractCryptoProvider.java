@@ -171,7 +171,7 @@ public abstract class AbstractCryptoProvider {
         return null;
     }
 
-    private PublicKey processKey(Algorithm requestedAlgorithm, String alias, JSONObject key) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidParameterSpecException, InvalidParameterException { // throws Exception {
+    private PublicKey processKey(Algorithm requestedAlgorithm, String alias, JSONObject key) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidParameterSpecException, InvalidParameterException {
         PublicKey publicKey = null;
         AlgorithmFamily algorithmFamily = null;
 
