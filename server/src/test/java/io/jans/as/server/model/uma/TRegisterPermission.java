@@ -42,15 +42,15 @@ class TRegisterPermission {
 		this.baseUri = baseUri;
 	}
 
-	public PermissionTicket registerPermission(final Token p_pat, final UmaPermission p_request, String path) {
-		final Holder<PermissionTicket> ticketH = new Holder<PermissionTicket>();
+	public PermissionTicket registerPermission(final Token pat, final UmaPermission permission, String path) {
+		final Holder<PermissionTicket> ticketH = new Holder<>();
 		Builder request = ResteasyClientBuilder.newClient().target(baseUri.toString() + path).request();
 		request.header("Accept", UmaConstants.JSON_MEDIA_TYPE);
-		request.header("Authorization", "Bearer " + p_pat.getAccessToken());
+		request.header("Authorization", "Bearer " + pat.getAccessToken());
 
 		String json = null;
 		try {
-			json = ServerUtil.createJsonMapper().writeValueAsString(p_request);
+			json = ServerUtil.createJsonMapper().writeValueAsString(permission);
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail();
