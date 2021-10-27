@@ -68,6 +68,7 @@ import java.security.Signature;
 import java.security.SignatureException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPublicKey;
@@ -157,17 +158,17 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
     }
 
     @Override
-    public JSONObject generateKey(Algorithm algorithm, Long expirationTime, Use use) throws Exception {
+    public JSONObject generateKey(Algorithm algorithm, Long expirationTime) throws Exception {
         if (algorithm == null) {
             throw new IllegalArgumentException("The signature algorithm parameter cannot be null");
         }
         JSONObject jsonObject = null;
         Use algUse = algorithm.getUse();
         if(algUse == Use.SIGNATURE) {
-            jsonObject = generateKeySignature(algorithm, expirationTime, use);
+            jsonObject = generateKeySignature(algorithm, expirationTime);
         }
         else if(algUse == Use.ENCRYPTION) {
-            jsonObject = generateKeyEncryption(algorithm, expirationTime, use);
+            jsonObject = generateKeyEncryption(algorithm, expirationTime);
         }
         return jsonObject;
     }
@@ -176,14 +177,14 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
         return "_" + use.getParamName().toLowerCase() + "_" + algorithm.getParamName().toLowerCase();
     }
 
-    public String getAliasByAlgorithmForDeletion(Algorithm algorithm, String newAlias, Use use) throws KeyStoreException {
+    public String getAliasByAlgorithmForDeletion(Algorithm algorithm, String newAlias) throws KeyStoreException {
         for (String alias : Collections.list(keyStore.aliases())) {
 
             if (newAlias.equals(alias)) { // skip newly created alias
                 continue;
             }
 
-            if (alias.endsWith(getKidSuffix(use, algorithm))) {
+            if (alias.endsWith(getKidSuffix(algorithm.getUse(), algorithm))) {
                 return alias;
             }
         }
@@ -323,6 +324,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
         if (key == null) {
             return null;
         }
+
         PrivateKey privateKey = (PrivateKey) key;
 
         checkKeyExpiration(alias);
@@ -405,11 +407,9 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
         return keyStore;
     }
 
-    private JSONObject generateKeySignature(Algorithm algorithm, Long expirationTime, Use use)
+    private JSONObject generateKeySignature(Algorithm algorithm, Long expirationTime)
             throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException, OperatorCreationException,
             CertificateException, KeyStoreException, IOException {
-
-        JSONObject jsonObject = null;
 
         SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(algorithm.getParamName());
         if (signatureAlgorithm == null) {
@@ -450,53 +450,26 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
         X509Certificate[] chain = new X509Certificate[1];
         chain[0] = cert;
 
-        String alias = UUID.randomUUID().toString() + getKidSuffix(use, algorithm);
+        String alias = UUID.randomUUID().toString() + getKidSuffix(algorithm.getUse(), algorithm);
         keyStore.setKeyEntry(alias, pk, keyStoreSecret.toCharArray(), chain);
 
-        final String oldAliasByAlgorithm = getAliasByAlgorithmForDeletion(algorithm, alias, use);
+        final String oldAliasByAlgorithm = getAliasByAlgorithmForDeletion(algorithm, alias);
         if (StringUtils.isNotBlank(oldAliasByAlgorithm)) {
             keyStore.deleteEntry(oldAliasByAlgorithm);
             LOG.trace("New key: " + alias + ", deleted key: " + oldAliasByAlgorithm);
         }
 
-        FileOutputStream stream = new FileOutputStream(keyStoreFile);
-        keyStore.store(stream, keyStoreSecret.toCharArray());
-        stream.close();
+        try (FileOutputStream stream = new FileOutputStream(keyStoreFile)) {
+            keyStore.store(stream, keyStoreSecret.toCharArray());
+        }
 
         PublicKey publicKey = keyPair.getPublic();
 
-        jsonObject = new JSONObject();
-        jsonObject.put(JWKParameter.KEY_TYPE, algorithm.getFamily());
-        jsonObject.put(JWKParameter.KEY_ID, alias);
-        jsonObject.put(JWKParameter.KEY_USE, use.getParamName());
-        jsonObject.put(JWKParameter.ALGORITHM, algorithm.getParamName());
-        jsonObject.put(JWKParameter.EXPIRATION_TIME, expirationTime);
-        if (publicKey instanceof RSAPublicKey) {
-            RSAPublicKey rsaPublicKey = (RSAPublicKey) publicKey;
-            jsonObject.put(JWKParameter.MODULUS, Base64Util.base64urlencodeUnsignedBigInt(rsaPublicKey.getModulus()));
-            jsonObject.put(JWKParameter.EXPONENT, Base64Util.base64urlencodeUnsignedBigInt(rsaPublicKey.getPublicExponent()));
-        } else if (publicKey instanceof ECPublicKey) {
-            ECPublicKey ecPublicKey = (ECPublicKey) publicKey;
-            jsonObject.put(JWKParameter.CURVE, signatureAlgorithm.getCurve().getName());
-            jsonObject.put(JWKParameter.X, Base64Util.base64urlencode(ecPublicKey.getW().getAffineX().toByteArray()));
-            jsonObject.put(JWKParameter.Y, Base64Util.base64urlencode(ecPublicKey.getW().getAffineY().toByteArray()));
-        } else if (publicKey instanceof EdDSAPublicKey) {
-            EdDSAPublicKey edDSAPublicKey = (EdDSAPublicKey) publicKey;
-            jsonObject.put(JWKParameter.CURVE, signatureAlgorithm.getCurve().getName());
-            jsonObject.put(JWKParameter.X, Base64Util.base64urlencode(edDSAPublicKey.getEncoded()));
-        }
-
-        JSONArray x5c = new JSONArray();
-        x5c.put(Base64.encodeBase64String(cert.getEncoded()));
-        jsonObject.put(JWKParameter.CERTIFICATE_CHAIN, x5c);
-
-        return jsonObject;
+        return getJson(algorithm, expirationTime, publicKey,  alias, cert);
     }
 
-    private JSONObject generateKeyEncryption(Algorithm algorithm, Long expirationTime, Use use) throws NoSuchAlgorithmException, NoSuchProviderException,
+    private JSONObject generateKeyEncryption(Algorithm algorithm, Long expirationTime) throws NoSuchAlgorithmException, NoSuchProviderException,
             InvalidAlgorithmParameterException, OperatorCreationException, CertificateException, KeyStoreException, IOException {
-
-        JSONObject jsonObject = null;
 
         KeyEncryptionAlgorithm keyEncryptionAlgorithm = KeyEncryptionAlgorithm.fromName(algorithm.getParamName());
         if (keyEncryptionAlgorithm == null) {
@@ -536,10 +509,10 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
         X509Certificate[] chain = new X509Certificate[1];
         chain[0] = cert;
 
-        String alias = UUID.randomUUID().toString() + getKidSuffix(use, algorithm);
+        String alias = UUID.randomUUID().toString() + getKidSuffix(algorithm.getUse(), algorithm);
         keyStore.setKeyEntry(alias, pk, keyStoreSecret.toCharArray(), chain);
 
-        final String oldAliasByAlgorithm = getAliasByAlgorithmForDeletion(algorithm, alias, use);
+        final String oldAliasByAlgorithm = getAliasByAlgorithmForDeletion(algorithm, alias);
         if (StringUtils.isNotBlank(oldAliasByAlgorithm)) {
             keyStore.deleteEntry(oldAliasByAlgorithm);
             LOG.trace("New key: " + alias + ", deleted key: " + oldAliasByAlgorithm);
@@ -551,10 +524,18 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
 
         PublicKey publicKey = keyPair.getPublic();
 
-        jsonObject = new JSONObject();
+        return getJson(algorithm, expirationTime, publicKey,  alias, cert);
+    }
+
+   private JSONObject getJson(Algorithm algorithm, Long expirationTime, PublicKey publicKey, String alias, X509Certificate cert) throws CertificateEncodingException {
+
+        Use use = algorithm.getUse();
+
+        JSONObject jsonObject = new JSONObject();
+
         jsonObject.put(JWKParameter.KEY_TYPE, algorithm.getFamily());
         jsonObject.put(JWKParameter.KEY_ID, alias);
-        jsonObject.put(JWKParameter.KEY_USE, use.getParamName());
+        jsonObject.put(JWKParameter.KEY_USE, algorithm.getUse().getParamName());
         jsonObject.put(JWKParameter.ALGORITHM, algorithm.getParamName());
         jsonObject.put(JWKParameter.EXPIRATION_TIME, expirationTime);
         if (publicKey instanceof RSAPublicKey) {
@@ -563,9 +544,20 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
             jsonObject.put(JWKParameter.EXPONENT, Base64Util.base64urlencodeUnsignedBigInt(rsaPublicKey.getPublicExponent()));
         } else if (publicKey instanceof ECPublicKey) {
             ECPublicKey ecPublicKey = (ECPublicKey) publicKey;
-            jsonObject.put(JWKParameter.CURVE, keyEncryptionAlgorithm.getCurve().getAlias());
+            if(use == Use.SIGNATURE) {
+                SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(algorithm.getParamName());                
+                jsonObject.put(JWKParameter.CURVE, signatureAlgorithm.getCurve().getName());
+            } else if(use == Use.ENCRYPTION) {
+                KeyEncryptionAlgorithm keyEncryptionAlgorithm = KeyEncryptionAlgorithm.fromName(algorithm.getParamName());                
+                jsonObject.put(JWKParameter.CURVE, keyEncryptionAlgorithm.getCurve().getName());
+            }
             jsonObject.put(JWKParameter.X, Base64Util.base64urlencode(ecPublicKey.getW().getAffineX().toByteArray()));
             jsonObject.put(JWKParameter.Y, Base64Util.base64urlencode(ecPublicKey.getW().getAffineY().toByteArray()));
+        } else if (use == Use.SIGNATURE && publicKey instanceof EdDSAPublicKey) {
+            EdDSAPublicKey edDSAPublicKey = (EdDSAPublicKey) publicKey;
+            SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(algorithm.getParamName());            
+            jsonObject.put(JWKParameter.CURVE, signatureAlgorithm.getCurve().getName());
+            jsonObject.put(JWKParameter.X, Base64Util.base64urlencode(edDSAPublicKey.getEncoded()));
         }
 
         JSONArray x5c = new JSONArray();
@@ -575,8 +567,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
         return jsonObject;
     }
 
-    private boolean verifySignatureEcEdRSA(String signingInput, String encodedSignature, String alias, JSONObject jwks,
-            SignatureAlgorithm signatureAlgorithm) {
+    private boolean verifySignatureEcEdRSA(String signingInput, String encodedSignature, String alias, JSONObject jwks, SignatureAlgorithm signatureAlgorithm) {
         PublicKey publicKey = null;
         try {
             if (jwks == null) {
@@ -593,7 +584,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
             return false;
         }
     }
-    
+
     private boolean verifySignatureEcEdRSA(String signingInput, String encodedSignature, SignatureAlgorithm signatureAlgorithm, PublicKey publicKey) throws JOSEException, NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, SignatureException {
         byte[] signature = Base64Util.base64urldecode(encodedSignature);
         byte[] signatureDer = signature;
