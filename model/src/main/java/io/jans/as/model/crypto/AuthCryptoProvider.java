@@ -7,9 +7,10 @@
 package io.jans.as.model.crypto;
 
 import com.google.common.collect.Lists;
-import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.crypto.impl.ECDSA;
 import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
 import io.jans.as.model.crypto.signature.AlgorithmFamily;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.jwk.Algorithm;
@@ -32,6 +33,8 @@ import org.bouncycastle.cert.CertIOException;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
+import org.bouncycastle.jcajce.interfaces.EdDSAPublicKey;
+import org.bouncycastle.jcajce.spec.EdDSAParameterSpec;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
@@ -41,6 +44,7 @@ import org.json.JSONObject;
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -49,6 +53,7 @@ import java.io.InputStream;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -60,6 +65,7 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Signature;
+import java.security.SignatureException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
@@ -74,11 +80,11 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-
 /**
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version February 12, 2019
+ * @author Sergey Manoylo
+ * @version October 26, 2021
  */
 public class AuthCryptoProvider extends AbstractCryptoProvider {
 
@@ -106,39 +112,35 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
     public AuthCryptoProvider(String keyStoreFile, String keyStoreSecret, String dnName, boolean rejectNoneAlg, KeySelectionStrategy keySelectionStrategy) throws KeyStoreException {
         this.rejectNoneAlg = rejectNoneAlg;
         this.keySelectionStrategy = keySelectionStrategy != null ? keySelectionStrategy : AppConfiguration.DEFAULT_KEY_SELECTION_STRATEGY;
-        if (!Util.isNullOrEmpty(keyStoreFile) && !Util.isNullOrEmpty(keyStoreSecret) /* && !Util.isNullOrEmpty(dnName) */) {
+        if (!Util.isNullOrEmpty(keyStoreFile) && !Util.isNullOrEmpty(keyStoreSecret)) {
             this.keyStoreFile = keyStoreFile;
             this.keyStoreSecret = keyStoreSecret;
             this.dnName = dnName;
-
-            keyStore = KeyStore.getInstance("JKS");
-
+            keyStore = KeyStore.getInstance("PKCS12");
             try {
                 File f = new File(keyStoreFile);
                 if (!f.exists()) {
                     keyStore.load(null, keyStoreSecret.toCharArray());
-                    try (FileOutputStream fos = new FileOutputStream(keyStoreFile)) {
-                        keyStore.store(fos, keyStoreSecret.toCharArray());
-                    }
+                    store();
                 }
-                try (InputStream is = new FileInputStream(keyStoreFile)) {
-                    keyStore.load(is, keyStoreSecret.toCharArray());
-                }
-            } catch (Exception e) {
-                LOG.error(e.getMessage(), e);
-            }
+                load();
+          } catch (Exception e) {
+              LOG.error(e.getMessage(), e);
+          }
         }
     }
 
-    public void load(String keyStoreSecret) {
-        this.keyStoreSecret = keyStoreSecret;
-        try(InputStream is = new FileInputStream(keyStoreFile)) {
-            keyStore = KeyStore.getInstance("JKS");
+    private void store() throws IOException, KeyStoreException, NoSuchAlgorithmException, CertificateException {
+        try (FileOutputStream fos = new FileOutputStream(keyStoreFile)) {
+            keyStore.store(fos, keyStoreSecret.toCharArray());
+        }
+    }
+
+    public void load() throws IOException, NoSuchAlgorithmException, CertificateException {
+        try (InputStream is = new FileInputStream(keyStoreFile)) {
             keyStore.load(is, keyStoreSecret.toCharArray());
             LOG.debug("Loaded keys from JKS.");
-            LOG.trace("Loaded keys:"+ getKeys());
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.trace("Loaded keys:" + getKeys());
         }
     }
 
@@ -155,67 +157,18 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
     }
 
     @Override
-    public JSONObject generateKey(Algorithm algorithm, Long expirationTime, Use use) throws NoSuchProviderException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, CertificateException, IOException, OperatorCreationException, KeyStoreException {
-        SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(algorithm.getParamName());
-        if (signatureAlgorithm == null) {
-            signatureAlgorithm = SignatureAlgorithm.RS256;
+    public JSONObject generateKey(Algorithm algorithm, Long expirationTime, Use use) throws Exception {
+        if (algorithm == null) {
+            throw new RuntimeException("The signature algorithm parameter cannot be null");
         }
-
-        KeyPairGenerator keyGen;
-        if (AlgorithmFamily.RSA.equals(algorithm.getFamily())) {
-            keyGen = KeyPairGenerator.getInstance(algorithm.getFamily().toString(), "BC");
-            keyGen.initialize(2048, new SecureRandom());
-        } else if (AlgorithmFamily.EC.equals(algorithm.getFamily())) {
-            ECGenParameterSpec eccgen = new ECGenParameterSpec(signatureAlgorithm.getCurve().getAlias());
-            keyGen = KeyPairGenerator.getInstance(algorithm.getFamily().toString(), "BC");
-            keyGen.initialize(eccgen, new SecureRandom());
-        } else {
-            throw new UnknownAlgorithmException("The provided signature algorithm parameter is not supported");
+        JSONObject jsonObject = null;
+        Use algUse = algorithm.getUse();
+        if(algUse == Use.SIGNATURE) {
+            jsonObject = generateKeySignature(algorithm, expirationTime, use);
         }
-
-        // Generate the key
-        KeyPair keyPair = keyGen.generateKeyPair();
-        PrivateKey pk = keyPair.getPrivate();
-
-        // Java API requires a certificate chain
-        X509Certificate cert = generateV3Certificate(keyPair, dnName, signatureAlgorithm.getAlgorithm(), expirationTime);
-        X509Certificate[] chain = new X509Certificate[1];
-        chain[0] = cert;
-
-        String alias = UUID.randomUUID().toString() + getKidSuffix(use, algorithm);
-        keyStore.setKeyEntry(alias, pk, keyStoreSecret.toCharArray(), chain);
-
-        final String oldAliasByAlgorithm = getAliasByAlgorithmForDeletion(algorithm, alias, use);
-        if (StringUtils.isNotBlank(oldAliasByAlgorithm)) {
-            keyStore.deleteEntry(oldAliasByAlgorithm);
-            LOG.trace("New key: " + alias + ", deleted key: " + oldAliasByAlgorithm);
+        else if(algUse == Use.ENCRYPTION) {
+            jsonObject = generateKeyEncryption(algorithm, expirationTime, use);
         }
-
-        FileOutputStream stream = new FileOutputStream(keyStoreFile);
-        keyStore.store(stream, keyStoreSecret.toCharArray());
-
-        PublicKey publicKey = keyPair.getPublic();
-
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put(JWKParameter.KEY_TYPE, algorithm.getFamily());
-        jsonObject.put(JWKParameter.KEY_ID, alias);
-        jsonObject.put(JWKParameter.KEY_USE, use.getParamName());
-        jsonObject.put(JWKParameter.ALGORITHM, algorithm.getParamName());
-        jsonObject.put(JWKParameter.EXPIRATION_TIME, expirationTime);
-        if (publicKey instanceof RSAPublicKey) {
-            RSAPublicKey rsaPublicKey = (RSAPublicKey) publicKey;
-            jsonObject.put(JWKParameter.MODULUS, Base64Util.base64urlencodeUnsignedBigInt(rsaPublicKey.getModulus()));
-            jsonObject.put(JWKParameter.EXPONENT, Base64Util.base64urlencodeUnsignedBigInt(rsaPublicKey.getPublicExponent()));
-        } else if (publicKey instanceof ECPublicKey) {
-            ECPublicKey ecPublicKey = (ECPublicKey) publicKey;
-            jsonObject.put(JWKParameter.CURVE, signatureAlgorithm.getCurve().getName());
-            jsonObject.put(JWKParameter.X, Base64Util.base64urlencode(ecPublicKey.getW().getAffineX().toByteArray()));
-            jsonObject.put(JWKParameter.Y, Base64Util.base64urlencode(ecPublicKey.getW().getAffineY().toByteArray()));
-        }
-        JSONArray x5c = new JSONArray();
-        x5c.put(Base64.encodeBase64String(cert.getEncoded()));
-        jsonObject.put(JWKParameter.CERTIFICATE_CHAIN, x5c);
-
         return jsonObject;
     }
 
@@ -240,7 +193,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
     @Override
     public boolean containsKey(String keyId) {
         try {
-            if (StringUtils.isBlank(keyId)){
+            if (StringUtils.isBlank(keyId)) {
                 return false;
             }
 
@@ -261,12 +214,12 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
             mac.init(secretKey);
             byte[] sig = mac.doFinal(signingInput.getBytes());
             return Base64Util.base64urlencode(sig);
-        } else { // EC or RSA
+        } else { // EC, ED or RSA
             PrivateKey privateKey = getPrivateKey(alias);
             if (privateKey == null) {
-                final String error = "Failed to find private key by kid: " + alias +
-                        ", signatureAlgorithm: " + signatureAlgorithm +
-                        "(check whether web keys JSON in persistence corresponds to keystore file), keySelectionStrategy: " + keySelectionStrategy;
+                final String error = "Failed to find private key by kid: " + alias + ", signatureAlgorithm: " + signatureAlgorithm
+                        + "(check whether web keys JSON in persistence corresponds to keystore file), keySelectionStrategy: "
+                        + keySelectionStrategy;
                 LOG.error(error);
                 throw new IllegalStateException(error);
             }
@@ -277,7 +230,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
 
             byte[] signature = signer.sign();
             if (AlgorithmFamily.EC.equals(signatureAlgorithm.getFamily())) {
-            	int signatureLenght = ECDSA.getSignatureByteArrayLength(JWSAlgorithm.parse(signatureAlgorithm.getName()));
+                int signatureLenght = ECDSA.getSignatureByteArrayLength(signatureAlgorithm.getJwsAlgorithm());
                 signature = ECDSA.transcodeSignatureToConcat(signature, signatureLenght);
             }
 
@@ -291,38 +244,13 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
             LOG.trace("None algorithm is forbidden by `rejectJwtWithNoneAlg` property.");
             return false;
         }
-
         if (signatureAlgorithm == SignatureAlgorithm.NONE) {
             return Util.isNullOrEmpty(encodedSignature);
         } else if (AlgorithmFamily.HMAC.equals(signatureAlgorithm.getFamily())) {
             String expectedSignature = sign(signingInput, null, sharedSecret, signatureAlgorithm);
             return expectedSignature.equals(encodedSignature);
-        } else { // EC or RSA
-            PublicKey publicKey;
-
-            try {
-                if (jwks == null) {
-                    publicKey = getPublicKey(alias);
-                } else {
-                    publicKey = getPublicKey(alias, jwks, signatureAlgorithm.getAlg());
-                }
-                if (publicKey == null) {
-                    return false;
-                }
-
-                byte[] signatureDer = Base64Util.base64urldecode(encodedSignature);
-                if (AlgorithmFamily.EC.equals(signatureAlgorithm.getFamily())) {
-                	signatureDer = ECDSA.transcodeSignatureToDER(signatureDer);
-                }
-
-                Signature verifier = Signature.getInstance(signatureAlgorithm.getAlgorithm(), "BC");
-                verifier.initVerify(publicKey);
-                verifier.update(signingInput.getBytes());
-                return verifier.verify(signatureDer);
-            } catch (Exception e) {
-                LOG.error(e.getMessage(), e);
-                return false;
-            }
+        } else { // EC, ED or RSA
+            return verifySignatureEcEdRSA(signingInput, encodedSignature, alias, jwks, signatureAlgorithm);
         }
     }
 
@@ -334,6 +262,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
         return true;
     }
 
+    @Override
     public PublicKey getPublicKey(String alias) {
         PublicKey publicKey = null;
 
@@ -390,8 +319,8 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
         return selectedKid;
     }
 
-    public PrivateKey getPrivateKey(String alias)
-            throws UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException {
+    @Override
+    public PrivateKey getPrivateKey(String alias) throws UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException {
         if (Util.isNullOrEmpty(alias)) {
             return null;
         }
@@ -469,7 +398,6 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
         return null;
     }
 
-
     private void checkKeyExpiration(String alias) {
         try {
             Date expirationDate = ((X509Certificate) keyStore.getCertificate(alias)).getNotAfter();
@@ -482,7 +410,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
     public KeyStore getKeyStore() {
         return keyStore;
     }
-    
+
     private JSONObject generateKeySignature(Algorithm algorithm, Long expirationTime, Use use)
             throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException, OperatorCreationException,
             CertificateException, KeyStoreException, IOException {
@@ -685,6 +613,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
         } catch (SignatureException e) {
             return verifier.verify(signature);
         }        
-    }    
+    }
 
 }
+

@@ -25,6 +25,7 @@ import org.apache.http.HttpStatus;
 import org.json.JSONObject;
 
 import java.security.PrivateKey;
+import java.security.PublicKey;
 
 /**
  * @author Javier Rojas Blum
@@ -135,4 +136,9 @@ public class ElevenCryptoProvider extends AbstractCryptoProvider {
 	public PrivateKey getPrivateKey(String keyId) {
         throw new UnsupportedOperationException("Method not implemented.");
 	}
+
+    @Override
+    public PublicKey getPublicKey(String keyId) {
+        throw new UnsupportedOperationException("Method not implemented.");
+    }
 }
