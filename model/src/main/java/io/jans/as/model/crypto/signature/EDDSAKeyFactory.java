@@ -183,7 +183,37 @@ public class EDDSAKeyFactory extends KeyFactory<EDDSAPrivateKey, EDDSAPublicKey>
      * @throws SignatureException
      */
     public static EDDSAPublicKey createEDDSAPublicKeyFromDecodedKey(final SignatureAlgorithm signatureAlgorithm, final byte [] decodedPublicKey) throws SignatureException {
-        byte[] encodedPubKey = null; 
+        byte[] encodedPubKey = getEncodedPubKey(signatureAlgorithm, decodedPublicKey);
+        return new EDDSAPublicKey(signatureAlgorithm, encodedPubKey);
+    }
+
+    /**
+     * Creates EDDSA private key from decoded array
+     * 
+     * @param signatureAlgorithm
+     * @param decodedPrivateKey
+     * @param decodedPublicKey
+     * @return
+     * @throws SignatureException
+     * @throws IOException
+     */
+    public static EDDSAPrivateKey createEDDSAPrivateKeyFromDecodedKey(final SignatureAlgorithm signatureAlgorithm, final byte [] decodedPrivateKey, final byte [] decodedPublicKey) throws SignatureException, IOException {
+        byte[] encodedPubKey = getEncodedPubKey(signatureAlgorithm, decodedPublicKey);
+        Ed25519PrivateKeyParameters privKeysParams = new Ed25519PrivateKeyParameters(decodedPrivateKey);
+        PrivateKeyInfo privKeyInfo = PrivateKeyInfoFactory.createPrivateKeyInfo(privKeysParams, null);
+        return new EDDSAPrivateKey(signatureAlgorithm, privKeyInfo.getEncoded(), encodedPubKey);
+    }
+
+    /**
+     * Returns encoded EDDSA public key (from decoded public key)
+     * 
+     * @param signatureAlgorithm
+     * @param decodedPublicKey
+     * @return
+     * @throws SignatureException
+     */
+    private static byte[] getEncodedPubKey(final SignatureAlgorithm signatureAlgorithm, final byte [] decodedPublicKey) throws SignatureException {
+        byte[] encodedPubKey = null;
         switch(signatureAlgorithm) {
         case EDDSA:
         case ED25519: {
@@ -202,44 +232,7 @@ public class EDDSAKeyFactory extends KeyFactory<EDDSAPrivateKey, EDDSAPublicKey>
             throw new SignatureException(String.format("Wrong type of the signature algorithm (SignatureAlgorithm): %s", signatureAlgorithm.toString()));     
         }
         }
-        return new EDDSAPublicKey(signatureAlgorithm, encodedPubKey);
+        return encodedPubKey;
     }
 
-    /**
-     * Creates EDDSA private key from decoded array
-     * 
-     * @param signatureAlgorithm
-     * @param decodedPrivateKey
-     * @param decodedPublicKey
-     * @return
-     * @throws SignatureException
-     * @throws IOException
-     */
-    public static EDDSAPrivateKey createEDDSAPrivateKeyFromDecodedKey(final SignatureAlgorithm signatureAlgorithm, final byte [] decodedPrivateKey, final byte [] decodedPublicKey) throws SignatureException, IOException {
-        byte[] encodedPubKey = null; 
-        if(decodedPublicKey != null) {
-            switch(signatureAlgorithm) {
-            case EDDSA:
-            case ED25519: {
-                encodedPubKey = new byte[Ed25519Prefix.length + Ed25519PublicKeyParameters.KEY_SIZE];
-                System.arraycopy(Ed25519Prefix, 0, encodedPubKey, 0, Ed25519Prefix.length);
-                System.arraycopy(decodedPublicKey, 0, encodedPubKey, Ed25519Prefix.length, decodedPublicKey.length);                
-                break;
-            }
-            case ED448: {
-                encodedPubKey = new byte[Ed448Prefix.length + Ed448PublicKeyParameters.KEY_SIZE];
-                System.arraycopy(Ed448Prefix, 0, encodedPubKey, 0, Ed448Prefix.length);
-                System.arraycopy(decodedPublicKey, 0, encodedPubKey, Ed448Prefix.length, decodedPublicKey.length);                
-                break;
-            }
-            default: {
-                throw new SignatureException(String.format("Wrong type of the signature algorithm (SignatureAlgorithm): %s", signatureAlgorithm.toString()));     
-            }
-            }
-        }
-        Ed25519PrivateKeyParameters privKeysParams = new Ed25519PrivateKeyParameters(decodedPrivateKey);
-        PrivateKeyInfo privKeyInfo = PrivateKeyInfoFactory.createPrivateKeyInfo(privKeysParams, null);
-        return new EDDSAPrivateKey(signatureAlgorithm, privKeyInfo.getEncoded(), encodedPubKey);
-    }
-    
 }
