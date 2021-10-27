@@ -88,7 +88,8 @@ public class MTLSService {
         final String hashedCn = HashUtil.getHash(cn, SignatureAlgorithm.HS512);
 
         if ((StringUtils.isBlank(cn) || StringUtils.isBlank(hashedCn)) || (!cn.equals(client.getClientId()) && !hashedCn.equals(HashUtil.getHash(client.getClientId(), SignatureAlgorithm.HS512)))) {
-            log.trace("Client certificate CN does not match clientId. Invoke registration script's isCertValidForClient, CN: " + cn + ", clientId: " + client.getClientId() + ", hashedCn:" + hashedCn);
+            if (log.isTraceEnabled())
+                log.trace("Client certificate CN does not match clientId. Invoke registration script's isCertValidForClient, CN: {}, clientId: {}, hashedCn: {}", cn, client.getClientId(), hashedCn);
 
             DynamicClientRegistrationContext context = new DynamicClientRegistrationContext(httpRequest, new JSONObject(), null, client);
             boolean result = externalDynamicClientRegistrationService.isCertValidForClient(cert, context);

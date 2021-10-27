@@ -9,7 +9,8 @@ package io.jans.as.model.token;
 import io.jans.as.model.error.IErrorType;
 
 /**
- * @author Javier Rojas Date: 09.22.2011
+ * @author Javier Rojas Blum
+ * @version September 30, 2021
  */
 public enum TokenErrorResponseType implements IErrorType {
     /**
@@ -78,11 +79,17 @@ public enum TokenErrorResponseType implements IErrorType {
     /**
      * CIBA. The end-user denied the authorization request.
      */
-    ACCESS_DENIED("access_denied");
+    ACCESS_DENIED("access_denied"),
+
+    /**
+     * DPoP. If the DPoP proof is invalid, the authorization server issues an error response with "invalid_dpop_proof"
+     * as the value of the "error" parameter.
+     */
+    INVALID_DPOP_PROOF("invalid_dpop_proof");
 
     private final String paramName;
 
-    TokenErrorResponseType(String paramName) {
+    private TokenErrorResponseType(String paramName) {
         this.paramName = paramName;
     }
 
