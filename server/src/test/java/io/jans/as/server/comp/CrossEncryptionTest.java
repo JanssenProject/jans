@@ -43,7 +43,6 @@ import io.jans.as.model.jwe.JweEncrypterImpl;
 import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.jwk.JSONWebKey;
 import io.jans.as.model.jwk.JSONWebKeySet;
-import io.jans.as.model.jwk.Use;
 import io.jans.as.model.jws.RSASigner;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtType;
@@ -386,7 +385,7 @@ public class CrossEncryptionTest {
 
         final JwtSigner jwtSigner = new JwtSigner(appConfiguration, keySet, SignatureAlgorithm.RS256, "audience", null, new AbstractCryptoProvider() {
             @Override
-            public JSONObject generateKey(Algorithm algorithm, Long expirationTime, Use use) throws Exception {
+            public JSONObject generateKey(Algorithm algorithm, Long expirationTime) throws Exception {
                 return null;
             }
 

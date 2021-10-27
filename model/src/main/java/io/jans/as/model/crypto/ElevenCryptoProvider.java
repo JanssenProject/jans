@@ -8,7 +8,6 @@ package io.jans.as.model.crypto;
 
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.jwk.Algorithm;
-import io.jans.as.model.jwk.Use;
 import io.jans.eleven.client.DeleteKeyClient;
 import io.jans.eleven.client.DeleteKeyRequest;
 import io.jans.eleven.client.DeleteKeyResponse;
@@ -54,7 +53,7 @@ public class ElevenCryptoProvider extends AbstractCryptoProvider {
     }
 
     @Override
-    public JSONObject generateKey(Algorithm algorithm, Long expirationTime, Use use) throws Exception {
+    public JSONObject generateKey(Algorithm algorithm, Long expirationTime) throws Exception {
         GenerateKeyRequest request = new GenerateKeyRequest();
         request.setSignatureAlgorithm(algorithm.toString());
         request.setExpirationTime(expirationTime);

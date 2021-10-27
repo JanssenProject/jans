@@ -63,11 +63,7 @@ public abstract class AbstractCryptoProvider {
 
     private int keyRegenerationIntervalInDays = -1;
 
-    public JSONObject generateKey(Algorithm algorithm, Long expirationTime) throws Exception {
-        return generateKey(algorithm, expirationTime, Use.SIGNATURE);
-    }
-
-    public abstract JSONObject generateKey(Algorithm algorithm, Long expirationTime, Use use) throws Exception;
+    public abstract JSONObject generateKey(Algorithm algorithm, Long expirationTime) throws Exception;
 
     public abstract String sign(String signingInput, String keyId, String sharedSecret, SignatureAlgorithm signatureAlgorithm) throws Exception;
 
@@ -136,7 +132,7 @@ public abstract class AbstractCryptoProvider {
                     LOG.debug(String.format("Key generation for %s is skipped because it's not allowed by keyAlgsAllowedForGeneration configuration property.", alg.toString()));
                     continue;
                 }
-                keys.put(cryptoProvider.generateKey(alg, expiration, alg.getUse()));
+                keys.put(cryptoProvider.generateKey(alg, expiration));
             } catch (Exception ex) {
                 LOG.error(String.format("Algorithm: %s", alg), ex);
             }
