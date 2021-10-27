@@ -57,7 +57,6 @@ import io.jans.orm.model.base.CustomAttribute;
 import io.jans.util.StringHelper;
 import io.jans.util.security.StringEncrypter;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang3.BooleanUtils;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -604,7 +603,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         } catch (Exception e) {
             final String msg = "Invalid software_statement.";
             log.error(msg, e);
-            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_SOFTWARE_STATEMENT, msg);
+            throw errorResponseFactory.createWebApplicationException(Response.Status.UNAUTHORIZED, RegisterErrorResponseType.INVALID_SOFTWARE_STATEMENT, msg);
         }
     }
 
