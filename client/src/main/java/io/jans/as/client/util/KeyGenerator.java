@@ -198,7 +198,7 @@ public class KeyGenerator {
 
             for (Algorithm algorithm : signatureAlgorithms) {
                 SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(algorithm.getParamName());
-                JSONObject result = cryptoProvider.generateKey(algorithm, calendar.getTimeInMillis(), Use.SIGNATURE);
+                JSONObject result = cryptoProvider.generateKey(algorithm, calendar.getTimeInMillis());
 
                 JSONWebKey key = new JSONWebKey();
                 key.setKid(result.getString(KEY_ID));
@@ -223,8 +223,7 @@ public class KeyGenerator {
             }
             for (Algorithm algorithm : encryptionAlgorithms) {
                 KeyEncryptionAlgorithm encryptionAlgorithm = KeyEncryptionAlgorithm.fromName(algorithm.getParamName());
-                JSONObject result = cryptoProvider.generateKey(algorithm,
-                        calendar.getTimeInMillis(), Use.ENCRYPTION);
+                JSONObject result = cryptoProvider.generateKey(algorithm, calendar.getTimeInMillis());
 
                 JSONWebKey key = new JSONWebKey();
                 key.setKid(result.getString(KEY_ID));
