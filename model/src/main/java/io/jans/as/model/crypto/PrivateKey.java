@@ -20,11 +20,6 @@ public abstract class PrivateKey implements JSONable {
     private String keyId;
 
     private SignatureAlgorithm signatureAlgorithm;
-    
-    protected PrivateKey (final String keyId, final SignatureAlgorithm signatureAlgorithm) {
-        this.keyId = keyId;
-        this.signatureAlgorithm = signatureAlgorithm;
-    }
 
     public String getKeyId() {
         return keyId;
