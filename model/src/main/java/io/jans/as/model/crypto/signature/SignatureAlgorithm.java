@@ -22,23 +22,65 @@ import java.util.List;
  */
 public enum SignatureAlgorithm {
 
-    NONE("none"),
-    HS256("HS256", AlgorithmFamily.HMAC, "HMACSHA256", JWSAlgorithm.HS256),
-    HS384("HS384", AlgorithmFamily.HMAC, "HMACSHA384", JWSAlgorithm.HS384),
-    HS512("HS512", AlgorithmFamily.HMAC, "HMACSHA512", JWSAlgorithm.HS512),
-    RS256("RS256", AlgorithmFamily.RSA, "SHA256WITHRSA", JWSAlgorithm.RS256),
-    RS384("RS384", AlgorithmFamily.RSA, "SHA384WITHRSA", JWSAlgorithm.RS384),
-    RS512("RS512", AlgorithmFamily.RSA, "SHA512WITHRSA", JWSAlgorithm.RS512),
-    ES256("ES256", AlgorithmFamily.EC, "SHA256WITHECDSA", EllipticEdvardsCurve.P_256, JWSAlgorithm.ES256),
-    ES256K("ES256K", AlgorithmFamily.EC, "SHA256WITHECDSA", EllipticEdvardsCurve.P_256K, JWSAlgorithm.ES256K),
-    ES384("ES384", AlgorithmFamily.EC, "SHA384WITHECDSA", EllipticEdvardsCurve.P_384, JWSAlgorithm.ES384),
-    ES512("ES512", AlgorithmFamily.EC, "SHA512WITHECDSA", EllipticEdvardsCurve.P_521, JWSAlgorithm.ES512),
-    PS256("PS256", AlgorithmFamily.RSA, "SHA256withRSAandMGF1", JWSAlgorithm.PS256),
-    PS384("PS384", AlgorithmFamily.RSA, "SHA384withRSAandMGF1", JWSAlgorithm.PS384),
-    PS512("PS512", AlgorithmFamily.RSA, "SHA512withRSAandMGF1", JWSAlgorithm.PS512),
-    ED25519("Ed25519", AlgorithmFamily.ED, "Ed25519", EllipticEdvardsCurve.ED_25519, JWSAlgorithm.EdDSA),
-    ED448("Ed448", AlgorithmFamily.ED, "Ed448", EllipticEdvardsCurve.ED_448, JWSAlgorithm.EdDSA),
-    EDDSA("EdDSA", AlgorithmFamily.ED, "Ed25519", EllipticEdvardsCurve.ED_25519, JWSAlgorithm.EdDSA);
+    NONE("none", AlgorithmFamily.NONE, null, null),
+
+    HS256(SignatureAlgorithm.DEF_HS256, AlgorithmFamily.HMAC, SignatureAlgorithm.DEF_HMACSHA256, JWSAlgorithm.HS256),
+    HS384(SignatureAlgorithm.DEF_HS384, AlgorithmFamily.HMAC, SignatureAlgorithm.DEF_HMACSHA384, JWSAlgorithm.HS384),
+    HS512(SignatureAlgorithm.DEF_HS512, AlgorithmFamily.HMAC, SignatureAlgorithm.DEF_HMACSHA512, JWSAlgorithm.HS512),
+
+    RS256(SignatureAlgorithm.DEF_RS256, AlgorithmFamily.RSA, SignatureAlgorithm.DEF_SHA256WITHRSA, JWSAlgorithm.RS256),
+    RS384(SignatureAlgorithm.DEF_RS384, AlgorithmFamily.RSA, SignatureAlgorithm.DEF_SHA384WITHRSA, JWSAlgorithm.RS384),
+    RS512(SignatureAlgorithm.DEF_RS512, AlgorithmFamily.RSA, SignatureAlgorithm.DEF_SHA512WITHRSA, JWSAlgorithm.RS512),
+
+    ES256(SignatureAlgorithm.DEF_ES256, AlgorithmFamily.EC, SignatureAlgorithm.DEF_SHA256WITHECDSA, EllipticEdvardsCurve.P_256, JWSAlgorithm.ES256),
+    ES256K(SignatureAlgorithm.DEF_ES256K, AlgorithmFamily.EC, SignatureAlgorithm.DEF_SHA256WITHECDSA, EllipticEdvardsCurve.P_256K, JWSAlgorithm.ES256K),
+    ES384(SignatureAlgorithm.DEF_ES384, AlgorithmFamily.EC, SignatureAlgorithm.DEF_SHA384WITHECDSA, EllipticEdvardsCurve.P_384, JWSAlgorithm.ES384),
+    ES512(SignatureAlgorithm.DEF_ES512, AlgorithmFamily.EC, SignatureAlgorithm.DEF_SHA512WITHECDSA, EllipticEdvardsCurve.P_521, JWSAlgorithm.ES512),
+
+    PS256(SignatureAlgorithm.DEF_PS256, AlgorithmFamily.RSA, SignatureAlgorithm.DEF_SHA256WITHRSAANDMGF1, JWSAlgorithm.PS256),
+    PS384(SignatureAlgorithm.DEF_PS384, AlgorithmFamily.RSA, SignatureAlgorithm.DEF_SHA384WITHRSAANDMGF1, JWSAlgorithm.PS384),
+    PS512(SignatureAlgorithm.DEF_PS512, AlgorithmFamily.RSA, SignatureAlgorithm.DEF_SHA512WITHRSAANDMGF1, JWSAlgorithm.PS512),
+
+    ED25519(SignatureAlgorithm.DEF_ED25519, AlgorithmFamily.ED, SignatureAlgorithm.DEF_ED25519, EllipticEdvardsCurve.ED_25519, JWSAlgorithm.EdDSA),
+    ED448(SignatureAlgorithm.DEF_ED448, AlgorithmFamily.ED, SignatureAlgorithm.DEF_ED448, EllipticEdvardsCurve.ED_448, JWSAlgorithm.EdDSA),
+    EDDSA(SignatureAlgorithm.DEF_EDDDSA, AlgorithmFamily.ED, SignatureAlgorithm.DEF_ED25519, EllipticEdvardsCurve.ED_25519, JWSAlgorithm.EdDSA);
+
+    public static final String DEF_HS256 = "HS256";
+    public static final String DEF_HS384 = "HS384";
+    public static final String DEF_HS512 = "HS512";
+
+    public static final String DEF_RS256 = "RS256";
+    public static final String DEF_RS384 = "RS384";
+    public static final String DEF_RS512 = "RS512";
+
+    public static final String DEF_ES256 = "ES256";
+    public static final String DEF_ES256K = "ES256K";
+    public static final String DEF_ES384 = "ES384";
+    public static final String DEF_ES512 = "ES512";
+
+    public static final String DEF_PS256 = "PS256";
+    public static final String DEF_PS384 = "PS384";
+    public static final String DEF_PS512 = "PS512";
+
+    public static final String DEF_ED25519 = "Ed25519";
+    public static final String DEF_ED448 = "Ed448";
+    public static final String DEF_EDDDSA = "EdDSA";
+
+    public static final String DEF_HMACSHA256 = "HMACSHA256";
+    public static final String DEF_HMACSHA384 = "HMACSHA384";
+    public static final String DEF_HMACSHA512 = "HMACSHA512";
+
+    public static final String DEF_SHA256WITHRSA = "SHA256WITHRSA";
+    public static final String DEF_SHA384WITHRSA = "SHA384WITHRSA";
+    public static final String DEF_SHA512WITHRSA = "SHA512WITHRSA";
+
+    public static final String DEF_SHA256WITHECDSA = "SHA256WITHECDSA";
+    public static final String DEF_SHA384WITHECDSA = "SHA384WITHECDSA";
+    public static final String DEF_SHA512WITHECDSA = "SHA512WITHECDSA";
+
+    public static final String DEF_SHA256WITHRSAANDMGF1 = "SHA256withRSAandMGF1";
+    public static final String DEF_SHA384WITHRSAANDMGF1 = "SHA384withRSAandMGF1";
+    public static final String DEF_SHA512WITHRSAANDMGF1 = "SHA512withRSAandMGF1";
 
     private final String name;
     private final AlgorithmFamily family;
@@ -60,10 +102,6 @@ public enum SignatureAlgorithm {
 
     SignatureAlgorithm(String name, AlgorithmFamily family, String algorithm, JWSAlgorithm jwsAlgorithm) {
         this(name, family, algorithm, null, jwsAlgorithm);
-    }
-
-    SignatureAlgorithm(String name) {
-        this(name, null, null, null, null);
     }
 
     public Algorithm getAlg() {
@@ -132,6 +170,11 @@ public enum SignatureAlgorithm {
         return name;
     }
 
+    /**
+     * Returns this.jwsAlgorithm (JSON Web Signature (JWS) algorithm name)
+     * 
+     * @return this.jwsAlgorithm (JSON Web Signature (JWS) algorithm name)
+     */
     public JWSAlgorithm getJwsAlgorithm() {
         return jwsAlgorithm;
     }
