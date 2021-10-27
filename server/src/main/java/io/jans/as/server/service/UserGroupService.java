@@ -38,10 +38,10 @@ public class UserGroupService {
     @Inject
     private PersistenceEntryManager ldapEntryManager;
 
-    public UserGroup loadGroup(String p_groupDN) {
+    public UserGroup loadGroup(String groupDN) {
         try {
-            if (StringUtils.isNotBlank(p_groupDN)) {
-                return ldapEntryManager.find(UserGroup.class, p_groupDN);
+            if (StringUtils.isNotBlank(groupDN)) {
+                return ldapEntryManager.find(UserGroup.class, groupDN);
             }
         } catch (Exception e) {
             log.debug(e.getMessage(), e);
@@ -49,12 +49,12 @@ public class UserGroupService {
         return null;
     }
 
-    public boolean isUserInGroup(String p_groupDN, String p_userDN) {
-        final UserGroup group = loadGroup(p_groupDN);
+    public boolean isUserInGroup(String groupDN, String userDN) {
+        final UserGroup group = loadGroup(groupDN);
         if (group != null) {
             final String[] member = group.getMember();
             if (member != null) {
-                return Arrays.asList(member).contains(p_userDN);
+                return Arrays.asList(member).contains(userDN);
             }
         }
         return false;
@@ -65,25 +65,23 @@ public class UserGroupService {
 		Filter memberFilter = Filter.createEqualityFilter("member", personDn);
 		Filter searchFilter = Filter.createORFilter(ownerFilter, memberFilter);
 
-		boolean isMemberOrOwner = false;
 		try {
-			isMemberOrOwner = ldapEntryManager.findEntries(groupDn, UserGroup.class, searchFilter, 1).size() > 0;
-
+			return !ldapEntryManager.findEntries(groupDn, UserGroup.class, searchFilter, 1).isEmpty();
 		} catch (EntryPersistenceException ex) {
 			log.error("Failed to determine if person '{}' memeber or owner of group '{}'", personDn, groupDn, ex);
 		}
 
-		return isMemberOrOwner;
+		return false;
 	}
 
-    public boolean isInAnyGroup(String[] p_groupDNs, String p_userDN) {
-        return p_groupDNs != null && isInAnyGroup(Arrays.asList(p_groupDNs), p_userDN);
+    public boolean isInAnyGroup(String[] groupDNs, String userDN) {
+        return groupDNs != null && isInAnyGroup(Arrays.asList(groupDNs), userDN);
     }
 
-    public boolean isInAnyGroup(List<String> p_groupDNs, String p_userDN) {
-        if (p_groupDNs != null && !p_groupDNs.isEmpty() && p_userDN != null && !p_userDN.isEmpty()) {
-            for (String groupDN : p_groupDNs) {
-                if (isUserInGroup(groupDN, p_userDN)) {
+    public boolean isInAnyGroup(List<String> groupDNs, String userDN) {
+        if (groupDNs != null && !groupDNs.isEmpty() && userDN != null && !userDN.isEmpty()) {
+            for (String groupDN : groupDNs) {
+                if (isUserInGroup(groupDN, userDN)) {
                     return true;
                 }
             }

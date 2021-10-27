@@ -11,7 +11,7 @@ import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.token.JsonWebResponse;
 import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
-import io.jans.as.server.model.ldap.TokenLdap;
+import io.jans.as.server.model.ldap.TokenEntity;
 
 import java.util.Collection;
 import java.util.Date;
@@ -22,7 +22,7 @@ import java.util.function.Function;
 /**
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version September 4, 2019
+ * @version September 30, 2021
  */
 
 public interface IAuthorizationGrant {
@@ -43,11 +43,11 @@ public interface IAuthorizationGrant {
 
     String getSub();
 
-    AccessToken createAccessToken(String certAsPem, ExecutionContext executionContext);
+    AccessToken createAccessToken(String dpop, String certAsPem, ExecutionContext executionContext);
 
-    RefreshToken createRefreshToken();
+    RefreshToken createRefreshToken(String dpop);
 
-    RefreshToken createRefreshToken(int lifetime);
+    RefreshToken createRefreshToken(String dpop, int lifetime);
 
     IdToken createIdToken(
             String nonce, AuthorizationCode authorizationCode, AccessToken accessToken, RefreshToken refreshToken,
@@ -99,9 +99,9 @@ public interface IAuthorizationGrant {
 
     Date getAuthenticationTime();
 
-    TokenLdap getTokenLdap();
+    TokenEntity getTokenEntity();
 
-    void setTokenLdap(TokenLdap tokenLdap);
+    void setTokenEntity(TokenEntity tokenEntity);
 
     void setLongLivedAccessToken(AccessToken longLivedAccessToken);
 

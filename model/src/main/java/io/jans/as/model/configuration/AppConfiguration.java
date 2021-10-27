@@ -8,12 +8,7 @@ package io.jans.as.model.configuration;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.common.collect.Lists;
-import io.jans.as.model.common.ComponentType;
-import io.jans.as.model.common.GrantType;
-import io.jans.as.model.common.ResponseMode;
-import io.jans.as.model.common.ResponseType;
-import io.jans.as.model.common.SoftwareStatementValidationType;
-import io.jans.as.model.common.WebKeyStorage;
+import io.jans.as.model.common.*;
 import io.jans.as.model.error.ErrorHandlingMethod;
 import io.jans.as.model.jwk.KeySelectionStrategy;
 
@@ -28,7 +23,7 @@ import java.util.Set;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version July 28, 2021
+ * @version September 30, 2021
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AppConfiguration implements Configuration {
@@ -72,6 +67,7 @@ public class AppConfiguration implements Configuration {
 
     private Boolean sessionAsJwt = false;
     private Boolean requireRequestObjectEncryption = false;
+    private Boolean requirePkce = false;
 
     private int sectorIdentifierCacheLifetimeInMinutes = 1440;
 
@@ -290,6 +286,11 @@ public class AppConfiguration implements Configuration {
     private int cibaGrantLifeExtraTimeSec;
     private int cibaMaxExpirationTimeAllowedSec;
 
+    // DPoP
+    private List<String> dpopSigningAlgValuesSupported;
+    private int dpopTimeframe = 5;
+    private int dpopJtiCacheTime = 3600;
+
     private Boolean allowIdTokenWithoutImplicitGrantType;
 
     private int discoveryCacheLifetimeInMinutes = 60;
@@ -308,6 +309,15 @@ public class AppConfiguration implements Configuration {
 
     public void setRequireRequestObjectEncryption(Boolean requireRequestObjectEncryption) {
         this.requireRequestObjectEncryption = requireRequestObjectEncryption;
+    }
+
+    public Boolean getRequirePkce() {
+        if (requirePkce == null) requirePkce = false;
+        return requirePkce;
+    }
+
+    public void setRequirePkce(Boolean requirePkce) {
+        this.requirePkce = requirePkce;
     }
 
     public Boolean getAllowIdTokenWithoutImplicitGrantType() {
@@ -1866,7 +1876,7 @@ public class AppConfiguration implements Configuration {
     }
 
     public Boolean getUpdateUserLastLogonTime() {
-        return updateUserLastLogonTime != null ? updateUserLastLogonTime : false;
+        return updateUserLastLogonTime != null && updateUserLastLogonTime;
     }
 
     public void setUpdateUserLastLogonTime(Boolean updateUserLastLogonTime) {
@@ -1874,7 +1884,7 @@ public class AppConfiguration implements Configuration {
     }
 
     public Boolean getUpdateClientAccessTime() {
-        return updateClientAccessTime != null ? updateClientAccessTime : false;
+        return updateClientAccessTime != null && updateClientAccessTime;
     }
 
     public void setUpdateClientAccessTime(Boolean updateClientAccessTime) {
@@ -2248,7 +2258,7 @@ public class AppConfiguration implements Configuration {
     }
 
     public Boolean getRequestUriHashVerificationEnabled() {
-        return requestUriHashVerificationEnabled != null ? requestUriHashVerificationEnabled : false;
+        return requestUriHashVerificationEnabled != null && requestUriHashVerificationEnabled;
     }
 
     public void setRequestUriHashVerificationEnabled(Boolean requestUriHashVerificationEnabled) {
@@ -2256,7 +2266,7 @@ public class AppConfiguration implements Configuration {
     }
 
     public Boolean getIdTokenFilterClaimsBasedOnAccessToken() {
-        return idTokenFilterClaimsBasedOnAccessToken != null ? idTokenFilterClaimsBasedOnAccessToken : false;
+        return idTokenFilterClaimsBasedOnAccessToken != null && idTokenFilterClaimsBasedOnAccessToken;
     }
 
     public void setIdTokenFilterClaimsBasedOnAccessToken(Boolean idTokenFilterClaimsBasedOnAccessToken) {
@@ -2365,5 +2375,30 @@ public class AppConfiguration implements Configuration {
 
     public void setMtlsDeviceAuthzEndpoint(String mtlsDeviceAuthzEndpoint) {
         this.mtlsDeviceAuthzEndpoint = mtlsDeviceAuthzEndpoint;
+    }
+
+    public List<String> getDpopSigningAlgValuesSupported() {
+        if (dpopSigningAlgValuesSupported == null) dpopSigningAlgValuesSupported = new ArrayList<>();
+        return dpopSigningAlgValuesSupported;
+    }
+
+    public void setDpopSigningAlgValuesSupported(List<String> dpopSigningAlgValuesSupported) {
+        this.dpopSigningAlgValuesSupported = dpopSigningAlgValuesSupported;
+    }
+
+    public int getDpopTimeframe() {
+        return dpopTimeframe;
+    }
+
+    public void setDpopTimeframe(int dpopTimeframe) {
+        this.dpopTimeframe = dpopTimeframe;
+    }
+
+    public int getDpopJtiCacheTime() {
+        return dpopJtiCacheTime;
+    }
+
+    public void setDpopJtiCacheTime(int dpopJtiCacheTime) {
+        this.dpopJtiCacheTime = dpopJtiCacheTime;
     }
 }

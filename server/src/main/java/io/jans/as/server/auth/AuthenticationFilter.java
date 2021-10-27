@@ -9,27 +9,30 @@ package io.jans.as.server.auth;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.authorize.AuthorizeRequestParam;
 import io.jans.as.model.common.AuthenticationMethod;
+import io.jans.as.model.common.GrantType;
 import io.jans.as.model.config.Constants;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.exception.InvalidJwtException;
+import io.jans.as.model.jwk.JSONWebKey;
+import io.jans.as.model.jwk.JSONWebKeySet;
+import io.jans.as.model.jwt.DPoPJwtPayloadParam;
+import io.jans.as.model.jwt.Jwt;
+import io.jans.as.model.jwt.JwtType;
 import io.jans.as.model.token.ClientAssertionType;
 import io.jans.as.model.token.TokenErrorResponseType;
+import io.jans.as.model.token.TokenRequestParam;
 import io.jans.as.model.util.Util;
-import io.jans.as.server.model.common.AbstractToken;
-import io.jans.as.server.model.common.AuthorizationGrant;
-import io.jans.as.server.model.common.AuthorizationGrantList;
-import io.jans.as.server.model.common.SessionId;
-import io.jans.as.server.model.common.SessionIdState;
+import io.jans.as.server.model.common.*;
+import io.jans.as.server.model.ldap.TokenEntity;
 import io.jans.as.server.model.token.ClientAssertion;
 import io.jans.as.server.model.token.HttpAuthTokenType;
-import io.jans.as.server.service.ClientFilterService;
-import io.jans.as.server.service.ClientService;
-import io.jans.as.server.service.CookieService;
-import io.jans.as.server.service.SessionIdService;
+import io.jans.as.server.service.*;
 import io.jans.as.server.service.token.TokenService;
+import io.jans.as.server.util.TokenHashUtil;
 import io.jans.model.security.Identity;
+import io.jans.service.CacheService;
 import io.jans.util.StringHelper;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
@@ -40,12 +43,7 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -54,6 +52,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Date;
 import java.util.List;
 
 import static io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType.INVALID_REQUEST;
@@ -62,7 +61,7 @@ import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 /**
  * @author Javier Rojas Blum
- * @version May 29, 2020
+ * @version September 30, 2021
  */
 @WebFilter(
         asyncSupported = true,
@@ -119,6 +118,12 @@ public class AuthenticationFilter implements Filter {
     @Inject
     private TokenService tokenService;
 
+    @Inject
+    private CacheService cacheService;
+
+    @Inject
+    private GrantService grantService;
+
     private String realm;
 
     @Override
@@ -142,6 +147,7 @@ public class AuthenticationFilter implements Filter {
             boolean revokeSessionEndpoint = requestUrl.endsWith("/revoke_session");
             boolean isParEndpoint = requestUrl.endsWith("/par");
             String authorizationHeader = httpRequest.getHeader(Constants.AUTHORIZATION);
+            String dpopHeader = httpRequest.getHeader("DPoP");
 
             if (processMTLS(httpRequest, httpResponse, filterChain)) {
                 return;
@@ -171,6 +177,8 @@ public class AuthenticationFilter implements Filter {
                 } else if (tokenService.isBasicAuthToken(authorizationHeader)) {
                     log.debug("Starting Basic Auth token endpoint authentication");
                     processBasicAuth(httpRequest, httpResponse, filterChain);
+                } else if (tokenEndpoint && StringUtils.isNotBlank(dpopHeader)) {
+                    processDPoP(httpRequest, httpResponse, filterChain);
                 } else {
                     log.debug("Starting POST Auth token endpoint authentication");
                     processPostAuth(clientFilterService, httpRequest, httpResponse, filterChain, tokenEndpoint);
@@ -496,11 +504,153 @@ public class AuthenticationFilter implements Filter {
         }
     }
 
+    private void processDPoP(HttpServletRequest servletRequest, HttpServletResponse servletResponse,
+                             FilterChain filterChain) {
+        boolean validDPoPProof = false;
+        boolean authorized = false;
+        String errorReason = null;
+
+        try {
+            String dpopStr = servletRequest.getHeader(TokenRequestParam.DPOP);
+            Jwt dpop = Jwt.parseOrThrow(dpopStr);
+            GrantType grantType = GrantType.fromString(servletRequest.getParameter("grant_type"));
+
+            validateDpopHeader(dpop);
+
+            validateDpopPayload(dpop);
+
+            JSONWebKey jwk = JSONWebKey.fromJSONObject(dpop.getHeader().getJwk());
+            String dpopJwkThumbprint = jwk.getJwkThumbprint();
+            validDPoPProof = validateDpopSignature(dpop, jwk, dpopJwkThumbprint);
+
+            if (grantType == GrantType.AUTHORIZATION_CODE) {
+                final String code = servletRequest.getParameter("code");
+                final AuthorizationCodeGrant authorizationCodeGrant = authorizationGrantList.getAuthorizationCodeGrant(code);
+
+                identity.logout();
+
+                identity.getCredentials().setUsername(authorizationCodeGrant.getClient().getClientId());
+                identity.getCredentials().setPassword(null);
+                authorized = authenticator.authenticateClient(servletRequest, true);
+
+                filterChain.doFilter(servletRequest, servletResponse);
+            } else if (grantType == GrantType.REFRESH_TOKEN) {
+                final String refreshTokenCode = servletRequest.getParameter("refresh_token");
+                TokenEntity tokenEntity;
+                if (!isTrue(appConfiguration.getPersistRefreshTokenInLdap())) {
+                    tokenEntity = (TokenEntity) cacheService.get(TokenHashUtil.hash(refreshTokenCode));
+                } else {
+                    tokenEntity = grantService.getGrantByCode(refreshTokenCode);
+                }
+
+                if (!dpopJwkThumbprint.equals(tokenEntity.getDpop())) {
+                    throw new InvalidJwtException("Invalid DPoP Proof Header. The jwk header is not valid.");
+                }
+
+                AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByRefreshToken(tokenEntity.getClientId(), refreshTokenCode);
+
+                identity.logout();
+
+                identity.getCredentials().setUsername(authorizationGrant.getClient().getClientId());
+                identity.getCredentials().setPassword(null);
+                authorized = authenticator.authenticateClient(servletRequest, true);
+
+                filterChain.doFilter(servletRequest, servletResponse);
+            }
+
+        } catch (Exception ex) {
+            log.info("Invalid DPoP.", ex);
+            errorReason = ex.getMessage();
+        }
+
+        if (!validDPoPProof) {
+            sendBadRequestError(servletResponse, errorReason);
+        }
+
+        if (!authorized) {
+            sendError(servletResponse);
+        }
+    }
+
+    private boolean validateDpopSignature(Jwt dpop, JSONWebKey jwk, String dpopJwkThumbprint) throws Exception {
+        if (dpopJwkThumbprint == null) {
+            throw new InvalidJwtException("Invalid DPoP Proof Header. The jwk header is not valid.");
+        }
+
+        JSONWebKeySet jwks = new JSONWebKeySet();
+        jwks.getKeys().add(jwk);
+
+        return cryptoProvider.verifySignature(
+                dpop.getSigningInput(),
+                dpop.getEncodedSignature(),
+                null,
+                jwks.toJSONObject(),
+                null,
+                dpop.getHeader().getSignatureAlgorithm());
+    }
+
+    private void validateDpopPayload(Jwt dpop) throws InvalidJwtException {
+        if (StringUtils.isBlank(dpop.getClaims().getClaimAsString(DPoPJwtPayloadParam.HTM))) {
+            throw new InvalidJwtException("Invalid DPoP Proof Payload. The htm param is required.");
+        }
+        if (StringUtils.isBlank(dpop.getClaims().getClaimAsString(DPoPJwtPayloadParam.HTU))) {
+            throw new InvalidJwtException("Invalid DPoP Proof Payload. The htu param is required");
+        }
+        if (dpop.getClaims().getClaimAsLong(DPoPJwtPayloadParam.IAT) == null) {
+            throw new InvalidJwtException("Invalid DPoP Proof Payload. The iat param is required.");
+        }
+        if (StringUtils.isBlank(dpop.getClaims().getClaimAsString(DPoPJwtPayloadParam.JTI))) {
+            throw new InvalidJwtException("Invalid DPoP Proof Payload. The jti param is required");
+        } else {
+            String jti = dpop.getClaims().getClaimAsString(DPoPJwtPayloadParam.JTI);
+            Long iat = dpop.getClaims().getClaimAsLong(DPoPJwtPayloadParam.IAT);
+            String htu = dpop.getClaims().getClaimAsString(DPoPJwtPayloadParam.HTU);
+            String cacheKey = "dpop_jti_" + jti;
+            DPoPJti dPoPJti = (DPoPJti) cacheService.get(cacheKey);
+
+            // Validate the token was issued within an acceptable timeframe.
+            int seconds = appConfiguration.getDpopTimeframe();
+            long diff = (new Date().getTime() - iat) / 1000;
+            if (diff > seconds) {
+                throw new InvalidJwtException("The DPoP token has expired.");
+            }
+
+            if (dPoPJti == null) {
+                dPoPJti = new DPoPJti(jti, iat, htu);
+                cacheService.put(appConfiguration.getDpopJtiCacheTime(), cacheKey, dPoPJti);
+            } else {
+                throw new InvalidJwtException("Invalid DPoP Proof. The jti param is has been used before.");
+            }
+        }
+    }
+
+    private void validateDpopHeader(Jwt dpop) throws InvalidJwtException {
+        if (dpop.getHeader().getType() != JwtType.DPOP_PLUS_JWT) {
+            throw new InvalidJwtException("Invalid DPoP Proof Header. The typ header must be dpop+jwt.");
+        }
+        if (dpop.getHeader().getSignatureAlgorithm() == null) {
+            throw new InvalidJwtException("Invalid DPoP Proof Header. The typ header must be dpop+jwt.");
+        }
+        if (dpop.getHeader().getJwk() == null) {
+            throw new InvalidJwtException("Invalid DPoP Proof Header. The jwk header is required.");
+        }
+    }
+
+    private void sendBadRequestError(HttpServletResponse servletResponse, String reason) {
+        try (PrintWriter out = servletResponse.getWriter()) {
+            servletResponse.setStatus(400);
+            servletResponse.setContentType(Constants.CONTENT_TYPE_APPLICATION_JSON_UTF_8);
+            out.write(errorResponseFactory.errorAsJson(TokenErrorResponseType.INVALID_DPOP_PROOF, reason));
+        } catch (IOException ex) {
+            log.error(ex.getMessage(), ex);
+        }
+    }
+
     private void sendError(HttpServletResponse servletResponse) {
         try (PrintWriter out = servletResponse.getWriter()) {
             servletResponse.setStatus(401);
             servletResponse.addHeader(Constants.WWW_AUTHENTICATE, "Basic realm=\"" + getRealm() + "\"");
-            servletResponse.setContentType("application/json;charset=UTF-8");
+            servletResponse.setContentType(Constants.CONTENT_TYPE_APPLICATION_JSON_UTF_8);
             out.write(errorResponseFactory.errorAsJson(TokenErrorResponseType.INVALID_CLIENT, "Unable to authenticate client."));
         } catch (IOException ex) {
             log.error(ex.getMessage(), ex);
@@ -511,7 +661,7 @@ public class AuthenticationFilter implements Filter {
         try (PrintWriter out = servletResponse.getWriter()) {
             servletResponse.setStatus(e.getResponse().getStatus());
             servletResponse.addHeader(Constants.WWW_AUTHENTICATE, "Basic realm=\"" + getRealm() + "\"");
-            servletResponse.setContentType("application/json;charset=UTF-8");
+            servletResponse.setContentType(Constants.CONTENT_TYPE_APPLICATION_JSON_UTF_8);
             out.write(e.getResponse().getEntity().toString());
         } catch (IOException ex) {
             log.error(ex.getMessage(), ex);

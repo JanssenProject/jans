@@ -11,7 +11,7 @@ import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.token.JsonWebResponse;
 import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
-import io.jans.as.server.model.ldap.TokenLdap;
+import io.jans.as.server.model.ldap.TokenEntity;
 
 import java.util.Collection;
 import java.util.Date;
@@ -24,13 +24,13 @@ import java.util.function.Function;
  *
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version September 4, 2019
+ * @version September 30, 2021
  */
 
 public class UnmodifiableAuthorizationGrant implements IAuthorizationGrant {
 
     public static final String NOT_ALLOWED_FOR_UNMODIFIABLE_AUTHORIZATION_GRANT = "Not allowed for UnmodifiableAuthorizationGrant.";
-    
+
     private final IAuthorizationGrant grant;
 
     public UnmodifiableAuthorizationGrant(IAuthorizationGrant grant) {
@@ -78,17 +78,17 @@ public class UnmodifiableAuthorizationGrant implements IAuthorizationGrant {
     }
 
     @Override
-    public AccessToken createAccessToken(String certAsPem, ExecutionContext executionContext) {
+    public AccessToken createAccessToken(String dpop, String certAsPem, ExecutionContext executionContext) {
         throw new UnsupportedOperationException(NOT_ALLOWED_FOR_UNMODIFIABLE_AUTHORIZATION_GRANT);
     }
 
     @Override
-    public RefreshToken createRefreshToken() {
+    public RefreshToken createRefreshToken(String dpop) {
         throw new UnsupportedOperationException(NOT_ALLOWED_FOR_UNMODIFIABLE_AUTHORIZATION_GRANT);
     }
 
     @Override
-    public RefreshToken createRefreshToken(int lifetime) {
+    public RefreshToken createRefreshToken(String dpop, int lifetime) {
         throw new UnsupportedOperationException(NOT_ALLOWED_FOR_UNMODIFIABLE_AUTHORIZATION_GRANT);
     }
 
@@ -216,12 +216,12 @@ public class UnmodifiableAuthorizationGrant implements IAuthorizationGrant {
     }
 
     @Override
-    public TokenLdap getTokenLdap() {
-        return grant.getTokenLdap();
+    public TokenEntity getTokenEntity() {
+        return grant.getTokenEntity();
     }
 
     @Override
-    public void setTokenLdap(TokenLdap token) {
+    public void setTokenEntity(TokenEntity token) {
         throw new UnsupportedOperationException(NOT_ALLOWED_FOR_UNMODIFIABLE_AUTHORIZATION_GRANT);
     }
 

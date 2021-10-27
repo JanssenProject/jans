@@ -52,25 +52,38 @@ public class ClientUtil {
 
     public static List<String> extractListByKey(JSONObject jsonObject, String key) {
         final List<String> result = new ArrayList<>();
-        if (jsonObject.has(key)) {
-            JSONArray arrayOfValues = jsonObject.optJSONArray(key);
-            if (arrayOfValues != null) {
-                for (int i = 0; i < arrayOfValues.length(); i++) {
-                    result.add(arrayOfValues.getString(i));
+        if (!jsonObject.has(key)) {
+            return result;
+        }
+
+        JSONArray arrayOfValues = jsonObject.optJSONArray(key);
+        if (arrayOfValues != null) {
+            for (int i = 0; i < arrayOfValues.length(); i++) {
+                final String v = arrayOfValues.optString(i);
+                if (StringUtils.isNotBlank(v)) {
+                    result.add(v);
                 }
-                return result;
             }
-            String listString = jsonObject.optString(key);
-            if (StringUtils.isNotBlank(listString)) {
-                String[] arrayOfStringValues = listString.split(" ");
-                for (String c : arrayOfStringValues) {
-                    if (StringUtils.isNotBlank(c)) {
-                        result.add(c);
-                    }
+            return result;
+        }
+        String listString = jsonObject.optString(key);
+        if (StringUtils.isNotBlank(listString)) {
+            String[] arrayOfStringValues = listString.split(" ");
+            for (String c : arrayOfStringValues) {
+                if (StringUtils.isNotBlank(c)) {
+                    result.add(c);
                 }
             }
         }
         return result;
+    }
+
+    public static Integer integerOrNull(JSONObject jsonObject, String key) {
+        return jsonObject.has(key) ? jsonObject.optInt(key) : null;
+    }
+
+    public static Boolean booleanOrNull(JSONObject jsonObject, String key) {
+        return jsonObject.has(key) ? jsonObject.optBoolean(key) : null;
     }
 
     /**

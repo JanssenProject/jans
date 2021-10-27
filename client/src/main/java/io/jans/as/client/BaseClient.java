@@ -6,6 +6,19 @@
 
 package io.jans.as.client;
 
+import io.jans.as.model.common.AuthenticationMethod;
+import io.jans.as.model.common.AuthorizationMethod;
+import io.jans.as.model.common.HasParamName;
+import io.jans.as.model.config.Constants;
+import io.jans.as.model.util.Util;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+import org.jboss.resteasy.client.ClientExecutor;
+import org.jboss.resteasy.client.ClientRequest;
+import org.jboss.resteasy.client.ClientResponse;
+
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.core.Cookie;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -13,26 +26,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.core.Cookie;
-
-import io.jans.as.model.config.Constants;
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
-import org.jboss.resteasy.client.ClientExecutor;
-import org.jboss.resteasy.client.ClientRequest;
-import org.jboss.resteasy.client.ClientResponse;
-
-import io.jans.as.model.common.AuthenticationMethod;
-import io.jans.as.model.common.AuthorizationMethod;
-import io.jans.as.model.common.HasParamName;
-import io.jans.as.model.util.Util;
-
 /**
  * Allows to retrieve HTTP requests to the authorization server and responses from it for display purposes.
  *
  * @author Javier Rojas Blum
- * @version May 28, 2020
+ * @version October 5, 2021
  */
 public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> {
 
@@ -104,12 +102,13 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
         }
     }
 
-    public static void putAllFormParameters(ClientRequest p_clientRequest, BaseRequest p_request) {
-        if (p_clientRequest != null && p_request != null) {
-            final Map<String, String> parameters = p_request.getParameters();
+    @SuppressWarnings("java:S1874")
+    public static void putAllFormParameters(ClientRequest clientRequest, BaseRequest request) {
+        if (clientRequest != null && request != null) {
+            final Map<String, String> parameters = request.getParameters();
             if (parameters != null && !parameters.isEmpty()) {
                 for (Map.Entry<String, String> e : parameters.entrySet()) {
-                    p_clientRequest.formParameter(e.getKey(), e.getValue());
+                    clientRequest.formParameter(e.getKey(), e.getValue());
                 }
             }
         }
@@ -123,6 +122,8 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
 
             if (getHttpMethod().equals(HttpMethod.POST) || getHttpMethod().equals(HttpMethod.PUT) || getHttpMethod().equals(HttpMethod.DELETE)) {
                 sb.append(getHttpMethod()).append(" ").append(theUrl.getPath()).append(Constants.SPACE_HTTP_11);
+                sb.append("\n");
+                sb.append("Host: ").append(theUrl.getHost());
                 if (StringUtils.isNotBlank(request.getContentType())) {
                     sb.append("\n");
                     sb.append("Content-Type: ").append(request.getContentType());
@@ -131,16 +132,10 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
                     sb.append("\n");
                     sb.append("Accept: ").append(request.getMediaType());
                 }
-                sb.append("\n");
-                sb.append("Host: ").append(theUrl.getHost());
 
-                if (request instanceof AuthorizationRequest) {
-                    AuthorizationRequest authorizationRequest = (AuthorizationRequest) request;
-                    if (authorizationRequest.isUseNoRedirectHeader()) {
-                        sb.append("\n");
-                        sb.append(AuthorizationRequest.NO_REDIRECT_HEADER + ": true");
-                    }
-                }
+                appendDpopHeader(sb);
+                appendNoRedirectHeader(sb);
+
                 if (request.getAuthorizationMethod() == null) {
                     if ((request.getAuthenticationMethod() == null || request.getAuthenticationMethod() == AuthenticationMethod.CLIENT_SECRET_BASIC) && request.hasCredentials()) {
                         String encodedCredentials = request.getEncodedCredentials();
@@ -155,8 +150,8 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
 
                 sb.append("\n");
                 sb.append("\n");
-                if (request instanceof RegisterRequest && ((RegisterRequest)request).hasJwtRequestAsString()) {
-                    sb.append(((RegisterRequest)request).getJwtRequestAsString());
+                if (request instanceof RegisterRequest && ((RegisterRequest) request).hasJwtRequestAsString()) {
+                    sb.append(((RegisterRequest) request).getJwtRequestAsString());
                 } else {
                     sb.append(request.getQueryString());
                 }
@@ -168,14 +163,14 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
                 sb.append(Constants.SPACE_HTTP_11);
                 sb.append("\n");
                 sb.append("Host: ").append(theUrl.getHost());
-
-                if (request instanceof AuthorizationRequest) {
-                    AuthorizationRequest authorizationRequest = (AuthorizationRequest) request;
-                    if (authorizationRequest.isUseNoRedirectHeader()) {
-                        sb.append("\n");
-                        sb.append(AuthorizationRequest.NO_REDIRECT_HEADER + ": true");
-                    }
+                if (StringUtils.isNotBlank(request.getContentType())) {
+                    sb.append("\n");
+                    sb.append("Content-Type: ").append(request.getContentType());
                 }
+
+                appendDpopHeader(sb);
+                appendNoRedirectHeader(sb);
+
                 if (request.getAuthorizationMethod() == null) {
                     if (request.hasCredentials()) {
                         String encodedCredentials = request.getEncodedCredentials();
@@ -198,6 +193,26 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
         }
 
         return sb.toString();
+    }
+
+    private void appendDpopHeader(StringBuilder sb) {
+        if (request instanceof TokenRequest) {
+            TokenRequest tokenRequest = (TokenRequest) request;
+            if (tokenRequest.getDpop() != null) {
+                sb.append("\n");
+                sb.append("DPoP: ").append(tokenRequest.getDpop().toString());
+            }
+        }
+    }
+
+    private void appendNoRedirectHeader(StringBuilder sb) {
+        if (request instanceof AuthorizationRequest) {
+            AuthorizationRequest authorizationRequest = (AuthorizationRequest) request;
+            if (authorizationRequest.isUseNoRedirectHeader()) {
+                sb.append("\n");
+                sb.append(AuthorizationRequest.NO_REDIRECT_HEADER + ": true");
+            }
+        }
     }
 
     public String getResponseAsString() {
@@ -258,5 +273,4 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
     public Map<String, String> getHeaders() {
         return headers;
     }
-
 }

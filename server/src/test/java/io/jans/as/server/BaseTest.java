@@ -51,7 +51,7 @@ public abstract class BaseTest extends ConfigurableTest {
 		Assert.fail(e.getMessage(), e);
 	}
 
-	public static void output(String p_msg) {
-		System.out.println(p_msg);
+	public static void output(String msg) {
+		System.out.println(msg);
 	}
 }

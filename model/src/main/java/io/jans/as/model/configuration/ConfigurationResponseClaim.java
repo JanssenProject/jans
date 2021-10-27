@@ -8,7 +8,7 @@ package io.jans.as.model.configuration;
 
 /**
  * @author Javier Rojas Blum
- * @version July 28, 2021
+ * @version September 30, 2021
  */
 public interface ConfigurationResponseClaim {
 
@@ -49,6 +49,7 @@ public interface ConfigurationResponseClaim {
     String REQUEST_OBJECT_ENCRYPTION_ENC_VALUES_SUPPORTED = "request_object_encryption_enc_values_supported";
     String TOKEN_ENDPOINT_AUTH_METHODS_SUPPORTED = "token_endpoint_auth_methods_supported";
     String TOKEN_ENDPOINT_AUTH_SIGNING_ALG_VALUES_SUPPORTED = "token_endpoint_auth_signing_alg_values_supported";
+    String DPOP_SIGNING_ALG_VALUES_SUPPORTED = "dpop_signing_alg_values_supported";
     String DISPLAY_VALUES_SUPPORTED = "display_values_supported";
     String CLAIM_TYPES_SUPPORTED = "claim_types_supported";
     String CLAIMS_SUPPORTED = "claims_supported";
