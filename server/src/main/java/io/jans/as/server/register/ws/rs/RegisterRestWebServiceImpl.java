@@ -603,7 +603,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         } catch (Exception e) {
             final String msg = "Invalid software_statement.";
             log.error(msg, e);
-            throw errorResponseFactory.createWebApplicationException(Response.Status.UNAUTHORIZED, RegisterErrorResponseType.INVALID_SOFTWARE_STATEMENT, msg);
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_SOFTWARE_STATEMENT, msg);
         }
     }
 
@@ -957,7 +957,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                     } else {
                         log.trace("The Access Token is not valid for the Client ID, returns invalid_token error.");
                         applicationAuditLogger.sendMessage(oAuth2AuditLog);
-                        return Response.status(Response.Status.BAD_REQUEST).
+                        return Response.status(Response.Status.UNAUTHORIZED).
                                 type(MediaType.APPLICATION_JSON_TYPE).
                                 entity(errorResponseFactory.errorAsJson(RegisterErrorResponseType.INVALID_TOKEN, "The Access Token is not valid for the Client ID.")).build();
                     }
@@ -998,7 +998,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         if (grant == null) {
             log.trace("Unable to find grant by access token: {}", accessToken);
             throw new WebApplicationException(Response.
-                    status(Response.Status.BAD_REQUEST).
+                    status(Response.Status.UNAUTHORIZED).
                     type(MediaType.APPLICATION_JSON_TYPE).
                     entity(errorResponseFactory.errorAsJson(RegisterErrorResponseType.INVALID_TOKEN, "The Access Token grant is not found."))
                     .build());
@@ -1008,7 +1008,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         if (accessTokenObj == null || !accessTokenObj.isValid()) {
             log.trace("Unable to find access token object or otherwise it's expired.");
             throw new WebApplicationException(Response.
-                    status(Response.Status.BAD_REQUEST).
+                    status(Response.Status.UNAUTHORIZED).
                     type(MediaType.APPLICATION_JSON_TYPE).
                     entity(errorResponseFactory.errorAsJson(RegisterErrorResponseType.INVALID_TOKEN, "The Access Token object is not found or otherwise expired."))
                     .build());
