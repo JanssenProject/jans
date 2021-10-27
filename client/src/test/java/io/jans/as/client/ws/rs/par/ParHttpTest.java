@@ -96,7 +96,7 @@ public class ParHttpTest extends BaseTest {
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse);
+        assertAuthorizationResponse(authorizationResponse, false);
         return authorizationResponse;
     }
 }

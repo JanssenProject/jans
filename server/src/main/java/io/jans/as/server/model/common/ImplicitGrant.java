@@ -6,11 +6,11 @@
 
 package io.jans.as.server.model.common;
 
-import java.util.Date;
-
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.common.GrantType;
+
+import java.util.Date;
 
 /**
  * <p>
@@ -38,12 +38,14 @@ import io.jans.as.model.common.GrantType;
  * available.
  * </p>
  *
- * @author Javier Rojas Blum Date: 09.29.2011
+ * @author Javier Rojas Blum
  * @author Yuriy Movchan
+ * @version September 30, 2021
  */
 public class ImplicitGrant extends AuthorizationGrant {
-	
-	public ImplicitGrant() {}
+
+    public ImplicitGrant() {
+    }
 
     /**
      * Constructs an implicit grant.
@@ -71,7 +73,7 @@ public class ImplicitGrant extends AuthorizationGrant {
      * The authorization server MUST NOT issue a refresh token.
      */
     @Override
-    public RefreshToken createRefreshToken() {
+    public RefreshToken createRefreshToken(String dpop) {
         throw new UnsupportedOperationException(
                 "The authorization server MUST NOT issue a refresh token.");
     }
