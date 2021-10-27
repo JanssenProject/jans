@@ -22,12 +22,6 @@ public abstract class PublicKey implements JSONable {
     private SignatureAlgorithm signatureAlgorithm;
 
     private Certificate certificate;
-    
-    protected PublicKey (final String keyId, final SignatureAlgorithm signatureAlgorithm, final Certificate certificate) {
-        this.keyId = keyId;
-        this.signatureAlgorithm = signatureAlgorithm;
-        this.certificate = certificate;
-    }    
 
     public String getKeyId() {
         return keyId;

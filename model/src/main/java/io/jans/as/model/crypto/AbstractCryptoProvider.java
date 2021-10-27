@@ -11,7 +11,12 @@ import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.signature.AlgorithmFamily;
 import io.jans.as.model.crypto.signature.EllipticEdvardsCurve;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
-import io.jans.as.model.jwk.*;
+import io.jans.as.model.exception.InvalidParameterException;
+import io.jans.as.model.jwk.Algorithm;
+import io.jans.as.model.jwk.JSONWebKey;
+import io.jans.as.model.jwk.JSONWebKeySet;
+import io.jans.as.model.jwk.JWKParameter;
+import io.jans.as.model.jwk.Use;
 import io.jans.as.model.util.Base64Util;
 import io.jans.eleven.model.JwksRequestParam;
 import io.jans.eleven.model.KeyRequestParam;
@@ -21,21 +26,39 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.math.BigInteger;
+import java.security.AlgorithmParameters;
 import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.*;
-import java.security.spec.*;
+import java.security.spec.ECGenParameterSpec;
+import java.security.spec.ECParameterSpec;
+import java.security.spec.ECPoint;
+import java.security.spec.ECPublicKeySpec;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.InvalidParameterSpecException;
+import java.security.spec.RSAPublicKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.TimeZone;
 
 /**
  * @author Javier Rojas Blum
- * @version September 30, 2021
+ * @author Sergey Manoylo
+ * @version October 26, 2021
  */
 public abstract class AbstractCryptoProvider {
 
     protected static final Logger LOG = Logger.getLogger(AbstractCryptoProvider.class);
+
+    private static final String DEF_EXPIRESON = "\n\tExpires On: ";
+    private static final String DEF_TODAYSDATE = "\n\tToday's Date: ";
+    private static final String DEF_DAYS = " days";
 
     private int keyRegenerationIntervalInDays = -1;
 
@@ -58,6 +81,8 @@ public abstract class AbstractCryptoProvider {
     }
 
     public abstract PrivateKey getPrivateKey(String keyId) throws Exception;
+
+    public abstract PublicKey getPublicKey(String alias) throws Exception;
 
     public String getKeyId(JSONWebKeySet jsonWebKeySet, Algorithm algorithm, Use use) throws Exception {
         if (algorithm == null || AlgorithmFamily.HMAC.equals(algorithm.getFamily())) {
@@ -95,7 +120,7 @@ public abstract class AbstractCryptoProvider {
     }
 
     public static JSONObject generateJwks(AbstractCryptoProvider cryptoProvider, AppConfiguration configuration) {
-        Calendar expirationTime = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+        GregorianCalendar expirationTime = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
         expirationTime.add(Calendar.HOUR, configuration.getKeyRegenerationInterval());
         expirationTime.add(Calendar.SECOND, configuration.getIdTokenLifetime());
 
@@ -107,12 +132,12 @@ public abstract class AbstractCryptoProvider {
         for (Algorithm alg : Algorithm.values()) {
             try {
                 if (!allowedAlgs.isEmpty() && !allowedAlgs.contains(alg.getParamName())) {
-                    LOG.debug("Key generation for " + alg + " is skipped because it's not allowed by keyAlgsAllowedForGeneration configuration property.");
+                    LOG.debug(String.format("Key generation for %s is skipped because it's not allowed by keyAlgsAllowedForGeneration configuration property.", alg.toString()));
                     continue;
                 }
                 keys.put(cryptoProvider.generateKey(alg, expiration, alg.getUse()));
             } catch (Exception ex) {
-                LOG.error("Algorithm: " + alg + ex.getMessage(), ex);
+                LOG.error(String.format("Algorithm: %s", alg), ex);
             }
         }
 
@@ -145,38 +170,56 @@ public abstract class AbstractCryptoProvider {
         return null;
     }
 
-    private PublicKey processKey(Algorithm requestedAlgorithm, String alias, JSONObject key) throws InvalidKeySpecException, NoSuchAlgorithmException, InvalidParameterSpecException {
+    private PublicKey processKey(Algorithm requestedAlgorithm, String alias, JSONObject key) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidParameterSpecException, InvalidParameterException { // throws Exception {
         PublicKey publicKey = null;
-        AlgorithmFamily family = null;
+        AlgorithmFamily algorithmFamily = null;
+
         if (key.has(JWKParameter.ALGORITHM)) {
             Algorithm algorithm = Algorithm.fromString(key.optString(JWKParameter.ALGORITHM));
 
             if (requestedAlgorithm != null && !requestedAlgorithm.equals(algorithm)) {
-                LOG.trace("kid matched but algorithm does not match. kid algorithm:" + algorithm + ", requestedAlgorithm:" + requestedAlgorithm + ", kid:" + alias);
+                LOG.trace("kid matched but algorithm does not match. kid algorithm:" + algorithm
+                        + ", requestedAlgorithm:" + requestedAlgorithm + ", kid:" + alias);
                 return null;
             }
-            family = algorithm.getFamily();
+            algorithmFamily = algorithm.getFamily();
         } else if (key.has(JWKParameter.KEY_TYPE)) {
-            family = AlgorithmFamily.fromString(key.get(JWKParameter.KEY_TYPE).toString());
+            algorithmFamily = AlgorithmFamily.fromString(key.getString(JWKParameter.KEY_TYPE));
+        }  else {
+            throw new InvalidParameterException("Wrong key (JSONObject): doesn't contain 'alg' and 'kty' properties");
         }
 
-        if (AlgorithmFamily.RSA.equals(family)) {
+        switch (algorithmFamily) {
+        case RSA: {
             KeyFactory keyFactory = KeyFactory.getInstance("RSA");
             RSAPublicKeySpec pubKeySpec = new RSAPublicKeySpec(
                     new BigInteger(1, Base64Util.base64urldecode(key.getString(JWKParameter.MODULUS))),
                     new BigInteger(1, Base64Util.base64urldecode(key.getString(JWKParameter.EXPONENT))));
             publicKey = keyFactory.generatePublic(pubKeySpec);
-        } else if (AlgorithmFamily.EC.equals(family)) {
+            break;
+        }
+        case EC: {
             EllipticEdvardsCurve curve = EllipticEdvardsCurve.fromString(key.optString(JWKParameter.CURVE));
             AlgorithmParameters parameters = AlgorithmParameters.getInstance(AlgorithmFamily.EC.toString());
             parameters.init(new ECGenParameterSpec(curve.getAlias()));
             ECParameterSpec ecParameters = parameters.getParameterSpec(ECParameterSpec.class);
-
-            publicKey = KeyFactory.getInstance(AlgorithmFamily.EC.toString()).generatePublic(new ECPublicKeySpec(
-                    new ECPoint(
-                            new BigInteger(1, Base64Util.base64urldecode(key.getString(JWKParameter.X))),
-                            new BigInteger(1, Base64Util.base64urldecode(key.getString(JWKParameter.Y)))
-                    ), ecParameters));
+            publicKey = KeyFactory.getInstance(AlgorithmFamily.EC.toString())
+                    .generatePublic(new ECPublicKeySpec(
+                            new ECPoint(
+                                    new BigInteger(1, Base64Util.base64urldecode(key.getString(JWKParameter.X))),
+                                    new BigInteger(1, Base64Util.base64urldecode(key.getString(JWKParameter.Y)))),
+                            ecParameters));
+            break;
+        }
+        case ED: {
+            X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(
+                    Base64Util.base64urldecode(key.getString(JWKParameter.X)));
+            publicKey = KeyFactory.getInstance(key.optString(JWKParameter.ALGORITHM)).generatePublic(publicKeySpec);
+            break;
+        }
+        default: {
+            throw new InvalidParameterException(String.format("Wrong AlgorithmFamily value: %s", algorithmFamily));
+        }
         }
 
         if (key.has(JWKParameter.EXPIRATION_TIME)) {
@@ -193,26 +236,27 @@ public abstract class AbstractCryptoProvider {
             Date today = new Date();
             long expiresInDays = (expirationTime - today.getTime()) / (24 * 60 * 60 * 1000);
             if (expiresInDays == 0) {
-                LOG.warn(String.format("%nWARNING! Key will expire soon, alias: %s%nExpires On: %s%nToday's Date: %s",
-                        alias, ft.format(expirationDate), ft.format(today)));
+                LOG.warn("\nWARNING! Key will expire soon, alias: " + alias + DEF_EXPIRESON
+                        + ft.format(expirationDate) + DEF_TODAYSDATE + ft.format(today));
                 return;
             }
             if (expiresInDays < 0) {
-                LOG.warn(String.format("%nWARNING! Expired Key is used, alias: %s%nExpires On: %s%nToday's Date: %s",
-                        alias, ft.format(expirationDate), ft.format(today)));
+                LOG.warn("\nWARNING! Expired Key is used, alias: " + alias + DEF_EXPIRESON
+                        + ft.format(expirationDate) + DEF_TODAYSDATE + ft.format(today));
                 return;
             }
 
             // re-generation interval is unknown, therefore we default to 30 days period warning
             if (keyRegenerationIntervalInDays <= 0 && expiresInDays < 30) {
-                LOG.warn(String.format("%nWARNING! Key with alias: %s%nExpires In: %s days%nExpires On: %s%nToday's Date: %s",
-                        alias, expiresInDays, ft.format(expirationDate), ft.format(today)));
+                LOG.warn("\nWARNING! Key with alias: " + alias + "\n\tExpires In: " + expiresInDays + DEF_DAYS
+                        + DEF_EXPIRESON + ft.format(expirationDate) + DEF_TODAYSDATE + ft.format(today));
                 return;
             }
 
             if (expiresInDays < keyRegenerationIntervalInDays) {
-                LOG.warn(String.format("%nWARNING! Key with alias: %s%nExpires In: %s days%nExpires On: %s%nKey Regeneration In: %s days%nToday's Date: %s",
-                        alias, expiresInDays, ft.format(expirationDate), keyRegenerationIntervalInDays, ft.format(today)));
+                LOG.warn("\nWARNING! Key with alias: " + alias + "\n\tExpires In: " + expiresInDays + DEF_DAYS
+                        + DEF_EXPIRESON + ft.format(expirationDate) + "\n\tKey Regeneration In: "
+                        + keyRegenerationIntervalInDays + DEF_DAYS + DEF_TODAYSDATE + ft.format(today));
             }
         } catch (Exception e) {
             LOG.error("Failed to check key expiration.", e);
