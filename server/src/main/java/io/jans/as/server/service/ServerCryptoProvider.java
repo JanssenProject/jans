@@ -23,6 +23,7 @@ import org.msgpack.core.Preconditions;
 
 import java.security.KeyStoreException;
 import java.security.PrivateKey;
+import java.security.PublicKey;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -125,4 +126,19 @@ public class ServerCryptoProvider extends AbstractCryptoProvider {
 
         return privateKey;
     }
+    
+
+    @Override
+    public PublicKey getPublicKey(String keyId) throws Exception {
+        PublicKey publicKey = cryptoProvider.getPublicKey(keyId);
+
+        if (publicKey == null) {
+            final AppConfiguration appConfiguration = configurationFactory.getAppConfiguration();
+            if (StringUtils.isNotBlank(appConfiguration.getStaticDecryptionKid())) {
+                publicKey = cryptoProvider.getPublicKey(appConfiguration.getStaticDecryptionKid());
+            }
+        }
+
+        return publicKey;
+    }    
 }
