@@ -18,6 +18,7 @@ import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.jwk.JSONWebKey;
 import io.jans.as.model.jwk.JSONWebKeySet;
+import io.jans.as.model.jwk.KeySelectionStrategy;
 
 /**
  * Represents a JSON Web Key (JWK) received from the authorization server.
@@ -106,7 +107,7 @@ public class JwkResponse extends BaseResponse {
             }
         }
 
-        Collections.sort(jsonWebKeys);
+        Collections.sort(jsonWebKeys, KeySelectionStrategy.compareExp());
         return jsonWebKeys;
     }
 

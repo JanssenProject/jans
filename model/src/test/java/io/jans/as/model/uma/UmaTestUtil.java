@@ -16,6 +16,7 @@ import org.jboss.resteasy.client.ClientResponse;
 import javax.ws.rs.core.Response;
 import java.util.Arrays;
 
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
@@ -27,16 +28,16 @@ public class UmaTestUtil {
     private UmaTestUtil() {
     }
 
-    public static void assertIt(UmaScopeDescription p_scopeDescription) {
-        assertNotNull(p_scopeDescription, "Scope description is null");
-        assertTrue(StringUtils.isNotBlank(p_scopeDescription.getName()), "Scope name is empty");
+    public static void assertIt(UmaScopeDescription scopeDescription) {
+        assertNotNull(scopeDescription, "Scope description is null");
+        assertTrue(StringUtils.isNotBlank(scopeDescription.getName()), "Scope name is empty");
     }
 
-    public static void assertIt(RptIntrospectionResponse p_rptStatus) {
-        assertNotNull(p_rptStatus, "Token response status is null");
-        assertTrue(p_rptStatus.getActive(), "Token is not active");
-        assertTrue(p_rptStatus.getPermissions() != null && !p_rptStatus.getPermissions().isEmpty(), "Permissions are empty.");
-        assertNotNull(p_rptStatus.getExpiresAt(), "Expiration date is null");
+    public static void assertIt(RptIntrospectionResponse rptStatus) {
+        assertNotNull(rptStatus, "Token response status is null");
+        assertTrue(rptStatus.getActive(), "Token is not active");
+        assertTrue(rptStatus.getPermissions() != null && !rptStatus.getPermissions().isEmpty(), "Permissions are empty.");
+        assertNotNull(rptStatus.getExpiresAt(), "Expiration date is null");
     }
 
     public static void assertIt(UmaMetadata metadata) {
@@ -80,14 +81,14 @@ public class UmaTestUtil {
         assertNotNull(response.getRpt(), "RPT is null");
     }
 
-    public static void assertIt(ClientResponse p_response) {
-        assertNotNull(p_response, "Response is null");
-        assertTrue(p_response.getStatus() == Response.Status.OK.getStatusCode(), "Response http code is not OK.");
+    public static void assertIt(ClientResponse response) {
+        assertNotNull(response, "Response is null");
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus(), "Response http code is not OK.");
     }
 
-    public static void assertIt(Id p_id) {
-        assertNotNull(p_id, "ID is null");
-        assertTrue(StringUtils.isNotBlank(p_id.getId()), "ID is blank");
+    public static void assertIt(Id id) {
+        assertNotNull(id, "ID is null");
+        assertTrue(StringUtils.isNotBlank(id.getId()), "ID is blank");
     }
 
     public static void assertIt(UmaTokenResponse response) {

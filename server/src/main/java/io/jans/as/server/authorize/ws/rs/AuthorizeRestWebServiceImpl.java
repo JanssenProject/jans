@@ -231,7 +231,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                         + "customRespHeaders = {}, claims = {}, tokenBindingHeader = {}",
                 acrValuesStr, amrValuesStr, originHeaders, codeChallenge, codeChallengeMethod, customRespHeaders, claims, tokenBindingHeader);
 
-        ResponseBuilder builder = Response.ok();
+        ResponseBuilder builder = null;
 
         Map<String, String> customParameters = requestParameterService.getCustomParameters(QueryStringDecoder.decode(httpRequest.getQueryString()));
 
@@ -263,10 +263,14 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             codeChallenge = par.getAttributes().getCodeChallenge();
             codeChallengeMethod = par.getAttributes().getCodeChallengeMethod();
 
+            if (StringUtils.isNotBlank(par.getAttributes().getState())) {
+                state = par.getAttributes().getState();
+            } else {
+                state = "";
+            }
+
             if (StringUtils.isNotBlank(par.getAttributes().getNonce()))
                 nonce = par.getAttributes().getNonce();
-            if (StringUtils.isNotBlank(par.getAttributes().getState()))
-                state = par.getAttributes().getState();
             if (StringUtils.isNotBlank(par.getAttributes().getSessionId()))
                 sessionId = par.getAttributes().getSessionId();
             if (StringUtils.isNotBlank(par.getAttributes().getCustomResponseHeaders()))
@@ -464,7 +468,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 }
                 authorizeRestWebServiceValidator.validateRequestJwt(request, requestUri, redirectUriResponse);
             }
+
             authorizeRestWebServiceValidator.validate(responseTypes, prompts, nonce, state, redirectUri, httpRequest, client, responseMode);
+            authorizeRestWebServiceValidator.validatePkce(codeChallenge, redirectUriResponse);
 
             if (CollectionUtils.isEmpty(acrValues) && !ArrayUtils.isEmpty(client.getDefaultAcrValues())) {
                 acrValues = Lists.newArrayList(client.getDefaultAcrValues());
@@ -577,7 +583,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
             ClientAuthorization clientAuthorization = null;
             boolean clientAuthorizationFetched = false;
-            if (scopes.size() > 0) {
+            if (!scopes.isEmpty()) {
                 if (prompts.contains(Prompt.CONSENT)) {
                     return redirectToAuthorizationPage(redirectUriResponse.getRedirectUri(), responseTypes, scope, clientId,
                             redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales,
@@ -591,7 +597,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     clientAuthorization = clientAuthorizationsService.find(user.getAttribute("inum"), client.getClientId());
                     clientAuthorizationFetched = true;
                     if (clientAuthorization != null && clientAuthorization.getScopes() != null) {
-                        log.trace("ClientAuthorization - scope: " + scope + ", dn: " + clientAuthorization.getDn() + ", requestedScope: " + scopes);
+                        if (log.isTraceEnabled())
+                            log.trace("ClientAuthorization - scope: {}, dn: {}, requestedScope: {}", scope, clientAuthorization.getDn(),  scopes);
                         if (Arrays.asList(clientAuthorization.getScopes()).containsAll(scopes)) {
                             sessionUser.addPermission(clientId, true);
                             sessionIdService.updateSessionId(sessionUser);
@@ -678,7 +685,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     authorizationGrant.setSessionDn(sessionUser.getDn());
                     authorizationGrant.save(); // call save after object modification!!!
                 }
-                newAccessToken = authorizationGrant.createAccessToken(httpRequest.getHeader("X-ClientCert"), new ExecutionContext(httpRequest, httpResponse));
+                newAccessToken = authorizationGrant.createAccessToken(null, httpRequest.getHeader("X-ClientCert"), new ExecutionContext(httpRequest, httpResponse));
 
                 redirectUriResponse.getRedirectUri().addResponseParameter(AuthorizeResponseParam.ACCESS_TOKEN, newAccessToken.getCode());
                 redirectUriResponse.getRedirectUri().addResponseParameter(AuthorizeResponseParam.TOKEN_TYPE, newAccessToken.getTokenType().toString());
@@ -802,7 +809,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         cibaRequestService.removeCibaRequest(authReqId);
         CIBAGrant cibaGrant = authorizationGrantList.createCIBAGrant(cibaRequest);
 
-        AccessToken accessToken = cibaGrant.createAccessToken(httpRequest.getHeader("X-ClientCert"), new ExecutionContext(httpRequest, httpResponse));
+        AccessToken accessToken = cibaGrant.createAccessToken(null, httpRequest.getHeader("X-ClientCert"), new ExecutionContext(httpRequest, httpResponse));
         log.debug("Issuing access token: {}", accessToken.getCode());
 
         ExternalUpdateTokenContext context = new ExternalUpdateTokenContext(httpRequest, cibaGrant, client, appConfiguration, attributeService);
@@ -811,9 +818,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         final int refreshTokenLifetimeInSeconds = externalUpdateTokenService.getRefreshTokenLifetimeInSeconds(context);
         final RefreshToken refreshToken;
         if (refreshTokenLifetimeInSeconds > 0) {
-            refreshToken = cibaGrant.createRefreshToken(refreshTokenLifetimeInSeconds);
+            refreshToken = cibaGrant.createRefreshToken(null, refreshTokenLifetimeInSeconds);
         } else {
-            refreshToken = cibaGrant.createRefreshToken();
+            refreshToken = cibaGrant.createRefreshToken(null);
         }
         log.debug("Issuing refresh token: {}", (refreshToken != null ? refreshToken.getCode() : ""));
 

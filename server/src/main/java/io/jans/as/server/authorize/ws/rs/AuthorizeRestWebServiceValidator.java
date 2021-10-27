@@ -6,6 +6,7 @@
 
 package io.jans.as.server.authorize.ws.rs;
 
+import com.google.common.base.Strings;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.util.RedirectUri;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
@@ -42,6 +43,7 @@ import java.util.List;
 import java.util.TimeZone;
 
 import static io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType.INVALID_REQUEST;
+import static org.apache.commons.lang.BooleanUtils.isTrue;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -98,7 +100,7 @@ public class AuthorizeRestWebServiceValidator {
                         .build());
             }
 
-            if (!isPar && client.getAttributes().getRequirePar()) {
+            if (!isPar && isTrue(client.getAttributes().getRequirePar())) {
                 log.debug("Client can performa only PAR requests.");
                 throw new WebApplicationException(Response
                         .status(Response.Status.BAD_REQUEST)
@@ -222,7 +224,7 @@ public class AuthorizeRestWebServiceValidator {
         final long expInMillis = jwtRequest.getExp() * 1000L;
         final long now = new Date().getTime();
         if (expInMillis < now) {
-            log.error("Request object expired. Exp:" + expInMillis + ", now: " + now);
+            log.error("Request object expired. Exp: {}, now: {}", expInMillis, now);
             throw new WebApplicationException(Response
                     .status(Response.Status.BAD_REQUEST)
                     .entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST))
@@ -236,14 +238,14 @@ public class AuthorizeRestWebServiceValidator {
                     .build());
         }
         if (StringUtils.isEmpty(jwtRequest.getIss()) || !jwtRequest.getIss().equals(clientId)) {
-            log.error("Request object has a wrong iss claim, iss: " + jwtRequest.getIss());
+            log.error("Request object has a wrong iss claim, iss: {}", jwtRequest.getIss());
             throw new WebApplicationException(Response
                     .status(Response.Status.BAD_REQUEST)
                     .entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST))
                     .build());
         }
         if (jwtRequest.getIat() == null || jwtRequest.getIat() == 0) {
-            log.error("Request object has a wrong iat claim, iat: " + jwtRequest.getIat());
+            log.error("Request object has a wrong iat claim, iat: {}", jwtRequest.getIat());
             throw new WebApplicationException(Response
                     .status(Response.Status.BAD_REQUEST)
                     .entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST))
@@ -252,14 +254,14 @@ public class AuthorizeRestWebServiceValidator {
         int nowInSeconds = Math.toIntExact(System.currentTimeMillis() / 1000);
         if (jwtRequest.getNbf() == null || jwtRequest.getNbf() >  nowInSeconds
                 || jwtRequest.getNbf() < nowInSeconds - appConfiguration.getCibaMaxExpirationTimeAllowedSec()) {
-            log.error("Request object has a wrong nbf claim, nbf: " + jwtRequest.getNbf());
+            log.error("Request object has a wrong nbf claim, nbf: {}", jwtRequest.getNbf());
             throw new WebApplicationException(Response
                     .status(Response.Status.BAD_REQUEST)
                     .entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST))
                     .build());
         }
         if (StringUtils.isEmpty(jwtRequest.getJti())) {
-            log.error("Request object has a wrong jti claim, jti: " + jwtRequest.getJti());
+            log.error("Request object has a wrong jti claim, jti: {}", jwtRequest.getJti());
             throw new WebApplicationException(Response
                     .status(Response.Status.BAD_REQUEST)
                     .entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST))
@@ -305,5 +307,12 @@ public class AuthorizeRestWebServiceValidator {
             return redirectUriResponse.createWebException(io.jans.as.model.authorize.AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT);
         }
         return redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT, reason);
+    }
+
+    public void validatePkce(String codeChallenge, RedirectUriResponse redirectUriResponse) {
+        if (isTrue(appConfiguration.getRequirePkce()) && Strings.isNullOrEmpty(codeChallenge)) {
+            log.error("PKCE is required but code_challenge is blank.");
+            throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST);
+        }
     }
 }
