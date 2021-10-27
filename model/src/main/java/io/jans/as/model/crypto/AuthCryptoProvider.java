@@ -47,6 +47,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -437,7 +438,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
             break;
         }
         default: {
-            throw new RuntimeException("The provided signature algorithm parameter is not supported: algorithmFamily = " + algorithmFamily);
+            throw new IllegalStateException("The provided signature algorithm parameter is not supported: algorithmFamily = " + algorithmFamily);
         }
         }
 
@@ -493,7 +494,8 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
         return jsonObject;
     }
 
-    private JSONObject generateKeyEncryption(Algorithm algorithm, Long expirationTime, Use use) throws Exception {
+    private JSONObject generateKeyEncryption(Algorithm algorithm, Long expirationTime, Use use) throws NoSuchAlgorithmException, NoSuchProviderException,
+            InvalidAlgorithmParameterException, OperatorCreationException, CertificateException, KeyStoreException, IOException {
 
         JSONObject jsonObject = null;
 
@@ -520,7 +522,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
             break;
         }
         default: {
-            throw new RuntimeException(
+            throw new IllegalStateException(
                     "The provided key encryption algorithm parameter is not supported: algorithmFamily = " + algorithmFamily);
         }
         }
@@ -544,9 +546,9 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
             LOG.trace("New key: " + alias + ", deleted key: " + oldAliasByAlgorithm);
         }
 
-        FileOutputStream stream = new FileOutputStream(keyStoreFile);
-        keyStore.store(stream, keyStoreSecret.toCharArray());
-        stream.close();
+        try (FileOutputStream stream = new FileOutputStream(keyStoreFile)) {
+            keyStore.store(stream, keyStoreSecret.toCharArray());
+        }
 
         PublicKey publicKey = keyPair.getPublic();
 
