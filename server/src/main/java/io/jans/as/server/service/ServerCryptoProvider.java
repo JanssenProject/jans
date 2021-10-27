@@ -129,7 +129,7 @@ public class ServerCryptoProvider extends AbstractCryptoProvider {
     
 
     @Override
-    public PublicKey getPublicKey(String keyId) throws Exception {
+    public PublicKey getPublicKey(String keyId) throws KeyStoreException {
         PublicKey publicKey = cryptoProvider.getPublicKey(keyId);
 
         if (publicKey == null) {

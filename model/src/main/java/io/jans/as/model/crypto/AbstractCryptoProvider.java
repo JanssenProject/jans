@@ -28,6 +28,7 @@ import org.json.JSONObject;
 import java.math.BigInteger;
 import java.security.AlgorithmParameters;
 import java.security.KeyFactory;
+import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -82,7 +83,7 @@ public abstract class AbstractCryptoProvider {
 
     public abstract PrivateKey getPrivateKey(String keyId) throws Exception;
 
-    public abstract PublicKey getPublicKey(String alias) throws Exception;
+    public abstract PublicKey getPublicKey(String alias) throws KeyStoreException;
 
     public String getKeyId(JSONWebKeySet jsonWebKeySet, Algorithm algorithm, Use use) throws Exception {
         if (algorithm == null || AlgorithmFamily.HMAC.equals(algorithm.getFamily())) {
