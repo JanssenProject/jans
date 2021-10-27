@@ -158,7 +158,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
     }
 
     @Override
-    public JSONObject generateKey(Algorithm algorithm, Long expirationTime) throws Exception {
+    public JSONObject generateKey(Algorithm algorithm, Long expirationTime) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException, OperatorCreationException, CertificateException, KeyStoreException, IOException {
         if (algorithm == null) {
             throw new IllegalArgumentException("The signature algorithm parameter cannot be null");
         }
