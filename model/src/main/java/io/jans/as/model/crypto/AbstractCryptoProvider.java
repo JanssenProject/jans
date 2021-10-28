@@ -80,6 +80,7 @@ public abstract class AbstractCryptoProvider {
 
     public abstract PublicKey getPublicKey(String alias) throws CryptoProviderException;
 
+    @SuppressWarnings("java:S1130")
     public String getKeyId(JSONWebKeySet jsonWebKeySet, Algorithm algorithm, Use use) throws CryptoProviderException {
         if (algorithm == null || AlgorithmFamily.HMAC.equals(algorithm.getFamily())) {
             return null;
