@@ -97,6 +97,7 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
 
             DynamicClientRegistrationContext context = new DynamicClientRegistrationContext(httpRequest, null, script, client);
             context.setRegisterRequest(registerRequest);
+            context.setSoftwareStatement(Jwt.parseSilently(registerRequest.getSoftwareStatement()));
             context.setErrorResponseFactory(errorResponseFactory);
 
             final boolean result = externalClientRegistrationType.updateClient(context);
