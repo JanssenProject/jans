@@ -69,7 +69,6 @@ import java.security.Signature;
 import java.security.SignatureException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPublicKey;
@@ -504,8 +503,8 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
         return getJson(algorithm, keyGen, signatureAlgorithm, expirationTime);
     }
 
-    private JSONObject getJson(final Algorithm algorithm, final KeyPairGenerator keyGen, final String signatureAlgorithmStr, final Long expirationTime) throws CertificateEncodingException, 
-            NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException, OperatorCreationException, CertificateException, KeyStoreException, IOException {
+    private JSONObject getJson(final Algorithm algorithm, final KeyPairGenerator keyGen, final String signatureAlgorithmStr, final Long expirationTime) throws NoSuchAlgorithmException,
+                OperatorCreationException, CertificateException, KeyStoreException, IOException {
 
         // Generate the key
         KeyPair keyPair = keyGen.generateKeyPair();
