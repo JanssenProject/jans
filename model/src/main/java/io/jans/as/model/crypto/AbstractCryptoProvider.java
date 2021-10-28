@@ -11,6 +11,7 @@ import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.signature.AlgorithmFamily;
 import io.jans.as.model.crypto.signature.EllipticEdvardsCurve;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.exception.CryptoProviderException;
 import io.jans.as.model.exception.InvalidParameterException;
 import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.jwk.JSONWebKey;
@@ -22,13 +23,11 @@ import io.jans.eleven.model.JwksRequestParam;
 import io.jans.eleven.model.KeyRequestParam;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.math.BigInteger;
 import java.security.AlgorithmParameters;
 import java.security.KeyFactory;
-import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -63,13 +62,13 @@ public abstract class AbstractCryptoProvider {
 
     private int keyRegenerationIntervalInDays = -1;
 
-    public abstract JSONObject generateKey(Algorithm algorithm, Long expirationTime) throws Exception;
+    public abstract JSONObject generateKey(Algorithm algorithm, Long expirationTime) throws CryptoProviderException;
 
-    public abstract String sign(String signingInput, String keyId, String sharedSecret, SignatureAlgorithm signatureAlgorithm) throws Exception;
+    public abstract String sign(String signingInput, String keyId, String sharedSecret, SignatureAlgorithm signatureAlgorithm) throws CryptoProviderException;
 
-    public abstract boolean verifySignature(String signingInput, String encodedSignature, String keyId, JSONObject jwks, String sharedSecret, SignatureAlgorithm signatureAlgorithm) throws Exception;
+    public abstract boolean verifySignature(String signingInput, String encodedSignature, String keyId, JSONObject jwks, String sharedSecret, SignatureAlgorithm signatureAlgorithm) throws CryptoProviderException;
 
-    public abstract boolean deleteKey(String keyId) throws Exception;
+    public abstract boolean deleteKey(String keyId) throws CryptoProviderException;
 
     public abstract boolean containsKey(String keyId);
 
@@ -77,11 +76,11 @@ public abstract class AbstractCryptoProvider {
         return Lists.newArrayList();
     }
 
-    public abstract PrivateKey getPrivateKey(String keyId) throws Exception;
+    public abstract PrivateKey getPrivateKey(String keyId) throws CryptoProviderException;
 
-    public abstract PublicKey getPublicKey(String alias) throws KeyStoreException;
+    public abstract PublicKey getPublicKey(String alias) throws CryptoProviderException;
 
-    public String getKeyId(JSONWebKeySet jsonWebKeySet, Algorithm algorithm, Use use) throws Exception {
+    public String getKeyId(JSONWebKeySet jsonWebKeySet, Algorithm algorithm, Use use) throws CryptoProviderException {
         if (algorithm == null || AlgorithmFamily.HMAC.equals(algorithm.getFamily())) {
             return null;
         }
@@ -94,7 +93,7 @@ public abstract class AbstractCryptoProvider {
         return null;
     }
 
-    public JwksRequestParam getJwksRequestParam(JSONObject jwkJsonObject) throws JSONException {
+    public JwksRequestParam getJwksRequestParam(JSONObject jwkJsonObject) {
         JwksRequestParam jwks = new JwksRequestParam();
         jwks.setKeyRequestParams(new ArrayList<>());
 
@@ -144,24 +143,29 @@ public abstract class AbstractCryptoProvider {
         return jsonObject;
     }
 
-    public PublicKey getPublicKey(String alias, JSONObject jwks, Algorithm requestedAlgorithm) throws Exception {
+    public PublicKey getPublicKey(String alias, JSONObject jwks, Algorithm requestedAlgorithm) throws CryptoProviderException {
         JSONArray webKeys = jwks.getJSONArray(JWKParameter.JSON_WEB_KEY_SET);
-        if (alias == null) {
-            if (webKeys.length() == 1) {
-                JSONObject key = webKeys.getJSONObject(0);
-                return processKey(requestedAlgorithm, alias, key);
-            } else {
-                return null;
-            }
-        }
-        for (int i = 0; i < webKeys.length(); i++) {
-            JSONObject key = webKeys.getJSONObject(i);
-            if (alias.equals(key.getString(JWKParameter.KEY_ID))) {
-                PublicKey publicKey = processKey(requestedAlgorithm, alias, key);
-                if (publicKey != null) {
-                    return publicKey;
+
+        try {
+            if (alias == null) {
+                if (webKeys.length() == 1) {
+                    JSONObject key = webKeys.getJSONObject(0);
+                        return processKey(requestedAlgorithm, alias, key);
+                } else {
+                    return null;
                 }
             }
+            for (int i = 0; i < webKeys.length(); i++) {
+                JSONObject key = webKeys.getJSONObject(i);
+                if (alias.equals(key.getString(JWKParameter.KEY_ID))) {
+                    PublicKey publicKey = processKey(requestedAlgorithm, alias, key);
+                    if (publicKey != null) {
+                        return publicKey;
+                    }
+                }
+            }
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException | InvalidParameterSpecException | InvalidParameterException e) {
+            throw new CryptoProviderException(e); 
         }
 
         return null;

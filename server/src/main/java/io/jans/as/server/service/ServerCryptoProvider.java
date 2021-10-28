@@ -10,6 +10,7 @@ import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.crypto.signature.AlgorithmFamily;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.exception.CryptoProviderException;
 import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.jwk.JSONWebKey;
 import io.jans.as.model.jwk.JSONWebKeySet;
@@ -21,7 +22,6 @@ import org.apache.log4j.Logger;
 import org.json.JSONObject;
 import org.msgpack.core.Preconditions;
 
-import java.security.KeyStoreException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 
@@ -43,7 +43,7 @@ public class ServerCryptoProvider extends AbstractCryptoProvider {
     }
 
     @Override
-    public String getKeyId(JSONWebKeySet jsonWebKeySet, Algorithm algorithm, Use use) throws Exception {
+    public String getKeyId(JSONWebKeySet jsonWebKeySet, Algorithm algorithm, Use use) throws CryptoProviderException {
         try {
             if (algorithm == null || AlgorithmFamily.HMAC.equals(algorithm.getFamily())) {
                 return null;
@@ -72,7 +72,7 @@ public class ServerCryptoProvider extends AbstractCryptoProvider {
             }
             return kid;
 
-        } catch (KeyStoreException e) {
+        } catch (CryptoProviderException e) {
             LOG.trace("Try to re-load configuration due to keystore exception (it can be rotated).");
             if (configurationFactory.reloadConfFromLdap()) {
                 return cryptoProvider.getKeyId(jsonWebKeySet, algorithm, use);
@@ -82,12 +82,12 @@ public class ServerCryptoProvider extends AbstractCryptoProvider {
     }
 
     @Override
-    public JSONObject generateKey(Algorithm algorithm, Long expirationTime) throws Exception {
+    public JSONObject generateKey(Algorithm algorithm, Long expirationTime) throws CryptoProviderException {
         return cryptoProvider.generateKey(algorithm, expirationTime);
     }
 
     @Override
-    public String sign(String signingInput, String keyId, String sharedSecret, SignatureAlgorithm signatureAlgorithm) throws Exception {
+    public String sign(String signingInput, String keyId, String sharedSecret, SignatureAlgorithm signatureAlgorithm) throws CryptoProviderException {
         if (configurationFactory.getAppConfiguration().getRejectJwtWithNoneAlg() && signatureAlgorithm == SignatureAlgorithm.NONE) {
             throw new UnsupportedOperationException("None algorithm is forbidden by `rejectJwtWithNoneAlg` configuration property.");
         }
@@ -95,7 +95,7 @@ public class ServerCryptoProvider extends AbstractCryptoProvider {
     }
 
     @Override
-    public boolean verifySignature(String signingInput, String encodedSignature, String keyId, JSONObject jwks, String sharedSecret, SignatureAlgorithm signatureAlgorithm) throws Exception {
+    public boolean verifySignature(String signingInput, String encodedSignature, String keyId, JSONObject jwks, String sharedSecret, SignatureAlgorithm signatureAlgorithm) throws CryptoProviderException {
         if (configurationFactory.getAppConfiguration().getRejectJwtWithNoneAlg() && signatureAlgorithm == SignatureAlgorithm.NONE) {
             LOG.trace("None algorithm is forbidden by `rejectJwtWithNoneAlg` configuration property.");
             return false;
@@ -104,7 +104,7 @@ public class ServerCryptoProvider extends AbstractCryptoProvider {
     }
 
     @Override
-    public boolean deleteKey(String keyId) throws Exception {
+    public boolean deleteKey(String keyId) throws CryptoProviderException {
         return cryptoProvider.deleteKey(keyId);
     }
 
@@ -114,7 +114,7 @@ public class ServerCryptoProvider extends AbstractCryptoProvider {
     }
 
     @Override
-    public PrivateKey getPrivateKey(String keyId) throws Exception {
+    public PrivateKey getPrivateKey(String keyId) throws CryptoProviderException {
         PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
 
         if (privateKey == null) {
@@ -129,7 +129,7 @@ public class ServerCryptoProvider extends AbstractCryptoProvider {
     
 
     @Override
-    public PublicKey getPublicKey(String keyId) throws KeyStoreException {
+    public PublicKey getPublicKey(String keyId) throws CryptoProviderException {
         PublicKey publicKey = cryptoProvider.getPublicKey(keyId);
 
         if (publicKey == null) {
