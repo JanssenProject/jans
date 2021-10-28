@@ -32,7 +32,6 @@ import org.apache.logging.log4j.status.StatusLogger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -188,7 +187,7 @@ public class KeyGenerator {
         }
 
         private void generateKeys(AbstractCryptoProvider cryptoProvider, List<Algorithm> signatureAlgorithms,
-                                  List<Algorithm> encryptionAlgorithms, int expiration, int expirationHours, String testPropFile) throws CryptoProviderException, FileNotFoundException, IOException {
+                                  List<Algorithm> encryptionAlgorithms, int expiration, int expirationHours, String testPropFile) throws CryptoProviderException, IOException {
             JSONWebKeySet jwks = new JSONWebKeySet();
 
             Calendar calendar = new GregorianCalendar();
