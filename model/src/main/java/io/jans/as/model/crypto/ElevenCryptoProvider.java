@@ -7,6 +7,7 @@
 package io.jans.as.model.crypto;
 
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.exception.CryptoProviderException;
 import io.jans.as.model.jwk.Algorithm;
 import io.jans.eleven.client.DeleteKeyClient;
 import io.jans.eleven.client.DeleteKeyRequest;
@@ -53,7 +54,7 @@ public class ElevenCryptoProvider extends AbstractCryptoProvider {
     }
 
     @Override
-    public JSONObject generateKey(Algorithm algorithm, Long expirationTime) throws Exception {
+    public JSONObject generateKey(Algorithm algorithm, Long expirationTime) throws CryptoProviderException {
         GenerateKeyRequest request = new GenerateKeyRequest();
         request.setSignatureAlgorithm(algorithm.toString());
         request.setExpirationTime(expirationTime);
@@ -62,16 +63,21 @@ public class ElevenCryptoProvider extends AbstractCryptoProvider {
         GenerateKeyClient client = new GenerateKeyClient(generateKeyEndpoint);
         client.setRequest(request);
 
-        GenerateKeyResponse response = client.exec();
+        GenerateKeyResponse response = null;
+        try {
+            response = client.exec();
+        } catch (Exception e) {
+            throw new CryptoProviderException(e);            
+        }
         if (response.getStatus() == HttpStatus.SC_OK && response.getKeyId() != null) {
             return response.getJSONEntity();
         } else {
-            throw new Exception(response.getEntity());
+            throw new CryptoProviderException(response.getEntity());            
         }
     }
 
     @Override
-    public String sign(String signingInput, String keyId, String shardSecret, SignatureAlgorithm signatureAlgorithm) throws Exception {
+    public String sign(String signingInput, String keyId, String shardSecret, SignatureAlgorithm signatureAlgorithm) throws CryptoProviderException {
         SignRequest request = new SignRequest();
         request.getSignRequestParam().setSigningInput(signingInput);
         request.getSignRequestParam().setAlias(keyId);
@@ -82,16 +88,21 @@ public class ElevenCryptoProvider extends AbstractCryptoProvider {
         SignClient client = new SignClient(signEndpoint);
         client.setRequest(request);
 
-        SignResponse response = client.exec();
+        SignResponse response = null;        
+        try {
+            response = client.exec();
+        } catch (Exception e) {
+            throw new CryptoProviderException(e);            
+        }        
         if (response.getStatus() == HttpStatus.SC_OK && response.getSignature() != null) {
             return response.getSignature();
         } else {
-            throw new Exception(response.getEntity());
+            throw new CryptoProviderException(response.getEntity());
         }
     }
 
     @Override
-    public boolean verifySignature(String signingInput, String encodedSignature, String keyId, JSONObject jwks, String sharedSecret, SignatureAlgorithm signatureAlgorithm) throws Exception {
+    public boolean verifySignature(String signingInput, String encodedSignature, String keyId, JSONObject jwks, String sharedSecret, SignatureAlgorithm signatureAlgorithm) throws CryptoProviderException {
         VerifySignatureRequest request = new VerifySignatureRequest();
         request.getVerifySignatureRequestParam().setSigningInput(signingInput);
         request.getVerifySignatureRequestParam().setSignature(encodedSignature);
@@ -106,28 +117,38 @@ public class ElevenCryptoProvider extends AbstractCryptoProvider {
         VerifySignatureClient client = new VerifySignatureClient(verifySignatureEndpoint);
         client.setRequest(request);
 
-        VerifySignatureResponse response = client.exec();
+        VerifySignatureResponse response = null;
+        try {
+            response = client.exec();
+        } catch (Exception e) {
+            throw new CryptoProviderException(e);            
+        }          
         if (response.getStatus() == HttpStatus.SC_OK) {
             return response.isVerified();
         } else {
-            throw new Exception(response.getEntity());
+            throw new CryptoProviderException(response.getEntity());            
         }
     }
 
     @Override
-    public boolean deleteKey(String keyId) throws Exception {
+    public boolean deleteKey(String keyId) throws CryptoProviderException {
         DeleteKeyRequest request = new DeleteKeyRequest();
         request.setAlias(keyId);
         request.setAccessToken(accessToken);
 
         DeleteKeyClient client = new DeleteKeyClient(deleteKeyEndpoint);
         client.setRequest(request);
-
-        DeleteKeyResponse response = client.exec();
-        if (response.getStatus() == org.apache.http.HttpStatus.SC_OK) {
+        
+        DeleteKeyResponse response = null;
+        try {
+            response = client.exec();
+        } catch (Exception e) {
+            throw new CryptoProviderException(e);            
+        }          
+        if (response.getStatus() == HttpStatus.SC_OK) {
             return response.isDeleted();
         } else {
-            throw new Exception(response.getEntity());
+            throw new CryptoProviderException(response.getEntity());            
         }
     }
 
