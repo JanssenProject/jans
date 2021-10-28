@@ -468,32 +468,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
             throw new IllegalStateException("The provided signature algorithm parameter is not supported: algorithmFamily = " + algorithmFamily);
         }
         }
-
-        // Generate the key
-        KeyPair keyPair = keyGen.generateKeyPair();
-        PrivateKey pk = keyPair.getPrivate();
-
-        // Java API requires a certificate chain
-        X509Certificate cert = generateV3Certificate(keyPair, dnName, signatureAlgorithm.getAlgorithm(), expirationTime);
-        X509Certificate[] chain = new X509Certificate[1];
-        chain[0] = cert;
-
-        String alias = UUID.randomUUID().toString() + getKidSuffix(algorithm.getUse(), algorithm);
-        keyStore.setKeyEntry(alias, pk, keyStoreSecret.toCharArray(), chain);
-
-        final String oldAliasByAlgorithm = getAliasByAlgorithmForDeletion(algorithm, alias);
-        if (StringUtils.isNotBlank(oldAliasByAlgorithm)) {
-            keyStore.deleteEntry(oldAliasByAlgorithm);
-            LOG.trace("New key: " + alias + ", deleted key: " + oldAliasByAlgorithm);
-        }
-
-        try (FileOutputStream stream = new FileOutputStream(keyStoreFile)) {
-            keyStore.store(stream, keyStoreSecret.toCharArray());
-        }
-
-        PublicKey publicKey = keyPair.getPublic();
-
-        return getJson(algorithm, expirationTime, publicKey,  alias, cert);
+        return getJson(algorithm, keyGen, signatureAlgorithm.getAlgorithm(), expirationTime);
     }
 
     private JSONObject generateKeyEncryption(Algorithm algorithm, Long expirationTime) throws NoSuchAlgorithmException, NoSuchProviderException,
@@ -526,13 +501,18 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
                     "The provided key encryption algorithm parameter is not supported: algorithmFamily = " + algorithmFamily);
         }
         }
+        return getJson(algorithm, keyGen, signatureAlgorithm, expirationTime);
+    }
+
+    private JSONObject getJson(final Algorithm algorithm, final KeyPairGenerator keyGen, final String signatureAlgorithmStr, final Long expirationTime) throws CertificateEncodingException, 
+            NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException, OperatorCreationException, CertificateException, KeyStoreException, IOException {
 
         // Generate the key
         KeyPair keyPair = keyGen.generateKeyPair();
         PrivateKey pk = keyPair.getPrivate();
 
         // Java API requires a certificate chain
-        X509Certificate cert = generateV3Certificate(keyPair, dnName, signatureAlgorithm, expirationTime);
+        X509Certificate cert = generateV3Certificate(keyPair, dnName, signatureAlgorithmStr, expirationTime);
 
         X509Certificate[] chain = new X509Certificate[1];
         chain[0] = cert;
@@ -550,12 +530,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
             keyStore.store(stream, keyStoreSecret.toCharArray());
         }
 
-        PublicKey publicKey = keyPair.getPublic();
-
-        return getJson(algorithm, expirationTime, publicKey,  alias, cert);
-    }
-
-   private JSONObject getJson(Algorithm algorithm, Long expirationTime, PublicKey publicKey, String alias, X509Certificate cert) throws CertificateEncodingException {
+        final PublicKey publicKey = keyPair.getPublic();
 
         Use use = algorithm.getUse();
 
