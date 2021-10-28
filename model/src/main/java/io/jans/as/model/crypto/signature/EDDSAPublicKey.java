@@ -10,7 +10,6 @@ import static io.jans.as.model.jwk.JWKParameter.MODULUS;
 import static io.jans.as.model.jwk.JWKParameter.X;
 
 import java.security.spec.X509EncodedKeySpec;
-import java.util.Arrays;
 
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.json.JSONException;
@@ -114,48 +113,5 @@ public class EDDSAPublicKey extends PublicKey {
         } catch (Exception e) {
             return StringUtils.EMPTY_STRING;
         }
-    }
-    
-    /**
-     * Overriding Object.equals() function
-     */
-    @Override
-    public boolean equals(Object obj) {
-        if(this == obj) {
-            return true;            
-        }
-        if(obj == null) {
-            return false;
-        }
-        if(this.getClass() != obj.getClass()) {
-            return false;
-        }
-        EDDSAPublicKey objTyped = (EDDSAPublicKey) obj;
-
-        if(!Arrays.equals(this.xEncoded, objTyped.xEncoded)) {
-            return false;
-        }
-
-        String thisKeyId = getKeyId();
-        String objKeyId = objTyped.getKeyId();        
-
-        SignatureAlgorithm thisSignAlg = this.getSignatureAlgorithm();        
-        SignatureAlgorithm objSignAlg = objTyped.getSignatureAlgorithm();
-        
-        boolean keysEquals = (thisKeyId == null && objKeyId == null) ||
-                (thisKeyId != null && thisKeyId.equals(objKeyId));
-
-        boolean signAlgEquals = (thisSignAlg == null && objSignAlg == null) ||
-                (thisSignAlg != null && thisSignAlg.equals(objSignAlg));
-
-        return keysEquals && signAlgEquals; 
-    }
-    
-    /**
-     * Overriding Object.hashCode() function
-     */
-    @Override
-    public int hashCode() {
-        return Arrays.hashCode(this.xEncoded);         
     }
 }
