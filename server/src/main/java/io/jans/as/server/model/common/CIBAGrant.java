@@ -6,10 +6,10 @@
 
 package io.jans.as.server.model.common;
 
-import javax.inject.Inject;
-
 import io.jans.as.model.common.GrantType;
 import io.jans.service.CacheService;
+
+import javax.inject.Inject;
 
 /**
  * An extension grant with the grant type value: urn:openid:params:grant-type:ciba
@@ -37,6 +37,7 @@ public class CIBAGrant extends AuthorizationGrant {
         super.init(cibaRequest.getUser(), AuthorizationGrantType.CIBA, cibaRequest.getClient(), null);
         setAuthReqId(cibaRequest.getAuthReqId());
         setAcrValues(cibaRequest.getAcrValues());
+        setScopes(cibaRequest.getScopes());
         setIsCachedWithNoPersistence(true);
     }
 
