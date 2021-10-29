@@ -29,6 +29,8 @@ public class TokenEntity implements Serializable {
     private String grantId;
     @AttributeName(name = "usrId")
     private String userId;
+    @AttributeName(name = "jansUsrDN")
+    private String userDn;
     @AttributeName(name = "clnId")
     private String clientId;
     @AttributeName(name = "iat")
@@ -216,6 +218,14 @@ public class TokenEntity implements Serializable {
 
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    public String getUserDn() {
+        return userDn;
+    }
+
+    public void setUserDn(String userDn) {
+        this.userDn = userDn;
     }
 
     public String getClientId() {
