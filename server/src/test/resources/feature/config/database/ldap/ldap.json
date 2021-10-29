@@ -1,0 +1,19 @@
+{
+  "bindPassword": "8OId4NKmlxY0eRdig9c1Dw==",
+   "level": 0,
+   "localPrimaryKey": "uid",
+   "version": 0,
+   "enabled": false,
+   "useSSL": true,
+   "bindDN": "cn=directory manager",
+   "servers": [
+      "localhost:1636"
+   ],
+   "baseDNs": [
+     "ou=people,o=gluu"
+   ],
+   "configId": "new_auth_ldap_server",
+   "useAnonymousBind": false,
+   "maxConnections": 1000,
+   "primaryKey": "uid"
+}
