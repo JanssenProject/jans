@@ -1,0 +1,18 @@
+ {
+  "tokenRevocationEndpoint": "https://pujavs3.infinity.com/jans-auth/restv1/revoke",
+  "introspectionEndpoint": "https://pujavs3.infinity.com/jans-auth/restv1/introspection",
+  "umaConfigurationEndpoint": "https://pujavs3.infinity.com/jans-auth/restv1/uma2-configuration",
+  "clientInfoEndpoint": "https://pujavs3.infinity.com/jans-auth/restv1/clientinfo",
+  "authorizationEndpoint": "https://pujavs3.infinity.com/jans-auth/restv1/authorize",
+  "backchannelAuthenticationEndpoint": "https://pujavs3.infinity.com/jans-auth/restv1/bc-authorize",
+  "baseEndpoint": "https://pujavs3.infinity.com/jans-auth/restv1",
+  "tokenEndpoint": "https://pujavs3.infinity.com/jans-auth/restv1/token",
+  "endSessionEndpoint": "https://pujavs3.infinity.com/jans-auth/restv1/end_session",
+  "idGenerationEndpoint": "https://pujavs3.infinity.com/jans-auth/restv1/id",
+  "backchannelDeviceRegistrationEndpoint": "https://pujavs3.infinity.com/jans-auth/restv1/bc-deviceRegistration",
+  "openIdDiscoveryEndpoint": "https://pujavs3.infinity.com/.well-known/webfinger",
+  "openIdConfigurationEndpoint": "https://pujavs3.infinity.com/.well-known/openid-configuration",
+  "userInfoEndpoint": "https://pujavs3.infinity.com/jans-auth/restv1/userinfo",
+  "oxElevenGenerateKeyEndpoint": "https://pujavs3.infinity.com/oxeleven/rest/oxeleven/generateKey",
+  "registrationEndpoint": "https://pujavs3.infinity.com/jans-auth/restv1/register"
+}
