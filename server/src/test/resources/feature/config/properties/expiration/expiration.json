@@ -1,5 +1,0 @@
-{
-  "expirationNotificatorIntervalInSeconds": 600,
-  "expirationNotificatorEnabled": false,
-  "expirationNotificatorMapSizeLimit": 100000
-}
