@@ -401,6 +401,7 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
         result.setTtl(token.getTtl());
         result.setTokenCode(hashedCode);
         result.setUserId(getUserId());
+        result.setUserDn(getUserDn());
         result.setClientId(getClientId());
 
         result.getAttributes().setX5cs256(token.getX5ts256());
