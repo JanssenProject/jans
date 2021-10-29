@@ -251,7 +251,7 @@ public class ClientService {
 		}
 	}
 
-	private void removeFromCache(Client client) {
+	public void removeFromCache(Client client) {
 		BaseCacheService usedCacheService = getCacheService();
 		try {
 			usedCacheService.remove(client.getDn());
