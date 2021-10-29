@@ -1,0 +1,39 @@
+{
+  "useLocalCache": true,
+  "metricReporterInterval": 300,
+  "cleanServiceInterval": 60,
+  "issuer": "https://pujavs4.2.gluu.server",
+  "baseEndpoint": "https://pujavs4.2.gluu.server/fido2/restv1",
+  "disableJdkLogger": true,
+  "externalLoggerConfiguration": "",
+  "cleanServiceBatchChunkSize": 10000,
+  "metricReporterEnabled": true,
+  "loggingLayout": "text",
+  "metricReporterKeepDataDays": 15,
+  "loggingLevel": "INFO",
+  "personCustomObjectClassList": [
+    "jansCustomPerson",
+    "jansPerson"
+  ],
+  "fido2Configuration": {
+    "serverMetadataFolder": "/etc/gluu/conf/fido2/server_metadata",
+    "requestedParties": [
+      {
+        "name": "https://pujavs4.2.gluu.server",
+        "domains": [
+          "pujavs4.2.gluu.server"
+        ]
+      }
+    ],
+    "authenticationHistoryExpiration": 800,
+    "mdsTocsFolder": "/etc/gluu/conf/fido2/mds/toc",
+    "requestedCredentialTypes": [
+      "RS256",
+      "ES256"
+    ],
+    "authenticatorCertsFolder": "/etc/gluu/conf/fido2/authenticator_cert",
+    "userAutoEnrollment": false,
+    "unfinishedRequestExpiration": 180,
+    "mdsCertsFolder": "/etc/gluu/conf/fido2/mds/cert"
+  }
+}

@@ -1,4 +1,4 @@
-@ignore
+
 Feature: Attributes 
 
 Background:
