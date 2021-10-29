@@ -361,6 +361,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             }
 
             if (!registerClient) {
+                clientService.removeFromCache(client); // clear cache to force reload from persistence
                 log.trace("Client parameters are invalid, returns invalid_request error. External registration script returned false.");
                 throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_CLIENT_METADATA, "External registration script returned false.");
             }
@@ -948,6 +949,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                             applicationAuditLogger.sendMessage(oAuth2AuditLog);
                             return Response.ok().entity(clientAsEntity(client)).build();
                         } else {
+                            clientService.removeFromCache(client); // clear cache to force reload from persistence
                             log.trace("The Access Token is not valid for the Client ID, returns invalid_token error, client_id: {}", clientId);
                             applicationAuditLogger.sendMessage(oAuth2AuditLog);
                             return Response.status(Response.Status.BAD_REQUEST).
