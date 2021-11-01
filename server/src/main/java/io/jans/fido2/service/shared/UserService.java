@@ -24,7 +24,7 @@ import io.jans.as.model.config.StaticConfiguration;
 @ApplicationScoped
 public class UserService extends io.jans.as.common.service.common.UserService {
 
-	public static final String[] USER_OBJECT_CLASSES = new String[] { AttributeConstants.objectClassPerson };
+	public static final String[] USER_OBJECT_CLASSES = new String[] { AttributeConstants.JANS_PERSON };
 
     @Inject
     private StaticConfiguration staticConfiguration;
