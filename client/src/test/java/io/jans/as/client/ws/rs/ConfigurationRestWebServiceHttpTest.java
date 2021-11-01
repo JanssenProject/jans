@@ -74,7 +74,6 @@ public class ConfigurationRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response.getJwksUri(), "The jwksUri is null");
         assertNotNull(response.getRegistrationEndpoint(), "The registrationEndpoint is null");
         assertNotNull(response.getIntrospectionEndpoint(), "The introspectionEndpoint is null");
-        assertNotNull(response.getIdGenerationEndpoint(), "The idGenerationEndpoint is null");
         assertNotNull(response.getParEndpoint(), "The parEndpoint is null");
 
         assertTrue(response.getScopesSupported().size() > 0, "The scopesSupported is empty");
