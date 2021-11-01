@@ -36,7 +36,6 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
     private String endSessionEndpoint;
     private String jwksUri;
     private String registrationEndpoint;
-    private String idGenerationEndpoint;
     private String introspectionEndpoint;
     private String parEndpoint;
     private Boolean requirePar;
@@ -81,7 +80,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
     private String opPolicyUri;
     private String opTosUri;
     private Map<String, List<String>> scopeToClaimsMapping = new HashMap<>();
-    private Map<String, Object> mltsAliases = new HashMap<>();
+    private Map<String, Serializable> mltsAliases = new HashMap<>();
 
     // CIBA
     private String backchannelAuthenticationEndpoint;
@@ -160,9 +159,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
      * Gets scopes to claims map.
      *
      * @return scopes to claims map
-     * @deprecated this parameter will be moved from /.well-known/openid-configuration to /.well-known/gluu-configuration
      */
-    @Deprecated
     public Map<String, List<String>> getScopeToClaimsMapping() {
         return scopeToClaimsMapping;
     }
@@ -171,9 +168,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
      * Sets scope to claim map.
      *
      * @param scopeToClaimsMapping scope to claim map
-     * @deprecated this parameter will be moved from /.well-known/openid-configuration to /.well-known/gluu-configuration
      */
-    @Deprecated
     public void setScopeToClaimsMapping(Map<String, List<String>> scopeToClaimsMapping) {
         this.scopeToClaimsMapping = scopeToClaimsMapping;
     }
@@ -376,34 +371,10 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
         this.registrationEndpoint = registrationEndpoint;
     }
 
-    /**
-     * @deprecated this parameter will be moved from /.well-known/openid-configuration to /.well-known/gluu-configuration
-     */
-    @Deprecated
-    public String getIdGenerationEndpoint() {
-        return idGenerationEndpoint;
-    }
-
-    /**
-     * @deprecated this parameter will be moved from /.well-known/openid-configuration to /.well-known/gluu-configuration
-     */
-    @Deprecated
-    public void setIdGenerationEndpoint(String idGenerationEndpoint) {
-        this.idGenerationEndpoint = idGenerationEndpoint;
-    }
-
-    /**
-     * @deprecated this parameter will be moved from /.well-known/openid-configuration to /.well-known/gluu-configuration
-     */
-    @Deprecated
     public String getIntrospectionEndpoint() {
         return introspectionEndpoint;
     }
 
-    /**
-     * @deprecated this parameter will be moved from /.well-known/openid-configuration to /.well-known/gluu-configuration
-     */
-    @Deprecated
     public void setIntrospectionEndpoint(String introspectionEndpoint) {
         this.introspectionEndpoint = introspectionEndpoint;
     }
@@ -1196,11 +1167,11 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
         this.deviceAuthzEndpoint = deviceAuthzEndpoint;
     }
 
-    public Map<String, Object> getMltsAliases() {
+    public Map<String, Serializable> getMltsAliases() {
         return mltsAliases;
     }
 
-    public void setMltsAliases(Map<String, Object> mltsAliases) {
+    public void setMltsAliases(Map<String, Serializable> mltsAliases) {
         this.mltsAliases = mltsAliases;
     }
 
@@ -1217,7 +1188,6 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
                 ", endSessionEndpoint='" + endSessionEndpoint + '\'' +
                 ", jwksUri='" + jwksUri + '\'' +
                 ", registrationEndpoint='" + registrationEndpoint + '\'' +
-                ", idGenerationEndpoint='" + idGenerationEndpoint + '\'' +
                 ", introspectionEndpoint='" + introspectionEndpoint + '\'' +
                 ", deviceAuthzEndpoint='" + deviceAuthzEndpoint + '\'' +
                 ", scopesSupported=" + scopesSupported +
