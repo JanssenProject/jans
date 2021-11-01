@@ -78,6 +78,29 @@ public class ClientUtil {
         return result;
     }
 
+    public static List<String> extractListByKeyOptString(JSONObject jsonObject, String key) {
+        List<String> values = new ArrayList<>();
+        if (jsonObject == null || StringUtils.isBlank(key) || !jsonObject.has(key)) {
+            return values;
+        }
+
+        JSONArray jsonArray = jsonObject.optJSONArray(key);
+        if (jsonArray != null) {
+            for (int i = 0; i < jsonArray.length(); i++) {
+                String value = jsonArray.optString(i);
+                if (value != null) {
+                    values.add(value);
+                }
+            }
+        } else {
+            String value = jsonObject.optString(key);
+            if (value != null) {
+                values.add(value);
+            }
+        }
+        return values;
+    }
+
     public static Integer integerOrNull(JSONObject jsonObject, String key) {
         return jsonObject.has(key) ? jsonObject.optInt(key) : null;
     }

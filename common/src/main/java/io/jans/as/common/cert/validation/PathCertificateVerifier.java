@@ -181,6 +181,7 @@ public class PathCertificateVerifier implements CertificateVerifier {
 
     @Override
     public void destroy() {
+        // empty destroy
     }
 
 }
