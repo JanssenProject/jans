@@ -77,7 +77,7 @@ public class JansConfigurationWS {
             log.trace("Gluu configuration: {}", entity);
 
             return Response.ok(entity).build();
-        } catch (Throwable ex) {
+        } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
             throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity(errorResponseFactory.getErrorResponse(GluuErrorResponseType.SERVER_ERROR)).build());
@@ -105,10 +105,10 @@ public class JansConfigurationWS {
     }
 
     private Map<String, Set<String>> createScopeToClaimsMapping() {
-        Map<String, Set<String>> result = new HashMap<String, Set<String>>();
+        Map<String, Set<String>> result = new HashMap<>();
         try {
             for (Scope scope : scopeService.getAllScopesList()) {
-                final Set<String> claimsList = new HashSet<String>();
+                final Set<String> claimsList = new HashSet<>();
                 result.put(scope.getId(), claimsList);
 
                 final List<String> claimIdList = scope.getClaims();

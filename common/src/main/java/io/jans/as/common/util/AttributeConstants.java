@@ -13,31 +13,31 @@ public class AttributeConstants {
 
     public static final String CURRENT_PERSON = "currentPerson";
 
-    public static final String top = "top";
-    public static final String objectClassPerson = "jansPerson";
-    public static final String objectClassInumMap = "gluuInumMap";
+    public static final String TOP = "top";
+    public static final String JANS_PERSON = "jansPerson";
+    public static final String GLUU_INUM_MAP = "gluuInumMap";
 
-    public static final String inumDelimiter = "!";
+    public static final String INUM_DELIMITER = "!";
 
     public static final String PERSON_INUM = "personInum";
 
-    public static final String ouPeople = "ou=people";
+    public static final String OU_PEOPLE = "ou=people";
 
-    public static final String inum = "inum";
-    public static final String displayName = "displayName";
-    public static final String description = "description";
-    public static final String origin = "jansAttrOrigin";
-    public static final String mail = "mail";
-    public static final String ppid = "jansPPID";
-    public static final String jsId = "jansId";
-    public static final String SCRYPT_TYPE = "jansScrTyp";
+    public static final String INUM = "inum";
+    public static final String DISPLAY_NAME = "displayName";
+    public static final String DESCRIPTION = "description";
+    public static final String JANS_ATTR_ORIGIN = "jansAttrOrigin";
+    public static final String MAIL = "mail";
+    public static final String JANS_PPID = "jansPPID";
+    public static final String JANS_ID = "jansId";
+    public static final String JANS_SCR_TYP = "jansScrTyp";
 
-    public static final String status = "status";
-    public static final String jsStatus = "jansStatus";
-    public static final String sn = "sn";
-    public static final String cn = "cn";
-    public static final String owner = "owner";
-    public static final String member = "member";
+    public static final String STATUS = "status";
+    public static final String JANS_STATUS = "jansStatus";
+    public static final String SN = "sn";
+    public static final String CN = "cn";
+    public static final String OWNER = "owner";
+    public static final String MEMBER = "member";
 
-    public static final String attributeName = "jansAttrName";
+    public static final String JANS_ATTR_NAME = "jansAttrName";
 }
