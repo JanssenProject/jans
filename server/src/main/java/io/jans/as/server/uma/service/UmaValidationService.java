@@ -276,15 +276,11 @@ public class UmaValidationService {
 
             try {
                 final Jwt idToken = Jwt.parse(claimToken);
-                if (idToken != null) {
-                    if (isTrue(appConfiguration.getUmaValidateClaimToken()) && !isIdTokenValid(idToken)) {
-                        log.error("claim_token validation failed.");
-                        throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, INVALID_CLAIM_TOKEN, "claim_token validation failed.");
-                    }
-                    return idToken;
-                } else {
-                    throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, INVALID_CLAIM_TOKEN, "id_tokne is null.");
+                if (isTrue(appConfiguration.getUmaValidateClaimToken()) && !isIdTokenValid(idToken)) {
+                    log.error("claim_token validation failed.");
+                    throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, INVALID_CLAIM_TOKEN, "claim_token validation failed.");
                 }
+                return idToken;
             } catch (Exception e) {
                 log.error("Failed to parse claim_token as valid id_token.", e);
                 throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, INVALID_CLAIM_TOKEN, "Failed to parse claim_token as valid id_token.");
