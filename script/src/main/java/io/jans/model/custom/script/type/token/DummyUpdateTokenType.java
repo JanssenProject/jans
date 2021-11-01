@@ -41,7 +41,27 @@ public class DummyUpdateTokenType implements UpdateTokenType {
 	}
 
     @Override
+    public boolean modifyRefreshToken(Object refreshToken, Object tokenContext) {
+        return false;
+    }
+
+    @Override
+    public boolean modifyAccessToken(Object accessToken, Object tokenContext) {
+        return false;
+    }
+
+    @Override
     public int getRefreshTokenLifetimeInSeconds(Object tokenContext) {
+        return 0;
+    }
+
+    @Override
+    public int getIdTokenLifetimeInSeconds(Object context) {
+        return 0;
+    }
+
+    @Override
+    public int getAccessTokenLifetimeInSeconds(Object context) {
         return 0;
     }
 }
