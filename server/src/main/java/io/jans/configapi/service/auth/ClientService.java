@@ -13,15 +13,20 @@ import io.jans.as.common.util.AttributeConstants;
 import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.register.ApplicationType;
+import io.jans.configapi.rest.model.SearchRequest;
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.model.PagedResult;
+import io.jans.orm.model.SortOrder;
 import io.jans.orm.search.filter.Filter;
 import io.jans.util.StringHelper;
-import org.slf4j.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.io.Serializable;
 import java.util.List;
+
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
 
 /**
  * @author Mougang T.Gasmyr
@@ -87,6 +92,24 @@ public class ClientService implements Serializable {
 
     public List<Client> getAllClients() {
         return persistenceEntryManager.findEntries(getDnForClient(null), Client.class, null);
+    }
+    
+    public PagedResult<Client> searchClients(SearchRequest searchRequest) {
+        Filter searchFilter = null;
+        if (StringUtils.isNotEmpty(searchRequest.getFilter())) {
+        String[] targetArray = new String[] { searchRequest.getFilter() };
+        Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.displayName, null, targetArray,
+                null);
+        Filter descriptionFilter = Filter.createSubstringFilter(AttributeConstants.description, null, targetArray,
+                null);
+        Filter inumFilter = Filter.createSubstringFilter(AttributeConstants.inum, null, targetArray, null);
+        searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter, inumFilter);
+        }
+        
+        PagedResult<Client> list = persistenceEntryManager.findPagedEntries(getDnForClient(null), Client.class, searchFilter, null, searchRequest.getSortBy(),
+                SortOrder.getByValue(searchRequest.getSortOrder()), searchRequest.getStartIndex() - 1, searchRequest.getCount(), searchRequest.getMaxCount());
+        
+        return list;
     }
 
     public Client getClientByDn(String Dn) {
