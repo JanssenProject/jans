@@ -106,7 +106,7 @@ public class JweDecrypterImpl extends AbstractJweDecrypter {
             if (signedJWT != null) {
                 final Jwt jwt = Jwt.parse(signedJWT.serialize());
                 jwe.setSignedJWTPayload(jwt);
-                jwe.setClaims(jwt != null ? jwt.getClaims() : null);
+                jwe.setClaims(jwt.getClaims());
             } else {
                 final String base64encodedPayload = encryptedJwt.getPayload().toString();
                 jwe.setClaims(new JwtClaims(base64encodedPayload));
