@@ -10,11 +10,14 @@ import com.github.fge.jsonpatch.JsonPatchException;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.common.EncryptionService;
 import io.jans.configapi.filters.ProtectedApi;
+import io.jans.configapi.rest.model.SearchRequest;
 import io.jans.configapi.service.auth.ClientService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.util.AttributeNames;
 import io.jans.configapi.util.Jackson;
+import io.jans.orm.model.PagedResult;
+import io.jans.orm.model.SortOrder;
 import io.jans.util.StringHelper;
 import io.jans.util.security.StringEncrypter.EncryptionException;
 
@@ -58,7 +61,9 @@ public class ClientsResource extends BaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_READ_ACCESS })
     public Response getOpenIdConnectClients(
             @DefaultValue(DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
-            @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern) throws Exception {
+            @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
+            @DefaultValue(DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex) throws Exception {
+        log.debug("Client serach param - limit:{}, pattern:{}, startIndex:{}",limit, pattern, startIndex);
         final List<Client> clients;
         if (!pattern.isEmpty() && pattern.length() >= 2) {
             clients = clientService.searchClients(pattern, limit);
@@ -72,6 +77,7 @@ public class ClientsResource extends BaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_READ_ACCESS })
     @Path(ApiConstants.INUM_PATH)
     public Response getOpenIdClientByInum(@PathParam(ApiConstants.INUM) @NotNull String inum) {
+        log.debug("Client serach by inum:{}", inum);
         Client client = clientService.getClientByInum(inum);
         checkResourceNotNull(client, OPENID_CONNECT_CLIENT);
         return Response.ok(client).build();
@@ -80,7 +86,7 @@ public class ClientsResource extends BaseResource {
     @POST
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS })
     public Response createOpenIdConnect(@Valid Client client) throws NoSuchAlgorithmException, EncryptionException {
-        log.debug("Client details to be added - client = " + client);
+        log.debug("Client details to be added - client:{}",client);
         String inum = client.getClientId();
         if (inum == null || inum.isEmpty() || inum.isBlank()) {
             inum = clientService.generateInumForNewClient();
@@ -106,7 +112,7 @@ public class ClientsResource extends BaseResource {
     @PUT
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS })
     public Response updateClient(@Valid Client client) throws EncryptionException {
-        log.debug("Client details to be updated - client = " + client);
+        log.debug("Client details to be updated - client:{}",client);
         String inum = client.getClientId();
         checkNotNull(inum, AttributeNames.INUM);
         checkNotNull(client.getClientName(), AttributeNames.DISPLAY_NAME);
@@ -131,7 +137,7 @@ public class ClientsResource extends BaseResource {
     @Path(ApiConstants.INUM_PATH)
     public Response patchClient(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString)
             throws JsonPatchException, IOException {
-        log.debug("Client details to be patched - inum = " + inum + " , pathString = " + pathString);
+        log.debug("Client details to be patched - inum:{}, pathString:{}", inum, pathString);
         Client existingClient = clientService.getClientByInum(inum);
         checkResourceNotNull(existingClient, OPENID_CONNECT_CLIENT);
 
@@ -144,7 +150,7 @@ public class ClientsResource extends BaseResource {
     @Path(ApiConstants.INUM_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_DELETE_ACCESS })
     public Response deleteClient(@PathParam(ApiConstants.INUM) @NotNull String inum) {
-        log.debug("Client to be deleted - inum = " + inum);
+        log.debug("Client to be deleted - inum:{} ", inum);
         Client client = clientService.getClientByInum(inum);
         checkResourceNotNull(client, OPENID_CONNECT_CLIENT);
         clientService.removeClient(client);
@@ -167,4 +173,27 @@ public class ClientsResource extends BaseResource {
                 .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append).toString();
 
     }
+    
+    private Response doSearch(String filter, Integer startIndex, Integer count, String sortBy,
+            String sortOrder) {
+         log.debug("Client search params:: - filter:{}, startIndex:{}, count:{}, sortBy:{}, sortOrder:{} ", filter, startIndex, count, sortBy, sortOrder);
+         Response response;
+                 
+             SearchRequest searchReq = new SearchRequest();
+             response = prepareSearchRequest(clientService.getDnForClient(null), filter, sortBy,
+                     sortOrder, startIndex, count, null, null, searchReq);
+             if (response != null) return response;
+
+             PagedResult<Client> pagedResult = clientService.searchClients(searchReq);
+             log.trace("PagedResult  - pagedResult:{}" ,pagedResult);
+             
+             List<Client> clients =  null;
+             if(pagedResult!=null) {
+                 log.trace("Clients fetched  - pagedResult.getEntries():{}" ,pagedResult.getEntries());
+                 clients = pagedResult.getEntries();
+             }
+             
+             log.debug("Clients fetched  - clients:{}" ,clients);
+             return Response.ok(clients).build();         
+     }
 }
