@@ -63,3 +63,27 @@ class UpdateToken(UpdateTokenType):
 		except:
 	                print "update token failure" , sys.exc_info()[1]
 	                return None
+
+    # Returns boolean, true - indicates that script applied changes. If false is returned token will not be created.
+    # refreshToken is reference of io.jans.as.server.model.common.RefreshToken (note authorization grant can be taken as context.getGrant())
+    # context is reference of io.jans.as.server.service.external.context.ExternalUpdateTokenContext (in https://github.com/JanssenProject/jans-auth-server project, )
+    def modifyRefreshToken(self, refreshToken, context):
+        return True
+
+    # Returns boolean, true - indicates that script applied changes. If false is returned token will not be created.
+    # accessToken is reference of io.jans.as.server.model.common.AccessToken (note authorization grant can be taken as context.getGrant())
+    # context is reference of io.jans.as.server.service.external.context.ExternalUpdateTokenContext (in https://github.com/JanssenProject/jans-auth-server project, )
+    def modifyAccessToken(self, accessToken, context):
+        return True
+
+    # context is reference of io.jans.as.server.service.external.context.ExternalUpdateTokenContext (in https://github.com/JanssenProject/jans-auth-server project, )
+    def getRefreshTokenLifetimeInSeconds(self, context):
+        return 0
+
+    # context is reference of io.jans.as.server.service.external.context.ExternalUpdateTokenContext (in https://github.com/JanssenProject/jans-auth-server project, )
+    def getIdTokenLifetimeInSeconds(self, context):
+        return 0
+
+    # context is reference of io.jans.as.server.service.external.context.ExternalUpdateTokenContext (in https://github.com/JanssenProject/jans-auth-server project, )
+    def getAccessTokenLifetimeInSeconds(self, context):
+        return 0
