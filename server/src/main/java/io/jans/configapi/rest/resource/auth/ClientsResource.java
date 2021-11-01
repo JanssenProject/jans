@@ -62,14 +62,20 @@ public class ClientsResource extends BaseResource {
     public Response getOpenIdConnectClients(
             @DefaultValue(DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
-            @DefaultValue(DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex) throws Exception {
-        log.debug("Client serach param - limit:{}, pattern:{}, startIndex:{}",limit, pattern, startIndex);
-        final List<Client> clients;
-        if (!pattern.isEmpty() && pattern.length() >= 2) {
-            clients = clientService.searchClients(pattern, limit);
-        } else {
-            clients = clientService.getAllClients(limit);
-        }
+            @DefaultValue(DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
+            @QueryParam(value = ApiConstants.SORTBY) String sortBy,
+            @QueryParam(value = ApiConstants.SORTORDER) String sortOrder) throws Exception {
+        log.debug("Client serach param - limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder", limit, pattern,
+                startIndex, sortBy, sortOrder);
+
+        SearchRequest searchReq = new SearchRequest();
+        Response response = prepareSearchRequest(clientService.getDnForClient(null), pattern, sortBy, sortOrder,
+                startIndex, limit, null, null, searchReq);
+        if (response != null)
+            return response;
+
+        final List<Client> clients = this.doSearch(searchReq);
+
         return Response.ok(getClients(clients)).build();
     }
 
@@ -86,7 +92,7 @@ public class ClientsResource extends BaseResource {
     @POST
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS })
     public Response createOpenIdConnect(@Valid Client client) throws NoSuchAlgorithmException, EncryptionException {
-        log.debug("Client details to be added - client:{}",client);
+        log.debug("Client details to be added - client:{}", client);
         String inum = client.getClientId();
         if (inum == null || inum.isEmpty() || inum.isBlank()) {
             inum = clientService.generateInumForNewClient();
@@ -112,7 +118,7 @@ public class ClientsResource extends BaseResource {
     @PUT
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS })
     public Response updateClient(@Valid Client client) throws EncryptionException {
-        log.debug("Client details to be updated - client:{}",client);
+        log.debug("Client details to be updated - client:{}", client);
         String inum = client.getClientId();
         checkNotNull(inum, AttributeNames.INUM);
         checkNotNull(client.getClientName(), AttributeNames.DISPLAY_NAME);
@@ -173,27 +179,21 @@ public class ClientsResource extends BaseResource {
                 .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append).toString();
 
     }
-    
-    private Response doSearch(String filter, Integer startIndex, Integer count, String sortBy,
-            String sortOrder) {
-         log.debug("Client search params:: - filter:{}, startIndex:{}, count:{}, sortBy:{}, sortOrder:{} ", filter, startIndex, count, sortBy, sortOrder);
-         Response response;
-                 
-             SearchRequest searchReq = new SearchRequest();
-             response = prepareSearchRequest(clientService.getDnForClient(null), filter, sortBy,
-                     sortOrder, startIndex, count, null, null, searchReq);
-             if (response != null) return response;
 
-             PagedResult<Client> pagedResult = clientService.searchClients(searchReq);
-             log.trace("PagedResult  - pagedResult:{}" ,pagedResult);
-             
-             List<Client> clients =  null;
-             if(pagedResult!=null) {
-                 log.trace("Clients fetched  - pagedResult.getEntries():{}" ,pagedResult.getEntries());
-                 clients = pagedResult.getEntries();
-             }
-             
-             log.debug("Clients fetched  - clients:{}" ,clients);
-             return Response.ok(clients).build();         
-     }
+    private List<Client> doSearch(SearchRequest searchReq) {
+        log.debug("Client search params - searchReq:{} ", searchReq);
+        Response response;
+
+        PagedResult<Client> pagedResult = clientService.searchClients(searchReq);
+        log.trace("PagedResult  - pagedResult:{}", pagedResult);
+
+        List<Client> clients = null;
+        if (pagedResult != null) {
+            log.trace("Clients fetched  - pagedResult.getEntries():{}", pagedResult.getEntries());
+            clients = pagedResult.getEntries();
+        }
+
+        log.debug("Clients fetched  - clients:{}", clients);
+        return clients;
+    }
 }
