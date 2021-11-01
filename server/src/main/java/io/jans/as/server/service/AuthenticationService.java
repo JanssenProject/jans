@@ -572,7 +572,7 @@ public class AuthenticationService {
 		if ((personCustomObjectClassList != null) && !personCustomObjectClassList.isEmpty()) {
 			// Combine object classes from LDAP and configuration in one list
 			Set<Object> customPersonCustomObjectClassList = new HashSet<Object>();
-			customPersonCustomObjectClassList.add(AttributeConstants.objectClassPerson);
+			customPersonCustomObjectClassList.add(AttributeConstants.JANS_PERSON);
 			customPersonCustomObjectClassList.addAll(personCustomObjectClassList);
 			if (user.getCustomObjectClasses() != null) { 
 				customPersonCustomObjectClassList.addAll(Arrays.asList(user.getCustomObjectClasses()));
