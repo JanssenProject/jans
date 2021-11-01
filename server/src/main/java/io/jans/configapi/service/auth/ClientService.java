@@ -93,22 +93,23 @@ public class ClientService implements Serializable {
     public List<Client> getAllClients() {
         return persistenceEntryManager.findEntries(getDnForClient(null), Client.class, null);
     }
-    
+
     public PagedResult<Client> searchClients(SearchRequest searchRequest) {
         Filter searchFilter = null;
         if (StringUtils.isNotEmpty(searchRequest.getFilter())) {
-        String[] targetArray = new String[] { searchRequest.getFilter() };
-        Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.displayName, null, targetArray,
-                null);
-        Filter descriptionFilter = Filter.createSubstringFilter(AttributeConstants.description, null, targetArray,
-                null);
-        Filter inumFilter = Filter.createSubstringFilter(AttributeConstants.inum, null, targetArray, null);
-        searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter, inumFilter);
+            String[] targetArray = new String[] { searchRequest.getFilter() };
+            Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.displayName, null, targetArray,
+                    null);
+            Filter descriptionFilter = Filter.createSubstringFilter(AttributeConstants.description, null, targetArray,
+                    null);
+            Filter inumFilter = Filter.createSubstringFilter(AttributeConstants.inum, null, targetArray, null);
+            searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter, inumFilter);
         }
-        
-        PagedResult<Client> list = persistenceEntryManager.findPagedEntries(getDnForClient(null), Client.class, searchFilter, null, searchRequest.getSortBy(),
-                SortOrder.getByValue(searchRequest.getSortOrder()), searchRequest.getStartIndex() - 1, searchRequest.getCount(), searchRequest.getMaxCount());
-        
+
+        PagedResult<Client> list = persistenceEntryManager.findPagedEntries(getDnForClient(null), Client.class,
+                searchFilter, null, searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
+                searchRequest.getStartIndex() - 1, searchRequest.getCount(), searchRequest.getMaxCount());
+
         return list;
     }
 
