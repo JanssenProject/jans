@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.AnnotationIntrospector;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
 import io.jans.as.model.common.HasParamName;
 import io.jans.orm.annotation.AttributeEnum;
@@ -22,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
@@ -64,7 +66,7 @@ public class Util {
     }
 
     public static ObjectMapper createJsonMapper() {
-        final AnnotationIntrospector jaxb = new JaxbAnnotationIntrospector();
+        final AnnotationIntrospector jaxb = new JaxbAnnotationIntrospector(TypeFactory.defaultInstance());
         final AnnotationIntrospector jackson = new JacksonAnnotationIntrospector();
 
         final AnnotationIntrospector pair = AnnotationIntrospector.pair(jackson, jaxb);
@@ -332,5 +334,18 @@ public class Util {
             return false;
         }
         return requestUri.startsWith(PAR_ID_REFIX) || requestUri.startsWith(PAR_ID_SHORT_REFIX);
+    }
+
+    public static Map<String, Serializable> toSerializableMap(Map<String, Object> map) {
+        Map<String, Serializable> result = new HashMap<>();
+        if (map == null || map.isEmpty()) {
+            return result;
+        }
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            if (entry.getValue() instanceof Serializable) {
+                result.put(entry.getKey(), (Serializable) entry.getValue());
+            }
+        }
+        return result;
     }
 }
