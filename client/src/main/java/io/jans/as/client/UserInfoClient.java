@@ -6,6 +6,7 @@
 
 package io.jans.as.client;
 
+import io.jans.as.client.util.ClientUtil;
 import io.jans.as.model.common.AuthorizationMethod;
 import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.jwe.Jwe;
@@ -13,7 +14,6 @@ import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.util.JwtUtil;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -21,7 +21,6 @@ import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.MediaType;
 import java.nio.charset.StandardCharsets;
 import java.security.PrivateKey;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -54,7 +53,7 @@ public class UserInfoClient extends BaseClient<UserInfoRequest, UserInfoResponse
                 || request.getAuthorizationMethod() == AuthorizationMethod.AUTHORIZATION_REQUEST_HEADER_FIELD
                 || request.getAuthorizationMethod() == AuthorizationMethod.URL_QUERY_PARAMETER) {
             return HttpMethod.GET;
-        } else /*if (request.getAuthorizationMethod() == AuthorizationMethod.FORM_ENCODED_BODY_PARAMETER)*/ {
+        } else {
             return HttpMethod.POST;
         }
     }
@@ -91,10 +90,8 @@ public class UserInfoClient extends BaseClient<UserInfoRequest, UserInfoResponse
             if (StringUtils.isNotBlank(getRequest().getAccessToken())) {
                 clientRequest.formParameter("access_token", getRequest().getAccessToken());
             }
-        } else if (getRequest().getAuthorizationMethod() == AuthorizationMethod.URL_QUERY_PARAMETER) {
-            if (StringUtils.isNotBlank(getRequest().getAccessToken())) {
-                clientRequest.queryParameter("access_token", getRequest().getAccessToken());
-            }
+        } else if (getRequest().getAuthorizationMethod() == AuthorizationMethod.URL_QUERY_PARAMETER && StringUtils.isNotBlank(getRequest().getAccessToken())) {
+            clientRequest.queryParameter("access_token", getRequest().getAccessToken());
         }
 
         // Call REST Service and handle response
@@ -112,60 +109,7 @@ public class UserInfoClient extends BaseClient<UserInfoRequest, UserInfoResponse
             String entity = clientResponse.getEntity(String.class);
             getResponse().setEntity(entity);
             getResponse().setHeaders(clientResponse.getMetadata());
-            if (StringUtils.isNotBlank(entity)) {
-                List<Object> contentType = clientResponse.getHeaders().get("Content-Type");
-                if (contentType != null && contentType.contains("application/jwt")) {
-                    String[] jwtParts = entity.split("\\.");
-                    if (jwtParts.length == 5) {
-                        byte[] sharedSymmetricKey = sharedKey != null ? sharedKey.getBytes(StandardCharsets.UTF_8) : null;
-                        Jwe jwe = Jwe.parse(entity, privateKey, sharedSymmetricKey);
-                        getResponse().getClaimMap().putAll(jwe.getClaims().toMap());
-                    } else {
-                        Jwt jwt = Jwt.parse(entity);
-
-                        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
-                        boolean signatureVerified = cryptoProvider.verifySignature(
-                                jwt.getSigningInput(),
-                                jwt.getEncodedSignature(),
-                                jwt.getHeader().getKeyId(),
-                                JwtUtil.getJSONWebKeys(jwksUri),
-                                sharedKey,
-                                jwt.getHeader().getSignatureAlgorithm());
-
-                        if (signatureVerified) {
-                            getResponse().getClaimMap().putAll(jwt.getClaims().toMap());
-                        }
-                    }
-                } else {
-                    try {
-                        JSONObject jsonObj = new JSONObject(entity);
-
-                        for (Iterator<String> iterator = jsonObj.keys(); iterator.hasNext(); ) {
-                            String key = iterator.next();
-                            List<String> values = new ArrayList<String>();
-
-                            JSONArray jsonArray = jsonObj.optJSONArray(key);
-                            if (jsonArray != null) {
-                                for (int i = 0; i < jsonArray.length(); i++) {
-                                    String value = jsonArray.optString(i);
-                                    if (value != null) {
-                                        values.add(value);
-                                    }
-                                }
-                            } else {
-                                String value = jsonObj.optString(key);
-                                if (value != null) {
-                                    values.add(value);
-                                }
-                            }
-
-                            getResponse().getClaimMap().put(key, values);
-                        }
-                    } catch (JSONException e) {
-                        LOG.error(e.getMessage(), e);
-                    }
-                }
-            }
+            parseEntity(entity);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         } finally {
@@ -173,6 +117,59 @@ public class UserInfoClient extends BaseClient<UserInfoRequest, UserInfoResponse
         }
 
         return getResponse();
+    }
+
+    private void parseEntity(String entity) throws Exception {
+        if (StringUtils.isBlank(entity)) {
+            return;
+        }
+
+        List<Object> contentType = clientResponse.getHeaders().get("Content-Type");
+        if (contentType != null && contentType.contains("application/jwt")) {
+            String[] jwtParts = entity.split("\\.");
+            if (jwtParts.length == 5) {
+                byte[] sharedSymmetricKey = sharedKey != null ? sharedKey.getBytes(StandardCharsets.UTF_8) : null;
+                Jwe jwe = Jwe.parse(entity, privateKey, sharedSymmetricKey);
+                getResponse().getClaimMap().putAll(jwe.getClaims().toMap());
+            } else {
+                parseJwt(entity);
+            }
+        } else {
+            parseJson(entity);
+        }
+    }
+
+    private void parseJwt(String entity) throws Exception {
+        Jwt jwt = Jwt.parseSilently(entity);
+        if (jwt == null) {
+            return;
+        }
+
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
+        boolean signatureVerified = cryptoProvider.verifySignature(
+                jwt.getSigningInput(),
+                jwt.getEncodedSignature(),
+                jwt.getHeader().getKeyId(),
+                JwtUtil.getJSONWebKeys(jwksUri),
+                sharedKey,
+                jwt.getHeader().getSignatureAlgorithm());
+
+        if (signatureVerified) {
+            getResponse().getClaimMap().putAll(jwt.getClaims().toMap());
+        }
+    }
+
+    private void parseJson(String entity) {
+        try {
+            JSONObject jsonObj = new JSONObject(entity);
+
+            for (Iterator<String> iterator = jsonObj.keys(); iterator.hasNext(); ) {
+                String key = iterator.next();
+                getResponse().getClaimMap().put(key, ClientUtil.extractListByKeyOptString(jsonObj, key));
+            }
+        } catch (JSONException e) {
+            LOG.error(e.getMessage(), e);
+        }
     }
 
     public void setSharedKey(String sharedKey) {

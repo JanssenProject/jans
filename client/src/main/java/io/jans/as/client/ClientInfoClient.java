@@ -6,20 +6,18 @@
 
 package io.jans.as.client;
 
+import io.jans.as.client.util.ClientUtil;
 import io.jans.as.model.common.AuthorizationMethod;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.ClientRequest;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.MediaType;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 /**
  * Encapsulates functionality to make client info request calls to an authorization server via REST Services.
@@ -65,14 +63,14 @@ public class ClientInfoClient extends BaseClient<ClientInfoRequest, ClientInfoRe
 
     public ClientInfoResponse exec() {
         initClientRequest();
-        return _exec();
+        return execInternal();
     }
 
 
     @Deprecated
     public ClientInfoResponse exec(ClientExecutor executor) {
         clientRequest = new ClientRequest(getUrl(), executor);
-        return _exec();
+        return execInternal();
     }
 
 
@@ -81,7 +79,7 @@ public class ClientInfoClient extends BaseClient<ClientInfoRequest, ClientInfoRe
      *
      * @return The service response.
      */
-    private ClientInfoResponse _exec() {
+    private ClientInfoResponse execInternal() {
         // Prepare request parameters
         clientRequest.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
         clientRequest.setHttpMethod(getHttpMethod());
@@ -95,10 +93,8 @@ public class ClientInfoClient extends BaseClient<ClientInfoRequest, ClientInfoRe
             if (StringUtils.isNotBlank(getRequest().getAccessToken())) {
                 clientRequest.formParameter("access_token", getRequest().getAccessToken());
             }
-        } else if (getRequest().getAuthorizationMethod() == AuthorizationMethod.URL_QUERY_PARAMETER) {
-            if (StringUtils.isNotBlank(getRequest().getAccessToken())) {
-                clientRequest.queryParameter("access_token", getRequest().getAccessToken());
-            }
+        } else if (getRequest().getAuthorizationMethod() == AuthorizationMethod.URL_QUERY_PARAMETER && StringUtils.isNotBlank(getRequest().getAccessToken())) {
+            clientRequest.queryParameter("access_token", getRequest().getAccessToken());
         }
 
         // Call REST Service and handle response
@@ -116,35 +112,7 @@ public class ClientInfoClient extends BaseClient<ClientInfoRequest, ClientInfoRe
             String entity = clientResponse.getEntity(String.class);
             getResponse().setEntity(entity);
             getResponse().setHeaders(clientResponse.getMetadata());
-            if (StringUtils.isNotBlank(entity)) {
-                try {
-                    JSONObject jsonObj = new JSONObject(entity);
-
-                    for (Iterator<String> iterator = jsonObj.keys(); iterator.hasNext(); ) {
-                        String key = iterator.next();
-                        List<String> values = new ArrayList<String>();
-
-                        JSONArray jsonArray = jsonObj.optJSONArray(key);
-                        if (jsonArray != null) {
-                            for (int i = 0; i < jsonArray.length(); i++) {
-                                String value = jsonArray.optString(i);
-                                if (value != null) {
-                                    values.add(value);
-                                }
-                            }
-                        } else {
-                            String value = jsonObj.optString(key);
-                            if (value != null) {
-                                values.add(value);
-                            }
-                        }
-
-                        getResponse().getClaimMap().put(key, values);
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
+            parseEntity(entity);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         } finally {
@@ -152,5 +120,22 @@ public class ClientInfoClient extends BaseClient<ClientInfoRequest, ClientInfoRe
         }
 
         return getResponse();
+    }
+
+    private void parseEntity(String entity) {
+        if (StringUtils.isBlank(entity)) {
+            return;
+        }
+
+        try {
+            JSONObject jsonObj = new JSONObject(entity);
+
+            for (Iterator<String> iterator = jsonObj.keys(); iterator.hasNext(); ) {
+                String key = iterator.next();
+                getResponse().getClaimMap().put(key, ClientUtil.extractListByKeyOptString(jsonObj, key));
+            }
+        } catch (JSONException e) {
+            LOG.error(e.getMessage(), e);
+        }
     }
 }

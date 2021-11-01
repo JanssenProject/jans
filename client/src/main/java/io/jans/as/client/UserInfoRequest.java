@@ -59,13 +59,10 @@ public class UserInfoRequest extends BaseRequest {
     public String getQueryString() {
         StringBuilder queryStringBuilder = new StringBuilder();
 
-        if (StringUtils.isNotBlank(accessToken)) {
-            switch (getAuthorizationMethod()) {
-                case FORM_ENCODED_BODY_PARAMETER:
-                case URL_QUERY_PARAMETER:
-                    queryStringBuilder.append("access_token=").append(accessToken);
-                    break;
-            }
+        boolean isMethodOk = getAuthorizationMethod() == AuthorizationMethod.FORM_ENCODED_BODY_PARAMETER ||
+                getAuthorizationMethod() == AuthorizationMethod.URL_QUERY_PARAMETER;
+        if (StringUtils.isNotBlank(accessToken) && isMethodOk) {
+            queryStringBuilder.append("access_token=").append(accessToken);
         }
 
         return queryStringBuilder.toString();
@@ -77,16 +74,16 @@ public class UserInfoRequest extends BaseRequest {
      *
      * @return A collection of parameters.
      */
+    @Override
     public Map<String, String> getParameters() {
         Map<String, String> parameters = new HashMap<>();
+        if (StringUtils.isBlank(accessToken)) {
+            return parameters;
+        }
 
-        if (accessToken != null && !accessToken.isEmpty()) {
-            switch (getAuthorizationMethod()) {
-                case FORM_ENCODED_BODY_PARAMETER:
-                case URL_QUERY_PARAMETER:
-                    parameters.put("access_token", accessToken);
-                    break;
-            }
+        if (getAuthorizationMethod() == AuthorizationMethod.FORM_ENCODED_BODY_PARAMETER ||
+                getAuthorizationMethod() == AuthorizationMethod.URL_QUERY_PARAMETER) {
+            parameters.put("access_token", accessToken);
         }
 
         return parameters;
