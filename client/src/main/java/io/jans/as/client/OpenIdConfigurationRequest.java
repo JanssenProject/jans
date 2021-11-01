@@ -13,12 +13,6 @@ package io.jans.as.client;
  */
 public class OpenIdConfigurationRequest extends BaseRequest{
 
-    /**
-     * Construct an OpenID Configuration Request.
-     */
-    public OpenIdConfigurationRequest() {
-    }
-
     @Override
     public String getQueryString() {
         return null;

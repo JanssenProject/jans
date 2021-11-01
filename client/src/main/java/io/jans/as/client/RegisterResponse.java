@@ -65,70 +65,73 @@ public class RegisterResponse extends BaseResponseWithErrors<RegisterErrorRespon
     }
 
     @Override
-    public RegisterErrorResponseType fromString(String p_string) {
-        return RegisterErrorResponseType.fromString(p_string);
+    public RegisterErrorResponseType fromString(String string) {
+        return RegisterErrorResponseType.fromString(string);
     }
 
     public void injectDataFromJson() {
         injectDataFromJson(getEntity());
     }
 
-    public static RegisterResponse valueOf(String p_json) {
+    public static RegisterResponse valueOf(String json) {
         final RegisterResponse r = new RegisterResponse();
-        r.injectDataFromJson(p_json);
+        r.injectDataFromJson(json);
         return r;
     }
 
+    @Override
     public void injectDataFromJson(String json) {
-        if (StringUtils.isNotBlank(json)) {
-            try {
-                JSONObject jsonObj = new JSONObject(json);
-                if (jsonObj.has(RegisterResponseParam.CLIENT_ID.toString())) {
-                    setClientId(jsonObj.getString(RegisterResponseParam.CLIENT_ID.toString()));
-                    jsonObj.remove(RegisterResponseParam.CLIENT_ID.toString());
-                }
-                if (jsonObj.has(CLIENT_SECRET.toString())) {
-                    setClientSecret(jsonObj.getString(CLIENT_SECRET.toString()));
-                    jsonObj.remove(CLIENT_SECRET.toString());
-                }
-                if (jsonObj.has(RegisterResponseParam.REGISTRATION_ACCESS_TOKEN.toString())) {
-                    setRegistrationAccessToken(jsonObj.getString(RegisterResponseParam.REGISTRATION_ACCESS_TOKEN.toString()));
-                    jsonObj.remove(RegisterResponseParam.REGISTRATION_ACCESS_TOKEN.toString());
-                }
-                if (jsonObj.has(REGISTRATION_CLIENT_URI.toString())) {
-                    setRegistrationClientUri(jsonObj.getString(REGISTRATION_CLIENT_URI.toString()));
-                    jsonObj.remove(REGISTRATION_CLIENT_URI.toString());
-                }
-                if (jsonObj.has(CLIENT_ID_ISSUED_AT.toString())) {
-                    long clientIdIssuedAt = jsonObj.getLong(CLIENT_ID_ISSUED_AT.toString());
-                    if (clientIdIssuedAt > 0) {
-                        setClientIdIssuedAt(new Date(clientIdIssuedAt * 1000L));
-                    }
-                    jsonObj.remove(CLIENT_ID_ISSUED_AT.toString());
-                }
-                if (jsonObj.has(CLIENT_SECRET_EXPIRES_AT.toString())) {
-                    long clientSecretExpiresAt = jsonObj.getLong(CLIENT_SECRET_EXPIRES_AT.toString());
-                    if (clientSecretExpiresAt > 0) {
-                        setClientSecretExpiresAt(new Date(clientSecretExpiresAt * 1000L));
-                    }
-                    jsonObj.remove(CLIENT_SECRET_EXPIRES_AT.toString());
-                }
-                if (jsonObj.has(RESPONSE_TYPES.toString())) {
-                    JSONArray responseTypesJsonArray = jsonObj.getJSONArray(RESPONSE_TYPES.toString());
-                    responseTypes = Util.asEnumList(responseTypesJsonArray, ResponseType.class);
-                }
-                if (jsonObj.has(GRANT_TYPES.toString())) {
-                    JSONArray grantTypesJsonArray = jsonObj.getJSONArray(GRANT_TYPES.toString());
-                    grantTypes = Util.asEnumList(grantTypesJsonArray, GrantType.class);
-                }
+        if (StringUtils.isBlank(json)) {
+            return;
+        }
 
-                for (Iterator<String> it = jsonObj.keys(); it.hasNext(); ) {
-                    String key = it.next();
-                    getClaimMap().put(key, Lists.newArrayList(String.valueOf(jsonObj.get(key))));
-                }
-            } catch (Exception e) {
-                LOG.error(e.getMessage(), e);
+        try {
+            JSONObject jsonObj = new JSONObject(json);
+            if (jsonObj.has(RegisterResponseParam.CLIENT_ID.toString())) {
+                setClientId(jsonObj.getString(RegisterResponseParam.CLIENT_ID.toString()));
+                jsonObj.remove(RegisterResponseParam.CLIENT_ID.toString());
             }
+            if (jsonObj.has(CLIENT_SECRET.toString())) {
+                setClientSecret(jsonObj.getString(CLIENT_SECRET.toString()));
+                jsonObj.remove(CLIENT_SECRET.toString());
+            }
+            if (jsonObj.has(RegisterResponseParam.REGISTRATION_ACCESS_TOKEN.toString())) {
+                setRegistrationAccessToken(jsonObj.getString(RegisterResponseParam.REGISTRATION_ACCESS_TOKEN.toString()));
+                jsonObj.remove(RegisterResponseParam.REGISTRATION_ACCESS_TOKEN.toString());
+            }
+            if (jsonObj.has(REGISTRATION_CLIENT_URI.toString())) {
+                setRegistrationClientUri(jsonObj.getString(REGISTRATION_CLIENT_URI.toString()));
+                jsonObj.remove(REGISTRATION_CLIENT_URI.toString());
+            }
+            if (jsonObj.has(CLIENT_ID_ISSUED_AT.toString())) {
+                long clientIdIssAt = jsonObj.getLong(CLIENT_ID_ISSUED_AT.toString());
+                if (clientIdIssAt > 0) {
+                    setClientIdIssuedAt(new Date(clientIdIssAt * 1000L));
+                }
+                jsonObj.remove(CLIENT_ID_ISSUED_AT.toString());
+            }
+            if (jsonObj.has(CLIENT_SECRET_EXPIRES_AT.toString())) {
+                long clientSecretExpAt = jsonObj.getLong(CLIENT_SECRET_EXPIRES_AT.toString());
+                if (clientSecretExpAt > 0) {
+                    setClientSecretExpiresAt(new Date(clientSecretExpAt * 1000L));
+                }
+                jsonObj.remove(CLIENT_SECRET_EXPIRES_AT.toString());
+            }
+            if (jsonObj.has(RESPONSE_TYPES.toString())) {
+                JSONArray responseTypesJsonArray = jsonObj.getJSONArray(RESPONSE_TYPES.toString());
+                responseTypes = Util.asEnumList(responseTypesJsonArray, ResponseType.class);
+            }
+            if (jsonObj.has(GRANT_TYPES.toString())) {
+                JSONArray grantTypesJsonArray = jsonObj.getJSONArray(GRANT_TYPES.toString());
+                grantTypes = Util.asEnumList(grantTypesJsonArray, GrantType.class);
+            }
+
+            for (Iterator<String> it = jsonObj.keys(); it.hasNext(); ) {
+                String key = it.next();
+                getClaimMap().put(key, Lists.newArrayList(String.valueOf(jsonObj.get(key))));
+            }
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
         }
     }
 
