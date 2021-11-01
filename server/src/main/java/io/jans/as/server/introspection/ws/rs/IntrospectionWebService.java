@@ -277,12 +277,12 @@ public class IntrospectionWebService {
             return new Pair<>(grant, false);
         }
         if (tokenService.isBasicAuthToken(authorization)) {
-            return isBasicTokenValid(authorization, grant, accessToken);
+            return isBasicTokenValid(authorization, accessToken);
         }
         return EMPTY;
     }
 
-    private Pair<AuthorizationGrant, Boolean> isBasicTokenValid(String authorization, AuthorizationGrant grant, String accessToken) throws UnsupportedEncodingException {
+    private Pair<AuthorizationGrant, Boolean> isBasicTokenValid(String authorization, String accessToken) throws UnsupportedEncodingException {
         String encodedCredentials = tokenService.getBasicToken(authorization);
 
         String token = new String(Base64.decodeBase64(encodedCredentials), StandardCharsets.UTF_8);
@@ -296,7 +296,7 @@ public class IntrospectionWebService {
         String clientId = URLDecoder.decode(token.substring(0, delim), Util.UTF8_STRING_ENCODING);
         String password = URLDecoder.decode(token.substring(delim + 1), Util.UTF8_STRING_ENCODING);
         if (clientService.authenticate(clientId, password)) {
-            grant = authorizationGrantList.getAuthorizationGrantByAccessToken(accessToken);
+            AuthorizationGrant grant = authorizationGrantList.getAuthorizationGrantByAccessToken(accessToken);
             if (grant != null && !grant.getClientId().equals(clientId)) {
                 log.trace("Failed to match grant object clientId and client id provided during authentication.");
                 return EMPTY;
