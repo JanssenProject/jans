@@ -41,7 +41,7 @@ import static io.jans.as.model.util.Util.escapeLog;
  */
 public abstract class UserService {
 
-    public static final String[] USER_OBJECT_CLASSES = new String[]{AttributeConstants.objectClassPerson};
+    public static final String[] USER_OBJECT_CLASSES = new String[]{AttributeConstants.JANS_PERSON};
     @Inject
     protected PersistenceEntryManager persistenceEntryManager;
     @Inject

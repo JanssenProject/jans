@@ -10,6 +10,7 @@ import org.apache.commons.lang.StringUtils;
 
 import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.token.JsonWebResponse;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,6 +73,7 @@ public class Jwt extends JsonWebResponse {
         }
     }
 
+    @NotNull
     public static Jwt parse(String encodedJwt) throws InvalidJwtException {
         if (StringUtils.isBlank(encodedJwt)) {
             return null;
