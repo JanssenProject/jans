@@ -58,10 +58,7 @@ public class Jwt extends JsonWebResponse {
     }
 
     public static Jwt parseOrThrow(String encodedJwt) throws InvalidJwtException {
-        final Jwt jwt = parse(encodedJwt);
-        if (jwt == null)
-            throw new InvalidJwtException("Jwt is null");
-        return jwt;
+        return parse(encodedJwt);
     }
 
     public static Jwt parseSilently(String encodedJwt) {
@@ -76,7 +73,7 @@ public class Jwt extends JsonWebResponse {
     @NotNull
     public static Jwt parse(String encodedJwt) throws InvalidJwtException {
         if (StringUtils.isBlank(encodedJwt)) {
-            return null;
+            throw new InvalidJwtException("Jwt is blank.");
         }
 
         String encodedHeader = null;

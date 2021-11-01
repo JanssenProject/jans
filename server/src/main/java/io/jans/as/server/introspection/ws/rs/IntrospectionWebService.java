@@ -31,6 +31,7 @@ import io.jans.util.Pair;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.BooleanUtils;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -56,6 +57,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import static io.jans.as.model.util.Util.escapeLog;
 import static org.apache.commons.lang.BooleanUtils.isTrue;
 
 /**
@@ -146,7 +148,9 @@ public class IntrospectionWebService {
 
     private Response introspect(String authorization, String token, String tokenTypeHint, String responseAsJwt, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
         try {
-            log.trace("Introspect token, authorization: {}, token to introspect: {}, tokenTypeHint: {}", authorization, token, tokenTypeHint);
+            if (log.isTraceEnabled()) {
+                log.trace("Introspect token, authorization: {}, token to introspect: {}, tokenTypeHint: {}", escapeLog(authorization), escapeLog(token), escapeLog(tokenTypeHint));
+            }
 
             AuthorizationGrant authorizationGrant = validateAuthorization(authorization, token);
 
@@ -159,37 +163,7 @@ public class IntrospectionWebService {
 
             final AuthorizationGrant grantOfIntrospectionToken = authorizationGrantList.getAuthorizationGrantByAccessToken(token);
 
-            AbstractToken tokenToIntrospect = null;
-            if (grantOfIntrospectionToken != null) {
-                tokenToIntrospect = grantOfIntrospectionToken.getAccessToken(token);
-
-                response.setActive(tokenToIntrospect.isValid());
-                response.setExpiresAt(ServerUtil.dateToSeconds(tokenToIntrospect.getExpirationDate()));
-                response.setIssuedAt(ServerUtil.dateToSeconds(tokenToIntrospect.getCreationDate()));
-                response.setAcrValues(grantOfIntrospectionToken.getAcrValues());
-                response.setScope(grantOfIntrospectionToken.getScopes() != null ? grantOfIntrospectionToken.getScopes() : Lists.newArrayList()); // #433
-                response.setClientId(grantOfIntrospectionToken.getClientId());
-                response.setSub(grantOfIntrospectionToken.getSub());
-                response.setUsername(grantOfIntrospectionToken.getUserId());
-                response.setIssuer(appConfiguration.getIssuer());
-                response.setAudience(grantOfIntrospectionToken.getClientId());
-
-                if (tokenToIntrospect instanceof AccessToken) {
-                    AccessToken accessToken = (AccessToken) tokenToIntrospect;
-                    response.setTokenType(accessToken.getTokenType() != null ? accessToken.getTokenType().getName() : io.jans.as.model.common.TokenType.BEARER.getName());
-
-                    // DPoP
-                    if (StringUtils.isNotBlank(accessToken.getDpop())) {
-                        response.setNotBefore(accessToken.getCreationDate().getTime());
-                        HashMap<String, String> cnf = new HashMap<>();
-                        cnf.put("jkt", accessToken.getDpop());
-                        response.setCnf(cnf);
-                    }
-                }
-            } else {
-                if (log.isDebugEnabled())
-                    log.debug("Failed to find grant for access_token: {}. Return 200 with active=false.", token);
-            }
+            AbstractToken tokenToIntrospect = fillResponse(token, response, grantOfIntrospectionToken);
             JSONObject responseAsJsonObject = createResponseAsJsonObject(response, tokenToIntrospect);
 
             ExternalIntrospectionContext context = new ExternalIntrospectionContext(authorizationGrant, httpRequest, httpResponse, appConfiguration, attributeService);
@@ -221,6 +195,42 @@ public class IntrospectionWebService {
             log.error(e.getMessage(), e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_JSON_TYPE).build();
         }
+    }
+
+    @Nullable
+    private AbstractToken fillResponse(String token, IntrospectionResponse response, AuthorizationGrant grantOfIntrospectionToken) {
+        AbstractToken tokenToIntrospect = null;
+        if (grantOfIntrospectionToken != null) {
+            tokenToIntrospect = grantOfIntrospectionToken.getAccessToken(token);
+
+            response.setActive(tokenToIntrospect.isValid());
+            response.setExpiresAt(ServerUtil.dateToSeconds(tokenToIntrospect.getExpirationDate()));
+            response.setIssuedAt(ServerUtil.dateToSeconds(tokenToIntrospect.getCreationDate()));
+            response.setAcrValues(grantOfIntrospectionToken.getAcrValues());
+            response.setScope(grantOfIntrospectionToken.getScopes() != null ? grantOfIntrospectionToken.getScopes() : Lists.newArrayList()); // #433
+            response.setClientId(grantOfIntrospectionToken.getClientId());
+            response.setSub(grantOfIntrospectionToken.getSub());
+            response.setUsername(grantOfIntrospectionToken.getUserId());
+            response.setIssuer(appConfiguration.getIssuer());
+            response.setAudience(grantOfIntrospectionToken.getClientId());
+
+            if (tokenToIntrospect instanceof AccessToken) {
+                AccessToken accessToken = (AccessToken) tokenToIntrospect;
+                response.setTokenType(accessToken.getTokenType() != null ? accessToken.getTokenType().getName() : io.jans.as.model.common.TokenType.BEARER.getName());
+
+                // DPoP
+                if (StringUtils.isNotBlank(accessToken.getDpop())) {
+                    response.setNotBefore(accessToken.getCreationDate().getTime());
+                    HashMap<String, String> cnf = new HashMap<>();
+                    cnf.put("jkt", accessToken.getDpop());
+                    response.setCnf(cnf);
+                }
+            }
+        } else {
+            if (log.isDebugEnabled())
+                log.debug("Failed to find grant for access_token: {}. Return 200 with active=false.", escapeLog(token));
+        }
+        return tokenToIntrospect;
     }
 
     private String createResponseAsJwt(JSONObject response, AuthorizationGrant grant) throws Exception {
