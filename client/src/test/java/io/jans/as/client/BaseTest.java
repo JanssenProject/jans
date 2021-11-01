@@ -96,7 +96,6 @@ public abstract class BaseTest {
     protected String jwksUri;
     protected String registrationEndpoint;
     protected String configurationEndpoint;
-    protected String idGenEndpoint;
     protected String introspectionEndpoint;
     protected String deviceAuthzEndpoint;
     protected String backchannelAuthenticationEndpoint;
@@ -260,14 +259,6 @@ public abstract class BaseTest {
 
     public void setScopeToClaimsMapping(Map<String, List<String>> p_scopeToClaimsMapping) {
         scopeToClaimsMapping = p_scopeToClaimsMapping;
-    }
-
-    public String getIdGenEndpoint() {
-        return idGenEndpoint;
-    }
-
-    public void setIdGenEndpoint(String p_idGenEndpoint) {
-        idGenEndpoint = p_idGenEndpoint;
     }
 
     public String getConfigurationEndpoint() {
@@ -847,7 +838,6 @@ public abstract class BaseTest {
             endSessionEndpoint = response.getEndSessionEndpoint();
             jwksUri = response.getJwksUri();
             registrationEndpoint = response.getRegistrationEndpoint();
-            idGenEndpoint = response.getIdGenerationEndpoint();
             introspectionEndpoint = response.getIntrospectionEndpoint();
             parEndpoint = response.getParEndpoint();
             deviceAuthzEndpoint = response.getDeviceAuthzEndpoint();
@@ -869,7 +859,6 @@ public abstract class BaseTest {
             jwksUri = context.getCurrentXmlTest().getParameter("jwksUri");
             registrationEndpoint = context.getCurrentXmlTest().getParameter("registrationEndpoint");
             configurationEndpoint = context.getCurrentXmlTest().getParameter("configurationEndpoint");
-            idGenEndpoint = context.getCurrentXmlTest().getParameter("idGenEndpoint");
             introspectionEndpoint = context.getCurrentXmlTest().getParameter("introspectionEndpoint");
             parEndpoint = context.getCurrentXmlTest().getParameter("parEndpoint");
             backchannelAuthenticationEndpoint = context.getCurrentXmlTest().getParameter("backchannelAuthenticationEndpoint");
