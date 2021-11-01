@@ -91,7 +91,7 @@ public class ScopeService {
     }
 
     public List<Scope> searchScopesById(String jsId) {
-        Filter searchFilter = Filter.createEqualityFilter(AttributeConstants.jsId, jsId);
+        Filter searchFilter = Filter.createEqualityFilter(AttributeConstants.JANS_ID, jsId);
         try {
             return persistenceEntryManager.findEntries(getDnForScope(null), Scope.class, searchFilter);
         } catch (Exception e) {
@@ -102,9 +102,9 @@ public class ScopeService {
 
     public List<Scope> searchScopes(String pattern, int sizeLimit, String scopeType) {
         String[] targetArray = new String[] { pattern };
-        Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.displayName, null, targetArray,
+        Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.DISPLAY_NAME, null, targetArray,
                 null);
-        Filter descriptionFilter = Filter.createSubstringFilter(AttributeConstants.description, null, targetArray,
+        Filter descriptionFilter = Filter.createSubstringFilter(AttributeConstants.DESCRIPTION, null, targetArray,
                 null);
         Filter searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter);
         if (StringHelper.isNotEmpty(scopeType)) {

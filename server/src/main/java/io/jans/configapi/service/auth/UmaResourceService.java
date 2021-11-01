@@ -13,12 +13,11 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.base.SimpleBranch;
 import io.jans.orm.search.filter.Filter;
 import io.jans.util.StringHelper;
+import org.apache.commons.lang.StringUtils;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.util.List;
-
-import org.apache.commons.lang.StringUtils;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -43,7 +42,7 @@ public class UmaResourceService {
     public List<UmaResource> findResources(String pattern, int sizeLimit) {
         String[] targetArray = new String[] { pattern };
         Filter jsIdFilter = Filter.createSubstringFilter("jansId", null, targetArray, null);
-        Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.displayName, null, targetArray,
+        Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.DISPLAY_NAME, null, targetArray,
                 null);
         Filter searchFilter = Filter.createORFilter(jsIdFilter, displayNameFilter);
         return persistenceEntryManager.findEntries(getDnForResource(null), UmaResource.class, searchFilter, sizeLimit);
@@ -51,7 +50,7 @@ public class UmaResourceService {
 
     public List<UmaResource> findResourcesByName(String name, int sizeLimit) {
         if (StringUtils.isNotBlank(name)) {
-            Filter searchFilter = Filter.createEqualityFilter(AttributeConstants.displayName, name);
+            Filter searchFilter = Filter.createEqualityFilter(AttributeConstants.DISPLAY_NAME, name);
             return persistenceEntryManager.findEntries(getDnForResource(null), UmaResource.class, searchFilter,
                     sizeLimit);
         }
