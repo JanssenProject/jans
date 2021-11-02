@@ -77,11 +77,11 @@ public class ClientService implements Serializable {
 
     public List<Client> searchClients(String pattern, int sizeLimit) {
         String[] targetArray = new String[] { pattern };
-        Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.displayName, null, targetArray,
+        Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.DISPLAY_NAME, null, targetArray,
                 null);
-        Filter descriptionFilter = Filter.createSubstringFilter(AttributeConstants.description, null, targetArray,
+        Filter descriptionFilter = Filter.createSubstringFilter(AttributeConstants.DESCRIPTION, null, targetArray,
                 null);
-        Filter inumFilter = Filter.createSubstringFilter(AttributeConstants.inum, null, targetArray, null);
+        Filter inumFilter = Filter.createSubstringFilter(AttributeConstants.INUM, null, targetArray, null);
         Filter searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter, inumFilter);
         return persistenceEntryManager.findEntries(getDnForClient(null), Client.class, searchFilter, sizeLimit);
     }
