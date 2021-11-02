@@ -6,14 +6,17 @@
 
 package io.jans.as.server.service.external;
 
+import com.google.common.collect.Lists;
 import io.jans.as.model.token.JsonWebResponse;
 import io.jans.as.server.service.external.context.ExternalUpdateTokenContext;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.custom.script.type.token.UpdateTokenType;
 import io.jans.service.custom.script.ExternalScriptService;
+import org.jetbrains.annotations.NotNull;
 
 import javax.enterprise.context.ApplicationScoped;
+import java.util.List;
 import java.util.function.Function;
 
 /**
@@ -22,7 +25,7 @@ import java.util.function.Function;
 @ApplicationScoped
 public class ExternalUpdateTokenService extends ExternalScriptService {
 
-	private static final long serialVersionUID = -1033475075863270249L;
+    private static final long serialVersionUID = -1033475075863270259L;
 
     public ExternalUpdateTokenService() {
         super(CustomScriptType.UPDATE_TOKEN);
@@ -47,12 +50,13 @@ public class ExternalUpdateTokenService extends ExternalScriptService {
     }
 
     public boolean modifyIdTokenMethods(JsonWebResponse jsonWebResponse, ExternalUpdateTokenContext context) {
-        if (this.customScriptConfigurations.isEmpty()) {
+        List<CustomScriptConfiguration> scripts = getScripts(context);
+        if (scripts.isEmpty()) {
             return false;
         }
-        log.trace("Executing {} update-token scripts.", this.customScriptConfigurations.size());
+        log.trace("Executing {} update-token scripts.", scripts.size());
 
-        for (CustomScriptConfiguration script : this.customScriptConfigurations) {
+        for (CustomScriptConfiguration script : scripts) {
             if (!modifyIdTokenMethod(script, jsonWebResponse, context)) {
                 return false;
             }
@@ -60,14 +64,14 @@ public class ExternalUpdateTokenService extends ExternalScriptService {
 
         return true;
     }
-    
-	public Function<JsonWebResponse, Void> buildModifyIdTokenProcessor(final ExternalUpdateTokenContext context) {
-		return jsonWebResponse -> {
+
+    public Function<JsonWebResponse, Void> buildModifyIdTokenProcessor(final ExternalUpdateTokenContext context) {
+        return jsonWebResponse -> {
             modifyIdTokenMethods(jsonWebResponse, context);
 
             return null;
         };
-	}
+    }
 
     public int getRefreshTokenLifetimeInSeconds(CustomScriptConfiguration script, ExternalUpdateTokenContext context) {
         try {
@@ -87,12 +91,13 @@ public class ExternalUpdateTokenService extends ExternalScriptService {
     }
 
     public int getRefreshTokenLifetimeInSeconds(ExternalUpdateTokenContext context) {
-        if (this.customScriptConfigurations.isEmpty()) {
+        List<CustomScriptConfiguration> scripts = getScripts(context);
+        if (scripts.isEmpty()) {
             return 0;
         }
-        log.trace("Executing {} 'getRefreshTokenLifetimeInSeconds' scripts.", this.customScriptConfigurations.size());
+        log.trace("Executing {} 'getRefreshTokenLifetimeInSeconds' scripts.", scripts.size());
 
-        for (CustomScriptConfiguration script : this.customScriptConfigurations) {
+        for (CustomScriptConfiguration script : scripts) {
             final int lifetime = getRefreshTokenLifetimeInSeconds(script, context);
             if (lifetime > 0) {
                 log.trace("Finished 'getRefreshTokenLifetimeInSeconds' methods, lifetime: {}", lifetime);
@@ -102,4 +107,18 @@ public class ExternalUpdateTokenService extends ExternalScriptService {
         return 0;
     }
 
+    @NotNull
+    private List<CustomScriptConfiguration> getScripts(@NotNull ExternalUpdateTokenContext context) {
+        if (customScriptConfigurations == null || customScriptConfigurations.isEmpty() || context.getClient() == null) {
+            return Lists.newArrayList();
+        }
+
+        final List<CustomScriptConfiguration> scripts = getCustomScriptConfigurationsByDns(context.getClient().getAttributes().getUpdateTokenScriptDns());
+        if (!scripts.isEmpty()) {
+            return scripts;
+        }
+
+        log.trace("No UpdateToken scripts associated with client {}", context.getClient().getClientId());
+        return Lists.newArrayList();
+    }
 }
