@@ -83,7 +83,7 @@ public class BaseResource {
 
     protected Response prepareSearchRequest(String schemas, String filter, String sortBy, String sortOrder, Integer startIndex, Integer count,
             String attrsList, String excludedAttrsList, SearchRequest request) {
-            log.("Search Request params:: - schemas:{}, filter:{}, sortBy:{}, sortOrder:{}, startIndex:{}, count:{}, attrsList:{}, excludedAttrsList:{}, request:{} ", schemas, filter, sortBy, sortOrder, startIndex, count, attrsList, excludedAttrsList, request);
+            log.debug("Search Request params:: - schemas:{}, filter:{}, sortBy:{}, sortOrder:{}, startIndex:{}, count:{}, attrsList:{}, excludedAttrsList:{}, request:{} ", schemas, filter, sortBy, sortOrder, startIndex, count, attrsList, excludedAttrsList, request);
 
             Response response = null;
 
