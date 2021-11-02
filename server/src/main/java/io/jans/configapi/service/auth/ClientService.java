@@ -76,6 +76,7 @@ public class ClientService implements Serializable {
     }
 
     public List<Client> searchClients(String pattern, int sizeLimit) {
+        logger.error("Search Clients with pattern:{}, sizeLimit:{}", pattern,sizeLimit);
         String[] targetArray = new String[] { pattern };
         Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.DISPLAY_NAME, null, targetArray,
                 null);
@@ -83,6 +84,8 @@ public class ClientService implements Serializable {
                 null);
         Filter inumFilter = Filter.createSubstringFilter(AttributeConstants.INUM, null, targetArray, null);
         Filter searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter, inumFilter);
+        
+        logger.error("Search Clients with searchFilter:{}", searchFilter);
         return persistenceEntryManager.findEntries(getDnForClient(null), Client.class, searchFilter, sizeLimit);
     }
 
@@ -95,22 +98,23 @@ public class ClientService implements Serializable {
     }
 
     public PagedResult<Client> searchClients(SearchRequest searchRequest) {
+        logger.error("Search Clients with searchRequest:{}", searchRequest);
         Filter searchFilter = null;
         if (StringUtils.isNotEmpty(searchRequest.getFilter())) {
             String[] targetArray = new String[] { searchRequest.getFilter() };
-            Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.displayName, null, targetArray,
+            Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.DISPLAY_NAME, null, targetArray,
                     null);
-            Filter descriptionFilter = Filter.createSubstringFilter(AttributeConstants.description, null, targetArray,
+            Filter descriptionFilter = Filter.createSubstringFilter(AttributeConstants.DESCRIPTION, null, targetArray,
                     null);
-            Filter inumFilter = Filter.createSubstringFilter(AttributeConstants.inum, null, targetArray, null);
+            Filter inumFilter = Filter.createSubstringFilter(AttributeConstants.INUM, null, targetArray, null);
             searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter, inumFilter);
         }
-
-        PagedResult<Client> list = persistenceEntryManager.findPagedEntries(getDnForClient(null), Client.class,
+        logger.error("Search Clients with searchFilter:{}", searchFilter);
+        PagedResult<Client> pagedResult = persistenceEntryManager.findPagedEntries(getDnForClient(null), Client.class,
                 searchFilter, null, searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
                 searchRequest.getStartIndex() - 1, searchRequest.getCount(), searchRequest.getMaxCount());
-
-        return list;
+        logger.error("Search Clients pagedResult:{}", pagedResult);
+        return pagedResult;
     }
 
     public Client getClientByDn(String Dn) {
