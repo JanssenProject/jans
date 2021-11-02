@@ -20,22 +20,23 @@ import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
+
 /**
  * @author Mougang T.Gasmyr
  *
  */
 public class BaseResource {
-    
+
     @Inject
     Logger log;
 
     @Inject
-    ConfigurationFactory configurationFactory;    
+    ConfigurationFactory configurationFactory;
 
     protected static final String READ_ACCESS = "config-api-read";
     protected static final String WRITE_ACCESS = "config-api-write";
-    protected static final String DEFAULT_LIST_SIZE =  ApiConstants.DEFAULT_LIST_SIZE;
-    //Pagination
+    protected static final String DEFAULT_LIST_SIZE = ApiConstants.DEFAULT_LIST_SIZE;
+    // Pagination
     protected static final String DEFAULT_LIST_START_INDEX = ApiConstants.DEFAULT_LIST_START_INDEX;
     protected static final int DEFAULT_MAX_COUNT = ApiConstants.DEFAULT_MAX_COUNT;
 
@@ -82,13 +83,13 @@ public class BaseResource {
 
     protected Response prepareSearchRequest(String schemas, String filter, String sortBy, String sortOrder, Integer startIndex, Integer count,
             String attrsList, String excludedAttrsList, SearchRequest request) {
-            log.error("Search Request params:: - schemas:{}, filter:{}, sortBy:{}, sortOrder:{}, startIndex:{}, count:{}, attrsList:{}, excludedAttrsList:{}, request:{} ", schemas, filter, sortBy, sortOrder, startIndex, count, attrsList, excludedAttrsList, request);
+            log.("Search Request params:: - schemas:{}, filter:{}, sortBy:{}, sortOrder:{}, startIndex:{}, count:{}, attrsList:{}, excludedAttrsList:{}, request:{} ", schemas, filter, sortBy, sortOrder, startIndex, count, attrsList, excludedAttrsList, request);
 
             Response response = null;
 
             if (StringUtils.isNotEmpty(schemas)) {
                 count = count == null ? getMaxCount() : count;
-                log.error(" count:{} ", count);
+                log.debug(" count:{} ", count);
                 //Per spec, a negative value SHALL be interpreted as "0" for count
                 if (count < 0) {
                     count = 0;
@@ -110,6 +111,7 @@ public class BaseResource {
                     request.setSortOrder(sortOrder);
                     request.setStartIndex(startIndex);
                     request.setCount(count);
+                    request.setMaxCount(getMaxCount());
                 } else {
                     return Response.status(Response.Status.BAD_REQUEST).entity("Maximum number of results per page is " + getMaxCount()).build();
                 }
@@ -119,10 +121,13 @@ public class BaseResource {
             return response;
 
         }
-    
-    protected int getMaxCount(){
-        log.error(" configurationFactory.getApiAppConfiguration().getMaxCount():{} ",configurationFactory.getApiAppConfiguration().getMaxCount());
-        return (configurationFactory.getApiAppConfiguration().getMaxCount() >0 ? configurationFactory.getApiAppConfiguration().getMaxCount() : DEFAULT_MAX_COUNT); 
+
+    protected int getMaxCount() {
+        log.trace(" MaxCount details - ApiAppConfiguration.MaxCount():{}, DEFAULT_MAX_COUNT:{} ",
+                configurationFactory.getApiAppConfiguration().getMaxCount(), DEFAULT_MAX_COUNT);
+        return (configurationFactory.getApiAppConfiguration().getMaxCount() > 0
+                ? configurationFactory.getApiAppConfiguration().getMaxCount()
+                : DEFAULT_MAX_COUNT);
     }
 
 }
