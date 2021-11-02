@@ -82,12 +82,13 @@ public class BaseResource {
 
     protected Response prepareSearchRequest(String schemas, String filter, String sortBy, String sortOrder, Integer startIndex, Integer count,
             String attrsList, String excludedAttrsList, SearchRequest request) {
-            log.debug("Search Request params:: - schemas:{}, filter:{}, sortBy:{}, sortOrder:{}, startIndex:{}, count:{}, attrsList:{}, excludedAttrsList:{}, request:{} ", schemas, filter, sortBy, sortOrder, startIndex, count, attrsList, excludedAttrsList, request);
+            log.error("Search Request params:: - schemas:{}, filter:{}, sortBy:{}, sortOrder:{}, startIndex:{}, count:{}, attrsList:{}, excludedAttrsList:{}, request:{} ", schemas, filter, sortBy, sortOrder, startIndex, count, attrsList, excludedAttrsList, request);
 
             Response response = null;
 
             if (StringUtils.isNotEmpty(schemas)) {
                 count = count == null ? getMaxCount() : count;
+                log.error(" count:{} ", count);
                 //Per spec, a negative value SHALL be interpreted as "0" for count
                 if (count < 0) {
                     count = 0;
@@ -120,7 +121,8 @@ public class BaseResource {
         }
     
     protected int getMaxCount(){
-        return (configurationFactory.getApiAppConfiguration().getMaxCount() !=0 ? configurationFactory.getApiAppConfiguration().getMaxCount() : DEFAULT_MAX_COUNT); 
+        log.error(" configurationFactory.getApiAppConfiguration().getMaxCount():{} ",configurationFactory.getApiAppConfiguration().getMaxCount());
+        return (configurationFactory.getApiAppConfiguration().getMaxCount() >0 ? configurationFactory.getApiAppConfiguration().getMaxCount() : DEFAULT_MAX_COUNT); 
     }
 
 }
