@@ -66,27 +66,17 @@ public class ClientsResource extends BaseResource {
             @DefaultValue(DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
             @QueryParam(value = ApiConstants.SORTBY) String sortBy,
             @QueryParam(value = ApiConstants.SORTORDER) String sortOrder) throws Exception {
-        log.error("Client serach param - limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}", limit, pattern,
+        log.debug("Client serach param - limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}", limit, pattern,
                 startIndex, sortBy, sortOrder);
-        
-        List<Client> clients;
-        if (!pattern.isEmpty() && pattern.length() >= 2) {
-            clients = clientService.searchClients(pattern, limit);
-        } else {
-            clients = clientService.getAllClients(limit);
-        }
-        log.error("Client serach result:{}", clients);
+
         SearchRequest searchReq = new SearchRequest();
-        if(StringUtils.isEmpty(sortBy)) {
-            sortBy = "inum";
-        }
         Response response = prepareSearchRequest(clientService.getDnForClient(null), pattern, sortBy, sortOrder,
                 startIndex, limit, null, null, searchReq);
         if (response != null)
             return response;
 
-        clients = this.doSearch(searchReq);
-        log.error("Client serach result:{}", clients);
+        final List<Client> clients = this.doSearch(searchReq);
+        log.debug("Client serach result:{}", clients);
         return Response.ok(getClients(clients)).build();
     }
 
@@ -94,7 +84,7 @@ public class ClientsResource extends BaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_READ_ACCESS })
     @Path(ApiConstants.INUM_PATH)
     public Response getOpenIdClientByInum(@PathParam(ApiConstants.INUM) @NotNull String inum) {
-        log.error("Client serach by inum:{}", inum);
+        log.debug("Client serach by inum:{}", inum);
         Client client = clientService.getClientByInum(inum);
         checkResourceNotNull(client, OPENID_CONNECT_CLIENT);
         return Response.ok(client).build();
@@ -103,7 +93,7 @@ public class ClientsResource extends BaseResource {
     @POST
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS })
     public Response createOpenIdConnect(@Valid Client client) throws NoSuchAlgorithmException, EncryptionException {
-        log.error("Client details to be added - client:{}", client);
+        log.debug("Client details to be added - client:{}", client);
         String inum = client.getClientId();
         if (inum == null || inum.isEmpty() || inum.isBlank()) {
             inum = clientService.generateInumForNewClient();
@@ -129,7 +119,7 @@ public class ClientsResource extends BaseResource {
     @PUT
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS })
     public Response updateClient(@Valid Client client) throws EncryptionException {
-        log.error("Client details to be updated - client:{}", client);
+        log.debug("Client details to be updated - client:{}", client);
         String inum = client.getClientId();
         checkNotNull(inum, AttributeNames.INUM);
         checkNotNull(client.getClientName(), AttributeNames.DISPLAY_NAME);
@@ -154,7 +144,7 @@ public class ClientsResource extends BaseResource {
     @Path(ApiConstants.INUM_PATH)
     public Response patchClient(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString)
             throws JsonPatchException, IOException {
-        log.error("Client details to be patched - inum:{}, pathString:{}", inum, pathString);
+        log.debug("Client details to be patched - inum:{}, pathString:{}", inum, pathString);
         Client existingClient = clientService.getClientByInum(inum);
         checkResourceNotNull(existingClient, OPENID_CONNECT_CLIENT);
 
@@ -192,19 +182,19 @@ public class ClientsResource extends BaseResource {
     }
 
     private List<Client> doSearch(SearchRequest searchReq) {
-        log.error("Client search params - searchReq:{} ", searchReq);
+        log.debug("Client search params - searchReq:{} ", searchReq);
         Response response;
 
         PagedResult<Client> pagedResult = clientService.searchClients(searchReq);
-        log.error("PagedResult  - pagedResult:{}", pagedResult);
+        log.trace("PagedResult  - pagedResult:{}", pagedResult);
 
         List<Client> clients = null;
         if (pagedResult != null) {
-            log.error("Clients fetched  - pagedResult.getEntries():{}", pagedResult.getEntries());
+            log.trace("Clients fetched  - pagedResult.getEntries():{}", pagedResult.getEntries());
             clients = pagedResult.getEntries();
         }
 
-        log.error("Clients fetched  - clients:{}", clients);
+        log.debug("Clients fetched  - clients:{}", clients);
         return clients;
     }
 }
