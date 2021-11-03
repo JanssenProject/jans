@@ -17,7 +17,6 @@ import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.util.AttributeNames;
 import io.jans.configapi.util.Jackson;
 import io.jans.orm.model.PagedResult;
-import io.jans.orm.model.SortOrder;
 import io.jans.util.StringHelper;
 import io.jans.util.security.StringEncrypter.EncryptionException;
 
@@ -33,7 +32,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
 /**
@@ -50,7 +48,7 @@ public class ClientsResource extends BaseResource {
     private static final String OPENID_CONNECT_CLIENT = "openid connect client";
 
     @Inject
-    Logger log;
+    Logger logger;
 
     @Inject
     ClientService clientService;
@@ -64,9 +62,9 @@ public class ClientsResource extends BaseResource {
             @DefaultValue(DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
             @DefaultValue(DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
-            @QueryParam(value = ApiConstants.SORTBY) String sortBy,
-            @QueryParam(value = ApiConstants.SORTORDER) String sortOrder) throws Exception {
-        log.debug("Client serach param - limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}", limit, pattern,
+            @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
+            @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder) throws EncryptionException {
+        logger.debug("Client serach param - limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}", limit, pattern,
                 startIndex, sortBy, sortOrder);
 
         SearchRequest searchReq = new SearchRequest();
@@ -84,7 +82,7 @@ public class ClientsResource extends BaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_READ_ACCESS })
     @Path(ApiConstants.INUM_PATH)
     public Response getOpenIdClientByInum(@PathParam(ApiConstants.INUM) @NotNull String inum) {
-        log.debug("Client serach by inum:{}", inum);
+        logger.debug("Client serach by inum:{}", inum);
         Client client = clientService.getClientByInum(inum);
         checkResourceNotNull(client, OPENID_CONNECT_CLIENT);
         return Response.ok(client).build();
@@ -93,7 +91,7 @@ public class ClientsResource extends BaseResource {
     @POST
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS })
     public Response createOpenIdConnect(@Valid Client client) throws NoSuchAlgorithmException, EncryptionException {
-        log.debug("Client details to be added - client:{}", client);
+        logger.debug("Client details to be added - client:{}", client);
         String inum = client.getClientId();
         if (inum == null || inum.isEmpty() || inum.isBlank()) {
             inum = clientService.generateInumForNewClient();
@@ -119,7 +117,7 @@ public class ClientsResource extends BaseResource {
     @PUT
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS })
     public Response updateClient(@Valid Client client) throws EncryptionException {
-        log.debug("Client details to be updated - client:{}", client);
+        logger.debug("Client details to be updated - client:{}", client);
         String inum = client.getClientId();
         checkNotNull(inum, AttributeNames.INUM);
         checkNotNull(client.getClientName(), AttributeNames.DISPLAY_NAME);
@@ -144,7 +142,7 @@ public class ClientsResource extends BaseResource {
     @Path(ApiConstants.INUM_PATH)
     public Response patchClient(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString)
             throws JsonPatchException, IOException {
-        log.debug("Client details to be patched - inum:{}, pathString:{}", inum, pathString);
+        logger.debug("Client details to be patched - inum:{}, pathString:{}", inum, pathString);
         Client existingClient = clientService.getClientByInum(inum);
         checkResourceNotNull(existingClient, OPENID_CONNECT_CLIENT);
 
@@ -157,7 +155,7 @@ public class ClientsResource extends BaseResource {
     @Path(ApiConstants.INUM_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_DELETE_ACCESS })
     public Response deleteClient(@PathParam(ApiConstants.INUM) @NotNull String inum) {
-        log.debug("Client to be deleted - inum:{} ", inum);
+        logger.debug("Client to be deleted - inum:{} ", inum);
         Client client = clientService.getClientByInum(inum);
         checkResourceNotNull(client, OPENID_CONNECT_CLIENT);
         clientService.removeClient(client);
@@ -182,8 +180,7 @@ public class ClientsResource extends BaseResource {
     }
 
     private List<Client> doSearch(SearchRequest searchReq) {
-        log.debug("Client search params - searchReq:{} ", searchReq);
-        Response response;
+        logger.debug("Client search params - searchReq:{} ", searchReq);
 
         PagedResult<Client> pagedResult = clientService.searchClients(searchReq);
         log.trace("PagedResult  - pagedResult:{}", pagedResult);
@@ -194,7 +191,7 @@ public class ClientsResource extends BaseResource {
             clients = pagedResult.getEntries();
         }
 
-        log.debug("Clients fetched  - clients:{}", clients);
+        logger.debug("Clients fetched  - clients:{}", clients);
         return clients;
     }
 }

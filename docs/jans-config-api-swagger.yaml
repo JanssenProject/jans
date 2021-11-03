@@ -1801,6 +1801,27 @@ paths:
           in: query
           name: pattern
           description: Search pattern.
+        - schema:
+            type: integer
+            default: 1
+          in: query
+          name: startIndex
+          description: The 1-based index of the first query result.
+        - schema:
+            type: string
+            default: 1
+          in: query
+          name: sortBy
+          description: Attribute whose value will be used to order the returned response.
+        - schema:
+            type: string
+            default: 1
+            enum: 
+              - ascending
+              - descending
+          in: query
+          name: sortOrder
+          description: Order in which the sortBy param is applied. Allowed values are "ascending" and "descending".  
     post:
       tags:
         - OAuth - OpenID Connect - Clients
