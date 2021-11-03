@@ -81,46 +81,50 @@ public class BaseResource {
         return Response.status(Response.Status.NOT_ACCEPTABLE).entity(error).build();
     }
 
-    protected Response prepareSearchRequest(String schemas, String filter, String sortBy, String sortOrder, Integer startIndex, Integer count,
-            String attrsList, String excludedAttrsList, SearchRequest request) {
-            log.debug("Search Request params:: - schemas:{}, filter:{}, sortBy:{}, sortOrder:{}, startIndex:{}, count:{}, attrsList:{}, excludedAttrsList:{}, request:{} ", schemas, filter, sortBy, sortOrder, startIndex, count, attrsList, excludedAttrsList, request);
+    protected Response prepareSearchRequest(String schemas, String filter, String sortBy, String sortOrder,
+            Integer startIndex, Integer count, String attrsList, String excludedAttrsList, SearchRequest request) {
+        log.debug(
+                "Search Request params:: - schemas:{}, filter:{}, sortBy:{}, sortOrder:{}, startIndex:{}, count:{}, attrsList:{}, excludedAttrsList:{}, request:{} ",
+                schemas, filter, sortBy, sortOrder, startIndex, count, attrsList, excludedAttrsList, request);
 
-            Response response = null;
+        Response response = null;
 
-            if (StringUtils.isNotEmpty(schemas)) {
-                count = count == null ? getMaxCount() : count;
-                log.debug(" count:{} ", count);
-                //Per spec, a negative value SHALL be interpreted as "0" for count
-                if (count < 0) {
-                    count = 0;
-                }
-
-                if (count <= getMaxCount()) {
-                    //SCIM searches are 1 indexed
-                    startIndex = (startIndex == null || startIndex < 1) ? 1 : startIndex;
-
-                    if (StringUtils.isEmpty(sortOrder) || !sortOrder.equals(SortOrder.DESCENDING.getValue())) {
-                        sortOrder = SortOrder.ASCENDING.getValue();
-                    }
-
-                    request.setSchemas(schemas);
-                    request.setAttributes(attrsList);
-                    request.setExcludedAttributes(excludedAttrsList);
-                    request.setFilter(filter);
-                    request.setSortBy(sortBy);
-                    request.setSortOrder(sortOrder);
-                    request.setStartIndex(startIndex);
-                    request.setCount(count);
-                    request.setMaxCount(getMaxCount());
-                } else {
-                    return Response.status(Response.Status.BAD_REQUEST).entity("Maximum number of results per page is " + getMaxCount()).build();
-                }
-            } else {
-                return Response.status(Response.Status.BAD_REQUEST).entity("Schema(s) not supplied in Search Request").build();
+        if (StringUtils.isNotEmpty(schemas)) {
+            count = count == null ? getMaxCount() : count;
+            log.debug(" count:{} ", count);
+            // Per spec, a negative value SHALL be interpreted as "0" for count
+            if (count < 0) {
+                count = 0;
             }
-            return response;
 
+            if (count <= getMaxCount()) {
+                // SCIM searches are 1 indexed
+                startIndex = (startIndex == null || startIndex < 1) ? 1 : startIndex;
+
+                if (StringUtils.isEmpty(sortOrder) || !sortOrder.equals(SortOrder.DESCENDING.getValue())) {
+                    sortOrder = SortOrder.ASCENDING.getValue();
+                }
+
+                request.setSchemas(schemas);
+                request.setAttributes(attrsList);
+                request.setExcludedAttributes(excludedAttrsList);
+                request.setFilter(filter);
+                request.setSortBy(sortBy);
+                request.setSortOrder(sortOrder);
+                request.setStartIndex(startIndex);
+                request.setCount(count);
+                request.setMaxCount(getMaxCount());
+            } else {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity("Maximum number of results per page is " + getMaxCount()).build();
+            }
+        } else {
+            return Response.status(Response.Status.BAD_REQUEST).entity("Schema(s) not supplied in Search Request")
+                    .build();
         }
+        return response;
+
+    }
 
     protected int getMaxCount() {
         log.trace(" MaxCount details - ApiAppConfiguration.MaxCount():{}, DEFAULT_MAX_COUNT:{} ",

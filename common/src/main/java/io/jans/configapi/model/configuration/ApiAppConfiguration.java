@@ -194,7 +194,7 @@ public class ApiAppConfiguration implements Configuration {
     public void setDisableJdkLogger(Boolean disableJdkLogger) {
         this.disableJdkLogger = disableJdkLogger;
     }
-    
+
     public int getMaxCount() {
         return this.maxCount;
     }
@@ -214,8 +214,7 @@ public class ApiAppConfiguration implements Configuration {
                 + ", corsConfigurationFilters=" + corsConfigurationFilters + ", exclusiveAuthScopes="
                 + exclusiveAuthScopes + ", loggingLevel=" + loggingLevel + " , loggingLayout=" + loggingLayout
                 + " , externalLoggerConfiguration=" + externalLoggerConfiguration + " , disableJdkLogger="
-                + disableJdkLogger + " , maxCount ="+maxCount
-                + "]";
+                + disableJdkLogger + " , maxCount =" + maxCount + "]";
     }
 
 }
