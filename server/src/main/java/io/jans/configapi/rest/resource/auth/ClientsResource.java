@@ -66,7 +66,7 @@ public class ClientsResource extends BaseResource {
             @DefaultValue(DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
             @QueryParam(value = ApiConstants.SORTBY) String sortBy,
             @QueryParam(value = ApiConstants.SORTORDER) String sortOrder) throws Exception {
-        log.error("Client serach param - limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}", limit, pattern,
+        log.debug("Client serach param - limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}", limit, pattern,
                 startIndex, sortBy, sortOrder);
 
         SearchRequest searchReq = new SearchRequest();
