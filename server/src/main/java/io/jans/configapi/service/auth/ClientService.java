@@ -98,7 +98,7 @@ public class ClientService implements Serializable {
     }
 
     public PagedResult<Client> searchClients(SearchRequest searchRequest) {
-        logger.debug("Search Clients with searchRequest:{}", searchRequest);
+        logger.error("Search Clients with searchRequest:{}", searchRequest);
         Filter searchFilter = null;
         if (StringUtils.isNotEmpty(searchRequest.getFilter())) {
             String[] targetArray = new String[] { searchRequest.getFilter() };

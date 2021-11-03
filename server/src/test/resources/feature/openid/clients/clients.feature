@@ -45,6 +45,24 @@ Then status 200
 And print response
 And assert response.length !=0
 
+Scenario: Search openid connect clients given a serach pattern and pagination
+Given url mainUrl
+And header Authorization = 'Bearer ' + accessToken
+And param pattern = 'test'
+And param limit = 10
+And param startIndex = 1
+When method GET
+Then status 200
+And print response
+Given url mainUrl
+And header Authorization = 'Bearer ' + accessToken
+And param pattern = response[0].displayName
+And print 'pattern = '+pattern 
+When method GET
+Then status 200
+And print response
+And assert response.length !=0
+
 
 Scenario: Get an openid connect client by inum(unexisting client)
 Given url mainUrl + '/53553532727272772'
