@@ -110,16 +110,15 @@ public class ClientService implements Serializable {
             searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter, inumFilter);
         }
 
-        PagedResult<Client> pagedResult = persistenceEntryManager.findPagedEntries(getDnForClient(null), Client.class,
+        return (PagedResult<Client>) persistenceEntryManager.findPagedEntries(getDnForClient(null), Client.class,
                 searchFilter, null, searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
                 searchRequest.getStartIndex() - 1, searchRequest.getCount(), searchRequest.getMaxCount());
 
-        return pagedResult;
     }
 
-    public Client getClientByDn(String Dn) {
+    public Client getClientByDn(String dn) {
         try {
-            return persistenceEntryManager.find(Client.class, Dn);
+            return persistenceEntryManager.find(Client.class, dn);
         } catch (Exception e) {
             logger.warn("", e);
             return null;
