@@ -71,6 +71,7 @@ public class ApiConstants {
     public static final String USER = "/user";
 
     public static final String LIMIT = "limit";
+    public static final String START_INDEX = "startIndex";
     public static final String PATTERN = "pattern";
     public static final String STATUS = "status";
     public static final String INUM = "inum";
@@ -100,5 +101,12 @@ public class ApiConstants {
     public static final int CONNECTION_POOL_DEFAULT_MAX_PER_ROUTE = 20;
     public static final int CONNECTION_POOL_VALIDATE_AFTER_INACTIVITY = 10;
     public static final int CONNECTION_POOL_CUSTOM_KEEP_ALIVE_TIMEOUT = 5;
+    
+    //Pagination
+    public static final String DEFAULT_LIST_SIZE = "50";
+    public static final String DEFAULT_LIST_START_INDEX = "1";
+    public static final int DEFAULT_MAX_COUNT = 200;  
+    public static final String SORT_BY = "sortBy";
+    public static final String SORT_ORDER = "sortOrder";
 
 }
