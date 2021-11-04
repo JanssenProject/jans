@@ -13,6 +13,8 @@ package io.jans.as.model.crypto;
  */
 public abstract class KeyFactory<E extends PrivateKey, F extends PublicKey> {
 
+    public static final String DEF_BC = "BC";
+
     public abstract E getPrivateKey();
 
     public abstract F getPublicKey();
