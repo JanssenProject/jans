@@ -47,6 +47,7 @@ import static org.apache.commons.lang.BooleanUtils.isTrue;
 
 /**
  * @author Yuriy Zabrovarnyy
+ * @version November 3, 2021
  */
 @Named
 @Stateless
@@ -285,6 +286,10 @@ public class AuthorizeRestWebServiceValidator {
 
     public String validateRedirectUri(@NotNull Client client, @Nullable String redirectUri, @Nullable String state,
                                       @Nullable String deviceAuthzUserCode, @Nullable HttpServletRequest httpRequest, @NotNull AuthorizeErrorResponseType error) {
+        if (appConfiguration.isFapi()) {
+            return redirectUri; // FAPI validator will check it in the request object.
+        }
+
         if (StringUtils.isNotBlank(deviceAuthzUserCode)) {
             DeviceAuthorizationCacheControl deviceAuthorizationCacheControl = deviceAuthorizationService
                     .getDeviceAuthzByUserCode(deviceAuthzUserCode);
