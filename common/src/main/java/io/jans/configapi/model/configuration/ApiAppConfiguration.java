@@ -31,6 +31,7 @@ public class ApiAppConfiguration implements Configuration {
     private String loggingLayout;
     private String externalLoggerConfiguration;
     private Boolean disableJdkLogger = true;
+    private int maxCount;
 
     public boolean isConfigOauthEnabled() {
         return configOauthEnabled;
@@ -194,6 +195,14 @@ public class ApiAppConfiguration implements Configuration {
         this.disableJdkLogger = disableJdkLogger;
     }
 
+    public int getMaxCount() {
+        return this.maxCount;
+    }
+
+    public void setMaxCount(int maxCount) {
+        this.maxCount = maxCount;
+    }
+
     @Override
     public String toString() {
         return "ApiAppConfiguration [" + " apiApprovedIssuer=" + apiApprovedIssuer + ", apiProtectionType="
@@ -205,7 +214,7 @@ public class ApiAppConfiguration implements Configuration {
                 + ", corsConfigurationFilters=" + corsConfigurationFilters + ", exclusiveAuthScopes="
                 + exclusiveAuthScopes + ", loggingLevel=" + loggingLevel + " , loggingLayout=" + loggingLayout
                 + " , externalLoggerConfiguration=" + externalLoggerConfiguration + " , disableJdkLogger="
-                + disableJdkLogger + "]";
+                + disableJdkLogger + " , maxCount =" + maxCount + "]";
     }
 
 }
