@@ -6,6 +6,7 @@
 
 package io.jans.configapi.service.auth;
 
+import static io.jans.as.model.util.Util.escapeLog;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.OrganizationService;
 import io.jans.as.common.service.common.InumService;
@@ -13,15 +14,20 @@ import io.jans.as.common.util.AttributeConstants;
 import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.register.ApplicationType;
+import io.jans.configapi.rest.model.SearchRequest;
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.model.PagedResult;
+import io.jans.orm.model.SortOrder;
 import io.jans.orm.search.filter.Filter;
 import io.jans.util.StringHelper;
-import org.slf4j.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.io.Serializable;
 import java.util.List;
+
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
 
 /**
  * @author Mougang T.Gasmyr
@@ -71,6 +77,9 @@ public class ClientService implements Serializable {
     }
 
     public List<Client> searchClients(String pattern, int sizeLimit) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Search Clients with pattern:{}, sizeLimit:{}", escapeLog(pattern), escapeLog(sizeLimit));
+        }
         String[] targetArray = new String[] { pattern };
         Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.DISPLAY_NAME, null, targetArray,
                 null);
@@ -78,6 +87,8 @@ public class ClientService implements Serializable {
                 null);
         Filter inumFilter = Filter.createSubstringFilter(AttributeConstants.INUM, null, targetArray, null);
         Filter searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter, inumFilter);
+
+        logger.debug("Search Clients with searchFilter:{}", searchFilter);
         return persistenceEntryManager.findEntries(getDnForClient(null), Client.class, searchFilter, sizeLimit);
     }
 
@@ -89,9 +100,30 @@ public class ClientService implements Serializable {
         return persistenceEntryManager.findEntries(getDnForClient(null), Client.class, null);
     }
 
-    public Client getClientByDn(String Dn) {
+    public PagedResult<Client> searchClients(SearchRequest searchRequest) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Search Clients with searchRequest:{}", escapeLog(searchRequest));
+        }
+        Filter searchFilter = null;
+        if (StringUtils.isNotEmpty(searchRequest.getFilter())) {
+            String[] targetArray = new String[] { searchRequest.getFilter() };
+            Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.DISPLAY_NAME, null, targetArray,
+                    null);
+            Filter descriptionFilter = Filter.createSubstringFilter(AttributeConstants.DESCRIPTION, null, targetArray,
+                    null);
+            Filter inumFilter = Filter.createSubstringFilter(AttributeConstants.INUM, null, targetArray, null);
+            searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter, inumFilter);
+        }
+
+        return persistenceEntryManager.findPagedEntries(getDnForClient(null), Client.class, searchFilter, null,
+                searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
+                searchRequest.getStartIndex() - 1, searchRequest.getCount(), searchRequest.getMaxCount());
+
+    }
+
+    public Client getClientByDn(String dn) {
         try {
-            return persistenceEntryManager.find(Client.class, Dn);
+            return persistenceEntryManager.find(Client.class, dn);
         } catch (Exception e) {
             logger.warn("", e);
             return null;
