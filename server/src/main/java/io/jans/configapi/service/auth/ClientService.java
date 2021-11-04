@@ -6,6 +6,7 @@
 
 package io.jans.configapi.service.auth;
 
+import static io.jans.as.model.util.Util.escapeLog;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.OrganizationService;
 import io.jans.as.common.service.common.InumService;
@@ -76,7 +77,9 @@ public class ClientService implements Serializable {
     }
 
     public List<Client> searchClients(String pattern, int sizeLimit) {
-        logger.debug("Search Clients with pattern:{}, sizeLimit:{}", pattern, sizeLimit);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Search Clients with pattern:{}, sizeLimit:{}", escapeLog(pattern), escapeLog(sizeLimit));
+        }
         String[] targetArray = new String[] { pattern };
         Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.DISPLAY_NAME, null, targetArray,
                 null);
@@ -98,7 +101,9 @@ public class ClientService implements Serializable {
     }
 
     public PagedResult<Client> searchClients(SearchRequest searchRequest) {
-        logger.debug("Search Clients with searchRequest:{}", searchRequest);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Search Clients with searchRequest:{}", escapeLog(searchRequest));
+        }
         Filter searchFilter = null;
         if (StringUtils.isNotEmpty(searchRequest.getFilter())) {
             String[] targetArray = new String[] { searchRequest.getFilter() };
@@ -110,8 +115,8 @@ public class ClientService implements Serializable {
             searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter, inumFilter);
         }
 
-        return (PagedResult<Client>) persistenceEntryManager.findPagedEntries(getDnForClient(null), Client.class,
-                searchFilter, null, searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
+        return persistenceEntryManager.findPagedEntries(getDnForClient(null), Client.class, searchFilter, null,
+                searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
                 searchRequest.getStartIndex() - 1, searchRequest.getCount(), searchRequest.getMaxCount());
 
     }

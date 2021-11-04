@@ -6,6 +6,7 @@
 
 package io.jans.configapi.rest.resource.auth;
 
+import static io.jans.as.model.util.Util.escapeLog;
 import io.jans.configapi.rest.model.ApiError;
 import io.jans.configapi.rest.model.SearchRequest;
 import io.jans.configapi.util.ApiConstants;
@@ -46,7 +47,7 @@ public class BaseResource {
         }
     }
 
-    public static <T> void checkNotNull(String attribute, String attributeName) {
+    public static void checkNotNull(String attribute, String attributeName) {
         if (attribute == null) {
             throw new BadRequestException(getMissingAttributeError(attributeName));
         }
@@ -56,6 +57,16 @@ public class BaseResource {
         if (list == null || list.isEmpty()) {
             throw new BadRequestException(getMissingAttributeError(attributeName));
         }
+    }
+
+    public static void checkNotEmpty(String attribute, String attributeName) {
+        if (StringUtils.isEmpty(attribute)) {
+            throw new BadRequestException(getMissingAttributeError(attributeName));
+        }
+    }
+
+    public static void thorwBadRequestException(String msg) {
+        throw new BadRequestException(getBadRequestException(msg));
     }
 
     /**
@@ -81,48 +92,55 @@ public class BaseResource {
         return Response.status(Response.Status.NOT_ACCEPTABLE).entity(error).build();
     }
 
-    protected Response prepareSearchRequest(String schemas, String filter, String sortBy, String sortOrder,
-            Integer startIndex, Integer count, String attrsList, String excludedAttrsList, SearchRequest request) {
-        log.debug(
-                "Search Request params:: - schemas:{}, filter:{}, sortBy:{}, sortOrder:{}, startIndex:{}, count:{}, attrsList:{}, excludedAttrsList:{}, request:{} ",
-                schemas, filter, sortBy, sortOrder, startIndex, count, attrsList, excludedAttrsList, request);
+    protected static Response getBadRequestException(String msg) {
+        ApiError error = new ApiError.ErrorBuilder()
+                .withCode(String.valueOf(Response.Status.NOT_ACCEPTABLE.getStatusCode())).withMessage(msg).build();
+        return Response.status(Response.Status.BAD_REQUEST).entity(error).build();
+    }
 
-        Response response = null;
-
-        if (StringUtils.isNotEmpty(schemas)) {
-            count = count == null ? getMaxCount() : count;
-            log.debug(" count:{} ", count);
-            // Per spec, a negative value SHALL be interpreted as "0" for count
-            if (count < 0) {
-                count = 0;
-            }
-
-            if (count <= getMaxCount()) {
-                // SCIM searches are 1 indexed
-                startIndex = (startIndex == null || startIndex < 1) ? 1 : startIndex;
-
-                if (StringUtils.isEmpty(sortOrder) || !sortOrder.equals(SortOrder.DESCENDING.getValue())) {
-                    sortOrder = SortOrder.ASCENDING.getValue();
-                }
-
-                request.setSchemas(schemas);
-                request.setAttributes(attrsList);
-                request.setExcludedAttributes(excludedAttrsList);
-                request.setFilter(filter);
-                request.setSortBy(sortBy);
-                request.setSortOrder(sortOrder);
-                request.setStartIndex(startIndex);
-                request.setCount(count);
-                request.setMaxCount(getMaxCount());
-            } else {
-                return Response.status(Response.Status.BAD_REQUEST)
-                        .entity("Maximum number of results per page is " + getMaxCount()).build();
-            }
-        } else {
-            return Response.status(Response.Status.BAD_REQUEST).entity("Schema(s) not supplied in Search Request")
-                    .build();
+    protected SearchRequest createSearchRequest(String schemas, String filter, String sortBy, String sortOrder,
+            Integer startIndex, Integer count, String attrsList, String excludedAttrsList) {
+        if (log.isDebugEnabled()) {
+            log.debug(
+                    "Search Request params:: - schemas:{}, filter:{}, sortBy:{}, sortOrder:{}, startIndex:{}, count:{}, attrsList:{}, excludedAttrsList:{} ",
+                    escapeLog(schemas), escapeLog(filter), escapeLog(sortBy), escapeLog(sortOrder),
+                    escapeLog(startIndex), escapeLog(count), escapeLog(attrsList), escapeLog(excludedAttrsList));
         }
-        return response;
+        SearchRequest searchRequest = new SearchRequest();
+
+        // Validation
+        checkNotEmpty(schemas, "Schema");
+        int maxCount = getMaxCount();
+        log.debug(" count:{}, maxCount:{}", count, maxCount);
+        if (count > maxCount) {
+            thorwBadRequestException("Maximum number of results per page is " + maxCount);
+        }
+
+        count = count == null ? maxCount : count;
+        log.debug(" count:{} ", count);
+        // Per spec, a negative value SHALL be interpreted as "0" for count
+        if (count < 0) {
+            count = 0;
+        }
+
+        // SCIM searches are 1 indexed
+        startIndex = (startIndex == null || startIndex < 1) ? 1 : startIndex;
+
+        if (StringUtils.isEmpty(sortOrder) || !sortOrder.equals(SortOrder.DESCENDING.getValue())) {
+            sortOrder = SortOrder.ASCENDING.getValue();
+        }
+
+        searchRequest.setSchemas(schemas);
+        searchRequest.setAttributes(attrsList);
+        searchRequest.setExcludedAttributes(excludedAttrsList);
+        searchRequest.setFilter(filter);
+        searchRequest.setSortBy(sortBy);
+        searchRequest.setSortOrder(sortOrder);
+        searchRequest.setStartIndex(startIndex);
+        searchRequest.setCount(count);
+        searchRequest.setMaxCount(getMaxCount());
+
+        return searchRequest;
 
     }
 
