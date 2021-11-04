@@ -11,6 +11,7 @@ import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.ElevenCryptoProvider;
 import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.exception.CryptoProviderException;
 import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.jwk.JSONWebKey;
 import io.jans.as.model.jwk.JSONWebKeySet;
@@ -32,6 +33,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -185,7 +187,7 @@ public class KeyGenerator {
         }
 
         private void generateKeys(AbstractCryptoProvider cryptoProvider, List<Algorithm> signatureAlgorithms,
-                                  List<Algorithm> encryptionAlgorithms, int expiration, int expirationHours, String testPropFile) throws Exception {
+                                  List<Algorithm> encryptionAlgorithms, int expiration, int expirationHours, String testPropFile) throws CryptoProviderException, IOException {
             JSONWebKeySet jwks = new JSONWebKeySet();
 
             Calendar calendar = new GregorianCalendar();
@@ -198,7 +200,7 @@ public class KeyGenerator {
 
             for (Algorithm algorithm : signatureAlgorithms) {
                 SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(algorithm.getParamName());
-                JSONObject result = cryptoProvider.generateKey(algorithm, calendar.getTimeInMillis(), Use.SIGNATURE);
+                JSONObject result = cryptoProvider.generateKey(algorithm, calendar.getTimeInMillis());
 
                 JSONWebKey key = new JSONWebKey();
                 key.setKid(result.getString(KEY_ID));
@@ -223,8 +225,7 @@ public class KeyGenerator {
             }
             for (Algorithm algorithm : encryptionAlgorithms) {
                 KeyEncryptionAlgorithm encryptionAlgorithm = KeyEncryptionAlgorithm.fromName(algorithm.getParamName());
-                JSONObject result = cryptoProvider.generateKey(algorithm,
-                        calendar.getTimeInMillis(), Use.ENCRYPTION);
+                JSONObject result = cryptoProvider.generateKey(algorithm, calendar.getTimeInMillis());
 
                 JSONWebKey key = new JSONWebKey();
                 key.setKid(result.getString(KEY_ID));
