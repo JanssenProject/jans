@@ -55,7 +55,7 @@ import java.util.List;
 
 /**
  * @author Javier Rojas Blum
- * @version November 3, 2021
+ * @version November 5, 2021
  */
 public class JwtAuthorizationRequest {
 
@@ -177,6 +177,9 @@ public class JwtAuthorizationRequest {
                 SignatureAlgorithm sigAlg = SignatureAlgorithm.fromString(algorithm);
                 if (sigAlg == null) {
                     throw new InvalidJwtException("The JWT algorithm is not supported");
+                }
+                if (sigAlg == SignatureAlgorithm.RS256 && appConfiguration.isFapi()) {
+                    throw new InvalidJwtException("RS256 algorithm is not allowed for FAPI");
                 }
                 if (sigAlg == SignatureAlgorithm.NONE && appConfiguration.isFapi()) {
                     throw new InvalidJwtException("None algorithm is not allowed for FAPI");
