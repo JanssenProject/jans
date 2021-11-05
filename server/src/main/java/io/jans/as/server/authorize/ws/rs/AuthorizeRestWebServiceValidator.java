@@ -12,7 +12,6 @@ import io.jans.as.common.util.RedirectUri;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.server.model.authorize.AuthorizeParamsValidator;
 import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
@@ -37,11 +36,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.TimeZone;
+import java.util.*;
 
 import static io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType.INVALID_REQUEST;
 import static org.apache.commons.lang.BooleanUtils.isTrue;
@@ -200,6 +195,7 @@ public class AuthorizeRestWebServiceValidator {
 
     /**
      * Validates expiration, audience and scopes in the JWT request.
+     *
      * @param jwtRequest Object to be validated.
      */
     public void validateCibaRequestObject(JwtAuthorizationRequest jwtRequest, String clientId) {
@@ -254,7 +250,7 @@ public class AuthorizeRestWebServiceValidator {
                     .build());
         }
         int nowInSeconds = Math.toIntExact(System.currentTimeMillis() / 1000);
-        if (jwtRequest.getNbf() == null || jwtRequest.getNbf() >  nowInSeconds
+        if (jwtRequest.getNbf() == null || jwtRequest.getNbf() > nowInSeconds
                 || jwtRequest.getNbf() < nowInSeconds - appConfiguration.getCibaMaxExpirationTimeAllowedSec()) {
             log.error("Request object has a wrong nbf claim, nbf: {}", jwtRequest.getNbf());
             throw new WebApplicationException(Response
