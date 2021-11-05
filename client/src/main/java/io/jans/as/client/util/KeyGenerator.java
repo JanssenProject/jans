@@ -204,8 +204,8 @@ public class KeyGenerator {
 
                 JSONWebKey key = new JSONWebKey();
 
-                key.setName(algorithm.getParamName());
-                key.setDescr(algorithm.getParamDescription());
+                key.setName(algorithm.getOutName());
+                key.setDescr(algorithm.getDescription());
                 key.setKid(result.getString(KEY_ID));
                 key.setUse(Use.SIGNATURE);
                 key.setAlg(algorithm);
@@ -232,8 +232,8 @@ public class KeyGenerator {
 
                 JSONWebKey key = new JSONWebKey();
 
-                key.setName(algorithm.getParamName());
-                key.setDescr(algorithm.getParamDescription());
+                key.setName(algorithm.getOutName());
+                key.setDescr(algorithm.getDescription());
                 key.setKid(result.getString(KEY_ID));
                 key.setUse(Use.ENCRYPTION);
                 key.setAlg(algorithm);
