@@ -83,12 +83,12 @@ public class UnmodifiableAuthorizationGrant implements IAuthorizationGrant {
     }
 
     @Override
-    public RefreshToken createRefreshToken(String dpop) {
+    public RefreshToken createRefreshToken(ExecutionContext executionContext) {
         throw new UnsupportedOperationException(NOT_ALLOWED_FOR_UNMODIFIABLE_AUTHORIZATION_GRANT);
     }
 
     @Override
-    public RefreshToken createRefreshToken(String dpop, int lifetime) {
+    public RefreshToken createRefreshToken(ExecutionContext executionContext, int lifetime) {
         throw new UnsupportedOperationException(NOT_ALLOWED_FOR_UNMODIFIABLE_AUTHORIZATION_GRANT);
     }
 
