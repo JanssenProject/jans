@@ -469,8 +469,11 @@ def secure_password_file(password_file, salt):
 
     if should_encode:
         logger.warning(f"Attempting to encode the password in {password_file}")
-        with open(password_file, "w") as f:
-            f.write(encode_text(password, salt).decode())
+        try:
+            with open(password_file, "w") as f:
+                f.write(encode_text(password, salt).decode())
+        except Exception as exc:  # noqa: B902
+            logger.warning(f"Unable to encode the password in {password_file}; reason={exc}")
 
     # returns plain password for compatibility
     return password

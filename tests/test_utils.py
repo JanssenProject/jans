@@ -269,3 +269,21 @@ def test_secure_password_file(tmpdir, password, encoded_password):
 
     with open(str(src)) as f:
         assert f.read() == encoded_password
+
+
+@pytest.mark.parametrize("password, encoded_password", [
+    ("secret", "secret"),
+])
+def test_secure_password_file_non_writable(tmpdir, password, encoded_password):
+    import stat
+    from jans.pycloudlib.utils import secure_password_file
+
+    src = tmpdir.join("password_file")
+    src.write(password)
+    # make READONLY file to test fallback
+    src.chmod(stat.S_IREAD | stat.S_IRGRP | stat.S_IROTH)
+    salt = "7MEDWVFAG3DmakHRyjMqp5EE"
+    assert secure_password_file(str(src), salt) == password
+
+    with open(str(src)) as f:
+        assert f.read() == encoded_password
