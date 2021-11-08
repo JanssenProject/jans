@@ -815,12 +815,18 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         ExternalUpdateTokenContext context = new ExternalUpdateTokenContext(httpRequest, cibaGrant, client, appConfiguration, attributeService);
         Function<JsonWebResponse, Void> postProcessor = externalUpdateTokenService.buildModifyIdTokenProcessor(context);
 
+        ExecutionContext executionContext = new ExecutionContext(httpRequest, httpResponse);
+        executionContext.setAppConfiguration(appConfiguration);
+        executionContext.setAttributeService(attributeService);
+        executionContext.setGrant(cibaGrant);
+        executionContext.setClient(client);
+
         final int refreshTokenLifetimeInSeconds = externalUpdateTokenService.getRefreshTokenLifetimeInSeconds(context);
         final RefreshToken refreshToken;
         if (refreshTokenLifetimeInSeconds > 0) {
-            refreshToken = cibaGrant.createRefreshToken(null, refreshTokenLifetimeInSeconds);
+            refreshToken = cibaGrant.createRefreshToken(executionContext, refreshTokenLifetimeInSeconds);
         } else {
-            refreshToken = cibaGrant.createRefreshToken(null);
+            refreshToken = cibaGrant.createRefreshToken(executionContext);
         }
         log.debug("Issuing refresh token: {}", (refreshToken != null ? refreshToken.getCode() : ""));
 
