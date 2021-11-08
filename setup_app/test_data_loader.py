@@ -49,8 +49,8 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                 '-cp', Config.non_setup_properties['oxauth_client_jar_fn'], Config.non_setup_properties['key_gen_path'],
                 '-keystore', client_keystore_fn,
                 '-keypasswd', 'secret',
-                '-sig_keys', Config.default_key_algs,
-                '-enc_keys', Config.default_key_algs,
+                '-sig_keys', Config.default_sig_key_algs,
+                '-enc_keys', Config.default_enc_key_algs,
                 '-dnname', "'{}'".format(Config.default_openid_jks_dn_name),
                 '-expiration', '365','>', keys_json_fn]
 
