@@ -17,28 +17,27 @@ import io.jans.as.model.token.ClientAssertionType;
  */
 public class ClientAuthnEnabler {
 
+    @SuppressWarnings("java:S1874")
     private final ClientRequest clientRequest;
 
+    @SuppressWarnings("java:S1874")
     public ClientAuthnEnabler(ClientRequest clientRequest) {
         this.clientRequest = clientRequest;
     }
 
     public void exec(ClientAuthnRequest request){
-        if (request.getAuthenticationMethod() == AuthenticationMethod.CLIENT_SECRET_BASIC
-                && request.hasCredentials()) {
-            clientRequest.header("Authorization", "Basic " + request.getEncodedCredentials());
+        if (addBasic(request)) {
             return;
         }
 
-        if (request.getAuthenticationMethod() == AuthenticationMethod.CLIENT_SECRET_POST) {
-            if (request.getAuthUsername() != null && !request.getAuthUsername().isEmpty()) {
-                clientRequest.formParameter("client_id", request.getAuthUsername());
-            }
-            if (request.getAuthPassword() != null && !request.getAuthPassword().isEmpty()) {
-                clientRequest.formParameter("client_secret", request.getAuthPassword());
-            }
+        if (addSecretPost(request)) {
             return;
         }
+
+        addJwt(request);
+    }
+
+    private void addJwt(ClientAuthnRequest request) {
         if (request.getAuthenticationMethod() == AuthenticationMethod.CLIENT_SECRET_JWT ||
                 request.getAuthenticationMethod() == AuthenticationMethod.PRIVATE_KEY_JWT) {
             clientRequest.formParameter("client_assertion_type", ClientAssertionType.JWT_BEARER);
@@ -49,5 +48,27 @@ public class ClientAuthnEnabler {
                 clientRequest.formParameter("client_id", request.getAuthUsername());
             }
         }
+    }
+
+    private boolean addSecretPost(ClientAuthnRequest request) {
+        if (request.getAuthenticationMethod() == AuthenticationMethod.CLIENT_SECRET_POST) {
+            if (request.getAuthUsername() != null && !request.getAuthUsername().isEmpty()) {
+                clientRequest.formParameter("client_id", request.getAuthUsername());
+            }
+            if (request.getAuthPassword() != null && !request.getAuthPassword().isEmpty()) {
+                clientRequest.formParameter("client_secret", request.getAuthPassword());
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private boolean addBasic(ClientAuthnRequest request) {
+        if (request.getAuthenticationMethod() == AuthenticationMethod.CLIENT_SECRET_BASIC
+                && request.hasCredentials()) {
+            clientRequest.header("Authorization", "Basic " + request.getEncodedCredentials());
+            return true;
+        }
+        return false;
     }
 }
