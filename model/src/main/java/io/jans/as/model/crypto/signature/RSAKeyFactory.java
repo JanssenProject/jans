@@ -6,6 +6,15 @@
 
 package io.jans.as.model.crypto.signature;
 
+import io.jans.as.model.crypto.Certificate;
+import io.jans.as.model.crypto.KeyFactory;
+import io.jans.as.model.jwk.JSONWebKey;
+import org.apache.commons.lang.StringUtils;
+import org.bouncycastle.jcajce.provider.asymmetric.rsa.BCRSAPrivateCrtKey;
+import org.bouncycastle.jcajce.provider.asymmetric.rsa.BCRSAPublicKey;
+import org.bouncycastle.x509.X509V1CertificateGenerator;
+
+import javax.security.auth.x500.X500Principal;
 import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.security.InvalidParameterException;
@@ -19,17 +28,7 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-
-import javax.security.auth.x500.X500Principal;
-
-import org.apache.commons.lang.StringUtils;
-import org.bouncycastle.jcajce.provider.asymmetric.rsa.BCRSAPrivateCrtKey;
-import org.bouncycastle.jcajce.provider.asymmetric.rsa.BCRSAPublicKey;
-import org.bouncycastle.x509.X509V1CertificateGenerator;
-
-import io.jans.as.model.crypto.Certificate;
-import io.jans.as.model.crypto.KeyFactory;
-import io.jans.as.model.jwk.JSONWebKey;
+import java.util.Random;
 
 /**
  * Factory to create asymmetric Public and Private Keys for the RSA algorithm
@@ -40,10 +39,8 @@ import io.jans.as.model.jwk.JSONWebKey;
 @Deprecated
 public class RSAKeyFactory extends KeyFactory<RSAPrivateKey, RSAPublicKey> {
 
-    public static final int DEF_KEYLENGTH = 2048;
-
-    private RSAPrivateKey rsaPrivateKey;
-    private RSAPublicKey rsaPublicKey;
+    private final RSAPrivateKey rsaPrivateKey;
+    private final RSAPublicKey rsaPublicKey;
     private Certificate certificate;
 
     @Deprecated
@@ -55,23 +52,25 @@ public class RSAKeyFactory extends KeyFactory<RSAPrivateKey, RSAPublicKey> {
         }
 
         KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA", "BC");
-        keyGen.initialize(RSAKeyFactory.DEF_KEYLENGTH, new SecureRandom());
+        keyGen.initialize(2048, new SecureRandom());
 
         KeyPair keyPair = keyGen.generateKeyPair();
 
         BCRSAPrivateCrtKey jcersaPrivateCrtKey = (BCRSAPrivateCrtKey) keyPair.getPrivate();
         BCRSAPublicKey jcersaPublicKey = (BCRSAPublicKey) keyPair.getPublic();
 
-        rsaPrivateKey = new RSAPrivateKey(signatureAlgorithm, jcersaPrivateCrtKey.getModulus(), jcersaPrivateCrtKey.getPrivateExponent());
+        rsaPrivateKey = new RSAPrivateKey(jcersaPrivateCrtKey.getModulus(),
+                jcersaPrivateCrtKey.getPrivateExponent());
 
-        rsaPublicKey = new RSAPublicKey(jcersaPublicKey.getModulus(), jcersaPublicKey.getPublicExponent());
+        rsaPublicKey = new RSAPublicKey(jcersaPublicKey.getModulus(),
+                jcersaPublicKey.getPublicExponent());
 
         if (StringUtils.isNotBlank(dnName)) {
             // Create certificate
             GregorianCalendar startDate = new GregorianCalendar(); // time from which certificate is valid
             GregorianCalendar expiryDate = new GregorianCalendar(); // time after which certificate is not valid
             expiryDate.add(Calendar.YEAR, 1);
-            BigInteger serialNumber = new BigInteger(1024, new SecureRandom()); // serial number for certificate
+            BigInteger serialNumber = new BigInteger(1024, new Random()); // serial number for certificate
 
             X509V1CertificateGenerator certGen = new X509V1CertificateGenerator();
             X500Principal principal = new X500Principal(dnName);
@@ -96,7 +95,6 @@ public class RSAKeyFactory extends KeyFactory<RSAPrivateKey, RSAPublicKey> {
         }
 
         rsaPrivateKey = new RSAPrivateKey(
-                null,
                 key.getN(),
                 key.getE());
         rsaPublicKey = new RSAPublicKey(
