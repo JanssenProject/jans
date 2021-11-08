@@ -13,7 +13,6 @@ import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
 import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.exception.InvalidJweException;
-import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwe.Jwe;
 import io.jans.as.model.jwe.JweEncrypter;
 import io.jans.as.model.jwe.JweEncrypterImpl;
@@ -25,8 +24,6 @@ import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -49,8 +46,6 @@ import static io.jans.as.model.authorize.AuthorizeResponseParam.RESPONSE;
  * @version September 9, 2021
  */
 public class RedirectUri {
-
-    private static final Logger log = LoggerFactory.getLogger(RedirectUri.class);
 
     private String baseRedirectUri;
     private List<ResponseType> responseTypes;
@@ -77,7 +72,7 @@ public class RedirectUri {
         this.baseRedirectUri = baseRedirectUri;
         this.responseMode = ResponseMode.QUERY;
 
-        responseParameters = new HashMap<>();
+        responseParameters = new HashMap<String, String>();
     }
 
     public RedirectUri(String baseRedirectUri, List<ResponseType> responseTypes, ResponseMode responseMode) {
@@ -242,7 +237,7 @@ public class RedirectUri {
                         String paramValue = URLDecoder.decode(stParamValue.nextElement().toString(), Util.UTF8_STRING_ENCODING);
                         responseParameters.put(paramName, paramValue);
                     } catch (UnsupportedEncodingException e) {
-                        log.error(e.getMessage(), e);
+                        e.printStackTrace();
                     }
                 }
             }
@@ -272,8 +267,10 @@ public class RedirectUri {
                     }
                 }
             }
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+            e.printStackTrace();
         }
 
         return sb.toString();
@@ -332,15 +329,6 @@ public class RedirectUri {
         return jwt.toString();
     }
 
-    private boolean parseNestedJwtIfPresent(Jwe jwe, String nestedJws) throws InvalidJwtException {
-        if (StringUtils.isBlank(nestedJws)) {
-            return false;
-        }
-
-        jwe.setSignedJWTPayload(Jwt.parse(nestedJws));
-        return true;
-    }
-
     private String getJweResponse(String nestedJws) throws Exception {
         Jwe jwe = new Jwe();
 
@@ -350,8 +338,7 @@ public class RedirectUri {
         jwe.getHeader().setEncryptionMethod(blockEncryptionAlgorithm);
 
         // Claims
-        final boolean hasNestedJwt = parseNestedJwtIfPresent(jwe, nestedJws);
-        if (!hasNestedJwt) {
+        if (nestedJws == null) {
             jwe.getClaims().setClaim(ISS, issuer);
             jwe.getClaims().setClaim(AUD, audience);
             if (responseParameters.containsKey(EXPIRES_IN)) {
@@ -364,6 +351,9 @@ public class RedirectUri {
             for (Map.Entry<String, String> entry : responseParameters.entrySet()) {
                 jwe.getClaims().setClaim(entry.getKey(), entry.getValue());
             }
+        } else {
+            Jwt jwt = Jwt.parse(nestedJws);
+            jwe.setSignedJWTPayload(jwt);
         }
 
         // Encryption
@@ -410,68 +400,51 @@ public class RedirectUri {
     public String toString() {
         StringBuilder sb = new StringBuilder(baseRedirectUri);
 
-        if (responseParameters.isEmpty()) {
-            return sb.toString();
-        }
-
-        if (responseMode == ResponseMode.FORM_POST) {
-            sb = createFormPostString();
-        } else if (responseMode == ResponseMode.FORM_POST_JWT) {
-            sb = new StringBuilder();
-            sb.append("<html>");
-            sb.append("<head><title>Submit This Form</title></head>");
-            sb.append("<body onload=\"javascript:document.forms[0].submit()\">");
-            sb.append("<form method=\"post\" action=\"").append(baseRedirectUri).append("\">");
-            sb.append("<input type=\"hidden\" name=\"response\"").append(" value=\"").append(getQueryString()).append("\"/>");
-            sb.append("</form>");
-            sb.append("</body>");
-            sb.append("</html>");
-        } else {
-            sb = createFallbackString();
-        }
-        return sb.toString();
-    }
-
-    private StringBuilder createFallbackString() {
-        StringBuilder sb = new StringBuilder();
-        if (responseMode != null) {
-            appendForResponseMode(sb);
-        } else if (responseTypes != null && (responseTypes.contains(ResponseType.TOKEN) || responseTypes.contains(ResponseType.ID_TOKEN))) {
-            appendFragmentSymbol(sb);
-        } else {
-            appendQuerySymbol(sb);
-        }
-        sb.append(getQueryString());
-        return sb;
-    }
-
-    private void appendForResponseMode(StringBuilder sb) {
-        if (responseMode == ResponseMode.QUERY || responseMode == ResponseMode.QUERY_JWT) {
-            appendQuerySymbol(sb);
-        } else if (responseMode == ResponseMode.FRAGMENT || responseMode == ResponseMode.FRAGMENT_JWT) {
-            appendFragmentSymbol(sb);
-        } else if (responseTypes != null && responseMode == ResponseMode.JWT) {
-            if (responseTypes.contains(ResponseType.TOKEN)) {
-                appendFragmentSymbol(sb);
-            } else if (responseTypes.contains(ResponseType.CODE)) {
-                appendQuerySymbol(sb);
+        if (responseParameters.size() > 0) {
+            if (responseMode == ResponseMode.FORM_POST) {
+                sb = new StringBuilder();
+                sb.append("<html>");
+                sb.append("<head><title>Submit This Form</title></head>");
+                sb.append("<body onload=\"javascript:document.forms[0].submit()\">");
+                sb.append("<form method=\"post\" action=\"").append(baseRedirectUri).append("\">");
+                for (Map.Entry<String, String> entry : responseParameters.entrySet()) {
+                    String entryValue = StringEscapeUtils.escapeHtml(entry.getValue());
+                    sb.append("<input type=\"hidden\" name=\"").append(entry.getKey()).append("\" value=\"").append(entryValue).append("\"/>");
+                }
+                sb.append("</form>");
+                sb.append("</body>");
+                sb.append("</html>");
+            } else if (responseMode == ResponseMode.FORM_POST_JWT) {
+                sb = new StringBuilder();
+                sb.append("<html>");
+                sb.append("<head><title>Submit This Form</title></head>");
+                sb.append("<body onload=\"javascript:document.forms[0].submit()\">");
+                sb.append("<form method=\"post\" action=\"").append(baseRedirectUri).append("\">");
+                sb.append("<input type=\"hidden\" name=\"response\"").append(" value=\"").append(getQueryString()).append("\"/>");
+                sb.append("</form>");
+                sb.append("</body>");
+                sb.append("</html>");
+            } else {
+                if (responseMode != null) {
+                    if (responseMode == ResponseMode.QUERY || responseMode == ResponseMode.QUERY_JWT) {
+                        appendQuerySymbol(sb);
+                    } else if (responseMode == ResponseMode.FRAGMENT || responseMode == ResponseMode.FRAGMENT_JWT) {
+                        appendFragmentSymbol(sb);
+                    } else if (responseTypes != null && responseMode == ResponseMode.JWT) {
+                        if (responseTypes.contains(ResponseType.TOKEN)) {
+                            appendFragmentSymbol(sb);
+                        } else if (responseTypes.contains(ResponseType.CODE)) {
+                            appendQuerySymbol(sb);
+                        }
+                    }
+                } else if (responseTypes != null && (responseTypes.contains(ResponseType.TOKEN) || responseTypes.contains(ResponseType.ID_TOKEN))) {
+                    appendFragmentSymbol(sb);
+                } else {
+                    appendQuerySymbol(sb);
+                }
+                sb.append(getQueryString());
             }
         }
-    }
-
-    private StringBuilder createFormPostString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("<html>");
-        sb.append("<head><title>Submit This Form</title></head>");
-        sb.append("<body onload=\"javascript:document.forms[0].submit()\">");
-        sb.append("<form method=\"post\" action=\"").append(baseRedirectUri).append("\">");
-        for (Map.Entry<String, String> entry : responseParameters.entrySet()) {
-            String entryValue = StringEscapeUtils.escapeHtml(entry.getValue());
-            sb.append("<input type=\"hidden\" name=\"").append(entry.getKey()).append("\" value=\"").append(entryValue).append("\"/>");
-        }
-        sb.append("</form>");
-        sb.append("</body>");
-        sb.append("</html>");
-        return sb;
+        return sb.toString();
     }
 }
