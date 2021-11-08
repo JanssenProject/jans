@@ -6,18 +6,17 @@
 
 package io.jans.as.model.crypto.signature;
 
-import static io.jans.as.model.jwk.JWKParameter.D;
-import static io.jans.as.model.jwk.JWKParameter.EXPONENT;
-import static io.jans.as.model.jwk.JWKParameter.MODULUS;
-
-import java.math.BigInteger;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import io.jans.as.model.crypto.PrivateKey;
 import io.jans.as.model.util.Base64Util;
 import io.jans.as.model.util.StringUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.math.BigInteger;
+
+import static io.jans.as.model.jwk.JWKParameter.D;
+import static io.jans.as.model.jwk.JWKParameter.EXPONENT;
+import static io.jans.as.model.jwk.JWKParameter.MODULUS;
 
 /**
  * The Private Key for the RSA Algorithm
@@ -30,14 +29,12 @@ public class RSAPrivateKey extends PrivateKey {
     private BigInteger modulus;
     private BigInteger privateExponent;
 
-    public RSAPrivateKey(SignatureAlgorithm signatureAlgorithm, BigInteger modulus, BigInteger privateExponent) {
-        setSignatureAlgorithm(signatureAlgorithm);
+    public RSAPrivateKey(BigInteger modulus, BigInteger privateExponent) {
         this.modulus = modulus;
         this.privateExponent = privateExponent;
     }
 
-    public RSAPrivateKey(SignatureAlgorithm signatureAlgorithm, String modulus, String privateExponent) {
-        setSignatureAlgorithm(signatureAlgorithm);
+    public RSAPrivateKey(String modulus, String privateExponent) {
         this.modulus = new BigInteger(1, Base64Util.base64urldecode(modulus));
         this.privateExponent = new BigInteger(1, Base64Util.base64urldecode(privateExponent));
     }

@@ -35,7 +35,6 @@ import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
 import io.jans.as.model.crypto.signature.RSAKeyFactory;
 import io.jans.as.model.crypto.signature.RSAPublicKey;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
-import io.jans.as.model.exception.CryptoProviderException;
 import io.jans.as.model.exception.InvalidJweException;
 import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwe.Jwe;
@@ -44,6 +43,7 @@ import io.jans.as.model.jwe.JweEncrypterImpl;
 import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.jwk.JSONWebKey;
 import io.jans.as.model.jwk.JSONWebKeySet;
+import io.jans.as.model.jwk.Use;
 import io.jans.as.model.jws.RSASigner;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtType;
@@ -63,14 +63,9 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
-import java.security.PublicKey;
 import java.security.Security;
 import java.security.Signature;
-import java.security.SignatureException;
 import java.security.interfaces.RSAPrivateKey;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -390,7 +385,7 @@ public class CrossEncryptionTest {
 
         final JwtSigner jwtSigner = new JwtSigner(appConfiguration, keySet, SignatureAlgorithm.RS256, "audience", null, new AbstractCryptoProvider() {
             @Override
-            public JSONObject generateKey(Algorithm algorithm, Long expirationTime) throws CryptoProviderException {
+            public JSONObject generateKey(Algorithm algorithm, Long expirationTime, Use use) throws Exception {
                 return null;
             }
 
@@ -400,38 +395,30 @@ public class CrossEncryptionTest {
             }
 
             @Override
-            public String sign(String signingInput, String keyId, String sharedSecret, SignatureAlgorithm signatureAlgorithm) throws CryptoProviderException {
-                try {
-                    RSAPrivateKey privateKey = ((RSAKey) JWK.parse(senderJwkJson)).toRSAPrivateKey();
-                    Signature signature = Signature.getInstance(signatureAlgorithm.getAlgorithm(), "BC");
-                    signature.initSign(privateKey);
-                    signature.update(signingInput.getBytes());
+            public String sign(String signingInput, String keyId, String sharedSecret, SignatureAlgorithm signatureAlgorithm) throws Exception {
+                RSAPrivateKey privateKey = ((RSAKey) JWK.parse(senderJwkJson)).toRSAPrivateKey();
 
-                    return Base64Util.base64urlencode(signature.sign());
-                } catch (JOSEException | ParseException | NoSuchAlgorithmException | NoSuchProviderException | InvalidKeyException | SignatureException e) {
-                    throw new CryptoProviderException(e);
-                }
+                Signature signature = Signature.getInstance(signatureAlgorithm.getAlgorithm(), "BC");
+                signature.initSign(privateKey);
+                signature.update(signingInput.getBytes());
+
+                return Base64Util.base64urlencode(signature.sign());
             }
 
             @Override
-            public boolean verifySignature(String signingInput, String encodedSignature, String keyId, JSONObject jwks, String sharedSecret, SignatureAlgorithm signatureAlgorithm) throws CryptoProviderException {
+            public boolean verifySignature(String signingInput, String encodedSignature, String keyId, JSONObject jwks, String sharedSecret, SignatureAlgorithm signatureAlgorithm) throws Exception {
                 return false;
             }
 
             @Override
-            public boolean deleteKey(String keyId) throws CryptoProviderException {
+            public boolean deleteKey(String keyId) throws Exception {
                 return false;
             }
 
 			@Override
-			public PrivateKey getPrivateKey(String keyId) throws CryptoProviderException {
+			public PrivateKey getPrivateKey(String keyId) throws Exception {
 		        throw new UnsupportedOperationException("Method not implemented.");
 			}
-
-            @Override
-            public PublicKey getPublicKey(String keyId) {
-                throw new UnsupportedOperationException("Method not implemented.");
-            }
         });
         Jwt jwt = jwtSigner.newJwt();
         jwt.getClaims().setSubjectIdentifier("testing");
