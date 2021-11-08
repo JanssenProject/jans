@@ -187,13 +187,13 @@ class Crypto64:
             dn_name = Config.default_openid_jks_dn_name
 
         if key_algs == None:
-            key_algs = Config.default_key_algs
+            key_algs = Config.default_sig_key_algs
 
         if key_expiration == None:
             key_expiration = Config.default_key_expiration
 
         if not enc_keys:
-            enc_keys = key_algs
+            enc_keys = Config.default_enc_key_algs
 
         # We can remove this once KeyGenerator will do the same
         if jks_create == True:
