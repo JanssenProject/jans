@@ -73,7 +73,7 @@ public class ImplicitGrant extends AuthorizationGrant {
      * The authorization server MUST NOT issue a refresh token.
      */
     @Override
-    public RefreshToken createRefreshToken(String dpop) {
+    public RefreshToken createRefreshToken(ExecutionContext executionContext) {
         throw new UnsupportedOperationException(
                 "The authorization server MUST NOT issue a refresh token.");
     }
