@@ -203,6 +203,9 @@ public class KeyGenerator {
                 JSONObject result = cryptoProvider.generateKey(algorithm, calendar.getTimeInMillis());
 
                 JSONWebKey key = new JSONWebKey();
+
+                key.setName(algorithm.getOutName());
+                key.setDescr(algorithm.getDescription());
                 key.setKid(result.getString(KEY_ID));
                 key.setUse(Use.SIGNATURE);
                 key.setAlg(algorithm);
@@ -228,6 +231,9 @@ public class KeyGenerator {
                 JSONObject result = cryptoProvider.generateKey(algorithm, calendar.getTimeInMillis());
 
                 JSONWebKey key = new JSONWebKey();
+
+                key.setName(algorithm.getOutName());
+                key.setDescr(algorithm.getDescription());
                 key.setKid(result.getString(KEY_ID));
                 key.setUse(Use.ENCRYPTION);
                 key.setAlg(algorithm);
