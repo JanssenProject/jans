@@ -55,7 +55,7 @@ import java.util.List;
 
 /**
  * @author Javier Rojas Blum
- * @version September 9, 2021
+ * @version November 5, 2021
  */
 public class JwtAuthorizationRequest {
 
@@ -546,6 +546,11 @@ public class JwtAuthorizationRequest {
         if (nbfDiff > SIXTY_MINUTES_AS_SECONDS) { // https://github.com/JanssenProject/jans-auth-server/issues/166
             log.error("nbf claim is more then 60 Minutes in the past, nbf: {}, nowSeconds: {}", nbf, nowSeconds);
             throw new InvalidJwtException("nbf claim is more then 60 in the past");
+        }
+
+        if (exp == null) {
+            log.error("The exp claim is not set");
+            throw new InvalidJwtException("exp claim is not set");
         }
 
         final long nowSecondsExp = System.currentTimeMillis() / 1000;
