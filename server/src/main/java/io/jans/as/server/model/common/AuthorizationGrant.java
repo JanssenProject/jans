@@ -28,7 +28,9 @@ import io.jans.as.server.service.GrantService;
 import io.jans.as.server.service.MetricService;
 import io.jans.as.server.service.SectorIdentifierService;
 import io.jans.as.server.service.external.ExternalIntrospectionService;
+import io.jans.as.server.service.external.ExternalUpdateTokenService;
 import io.jans.as.server.service.external.context.ExternalIntrospectionContext;
+import io.jans.as.server.service.external.context.ExternalUpdateTokenContext;
 import io.jans.as.server.service.stat.StatService;
 import io.jans.as.server.util.TokenHashUtil;
 import io.jans.model.metric.MetricType;
@@ -75,6 +77,9 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
 
     @Inject
     private ExternalIntrospectionService externalIntrospectionService;
+
+    @Inject
+    private ExternalUpdateTokenService externalUpdateTokenService;
 
     @Inject
     private AttributeService attributeService;
@@ -270,10 +275,19 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
         }
     }
 
-    private RefreshToken saveRefreshToken(RefreshToken refreshToken) {
+    private RefreshToken saveRefreshToken(RefreshToken refreshToken, ExecutionContext executionContext) {
         try {
             if (refreshToken.getExpiresIn() > 0) {
-                persist(asToken(refreshToken));
+                final TokenEntity entity = asToken(refreshToken);
+                executionContext.setRefreshTokenEntity(entity);
+
+                boolean externalOk = externalUpdateTokenService.modifyRefreshToken(refreshToken, ExternalUpdateTokenContext.of(executionContext));
+                if (!externalOk) {
+                    log.trace("External script forbids refresh token creation.");
+                    return null;
+                }
+
+                persist(entity);
                 statService.reportRefreshToken(getGrantType());
                 metricService.incCounter(MetricType.TOKEN_REFRESH_TOKEN_COUNT);
 
@@ -292,9 +306,9 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
         }
     }
 
-    private RefreshToken saveRefreshToken(Supplier<RefreshToken> supplier) {
+    private RefreshToken saveRefreshToken(Supplier<RefreshToken> supplier, ExecutionContext executionContext) {
         try {
-            return saveRefreshToken(supplier.get());
+            return saveRefreshToken(supplier.get(), executionContext);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             return null;
@@ -302,22 +316,22 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
     }
 
     @Override
-    public RefreshToken createRefreshToken(String dpop) {
-        return saveRefreshToken(() -> super.createRefreshToken(dpop));
+    public RefreshToken createRefreshToken(ExecutionContext context) {
+        return saveRefreshToken(() -> super.createRefreshToken(context), context);
     }
 
     @Override
-    public RefreshToken createRefreshToken(String dpop, int lifetime) {
-        return saveRefreshToken(() -> super.createRefreshToken(dpop, lifetime));
+    public RefreshToken createRefreshToken(ExecutionContext context, int lifetime) {
+        return saveRefreshToken(() -> super.createRefreshToken(context, lifetime), context);
     }
 
-    public RefreshToken createRefreshToken(String dpop, Date expirationDate) {
+    public RefreshToken createRefreshToken(ExecutionContext context, Date expirationDate) {
         return saveRefreshToken(() -> {
             RefreshToken refreshToken = new RefreshToken(HandleTokenFactory.generateHandleToken(), new Date(), expirationDate);
             refreshToken.setSessionDn(getSessionDn());
-            refreshToken.setDpop(dpop);
+            refreshToken.setDpop(context.getDpop());
             return refreshToken;
-        });
+        }, context);
     }
 
     @Override
