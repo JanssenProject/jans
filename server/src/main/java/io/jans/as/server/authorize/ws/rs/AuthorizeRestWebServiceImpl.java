@@ -89,7 +89,7 @@ import static org.apache.commons.lang3.BooleanUtils.isTrue;
  * Implementation for request authorization through REST web services.
  *
  * @author Javier Rojas Blum
- * @version October 21, 2021
+ * @version November 3, 2021
  */
 @Path("/")
 public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
@@ -382,6 +382,10 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     if (appConfiguration.isFapi() && StringUtils.isBlank(jwtRequest.getState())) {
                         state = ""; // #1250 - FAPI : discard state if in JWT we don't have state
                         redirectUriResponse.setState("");
+                    }
+
+                    if (jwtRequest.getRedirectUri() != null) {
+                        redirectUriResponse.getRedirectUri().setBaseRedirectUri(jwtRequest.getRedirectUri());
                     }
 
                     authorizeRestWebServiceValidator.validateRequestObject(jwtRequest, redirectUriResponse);
