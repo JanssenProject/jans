@@ -56,8 +56,9 @@ Then status 200
 And print response
 Given url mainUrl
 And header Authorization = 'Bearer ' + accessToken
-And param pattern = response[0].displayName
-And print 'pattern = '+pattern 
+And def search_str = response[0].inum
+And param pattern = search_str
+And print search_str 
 When method GET
 Then status 200
 And print response
