@@ -144,7 +144,7 @@ public class ExternalUpdateTokenService extends ExternalScriptService {
     public boolean modifyRefreshToken(RefreshToken refreshToken, ExternalUpdateTokenContext context) {
         List<CustomScriptConfiguration> scripts = getScripts(context);
         if (scripts.isEmpty()) {
-            return false;
+            return true;
         }
         log.trace("Executing {} update-token modifyRefreshToken scripts.", scripts.size());
 
