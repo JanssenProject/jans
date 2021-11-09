@@ -8,6 +8,7 @@ package io.jans.as.server.service.external;
 
 import com.google.common.collect.Lists;
 import io.jans.as.model.token.JsonWebResponse;
+import io.jans.as.server.model.common.RefreshToken;
 import io.jans.as.server.service.external.context.ExternalUpdateTokenContext;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
@@ -120,5 +121,39 @@ public class ExternalUpdateTokenService extends ExternalScriptService {
 
         log.trace("No UpdateToken scripts associated with client {}", context.getClient().getClientId());
         return Lists.newArrayList();
+    }
+
+    public boolean modifyRefreshToken(CustomScriptConfiguration script, RefreshToken refreshToken, ExternalUpdateTokenContext context) {
+        try {
+            log.trace("Executing python 'modifyRefreshToken' method, script name: {}, context: {}", script.getName(), context);
+            context.setScript(script);
+
+            UpdateTokenType updateTokenType = (UpdateTokenType) script.getExternalType();
+            final boolean result = updateTokenType.modifyRefreshToken(refreshToken, context);
+            log.trace("Finished 'modifyRefreshToken' method, script name: {}, context: {}, result: {}", script.getName(), context, result);
+
+            return result;
+        } catch (Exception ex) {
+            log.error(ex.getMessage(), ex);
+            saveScriptError(script.getCustomScript(), ex);
+        }
+
+        return false;
+    }
+
+    public boolean modifyRefreshToken(RefreshToken refreshToken, ExternalUpdateTokenContext context) {
+        List<CustomScriptConfiguration> scripts = getScripts(context);
+        if (scripts.isEmpty()) {
+            return false;
+        }
+        log.trace("Executing {} update-token modifyRefreshToken scripts.", scripts.size());
+
+        for (CustomScriptConfiguration script : scripts) {
+            if (!modifyRefreshToken(script, refreshToken, context)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

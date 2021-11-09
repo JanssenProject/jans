@@ -288,7 +288,15 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         reToken = createRefreshToken(request, client, scope, authorizationGrant, dpopStr); // extend lifetime
                     } else {
                         log.trace("Create refresh token with fixed (not extended) lifetime taken from previous refresh token.");
-                        reToken = authorizationGrant.createRefreshToken(dpopStr, refreshTokenObject.getExpirationDate()); // do not extend lifetime
+
+                        ExecutionContext executionContext = new ExecutionContext(request, response);
+                        executionContext.setClient(client);
+                        executionContext.setGrant(authorizationGrant);
+                        executionContext.setDpop(dpopStr);
+                        executionContext.setAppConfiguration(appConfiguration);
+                        executionContext.setAttributeService(attributeService);
+
+                        reToken = authorizationGrant.createRefreshToken(executionContext, refreshTokenObject.getExpirationDate()); // do not extend lifetime
                     }
                 }
 
@@ -546,12 +554,19 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
             return null;
         }
 
+        ExecutionContext executionContext = new ExecutionContext(request, null);
+        executionContext.setGrant(grant);
+        executionContext.setClient(client);
+        executionContext.setAttributeService(attributeService);
+        executionContext.setAppConfiguration(appConfiguration);
+        executionContext.setDpop(dpop);
+
         final ExternalUpdateTokenContext context = new ExternalUpdateTokenContext(request, grant, client, appConfiguration, attributeService);
         final int refreshTokenLifetimeInSeconds = externalUpdateTokenService.getRefreshTokenLifetimeInSeconds(context);
         if (refreshTokenLifetimeInSeconds > 0) {
-            return grant.createRefreshToken(dpop, refreshTokenLifetimeInSeconds);
+            return grant.createRefreshToken(executionContext, refreshTokenLifetimeInSeconds);
         }
-        return grant.createRefreshToken(dpop);
+        return grant.createRefreshToken(executionContext);
     }
 
     /**

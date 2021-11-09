@@ -45,9 +45,9 @@ public interface IAuthorizationGrant {
 
     AccessToken createAccessToken(String dpop, String certAsPem, ExecutionContext executionContext);
 
-    RefreshToken createRefreshToken(String dpop);
+    RefreshToken createRefreshToken(ExecutionContext executionContext);
 
-    RefreshToken createRefreshToken(String dpop, int lifetime);
+    RefreshToken createRefreshToken(ExecutionContext executionContext, int lifetime);
 
     IdToken createIdToken(
             String nonce, AuthorizationCode authorizationCode, AccessToken accessToken, RefreshToken refreshToken,
