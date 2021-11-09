@@ -306,7 +306,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
     }
 
     @Override
-    public RefreshToken createRefreshToken(String dpop) {
+    public RefreshToken createRefreshToken(ExecutionContext context) {
         int lifetime = appConfiguration.getRefreshTokenLifetime();
         if (client.getRefreshTokenLifetime() != null && client.getRefreshTokenLifetime() > 0) {
             lifetime = client.getRefreshTokenLifetime();
@@ -315,16 +315,16 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
         RefreshToken refreshToken = new RefreshToken(lifetime);
 
         refreshToken.setSessionDn(getSessionDn());
-        refreshToken.setDpop(dpop);
+        refreshToken.setDpop(context.getDpop());
         return refreshToken;
     }
 
     @Override
-    public RefreshToken createRefreshToken(String dpop, int lifetime) {
+    public RefreshToken createRefreshToken(ExecutionContext context, int lifetime) {
         RefreshToken refreshToken = new RefreshToken(lifetime);
 
         refreshToken.setSessionDn(getSessionDn());
-        refreshToken.setDpop(dpop);
+        refreshToken.setDpop(context.getDpop());
 
         return refreshToken;
     }

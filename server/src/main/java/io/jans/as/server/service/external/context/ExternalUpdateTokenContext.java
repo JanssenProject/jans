@@ -11,8 +11,10 @@ import javax.servlet.http.HttpServletRequest;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.AttributeService;
 import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.server.model.common.AbstractAuthorizationGrant;
+import io.jans.as.server.model.common.AuthorizationGrant;
+import io.jans.as.server.model.common.ExecutionContext;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author Yuriy Movchan
@@ -20,14 +22,16 @@ import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 public class ExternalUpdateTokenContext extends ExternalScriptContext {
 
 	private final Client client;
-	private final AbstractAuthorizationGrant grant;
+	private final AuthorizationGrant grant;
 
-	private CustomScriptConfiguration script;
+    private final AppConfiguration appConfiguration;
+    private final AttributeService attributeService;
 
-	private final AppConfiguration appConfiguration;
-	private final AttributeService attributeService;
+    private CustomScriptConfiguration script;
+    @Nullable
+    private ExecutionContext executionContext;
 
-	public ExternalUpdateTokenContext(HttpServletRequest httpRequest, AbstractAuthorizationGrant grant,
+	public ExternalUpdateTokenContext(HttpServletRequest httpRequest, AuthorizationGrant grant,
 			Client client, AppConfiguration appConfiguration, AttributeService attributeService) {
 		super(httpRequest);
 		this.client = client;
@@ -35,6 +39,12 @@ public class ExternalUpdateTokenContext extends ExternalScriptContext {
 		this.appConfiguration = appConfiguration;
 		this.attributeService = attributeService;
 	}
+
+	public static ExternalUpdateTokenContext of(ExecutionContext executionContext) {
+        ExternalUpdateTokenContext context = new ExternalUpdateTokenContext(executionContext.getHttpRequest(), executionContext.getGrant(), executionContext.getClient(), executionContext.getAppConfiguration(), executionContext.getAttributeService());
+        context.setExecutionContext(executionContext);
+        return context;
+    }
 
 	public CustomScriptConfiguration getScript() {
 		return script;
@@ -48,7 +58,7 @@ public class ExternalUpdateTokenContext extends ExternalScriptContext {
 		return client;
 	}
 
-	public AbstractAuthorizationGrant getGrant() {
+	public AuthorizationGrant getGrant() {
 		return grant;
 	}
 
@@ -60,4 +70,12 @@ public class ExternalUpdateTokenContext extends ExternalScriptContext {
 		return attributeService;
 	}
 
+    @Nullable
+    public ExecutionContext getExecutionContext() {
+        return executionContext;
+    }
+
+    public void setExecutionContext(@Nullable ExecutionContext executionContext) {
+        this.executionContext = executionContext;
+    }
 }
