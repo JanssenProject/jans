@@ -12,6 +12,8 @@ package io.jans.as.model.jwk;
  */
 public interface JWKParameter {
 
+    String NAME = "name";
+    String DESCRIPTION = "descr";
     String JSON_WEB_KEY_SET = "keys";
     String KEY_TYPE = "kty";
     String KEY_USE = "use";

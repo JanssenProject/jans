@@ -25,6 +25,8 @@ import java.util.List;
  */
 public class JSONWebKey {
 
+    private String name;
+    private String descr;
     private String kid;
     private KeyType kty;
     private Use use;
@@ -46,6 +48,42 @@ public class JSONWebKey {
 
     private String x;
     private String y;
+
+    /**
+     * Returns the Key Name.
+     *
+     * @return the Key Name
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Sets the Key Name.
+     *  
+     * @param name the Key Name
+     */
+    public void setName(final String name) {
+        this.name = name;
+    }
+
+    /**
+     * Returns the Key Description.
+     * 
+     * @return the Key Description
+     */
+    public String getDescr() {
+        return this.descr;
+    }
+
+    /**
+     * Sets the Key Description.
+     * 
+     * @param description the Key Description
+     */
+    public void setDescr(final String description) {
+        this.descr = description;
+    }
 
     /**
      * Returns the Key ID. The Key ID member can be used to match a specific key. This can be used, for instance,
@@ -267,6 +305,12 @@ public class JSONWebKey {
     public JSONObject toJSONObject() throws JSONException {
         JSONObject jsonObj = new JSONObject();
 
+        if(name != null) {
+            jsonObj.put(JWKParameter.NAME, name);
+        }
+        if(descr != null) {
+            jsonObj.put(JWKParameter.DESCRIPTION, descr);
+        }
         jsonObj.put(JWKParameter.KEY_ID, kid);
         jsonObj.put(JWKParameter.KEY_TYPE, kty);
         if (use != null) {
@@ -299,6 +343,8 @@ public class JSONWebKey {
     public static JSONWebKey fromJSONObject(JSONObject jwkJSONObject) throws JSONException {
         JSONWebKey jwk = new JSONWebKey();
 
+        jwk.setName(jwkJSONObject.optString(JWKParameter.NAME));
+        jwk.setDescr(jwkJSONObject.optString(JWKParameter.DESCRIPTION));        
         jwk.setKid(jwkJSONObject.optString(JWKParameter.KEY_ID));
         jwk.setKty(KeyType.fromString(jwkJSONObject.optString(JWKParameter.KEY_TYPE)));
         jwk.setUse(Use.fromString(jwkJSONObject.optString(JWKParameter.KEY_USE)));
