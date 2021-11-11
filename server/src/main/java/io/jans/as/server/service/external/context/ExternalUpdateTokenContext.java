@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.AttributeService;
+import io.jans.as.model.common.GrantType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.server.model.common.AuthorizationGrant;
 import io.jans.as.server.model.common.ExecutionContext;
@@ -69,6 +70,10 @@ public class ExternalUpdateTokenContext extends ExternalScriptContext {
 	public AttributeService getAttributeService() {
 		return attributeService;
 	}
+
+	public boolean isRefreshingGrant() {
+	    return grant != null && grant.getGrantType() == GrantType.REFRESH_TOKEN;
+    }
 
     @Nullable
     public ExecutionContext getExecutionContext() {

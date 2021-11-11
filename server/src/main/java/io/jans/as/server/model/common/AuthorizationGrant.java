@@ -191,16 +191,27 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
     }
 
     @Override
-    public AccessToken createAccessToken(String dpop, String certAsPem, ExecutionContext context) {
+    public AccessToken createAccessToken(ExecutionContext context) {
         try {
-            final AccessToken accessToken = super.createAccessToken(dpop, certAsPem, context);
+            final AccessToken accessToken = super.createAccessToken(context);
             if (getClient().isAccessTokenAsJwt()) {
-                accessToken.setCode(createAccessTokenAsJwt(accessToken, dpop, context));
+                accessToken.setCode(createAccessTokenAsJwt(accessToken, context));
             }
-            if (accessToken.getExpiresIn() > 0) {
-                persist(asToken(accessToken));
+            if (accessToken.getExpiresIn() < 0) {
+                log.trace("Failed to create access token with negative expiration time");
+                return null;
             }
 
+            final TokenEntity tokenEntity = asToken(accessToken);
+            context.setAccessTokenEntity(tokenEntity);
+
+            boolean externalOk = externalUpdateTokenService.modifyAccessToken(accessToken, ExternalUpdateTokenContext.of(context));
+            if (!externalOk) {
+                log.trace("External script forbids access token creation.");
+                return null;
+            }
+
+            persist(tokenEntity);
             statService.reportAccessToken(getGrantType());
             metricService.incCounter(MetricType.TOKEN_ACCESS_TOKEN_COUNT);
 
@@ -214,7 +225,7 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
         }
     }
 
-    private String createAccessTokenAsJwt(AccessToken accessToken, String dpop, ExecutionContext context) throws Exception {
+    private String createAccessTokenAsJwt(AccessToken accessToken, ExecutionContext context) throws Exception {
         final User user = getUser();
         final Client client = getClient();
 
@@ -239,6 +250,7 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
         jwt.getClaims().setClaim("x5t#S256", accessToken.getX5ts256());
 
         // DPoP
+        final String dpop = context.getDpop();
         if (StringUtils.isNotBlank(dpop)) {
             jwt.getClaims().setNotBefore(accessToken.getCreationDate());
             JSONObject cnf = new JSONObject();
