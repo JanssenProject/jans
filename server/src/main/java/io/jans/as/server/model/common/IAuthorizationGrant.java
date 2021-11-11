@@ -43,7 +43,7 @@ public interface IAuthorizationGrant {
 
     String getSub();
 
-    AccessToken createAccessToken(String dpop, String certAsPem, ExecutionContext executionContext);
+    AccessToken createAccessToken(ExecutionContext executionContext);
 
     RefreshToken createRefreshToken(ExecutionContext executionContext);
 
