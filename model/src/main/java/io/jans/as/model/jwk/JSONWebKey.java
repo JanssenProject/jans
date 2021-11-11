@@ -297,6 +297,20 @@ public class JSONWebKey {
 
             byte[] hash = JwtUtil.getMessageDigestSHA256(jwkStr);
             result = Base64Util.base64urlencode(hash);
+        } else if (kty == KeyType.OKP) {
+            if (crv == null) throw new JWKException("The crv is required");
+            if (x == null) throw new JWKException("The x is required");
+
+            String jwkStr = new StringBuilder()
+                    .append("{")
+                    .append("\"crv\":").append("\"").append(crv).append("\",")
+                    .append("\"kty\":").append("\"").append(kty).append("\",")
+                    .append("\"x\":").append("\"").append(y).append("\"")
+                    .append("}")
+                    .toString();
+
+            byte[] hash = JwtUtil.getMessageDigestSHA256(jwkStr);
+            result = Base64Util.base64urlencode(hash);
         } else throw new JWKException("Thumbprint not supported for the kty");
 
         return result;
