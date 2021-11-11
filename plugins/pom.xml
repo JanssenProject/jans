@@ -18,7 +18,7 @@
 	<packaging>pom</packaging>
 
 	<modules>
-		<module>configapi-extension-util</module>
+		<module>shared</module>
 		<module>admin-ui-plugin</module>
 		<module>scim-plugin</module>
 	</modules>
