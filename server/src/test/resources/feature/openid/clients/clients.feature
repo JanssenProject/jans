@@ -54,16 +54,6 @@ And param startIndex = 1
 When method GET
 Then status 200
 And print response
-Given url mainUrl
-And header Authorization = 'Bearer ' + accessToken
-And def search_str = response[0].inum
-And param pattern = search_str
-And print search_str 
-When method GET
-Then status 200
-And print response
-And assert response.length !=0
-
 
 Scenario: Get an openid connect client by inum(unexisting client)
 Given url mainUrl + '/53553532727272772'
