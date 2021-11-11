@@ -242,7 +242,7 @@ public class CleanerTimerTest extends BaseComponentTest {
 
         // 1. create token
         final ClientCredentialsGrant grant = authorizationGrantList.createClientCredentialsGrant(new User(), client);
-        final AccessToken accessToken = grant.createAccessToken(null, null, new ExecutionContext(null, null));
+        final AccessToken accessToken = grant.createAccessToken(new ExecutionContext(null, null));
 
         // 2. token exists
         assertNotNull(grantService.getGrantByCode(accessToken.getCode()));
