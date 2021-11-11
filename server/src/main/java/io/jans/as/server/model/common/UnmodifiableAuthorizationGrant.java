@@ -78,7 +78,7 @@ public class UnmodifiableAuthorizationGrant implements IAuthorizationGrant {
     }
 
     @Override
-    public AccessToken createAccessToken(String dpop, String certAsPem, ExecutionContext executionContext) {
+    public AccessToken createAccessToken(ExecutionContext executionContext) {
         throw new UnsupportedOperationException(NOT_ALLOWED_FOR_UNMODIFIABLE_AUTHORIZATION_GRANT);
     }
 

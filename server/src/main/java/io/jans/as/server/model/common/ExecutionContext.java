@@ -40,6 +40,7 @@ public class ExecutionContext {
     private TokenEntity refreshTokenEntity;
 
     private String dpop;
+    private String certAsPem;
 
     @NotNull
     private final Map<String, String> attributes = new HashMap<>();
@@ -148,5 +149,13 @@ public class ExecutionContext {
 
     public void setDpop(String dpop) {
         this.dpop = dpop;
+    }
+
+    public String getCertAsPem() {
+        return certAsPem;
+    }
+
+    public void setCertAsPem(String certAsPem) {
+        this.certAsPem = certAsPem;
     }
 }
