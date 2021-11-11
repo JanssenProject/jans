@@ -8,6 +8,7 @@ package io.jans.as.server.service.external;
 
 import com.google.common.collect.Lists;
 import io.jans.as.model.token.JsonWebResponse;
+import io.jans.as.server.model.common.AccessToken;
 import io.jans.as.server.model.common.RefreshToken;
 import io.jans.as.server.service.external.context.ExternalUpdateTokenContext;
 import io.jans.model.custom.script.CustomScriptType;
@@ -150,6 +151,40 @@ public class ExternalUpdateTokenService extends ExternalScriptService {
 
         for (CustomScriptConfiguration script : scripts) {
             if (!modifyRefreshToken(script, refreshToken, context)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public boolean modifyAccessToken(CustomScriptConfiguration script, AccessToken accessToken, ExternalUpdateTokenContext context) {
+        try {
+            log.trace("Executing python 'modifyAccessToken' method, script name: {}, context: {}", script.getName(), context);
+            context.setScript(script);
+
+            UpdateTokenType updateTokenType = (UpdateTokenType) script.getExternalType();
+            final boolean result = updateTokenType.modifyAccessToken(accessToken, context);
+            log.trace("Finished 'modifyAccessToken' method, script name: {}, context: {}, result: {}", script.getName(), context, result);
+
+            return result;
+        } catch (Exception ex) {
+            log.error(ex.getMessage(), ex);
+            saveScriptError(script.getCustomScript(), ex);
+        }
+
+        return false;
+    }
+
+    public boolean modifyAccessToken(AccessToken accessToken, ExternalUpdateTokenContext context) {
+        List<CustomScriptConfiguration> scripts = getScripts(context);
+        if (scripts.isEmpty()) {
+            return true;
+        }
+        log.trace("Executing {} update-token modifyAccessToken scripts.", scripts.size());
+
+        for (CustomScriptConfiguration script : scripts) {
+            if (!modifyAccessToken(script, accessToken, context)) {
                 return false;
             }
         }
