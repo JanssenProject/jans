@@ -286,7 +286,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
     }
 
     @Override
-    public AccessToken createAccessToken(String dpop, String certAsPem, ExecutionContext executionContext) {
+    public AccessToken createAccessToken(ExecutionContext executionContext) {
         int lifetime = appConfiguration.getAccessTokenLifetime();
         // Jans Auth #830 Client-specific access token expiration
         if (client != null && client.getAccessTokenLifetime() != null && client.getAccessTokenLifetime() > 0) {
@@ -295,8 +295,9 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
         AccessToken accessToken = new AccessToken(lifetime);
 
         accessToken.setSessionDn(getSessionDn());
-        accessToken.setX5ts256(CertUtils.confirmationMethodHashS256(certAsPem));
+        accessToken.setX5ts256(CertUtils.confirmationMethodHashS256(executionContext.getCertAsPem()));
 
+        final String dpop = executionContext.getDpop();
         if (StringUtils.isNoneBlank(dpop)) {
             accessToken.setDpop(dpop);
             accessToken.setTokenType(TokenType.DPOP);
