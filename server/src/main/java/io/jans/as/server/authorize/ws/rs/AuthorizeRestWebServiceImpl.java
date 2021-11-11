@@ -689,7 +689,10 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     authorizationGrant.setSessionDn(sessionUser.getDn());
                     authorizationGrant.save(); // call save after object modification!!!
                 }
-                newAccessToken = authorizationGrant.createAccessToken(null, httpRequest.getHeader("X-ClientCert"), new ExecutionContext(httpRequest, httpResponse));
+
+                final ExecutionContext executionContext = new ExecutionContext(httpRequest, httpResponse);
+                executionContext.setCertAsPem(httpRequest.getHeader("X-ClientCert"));
+                newAccessToken = authorizationGrant.createAccessToken(executionContext);
 
                 redirectUriResponse.getRedirectUri().addResponseParameter(AuthorizeResponseParam.ACCESS_TOKEN, newAccessToken.getCode());
                 redirectUriResponse.getRedirectUri().addResponseParameter(AuthorizeResponseParam.TOKEN_TYPE, newAccessToken.getTokenType().toString());
@@ -813,17 +816,18 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         cibaRequestService.removeCibaRequest(authReqId);
         CIBAGrant cibaGrant = authorizationGrantList.createCIBAGrant(cibaRequest);
 
-        AccessToken accessToken = cibaGrant.createAccessToken(null, httpRequest.getHeader("X-ClientCert"), new ExecutionContext(httpRequest, httpResponse));
-        log.debug("Issuing access token: {}", accessToken.getCode());
-
-        ExternalUpdateTokenContext context = new ExternalUpdateTokenContext(httpRequest, cibaGrant, client, appConfiguration, attributeService);
-        Function<JsonWebResponse, Void> postProcessor = externalUpdateTokenService.buildModifyIdTokenProcessor(context);
-
         ExecutionContext executionContext = new ExecutionContext(httpRequest, httpResponse);
         executionContext.setAppConfiguration(appConfiguration);
         executionContext.setAttributeService(attributeService);
         executionContext.setGrant(cibaGrant);
         executionContext.setClient(client);
+        executionContext.setCertAsPem(httpRequest.getHeader("X-ClientCert"));
+
+        AccessToken accessToken = cibaGrant.createAccessToken(executionContext);
+        log.debug("Issuing access token: {}", accessToken.getCode());
+
+        ExternalUpdateTokenContext context = new ExternalUpdateTokenContext(httpRequest, cibaGrant, client, appConfiguration, attributeService);
+        Function<JsonWebResponse, Void> postProcessor = externalUpdateTokenService.buildModifyIdTokenProcessor(context);
 
         final int refreshTokenLifetimeInSeconds = externalUpdateTokenService.getRefreshTokenLifetimeInSeconds(context);
         final RefreshToken refreshToken;
