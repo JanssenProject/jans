@@ -26,7 +26,7 @@ import io.jans.as.model.common.ResponseType;
  * Encapsulates functionality to make authorization request calls to an authorization server via REST Services.
  *
  * @author Javier Rojas Blum
- * @version October 7, 2019
+ * @version November 12, 2021
  */
 public class AuthorizeClient extends BaseClient<AuthorizationRequest, AuthorizationResponse> {
 
@@ -216,7 +216,7 @@ public class AuthorizeClient extends BaseClient<AuthorizationRequest, Authorizat
         addReqParam(AuthorizeRequestParam.SCOPE, scopesAsString);
         addReqParam(AuthorizeRequestParam.REDIRECT_URI, getRequest().getRedirectUri());
         addReqParam(AuthorizeRequestParam.STATE, getRequest().getState());
-
+        addReqParam(AuthorizeRequestParam.RESPONSE_MODE, getRequest().getResponseMode());
         addReqParam(AuthorizeRequestParam.NONCE, getRequest().getNonce());
         addReqParam(AuthorizeRequestParam.DISPLAY, getRequest().getDisplay());
         addReqParam(AuthorizeRequestParam.PROMPT, promptsAsString);
