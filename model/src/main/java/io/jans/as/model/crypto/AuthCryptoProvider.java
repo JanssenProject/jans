@@ -45,7 +45,6 @@ import org.json.JSONObject;
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -159,17 +158,21 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
 
     @Override
     public JSONObject generateKey(Algorithm algorithm, Long expirationTime) throws CryptoProviderException {
+        return generateKey(algorithm, expirationTime,  2048);
+    }
+
+    @Override
+    public JSONObject generateKey(Algorithm algorithm, Long expirationTime, int keyLength) throws CryptoProviderException {
         if (algorithm == null) {
             throw new IllegalArgumentException("The signature algorithm parameter cannot be null");
         }
         JSONObject jsonObject = null;
         try {
             Use algUse = algorithm.getUse();
-            if(algUse == Use.SIGNATURE) {
-                    jsonObject = generateKeySignature(algorithm, expirationTime);
-            }
-            else if(algUse == Use.ENCRYPTION) {
-                jsonObject = generateKeyEncryption(algorithm, expirationTime);
+            if (algUse == Use.SIGNATURE) {
+                jsonObject = generateKeySignature(algorithm, expirationTime, keyLength);
+            } else if (algUse == Use.ENCRYPTION) {
+                jsonObject = generateKeyEncryption(algorithm, expirationTime, keyLength);
             }
         } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException | OperatorCreationException
                 | CertificateException | KeyStoreException | IOException e) {
@@ -434,7 +437,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
         return keyStore;
     }
 
-    private JSONObject generateKeySignature(Algorithm algorithm, Long expirationTime) 
+    private JSONObject generateKeySignature(Algorithm algorithm, Long expirationTime, int keyLength)
             throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException, OperatorCreationException,
             CertificateException, KeyStoreException, IOException {
 
@@ -446,31 +449,31 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
         KeyPairGenerator keyGen = null;
         final AlgorithmFamily algorithmFamily = algorithm.getFamily();
         switch (algorithmFamily) {
-        case RSA: {
-            keyGen = KeyPairGenerator.getInstance(algorithmFamily.toString(), "BC");
-            keyGen.initialize(2048, new SecureRandom());
-            break;
-        }
-        case EC: {
-            ECGenParameterSpec eccgen = new ECGenParameterSpec(signatureAlgorithm.getCurve().getAlias());
-            keyGen = KeyPairGenerator.getInstance(algorithmFamily.toString(), "BC");
-            keyGen.initialize(eccgen, new SecureRandom());
-            break;
-        }
-        case ED: {
-            EdDSAParameterSpec edSpec = new EdDSAParameterSpec(signatureAlgorithm.getName());
-            keyGen = KeyPairGenerator.getInstance(signatureAlgorithm.getName(), "BC");
-            keyGen.initialize(edSpec, new SecureRandom());
-            break;
-        }
-        default: {
-            throw new IllegalStateException("The provided signature algorithm parameter is not supported: algorithmFamily = " + algorithmFamily);
-        }
+            case RSA: {
+                keyGen = KeyPairGenerator.getInstance(algorithmFamily.toString(), "BC");
+                keyGen.initialize(keyLength, new SecureRandom());
+                break;
+            }
+            case EC: {
+                ECGenParameterSpec eccgen = new ECGenParameterSpec(signatureAlgorithm.getCurve().getAlias());
+                keyGen = KeyPairGenerator.getInstance(algorithmFamily.toString(), "BC");
+                keyGen.initialize(eccgen, new SecureRandom());
+                break;
+            }
+            case ED: {
+                EdDSAParameterSpec edSpec = new EdDSAParameterSpec(signatureAlgorithm.getName());
+                keyGen = KeyPairGenerator.getInstance(signatureAlgorithm.getName(), "BC");
+                keyGen.initialize(edSpec, new SecureRandom());
+                break;
+            }
+            default: {
+                throw new IllegalStateException("The provided signature algorithm parameter is not supported: algorithmFamily = " + algorithmFamily);
+            }
         }
         return getJson(algorithm, keyGen, signatureAlgorithm.getAlgorithm(), expirationTime);
     }
 
-    private JSONObject generateKeyEncryption(Algorithm algorithm, Long expirationTime) throws NoSuchAlgorithmException, NoSuchProviderException,
+    private JSONObject generateKeyEncryption(Algorithm algorithm, Long expirationTime, int keyLength) throws NoSuchAlgorithmException, NoSuchProviderException,
             InvalidAlgorithmParameterException, OperatorCreationException, CertificateException, KeyStoreException, IOException {
 
         KeyEncryptionAlgorithm keyEncryptionAlgorithm = KeyEncryptionAlgorithm.fromName(algorithm.getParamName());
@@ -482,23 +485,23 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
         String signatureAlgorithm = null;
         final AlgorithmFamily algorithmFamily = algorithm.getFamily();
         switch (algorithmFamily) {
-        case RSA: {
-            keyGen = KeyPairGenerator.getInstance(algorithmFamily.toString(), "BC");
-            keyGen.initialize(2048, new SecureRandom());
-            signatureAlgorithm = "SHA256WITHRSA";
-            break;
-        }
-        case EC: {
-            ECGenParameterSpec eccgen = new ECGenParameterSpec(keyEncryptionAlgorithm.getCurve().getAlias());
-            keyGen = KeyPairGenerator.getInstance(algorithmFamily.toString(), "BC");
-            keyGen.initialize(eccgen, new SecureRandom());
-            signatureAlgorithm = "SHA256WITHECDSA";
-            break;
-        }
-        default: {
-            throw new IllegalStateException(
-                    "The provided key encryption algorithm parameter is not supported: algorithmFamily = " + algorithmFamily);
-        }
+            case RSA: {
+                keyGen = KeyPairGenerator.getInstance(algorithmFamily.toString(), "BC");
+                keyGen.initialize(keyLength, new SecureRandom());
+                signatureAlgorithm = "SHA256WITHRSA";
+                break;
+            }
+            case EC: {
+                ECGenParameterSpec eccgen = new ECGenParameterSpec(keyEncryptionAlgorithm.getCurve().getAlias());
+                keyGen = KeyPairGenerator.getInstance(algorithmFamily.toString(), "BC");
+                keyGen.initialize(eccgen, new SecureRandom());
+                signatureAlgorithm = "SHA256WITHECDSA";
+                break;
+            }
+            default: {
+                throw new IllegalStateException(
+                        "The provided key encryption algorithm parameter is not supported: algorithmFamily = " + algorithmFamily);
+            }
         }
         return getJson(algorithm, keyGen, signatureAlgorithm, expirationTime);
     }
