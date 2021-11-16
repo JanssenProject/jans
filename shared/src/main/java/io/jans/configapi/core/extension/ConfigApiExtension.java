@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.configapi.plugin.extension;
+package io.jans.configapi.core.extension;
 
 import javax.interceptor.InterceptorBinding;
 import java.lang.annotation.Documented;

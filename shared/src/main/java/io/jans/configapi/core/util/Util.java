@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.configapi.plugin.util;
+package io.jans.configapi.core.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
