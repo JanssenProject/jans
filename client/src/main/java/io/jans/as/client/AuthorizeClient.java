@@ -10,11 +10,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.ws.rs.HttpMethod;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.log4j.Logger;
-import org.jboss.resteasy.client.ClientExecutor;
-import org.jboss.resteasy.client.ClientRequest;
+import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 
 import io.jans.as.model.authorize.AuthorizeRequestParam;
 import io.jans.as.model.common.AuthorizationMethod;
@@ -180,12 +182,14 @@ public class AuthorizeClient extends BaseClient<AuthorizationRequest, Authorizat
     }
 
     @Deprecated
-    public AuthorizationResponse exec(ClientExecutor clientExecutor) {
+    public AuthorizationResponse exec(ClientHttpEngine engine) {
         AuthorizationResponse response = null;
 
         try {
-            clientRequest = new ClientRequest(getUrl(), clientExecutor);
-            response = exec_();
+        	resteasyClient = ((ResteasyClientBuilder) ResteasyClientBuilder.newBuilder()).httpEngine(engine).build();
+        	webTarget = resteasyClient.target(getUrl());
+
+			response = exec_();
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }
@@ -195,14 +199,6 @@ public class AuthorizeClient extends BaseClient<AuthorizationRequest, Authorizat
     }
 
     private AuthorizationResponse exec_() throws Exception {
-        // Prepare request parameters
-        clientRequest.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
-        clientRequest.setHttpMethod(getHttpMethod());
-
-        if (getRequest().isUseNoRedirectHeader()) {
-            clientRequest.header(AuthorizationRequest.NO_REDIRECT_HEADER, "true");
-        }
-
         final String responseTypesAsString = getRequest().getResponseTypesAsString();
         final String scopesAsString = getRequest().getScopesAsString();
         final String promptsAsString = getRequest().getPromptsAsString();
@@ -249,15 +245,26 @@ public class AuthorizeClient extends BaseClient<AuthorizationRequest, Authorizat
             addReqParam(key, request.getCustomParameters().get(key));
         }
 
+        Builder clientRequest = webTarget.request();
+        applyCookies(clientRequest);
+
+        // Prepare request parameters
+        clientRequest.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
+////        clientRequest.setHttpMethod(getHttpMethod());
+
+        if (getRequest().isUseNoRedirectHeader()) {
+            clientRequest.header(AuthorizationRequest.NO_REDIRECT_HEADER, "true");
+        }
+
         if (request.getAuthorizationMethod() != AuthorizationMethod.FORM_ENCODED_BODY_PARAMETER && request.hasCredentials()) {
             clientRequest.header("Authorization", "Basic " + request.getEncodedCredentials());
         }
 
         // Call REST Service and handle response
         if (request.getAuthorizationMethod() == AuthorizationMethod.FORM_ENCODED_BODY_PARAMETER) {
-            clientResponse = clientRequest.post(String.class);
+            clientResponse = clientRequest.buildPost(Entity.form(requestForm)).invoke();
         } else {
-            clientResponse = clientRequest.get(String.class);
+            clientResponse = clientRequest.buildGet().invoke();
         }
 
         setResponse(new AuthorizationResponse(clientResponse));

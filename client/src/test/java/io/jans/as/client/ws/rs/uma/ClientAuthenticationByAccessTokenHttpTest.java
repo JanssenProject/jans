@@ -32,7 +32,6 @@ import io.jans.as.model.uma.UmaMetadata;
 import io.jans.as.model.uma.UmaNeedInfoResponse;
 import io.jans.as.model.uma.wrapper.Token;
 import io.jans.as.model.util.Util;
-import org.jboss.resteasy.client.ClientResponseFailure;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
@@ -75,7 +74,7 @@ public class ClientAuthenticationByAccessTokenHttpTest extends BaseTest {
         this.metadata = UmaClientFactory.instance().createMetadataService(umaMetaDataUrl, clientEngine(true)).getMetadata();
         assertIt(metadata);
 
-        pat = UmaClient.requestPat(tokenEndpoint, umaPatClientId, umaPatClientSecret, clientExecutor(true));
+        pat = UmaClient.requestPat(tokenEndpoint, umaPatClientId, umaPatClientSecret, clientEngine(true));
         assertIt(pat);
 
         this.registerResourceTest = new RegisterResourceFlowHttpTest(this.metadata);
@@ -107,7 +106,7 @@ public class ClientAuthenticationByAccessTokenHttpTest extends BaseTest {
         registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setExecutor(clientExecutor(true));
+        registerClient.setExecutor(clientEngine(true));
         registerClient.setRequest(registerRequest);
         RegisterResponse response = registerClient.exec();
 
@@ -143,7 +142,7 @@ public class ClientAuthenticationByAccessTokenHttpTest extends BaseTest {
         authorizationRequest.getPrompts().add(Prompt.NONE);
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
-        authorizeClient.setExecutor(clientExecutor(true));
+        authorizeClient.setExecutor(clientEngine(true));
         authorizeClient.setRequest(authorizationRequest);
         AuthorizationResponse authorizationResponse = authorizeClient.exec();
 
@@ -178,7 +177,7 @@ public class ClientAuthenticationByAccessTokenHttpTest extends BaseTest {
         tokenRequest.setAuthPassword(clientSecret);
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
-        tokenClient.setExecutor(clientExecutor(true));
+        tokenClient.setExecutor(clientEngine(true));
         tokenClient.setRequest(tokenRequest);
         TokenResponse tokenResponse = tokenClient.exec();
 
@@ -224,7 +223,6 @@ public class ClientAuthenticationByAccessTokenHttpTest extends BaseTest {
                     GrantType.OXAUTH_UMA_TICKET.getValue(),
                     permissionFlowTest.ticket,
                     null, null, null, null, null);
-        } catch (ClientResponseFailure ex) {
         } catch (ClientErrorException ex) {
             // expected need_info error :
             // sample:  {"error":"need_info","ticket":"c024311b-f451-41db-95aa-cd405f16eed4","required_claims":[{"issuer":["https://localhost:8443"],"name":"country","claim_token_format":["http://openid.net/specs/openid-connect-core-1_0.html#IDToken"],"claim_type":"string","friendly_name":"country"},{"issuer":["https://localhost:8443"],"name":"city","claim_token_format":["http://openid.net/specs/openid-connect-core-1_0.html#IDToken"],"claim_type":"string","friendly_name":"city"}],"redirect_user":"https://localhost:8443/restv1/uma/gather_claimsgathering_id=sampleClaimsGathering&&?gathering_id=sampleClaimsGathering&&"}

@@ -9,12 +9,14 @@ package io.jans.as.client;
 import java.util.List;
 
 import javax.ws.rs.HttpMethod;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.jboss.resteasy.client.ClientExecutor;
-import org.jboss.resteasy.client.ClientRequest;
+import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 
 import io.jans.as.client.util.ClientUtil;
 import io.jans.as.model.register.ApplicationType;
@@ -75,15 +77,21 @@ public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse
     }
 
     @Deprecated
-    public RegisterResponse exec(ClientExecutor clientExecutor) {
-        this.clientRequest = new ClientRequest(getUrl(), clientExecutor);
-        return _exec();
+    public RegisterResponse exec(ClientHttpEngine engine) {
+        resteasyClient = ((ResteasyClientBuilder) ResteasyClientBuilder.newBuilder()).httpEngine(engine).build();
+		webTarget = resteasyClient.target(getUrl());
+
+		return _exec();
     }
 
     private RegisterResponse _exec() {
         try {
             // Prepare request parameters
-            clientRequest.setHttpMethod(getHttpMethod());
+//            clientRequest.setHttpMethod(getHttpMethod());
+
+            Entity requestEntity = null;
+            Builder clientRequest = webTarget.request();
+            applyCookies(clientRequest);
 
             // POST - Client Register, PUT - update client
             if (getHttpMethod().equals(HttpMethod.POST) || getHttpMethod().equals(HttpMethod.PUT)) {
@@ -96,7 +104,7 @@ public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse
 
                 String bodyString = getRequest().hasJwtRequestAsString() ? getRequest().getJwtRequestAsString() : ClientUtil.toPrettyJson(getRequest().getJSONParameters());
 
-                clientRequest.body(MediaType.APPLICATION_JSON, bodyString);
+                requestEntity = Entity.json(bodyString);
             } else { // GET, Client Read
                 clientRequest.accept(MediaType.APPLICATION_JSON);
 
@@ -108,13 +116,13 @@ public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse
             // Call REST Service and handle response
 
             if (getHttpMethod().equals(HttpMethod.POST)) {
-                clientResponse = clientRequest.post(String.class);
+                clientResponse = clientRequest.buildPost(requestEntity).invoke();
             } else if (getHttpMethod().equals(HttpMethod.PUT)) {
-                clientResponse = clientRequest.put(String.class);
+                clientResponse = clientRequest.buildPut(requestEntity).invoke();
             } else if (getHttpMethod().equals(HttpMethod.DELETE)) {
-                clientResponse = clientRequest.delete(String.class);
+                clientResponse = clientRequest.buildDelete().invoke();
             } else { // GET
-                clientResponse = clientRequest.get(String.class);
+                clientResponse = clientRequest.buildGet().invoke();
             }
             setResponse(new RegisterResponse(clientResponse));
         } catch (Exception e) {
