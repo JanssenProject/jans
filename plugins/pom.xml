@@ -18,7 +18,6 @@
 	<packaging>pom</packaging>
 
 	<modules>
-		<module>shared</module>
 		<module>admin-ui-plugin</module>
 		<module>scim-plugin</module>
 	</modules>
