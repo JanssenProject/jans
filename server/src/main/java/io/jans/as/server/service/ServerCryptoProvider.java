@@ -82,8 +82,13 @@ public class ServerCryptoProvider extends AbstractCryptoProvider {
     }
 
     @Override
+    public JSONObject generateKey(Algorithm algorithm, Long expirationTime, int keyLength) throws CryptoProviderException {
+        return cryptoProvider.generateKey(algorithm, expirationTime, keyLength);
+    }
+
+    @Override
     public JSONObject generateKey(Algorithm algorithm, Long expirationTime) throws CryptoProviderException {
-        return cryptoProvider.generateKey(algorithm, expirationTime);
+        return generateKey(algorithm, expirationTime, 2048);
     }
 
     @Override
