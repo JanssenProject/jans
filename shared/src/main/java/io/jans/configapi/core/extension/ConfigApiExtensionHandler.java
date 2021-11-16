@@ -1,4 +1,4 @@
-package io.jans.configapi.plugin.extension;
+package io.jans.configapi.core.extension;
 
 import javax.enterprise.inject.spi.Extension;
 
