@@ -130,7 +130,7 @@ public class RegistrationWithSoftwareStatementTest extends BaseTest {
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
-        registerClient.setExecutor(clientExecutor(true));
+        registerClient.setExecutor(clientEngine(true));
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
@@ -238,7 +238,7 @@ public class RegistrationWithSoftwareStatementTest extends BaseTest {
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
-        registerClient.setExecutor(clientExecutor(true));
+        registerClient.setExecutor(clientEngine(true));
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
@@ -420,7 +420,7 @@ public class RegistrationWithSoftwareStatementTest extends BaseTest {
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
-        registerClient.setExecutor(clientExecutor(true));
+        registerClient.setExecutor(clientEngine(true));
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
@@ -440,7 +440,7 @@ public class RegistrationWithSoftwareStatementTest extends BaseTest {
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
-        registerClient.setExecutor(clientExecutor(true));
+        registerClient.setExecutor(clientEngine(true));
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
@@ -510,7 +510,7 @@ public class RegistrationWithSoftwareStatementTest extends BaseTest {
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest.sign(SignatureAlgorithm.RS256, keyId, cryptoProvider));
-        registerClient.setExecutor(clientExecutor(true));
+        registerClient.setExecutor(clientEngine(true));
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
@@ -630,7 +630,7 @@ public class RegistrationWithSoftwareStatementTest extends BaseTest {
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest.sign(SignatureAlgorithm.RS256, keyId, cryptoProvider));
-        registerClient.setExecutor(clientExecutor(true));
+        registerClient.setExecutor(clientEngine(true));
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
@@ -684,7 +684,7 @@ public class RegistrationWithSoftwareStatementTest extends BaseTest {
         assertTrue(response.getClaims().containsKey(SOFTWARE_STATEMENT.toString()));
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
-        tokenClient.setExecutor(clientExecutor(true));
+        tokenClient.setExecutor(clientEngine(true));
         TokenResponse tokenResponse = tokenClient.execClientCredentialsGrant("openid", response.getClientId(), response.getClientSecret());
 
         showClient(tokenClient);

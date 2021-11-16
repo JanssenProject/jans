@@ -20,7 +20,7 @@ import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.StringUtils;
-import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
+import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
 import org.testng.Assert;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
@@ -92,7 +92,7 @@ public class TokenBindingHttpTest extends BaseTest {
         authorizationRequest.getPrompts().add(Prompt.NONE);
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
-        authorizeClient.setExecutor(new ApacheHttpClient4Executor(createHttpClientTrustAll()));
+        authorizeClient.setExecutor(new ApacheHttpClient43Engine(createHttpClientTrustAll()));
         authorizeClient.setRequest(authorizationRequest);
         authorizeClient.getHeaders().put("Sec-Token-Binding", ENCODED_TOKEN_BINDING_MESSAGE);
 
@@ -119,7 +119,7 @@ public class TokenBindingHttpTest extends BaseTest {
         registerRequest.setIdTokenTokenBindingCnf(JwtClaimName.TOKEN_BINDING_HASH); // token binding hash for cnf
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setExecutor(new ApacheHttpClient4Executor(createHttpClientTrustAll()));
+        registerClient.setExecutor(new ApacheHttpClient43Engine(createHttpClientTrustAll()));
         registerClient.setRequest(registerRequest);
         RegisterResponse registerResponse = registerClient.exec();
 

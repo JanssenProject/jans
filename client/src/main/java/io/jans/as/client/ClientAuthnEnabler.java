@@ -6,7 +6,8 @@
 
 package io.jans.as.client;
 
-import org.jboss.resteasy.client.ClientRequest;
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.core.Form;
 
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.token.ClientAssertionType;
@@ -17,9 +18,10 @@ import io.jans.as.model.token.ClientAssertionType;
  */
 public class ClientAuthnEnabler {
 
-    private final ClientRequest clientRequest;
+    private Builder clientRequest;
+    private Form requestForm;
 
-    public ClientAuthnEnabler(ClientRequest clientRequest) {
+    public ClientAuthnEnabler(Builder clientRequest, Form requestForm) {
         this.clientRequest = clientRequest;
     }
 
@@ -32,21 +34,21 @@ public class ClientAuthnEnabler {
 
         if (request.getAuthenticationMethod() == AuthenticationMethod.CLIENT_SECRET_POST) {
             if (request.getAuthUsername() != null && !request.getAuthUsername().isEmpty()) {
-                clientRequest.formParameter("client_id", request.getAuthUsername());
+                requestForm.param("client_id", request.getAuthUsername());
             }
             if (request.getAuthPassword() != null && !request.getAuthPassword().isEmpty()) {
-                clientRequest.formParameter("client_secret", request.getAuthPassword());
+                requestForm.param("client_secret", request.getAuthPassword());
             }
             return;
         }
         if (request.getAuthenticationMethod() == AuthenticationMethod.CLIENT_SECRET_JWT ||
                 request.getAuthenticationMethod() == AuthenticationMethod.PRIVATE_KEY_JWT) {
-            clientRequest.formParameter("client_assertion_type", ClientAssertionType.JWT_BEARER);
+            requestForm.param("client_assertion_type", ClientAssertionType.JWT_BEARER.toString());
             if (request.getClientAssertion() != null) {
-                clientRequest.formParameter("client_assertion", request.getClientAssertion());
+                requestForm.param("client_assertion", request.getClientAssertion());
             }
             if (request.getAuthUsername() != null && !request.getAuthUsername().isEmpty()) {
-                clientRequest.formParameter("client_id", request.getAuthUsername());
+                requestForm.param("client_id", request.getAuthUsername());
             }
         }
     }

@@ -3,7 +3,7 @@ package io.jans.as.client.par;
 import io.jans.as.client.BaseResponseWithErrors;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.error.IErrorType;
-import org.jboss.resteasy.client.ClientResponse;
+import javax.ws.rs.core.Response;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -15,7 +15,7 @@ public class ParResponse extends BaseResponseWithErrors {
     private String requestUri;
     private Integer expiresIn;
 
-    public ParResponse(ClientResponse<String> clientResponse) {
+    public ParResponse(Response clientResponse) {
         super(clientResponse);
         parseJson(entity);
     }

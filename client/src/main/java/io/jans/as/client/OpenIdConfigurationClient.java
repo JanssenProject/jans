@@ -13,6 +13,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.ws.rs.HttpMethod;
+import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 
@@ -58,22 +59,26 @@ public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationReq
     private OpenIdConfigurationResponse exec() throws IOException {
         setRequest(new OpenIdConfigurationRequest());
 
-        // Prepare request parameters
-        clientRequest.accept(MEDIA_TYPES);
-        clientRequest.setHttpMethod(getHttpMethod());
-
-        // Support AWS LB
-        clientRequest.followRedirects(true);
-
         // Call REST Service and handle response
         String entity = null;
         try {
-            clientResponse = clientRequest.get(String.class);
+            Builder clientRequest = webTarget.request();
+            applyCookies(clientRequest);
+
+            // Prepare request parameters
+            clientRequest.accept(MEDIA_TYPES);
+//            clientRequest.setHttpMethod(getHttpMethod());
+
+            // Support AWS LB
+            // TODO: Implement follow redirect manually because we have to set engine.setFollowRedirects(true); on engine layer 
+//            clientRequest.followRedirects(true);
+            
+            clientResponse = clientRequest.buildGet().invoke();
             int status = clientResponse.getStatus();
 
             setResponse(new OpenIdConfigurationResponse(status));
 
-            entity = clientResponse.getEntity(String.class);
+            entity = clientResponse.readEntity(String.class);
             getResponse().setEntity(entity);
             getResponse().setHeaders(clientResponse.getMetadata());
             parse(entity, getResponse());
@@ -82,9 +87,6 @@ public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationReq
             if (entity != null) {
                 LOG.error("Invalid JSON: " + entity);
             }
-        } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
-            throw e;
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
             LOG.error(e.getMessage(), e); // Unexpected exception.
