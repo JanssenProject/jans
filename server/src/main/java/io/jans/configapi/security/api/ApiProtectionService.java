@@ -172,9 +172,11 @@ public class ApiProtectionService {
             }
         }
 
-        // Add to scope cache anyways
-        scopeList.add(scope);
-        ApiProtectionCache.putScope(scope);
+        // Add to scope if not null
+        if (scope != null) {
+            scopeList.add(scope);
+            ApiProtectionCache.putScope(scope);
+        }
         return scopeList;
     }
 
