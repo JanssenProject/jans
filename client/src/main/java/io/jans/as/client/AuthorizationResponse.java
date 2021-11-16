@@ -17,7 +17,7 @@ import io.jans.as.model.util.JwtUtil;
 import io.jans.as.model.util.Util;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.jboss.resteasy.client.ClientResponse;
+import javax.ws.rs.core.Response;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -29,6 +29,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import javax.ws.rs.core.Response;
 
 import static io.jans.as.model.authorize.AuthorizeResponseParam.ACCESS_TOKEN;
 import static io.jans.as.model.authorize.AuthorizeResponseParam.AUD;
@@ -83,7 +85,7 @@ public class AuthorizationResponse extends BaseResponse {
     /**
      * Constructs an authorization response.
      */
-    public AuthorizationResponse(ClientResponse<String> clientResponse) {
+    public AuthorizationResponse(Response clientResponse) {
         super(clientResponse);
         customParams = new HashMap<>();
 

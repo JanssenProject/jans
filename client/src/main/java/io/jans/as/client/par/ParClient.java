@@ -6,6 +6,8 @@ import io.jans.as.model.authorize.AuthorizeRequestParam;
 import org.apache.log4j.Logger;
 
 import javax.ws.rs.HttpMethod;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.MediaType;
 
 /**
@@ -44,10 +46,6 @@ public class ParClient extends BaseClient<ParRequest, ParResponse> {
     private ParResponse exec_() throws Exception {
         // Prepare request parameters
         initClientRequest();
-        new ClientAuthnEnabler(clientRequest).exec(request);
-
-        clientRequest.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
-        clientRequest.setHttpMethod(getHttpMethod());
 
         final String responseTypesAsString = getRequest().getAuthorizationRequest().getResponseTypesAsString();
         final String scopesAsString = getRequest().getAuthorizationRequest().getScopesAsString();
@@ -92,7 +90,14 @@ public class ParClient extends BaseClient<ParRequest, ParResponse> {
             addReqParam(key, request.getCustomParameters().get(key));
         }
 
-        clientResponse = clientRequest.post(String.class);
+        Builder clientRequest = webTarget.request();
+
+    	new ClientAuthnEnabler(clientRequest, requestForm).exec(request);
+
+        clientRequest.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
+//        clientRequest.setHttpMethod(getHttpMethod());
+
+        clientResponse = clientRequest.buildPost(Entity.form(requestForm)).invoke();
 
         setResponse(new ParResponse(clientResponse));
 

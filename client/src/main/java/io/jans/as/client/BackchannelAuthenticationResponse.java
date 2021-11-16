@@ -10,9 +10,10 @@ import static io.jans.as.model.ciba.BackchannelAuthenticationResponseParam.AUTH_
 import static io.jans.as.model.ciba.BackchannelAuthenticationResponseParam.EXPIRES_IN;
 import static io.jans.as.model.ciba.BackchannelAuthenticationResponseParam.INTERVAL;
 
+import javax.ws.rs.core.Response;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.jboss.resteasy.client.ClientResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -41,7 +42,7 @@ public class BackchannelAuthenticationResponse extends BaseResponseWithErrors<Ba
     /**
      * Constructs a backchannel authentication response.
      */
-    public BackchannelAuthenticationResponse(ClientResponse<String> clientResponse) {
+    public BackchannelAuthenticationResponse(Response clientResponse) {
         super(clientResponse);
     }
 
