@@ -14,7 +14,7 @@ import io.jans.as.client.uma.wrapper.UmaClient;
 import io.jans.as.model.common.IntrospectionResponse;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.uma.wrapper.Token;
-import org.jboss.resteasy.client.ClientExecutor;
+import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
@@ -43,11 +43,11 @@ public class IntrospectionWsHttpTest extends BaseTest {
     @Test
     @Parameters({"umaPatClientId", "umaPatClientSecret"})
     public void bearerWithResponseAsJwt(final String umaPatClientId, final String umaPatClientSecret) throws Exception {
-        final ClientExecutor clientExecutor = clientExecutor(true);
-        final Token authorization = UmaClient.requestPat(tokenEndpoint, umaPatClientId, umaPatClientSecret, clientExecutor);
-        final Token tokenToIntrospect = UmaClient.requestPat(tokenEndpoint, umaPatClientId, umaPatClientSecret, clientExecutor);
+        final ClientHttpEngine engine = clientEngine(true);
+        final Token authorization = UmaClient.requestPat(tokenEndpoint, umaPatClientId, umaPatClientSecret, engine);
+        final Token tokenToIntrospect = UmaClient.requestPat(tokenEndpoint, umaPatClientId, umaPatClientSecret, engine);
 
-        final IntrospectionService introspectionService = ClientFactory.instance().createIntrospectionService(introspectionEndpoint, clientExecutor);
+        final IntrospectionService introspectionService = ClientFactory.instance().createIntrospectionService(introspectionEndpoint, engine);
         final String jwtAsString = introspectionService.introspectTokenWithResponseAsJwt("Bearer " + authorization.getAccessToken(), tokenToIntrospect.getAccessToken(), true);
         final Jwt jwt = Jwt.parse(jwtAsString);
         assertTrue(Boolean.parseBoolean(jwt.getClaims().getClaimAsString("active")));
@@ -56,9 +56,9 @@ public class IntrospectionWsHttpTest extends BaseTest {
     @Test
     @Parameters({"umaPatClientId", "umaPatClientSecret"})
     public void basicAuthentication(final String umaPatClientId, final String umaPatClientSecret) throws Exception {
-        final Token tokenToIntrospect = UmaClient.requestPat(tokenEndpoint, umaPatClientId, umaPatClientSecret, clientExecutor(true));
+        final Token tokenToIntrospect = UmaClient.requestPat(tokenEndpoint, umaPatClientId, umaPatClientSecret, clientEngine(true));
 
-        final IntrospectionService introspectionService = ClientFactory.instance().createIntrospectionService(introspectionEndpoint, clientExecutor(true));
+        final IntrospectionService introspectionService = ClientFactory.instance().createIntrospectionService(introspectionEndpoint, clientEngine(true));
         final IntrospectionResponse introspectionResponse = introspectionService.introspectToken("Basic " + BaseRequest.getEncodedCredentials(umaPatClientId, umaPatClientSecret), tokenToIntrospect.getAccessToken());
         assertTrue(introspectionResponse != null && introspectionResponse.isActive());
     }
@@ -66,9 +66,9 @@ public class IntrospectionWsHttpTest extends BaseTest {
     @Test
     @Parameters({"umaPatClientId", "umaPatClientSecret"})
     public void introspectWithValidAuthorizationButInvalidTokenShouldReturnActiveFalse(final String umaPatClientId, final String umaPatClientSecret) throws Exception {
-        final Token authorization = UmaClient.requestPat(tokenEndpoint, umaPatClientId, umaPatClientSecret, clientExecutor(true));
+        final Token authorization = UmaClient.requestPat(tokenEndpoint, umaPatClientId, umaPatClientSecret, clientEngine(true));
 
-        final IntrospectionService introspectionService = ClientFactory.instance().createIntrospectionService(introspectionEndpoint, clientExecutor(true));
+        final IntrospectionService introspectionService = ClientFactory.instance().createIntrospectionService(introspectionEndpoint, clientEngine(true));
         final IntrospectionResponse introspectionResponse = introspectionService.introspectToken("Bearer " + authorization.getAccessToken(), "invalid_token");
         assertNotNull(introspectionResponse);
         assertFalse(introspectionResponse.isActive());

@@ -39,7 +39,7 @@ public class EndSessionUtils {
     }
 
     public static void callRpWithBackchannelUri(final String backchannelLogoutUri, String logoutToken) {
-        javax.ws.rs.client.Client client = new ResteasyClientBuilder().httpEngine(ClientFactory.instance().createEngine(true)).build();
+        javax.ws.rs.client.Client client = ((ResteasyClientBuilder) ResteasyClientBuilder.newBuilder()).httpEngine(ClientFactory.instance().createEngine(true)).build();
         WebTarget target = client.target(backchannelLogoutUri);
 
         log.debug("Calling RP with backchannel, backchannel_logout_uri: " + backchannelLogoutUri);

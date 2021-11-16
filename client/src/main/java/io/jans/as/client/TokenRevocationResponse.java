@@ -10,7 +10,7 @@ import io.jans.as.model.config.Constants;
 import io.jans.as.model.token.TokenRevocationErrorResponseType;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.jboss.resteasy.client.ClientResponse;
+import javax.ws.rs.core.Response;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -29,7 +29,7 @@ public class TokenRevocationResponse extends BaseResponse {
     /**
      * Constructs an token revocation response.
      */
-    public TokenRevocationResponse(ClientResponse<String> clientResponse) {
+    public TokenRevocationResponse(Response clientResponse) {
         super(clientResponse);
 
         if (StringUtils.isNotBlank(entity)) {
