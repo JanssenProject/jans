@@ -17,7 +17,7 @@ LOGGING_CONFIG = {
             "level": "INFO",
             "propagate": True,
         },
-        "configuration-manager": {
+        "configurator": {
             "handlers": ["console"],
             "level": "INFO",
             "propagate": False,

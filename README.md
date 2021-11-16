@@ -1,4 +1,4 @@
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/482d45faeed647d4a2a9a48adb400441)](https://www.codacy.com/gh/JanssenProject/docker-jans-configuration-manager/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=JanssenProject/docker-jans-configuration-manager&amp;utm_campaign=Badge_Grade)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/482d45faeed647d4a2a9a48adb400441)](https://www.codacy.com/gh/JanssenProject/docker-jans-configurator/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=JanssenProject/docker-jans-configurator&amp;utm_campaign=Badge_Grade)
 
 ## Overview
 
@@ -6,8 +6,8 @@ Configuration manager is a special container used to load (generate/restore) and
 
 ## Versions
 
-See [Releases](https://github.com/JanssenProject/docker-jans-configuration-manager/releases) for stable versions.
-For bleeding-edge/unstable version, use `janssenproject/configuration-manager:1.0.0_dev`.
+See [Releases](https://github.com/JanssenProject/docker-jans-configurator/releases) for stable versions.
+For bleeding-edge/unstable version, use `janssenproject/configurator:1.0.0_dev`.
 
 ## Environment Variables
 
@@ -96,7 +96,7 @@ The load command can be used either to generate or restore config and secret for
         -v /path/to/host/volume:/app/db \
         -v /path/to/vault_role_id.txt:/etc/certs/vault_role_id \
         -v /path/to/vault_secret_id.txt:/etc/certs/vault_secret_id \
-        janssenproject/configuration-manager:1.0.0_dev load
+        janssenproject/configurator:1.0.0_dev load
     ```
 
 #### Kubernetes
@@ -133,7 +133,7 @@ The load command can be used either to generate or restore config and secret for
 	apiVersion: batch/v1
 	kind: Job
 	metadata:
-	  name: configuration-manager-load-job
+	  name: configurator-load-job
 	spec:
 	  template:
 	    spec:
@@ -143,8 +143,8 @@ The load command can be used either to generate or restore config and secret for
 	          configMap:
 	            name: config-generate-params
 	      containers:
-	        - name: configuration-manager-load
-	          image: janssenproject/configuration-manager:1.0.0_dev
+	        - name: configurator-load
+	          image: janssenproject/configurator:1.0.0_dev
 	          volumeMounts:
 	            - mountPath: /app/db/generate.json
 	              name: config-generate-params
@@ -170,7 +170,7 @@ The load command can be used either to generate or restore config and secret for
 	apiVersion: batch/v1
 	kind: Job
 	metadata:
-	  name: configuration-manager-load-job
+	  name: configurator-load-job
 	spec:
 	  template:
 	    spec:
@@ -183,8 +183,8 @@ The load command can be used either to generate or restore config and secret for
 	          configMap:
 	            name: secret-params
 	      containers:
-	        - name: configuration-manager-load
-	          image: janssenproject/configuration-manager:1.0.0_dev
+	        - name: configurator-load
+	          image: janssenproject/configurator:1.0.0_dev
 	          volumeMounts:
 	            - mountPath: /app/db/config.json
 	              name: config-params
@@ -218,7 +218,7 @@ docker run \
     -v /path/to/host/volume:/app/db \
     -v /path/to/vault_role_id.txt:/etc/certs/vault_role_id \
     -v /path/to/vault_secret_id.txt:/etc/certs/vault_secret_id \
-    janssenproject/configuration-manager:1.0.0_dev dump
+    janssenproject/configurator:1.0.0_dev dump
 ```
 
 #### Kubernetes
@@ -227,14 +227,14 @@ docker run \
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: configuration-manager-dump-job
+  name: configurator-dump-job
 spec:
   template:
     spec:
       restartPolicy: Never
       containers:
-        - name: configuration-manager-dump-job
-          image: janssenproject/configuration-manager:1.0.0_dev
+        - name: configurator-dump-job
+          image: janssenproject/configurator:1.0.0_dev
           command:
             - /bin/sh
             - -c

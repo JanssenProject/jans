@@ -111,7 +111,7 @@ ENV CN_WAIT_MAX_TIME=300 \
 # misc
 # ====
 
-LABEL name="configuration-manager" \
+LABEL name="configurator" \
     maintainer="Janssen <support@jans.io>" \
     vendor="Janssen" \
     version="1.0.0" \

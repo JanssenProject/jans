@@ -1,5 +1,5 @@
 CN_VERSION=1.0.0
-IMAGE_NAME=janssenproject/configuration-manager
+IMAGE_NAME=janssenproject/configurator
 UNSTABLE_VERSION=dev
 
 build-dev:
