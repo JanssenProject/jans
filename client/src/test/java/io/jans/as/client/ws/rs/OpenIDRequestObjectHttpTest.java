@@ -831,7 +831,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
-        registerClient.setExecutor(clientExecutor(true));
+        registerClient.setExecutor(clientEngine(true));
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
@@ -872,7 +872,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
         authorizeClient.setRequest(request);
-        authorizeClient.setExecutor(clientExecutor(true));
+        authorizeClient.setExecutor(clientEngine(true));
         AuthorizationResponse response1 = authorizeClient.exec();
 
         showClient(authorizeClient);
@@ -887,7 +887,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
 
         // 3. Request user info
         UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
-        userInfoClient.setExecutor(clientExecutor(true));
+        userInfoClient.setExecutor(clientEngine(true));
         UserInfoResponse response3 = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);

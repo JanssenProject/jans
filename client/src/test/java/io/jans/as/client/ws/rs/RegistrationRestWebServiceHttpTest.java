@@ -208,7 +208,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
-        registerClient.setExecutor(clientExecutor(true));
+        registerClient.setExecutor(clientEngine(true));
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
@@ -316,7 +316,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
 
         final RegisterClient registerClient = new RegisterClient(registrationClientUri1);
         registerClient.setRequest(registerRequest);
-        registerClient.setExecutor(clientExecutor(true));
+        registerClient.setExecutor(clientEngine(true));
         final RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
@@ -383,7 +383,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
-        registerClient.setExecutor(clientExecutor(true));
+        registerClient.setExecutor(clientEngine(true));
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
@@ -436,7 +436,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
 
         final RegisterClient registerClient = new RegisterClient(registrationClientUri2);
         registerClient.setRequest(registerRequest);
-        registerClient.setExecutor(clientExecutor(true));
+        registerClient.setExecutor(clientEngine(true));
         final RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
@@ -494,7 +494,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         request.setResponseTypes(Lists.newArrayList(ResponseType.CODE));
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setExecutor(clientExecutor(true));
+        registerClient.setExecutor(clientEngine(true));
         registerClient.setRequest(request);
         RegisterResponse response = registerClient.exec();
 
@@ -531,7 +531,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
-        registerClient.setExecutor(clientExecutor(true));
+        registerClient.setExecutor(clientEngine(true));
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
@@ -554,7 +554,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         registerRequest.setSubjectType(SubjectType.PUBLIC);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setExecutor(clientExecutor(true));
+        registerClient.setExecutor(clientEngine(true));
         registerClient.setRequest(registerRequest);
         RegisterResponse response = registerClient.exec();
 
@@ -580,7 +580,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setExecutor(clientExecutor(true));
+        registerClient.setExecutor(clientEngine(true));
         registerClient.setRequest(registerRequest);
         RegisterResponse response = registerClient.exec();
 
@@ -605,7 +605,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         registerRequest.setSubjectType(SubjectType.PUBLIC);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setExecutor(clientExecutor(true));
+        registerClient.setExecutor(clientEngine(true));
         registerClient.setRequest(registerRequest);
         RegisterResponse response = registerClient.exec();
 
@@ -630,7 +630,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         registerRequest.setSubjectType(SubjectType.PUBLIC);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setExecutor(clientExecutor(true));
+        registerClient.setExecutor(clientEngine(true));
         registerClient.setRequest(registerRequest);
         RegisterResponse response = registerClient.exec();
 
@@ -655,7 +655,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         registerRequest.setSubjectType(SubjectType.PUBLIC);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setExecutor(clientExecutor(true));
+        registerClient.setExecutor(clientEngine(true));
         registerClient.setRequest(registerRequest);
         RegisterResponse response = registerClient.exec();
 
@@ -677,7 +677,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         registerRequest.setSubjectType(SubjectType.PUBLIC);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setExecutor(clientExecutor(true));
+        registerClient.setExecutor(clientEngine(true));
         registerClient.setRequest(registerRequest);
         RegisterResponse response = registerClient.exec();
 
@@ -693,7 +693,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
 
         RegisterClient deleteClient = new RegisterClient(response.getRegistrationClientUri());
         deleteClient.setRequest(registerRequest);
-        deleteClient.setExecutor(clientExecutor(true));
+        deleteClient.setExecutor(clientEngine(true));
         RegisterResponse deleteResponse = deleteClient.exec();
 
         showClient(deleteClient);

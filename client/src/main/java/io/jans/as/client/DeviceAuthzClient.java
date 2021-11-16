@@ -16,11 +16,13 @@ import static io.jans.as.model.authorize.DeviceAuthorizationResponseParam.VERIFI
 import static io.jans.as.model.authorize.DeviceAuthorizationResponseParam.VERIFICATION_URI_COMPLETE;
 
 import javax.ws.rs.HttpMethod;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.jboss.resteasy.client.ClientExecutor;
-import org.jboss.resteasy.client.ClientRequest;
+import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.json.JSONObject;
 
 import io.jans.as.model.util.Util;
@@ -48,39 +50,42 @@ public class DeviceAuthzClient extends BaseClient<DeviceAuthzRequest, DeviceAuth
 
     public DeviceAuthzResponse exec() {
         initClientRequest();
+
         return _exec();
     }
 
     @Deprecated
-    public DeviceAuthzResponse exec(ClientExecutor clientExecutor) {
-        this.clientRequest = new ClientRequest(getUrl(), clientExecutor);
+    public DeviceAuthzResponse exec(ClientHttpEngine engine) {
+        resteasyClient = ((ResteasyClientBuilder) ResteasyClientBuilder.newBuilder()).httpEngine(engine).build();
+        webTarget = resteasyClient.target(getUrl());
+
         return _exec();
     }
 
     private DeviceAuthzResponse _exec() {
         try {
-            clientRequest.setHttpMethod(getHttpMethod());
+    //        clientRequest.setHttpMethod(getHttpMethod());
+            Builder clientRequest = webTarget.request();
+            applyCookies(clientRequest);
+
             clientRequest.header("Content-Type", request.getContentType());
-            new ClientAuthnEnabler(clientRequest).exec(getRequest());
+            new ClientAuthnEnabler(clientRequest, requestForm).exec(getRequest());
 
             final String scopesAsString = Util.listAsString(getRequest().getScopes());
 
             if (StringUtils.isNotBlank(scopesAsString)) {
-                clientRequest.formParameter(SCOPE, scopesAsString);
+                requestForm.param(SCOPE, scopesAsString);
             }
             if (StringUtils.isNotBlank(getRequest().getClientId())) {
-                clientRequest.formParameter(CLIENT_ID, getRequest().getClientId());
+                requestForm.param(CLIENT_ID, getRequest().getClientId());
             }
 
             // Call REST Service and handle response
-            clientResponse = clientRequest.post(String.class);
+            clientResponse = clientRequest.buildPost(Entity.form(requestForm)).invoke();
 
             setResponse(new DeviceAuthzResponse(clientResponse));
-            String entity = clientResponse.getEntity(String.class);
-            getResponse().setEntity(entity);
-            getResponse().setHeaders(clientResponse.getMetadata());
-            if (StringUtils.isNotBlank(entity)) {
-                JSONObject jsonObj = new JSONObject(entity);
+            if (StringUtils.isNotBlank(response.getEntity())) {
+                JSONObject jsonObj = new JSONObject(response.getEntity());
 
                 if (jsonObj.has(USER_CODE)) {
                     getResponse().setUserCode(jsonObj.getString(USER_CODE));

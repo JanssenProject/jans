@@ -60,9 +60,14 @@
                 <enabled>true</enabled>
                 <updatePolicy>always</updatePolicy>
             </snapshots>
-            <id>jans</id>
+			<id>jans</id>
 			<name>Janssen project repository</name>
 			<url>https://maven.jans.io/maven</url>
+		</repository>
+		<repository>
+			<id>gluu</id>
+			<name>Gluu project repository</name>
+			<url>https://maven.gluu.org/maven</url>
 		</repository>
 		<repository>
 			<id>bouncycastle</id>
@@ -258,6 +263,11 @@
 				<artifactId>javax.servlet-api</artifactId>
 				<version>3.1.0</version>
 				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>commons-net</groupId>
+				<artifactId>commons-net</artifactId>
+				<version>3.0</version>
 			</dependency>
 
             <!-- Test -->

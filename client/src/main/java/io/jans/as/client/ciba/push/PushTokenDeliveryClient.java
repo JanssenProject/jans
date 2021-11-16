@@ -12,7 +12,8 @@ import org.apache.log4j.Logger;
 import org.json.JSONObject;
 
 import javax.ws.rs.HttpMethod;
-import javax.ws.rs.core.MediaType;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
 
 /**
  * @author Javier Rojas Blum
@@ -39,7 +40,10 @@ public class PushTokenDeliveryClient extends BaseClient<PushTokenDeliveryRequest
     private PushTokenDeliveryResponse _exec() {
         try {
             // Prepare request parameters
-            clientRequest.setHttpMethod(getHttpMethod());
+    //        clientRequest.setHttpMethod(getHttpMethod());
+        	
+        	Builder clientRequest = webTarget.request();
+        	applyCookies(clientRequest);
 
             clientRequest.header("Content-Type", getRequest().getContentType());
 
@@ -48,10 +52,9 @@ public class PushTokenDeliveryClient extends BaseClient<PushTokenDeliveryRequest
             }
 
             JSONObject requestBody = getRequest().getJSONParameters();
-            clientRequest.body(MediaType.APPLICATION_JSON, requestBody.toString(4));
 
             // Call REST Service and handle response
-            clientResponse = clientRequest.post(String.class);
+            clientResponse = clientRequest.buildPost(Entity.json(requestBody.toString(4))).invoke();
             setResponse(new PushTokenDeliveryResponse(clientResponse));
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);

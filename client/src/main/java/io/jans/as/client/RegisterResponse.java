@@ -14,7 +14,7 @@ import io.jans.as.model.register.RegisterResponseParam;
 import io.jans.as.model.util.Util;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.jboss.resteasy.client.ClientResponse;
+import javax.ws.rs.core.Response;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -55,10 +55,10 @@ public class RegisterResponse extends BaseResponseWithErrors<RegisterErrorRespon
     /**
      * Constructs a register response.
      */
-    public RegisterResponse(ClientResponse<String> clientResponse) {
+    public RegisterResponse(Response clientResponse) {
         super(clientResponse);
 
-        String entity = clientResponse.getEntity(String.class);
+        String entity = clientResponse.readEntity(String.class);
         setEntity(entity);
         setHeaders(clientResponse.getMetadata());
         injectDataFromJson(entity);
