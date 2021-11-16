@@ -118,11 +118,11 @@ class HttpdInstaller(BaseInstaller, SetupUtils):
             cmd_a2enmod = shutil.which('a2enmod')
             cmd_a2dismod = shutil.which('a2dismod')
 
-            for mod_load_fn in glob.glob('/etc/apache2/mods-enabled/*'):
+            for mod_load_fn in glob.glob('/etc/apache2/mods-enabled/*.load'):
                 mod_load_base_name = os.path.basename(mod_load_fn)
                 f_name, f_ext = os.path.splitext(mod_load_base_name)
                 if not f_name in mods_enabled:
-                    self.run([cmd_a2dismod, mod_load_fn])
+                    self.run([cmd_a2dismod, '-f', f_name])
 
             for amod in mods_enabled:
                 self.run([cmd_a2enmod, amod])
