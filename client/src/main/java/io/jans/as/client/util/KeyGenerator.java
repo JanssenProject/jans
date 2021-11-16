@@ -72,6 +72,7 @@ public class KeyGenerator {
     private static final String OXELEVEN_GENERATE_KEY_ENDPOINT = "ox11";
     private static final String EXPIRATION = "expiration";
     private static final String EXPIRATION_HOURS = "expiration_hours";
+    private static final String KEY_LENGTH = "key_length";
     private static final String HELP = "h";
     private static final String TEST_PROP_FILE = "test_prop_file";
 
@@ -112,6 +113,7 @@ public class KeyGenerator {
             options.addOption(OXELEVEN_GENERATE_KEY_ENDPOINT, true, "oxEleven Generate Key Endpoint.");
             options.addOption(EXPIRATION, true, "Expiration in days.");
             options.addOption(EXPIRATION_HOURS, true, "Expiration in hours.");
+            options.addOption(KEY_LENGTH, true, "Key length");
             options.addOption(HELP, false, "Show help.");
         }
 
@@ -139,6 +141,7 @@ public class KeyGenerator {
                     help();
                 }
 
+                int keyLength = StringHelper.toInt(cmd.getOptionValue(KEY_LENGTH), 2048);
                 int expiration = StringHelper.toInt(cmd.getOptionValue(EXPIRATION), 0);
                 int expirationHours = StringHelper.toInt(cmd.getOptionValue(EXPIRATION_HOURS), 0);
 
@@ -155,7 +158,7 @@ public class KeyGenerator {
                         ElevenCryptoProvider cryptoProvider = new ElevenCryptoProvider(generateKeyEndpoint,
                                 null, null, null, accessToken);
 
-                        generateKeys(cryptoProvider, signatureAlgorithms, encryptionAlgorithms, expiration, expirationHours, testPropFile);
+                        generateKeys(cryptoProvider, signatureAlgorithms, encryptionAlgorithms, expiration, expirationHours, testPropFile, keyLength);
                     } catch (Exception e) {
                         log.error("Failed to generate keys", e);
                         help();
@@ -171,7 +174,7 @@ public class KeyGenerator {
                         SecurityProviderUtility.installBCProvider(true);
 
                         AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keystore, keypasswd, dnName);
-                        generateKeys(cryptoProvider, signatureAlgorithms, encryptionAlgorithms, expiration, expirationHours, testPropFile);
+                        generateKeys(cryptoProvider, signatureAlgorithms, encryptionAlgorithms, expiration, expirationHours, testPropFile, keyLength);
                     } catch (Exception e) {
                         e.printStackTrace();
                         log.error("Failed to generate keys", e);
@@ -187,7 +190,7 @@ public class KeyGenerator {
         }
 
         private void generateKeys(AbstractCryptoProvider cryptoProvider, List<Algorithm> signatureAlgorithms,
-                                  List<Algorithm> encryptionAlgorithms, int expiration, int expirationHours, String testPropFile) throws CryptoProviderException, IOException {
+                                  List<Algorithm> encryptionAlgorithms, int expiration, int expirationHours, String testPropFile, int keyLength) throws CryptoProviderException, IOException {
             JSONWebKeySet jwks = new JSONWebKeySet();
 
             Calendar calendar = new GregorianCalendar();
@@ -200,7 +203,7 @@ public class KeyGenerator {
 
             for (Algorithm algorithm : signatureAlgorithms) {
                 SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(algorithm.getParamName());
-                JSONObject result = cryptoProvider.generateKey(algorithm, calendar.getTimeInMillis());
+                JSONObject result = cryptoProvider.generateKey(algorithm, calendar.getTimeInMillis(), keyLength);
 
                 JSONWebKey key = new JSONWebKey();
 
@@ -228,7 +231,7 @@ public class KeyGenerator {
             }
             for (Algorithm algorithm : encryptionAlgorithms) {
                 KeyEncryptionAlgorithm encryptionAlgorithm = KeyEncryptionAlgorithm.fromName(algorithm.getParamName());
-                JSONObject result = cryptoProvider.generateKey(algorithm, calendar.getTimeInMillis());
+                JSONObject result = cryptoProvider.generateKey(algorithm, calendar.getTimeInMillis(), keyLength);
 
                 JSONWebKey key = new JSONWebKey();
 
