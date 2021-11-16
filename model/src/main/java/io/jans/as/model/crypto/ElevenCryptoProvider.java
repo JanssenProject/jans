@@ -54,7 +54,7 @@ public class ElevenCryptoProvider extends AbstractCryptoProvider {
     }
 
     @Override
-    public JSONObject generateKey(Algorithm algorithm, Long expirationTime) throws CryptoProviderException {
+    public JSONObject generateKey(Algorithm algorithm, Long expirationTime, int keyLength) throws CryptoProviderException {
         GenerateKeyRequest request = new GenerateKeyRequest();
         request.setSignatureAlgorithm(algorithm.toString());
         request.setExpirationTime(expirationTime);
@@ -74,6 +74,11 @@ public class ElevenCryptoProvider extends AbstractCryptoProvider {
         } else {
             throw new CryptoProviderException(response.getEntity());            
         }
+    }
+
+    @Override
+    public JSONObject generateKey(Algorithm algorithm, Long expirationTime) throws CryptoProviderException {
+        return generateKey(algorithm, expirationTime, 2048);
     }
 
     @Override
