@@ -46,6 +46,9 @@ parser.add_argument('--args', help="Arguments to be passed to setup.py")
 parser.add_argument('-n', help="No prompt", action='store_true')
 parser.add_argument('--keep-downloads', help="Keep downloaded files (applicable for uninstallation only)", action='store_true')
 parser.add_argument('--profile', help="Setup profile", choices=['jans', 'openbanking'], default='jans')
+parser.add_argument('--jans-app-version', help="Version for Jannses applications")
+parser.add_argument('--jans-build', help="Buid version for Janssen applications")
+parser.add_argument('--setup-branch', help="Jannsen setup github branch")
 
 if '-a' in sys.argv:
     parser.add_argument('--jetty-version', help="Jetty verison. For example 11.0.6")
@@ -53,6 +56,15 @@ if '-a' in sys.argv:
 argsp = parser.parse_args()
 
 ssl._create_default_https_context = ssl._create_unverified_context
+
+if argsp.jans_app_version:
+    app_versions['JANS_APP_VERSION'] = argsp.jans_app_version
+
+if argsp.jans_build:
+    app_versions['JANS_BUILD'] = argsp.jans_build
+
+if argsp.setup_branch:
+    app_versions['SETUP_BRANCH'] = argsp.setup_branch
 
 jetty_dist_string = 'jetty-distribution'
 if getattr(argsp, 'jetty_version', None):
