@@ -77,6 +77,9 @@ public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse
         return _exec();
     }
 
+    /**
+     * @deprecated Engine should be shared between clients
+     */
     @SuppressWarnings("java:S1133")
     @Deprecated
     public RegisterResponse exec(ClientHttpEngine engine) {
@@ -89,8 +92,6 @@ public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse
     private RegisterResponse _exec() {
         try {
             // Prepare request parameters
-//            clientRequest.setHttpMethod(getHttpMethod());
-
             Entity<?> requestEntity = null;
             Builder clientRequest = webTarget.request();
             applyCookies(clientRequest);
