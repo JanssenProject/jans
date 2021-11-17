@@ -55,6 +55,7 @@ public class DeviceAuthzClient extends BaseClient<DeviceAuthzRequest, DeviceAuth
         return _exec();
     }
 
+    @SuppressWarnings("deprecation")
     @Deprecated
     public DeviceAuthzResponse exec(ClientHttpEngine engine) {
         resteasyClient = ((ResteasyClientBuilder) ClientBuilder.newBuilder()).httpEngine(engine).build();
