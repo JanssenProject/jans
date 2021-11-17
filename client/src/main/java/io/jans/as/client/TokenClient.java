@@ -220,7 +220,7 @@ public class TokenClient extends BaseClient<TokenRequest, TokenResponse> {
     public TokenResponse exec() {
         try {
             // Prepare request parameters
-            initClientRequest();
+            initClient();
 
             addFormParameterIfNotNull(GRANT_TYPE, getRequest().getGrantType());
             addFormParameterIfNotBlank(CODE, getRequest().getCode());

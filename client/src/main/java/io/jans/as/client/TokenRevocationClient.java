@@ -78,7 +78,7 @@ public class TokenRevocationClient extends BaseClient<TokenRevocationRequest, To
      */
     public TokenRevocationResponse exec() {
         // Prepare request parameters
-        initClientRequest();
+        initClient();
 
         if (StringUtils.isNotBlank(getRequest().getToken())) {
             requestForm.param(TokenRevocationRequestParam.TOKEN, getRequest().getToken());

@@ -79,7 +79,7 @@ public class UserInfoClient extends BaseClient<UserInfoRequest, UserInfoResponse
      */
     public UserInfoResponse exec() {
         // Prepare request parameters
-        initClientRequest();
+        initClient();
 
         Builder clientRequest = prepareAuthorizatedClientRequest(getRequest().getAuthorizationMethod(), getRequest().getAccessToken());
 

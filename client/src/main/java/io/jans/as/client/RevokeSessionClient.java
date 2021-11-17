@@ -40,7 +40,7 @@ public class RevokeSessionClient extends BaseClient<RevokeSessionRequest, Revoke
     }
 
     public RevokeSessionResponse exec() {
-        initClientRequest();
+        initClient();
 
         Builder clientRequest = webTarget.request();
         applyCookies(clientRequest);

@@ -33,7 +33,7 @@ public class PushTokenDeliveryClient extends BaseClient<PushTokenDeliveryRequest
     }
 
     public PushTokenDeliveryResponse exec() {
-        initClientRequest();
+        initClient();
         return _exec();
     }
 
