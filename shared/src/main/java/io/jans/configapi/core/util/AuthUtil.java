@@ -2,6 +2,7 @@ package io.jans.configapi.core.util;
 
 import io.jans.as.common.model.registration.Client;
 import io.jans.configapi.core.service.ConfService;
+import io.jans.configapi.core.service.ClientService;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
@@ -30,12 +31,19 @@ public class AuthUtil {
     @Inject
     ConfService confService;
 
+    @Inject
+    ClientService clientService;
+
     public String getOpenIdConfigurationEndpoint(String dn) {
         return this.confService.find(dn).getOpenIdConfigurationEndpoint();
     }
 
     public String getIssuer(String dn) {
         return this.confService.find(dn).getIssuer();
+    }
+
+    public Client getClient(String clientId) {
+        return clientService.getClientByInum(clientId);
     }
 
     public List<String> findMissingElements(List<String> list1, List<String> list2) {
