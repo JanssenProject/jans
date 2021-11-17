@@ -6,6 +6,7 @@
 
 package io.jans.as.client.service;
 
+import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.UriBuilder;
 
 import org.apache.http.client.config.CookieSpecs;
@@ -43,7 +44,7 @@ public class ClientFactory {
     }
 
     public StatService createStatService(String url, ClientHttpEngine engine) {
-        ResteasyClient client = ((ResteasyClientBuilder) ResteasyClientBuilder.newBuilder()).httpEngine(engine).build();
+        ResteasyClient client = ((ResteasyClientBuilder) ClientBuilder.newBuilder()).httpEngine(engine).build();
         ResteasyWebTarget target = client.target(UriBuilder.fromPath(url));
         return target.proxy(StatService.class);
     }
@@ -53,7 +54,7 @@ public class ClientFactory {
     }
     
     public IntrospectionService createIntrospectionService(String url, ClientHttpEngine engine) {
-        ResteasyClient client = ((ResteasyClientBuilder) ResteasyClientBuilder.newBuilder()).httpEngine(engine).build();
+        ResteasyClient client = ((ResteasyClientBuilder) ClientBuilder.newBuilder()).httpEngine(engine).build();
         ResteasyWebTarget target = client.target(UriBuilder.fromPath(url));
         return target.proxy(IntrospectionService.class);
     }

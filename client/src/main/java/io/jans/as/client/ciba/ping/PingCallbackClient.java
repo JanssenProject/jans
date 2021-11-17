@@ -49,7 +49,6 @@ public class PingCallbackClient extends BaseClient<PingCallbackRequest, PingCall
     private PingCallbackResponse _exec() {
         try {
             // Prepare request parameters
-    //        clientRequest.setHttpMethod(getHttpMethod());
         	
         	Builder clientRequest = webTarget.request();
         	applyCookies(clientRequest);

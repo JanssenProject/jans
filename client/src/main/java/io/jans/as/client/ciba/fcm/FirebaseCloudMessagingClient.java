@@ -46,7 +46,6 @@ public class FirebaseCloudMessagingClient extends BaseClient<FirebaseCloudMessag
     private FirebaseCloudMessagingResponse _exec() {
         try {
             // Prepare request parameters
-    //        clientRequest.setHttpMethod(getHttpMethod());
         	
         	Builder clientRequest = webTarget.request();
         	applyCookies(clientRequest);

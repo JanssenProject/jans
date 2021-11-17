@@ -16,6 +16,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.ws.rs.HttpMethod;
+import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.MediaType;
@@ -71,7 +72,7 @@ public class ClientInfoClient extends BaseClient<ClientInfoRequest, ClientInfoRe
 
     @Deprecated
     public ClientInfoResponse exec(ClientHttpEngine engine) {
-    	resteasyClient = ((ResteasyClientBuilder) ResteasyClientBuilder.newBuilder()).httpEngine(engine).build();
+    	resteasyClient = ((ResteasyClientBuilder) ClientBuilder.newBuilder()).httpEngine(engine).build();
 		webTarget = resteasyClient.target(getUrl());
 
 		return execInternal();

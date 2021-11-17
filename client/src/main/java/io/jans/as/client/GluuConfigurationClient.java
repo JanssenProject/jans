@@ -55,7 +55,6 @@ public class GluuConfigurationClient extends BaseClient<GluuConfigurationRequest
 
         // Prepare request parameters
         clientRequest.header("Content-Type", MediaType.APPLICATION_JSON);
-//        clientRequest.setHttpMethod(getHttpMethod());
 
         // Call REST Service and handle response
         try {
