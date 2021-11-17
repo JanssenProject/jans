@@ -389,7 +389,7 @@ public class DeviceAuthzFlowHttpTest extends BaseTest {
     private void processUserInfo(String accessToken) throws UnrecoverableKeyException, NoSuchAlgorithmException,
             KeyStoreException, KeyManagementException {
         UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
-        userInfoClient.setExecutor(clientExecutor(true));
+        userInfoClient.setExecutor(clientEngine(true));
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
@@ -422,7 +422,7 @@ public class DeviceAuthzFlowHttpTest extends BaseTest {
                                                           String clientSecret) throws UnrecoverableKeyException,
             NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
         TokenClient tokenClient2 = new TokenClient(tokenEndpoint);
-        tokenClient2.setExecutor(clientExecutor(true));
+        tokenClient2.setExecutor(clientEngine(true));
         TokenResponse tokenResponse2 = tokenClient2.execRefreshToken(scopes, refreshToken, clientId, clientSecret);
 
         showClient(tokenClient2);
@@ -450,7 +450,7 @@ public class DeviceAuthzFlowHttpTest extends BaseTest {
 
         RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
                 jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID), clientExecutor(true));
+                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID), clientEngine(true));
         RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS256, publicKey);
 
         assertTrue(rsaSigner.validate(jwt));

@@ -9541,7 +9541,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
 
         RegisterClient readClient = new RegisterClient(registrationClientUri);
         readClient.setRequest(readClientRequest);
-        readClient.setExecutor(clientExecutor(true));
+        readClient.setExecutor(clientEngine(true));
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);

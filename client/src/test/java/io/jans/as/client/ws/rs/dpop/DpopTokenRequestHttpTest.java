@@ -549,7 +549,7 @@ public class DpopTokenRequestHttpTest extends BaseTest {
     }
 
     private void tokenIntrospection(String jwkThumbprint, String accessToken) throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException, UnrecoverableKeyException, InvalidJwtException {
-        IntrospectionService introspectionService = ClientFactory.instance().createIntrospectionService(introspectionEndpoint, clientExecutor(true));
+        IntrospectionService introspectionService = ClientFactory.instance().createIntrospectionService(introspectionEndpoint, clientEngine(true));
         String jwtAsString = introspectionService.introspectTokenWithResponseAsJwt("Bearer " + accessToken, accessToken, true);
 
         Jwt jwt = Jwt.parse(jwtAsString);

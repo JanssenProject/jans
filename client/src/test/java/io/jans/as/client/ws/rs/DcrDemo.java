@@ -33,7 +33,7 @@ public class DcrDemo extends BaseTest {
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
-        registerClient.setExecutor(clientExecutor(true));
+        registerClient.setExecutor(clientEngine(true));
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);

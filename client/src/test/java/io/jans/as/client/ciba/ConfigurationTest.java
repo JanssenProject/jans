@@ -13,7 +13,7 @@ import io.jans.as.client.OpenIdConnectDiscoveryClient;
 import io.jans.as.client.OpenIdConnectDiscoveryResponse;
 import io.jans.as.client.dev.HostnameVerifierType;
 import io.jans.as.model.common.GrantType;
-import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
+import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
@@ -34,7 +34,7 @@ public class ConfigurationTest extends BaseTest {
 
         OpenIdConnectDiscoveryClient openIdConnectDiscoveryClient = new OpenIdConnectDiscoveryClient(resource);
         OpenIdConnectDiscoveryResponse openIdConnectDiscoveryResponse = openIdConnectDiscoveryClient.exec(
-                new ApacheHttpClient4Executor(createHttpClient(HostnameVerifierType.ALLOW_ALL)));
+                new ApacheHttpClient43Engine(createHttpClient(HostnameVerifierType.ALLOW_ALL)));
 
         showClient(openIdConnectDiscoveryClient);
         assertEquals(openIdConnectDiscoveryResponse.getStatus(), 200, "Unexpected response code");

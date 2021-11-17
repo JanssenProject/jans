@@ -9,16 +9,16 @@ package io.jans.as.client;
 import io.jans.as.model.config.Constants;
 import io.jans.as.model.error.IErrorType;
 import org.apache.commons.lang.StringUtils;
-import org.jboss.resteasy.client.ClientResponse;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.ws.rs.core.Response;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -38,7 +38,7 @@ public abstract class BaseResponseWithErrors<T extends IErrorType> extends BaseR
     }
 
     @SuppressWarnings("java:S1874")
-    protected BaseResponseWithErrors(ClientResponse<String> clientResponse) {
+    protected BaseResponseWithErrors(Response clientResponse) {
         super(clientResponse);
         claimMap = new HashMap<>();
         final String entity = getEntity();

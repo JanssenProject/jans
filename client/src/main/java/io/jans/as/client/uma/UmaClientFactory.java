@@ -6,14 +6,17 @@
 
 package io.jans.as.client.uma;
 
-import io.jans.as.client.service.ClientFactory;
-import io.jans.as.model.uma.UmaMetadata;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.core.UriBuilder;
+
 import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
-import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
-import org.jboss.resteasy.specimpl.ResteasyUriBuilder;
+import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
+
+import io.jans.as.client.service.ClientFactory;
+import io.jans.as.model.uma.UmaMetadata;
 
 /**
  * Helper class which creates proxied UMA services
@@ -25,7 +28,7 @@ public class UmaClientFactory {
 
     private static final UmaClientFactory instance = new UmaClientFactory();
 
-    private final ApacheHttpClient4Engine engine;
+    private final ApacheHttpClient43Engine engine;
 
     private UmaClientFactory() {
         this.engine = ClientFactory.instance().createEngine(true);
@@ -40,7 +43,7 @@ public class UmaClientFactory {
     }
 
     public UmaResourceService createResourceService(UmaMetadata metadata, ClientHttpEngine engine) {
-        ResteasyWebTarget target = newClient(engine).target(new ResteasyUriBuilder().uri(metadata.getResourceRegistrationEndpoint()));
+        ResteasyWebTarget target = newClient(engine).target(UriBuilder.fromPath(metadata.getResourceRegistrationEndpoint()));
         return target.proxy(UmaResourceService.class);
     }
 
@@ -49,7 +52,7 @@ public class UmaClientFactory {
     }
 
     public UmaPermissionService createPermissionService(UmaMetadata metadata, ClientHttpEngine engine) {
-        ResteasyWebTarget target = newClient(engine).target(new ResteasyUriBuilder().uri(metadata.getPermissionEndpoint()));
+        ResteasyWebTarget target = newClient(engine).target(UriBuilder.fromPath(metadata.getPermissionEndpoint()));
         return target.proxy(UmaPermissionService.class);
     }
 
@@ -58,7 +61,7 @@ public class UmaClientFactory {
     }
 
     public UmaRptIntrospectionService createRptStatusService(UmaMetadata metadata, ClientHttpEngine engine) {
-        ResteasyWebTarget target = newClient(engine).target(new ResteasyUriBuilder().uri(metadata.getIntrospectionEndpoint()));
+        ResteasyWebTarget target = newClient(engine).target(UriBuilder.fromPath(metadata.getIntrospectionEndpoint()));
         return target.proxy(UmaRptIntrospectionService.class);
     }
 
@@ -67,7 +70,7 @@ public class UmaClientFactory {
     }
 
     public UmaMetadataService createMetadataService(String umaMetadataUri, ClientHttpEngine engine) {
-        ResteasyWebTarget target = newClient(engine).target(new ResteasyUriBuilder().uri(umaMetadataUri));
+        ResteasyWebTarget target = newClient(engine).target(UriBuilder.fromPath(umaMetadataUri));
         return target.proxy(UmaMetadataService.class);
     }
 
@@ -76,7 +79,7 @@ public class UmaClientFactory {
     }
 
     public UmaScopeService createScopeService(String scopeEndpointUri, ClientHttpEngine engine) {
-        ResteasyWebTarget target = newClient(engine).target(new ResteasyUriBuilder().uri(scopeEndpointUri));
+        ResteasyWebTarget target = newClient(engine).target(UriBuilder.fromPath(scopeEndpointUri));
         return target.proxy(UmaScopeService.class);
     }
 
@@ -85,11 +88,11 @@ public class UmaClientFactory {
     }
 
     public UmaTokenService createTokenService(UmaMetadata metadata, ClientHttpEngine engine) {
-        ResteasyWebTarget target = newClient(engine).target(new ResteasyUriBuilder().uri(metadata.getTokenEndpoint()));
+        ResteasyWebTarget target = newClient(engine).target(UriBuilder.fromPath(metadata.getTokenEndpoint()));
         return target.proxy(UmaTokenService.class);
     }
 
     public ResteasyClient newClient(ClientHttpEngine engine) {
-        return new ResteasyClientBuilder().httpEngine(engine).build();
+        return ((ResteasyClientBuilder) ClientBuilder.newBuilder()).httpEngine(engine).build();
     }
 }
