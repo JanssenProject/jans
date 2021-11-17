@@ -60,7 +60,7 @@ public class OpenIdConnectDiscoveryClient extends BaseClient<OpenIdConnectDiscov
         return _exec();
     }
 
-    @SuppressWarnings("deprecation")
+    @SuppressWarnings("java:S1133")
     @Deprecated
     public OpenIdConnectDiscoveryResponse exec(ClientHttpEngine engine) {
         resteasyClient = ((ResteasyClientBuilder) ClientBuilder.newBuilder()).httpEngine(engine).build();
