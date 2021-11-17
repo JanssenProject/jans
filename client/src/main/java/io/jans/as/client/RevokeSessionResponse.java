@@ -6,7 +6,7 @@
 
 package io.jans.as.client;
 
-import org.jboss.resteasy.client.ClientResponse;
+import javax.ws.rs.core.Response;
 
 import io.jans.as.model.session.EndSessionErrorResponseType;
 
@@ -18,7 +18,7 @@ public class RevokeSessionResponse extends BaseResponseWithErrors<EndSessionErro
     public RevokeSessionResponse() {
     }
 
-    public RevokeSessionResponse(ClientResponse<String> clientResponse) {
+    public RevokeSessionResponse(Response clientResponse) {
         super(clientResponse);
         injectDataFromJson();
     }

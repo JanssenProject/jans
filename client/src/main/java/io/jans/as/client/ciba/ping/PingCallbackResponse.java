@@ -7,7 +7,7 @@
 package io.jans.as.client.ciba.ping;
 
 import io.jans.as.client.BaseResponse;
-import org.jboss.resteasy.client.ClientResponse;
+import javax.ws.rs.core.Response;
 
 /**
  * @author Javier Rojas Blum
@@ -15,10 +15,10 @@ import org.jboss.resteasy.client.ClientResponse;
  */
 public class PingCallbackResponse extends BaseResponse {
 
-    public PingCallbackResponse(ClientResponse<String> clientResponse) {
+    public PingCallbackResponse(Response clientResponse) {
         super(clientResponse);
 
-        String entity = clientResponse.getEntity(String.class);
+        String entity = clientResponse.readEntity(String.class);
         setEntity(entity);
         setHeaders(clientResponse.getMetadata());
     }
