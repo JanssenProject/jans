@@ -55,7 +55,7 @@
 
 		<!-- Jython -->
 		<dependency>
-			<groupId>org.python</groupId>
+			<groupId>org.gluufederation</groupId>
 			<artifactId>jython-standalone</artifactId>
 		</dependency>
 
@@ -74,6 +74,12 @@
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
 			<scope>provided</scope>
+		</dependency>
+
+		<!-- Google -->
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
 		</dependency>
 
 		<!-- Logging -->

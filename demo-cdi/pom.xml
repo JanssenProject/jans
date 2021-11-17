@@ -47,8 +47,7 @@
 		<!-- Resteasy -->
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>resteasy-jaxrs</artifactId>
-			<scope>provided</scope>
+			<artifactId>resteasy-cdi</artifactId>
 		</dependency>
 	</dependencies>
 
