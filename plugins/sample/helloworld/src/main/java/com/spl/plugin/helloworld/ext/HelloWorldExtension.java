@@ -1,4 +1,4 @@
-package com.spl.plugins.helloworld.ext;
+package com.spl.plugin.helloworld.ext;
 
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.AfterDeploymentValidation;

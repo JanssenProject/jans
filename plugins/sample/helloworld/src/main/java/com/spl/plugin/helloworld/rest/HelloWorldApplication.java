@@ -1,4 +1,4 @@
-package com.spl.plugins.helloworld.rest;
+package com.spl.plugin.helloworld.rest;
 
 import java.util.HashSet;
 import java.util.Set;
