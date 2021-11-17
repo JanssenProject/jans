@@ -40,7 +40,6 @@ public class PushTokenDeliveryClient extends BaseClient<PushTokenDeliveryRequest
     private PushTokenDeliveryResponse _exec() {
         try {
             // Prepare request parameters
-    //        clientRequest.setHttpMethod(getHttpMethod());
         	
         	Builder clientRequest = webTarget.request();
         	applyCookies(clientRequest);

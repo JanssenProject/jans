@@ -16,6 +16,7 @@ import static io.jans.as.model.discovery.WebFingerParam.SUBJECT;
 import java.net.URISyntaxException;
 
 import javax.ws.rs.HttpMethod;
+import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.MediaType;
 
@@ -61,7 +62,7 @@ public class OpenIdConnectDiscoveryClient extends BaseClient<OpenIdConnectDiscov
 
     @Deprecated
     public OpenIdConnectDiscoveryResponse exec(ClientHttpEngine engine) {
-        resteasyClient = ((ResteasyClientBuilder) ResteasyClientBuilder.newBuilder()).httpEngine(engine).build();
+        resteasyClient = ((ResteasyClientBuilder) ClientBuilder.newBuilder()).httpEngine(engine).build();
 		webTarget = resteasyClient.target(getUrl());
 
 		return _exec();

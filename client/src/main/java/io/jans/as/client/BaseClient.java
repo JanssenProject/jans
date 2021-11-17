@@ -13,6 +13,8 @@ import io.jans.as.model.config.Constants;
 import io.jans.as.model.util.Util;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+
+import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.Response;
 import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
@@ -249,7 +251,7 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
         if (this.executor == null) {
         	resteasyClient = (ResteasyClient) ResteasyClientBuilder.newClient();
         } else {
-        	resteasyClient = ((ResteasyClientBuilder) ResteasyClientBuilder.newBuilder()).httpEngine(executor).build();
+        	resteasyClient = ((ResteasyClientBuilder) ClientBuilder.newBuilder()).httpEngine(executor).build();
         }
 
         webTarget = resteasyClient.target(getUrl());

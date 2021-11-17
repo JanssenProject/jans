@@ -67,7 +67,6 @@ public class JwkClient extends BaseClient<JwkRequest, JwkResponse> {
             clientRequest.header("Authorization", "Basic " + encodedCredentials);
         }
         clientRequest.accept(MediaType.APPLICATION_JSON);
-//        clientRequest.setHttpMethod(getHttpMethod());
 
         // Call REST Service and handle response
         try {
