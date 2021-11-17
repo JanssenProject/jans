@@ -23,6 +23,7 @@ public class ClientAuthnEnabler {
 
     public ClientAuthnEnabler(Builder clientRequest, Form requestForm) {
         this.clientRequest = clientRequest;
+        this.requestForm = requestForm;
     }
 
     public void exec(ClientAuthnRequest request){
