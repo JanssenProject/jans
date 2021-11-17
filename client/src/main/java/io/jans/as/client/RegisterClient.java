@@ -90,7 +90,7 @@ public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse
             // Prepare request parameters
 //            clientRequest.setHttpMethod(getHttpMethod());
 
-            Entity requestEntity = null;
+            Entity<?> requestEntity = null;
             Builder clientRequest = webTarget.request();
             applyCookies(clientRequest);
 
