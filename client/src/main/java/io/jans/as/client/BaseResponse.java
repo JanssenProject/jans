@@ -29,7 +29,7 @@ public abstract class BaseResponse {
         this.status = status;
     }
 
-    public BaseResponse(Response clientResponse) {
+    protected BaseResponse(Response clientResponse) {
         if (clientResponse != null) {
             status = clientResponse.getStatus();
             if (clientResponse.getLocation() != null) {
