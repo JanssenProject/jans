@@ -66,11 +66,10 @@ public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationReq
 
             // Prepare request parameters
             clientRequest.accept(MEDIA_TYPES);
-//            clientRequest.setHttpMethod(getHttpMethod());
 
             // Support AWS LB
             // Implement follow redirect manually because we have to set engine.setFollowRedirects(true); on engine layer 
-//            clientRequest.followRedirects(true);
+            // clientRequest.followRedirects(true);
             
             clientResponse = clientRequest.buildGet().invoke();
             int status = clientResponse.getStatus();
