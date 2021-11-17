@@ -39,15 +39,14 @@ public class ClientService implements Serializable {
 
     @Inject
     private Logger logger;
-    
+
     @Inject
     private OrgService orgService;
-
 
     public boolean contains(String clientDn) {
         return persistenceEntryManager.contains(clientDn, Client.class);
     }
-    
+
     public Client getClientByInum(String inum) {
         Client result = null;
         try {
@@ -75,5 +74,4 @@ public class ClientService implements Serializable {
         return String.format("inum=%s,ou=clients,%s", inum, orgDn);
     }
 
-   
 }
