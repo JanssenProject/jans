@@ -96,18 +96,18 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
         this.executor = executor;
     }
 
-    protected void addReqParam(String p_key, HasParamName p_value) {
-        if (p_value != null) {
-            addReqParam(p_key, p_value.getParamName());
+    protected void addReqParam(String key, HasParamName value) {
+        if (value != null) {
+            addReqParam(key, value.getParamName());
         }
     }
 
-    protected void addReqParam(String p_key, String p_value) {
-        if (Util.allNotBlank(p_key, p_value)) {
+    protected void addReqParam(String key, String value) {
+        if (Util.allNotBlank(key, value)) {
             if (request.getAuthorizationMethod() == AuthorizationMethod.FORM_ENCODED_BODY_PARAMETER) {
-            	requestForm.param(p_key, p_value);
+            	requestForm.param(key, value);
             } else {
-            	webTarget = webTarget.queryParam(p_key, p_value);
+            	webTarget = webTarget.queryParam(key, value);
             }
         }
     }
