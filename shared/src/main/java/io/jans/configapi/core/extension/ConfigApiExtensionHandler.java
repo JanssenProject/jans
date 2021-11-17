@@ -19,7 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ConfigApiExtensionHandler implements Extension {
-    
+
     private static final Logger log = LoggerFactory.getLogger(ConfigApiExtensionHandler.class.getName());
 
     private Map<String, ConfigApiExtension> configApiExtensions = new HashMap<String, ConfigApiExtension>();
@@ -27,7 +27,6 @@ public class ConfigApiExtensionHandler implements Extension {
     public <X> void processAnnotatedType(@Observes ProcessAnnotatedType<X> pat) {
         final AnnotatedTypeConfigurator<X> cat = pat.configureAnnotatedType();
 
-      
     }
-    
+
 }
