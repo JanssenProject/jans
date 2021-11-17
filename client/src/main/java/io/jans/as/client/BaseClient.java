@@ -111,19 +111,7 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
             }
         }
     }
-/*
-    @SuppressWarnings("java:S1874")
-    public static void putAllFormParameters(ClientRequest clientRequest, BaseRequest request) {
-        if (clientRequest != null && request != null) {
-            final Map<String, String> parameters = request.getParameters();
-            if (parameters != null && !parameters.isEmpty()) {
-                for (Map.Entry<String, String> e : parameters.entrySet()) {
-                    p_requestForm.param(e.getKey(), e.getValue());
-                }
-            }
-        }
-    }
-*/
+
     public String getRequestAsString() {
         StringBuilder sb = new StringBuilder();
 
