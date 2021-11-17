@@ -64,10 +64,16 @@
 			<groupId>org.apache.ws.security</groupId>
 			<artifactId>wss4j</artifactId>
 		</dependency>
-        <dependency>
-            <groupId>org.opensaml</groupId>
-            <artifactId>opensaml</artifactId>
-        </dependency>
+	        <dependency>
+        	    <groupId>org.opensaml</groupId>
+	            <artifactId>opensaml</artifactId>
+			    <exclusions>
+			    	<exclusion>
+		    			<groupId>ca.juliusdavies</groupId>
+		    			<artifactId>not-yet-commons-ssl</artifactId>
+			    	</exclusion>
+			    </exclusions>
+	        </dependency>
 		<dependency>
 		    <groupId>org.apache.santuario</groupId>
 		    <artifactId>xmlsec</artifactId>

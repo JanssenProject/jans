@@ -6,17 +6,18 @@
 
 package io.jans.service.cache;
 
-import com.google.common.collect.Sets;
+import java.io.Serializable;
+import java.util.Set;
+
 import org.apache.commons.lang.SerializationUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.JedisSentinelPool;
 import redis.clients.jedis.Protocol;
-
-import java.io.Serializable;
 
 /**
  * Important : keep it weld free. It's reused by oxd !
@@ -41,7 +42,7 @@ public class RedisSentinelProvider extends AbstractRedisProvider {
             String password = redisConfiguration.getPassword();
             pool = new JedisSentinelPool(
                     getRedisConfiguration().getSentinelMasterGroupName(),
-                    Sets.newHashSet(StringUtils.split(getRedisConfiguration().getServers().trim(), ",")),
+                    Set.of(StringUtils.split(getRedisConfiguration().getServers().trim(), ",")),
                     poolConfig,
                     redisConfiguration.getConnectionTimeout(),
                     redisConfiguration.getSoTimeout(),
