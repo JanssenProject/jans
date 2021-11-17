@@ -33,7 +33,7 @@ public class PushErrorClient extends BaseClient<PushErrorRequest, PushErrorRespo
     }
 
     public PushErrorResponse exec() {
-        initClientRequest();
+        initClient();
         return _exec();
     }
 

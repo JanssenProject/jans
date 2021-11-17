@@ -73,7 +73,7 @@ public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse
     }
 
     public RegisterResponse exec() {
-        initClientRequest();
+        initClient();
         return _exec();
     }
 

@@ -171,7 +171,7 @@ public class AuthorizeClient extends BaseClient<AuthorizationRequest, Authorizat
         AuthorizationResponse response = null;
 
         try {
-            initClientRequest();
+            initClient();
             response = exec_();
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);

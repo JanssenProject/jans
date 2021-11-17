@@ -46,7 +46,7 @@ public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationReq
     }
 
     public OpenIdConfigurationResponse execOpenIdConfiguration() throws IOException {
-        initClientRequest();
+        initClient();
 
         return exec();
     }

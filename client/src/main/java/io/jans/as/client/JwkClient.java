@@ -57,7 +57,7 @@ public class JwkClient extends BaseClient<JwkRequest, JwkResponse> {
         }
 
         // Prepare request parameters
-        initClientRequest();
+        initClient();
 
         Builder clientRequest = webTarget.request();
         applyCookies(clientRequest);
