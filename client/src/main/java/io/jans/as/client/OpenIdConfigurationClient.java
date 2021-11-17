@@ -56,7 +56,7 @@ public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationReq
      *
      * @return The service response.
      */
-    private OpenIdConfigurationResponse exec() throws IOException {
+    private OpenIdConfigurationResponse exec() {
         setRequest(new OpenIdConfigurationRequest());
 
         // Call REST Service and handle response
