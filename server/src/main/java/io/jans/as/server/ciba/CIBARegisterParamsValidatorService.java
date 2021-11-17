@@ -21,7 +21,6 @@ import org.slf4j.LoggerFactory;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.ws.rs.HttpMethod;
 import javax.ws.rs.client.ClientBuilder;
 
 import java.util.List;
