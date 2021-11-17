@@ -6,6 +6,7 @@
 
 package io.jans.as.client.fido.u2f;
 
+import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.UriBuilder;
 
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
@@ -36,19 +37,19 @@ public class FidoU2fClientFactory {
     }
 
     public U2fConfigurationService createMetaDataConfigurationService(String u2fMetaDataUri) {
-        ResteasyClient client = ((ResteasyClientBuilder) ResteasyClientBuilder.newBuilder()).httpEngine(engine).build();
+        ResteasyClient client = ((ResteasyClientBuilder) ClientBuilder.newBuilder()).httpEngine(engine).build();
         ResteasyWebTarget target = client.target(UriBuilder.fromPath(u2fMetaDataUri));
         return target.proxy(U2fConfigurationService.class);
     }
 
     public AuthenticationRequestService createAuthenticationRequestService(U2fConfiguration metadataConfiguration) {
-        ResteasyClient client = ((ResteasyClientBuilder) ResteasyClientBuilder.newBuilder()).httpEngine(engine).build();
+        ResteasyClient client = ((ResteasyClientBuilder) ClientBuilder.newBuilder()).httpEngine(engine).build();
         ResteasyWebTarget target = client.target(UriBuilder.fromPath(metadataConfiguration.getAuthenticationEndpoint()));
         return target.proxy(AuthenticationRequestService.class);
     }
 
     public RegistrationRequestService createRegistrationRequestService(U2fConfiguration metadataConfiguration) {
-        ResteasyClient client = ((ResteasyClientBuilder) ResteasyClientBuilder.newBuilder()).httpEngine(engine).build();
+        ResteasyClient client = ((ResteasyClientBuilder) ClientBuilder.newBuilder()).httpEngine(engine).build();
         ResteasyWebTarget target = client.target(UriBuilder.fromPath(metadataConfiguration.getRegistrationEndpoint()));
         return target.proxy(RegistrationRequestService.class);
     }

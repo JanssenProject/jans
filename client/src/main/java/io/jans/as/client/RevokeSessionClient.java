@@ -48,7 +48,6 @@ public class RevokeSessionClient extends BaseClient<RevokeSessionRequest, Revoke
         new ClientAuthnEnabler(clientRequest, requestForm).exec(request);
 
         clientRequest.header("Content-Type", request.getContentType());
-//        clientRequest.setHttpMethod(getHttpMethod());
 
         if (getRequest().getUserCriterionKey() != null) {
             requestForm.param("user_criterion_key", getRequest().getUserCriterionKey());
