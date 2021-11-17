@@ -244,7 +244,6 @@ public class TokenClient extends BaseClient<TokenRequest, TokenResponse> {
             new ClientAuthnEnabler(clientRequest, requestForm).exec(request);
 
             clientRequest.header("Content-Type", request.getContentType());
-    //        clientRequest.setHttpMethod(getHttpMethod());
 
             if (getRequest().getDpop() != null) {
                 clientRequest.header(DPOP, getRequest().getDpop().getEncodedJwt());
