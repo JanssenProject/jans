@@ -67,10 +67,6 @@
 				<artifactId>jakarta.xml.bind-api</artifactId>
 				<version>2.3.3</version>
 			</dependency>
-			<dependency>
-				<groupId>javax.annotation</groupId>
-				<artifactId>javax.annotation-api</artifactId>
-			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
