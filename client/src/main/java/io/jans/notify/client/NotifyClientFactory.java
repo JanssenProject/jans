@@ -13,7 +13,7 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
-import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
+import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
 
 import javax.ws.rs.core.UriBuilder;
 import java.util.Base64;
@@ -32,7 +32,7 @@ public class NotifyClientFactory {
 
 	private NotifyClientFactory() {
 		// Create single connection client
-		this.client = new ResteasyClientBuilder().build();
+		this.client = ((ResteasyClientBuilder) ResteasyClientBuilder.newBuilder()).build();
 
 		// Create polled client
 		PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
@@ -40,9 +40,9 @@ public class NotifyClientFactory {
 		cm.setDefaultMaxPerRoute(20); // Increase default max connection per route to 20
 
 		CloseableHttpClient httpClient = HttpClients.custom().setConnectionManager(cm).build();
-		ApacheHttpClient4Engine engine = new ApacheHttpClient4Engine(httpClient);
+		ApacheHttpClient43Engine engine = new ApacheHttpClient43Engine(httpClient);
 		 
-		this.pooledClient = new ResteasyClientBuilder().httpEngine(engine).build();
+		this.pooledClient = ((ResteasyClientBuilder) ResteasyClientBuilder.newBuilder()).httpEngine(engine).build();
 	}
 
 	public static NotifyClientFactory instance() {

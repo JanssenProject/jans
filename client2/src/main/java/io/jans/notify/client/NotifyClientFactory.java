@@ -6,15 +6,18 @@
 
 package io.jans.notify.client;
 
+import javax.ws.rs.core.UriBuilder;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.conn.ssl.SSLContexts;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import io.jans.notify.model.NotifyMetadata;
-import org.jboss.resteasy.client.ClientExecutor;
-import org.jboss.resteasy.client.ProxyFactory;
-import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
+import org.jboss.resteasy.client.jaxrs.ResteasyClient;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
+import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
 /**
  * Helper class which creates proxy
  *
@@ -24,7 +27,8 @@ import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
 public class NotifyClientFactory {
 
 	private final static NotifyClientFactory instance = new NotifyClientFactory();
-	private ClientExecutor pooledClientExecutor;
+
+	private ApacheHttpClient43Engine engine;
 
 	private NotifyClientFactory() {
         // Create polled client
@@ -34,7 +38,7 @@ public class NotifyClientFactory {
 
 		CloseableHttpClient httpClient = HttpClients.custom().setConnectionManager(cm).setSslcontext(SSLContexts.createSystemDefault()).build();
 
-		this.pooledClientExecutor = new ApacheHttpClient4Executor(httpClient);
+		this.engine = new ApacheHttpClient43Engine(httpClient);
 	}
 
 	public static NotifyClientFactory instance() {
@@ -42,13 +46,20 @@ public class NotifyClientFactory {
 	}
 
 	public NotifyMetadataClientService createMetaDataConfigurationService(String issuer) {
+		ResteasyClient client = ((ResteasyClientBuilder) ResteasyClientBuilder.newBuilder()).httpEngine(engine).build();
 		String metadataUri = issuer + "/.well-known/notify-configuration";
-		return ProxyFactory.create(NotifyMetadataClientService.class, metadataUri, pooledClientExecutor);
-	}
+        ResteasyWebTarget target = client.target(UriBuilder.fromPath(metadataUri));
+
+        return target.proxy(NotifyMetadataClientService.class);
+    }
 
 	public NotifyClientService createNotifyService(NotifyMetadata notifyMetadata) {
-		String targetUri = notifyMetadata.getNotifyEndpoint();
-		return ProxyFactory.create(NotifyClientService.class, targetUri, pooledClientExecutor);
+        ResteasyClient client = ((ResteasyClientBuilder) ResteasyClientBuilder.newBuilder()).httpEngine(engine).build();
+
+        String targetUri = notifyMetadata.getNotifyEndpoint();
+        ResteasyWebTarget target = client.target(UriBuilder.fromPath(targetUri));
+
+        return target.proxy(NotifyClientService.class);
 	}
 
 	public static String getAuthorization(String accessKeyId,  String secretAccessKey) {
