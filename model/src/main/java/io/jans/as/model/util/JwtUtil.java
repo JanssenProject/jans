@@ -187,7 +187,9 @@ public class JwtUtil {
 
 	                if (status == 200) {
 	                    jwks = clientResponse.readEntity(String.class);
-	                    log.debug(String.format("JWK: %s", jwks));
+	                    if (log.isDebugEnabled()) {
+	                    	log.debug(String.format("JWK: %s", jwks));
+	                    }
 	                }
         		} finally {
         			clientRequest.close();
@@ -217,10 +219,6 @@ public class JwtUtil {
         return jsonKey;
     }
 
-    private static void logJwks(Object jwks) {
-        log.debug("JWK: {}", jwks);
-    }
-
     public static JSONObject getJSONWebKeys(String jwksUri) {
         return getJSONWebKeys(jwksUri, null);
     }
@@ -245,7 +243,9 @@ public class JwtUtil {
 
 	                if (status == 200) {
 	                    jwks = fromJson(clientResponse.readEntity(String.class));
-	                    log.debug(String.format("JWK: %s", jwks));
+	                    if (log.isDebugEnabled()) {
+	                    	log.debug(String.format("JWK: %s", jwks));
+	                    }
 	                }
         		} finally {
         			clientRequest.close();
