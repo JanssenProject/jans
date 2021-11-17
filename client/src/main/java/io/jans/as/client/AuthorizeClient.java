@@ -145,6 +145,7 @@ public class AuthorizeClient extends BaseClient<AuthorizationRequest, Authorizat
      *                    select_account, and none.
      * @return The authorization response.
      */
+    @SuppressWarnings("deprecation")
     @Deprecated // it produces confusion since we have parameters and request object at the same time
     public AuthorizationResponse execImplicitGrant(
             String clientId, List<String> scopes, String redirectUri, String nonce,
@@ -182,6 +183,7 @@ public class AuthorizeClient extends BaseClient<AuthorizationRequest, Authorizat
         return response;
     }
 
+    @SuppressWarnings("deprecation")
     @Deprecated
     public AuthorizationResponse exec(ClientHttpEngine engine) {
         AuthorizationResponse response = null;
