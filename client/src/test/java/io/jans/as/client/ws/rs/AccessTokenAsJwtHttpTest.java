@@ -81,7 +81,7 @@ public class AccessTokenAsJwtHttpTest extends BaseTest {
         registerRequest.setAccessTokenSigningAlg(SignatureAlgorithm.RS512);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setExecutor(clientExecutor(true));
+        registerClient.setExecutor(clientEngine(true));
         registerClient.setRequest(registerRequest);
         RegisterResponse registerResponse = registerClient.exec();
 

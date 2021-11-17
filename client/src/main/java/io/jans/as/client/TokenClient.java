@@ -11,6 +11,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import javax.ws.rs.HttpMethod;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
 
 import static io.jans.as.model.token.TokenRequestParam.*;
 
@@ -218,15 +220,7 @@ public class TokenClient extends BaseClient<TokenRequest, TokenResponse> {
     public TokenResponse exec() {
         try {
             // Prepare request parameters
-            initClientRequest();
-            new ClientAuthnEnabler(clientRequest).exec(request);
-
-            clientRequest.header("Content-Type", request.getContentType());
-            clientRequest.setHttpMethod(getHttpMethod());
-
-            if (getRequest().getDpop() != null) {
-                clientRequest.header(DPOP, getRequest().getDpop().getEncodedJwt());
-            }
+            initClient();
 
             addFormParameterIfNotNull(GRANT_TYPE, getRequest().getGrantType());
             addFormParameterIfNotBlank(CODE, getRequest().getCode());
@@ -244,8 +238,19 @@ public class TokenClient extends BaseClient<TokenRequest, TokenResponse> {
                 addFormParameterIfNotBlank(key, getRequest().getCustomParameters().get(key));
             }
 
+            Builder clientRequest = webTarget.request();
+            applyCookies(clientRequest);
+
+            new ClientAuthnEnabler(clientRequest, requestForm).exec(request);
+
+            clientRequest.header("Content-Type", request.getContentType());
+
+            if (getRequest().getDpop() != null) {
+                clientRequest.header(DPOP, getRequest().getDpop().getEncodedJwt());
+            }
+
             // Call REST Service and handle response
-            clientResponse = clientRequest.post(String.class);
+            clientResponse = clientRequest.buildPost(Entity.form(requestForm)).invoke();
 
             final TokenResponse tokenResponse = new TokenResponse(clientResponse);
             tokenResponse.injectDataFromJson();
@@ -267,7 +272,7 @@ public class TokenClient extends BaseClient<TokenRequest, TokenResponse> {
 
     private void addFormParameterIfNotNull(String paramName, Object value) {
         if (value != null) {
-            clientRequest.formParameter(paramName, value);
+            requestForm.param(paramName, value.toString());
         }
     }
 }

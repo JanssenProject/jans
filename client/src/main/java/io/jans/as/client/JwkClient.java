@@ -9,10 +9,11 @@ package io.jans.as.client;
 import static io.jans.as.model.jwk.JWKParameter.JSON_WEB_KEY_SET;
 
 import javax.ws.rs.HttpMethod;
+import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.lang.StringUtils;
-import org.jboss.resteasy.client.ClientExecutor;
+import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
 import org.json.JSONObject;
 
 import io.jans.as.model.crypto.PublicKey;
@@ -56,23 +57,26 @@ public class JwkClient extends BaseClient<JwkRequest, JwkResponse> {
         }
 
         // Prepare request parameters
-        initClientRequest();
+        initClient();
+
+        Builder clientRequest = webTarget.request();
+        applyCookies(clientRequest);
+
         if (getRequest().hasCredentials()) {
             String encodedCredentials = getRequest().getEncodedCredentials();
             clientRequest.header("Authorization", "Basic " + encodedCredentials);
         }
         clientRequest.accept(MediaType.APPLICATION_JSON);
-        clientRequest.setHttpMethod(getHttpMethod());
 
         // Call REST Service and handle response
         try {
-            clientResponse = clientRequest.get(String.class);
+            clientResponse = clientRequest.buildGet().invoke();
             int status = clientResponse.getStatus();
 
             setResponse(new JwkResponse(status));
             getResponse().setHeaders(clientResponse.getMetadata());
 
-            String entity = clientResponse.getEntity(String.class);
+            String entity = clientResponse.readEntity(String.class);
             getResponse().setEntity(entity);
             if (StringUtils.isNotBlank(entity)) {
                 JSONObject jsonObj = new JSONObject(entity);
@@ -94,11 +98,11 @@ public class JwkClient extends BaseClient<JwkRequest, JwkResponse> {
         return getRSAPublicKey(jwkSetUri, keyId, null);
     }
 
-    public static RSAPublicKey getRSAPublicKey(String jwkSetUri, String keyId, ClientExecutor clientExecutor) {
+    public static RSAPublicKey getRSAPublicKey(String jwkSetUri, String keyId, ClientHttpEngine engine) {
         RSAPublicKey publicKey = null;
 
         JwkClient jwkClient = new JwkClient(jwkSetUri);
-        jwkClient.setExecutor(clientExecutor);
+        jwkClient.setExecutor(engine);
         JwkResponse jwkResponse = jwkClient.exec();
         if (jwkResponse != null && jwkResponse.getStatus() == 200) {
             PublicKey pk = jwkResponse.getPublicKey(keyId);
@@ -114,12 +118,12 @@ public class JwkClient extends BaseClient<JwkRequest, JwkResponse> {
         return getECDSAPublicKey(jwkSetUrl, keyId, null);
     }
 
-    public static ECDSAPublicKey getECDSAPublicKey(String jwkSetUrl, String keyId, ClientExecutor clientExecutor) {
+    public static ECDSAPublicKey getECDSAPublicKey(String jwkSetUrl, String keyId, ClientHttpEngine engine) {
         ECDSAPublicKey publicKey = null;
 
         JwkClient jwkClient = new JwkClient(jwkSetUrl);
-        if (clientExecutor != null) {
-            jwkClient.setExecutor(clientExecutor);
+        if (engine != null) {
+            jwkClient.setExecutor(engine);
         }
         JwkResponse jwkResponse = jwkClient.exec();
         if (jwkResponse != null && jwkResponse.getStatus() == 200) {
