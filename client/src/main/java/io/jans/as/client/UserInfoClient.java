@@ -101,8 +101,6 @@ public class UserInfoClient extends BaseClient<UserInfoRequest, UserInfoResponse
         }
 
         clientRequest.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
-//      clientRequest.setHttpMethod(getHttpMethod());
-
 
         // Call REST Service and handle response
         try {
