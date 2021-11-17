@@ -30,7 +30,6 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.util.EntityUtils;
-import org.jboss.resteasy.util.HttpResponseCodes;
 import org.slf4j.Logger;
 
 import javax.annotation.PostConstruct;
@@ -177,7 +176,7 @@ public class HttpService implements Serializable {
 	}
 
 	public byte[] getResponseContent(HttpResponse httpResponse) throws IOException {
-        if ((httpResponse == null) || (httpResponse.getStatusLine().getStatusCode() != HttpResponseCodes.SC_OK)) {
+        if ((httpResponse == null) || (httpResponse.getStatusLine().getStatusCode() != HttpStatus.SC_OK)) {
         	return null;
         }
 
@@ -196,7 +195,7 @@ public class HttpService implements Serializable {
 	}
 
 	public void consume(HttpResponse httpResponse) throws IOException {
-        if ((httpResponse == null) || (httpResponse.getStatusLine().getStatusCode() != HttpResponseCodes.SC_OK)) {
+        if ((httpResponse == null) || (httpResponse.getStatusLine().getStatusCode() != HttpStatus.SC_OK)) {
         	return;
         }
 

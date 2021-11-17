@@ -21,18 +21,16 @@ import io.jans.as.model.util.URLPatternList;
 import io.jans.as.model.util.Util;
 import io.jans.as.server.util.ServerUtil;
 import org.apache.commons.lang.StringUtils;
-import org.jboss.resteasy.client.ClientRequest;
-import org.jboss.resteasy.client.ClientResponse;
+import javax.ws.rs.core.Response;
 import org.json.JSONArray;
 import org.slf4j.Logger;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.ws.rs.HttpMethod;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashSet;
@@ -306,18 +304,21 @@ public class RegisterParamsValidator {
                     valid = false;
                 }
 
-                ClientRequest clientRequest = new ClientRequest(sectorIdentifierUrl);
-                clientRequest.setHttpMethod(HttpMethod.GET);
+                javax.ws.rs.client.Client clientRequest = ClientBuilder.newClient();
+        		String entity = null;
+        		try {
+        			Response clientResponse = clientRequest.target(sectorIdentifierUrl).request().buildGet().invoke();
+	                int status = clientResponse.getStatus();
 
-                ClientResponse<String> clientResponse = clientRequest.get(String.class);
-                int status = clientResponse.getStatus();
+	                if (status == 200) {
+	                    entity = clientResponse.readEntity(String.class);
 
-                if (status == 200) {
-                    String entity = clientResponse.getEntity(String.class);
-
-                    JSONArray sectorIdentifierJsonArray = new JSONArray(entity);
-                    valid = Util.asList(sectorIdentifierJsonArray).containsAll(redirectUris);
-                }
+	                    JSONArray sectorIdentifierJsonArray = new JSONArray(entity);
+	                    valid = Util.asList(sectorIdentifierJsonArray).containsAll(redirectUris);
+	                }
+        		} finally {
+        			clientRequest.close();
+        		}
             } catch (Exception e) {
                 log.debug(e.getMessage(), e);
                 valid = false;

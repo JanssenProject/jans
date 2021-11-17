@@ -466,7 +466,18 @@ public class AuthorizationRequest extends BaseRequest {
     }
 
     public String getCustomResponseHeadersAsString() throws JSONException {
-        return Util.mapAsString(customResponseHeaders);
+        String header = Util.mapAsString(customResponseHeaders);
+        if (header == null) {
+        	return null;
+        }
+
+        try {
+			return URLEncoder.encode(header, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			LOG.warn("Failed to encode string", e);
+		}
+
+        return null;
     }
 
     public Map<String, String> getCustomResponseHeaders() {
