@@ -1,7 +1,7 @@
 package io.jans.configapi.core.util;
 
 import io.jans.as.common.model.registration.Client;
-import io.jans.configapi.core.service.ConfigurationService;
+import io.jans.configapi.core.service.ConfService;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
@@ -28,14 +28,14 @@ public class AuthUtil {
     Logger log;
 
     @Inject
-    ConfigurationService configurationService;
+    ConfService confService;
 
     public String getOpenIdConfigurationEndpoint(String dn) {
-        return this.configurationService.find(dn).getOpenIdConfigurationEndpoint();
+        return this.confService.find(dn).getOpenIdConfigurationEndpoint();
     }
 
     public String getIssuer(String dn) {
-        return this.configurationService.find(dn).getIssuer();
+        return this.confService.find(dn).getIssuer();
     }
 
     public List<String> findMissingElements(List<String> list1, List<String> list2) {
