@@ -77,7 +77,7 @@ public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse
         return _exec();
     }
 
-    @SuppressWarnings("deprecation")
+    @SuppressWarnings("removal")
     @Deprecated
     public RegisterResponse exec(ClientHttpEngine engine) {
         resteasyClient = ((ResteasyClientBuilder) ClientBuilder.newBuilder()).httpEngine(engine).build();
