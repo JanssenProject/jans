@@ -20,7 +20,6 @@ import org.json.JSONObject;
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.MediaType;
 import java.nio.charset.StandardCharsets;
 import java.security.PrivateKey;
 import java.util.Iterator;
