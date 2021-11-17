@@ -42,7 +42,7 @@ public class PingCallbackClient extends BaseClient<PingCallbackRequest, PingCall
         if (this.fapiCompatibility) {
             setExecutor(getApacheHttpClient4ExecutorForMTLS());
         }
-        initClientRequest();
+        initClient();
         return _exec();
     }
 

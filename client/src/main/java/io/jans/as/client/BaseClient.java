@@ -247,10 +247,9 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
         return sb.toString();
     }
 
-    // TODO: Rename method
-    protected void initClientRequest() {
+    protected void initClient() {
         if (this.executor == null) {
-        	resteasyClient = (ResteasyClient) ResteasyClientBuilder.newClient();
+        	resteasyClient = (ResteasyClient) ClientBuilder.newClient();
         } else {
         	resteasyClient = ((ResteasyClientBuilder) ClientBuilder.newBuilder()).httpEngine(executor).build();
         }

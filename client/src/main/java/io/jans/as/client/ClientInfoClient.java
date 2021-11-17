@@ -65,7 +65,7 @@ public class ClientInfoClient extends BaseClient<ClientInfoRequest, ClientInfoRe
     }
 
     public ClientInfoResponse exec() {
-        initClientRequest();
+        initClient();
         return execInternal();
     }
 

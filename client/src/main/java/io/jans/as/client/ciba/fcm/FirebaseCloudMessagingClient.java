@@ -39,7 +39,7 @@ public class FirebaseCloudMessagingClient extends BaseClient<FirebaseCloudMessag
     }
 
     public FirebaseCloudMessagingResponse exec() {
-        initClientRequest();
+        initClient();
         return _exec();
     }
 

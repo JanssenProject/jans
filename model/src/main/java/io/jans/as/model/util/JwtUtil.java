@@ -232,7 +232,7 @@ public class JwtUtil {
         JSONObject jwks = null;
         try {
             if (!StringHelper.isEmpty(jwksUri)) {
-            	ClientBuilder clientBuilder = ResteasyClientBuilder.newBuilder();
+            	ClientBuilder clientBuilder = ClientBuilder.newBuilder();
             	if (engine != null) {
             		((ResteasyClientBuilder) clientBuilder).httpEngine(engine);
             	}
