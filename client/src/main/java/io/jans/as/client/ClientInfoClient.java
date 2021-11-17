@@ -70,6 +70,7 @@ public class ClientInfoClient extends BaseClient<ClientInfoRequest, ClientInfoRe
     }
 
 
+    @SuppressWarnings("deprecation")
     @Deprecated
     public ClientInfoResponse exec(ClientHttpEngine engine) {
     	resteasyClient = ((ResteasyClientBuilder) ClientBuilder.newBuilder()).httpEngine(engine).build();
