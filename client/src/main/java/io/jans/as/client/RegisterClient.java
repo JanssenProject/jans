@@ -77,7 +77,7 @@ public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse
         return _exec();
     }
 
-    @SuppressWarnings("removal")
+    @SuppressWarnings("java:S1133")
     @Deprecated
     public RegisterResponse exec(ClientHttpEngine engine) {
         resteasyClient = ((ResteasyClientBuilder) ClientBuilder.newBuilder()).httpEngine(engine).build();

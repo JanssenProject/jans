@@ -15,7 +15,6 @@ import org.json.JSONObject;
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.MediaType;
-import java.io.IOException;
 
 import static io.jans.as.model.configuration.ConfigurationResponseClaim.*;
 
@@ -45,7 +44,7 @@ public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationReq
         return HttpMethod.GET;
     }
 
-    public OpenIdConfigurationResponse execOpenIdConfiguration() throws IOException {
+    public OpenIdConfigurationResponse execOpenIdConfiguration() {
         initClient();
 
         return exec();
