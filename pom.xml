@@ -13,33 +13,31 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.min-version>3.0.3</maven.min-version>
 
-		<resteasy.version>3.15.2.Final</resteasy.version>
-		<resteasy.jaxrs.version>3.15.2.Final</resteasy.jaxrs.version>
+		<resteasy.version>4.5.7.Final</resteasy.version>
 
 		<httpcore.version>4.4.14</httpcore.version>
 		<httpclient.version>4.5.13</httpclient.version>
 
-		<jettison.version>1.3.2</jettison.version>
-
 		<weld.version>3.1.8.Final</weld.version>
-		<richfaces.version>4.5.18-gluu.Final</richfaces.version>
+		<servlet.version>5.0.0</servlet.version>
+		<richfaces.version>4.5.19-gluu.Final</richfaces.version>
 
 		<jsf-api.version>2.2.20</jsf-api.version>
 		<jsf-impl.version>2.3.14</jsf-impl.version>
 		<uel-api.version>2.2.1-b04</uel-api.version>
 		<uel-impl.version>2.2.1-b05</uel-impl.version>
 
-		<jackson.version>2.12.4</jackson.version>
-		<jackson.databind.version>2.11.2</jackson.databind.version>
+		<jackson.version>2.13.0</jackson.version>
+		<jackson.databind.version>2.13.0</jackson.databind.version>
 		<json.version>20210307</json.version>
 
 		<log4j.version>2.14.1</log4j.version>
 		<slf4j.version>1.7.31</slf4j.version>
 
-		<guava.version>30.1.1-jre</guava.version>
+		<guava.version>31.0.1-jre</guava.version>
 
-		<aws.sns.version>1.12.25</aws.sns.version>
-		<jackrabbit.version>2.21.7</jackrabbit.version>
+		<aws.sns.version>1.12.94</aws.sns.version>
+		<jackrabbit.version>2.21.8</jackrabbit.version>
 	</properties>
 
 	<repositories>
@@ -59,11 +57,6 @@
 			<name>Bouncy Castle</name>
 			<url>https://repo2.maven.org/maven2/org/bouncycastle</url>
 		</repository>
-        <repository>
-            <id>mulesoft</id>
-            <name>mulesoft</name>
-            <url>https://repository.mulesoft.org/nexus/content/repositories/releases</url>
-        </repository>
 	</repositories>
 
 	<dependencyManagement>
@@ -251,7 +244,7 @@
 			<dependency>
 				<groupId>com.nimbusds</groupId>
 				<artifactId>nimbus-jose-jwt</artifactId>
-				<version>9.11.1</version>
+				<version>9.15.2</version>
 			</dependency>
 
 			<!-- Weld -->
@@ -262,6 +255,13 @@
 				<scope>import</scope>
 				<type>pom</type>
 			</dependency>
+<!--
+			<dependency>
+				<groupId>jakarta.servlet</groupId>
+				<artifactId>jakarta.servlet-api</artifactId>
+				<version>${servlet.version}</version>
+			</dependency>
+-->
 			<dependency>
 				<groupId>javax.enterprise</groupId>
 				<artifactId>cdi-api</artifactId>
@@ -349,7 +349,7 @@
 			<dependency>
 				<groupId>commons-codec</groupId>
 				<artifactId>commons-codec</artifactId>
-				<version>1.14</version>
+				<version>1.15</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.commons</groupId>
@@ -376,21 +376,6 @@
 				<artifactId>commons-collections</artifactId>
 				<version>3.2.2</version>
 			</dependency>
-            <dependency>
-                <groupId>commons-fileupload</groupId>
-                <artifactId>commons-fileupload</artifactId>
-                <version>1.3.3</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.commons</groupId>
-                <artifactId>commons-compress</artifactId>
-                <version>1.21</version>
-            </dependency>
-            <dependency>
-                <groupId>xerces</groupId>
-                <artifactId>xercesImpl</artifactId>
-                <version>2.12.1</version>
-            </dependency>
 
 			<!-- Logging -->
 			<dependency>
@@ -429,6 +414,11 @@
 				<artifactId>slf4j-log4j12</artifactId>
 				<version>${slf4j.version}</version>
 				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.logging.log4j</groupId>
+				<artifactId>log4j-slf4j-impl</artifactId>
+				<version>${log4j.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>
@@ -485,9 +475,9 @@
 
 			<!-- Jython -->
 			<dependency>
-				<groupId>org.python</groupId>
+				<groupId>org.gluufederation</groupId>
 				<artifactId>jython-standalone</artifactId>
-				<version>2.7.2</version>
+				<version>2.7.3</version>
 			</dependency>
 
 			<!-- Jackrabbit content repository --> 
@@ -530,11 +520,6 @@
 			</dependency>
 			<dependency>
 				<groupId>org.jboss.resteasy</groupId>
-				<artifactId>resteasy-jaxrs</artifactId>
-				<version>${resteasy.jaxrs.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.jboss.resteasy</groupId>
 				<artifactId>resteasy-jaxb-provider</artifactId>
 				<version>${resteasy.version}</version>
 			</dependency>
@@ -562,17 +547,12 @@
 				<artifactId>jakarta.mail</artifactId>
 				<version>1.6.7</version>
 			</dependency>
-			<dependency>
-				<groupId>commons-net</groupId>
-				<artifactId>commons-net</artifactId>
-				<version>3.8.0</version>
-			</dependency>
 
 			<!-- Cache -->
 			<dependency>
 				<groupId>net.sf.ehcache</groupId>
 				<artifactId>ehcache-core</artifactId>
-				<version>2.6.11</version>
+				<version>2.10.9.2</version>
 			</dependency>
 
 			<dependency>
@@ -619,16 +599,6 @@
 				<artifactId>opensaml</artifactId>
 				<version>2.6.4</version>
 			</dependency>
-            <dependency>
-                <groupId>org.owasp.esapi</groupId>
-                <artifactId>esapi</artifactId>
-                <version>2.1.0.1</version>
-            </dependency>
-            <dependency>
-                <groupId>ca.juliusdavies</groupId>
-                <artifactId>not-yet-commons-ssl</artifactId>
-                <version>0.3.17</version>
-            </dependency>
 			<dependency>
 			    <groupId>org.apache.santuario</groupId>
 			    <artifactId>xmlsec</artifactId>
@@ -646,7 +616,7 @@
 			<dependency>
 				<groupId>com.couchbase.client</groupId>
 				<artifactId>java-client</artifactId>
-				<version>2.7.19</version>
+				<version>2.7.22</version>
 			</dependency>
 
 			<!-- SQL JDBC Drivers -->
@@ -658,17 +628,17 @@
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-dbcp2</artifactId>
-				<version>2.8.0</version>
+				<version>2.9.0</version>
 			</dependency>
 			<dependency>
 			    <groupId>mysql</groupId>
 			    <artifactId>mysql-connector-java</artifactId>
-			    <version>8.0.25</version>
+			    <version>8.0.27</version>
 			</dependency>
 			<dependency>
 			    <groupId>org.postgresql</groupId>
 			    <artifactId>postgresql</artifactId>
-			    <version>42.2.18</version>
+			    <version>42.2.23.jre7</version>
 			</dependency>
 
 			<!-- SQL Query -->
@@ -680,21 +650,21 @@
 			<dependency>
 				<groupId>com.github.jsqlparser</groupId>
 				<artifactId>jsqlparser</artifactId>
-				<version>4.1</version>
+				<version>4.2</version>
 			</dependency>
 
 			<!-- Cloud Spanner -->
 			<dependency>
 			    <groupId>com.google.cloud</groupId>
 			    <artifactId>google-cloud-spanner</artifactId>
-			    <version>6.12.2</version>
+			    <version>6.15.1</version>
 			</dependency>
 
 			<!-- Metrics -->
 			<dependency>
 				<groupId>io.dropwizard.metrics</groupId>
 				<artifactId>metrics-core</artifactId>
-				<version>4.2.2</version>
+				<version>4.2.4</version>
 			</dependency>
 			
 			<!-- Timer -->
@@ -715,7 +685,7 @@
 			<dependency>
 				<groupId>org.reflections</groupId>
 				<artifactId>reflections</artifactId>
-				<version>0.9.12</version>
+				<version>0.10.1</version>
 			</dependency>
 			<dependency>
 				<groupId>javax.servlet</groupId>
@@ -740,14 +710,14 @@
 			<dependency>
 				<groupId>joda-time</groupId>
 				<artifactId>joda-time</artifactId>
-				<version>2.9.9</version>
+				<version>2.10.12</version>
 			</dependency>
 
 			<!-- Deprecated XML libraries -->
 			<dependency>
 				<groupId>jakarta.xml.bind</groupId>
 				<artifactId>jakarta.xml.bind-api</artifactId>
-				<version>2.3.3</version>
+				<version>3.0.1</version>
 			</dependency>
 			<dependency>
 				<groupId>javax.annotation</groupId>
@@ -765,7 +735,7 @@
 			<dependency>
 				<groupId>junit</groupId>
 				<artifactId>junit</artifactId>
-				<version>4.13.1</version>
+				<version>4.13.2</version>
 				<scope>test</scope>
 			</dependency>
 
@@ -782,7 +752,7 @@
 			<dependency>
 				<groupId>com.beust</groupId>
 				<artifactId>jcommander</artifactId>
-				<version>1.78</version>
+				<version>1.81</version>
 				<scope>test</scope>
 			</dependency>
 
