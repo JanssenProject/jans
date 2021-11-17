@@ -50,9 +50,7 @@ class Introspection(IntrospectionType):
             # Getting user-info-jwt
             ujwt = context.getHttpRequest().getParameter("ujwt")
             print ujwt
-            print "---jwks_url---"
             jwks_url = System.getenv("ADMIN_UI_JWKS")
-            print jwks_url
             if not ujwt:
                 print "UJWT is empty or null"
             # Parse jwt
@@ -95,7 +93,7 @@ class Introspection(IntrospectionType):
                 # Get claims from parsed JWT
                 jwtClaims = userInfoJwt.getClaims()
                 jansAdminUIRole = jwtClaims.getClaim("jansAdminUIRole")
-                print jansAdminUIRole.getString(0)
+                print "Role obtained from UJWT: " + jansAdminUIRole.getString(0)
                 # fetch role-scope mapping from database
                 scopes = None
                 try:
@@ -110,7 +108,7 @@ class Introspection(IntrospectionType):
                 except:
                     print "Admin UI: roleScopeMapping. Failed to fetch/parse Admin UI roleScopeMapping from DB"
 
-                print scopes
+                print "Following scopes will be added in api token:" + scopes
 
             responseAsJsonObject.accumulate("scope", scopes)
         except Exception as e:
