@@ -14,7 +14,6 @@ import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.RequestScoped;
 import javax.enterprise.event.Observes;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
