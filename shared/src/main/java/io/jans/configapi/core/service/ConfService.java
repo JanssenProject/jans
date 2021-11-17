@@ -7,6 +7,7 @@
 package io.jans.configapi.core.service;
 
 import io.jans.as.common.service.common.ApplicationFactory;
+import io.jans.as.common.service.OrganizationService;
 import io.jans.as.model.config.Conf;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.persistence.model.configuration.GluuConfiguration;
@@ -17,7 +18,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 @ApplicationScoped
-public class ConfigurationService {
+public class ConfService {
 
     @Inject
     @Named(ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME)
