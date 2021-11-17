@@ -86,26 +86,7 @@ public class ClientInfoClient extends BaseClient<ClientInfoRequest, ClientInfoRe
     private ClientInfoResponse execInternal() {
         // Prepare request parameters
 
-        Builder clientRequest = null;
-        if (getRequest().getAuthorizationMethod() == null
-                || getRequest().getAuthorizationMethod() == AuthorizationMethod.AUTHORIZATION_REQUEST_HEADER_FIELD) {
-            if (StringUtils.isNotBlank(getRequest().getAccessToken())) {
-            	clientRequest = webTarget.request();
-                clientRequest.header("Authorization", "Bearer " + getRequest().getAccessToken());
-            }
-        } else if (getRequest().getAuthorizationMethod() == AuthorizationMethod.FORM_ENCODED_BODY_PARAMETER) {
-            if (StringUtils.isNotBlank(getRequest().getAccessToken())) {
-                requestForm.param("access_token", getRequest().getAccessToken());
-            }
-        } else if (getRequest().getAuthorizationMethod() == AuthorizationMethod.URL_QUERY_PARAMETER && StringUtils.isNotBlank(getRequest().getAccessToken())) {
-            addReqParam("access_token", getRequest().getAccessToken());
-        }
-
-        if (clientRequest == null) {
-        	clientRequest = webTarget.request();
-        }
-
-        clientRequest.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
+        Builder clientRequest = prepareAuthorizatedClientRequest();
 
         // Call REST Service and handle response
         try {
@@ -131,6 +112,30 @@ public class ClientInfoClient extends BaseClient<ClientInfoRequest, ClientInfoRe
 
         return getResponse();
     }
+
+	private Builder prepareAuthorizatedClientRequest() {
+		Builder clientRequest = null;
+        if (getRequest().getAuthorizationMethod() == null
+                || getRequest().getAuthorizationMethod() == AuthorizationMethod.AUTHORIZATION_REQUEST_HEADER_FIELD) {
+            if (StringUtils.isNotBlank(getRequest().getAccessToken())) {
+            	clientRequest = webTarget.request();
+                clientRequest.header("Authorization", "Bearer " + getRequest().getAccessToken());
+            }
+        } else if (getRequest().getAuthorizationMethod() == AuthorizationMethod.FORM_ENCODED_BODY_PARAMETER) {
+            if (StringUtils.isNotBlank(getRequest().getAccessToken())) {
+                requestForm.param("access_token", getRequest().getAccessToken());
+            }
+        } else if (getRequest().getAuthorizationMethod() == AuthorizationMethod.URL_QUERY_PARAMETER && StringUtils.isNotBlank(getRequest().getAccessToken())) {
+            addReqParam("access_token", getRequest().getAccessToken());
+        }
+
+        if (clientRequest == null) {
+        	clientRequest = webTarget.request();
+        }
+
+        clientRequest.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
+		return clientRequest;
+	}
 
     private void parseEntity(String entity) {
         if (StringUtils.isBlank(entity)) {
