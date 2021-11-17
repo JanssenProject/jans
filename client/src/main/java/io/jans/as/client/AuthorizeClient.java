@@ -182,7 +182,10 @@ public class AuthorizeClient extends BaseClient<AuthorizationRequest, Authorizat
 
         return response;
     }
-
+    
+    /**
+     * @deprecated Engine should be shared between clients
+     */
     @SuppressWarnings("java:S1133")
     @Deprecated
     public AuthorizationResponse exec(ClientHttpEngine engine) {
