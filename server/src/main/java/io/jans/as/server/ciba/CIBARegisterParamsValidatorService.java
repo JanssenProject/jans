@@ -13,8 +13,7 @@ import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.signature.AsymmetricSignatureAlgorithm;
 import io.jans.as.model.util.Util;
 import org.apache.logging.log4j.util.Strings;
-import org.jboss.resteasy.client.ClientRequest;
-import org.jboss.resteasy.client.ClientResponse;
+import javax.ws.rs.core.Response;
 import org.json.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +21,8 @@ import org.slf4j.LoggerFactory;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.ws.rs.HttpMethod;
+import javax.ws.rs.client.ClientBuilder;
+
 import java.util.List;
 
 import static io.jans.as.model.common.BackchannelTokenDeliveryMode.PING;
@@ -81,17 +81,21 @@ public class CIBARegisterParamsValidatorService {
                 }
 
                 if (Strings.isNotBlank(sectorIdentifierUri)) {
-                    ClientRequest clientRequest = new ClientRequest(sectorIdentifierUri);
-                    clientRequest.setHttpMethod(HttpMethod.GET);
+					javax.ws.rs.client.Client clientRequest = ClientBuilder.newClient();
+					String entity = null;
+					try {
+						Response clientResponse = clientRequest.target(sectorIdentifierUri).request().buildGet().invoke();
+	                    int status = clientResponse.getStatus();
 
-                    ClientResponse<String> clientResponse = clientRequest.get(String.class);
-                    int status = clientResponse.getStatus();
+	                    if (status != 200) {
+	                        return false;
+	                    }
 
-                    if (status != 200) {
-                        return false;
+	                    entity = clientResponse.readEntity(String.class);
+					} finally {
+						clientRequest.close();
                     }
 
-                    String entity = clientResponse.getEntity(String.class);
                     JSONArray sectorIdentifierJsonArray = new JSONArray(entity);
 
                     if (backchannelTokenDeliveryMode == PING || backchannelTokenDeliveryMode == POLL) {

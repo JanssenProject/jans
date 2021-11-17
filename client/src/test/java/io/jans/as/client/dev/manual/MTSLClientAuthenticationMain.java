@@ -15,7 +15,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
+import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -77,7 +77,7 @@ public class MTSLClientAuthenticationMain {
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.TLS_CLIENT_AUTH);
 
         TokenClient tokenClient = new TokenClient("https://ce-ob.gluu.org/jans-auth/restv1/token");
-        tokenClient.setExecutor(new ApacheHttpClient4Executor(httpclient));
+        tokenClient.setExecutor(new ApacheHttpClient43Engine(httpclient));
         tokenClient.setRequest(tokenRequest);
         TokenResponse tokenResponse = tokenClient.exec();
 
