@@ -6,6 +6,7 @@
 
 package io.jans.as.client.uma;
 
+import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.UriBuilder;
 
 import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
@@ -92,6 +93,6 @@ public class UmaClientFactory {
     }
 
     public ResteasyClient newClient(ClientHttpEngine engine) {
-        return ((ResteasyClientBuilder) ResteasyClientBuilder.newBuilder()).httpEngine(engine).build();
+        return ((ResteasyClientBuilder) ClientBuilder.newBuilder()).httpEngine(engine).build();
     }
 }

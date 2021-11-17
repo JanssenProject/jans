@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.ws.rs.HttpMethod;
+import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.MediaType;
@@ -186,7 +187,7 @@ public class AuthorizeClient extends BaseClient<AuthorizationRequest, Authorizat
         AuthorizationResponse response = null;
 
         try {
-        	resteasyClient = ((ResteasyClientBuilder) ResteasyClientBuilder.newBuilder()).httpEngine(engine).build();
+        	resteasyClient = ((ResteasyClientBuilder) ClientBuilder.newBuilder()).httpEngine(engine).build();
         	webTarget = resteasyClient.target(getUrl());
 
 			response = exec_();
@@ -250,7 +251,6 @@ public class AuthorizeClient extends BaseClient<AuthorizationRequest, Authorizat
 
         // Prepare request parameters
         clientRequest.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
-////        clientRequest.setHttpMethod(getHttpMethod());
 
         if (getRequest().isUseNoRedirectHeader()) {
             clientRequest.header(AuthorizationRequest.NO_REDIRECT_HEADER, "true");

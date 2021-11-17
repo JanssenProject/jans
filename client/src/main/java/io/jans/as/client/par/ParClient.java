@@ -95,7 +95,6 @@ public class ParClient extends BaseClient<ParRequest, ParResponse> {
     	new ClientAuthnEnabler(clientRequest, requestForm).exec(request);
 
         clientRequest.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
-//        clientRequest.setHttpMethod(getHttpMethod());
 
         clientResponse = clientRequest.buildPost(Entity.form(requestForm)).invoke();
 

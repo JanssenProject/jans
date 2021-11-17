@@ -96,8 +96,6 @@ public class TokenRevocationClient extends BaseClient<TokenRevocationRequest, To
         new ClientAuthnEnabler(clientRequest, requestForm).exec(request);
 
         clientRequest.header("Content-Type", request.getContentType());
-//        clientRequest.setHttpMethod(getHttpMethod());
-
 
         // Call REST Service and handle response
         try {

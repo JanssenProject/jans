@@ -16,6 +16,7 @@ import static io.jans.as.model.authorize.DeviceAuthorizationResponseParam.VERIFI
 import static io.jans.as.model.authorize.DeviceAuthorizationResponseParam.VERIFICATION_URI_COMPLETE;
 
 import javax.ws.rs.HttpMethod;
+import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
 
@@ -56,7 +57,7 @@ public class DeviceAuthzClient extends BaseClient<DeviceAuthzRequest, DeviceAuth
 
     @Deprecated
     public DeviceAuthzResponse exec(ClientHttpEngine engine) {
-        resteasyClient = ((ResteasyClientBuilder) ResteasyClientBuilder.newBuilder()).httpEngine(engine).build();
+        resteasyClient = ((ResteasyClientBuilder) ClientBuilder.newBuilder()).httpEngine(engine).build();
         webTarget = resteasyClient.target(getUrl());
 
         return _exec();
@@ -64,7 +65,6 @@ public class DeviceAuthzClient extends BaseClient<DeviceAuthzRequest, DeviceAuth
 
     private DeviceAuthzResponse _exec() {
         try {
-    //        clientRequest.setHttpMethod(getHttpMethod());
             Builder clientRequest = webTarget.request();
             applyCookies(clientRequest);
 
