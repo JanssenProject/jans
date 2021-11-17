@@ -1,8 +1,7 @@
 package io.jans.configapi.core.util;
 
 import io.jans.as.common.model.registration.Client;
-//import io.jans.configapi.service.auth.ConfigurationService;
-
+import io.jans.configapi.core.service.ConfigurationService;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
@@ -27,43 +26,21 @@ public class AuthUtil {
 
     @Inject
     Logger log;
-/*
-   
+
     @Inject
     ConfigurationService configurationService;
 
-    */
-    
-    public String getOpenIdConfigurationEndpoint() {
-        //return this.configurationService.find().getOpenIdConfigurationEndpoint();
-        //TO-DO
-        return null;
-    }
-    
-   
-    
-    public String getIssuer() {
-        //return this.configurationService.find().getIssuer();
-        //TO-DO
-        return null;
-
-    }
-  
-
-    public Client getClient(String clientId) {
-        //return clientService.getClientByInum(clientId);
-        //TO-DO
-        return null;
-
+    public String getOpenIdConfigurationEndpoint(String dn) {
+        return this.configurationService.find(dn).getOpenIdConfigurationEndpoint();
     }
 
-   
-  
+    public String getIssuer(String dn) {
+        return this.configurationService.find(dn).getIssuer();
+    }
 
     public List<String> findMissingElements(List<String> list1, List<String> list2) {
         List<String> unavailable = list1.stream().filter(e -> !list2.contains(e)).collect(Collectors.toList());
         return unavailable;
-
     }
 
     public boolean isEqualCollection(List<String> list1, List<String> list2) {
