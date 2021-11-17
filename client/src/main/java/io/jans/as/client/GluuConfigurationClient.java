@@ -46,7 +46,7 @@ public class GluuConfigurationClient extends BaseClient<GluuConfigurationRequest
     }
 
     public GluuConfigurationResponse execGluuConfiguration() {
-        initClientRequest();
+        initClient();
 
         setRequest(new GluuConfigurationRequest());
         

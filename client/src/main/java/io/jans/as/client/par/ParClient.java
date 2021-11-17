@@ -45,7 +45,7 @@ public class ParClient extends BaseClient<ParRequest, ParResponse> {
 
     private ParResponse exec_() throws Exception {
         // Prepare request parameters
-        initClientRequest();
+        initClient();
 
         final String responseTypesAsString = getRequest().getAuthorizationRequest().getResponseTypesAsString();
         final String scopesAsString = getRequest().getAuthorizationRequest().getScopesAsString();

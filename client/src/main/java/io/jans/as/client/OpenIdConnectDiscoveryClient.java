@@ -55,7 +55,7 @@ public class OpenIdConnectDiscoveryClient extends BaseClient<OpenIdConnectDiscov
     }
 
     public OpenIdConnectDiscoveryResponse exec() {
-        initClientRequest();
+        initClient();
 
         return _exec();
     }
