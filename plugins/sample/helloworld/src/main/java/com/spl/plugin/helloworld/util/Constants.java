@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package com.spl.plugins.helloworld.util;
+package com.spl.plugin.helloworld.util;
 
 public class Constants {
 
