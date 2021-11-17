@@ -19,7 +19,6 @@ import javax.ws.rs.HttpMethod;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.MediaType;
 import java.util.Iterator;
 
 /**

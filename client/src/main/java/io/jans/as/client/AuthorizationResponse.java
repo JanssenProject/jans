@@ -30,8 +30,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.ws.rs.core.Response;
-
 import static io.jans.as.model.authorize.AuthorizeResponseParam.ACCESS_TOKEN;
 import static io.jans.as.model.authorize.AuthorizeResponseParam.AUD;
 import static io.jans.as.model.authorize.AuthorizeResponseParam.CODE;
