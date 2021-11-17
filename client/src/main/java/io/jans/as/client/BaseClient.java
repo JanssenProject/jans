@@ -25,6 +25,7 @@ import javax.ws.rs.HttpMethod;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.Form;
+import javax.ws.rs.core.MediaType;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -289,4 +290,29 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
     public Map<String, String> getHeaders() {
         return headers;
     }
+
+	protected Builder prepareAuthorizatedClientRequest(AuthorizationMethod authorizationMethod, String accessToken) {
+		Builder clientRequest = null;
+        if (authorizationMethod == null
+                || authorizationMethod == AuthorizationMethod.AUTHORIZATION_REQUEST_HEADER_FIELD) {
+            if (StringUtils.isNotBlank(accessToken)) {
+            	clientRequest = webTarget.request();
+                clientRequest.header("Authorization", "Bearer " + accessToken);
+            }
+        } else if (authorizationMethod == AuthorizationMethod.FORM_ENCODED_BODY_PARAMETER) {
+            if (StringUtils.isNotBlank(accessToken)) {
+                requestForm.param("access_token", accessToken);
+            }
+        } else if (authorizationMethod == AuthorizationMethod.URL_QUERY_PARAMETER && StringUtils.isNotBlank(accessToken)) {
+            addReqParam("access_token", accessToken);
+        }
+
+        if (clientRequest == null) {
+        	clientRequest = webTarget.request();
+        }
+
+        clientRequest.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
+		return clientRequest;
+	}
+
 }
