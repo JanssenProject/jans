@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package  io.jans.configapi.core.rest;
+package io.jans.configapi.core.rest;
 
 import javax.ws.rs.NameBinding;
 import java.lang.annotation.ElementType;

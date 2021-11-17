@@ -14,16 +14,15 @@ import java.lang.annotation.Target;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-
 @InterceptorBinding
 @Retention(RUNTIME)
-@Target({ElementType.METHOD})
+@Target({ ElementType.METHOD })
 @Documented
-public @interface ConfigApiExtension { 
+public @interface ConfigApiExtension {
 
     /**
      * @returns Name of extention
      */
-	String name();	
+    String name();
 
 }
