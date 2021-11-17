@@ -55,7 +55,7 @@ public class BackchannelAuthenticationClient extends BaseClient<BackchannelAuthe
         BackchannelAuthenticationResponse response = null;
 
         try {
-            initClientRequest();
+            initClient();
             response = execInternal();
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);

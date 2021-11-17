@@ -67,7 +67,7 @@ public class EndSessionClient extends BaseClient<EndSessionRequest, EndSessionRe
      */
     public EndSessionResponse exec() {
         // Prepare request parameters
-        initClientRequest();
+        initClient();
 
         if (StringUtils.isNotBlank(getRequest().getIdTokenHint())) {
             addReqParam(EndSessionRequestParam.ID_TOKEN_HINT, getRequest().getIdTokenHint());

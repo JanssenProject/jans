@@ -50,7 +50,7 @@ public class DeviceAuthzClient extends BaseClient<DeviceAuthzRequest, DeviceAuth
     }
 
     public DeviceAuthzResponse exec() {
-        initClientRequest();
+        initClient();
 
         return _exec();
     }
