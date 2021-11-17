@@ -60,6 +60,9 @@ public class OpenIdConnectDiscoveryClient extends BaseClient<OpenIdConnectDiscov
         return _exec();
     }
 
+    /**
+     * @deprecated Engine should be shared between clients
+     */
     @SuppressWarnings("java:S1133")
     @Deprecated
     public OpenIdConnectDiscoveryResponse exec(ClientHttpEngine engine) {

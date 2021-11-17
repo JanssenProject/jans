@@ -88,7 +88,6 @@ public class EndSessionClient extends BaseClient<EndSessionRequest, EndSessionRe
             applyCookies(clientRequest);
 
             clientRequest.accept(MediaType.TEXT_PLAIN);
-//          clientRequest.setHttpMethod(getHttpMethod());
 
             clientResponse = clientRequest.buildGet().invoke();
             int status = clientResponse.getStatus();

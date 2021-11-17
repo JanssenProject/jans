@@ -69,6 +69,9 @@ public class ClientInfoClient extends BaseClient<ClientInfoRequest, ClientInfoRe
     }
 
 
+    /**
+     * @deprecated Engine should be shared between clients
+     */
     @SuppressWarnings("java:S1133")
     @Deprecated
     public ClientInfoResponse exec(ClientHttpEngine engine) {
