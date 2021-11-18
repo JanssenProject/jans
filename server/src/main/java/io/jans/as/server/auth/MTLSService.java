@@ -25,6 +25,7 @@ import io.jans.as.server.model.common.SessionIdState;
 import io.jans.as.server.service.SessionIdService;
 import io.jans.as.server.service.external.ExternalDynamicClientRegistrationService;
 import io.jans.as.server.service.external.context.DynamicClientRegistrationContext;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
@@ -39,9 +40,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.util.List;
+
+import static io.jans.as.model.register.RegisterRequestParam.TLS_CLIENT_AUTH_SUBJECT_DN;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -168,5 +172,33 @@ public class MTLSService {
         }
 
         authenticator.authenticateBySessionId(sessionIdObject);
+    }
+
+    public boolean processRegisterMTLS(HttpServletRequest httpRequest) {
+        log.debug("Trying to authenticate client registration request via MTLS");
+
+        String tlsClientAuthSubjectDn = null;
+        try {
+            String request = IOUtils.toString(httpRequest.getReader());
+            JSONObject jsonObject = new JSONObject(request);
+            tlsClientAuthSubjectDn = jsonObject.optString(TLS_CLIENT_AUTH_SUBJECT_DN.toString());
+        } catch (Exception exception) {
+            log.error("Error getting TLS_CLIENT_AUTH_SUBJECT_DN field from request registration body", exception);
+        }
+
+        final String clientCertAsPem = httpRequest.getHeader("X-ClientCert");
+        if (StringUtils.isBlank(clientCertAsPem)) {
+            log.debug("Client certificate is missed in `X-ClientCert` header");
+            return false;
+        }
+
+        X509Certificate cert = CertUtils.x509CertificateFromPem(clientCertAsPem);
+        if (cert == null) {
+            log.debug("Failed to parse client certificate");
+            return false;
+        }
+
+        log.debug("MTLS client authentication tlsClientAuthSubjectDn = {}", tlsClientAuthSubjectDn);
+        return CertUtils.equalsRdn(tlsClientAuthSubjectDn, cert.getSubjectDN().getName());
     }
 }
