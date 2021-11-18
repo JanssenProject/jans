@@ -209,6 +209,7 @@
     "dcrSignatureValidationJwksUri": null,
     "dcrAuthorizationWithClientCredentials": false,
     "dcrSkipSignatureValidation": true,
+    "dcrAuthorizationWithMTLS": false,
     "softwareStatementValidationType": "script",
     "softwareStatementValidationClaimName": "jwks_uri",
     "dynamicRegistrationEnabled":true,
