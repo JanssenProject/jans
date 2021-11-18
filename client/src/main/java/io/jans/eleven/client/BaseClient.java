@@ -12,7 +12,8 @@ import com.google.common.base.Strings;
 
 import javax.ws.rs.core.Form;
 import javax.ws.rs.core.Response;
-import org.jboss.resteasy.logging.Logger;
+
+import org.apache.log4j.Logger;
 
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.client.WebTarget;
