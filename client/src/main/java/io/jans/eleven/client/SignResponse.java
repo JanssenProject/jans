@@ -8,7 +8,7 @@ package io.jans.eleven.client;
 
 import static io.jans.eleven.model.SignResponseParam.SIGNATURE;
 
-import org.jboss.resteasy.client.ClientResponse;
+import javax.ws.rs.core.Response;
 import org.json.JSONObject;
 
 /**
@@ -19,7 +19,7 @@ public class SignResponse extends BaseResponse {
 
     private String signature;
 
-    public SignResponse(ClientResponse<String> clientResponse) {
+    public SignResponse(Response clientResponse) {
         super(clientResponse);
 
         JSONObject jsonObject = getJSONEntity();

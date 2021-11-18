@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>jans-eleven-server</artifactId>
 	<name>Eleven Server</name>
@@ -68,10 +69,6 @@
 		</dependency>
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>resteasy-jaxrs</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.jboss.resteasy</groupId>
 			<artifactId>resteasy-jaxb-provider</artifactId>
 		</dependency>
 		<dependency>
@@ -98,6 +95,12 @@
             <groupId>org.codehaus.jettison</groupId>
             <artifactId>jettison</artifactId>
         </dependency>
+
+		<!-- Commons libs -->
+		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+		</dependency>
 	</dependencies>
 
 	<profiles>

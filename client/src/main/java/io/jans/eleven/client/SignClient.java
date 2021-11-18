@@ -7,8 +7,12 @@
 package io.jans.eleven.client;
 
 import javax.ws.rs.HttpMethod;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.client.WebTarget;
 
-import org.jboss.resteasy.client.ClientRequest;
+import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 
 import com.google.common.base.Strings;
 
@@ -57,25 +61,32 @@ public class SignClient extends BaseClient<SignRequest, SignResponse> {
 
     @Override
     public SignResponse exec() throws Exception {
-        clientRequest = new ClientRequest(url);
+    	ResteasyClient resteasyClient = (ResteasyClient) ClientBuilder.newClient();
+    	WebTarget webTarget = resteasyClient.target(url);
+
+        Builder clientRequest = webTarget.request();
+
         clientRequest.header("Content-Type", getRequest().getMediaType());
-        clientRequest.setHttpMethod(getRequest().getHttpMethod());
         if (!Strings.isNullOrEmpty(getRequest().getAccessToken())) {
             clientRequest.header("Authorization", "Bearer " + getRequest().getAccessToken());
         }
 
-        if (getRequest().getSignRequestParam() != null) {
-            clientRequest.body(getRequest().getMediaType(), toPrettyJson(getRequest().getSignRequestParam()));
-        }
-
         // Call REST Service and handle response
         if (HttpMethod.POST.equals(request.getHttpMethod())) {
-            clientResponse = clientRequest.post(String.class);
+        	String body = "{}";
+            if (getRequest().getSignRequestParam() != null) {
+                body = toPrettyJson(getRequest().getSignRequestParam());
+            }
+            clientResponse = clientRequest.buildPost(Entity.entity(body, getRequest().getMediaType())).invoke();
         } else {
-            clientResponse = clientRequest.get(String.class);
+            clientResponse = clientRequest.buildGet().invoke();
         }
 
-        setResponse(new SignResponse(clientResponse));
+        try {
+        	setResponse(new SignResponse(clientResponse));
+        } finally {
+        	clientResponse.close();
+        }
 
         return getResponse();
     }

@@ -9,8 +9,12 @@ package io.jans.eleven.client;
 import static io.jans.eleven.model.DeleteKeyRequestParam.KEY_ID;
 
 import javax.ws.rs.HttpMethod;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.client.WebTarget;
 
-import org.jboss.resteasy.client.ClientRequest;
+import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 
 import com.google.common.base.Strings;
 
@@ -59,23 +63,30 @@ public class DeleteKeyClient extends BaseClient<DeleteKeyRequest, DeleteKeyRespo
 
     @Override
     public DeleteKeyResponse exec() throws Exception {
-        clientRequest = new ClientRequest(url);
+    	ResteasyClient resteasyClient = (ResteasyClient) ClientBuilder.newClient();
+    	WebTarget webTarget = resteasyClient.target(url);
+
+        Builder clientRequest = webTarget.request();
+
+        addRequestParam(KEY_ID, getRequest().getAlias());
+
         clientRequest.header("Content-Type", getRequest().getMediaType());
-        clientRequest.setHttpMethod(getRequest().getHttpMethod());
         if (!Strings.isNullOrEmpty(getRequest().getAccessToken())) {
             clientRequest.header("Authorization", "Bearer " + getRequest().getAccessToken());
         }
 
-        addRequestParam(KEY_ID, getRequest().getAlias());
-
         // Call REST Service and handle response
         if (HttpMethod.POST.equals(request.getHttpMethod())) {
-            clientResponse = clientRequest.post(String.class);
+        	clientResponse = clientRequest.buildPost(Entity.entity("{}", getRequest().getMediaType())).invoke();
         } else {
-            clientResponse = clientRequest.get(String.class);
+            clientResponse = clientRequest.buildGet().invoke();
         }
 
-        setResponse(new DeleteKeyResponse(clientResponse));
+        try {
+        	setResponse(new DeleteKeyResponse(clientResponse));
+        } finally {
+        	clientResponse.close();
+        }
 
         return getResponse();
     }

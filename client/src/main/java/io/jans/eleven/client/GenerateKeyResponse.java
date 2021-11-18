@@ -21,7 +21,7 @@ import static io.jans.eleven.model.GenerateKeyResponseParam.Y;
 import java.util.List;
 
 import io.jans.eleven.util.StringUtils;
-import org.jboss.resteasy.client.ClientResponse;
+import javax.ws.rs.core.Response;
 import org.json.JSONObject;
 
 /**
@@ -42,7 +42,7 @@ public class GenerateKeyResponse extends BaseResponse {
     private String y;
     private List<String> x5c;
 
-    public GenerateKeyResponse(ClientResponse<String> clientResponse) {
+    public GenerateKeyResponse(Response clientResponse) {
         super(clientResponse);
 
         JSONObject jsonObject = getJSONEntity();

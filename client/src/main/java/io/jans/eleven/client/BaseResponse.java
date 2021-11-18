@@ -8,7 +8,7 @@ package io.jans.eleven.client;
 
 import javax.ws.rs.core.MultivaluedMap;
 
-import org.jboss.resteasy.client.ClientResponse;
+import javax.ws.rs.core.Response;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -23,13 +23,13 @@ public abstract class BaseResponse {
     protected String entity;
     protected MultivaluedMap<String, Object> headers;
 
-    public BaseResponse(ClientResponse<String> clientResponse) {
+    public BaseResponse(Response clientResponse) {
         if (clientResponse != null) {
             status = clientResponse.getStatus();
-            entity = clientResponse.getEntity(String.class);
+            entity = clientResponse.readEntity(String.class);
             headers = clientResponse.getHeaders();
-            if (clientResponse.getLocationLink() != null) {
-                location = clientResponse.getLocationLink().getHref();
+            if (clientResponse.getLocation() != null) {
+                location = clientResponse.getLocation().toString();
             }
         }
     }
@@ -51,7 +51,7 @@ public abstract class BaseResponse {
     }
 
     public JSONObject getJSONEntity() {
-        if (entity != null) {
+        if ((entity != null) && (entity.length() > 0)) {
             try {
                 JSONObject jsonObject = new JSONObject(entity);
                 return jsonObject;

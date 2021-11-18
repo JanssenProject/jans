@@ -7,8 +7,13 @@
 package io.jans.eleven.client;
 
 import javax.ws.rs.HttpMethod;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.client.WebTarget;
 
 import org.jboss.resteasy.client.ClientRequest;
+import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 
 import com.google.common.base.Strings;
 
@@ -57,25 +62,32 @@ public class VerifySignatureClient extends BaseClient<VerifySignatureRequest, Ve
 
     @Override
     public VerifySignatureResponse exec() throws Exception {
-        clientRequest = new ClientRequest(url);
-        clientRequest.header("Content-Type", getRequest().getMediaType());
-        clientRequest.setHttpMethod(getRequest().getHttpMethod());
-        if (!Strings.isNullOrEmpty(getRequest().getAccessToken())) {
-            clientRequest.header("Authorization", "Bearer " + getRequest().getAccessToken());
-        }
+    	ResteasyClient resteasyClient = (ResteasyClient) ClientBuilder.newClient();
+    	WebTarget webTarget = resteasyClient.target(url);
 
-        if (getRequest().getVerifySignatureRequestParam() != null) {
-            clientRequest.body(getRequest().getMediaType(), toPrettyJson(getRequest().getVerifySignatureRequestParam()));
+        Builder clientRequest = webTarget.request();
+        clientRequest.header("Content-Type", getRequest().getMediaType());
+
+    	if (!Strings.isNullOrEmpty(getRequest().getAccessToken())) {
+            clientRequest.header("Authorization", "Bearer " + getRequest().getAccessToken());
         }
 
         // Call REST Service and handle response
         if (HttpMethod.POST.equals(request.getHttpMethod())) {
-            clientResponse = clientRequest.post(String.class);
+        	String body = "{}";
+            if (getRequest().getVerifySignatureRequestParam() != null) {
+                body = toPrettyJson(getRequest().getVerifySignatureRequestParam());
+            }
+            clientResponse = clientRequest.buildPost(Entity.entity(body, getRequest().getMediaType())).invoke();
         } else {
-            clientResponse = clientRequest.get(String.class);
+            clientResponse = clientRequest.buildGet().invoke();
         }
 
-        setResponse(new VerifySignatureResponse(clientResponse));
+        try {
+        	setResponse(new VerifySignatureResponse(clientResponse));
+        } finally {
+        	clientResponse.close();
+        }
 
         return getResponse();
     }
