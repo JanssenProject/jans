@@ -8,7 +8,7 @@ package io.jans.eleven.client;
 
 import static io.jans.eleven.model.VerifySignatureResponseParam.VERIFIED;
 
-import org.jboss.resteasy.client.ClientResponse;
+import javax.ws.rs.core.Response;
 import org.json.JSONObject;
 
 /**
@@ -19,7 +19,7 @@ public class VerifySignatureResponse extends BaseResponse {
 
     private boolean verified;
 
-    public VerifySignatureResponse(ClientResponse<String> clientResponse) {
+    public VerifySignatureResponse(Response clientResponse) {
         super(clientResponse);
 
         JSONObject jsonObject = getJSONEntity();
