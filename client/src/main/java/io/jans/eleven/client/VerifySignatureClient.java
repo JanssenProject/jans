@@ -12,7 +12,6 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.WebTarget;
 
-import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 
 import com.google.common.base.Strings;
