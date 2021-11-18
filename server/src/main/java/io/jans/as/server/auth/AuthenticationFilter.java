@@ -73,7 +73,9 @@ import static org.apache.commons.lang3.BooleanUtils.isTrue;
                 "/restv1/revoke_session",
                 "/restv1/bc-authorize",
                 "/restv1/par",
-                "/restv1/device_authorization"},
+                "/restv1/device_authorization",
+                "/restv1/register"
+        },
         displayName = "oxAuth")
 public class AuthenticationFilter implements Filter {
 
@@ -261,6 +263,13 @@ public class AuthenticationFilter implements Filter {
                     (client.getAuthenticationMethod() == io.jans.as.model.common.AuthenticationMethod.TLS_CLIENT_AUTH ||
                             client.getAuthenticationMethod() == io.jans.as.model.common.AuthenticationMethod.SELF_SIGNED_TLS_CLIENT_AUTH)) {
                 return mtlsService.processMTLS(httpRequest, httpResponse, filterChain, client);
+            }
+        } else {
+            final String requestUrl = httpRequest.getRequestURL().toString();
+            boolean isRegisterEndpoint = requestUrl.endsWith("/register");
+            boolean isRegistration = "POST".equalsIgnoreCase(httpRequest.getMethod());
+            if (appConfiguration.getDcrAuthorizationWithMTLS() && isRegistration && isRegisterEndpoint) {
+                return mtlsService.processRegisterMTLS(httpRequest);
             }
         }
         return false;
