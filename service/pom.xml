@@ -134,7 +134,7 @@
 
 		<!-- Jython -->
 		<dependency>
-			<groupId>org.python</groupId>
+			<groupId>org.gluufederation</groupId>
 			<artifactId>jython-standalone</artifactId>
 		</dependency>
 
