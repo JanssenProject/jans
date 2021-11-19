@@ -23,7 +23,7 @@ public class ResteasyClientFactory {
 
     @PostConstruct
     public void init() {
-        this.resteasyClientBuilder = new ResteasyClientBuilder();
+        this.resteasyClientBuilder = ((ResteasyClientBuilder) ResteasyClientBuilder.newBuilder());
     }
 
     public ResteasyClient buildResteasyClient() {
