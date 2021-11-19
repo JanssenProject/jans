@@ -1,7 +1,10 @@
 # Please do not attempt to edit this flow without the direct consent from the DevOps team. This file is managed centrally.
 # Contact @moabu
 name: Scan Image
-on: [push]
+on:
+  push:
+    paths:
+      - "docker-jans-**"
 jobs:
   build:
     runs-on: ubuntu-latest
