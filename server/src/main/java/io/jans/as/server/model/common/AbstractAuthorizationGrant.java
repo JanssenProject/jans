@@ -14,6 +14,8 @@ import io.jans.as.model.util.CertUtils;
 import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.server.model.authorize.ScopeChecker;
 import io.jans.as.server.model.ldap.TokenEntity;
+import io.jans.as.server.service.external.ExternalUpdateTokenService;
+import io.jans.as.server.service.external.context.ExternalUpdateTokenContext;
 import io.jans.as.server.util.TokenHashUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -43,6 +45,9 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
 
     @Inject
     protected AppConfiguration appConfiguration;
+
+    @Inject
+    private ExternalUpdateTokenService externalUpdateTokenService;
 
     @Inject
     protected ScopeChecker scopeChecker;
@@ -292,6 +297,13 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
         if (client != null && client.getAccessTokenLifetime() != null && client.getAccessTokenLifetime() > 0) {
             lifetime = client.getAccessTokenLifetime();
         }
+
+        int lifetimeFromScript = externalUpdateTokenService.getAccessTokenLifetimeInSeconds(ExternalUpdateTokenContext.of(executionContext));
+        if (lifetimeFromScript > 0) {
+            lifetime = lifetimeFromScript;
+            log.trace("Override access token lifetime with value from script: {}", lifetimeFromScript);
+        }
+
         AccessToken accessToken = new AccessToken(lifetime);
 
         accessToken.setSessionDn(getSessionDn());
