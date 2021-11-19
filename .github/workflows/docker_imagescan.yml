@@ -36,6 +36,7 @@ jobs:
       with:
         sarif_file: results.sarif
     - uses: azure/container-scan@v0
+      continue-on-error: true
       with:
         image-name: localbuild/scanimage:latest
         run-quality-checks: true
