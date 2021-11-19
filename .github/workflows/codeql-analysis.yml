@@ -9,16 +9,16 @@ on:
   push:
     branches: [master]
     paths:
-      - "jans/**"
-      - "tests/**"
-      - "setup.py"
+      - "jans-pycloudlib/jans/**"
+      - "jans-pycloudlib/tests/**"
+      - "jans-pycloudlib/setup.py"
   pull_request:
     # The branches below must be a subset of the branches above
     branches: [master]
     paths:
-      - "jans/**"
-      - "tests/**"
-      - "setup.py"
+      - "jans-pycloudlib/jans/**"
+      - "jans-pycloudlib/tests/**"
+      - "jans-pycloudlib/setup.py"
 
 jobs:
   analyze:

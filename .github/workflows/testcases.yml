@@ -5,16 +5,16 @@ on:
     branches:
       - master
     paths:
-      - "jans/**"
-      - "tests/**"
-      - "setup.py"
+      - "jans-pycloudlib/jans/**"
+      - "jans-pycloudlib/tests/**"
+      - "jans-pycloudlib/setup.py"
   pull_request:
     branches:
       - master
     paths:
-      - "jans/**"
-      - "tests/**"
-      - "setup.py"
+      - "jans-pycloudlib/jans/**"
+      - "jans-pycloudlib/tests/**"
+      - "jans-pycloudlib/setup.py"
 
 jobs:
   build:
