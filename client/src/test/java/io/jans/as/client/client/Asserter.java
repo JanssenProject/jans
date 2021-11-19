@@ -25,7 +25,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 
-import static io.jans.as.client.BaseTest.clientExecutor;
+import static io.jans.as.client.BaseTest.clientEngine;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
@@ -82,7 +82,7 @@ public class Asserter {
         Jwt jwt = Jwt.parse(idToken);
         Asserter.assertIdToken(jwt, JwtClaimName.CODE_HASH);
 
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(jwksUri, jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID), clientExecutor(true));
+        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(jwksUri, jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID), clientEngine(true));
         RSASigner rsaSigner = new RSASigner(alg, publicKey);
         assertTrue(rsaSigner.validate(jwt));
     }

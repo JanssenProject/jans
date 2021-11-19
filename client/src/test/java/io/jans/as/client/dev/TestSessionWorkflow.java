@@ -20,8 +20,7 @@ import junit.framework.Assert;
 import org.apache.http.client.CookieStore;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.jboss.resteasy.client.ClientExecutor;
-import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
+import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
@@ -41,7 +40,7 @@ public class TestSessionWorkflow extends BaseTest {
         try {
             CookieStore cookieStore = new BasicCookieStore();
             httpClient.setCookieStore(cookieStore);
-            ClientExecutor clientExecutor = new ApacheHttpClient4Executor(httpClient);
+            ApacheHttpClient43Engine clientExecutor = new ApacheHttpClient43Engine(httpClient);
 
             ////////////////////////////////////////////////
             //             TV side. Code 1                //

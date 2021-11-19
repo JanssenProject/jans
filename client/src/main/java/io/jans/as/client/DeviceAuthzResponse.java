@@ -10,7 +10,7 @@ import io.jans.as.model.authorize.DeviceAuthorizationResponseParam;
 import io.jans.as.model.authorize.DeviceAuthzErrorResponseType;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.jboss.resteasy.client.ClientResponse;
+import javax.ws.rs.core.Response;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -28,7 +28,7 @@ public class DeviceAuthzResponse extends BaseResponseWithErrors<DeviceAuthzError
     private String verificationUriComplete;
     private Integer expiresIn;
 
-    public DeviceAuthzResponse(ClientResponse<String> clientResponse) {
+    public DeviceAuthzResponse(Response clientResponse) {
         super(clientResponse);
     }
 

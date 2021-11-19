@@ -11,7 +11,9 @@ import io.jans.as.client.uma.UmaClientFactory;
 import io.jans.as.client.uma.UmaMetadataService;
 import io.jans.as.model.uma.UmaMetadata;
 import io.jans.as.model.uma.UmaTestUtil;
-import org.jboss.resteasy.client.ClientResponseFailure;
+
+import javax.ws.rs.ClientErrorException;
+
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
@@ -36,8 +38,8 @@ public class MetaDataFlowHttpTest extends BaseTest {
         UmaMetadata c = null;
         try {
             c = metaDataConfigurationService.getMetadata();
-        } catch (ClientResponseFailure ex) {
-            System.err.println(ex.getResponse().getEntity(String.class));
+        } catch (ClientErrorException ex) {
+            System.err.println(ex.getResponse().readEntity(String.class));
             throw ex;
         }
 

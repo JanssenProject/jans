@@ -8,7 +8,7 @@ package io.jans.as.client;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.jboss.resteasy.client.ClientResponse;
+import javax.ws.rs.core.Response;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -39,7 +39,7 @@ public class TokenResponse extends BaseResponseWithErrors<TokenErrorResponseType
      *
      * @param clientResponse The response
      */
-    public TokenResponse(ClientResponse<String> clientResponse) {
+    public TokenResponse(Response clientResponse) {
         super(clientResponse);
     }
 

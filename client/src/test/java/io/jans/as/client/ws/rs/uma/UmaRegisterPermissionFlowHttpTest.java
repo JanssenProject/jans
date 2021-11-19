@@ -14,7 +14,6 @@ import io.jans.as.model.uma.UmaMetadata;
 import io.jans.as.model.uma.UmaPermission;
 import io.jans.as.model.uma.UmaPermissionList;
 import io.jans.as.model.uma.UmaTestUtil;
-import org.jboss.resteasy.client.ClientResponseFailure;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Parameters;
@@ -118,7 +117,6 @@ public class UmaRegisterPermissionFlowHttpTest extends BaseTest {
         try {
             ticket = getPermissionService().registerPermission(
                     "Bearer " + this.registerResourceTest.pat.getAccessToken(), UmaPermissionList.instance(permission));
-        } catch (ClientResponseFailure ex) {
         } catch (ClientErrorException ex) {
             System.err.println(ex.getResponse().readEntity(String.class));
             assertTrue(ex.getResponse().getStatus() != Response.Status.CREATED.getStatusCode() &&

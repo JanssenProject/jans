@@ -72,7 +72,7 @@ public class SpontaneousScopeHttpTest extends BaseTest {
         registerRequest.setSpontaneousScopes(Lists.newArrayList("^transaction:.+$"));
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setExecutor(clientExecutor(true));
+        registerClient.setExecutor(clientEngine(true));
         registerClient.setRequest(registerRequest);
         RegisterResponse registerResponse = registerClient.exec();
 
