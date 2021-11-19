@@ -10,13 +10,15 @@ import io.jans.as.client.util.ClientUtil;
 import io.jans.as.model.common.AuthorizationMethod;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.jboss.resteasy.client.ClientExecutor;
-import org.jboss.resteasy.client.ClientRequest;
+import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.ws.rs.HttpMethod;
-import javax.ws.rs.core.MediaType;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
 import java.util.Iterator;
 
 /**
@@ -62,15 +64,21 @@ public class ClientInfoClient extends BaseClient<ClientInfoRequest, ClientInfoRe
     }
 
     public ClientInfoResponse exec() {
-        initClientRequest();
+        initClient();
         return execInternal();
     }
 
 
+    /**
+     * @deprecated Engine should be shared between clients
+     */
+    @SuppressWarnings("java:S1133")
     @Deprecated
-    public ClientInfoResponse exec(ClientExecutor executor) {
-        clientRequest = new ClientRequest(getUrl(), executor);
-        return execInternal();
+    public ClientInfoResponse exec(ClientHttpEngine engine) {
+    	resteasyClient = ((ResteasyClientBuilder) ClientBuilder.newBuilder()).httpEngine(engine).build();
+		webTarget = resteasyClient.target(getUrl());
+
+		return execInternal();
     }
 
 
@@ -81,35 +89,22 @@ public class ClientInfoClient extends BaseClient<ClientInfoRequest, ClientInfoRe
      */
     private ClientInfoResponse execInternal() {
         // Prepare request parameters
-        clientRequest.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
-        clientRequest.setHttpMethod(getHttpMethod());
 
-        if (getRequest().getAuthorizationMethod() == null
-                || getRequest().getAuthorizationMethod() == AuthorizationMethod.AUTHORIZATION_REQUEST_HEADER_FIELD) {
-            if (StringUtils.isNotBlank(getRequest().getAccessToken())) {
-                clientRequest.header("Authorization", "Bearer " + getRequest().getAccessToken());
-            }
-        } else if (getRequest().getAuthorizationMethod() == AuthorizationMethod.FORM_ENCODED_BODY_PARAMETER) {
-            if (StringUtils.isNotBlank(getRequest().getAccessToken())) {
-                clientRequest.formParameter("access_token", getRequest().getAccessToken());
-            }
-        } else if (getRequest().getAuthorizationMethod() == AuthorizationMethod.URL_QUERY_PARAMETER && StringUtils.isNotBlank(getRequest().getAccessToken())) {
-            clientRequest.queryParameter("access_token", getRequest().getAccessToken());
-        }
+        Builder clientRequest = prepareAuthorizatedClientRequest(getRequest().getAuthorizationMethod(), getRequest().getAccessToken());
 
         // Call REST Service and handle response
         try {
             if (getRequest().getAuthorizationMethod() == null
                     || getRequest().getAuthorizationMethod() == AuthorizationMethod.AUTHORIZATION_REQUEST_HEADER_FIELD
                     || getRequest().getAuthorizationMethod() == AuthorizationMethod.FORM_ENCODED_BODY_PARAMETER) {
-                clientResponse = clientRequest.post(String.class);
+                clientResponse = clientRequest.buildPost(Entity.form(requestForm)).invoke();
             } else {  //AuthorizationMethod.URL_QUERY_PARAMETER
-                clientResponse = clientRequest.get(String.class);
+                clientResponse = clientRequest.buildGet().invoke();
             }
 
             setResponse(new ClientInfoResponse(clientResponse));
 
-            String entity = clientResponse.getEntity(String.class);
+            String entity = clientResponse.readEntity(String.class);
             getResponse().setEntity(entity);
             getResponse().setHeaders(clientResponse.getMetadata());
             parseEntity(entity);

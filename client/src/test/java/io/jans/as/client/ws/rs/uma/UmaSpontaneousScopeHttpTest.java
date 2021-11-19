@@ -69,7 +69,7 @@ public class UmaSpontaneousScopeHttpTest extends BaseTest {
         registerRequest.setAllowSpontaneousScopes(true); // allow spontaneous scopes (which are off by default)
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setExecutor(clientExecutor(true));
+        registerClient.setExecutor(clientEngine(true));
         registerClient.setRequest(registerRequest);
         clientResponse = registerClient.exec();
 
@@ -90,7 +90,7 @@ public class UmaSpontaneousScopeHttpTest extends BaseTest {
 
         registerClient();
 
-        pat = UmaClient.requestPat(tokenEndpoint, clientResponse.getClientId(), clientResponse.getClientSecret(), clientExecutor(true));
+        pat = UmaClient.requestPat(tokenEndpoint, clientResponse.getClientId(), clientResponse.getClientSecret(), clientEngine(true));
         assertIt(pat);
 
         this.registerResourceTest = new RegisterResourceFlowHttpTest(this.metadata);

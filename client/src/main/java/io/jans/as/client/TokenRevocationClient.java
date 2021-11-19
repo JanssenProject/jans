@@ -7,6 +7,8 @@
 package io.jans.as.client;
 
 import javax.ws.rs.HttpMethod;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -76,26 +78,28 @@ public class TokenRevocationClient extends BaseClient<TokenRevocationRequest, To
      */
     public TokenRevocationResponse exec() {
         // Prepare request parameters
-        initClientRequest();
-
-        new ClientAuthnEnabler(clientRequest).exec(request);
-
-        clientRequest.header("Content-Type", request.getContentType());
-        clientRequest.setHttpMethod(getHttpMethod());
+        initClient();
 
         if (StringUtils.isNotBlank(getRequest().getToken())) {
-            clientRequest.formParameter(TokenRevocationRequestParam.TOKEN, getRequest().getToken());
+            requestForm.param(TokenRevocationRequestParam.TOKEN, getRequest().getToken());
         }
         if (getRequest().getTokenTypeHint() != null) {
-            clientRequest.formParameter(TokenRevocationRequestParam.TOKEN_TYPE_HINT, getRequest().getTokenTypeHint());
+            requestForm.param(TokenRevocationRequestParam.TOKEN_TYPE_HINT, getRequest().getTokenTypeHint().toString());
         }
         if (request.getAuthUsername() != null && !request.getAuthUsername().isEmpty()) {
-            clientRequest.formParameter("client_id", request.getAuthUsername());
+            requestForm.param("client_id", request.getAuthUsername());
         }
+
+        Builder clientRequest = webTarget.request();
+        applyCookies(clientRequest);
+
+        new ClientAuthnEnabler(clientRequest, requestForm).exec(request);
+
+        clientRequest.header("Content-Type", request.getContentType());
 
         // Call REST Service and handle response
         try {
-            clientResponse = clientRequest.post(String.class);
+            clientResponse = clientRequest.buildPost(Entity.form(requestForm)).invoke();
 
             final TokenRevocationResponse tokenResponse = new TokenRevocationResponse(clientResponse);
             setResponse(tokenResponse);

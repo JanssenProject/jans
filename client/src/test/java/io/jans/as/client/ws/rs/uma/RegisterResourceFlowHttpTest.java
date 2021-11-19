@@ -16,7 +16,6 @@ import io.jans.as.model.uma.UmaResourceResponse;
 import io.jans.as.model.uma.UmaResourceWithId;
 import io.jans.as.model.uma.UmaTestUtil;
 import io.jans.as.model.uma.wrapper.Token;
-import org.jboss.resteasy.client.ClientResponseFailure;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
@@ -66,7 +65,7 @@ public class RegisterResourceFlowHttpTest extends BaseTest {
             UmaTestUtil.assertIt(this.metadata);
         }
 
-        pat = UmaClient.requestPat(tokenEndpoint, umaPatClientId, umaPatClientSecret, clientExecutor(true));
+        pat = UmaClient.requestPat(tokenEndpoint, umaPatClientId, umaPatClientSecret, clientEngine(true));
         UmaTestUtil.assertIt(pat);
     }
 
@@ -100,8 +99,8 @@ public class RegisterResourceFlowHttpTest extends BaseTest {
 
             this.resourceId = resourceStatus.getId();
             return this.resourceId;
-        } catch (ClientResponseFailure ex) {
-            System.err.println(ex.getResponse().getEntity(String.class));
+        } catch (ClientErrorException ex) {
+            System.err.println(ex.getResponse().readEntity(String.class));
             throw ex;
         }
     }
@@ -119,8 +118,8 @@ public class RegisterResourceFlowHttpTest extends BaseTest {
 
             this.resourceIdWithScopeExpression = resourceStatus.getId();
             return this.resourceIdWithScopeExpression;
-        } catch (ClientResponseFailure ex) {
-            System.err.println(ex.getResponse().getEntity(String.class));
+        } catch (ClientErrorException ex) {
+            System.err.println(ex.getResponse().readEntity(String.class));
             throw ex;
         }
     }
@@ -142,8 +141,8 @@ public class RegisterResourceFlowHttpTest extends BaseTest {
             resource.setType("myType");
 
             resourceStatus = getResourceService().updateResource("Bearer " + pat.getAccessToken(), this.resourceId, resource);
-        } catch (ClientResponseFailure ex) {
-            System.err.println(ex.getResponse().getEntity(String.class));
+        } catch (ClientErrorException ex) {
+            System.err.println(ex.getResponse().readEntity(String.class));
             throw ex;
         }
 
@@ -155,8 +154,8 @@ public class RegisterResourceFlowHttpTest extends BaseTest {
             resource.setType("myType");
 
             resourceStatus = getResourceService().updateResource("Bearer " + pat.getAccessToken(), this.resourceIdWithScopeExpression, resource);
-        } catch (ClientResponseFailure ex) {
-            System.err.println(ex.getResponse().getEntity(String.class));
+        } catch (ClientErrorException ex) {
+            System.err.println(ex.getResponse().readEntity(String.class));
             throw ex;
         }
 
@@ -178,7 +177,6 @@ public class RegisterResourceFlowHttpTest extends BaseTest {
             resource.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view", "http://photoz.example.com/dev/scopes/all"));
 
             getResourceService().updateResource("Bearer " + pat.getAccessToken(), "fake_resource_id", resource);
-        } catch (ClientResponseFailure ex) {
         } catch (ClientErrorException ex) {
             System.err.println(ex.getResponse().readEntity(String.class));
             int status = ex.getResponse().getStatus();
@@ -201,7 +199,6 @@ public class RegisterResourceFlowHttpTest extends BaseTest {
             resource.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view", "http://photoz.example.com/dev/scopes/all"));
 
             resourceStatus = getResourceService().updateResource("Bearer " + pat.getAccessToken() + "_invalid", this.resourceId + "_invalid", resource);
-        } catch (ClientResponseFailure ex) {
         } catch (ClientErrorException ex) {
             System.err.println(ex.getResponse().readEntity(String.class));
             assertEquals(ex.getResponse().getStatus(), Response.Status.UNAUTHORIZED.getStatusCode(), "Unexpected response status");
@@ -223,8 +220,8 @@ public class RegisterResourceFlowHttpTest extends BaseTest {
 
             UmaResourceWithId resourceWithExpression = getResourceService().getResource("Bearer " + pat.getAccessToken(), this.resourceIdWithScopeExpression);
             assertEquals(resourceWithExpression.getScopeExpression(), MODIFY_SCOPE_EXPRESSION);
-        } catch (ClientResponseFailure ex) {
-            System.err.println(ex.getResponse().getEntity(String.class));
+        } catch (ClientErrorException ex) {
+            System.err.println(ex.getResponse().readEntity(String.class));
             throw ex;
         }
     }
@@ -239,8 +236,8 @@ public class RegisterResourceFlowHttpTest extends BaseTest {
         List<String> resources = null;
         try {
             resources = getResourceService().getResourceList("Bearer " + pat.getAccessToken(), "");
-        } catch (ClientResponseFailure ex) {
-            System.err.println(ex.getResponse().getEntity(String.class));
+        } catch (ClientErrorException ex) {
+            System.err.println(ex.getResponse().readEntity(String.class));
             throw ex;
         }
 
@@ -257,8 +254,8 @@ public class RegisterResourceFlowHttpTest extends BaseTest {
 
         try {
             getResourceService().deleteResource("Bearer " + pat.getAccessToken(), this.resourceId);
-        } catch (ClientResponseFailure ex) {
-            System.err.println(ex.getResponse().getEntity(String.class));
+        } catch (ClientErrorException ex) {
+            System.err.println(ex.getResponse().readEntity(String.class));
             throw ex;
         }
     }
