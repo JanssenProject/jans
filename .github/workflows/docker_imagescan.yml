@@ -3,15 +3,28 @@
 name: Scan Image
 on:
   push:
+    branches:
+      - master
+      - main
     paths:
-      - "docker-jans-**"
+      - "docker-jans-**/**"
+  pull_request:
+    branches:
+      - master
+      - main
+    paths:
+      - "docker-jans-**/**"
+  workflow_dispatch:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        docker-images: ["auth-server", "certmanager", "client-api", "configurator", "fido2", "persistence-loader", "scim"]
     steps:
     - uses: actions/checkout@v2
     - name: Build the Container image
-      run: docker build . --file Dockerfile --tag localbuild/scanimage:latest
+      run: docker build ./docker-jans-"${{ matrix.docker-images }}" --file Dockerfile --tag localbuild/scanimage:latest
     - uses: anchore/scan-action@v3
       id: scan
       with:
