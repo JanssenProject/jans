@@ -9,7 +9,7 @@ package io.jans.as.client.ciba.fcm;
 import io.jans.as.client.BaseResponse;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.jboss.resteasy.client.ClientResponse;
+import javax.ws.rs.core.Response;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -36,10 +36,10 @@ public class FirebaseCloudMessagingResponse extends BaseResponse {
     private int failure;
     private List<Result> results;
 
-    public FirebaseCloudMessagingResponse(ClientResponse<String> clientResponse) {
+    public FirebaseCloudMessagingResponse(Response clientResponse) {
         super(clientResponse);
 
-        String entity = clientResponse.getEntity(String.class);
+        String entity = clientResponse.readEntity(String.class);
         setEntity(entity);
         setHeaders(clientResponse.getMetadata());
         injectDataFromJson(entity);

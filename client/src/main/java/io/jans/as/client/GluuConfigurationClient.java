@@ -12,6 +12,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import javax.ws.rs.HttpMethod;
+import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.MediaType;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -45,21 +46,23 @@ public class GluuConfigurationClient extends BaseClient<GluuConfigurationRequest
     }
 
     public GluuConfigurationResponse execGluuConfiguration() {
-        initClientRequest();
+        initClient();
 
         setRequest(new GluuConfigurationRequest());
+        
+        Builder clientRequest = webTarget.request();
+        applyCookies(clientRequest);
 
         // Prepare request parameters
         clientRequest.header("Content-Type", MediaType.APPLICATION_JSON);
-        clientRequest.setHttpMethod(getHttpMethod());
 
         // Call REST Service and handle response
         try {
-            clientResponse = clientRequest.get(String.class);
+            clientResponse = clientRequest.buildGet().invoke();
 
             setResponse(new GluuConfigurationResponse());
 
-            String entity = clientResponse.getEntity(String.class);
+            String entity = clientResponse.readEntity(String.class);
             getResponse().setEntity(entity);
             getResponse().setHeaders(clientResponse.getMetadata());
             getResponse().setStatus(clientResponse.getStatus());
