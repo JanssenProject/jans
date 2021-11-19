@@ -105,7 +105,7 @@ public class ClientInfoClient extends BaseClient<ClientInfoRequest, ClientInfoRe
             setResponse(new ClientInfoResponse(clientResponse));
 
             getResponse().setHeaders(clientResponse.getMetadata());
-            parseEntity(entity);
+            parseEntity(getResponse().getEntity());
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         } finally {
