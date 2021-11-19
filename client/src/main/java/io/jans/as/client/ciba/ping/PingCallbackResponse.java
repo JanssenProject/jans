@@ -18,8 +18,6 @@ public class PingCallbackResponse extends BaseResponse {
     public PingCallbackResponse(Response clientResponse) {
         super(clientResponse);
 
-        String entity = clientResponse.readEntity(String.class);
-        setEntity(entity);
         setHeaders(clientResponse.getMetadata());
     }
 }
