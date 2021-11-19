@@ -191,4 +191,38 @@ public class ExternalUpdateTokenService extends ExternalScriptService {
 
         return true;
     }
+
+    public int getAccessTokenLifetimeInSeconds(CustomScriptConfiguration script, ExternalUpdateTokenContext context) {
+        try {
+            log.trace("Executing python 'getAccessTokenLifetimeInSeconds' method, script name: {}, context: {}", script.getName(), context);
+            context.setScript(script);
+
+            UpdateTokenType updateTokenType = (UpdateTokenType) script.getExternalType();
+            final int result = updateTokenType.getAccessTokenLifetimeInSeconds(context);
+            log.trace("Finished 'getAccessTokenLifetimeInSeconds' method, script name: {}, context: {}, result: {}", script.getName(), context, result);
+
+            return result;
+        } catch (Exception ex) {
+            log.error(ex.getMessage(), ex);
+            saveScriptError(script.getCustomScript(), ex);
+        }
+        return 0;
+    }
+
+    public int getAccessTokenLifetimeInSeconds(ExternalUpdateTokenContext context) {
+        List<CustomScriptConfiguration> scripts = getScripts(context);
+        if (scripts.isEmpty()) {
+            return 0;
+        }
+        log.trace("Executing {} 'getAccessTokenLifetimeInSeconds' scripts.", scripts.size());
+
+        for (CustomScriptConfiguration script : scripts) {
+            final int lifetime = getAccessTokenLifetimeInSeconds(script, context);
+            if (lifetime > 0) {
+                log.trace("Finished 'getAccessTokenLifetimeInSeconds' methods, lifetime: {}", lifetime);
+                return lifetime;
+            }
+        }
+        return 0;
+    }
 }
