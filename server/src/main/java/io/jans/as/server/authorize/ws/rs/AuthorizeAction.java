@@ -57,8 +57,7 @@ import io.jans.util.StringHelper;
 import io.jans.util.ilocale.LocaleUtil;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.util.Strings;
-import org.jboss.resteasy.client.ClientRequest;
-import org.jboss.resteasy.client.ClientResponse;
+import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 
 import javax.enterprise.context.RequestScoped;
@@ -69,8 +68,8 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.HttpMethod;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -491,23 +490,26 @@ public class AuthorizeAction {
                 String reqUriHash = reqUri.getFragment();
                 String reqUriWithoutFragment = reqUri.getScheme() + ":" + reqUri.getSchemeSpecificPart();
 
-                ClientRequest clientRequest = new ClientRequest(reqUriWithoutFragment);
-                clientRequest.setHttpMethod(HttpMethod.GET);
+                javax.ws.rs.client.Client clientRequest = ClientBuilder.newClient();
+                try {
+	        	    Response clientResponse = clientRequest.target(reqUriWithoutFragment).request().buildGet().invoke();
+	        	    clientRequest.close();
 
-                ClientResponse<String> clientResponse = clientRequest.get(String.class);
-                int status = clientResponse.getStatus();
+	                int status = clientResponse.getStatus();
+	                if (status == 200) {
+	                    String entity = clientResponse.readEntity(String.class);
 
-                if (status == 200) {
-                    String entity = clientResponse.getEntity(String.class);
-
-                    if (StringUtils.isBlank(reqUriHash)) {
-                        requestJwt = entity;
-                    } else {
-                        String hash = Base64Util.base64urlencode(JwtUtil.getMessageDigestSHA256(entity));
-                        if (StringUtils.equals(reqUriHash, hash)) {
-                            requestJwt = entity;
-                        }
-                    }
+	                    if (StringUtils.isBlank(reqUriHash)) {
+	                        requestJwt = entity;
+	                    } else {
+	                        String hash = Base64Util.base64urlencode(JwtUtil.getMessageDigestSHA256(entity));
+	                        if (StringUtils.equals(reqUriHash, hash)) {
+	                            requestJwt = entity;
+	                        }
+	                    }
+	                }
+                } finally {
+                	clientRequest.close();
                 }
             } catch (Exception e) {
                 log.error(e.getMessage(), e);

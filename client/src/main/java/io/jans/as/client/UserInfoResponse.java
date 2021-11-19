@@ -7,7 +7,7 @@
 package io.jans.as.client;
 
 import io.jans.as.model.userinfo.UserInfoErrorResponseType;
-import org.jboss.resteasy.client.ClientResponse;
+import javax.ws.rs.core.Response;
 
 /**
  * Represents an user info response received from the authorization server.
@@ -21,7 +21,7 @@ public class UserInfoResponse extends BaseResponseWithErrors<UserInfoErrorRespon
      *
      * @param clientResponse The response status code.
      */
-    public UserInfoResponse(ClientResponse<String> clientResponse) {
+    public UserInfoResponse(Response clientResponse) {
         super(clientResponse);
     }
 

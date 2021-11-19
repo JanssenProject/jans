@@ -18,7 +18,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.ws.rs.HttpMethod;
-import javax.ws.rs.core.MediaType;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
 import java.nio.charset.StandardCharsets;
 import java.security.PrivateKey;
 import java.util.Iterator;
@@ -77,36 +78,23 @@ public class UserInfoClient extends BaseClient<UserInfoRequest, UserInfoResponse
      */
     public UserInfoResponse exec() {
         // Prepare request parameters
-        initClientRequest();
-        clientRequest.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
-        clientRequest.setHttpMethod(getHttpMethod());
+        initClient();
 
-        if (getRequest().getAuthorizationMethod() == null
-                || getRequest().getAuthorizationMethod() == AuthorizationMethod.AUTHORIZATION_REQUEST_HEADER_FIELD) {
-            if (StringUtils.isNotBlank(getRequest().getAccessToken())) {
-                clientRequest.header("Authorization", "Bearer " + getRequest().getAccessToken());
-            }
-        } else if (getRequest().getAuthorizationMethod() == AuthorizationMethod.FORM_ENCODED_BODY_PARAMETER) {
-            if (StringUtils.isNotBlank(getRequest().getAccessToken())) {
-                clientRequest.formParameter("access_token", getRequest().getAccessToken());
-            }
-        } else if (getRequest().getAuthorizationMethod() == AuthorizationMethod.URL_QUERY_PARAMETER && StringUtils.isNotBlank(getRequest().getAccessToken())) {
-            clientRequest.queryParameter("access_token", getRequest().getAccessToken());
-        }
+        Builder clientRequest = prepareAuthorizatedClientRequest(getRequest().getAuthorizationMethod(), getRequest().getAccessToken());
 
         // Call REST Service and handle response
         try {
             if (getRequest().getAuthorizationMethod() == null
                     || getRequest().getAuthorizationMethod() == AuthorizationMethod.AUTHORIZATION_REQUEST_HEADER_FIELD
                     || getRequest().getAuthorizationMethod() == AuthorizationMethod.URL_QUERY_PARAMETER) {
-                clientResponse = clientRequest.get(String.class);
+                clientResponse = clientRequest.buildGet().invoke();
             } else if (getRequest().getAuthorizationMethod() == AuthorizationMethod.FORM_ENCODED_BODY_PARAMETER) {
-                clientResponse = clientRequest.post(String.class);
+                clientResponse = clientRequest.buildPost(Entity.form(requestForm)).invoke();
             }
 
             setResponse(new UserInfoResponse(clientResponse));
 
-            String entity = clientResponse.getEntity(String.class);
+            String entity = clientResponse.readEntity(String.class);
             getResponse().setEntity(entity);
             getResponse().setHeaders(clientResponse.getMetadata());
             parseEntity(entity);

@@ -13,7 +13,7 @@ import io.jans.as.client.OpenIdConnectDiscoveryClient;
 import io.jans.as.client.OpenIdConnectDiscoveryResponse;
 import io.jans.as.client.dev.HostnameVerifierType;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
+import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
@@ -43,7 +43,7 @@ public class ConfigurationRestWebServiceHttpTest extends BaseTest {
         CloseableHttpClient httpClient = createHttpClient(HostnameVerifierType.ALLOW_ALL);
         OpenIdConnectDiscoveryResponse openIdConnectDiscoveryResponse;
         try {
-            openIdConnectDiscoveryResponse = openIdConnectDiscoveryClient.exec(new ApacheHttpClient4Executor(httpClient));
+            openIdConnectDiscoveryResponse = openIdConnectDiscoveryClient.exec(new ApacheHttpClient43Engine(httpClient));
         } finally {
             httpClient.close();
         }
