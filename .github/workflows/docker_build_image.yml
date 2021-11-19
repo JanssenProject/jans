@@ -36,10 +36,10 @@ jobs:
       - name: Check docker directories that changed
         id: build_docker_image
         run: |
-          echo ::set-output name=build::False
+          echo "::set-output name=build::False"
           DIRECTORIES_CHANGED=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | cut -d/ -f1 | sort -u | grep "docker-jans")
           if [[ "$DIRECTORIES_CHANGED" =~ "${{ matrix.docker-images }}" ]]; then
-            echo ::set-output name=build::True
+            echo "::set-output name=build::True"
           fi
 
       - name: Install dependencies

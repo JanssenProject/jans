@@ -24,7 +24,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build the Container image
-      run: docker build ./docker-jans-${{ matrix.docker-images }} --file Dockerfile --tag localbuild/scanimage:latest
+      run: docker build ./docker-jans-${{ matrix.docker-images }} --file ./docker-jans-${{ matrix.docker-images }}/Dockerfile --tag localbuild/scanimage:latest
     - uses: anchore/scan-action@v3
       id: scan
       with:

@@ -34,6 +34,7 @@ jobs:
         python3 -m pip install tox
     - name: Test with pytest
       run: |
+        cd ./jans-pycloudlib
         tox
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
