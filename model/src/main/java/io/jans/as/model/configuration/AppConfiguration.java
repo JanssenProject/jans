@@ -243,6 +243,7 @@ public class AppConfiguration implements Configuration {
     private String dcrSignatureValidationJwksUri;
     private Boolean dcrAuthorizationWithClientCredentials = false;
     private Boolean dcrSkipSignatureValidation = false;
+    private Boolean dcrAuthorizationWithMTLS = false;
 
     private Boolean useLocalCache = false;
     private Boolean fapiCompatibility = false;
@@ -660,6 +661,15 @@ public class AppConfiguration implements Configuration {
 
     public void setDcrSignatureValidationJwksUri(String dcrSignatureValidationJwksUri) {
         this.dcrSignatureValidationJwksUri = dcrSignatureValidationJwksUri;
+    }
+
+    public Boolean getDcrAuthorizationWithMTLS() {
+        if (dcrAuthorizationWithMTLS == null) dcrAuthorizationWithMTLS = false;
+        return dcrAuthorizationWithMTLS;
+    }
+
+    public void setDcrAuthorizationWithMTLS(Boolean dcrAuthorizationWithMTLS) {
+        this.dcrAuthorizationWithMTLS = dcrAuthorizationWithMTLS;
     }
 
     public Boolean getForceIdTokenHintPrecense() {
