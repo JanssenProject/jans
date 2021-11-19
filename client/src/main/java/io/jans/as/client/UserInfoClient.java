@@ -95,7 +95,7 @@ public class UserInfoClient extends BaseClient<UserInfoRequest, UserInfoResponse
             setResponse(new UserInfoResponse(clientResponse));
 
             getResponse().setHeaders(clientResponse.getMetadata());
-            parseEntity(entity);
+            parseEntity(getResponse().getEntity());
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         } finally {
