@@ -33,13 +33,13 @@ public class AdminConf {
         this.dn = dn;
     }
 
-	public long getRevision() {
-		return revision;
-	}
+    public long getRevision() {
+        return revision;
+    }
 
-	public void setRevision(long revision) {
-		this.revision = revision;
-	}
+    public void setRevision(long revision) {
+        this.revision = revision;
+    }
 
     public DynamicConfig getDynamic() {
         return dynamic;
@@ -49,7 +49,7 @@ public class AdminConf {
         this.dynamic = dynamic;
     }
 
-	@Override
+    @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         sb.append("Conf");
