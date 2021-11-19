@@ -8,7 +8,7 @@ package io.jans.as.client.ciba.push;
 
 import io.jans.as.client.BaseResponse;
 import org.apache.log4j.Logger;
-import org.jboss.resteasy.client.ClientResponse;
+import javax.ws.rs.core.Response;
 
 /**
  * @author Javier Rojas Blum
@@ -18,10 +18,10 @@ public class PushTokenDeliveryResponse extends BaseResponse {
 
     private static final Logger LOG = Logger.getLogger(PushTokenDeliveryResponse.class);
 
-    public PushTokenDeliveryResponse(ClientResponse<String> clientResponse) {
+    public PushTokenDeliveryResponse(Response clientResponse) {
         super(clientResponse);
 
-        String entity = clientResponse.getEntity(String.class);
+        String entity = clientResponse.readEntity(String.class);
         setEntity(entity);
         setHeaders(clientResponse.getMetadata());
     }

@@ -23,7 +23,7 @@ import io.jans.as.model.uma.UmaScopeType;
 import io.jans.as.model.uma.wrapper.Token;
 import io.jans.as.model.util.Util;
 import io.jans.util.StringHelper;
-import org.jboss.resteasy.client.ClientExecutor;
+import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -64,8 +64,8 @@ public class UmaClient {
     }
 
     @SuppressWarnings("java:S1874")
-    public static Token requestPat(final String tokenUrl, final String umaClientId, final String umaClientSecret, ClientExecutor clientExecutor, String... scopeArray) {
-        return request(tokenUrl, umaClientId, umaClientSecret, UmaScopeType.PROTECTION, clientExecutor, scopeArray);
+    public static Token requestPat(final String tokenUrl, final String umaClientId, final String umaClientSecret, ClientHttpEngine engine, String... scopeArray) {
+        return request(tokenUrl, umaClientId, umaClientSecret, UmaScopeType.PROTECTION, engine, scopeArray);
     }
 
     /**
@@ -133,7 +133,7 @@ public class UmaClient {
 
     @SuppressWarnings("java:S1874")
     public static Token request(final String tokenUrl, final String umaClientId, final String umaClientSecret, UmaScopeType scopeType,
-                                ClientExecutor clientExecutor, String... scopeArray) {
+                                ClientHttpEngine engine, String... scopeArray) {
 
         StringBuilder scope = new StringBuilder(scopeType.getValue());
         if (scopeArray != null && scopeArray.length > 0) {
@@ -143,8 +143,8 @@ public class UmaClient {
         }
 
         TokenClient tokenClient = new TokenClient(tokenUrl);
-        if (clientExecutor != null) {
-            tokenClient.setExecutor(clientExecutor);
+        if (engine != null) {
+            tokenClient.setExecutor(engine);
         }
         TokenResponse response = tokenClient.execClientCredentialsGrant(scope.toString(), umaClientId, umaClientSecret);
 

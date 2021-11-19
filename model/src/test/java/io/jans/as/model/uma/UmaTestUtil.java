@@ -11,9 +11,10 @@ import io.jans.as.model.common.Id;
 import io.jans.as.model.uma.wrapper.Token;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
-import org.jboss.resteasy.client.ClientResponse;
+import org.jboss.resteasy.client.jaxrs.internal.ClientResponse;
 
 import javax.ws.rs.core.Response;
+
 import java.util.Arrays;
 
 import static org.testng.Assert.assertEquals;

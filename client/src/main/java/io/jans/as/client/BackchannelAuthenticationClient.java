@@ -14,6 +14,8 @@ import org.apache.log4j.Logger;
 import org.json.JSONObject;
 
 import javax.ws.rs.HttpMethod;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
 
 import static io.jans.as.model.ciba.BackchannelAuthenticationResponseParam.AUTH_REQ_ID;
 import static io.jans.as.model.ciba.BackchannelAuthenticationResponseParam.EXPIRES_IN;
@@ -53,7 +55,7 @@ public class BackchannelAuthenticationClient extends BaseClient<BackchannelAuthe
         BackchannelAuthenticationResponse response = null;
 
         try {
-            initClientRequest();
+            initClient();
             response = execInternal();
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
@@ -65,63 +67,63 @@ public class BackchannelAuthenticationClient extends BaseClient<BackchannelAuthe
     }
 
     private BackchannelAuthenticationResponse execInternal() throws Exception {
-        // Prepare request parameters
-        clientRequest.setHttpMethod(getHttpMethod());
-        clientRequest.header("Content-Type", request.getContentType());
-        if (request.getAuthenticationMethod() == AuthenticationMethod.CLIENT_SECRET_BASIC && request.hasCredentials()) {
-            clientRequest.header("Authorization", "Basic " + request.getEncodedCredentials());
-        }
-
         final String scopesAsString = Util.listAsString(getRequest().getScope());
         final String acrValuesAsString = Util.listAsString(getRequest().getAcrValues());
 
         if (StringUtils.isNotBlank(scopesAsString)) {
-            clientRequest.formParameter(BackchannelAuthenticationRequestParam.SCOPE, scopesAsString);
+            requestForm.param(BackchannelAuthenticationRequestParam.SCOPE, scopesAsString);
         }
         if (StringUtils.isNotBlank(getRequest().getClientNotificationToken())) {
-            clientRequest.formParameter(BackchannelAuthenticationRequestParam.CLIENT_NOTIFICATION_TOKEN, getRequest().getClientNotificationToken());
+            requestForm.param(BackchannelAuthenticationRequestParam.CLIENT_NOTIFICATION_TOKEN, getRequest().getClientNotificationToken());
         }
         if (StringUtils.isNotBlank(acrValuesAsString)) {
-            clientRequest.formParameter(BackchannelAuthenticationRequestParam.ACR_VALUES, acrValuesAsString);
+            requestForm.param(BackchannelAuthenticationRequestParam.ACR_VALUES, acrValuesAsString);
         }
         if (StringUtils.isNotBlank(getRequest().getLoginHintToken())) {
-            clientRequest.formParameter(BackchannelAuthenticationRequestParam.LOGIN_HINT_TOKEN, getRequest().getLoginHintToken());
+            requestForm.param(BackchannelAuthenticationRequestParam.LOGIN_HINT_TOKEN, getRequest().getLoginHintToken());
         }
         if (StringUtils.isNotBlank(getRequest().getIdTokenHint())) {
-            clientRequest.formParameter(BackchannelAuthenticationRequestParam.ID_TOKEN_HINT, getRequest().getIdTokenHint());
+            requestForm.param(BackchannelAuthenticationRequestParam.ID_TOKEN_HINT, getRequest().getIdTokenHint());
         }
         if (StringUtils.isNotBlank(getRequest().getLoginHint())) {
-            clientRequest.formParameter(BackchannelAuthenticationRequestParam.LOGIN_HINT, getRequest().getLoginHint());
+            requestForm.param(BackchannelAuthenticationRequestParam.LOGIN_HINT, getRequest().getLoginHint());
         }
         if (StringUtils.isNotBlank(getRequest().getBindingMessage())) {
-            clientRequest.formParameter(BackchannelAuthenticationRequestParam.BINDING_MESSAGE, getRequest().getBindingMessage());
+            requestForm.param(BackchannelAuthenticationRequestParam.BINDING_MESSAGE, getRequest().getBindingMessage());
         }
         if (StringUtils.isNotBlank(getRequest().getUserCode())) {
-            clientRequest.formParameter(BackchannelAuthenticationRequestParam.USER_CODE, getRequest().getUserCode());
+            requestForm.param(BackchannelAuthenticationRequestParam.USER_CODE, getRequest().getUserCode());
         }
         if (getRequest().getRequestedExpiry() != null) {
-            clientRequest.formParameter(BackchannelAuthenticationRequestParam.REQUESTED_EXPIRY, getRequest().getRequestedExpiry());
+            requestForm.param(BackchannelAuthenticationRequestParam.REQUESTED_EXPIRY, getRequest().getRequestedExpiry().toString());
         }
         if (StringUtils.isNotBlank(getRequest().getClientId())) {
-            clientRequest.formParameter(BackchannelAuthenticationRequestParam.CLIENT_ID, getRequest().getClientId());
+            requestForm.param(BackchannelAuthenticationRequestParam.CLIENT_ID, getRequest().getClientId());
         }
         if (StringUtils.isNotBlank(getRequest().getRequest())) {
-            clientRequest.formParameter(BackchannelAuthenticationRequestParam.REQUEST, getRequest().getRequest());
+            requestForm.param(BackchannelAuthenticationRequestParam.REQUEST, getRequest().getRequest());
         }
         if (StringUtils.isNotBlank(getRequest().getRequestUri())) {
-            clientRequest.formParameter(BackchannelAuthenticationRequestParam.REQUEST_URI, getRequest().getRequestUri());
+            requestForm.param(BackchannelAuthenticationRequestParam.REQUEST_URI, getRequest().getRequestUri());
         }
-        new ClientAuthnEnabler(clientRequest).exec(getRequest());
+
+        Builder clientRequest = webTarget.request();
+        applyCookies(clientRequest);
+
+        // Prepare request parameters
+	    clientRequest.header("Content-Type", request.getContentType());
+	    if (request.getAuthenticationMethod() == AuthenticationMethod.CLIENT_SECRET_BASIC && request.hasCredentials()) {
+	        clientRequest.header("Authorization", "Basic " + request.getEncodedCredentials());
+	    }
+
+        new ClientAuthnEnabler(clientRequest, requestForm).exec(getRequest());
 
         // Call REST Service and handle response
-        clientResponse = clientRequest.post(String.class);
+        clientResponse = clientRequest.buildPost(Entity.form(requestForm)).invoke();
 
         setResponse(new BackchannelAuthenticationResponse(clientResponse));
-        String entity = clientResponse.getEntity(String.class);
-        getResponse().setEntity(entity);
-        getResponse().setHeaders(clientResponse.getMetadata());
-        if (StringUtils.isNotBlank(entity)) {
-            JSONObject jsonObj = new JSONObject(entity);
+        if (StringUtils.isNotBlank(response.getEntity())) {
+            JSONObject jsonObj = new JSONObject(response.getEntity());
 
             if (jsonObj.has(AUTH_REQ_ID)) {
                 getResponse().setAuthReqId(jsonObj.getString(AUTH_REQ_ID));

@@ -13,12 +13,20 @@ import io.jans.as.model.config.Constants;
 import io.jans.as.model.util.Util;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.jboss.resteasy.client.ClientExecutor;
-import org.jboss.resteasy.client.ClientRequest;
-import org.jboss.resteasy.client.ClientResponse;
+
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.core.Response;
+import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
+import org.jboss.resteasy.client.jaxrs.ResteasyClient;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 
 import javax.ws.rs.HttpMethod;
+import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Cookie;
+import javax.ws.rs.core.Form;
+import javax.ws.rs.core.MediaType;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -40,12 +48,14 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
 
     protected T request;
     protected V response;
-    protected ClientRequest clientRequest = null;
-    protected ClientResponse<String> clientResponse = null;
+    protected ResteasyClient resteasyClient = null;
+    protected WebTarget webTarget = null;
+    protected Form requestForm = new Form();
+    protected Response clientResponse = null;
     private final List<Cookie> cookies = new ArrayList<>();
     private final Map<String, String> headers = new HashMap<>();
 
-    protected ClientExecutor executor = null;
+    protected ClientHttpEngine executor = null;
 
     protected BaseClient() {
     }
@@ -78,11 +88,11 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
         this.response = response;
     }
 
-    public ClientExecutor getExecutor() {
+    public ClientHttpEngine getExecutor() {
         return executor;
     }
 
-    public void setExecutor(ClientExecutor executor) {
+    public void setExecutor(ClientHttpEngine executor) {
         this.executor = executor;
     }
 
@@ -95,21 +105,9 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
     protected void addReqParam(String key, String value) {
         if (Util.allNotBlank(key, value)) {
             if (request.getAuthorizationMethod() == AuthorizationMethod.FORM_ENCODED_BODY_PARAMETER) {
-                clientRequest.formParameter(key, value);
+            	requestForm.param(key, value);
             } else {
-                clientRequest.queryParameter(key, value);
-            }
-        }
-    }
-
-    @SuppressWarnings("java:S1874")
-    public static void putAllFormParameters(ClientRequest clientRequest, BaseRequest request) {
-        if (clientRequest != null && request != null) {
-            final Map<String, String> parameters = request.getParameters();
-            if (parameters != null && !parameters.isEmpty()) {
-                for (Map.Entry<String, String> e : parameters.entrySet()) {
-                    clientRequest.formParameter(e.getKey(), e.getValue());
-                }
+            	webTarget = webTarget.queryParam(key, value);
             }
         }
     }
@@ -237,13 +235,18 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
         return sb.toString();
     }
 
-    protected void initClientRequest() {
+    protected void initClient() {
         if (this.executor == null) {
-            this.clientRequest = new ClientRequest(getUrl());
+        	resteasyClient = (ResteasyClient) ClientBuilder.newClient();
         } else {
-            this.clientRequest = new ClientRequest(getUrl(), this.executor);
+        	resteasyClient = ((ResteasyClientBuilder) ClientBuilder.newBuilder()).httpEngine(executor).build();
         }
-        for (Cookie cookie : cookies) {
+
+        webTarget = resteasyClient.target(getUrl());
+    }
+
+    protected void applyCookies(Builder clientRequest) {
+		for (Cookie cookie : cookies) {
             clientRequest.cookie(cookie);
         }
         for (Map.Entry<String, String> headerEntry : headers.entrySet()) {
@@ -254,11 +257,12 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
     public void closeConnection() {
         try {
             if (clientResponse != null) {
-                clientResponse.releaseConnection();
+                clientResponse.close();
             }
-            if (clientRequest != null && clientRequest.getExecutor() != null) {
-                clientRequest.getExecutor().close();
-            }
+            // Why we should close engine after processing response?
+//            if (resteasyClient != null && resteasyClient.httpEngine() != null) {
+//            	resteasyClient.httpEngine().close();
+//            }
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }
@@ -273,4 +277,29 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
     public Map<String, String> getHeaders() {
         return headers;
     }
+
+	protected Builder prepareAuthorizatedClientRequest(AuthorizationMethod authorizationMethod, String accessToken) {
+		Builder clientRequest = null;
+        if (authorizationMethod == null
+                || authorizationMethod == AuthorizationMethod.AUTHORIZATION_REQUEST_HEADER_FIELD) {
+            if (StringUtils.isNotBlank(accessToken)) {
+            	clientRequest = webTarget.request();
+                clientRequest.header("Authorization", "Bearer " + accessToken);
+            }
+        } else if (authorizationMethod == AuthorizationMethod.FORM_ENCODED_BODY_PARAMETER) {
+            if (StringUtils.isNotBlank(accessToken)) {
+                requestForm.param("access_token", accessToken);
+            }
+        } else if (authorizationMethod == AuthorizationMethod.URL_QUERY_PARAMETER && StringUtils.isNotBlank(accessToken)) {
+            addReqParam("access_token", accessToken);
+        }
+
+        if (clientRequest == null) {
+        	clientRequest = webTarget.request();
+        }
+
+        clientRequest.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
+		return clientRequest;
+	}
+
 }

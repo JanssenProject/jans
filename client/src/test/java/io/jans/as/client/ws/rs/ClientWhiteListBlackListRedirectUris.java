@@ -87,7 +87,7 @@ public class ClientWhiteListBlackListRedirectUris extends BaseTest {
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
-        registerClient.setExecutor(clientExecutor(true));
+        registerClient.setExecutor(clientEngine(true));
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
@@ -114,7 +114,7 @@ public class ClientWhiteListBlackListRedirectUris extends BaseTest {
 
         final RegisterClient registerClient = new RegisterClient(registrationClientUri1);
         registerClient.setRequest(registerRequest);
-        registerClient.setExecutor(clientExecutor(true));
+        registerClient.setExecutor(clientEngine(true));
         final RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
