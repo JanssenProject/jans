@@ -4084,6 +4084,30 @@
         "top"
       ], 
       "x_origin": "Jans created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "c",
+        "ou",
+        "description",
+        "inum",
+        "displayName",
+        "jansConfDyn",
+        "o",
+        "jansRevision"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "jansAdminConfDyn"
+      ],
+      "oid": "jansObjClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Jans created objectclass"
     }
   ],
   "oidMacros": {
