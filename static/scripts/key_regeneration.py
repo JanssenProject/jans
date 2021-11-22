@@ -27,7 +27,7 @@ gluu_hybrid_roperties_fn = os.path.join(conf_dir, 'jans-hybrid.properties')
 gluu_couchbase_roperties_fn = os.path.join(conf_dir, 'jans-couchbase.properties')
 gluu_ldap_roperties_fn = os.path.join(conf_dir, 'jans-ldap.properties')
 
-keystore_fn = 'jans-keys.jks'
+keystore_fn = 'jans-auth-keys.jks'
 oxauth_keys_json_fn = 'jans-keys.json'
 
 algs_for_versions = {
