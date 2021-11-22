@@ -103,7 +103,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           builder: ${{ steps.buildx.outputs.name }}
-          context: .
+          context: ./docker-jans-${{ matrix.docker-images }}
           file: ./docker-jans-${{ matrix.docker-images }}/Dockerfile
           #target: prod
           # add to platforms comma seperated linux/ppc64leL Issue: py3-grpcio
