@@ -723,17 +723,6 @@
       "type": "STRING"
     }
   },
-  "jansLogoutURI": {
-    "mysql": {
-      "type": "TINYTEXT"
-    },
-    "pgsql": {
-      "type": "TEXT"
-    },
-    "spanner": {
-      "type": "STRING(MAX)"
-    }
-  },
   "jansJwks": {
     "mysql": {
       "type": "TEXT"
