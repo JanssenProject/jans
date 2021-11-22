@@ -18,7 +18,7 @@ def find_version(*file_paths):
 
 setup(
     name="jans-pycloudlib",
-    version=find_version("jans", "pycloudlib", "__init__.py"),
+    version=find_version("jans", "pycloudlib", "version.py"),
     url="",
     license="Apache",
     author="Janssen",

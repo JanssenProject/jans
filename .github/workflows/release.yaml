@@ -6,12 +6,6 @@ on:
       - main
       # below branch is triggered by jenkins which triggers dev image
       - update-source-build-date
-  pull_request:
-    branches:
-      - master
-      - main
-      # below branch is triggered by jenkins which triggers dev image
-      - update-source-build-dates
   workflow_dispatch:
 jobs:
   release-docker-pr:
