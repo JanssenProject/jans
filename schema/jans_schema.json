@@ -3635,7 +3635,8 @@
         "usrId",
         "ssnId",
         "jansUmaPermission",
-        "uuid"
+        "uuid",
+        "dpop"
       ],
       "must": [
         "objectclass"
@@ -3875,7 +3876,8 @@
         "del",
         "tknCde",
         "ssnId",
-        "jansClaimValues"
+        "jansClaimValues",
+        "dpop"
       ],
       "must": [
         "objectclass"
