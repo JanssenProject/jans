@@ -19,7 +19,7 @@
     },
     {
       "op": "replace",
-      "path" : "phoneNumbers[(not (type ge \"home\") and value ew \"9\") and display ne null or primary eq null]",
+      "path" : "phoneNumbers[(not(type ge \"home\") and value ew \"9\") and display ne null or primary eq null]",
       "value": {
         "value": "+1 1234 56789"
       }
