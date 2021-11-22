@@ -20,8 +20,8 @@ maven_base_url = 'https://maven.jans.io/maven/io/jans/'
 app_versions = {
   "JANS_APP_VERSION": "1.0.0",
   "JANS_BUILD": "-SNAPSHOT", 
-  "JETTY_VERSION": "9.4.35.v20201120", 
-  "AMAZON_CORRETTO_VERSION": "11.0.8.10.1", 
+  "JETTY_VERSION": "9.4.44.v20210927", 
+  "AMAZON_CORRETTO_VERSION": "11.0.13.8.1", 
   "JYTHON_VERSION": "2.7.3",
   "OPENDJ_VERSION": "4.4.12",
   "SETUP_BRANCH": "master",
@@ -46,6 +46,9 @@ parser.add_argument('--args', help="Arguments to be passed to setup.py")
 parser.add_argument('-n', help="No prompt", action='store_true')
 parser.add_argument('--keep-downloads', help="Keep downloaded files (applicable for uninstallation only)", action='store_true')
 parser.add_argument('--profile', help="Setup profile", choices=['jans', 'openbanking'], default='jans')
+parser.add_argument('--jans-app-version', help="Version for Jannses applications")
+parser.add_argument('--jans-build', help="Buid version for Janssen applications")
+parser.add_argument('--setup-branch', help="Jannsen setup github branch")
 
 if '-a' in sys.argv:
     parser.add_argument('--jetty-version', help="Jetty verison. For example 11.0.6")
@@ -53,6 +56,15 @@ if '-a' in sys.argv:
 argsp = parser.parse_args()
 
 ssl._create_default_https_context = ssl._create_unverified_context
+
+if argsp.jans_app_version:
+    app_versions['JANS_APP_VERSION'] = argsp.jans_app_version
+
+if argsp.jans_build:
+    app_versions['JANS_BUILD'] = argsp.jans_build
+
+if argsp.setup_branch:
+    app_versions['SETUP_BRANCH'] = argsp.setup_branch
 
 jetty_dist_string = 'jetty-distribution'
 if getattr(argsp, 'jetty_version', None):
@@ -130,7 +142,7 @@ if not (argsp.u or argsp.uninstall):
 
     download('https://corretto.aws/downloads/resources/{0}/amazon-corretto-{0}-linux-x64.tar.gz'.format(app_versions['AMAZON_CORRETTO_VERSION']), os.path.join(app_dir, 'amazon-corretto-{0}-linux-x64.tar.gz'.format(app_versions['AMAZON_CORRETTO_VERSION'])))
     download('https://repo1.maven.org/maven2/org/eclipse/jetty/{1}/{0}/{1}-{0}.tar.gz'.format(app_versions['JETTY_VERSION'], jetty_dist_string), os.path.join(app_dir,'{1}-{0}.tar.gz'.format(app_versions['JETTY_VERSION'], jetty_dist_string)))
-    download('https://ox.gluu.org/maven/org/gluufederation/jython-installer/{0}/jython-installer-{0}.jar'.format(app_versions['JYTHON_VERSION']), os.path.join(app_dir, 'jython-installer-{0}.jar'.format(app_versions['JYTHON_VERSION'])))
+    download('https://maven.gluu.org/maven/org/gluufederation/jython-installer/{0}/jython-installer-{0}.jar'.format(app_versions['JYTHON_VERSION']), os.path.join(app_dir, 'jython-installer-{0}.jar'.format(app_versions['JYTHON_VERSION'])))
     download(urljoin(maven_base_url, 'jans-auth-server/{0}{1}/jans-auth-server-{0}{1}.war'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD'])), os.path.join(jans_app_dir, 'jans-auth.war'))
     download(urljoin(maven_base_url, 'jans-auth-client/{0}{1}/jans-auth-client-{0}{1}-jar-with-dependencies.jar'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD'])), os.path.join(jans_app_dir, 'jans-auth-client-jar-with-dependencies.jar'))
     download(urljoin(maven_base_url, 'jans-config-api-server/{0}{1}/jans-config-api-server-{0}{1}.war'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD'])), os.path.join(jans_app_dir, 'jans-config-api.war'))
@@ -141,7 +153,7 @@ if not (argsp.u or argsp.uninstall):
     download('https://ox.gluu.org/icrby8xcvbcv/cli-swagger/scim.tgz', os.path.join(jans_app_dir, 'scim-swagger-client.tgz'))
 
     if argsp.profile == 'jans':
-        download('https://ox.gluu.org/maven/org/gluufederation/opendj/opendj-server-legacy/{0}/opendj-server-legacy-{0}.zip'.format(app_versions['OPENDJ_VERSION']), os.path.join(app_dir, 'opendj-server-legacy-{0}.zip'.format(app_versions['OPENDJ_VERSION'])))
+        download('https://maven.gluu.org/maven/org/gluufederation/opendj/opendj-server-legacy/{0}/opendj-server-legacy-{0}.zip'.format(app_versions['OPENDJ_VERSION']), os.path.join(app_dir, 'opendj-server-legacy-{0}.zip'.format(app_versions['OPENDJ_VERSION'])))
         download(urljoin(maven_base_url, 'jans-fido2-server/{0}{1}/jans-fido2-server-{0}{1}.war'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD'])), os.path.join(jans_app_dir, 'jans-fido2.war'))
         download(urljoin(maven_base_url, 'jans-scim-server/{0}{1}/jans-scim-server-{0}{1}.war'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD'])), os.path.join(jans_app_dir, 'jans-scim.war'))
         download('https://jenkins.jans.io/maven/io/jans/jans-eleven-server/{0}{1}/jans-eleven-server-{0}{1}.war'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD']), os.path.join(jans_app_dir, 'jans-eleven.war'))

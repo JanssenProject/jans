@@ -91,7 +91,7 @@ class ConfigApiInstaller(JettyInstaller):
         scopes = {}
         jansUmaScopes_all = [ 'inum=C4F7,ou=scopes,o=jans' ]
 
-        if hasattr(base, 'ScimInstaller'):
+        if hasattr(base.current_app, 'ScimInstaller'):
             scim_scopes = base.current_app.ScimInstaller.create_user_scopes()
             jansUmaScopes_all += scim_scopes
 
