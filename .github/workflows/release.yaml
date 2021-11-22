@@ -1,12 +1,20 @@
 name: release
 on:
   push:
-    paths:
-      - __version__.py
-    branches: [master]
+    branches:
+      - master
+      - main
+      # below branch is triggered by jenkins which triggers dev image
+      - update-source-build-date
+  pull_request:
+    branches:
+      - master
+      - main
+      # below branch is triggered by jenkins which triggers dev image
+      - update-source-build-dates
   workflow_dispatch:
 jobs:
-  release-pr:
+  release-docker-pr:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
