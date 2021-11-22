@@ -25,6 +25,7 @@ jobs:
   docker:
     runs-on: ubuntu-latest
     strategy:
+      max-parallel: 1
       matrix:
         docker-images: ["auth-server", "certmanager", "client-api", "configurator", "fido2", "persistence-loader", "scim"]
     steps:
