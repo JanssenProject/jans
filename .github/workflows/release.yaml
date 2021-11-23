@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        docker-images: [ "docker-jans-auth-server", "docker-jans-certmanager", "docker-jans-client-api", "docker-jans-configurator", "docker-jans-fido2", "docker-jans-persistence-loader", "docker-jans-scim" ]
+        docker-images: [ "docker-jans-auth-server", "docker-jans-certmanager", "docker-jans-config-api", "docker-jans-client-api", "docker-jans-configurator", "docker-jans-fido2", "docker-jans-persistence-loader", "docker-jans-scim" ]
     steps:
     - name: Checkout
       uses: actions/checkout@v2

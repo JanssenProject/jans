@@ -27,7 +27,7 @@ jobs:
     strategy:
       max-parallel: 8
       matrix:
-        docker-images: ["auth-server", "certmanager", "client-api", "configurator", "fido2", "persistence-loader", "scim"]
+        docker-images: ["auth-server", "certmanager", "config-api", "client-api", "configurator", "fido2", "persistence-loader", "scim"]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -37,7 +37,7 @@ jobs:
       - name: Check docker directories that changed
         id: build_docker_image
         run: |
-          DEFAULT_ALL="docker-jans-auth-server docker-jans-certmanager docker-jans-client-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim"
+          DEFAULT_ALL="docker-jans-auth-server docker-jans-certmanager docker-jans-client-api docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim"
           # Detect actual docker folders that changed if error arises default to all images
           DIRECTORIES_CHANGED=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | cut -d/ -f1 | sort -u | grep "docker-jans" || echo "$DEFAULT_ALL")
           if [[ "$DIRECTORIES_CHANGED" =~ "${{ matrix.docker-images }}" ]]; then
