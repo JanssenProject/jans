@@ -457,30 +457,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     redirectUriResponse.getRedirectUri().setKeyId(keyId);
                 }
             }
-            // Validate request object after JARM
+            // Validate JWT request object after JARM check, because we want to return errors well formatted (JSON/JWT).
             if (jwtRequest != null) {
-                try {
-                    jwtRequest.validate();
-
-                    authorizeRestWebServiceValidator.validateRequestObject(jwtRequest, redirectUriResponse);
-
-                    // MUST be equal
-                    if (!jwtRequest.getResponseTypes().containsAll(responseTypes) || !responseTypes.containsAll(jwtRequest.getResponseTypes())) {
-                        throw authorizeRestWebServiceValidator.createInvalidJwtRequestException(redirectUriResponse, "The responseType parameter is not the same in the JWT");
-                    }
-                    if (StringUtils.isBlank(jwtRequest.getClientId()) || !jwtRequest.getClientId().equals(clientId)) {
-                        throw authorizeRestWebServiceValidator.createInvalidJwtRequestException(redirectUriResponse, "The clientId parameter is not the same in the JWT");
-                    }
-                } catch (WebApplicationException e) {
-                    throw e;
-                } catch (InvalidJwtException e) {
-                    log.debug("Invalid JWT authorization request. " + e.getMessage());
-                    redirectUriResponse.getRedirectUri().parseQueryString(errorResponseFactory.getErrorAsQueryString(
-                            AuthorizeErrorResponseType.INVALID_REQUEST, state));
-                    throw new WebApplicationException(RedirectUtil.getRedirectResponseBuilder(redirectUriResponse.getRedirectUri(), httpRequest).build());
-                } catch (Exception e) {
-                    log.error("Unexpected exception. " + e.getMessage(), e);
-                }
+                validateJwtRequest(clientId, state, httpRequest, responseTypes, redirectUriResponse, jwtRequest);
             }
 
             if (!cibaRequestService.hasCibaCompatibility(client) && !isPar) {
@@ -815,6 +794,31 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
         applicationAuditLogger.sendMessage(oAuth2AuditLog);
         return builder.build();
+    }
+
+    private void validateJwtRequest(String clientId, String state, HttpServletRequest httpRequest, List<ResponseType> responseTypes, RedirectUriResponse redirectUriResponse, JwtAuthorizationRequest jwtRequest) {
+        try {
+            jwtRequest.validate();
+
+            authorizeRestWebServiceValidator.validateRequestObject(jwtRequest, redirectUriResponse);
+
+            // MUST be equal
+            if (!jwtRequest.getResponseTypes().containsAll(responseTypes) || !responseTypes.containsAll(jwtRequest.getResponseTypes())) {
+                throw authorizeRestWebServiceValidator.createInvalidJwtRequestException(redirectUriResponse, "The responseType parameter is not the same in the JWT");
+            }
+            if (StringUtils.isBlank(jwtRequest.getClientId()) || !jwtRequest.getClientId().equals(clientId)) {
+                throw authorizeRestWebServiceValidator.createInvalidJwtRequestException(redirectUriResponse, "The clientId parameter is not the same in the JWT");
+            }
+        } catch (WebApplicationException e) {
+            throw e;
+        } catch (InvalidJwtException e) {
+            log.debug("Invalid JWT authorization request. {}", e.getMessage());
+            redirectUriResponse.getRedirectUri().parseQueryString(errorResponseFactory.getErrorAsQueryString(
+                    AuthorizeErrorResponseType.INVALID_REQUEST, state));
+            throw new WebApplicationException(RedirectUtil.getRedirectResponseBuilder(redirectUriResponse.getRedirectUri(), httpRequest).build());
+        } catch (Exception e) {
+            log.error("Unexpected exception. " + e.getMessage(), e);
+        }
     }
 
     private String getAcrForGrant(String acrValuesStr, SessionId sessionUser) {
