@@ -17,10 +17,10 @@ import io.jans.as.model.util.JwtUtil;
 import io.jans.as.model.util.Util;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import javax.ws.rs.core.Response;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import javax.ws.rs.core.Response;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -30,25 +30,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import static io.jans.as.model.authorize.AuthorizeResponseParam.ACCESS_TOKEN;
-import static io.jans.as.model.authorize.AuthorizeResponseParam.AUD;
-import static io.jans.as.model.authorize.AuthorizeResponseParam.CODE;
-import static io.jans.as.model.authorize.AuthorizeResponseParam.EXP;
-import static io.jans.as.model.authorize.AuthorizeResponseParam.EXPIRES_IN;
-import static io.jans.as.model.authorize.AuthorizeResponseParam.ID_TOKEN;
-import static io.jans.as.model.authorize.AuthorizeResponseParam.ISS;
-import static io.jans.as.model.authorize.AuthorizeResponseParam.RESPONSE;
-import static io.jans.as.model.authorize.AuthorizeResponseParam.SCOPE;
-import static io.jans.as.model.authorize.AuthorizeResponseParam.SESSION_ID;
-import static io.jans.as.model.authorize.AuthorizeResponseParam.SID;
-import static io.jans.as.model.authorize.AuthorizeResponseParam.STATE;
-import static io.jans.as.model.authorize.AuthorizeResponseParam.TOKEN_TYPE;
+import static io.jans.as.model.authorize.AuthorizeResponseParam.*;
 
 /**
  * Represents an authorization response received from the authorization server.
  *
  * @author Javier Rojas Blum
- * @version July 28, 2021
+ * @version November 22, 2021
  */
 public class AuthorizationResponse extends BaseResponse {
 
@@ -169,8 +157,10 @@ public class AuthorizationResponse extends BaseResponse {
                             byte[] sharedSymmetricKey = sharedKey != null ? sharedKey.getBytes(StandardCharsets.UTF_8) : null;
                             Jwe jwe = Jwe.parse(response, privateKey, sharedSymmetricKey);
 
-                            for (Map.Entry<String, List<String>> entry : jwe.getClaims().toMap().entrySet()) {
-                                params.put(entry.getKey(), entry.getValue().get(0));
+                            if (jwe != null) {
+                                for (Map.Entry<String, List<String>> entry : jwe.getClaims().toMap().entrySet()) {
+                                    params.put(entry.getKey(), entry.getValue().get(0));
+                                }
                             }
                         } else {
                             Jwt jwt = Jwt.parse(response);

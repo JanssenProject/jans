@@ -14,12 +14,7 @@ import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
 import io.jans.as.model.crypto.signature.AlgorithmFamily;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.exception.CryptoProviderException;
-import io.jans.as.model.jwk.Algorithm;
-import io.jans.as.model.jwk.JSONWebKey;
-import io.jans.as.model.jwk.JSONWebKeySet;
-import io.jans.as.model.jwk.JWKParameter;
-import io.jans.as.model.jwk.KeySelectionStrategy;
-import io.jans.as.model.jwk.Use;
+import io.jans.as.model.jwk.*;
 import io.jans.as.model.util.Base64Util;
 import io.jans.as.model.util.Util;
 import org.apache.commons.codec.binary.Base64;
@@ -45,46 +40,27 @@ import org.json.JSONObject;
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
 import java.security.Key;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.Signature;
-import java.security.SignatureException;
-import java.security.UnrecoverableKeyException;
+import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.ECGenParameterSpec;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
  * @author Sergey Manoylo
- * @version October 26, 2021
+ * @version November 22, 2021
  */
 public class AuthCryptoProvider extends AbstractCryptoProvider {
 
@@ -124,9 +100,9 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
                     store();
                 }
                 load();
-          } catch (Exception e) {
-              LOG.error(e.getMessage(), e);
-          }
+            } catch (Exception e) {
+                LOG.error(e.getMessage(), e);
+            }
         }
     }
 
@@ -158,7 +134,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
 
     @Override
     public JSONObject generateKey(Algorithm algorithm, Long expirationTime) throws CryptoProviderException {
-        return generateKey(algorithm, expirationTime,  2048);
+        return generateKey(algorithm, expirationTime, 2048);
     }
 
     @Override
@@ -246,10 +222,10 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
 
                 return Base64Util.base64urlencode(signature);
             }
-            
+
         } catch (NoSuchAlgorithmException | InvalidKeyException | NoSuchProviderException | SignatureException | JOSEException e) {
             throw new CryptoProviderException(e);
-        } 
+        }
     }
 
     @Override
@@ -275,7 +251,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
         } catch (KeyStoreException e) {
             throw new CryptoProviderException(e);
         }
-        try(FileOutputStream stream = new FileOutputStream(keyStoreFile)) {
+        try (FileOutputStream stream = new FileOutputStream(keyStoreFile)) {
             keyStore.store(stream, keyStoreSecret.toCharArray());
         } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException e) {
             throw new CryptoProviderException(e);
@@ -285,7 +261,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
 
     @Override
     public PublicKey getPublicKey(String alias) throws CryptoProviderException {
-        if (Util.isNullOrEmpty(alias)) {
+        if (Util.isNullOrEmpty(alias) || keyStore == null) {
             return null;
         }
         try {
@@ -296,7 +272,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
             checkKeyExpiration(alias);
             return certificate.getPublicKey();
         } catch (KeyStoreException e) {
-            throw new CryptoProviderException(e);            
+            throw new CryptoProviderException(e);
         }
     }
 
@@ -310,35 +286,35 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
             final List<JSONWebKey> keys = jsonWebKeySet.getKeys();
             LOG.trace("WebKeys:" + keys.stream().map(JSONWebKey::getKid).collect(Collectors.toList()));
             LOG.trace("KeyStoreKeys:" + getKeys());
-    
+
             List<JSONWebKey> keysByAlgAndUse = new ArrayList<>();
-    
+
             for (JSONWebKey key : keys) {
                 if (algorithm == key.getAlg() && (use == null || use == key.getUse())) {
                     kid = key.getKid();
                     Key keyFromStore;
-                        keyFromStore = keyStore.getKey(kid, keyStoreSecret.toCharArray());
+                    keyFromStore = keyStore.getKey(kid, keyStoreSecret.toCharArray());
                     if (keyFromStore != null) {
                         keysByAlgAndUse.add(key);
                     }
                 }
             }
-    
+
             if (keysByAlgAndUse.isEmpty()) {
                 LOG.trace("kid is not in keystore, algorithm: " + algorithm + ", kid: " + kid + ", keyStorePath:" + keyStoreFile);
                 return kid;
             }
-    
+
             final JSONWebKey selectedKey = keySelectionStrategy.select(keysByAlgAndUse);
             final String selectedKid = selectedKey != null ? selectedKey.getKid() : null;
             LOG.trace("Selected kid: " + selectedKid + ", keySelection Strategy: " + keySelectionStrategy);
-            
+
             return selectedKid;
-        
+
         } catch (UnrecoverableKeyException | KeyStoreException | NoSuchAlgorithmException e) {
-            throw new CryptoProviderException(e);            
+            throw new CryptoProviderException(e);
         }
-        
+
     }
 
     @Override
@@ -351,14 +327,14 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
             if (key == null) {
                 return null;
             }
-    
+
             PrivateKey privateKey = (PrivateKey) key;
-    
+
             checkKeyExpiration(alias);
-    
+
             return privateKey;
         } catch (UnrecoverableKeyException | KeyStoreException | NoSuchAlgorithmException e) {
-            throw new CryptoProviderException(e);            
+            throw new CryptoProviderException(e);
         }
     }
 
@@ -507,7 +483,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
     }
 
     private JSONObject getJson(final Algorithm algorithm, final KeyPairGenerator keyGen, final String signatureAlgorithmStr, final Long expirationTime) throws NoSuchAlgorithmException,
-                OperatorCreationException, CertificateException, KeyStoreException, IOException {
+            OperatorCreationException, CertificateException, KeyStoreException, IOException {
 
         // Generate the key
         KeyPair keyPair = keyGen.generateKeyPair();
@@ -549,18 +525,18 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
             jsonObject.put(JWKParameter.EXPONENT, Base64Util.base64urlencodeUnsignedBigInt(rsaPublicKey.getPublicExponent()));
         } else if (publicKey instanceof ECPublicKey) {
             ECPublicKey ecPublicKey = (ECPublicKey) publicKey;
-            if(use == Use.SIGNATURE) {
-                SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(algorithm.getParamName());                
+            if (use == Use.SIGNATURE) {
+                SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(algorithm.getParamName());
                 jsonObject.put(JWKParameter.CURVE, signatureAlgorithm.getCurve().getName());
-            } else if(use == Use.ENCRYPTION) {
-                KeyEncryptionAlgorithm keyEncryptionAlgorithm = KeyEncryptionAlgorithm.fromName(algorithm.getParamName());                
+            } else if (use == Use.ENCRYPTION) {
+                KeyEncryptionAlgorithm keyEncryptionAlgorithm = KeyEncryptionAlgorithm.fromName(algorithm.getParamName());
                 jsonObject.put(JWKParameter.CURVE, keyEncryptionAlgorithm.getCurve().getName());
             }
             jsonObject.put(JWKParameter.X, Base64Util.base64urlencode(ecPublicKey.getW().getAffineX().toByteArray()));
             jsonObject.put(JWKParameter.Y, Base64Util.base64urlencode(ecPublicKey.getW().getAffineY().toByteArray()));
         } else if (use == Use.SIGNATURE && publicKey instanceof EdDSAPublicKey) {
             EdDSAPublicKey edDSAPublicKey = (EdDSAPublicKey) publicKey;
-            SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(algorithm.getParamName());            
+            SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(algorithm.getParamName());
             jsonObject.put(JWKParameter.CURVE, signatureAlgorithm.getCurve().getName());
             jsonObject.put(JWKParameter.X, Base64Util.base64urlencode(edDSAPublicKey.getEncoded()));
         }
@@ -603,7 +579,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
             return verifier.verify(signatureDer);
         } catch (SignatureException e) {
             return verifier.verify(signature);
-        }        
+        }
     }
 
 }
