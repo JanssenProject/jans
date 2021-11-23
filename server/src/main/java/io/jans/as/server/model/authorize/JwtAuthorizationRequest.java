@@ -515,8 +515,7 @@ public class JwtAuthorizationRequest {
         }
 
         try {
-            final JwtAuthorizationRequest requestObject = new JwtAuthorizationRequest(appConfiguration, cryptoProvider, request, client);
-            return requestObject;
+            return new JwtAuthorizationRequest(appConfiguration, cryptoProvider, request, client);
         } catch (WebApplicationException e) {
             throw e;
         } catch (Exception e) {
