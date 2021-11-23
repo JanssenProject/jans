@@ -12,13 +12,17 @@ import javax.servlet.http.HttpServletResponse;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.AttributeService;
 import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.token.JsonWebResponse;
 import io.jans.as.server.model.ldap.TokenEntity;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -41,6 +45,17 @@ public class ExecutionContext {
 
     private String dpop;
     private String certAsPem;
+
+    private String nonce;
+    private String state;
+
+    private boolean includeIdTokenClaims;
+
+    private Function<JsonWebResponse, Void> preProcessing;
+    private Function<JsonWebResponse, Void> postProcessor;
+
+    private Set<String> scopes;
+    private String claimsAsString;
 
     @NotNull
     private final Map<String, String> attributes = new HashMap<>();
@@ -157,5 +172,62 @@ public class ExecutionContext {
 
     public void setCertAsPem(String certAsPem) {
         this.certAsPem = certAsPem;
+    }
+
+    public boolean isIncludeIdTokenClaims() {
+        return includeIdTokenClaims;
+    }
+
+    public void setIncludeIdTokenClaims(boolean includeIdTokenClaims) {
+        this.includeIdTokenClaims = includeIdTokenClaims;
+    }
+
+    public Function<JsonWebResponse, Void> getPreProcessing() {
+        return preProcessing;
+    }
+
+    public void setPreProcessing(Function<JsonWebResponse, Void> preProcessing) {
+        this.preProcessing = preProcessing;
+    }
+
+    public Function<JsonWebResponse, Void> getPostProcessor() {
+        return postProcessor;
+    }
+
+    public void setPostProcessor(Function<JsonWebResponse, Void> postProcessor) {
+        this.postProcessor = postProcessor;
+    }
+
+    public Set<String> getScopes() {
+        if (scopes == null) scopes = new HashSet<>();
+        return scopes;
+    }
+
+    public void setScopes(Set<String> scopes) {
+        this.scopes = scopes;
+    }
+
+    public String getClaimsAsString() {
+        return claimsAsString;
+    }
+
+    public void setClaimsAsString(String claimsAsString) {
+        this.claimsAsString = claimsAsString;
+    }
+
+    public String getNonce() {
+        return nonce;
+    }
+
+    public void setNonce(String nonce) {
+        this.nonce = nonce;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
     }
 }
