@@ -644,24 +644,26 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         Set<ResponseType> responseTypeSet = new HashSet<>(requestObject.getResponseTypes());
         Set<GrantType> grantTypeSet = new HashSet<>(requestObject.getGrantTypes());
 
-        if (isTrue(appConfiguration.getClientRegDefaultToCodeFlowWithRefresh())) {
-            if (responseTypeSet.isEmpty() && grantTypeSet.isEmpty()) {
-                responseTypeSet.add(ResponseType.CODE);
+        if (isTrue(appConfiguration.getGrantTypesAndResponseTypesAutofixEnabled())) {
+            if (isTrue(appConfiguration.getClientRegDefaultToCodeFlowWithRefresh())) {
+                if (responseTypeSet.isEmpty() && grantTypeSet.isEmpty()) {
+                    responseTypeSet.add(ResponseType.CODE);
+                }
+                if (responseTypeSet.contains(ResponseType.CODE)) {
+                    grantTypeSet.add(GrantType.AUTHORIZATION_CODE);
+                    grantTypeSet.add(GrantType.REFRESH_TOKEN);
+                }
+                if (grantTypeSet.contains(GrantType.AUTHORIZATION_CODE)) {
+                    responseTypeSet.add(ResponseType.CODE);
+                    grantTypeSet.add(GrantType.REFRESH_TOKEN);
+                }
             }
-            if (responseTypeSet.contains(ResponseType.CODE)) {
-                grantTypeSet.add(GrantType.AUTHORIZATION_CODE);
-                grantTypeSet.add(GrantType.REFRESH_TOKEN);
+            if (responseTypeSet.contains(ResponseType.TOKEN) || responseTypeSet.contains(ResponseType.ID_TOKEN)) {
+                grantTypeSet.add(GrantType.IMPLICIT);
             }
-            if (grantTypeSet.contains(GrantType.AUTHORIZATION_CODE)) {
-                responseTypeSet.add(ResponseType.CODE);
-                grantTypeSet.add(GrantType.REFRESH_TOKEN);
+            if (grantTypeSet.contains(GrantType.IMPLICIT)) {
+                responseTypeSet.add(ResponseType.TOKEN);
             }
-        }
-        if (responseTypeSet.contains(ResponseType.TOKEN) || responseTypeSet.contains(ResponseType.ID_TOKEN)) {
-            grantTypeSet.add(GrantType.IMPLICIT);
-        }
-        if (grantTypeSet.contains(GrantType.IMPLICIT)) {
-            responseTypeSet.add(ResponseType.TOKEN);
         }
 
         responseTypeSet.retainAll(appConfiguration.getAllResponseTypesSupported());
