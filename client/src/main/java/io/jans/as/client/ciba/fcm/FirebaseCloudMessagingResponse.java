@@ -39,8 +39,6 @@ public class FirebaseCloudMessagingResponse extends BaseResponse {
     public FirebaseCloudMessagingResponse(Response clientResponse) {
         super(clientResponse);
 
-        String entity = clientResponse.readEntity(String.class);
-        setEntity(entity);
         setHeaders(clientResponse.getMetadata());
         injectDataFromJson(entity);
     }
