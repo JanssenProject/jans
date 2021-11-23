@@ -35,7 +35,7 @@ import static org.testng.Assert.assertNull;
 
 /**
  * @author Javier Rojas Blum
- * @version November 12, 2021
+ * @version November 22, 2021
  */
 public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest extends BaseTest {
 
@@ -135,14 +135,14 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         String nonce = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scope, redirectUri, null);
-        authorizationRequest.setResponseMode(ResponseMode.JWT);
-        authorizationRequest.setState(state);
 
         AuthCryptoProvider cryptoProvider1 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         JwtAuthorizationRequest jwsAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.PS256, cryptoProvider1);
+        jwsAuthorizationRequest.setResponseMode(ResponseMode.JWT);
         jwsAuthorizationRequest.setKeyId(signingKeyId);
         jwsAuthorizationRequest.setRedirectUri(redirectUri);
+        jwsAuthorizationRequest.setState(state);
         jwsAuthorizationRequest.setNonce(nonce); // FAPI: nonce param is required
         jwsAuthorizationRequest.setNbf((int) Instant.now().getEpochSecond()); // FAPI: require the request object to contain an exp claim that has a lifetime of no longer than 60 minutes after the nbf claim
         jwsAuthorizationRequest.setExp(null); // FAPI: exp param is required
@@ -208,14 +208,16 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         String nonce = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scope, redirectUri, null);
-        authorizationRequest.setResponseMode(ResponseMode.JWT);
-        authorizationRequest.setState(state);
 
         AuthCryptoProvider cryptoProvider1 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         JwtAuthorizationRequest jwsAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.PS256, cryptoProvider1);
+        jwsAuthorizationRequest.setResponseTypes(responseTypes);
+        jwsAuthorizationRequest.setResponseMode(ResponseMode.JWT);
+        jwsAuthorizationRequest.setScopes(scope);
         jwsAuthorizationRequest.setKeyId(signingKeyId);
         jwsAuthorizationRequest.setRedirectUri(redirectUri);
+        jwsAuthorizationRequest.setState(state);
         jwsAuthorizationRequest.setNonce(nonce); // FAPI: nonce param is required
         jwsAuthorizationRequest.setNbf(null); // FAPI: nbf param is required
         jwsAuthorizationRequest.setExp((int) Instant.now().getEpochSecond() + 3600); // FAPI: require the request object to contain an exp claim that has a lifetime of no longer than 60 minutes after the nbf claim
@@ -281,14 +283,14 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         String nonce = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scope, redirectUri, null);
-        authorizationRequest.setResponseMode(ResponseMode.JWT);
-        authorizationRequest.setState(state);
 
         AuthCryptoProvider cryptoProvider1 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         JwtAuthorizationRequest jwsAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.PS256, cryptoProvider1);
         jwsAuthorizationRequest.setKeyId(signingKeyId);
         jwsAuthorizationRequest.setRedirectUri(redirectUri);
+        jwsAuthorizationRequest.setResponseMode(ResponseMode.JWT);
+        jwsAuthorizationRequest.setState(state);
         jwsAuthorizationRequest.setNonce(nonce); // FAPI: nonce param is required
         jwsAuthorizationRequest.setScopes(null); // FAPI: scope param is required
         jwsAuthorizationRequest.setNbf((int) Instant.now().getEpochSecond()); // FAPI: require the request object to contain an exp claim that has a lifetime of no longer than 60 minutes after the nbf claim
@@ -355,13 +357,13 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         String nonce = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scope, redirectUri, nonce);
-        authorizationRequest.setResponseMode(ResponseMode.JWT);
-        authorizationRequest.setState(state);
 
         AuthCryptoProvider cryptoProvider1 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         JwtAuthorizationRequest jwsAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.PS256, cryptoProvider1);
         jwsAuthorizationRequest.setKeyId(signingKeyId);
+        jwsAuthorizationRequest.setResponseMode(ResponseMode.JWT);
+        jwsAuthorizationRequest.setState(state);
         jwsAuthorizationRequest.setScopes(scope);
         jwsAuthorizationRequest.setRedirectUri(redirectUri);
         jwsAuthorizationRequest.setNonce(null); // FAPI: nonce param is required
@@ -429,14 +431,14 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         String nonce = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scope, redirectUri, null);
-        authorizationRequest.setResponseMode(ResponseMode.JWT);
-        authorizationRequest.setState(state);
 
         AuthCryptoProvider cryptoProvider1 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         JwtAuthorizationRequest jwsAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.PS256, cryptoProvider1);
         jwsAuthorizationRequest.setKeyId(signingKeyId);
         jwsAuthorizationRequest.setRedirectUri(null);
+        jwsAuthorizationRequest.setResponseMode(ResponseMode.JWT);
+        jwsAuthorizationRequest.setState(state);
         jwsAuthorizationRequest.setNonce(nonce); // FAPI: nonce param is required
         jwsAuthorizationRequest.setNbf((int) Instant.now().getEpochSecond()); // FAPI: require the request object to contain an exp claim that has a lifetime of no longer than 60 minutes after the nbf claim
         jwsAuthorizationRequest.setExp(jwsAuthorizationRequest.getNbf() + 3600); // FAPI: require the request object to contain an exp claim that has a lifetime of no longer than 60 minutes after the nbf claim
@@ -502,14 +504,14 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         String nonce = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scope, redirectUri, null);
-        authorizationRequest.setResponseMode(ResponseMode.JWT);
-        authorizationRequest.setState(state);
 
         AuthCryptoProvider cryptoProvider1 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         JwtAuthorizationRequest jwsAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.PS256, cryptoProvider1);
         jwsAuthorizationRequest.setKeyId(signingKeyId);
         jwsAuthorizationRequest.setRedirectUri(redirectUri);
+        jwsAuthorizationRequest.setResponseMode(ResponseMode.JWT);
+        jwsAuthorizationRequest.setState(state);
         jwsAuthorizationRequest.setNonce(nonce); // FAPI: nonce param is required
         jwsAuthorizationRequest.setNbf((int) Instant.now().getEpochSecond()); // FAPI: require the request object to contain an exp claim that has a lifetime of no longer than 60 minutes after the nbf claim
         jwsAuthorizationRequest.setExp(jwsAuthorizationRequest.getNbf() - 3600); // Address expired exp
@@ -575,8 +577,6 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         String nonce = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scope, redirectUri, null);
-        authorizationRequest.setResponseMode(ResponseMode.JWT);
-        authorizationRequest.setState(state);
 
         AuthCryptoProvider cryptoProvider1 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
@@ -584,6 +584,8 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         jwsAuthorizationRequest.setKeyId(signingKeyId);
         jwsAuthorizationRequest.setAud("https://www.other1.example.com/"); // Added bad aud to request object claims
         jwsAuthorizationRequest.setRedirectUri(redirectUri);
+        jwsAuthorizationRequest.setResponseMode(ResponseMode.JWT);
+        jwsAuthorizationRequest.setState(state);
         jwsAuthorizationRequest.setNonce(nonce); // FAPI: nonce param is required
         jwsAuthorizationRequest.setNbf((int) Instant.now().getEpochSecond()); // FAPI: require the request object to contain an exp claim that has a lifetime of no longer than 60 minutes after the nbf claim
         jwsAuthorizationRequest.setExp(jwsAuthorizationRequest.getNbf() + 3600); // FAPI: require the request object to contain an exp claim that has a lifetime of no longer than 60 minutes after the nbf claim
@@ -649,14 +651,14 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         String nonce = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scope, redirectUri, null);
-        authorizationRequest.setResponseMode(ResponseMode.JWT);
-        authorizationRequest.setState(state);
 
         AuthCryptoProvider cryptoProvider1 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         JwtAuthorizationRequest jwsAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.PS256, cryptoProvider1);
         jwsAuthorizationRequest.setKeyId(signingKeyId);
         jwsAuthorizationRequest.setRedirectUri(redirectUri);
+        jwsAuthorizationRequest.setResponseMode(ResponseMode.JWT);
+        jwsAuthorizationRequest.setState(state);
         jwsAuthorizationRequest.setNonce(nonce); // FAPI: nonce param is required
         jwsAuthorizationRequest.setNbf((int) Instant.now().getEpochSecond()); // FAPI: require the request object to contain an exp claim that has a lifetime of no longer than 60 minutes after the nbf claim
         jwsAuthorizationRequest.setExp(jwsAuthorizationRequest.getNbf() + 4200); // Added invalid exp value to request object which is 70 minutes in the future
@@ -722,14 +724,14 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         String nonce = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scope, redirectUri, null);
-        authorizationRequest.setResponseMode(ResponseMode.JWT);
-        authorizationRequest.setState(state);
 
         AuthCryptoProvider cryptoProvider1 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
         JwtAuthorizationRequest jwsAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.PS256, cryptoProvider1);
         jwsAuthorizationRequest.setKeyId(signingKeyId);
         jwsAuthorizationRequest.setRedirectUri(redirectUri);
+        jwsAuthorizationRequest.setResponseMode(ResponseMode.JWT);
+        jwsAuthorizationRequest.setState(state);
         jwsAuthorizationRequest.setNonce(nonce); // FAPI: nonce param is required
         jwsAuthorizationRequest.setNbf((int) Instant.now().getEpochSecond() - 4200); // Added invalid nbf value to request object which is 70 minutes in the past
         jwsAuthorizationRequest.setExp((int) Instant.now().getEpochSecond() + 3600); // FAPI: require the request object to contain an exp claim that has a lifetime of no longer than 60 minutes after the nbf claim
@@ -795,14 +797,14 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         String nonce = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scope, redirectUri, null);
-        authorizationRequest.setResponseMode(ResponseMode.JWT);
-        authorizationRequest.setState(state);
 
-        AuthCryptoProvider cryptoProvider1 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
-        JwtAuthorizationRequest jwsAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.RS256, cryptoProvider1); // RS256 Request Object is not permitted by the FAPI-RW specification.
+        JwtAuthorizationRequest jwsAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.RS256, cryptoProvider); // RS256 Request Object is not permitted by the FAPI-RW specification.
         jwsAuthorizationRequest.setKeyId(signingKeyId);
         jwsAuthorizationRequest.setRedirectUri(redirectUri);
+        jwsAuthorizationRequest.setResponseMode(ResponseMode.JWT);
+        jwsAuthorizationRequest.setState(state);
         jwsAuthorizationRequest.setNonce(nonce); // FAPI: nonce param is required
         jwsAuthorizationRequest.setNbf((int) Instant.now().getEpochSecond()); // FAPI: require the request object to contain an exp claim that has a lifetime of no longer than 60 minutes after the nbf claim
         jwsAuthorizationRequest.setExp(jwsAuthorizationRequest.getNbf() + 3600); // FAPI: require the request object to contain an exp claim that has a lifetime of no longer than 60 minutes after the nbf claim
@@ -849,13 +851,14 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         String nonce = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scope, redirectUri, null);
-        authorizationRequest.setResponseMode(ResponseMode.JWT);
         authorizationRequest.setState(state);
 
-        AuthCryptoProvider cryptoProvider1 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
-        JwtAuthorizationRequest jwsAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.NONE, cryptoProvider1); // none Request Object is not permitted by the FAPI-RW specification.
+        JwtAuthorizationRequest jwsAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.NONE, cryptoProvider); // none Request Object is not permitted by the FAPI-RW specification.
         jwsAuthorizationRequest.setRedirectUri(redirectUri);
+        jwsAuthorizationRequest.setResponseMode(ResponseMode.JWT);
+        jwsAuthorizationRequest.setState(state);
         jwsAuthorizationRequest.setNonce(nonce); // FAPI: nonce param is required
         jwsAuthorizationRequest.setNbf((int) Instant.now().getEpochSecond()); // FAPI: require the request object to contain an exp claim that has a lifetime of no longer than 60 minutes after the nbf claim
         jwsAuthorizationRequest.setExp(jwsAuthorizationRequest.getNbf() + 3600); // FAPI: require the request object to contain an exp claim that has a lifetime of no longer than 60 minutes after the nbf claim
