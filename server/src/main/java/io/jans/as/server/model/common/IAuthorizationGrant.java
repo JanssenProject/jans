@@ -9,7 +9,6 @@ package io.jans.as.server.model.common;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.common.GrantType;
-import io.jans.as.model.token.JsonWebResponse;
 import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.server.model.ldap.TokenEntity;
 
@@ -17,7 +16,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Function;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -51,7 +49,7 @@ public interface IAuthorizationGrant {
 
     IdToken createIdToken(
             String nonce, AuthorizationCode authorizationCode, AccessToken accessToken, RefreshToken refreshToken,
-            String state, AuthorizationGrant authorizationGrant, boolean includeIdTokenClaims, Function<JsonWebResponse, Void> preProcessing, Function<JsonWebResponse, Void> postProcessing);
+            String state, ExecutionContext executionContext);
 
     RefreshToken getRefreshToken(String refreshTokenCode);
 
