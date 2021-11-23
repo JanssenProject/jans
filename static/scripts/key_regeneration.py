@@ -22,48 +22,20 @@ argsp = parser.parse_args()
 
 defaul_storage = 'ldap'
 
-conf_dir = '/etc/gluu/conf'
-gluu_hybrid_roperties_fn = os.path.join(conf_dir, 'gluu-hybrid.properties')
-gluu_couchbase_roperties_fn = os.path.join(conf_dir, 'gluu-couchbase.properties')
-gluu_ldap_roperties_fn = os.path.join(conf_dir, 'gluu-ldap.properties')
-ox_ldap_roperties_fn = os.path.join(conf_dir, 'ox-ldap.properties')
+conf_dir = '/etc/jans/conf'
+gluu_hybrid_roperties_fn = os.path.join(conf_dir, 'jans-hybrid.properties')
+gluu_couchbase_roperties_fn = os.path.join(conf_dir, 'jans-couchbase.properties')
+gluu_ldap_roperties_fn = os.path.join(conf_dir, 'jans-ldap.properties')
 
-keystore_fn = 'oxauth-keys.jks'
-oxauth_keys_json_fn = 'oxauth-keys.json'
+keystore_fn = 'jans-auth-keys.jks'
+oxauth_keys_json_fn = 'jans-keys.json'
 
 algs_for_versions = {
-    '3.0.0': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512'},
-    '3.0.1': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512'},
-    '3.0.2': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512'},
-    '3.0.3': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512'},
-    '3.1.0': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512'},
-    '3.1.1': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512'},
-    '3.1.2.sp2': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512'},
-    '3.1.2': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512'},
-    '3.1.3.sp2': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512'},
-    '3.1.3': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512'},
-    '3.1.3.1': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512'},
-    '3.1.4.sp3': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512'},
-    '3.1.4': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512'},
-    '3.1.4': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512'},
-    '3.1.5.sp4': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512'},
-    '3.1.5.sp3': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512'},
-    '3.1.5.sp2': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512'},
-    '3.1.5': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512'},
-    '3.1.6.sp2': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512'},
-    '3.1.6.sp1': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512'},
-    '3.1.6': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512'},
-    '3.1.7': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512', 'enc_keys': 'RSA1_5 RSA-OAEP'},
-    '3.1.8': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512', 'enc_keys': 'RSA1_5 RSA-OAEP'},
-    '4.0':   {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512', 'enc_keys': 'RSA1_5 RSA-OAEP'},
-    '4.0.1': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512', 'enc_keys': 'RSA1_5 RSA-OAEP'},
-    '4.1.0': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512', 'enc_keys': 'RSA1_5 RSA-OAEP'},
-    '4.1.1': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512', 'enc_keys': 'RSA1_5 RSA-OAEP'},
-    '4.2.0': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512', 'enc_keys': 'RSA1_5 RSA-OAEP'},
+    '1.0.0': {'sig_keys': 'RS256 RS384 RS512 ES256 ES256K ES384 ES512 PS256 PS384 PS512 Ed25519 Ed448', 'enc_keys': 'RSA1_5 RSA-OAEP ECDH-ES'},
 }
 
-sig_keys = 'RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512'
-enc_keys = 'RSA1_5 RSA-OAEP'
+sig_keys = 'RS256 RS384 RS512 ES256 ES256K ES384 ES512 PS256 PS384 PS512 Ed25519 Ed448'
+enc_keys = 'RSA1_5 RSA-OAEP ECDH-ES'
 
 
 if os.path.exists('/etc/yum.repos.d/'):
@@ -102,7 +74,7 @@ if missing_packages:
         sys.exit(False)
 
     if package_type == 'rpm':
-        cmd = 'yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm'
+        cmd = 'yum install -y epel-release'
         os.system(cmd)
         cmd = 'yum clean all'
         os.system(cmd)
@@ -136,12 +108,13 @@ elif os.path.exists(gluu_couchbase_roperties_fn):
 print("Obtaining keystore passwrod")
 
 if defaul_storage == 'ldap':
+    dn = 'ou=jans-auth,ou=configuration,o=jans'
     prop_fn = gluu_ldap_roperties_fn if os.path.exists(gluu_ldap_roperties_fn) else ox_ldap_roperties_fn
     # Obtain ldap binddn, server and password
     for l in open(prop_fn):
         if l.startswith('bindPassword'):
             crypted_passwd = l.split(':')[1].strip()
-            ldap_password = os.popen('/opt/gluu/bin/encode.py -D {}'.format(crypted_passwd)).read().strip()
+            ldap_password = os.popen('/opt/jans/bin/encode.py -D {}'.format(crypted_passwd)).read().strip()
         elif l.startswith('servers'):
             ls = l.strip()
             n = ls.find(':')
@@ -153,30 +126,26 @@ if defaul_storage == 'ldap':
             ldap_binddn = l.split(':')[1].strip()
 
     server = ldap3.Server(ldap_host, port=int(ldap_port), use_ssl=True)
-    
     ldap_conn = ldap3.Connection(server, user=ldap_binddn, password=ldap_password)
     ldap_conn.bind()
 
     ldap_conn.search(
-                search_base='o=gluu', 
-                search_scope=ldap3.SUBTREE, 
-                search_filter='(objectClass=oxAuthConfiguration)', 
-                attributes=['oxAuthConfDynamic','oxAuthConfWebKeys', 'oxRevision']
+                search_base=dn,
+                search_scope=ldap3.BASE,
+                search_filter='(objectClass=jansAppConf)',
+                attributes=['jansConfDyn', 'jansConfWebKeys', 'jansRevision']
                 )
 
     result = ldap_conn.response
-
-    dn = result[0]['dn']
-
-    oxAuthConfDynamic = json.loads(result[0]['attributes']['oxAuthConfDynamic'][0])
+    oxAuthConfDynamic = json.loads(result[0]['attributes']['jansConfDyn'][0])
     keyStoreSecret = oxAuthConfDynamic['keyStoreSecret']
     try:
-        oxAuthConfWebKeys = json.loads(result[0]['attributes']['oxAuthConfWebKeys'][0])
+        oxAuthConfWebKeys = json.loads(result[0]['attributes']['jansConfWebKeys'][0])
     except:
         oxAuthConfWebKeys = None
-    oxRevision = 1
+        oxRevision = 1
     try:
-        oxRevision = result[0]['attributes']['oxRevision'][0]
+        oxRevision = result[0]['attributes']['jansRevision'][0]
     except:
         pass
 else:
@@ -195,19 +164,19 @@ else:
     from pylib.cbm import CBM
 
     cbm = CBM(server, userName, userPassword)
-    result = cbm.exec_query('select * from gluu USE KEYS "configuration_oxauth"')
+    result = cbm.exec_query('select * from gluu USE KEYS "configuration_jansauth"')
 
     if result.ok:
         configuration_oxauth = result.json()
-        keyStoreSecret = configuration_oxauth['results'][0]['gluu']['oxAuthConfDynamic']['keyStoreSecret']
-        oxAuthConfWebKeys = configuration_oxauth['results'][0]['gluu']['oxAuthConfWebKeys']
-        oxRevision = configuration_oxauth['results'][0]['gluu']['oxRevision']
+        keyStoreSecret = configuration_oxauth['results'][0]['jans']['jansConfDyn']['keyStoreSecret']
+        oxAuthConfWebKeys = configuration_oxauth['results'][0]['jans']['jansConfWebKeys']
+        oxRevision = configuration_oxauth['results'][0]['jans']['jansRevision']
     else:
         print("Couchbase server responded unexpectedly", result.text)
 
 oxRevision = int(oxRevision) + 1
-
-print("Creating oxauth-keys.jks")
+print(oxRevision)
+print("Creating", keystore_fn)
 # Create oxauth-keys.jks
 args = ['/opt/jre/bin/keytool', '-genkey',
         '-alias', 'dummy',
@@ -222,7 +191,7 @@ output = run_command(args)
 
 print("Determining version and vendor_id")
 #Determine version and vendor_id
-war_zip = zipfile.ZipFile('/opt/gluu/jetty/oxauth/webapps/oxauth.war', 'r')
+war_zip = zipfile.ZipFile('/opt/jans/jetty/jans-auth/webapps/jans-auth.war', 'r')
 menifest = war_zip.read('META-INF/MANIFEST.MF')
 
 for l in menifest.splitlines():
@@ -235,38 +204,18 @@ for l in menifest.splitlines():
 
 vendor = vendor_id.split('.')[-1]
 
-oxauth_client_jar_fn = '/opt/dist/gluu/jans-auth-client-jar-with-dependencies.jar'
-if not os.path.exists(oxauth_client_jar_fn):
-    print("Downloading jans-auth-client with dependencies")
-    # Download jans-auth-client with dependencies
-    oxauth_client_url = 'https://ox.gluu.org/maven/org/{0}/jans-auth-client/{1}/jans-auth-client-{1}-jar-with-dependencies.jar'.format(vendor, gluu_ver)
-    args = ['wget', '-nv',oxauth_client_url, '-O', oxauth_client_jar_fn]
-    output = run_command(args)
-
-
+oxauth_client_jar_fn = '/opt/dist/jans/jans-auth-client-jar-with-dependencies.jar'
 print("Determining oxauth key generator path")
 # Determine oxauth key generator path
-try:
-    oxauth_client_jar_fn = max(list(glob.iglob('/home/jetty/lib/jans-auth-client-*.jar')))
-except:
-    try:
-        oxauth_client_jar_fn = max(list(glob.iglob('/opt/dist/gluu/jans-auth-client-*.jar')))
-    except:
-        print("Can't find jans-auth-client jar file. Exiting...")
-        sys.exit(False)
-
-
 oxauth_client_jar_zf = zipfile.ZipFile(oxauth_client_jar_fn)
 for fn in oxauth_client_jar_zf.namelist():
-    if fn.endswith('KeyGenerator.class'):
+    if os.path.basename(fn) == 'KeyGenerator.class':
         fp, ext = os.path.splitext(fn)
         key_gen_path = fp.replace('/','.')
         break
 else:
     print("Can't determine jans-auth-client KeyGenerator path. Exiting...")
     sys.exit(False)
-
-
 
 
 # Delete current keys
@@ -298,15 +247,10 @@ if gluu_ver_real in algs_for_versions:
 #Generete keys
 args = ['/opt/jre/bin/java', '-Dlog4j.defaultInitOverride=true',
     '-cp', oxauth_client_jar_fn, key_gen_path,
-    '-keystore oxauth-keys.jks',
+    '-keystore', keystore_fn,
     '-keypasswd', keyStoreSecret]
 
-
-if gluu_ver_real < '3.1.2':
-    args += ['-algorithms', key_algs]
-else:
-    args += ['-sig_keys', key_algs, '-enc_keys', enc_keys]
-    
+args += ['-sig_keys', key_algs, '-enc_keys', enc_keys]
 args += ['-dnname', "'CN=Jans Auth CA Certificates'"]
 
 if argsp.expiration_hours:
@@ -370,22 +314,23 @@ else:
     print("Validation failed, not updating db")
     sys.exit(1)
 
-print("Updating oxAuthConfWebKeys in db")
+print("Updating jansConfWebKeys in db")
 
 with open(oxauth_keys_json_fn) as f:
     oxauth_oxAuthConfWebKeys = f.read()
 
 if defaul_storage == 'ldap':
+    print("LDAP modify", dn)
     ldap_conn.modify(
                     dn,
                     {
-                        "oxAuthConfWebKeys": [ldap3.MODIFY_REPLACE, oxauth_oxAuthConfWebKeys],
-                        "oxRevision": [ldap3.MODIFY_REPLACE, str(oxRevision)]
+                        "jansConfWebKeys": [ldap3.MODIFY_REPLACE, oxauth_oxAuthConfWebKeys],
+                        "jansRevision": [ldap3.MODIFY_REPLACE, str(oxRevision)]
                     }
                 )
 
 else:
-    result = cbm.exec_query("update gluu USE KEYS 'configuration_oxauth' set gluu.oxAuthConfWebKeys='{}'".format(oxauth_oxAuthConfWebKeys))
-    result = cbm.exec_query("update gluu USE KEYS 'configuration_oxauth' set gluu.oxRevision={}".format(oxRevision))
+    result = cbm.exec_query("update gluu USE KEYS 'configuration_jansauth' set jans.jansConfWebKeys='{}'".format(oxauth_oxAuthConfWebKeys))
+    result = cbm.exec_query("update gluu USE KEYS 'configuration_jansauth' set jans.jansRevision={}".format(oxRevision))
 
-print("Please exit container and restart Gluu Server")
+print("Please restart Jans Server")
