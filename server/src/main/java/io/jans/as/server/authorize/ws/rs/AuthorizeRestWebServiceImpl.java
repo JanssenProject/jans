@@ -713,13 +713,19 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 }
 
                 ExternalUpdateTokenContext context = new ExternalUpdateTokenContext(httpRequest, authorizationGrant, client, appConfiguration, attributeService);
+
+                final Function<JsonWebResponse, Void> preProcessor = JwrService.wrapWithSidFunction(TokenBindingMessage.createIdTokenTokingBindingPreprocessing(tokenBindingHeader, client.getIdTokenTokenBindingCnf()), sessionUser.getOutsideSid());
                 Function<JsonWebResponse, Void> postProcessor = externalUpdateTokenService.buildModifyIdTokenProcessor(context);
+
+                final ExecutionContext executionContext = context.toExecutionContext();
+                executionContext.setPreProcessing(preProcessor);
+                executionContext.setPostProcessor(postProcessor);
+                executionContext.setIncludeIdTokenClaims(includeIdTokenClaims);
+                executionContext.setGrant(authorizationGrant);
 
                 IdToken idToken = authorizationGrant.createIdToken(
                         nonce, authorizationCode, newAccessToken, null,
-                        state, authorizationGrant, includeIdTokenClaims,
-                        JwrService.wrapWithSidFunction(TokenBindingMessage.createIdTokenTokingBindingPreprocessing(tokenBindingHeader, client.getIdTokenTokenBindingCnf()), sessionUser.getOutsideSid()),
-                        postProcessor);
+                        state, executionContext);
 
                 redirectUriResponse.getRedirectUri().addResponseParameter(AuthorizeResponseParam.ID_TOKEN, idToken.getCode());
             }
@@ -848,7 +854,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         log.debug("Issuing access token: {}", accessToken.getCode());
 
         ExternalUpdateTokenContext context = new ExternalUpdateTokenContext(httpRequest, cibaGrant, client, appConfiguration, attributeService);
-        Function<JsonWebResponse, Void> postProcessor = externalUpdateTokenService.buildModifyIdTokenProcessor(context);
+
 
         final int refreshTokenLifetimeInSeconds = externalUpdateTokenService.getRefreshTokenLifetimeInSeconds(context);
         final RefreshToken refreshToken;
@@ -859,9 +865,11 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         }
         log.debug("Issuing refresh token: {}", (refreshToken != null ? refreshToken.getCode() : ""));
 
-        IdToken idToken = cibaGrant.createIdToken(
-                null, null, accessToken, refreshToken,
-                null, cibaGrant, false, null, postProcessor);
+        executionContext.setPostProcessor(externalUpdateTokenService.buildModifyIdTokenProcessor(context));
+        executionContext.setGrant(cibaGrant);
+        executionContext.setIncludeIdTokenClaims(false);
+
+        IdToken idToken = cibaGrant.createIdToken(null, null, accessToken, refreshToken,null, executionContext);
 
         cibaGrant.setTokensDelivered(true);
         cibaGrant.save();
