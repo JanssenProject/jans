@@ -3646,7 +3646,7 @@
       ],
       "oid": "jansObjClass",
       "sup": [
-        "top"
+        "jansToken"
       ],
       "x_origin": "Jans created objectclass"
     },
