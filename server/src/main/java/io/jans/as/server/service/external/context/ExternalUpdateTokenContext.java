@@ -47,6 +47,23 @@ public class ExternalUpdateTokenContext extends ExternalScriptContext {
         return context;
     }
 
+    public ExecutionContext toExecutionContext() {
+	    if (executionContext == null) {
+            executionContext = createExecutionContext();
+        }
+	    return executionContext;
+    }
+
+    private ExecutionContext createExecutionContext() {
+        ExecutionContext result = new ExecutionContext(httpRequest, httpResponse);
+        result.setGrant(grant);
+        result.setClient(client);
+        result.setAppConfiguration(appConfiguration);
+        result.setAttributeService(attributeService);
+        result.setScript(script);
+        return result;
+    }
+
 	public CustomScriptConfiguration getScript() {
 		return script;
 	}
