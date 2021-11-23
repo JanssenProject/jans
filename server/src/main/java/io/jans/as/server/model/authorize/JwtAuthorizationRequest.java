@@ -33,7 +33,6 @@ import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.RedirectUriResponse;
 import io.jans.service.cdi.util.CdiUtil;
 import org.apache.commons.lang.StringUtils;
-import javax.ws.rs.core.Response;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
@@ -44,7 +43,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.ClientBuilder;
-
+import javax.ws.rs.core.Response;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLDecoder;
@@ -55,7 +54,7 @@ import java.util.List;
 
 /**
  * @author Javier Rojas Blum
- * @version November 5, 2021
+ * @version November 22, 2021
  */
 public class JwtAuthorizationRequest {
 
@@ -177,12 +176,6 @@ public class JwtAuthorizationRequest {
                 SignatureAlgorithm sigAlg = SignatureAlgorithm.fromString(algorithm);
                 if (sigAlg == null) {
                     throw new InvalidJwtException("The JWT algorithm is not supported");
-                }
-                if (sigAlg == SignatureAlgorithm.RS256 && appConfiguration.isFapi()) {
-                    throw new InvalidJwtException("RS256 algorithm is not allowed for FAPI");
-                }
-                if (sigAlg == SignatureAlgorithm.NONE && appConfiguration.isFapi()) {
-                    throw new InvalidJwtException("None algorithm is not allowed for FAPI");
                 }
                 if (!validateSignature(cryptoProvider, sigAlg, client, signingInput, encodedSignature)) {
                     throw new InvalidJwtException("The JWT signature is not valid");
@@ -482,21 +475,21 @@ public class JwtAuthorizationRequest {
 
             String request = null;
             try {
-	            Response clientResponse = clientRequest.target(reqUriWithoutFragment).request().buildGet().invoke();
-	            int status = clientResponse.getStatus();
+                Response clientResponse = clientRequest.target(reqUriWithoutFragment).request().buildGet().invoke();
+                int status = clientResponse.getStatus();
 
-	            if (status == 200) {
-	                request = clientResponse.readEntity(String.class);
+                if (status == 200) {
+                    request = clientResponse.readEntity(String.class);
 
-	                if (StringUtils.isBlank(reqUriHash) || !appConfiguration.getRequestUriHashVerificationEnabled()) {
-	                    validRequestUri = true;
-	                } else {
-	                    String hash = Base64Util.base64urlencode(JwtUtil.getMessageDigestSHA256(request));
-	                    validRequestUri = StringUtils.equals(reqUriHash, hash);
-	                }
-	            }
+                    if (StringUtils.isBlank(reqUriHash) || !appConfiguration.getRequestUriHashVerificationEnabled()) {
+                        validRequestUri = true;
+                    } else {
+                        String hash = Base64Util.base64urlencode(JwtUtil.getMessageDigestSHA256(request));
+                        validRequestUri = StringUtils.equals(reqUriHash, hash);
+                    }
+                }
             } finally {
-            	clientRequest.close();
+                clientRequest.close();
             }
 
             if (!validRequestUri && redirectUriResponse != null) {
@@ -522,9 +515,7 @@ public class JwtAuthorizationRequest {
         }
 
         try {
-            final JwtAuthorizationRequest requestObject = new JwtAuthorizationRequest(appConfiguration, cryptoProvider, request, client);
-            requestObject.validate();
-            return requestObject;
+            return new JwtAuthorizationRequest(appConfiguration, cryptoProvider, request, client);
         } catch (WebApplicationException e) {
             throw e;
         } catch (Exception e) {
@@ -533,13 +524,20 @@ public class JwtAuthorizationRequest {
         return null;
     }
 
-    private void validate() throws InvalidJwtException {
+    public void validate() throws InvalidJwtException {
         if (appConfiguration.isFapi()) {
             validateFapi();
         }
     }
 
     private void validateFapi() throws InvalidJwtException {
+        if (SignatureAlgorithm.fromString(algorithm) == SignatureAlgorithm.RS256) {
+            throw new InvalidJwtException("RS256 algorithm is not allowed for FAPI");
+        }
+        if (SignatureAlgorithm.fromString(algorithm) == SignatureAlgorithm.NONE && appConfiguration.isFapi()) {
+            throw new InvalidJwtException("None algorithm is not allowed for FAPI");
+        }
+
         if (nbf == null || nbf <= 0) { // https://github.com/JanssenProject/jans-auth-server/issues/164 fapi1-advanced-final-ensure-request-object-without-nbf-fails
             log.error("nbf claim is not set, nbf: {}", nbf);
             throw new InvalidJwtException("nbf claim is not set");

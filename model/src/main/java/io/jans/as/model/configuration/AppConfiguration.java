@@ -160,6 +160,7 @@ public class AppConfiguration implements Configuration {
     private Boolean authenticationFiltersEnabled;
     private Boolean clientAuthenticationFiltersEnabled;
     private Boolean clientRegDefaultToCodeFlowWithRefresh;
+    private Boolean grantTypesAndResponseTypesAutofixEnabled;
     private List<AuthenticationFilter> authenticationFilters;
     private List<ClientAuthenticationFilter> clientAuthenticationFilters;
     private List<CorsConfigurationFilter> corsConfigurationFilters;
@@ -2233,6 +2234,15 @@ public class AppConfiguration implements Configuration {
 
     public void setClientRegDefaultToCodeFlowWithRefresh(Boolean clientRegDefaultToCodeFlowWithRefresh) {
         this.clientRegDefaultToCodeFlowWithRefresh = clientRegDefaultToCodeFlowWithRefresh;
+    }
+
+    public Boolean getGrantTypesAndResponseTypesAutofixEnabled() {
+        if (grantTypesAndResponseTypesAutofixEnabled == null) grantTypesAndResponseTypesAutofixEnabled = false;
+        return grantTypesAndResponseTypesAutofixEnabled;
+    }
+
+    public void setGrantTypesAndResponseTypesAutofixEnabled(Boolean grantTypesAndResponseTypesAutofixEnabled) {
+        this.grantTypesAndResponseTypesAutofixEnabled = grantTypesAndResponseTypesAutofixEnabled;
     }
 
     public String getDeviceAuthzEndpoint() {
