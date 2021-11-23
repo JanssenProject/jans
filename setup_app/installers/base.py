@@ -94,7 +94,8 @@ class BaseInstaller:
     def check_scope(self, scope_id):
         search_filter = '(&(objectClass=jansScope)(jansId={}))'.format(scope_id)
         result = self.dbUtils.search('ou=scopes,o=jans', search_filter=search_filter)
-        return result.get('dn')
+        if result:
+            return result.get('dn')
 
 
     def run_service_command(self, operation, service):
