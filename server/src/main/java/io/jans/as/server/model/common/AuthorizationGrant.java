@@ -43,8 +43,6 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
@@ -107,13 +105,8 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
         super.init(user, authorizationGrantType, client, authenticationTime);
     }
 
-    public IdToken createIdToken(
-            IAuthorizationGrant grant, String nonce,
-            AuthorizationCode authorizationCode, AccessToken accessToken, RefreshToken refreshToken,
-            String state, Set<String> scopes, boolean includeIdTokenClaims, Function<JsonWebResponse,
-            Void> preProcessing, Function<JsonWebResponse, Void> postProcessing, String claims) throws Exception {
-        JsonWebResponse jwr = idTokenFactory.createJwr(grant, nonce, authorizationCode, accessToken, refreshToken,
-                state, scopes, includeIdTokenClaims, preProcessing, postProcessing, claims);
+    private IdToken createIdTokenInternal(AuthorizationCode authorizationCode, AccessToken accessToken, RefreshToken refreshToken, ExecutionContext executionContext) throws Exception {
+        JsonWebResponse jwr = idTokenFactory.createJwr(this, authorizationCode, accessToken, refreshToken, executionContext);
         final IdToken idToken = new IdToken(jwr.toString(), jwr.getClaims().getClaimAsDate(JwtClaimName.ISSUED_AT),
                 jwr.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME));
         if (log.isTraceEnabled())
@@ -349,12 +342,17 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
     @Override
     public IdToken createIdToken(
             String nonce, AuthorizationCode authorizationCode, AccessToken accessToken, RefreshToken refreshToken,
-            String state, AuthorizationGrant authorizationGrant, boolean includeIdTokenClaims, Function<JsonWebResponse, Void> preProcessing, Function<JsonWebResponse, Void> postProcessing) {
+            String state, ExecutionContext executionContext) {
         try {
-            final IdToken idToken = createIdToken(this, nonce, authorizationCode, accessToken, refreshToken,
-                    state, getScopes(), includeIdTokenClaims, preProcessing, postProcessing, this.getClaims());
-            final String acrValues = authorizationGrant.getAcrValues();
-            final String sessionDn = authorizationGrant.getSessionDn();
+            executionContext.setScopes(getScopes());
+            executionContext.setClaimsAsString(getClaims());
+            executionContext.setNonce(nonce);
+            executionContext.setState(state);
+
+            final IdToken idToken = createIdTokenInternal(authorizationCode, accessToken, refreshToken, executionContext);
+            final AuthorizationGrant grant = executionContext.getGrant();
+            final String acrValues = grant.getAcrValues();
+            final String sessionDn = grant.getSessionDn();
             if (idToken.getExpiresIn() > 0) {
                 final TokenEntity tokenEntity = asToken(idToken);
                 tokenEntity.setAuthMode(acrValues);
