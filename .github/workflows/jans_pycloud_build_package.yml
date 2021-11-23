@@ -1,4 +1,4 @@
-name: Build and Publish Releases to Hub
+name: Images Janspycloud updater
 
 on:
   push:
