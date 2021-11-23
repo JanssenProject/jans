@@ -225,4 +225,38 @@ public class ExternalUpdateTokenService extends ExternalScriptService {
         }
         return 0;
     }
+
+    public int getIdTokenLifetimeInSeconds(CustomScriptConfiguration script, ExternalUpdateTokenContext context) {
+        try {
+            log.trace("Executing python 'getIdTokenLifetimeInSeconds' method, script name: {}, context: {}", script.getName(), context);
+            context.setScript(script);
+
+            UpdateTokenType updateTokenType = (UpdateTokenType) script.getExternalType();
+            final int result = updateTokenType.getIdTokenLifetimeInSeconds(context);
+            log.trace("Finished 'getIdTokenLifetimeInSeconds' method, script name: {}, context: {}, result: {}", script.getName(), context, result);
+
+            return result;
+        } catch (Exception ex) {
+            log.error(ex.getMessage(), ex);
+            saveScriptError(script.getCustomScript(), ex);
+        }
+        return 0;
+    }
+
+    public int getIdTokenLifetimeInSeconds(ExternalUpdateTokenContext context) {
+        List<CustomScriptConfiguration> scripts = getScripts(context);
+        if (scripts.isEmpty()) {
+            return 0;
+        }
+        log.trace("Executing {} 'getIdTokenLifetimeInSeconds' scripts.", scripts.size());
+
+        for (CustomScriptConfiguration script : scripts) {
+            final int lifetime = getIdTokenLifetimeInSeconds(script, context);
+            if (lifetime > 0) {
+                log.trace("Finished 'getIdTokenLifetimeInSeconds' methods, lifetime: {}", lifetime);
+                return lifetime;
+            }
+        }
+        return 0;
+    }
 }

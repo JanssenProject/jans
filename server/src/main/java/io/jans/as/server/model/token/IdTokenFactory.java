@@ -25,7 +25,9 @@ import io.jans.as.server.service.ScopeService;
 import io.jans.as.server.service.SessionIdService;
 import io.jans.as.server.service.external.ExternalAuthenticationService;
 import io.jans.as.server.service.external.ExternalDynamicScopeService;
+import io.jans.as.server.service.external.ExternalUpdateTokenService;
 import io.jans.as.server.service.external.context.DynamicScopeExternalContext;
+import io.jans.as.server.service.external.context.ExternalUpdateTokenContext;
 import io.jans.model.GluuAttribute;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.custom.script.type.auth.PersonAuthenticationType;
@@ -39,7 +41,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.*;
-import java.util.function.Function;
 
 import static io.jans.as.model.common.ScopeType.DYNAMIC;
 
@@ -69,6 +70,9 @@ public class IdTokenFactory {
 
     @Inject
     private ExternalAuthenticationService externalAuthenticationService;
+
+    @Inject
+    private ExternalUpdateTokenService externalUpdateTokenService;
 
     @Inject
     private ScopeService scopeService;
@@ -109,15 +113,20 @@ public class IdTokenFactory {
     }
 
     private void fillClaims(JsonWebResponse jwr,
-                            IAuthorizationGrant authorizationGrant, String nonce,
+                            IAuthorizationGrant authorizationGrant,
                             AuthorizationCode authorizationCode, AccessToken accessToken, RefreshToken refreshToken,
-                            String state, Set<String> scopes, boolean includeIdTokenClaims, Function<JsonWebResponse,
-                            Void> preProcessing, Function<JsonWebResponse, Void> postProcessing, String requestedClaims) throws Exception {
+                            ExecutionContext executionContext) throws Exception {
 
         jwr.getClaims().setIssuer(appConfiguration.getIssuer());
         Audience.setAudience(jwr.getClaims(), authorizationGrant.getClient());
 
         int lifeTime = appConfiguration.getIdTokenLifetime();
+        int lifetimeFromScript = externalUpdateTokenService.getIdTokenLifetimeInSeconds(ExternalUpdateTokenContext.of(executionContext));
+        if (lifetimeFromScript > 0) {
+            lifeTime = lifetimeFromScript;
+            log.trace("Override id token lifetime with value from script: {}", lifetimeFromScript);
+        }
+
         Calendar calendar = Calendar.getInstance();
         Date issuedAt = calendar.getTime();
         calendar.add(Calendar.SECOND, lifeTime);
@@ -127,8 +136,8 @@ public class IdTokenFactory {
         jwr.getClaims().setIssuedAt(issuedAt);
         jwr.setClaim("code", UUID.randomUUID().toString());
 
-        if (preProcessing != null) {
-            preProcessing.apply(jwr);
+        if (executionContext.getPreProcessing() != null) {
+            executionContext.getPreProcessing().apply(jwr);
         }
         final SessionId session = sessionIdService.getSessionByDn(authorizationGrant.getSessionDn());
         if (session != null) {
@@ -139,6 +148,7 @@ public class IdTokenFactory {
             jwr.setClaim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, authorizationGrant.getAcrValues());
             setAmrClaim(jwr, authorizationGrant.getAcrValues());
         }
+        String nonce = executionContext.getNonce();
         if (StringUtils.isNotBlank(nonce)) {
             jwr.setClaim(JwtClaimName.NONCE, nonce);
         }
@@ -153,6 +163,7 @@ public class IdTokenFactory {
             String accessTokenHash = AbstractToken.getHash(accessToken.getCode(), jwr.getHeader().getSignatureAlgorithm());
             jwr.setClaim(JwtClaimName.ACCESS_TOKEN_HASH, accessTokenHash);
         }
+        String state = executionContext.getState();
         if (Strings.isNotBlank(state)) {
             String stateHash = AbstractToken.getHash(state, jwr.getHeader().getSignatureAlgorithm());
             jwr.setClaim(JwtClaimName.STATE_HASH, stateHash);
@@ -164,8 +175,8 @@ public class IdTokenFactory {
 
         User user = authorizationGrant.getUser();
         List<Scope> dynamicScopes = new ArrayList<>();
-        if (includeIdTokenClaims && authorizationGrant.getClient().isIncludeClaimsInIdToken()) {
-            for (String scopeName : scopes) {
+        if (executionContext.isIncludeIdTokenClaims() && authorizationGrant.getClient().isIncludeClaimsInIdToken()) {
+            for (String scopeName : executionContext.getScopes()) {
                 Scope scope = scopeService.getScopeById(scopeName);
                 if (scope == null) {
                     continue;
@@ -214,8 +225,8 @@ public class IdTokenFactory {
             }
         }
 
-        setClaimsFromJwtAuthorizationRequest(jwr, authorizationGrant, scopes);
-        setClaimsFromRequestedClaims(requestedClaims, jwr, user);
+        setClaimsFromJwtAuthorizationRequest(jwr, authorizationGrant, executionContext.getScopes());
+        setClaimsFromRequestedClaims(executionContext.getClaimsAsString(), jwr, user);
         filterClaimsBasedOnAccessToken(jwr, accessToken, authorizationCode);
         jwrService.setSubjectIdentifier(jwr, authorizationGrant);
 
@@ -227,8 +238,8 @@ public class IdTokenFactory {
 
         processCiba(jwr, authorizationGrant, refreshToken);
 
-        if (postProcessing != null) {
-        	postProcessing.apply(jwr);
+        if (executionContext.getPostProcessor() != null) {
+            executionContext.getPostProcessor().apply(jwr);
         }
     }
 
@@ -322,18 +333,15 @@ public class IdTokenFactory {
     }
 
     public JsonWebResponse createJwr(
-            IAuthorizationGrant grant, String nonce,
-            AuthorizationCode authorizationCode, AccessToken accessToken, RefreshToken refreshToken,
-            String state, Set<String> scopes, boolean includeIdTokenClaims, Function<JsonWebResponse,
-            Void> preProcessing, Function<JsonWebResponse, Void> postProcessing, String claims) throws Exception {
+            IAuthorizationGrant grant, AuthorizationCode authorizationCode, AccessToken accessToken, RefreshToken refreshToken,
+            ExecutionContext executionContext) throws Exception {
 
         final Client client = grant.getClient();
 
         JsonWebResponse jwr = jwrService.createJwr(client);
-        fillClaims(jwr, grant, nonce, authorizationCode, accessToken, refreshToken, state, scopes,
-                includeIdTokenClaims, preProcessing, postProcessing, claims);
+        fillClaims(jwr, grant, authorizationCode, accessToken, refreshToken, executionContext);
         if (log.isTraceEnabled())
-            log.trace("Created claims for id_token, claims: " + jwr.getClaims().toJsonString());
+            log.trace("Created claims for id_token, claims: {}", jwr.getClaims().toJsonString());
         return jwrService.encode(jwr, client);
     }
 
