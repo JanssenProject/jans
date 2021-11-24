@@ -118,7 +118,7 @@
   },
   "userPassword": {
     "mysql": {
-      "size": 100,
+      "size": 256,
       "type": "VARCHAR"
     },
     "spanner": {
