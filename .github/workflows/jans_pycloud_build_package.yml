@@ -48,7 +48,7 @@ jobs:
         run: |
           dockerimages="auth-server certmanager client-api config-api configurator fido2 persistence-loader scim"]
           for image in $dockerimages; do
-            cat "-e git+https://github.com/$GITHUB_REPOSITORY@$PR_DOCKER_DEV_BRANCH_NAME#egg=jans-pycloudlib&subdirectory=jans-pycloudlib" > ./docker-jans-$image/requirements.txt || exit 1
+            echo "-e git+https://github.com/$GITHUB_REPOSITORY@$PR_DOCKER_DEV_BRANCH_NAME#egg=jans-pycloudlib&subdirectory=jans-pycloudlib" > ./docker-jans-$image/requirements.txt || exit 1
           done
 
       - name: Configure Git and open dev PR
