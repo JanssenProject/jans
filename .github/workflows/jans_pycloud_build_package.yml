@@ -44,7 +44,7 @@ jobs:
 
       - name: Update dev requriments in docker images
         if: github.event_name == 'pull_request'
-        id: build_docker_image
+        id: build_dev_reqs
         run: |
           dockerimages="auth-server certmanager client-api config-api configurator fido2 persistence-loader scim"]
           for image in $dockerimages; do
@@ -67,7 +67,7 @@ jobs:
 
       - name: Update stable requriments in docker images
         if: github.event_name != 'pull_request'
-        id: build_docker_image
+        id: build_stable_reqs
         run: |
           dockerimages="auth-server certmanager client-api config-api configurator fido2 persistence-loader scim"]
           for image in $dockerimages; do
