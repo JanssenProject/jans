@@ -23,10 +23,6 @@ jobs:
     env:
       PR_DOCKER_DEV_BRANCH_NAME: update-dev-jans-pycloudlib
       PR_DOCKER_STABLE_BRANCH_NAME: update-stable-jans-pycloudlib
-    strategy:
-      max-parallel: 8
-      matrix:
-        docker-images: ["auth-server", "certmanager", "config-api", "client-api", "configurator", "fido2", "persistence-loader", "scim"]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -46,7 +42,7 @@ jobs:
         if: github.event_name == 'pull_request'
         id: build_dev_reqs
         run: |
-          dockerimages="auth-server certmanager client-api config-api configurator fido2 persistence-loader scim"]
+          dockerimages="auth-server certmanager client-api config-api configurator fido2 persistence-loader scim"
           for image in $dockerimages; do
             echo "-e git+https://github.com/$GITHUB_REPOSITORY@$PR_DOCKER_DEV_BRANCH_NAME#egg=jans-pycloudlib&subdirectory=jans-pycloudlib" > ./docker-jans-$image/requirements.txt || exit 1
           done
