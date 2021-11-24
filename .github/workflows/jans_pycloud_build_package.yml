@@ -20,14 +20,14 @@ on:
 jobs:
   docker:
     runs-on: ubuntu-latest
+    env:
+      PR_DOCKER_DEV_BRANCH_NAME: update-dev-jans-pycloudlib
+      PR_DOCKER_STABLE_BRANCH_NAME: update-stable-jans-pycloudlib
     strategy:
       max-parallel: 8
       matrix:
         docker-images: ["auth-server", "certmanager", "config-api", "client-api", "configurator", "fido2", "persistence-loader", "scim"]
     steps:
-      - env:
-          PR_DOCKER_DEV_BRANCH_NAME: update-dev-jans-pycloudlib
-          PR_DOCKER_STABLE_BRANCH_NAME: update-stable-jans-pycloudlib
       - name: Checkout
         uses: actions/checkout@v2
         with:
