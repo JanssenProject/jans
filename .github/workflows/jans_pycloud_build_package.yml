@@ -23,6 +23,7 @@ jobs:
     env:
       PR_DOCKER_DEV_BRANCH_NAME: update-dev-jans-pycloudlib
       PR_DOCKER_STABLE_BRANCH_NAME: update-stable-jans-pycloudlib
+      GITHUB_TOKEN: ${{ secrets.MOWORKFLOWTOKEN }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
