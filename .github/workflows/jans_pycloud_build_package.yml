@@ -2,19 +2,17 @@ name: Images Janspycloud updater
 
 on:
   push:
-    branches-ignore:
-      - "release-**"
     branches:
       - master
       - main
+      - "!release-**"
     paths:
       - "jans-pycloudlib/**"
   pull_request:
-    branches-ignore:
-      - "release-**"
     branches:
       - master
       - main
+      - "!release-**"
     paths:
       - "jans-pycloudlib/**"
   workflow_dispatch:
