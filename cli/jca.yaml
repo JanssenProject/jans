@@ -2909,7 +2909,6 @@ components:
         - script
         - scriptType
         - programmingLanguage
-        - moduleProperties
         - level
       properties:
         dn:
