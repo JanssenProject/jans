@@ -6,13 +6,10 @@ jobs:
   checkBuildAndUpdate:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@master
-
-      - name: Set up Python 3.7
-        uses: actions/setup-python@v2.3.0
+      - name: Checkout
+        uses: actions/checkout@v2
         with:
-          python-version: 3.7
+          fetch-depth: 0
 
       - name: Import GPG key
         id: import_gpg
@@ -22,6 +19,11 @@ jobs:
           passphrase: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY_PASSPHRASE }}
           git_user_signingkey: true
           git_commit_gpgsign: true
+
+      - name: Setup Python 3.7
+        uses: actions/setup-python@v2.3.0
+        with:
+          python-version: 3.7
 
       - name: Install dependencies
         run: |
@@ -47,4 +49,4 @@ jobs:
           git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
           git add -A
           git commit -S -s -m "chore(Dockerfile): updated build dates"
-          PR=$(gh pr create --assignee "@moabu" --base "master" --body "Updated build date. Auto-generated." --label "enhancment,bot" --reviewer "@moabu" --title "chore(Dockerfile): updated build dates")
+          PR=$(gh pr create --assignee "moabu" --base "master" --body "Updated build date. Auto-generated." --label "enhancement,bot" --reviewer "moabu" --title "chore(Dockerfile): updated build dates" || echo "PR Branch is already open")
