@@ -1,0 +1,125 @@
+name: Build and Publish Releases to Hub
+
+on:
+  push:
+    tags:
+      - "*"
+    branches:
+      - master
+      - main
+      # below branch is triggered by jenkins which triggers dev image
+      - update-source-build-date
+    paths:
+      - "docker-jans-**/**"
+  pull_request:
+    branches:
+      - master
+      - main
+      # below branch is triggered by jenkins which triggers dev image
+      - update-source-build-dates
+    paths:
+      - "docker-jans-**/**"
+  workflow_dispatch:
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 8
+      matrix:
+        docker-images: ["auth-server", "certmanager", "config-api", "client-api", "configurator", "fido2", "persistence-loader", "scim"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Check docker directories that changed
+        id: build_docker_image
+        run: |
+          DEFAULT_ALL="docker-jans-auth-server docker-jans-certmanager docker-jans-client-api docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim"
+          # Detect actual docker folders that changed if error arises default to all images
+          DIRECTORIES_CHANGED=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | cut -d/ -f1 | sort -u | grep "docker-jans" || echo "$DEFAULT_ALL")
+          if [[ "$DIRECTORIES_CHANGED" =~ "${{ matrix.docker-images }}" ]]; then
+            echo "::set-output name=build::'True'"
+          fi
+
+      - name: Install dependencies
+        if: ${{ steps.build_docker_image.outputs.build }} == "True"
+        run: |
+          sudo apt-get update
+          sudo python3 -m pip install --upgrade pip
+          sudo pip3 install setuptools --upgrade
+          sudo pip3 install -r ./automation/requirements.txt
+          sudo apt-get update
+
+
+      - name: Prepare
+        if: ${{ steps.build_docker_image.outputs.build }} == "True"
+        id: prep
+        run: |
+          MAIN_VERSION=$(python3 -c "from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('./docker-jans-${{ matrix.docker-images }}') ; print(dfparser.labels['version'])")
+          DOCKER_IMAGE=janssenproject/${{ matrix.docker-images }}
+          VERSION=${MAIN_VERSION}_dev
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/}
+          fi
+          TAGS="${DOCKER_IMAGE}:${VERSION}"
+          if [[ $VERSION =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\_[a-b]{1}[0-9]{1,3}$ ]]; then
+            TAGS="$TAGS,${DOCKER_IMAGE}:${MAIN_VERSION}_dev"
+          fi
+          echo ::set-output name=tags::${TAGS}
+
+      - name: Set up QEMU
+        if: ${{ steps.build_docker_image.outputs.build }} == "True"
+        uses: docker/setup-qemu-action@master
+        with:
+          image: tonistiigi/binfmt:master
+          platforms: all
+
+      - name: Set up Docker Buildx
+        if: ${{ steps.build_docker_image.outputs.build }} == "True"
+        id: buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Cache Docker layers
+        if: ${{ steps.build_docker_image.outputs.build }} == "True"
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Login to Docker Hub
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.MOAUTO_DOCKERHUB_USERNAME }}
+          password: ${{ secrets.MOAUTO_DOCKERHUB_TOKEN }}
+
+      - name: Build and push
+        if: ${{ steps.build_docker_image.outputs.build }} == "True"
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          builder: ${{ steps.buildx.outputs.name }}
+          context: ./docker-jans-${{ matrix.docker-images }}
+          file: ./docker-jans-${{ matrix.docker-images }}/Dockerfile
+          #target: prod
+          # add to platforms comma seperated linux/ppc64leL Issue: py3-grpcio
+          # add to platforms comma seperated linux/386 : Issue: openjdk11-jre-headless alpine package not
+          # add to platforms comma seperated ,linux/arm/v6 : Issue: openjdk11-jre-headless alpine package not found
+          # add to platforms comma seperated ,linux/arm/v7 : Issue: openjdk11-jre-headless alpine package not found
+          # add to platforms comma seperated ,linux/s390x: All images with openjdk hav an issue with linux/s390x Problematic frame: J 6 c1 java.lang.String.hashCode()I java.base@11.0.9 (49 bytes) : Issue: openjdk11-jre-headles
+          # add to platforms comma seperated ,linux/arm64:  : PyDev issue only
+
+          platforms: linux/amd64
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.prep.outputs.tags }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+
+      - name: Image digest
+        if: ${{ steps.build_docker_image.outputs.build }} == "True"
+        run: echo ${{ steps.docker_build.outputs.digest }}
