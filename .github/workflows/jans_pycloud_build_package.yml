@@ -57,7 +57,7 @@ jobs:
           git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
           git add -A
           git commit -S -s -m "chore(jans-pycloudlib): updated dev build"
-          PR=$(gh pr create --head $PR_DOCKER_DEV_BRANCH_NAME --assignee "@moabu" --base "master" --body "Updated dev build. Auto-generated." --label "enhancment,bot" --reviewer "@moabu" --title "chore(jans-pycloudlib): updated dev build" || echo "PR Branch is already open")
+          PR=$(gh pr create --head $PR_DOCKER_DEV_BRANCH_NAME --assignee "moabu" --base "master" --body "Updated dev build. Auto-generated." --label "enhancment,bot" --reviewer "moabu" --title "chore(jans-pycloudlib): updated dev build" || echo "PR Branch is already open")
 
 
       - name: Update stable requriments in docker images
@@ -78,5 +78,5 @@ jobs:
           git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
           git add -A
           git commit -S -s -m "chore(jans-pycloudlib): updated stable build"
-          PR=$(gh pr create --assignee "@moabu" --base "master" --body "Updated stable build. Auto-generated." --label "enhancment,bot" --reviewer "@moabu" --title "chore(jans-pycloudlib): updated stable build" || echo "PR Branch is already open")
+          PR=$(gh pr create --assignee "moabu" --base "master" --body "Updated stable build. Auto-generated." --label "enhancment,bot" --reviewer "moabu" --title "chore(jans-pycloudlib): updated stable build" || echo "PR Branch is already open")
 
