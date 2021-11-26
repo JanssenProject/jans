@@ -1,0 +1,3 @@
+[run]
+omit =
+    */jans/pycloudlib/persistence/spanner.py
