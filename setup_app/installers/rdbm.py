@@ -140,6 +140,11 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                     for incobjcls in obj['sql']['includeObjectClass']:
                         attr_list += all_schema[incobjcls]['may']
 
+            for s in obj['sup']:
+                if s == 'top':
+                    continue
+                attr_list += all_schema[s]['may']
+
             cols_ =[]
             for attrname in attr_list:
                 if attrname in cols_:
