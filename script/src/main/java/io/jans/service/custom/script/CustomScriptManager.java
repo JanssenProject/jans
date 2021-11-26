@@ -282,14 +282,6 @@ public class CustomScriptManager implements Serializable {
 					}
 				}
 				
-				// Automatic package update '.xdi' --> '.org'
-				// TODO: Remove in CE 7.0
-				String scriptCode = loadedCustomScript.getScript();
-				if (scriptCode != null) {
-					scriptCode = scriptCode.replaceAll("org.gluu", "io.jans");
-					loadedCustomScript.setScript(scriptCode);
-				}
-
 				// Load script
 				BaseExternalType newCustomScriptExternalType = createExternalType(loadedCustomScript,
 						newConfigurationAttributes);
