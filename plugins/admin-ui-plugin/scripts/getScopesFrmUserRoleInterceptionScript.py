@@ -9,7 +9,7 @@ from io.jans.service.cdi.util import CdiUtil
 from io.jans.as.model.crypto import AuthCryptoProvider
 from io.jans.orm import PersistenceEntryManager
 from io.jans.model.custom.script.type.introspection import IntrospectionType
-from io.jans.as.model.config.adminui import Configuration
+from io.jans.as.model.config.adminui import AdminConf
 from java.net import HttpURLConnection, URL
 from org.json import JSONArray, JSONObject
 from java.lang import String
@@ -56,7 +56,7 @@ class Introspection(IntrospectionType):
             # Parse jwt
             userInfoJwt = Jwt.parse(ujwt)
             # Get auth-server keys
-            url = URL("https://admin-ui-test.gluu.org/jans-auth/restv1/jwks")
+            url = URL("https://ce-dev6.gluu.org/jans-auth/restv1/jwks")
             conn = url.openConnection()
             conn.setDoOutput(True)
             conn.setRequestMethod("GET")
@@ -98,15 +98,19 @@ class Introspection(IntrospectionType):
                 scopes = None
                 try:
                     entryManager = CdiUtil.bean(PersistenceEntryManager)
-                    adminUIConfig = Configuration()
+                    adminUIConfig = AdminConf()
                     adminUIConfig = entryManager.find(adminUIConfig.getClass(), "ou=admin-ui,ou=configuration,o=jans")
 
-                    roleScopeMapping = adminUIConfig.getDynamic().getRoleScopeMapping()
+                    roleScopeMapping = adminUIConfig.getDynamic().getRolePermissionMapping()
+                    # roleScopeMapping = adminUIConfig.getDynamic()
+                    print roleScopeMapping
+
                     for ele in roleScopeMapping:
                         if ele.getRole() == jansAdminUIRole.getString(0):
-                            scopes = ele.getScopes()
-                except:
-                    print "Admin UI: roleScopeMapping. Failed to fetch/parse Admin UI roleScopeMapping from DB"
+                            scopes = ele.getPermissions()
+                except Exception as e:
+                    print "Error:  Failed to fetch/parse Admin UI roleScopeMapping from DB"
+                    print e
 
                 print "Following scopes will be added in api token:" + scopes
 
@@ -115,4 +119,3 @@ class Introspection(IntrospectionType):
                 print "Exception occured. Unable to resolve role/scope mapping."
                 print e
         return True
-
