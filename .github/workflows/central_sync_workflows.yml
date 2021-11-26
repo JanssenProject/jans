@@ -28,15 +28,6 @@ jobs:
         env:
           #  JanssenProject/home
           REPOSITORIES: |
-            JanssenProject/docker-jans-auth-server
-            JanssenProject/docker-jans-certmanager
-            JanssenProject/docker-jans-client-api
-            JanssenProject/docker-jans-config-api
-            JanssenProject/docker-jans-configuration-manager
-            JanssenProject/docker-jans-fido2
-            JanssenProject/docker-jans-persistence-loader
-            JanssenProject/docker-jans-scim
-            JanssenProject/jans-pycloudlib
             JanssenProject/docs
             JanssenProject/jans-auth-server
             JanssenProject/jans-bom
@@ -57,32 +48,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.MOWORKFLOWTOKEN }}
           GPG_KEY_ID: ${{ steps.import_gpg.outputs.keyid }}
           PR_BRANCH_NAME: repo_sync
-        run: |
-          echo
-          wget https://raw.githubusercontent.com/mo-auto/scripts/main/org_workflows_sync.sh
-          chmod u+x org_workflows_sync.sh
-          bash org_workflows_sync.sh
-
-      - name: Running Docker Workflow Sync
-        env:
-          REPOSITORIES: |
-            JanssenProject/docker-jans-auth-server
-            JanssenProject/docker-jans-certmanager
-            JanssenProject/docker-jans-client-api
-            JanssenProject/docker-jans-config-api
-            JanssenProject/docker-jans-configuration-manager
-            JanssenProject/docker-jans-fido2
-            JanssenProject/docker-jans-persistence-loader
-            JanssenProject/docker-jans-scim
-          WORKFLOW_FILES: |
-            .github/docker/central_docker_imagescan.yml=.github/workflows/imagescan.yml
-            .github/docker/central_docker_release.yml=.github/workflows/release.yml
-            .github/docker/central_docker_triggerdevbuild.yml=.github/workflows/triggerdevbuild.yml
-            .github/docker/central_docker_build_image.yml=.github/workflows/build_image.yml
-            .github/docker/central_docker_dependabot.yml=.github/dependabot.yml
-          GITHUB_TOKEN: ${{ secrets.MOWORKFLOWTOKEN }}
-          GPG_KEY_ID: ${{ steps.import_gpg.outputs.keyid }}
-          PR_BRANCH_NAME: docker_repo_sync
         run: |
           echo
           wget https://raw.githubusercontent.com/mo-auto/scripts/main/org_workflows_sync.sh
