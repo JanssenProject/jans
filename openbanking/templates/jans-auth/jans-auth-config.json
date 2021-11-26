@@ -228,6 +228,7 @@
     "invalidateSessionCookiesAfterAuthorizationFlow":false,
     "clientAuthenticationFiltersEnabled":false,
     "clientRegDefaultToCodeFlowWithRefresh": true,
+    "grantTypesAndResponseTypesAutofixEnabled": false,
     "authenticationFilters":[
     ],
     "clientAuthenticationFilters":[
