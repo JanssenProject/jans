@@ -5,6 +5,8 @@ on: [workflow_dispatch]
 jobs:
   checkBuildAndUpdate:
     runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.MOWORKFLOWTOKEN }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
