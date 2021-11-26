@@ -84,7 +84,7 @@ jobs:
 
       - name: Cache Docker layers
         if: ${{ steps.build_docker_image.outputs.build }} == "True"
-        uses: actions/cache@v2
+        uses: actions/cache@v2.1.7
         with:
           path: /tmp/.buildx-cache
           key: ${{ runner.os }}-buildx-${{ github.sha }}
