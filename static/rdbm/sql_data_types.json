@@ -118,7 +118,7 @@
   },
   "userPassword": {
     "mysql": {
-      "size": 100,
+      "size": 256,
       "type": "VARCHAR"
     },
     "spanner": {
@@ -721,17 +721,6 @@
     "spanner": {
       "size": 48,
       "type": "STRING"
-    }
-  },
-  "jansLogoutURI": {
-    "mysql": {
-      "type": "TINYTEXT"
-    },
-    "pgsql": {
-      "type": "TEXT"
-    },
-    "spanner": {
-      "type": "STRING(MAX)"
     }
   },
   "jansJwks": {
