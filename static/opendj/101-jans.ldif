@@ -1821,5 +1821,10 @@ objectClasses: ( 1.3.6.1.4.1.48710.1.4.35 NAME 'jansInumMap'
   MUST ( objectclass )
   MAY ( jansStatus $ inum $ jansPrimaryKeyAttrName $ jansPrimaryKeyValue $ jansSecondaryKeyAttrName $ jansSecondaryKeyValue $ jansTertiaryKeyAttrName $ jansTertiaryKeyValue )
   X-ORIGIN 'Jans created objectclass' )
-
+objectClasses: ( 1.3.6.1.4.1.48710.1.4.36 NAME 'jansAdminConfDyn'
+  SUP ( top )
+  STRUCTURAL
+  MUST ( objectclass )
+  MAY ( c $ ou $ description $ inum $ displayName $ jansConfDyn $ o $ jansRevision )
+  X-ORIGIN 'Jans created objectclass' )
 
