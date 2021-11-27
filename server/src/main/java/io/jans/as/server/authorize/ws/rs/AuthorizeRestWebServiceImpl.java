@@ -42,6 +42,7 @@ import io.jans.as.server.model.common.*;
 import io.jans.as.server.model.config.ConfigurationFactory;
 import io.jans.as.server.model.config.Constants;
 import io.jans.as.server.model.exception.AcrChangedException;
+import io.jans.as.server.model.exception.InvalidRedirectUrlException;
 import io.jans.as.server.model.exception.InvalidSessionStateException;
 import io.jans.as.server.model.ldap.ClientAuthorization;
 import io.jans.as.server.model.token.JwrService;
@@ -90,7 +91,7 @@ import static org.apache.commons.lang3.BooleanUtils.isTrue;
  * Implementation for request authorization through REST web services.
  *
  * @author Javier Rojas Blum
- * @version November 22, 2021
+ * @version November 26, 2021
  */
 @Path("/")
 public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
@@ -791,6 +792,11 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.UNAUTHORIZED_CLIENT, state, ""))
                     .type(MediaType.APPLICATION_JSON_TYPE);
             log.error(e.getMessage(), e);
+        } catch (InvalidRedirectUrlException e) {
+            builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode())
+                    .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST, state, ""))
+                    .type(MediaType.APPLICATION_JSON_TYPE);
+            log.error(e.getMessage(), e);
         } catch (InvalidSessionStateException ex) { // Allow to handle it via GlobalExceptionHandler
             throw ex;
         } catch (Exception e) {
@@ -815,12 +821,12 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             if (StringUtils.isBlank(jwtRequest.getClientId()) || !jwtRequest.getClientId().equals(clientId)) {
                 throw authorizeRestWebServiceValidator.createInvalidJwtRequestException(redirectUriResponse, "The clientId parameter is not the same in the JWT");
             }
-        } catch (WebApplicationException e) {
+        } catch (WebApplicationException | InvalidRedirectUrlException e) {
             throw e;
         } catch (InvalidJwtException e) {
             log.debug("Invalid JWT authorization request. {}", e.getMessage());
             redirectUriResponse.getRedirectUri().parseQueryString(errorResponseFactory.getErrorAsQueryString(
-                    AuthorizeErrorResponseType.INVALID_REQUEST, state));
+                    AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT, state));
             throw new WebApplicationException(RedirectUtil.getRedirectResponseBuilder(redirectUriResponse.getRedirectUri(), httpRequest).build());
         } catch (Exception e) {
             log.error("Unexpected exception. " + e.getMessage(), e);
@@ -869,7 +875,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         executionContext.setGrant(cibaGrant);
         executionContext.setIncludeIdTokenClaims(false);
 
-        IdToken idToken = cibaGrant.createIdToken(null, null, accessToken, refreshToken,null, executionContext);
+        IdToken idToken = cibaGrant.createIdToken(null, null, accessToken, refreshToken, null, executionContext);
 
         cibaGrant.setTokensDelivered(true);
         cibaGrant.save();

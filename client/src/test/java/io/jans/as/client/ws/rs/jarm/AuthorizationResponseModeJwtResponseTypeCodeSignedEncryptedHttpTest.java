@@ -9,6 +9,7 @@ import io.jans.as.client.*;
 import io.jans.as.client.model.authorize.Claim;
 import io.jans.as.client.model.authorize.ClaimValue;
 import io.jans.as.client.model.authorize.JwtAuthorizationRequest;
+import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.authorize.AuthorizeResponseParam;
 import io.jans.as.model.common.ResponseMode;
 import io.jans.as.model.common.ResponseType;
@@ -30,12 +31,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
+import static org.testng.Assert.*;
 
 /**
  * @author Javier Rojas Blum
- * @version November 22, 2021
+ * @version November 26, 2021
  */
 public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest extends BaseTest {
 
@@ -181,6 +181,8 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.CODE));
         assertNotNull(response.getClaims().getClaimAsString("error"));
         assertNotNull(response.getClaims().getClaimAsString("error_description"));
+        assertTrue(Arrays.asList("invalid_request", "invalid_request_object", "invalid_request_uri", "access_denied")
+                .contains(response.getClaims().getClaimAsString("error")));
 
         privateKey = null; // Clear private key to do not affect to other tests
     }
@@ -256,6 +258,8 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.CODE));
         assertNotNull(response.getClaims().getClaimAsString("error"));
         assertNotNull(response.getClaims().getClaimAsString("error_description"));
+        assertTrue(Arrays.asList("invalid_request", "invalid_request_object", "invalid_request_uri", "access_denied")
+                .contains(response.getClaims().getClaimAsString("error")));
 
         privateKey = null; // Clear private key to do not affect to other tests
     }
@@ -330,6 +334,8 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.CODE));
         assertNotNull(response.getClaims().getClaimAsString("error"));
         assertNotNull(response.getClaims().getClaimAsString("error_description"));
+        assertTrue(Arrays.asList("invalid_request", "invalid_request_object", "invalid_request_uri", "access_denied")
+                .contains(response.getClaims().getClaimAsString("error")));
 
         privateKey = null; // Clear private key to do not affect to other tests
     }
@@ -404,6 +410,8 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.CODE));
         assertNotNull(response.getClaims().getClaimAsString("error"));
         assertNotNull(response.getClaims().getClaimAsString("error_description"));
+        assertTrue(Arrays.asList("invalid_request", "invalid_request_object", "invalid_request_uri")
+                .contains(response.getClaims().getClaimAsString("error")));
 
         privateKey = null; // Clear private key to do not affect to other tests
     }
@@ -477,6 +485,8 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.CODE));
         assertNotNull(response.getClaims().getClaimAsString("error"));
         assertNotNull(response.getClaims().getClaimAsString("error_description"));
+        assertTrue(Arrays.asList("invalid_request", "invalid_request_object")
+                .contains(response.getClaims().getClaimAsString("error")));
 
         privateKey = null; // Clear private key to do not affect to other tests
     }
@@ -550,6 +560,7 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.CODE));
         assertNotNull(response.getClaims().getClaimAsString("error"));
         assertNotNull(response.getClaims().getClaimAsString("error_description"));
+        assertEquals(response.getClaims().getClaimAsString("error"), "invalid_request_object");
 
         privateKey = null; // Clear private key to do not affect to other tests
     }
@@ -624,6 +635,7 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.CODE));
         assertNotNull(response.getClaims().getClaimAsString("error"));
         assertNotNull(response.getClaims().getClaimAsString("error_description"));
+        assertEquals(response.getClaims().getClaimAsString("error"), "invalid_request_object");
 
         privateKey = null; // Clear private key to do not affect to other tests
     }
@@ -697,6 +709,7 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.CODE));
         assertNotNull(response.getClaims().getClaimAsString("error"));
         assertNotNull(response.getClaims().getClaimAsString("error_description"));
+        assertEquals(response.getClaims().getClaimAsString("error"), "invalid_request_object");
 
         privateKey = null; // Clear private key to do not affect to other tests
     }
@@ -770,16 +783,17 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.CODE));
         assertNotNull(response.getClaims().getClaimAsString("error"));
         assertNotNull(response.getClaims().getClaimAsString("error_description"));
+        assertEquals(response.getClaims().getClaimAsString("error"), "invalid_request_object");
 
         privateKey = null; // Clear private key to do not affect to other tests
     }
 
-    @Parameters({"redirectUri", "redirectUris", "clientJwksUri", "RS256_keyId",
+    @Parameters({"audience", "redirectUri", "redirectUris", "clientJwksUri", "RS256_keyId",
             "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
     @Test(enabled = false) // Enable FAPI to run this test!
     public void ensureSignedRequestObjectWithRS256Fails(
-            final String redirectUri, final String redirectUris, final String clientJwksUri, final String signingKeyId,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret,
+            final String audience, final String redirectUri, final String redirectUris, final String clientJwksUri,
+            final String signingKeyId, final String dnName, final String keyStoreFile, final String keyStoreSecret,
             final String sectorIdentifierUri) throws Exception {
         showTitle("ensureSignedRequestObjectWithRS256Fails");
 
@@ -802,6 +816,8 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
 
         JwtAuthorizationRequest jwsAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.RS256, cryptoProvider); // RS256 Request Object is not permitted by the FAPI-RW specification.
         jwsAuthorizationRequest.setKeyId(signingKeyId);
+        jwsAuthorizationRequest.setAud(audience);
+        jwsAuthorizationRequest.setIss(clientId);
         jwsAuthorizationRequest.setRedirectUri(redirectUri);
         jwsAuthorizationRequest.setResponseMode(ResponseMode.JWT);
         jwsAuthorizationRequest.setState(state);
@@ -881,5 +897,73 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.CODE));
         assertNotNull(response.getClaims().getClaimAsString("error"));
         assertNotNull(response.getClaims().getClaimAsString("error_description"));
+    }
+
+    @Parameters({"redirectUri", "redirectUris", "clientJwksUri", "RSA_OAEP_keyId", "PS256_keyId",
+            "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Test(enabled = false) // Enable FAPI to run this test!
+    public void ensureRedirectUriInAuthorizationRequest(
+            final String redirectUri, final String redirectUris, final String clientJwksUri,
+            final String encryptionKeyId, final String signingKeyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("ensureRedirectUriInAuthorizationRequest");
+
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+
+        // 1. Dynamic Client Registration
+        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, sectorIdentifierUri, clientJwksUri,
+                SignatureAlgorithm.PS256, KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM);
+
+        String clientId = registerResponse.getClientId();
+
+        // 2. Request authorization
+        List<String> scope = Arrays.asList("openid", "profile", "address", "email");
+        String state = UUID.randomUUID().toString();
+        String nonce = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scope, null, null);
+
+        AuthCryptoProvider cryptoProvider1 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        JwtAuthorizationRequest jwsAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.PS256, cryptoProvider1);
+        jwsAuthorizationRequest.setKeyId(signingKeyId);
+        jwsAuthorizationRequest.setRedirectUri(null);
+        jwsAuthorizationRequest.setResponseMode(ResponseMode.JWT);
+        jwsAuthorizationRequest.setState(state);
+        jwsAuthorizationRequest.setNonce(nonce); // FAPI: nonce param is required
+        jwsAuthorizationRequest.setNbf((int) Instant.now().getEpochSecond()); // FAPI: require the request object to contain an exp claim that has a lifetime of no longer than 60 minutes after the nbf claim
+        jwsAuthorizationRequest.setExp(jwsAuthorizationRequest.getNbf() + 3600); // FAPI: require the request object to contain an exp claim that has a lifetime of no longer than 60 minutes after the nbf claim
+        Jwt authJws = Jwt.parse(jwsAuthorizationRequest.getEncodedJwt());
+
+        JwkClient jwkClient = new JwkClient(jwksUri);
+        JwkResponse jwkResponse = jwkClient.exec();
+        String serverKeyId = jwkResponse.getKeyId(Algorithm.RSA_OAEP);
+        assertNotNull(serverKeyId);
+
+        JSONObject jwks = JwtUtil.getJSONWebKeys(jwksUri);
+        AuthCryptoProvider cryptoProvider2 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        privateKey = cryptoProvider2.getPrivateKey(encryptionKeyId);
+
+        JwtAuthorizationRequest jweAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
+                KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM, cryptoProvider2);
+        jweAuthorizationRequest.setKeyId(serverKeyId);
+        jweAuthorizationRequest.setNestedPayload(authJws);
+        String authJwe = jweAuthorizationRequest.getEncodedJwt(jwks);
+
+        authorizationRequest.setRequest(authJwe);
+
+        AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
+        authorizeClient.setRequest(authorizationRequest);
+        AuthorizationResponse authorizationResponse = authorizeClient.exec();
+
+        showClient(authorizeClient);
+
+        assertEquals(authorizationResponse.getStatus(), 400);
+        assertNotNull(authorizationResponse.getEntity());
+        assertNotNull(authorizationResponse.getErrorType());
+        assertNotNull(authorizationResponse.getErrorDescription());
+        assertEquals(authorizationResponse.getErrorType(), AuthorizeErrorResponseType.INVALID_REQUEST);
+
+        privateKey = null; // Clear private key to do not affect to other tests
     }
 }
