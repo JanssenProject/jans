@@ -114,7 +114,7 @@ class PropertiesUtils(SetupUtils):
             if Config.cb_install and not Config.get('cb_password'):
                 Config.cb_password = Config.admin_password
 
-            if not Config.wrends_install:
+            if not Config.opendj_install:
                 if Config.cb_install:
                     Config.mappingLocations = { group: 'couchbase' for group in Config.couchbaseBucketDict }
 
@@ -188,8 +188,8 @@ class PropertiesUtils(SetupUtils):
         if p.get('cb_install') == '0':
            p['cb_install'] = InstallTypes.NONE
 
-        if p.get('wrends_install') == '0':
-            p['wrends_install'] = InstallTypes.NONE
+        if p.get('opendj_install') == '0':
+            p['opendj_install'] = InstallTypes.NONE
 
         properties_list = list(p.keys())
 
@@ -220,16 +220,16 @@ class PropertiesUtils(SetupUtils):
             
         if p.get('ldap_hostname') != 'localhost':
             if p.get('remoteLdap','').lower() == 'true':
-                Config.wrends_install = InstallTypes.REMOTE
+                Config.opendj_install = InstallTypes.REMOTE
             elif p.get('installLdap','').lower() == 'true':
-                Config.wrends_install = InstallTypes.LOCAL
-            elif p.get('wrends_install'):
-                Config.wrends_install = p['wrends_install']   
+                Config.opendj_install = InstallTypes.LOCAL
+            elif p.get('opendj_install'):
+                Config.opendj_install = p['opendj_install']   
             else:
-                Config.wrends_install = InstallTypes.NONE
+                Config.opendj_install = InstallTypes.NONE
 
         if map_db and not 'ldap' in map_db:
-            Config.wrends_install = InstallTypes.NONE
+            Config.opendj_install = InstallTypes.NONE
 
         if 'couchbase' in map_db:
             if 'remoteCouchbase' in properties_list and p.get('remoteCouchbase','').lower() == 'true':
@@ -257,7 +257,7 @@ class PropertiesUtils(SetupUtils):
                 print("Can't connect to remote Couchbase Server with credentials found in setup.properties.")
                 sys.exit(1)
 
-        if Config.wrends_install == InstallTypes.REMOTE:
+        if Config.opendj_install == InstallTypes.REMOTE:
             conn_check = self.check_remote_ldap(Config.ldap_hostname, Config.ldap_binddn, Config.ldapPass)
             if not conn_check['result']:
                 print("Can't connect to remote LDAP Server with credentials found in setup.properties.")
@@ -330,7 +330,7 @@ class PropertiesUtils(SetupUtils):
         backend_types = []
 
         if glob.glob(Config.distFolder+'/app/opendj-server-*4*.zip'):
-            backend_types.append('wrends')
+            backend_types.append('opendj')
 
         if glob.glob(Config.distFolder+'/couchbase/couchbase-server-enterprise*.' + base.clone_type):
             backend_types.append('couchbase')
@@ -462,7 +462,7 @@ class PropertiesUtils(SetupUtils):
             options_text.append('({0}) {1}'.format(i+1,m))
             options.append(str(i+1))
 
-        options_text = 'Use WrenDS to store {}'.format(' '.join(options_text))
+        options_text = 'Use opendj to store {}'.format(' '.join(options_text))
 
         re_pattern = '^[1-{0}]+$'.format(len(Config.couchbaseBucketDict))
 
@@ -483,15 +483,15 @@ class PropertiesUtils(SetupUtils):
             Config.mappingLocations[m] = 'couchbase'
 
     def set_persistence_type(self):
-        if Config.wrends_install and (not Config.cb_install) and (not Config.rdbm_install):
+        if Config.opendj_install and (not Config.cb_install) and (not Config.rdbm_install):
             Config.persistence_type = 'ldap'
-        elif (not Config.wrends_install) and (not Config.rdbm_install) and Config.cb_install:
+        elif (not Config.opendj_install) and (not Config.rdbm_install) and Config.cb_install:
             Config.persistence_type = 'couchbase'
         elif Config.rdbm_type == 'spanner':
             Config.persistence_type = 'spanner'
-        elif (not Config.wrends_install) and Config.rdbm_install and (not Config.cb_install):
+        elif (not Config.opendj_install) and Config.rdbm_install and (not Config.cb_install):
             Config.persistence_type = 'sql'
-        elif Config.wrends_install and Config.cb_install:
+        elif Config.opendj_install and Config.cb_install:
             Config.persistence_type = 'hybrid'
 
 
@@ -675,7 +675,7 @@ class PropertiesUtils(SetupUtils):
         backend_type_str = backend_types[int(choice)-1]
 
         if backend_type_str == 'Local OpenDj':
-            Config.wrends_install = InstallTypes.LOCAL
+            Config.opendj_install = InstallTypes.LOCAL
             ldapPass = Config.ldapPass or Config.admin_password or self.getPW(special='.*=!%&+/-')
 
             while True:
@@ -690,7 +690,7 @@ class PropertiesUtils(SetupUtils):
 
 
         elif backend_type_str == 'Remote OpenDj':
-            Config.wrends_install = InstallTypes.REMOTE
+            Config.opendj_install = InstallTypes.REMOTE
             while True:
                 ldapHost = self.getPrompt("    LDAP hostname")
                 ldapPass = self.getPrompt("    Password for '{0}'".format(Config.ldap_binddn))
@@ -704,7 +704,7 @@ class PropertiesUtils(SetupUtils):
             Config.ldap_hostname = ldapHost
 
         elif backend_type_str == 'Local Couchbase':
-            Config.wrends_install = InstallTypes.NONE
+            Config.opendj_install = InstallTypes.NONE
             Config.cb_install = InstallTypes.LOCAL
             Config.isCouchbaseUserAdmin = True
 
@@ -720,7 +720,7 @@ class PropertiesUtils(SetupUtils):
             Config.mappingLocations = { group: 'couchbase' for group in Config.couchbaseBucketDict }
 
         elif backend_type_str == 'Remote Couchbase':
-            Config.wrends_install = InstallTypes.NONE
+            Config.opendj_install = InstallTypes.NONE
             Config.cb_install = InstallTypes.REMOTE
 
             while True:
@@ -734,7 +734,7 @@ class PropertiesUtils(SetupUtils):
             Config.mappingLocations = { group: 'couchbase' for group in Config.couchbaseBucketDict }
 
         elif backend_type_str == 'Local MySQL':
-            Config.wrends_install = InstallTypes.NONE
+            Config.opendj_install = InstallTypes.NONE
             Config.rdbm_install = True
             Config.rdbm_install_type = InstallTypes.LOCAL
             Config.rdbm_type = 'mysql'
@@ -745,7 +745,7 @@ class PropertiesUtils(SetupUtils):
             Config.rdbm_db = 'gluudb'
 
         elif backend_type_str == 'Remote MySQL':
-            Config.wrends_install = InstallTypes.NONE
+            Config.opendj_install = InstallTypes.NONE
             Config.rdbm_install = True
             Config.rdbm_install_type = InstallTypes.REMOTE
             Config.rdbm_type = 'mysql'
@@ -765,7 +765,7 @@ class PropertiesUtils(SetupUtils):
                     print("  {}Can't connect to MySQL: {}{}".format(colors.DANGER, e, colors.ENDC))
 
         elif backend_type_str == 'Cloud Spanner':
-            Config.wrends_install = InstallTypes.NONE
+            Config.opendj_install = InstallTypes.NONE
             Config.rdbm_type = 'spanner'
             Config.rdbm_install = True
             Config.rdbm_install_type = InstallTypes.REMOTE
