@@ -470,7 +470,7 @@ class SetupUtils(Crypto64):
         if Config.persistence_type == 'couchbase' or 'default' in couchbase_mappings:
             changeTo = 'couchbase-server'
 
-        if Config.get('wrends_install') == InstallTypes.REMOTE or Config.get('cb_install') == InstallTypes.REMOTE:
+        if Config.get('opendj_install') == InstallTypes.REMOTE or Config.get('cb_install') == InstallTypes.REMOTE:
             changeTo = ''
 
         if serviceName in Config.service_requirements:
