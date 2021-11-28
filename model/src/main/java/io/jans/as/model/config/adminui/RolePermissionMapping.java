@@ -2,9 +2,9 @@ package io.jans.as.model.config.adminui;
 
 import java.util.List;
 
-public class RoleScopeMapping {
+public class RolePermissionMapping {
     private String role;
-    private List<String> scopes;
+    private List<String> permissions;
 
     public String getRole() {
         return role;
@@ -14,19 +14,19 @@ public class RoleScopeMapping {
         this.role = role;
     }
 
-    public List<String> getScopes() {
-        return scopes;
+    public List<String> getPermissions() {
+        return permissions;
     }
 
-    public void setScopes(List<String> scopes) {
-        this.scopes = scopes;
+    public void setPermissions(List<String> permissions) {
+        this.permissions = permissions;
     }
 
     @Override
     public String toString() {
-        return "RoleScopeMapping{" +
+        return "RolePermissionMapping{" +
                 "role='" + role + '\'' +
-                ", scopes=" + scopes +
+                ", permissions=" + permissions +
                 '}';
     }
 }
