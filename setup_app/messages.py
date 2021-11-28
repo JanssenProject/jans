@@ -1,5 +1,5 @@
 class msg:
-    
+
     MAIN_label = "System Information"
     HostForm_label = "Gathering Information"
     ServicesForm_label = "Select Services to Install"
@@ -34,7 +34,7 @@ class msg:
     installOxAuthRP_label = "Install OxAuthRP" 
     installPassport_label = "Install Passport" 
     installJansRadius_label = "Install Radius"
-    wrends_storages_label = "Store on OpenDJ"
+    opendj_storages_label = "Store on OpenDJ"
     installing_label = "Current"
     installOxd_label = "Install Oxd"
     installCasa_label = "Install Casa"
@@ -79,12 +79,12 @@ class msg:
     ask_installJansRadius = "Install Janssen Radius"
     ask_installCasa = "Install Casa"
     ask_installOxd = "Install Oxd"
-    ask_wrends_install = "Install OpenDJ"
+    ask_opendj_install = "Install OpenDJ"
     ask_installScimServer = "Install Scim Server"
     ask_installFido2 = "Install Fido2"
 
 
-    wrends_install_options = ["Don't Install","Install Locally","Use Remote OpenDJ"]
+    opendj_install_options = ["Don't Install","Install Locally","Use Remote OpenDJ"]
     oxd_url_label = "oxd Server URL"
     install_oxd_or_url_warning = "Please either enter oxd Server URL or check Install Oxd"
     oxd_connection_error = "Can't connect to oxd-server with url {}. Reason: {}"

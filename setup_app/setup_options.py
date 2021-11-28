@@ -27,9 +27,9 @@ def get_setup_options():
     }
 
     if not (getattr(base.argsp, 'remote_couchbase', None) or base.argsp.remote_rdbm or base.argsp.local_rdbm):
-        setupOptions['wrends_install'] = InstallTypes.LOCAL
+        setupOptions['opendj_install'] = InstallTypes.LOCAL
     else:
-        setupOptions['wrends_install'] = InstallTypes.NONE
+        setupOptions['opendj_install'] = InstallTypes.NONE
 
         if getattr(base.argsp, 'remote_couchbase', None):
             setupOptions['cb_install'] = InstallTypes.REMOTE
@@ -75,7 +75,7 @@ def get_setup_options():
 
     if base.profile == 'jans':
         if base.argsp.disable_local_ldap:
-            setupOptions['wrends_install'] = InstallTypes.NONE
+            setupOptions['opendj_install'] = InstallTypes.NONE
 
         if base.argsp.local_couchbase:
             setupOptions['cb_install'] = InstallTypes.LOCAL
@@ -131,7 +131,7 @@ def get_setup_options():
         setupOptions['dump_config_on_error'] = base.argsp.dump_config_on_error
 
         if base.argsp.remote_ldap:
-            setupOptions['wrends_install'] = InstallTypes.REMOTE
+            setupOptions['opendj_install'] = InstallTypes.REMOTE
 
         if base.argsp.no_data:
             setupOptions['loadData'] = False
@@ -150,7 +150,7 @@ def get_setup_options():
         setupOptions['properties_password'] = base.argsp.properties_password
 
     if base.profile == 'openbanking':
-        setupOptions['wrends_install'] = InstallTypes.NONE
+        setupOptions['opendj_install'] = InstallTypes.NONE
         if base.argsp.static_kid:
             setupOptions['staticKid'] = base.argsp.static_kid
 
