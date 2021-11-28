@@ -31,8 +31,8 @@ RUN wget -q https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/${JETTY_
 # ==========
 
 ENV CN_VERSION=1.0.0-SNAPSHOT
-ENV CN_BUILD_DATE='2021-11-19 02:42'
-ENV CN_SOURCE_URL=https://maven.jans.io/maven/io/jans/jans-config-api-server/${CN_VERSION}/jans-config-api-server-${CN_VERSION}.war
+ENV CN_BUILD_DATE='2021-11-22 02:35'
+ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api-server/${CN_VERSION}/jans-config-api-server-${CN_VERSION}.war
 
 # Install Jans Config API
 RUN wget -q ${CN_SOURCE_URL} -O /tmp/jans-config-api.war \
@@ -45,13 +45,27 @@ RUN wget -q ${CN_SOURCE_URL} -O /tmp/jans-config-api.war \
 # Ports exposed by config-api
 EXPOSE 8074
 
+# =======
+# Plugins
+# =======
+
+RUN mkdir -p /usr/share/java
+
+ENV SCIM_PLUGIN_BUILD_DATE='2021-11-08 19:07'
+ENV SCIM_PLUGIN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/scim-plugin/${CN_VERSION}/scim-plugin-${CN_VERSION}-distribution.jar
+RUN wget -q ${SCIM_PLUGIN_SOURCE_URL} -O /usr/share/java/scim-plugin.jar
+
+ENV ADMIN_UI_PLUGIN_BUILD_DATE='2021-11-08 19:07'
+ENV ADMIN_UI_SOURCE_URL=https://maven.jans.io/maven/io/jans/admin-ui-plugin/${CN_VERSION}/admin-ui-plugin-${CN_VERSION}-distribution.jar
+RUN wget -q ${ADMIN_UI_SOURCE_URL} -O /usr/share/java/admin-ui-plugin.jar
+
 # ======
 # Python
 # ======
 
 COPY requirements.txt /app/requirements.txt
 RUN pip3 install -U pip \
-    && pip3 install --no-cache-dir -r /app/requirements.txt \
+    && pip3 install --no-cache-dir --default-timeout=300 -r /app/requirements.txt \
     && rm -rf /src/jans-pycloudlib/.git
 
 # =======
@@ -152,16 +166,17 @@ LABEL name="Config API" \
     maintainer="Janssen Project <support@jans.io>" \
     vendor="Janssen" \
     version="1.0.0" \
-    release="b12" \
+    release="b11" \
     summary="Janssen Config API" \
     description=""
 
-RUN mkdir -p /etc/certs /app/templates/ /deploy /etc/jans/conf
+RUN mkdir -p /etc/certs /app/templates/ /deploy /etc/jans/conf ${JETTY_BASE}/jans-config-api/custom/libs ${JETTY_BASE}/jans-config-api/custom/config
 RUN touch /etc/hosts.back
 COPY jetty/jans-config-api.xml ${JETTY_BASE}/jans-config-api/webapps/
 COPY jetty/jetty-env.xml ${JETTY_BASE}/jans-config-api/webapps/jans-config-api/WEB-INF/
 COPY jetty/log4j2.xml ${JETTY_BASE}/jans-config-api/resources/
 COPY conf/*.tmpl /app/templates/
+COPY plugins /app/plugins
 COPY scripts /app/scripts
 RUN chmod +x /app/scripts/entrypoint.sh
 

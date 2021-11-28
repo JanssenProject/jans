@@ -1,2 +1,2 @@
 ruamel.yaml==0.16.10
--e git+https://github.com/JanssenProject/jans-pycloudlib@132da3fcc2bbea66a4bd2a7c4bcb7a7b7a1e87e4#egg=jans-pycloudlib
+-e 'git+https://github.com/JanssenProject/jans-cloud-native@bd1a605999b2c560077cb19d7c80d93f6cba3f5d#egg=jans-pycloudlib&subdirectory=jans-pycloudlib'

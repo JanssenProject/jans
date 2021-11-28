@@ -51,8 +51,8 @@ RUN wget -q https://github.com/fabioz/PyDev.Debugger/archive/refs/tags/pydev_deb
 # ===========
 
 ENV CN_VERSION=1.0.0-SNAPSHOT
-ENV CN_BUILD_DATE='2021-11-19 02:13'
-ENV CN_SOURCE_URL=https://maven.jans.io/maven/io/jans/jans-auth-server/${CN_VERSION}/jans-auth-server-${CN_VERSION}.war
+ENV CN_BUILD_DATE='2021-11-28 14:43'
+ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-server/${CN_VERSION}/jans-auth-server-${CN_VERSION}.war
 
 # Install Jans Auth
 RUN wget -q ${CN_SOURCE_URL} -O /tmp/jans-auth.war \
@@ -79,7 +79,7 @@ RUN wget -q https://repo1.maven.org/maven2/org/jsmpp/jsmpp/${JSMPP_VERSION}/jsmp
 
 COPY requirements.txt /app/requirements.txt
 RUN pip3 install -U pip \
-    && pip3 install --no-cache-dir -r /app/requirements.txt \
+    && pip3 install --no-cache-dir --default-timeout=300 -r /app/requirements.txt \
     && rm -rf /src/jans-pycloudlib/.git
 
 # =======
@@ -177,7 +177,8 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_SYNC_JKS_ENABLED=false \
     CN_SYNC_JKS_INTERVAL=30 \
     GOOGLE_PROJECT_ID="" \
-    GOOGLE_APPLICATION_CREDENTIALS=/etc/jans/conf/google-credentials.json
+    GOOGLE_APPLICATION_CREDENTIALS=/etc/jans/conf/google-credentials.json \
+    ADMIN_UI_JWKS=http://0.0.0.0:8080/jans-auth/restv1/jwks
 
 # ==========
 # misc stuff
