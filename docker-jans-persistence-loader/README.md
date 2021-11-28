@@ -77,7 +77,7 @@ The following environment variables are supported by the container:
 - `CN_GOOGLE_SPANNER_INSTANCE_ID`: Google Spanner instance ID.
 - `CN_GOOGLE_SPANNER_DATABASE_ID`: Google Spanner database ID.
 - `CN_AUTH_SERVER_URL`: Base URL of Janssen Auth server, i.e. `auth-server:8080` (default to empty string).
-- `CN_CONFIG_API_APPROVED_ISSUER`: config api approved issuer which defaults to https://hostname
+- `CN_TOKEN_SERVER_HOSTNAME`: Hostname of token server (default to empty string).
 
 ## Initializing Data
 

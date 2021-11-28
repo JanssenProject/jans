@@ -11,7 +11,7 @@ from ldap3.utils import dn as dnutils
 from ldif import LDIFParser
 
 from jans.pycloudlib.persistence.spanner import SpannerClient
-from jans.pycloudlib.utils import as_boolean
+# from jans.pycloudlib.utils import as_boolean
 
 from settings import LOGGING_CONFIG
 from utils import prepare_template_ctx
@@ -254,17 +254,12 @@ class SpannerBackend:
                     self.insert_into_subtable(table_name, column_mapping)
 
     def initialize(self):
-        def is_initialized():
-            return self.client.row_exists("jansClnt", self.manager.config.get("jca_client_id"))
-
-        should_skip = as_boolean(os.environ.get("CN_PERSISTENCE_SKIP_INITIALIZED", False))
-        if should_skip and is_initialized():
-            logger.info("Spanner backend already initialized")
-            return
-
         logger.info("Creating tables (if not exist)")
         self.create_tables()
         self.create_subtables()
+
+        logger.info("Updating schema (if required)")
+        self.update_schema()
 
         logger.info("Creating indexes (if not exist)")
         self.create_indexes()
@@ -406,3 +401,49 @@ class SpannerBackend:
                         column: item
                     },
                 )
+
+    def update_schema(self):
+        table_mapping = self.client.get_table_mapping()
+
+        # 1 - jansDefAcrValues is changed to multivalued (JSON type)
+        table_name = "jansClnt"
+        col_name = "jansDefAcrValues"
+        old_data_type = table_mapping[table_name][col_name]
+        data_type = self.get_data_type(col_name, table_name)
+
+        if not old_data_type.startswith("ARRAY"):
+            # get the value first before updating column type
+            acr_values = {
+                row["doc_id"]: row[col_name]
+                for row in self.client.search(table_name, ["doc_id", col_name])
+            }
+
+            # to change the storage format of a JSON column, drop the column and
+            # add the column back specifying the new storage format
+            self.client.database.update_ddl([
+                f"ALTER TABLE {self.client.quoted_id(table_name)} DROP COLUMN {self.client.quoted_id(col_name)}"
+            ])
+            self.client.database.update_ddl([
+                f"ALTER TABLE {self.client.quoted_id(table_name)} ADD COLUMN {self.client.quoted_id(col_name)} {data_type}"
+            ])
+
+            for doc_id, value in acr_values.items():
+                if not value:
+                    value_list = []
+                else:
+                    value_list = [value]
+                self.client.update(
+                    table_name,
+                    doc_id,
+                    {col_name: self.transform_value(col_name, value_list)}
+                )
+
+        # 2 - jansUsrDN column must be in jansToken table
+        table_name = "jansToken"
+        col_name = "jansUsrDN"
+
+        if col_name not in table_mapping[table_name]:
+            data_type = self.get_data_type(col_name, table_name)
+            self.client.database.update_ddl([
+                f"ALTER TABLE {self.client.quoted_id(table_name)} ADD COLUMN {self.client.quoted_id(col_name)} {data_type}"
+            ])

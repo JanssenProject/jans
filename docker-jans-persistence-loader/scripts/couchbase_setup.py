@@ -12,7 +12,7 @@ from jans.pycloudlib.persistence.couchbase import get_couchbase_superuser
 from jans.pycloudlib.persistence.couchbase import get_couchbase_password
 from jans.pycloudlib.persistence.couchbase import get_couchbase_superuser_password
 from jans.pycloudlib.persistence.couchbase import CouchbaseClient
-from jans.pycloudlib.utils import as_boolean
+# from jans.pycloudlib.utils import as_boolean
 
 from settings import LOGGING_CONFIG
 from utils import prepare_template_ctx
@@ -232,7 +232,7 @@ class CouchbaseBackend:
         logger.info("Minimum memory size per node for Couchbase buckets was determined as {} MB".format(min_mem))
 
         if total_mem < min_mem:
-            logger.error("Available quota on couchbase node is less than {} MB".format(min_mem))
+            logger.warning("Available quota on couchbase node is less than {} MB".format(min_mem))
 
         persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "ldap")
         ldap_mapping = os.environ.get("CN_PERSISTENCE_LDAP_MAPPING", "default")
@@ -377,30 +377,6 @@ class CouchbaseBackend:
                             logger.warning("Failed to execute query, reason={}".format(req.json()))
 
     def initialize(self):
-        def is_initialized():
-            persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "couchbase")
-            ldap_mapping = os.environ.get("CN_PERSISTENCE_LDAP_MAPPING", "default")
-            bucket_prefix = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
-
-            # only default and user buckets buckets that may have initial data;
-            # these data also affected by LDAP mapping selection;
-            bucket, key = bucket_prefix, "configuration_jans-auth"
-
-            # if `hybrid` is selected and default mapping is stored in LDAP,
-            # the default bucket won't have data, hence we check the user bucket instead
-            if persistence_type == "hybrid" and ldap_mapping == "default":
-                bucket, key = f"{bucket_prefix}_user", "groups_60B7"
-
-            req = self.client.exec_query(
-                f"SELECT objectClass FROM {bucket} USE KEYS $key",
-                key=key,
-            )
-
-            if req.ok:
-                data = req.json()
-                return bool(data["results"])
-            return False
-
         num_replica = int(os.environ.get("CN_COUCHBASE_INDEX_NUM_REPLICA", 0))
         num_indexer_nodes = len(self.client.get_index_nodes())
 
@@ -416,13 +392,6 @@ class CouchbaseBackend:
 
         time.sleep(5)
         self.create_indexes(bucket_mappings)
-
-        should_skip = as_boolean(
-            os.environ.get("CN_PERSISTENCE_SKIP_INITIALIZED", False),
-        )
-        if should_skip and is_initialized():
-            logger.info("Couchbase backend already initialized")
-            return
 
         time.sleep(5)
         self.import_ldif(bucket_mappings)
