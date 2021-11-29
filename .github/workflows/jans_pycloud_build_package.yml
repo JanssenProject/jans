@@ -27,8 +27,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
 
       - name: Import GPG key
         id: import_gpg
@@ -46,7 +44,7 @@ jobs:
           git checkout -b $PR_DOCKER_DEV_BRANCH_NAME || git checkout $PR_DOCKER_DEV_BRANCH_NAME
           dockerimages="auth-server certmanager client-api config-api configurator fido2 persistence-loader scim"
           for image in $dockerimages; do
-            echo "-e git+https://github.com/$GITHUB_REPOSITORY@$PR_DOCKER_DEV_BRANCH_NAME#egg=jans-pycloudlib&subdirectory=jans-pycloudlib" > ./docker-jans-$image/requirements.txt || exit 1
+            sed -i '/git+https/c\git+https://github.com/$GITHUB_REPOSITORY@$PR_DOCKER_DEV_BRANCH_NAME#egg=jans-pycloudlib&subdirectory=jans-pycloudlib' ./docker-jans-$image/requirements.txt
           done
 
       - name: Configure Git and open dev PR
@@ -67,7 +65,7 @@ jobs:
           git checkout -b $PR_DOCKER_STABLE_BRANCH_NAME || git checkout $PR_DOCKER_STABLE_BRANCH_NAME
           dockerimages="auth-server certmanager client-api config-api configurator fido2 persistence-loader scim"]
           for image in $dockerimages; do
-            echo "-e git+https://github.com/$GITHUB_REPOSITORY@PR_DOCKER_STABLE_BRANCH_NAME#egg=jans-pycloudlib&subdirectory=jans-pycloudlib" > ./docker-jans-$image/requirements.txt || exit 1
+            sed -i '/git+https/c\git+https://github.com/$GITHUB_REPOSITORY@$PR_DOCKER_STABLE_BRANCH_NAME#egg=jans-pycloudlib&subdirectory=jans-pycloudlib' ./docker-jans-$image/requirements.txt
           done
 
       - name: Configure Git and open stable PR
