@@ -53,7 +53,7 @@ jobs:
           token: ${{ secrets.MOWORKFLOWTOKEN }}
           committer: mo-auto <54212639+mo-auto@users.noreply.github.com>
           author: mo-auto <54212639+mo-auto@users.noreply.github.com>
-          branch: $PR_DOCKER_DEV_BRANCH_NAME
+          branch: ${{ PR_DOCKER_DEV_BRANCH_NAME }}
           title: 'chore(Dockerfiles): updated build dates'
           body: |
             - Always leave open
