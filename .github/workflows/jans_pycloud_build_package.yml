@@ -83,7 +83,7 @@ jobs:
           token: ${{ secrets.MOWORKFLOWTOKEN }}
           committer: mo-auto <54212639+mo-auto@users.noreply.github.com>
           author: mo-auto <54212639+mo-auto@users.noreply.github.com>
-          branch: ${{ $PR_DOCKER_STABLE_BRANCH_NAME }}
+          branch: ${{ env.PR_DOCKER_STABLE_BRANCH_NAME }}
           title: 'chore(Dockerfile): updated build date'
           body: |
             - Merge PR. Do not leave open
@@ -105,7 +105,7 @@ jobs:
           token: ${{ secrets.MOWORKFLOWTOKEN }}
           committer: mo-auto <54212639+mo-auto@users.noreply.github.com>
           author: mo-auto <54212639+mo-auto@users.noreply.github.com>
-          branch: ${{ PR_DOCKER_DEV_BRANCH_NAME }}
+          branch: ${{ env.PR_DOCKER_DEV_BRANCH_NAME }}
           title: 'chore(Dockerfile): updated build date'
           body: |
             - Always leave open
