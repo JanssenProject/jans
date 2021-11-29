@@ -41,7 +41,6 @@ jobs:
         if: github.event_name == 'pull_request'
         id: build_dev_reqs
         run: |
-          git checkout -b $PR_DOCKER_DEV_BRANCH_NAME || git checkout $PR_DOCKER_DEV_BRANCH_NAME
           dockerimages="auth-server certmanager client-api config-api configurator fido2 persistence-loader scim"
           for image in $dockerimages; do
             sed -i '/git+https/c\git+https://github.com/$GITHUB_REPOSITORY@$PR_DOCKER_DEV_BRANCH_NAME#egg=jans-pycloudlib&subdirectory=jans-pycloudlib' ./docker-jans-$image/requirements.txt
@@ -55,14 +54,12 @@ jobs:
           git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
           git add -A
           git commit -S -s -m "chore(jans-pycloudlib): updated dev build"
-          PR=$(gh pr create --head $PR_DOCKER_DEV_BRANCH_NAME --assignee "moabu" --base "master" --body "Updated dev build. Auto-generated." --label "enhancement,bot" --reviewer "moabu" --title "chore(jans-pycloudlib): updated dev build" || echo "PR Branch is already open")
 
 
       - name: Update stable requriments in docker images
         if: github.event_name != 'pull_request'
         id: build_stable_reqs
         run: |
-          git checkout -b $PR_DOCKER_STABLE_BRANCH_NAME || git checkout $PR_DOCKER_STABLE_BRANCH_NAME
           dockerimages="auth-server certmanager client-api config-api configurator fido2 persistence-loader scim"]
           for image in $dockerimages; do
             sed -i '/git+https/c\git+https://github.com/$GITHUB_REPOSITORY@$PR_DOCKER_STABLE_BRANCH_NAME#egg=jans-pycloudlib&subdirectory=jans-pycloudlib' ./docker-jans-$image/requirements.txt
@@ -76,5 +73,47 @@ jobs:
           git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
           git add -A
           git commit -S -s -m "chore(jans-pycloudlib): updated stable build"
-          PR=$(gh pr create --assignee "moabu" --base "master" --body "Updated stable build. Auto-generated." --label "enhancement,bot" --reviewer "moabu" --title "chore(jans-pycloudlib): updated stable build" || echo "PR Branch is already open")
 
+      # Buggy behaviour with gh pr command. Will use the following action until bugs have been fixed.
+      #PR=$(gh pr create --head $PR_DOCKER_DEV_BRANCH_NAME --assignee "moabu" --base "master" --body "Updated build date. Auto-generated." --label "enhancement,bot" --reviewer "moabu" --title "chore(Dockerfile): updated build dates" || echo "PR Branch is already open")
+      - name: Open PR
+        if: github.event_name != 'pull_request'
+        uses: peter-evans/create-pull-request@v3
+        with:
+          token: ${{ secrets.MOWORKFLOWTOKEN }}
+          committer: mo-auto <54212639+mo-auto@users.noreply.github.com>
+          author: mo-auto <54212639+mo-auto@users.noreply.github.com>
+          branch: $PR_DOCKER_STABLE_BRANCH_NAME
+          title: 'chore(Dockerfile): updated build date'
+          body: |
+            - Merge PR. Do not leave open
+            - Updated stable build
+            - Auto-generated.
+          labels: |
+            enhancement
+            bot
+          assignees: moabu
+          reviewers: moabu
+          delete-branch: true
+
+      # Buggy behaviour with gh pr command. Will use the following action until bugs have been fixed.
+      #PR=$(gh pr create --head $PR_DOCKER_DEV_BRANCH_NAME --assignee "moabu" --base "master" --body "Updated build date. Auto-generated." --label "enhancement,bot" --reviewer "moabu" --title "chore(Dockerfile): updated build dates" || echo "PR Branch is already open")
+      - name: Open PR
+        if: github.event_name == 'pull_request'
+        uses: peter-evans/create-pull-request@v3
+        with:
+          token: ${{ secrets.MOWORKFLOWTOKEN }}
+          committer: mo-auto <54212639+mo-auto@users.noreply.github.com>
+          author: mo-auto <54212639+mo-auto@users.noreply.github.com>
+          branch: $PR_DOCKER_DEV_BRANCH_NAME
+          title: 'chore(Dockerfile): updated build date'
+          body: |
+            - Always leave open
+            - Updated stable build
+            - Auto-generated.
+          labels: |
+            enhancement
+            bot
+          assignees: moabu
+          reviewers: moabu
+          delete-branch: true
