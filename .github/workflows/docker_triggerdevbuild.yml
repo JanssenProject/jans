@@ -35,17 +35,11 @@ jobs:
           sudo apt-get update
           sudo apt-get install jq
 
-      - uses: actions/checkout@v2
-
-      - name: Update images
+      - name: Update Images and open PR
         run: |
           git checkout -b $PR_DOCKER_DEV_BRANCH_NAME || git checkout $PR_DOCKER_DEV_BRANCH_NAME
           cd automation
           sudo python3 auto_update_build_date.py
-
-
-      - name: Configure Git
-        run: |
           git config user.name "mo-auto"
           git config user.email "54212639+mo-auto@users.noreply.github.com"
           git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
