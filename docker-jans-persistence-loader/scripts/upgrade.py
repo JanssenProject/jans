@@ -25,7 +25,6 @@ Entry = namedtuple("Entry", ["id", "attrs"])
 
 def doc_id_from_dn(dn):
     parsed_dn = dnutils.parse_dn(dn)
-    # rdn_name = parsed_dn[0][0]
     doc_id = parsed_dn[0][1]
 
     if doc_id == "jans":
@@ -43,7 +42,18 @@ def id_from_dn(dn):
     return '_'.join(dns) or "_"
 
 
-class LDAPBackend:
+class BaseBackend:
+    """Base class for backend adapters. Must be sub-classed per
+    implementation details.
+    """
+
+    def __init__(self):
+        self.jansAdminUIRoleId = "inum=43F1,ou=scopes,o=jans"
+        self.jansAdminUiClaim = "inum=0A01,ou=attributes,o=jans"
+        self.jansAttrs = '{"spontaneousClientId":null,"spontaneousClientScopes":null,"showInConfigurationEndpoint":true}'
+
+
+class LDAPBackend(BaseBackend):
     def __init__(self, manager):
         self.manager = manager
         self.client = LdapClient(manager)
@@ -96,16 +106,15 @@ class LDAPBackend:
 
     def update_scopes_entries(self):
         # add jansAdminUIRole claim to profile scope
-        id_ = "inum=43F1,ou=scopes,o=jans"
         kwargs = {}
 
-        entry = self.get_entry(id_, **kwargs)
+        entry = self.get_entry(self.jansAdminUIRoleId, **kwargs)
         if not entry:
             return
 
-        if "inum=0A01,ou=attributes,o=jans" not in entry.attrs["jansClaim"]:
-            entry.attrs["jansClaim"].append("inum=0A01,ou=attributes,o=jans")
-            self.modify_entry(id_, entry.attrs, **kwargs)
+        if self.jansAdminUiClaim not in entry.attrs["jansClaim"]:
+            entry.attrs["jansClaim"].append(self.jansAdminUiClaim)
+            self.modify_entry(self.jansAdminUIRoleId, entry.attrs, **kwargs)
 
     def update_clients_entries(self):
         jca_client_id = self.manager.config.get("jca_client_id")
@@ -153,11 +162,12 @@ class LDAPBackend:
                 continue
 
             if "jansAttrs" not in entry.attrs:
-                entry.attrs["jansAttrs"] = '{"spontaneousClientId":null,"spontaneousClientScopes":null,"showInConfigurationEndpoint":true}'
+                entry.attrs[
+                    "jansAttrs"] = self.jansAttrs
                 self.modify_entry(id_, entry.attrs, **kwargs)
 
 
-class SQLBackend:
+class SQLBackend(BaseBackend):
     def __init__(self, manager):
         self.manager = manager
         self.client = SQLClient()
@@ -173,7 +183,6 @@ class SQLBackend:
 
     def modify_entry(self, key, attrs=None, **kwargs):
         attrs = attrs or {}
-        # del_flag = kwargs.get("delete_attr", False)
         table_name = kwargs.get("table_name")
         return self.client.update(table_name, key, attrs), ""
 
@@ -194,7 +203,7 @@ class SQLBackend:
 
     def update_scopes_entries(self):
         # add jansAdminUIRole claim to profile scope
-        id_ = doc_id_from_dn("inum=43F1,ou=scopes,o=jans")
+        id_ = doc_id_from_dn(self.jansAdminUIRoleId)
         kwargs = {"table_name": "jansScope"}
 
         entry = self.get_entry(id_, **kwargs)
@@ -202,8 +211,8 @@ class SQLBackend:
         if not entry:
             return
 
-        if "inum=0A01,ou=attributes,o=jans" not in entry.attrs["jansClaim"]["v"]:
-            entry.attrs["jansClaim"]["v"].append("inum=0A01,ou=attributes,o=jans")
+        if self.jansAdminUiClaim not in entry.attrs["jansClaim"]["v"]:
+            entry.attrs["jansClaim"]["v"].append(self.jansAdminUiClaim)
             self.modify_entry(id_, entry.attrs, **kwargs)
 
     def update_clients_entries(self):
@@ -253,11 +262,12 @@ class SQLBackend:
                 continue
 
             if "jansAttrs" not in entry.attrs:
-                entry.attrs["jansAttrs"] = '{"spontaneousClientId":null,"spontaneousClientScopes":null,"showInConfigurationEndpoint":true}'
+                entry.attrs[
+                    "jansAttrs"] = self.jansAttrs
                 self.modify_entry(id_, entry.attrs, **kwargs)
 
 
-class CouchbaseBackend:
+class CouchbaseBackend(BaseBackend):
     def __init__(self, manager):
         self.manager = manager
         hostname = os.environ.get("CN_COUCHBASE_URL", "localhost")
@@ -331,7 +341,7 @@ class CouchbaseBackend:
 
     def update_scopes_entries(self):
         # add jansAdminUIRole claim to profile scope
-        id_ = id_from_dn("inum=43F1,ou=scopes,o=jans")
+        id_ = id_from_dn(self.jansAdminUIRoleId)
         bucket = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
         kwargs = {"bucket": bucket}
 
@@ -339,8 +349,8 @@ class CouchbaseBackend:
         if not entry:
             return
 
-        if "inum=0A01,ou=attributes,o=jans" not in entry.attrs["jansClaim"]:
-            entry.attrs["jansClaim"].append("inum=0A01,ou=attributes,o=jans")
+        if self.jansAdminUiClaim not in entry.attrs["jansClaim"]:
+            entry.attrs["jansClaim"].append(self.jansAdminUiClaim)
             self.modify_entry(id_, entry.attrs, **kwargs)
 
     def update_clients_entries(self):
@@ -391,7 +401,8 @@ class CouchbaseBackend:
                 continue
 
             if "jansAttrs" not in entry.attrs:
-                entry.attrs["jansAttrs"] = '{"spontaneousClientId":null,"spontaneousClientScopes":null,"showInConfigurationEndpoint":true}'
+                entry.attrs[
+                    "jansAttrs"] = self.jansAttrs
                 self.modify_entry(id_, entry.attrs, **kwargs)
 
     def update_misc(self):
@@ -416,7 +427,7 @@ class CouchbaseBackend:
         self.client.exec_query(f'DROP INDEX `{bucket}`.`def_jans_fix_oc`')
 
 
-class SpannerBackend:
+class SpannerBackend(BaseBackend):
     def __init__(self, manager):
         self.manager = manager
         self.client = SpannerClient()
@@ -452,7 +463,7 @@ class SpannerBackend:
 
     def update_scopes_entries(self):
         # add jansAdminUIRole claim to profile scope
-        id_ = doc_id_from_dn("inum=43F1,ou=scopes,o=jans")
+        id_ = doc_id_from_dn(self.jansAdminUIRoleId)
         kwargs = {"table_name": "jansScope"}
 
         entry = self.get_entry(id_, **kwargs)
@@ -460,8 +471,8 @@ class SpannerBackend:
         if not entry:
             return
 
-        if "inum=0A01,ou=attributes,o=jans" not in entry.attrs["jansClaim"]:
-            entry.attrs["jansClaim"].append("inum=0A01,ou=attributes,o=jans")
+        if self.jansAdminUiClaim not in entry.attrs["jansClaim"]:
+            entry.attrs["jansClaim"].append(self.jansAdminUiClaim)
             self.modify_entry(id_, entry.attrs, **kwargs)
 
     def update_clients_entries(self):
@@ -511,7 +522,8 @@ class SpannerBackend:
                 continue
 
             if "jansAttrs" not in entry.attrs:
-                entry.attrs["jansAttrs"] = '{"spontaneousClientId":null,"spontaneousClientScopes":null,"showInConfigurationEndpoint":true}'
+                entry.attrs[
+                    "jansAttrs"] = self.jansAttrs
                 self.modify_entry(id_, entry.attrs, **kwargs)
 
 

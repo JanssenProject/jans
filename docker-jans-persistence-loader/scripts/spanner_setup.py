@@ -11,7 +11,6 @@ from ldap3.utils import dn as dnutils
 from ldif import LDIFParser
 
 from jans.pycloudlib.persistence.spanner import SpannerClient
-# from jans.pycloudlib.utils import as_boolean
 
 from settings import LOGGING_CONFIG
 from utils import prepare_template_ctx

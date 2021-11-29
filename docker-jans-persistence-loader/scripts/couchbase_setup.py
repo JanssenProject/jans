@@ -12,7 +12,6 @@ from jans.pycloudlib.persistence.couchbase import get_couchbase_superuser
 from jans.pycloudlib.persistence.couchbase import get_couchbase_password
 from jans.pycloudlib.persistence.couchbase import get_couchbase_superuser_password
 from jans.pycloudlib.persistence.couchbase import CouchbaseClient
-# from jans.pycloudlib.utils import as_boolean
 
 from settings import LOGGING_CONFIG
 from utils import prepare_template_ctx
