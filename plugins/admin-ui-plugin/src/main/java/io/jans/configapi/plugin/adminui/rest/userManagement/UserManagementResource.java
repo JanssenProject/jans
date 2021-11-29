@@ -1,11 +1,10 @@
 package io.jans.configapi.plugin.adminui.rest.userManagement;
 
+import io.jans.as.model.config.adminui.AdminPermission;
+import io.jans.as.model.config.adminui.AdminRole;
 import io.jans.as.model.config.adminui.RolePermissionMapping;
 import io.jans.configapi.filters.ProtectedApi;
-
 import io.jans.configapi.plugin.adminui.model.exception.ApplicationException;
-import io.jans.configapi.plugin.adminui.model.userManagement.UserManagementRequest;
-
 import io.jans.configapi.plugin.adminui.service.userManagement.UserManagementService;
 import io.jans.configapi.plugin.adminui.utils.ErrorResponse;
 import io.jans.configapi.plugin.adminui.utils.PluginConstants;
@@ -23,10 +22,12 @@ import java.util.List;
 public class UserManagementResource {
 
     static final String GET_ADMINUI_ROLES = "/getRoles";
-    static final String ADD_ADMINUI_ROLES = "/addRoles";
+    static final String ADD_ADMINUI_ROLE = "/addRole";
+    static final String EDIT_ADMINUI_ROLE = "/editRole";
     static final String DELETE_ADMINUI_ROLE = "/deleteRole";
     static final String GET_ADMINUI_PERMISSIONS = "/getPermissions";
-    static final String ADD_ADMINUI_PERMISSIONS = "/addPermissions";
+    static final String ADD_ADMINUI_PERMISSION = "/addPermission";
+    static final String EDIT_ADMINUI_PERMISSION = "/editPermission";
     static final String DELETE_ADMINUI_PERMISSION = "/deletePermission";
     static final String GET_ADMINUI_ROLE_PERMISSIONS_MAPPING = "/getRolePermissionsMapping";
     static final String MAP_PERMISSIONS_TO_ROLE = "/mapPermissionsToRole";
@@ -45,7 +46,7 @@ public class UserManagementResource {
     public Response getRoles() {
         try {
             log.info("Get all Admin-UI roles.");
-            List<String> roles = userManagementService.getRoles();
+            List<AdminRole> roles = userManagementService.getRoles();
             log.info("Roles received from Auth Server.");
             return Response.ok(roles).build();
         } catch (ApplicationException e) {
@@ -57,14 +58,14 @@ public class UserManagementResource {
         }
     }
 
-    @PUT
-    @Path(ADD_ADMINUI_ROLES)
+    @POST
+    @Path(ADD_ADMINUI_ROLE)
     @Produces(MediaType.APPLICATION_JSON)
     @ProtectedApi(scopes = PluginConstants.ADMINUI_PERMISSIONS_WRITE)
-    public Response addRoles(@Valid @NotNull UserManagementRequest userManagementRequest) {
+    public Response addRole(@Valid @NotNull AdminRole roleArg) {
         try {
             log.info("Adding Admin-UI role.");
-            List<String> savedRoles = userManagementService.addRoles(userManagementRequest.getRoles());
+            List<AdminRole> savedRoles = userManagementService.addRole(roleArg);
             log.info("Added Admin-UI role..");
             return Response.ok(savedRoles).build();
         } catch (ApplicationException e) {
@@ -76,14 +77,33 @@ public class UserManagementResource {
         }
     }
 
+    @PUT
+    @Path(EDIT_ADMINUI_ROLE)
+    @Produces(MediaType.APPLICATION_JSON)
+    @ProtectedApi(scopes = PluginConstants.ADMINUI_PERMISSIONS_WRITE)
+    public Response editRole(@Valid @NotNull AdminRole roleArg) {
+        try {
+            log.info("Editing Admin-UI role.");
+            List<AdminRole> savedRoles = userManagementService.editRole(roleArg);
+            log.info("Edited Admin-UI role..");
+            return Response.ok(savedRoles).build();
+        } catch (ApplicationException e) {
+            log.error(ErrorResponse.EDIT_ADMIUI_ROLES_ERROR.getDescription(), e);
+            return Response.status(e.getErrorCode()).entity(e.getMessage()).build();
+        } catch (Exception e) {
+            log.error(ErrorResponse.EDIT_ADMIUI_ROLES_ERROR.getDescription(), e);
+            return Response.serverError().entity(e.getMessage()).build();
+        }
+    }
+
     @DELETE
     @Path(DELETE_ADMINUI_ROLE)
     @Produces(MediaType.APPLICATION_JSON)
     @ProtectedApi(scopes = PluginConstants.ADMINUI_PERMISSIONS_WRITE)
-    public Response deleteRole(@Valid @NotNull UserManagementRequest userManagementRequest) {
+    public Response deleteRole(@Valid @NotNull AdminRole roleArg) {
         try {
             log.info("Deleting Admin-UI role.");
-            List<String> roles = userManagementService.deleteRole(userManagementRequest.getRole());
+            List<AdminRole> roles = userManagementService.deleteRole(roleArg);
             log.info("Deleted Admin-UI role..");
             return Response.ok(roles).build();
         } catch (ApplicationException e) {
@@ -102,7 +122,7 @@ public class UserManagementResource {
     public Response getPermissions() {
         try {
             log.info("Get all Admin-UI permissions.");
-            List<String> permissions = userManagementService.getPermissions();
+            List<AdminPermission> permissions = userManagementService.getPermissions();
             log.info("Permissions received from Auth Server.");
             return Response.ok(permissions).build();
         } catch (ApplicationException e) {
@@ -114,14 +134,14 @@ public class UserManagementResource {
         }
     }
 
-    @PUT
-    @Path(ADD_ADMINUI_PERMISSIONS)
+    @POST
+    @Path(ADD_ADMINUI_PERMISSION)
     @Produces(MediaType.APPLICATION_JSON)
     @ProtectedApi(scopes = PluginConstants.ADMINUI_PERMISSIONS_WRITE)
-    public Response addPermissions(@Valid @NotNull UserManagementRequest userManagementRequest) {
+    public Response addPermission(@Valid @NotNull AdminPermission permissionArg) {
         try {
             log.info("Adding Admin-UI permissions.");
-            List<String> savedPermissions = userManagementService.addPermissions(userManagementRequest.getPermissions());
+            List<AdminPermission> savedPermissions = userManagementService.addPermission(permissionArg);
             log.info("Added Admin-UI permissions..");
             return Response.ok(savedPermissions).build();
         } catch (ApplicationException e) {
@@ -133,14 +153,33 @@ public class UserManagementResource {
         }
     }
 
+    @PUT
+    @Path(EDIT_ADMINUI_PERMISSION)
+    @Produces(MediaType.APPLICATION_JSON)
+    @ProtectedApi(scopes = PluginConstants.ADMINUI_PERMISSIONS_WRITE)
+    public Response editPermission(@Valid @NotNull AdminPermission permissionArg) {
+        try {
+            log.info("Editing Admin-UI permissions.");
+            List<AdminPermission> savedPermissions = userManagementService.editPermission(permissionArg);
+            log.info("Edited Admin-UI permissions..");
+            return Response.ok(savedPermissions).build();
+        } catch (ApplicationException e) {
+            log.error(ErrorResponse.EDIT_ADMIUI_ROLES_ERROR.getDescription(), e);
+            return Response.status(e.getErrorCode()).entity(e.getMessage()).build();
+        } catch (Exception e) {
+            log.error(ErrorResponse.SAVE_ADMIUI_PERMISSIONS_ERROR.getDescription(), e);
+            return Response.serverError().entity(e.getMessage()).build();
+        }
+    }
+
     @DELETE
     @Path(DELETE_ADMINUI_PERMISSION)
     @Produces(MediaType.APPLICATION_JSON)
     @ProtectedApi(scopes = PluginConstants.ADMINUI_PERMISSIONS_WRITE)
-    public Response deletePermission(@Valid @NotNull UserManagementRequest userManagementRequest) {
+    public Response deletePermission(@Valid @NotNull AdminPermission permissionArg) {
         try {
             log.info("Deleting Admin-UI permission.");
-            List<String> permissions = userManagementService.deletePermission(userManagementRequest.getPermission());
+            List<AdminPermission> permissions = userManagementService.deletePermission(permissionArg);
             log.info("Deleted Admin-UI permission..");
             return Response.ok(permissions).build();
         } catch (ApplicationException e) {
@@ -175,10 +214,10 @@ public class UserManagementResource {
     @Path(MAP_PERMISSIONS_TO_ROLE)
     @Produces(MediaType.APPLICATION_JSON)
     @ProtectedApi(scopes = PluginConstants.ADMINUI_PERMISSIONS_WRITE)
-    public Response mapPermissionsToRole(@Valid @NotNull UserManagementRequest userManagementRequest) {
+    public Response mapPermissionsToRole(@Valid @NotNull RolePermissionMapping rolePermissionMappingArg) {
         try {
             log.info("Mapping permissions to Admin-UI role.");
-            List<RolePermissionMapping> roleScopeMapping = userManagementService.mapPermissionsToRole(userManagementRequest);
+            List<RolePermissionMapping> roleScopeMapping = userManagementService.mapPermissionsToRole(rolePermissionMappingArg);
             log.info("Mapped permissions to Admin-UI role..");
             return Response.ok(roleScopeMapping).build();
         } catch (ApplicationException e) {
@@ -194,10 +233,10 @@ public class UserManagementResource {
     @Path(REMOVE_PERMISSIONS_FROM_ROLE)
     @Produces(MediaType.APPLICATION_JSON)
     @ProtectedApi(scopes = PluginConstants.ADMINUI_PERMISSIONS_WRITE)
-    public Response removePermissionsFromRole(@Valid @NotNull UserManagementRequest userManagementRequest) {
+    public Response removePermissionsFromRole(@Valid @NotNull RolePermissionMapping rolePermissionMappingArg) {
         try {
             log.info("Removing permissions to Admin-UI role.");
-            List<RolePermissionMapping> roleScopeMapping = userManagementService.removePermissionsFromRole(userManagementRequest);
+            List<RolePermissionMapping> roleScopeMapping = userManagementService.removePermissionsFromRole(rolePermissionMappingArg);
             log.info("Removed permissions to Admin-UI role..");
             return Response.ok(roleScopeMapping).build();
         } catch (ApplicationException e) {
