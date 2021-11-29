@@ -35,9 +35,8 @@ jobs:
           sudo apt-get update
           sudo apt-get install jq
 
-      - name: Update Images and open PR
+      - name: Update Images
         run: |
-          git checkout -b $PR_DOCKER_DEV_BRANCH_NAME || git checkout $PR_DOCKER_DEV_BRANCH_NAME
           cd automation
           sudo python3 auto_update_build_date.py
           git config user.name "mo-auto"
@@ -45,4 +44,24 @@ jobs:
           git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
           git add -A
           git commit -S -s -m "chore(Dockerfile): updated build dates"
-          PR=$(gh pr create --head $PR_DOCKER_DEV_BRANCH_NAME --assignee "moabu" --base "master" --body "Updated build date. Auto-generated." --label "enhancement,bot" --reviewer "moabu" --title "chore(Dockerfile): updated build dates" || echo "PR Branch is already open")
+
+      # Buggy behaviour with gh pr command. Will use the following action until bugs have been fixed.
+      #PR=$(gh pr create --head $PR_DOCKER_DEV_BRANCH_NAME --assignee "moabu" --base "master" --body "Updated build date. Auto-generated." --label "enhancement,bot" --reviewer "moabu" --title "chore(Dockerfiles): updated build dates" || echo "PR Branch is already open")
+      - name: Open PR
+        uses: peter-evans/create-pull-request@v3
+        with:
+          token: ${{ secrets.MOWORKFLOWTOKEN }}
+          committer: mo-auto <54212639+mo-auto@users.noreply.github.com>
+          author: mo-auto <54212639+mo-auto@users.noreply.github.com>
+          branch: $PR_DOCKER_DEV_BRANCH_NAME
+          title: 'chore(Dockerfiles): updated build dates'
+          body: |
+            - Always leave open
+            - Updated build dates for images.
+            - Auto-generated.
+          labels: |
+            enhancement
+            bot
+          assignees: moabu
+          reviewers: moabu
+          delete-branch: true
