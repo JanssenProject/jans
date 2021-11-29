@@ -21,9 +21,11 @@ public enum ErrorResponse {
     ERROR_IN_MAPPING_ROLE_PERMISSION("Error in mapping role-permission."),
     GET_ADMIUI_ROLES_ERROR("Error in fetching Admin UI roles."),
     SAVE_ADMIUI_ROLES_ERROR("Error in saving Admin UI roles."),
+    EDIT_ADMIUI_ROLES_ERROR("Error in editing Admin UI roles."),
     DELETE_ADMIUI_ROLES_ERROR("Error in deleting Admin UI roles."),
     GET_ADMIUI_PERMISSIONS_ERROR("Error in fetching Admin UI permissions."),
     SAVE_ADMIUI_PERMISSIONS_ERROR("Error in saving Admin UI permissions."),
+    EDIT_ADMIUI_PERMISSIONS_ERROR("Error in editing Admin UI permissions."),
     DELETE_ADMIUI_PERMISSIONS_ERROR("Error in deleting Admin UI permissions."),
     UNABLE_TO_DELETE_ROLE_MAPPED_TO_PERMISSIONS("Role is mapped to permissions so cannot be deleted. Please remove the permissions mapped before deleting the role."),
     UNABLE_TO_DELETE_PERMISSION_MAPPED_TO_ROLE("Permission is mapped to role so cannot be deleted. Please remove the permission mapped to the role before deleting it.");
