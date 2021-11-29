@@ -4,23 +4,23 @@ import java.util.List;
 
 public class DynamicConfig {
 
-    private List<String> roles;
-    private List<String> permissions;
+    private List<AdminRole> roles;
+    private List<AdminPermission> permissions;
     private List<RolePermissionMapping> rolePermissionMapping;
 
-    public List<String> getRoles() {
+    public List<AdminRole> getRoles() {
         return roles;
     }
 
-    public void setRoles(List<String> roles) {
+    public void setRoles(List<AdminRole> roles) {
         this.roles = roles;
     }
 
-    public List<String> getPermissions() {
+    public List<AdminPermission> getPermissions() {
         return permissions;
     }
 
-    public void setPermissions(List<String> permissions) {
+    public void setPermissions(List<AdminPermission> permissions) {
         this.permissions = permissions;
     }
 
