@@ -51,16 +51,20 @@ class BaseBackend:
         self.jans_admin_ui_role_id = "inum=43F1,ou=scopes,o=jans"
         self.jans_admin_ui_claim = "inum=0A01,ou=attributes,o=jans"
         self.jans_attrs = '{"spontaneousClientId":null,"spontaneousClientScopes":null,"showInConfigurationEndpoint":true}'
-        # jans_stat, SCIM users.read, SCIM users.write scopes that get added to config-api client
-        self.jans_config_api_stat_scim_scopes = [
-            "inum=C4F7,ou=scopes,o=jans",  # jans_stat
+        # SCIM users.read, SCIM users.write scopes that get added to config-api client
+        self.jans_scim_scopes = [
             "inum=1200.2B7428,ou=scopes,o=jans",  # users.read scope
             "inum=1200.0A0198,ou=scopes,o=jans",  # users.write scope
+        ]
+        # jans_stat
+        self.jans_stat_scopes = [
+            "inum=C4F7,ou=scopes,o=jans",  # jans_stat
         ]
 
 
 class LDAPBackend(BaseBackend):
     def __init__(self, manager):
+        super().__init__()
         self.manager = manager
         self.client = LdapClient(manager)
         self.type = "ldap"
@@ -141,7 +145,7 @@ class LDAPBackend(BaseBackend):
             should_update = True
 
         # add jans_stat, SCIM users.read, SCIM users.write scopes to config-api client
-        for scope in self.jans_config_api_stat_scim_scopes:
+        for scope in (self.jans_scim_scopes + self.jans_stat_scopes):
             if scope not in entry.attrs["jansScope"]:
                 entry.attrs["jansScope"].append(scope)
                 should_update = True
@@ -151,10 +155,7 @@ class LDAPBackend(BaseBackend):
 
     def update_scim_scopes_entries(self):
         # add jansAttrs to SCIM users.read and users.write scopes
-        ids = [
-            "inum=1200.2B7428,ou=scopes,o=jans",  # users.read scope
-            "inum=1200.0A0198,ou=scopes,o=jans",  # users.write scope
-        ]
+        ids = self.jans_scim_scopes
         kwargs = {}
 
         for id_ in ids:
@@ -170,6 +171,7 @@ class LDAPBackend(BaseBackend):
 
 class SQLBackend(BaseBackend):
     def __init__(self, manager):
+        super().__init__()
         self.manager = manager
         self.client = SQLClient()
         self.type = "sql"
@@ -236,7 +238,7 @@ class SQLBackend(BaseBackend):
             should_update = True
 
         # add jans_stat, SCIM users.read, SCIM users.write scopes to config-api client
-        for scope in self.jans_config_api_stat_scim_scopes:
+        for scope in (self.jans_scim_scopes + self.jans_stat_scopes):
             if scope not in entry.attrs["jansScope"]["v"]:
                 entry.attrs["jansScope"]["v"].append(scope)
                 should_update = True
@@ -246,10 +248,7 @@ class SQLBackend(BaseBackend):
 
     def update_scim_scopes_entries(self):
         # add jansAttrs to SCIM users.read and users.write scopes
-        ids = [
-            doc_id_from_dn("inum=1200.2B7428,ou=scopes,o=jans"),  # users.read scope
-            doc_id_from_dn("inum=1200.0A0198,ou=scopes,o=jans"),  # users.write scope
-        ]
+        ids = [doc_id_from_dn(scope) for scope in self.jans_scim_scopes]
         kwargs = {"table_name": "jansScope"}
 
         for id_ in ids:
@@ -265,6 +264,7 @@ class SQLBackend(BaseBackend):
 
 class CouchbaseBackend(BaseBackend):
     def __init__(self, manager):
+        super().__init__()
         self.manager = manager
         hostname = os.environ.get("CN_COUCHBASE_URL", "localhost")
         user = get_couchbase_superuser(manager) or get_couchbase_user(manager)
@@ -369,7 +369,7 @@ class CouchbaseBackend(BaseBackend):
             should_update = True
 
         # add jans_stat, SCIM users.read, SCIM users.write scopes to config-api client
-        for scope in self.jans_config_api_stat_scim_scopes:
+        for scope in (self.jans_scim_scopes + self.jans_stat_scopes):
             if scope not in entry.attrs["jansScope"]:
                 entry.attrs["jansScope"].append(scope)
                 should_update = True
@@ -379,10 +379,7 @@ class CouchbaseBackend(BaseBackend):
 
     def update_scim_scopes_entries(self):
         # add jansAttrs to SCIM users.read and users.write scopes
-        ids = map(id_from_dn, [
-            "inum=1200.2B7428,ou=scopes,o=jans",  # users.read scope
-            "inum=1200.0A0198,ou=scopes,o=jans",  # users.write scope
-        ])
+        ids = map(id_from_dn, self.jans_scim_scopes)
         bucket = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
         kwargs = {"bucket": bucket}
 
@@ -420,6 +417,7 @@ class CouchbaseBackend(BaseBackend):
 
 class SpannerBackend(BaseBackend):
     def __init__(self, manager):
+        super().__init__()
         self.manager = manager
         self.client = SpannerClient()
         self.type = "spanner"
@@ -486,7 +484,7 @@ class SpannerBackend(BaseBackend):
             should_update = True
 
         # add jans_stat, SCIM users.read, SCIM users.write scopes to config-api client
-        for scope in self.jans_config_api_stat_scim_scopes:
+        for scope in (self.jans_scim_scopes + self.jans_stat_scopes):
             if scope not in entry.attrs["jansScope"]:
                 entry.attrs["jansScope"].append(scope)
                 should_update = True
@@ -496,10 +494,7 @@ class SpannerBackend(BaseBackend):
 
     def update_scim_scopes_entries(self):
         # add jansAttrs to SCIM users.read and users.write scopes
-        ids = [
-            doc_id_from_dn("inum=1200.2B7428,ou=scopes,o=jans"),  # users.read scope
-            doc_id_from_dn("inum=1200.0A0198,ou=scopes,o=jans"),  # users.write scope
-        ]
+        ids = [doc_id_from_dn(scope) for scope in self.jans_scim_scopes]
         kwargs = {"table_name": "jansScope"}
 
         for id_ in ids:
