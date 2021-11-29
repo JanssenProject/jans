@@ -48,9 +48,15 @@ class BaseBackend:
     """
 
     def __init__(self):
-        self.jansAdminUIRoleId = "inum=43F1,ou=scopes,o=jans"
-        self.jansAdminUiClaim = "inum=0A01,ou=attributes,o=jans"
-        self.jansAttrs = '{"spontaneousClientId":null,"spontaneousClientScopes":null,"showInConfigurationEndpoint":true}'
+        self.jans_admin_ui_role_id = "inum=43F1,ou=scopes,o=jans"
+        self.jans_admin_ui_claim = "inum=0A01,ou=attributes,o=jans"
+        self.jans_attrs = '{"spontaneousClientId":null,"spontaneousClientScopes":null,"showInConfigurationEndpoint":true}'
+        # jans_stat, SCIM users.read, SCIM users.write scopes that get added to config-api client
+        self.jans_config_api_stat_scim_scopes = [
+            "inum=C4F7,ou=scopes,o=jans",  # jans_stat
+            "inum=1200.2B7428,ou=scopes,o=jans",  # users.read scope
+            "inum=1200.0A0198,ou=scopes,o=jans",  # users.write scope
+        ]
 
 
 class LDAPBackend(BaseBackend):
@@ -108,13 +114,13 @@ class LDAPBackend(BaseBackend):
         # add jansAdminUIRole claim to profile scope
         kwargs = {}
 
-        entry = self.get_entry(self.jansAdminUIRoleId, **kwargs)
+        entry = self.get_entry(self.jans_admin_ui_role_id, **kwargs)
         if not entry:
             return
 
-        if self.jansAdminUiClaim not in entry.attrs["jansClaim"]:
-            entry.attrs["jansClaim"].append(self.jansAdminUiClaim)
-            self.modify_entry(self.jansAdminUIRoleId, entry.attrs, **kwargs)
+        if self.jans_admin_ui_claim not in entry.attrs["jansClaim"]:
+            entry.attrs["jansClaim"].append(self.jans_admin_ui_claim)
+            self.modify_entry(self.jans_admin_ui_role_id, entry.attrs, **kwargs)
 
     def update_clients_entries(self):
         jca_client_id = self.manager.config.get("jca_client_id")
@@ -135,12 +141,7 @@ class LDAPBackend(BaseBackend):
             should_update = True
 
         # add jans_stat, SCIM users.read, SCIM users.write scopes to config-api client
-        scopes = [
-            "inum=C4F7,ou=scopes,o=jans",  # jans_stat
-            "inum=1200.2B7428,ou=scopes,o=jans",  # users.read scope
-            "inum=1200.0A0198,ou=scopes,o=jans",  # users.write scope
-        ]
-        for scope in scopes:
+        for scope in self.jans_config_api_stat_scim_scopes:
             if scope not in entry.attrs["jansScope"]:
                 entry.attrs["jansScope"].append(scope)
                 should_update = True
@@ -163,7 +164,7 @@ class LDAPBackend(BaseBackend):
 
             if "jansAttrs" not in entry.attrs:
                 entry.attrs[
-                    "jansAttrs"] = self.jansAttrs
+                    "jansAttrs"] = self.jans_attrs
                 self.modify_entry(id_, entry.attrs, **kwargs)
 
 
@@ -203,7 +204,7 @@ class SQLBackend(BaseBackend):
 
     def update_scopes_entries(self):
         # add jansAdminUIRole claim to profile scope
-        id_ = doc_id_from_dn(self.jansAdminUIRoleId)
+        id_ = doc_id_from_dn(self.jans_admin_ui_role_id)
         kwargs = {"table_name": "jansScope"}
 
         entry = self.get_entry(id_, **kwargs)
@@ -211,8 +212,8 @@ class SQLBackend(BaseBackend):
         if not entry:
             return
 
-        if self.jansAdminUiClaim not in entry.attrs["jansClaim"]["v"]:
-            entry.attrs["jansClaim"]["v"].append(self.jansAdminUiClaim)
+        if self.jans_admin_ui_claim not in entry.attrs["jansClaim"]["v"]:
+            entry.attrs["jansClaim"]["v"].append(self.jans_admin_ui_claim)
             self.modify_entry(id_, entry.attrs, **kwargs)
 
     def update_clients_entries(self):
@@ -235,12 +236,7 @@ class SQLBackend(BaseBackend):
             should_update = True
 
         # add jans_stat, SCIM users.read, SCIM users.write scopes to config-api client
-        scopes = [
-            "inum=C4F7,ou=scopes,o=jans",  # jans_stat
-            "inum=1200.2B7428,ou=scopes,o=jans",  # users.read scope
-            "inum=1200.0A0198,ou=scopes,o=jans",  # users.write scope
-        ]
-        for scope in scopes:
+        for scope in self.jans_config_api_stat_scim_scopes:
             if scope not in entry.attrs["jansScope"]["v"]:
                 entry.attrs["jansScope"]["v"].append(scope)
                 should_update = True
@@ -263,7 +259,7 @@ class SQLBackend(BaseBackend):
 
             if "jansAttrs" not in entry.attrs:
                 entry.attrs[
-                    "jansAttrs"] = self.jansAttrs
+                    "jansAttrs"] = self.jans_attrs
                 self.modify_entry(id_, entry.attrs, **kwargs)
 
 
@@ -341,7 +337,7 @@ class CouchbaseBackend(BaseBackend):
 
     def update_scopes_entries(self):
         # add jansAdminUIRole claim to profile scope
-        id_ = id_from_dn(self.jansAdminUIRoleId)
+        id_ = id_from_dn(self.jans_admin_ui_role_id)
         bucket = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
         kwargs = {"bucket": bucket}
 
@@ -349,8 +345,8 @@ class CouchbaseBackend(BaseBackend):
         if not entry:
             return
 
-        if self.jansAdminUiClaim not in entry.attrs["jansClaim"]:
-            entry.attrs["jansClaim"].append(self.jansAdminUiClaim)
+        if self.jans_admin_ui_claim not in entry.attrs["jansClaim"]:
+            entry.attrs["jansClaim"].append(self.jans_admin_ui_claim)
             self.modify_entry(id_, entry.attrs, **kwargs)
 
     def update_clients_entries(self):
@@ -373,12 +369,7 @@ class CouchbaseBackend(BaseBackend):
             should_update = True
 
         # add jans_stat, SCIM users.read, SCIM users.write scopes to config-api client
-        scopes = [
-            "inum=C4F7,ou=scopes,o=jans",  # jans_stat
-            "inum=1200.2B7428,ou=scopes,o=jans",  # users.read scope
-            "inum=1200.0A0198,ou=scopes,o=jans",  # users.write scope
-        ]
-        for scope in scopes:
+        for scope in self.jans_config_api_stat_scim_scopes:
             if scope not in entry.attrs["jansScope"]:
                 entry.attrs["jansScope"].append(scope)
                 should_update = True
@@ -402,7 +393,7 @@ class CouchbaseBackend(BaseBackend):
 
             if "jansAttrs" not in entry.attrs:
                 entry.attrs[
-                    "jansAttrs"] = self.jansAttrs
+                    "jansAttrs"] = self.jans_attrs
                 self.modify_entry(id_, entry.attrs, **kwargs)
 
     def update_misc(self):
@@ -463,7 +454,7 @@ class SpannerBackend(BaseBackend):
 
     def update_scopes_entries(self):
         # add jansAdminUIRole claim to profile scope
-        id_ = doc_id_from_dn(self.jansAdminUIRoleId)
+        id_ = doc_id_from_dn(self.jans_admin_ui_role_id)
         kwargs = {"table_name": "jansScope"}
 
         entry = self.get_entry(id_, **kwargs)
@@ -471,8 +462,8 @@ class SpannerBackend(BaseBackend):
         if not entry:
             return
 
-        if self.jansAdminUiClaim not in entry.attrs["jansClaim"]:
-            entry.attrs["jansClaim"].append(self.jansAdminUiClaim)
+        if self.jans_admin_ui_claim not in entry.attrs["jansClaim"]:
+            entry.attrs["jansClaim"].append(self.jans_admin_ui_claim)
             self.modify_entry(id_, entry.attrs, **kwargs)
 
     def update_clients_entries(self):
@@ -495,12 +486,7 @@ class SpannerBackend(BaseBackend):
             should_update = True
 
         # add jans_stat, SCIM users.read, SCIM users.write scopes to config-api client
-        scopes = [
-            "inum=C4F7,ou=scopes,o=jans",  # jans_stat
-            "inum=1200.2B7428,ou=scopes,o=jans",  # users.read scope
-            "inum=1200.0A0198,ou=scopes,o=jans",  # users.write scope
-        ]
-        for scope in scopes:
+        for scope in self.jans_config_api_stat_scim_scopes:
             if scope not in entry.attrs["jansScope"]:
                 entry.attrs["jansScope"].append(scope)
                 should_update = True
@@ -523,7 +509,7 @@ class SpannerBackend(BaseBackend):
 
             if "jansAttrs" not in entry.attrs:
                 entry.attrs[
-                    "jansAttrs"] = self.jansAttrs
+                    "jansAttrs"] = self.jans_attrs
                 self.modify_entry(id_, entry.attrs, **kwargs)
 
 
