@@ -67,7 +67,7 @@ class Config:
 
     @classmethod
     def calculate_mem(self):
-        if Config.wrends_install:
+        if Config.opendj_install:
             self.opendj_max_ram = int(int(Config.jans_max_mem) * .2) # 20% of mem_use
             self.application_max_ram = int(int(Config.jans_max_mem) * .8) # 80% of mem_use
         else:
@@ -143,7 +143,7 @@ class Config:
         self.encoded_cb_password = ''
 
         #DB installation types
-        self.wrends_install = InstallTypes.LOCAL
+        self.opendj_install = InstallTypes.LOCAL
         self.cb_install = InstallTypes.NONE
         self.rdbm_install = False
         

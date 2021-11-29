@@ -40,9 +40,8 @@ admin_email=
 ### The password to be used in Java KeyStore
 jksPass=
 
-### Install local Directory Manager and set cn=Directory Manager's password in ldap
-wrends_install=1
-ldapPass=
+### Install OpenDJ
+installLdap=True
 
 ### Total memory (in KB) to be used by Jannses applications. This is typically 
 ### 80% of your physical memory. If you have 8GB of ram, value will be 6553
