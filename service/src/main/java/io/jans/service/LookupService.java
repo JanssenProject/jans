@@ -47,16 +47,40 @@ public class LookupService implements Serializable {
 	 *            display name
 	 * @return DisplayNameEntry object
 	 */
-	public DisplayNameEntry getDisplayNameEntry(String dn) throws Exception {
-		String key = "l_" + dn;
+	public DisplayNameEntry getDisplayNameEntry(String dn, String objectClass) throws Exception {
+		String key = "l_" + objectClass + "_" + dn;
 		DisplayNameEntry entry = (DisplayNameEntry) cacheService.get(OxConstants.CACHE_LOOKUP_NAME, key);
 		if (entry == null) {
-			entry = persistenceEntryManager.find(dn, DisplayNameEntry.class, null);
+			// Prepare sample for search
+			DisplayNameEntry sample = new DisplayNameEntry();
+			sample.setBaseDn(dn);
+			sample.setCustomObjectClasses(new String[] { objectClass });
+
+			List<DisplayNameEntry> entries = persistenceEntryManager.findEntries(sample, 1);
+			if (entries.size() == 1) {
+				entry = entries.get(0);
+			}
 
 			cacheService.put(OxConstants.CACHE_LOOKUP_NAME, key, entry);
 		}
 
 		return entry;
+	}
+
+	public <T> T getDisplayNameEntry(String dn, Class<T> entryClass) throws Exception {
+		String key = "l_" + entryClass.getSimpleName() + "_" + dn;
+		T entry = (T) cacheService.get(OxConstants.CACHE_LOOKUP_NAME, key);
+		if (entry == null) {
+			entry = persistenceEntryManager.find(dn, entryClass, null);
+
+			cacheService.put(OxConstants.CACHE_LOOKUP_NAME, key, entry);
+		}
+
+		return entry;
+	}
+
+	public DisplayNameEntry getDisplayNameEntry(String dn) throws Exception {
+		return getDisplayNameEntry(dn, DisplayNameEntry.class);
 	}
 
 	/**
@@ -72,7 +96,7 @@ public class LookupService implements Serializable {
 		}
 
 		Class entryClass = Class.class.forName(clazz);
-		String key = "l_" + dn;
+		String key = "l_" + entryClass.getSimpleName() + "_" + dn;
 		Object entry = cacheService.get(OxConstants.CACHE_LOOKUP_NAME, key);
 		if (entry == null) {
 			entry = persistenceEntryManager.find(entryClass, dn);
@@ -93,20 +117,24 @@ public class LookupService implements Serializable {
 	 * @return list of DisplayNameEntry objects
 	 */
 	@SuppressWarnings("unchecked")
-	public List<DisplayNameEntry> getDisplayNameEntries(String baseDn, List<String> dns) {
+	public <T> List<T> getDisplayNameEntries(String baseDn, Class<T> entryClass, List<String> dns) {
 		List<String> inums = getInumsFromDns(dns);
 		if (inums.size() == 0) {
 			return null;
 		}
 
-		String key = getCompoundKey(inums);
-		List<DisplayNameEntry> entries = (List<DisplayNameEntry>) cacheService.get(OxConstants.CACHE_LOOKUP_NAME, key);
+		String key = getCompoundKey(entryClass, inums);
+		List<T> entries = (List<T>) cacheService.get(OxConstants.CACHE_LOOKUP_NAME, key);
 		if (entries == null) {
 			Filter searchFilter = buildInumFilter(inums);
-			entries = persistenceEntryManager.findEntries(baseDn, DisplayNameEntry.class, searchFilter);
+			entries = persistenceEntryManager.findEntries(baseDn, entryClass, searchFilter);
 			cacheService.put(OxConstants.CACHE_LOOKUP_NAME, key, entries);
 		}
 		return entries;
+	}
+
+	public List<DisplayNameEntry> getDisplayNameEntries(String baseDn, List<String> dns) {
+		return getDisplayNameEntries(baseDn, DisplayNameEntry.class, dns);
 	}
 
 	public Filter buildInumFilter(List<String> inums) {
@@ -136,13 +164,13 @@ public class LookupService implements Serializable {
 		return inums;
 	}
 
-	private String getCompoundKey(List<String> inums) {
+	private <T> String getCompoundKey(Class<T> entryClass, List<String> inums) {
 		StringBuilder compoundKey = new StringBuilder();
 		for (String inum : inums) {
 			if (compoundKey.length() > 0) {
 				compoundKey.append("_");
 			} else {
-				compoundKey.append("l_");
+				compoundKey.append("l_" + entryClass.getSimpleName() + "_");
 			}
 			compoundKey.append(inum);
 		}
@@ -156,12 +184,15 @@ public class LookupService implements Serializable {
 			return null;
 		}
 
+		Class objectClass = DisplayNameEntry.class;
 		List<String> dns = new ArrayList<String>(entries.size());
 		for (Entry entry : entries) {
 			dns.add(entry.getDn());
+			objectClass = objectClass.getClass();
 		}
+		
 
-		return getDisplayNameEntries(baseDn, dns);
+		return getDisplayNameEntries(baseDn, objectClass, dns);
 	}
 
 	/**
