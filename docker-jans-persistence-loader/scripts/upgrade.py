@@ -286,9 +286,9 @@ class CouchbaseBackend(BaseBackend):
             return
 
         try:
-            attrs = req.json()["results"][0]
-            id_ = attrs.pop("id")
-            entry = Entry(id_, attrs)
+            _attrs = req.json()["results"][0]
+            id_ = _attrs.pop("id")
+            entry = Entry(id_, _attrs)
         except IndexError:
             entry = None
         return entry
