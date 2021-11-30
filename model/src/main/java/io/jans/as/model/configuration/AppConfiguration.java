@@ -245,6 +245,7 @@ public class AppConfiguration implements Configuration {
     private Boolean dcrAuthorizationWithClientCredentials = false;
     private Boolean dcrSkipSignatureValidation = false;
     private Boolean dcrAuthorizationWithMTLS = false;
+    private List<String> dcrIssuers  = new ArrayList<>();
 
     private Boolean useLocalCache = false;
     private Boolean fapiCompatibility = false;
@@ -671,6 +672,15 @@ public class AppConfiguration implements Configuration {
 
     public void setDcrAuthorizationWithMTLS(Boolean dcrAuthorizationWithMTLS) {
         this.dcrAuthorizationWithMTLS = dcrAuthorizationWithMTLS;
+    }
+
+    public List<String> getDcrIssuers() {
+        if (dcrIssuers == null) dcrIssuers = new ArrayList<>();
+        return dcrIssuers;
+    }
+
+    public void setDcrIssuers(List<String> dcrIssuers) {
+        this.dcrIssuers = dcrIssuers;
     }
 
     public Boolean getForceIdTokenHintPrecense() {
