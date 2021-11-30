@@ -41,7 +41,7 @@ import static io.jans.as.model.util.StringUtils.base64urlencode;
 
 /**
  * @author Javier Rojas Blum
- * @version September 9, 2021
+ * @version November 23, 2021
  */
 public class JwtAuthorizationRequest {
 
@@ -616,7 +616,9 @@ public class JwtAuthorizationRequest {
                     claimsObj.put("id_token", idTokenMember.toJSONObject());
                 }
 
-                obj.put("claims", claimsObj);
+                if ((claimsObj.has("userinfo") && !claimsObj.getJSONObject("userinfo").isEmpty()) ||
+                        (claimsObj.has("id_token") && !claimsObj.getJSONObject("id_token").isEmpty()))
+                    obj.put("claims", claimsObj);
             }
             if (StringUtils.isNotBlank(aud)) {
                 obj.put("aud", aud);
