@@ -17,6 +17,7 @@ import io.jans.as.server.model.authorize.AuthorizeParamsValidator;
 import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.server.model.common.DeviceAuthorizationCacheControl;
 import io.jans.as.server.model.common.SessionId;
+import io.jans.as.server.model.exception.InvalidRedirectUrlException;
 import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.DeviceAuthorizationService;
 import io.jans.as.server.service.RedirectUriResponse;
@@ -43,7 +44,7 @@ import static org.apache.commons.lang.BooleanUtils.isTrue;
 
 /**
  * @author Yuriy Zabrovarnyy
- * @version November 5, 2021
+ * @version November 26, 2021
  */
 @Named
 @Stateless
@@ -189,7 +190,11 @@ public class AuthorizeRestWebServiceValidator {
         }
         if (StringUtils.isBlank(jwtRequest.getRedirectUri())) {
             log.error("Request object does not have redirect_uri claim.");
-            throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT);
+            if (redirectUriResponse.getRedirectUri().getBaseRedirectUri() != null) {
+                throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT);
+            } else {
+                throw new InvalidRedirectUrlException("Request object and Authorization request does not have redirect_uri claim.");
+            }
         }
     }
 
