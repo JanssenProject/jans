@@ -8,6 +8,7 @@ package io.jans.as.server.service.external.context;
 
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.error.IErrorType;
 import io.jans.as.model.jwt.Jwt;
@@ -15,6 +16,7 @@ import io.jans.as.model.register.RegisterErrorResponseType;
 import io.jans.as.model.util.CertUtils;
 import io.jans.model.SimpleCustomProperty;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
+import io.jans.service.cdi.util.CdiUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.json.JSONObject;
@@ -124,6 +126,24 @@ public class DynamicClientRegistrationContext extends ExternalScriptContext {
         validateCertSubjectHasCNAndOU();
         validateCNEqualsSoftwareId();
         validateOUEqualsOrgId();
+        validateIssuer();
+    }
+
+    public void validateIssuer() {
+        final List<String> dcrIssuers = CdiUtil.bean(AppConfiguration.class).getDcrIssuers();
+        if (dcrIssuers.isEmpty()) { // nothing to check
+            return;
+        }
+
+        final String issuer = softwareStatement.getClaims().getClaimAsString("iss");
+        if (!dcrIssuers.contains(issuer)) {
+            throwWebApplicationException("SSA Issuer is not allowed.", RegisterErrorResponseType.INVALID_CLIENT_METADATA);
+        }
+
+        final String certificateIssuer = certificate.getIssuerX500Principal().getName();
+        if (!dcrIssuers.contains(certificateIssuer)) {
+            throwWebApplicationException("Certificate Issuer is not allowed.", RegisterErrorResponseType.INVALID_CLIENT_METADATA);
+        }
     }
 
     public void validateCertSubjectHasCNAndOU() {
