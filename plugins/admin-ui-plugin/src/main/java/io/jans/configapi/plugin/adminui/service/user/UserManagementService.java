@@ -1,5 +1,6 @@
-package io.jans.configapi.plugin.adminui.service.userManagement;
+package io.jans.configapi.plugin.adminui.service.user;
 
+import com.google.api.client.util.Lists;
 import io.jans.as.model.config.adminui.AdminConf;
 import io.jans.as.model.config.adminui.AdminPermission;
 import io.jans.as.model.config.adminui.AdminRole;
@@ -12,10 +13,7 @@ import org.slf4j.Logger;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.core.Response;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Singleton
@@ -92,7 +90,11 @@ public class UserManagementService {
                     .collect(Collectors.toList());
 
             if (!roleScopeMapping.isEmpty()) {
-                List<String> permissions = roleScopeMapping.stream().findAny().get().getPermissions();
+                Optional<RolePermissionMapping> rolePermissionMappingOptional = roleScopeMapping.stream().findAny();
+                List<String> permissions = Lists.newArrayList();
+                if (rolePermissionMappingOptional.isPresent()) {
+                    permissions = rolePermissionMappingOptional.get().getPermissions();
+                }
                 if (!permissions.isEmpty()) {
                     log.error(ErrorResponse.UNABLE_TO_DELETE_ROLE_MAPPED_TO_PERMISSIONS.getDescription() + "Role from request: {}", roleArg.getRole());
                     throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.UNABLE_TO_DELETE_ROLE_MAPPED_TO_PERMISSIONS.getDescription());
@@ -161,7 +163,9 @@ public class UserManagementService {
             entryManager.merge(adminConf);
 
             return adminConf.getDynamic().getPermissions();
-
+        } catch (ApplicationException e) {
+            log.error(ErrorResponse.EDIT_ADMIUI_PERMISSIONS_ERROR.getDescription(), e);
+            throw e;
         } catch (Exception e) {
             log.error(ErrorResponse.EDIT_ADMIUI_PERMISSIONS_ERROR.getDescription(), e);
             throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), ErrorResponse.EDIT_ADMIUI_PERMISSIONS_ERROR.getDescription());
@@ -173,7 +177,7 @@ public class UserManagementService {
             AdminConf adminConf = entryManager.find(AdminConf.class, CONFIG_DN);
 
             boolean anyPermissionMapped = adminConf.getDynamic().getRolePermissionMapping()
-                    .stream().anyMatch(ele -> ele.getPermissions().contains(permissionArg));
+                    .stream().anyMatch(ele -> ele.getPermissions().contains(permissionArg.getPermission()));
 
             if (anyPermissionMapped) {
                 log.error(ErrorResponse.UNABLE_TO_DELETE_PERMISSION_MAPPED_TO_ROLE.getDescription());
@@ -230,26 +234,29 @@ public class UserManagementService {
                 RolePermissionMapping rolePermissionMapping = new RolePermissionMapping();
                 rolePermissionMapping.setRole(rolePermissionMappingArg.getRole());
 
-                roleScopeMappingList = new ArrayList<>();
+                roleScopeMappingList = Lists.newArrayList();
                 roleScopeMappingList.add(rolePermissionMapping);
             }
 
-            List<String> mappedPermissions = roleScopeMappingList.stream().findFirst().get().getPermissions();
-            if (mappedPermissions == null) {
-                mappedPermissions = new ArrayList<>();
+            Optional<RolePermissionMapping> rolePermissionMappingOptional = roleScopeMappingList.stream().findFirst();
+            List<String> mappedPermissions = Lists.newArrayList();
+            if (rolePermissionMappingOptional.isPresent()) {
+                mappedPermissions = rolePermissionMappingOptional.get().getPermissions();
             }
+
             //remove duplicate permissions
             Set<String> scopesSet = new LinkedHashSet<>(mappedPermissions);
             scopesSet.addAll(rolePermissionMappingArg.getPermissions());
             List<String> combinedScopes = new ArrayList<>(scopesSet);
-            roleScopeMappingList.stream().findFirst().get().setPermissions(combinedScopes);
 
             if (adminConf.getDynamic().getRolePermissionMapping()
                     .stream().anyMatch(ele -> ele.getRole().equalsIgnoreCase(rolePermissionMappingArg.getRole()))) {
                 adminConf.getDynamic().getRolePermissionMapping()
                         .stream().filter(ele -> ele.getRole().equalsIgnoreCase(rolePermissionMappingArg.getRole()))
-                        .collect(Collectors.toList()).stream().findFirst().get().setPermissions(combinedScopes);
+                        .collect(Collectors.toList())
+                        .forEach(ele -> ele.setPermissions(combinedScopes));
             } else {
+                roleScopeMappingList.forEach(ele -> ele.setPermissions(combinedScopes));
                 adminConf.getDynamic().getRolePermissionMapping().addAll(roleScopeMappingList);
             }
 
@@ -276,14 +283,19 @@ public class UserManagementService {
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.ROLE_NOT_FOUND.getDescription());
             }
 
-            List<String> permissions = roleScopeMapping.stream().findFirst().get().getPermissions();
-            permissions.removeIf(ele -> rolePermissionMappingArg.getPermissions().contains(ele));
+            Optional<RolePermissionMapping> rolePermissionMappingOptional = roleScopeMapping.stream().findFirst();
 
-            adminConf.getDynamic().getRolePermissionMapping()
-                    .stream().filter(ele -> ele.getRole().equalsIgnoreCase(rolePermissionMappingArg.getRole()))
-                    .collect(Collectors.toList()).stream().findFirst().get().setPermissions(permissions);
+            if (rolePermissionMappingOptional.isPresent()) {
+                List<String> permissions = rolePermissionMappingOptional.get().getPermissions();
+                permissions.removeIf(ele -> rolePermissionMappingArg.getPermissions().contains(ele));
 
-            entryManager.merge(adminConf);
+                adminConf.getDynamic().getRolePermissionMapping()
+                        .stream().filter(ele -> ele.getRole().equalsIgnoreCase(rolePermissionMappingArg.getRole()))
+                        .collect(Collectors.toList()).forEach(ele -> ele.setPermissions(permissions));
+
+                entryManager.merge(adminConf);
+            }
+
             return adminConf.getDynamic().getRolePermissionMapping();
         } catch (ApplicationException e) {
             log.error(ErrorResponse.ERROR_IN_MAPPING_ROLE_PERMISSION.getDescription(), e);
