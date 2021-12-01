@@ -40,7 +40,7 @@ public class ExternalScriptContext extends io.jans.service.external.context.Exte
     }
 
     public ExternalScriptContext(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
-    	super(httpRequest, httpResponse);
+        super(httpRequest, httpResponse);
         this.ldapEntryManager = ServerUtil.getLdapManager();
     }
 

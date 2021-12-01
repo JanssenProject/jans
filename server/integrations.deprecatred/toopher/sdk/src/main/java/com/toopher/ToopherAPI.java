@@ -35,7 +35,6 @@ import java.util.List;
 
 /**
  * A Java binding for the Toopher API
- * 
  */
 public class ToopherAPI {
     /**
@@ -45,30 +44,25 @@ public class ToopherAPI {
 
     /**
      * Create an API object with the supplied credentials
-     * 
-     * @param consumerKey
-     *            The consumer key for a requester (obtained from the developer portal)
-     * @param consumerSecret
-     *            The consumer secret for a requester (obtained from the developer portal)
+     *
+     * @param consumerKey    The consumer key for a requester (obtained from the developer portal)
+     * @param consumerSecret The consumer secret for a requester (obtained from the developer portal)
      */
     public ToopherAPI(String consumerKey, String consumerSecret) {
         httpClient = new DefaultHttpClient();
         HttpProtocolParams.setUserAgent(httpClient.getParams(),
-                                        String.format("ToopherJava/%s", VERSION));
+                String.format("ToopherJava/%s", VERSION));
 
         consumer = new CommonsHttpOAuthConsumer(consumerKey, consumerSecret);
     }
 
     /**
      * Create a pairing
-     * 
-     * @param pairingPhrase
-     *            The pairing phrase supplied by the user
-     * @param userName
-     *            A user-facing descriptive name for the user (displayed in requests)
+     *
+     * @param pairingPhrase The pairing phrase supplied by the user
+     * @param userName      A user-facing descriptive name for the user (displayed in requests)
      * @return A PairingStatus object
-     * @throws RequestError
-     *             Thrown when an exceptional condition is encountered
+     * @throws RequestError Thrown when an exceptional condition is encountered
      */
     public PairingStatus pair(String pairingPhrase, String userName) throws RequestError {
         final String endpoint = "pairings/create";
@@ -87,12 +81,10 @@ public class ToopherAPI {
 
     /**
      * Retrieve the current status of a pairing request
-     * 
-     * @param pairingRequestId
-     *            The unique id for a pairing request
+     *
+     * @param pairingRequestId The unique id for a pairing request
      * @return A PairingStatus object
-     * @throws RequestError
-     *             Thrown when an exceptional condition is encountered
+     * @throws RequestError Thrown when an exceptional condition is encountered
      */
     public PairingStatus getPairingStatus(String pairingRequestId) throws RequestError {
         final String endpoint = String.format("pairings/%s", pairingRequestId);
@@ -107,14 +99,11 @@ public class ToopherAPI {
 
     /**
      * Initiate a login authentication request
-     * 
-     * @param pairingId
-     *            The pairing id indicating to whom the request should be sent
-     * @param terminalName
-     *            The user-facing descriptive name for the terminal from which the request originates
+     *
+     * @param pairingId    The pairing id indicating to whom the request should be sent
+     * @param terminalName The user-facing descriptive name for the terminal from which the request originates
      * @return An AuthenticationStatus object
-     * @throws RequestError
-     *             Thrown when an exceptional condition is encountered
+     * @throws RequestError Thrown when an exceptional condition is encountered
      */
     public AuthenticationStatus authenticate(String pairingId, String terminalName) throws RequestError {
         return authenticate(pairingId, terminalName, null);
@@ -122,16 +111,12 @@ public class ToopherAPI {
 
     /**
      * Initiate an authentication request
-     * 
-     * @param pairingId
-     *            The pairing id indicating to whom the request should be sent
-     * @param terminalName
-     *            The user-facing descriptive name for the terminal from which the request originates
-     * @param actionName
-     *            The user-facing descriptive name for the action which is being authenticated
+     *
+     * @param pairingId    The pairing id indicating to whom the request should be sent
+     * @param terminalName The user-facing descriptive name for the terminal from which the request originates
+     * @param actionName   The user-facing descriptive name for the action which is being authenticated
      * @return An AuthenticationStatus object
-     * @throws RequestError
-     *             Thrown when an exceptional condition is encountered
+     * @throws RequestError Thrown when an exceptional condition is encountered
      */
     public AuthenticationStatus authenticate(String pairingId, String terminalName,
                                              String actionName) throws RequestError {
@@ -154,12 +139,10 @@ public class ToopherAPI {
 
     /**
      * Retrieve status information for an authentication request
-     * 
-     * @param authenticationRequestId
-     *            The authentication request ID
+     *
+     * @param authenticationRequestId The authentication request ID
      * @return An AuthenticationStatus object
-     * @throws RequestError
-     *             Thrown when an exceptional condition is encountered
+     * @throws RequestError Thrown when an exceptional condition is encountered
      */
     public AuthenticationStatus getAuthenticationStatus(String authenticationRequestId)
             throws RequestError {
@@ -175,7 +158,7 @@ public class ToopherAPI {
 
     private JSONObject get(String endpoint) throws Exception {
         URI uri = new URIBuilder().setScheme(URI_SCHEME).setHost(URI_HOST)
-                                  .setPath(URI_BASE + endpoint).build();
+                .setPath(URI_BASE + endpoint).build();
         HttpGet get = new HttpGet(uri);
         consumer.sign(get);
         return httpClient.execute(get, jsonHandler);
@@ -183,7 +166,7 @@ public class ToopherAPI {
 
     private JSONObject post(String endpoint, List<NameValuePair> params) throws Exception {
         URI uri = new URIBuilder().setScheme(URI_SCHEME).setHost(URI_HOST)
-                                  .setPath(URI_BASE + endpoint).build();
+                .setPath(URI_BASE + endpoint).build();
         HttpPost post = new HttpPost(uri);
         if (params != null && params.size() > 0) {
             post.setEntity(new UrlEncodedFormEntity(params));
@@ -202,7 +185,7 @@ public class ToopherAPI {
             StatusLine statusLine = response.getStatusLine();
             if (statusLine.getStatusCode() >= 300) {
                 throw new HttpResponseException(statusLine.getStatusCode(),
-                                                statusLine.getReasonPhrase());
+                        statusLine.getReasonPhrase());
             }
 
             HttpEntity entity = response.getEntity(); // TODO: check entity == null

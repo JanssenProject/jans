@@ -14,10 +14,10 @@ import io.jans.as.model.register.RegisterResponseParam;
 import io.jans.as.model.util.Util;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import javax.ws.rs.core.Response;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;

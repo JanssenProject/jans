@@ -6,10 +6,11 @@
 
 package io.jans.as.server.model.token;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
+import io.jans.as.model.util.Util;
+import io.jans.as.server.model.common.AccessToken;
+import io.jans.as.server.model.common.AuthorizationGrantType;
+import io.jans.as.server.model.common.IdToken;
+import io.jans.as.server.model.common.RefreshToken;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -17,11 +18,9 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.jans.as.model.util.Util;
-import io.jans.as.server.model.common.AccessToken;
-import io.jans.as.server.model.common.AuthorizationGrantType;
-import io.jans.as.server.model.common.IdToken;
-import io.jans.as.server.model.common.RefreshToken;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author Javier Rojas Blum Date: 05.22.2012

@@ -33,13 +33,22 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Path;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import static io.jans.as.model.authorize.DeviceAuthorizationResponseParam.*;
+import static io.jans.as.model.authorize.DeviceAuthorizationResponseParam.DEVICE_CODE;
+import static io.jans.as.model.authorize.DeviceAuthorizationResponseParam.EXPIRES_IN;
+import static io.jans.as.model.authorize.DeviceAuthorizationResponseParam.INTERVAL;
+import static io.jans.as.model.authorize.DeviceAuthorizationResponseParam.USER_CODE;
+import static io.jans.as.model.authorize.DeviceAuthorizationResponseParam.VERIFICATION_URI;
+import static io.jans.as.model.authorize.DeviceAuthorizationResponseParam.VERIFICATION_URI_COMPLETE;
 import static io.jans.as.model.token.TokenErrorResponseType.INVALID_CLIENT;
 import static io.jans.as.model.token.TokenErrorResponseType.INVALID_GRANT;
 

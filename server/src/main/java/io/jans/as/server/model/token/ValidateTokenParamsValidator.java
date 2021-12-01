@@ -13,14 +13,13 @@ package io.jans.as.server.model.token;
  */
 public class ValidateTokenParamsValidator {
 
-	/**
-	 * Validates the parameters for a validate token request.
-	 *
-	 * @param accessToken
-	 *            The access token issued by the authorization server.
-	 * @return Returns <code>true</code> when all the parameters are valid.
-	 */
-	public static boolean validateParams(String accessToken) {
-		return accessToken != null && !accessToken.isEmpty();
-	}
+    /**
+     * Validates the parameters for a validate token request.
+     *
+     * @param accessToken The access token issued by the authorization server.
+     * @return Returns <code>true</code> when all the parameters are valid.
+     */
+    public static boolean validateParams(String accessToken) {
+        return accessToken != null && !accessToken.isEmpty();
+    }
 }

@@ -40,29 +40,27 @@ import java.util.Date;
  * </p>
  *
  * @author Javier Rojas Date: 09.29.2011
- *
  */
 public class RefreshToken extends AbstractToken {
 
-	/**
-	 * <p>
-	 * Constructs a refresh token.
-	 * </p>
-	 * <p>
-	 * When created, a token is valid for a given lifetime, and after this
-	 * period of time, it will be marked as expired automatically by a
-	 * background process.
-	 * </p>
-	 * <p>
-	 * When required, the token can be marked as revoked.
-	 * </p>
-	 *
-	 * @param lifeTime
-	 *            The life time of the token.
-	 */
-	public RefreshToken(int lifeTime) {
-		super(lifeTime);
-	}
+    /**
+     * <p>
+     * Constructs a refresh token.
+     * </p>
+     * <p>
+     * When created, a token is valid for a given lifetime, and after this
+     * period of time, it will be marked as expired automatically by a
+     * background process.
+     * </p>
+     * <p>
+     * When required, the token can be marked as revoked.
+     * </p>
+     *
+     * @param lifeTime The life time of the token.
+     */
+    public RefreshToken(int lifeTime) {
+        super(lifeTime);
+    }
 
     public RefreshToken(String code, Date creationDate, Date expirationDate) {
         super(code, creationDate, expirationDate);

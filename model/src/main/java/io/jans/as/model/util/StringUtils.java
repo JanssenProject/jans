@@ -15,7 +15,12 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.StringJoiner;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
@@ -55,7 +60,7 @@ public class StringUtils {
     public static boolean equalsIgnoringSpaces(String a, String b) {
         if (a == null || b == null)
             return false;
-        return a.replaceAll("\\s+","").equalsIgnoreCase(b.replaceAll("\\s+",""));
+        return a.replaceAll("\\s+", "").equalsIgnoreCase(b.replaceAll("\\s+", ""));
     }
 
     /**
@@ -203,6 +208,7 @@ public class StringUtils {
 
     /**
      * Generates a random code using a byte array as its seed.
+     *
      * @param seedLength Length of the byte array
      */
     public static String generateRandomCode(byte seedLength) {

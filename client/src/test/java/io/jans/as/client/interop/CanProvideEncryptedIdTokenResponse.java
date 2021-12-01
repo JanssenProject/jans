@@ -22,7 +22,6 @@ import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.jwt.JwtHeaderName;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.StringUtils;
-import io.jans.as.model.util.Util;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 

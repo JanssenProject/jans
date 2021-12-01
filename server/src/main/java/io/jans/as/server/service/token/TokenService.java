@@ -6,16 +6,15 @@
 
 package io.jans.as.server.service.token;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-
+import io.jans.as.server.model.common.AuthorizationGrant;
+import io.jans.as.server.model.common.AuthorizationGrantList;
+import io.jans.as.server.model.token.HttpAuthTokenType;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import io.jans.as.server.model.common.AuthorizationGrant;
-import io.jans.as.server.model.common.AuthorizationGrantList;
-import io.jans.as.server.model.token.HttpAuthTokenType;
+import javax.inject.Inject;
+import javax.inject.Named;
 
 /**
  * Token specific service methods
@@ -49,7 +48,7 @@ public class TokenService {
     }
 
     public boolean isNegotiateAuthToken(@Nullable String authorizationParameter) {
-        return isToken(authorizationParameter,HttpAuthTokenType.Negotiate);
+        return isToken(authorizationParameter, HttpAuthTokenType.Negotiate);
     }
 
     @Nullable

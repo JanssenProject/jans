@@ -4,8 +4,8 @@ import org.testng.annotations.Test;
 
 import java.util.Date;
 
-import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author Yuriy Zabrovarnyy

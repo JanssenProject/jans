@@ -46,7 +46,7 @@ import static io.jans.as.model.jwk.JWKParameter.KEY_ID;
 @Named
 public class KeyGeneratorTimer {
 
-	private static final int DEFAULT_INTERVAL = 60;
+    private static final int DEFAULT_INTERVAL = 60;
 
     @Inject
     private Logger log;
@@ -67,16 +67,16 @@ public class KeyGeneratorTimer {
     private AbstractCryptoProvider cryptoProvider;
 
     private AtomicBoolean isActive;
-	private long lastFinishedTime;
+    private long lastFinishedTime;
 
     public void initTimer() {
         log.debug("Initializing Key Generator Timer");
         this.isActive = new AtomicBoolean(false);
 
-		timerEvent.fire(new TimerEvent(new TimerSchedule(DEFAULT_INTERVAL, DEFAULT_INTERVAL), new KeyGenerationEvent(),
-				Scheduled.Literal.INSTANCE));
+        timerEvent.fire(new TimerEvent(new TimerSchedule(DEFAULT_INTERVAL, DEFAULT_INTERVAL), new KeyGenerationEvent(),
+                Scheduled.Literal.INSTANCE));
 
-		this.lastFinishedTime = System.currentTimeMillis();
+        this.lastFinishedTime = System.currentTimeMillis();
     }
 
     @Asynchronous
@@ -94,35 +94,35 @@ public class KeyGeneratorTimer {
         }
 
         try {
-        	updateKeys();
+            updateKeys();
         } catch (Exception ex) {
-			log.error("Exception happened while executing keys update", ex);
+            log.error("Exception happened while executing keys update", ex);
         } finally {
             this.isActive.set(false);
         }
     }
 
-	private void updateKeys() throws Exception {
-		if (!isStartUpdateKeys()) {
-			return;
-		}
+    private void updateKeys() throws Exception {
+        if (!isStartUpdateKeys()) {
+            return;
+        }
 
-		updateKeysImpl();
-		this.lastFinishedTime = System.currentTimeMillis();
-	}
+        updateKeysImpl();
+        this.lastFinishedTime = System.currentTimeMillis();
+    }
 
-	private boolean isStartUpdateKeys() {
-		long poolingInterval = appConfiguration.getKeyRegenerationInterval();
+    private boolean isStartUpdateKeys() {
+        long poolingInterval = appConfiguration.getKeyRegenerationInterval();
         if (poolingInterval <= 0) {
-        	poolingInterval = DEFAULT_INTERVAL;
+            poolingInterval = DEFAULT_INTERVAL;
         }
 
         poolingInterval = poolingInterval * 3600 * 1000L;
 
-		long timeDifference = System.currentTimeMillis() - this.lastFinishedTime;
+        long timeDifference = System.currentTimeMillis() - this.lastFinishedTime;
 
-		return timeDifference >= poolingInterval;
-	}
+        return timeDifference >= poolingInterval;
+    }
 
     private void updateKeysImpl() throws Exception {
         log.info("Updating JWKS keys ...");
@@ -130,7 +130,7 @@ public class KeyGeneratorTimer {
         Conf conf = ldapEntryManager.find(Conf.class, dn);
 
         JSONObject jwks = conf.getWebKeys().toJSONObject();
-        JSONObject updatedJwks =  updateKeys(jwks);
+        JSONObject updatedJwks = updateKeys(jwks);
 
         conf.setWebKeys(ServerUtil.createJsonMapper().readValue(updatedJwks.toString(), WebKeysConfiguration.class));
 

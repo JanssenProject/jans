@@ -244,7 +244,6 @@ public class SessionIdService {
     }
 
     /**
-     *
      * @param session
      * @param force
      * @return returns whether session was updated
@@ -270,8 +269,8 @@ public class SessionIdService {
             session.setSessionAttributes(currentSessionAttributes);
 
             if (force) {
-            	// Reset state to unauthenticated
-            	session.setState(SessionIdState.UNAUTHENTICATED);
+                // Reset state to unauthenticated
+                session.setState(SessionIdState.UNAUTHENTICATED);
                 externalEvent(new SessionEvent(SessionEventType.UNAUTHENTICATED, session));
             }
 
@@ -304,7 +303,7 @@ public class SessionIdService {
             log.debug("Failed to update session entry: '{}'", session.getId());
             return null;
         }
-        
+
         return session;
     }
 
@@ -332,13 +331,13 @@ public class SessionIdService {
         String sessionId = cookieService.getSessionIdFromCookie();
 
         if (StringHelper.isEmpty(sessionId) && identity.getSessionId() != null) {
-      		sessionId = identity.getSessionId().getId();
+            sessionId = identity.getSessionId().getId();
         }
 
         if (StringHelper.isNotEmpty(sessionId)) {
             return getSessionId(sessionId);
         } else {
-        	log.trace("Session cookie not exists");
+            log.trace("Session cookie not exists");
         }
 
         return null;
@@ -380,8 +379,8 @@ public class SessionIdService {
             log.info("Start session result for '{}': '{}'", userName, externalResult);
 
             if (!externalResult) {
-            	reinitLogin(sessionId, true);
-            	throw new InvalidSessionStateException("Session creation is prohibited by external session script!");
+                reinitLogin(sessionId, true);
+                throw new InvalidSessionStateException("Session creation is prohibited by external session script!");
             }
 
             externalEvent(new SessionEvent(SessionEventType.AUTHENTICATED, sessionId).setHttpRequest(httpRequest));
@@ -409,15 +408,15 @@ public class SessionIdService {
     public SessionId generateUnauthenticatedSessionId(String userDn, Date authenticationDate, SessionIdState state, Map<String, String> sessionIdAttributes, boolean persist) {
         return generateSessionId(userDn, authenticationDate, state, sessionIdAttributes, persist);
     }
-    
+
     public String computeSessionState(SessionId sessionId, String clientId, String redirectUri) {
         final boolean isSameClient = clientId.equals(sessionId.getSessionAttributes().get("client_id")) &&
                 redirectUri.equals(sessionId.getSessionAttributes().get("redirect_uri"));
-        if(isSameClient)
+        if (isSameClient)
             return sessionId.getSessionState();
         final String salt = UUID.randomUUID().toString();
         final String opbs = sessionId.getOPBrowserState();
-        return computeSessionState(clientId,redirectUri, opbs, salt);
+        return computeSessionState(clientId, redirectUri, opbs, salt);
     }
 
     private String computeSessionState(String clientId, String redirectUri, String opbs, String salt) {
@@ -429,19 +428,19 @@ public class SessionIdService {
             if (log.isErrorEnabled())
                 log.error("Failed generating session state! " + e.getMessage(), e);
             throw new FailedComputeSessionStateException(e.getMessage(), e);
-		}
+        }
     }
 
     private String getClientOrigin(String redirectUri) throws URISyntaxException {
-    	if (StringHelper.isNotEmpty(redirectUri)) {
-	        final URI uri = new URI(redirectUri);
-	        String result = uri.getScheme() + "://" + uri.getHost();
-	        if(uri.getPort() > 0)
-	            result += ":" + uri.getPort();
-	        return result;
-    	} else {
-    		return appConfiguration.getIssuer();
-    	}
+        if (StringHelper.isNotEmpty(redirectUri)) {
+            final URI uri = new URI(redirectUri);
+            String result = uri.getScheme() + "://" + uri.getHost();
+            if (uri.getPort() > 0)
+                result += ":" + uri.getPort();
+            return result;
+        } else {
+            return appConfiguration.getIssuer();
+        }
     }
 
     private SessionId generateSessionId(String userDn, Date authenticationDate, SessionIdState state, Map<String, String> sessionIdAttributes, boolean persist) {
@@ -568,8 +567,8 @@ public class SessionIdService {
             log.info("Start session result for '{}': '{}'", userName, externalResult);
 
             if (!externalResult) {
-            	reinitLogin(sessionId, true);
-            	throw new InvalidSessionStateException("Session creation is prohibited by external session script!");
+                reinitLogin(sessionId, true);
+                throw new InvalidSessionStateException("Session creation is prohibited by external session script!");
             }
             externalEvent(new SessionEvent(SessionEventType.AUTHENTICATED, sessionId).setHttpRequest(httpRequest).setHttpResponse(httpResponse));
         }
@@ -629,7 +628,7 @@ public class SessionIdService {
                     Date lastUsedAt = new Date();
                     if (sessionId.getLastUsedAt() != null) {
                         long diff = lastUsedAt.getTime() - sessionId.getLastUsedAt().getTime();
-                        int unusedDiffInSeconds = (int) (diff/1000);
+                        int unusedDiffInSeconds = (int) (diff / 1000);
                         if (unusedDiffInSeconds > unusedLifetime) {
                             log.debug("Session id expired: {} by sessionIdUnusedLifetime, remove it.", sessionId.getId());
                             remove(sessionId); // expired
@@ -912,9 +911,9 @@ public class SessionIdService {
 
         HashSet<String> resultAcrs = new HashSet<>();
         for (String acr : acrs) {
-        	resultAcrs.add(externalAuthenticationService.scriptName(acr));
+            resultAcrs.add(externalAuthenticationService.scriptName(acr));
         }
-        
+
         return new ArrayList<>(resultAcrs);
     }
 

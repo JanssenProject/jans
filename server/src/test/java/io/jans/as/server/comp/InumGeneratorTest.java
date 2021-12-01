@@ -6,15 +6,14 @@
 
 package io.jans.as.server.comp;
 
-import javax.inject.Inject;
-
+import io.jans.as.model.common.IdType;
+import io.jans.as.server.BaseComponentTest;
+import io.jans.as.server.idgen.ws.rs.InumGenerator;
 import org.apache.commons.lang.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import io.jans.as.model.common.IdType;
-import io.jans.as.server.BaseComponentTest;
-import io.jans.as.server.idgen.ws.rs.InumGenerator;
+import javax.inject.Inject;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -23,13 +22,13 @@ import io.jans.as.server.idgen.ws.rs.InumGenerator;
 
 public class InumGeneratorTest extends BaseComponentTest {
 
-	@Inject
-	private InumGenerator inumGenerator;
+    @Inject
+    private InumGenerator inumGenerator;
 
-	@Test
-	public void test() {
-		final String inum = inumGenerator.generateId(IdType.CLIENTS, "@!1111");
-		Assert.assertTrue(StringUtils.isNotBlank(inum));
-	}
+    @Test
+    public void test() {
+        final String inum = inumGenerator.generateId(IdType.CLIENTS, "@!1111");
+        Assert.assertTrue(StringUtils.isNotBlank(inum));
+    }
 
 }

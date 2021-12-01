@@ -57,7 +57,6 @@ import io.jans.util.StringHelper;
 import io.jans.util.ilocale.LocaleUtil;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.util.Strings;
-import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 
 import javax.enterprise.context.RequestScoped;
@@ -71,6 +70,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -165,10 +165,10 @@ public class AuthorizeAction {
 
     @Inject
     private CookieService cookieService;
-    
+
     @Inject
     private Authenticator authenticator;
-    
+
     @Inject
     private AuthenticationService authenticationService;
 
@@ -178,8 +178,8 @@ public class AuthorizeAction {
     @Inject
     private CibaRequestService cibaRequestService;
 
-	@Inject
-	private Identity identity;
+    @Inject
+    private Identity identity;
 
     @Inject
     private AuthorizeRestWebServiceValidator authorizeRestWebServiceValidator;
@@ -233,7 +233,7 @@ public class AuthorizeAction {
                 languageBean.setLocale(requestedLocale);
                 return;
             }
-            
+
             Locale defaultLocale = facesContext.getApplication().getDefaultLocale();
             if (defaultLocale != null) {
                 languageBean.setLocale(defaultLocale);
@@ -338,10 +338,10 @@ public class AuthorizeAction {
             SessionId unauthenticatedSession = sessionIdService.generateUnauthenticatedSessionId(null, new Date(), SessionIdState.UNAUTHENTICATED, requestParameterMap, false);
             unauthenticatedSession.setSessionAttributes(requestParameterMap);
             unauthenticatedSession.addPermission(clientId, false);
-            
+
             // Copy ACR script parameters
             if (appConfiguration.getKeepAuthenticatorAttributesOnAcrChange()) {
-            	authenticationService.copyAuthenticatorExternalAttributes(session, unauthenticatedSession);
+                authenticationService.copyAuthenticatorExternalAttributes(session, unauthenticatedSession);
             }
 
             // #1030, fix for flow 4 - transfer previous session permissions to new session
@@ -367,16 +367,16 @@ public class AuthorizeAction {
                 loginParameters.put(io.jans.as.model.authorize.AuthorizeRequestParam.LOGIN_HINT, requestParameterMap.get(io.jans.as.model.authorize.AuthorizeRequestParam.LOGIN_HINT));
             }
 
-            boolean enableRedirect = StringHelper.toBoolean(System.getProperty("gluu.enable-redirect", "false"), false); 
+            boolean enableRedirect = StringHelper.toBoolean(System.getProperty("gluu.enable-redirect", "false"), false);
             if (!enableRedirect && redirectTo.toLowerCase().endsWith("xhtml")) {
-            	if (redirectTo.toLowerCase().endsWith("postlogin.xhtml")) {
-                	authenticator.authenticateWithOutcome();
-            	} else {
-	            	authenticator.prepareAuthenticationForStep(unauthenticatedSession);
-	            	facesService.renderView(redirectTo);
-            	}
+                if (redirectTo.toLowerCase().endsWith("postlogin.xhtml")) {
+                    authenticator.authenticateWithOutcome();
+                } else {
+                    authenticator.prepareAuthenticationForStep(unauthenticatedSession);
+                    facesService.renderView(redirectTo);
+                }
             } else {
-            	facesService.redirectWithExternal(redirectTo, loginParameters);
+                facesService.redirectWithExternal(redirectTo, loginParameters);
             }
 
             return;
@@ -406,7 +406,7 @@ public class AuthorizeAction {
             return;
         }
 
-        ExternalPostAuthnContext postAuthnContext = new ExternalPostAuthnContext(client, session, (HttpServletRequest)externalContext.getRequest(), (HttpServletResponse) externalContext.getResponse());
+        ExternalPostAuthnContext postAuthnContext = new ExternalPostAuthnContext(client, session, (HttpServletRequest) externalContext.getRequest(), (HttpServletResponse) externalContext.getResponse());
         final boolean forceAuthorization = externalPostAuthnService.externalForceAuthorization(client, postAuthnContext);
 
         final boolean hasConsentPrompt = prompts.contains(io.jans.as.model.common.Prompt.CONSENT);
@@ -492,24 +492,24 @@ public class AuthorizeAction {
 
                 javax.ws.rs.client.Client clientRequest = ClientBuilder.newClient();
                 try {
-	        	    Response clientResponse = clientRequest.target(reqUriWithoutFragment).request().buildGet().invoke();
-	        	    clientRequest.close();
+                    Response clientResponse = clientRequest.target(reqUriWithoutFragment).request().buildGet().invoke();
+                    clientRequest.close();
 
-	                int status = clientResponse.getStatus();
-	                if (status == 200) {
-	                    String entity = clientResponse.readEntity(String.class);
+                    int status = clientResponse.getStatus();
+                    if (status == 200) {
+                        String entity = clientResponse.readEntity(String.class);
 
-	                    if (StringUtils.isBlank(reqUriHash)) {
-	                        requestJwt = entity;
-	                    } else {
-	                        String hash = Base64Util.base64urlencode(JwtUtil.getMessageDigestSHA256(entity));
-	                        if (StringUtils.equals(reqUriHash, hash)) {
-	                            requestJwt = entity;
-	                        }
-	                    }
-	                }
+                        if (StringUtils.isBlank(reqUriHash)) {
+                            requestJwt = entity;
+                        } else {
+                            String hash = Base64Util.base64urlencode(JwtUtil.getMessageDigestSHA256(entity));
+                            if (StringUtils.equals(reqUriHash, hash)) {
+                                requestJwt = entity;
+                            }
+                        }
+                    }
                 } finally {
-                	clientRequest.close();
+                    clientRequest.close();
                 }
             } catch (Exception e) {
                 log.error(e.getMessage(), e);

@@ -6,11 +6,11 @@
 
 package io.jans.as.server.service.logger;
 
+import io.jans.as.model.configuration.AppConfiguration;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
-
-import io.jans.as.model.configuration.AppConfiguration;
 
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 

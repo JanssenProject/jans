@@ -6,11 +6,11 @@
 
 package io.jans.as.client;
 
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.Form;
-
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.token.ClientAssertionType;
+
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.core.Form;
 
 
 /**
@@ -26,7 +26,7 @@ public class ClientAuthnEnabler {
         this.requestForm = requestForm;
     }
 
-    public void exec(ClientAuthnRequest request){
+    public void exec(ClientAuthnRequest request) {
         if (request.getAuthenticationMethod() == AuthenticationMethod.CLIENT_SECRET_BASIC
                 && request.hasCredentials()) {
             clientRequest.header("Authorization", "Basic " + request.getEncodedCredentials());

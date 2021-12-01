@@ -6,14 +6,14 @@
 
 package io.jans.as.server.service;
 
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.configuration.AuthenticationProtectionConfiguration;
+import io.jans.service.cdi.event.ConfigurationUpdate;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Named;
-
-import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.model.configuration.AuthenticationProtectionConfiguration;
-import io.jans.service.cdi.event.ConfigurationUpdate;
 
 /**
  * Brute Force authentication protection service implementation
@@ -31,7 +31,7 @@ public class AuthenticationProtectionService extends io.jans.service.security.pr
     private static final int DEFAULT_DELAY_TIME = 2; // 5 seconds
 
     private static final String DEFAULT_KEY_PREFIX = "user";
-    
+
     @Inject
     private AppConfiguration appConfiguration;
 
@@ -64,7 +64,7 @@ public class AuthenticationProtectionService extends io.jans.service.security.pr
         AuthenticationProtectionConfiguration authenticationProtectionConfiguration = appConfiguration.getAuthenticationProtectionConfiguration();
 
         return (authenticationProtectionConfiguration != null) && (authenticationProtectionConfiguration.getBruteForceProtectionEnabled());
-        
+
     }
 
 }

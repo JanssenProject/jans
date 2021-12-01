@@ -60,7 +60,7 @@ public class JSONWebKey {
 
     /**
      * Sets the Key Name.
-     *  
+     *
      * @param name the Key Name
      */
     public void setName(final String name) {
@@ -69,7 +69,7 @@ public class JSONWebKey {
 
     /**
      * Returns the Key Description.
-     * 
+     *
      * @return the Key Description
      */
     public String getDescr() {
@@ -78,7 +78,7 @@ public class JSONWebKey {
 
     /**
      * Sets the Key Description.
-     * 
+     *
      * @param description the Key Description
      */
     public void setDescr(final String description) {
@@ -319,10 +319,10 @@ public class JSONWebKey {
     public JSONObject toJSONObject() throws JSONException {
         JSONObject jsonObj = new JSONObject();
 
-        if(name != null) {
+        if (name != null) {
             jsonObj.put(JWKParameter.NAME, name);
         }
-        if(descr != null) {
+        if (descr != null) {
             jsonObj.put(JWKParameter.DESCRIPTION, descr);
         }
         jsonObj.put(JWKParameter.KEY_ID, kid);
@@ -358,7 +358,7 @@ public class JSONWebKey {
         JSONWebKey jwk = new JSONWebKey();
 
         jwk.setName(jwkJSONObject.optString(JWKParameter.NAME));
-        jwk.setDescr(jwkJSONObject.optString(JWKParameter.DESCRIPTION));        
+        jwk.setDescr(jwkJSONObject.optString(JWKParameter.DESCRIPTION));
         jwk.setKid(jwkJSONObject.optString(JWKParameter.KEY_ID));
         jwk.setKty(KeyType.fromString(jwkJSONObject.optString(JWKParameter.KEY_TYPE)));
         jwk.setUse(Use.fromString(jwkJSONObject.optString(JWKParameter.KEY_USE)));

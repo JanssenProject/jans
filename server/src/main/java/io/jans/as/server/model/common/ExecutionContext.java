@@ -6,9 +6,6 @@
 
 package io.jans.as.server.model.common;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.AttributeService;
 import io.jans.as.model.configuration.AppConfiguration;
@@ -18,6 +15,8 @@ import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
