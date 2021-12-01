@@ -6,14 +6,7 @@
 
 package io.jans.as.server.model.token;
 
-import java.util.Date;
-import java.util.List;
-
-import org.apache.commons.lang.StringUtils;
-import org.json.JSONObject;
-
 import com.google.common.base.Strings;
-
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.configuration.AppConfiguration;
@@ -30,6 +23,11 @@ import io.jans.as.model.util.JwtUtil;
 import io.jans.as.server.service.ClientService;
 import io.jans.service.cdi.util.CdiUtil;
 import io.jans.util.security.StringEncrypter;
+import org.apache.commons.lang.StringUtils;
+import org.json.JSONObject;
+
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author Javier Rojas Blum

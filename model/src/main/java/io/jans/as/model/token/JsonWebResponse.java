@@ -6,11 +6,11 @@
 
 package io.jans.as.model.token;
 
-import java.io.Serializable;
-
 import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwt.JwtClaims;
 import io.jans.as.model.jwt.JwtHeader;
+
+import java.io.Serializable;
 
 /**
  * JSON Web Token is a compact token format intended for space constrained
@@ -20,48 +20,48 @@ import io.jans.as.model.jwt.JwtHeader;
  */
 public class JsonWebResponse implements Serializable {
 
-	private static final long serialVersionUID = -4141298937204111173L;
+    private static final long serialVersionUID = -4141298937204111173L;
 
-	protected JwtHeader header;
-	protected JwtClaims claims;
-	
-	public JsonWebResponse() {
+    protected JwtHeader header;
+    protected JwtClaims claims;
+
+    public JsonWebResponse() {
         this.header = new JwtHeader();
         this.claims = new JwtClaims();
-	}
-
-	public JwtHeader getHeader() {
-		return header;
-	}
-
-	public void setHeader(JwtHeader header) {
-		this.header = header;
-	}
-
-	public JwtClaims getClaims() {
-		return claims;
-	}
-
-    public void setClaim(String key, String value) {
-	    if (claims == null) {
-	        return;
-        }
-	    claims.setClaim(key, value);
     }
 
-	public void setClaims(JwtClaims claims) {
-		this.claims = claims;
-	}
+    public JwtHeader getHeader() {
+        return header;
+    }
 
-	public String asString() {
-		try {
-			return claims.toJsonString();
-		} catch (InvalidJwtException ex) {
-			ex.printStackTrace();
-		}
+    public void setHeader(JwtHeader header) {
+        this.header = header;
+    }
 
-		return "";
-	}
+    public JwtClaims getClaims() {
+        return claims;
+    }
+
+    public void setClaim(String key, String value) {
+        if (claims == null) {
+            return;
+        }
+        claims.setClaim(key, value);
+    }
+
+    public void setClaims(JwtClaims claims) {
+        this.claims = claims;
+    }
+
+    public String asString() {
+        try {
+            return claims.toJsonString();
+        } catch (InvalidJwtException ex) {
+            ex.printStackTrace();
+        }
+
+        return "";
+    }
 
     @Override
     public String toString() {

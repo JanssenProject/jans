@@ -6,17 +6,14 @@
 
 package io.jans.as.model.uma;
 
-import java.util.Arrays;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.jans.as.model.discovery.OAuth2Discovery;
+import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-
-import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import io.jans.as.model.discovery.OAuth2Discovery;
+import java.util.Arrays;
 
 /**
  * UMA2 metadata

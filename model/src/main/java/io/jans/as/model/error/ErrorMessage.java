@@ -29,14 +29,13 @@ import javax.xml.bind.annotation.XmlRootElement;
  * </p>
  *
  * @author Javier Rojas Date: 09.23.2011
- *
  */
 @XmlRootElement(name = "error")
 public class ErrorMessage {
 
-	private String id;
-	private String description;
-	private String uri;
+    private String id;
+    private String description;
+    private String uri;
 
     public ErrorMessage() {
     }
@@ -48,29 +47,29 @@ public class ErrorMessage {
     }
 
     @XmlAttribute(name = "id")
-	public String getId() {
-		return id;
-	}
+    public String getId() {
+        return id;
+    }
 
-	public void setId(String id) {
-		this.id = id;
-	}
+    public void setId(String id) {
+        this.id = id;
+    }
 
-	@XmlElement(name = "error-description")
-	public String getDescription() {
-		return description;
-	}
+    @XmlElement(name = "error-description")
+    public String getDescription() {
+        return description;
+    }
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-	@XmlElement(name = "error-uri")
-	public String getUri() {
-		return uri;
-	}
+    @XmlElement(name = "error-uri")
+    public String getUri() {
+        return uri;
+    }
 
-	public void setUri(String uri) {
-		this.uri = uri;
-	}
+    public void setUri(String uri) {
+        this.uri = uri;
+    }
 }

@@ -143,7 +143,7 @@ public enum AuthorizeErrorResponseType implements IErrorType {
      *
      * @param param The parameter to be match.
      * @return The <code>enumeration</code> if found, otherwise
-     *         <code>null</code>.
+     * <code>null</code>.
      */
     public static AuthorizeErrorResponseType fromString(String param) {
         if (param != null) {

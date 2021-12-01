@@ -6,6 +6,8 @@
 
 package io.jans.as.server.session.ws.rs;
 
+import io.jans.as.model.session.EndSessionRequestParam;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.GET;
@@ -17,8 +19,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
-import io.jans.as.model.session.EndSessionRequestParam;
-
 /**
  * @author Javier Rojas Blum
  * @version August 9, 2017
@@ -29,11 +29,11 @@ public interface EndSessionRestWebService {
     @Path("/end_session")
     @Produces({MediaType.TEXT_PLAIN})
     Response requestEndSession(@QueryParam(EndSessionRequestParam.ID_TOKEN_HINT) String idTokenHint,
-            @QueryParam(EndSessionRequestParam.POST_LOGOUT_REDIRECT_URI) String postLogoutRedirectUri,
-            @QueryParam(EndSessionRequestParam.STATE) String state,
-            @QueryParam("sid") String sid,
-            @Context HttpServletRequest httpRequest,
-            @Context HttpServletResponse httpResponse,
-            @Context SecurityContext securityContext);
+                               @QueryParam(EndSessionRequestParam.POST_LOGOUT_REDIRECT_URI) String postLogoutRedirectUri,
+                               @QueryParam(EndSessionRequestParam.STATE) String state,
+                               @QueryParam("sid") String sid,
+                               @Context HttpServletRequest httpRequest,
+                               @Context HttpServletResponse httpResponse,
+                               @Context SecurityContext securityContext);
 
 }

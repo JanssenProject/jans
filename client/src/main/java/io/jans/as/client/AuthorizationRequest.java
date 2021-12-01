@@ -468,14 +468,14 @@ public class AuthorizationRequest extends BaseRequest {
     public String getCustomResponseHeadersAsString() throws JSONException {
         String header = Util.mapAsString(customResponseHeaders);
         if (header == null) {
-        	return null;
+            return null;
         }
 
         try {
-			return URLEncoder.encode(header, "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			LOG.warn("Failed to encode string", e);
-		}
+            return URLEncoder.encode(header, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            LOG.warn("Failed to encode string", e);
+        }
 
         return null;
     }

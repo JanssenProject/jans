@@ -7,7 +7,6 @@
 package io.jans.as.model.config;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import io.jans.as.model.configuration.Configuration;
 import io.jans.as.model.jwk.JSONWebKeySet;
 

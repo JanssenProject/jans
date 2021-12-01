@@ -428,10 +428,10 @@ public class CrossEncryptionTest {
                 return false;
             }
 
-			@Override
-			public PrivateKey getPrivateKey(String keyId) throws CryptoProviderException {
-		        throw new UnsupportedOperationException("Method not implemented.");
-			}
+            @Override
+            public PrivateKey getPrivateKey(String keyId) throws CryptoProviderException {
+                throw new UnsupportedOperationException("Method not implemented.");
+            }
 
             @Override
             public PublicKey getPublicKey(String keyId) {

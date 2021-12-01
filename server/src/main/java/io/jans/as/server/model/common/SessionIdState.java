@@ -17,7 +17,7 @@ import java.util.Map;
  * @version 0.9, 09/02/2015
  */
 
-public enum SessionIdState  implements AttributeEnum {
+public enum SessionIdState implements AttributeEnum {
 
     UNAUTHENTICATED("unauthenticated"), AUTHENTICATED("authenticated");
 
@@ -25,11 +25,11 @@ public enum SessionIdState  implements AttributeEnum {
 
     private static final Map<String, SessionIdState> mapByValues = new HashMap<String, SessionIdState>();
 
-	static {
-		for (SessionIdState enumType : values()) {
-			mapByValues.put(enumType.getValue(), enumType);
-		}
-	}
+    static {
+        for (SessionIdState enumType : values()) {
+            mapByValues.put(enumType.getValue(), enumType);
+        }
+    }
 
     SessionIdState(String value) {
         this.value = value;
@@ -39,17 +39,17 @@ public enum SessionIdState  implements AttributeEnum {
         return value;
     }
 
-	public static SessionIdState getByValue(String value) {
-		return mapByValues.get(value);
-	}
+    public static SessionIdState getByValue(String value) {
+        return mapByValues.get(value);
+    }
 
-	public Enum<? extends AttributeEnum> resolveByValue(String value) {
-		return getByValue(value);
-	}
+    public Enum<? extends AttributeEnum> resolveByValue(String value) {
+        return getByValue(value);
+    }
 
-	@Override
-	public String toString() {
-		return value;
-	}
+    @Override
+    public String toString() {
+        return value;
+    }
 
 }

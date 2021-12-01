@@ -6,7 +6,11 @@
 
 package io.jans.as.model.config.adminui;
 
-import io.jans.orm.annotation.*;
+import io.jans.orm.annotation.AttributeName;
+import io.jans.orm.annotation.DN;
+import io.jans.orm.annotation.DataEntry;
+import io.jans.orm.annotation.JsonObject;
+import io.jans.orm.annotation.ObjectClass;
 
 /**
  * @author Yuriy Zabrovarnyy

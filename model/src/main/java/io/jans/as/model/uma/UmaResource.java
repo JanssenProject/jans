@@ -21,7 +21,7 @@ import java.util.List;
  * Resource that needs protection by registering a resource description at the AS.
  *
  * @author Yuriy Zabrovarnyy
- *         Date: 17/05/2017
+ * Date: 17/05/2017
  */
 
 @IgnoreMediaTypes("application/*+json")

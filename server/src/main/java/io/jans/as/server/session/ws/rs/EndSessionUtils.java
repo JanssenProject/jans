@@ -6,24 +6,22 @@
 
 package io.jans.as.server.session.ws.rs;
 
-import static io.jans.as.server.util.ServerUtil.daemonThreadFactory;
-
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import io.jans.as.client.service.ClientFactory;
+import io.jans.as.model.util.Util;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Form;
 import javax.ws.rs.core.Response;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import io.jans.as.client.service.ClientFactory;
-import io.jans.as.model.util.Util;
+import static io.jans.as.server.util.ServerUtil.daemonThreadFactory;
 
 /**
  * @author Yuriy Zabrovarnyy

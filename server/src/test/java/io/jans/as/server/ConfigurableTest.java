@@ -28,59 +28,59 @@ import java.util.Properties;
 
 /**
  * Base class for all seam test which requre external configuration
- * 
+ *
  * @author Yuriy Movchan Date: 05/16/2016
  */
 @ArquillianSuiteDeployment
 public abstract class ConfigurableTest extends Arquillian {
 
-	public static FileConfiguration testData;
-	public boolean initialized = false;
+    public static FileConfiguration testData;
+    public boolean initialized = false;
 
-	@Deployment
-	@OverProtocol("Servlet 3.0")
-	public static Archive<?> createDeployment() {
-		return Deployments.createDeployment();
-	}
+    @Deployment
+    @OverProtocol("Servlet 3.0")
+    public static Archive<?> createDeployment() {
+        return Deployments.createDeployment();
+    }
 
-	@BeforeSuite
-	public void initTestSuite(ITestContext context) throws IOException {
-		if (initialized) {
-			return;
-		}
+    @BeforeSuite
+    public void initTestSuite(ITestContext context) throws IOException {
+        if (initialized) {
+            return;
+        }
 
-		Reporter.log("Invoked init test suite method", true);
+        Reporter.log("Invoked init test suite method", true);
 
         String propertiesFile = context.getCurrentXmlTest().getParameter("propertiesFile");
-		if (StringHelper.isEmpty(propertiesFile)) {
-			propertiesFile = "target/test-classes/testng.properties";
-		}
+        if (StringHelper.isEmpty(propertiesFile)) {
+            propertiesFile = "target/test-classes/testng.properties";
+        }
 
-		// Load test parameters
-		FileInputStream conf = new FileInputStream(propertiesFile);
+        // Load test parameters
+        FileInputStream conf = new FileInputStream(propertiesFile);
         Properties prop;
         try {
-			prop = new Properties();
-			prop.load(conf);
-		} finally {
-			IOUtils.closeQuietly(conf);
-		}
+            prop = new Properties();
+            prop.load(conf);
+        } finally {
+            IOUtils.closeQuietly(conf);
+        }
 
-		Map<String, String> parameters = new HashMap<String, String>();
-		for (Entry<Object, Object> entry : prop.entrySet()) {
-			Object key = entry.getKey();
-			Object value = entry.getValue();
+        Map<String, String> parameters = new HashMap<String, String>();
+        for (Entry<Object, Object> entry : prop.entrySet()) {
+            Object key = entry.getKey();
+            Object value = entry.getValue();
 
-			if (StringHelper.isEmptyString(key) || StringHelper.isEmptyString(value)) {
-				continue;
-			}
-			parameters.put(key.toString(), value.toString());
-		}
+            if (StringHelper.isEmptyString(key) || StringHelper.isEmptyString(value)) {
+                continue;
+            }
+            parameters.put(key.toString(), value.toString());
+        }
 
-		// Override test parameters
-		context.getSuite().getXmlSuite().setParameters(parameters);
-		
-		initialized = true;
-	}
+        // Override test parameters
+        context.getSuite().getXmlSuite().setParameters(parameters);
+
+        initialized = true;
+    }
 
 }

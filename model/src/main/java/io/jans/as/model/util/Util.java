@@ -229,7 +229,7 @@ public class Util {
 
     public static JSONArray listToJsonArray(Collection<String> list) {
         if (list == null) {
-        	return new JSONArray();
+            return new JSONArray();
         }
 
         return new JSONArray(list);
@@ -290,8 +290,7 @@ public class Util {
         try {
             md = MessageDigest.getInstance("SHA-1");
             return byteArrayToHexString(md.digest(input.getBytes()));
-        }
-        catch(NoSuchAlgorithmException e) {
+        } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
 
