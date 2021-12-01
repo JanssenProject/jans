@@ -28,7 +28,7 @@ import io.jans.as.model.util.StringUtils;
  */
 public class EDDSAPublicKey extends PublicKey {
 
-    private byte[] xEncoded;
+    private final byte[] xEncoded;
 
     /**
      * Constructor

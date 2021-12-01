@@ -56,11 +56,11 @@ public class EDDSAKeyFactory extends KeyFactory<EDDSAPrivateKey, EDDSAPublicKey>
     protected static final byte[] Ed448Prefix = Hex.decode("3043300506032b6571033a00");
     protected static final byte[] Ed25519Prefix = Hex.decode("302a300506032b6570032100");
 
-    private SignatureAlgorithm signatureAlgorithm;
+    private final SignatureAlgorithm signatureAlgorithm;
 
-    private KeyPair keyPair;
-    private EDDSAPrivateKey eddsaPrivateKey;
-    private EDDSAPublicKey eddsaPublicKey;
+    private final KeyPair keyPair;
+    private final EDDSAPrivateKey eddsaPrivateKey;
+    private final EDDSAPublicKey eddsaPublicKey;
     private Certificate certificate;
 
     /**

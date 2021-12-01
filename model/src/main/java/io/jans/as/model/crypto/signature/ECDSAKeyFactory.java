@@ -47,11 +47,11 @@ import io.jans.as.model.crypto.KeyFactory;
  */
 public class ECDSAKeyFactory extends KeyFactory<ECDSAPrivateKey, ECDSAPublicKey> {
 
-    private SignatureAlgorithm signatureAlgorithm;
-    private KeyPair keyPair;
+    private final SignatureAlgorithm signatureAlgorithm;
+    private final KeyPair keyPair;
 
-    private ECDSAPrivateKey ecdsaPrivateKey;
-    private ECDSAPublicKey ecdsaPublicKey;
+    private final ECDSAPrivateKey ecdsaPrivateKey;
+    private final ECDSAPublicKey ecdsaPublicKey;
     private Certificate certificate;
 
     public ECDSAKeyFactory(SignatureAlgorithm signatureAlgorithm, String dnName) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException, OperatorCreationException, CertificateException {
