@@ -33,8 +33,8 @@ import io.jans.as.model.util.StringUtils;
  */
 public class EDDSAPrivateKey extends PrivateKey {
 
-    private byte[] dEncoded;
-    private byte[] xEncoded;
+    private final byte[] dEncoded;
+    private final byte[] xEncoded;
 
     /**
      * Constructor

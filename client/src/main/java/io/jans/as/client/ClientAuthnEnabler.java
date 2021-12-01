@@ -18,8 +18,8 @@ import io.jans.as.model.token.ClientAssertionType;
  */
 public class ClientAuthnEnabler {
 
-    private Builder clientRequest;
-    private Form requestForm;
+    private final Builder clientRequest;
+    private final Form requestForm;
 
     public ClientAuthnEnabler(Builder clientRequest, Form requestForm) {
         this.clientRequest = clientRequest;
