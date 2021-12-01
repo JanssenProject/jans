@@ -6,12 +6,17 @@
 
 package io.jans.as.server.service;
 
-import static io.jans.as.model.util.StringUtils.toList;
-
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Set;
+import com.google.common.collect.Sets;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.server.model.common.SessionId;
+import io.jans.as.server.model.common.SessionIdState;
+import io.jans.as.server.model.config.ConfigurationFactory;
+import io.jans.orm.exception.EntryPersistenceException;
+import io.jans.service.cdi.util.CdiUtil;
+import org.apache.commons.lang.StringUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.slf4j.Logger;
 
 import javax.enterprise.context.RequestScoped;
 import javax.faces.context.ExternalContext;
@@ -20,20 +25,12 @@ import javax.inject.Inject;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Set;
 
-import org.apache.commons.lang.StringUtils;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.slf4j.Logger;
-
-import com.google.common.collect.Sets;
-
-import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.server.model.common.SessionId;
-import io.jans.as.server.model.common.SessionIdState;
-import io.jans.as.server.model.config.ConfigurationFactory;
-import io.jans.orm.exception.EntryPersistenceException;
-import io.jans.service.cdi.util.CdiUtil;
+import static io.jans.as.model.util.StringUtils.toList;
 
 /**
  * @author Yuriy Zabrovarnyy

@@ -6,22 +6,20 @@
 
 package io.jans.as.server.service;
 
-import java.util.Map;
-
-import javax.annotation.PostConstruct;
-import javax.ejb.DependsOn;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
-
-import org.apache.commons.lang.StringUtils;
-
 import io.jans.as.common.model.common.User;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.AuthenticationException;
 import io.jans.orm.exception.operation.SearchException;
 import io.jans.util.StringHelper;
+import org.apache.commons.lang.StringUtils;
+
+import javax.annotation.PostConstruct;
+import javax.ejb.DependsOn;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.util.Map;
 
 /**
  * Provides operations with authentication filters

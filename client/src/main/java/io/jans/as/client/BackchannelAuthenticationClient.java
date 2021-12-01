@@ -111,10 +111,10 @@ public class BackchannelAuthenticationClient extends BaseClient<BackchannelAuthe
         applyCookies(clientRequest);
 
         // Prepare request parameters
-	    clientRequest.header("Content-Type", request.getContentType());
-	    if (request.getAuthenticationMethod() == AuthenticationMethod.CLIENT_SECRET_BASIC && request.hasCredentials()) {
-	        clientRequest.header("Authorization", "Basic " + request.getEncodedCredentials());
-	    }
+        clientRequest.header("Content-Type", request.getContentType());
+        if (request.getAuthenticationMethod() == AuthenticationMethod.CLIENT_SECRET_BASIC && request.hasCredentials()) {
+            clientRequest.header("Authorization", "Basic " + request.getEncodedCredentials());
+        }
 
         new ClientAuthnEnabler(clientRequest, requestForm).exec(getRequest());
 

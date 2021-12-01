@@ -7,7 +7,6 @@
 package io.jans.as.server.servlet;
 
 import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.model.util.Util;
 import io.jans.as.server.model.discovery.OpenIdConnectDiscoveryParamsValidator;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -37,20 +36,20 @@ import static io.jans.as.model.util.Util.escapeLog;
 @WebServlet(urlPatterns = "/.well-known/webfinger")
 public class WebFinger extends HttpServlet {
 
-	private static final long serialVersionUID = -4708834950205359151L;
+    private static final long serialVersionUID = -4708834950205359151L;
 
-	@Inject
+    @Inject
     private Logger log;
-	
-	@Inject
-	private AppConfiguration appConfiguration;
+
+    @Inject
+    private AppConfiguration appConfiguration;
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
      *
      * @param request  servlet request
      * @param response servlet response
-     * @throws java.io.IOException            if an I/O error occurs
+     * @throws java.io.IOException if an I/O error occurs
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
@@ -97,7 +96,7 @@ public class WebFinger extends HttpServlet {
     protected void doGet
     (HttpServletRequest
              request, HttpServletResponse
-            response)
+             response)
             throws ServletException, IOException {
         processRequest(request, response);
     }
@@ -114,7 +113,7 @@ public class WebFinger extends HttpServlet {
     protected void doPost
     (HttpServletRequest
              request, HttpServletResponse
-            response)
+             response)
             throws ServletException, IOException {
         processRequest(request, response);
     }

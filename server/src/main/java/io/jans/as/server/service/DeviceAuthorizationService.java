@@ -6,22 +6,6 @@
 
 package io.jans.as.server.service;
 
-import java.io.Serializable;
-import java.net.URI;
-import java.util.Map;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilder;
-
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.common.GrantType;
@@ -31,6 +15,20 @@ import io.jans.as.server.model.common.DeviceAuthorizationCacheControl;
 import io.jans.as.server.model.common.DeviceAuthorizationStatus;
 import io.jans.as.server.model.common.SessionId;
 import io.jans.service.CacheService;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriBuilder;
+import java.io.Serializable;
+import java.net.URI;
+import java.util.Map;
 
 /**
  * Service used to process data related to device code grant type.
@@ -60,9 +58,10 @@ public class DeviceAuthorizationService implements Serializable {
 
     /**
      * Saves data in cache, it could be saved with two identifiers used by Token endpoint or device_authorization page.
-     * @param data Data to be saved.
+     *
+     * @param data           Data to be saved.
      * @param saveDeviceCode Defines whether data should be saved using device code.
-     * @param saveUserCode Defines whether data should be saved using user code.
+     * @param saveUserCode   Defines whether data should be saved using user code.
      */
     public void saveInCache(DeviceAuthorizationCacheControl data, boolean saveDeviceCode, boolean saveUserCode) {
         if (saveDeviceCode) {
@@ -119,25 +118,25 @@ public class DeviceAuthorizationService implements Serializable {
      * used to process device authorizations.
      *
      * @param deviceAuthorizationCacheControl Cache data related to the device code request.
-     * @param client Client in process.
-     * @param state State of the authorization request.
-     * @param servletRequest HttpServletRequest
+     * @param client                          Client in process.
+     * @param state                           State of the authorization request.
+     * @param servletRequest                  HttpServletRequest
      */
     public String getDeviceAuthorizationPage(DeviceAuthorizationCacheControl deviceAuthorizationCacheControl, Client client,
                                              String state, HttpServletRequest servletRequest) {
         if (deviceAuthorizationCacheControl == null) {
             throw new WebApplicationException(Response
-                .status(Response.Status.BAD_REQUEST)
-                .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST, state, "Request not processed."))
-                .type(MediaType.APPLICATION_JSON_TYPE)
-                .build());
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST, state, "Request not processed."))
+                    .type(MediaType.APPLICATION_JSON_TYPE)
+                    .build());
         }
         if (deviceAuthorizationCacheControl.getStatus() != DeviceAuthorizationStatus.PENDING) {
             throw new WebApplicationException(Response
-                .status(Response.Status.BAD_REQUEST)
-                .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST, state, "Request already processed."))
-                .type(MediaType.APPLICATION_JSON_TYPE)
-                .build());
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST, state, "Request already processed."))
+                    .type(MediaType.APPLICATION_JSON_TYPE)
+                    .build());
         }
         if (!deviceAuthorizationCacheControl.getClient().getClientId().equals(client.getClientId())) {
             throw new WebApplicationException(Response
@@ -153,7 +152,8 @@ public class DeviceAuthorizationService implements Serializable {
 
     /**
      * Removes device request data from cache using user_code and device_code.
-     * @param userCode User code used as key in cache.
+     *
+     * @param userCode   User code used as key in cache.
      * @param deviceCode Device code used as key in cache.
      */
     public void removeDeviceAuthRequestInCache(String userCode, String deviceCode) {
@@ -172,6 +172,7 @@ public class DeviceAuthorizationService implements Serializable {
 
     /**
      * Uses an HttpServletRequest, process it and return userCode in the session whether it exists.
+     *
      * @param httpRequest Request received from an user agent.
      */
     public String getUserCodeFromSession(HttpServletRequest httpRequest) {

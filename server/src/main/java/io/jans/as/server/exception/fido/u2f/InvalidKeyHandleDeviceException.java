@@ -8,14 +8,14 @@ package io.jans.as.server.exception.fido.u2f;
 
 public class InvalidKeyHandleDeviceException extends Exception {
 
-	private static final long serialVersionUID = 4324358428668365475L;
+    private static final long serialVersionUID = 4324358428668365475L;
 
-	public InvalidKeyHandleDeviceException(String message, Throwable cause) {
-		super(message, cause);
-	}
+    public InvalidKeyHandleDeviceException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
-	public InvalidKeyHandleDeviceException(String message) {
-		super(message);
-	}
+    public InvalidKeyHandleDeviceException(String message) {
+        super(message);
+    }
 
 }

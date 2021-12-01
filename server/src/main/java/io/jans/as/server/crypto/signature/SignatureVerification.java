@@ -6,14 +6,14 @@
 
 package io.jans.as.server.crypto.signature;
 
+import io.jans.as.model.exception.SignatureException;
+
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 
-import io.jans.as.model.exception.SignatureException;
-
 public interface SignatureVerification {
 
-	boolean checkSignature(X509Certificate attestationCertificate, byte[] signedBytes, byte[] signature) throws SignatureException;
+    boolean checkSignature(X509Certificate attestationCertificate, byte[] signedBytes, byte[] signature) throws SignatureException;
 
     boolean checkSignature(PublicKey publicKey, byte[] signedBytes, byte[] signature) throws SignatureException;
 

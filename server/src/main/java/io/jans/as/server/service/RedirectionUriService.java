@@ -17,7 +17,6 @@ import io.jans.as.model.session.EndSessionErrorResponseType;
 import io.jans.as.model.util.Util;
 import io.jans.as.server.model.common.SessionId;
 import org.apache.commons.lang.StringUtils;
-import javax.ws.rs.core.Response;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.slf4j.Logger;
@@ -26,6 +25,7 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.core.Response;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -73,22 +73,22 @@ public class RedirectionUriService {
             return sectorRedirectUris;
         }
 
-		javax.ws.rs.client.Client clientRequest = ClientBuilder.newClient();
+        javax.ws.rs.client.Client clientRequest = ClientBuilder.newClient();
 
-		String entity = null;
-		try {
-			Response clientResponse = clientRequest.target(sectorIdentiferUri).request().buildGet().invoke();
-	        int status = clientResponse.getStatus();
-	        if (status != 200) {
-	            return result;
-	        }
+        String entity = null;
+        try {
+            Response clientResponse = clientRequest.target(sectorIdentiferUri).request().buildGet().invoke();
+            int status = clientResponse.getStatus();
+            if (status != 200) {
+                return result;
+            }
 
-	        entity = clientResponse.readEntity(String.class);
-		} finally {
-			clientRequest.close();
-		}
+            entity = clientResponse.readEntity(String.class);
+        } finally {
+            clientRequest.close();
+        }
 
-		JSONArray sectorIdentifierJsonArray = new JSONArray(entity);
+        JSONArray sectorIdentifierJsonArray = new JSONArray(entity);
 
         for (int i = 0; i < sectorIdentifierJsonArray.length(); i++) {
             result.add(sectorIdentifierJsonArray.getString(i));

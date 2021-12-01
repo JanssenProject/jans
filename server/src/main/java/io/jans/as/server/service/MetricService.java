@@ -31,24 +31,24 @@ import javax.inject.Named;
 @DependsOn("appInitializer")
 @Named(MetricService.METRIC_SERVICE_COMPONENT_NAME)
 public class MetricService extends io.jans.service.metric.MetricService {
-	
-	public static final String METRIC_SERVICE_COMPONENT_NAME = "metricService";
 
-	private static final long serialVersionUID = 7875838160379126796L;
+    public static final String METRIC_SERVICE_COMPONENT_NAME = "metricService";
 
-	@Inject
+    private static final long serialVersionUID = 7875838160379126796L;
+
+    @Inject
     private Instance<MetricService> instance;
 
-	@Inject
+    @Inject
     private ConfigurationService configurationService;
 
-	@Inject
-	private AppConfiguration appConfiguration;
+    @Inject
+    private AppConfiguration appConfiguration;
 
-	@Inject
+    @Inject
     private StaticConfiguration staticConfiguration;
 
-	@Inject
+    @Inject
     private NetworkService networkService;
 
     @Inject
@@ -57,17 +57,17 @@ public class MetricService extends io.jans.service.metric.MetricService {
     private PersistenceEntryManager ldapEntryManager;
 
     public void initTimer() {
-    	initTimer(this.appConfiguration.getMetricReporterInterval(), this.appConfiguration.getMetricReporterKeepDataDays());
+        initTimer(this.appConfiguration.getMetricReporterInterval(), this.appConfiguration.getMetricReporterKeepDataDays());
     }
 
-	@Override
-	public String baseDn() {
-		return staticConfiguration.getBaseDn().getMetric();
-	}
+    @Override
+    public String baseDn() {
+        return staticConfiguration.getBaseDn().getMetric();
+    }
 
-	public io.jans.service.metric.MetricService getMetricServiceInstance() {
-		return instance.get();
-	}
+    public io.jans.service.metric.MetricService getMetricServiceInstance() {
+        return instance.get();
+    }
 
     @Override
     public boolean isMetricReporterEnabled() {
@@ -84,9 +84,9 @@ public class MetricService extends io.jans.service.metric.MetricService {
         return ldapEntryManager;
     }
 
-	@Override
-	public String getNodeIndetifier() {
-		return networkService.getMacAdress();
-	}
+    @Override
+    public String getNodeIndetifier() {
+        return networkService.getMacAdress();
+    }
 
 }

@@ -13,34 +13,34 @@ import java.security.Security;
 
 public class SecurityProviderUtility {
 
-	private static final Logger log = Logger.getLogger(SecurityProviderUtility.class);
+    private static final Logger log = Logger.getLogger(SecurityProviderUtility.class);
 
-	private static BouncyCastleProvider bouncyCastleProvider;
+    private static BouncyCastleProvider bouncyCastleProvider;
 
-	private SecurityProviderUtility() {
+    private SecurityProviderUtility() {
     }
 
-	public static void installBCProvider(boolean silent) {
-		bouncyCastleProvider = (BouncyCastleProvider) Security.getProvider(BouncyCastleProvider.PROVIDER_NAME);
-		if (bouncyCastleProvider == null) {
-			if (!silent) {
-				log.info("Adding Bouncy Castle Provider");
-			}
+    public static void installBCProvider(boolean silent) {
+        bouncyCastleProvider = (BouncyCastleProvider) Security.getProvider(BouncyCastleProvider.PROVIDER_NAME);
+        if (bouncyCastleProvider == null) {
+            if (!silent) {
+                log.info("Adding Bouncy Castle Provider");
+            }
 
-			bouncyCastleProvider = new BouncyCastleProvider();
-			Security.addProvider(bouncyCastleProvider);
-		} else {
-			if (!silent) {
-				log.info("Bouncy Castle Provider was added already");
-			}
-		}
-	}
+            bouncyCastleProvider = new BouncyCastleProvider();
+            Security.addProvider(bouncyCastleProvider);
+        } else {
+            if (!silent) {
+                log.info("Bouncy Castle Provider was added already");
+            }
+        }
+    }
 
-	public static void installBCProvider() {
-		installBCProvider(false);
-	}
-	
-	public static BouncyCastleProvider getInstance() {
-	    return bouncyCastleProvider;
-	}
+    public static void installBCProvider() {
+        installBCProvider(false);
+    }
+
+    public static BouncyCastleProvider getInstance() {
+        return bouncyCastleProvider;
+    }
 }

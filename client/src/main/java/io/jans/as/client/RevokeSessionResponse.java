@@ -6,14 +6,14 @@
 
 package io.jans.as.client;
 
-import javax.ws.rs.core.Response;
-
 import io.jans.as.model.session.EndSessionErrorResponseType;
+
+import javax.ws.rs.core.Response;
 
 /**
  * @author Yuriy Zabrovarnyy
  */
-public class RevokeSessionResponse extends BaseResponseWithErrors<EndSessionErrorResponseType>{
+public class RevokeSessionResponse extends BaseResponseWithErrors<EndSessionErrorResponseType> {
 
     public RevokeSessionResponse() {
     }

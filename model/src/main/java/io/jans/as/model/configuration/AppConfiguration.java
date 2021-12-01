@@ -8,7 +8,12 @@ package io.jans.as.model.configuration;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.common.collect.Lists;
-import io.jans.as.model.common.*;
+import io.jans.as.model.common.ComponentType;
+import io.jans.as.model.common.GrantType;
+import io.jans.as.model.common.ResponseMode;
+import io.jans.as.model.common.ResponseType;
+import io.jans.as.model.common.SoftwareStatementValidationType;
+import io.jans.as.model.common.WebKeyStorage;
 import io.jans.as.model.error.ErrorHandlingMethod;
 import io.jans.as.model.jwk.KeySelectionStrategy;
 
@@ -245,7 +250,7 @@ public class AppConfiguration implements Configuration {
     private Boolean dcrAuthorizationWithClientCredentials = false;
     private Boolean dcrSkipSignatureValidation = false;
     private Boolean dcrAuthorizationWithMTLS = false;
-    private List<String> dcrIssuers  = new ArrayList<>();
+    private List<String> dcrIssuers = new ArrayList<>();
 
     private Boolean useLocalCache = false;
     private Boolean fapiCompatibility = false;

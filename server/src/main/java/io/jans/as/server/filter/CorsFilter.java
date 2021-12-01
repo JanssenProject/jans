@@ -44,7 +44,7 @@ import java.util.List;
         urlPatterns = {"/.well-known/*", "/restv1/*", "/opiframe"})
 public class CorsFilter extends AbstractCorsFilter {
 
-	@Inject
+    @Inject
     private Logger log;
 
     @Inject
@@ -107,10 +107,10 @@ public class CorsFilter extends AbstractCorsFilter {
         Collection<String> globalAllowedOrigins = null;
         if (this.filterEnabled) {
             try {
-				globalAllowedOrigins = doFilterImpl(servletRequest);
-			} catch (Exception ex) {
-				log.error("Failed to process request", ex);
-			}
+                globalAllowedOrigins = doFilterImpl(servletRequest);
+            } catch (Exception ex) {
+                log.error("Failed to process request", ex);
+            }
             super.doFilter(servletRequest, servletResponse, filterChain);
             setAllowedOrigins(globalAllowedOrigins);
         } else {

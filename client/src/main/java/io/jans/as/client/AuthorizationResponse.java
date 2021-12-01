@@ -30,7 +30,19 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import static io.jans.as.model.authorize.AuthorizeResponseParam.*;
+import static io.jans.as.model.authorize.AuthorizeResponseParam.ACCESS_TOKEN;
+import static io.jans.as.model.authorize.AuthorizeResponseParam.AUD;
+import static io.jans.as.model.authorize.AuthorizeResponseParam.CODE;
+import static io.jans.as.model.authorize.AuthorizeResponseParam.EXP;
+import static io.jans.as.model.authorize.AuthorizeResponseParam.EXPIRES_IN;
+import static io.jans.as.model.authorize.AuthorizeResponseParam.ID_TOKEN;
+import static io.jans.as.model.authorize.AuthorizeResponseParam.ISS;
+import static io.jans.as.model.authorize.AuthorizeResponseParam.RESPONSE;
+import static io.jans.as.model.authorize.AuthorizeResponseParam.SCOPE;
+import static io.jans.as.model.authorize.AuthorizeResponseParam.SESSION_ID;
+import static io.jans.as.model.authorize.AuthorizeResponseParam.SID;
+import static io.jans.as.model.authorize.AuthorizeResponseParam.STATE;
+import static io.jans.as.model.authorize.AuthorizeResponseParam.TOKEN_TYPE;
 
 /**
  * Represents an authorization response received from the authorization server.

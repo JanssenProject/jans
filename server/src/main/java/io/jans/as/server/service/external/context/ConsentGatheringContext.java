@@ -6,12 +6,6 @@
 
 package io.jans.as.server.service.external.context;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.common.UserService;
@@ -20,6 +14,11 @@ import io.jans.as.server.authorize.ws.rs.ConsentGatheringSessionService;
 import io.jans.as.server.model.common.SessionId;
 import io.jans.jsf2.service.FacesService;
 import io.jans.model.SimpleCustomProperty;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Yuriy Movchan Date: 10/30/2017
@@ -36,8 +35,8 @@ public class ConsentGatheringContext extends ExternalScriptContext {
     private final Map<String, String> pageAttributes;
 
     public ConsentGatheringContext(Map<String, SimpleCustomProperty> configurationAttributes, HttpServletRequest httpRequest, HttpServletResponse httpResponse, SessionId session,
-                            Map<String, String> pageAttributes,
-                            ConsentGatheringSessionService sessionService, UserService userService, FacesService facesService, AppConfiguration appConfiguration) {
+                                   Map<String, String> pageAttributes,
+                                   ConsentGatheringSessionService sessionService, UserService userService, FacesService facesService, AppConfiguration appConfiguration) {
         super(httpRequest, httpResponse);
         this.configurationAttributes = configurationAttributes;
         this.session = session;
@@ -108,21 +107,21 @@ public class ConsentGatheringContext extends ExternalScriptContext {
      * Must not take any parameters
      */
     public void persist() {
-    	session.getSessionAttributes().putAll(this.pageAttributes);
+        session.getSessionAttributes().putAll(this.pageAttributes);
 
-    	sessionService.persist(session);
+        sessionService.persist(session);
     }
 
-	public UserService getUserService() {
-		return userService;
-	}
+    public UserService getUserService() {
+        return userService;
+    }
 
-	public FacesService getFacesService() {
-		return facesService;
-	}
+    public FacesService getFacesService() {
+        return facesService;
+    }
 
-	public AppConfiguration getAppConfiguration() {
-		return appConfiguration;
-	}
+    public AppConfiguration getAppConfiguration() {
+        return appConfiguration;
+    }
 
 }

@@ -14,7 +14,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
  *
  * @author Javier Rojas Blum
  * @author Sergey Manoylo
- * @version September 13, 2021 
+ * @version September 13, 2021
  */
 public enum KeyType {
 
@@ -30,12 +30,12 @@ public enum KeyType {
 
     /**
      * Octet Key Pair.
-     *
+     * <p>
      * A new key type (kty) value "OKP" (Octet Key Pair) is defined for public key
      * algorithms that use octet strings as private and public keys. Defined by RFC
      * 8037 (CFRG Elliptic Curve Diffie-Hellman (ECDH) and Signatures in JSON Object
      * Signing and Encryption (JOSE)).
-     * 
+     * <p>
      * The Edwards Curve Digital Signature Algorithm (EDDSA) is defined by RFC 8032.
      */
     OKP("OKP"),

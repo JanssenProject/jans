@@ -10,9 +10,10 @@ import io.jans.as.model.authorize.DeviceAuthorizationResponseParam;
 import io.jans.as.model.authorize.DeviceAuthzErrorResponseType;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import javax.ws.rs.core.Response;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import javax.ws.rs.core.Response;
 
 /**
  * Represents a device authz response received from the authorization server.

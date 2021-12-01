@@ -21,7 +21,6 @@ import io.jans.as.model.util.URLPatternList;
 import io.jans.as.model.util.Util;
 import io.jans.as.server.util.ServerUtil;
 import org.apache.commons.lang.StringUtils;
-import javax.ws.rs.core.Response;
 import org.json.JSONArray;
 import org.slf4j.Logger;
 
@@ -31,6 +30,7 @@ import javax.inject.Named;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashSet;
@@ -80,8 +80,8 @@ public class RegisterParamsValidator {
 
         if (grantTypes != null &&
                 (grantTypes.contains(GrantType.AUTHORIZATION_CODE) || grantTypes.contains(GrantType.IMPLICIT)
-                || (responseTypes.contains(ResponseType.CODE) && !grantTypes.contains(GrantType.DEVICE_CODE))
-                || responseTypes.contains(ResponseType.TOKEN) || responseTypes.contains(ResponseType.ID_TOKEN))) {
+                        || (responseTypes.contains(ResponseType.CODE) && !grantTypes.contains(GrantType.DEVICE_CODE))
+                        || responseTypes.contains(ResponseType.TOKEN) || responseTypes.contains(ResponseType.ID_TOKEN))) {
             if (redirectUris == null || redirectUris.isEmpty()) {
                 return new Pair<>(false, "Redirect uris are empty.");
             }
@@ -101,91 +101,91 @@ public class RegisterParamsValidator {
      *
      * @param registerRequest Object containing all parameters received to register a client.
      */
-    public void validateAlgorithms( RegisterRequest registerRequest ) {
-        if ( registerRequest.getIdTokenSignedResponseAlg() != null
+    public void validateAlgorithms(RegisterRequest registerRequest) {
+        if (registerRequest.getIdTokenSignedResponseAlg() != null
                 && registerRequest.getIdTokenSignedResponseAlg() != SignatureAlgorithm.NONE &&
-                ! appConfiguration.getIdTokenSigningAlgValuesSupported().contains(
-                        registerRequest.getIdTokenSignedResponseAlg().toString()) ) {
+                !appConfiguration.getIdTokenSigningAlgValuesSupported().contains(
+                        registerRequest.getIdTokenSignedResponseAlg().toString())) {
             log.debug("Parameter id_token_signed_response_alg is not valid.");
             throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
                     RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter id_token_signed_response_alg is not valid.");
         }
 
-        if ( registerRequest.getIdTokenEncryptedResponseAlg() != null &&
-                ! appConfiguration.getIdTokenEncryptionAlgValuesSupported().contains(
-                        registerRequest.getIdTokenEncryptedResponseAlg().toString()) ) {
+        if (registerRequest.getIdTokenEncryptedResponseAlg() != null &&
+                !appConfiguration.getIdTokenEncryptionAlgValuesSupported().contains(
+                        registerRequest.getIdTokenEncryptedResponseAlg().toString())) {
             log.debug("Parameter id_token_encrypted_response_alg is not valid.");
             throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
                     RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter id_token_encrypted_response_alg is not valid.");
         }
 
-        if ( registerRequest.getIdTokenEncryptedResponseEnc() != null &&
-                ! appConfiguration.getIdTokenEncryptionEncValuesSupported().contains(
-                        registerRequest.getIdTokenEncryptedResponseEnc().toString()) ) {
+        if (registerRequest.getIdTokenEncryptedResponseEnc() != null &&
+                !appConfiguration.getIdTokenEncryptionEncValuesSupported().contains(
+                        registerRequest.getIdTokenEncryptedResponseEnc().toString())) {
             log.debug("Parameter id_token_encrypted_response_enc is not valid.");
             throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
                     RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter id_token_encrypted_response_enc is not valid.");
         }
 
-        if ( registerRequest.getUserInfoSignedResponseAlg() != null &&
-                ! appConfiguration.getUserInfoSigningAlgValuesSupported().contains(
-                        registerRequest.getUserInfoSignedResponseAlg().toString()) ) {
+        if (registerRequest.getUserInfoSignedResponseAlg() != null &&
+                !appConfiguration.getUserInfoSigningAlgValuesSupported().contains(
+                        registerRequest.getUserInfoSignedResponseAlg().toString())) {
             log.debug("Parameter userinfo_signed_response_alg is not valid.");
             throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
                     RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter userinfo_signed_response_alg is not valid.");
         }
 
-        if ( registerRequest.getUserInfoEncryptedResponseAlg() != null &&
-                ! appConfiguration.getUserInfoEncryptionAlgValuesSupported().contains(
-                        registerRequest.getUserInfoEncryptedResponseAlg().toString()) ) {
+        if (registerRequest.getUserInfoEncryptedResponseAlg() != null &&
+                !appConfiguration.getUserInfoEncryptionAlgValuesSupported().contains(
+                        registerRequest.getUserInfoEncryptedResponseAlg().toString())) {
             log.debug("Parameter userinfo_encrypted_response_alg is not valid.");
             throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
                     RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter userinfo_encrypted_response_alg is not valid.");
         }
 
-        if ( registerRequest.getUserInfoEncryptedResponseEnc() != null &&
-                ! appConfiguration.getUserInfoEncryptionEncValuesSupported().contains(
-                        registerRequest.getUserInfoEncryptedResponseEnc().toString()) ) {
+        if (registerRequest.getUserInfoEncryptedResponseEnc() != null &&
+                !appConfiguration.getUserInfoEncryptionEncValuesSupported().contains(
+                        registerRequest.getUserInfoEncryptedResponseEnc().toString())) {
             log.debug("Parameter userinfo_encrypted_response_enc is not valid.");
             throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
                     RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter userinfo_encrypted_response_enc is not valid.");
         }
 
-        if ( registerRequest.getRequestObjectSigningAlg() != null &&
-                ! appConfiguration.getRequestObjectSigningAlgValuesSupported().contains(
-                        registerRequest.getRequestObjectSigningAlg().toString()) ) {
+        if (registerRequest.getRequestObjectSigningAlg() != null &&
+                !appConfiguration.getRequestObjectSigningAlgValuesSupported().contains(
+                        registerRequest.getRequestObjectSigningAlg().toString())) {
             log.debug("Parameter request_object_signing_alg is not valid.");
             throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
                     RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter request_object_signing_alg is not valid.");
         }
 
-        if ( registerRequest.getRequestObjectEncryptionAlg() != null &&
-                ! appConfiguration.getRequestObjectEncryptionAlgValuesSupported().contains(
-                        registerRequest.getRequestObjectEncryptionAlg().toString()) ) {
+        if (registerRequest.getRequestObjectEncryptionAlg() != null &&
+                !appConfiguration.getRequestObjectEncryptionAlgValuesSupported().contains(
+                        registerRequest.getRequestObjectEncryptionAlg().toString())) {
             log.debug("Parameter request_object_encryption_alg is not valid.");
             throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
                     RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter request_object_encryption_alg is not valid.");
         }
 
-        if ( registerRequest.getRequestObjectEncryptionEnc() != null &&
-                ! appConfiguration.getRequestObjectEncryptionEncValuesSupported().contains(
-                        registerRequest.getRequestObjectEncryptionEnc().toString()) ) {
+        if (registerRequest.getRequestObjectEncryptionEnc() != null &&
+                !appConfiguration.getRequestObjectEncryptionEncValuesSupported().contains(
+                        registerRequest.getRequestObjectEncryptionEnc().toString())) {
             log.debug("Parameter request_object_encryption_enc is not valid.");
             throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
                     RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter request_object_encryption_enc is not valid.");
         }
 
-        if ( registerRequest.getTokenEndpointAuthMethod() != null &&
-                ! appConfiguration.getTokenEndpointAuthMethodsSupported().contains(
-                        registerRequest.getTokenEndpointAuthMethod().toString()) ) {
+        if (registerRequest.getTokenEndpointAuthMethod() != null &&
+                !appConfiguration.getTokenEndpointAuthMethodsSupported().contains(
+                        registerRequest.getTokenEndpointAuthMethod().toString())) {
             log.debug("Parameter token_endpoint_auth_method is not valid.");
             throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
                     RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter token_endpoint_auth_method is not valid.");
         }
 
-        if ( registerRequest.getTokenEndpointAuthSigningAlg() != null &&
-                ! appConfiguration.getTokenEndpointAuthSigningAlgValuesSupported().contains(
-                        registerRequest.getTokenEndpointAuthSigningAlg().toString()) ) {
+        if (registerRequest.getTokenEndpointAuthSigningAlg() != null &&
+                !appConfiguration.getTokenEndpointAuthSigningAlgValuesSupported().contains(
+                        registerRequest.getTokenEndpointAuthSigningAlg().toString())) {
             log.debug("Parameter token_endpoint_auth_signing_alg is not valid.");
             throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
                     RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter token_endpoint_auth_signing_alg is not valid.");
@@ -305,20 +305,20 @@ public class RegisterParamsValidator {
                 }
 
                 javax.ws.rs.client.Client clientRequest = ClientBuilder.newClient();
-        		String entity = null;
-        		try {
-        			Response clientResponse = clientRequest.target(sectorIdentifierUrl).request().buildGet().invoke();
-	                int status = clientResponse.getStatus();
+                String entity = null;
+                try {
+                    Response clientResponse = clientRequest.target(sectorIdentifierUrl).request().buildGet().invoke();
+                    int status = clientResponse.getStatus();
 
-	                if (status == 200) {
-	                    entity = clientResponse.readEntity(String.class);
+                    if (status == 200) {
+                        entity = clientResponse.readEntity(String.class);
 
-	                    JSONArray sectorIdentifierJsonArray = new JSONArray(entity);
-	                    valid = Util.asList(sectorIdentifierJsonArray).containsAll(redirectUris);
-	                }
-        		} finally {
-        			clientRequest.close();
-        		}
+                        JSONArray sectorIdentifierJsonArray = new JSONArray(entity);
+                        valid = Util.asList(sectorIdentifierJsonArray).containsAll(redirectUris);
+                    }
+                } finally {
+                    clientRequest.close();
+                }
             } catch (Exception e) {
                 log.debug(e.getMessage(), e);
                 valid = false;
@@ -443,6 +443,7 @@ public class RegisterParamsValidator {
 
     /**
      * Check if exists a Password Grant Type in the list of Grant Types.
+     *
      * @param grantTypes List of Grant Types.
      * @return True if Password Grant Type exists in the list, otherwise false
      */

@@ -3,9 +3,10 @@ package io.jans.as.client.par;
 import io.jans.as.client.BaseResponseWithErrors;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.error.IErrorType;
-import javax.ws.rs.core.Response;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import javax.ws.rs.core.Response;
 
 /**
  * @author Yuriy Zabrovarnyy

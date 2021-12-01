@@ -6,7 +6,12 @@
 
 package io.jans.as.client.ws.rs;
 
-import static org.testng.Assert.assertEquals;
+import io.jans.as.client.BaseTest;
+import io.jans.as.model.util.Base64Util;
+import org.testng.ITestContext;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+import sun.security.x509.X509CertImpl;
 
 import java.math.BigInteger;
 import java.security.PublicKey;
@@ -14,13 +19,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPublicKey;
 
-import org.testng.ITestContext;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
-
-import io.jans.as.client.BaseTest;
-import io.jans.as.model.util.Base64Util;
-import sun.security.x509.X509CertImpl;
+import static org.testng.Assert.assertEquals;
 
 /**
  * @author Javier Rojas Blum

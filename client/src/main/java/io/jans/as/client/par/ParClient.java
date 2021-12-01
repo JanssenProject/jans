@@ -92,7 +92,7 @@ public class ParClient extends BaseClient<ParRequest, ParResponse> {
 
         Builder clientRequest = webTarget.request();
 
-    	new ClientAuthnEnabler(clientRequest, requestForm).exec(request);
+        new ClientAuthnEnabler(clientRequest, requestForm).exec(request);
 
         clientRequest.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 

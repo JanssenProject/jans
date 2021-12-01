@@ -6,15 +6,13 @@
 
 package io.jans.as.model.uma;
 
-import java.io.Serializable;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-
-import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import java.io.Serializable;
 
 /**
  * @author yuriyz on 06/04/2017.
@@ -39,7 +37,7 @@ public class UmaTokenResponse implements Serializable {
 
     @JsonProperty(value = "upgraded")
     @XmlElement(name = "upgraded")
-    private Boolean upgraded =false;
+    private Boolean upgraded = false;
 
     public String getAccessToken() {
         return accessToken;
