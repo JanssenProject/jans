@@ -588,7 +588,6 @@ public class AuthenticationService {
         } catch (EntryPersistenceException epe) {
             log.error("Failed to update jansLastLogonTime of user '{}'", user.getUserId());
             log.trace("Failed to update user:", epe);
-            epe.printStackTrace();
         }
     }
 
