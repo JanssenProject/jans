@@ -67,12 +67,12 @@ public class ElevenCryptoProvider extends AbstractCryptoProvider {
         try {
             response = client.exec();
         } catch (Exception e) {
-            throw new CryptoProviderException(e);            
+            throw new CryptoProviderException(e);
         }
         if (response.getStatus() == HttpStatus.SC_OK && response.getKeyId() != null) {
             return response.getJSONEntity();
         } else {
-            throw new CryptoProviderException(response.getEntity());            
+            throw new CryptoProviderException(response.getEntity());
         }
     }
 
@@ -93,12 +93,12 @@ public class ElevenCryptoProvider extends AbstractCryptoProvider {
         SignClient client = new SignClient(signEndpoint);
         client.setRequest(request);
 
-        SignResponse response = null;        
+        SignResponse response = null;
         try {
             response = client.exec();
         } catch (Exception e) {
-            throw new CryptoProviderException(e);            
-        }        
+            throw new CryptoProviderException(e);
+        }
         if (response.getStatus() == HttpStatus.SC_OK && response.getSignature() != null) {
             return response.getSignature();
         } else {
@@ -126,12 +126,12 @@ public class ElevenCryptoProvider extends AbstractCryptoProvider {
         try {
             response = client.exec();
         } catch (Exception e) {
-            throw new CryptoProviderException(e);            
-        }          
+            throw new CryptoProviderException(e);
+        }
         if (response.getStatus() == HttpStatus.SC_OK) {
             return response.isVerified();
         } else {
-            throw new CryptoProviderException(response.getEntity());            
+            throw new CryptoProviderException(response.getEntity());
         }
     }
 
@@ -143,24 +143,24 @@ public class ElevenCryptoProvider extends AbstractCryptoProvider {
 
         DeleteKeyClient client = new DeleteKeyClient(deleteKeyEndpoint);
         client.setRequest(request);
-        
+
         DeleteKeyResponse response = null;
         try {
             response = client.exec();
         } catch (Exception e) {
-            throw new CryptoProviderException(e);            
-        }          
+            throw new CryptoProviderException(e);
+        }
         if (response.getStatus() == HttpStatus.SC_OK) {
             return response.isDeleted();
         } else {
-            throw new CryptoProviderException(response.getEntity());            
+            throw new CryptoProviderException(response.getEntity());
         }
     }
 
-	@Override
-	public PrivateKey getPrivateKey(String keyId) {
+    @Override
+    public PrivateKey getPrivateKey(String keyId) {
         throw new UnsupportedOperationException("Method not implemented.");
-	}
+    }
 
     @Override
     public PublicKey getPublicKey(String keyId) {

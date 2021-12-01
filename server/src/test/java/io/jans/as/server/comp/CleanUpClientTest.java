@@ -6,20 +6,18 @@
 
 package io.jans.as.server.comp;
 
-import java.util.Arrays;
-import java.util.List;
-
-import javax.inject.Inject;
-
-import org.testng.Assert;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.server.BaseComponentTest;
 import io.jans.as.server.service.ClientService;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.util.StringHelper;
+import org.testng.Assert;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
+import javax.inject.Inject;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author Yuriy Movchan
@@ -28,44 +26,44 @@ import io.jans.util.StringHelper;
 
 public class CleanUpClientTest extends BaseComponentTest {
 
-	@Inject
-	private ClientService clientService;
+    @Inject
+    private ClientService clientService;
 
-	@Test
-	@Parameters(value = "usedClients")
-	public void cleanUpClient(String usedClients) {
-		Assert.assertNotNull(usedClients);
-		List<String> usedClientsList = Arrays.asList(StringHelper.split(usedClients, ",", true, false));
-		output("Used clients: " + usedClientsList);
+    @Test
+    @Parameters(value = "usedClients")
+    public void cleanUpClient(String usedClients) {
+        Assert.assertNotNull(usedClients);
+        List<String> usedClientsList = Arrays.asList(StringHelper.split(usedClients, ",", true, false));
+        output("Used clients: " + usedClientsList);
 
-		int clientsResultSetSize = 50;
+        int clientsResultSetSize = 50;
 
-		int countResults = 0;
-		int countRemoved = 0;
-		boolean existsMoreClients = true;
-		while (existsMoreClients && countResults < 10000) {
-			List<Client> clients = clientService.getAllClients(new String[] { "inum" }, clientsResultSetSize);
+        int countResults = 0;
+        int countRemoved = 0;
+        boolean existsMoreClients = true;
+        while (existsMoreClients && countResults < 10000) {
+            List<Client> clients = clientService.getAllClients(new String[]{"inum"}, clientsResultSetSize);
 
-			existsMoreClients = clients.size() == clientsResultSetSize;
-			countResults += clients.size();
+            existsMoreClients = clients.size() == clientsResultSetSize;
+            countResults += clients.size();
 
-			Assert.assertNotNull(clients);
-			output("Found clients: " + clients.size());
-			output("Total clients: " + countResults);
+            Assert.assertNotNull(clients);
+            output("Found clients: " + clients.size());
+            output("Total clients: " + countResults);
 
-			for (Client client : clients) {
-				String clientId = client.getClientId();
-				if (!usedClientsList.contains(clientId)) {
-					try {
-						clientService.remove(client);
-					} catch (EntryPersistenceException ex) {
-						output("Failed to remove client: " + ex.getMessage());
-					}
-					countRemoved++;
-				}
-			}
-		}
+            for (Client client : clients) {
+                String clientId = client.getClientId();
+                if (!usedClientsList.contains(clientId)) {
+                    try {
+                        clientService.remove(client);
+                    } catch (EntryPersistenceException ex) {
+                        output("Failed to remove client: " + ex.getMessage());
+                    }
+                    countRemoved++;
+                }
+            }
+        }
 
-		output("Removed clients: " + countRemoved);
-	}
+        output("Removed clients: " + countRemoved);
+    }
 }

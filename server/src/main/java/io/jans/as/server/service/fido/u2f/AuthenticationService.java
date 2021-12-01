@@ -6,23 +6,6 @@
 
 package io.jans.as.server.service.fido.u2f;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.Set;
-import java.util.TimeZone;
-import java.util.UUID;
-
-import javax.ejb.Stateless;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Produces;
-import javax.inject.Inject;
-import javax.inject.Named;
-
-import org.apache.commons.codec.binary.Hex;
-import org.slf4j.Logger;
-
 import io.jans.as.common.service.common.UserService;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.fido.u2f.exception.BadInputException;
@@ -43,6 +26,21 @@ import io.jans.as.server.model.fido.u2f.DeviceRegistrationResult;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.search.filter.Filter;
 import io.jans.util.StringHelper;
+import org.apache.commons.codec.binary.Hex;
+import org.slf4j.Logger;
+
+import javax.ejb.Stateless;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Produces;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.Set;
+import java.util.TimeZone;
+import java.util.UUID;
 
 /**
  * Provides operations with U2F authentication request
@@ -82,7 +80,9 @@ public class AuthenticationService extends RequestService {
     @Inject
     private StaticConfiguration staticConfiguration;
 
-	@Produces @ApplicationScoped @Named("sha256withECDSASignatureVerification")
+    @Produces
+    @ApplicationScoped
+    @Named("sha256withECDSASignatureVerification")
     public SHA256withECDSASignatureVerification getBouncyCastleSignatureVerification() {
         return new SHA256withECDSASignatureVerification();
     }

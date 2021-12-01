@@ -11,7 +11,6 @@ import org.json.JSONObject;
 
 /**
  * Provides information about the status of a pairing request
- * 
  */
 public class PairingStatus {
     /**
@@ -37,7 +36,7 @@ public class PairingStatus {
     @Override
     public String toString() {
         return String.format("[PairingStatus: id=%s; userId=%s; userName=%s, enabled=%b]", id,
-                             userId, userName, enabled);
+                userId, userName, enabled);
     }
 
     static PairingStatus fromJSON(JSONObject json) throws JSONException {

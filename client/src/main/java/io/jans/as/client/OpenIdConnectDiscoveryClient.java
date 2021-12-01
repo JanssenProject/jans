@@ -6,31 +6,28 @@
 
 package io.jans.as.client;
 
+import io.jans.as.model.discovery.WebFingerLink;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.net.URISyntaxException;
+
 import static io.jans.as.model.discovery.WebFingerParam.HREF;
 import static io.jans.as.model.discovery.WebFingerParam.LINKS;
 import static io.jans.as.model.discovery.WebFingerParam.REL;
 import static io.jans.as.model.discovery.WebFingerParam.REL_VALUE;
 import static io.jans.as.model.discovery.WebFingerParam.RESOURCE;
 import static io.jans.as.model.discovery.WebFingerParam.SUBJECT;
-
-import java.net.URISyntaxException;
-
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.MediaType;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
-import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-
-import javax.ws.rs.core.Response;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import io.jans.as.model.discovery.WebFingerLink;
 
 /**
  * @author Javier Rojas Blum
@@ -67,9 +64,9 @@ public class OpenIdConnectDiscoveryClient extends BaseClient<OpenIdConnectDiscov
     @Deprecated
     public OpenIdConnectDiscoveryResponse exec(ClientHttpEngine engine) {
         resteasyClient = ((ResteasyClientBuilder) ClientBuilder.newBuilder()).httpEngine(engine).build();
-		webTarget = resteasyClient.target(getUrl());
+        webTarget = resteasyClient.target(getUrl());
 
-		return _exec();
+        return _exec();
     }
 
     private OpenIdConnectDiscoveryResponse _exec() {
@@ -101,7 +98,7 @@ public class OpenIdConnectDiscoveryClient extends BaseClient<OpenIdConnectDiscov
 
             clientRequest.accept(MEDIA_TYPE);
 //          clientRequest.setHttpMethod(getHttpMethod());
-            
+
             clientResponse1 = clientRequest.buildGet().invoke();
             int status = clientResponse1.getStatus();
 

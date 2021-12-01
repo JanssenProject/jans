@@ -11,18 +11,18 @@ package io.jans.as.server.exception;
  */
 public class InvalidSchemaUpdateException extends RuntimeException {
 
-	private static final long serialVersionUID = 3071969232087073304L;
+    private static final long serialVersionUID = 3071969232087073304L;
 
-	public InvalidSchemaUpdateException(Throwable root) {
-		super(root);
-	}
+    public InvalidSchemaUpdateException(Throwable root) {
+        super(root);
+    }
 
-	public InvalidSchemaUpdateException(String string, Throwable root) {
-		super(string, root);
-	}
+    public InvalidSchemaUpdateException(String string, Throwable root) {
+        super(string, root);
+    }
 
-	public InvalidSchemaUpdateException(String s) {
-		super(s);
-	}
+    public InvalidSchemaUpdateException(String s) {
+        super(s);
+    }
 
 }

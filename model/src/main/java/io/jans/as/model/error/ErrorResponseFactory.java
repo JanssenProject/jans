@@ -69,7 +69,7 @@ public class ErrorResponseFactory implements Configuration {
      * Looks for an error message.
      *
      * @param list error list
-     * @param type   The type of the error.
+     * @param type The type of the error.
      * @return Error message or <code>null</code> if not found.
      */
     private ErrorMessage getError(List<ErrorMessage> list, IErrorType type) {

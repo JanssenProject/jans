@@ -6,20 +6,6 @@
 
 package io.jans.as.server.service.fido.u2f;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.Set;
-import java.util.TimeZone;
-import java.util.UUID;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-
-import org.slf4j.Logger;
-
 import io.jans.as.common.service.common.UserService;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.fido.u2f.DeviceRegistrationStatus;
@@ -37,6 +23,18 @@ import io.jans.as.server.util.ServerUtil;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.search.filter.Filter;
 import io.jans.util.StringHelper;
+import org.slf4j.Logger;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.Set;
+import java.util.TimeZone;
+import java.util.UUID;
 
 /**
  * Provides operations with U2F registration requests
@@ -171,7 +169,7 @@ public class RegistrationService extends RequestService {
                 throw new BadInputException(String.format("KeyHandle %s was compromised", deviceRegistration.getKeyHandle()));
             }
 
-    		deviceRegistrationService.addUserDeviceRegistration(userInum, deviceRegistration);
+            deviceRegistrationService.addUserDeviceRegistration(userInum, deviceRegistration);
         } else {
             deviceRegistration.setDn(deviceRegistrationService.getDnForOneStepU2fDevice(deviceRegistrationId));
             deviceRegistrationService.addOneStepDeviceRegistration(deviceRegistration);

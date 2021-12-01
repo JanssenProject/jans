@@ -23,7 +23,11 @@ import java.security.NoSuchProviderException;
 import java.util.Date;
 import java.util.UUID;
 
-import static io.jans.as.model.jwt.DPoPJwtPayloadParam.*;
+import static io.jans.as.model.jwt.DPoPJwtPayloadParam.ATH;
+import static io.jans.as.model.jwt.DPoPJwtPayloadParam.HTM;
+import static io.jans.as.model.jwt.DPoPJwtPayloadParam.HTU;
+import static io.jans.as.model.jwt.DPoPJwtPayloadParam.IAT;
+import static io.jans.as.model.jwt.DPoPJwtPayloadParam.JTI;
 import static io.jans.as.model.jwt.JwtType.DPOP_PLUS_JWT;
 
 /**

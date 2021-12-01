@@ -6,12 +6,11 @@
 
 package io.jans.as.server.model.audit;
 
-import java.util.Date;
-
-import org.apache.commons.lang.StringUtils;
-
 import io.jans.as.server.model.common.AuthorizationGrant;
 import io.jans.net.InetAddressUtility;
+import org.apache.commons.lang.StringUtils;
+
+import java.util.Date;
 
 
 public class OAuth2AuditLog {

@@ -41,24 +41,24 @@ import java.util.Set;
 @Path("/")
 public class ClientInfoRestWebServiceImpl implements ClientInfoRestWebService {
 
-	@Inject
-	private Logger log;
+    @Inject
+    private Logger log;
 
-	@Inject
-	private ErrorResponseFactory errorResponseFactory;
+    @Inject
+    private ErrorResponseFactory errorResponseFactory;
 
-	@Inject
-	private AuthorizationGrantList authorizationGrantList;
+    @Inject
+    private AuthorizationGrantList authorizationGrantList;
 
-	@Inject
-	private ScopeService scopeService;
+    @Inject
+    private ScopeService scopeService;
 
-	@Inject
-	private ClientService clientService;
+    @Inject
+    private ClientService clientService;
 
-	@Inject
+    @Inject
     private AttributeService attributeService;
-    
+
     @Inject
     private TokenService tokenService;
 
@@ -89,13 +89,13 @@ public class ClientInfoRestWebServiceImpl implements ClientInfoRestWebService {
 
             if (authorizationGrant == null) {
                 log.trace("Failed to find authorization grant for access token.");
-                return Response.status(400).entity(errorResponseFactory.getErrorAsJson(ClientInfoErrorResponseType.INVALID_TOKEN,"","Unable to find grant object associated with access token.")).build();
+                return Response.status(400).entity(errorResponseFactory.getErrorAsJson(ClientInfoErrorResponseType.INVALID_TOKEN, "", "Unable to find grant object associated with access token.")).build();
             }
 
             final AbstractToken token = authorizationGrant.getAccessToken(accessToken);
             if (token == null || !token.isValid()) {
                 log.trace("Invalid access token.");
-                return Response.status(400).entity(errorResponseFactory.getErrorAsJson(ClientInfoErrorResponseType.INVALID_TOKEN,"","Invalid access token.")).build();
+                return Response.status(400).entity(errorResponseFactory.getErrorAsJson(ClientInfoErrorResponseType.INVALID_TOKEN, "", "Invalid access token.")).build();
             }
 
             builder.cacheControl(ServerUtil.cacheControlWithNoStoreTransformAndPrivate());

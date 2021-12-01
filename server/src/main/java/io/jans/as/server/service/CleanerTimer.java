@@ -90,7 +90,7 @@ public class CleanerTimer {
     private Event<TimerEvent> cleanerEvent;
 
     @Inject
-	private MetricService metricService;
+    private MetricService metricService;
 
     private long lastFinishedTime;
 
