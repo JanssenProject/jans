@@ -52,46 +52,46 @@ public class Conf {
     }
 
     public AppConfiguration getDynamic() {
-		return dynamic;
-	}
+        return dynamic;
+    }
 
-	public void setDynamic(AppConfiguration dynamic) {
-		this.dynamic = dynamic;
-	}
+    public void setDynamic(AppConfiguration dynamic) {
+        this.dynamic = dynamic;
+    }
 
-	public StaticConfiguration getStatics() {
-		return statics;
-	}
+    public StaticConfiguration getStatics() {
+        return statics;
+    }
 
-	public void setStatics(StaticConfiguration statics) {
-		this.statics = statics;
-	}
+    public void setStatics(StaticConfiguration statics) {
+        this.statics = statics;
+    }
 
-	public ErrorMessages getErrors() {
-		return errors;
-	}
+    public ErrorMessages getErrors() {
+        return errors;
+    }
 
-	public void setErrors(ErrorMessages errors) {
-		this.errors = errors;
-	}
+    public void setErrors(ErrorMessages errors) {
+        this.errors = errors;
+    }
 
-	public WebKeysConfiguration getWebKeys() {
-		return webKeys;
-	}
+    public WebKeysConfiguration getWebKeys() {
+        return webKeys;
+    }
 
-	public void setWebKeys(WebKeysConfiguration webKeys) {
-		this.webKeys = webKeys;
-	}
+    public void setWebKeys(WebKeysConfiguration webKeys) {
+        this.webKeys = webKeys;
+    }
 
-	public long getRevision() {
-		return revision;
-	}
+    public long getRevision() {
+        return revision;
+    }
 
-	public void setRevision(long revision) {
-		this.revision = revision;
-	}
+    public void setRevision(long revision) {
+        this.revision = revision;
+    }
 
-	@Override
+    @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         sb.append("Conf");

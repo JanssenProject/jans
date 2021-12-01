@@ -48,13 +48,13 @@ public class GlobalExceptionHandler extends ExceptionHandlerWrapper {
             final FacesContext fc = FacesContext.getCurrentInstance();
             final ExternalContext externalContext = fc.getExternalContext();
             try {
-				if (isInvalidSessionStateException(t)) {
-	                log.error(t.getMessage(), t);
-					performRedirect(externalContext, "/error_session.htm");
-				} else {
-	                log.error(t.getMessage(), t);
-	                performRedirect(externalContext, "/error_service.htm");
-				}
+                if (isInvalidSessionStateException(t)) {
+                    log.error(t.getMessage(), t);
+                    performRedirect(externalContext, "/error_session.htm");
+                } else {
+                    log.error(t.getMessage(), t);
+                    performRedirect(externalContext, "/error_service.htm");
+                }
                 fc.renderResponse();
             } finally {
                 i.remove();

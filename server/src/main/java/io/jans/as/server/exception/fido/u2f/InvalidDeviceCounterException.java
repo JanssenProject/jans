@@ -10,9 +10,9 @@ import io.jans.as.server.model.fido.u2f.DeviceRegistration;
 
 public class InvalidDeviceCounterException extends DeviceCompromisedException {
 
-	private static final long serialVersionUID = -3393844723613998052L;
+    private static final long serialVersionUID = -3393844723613998052L;
 
-	public InvalidDeviceCounterException(DeviceRegistration registration) {
-		super(registration, "The device's internal counter was was smaller than expected. It's possible that the device has been cloned!");
-	}
+    public InvalidDeviceCounterException(DeviceRegistration registration) {
+        super(registration, "The device's internal counter was was smaller than expected. It's possible that the device has been cloned!");
+    }
 }

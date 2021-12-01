@@ -40,9 +40,9 @@ public class PushErrorClient extends BaseClient<PushErrorRequest, PushErrorRespo
     private PushErrorResponse _exec() {
         try {
             // Prepare request parameters
-        	
-        	Builder clientRequest = webTarget.request();
-        	applyCookies(clientRequest);
+
+            Builder clientRequest = webTarget.request();
+            applyCookies(clientRequest);
 
             clientRequest.header("Content-Type", getRequest().getContentType());
 

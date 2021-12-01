@@ -6,6 +6,14 @@
 
 package io.jans.as.server.crypto.signature;
 
+import io.jans.as.model.exception.SignatureException;
+import org.bouncycastle.asn1.sec.SECNamedCurves;
+import org.bouncycastle.asn1.x9.X9ECParameters;
+import org.bouncycastle.jce.spec.ECParameterSpec;
+import org.bouncycastle.jce.spec.ECPublicKeySpec;
+import org.bouncycastle.math.ec.ECPoint;
+
+import javax.inject.Named;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.MessageDigest;
@@ -13,16 +21,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.Signature;
 import java.security.cert.X509Certificate;
-
-import javax.inject.Named;
-
-import org.bouncycastle.asn1.sec.SECNamedCurves;
-import org.bouncycastle.asn1.x9.X9ECParameters;
-import org.bouncycastle.jce.spec.ECParameterSpec;
-import org.bouncycastle.jce.spec.ECPublicKeySpec;
-import org.bouncycastle.math.ec.ECPoint;
-
-import io.jans.as.model.exception.SignatureException;
 
 @Named
 public class SHA256withECDSASignatureVerification implements SignatureVerification {
@@ -35,38 +33,38 @@ public class SHA256withECDSASignatureVerification implements SignatureVerificati
     @Override
     public boolean checkSignature(PublicKey publicKey, byte[] signedBytes, byte[] signature) throws SignatureException {
         boolean isValid = false;
-		try {
-			Signature ecdsaSignature = Signature.getInstance("SHA256withECDSA", "BC");
-			ecdsaSignature.initVerify(publicKey);
-			ecdsaSignature.update(signedBytes);
+        try {
+            Signature ecdsaSignature = Signature.getInstance("SHA256withECDSA", "BC");
+            ecdsaSignature.initVerify(publicKey);
+            ecdsaSignature.update(signedBytes);
 
-			isValid = ecdsaSignature.verify(signature);
-		} catch (GeneralSecurityException ex) {
-			throw new SignatureException(ex);
-		}
-        
+            isValid = ecdsaSignature.verify(signature);
+        } catch (GeneralSecurityException ex) {
+            throw new SignatureException(ex);
+        }
+
         return isValid;
     }
 
     @Override
     public PublicKey decodePublicKey(byte[] encodedPublicKey) throws SignatureException {
-            X9ECParameters curve = SECNamedCurves.getByName("secp256r1");
-            ECPoint point = curve.getCurve().decodePoint(encodedPublicKey);
+        X9ECParameters curve = SECNamedCurves.getByName("secp256r1");
+        ECPoint point = curve.getCurve().decodePoint(encodedPublicKey);
 
-            try {
-				return KeyFactory.getInstance("ECDSA").generatePublic(
-				        new ECPublicKeySpec(point,
-				                new ECParameterSpec(
-				                        curve.getCurve(),
-				                        curve.getG(),
-				                        curve.getN(),
-				                        curve.getH()
-				                )
-				        )
-				);
-			} catch (GeneralSecurityException ex) {
-				throw new SignatureException(ex);
-			}
+        try {
+            return KeyFactory.getInstance("ECDSA").generatePublic(
+                    new ECPublicKeySpec(point,
+                            new ECParameterSpec(
+                                    curve.getCurve(),
+                                    curve.getG(),
+                                    curve.getN(),
+                                    curve.getH()
+                            )
+                    )
+            );
+        } catch (GeneralSecurityException ex) {
+            throw new SignatureException(ex);
+        }
     }
 
     @Override

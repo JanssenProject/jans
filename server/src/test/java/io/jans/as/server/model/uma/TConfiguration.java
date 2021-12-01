@@ -6,23 +6,21 @@
 
 package io.jans.as.server.model.uma;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.fail;
-
-import java.io.IOException;
-import java.net.URI;
-
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.Response;
-
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-
 import io.jans.as.model.uma.UmaConstants;
 import io.jans.as.model.uma.UmaMetadata;
 import io.jans.as.model.uma.UmaTestUtil;
 import io.jans.as.server.BaseTest;
 import io.jans.as.server.util.ServerUtil;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.net.URI;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.fail;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -31,42 +29,42 @@ import io.jans.as.server.util.ServerUtil;
 
 class TConfiguration {
 
-	private final URI baseUri;
-	private UmaMetadata configuration = null;
+    private final URI baseUri;
+    private UmaMetadata configuration = null;
 
-	public TConfiguration(URI baseUri) {
-		assertNotNull(baseUri); // must not be null
-		this.baseUri = baseUri;
-	}
+    public TConfiguration(URI baseUri) {
+        assertNotNull(baseUri); // must not be null
+        this.baseUri = baseUri;
+    }
 
-	public UmaMetadata getConfiguration(final String umaConfigurationPath) {
-		if (configuration == null) {
-			try {
-				configuration(umaConfigurationPath);
-			} catch (Exception e) {
-				e.printStackTrace();
-				fail();
-			}
-		}
-		UmaTestUtil.assertIt(configuration);
-		return configuration;
-	}
+    public UmaMetadata getConfiguration(final String umaConfigurationPath) {
+        if (configuration == null) {
+            try {
+                configuration(umaConfigurationPath);
+            } catch (Exception e) {
+                e.printStackTrace();
+                fail();
+            }
+        }
+        UmaTestUtil.assertIt(configuration);
+        return configuration;
+    }
 
-	private void configuration(final String umaConfigurationPath) throws Exception {
-		Builder request = ResteasyClientBuilder.newClient().target(baseUri.toString() + umaConfigurationPath).request();
-		request.header("Accept", UmaConstants.JSON_MEDIA_TYPE);
-		Response response = request.get();
-		String entity = response.readEntity(String.class);
+    private void configuration(final String umaConfigurationPath) throws Exception {
+        Builder request = ResteasyClientBuilder.newClient().target(baseUri.toString() + umaConfigurationPath).request();
+        request.header("Accept", UmaConstants.JSON_MEDIA_TYPE);
+        Response response = request.get();
+        String entity = response.readEntity(String.class);
 
-		BaseTest.showResponse("UMA : TConfiguration.configuration", response, entity);
+        BaseTest.showResponse("UMA : TConfiguration.configuration", response, entity);
 
-		assertEquals(response.getStatus(), 200, "Unexpected response code.");
-		try {
-			configuration = ServerUtil.createJsonMapper().readValue(entity, UmaMetadata.class);
-			UmaTestUtil.assertIt(configuration);
-		} catch (IOException e) {
-			e.printStackTrace();
-			fail();
-		}
-	}
+        assertEquals(response.getStatus(), 200, "Unexpected response code.");
+        try {
+            configuration = ServerUtil.createJsonMapper().readValue(entity, UmaMetadata.class);
+            UmaTestUtil.assertIt(configuration);
+        } catch (IOException e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
 }

@@ -153,7 +153,7 @@ public abstract class AbstractCryptoProvider {
             if (alias == null) {
                 if (webKeys.length() == 1) {
                     JSONObject key = webKeys.getJSONObject(0);
-                        return processKey(requestedAlgorithm, alias, key);
+                    return processKey(requestedAlgorithm, alias, key);
                 } else {
                     return null;
                 }
@@ -168,7 +168,7 @@ public abstract class AbstractCryptoProvider {
                 }
             }
         } catch (NoSuchAlgorithmException | InvalidKeySpecException | InvalidParameterSpecException | InvalidParameterException e) {
-            throw new CryptoProviderException(e); 
+            throw new CryptoProviderException(e);
         }
 
         return null;
@@ -189,41 +189,41 @@ public abstract class AbstractCryptoProvider {
             algorithmFamily = algorithm.getFamily();
         } else if (key.has(JWKParameter.KEY_TYPE)) {
             algorithmFamily = AlgorithmFamily.fromString(key.getString(JWKParameter.KEY_TYPE));
-        }  else {
+        } else {
             throw new InvalidParameterException("Wrong key (JSONObject): doesn't contain 'alg' and 'kty' properties");
         }
 
         switch (algorithmFamily) {
-        case RSA: {
-            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-            RSAPublicKeySpec pubKeySpec = new RSAPublicKeySpec(
-                    new BigInteger(1, Base64Util.base64urldecode(key.getString(JWKParameter.MODULUS))),
-                    new BigInteger(1, Base64Util.base64urldecode(key.getString(JWKParameter.EXPONENT))));
-            publicKey = keyFactory.generatePublic(pubKeySpec);
-            break;
-        }
-        case EC: {
-            EllipticEdvardsCurve curve = EllipticEdvardsCurve.fromString(key.optString(JWKParameter.CURVE));
-            AlgorithmParameters parameters = AlgorithmParameters.getInstance(AlgorithmFamily.EC.toString());
-            parameters.init(new ECGenParameterSpec(curve.getAlias()));
-            ECParameterSpec ecParameters = parameters.getParameterSpec(ECParameterSpec.class);
-            publicKey = KeyFactory.getInstance(AlgorithmFamily.EC.toString())
-                    .generatePublic(new ECPublicKeySpec(
-                            new ECPoint(
-                                    new BigInteger(1, Base64Util.base64urldecode(key.getString(JWKParameter.X))),
-                                    new BigInteger(1, Base64Util.base64urldecode(key.getString(JWKParameter.Y)))),
-                            ecParameters));
-            break;
-        }
-        case ED: {
-            X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(
-                    Base64Util.base64urldecode(key.getString(JWKParameter.X)));
-            publicKey = KeyFactory.getInstance(key.optString(JWKParameter.ALGORITHM)).generatePublic(publicKeySpec);
-            break;
-        }
-        default: {
-            throw new InvalidParameterException(String.format("Wrong AlgorithmFamily value: %s", algorithmFamily));
-        }
+            case RSA: {
+                KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+                RSAPublicKeySpec pubKeySpec = new RSAPublicKeySpec(
+                        new BigInteger(1, Base64Util.base64urldecode(key.getString(JWKParameter.MODULUS))),
+                        new BigInteger(1, Base64Util.base64urldecode(key.getString(JWKParameter.EXPONENT))));
+                publicKey = keyFactory.generatePublic(pubKeySpec);
+                break;
+            }
+            case EC: {
+                EllipticEdvardsCurve curve = EllipticEdvardsCurve.fromString(key.optString(JWKParameter.CURVE));
+                AlgorithmParameters parameters = AlgorithmParameters.getInstance(AlgorithmFamily.EC.toString());
+                parameters.init(new ECGenParameterSpec(curve.getAlias()));
+                ECParameterSpec ecParameters = parameters.getParameterSpec(ECParameterSpec.class);
+                publicKey = KeyFactory.getInstance(AlgorithmFamily.EC.toString())
+                        .generatePublic(new ECPublicKeySpec(
+                                new ECPoint(
+                                        new BigInteger(1, Base64Util.base64urldecode(key.getString(JWKParameter.X))),
+                                        new BigInteger(1, Base64Util.base64urldecode(key.getString(JWKParameter.Y)))),
+                                ecParameters));
+                break;
+            }
+            case ED: {
+                X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(
+                        Base64Util.base64urldecode(key.getString(JWKParameter.X)));
+                publicKey = KeyFactory.getInstance(key.optString(JWKParameter.ALGORITHM)).generatePublic(publicKeySpec);
+                break;
+            }
+            default: {
+                throw new InvalidParameterException(String.format("Wrong AlgorithmFamily value: %s", algorithmFamily));
+            }
         }
 
         if (key.has(JWKParameter.EXPIRATION_TIME)) {

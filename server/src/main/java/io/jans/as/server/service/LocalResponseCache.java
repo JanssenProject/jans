@@ -1,23 +1,20 @@
 package io.jans.as.server.service;
 
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.server.service.cdi.event.AuthConfigurationEvent;
+import io.jans.service.cdi.async.Asynchronous;
+import io.jans.service.cdi.event.Scheduled;
+import org.json.JSONObject;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Named;
-
-import org.json.JSONObject;
-
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-
-import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.server.service.cdi.event.AuthConfigurationEvent;
-import io.jans.service.cdi.async.Asynchronous;
-import io.jans.service.cdi.event.Scheduled;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Yuriy Zabrovarnyy

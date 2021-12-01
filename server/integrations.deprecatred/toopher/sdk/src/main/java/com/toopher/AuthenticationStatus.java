@@ -11,7 +11,6 @@ import org.json.JSONObject;
 
 /**
  * Provide information about the status of an authentication request
- * 
  */
 public class AuthenticationStatus {
     /**
@@ -57,7 +56,7 @@ public class AuthenticationStatus {
     @Override
     public String toString() {
         return String.format("[AuthenticationStatus: id=%s; pending=%b; granted=%b; automated=%b; cancelled=%d; reason=%s; terminalId=%s; terminalName=%s]",
-                             id, pending, granted, automated, cancelled, reason, terminalId, terminalName);
+                id, pending, granted, automated, cancelled, reason, terminalId, terminalName);
     }
 
     static AuthenticationStatus fromJSON(JSONObject json) throws JSONException {

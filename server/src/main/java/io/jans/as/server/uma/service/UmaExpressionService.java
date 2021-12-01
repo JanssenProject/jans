@@ -120,7 +120,7 @@ public class UmaExpressionService {
                 }
             } else {
                 log.error("Scope size in JsonLogic object 'data' and in permission differs which is forbidden. Node data: {}, permissionDns: {}, result scopeIds: {}",
-                        node, permission.getScopeDns() ,scopeIdToDnMap);
+                        node, permission.getScopeDns(), scopeIdToDnMap);
                 throw errorResponseFactory.createWebApplicationException(Response.Status.FORBIDDEN, UmaErrorResponseType.FORBIDDEN_BY_POLICY, "Scope size in JsonLogic object 'data' and in permission differs which is forbidden.");
             }
         } else {

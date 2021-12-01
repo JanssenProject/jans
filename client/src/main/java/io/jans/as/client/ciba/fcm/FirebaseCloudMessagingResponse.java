@@ -9,11 +9,11 @@ package io.jans.as.client.ciba.fcm;
 import io.jans.as.client.BaseResponse;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import javax.ws.rs.core.Response;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
 

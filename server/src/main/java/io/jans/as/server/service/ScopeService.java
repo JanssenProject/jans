@@ -28,8 +28,11 @@ import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import java.text.ParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Javier Rojas Blum Date: 07.05.2012
@@ -42,10 +45,10 @@ public class ScopeService {
     private Logger log;
 
     @Inject
-	private AppConfiguration appConfiguration;
+    private AppConfiguration appConfiguration;
 
-	@Inject
-	private CacheService cacheService;
+    @Inject
+    private CacheService cacheService;
 
     @Inject
     private LocalCacheService localCacheService;
@@ -80,7 +83,7 @@ public class ScopeService {
 
         for (Scope scope : getAllScopesList()) {
             if (Boolean.TRUE.equals(scope.isDefaultScope())) {
-            	defaultScopes.add(scope.getDn());
+                defaultScopes.add(scope.getDn());
             }
         }
 
@@ -121,10 +124,10 @@ public class ScopeService {
      * @return Scope
      */
     public Scope getScopeByDn(String dn) {
-    	BaseCacheService usedCacheService = getCacheService();
+        BaseCacheService usedCacheService = getCacheService();
         final Scope scope = usedCacheService.getWithPut(dn, () -> ldapEntryManager.find(Scope.class, dn), 60);
         if (scope != null && StringUtils.isNotBlank(scope.getId())) {
-        	usedCacheService.put(scope.getId(), scope); // put also by id, since we call it by id and dn
+            usedCacheService.put(scope.getId(), scope); // put also by id, since we call it by id and dn
         }
         return scope;
     }
@@ -150,9 +153,9 @@ public class ScopeService {
      * @return scope
      */
     public Scope getScopeById(String id) {
-    	BaseCacheService usedCacheService = getCacheService();
+        BaseCacheService usedCacheService = getCacheService();
 
-    	final Object cached = usedCacheService.get(id);
+        final Object cached = usedCacheService.get(id);
         if (cached != null)
             return (Scope) cached;
 
@@ -170,7 +173,7 @@ public class ScopeService {
         }
         return null;
     }
-    
+
     /**
      * Get scope by jsClaims
      *
@@ -178,50 +181,50 @@ public class ScopeService {
      * @return List of scope
      */
     public List<Scope> getScopeByClaim(String claimDn) {
-    	List<Scope> scopes = fromCacheByClaimDn(claimDn);
-    	if (scopes == null) {
-	        Filter filter = Filter.createEqualityFilter("jansClaim", claimDn);
-	        
-	    	String scopesBaseDN = staticConfiguration.getBaseDn().getScopes();
-	        scopes = ldapEntryManager.findEntries(scopesBaseDN, Scope.class, filter);
-	
-	        putInCache(claimDn, scopes);
-    	}
+        List<Scope> scopes = fromCacheByClaimDn(claimDn);
+        if (scopes == null) {
+            Filter filter = Filter.createEqualityFilter("jansClaim", claimDn);
+
+            String scopesBaseDN = staticConfiguration.getBaseDn().getScopes();
+            scopes = ldapEntryManager.findEntries(scopesBaseDN, Scope.class, filter);
+
+            putInCache(claimDn, scopes);
+        }
 
         return scopes;
     }
 
-	public List<Scope> getScopesByClaim(List<Scope> scopes, String claimDn) {
-		List<Scope> result = new ArrayList<>();
-		for (Scope scope : scopes) {
-			List<String> claims = scope.getClaims();
-			if ((claims != null) && claims.contains(claimDn)) {
-				result.add(scope);
-			}
-		}
+    public List<Scope> getScopesByClaim(List<Scope> scopes, String claimDn) {
+        List<Scope> result = new ArrayList<>();
+        for (Scope scope : scopes) {
+            List<String> claims = scope.getClaims();
+            if ((claims != null) && claims.contains(claimDn)) {
+                result.add(scope);
+            }
+        }
 
-		return result;
-	}
+        return result;
+    }
 
     private void putInCache(String claimDn, List<Scope> scopes) {
-    	if (scopes == null) {
-    		return;
-    	}
+        if (scopes == null) {
+            return;
+        }
 
-    	BaseCacheService usedCacheService = getCacheService();
-    	try {
-        	String key = getClaimDnCacheKey(claimDn);
-        	usedCacheService.put(key, scopes);
+        BaseCacheService usedCacheService = getCacheService();
+        try {
+            String key = getClaimDnCacheKey(claimDn);
+            usedCacheService.put(key, scopes);
         } catch (Exception ex) {
             log.error("Failed to put scopes in cache, claimDn: '{}'", claimDn, ex);
         }
     }
 
     @SuppressWarnings("unchecked")
-	private List<Scope> fromCacheByClaimDn(String claimDn) {
-    	BaseCacheService usedCacheService = getCacheService();
+    private List<Scope> fromCacheByClaimDn(String claimDn) {
+        BaseCacheService usedCacheService = getCacheService();
         try {
-        	String key = getClaimDnCacheKey(claimDn);
+            String key = getClaimDnCacheKey(claimDn);
             return (List<Scope>) usedCacheService.get(key);
         } catch (Exception ex) {
             log.error("Failed to get scopes from cache, claimDn: '{}'", claimDn, ex);
@@ -238,11 +241,11 @@ public class ScopeService {
     }
 
     private BaseCacheService getCacheService() {
-    	if (appConfiguration.getUseLocalCache()) {
-    		return localCacheService;
-    	}
-    	
-    	return cacheService;
+        if (appConfiguration.getUseLocalCache()) {
+            return localCacheService;
+        }
+
+        return cacheService;
     }
 
     public Map<String, Object> getClaims(User user, Scope scope) throws InvalidClaimException {
@@ -291,7 +294,7 @@ public class ScopeService {
             attribute = user.getUserId();
         } else if (ldapName.equals("updatedAt")) {
             attribute = user.getUpdatedAt();
-        } else  if (ldapName.equals("createdAt")) {
+        } else if (ldapName.equals("createdAt")) {
             attribute = user.getCreatedAt();
         } else if (AttributeDataType.BOOLEAN.equals(gluuAttribute.getDataType())) {
             final Object value = user.getAttribute(gluuAttribute.getName(), true, gluuAttribute.getOxMultiValuedAttribute());

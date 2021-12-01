@@ -6,29 +6,28 @@
 
 package io.jans.as.server.comp;
 
-import javax.inject.Inject;
-
+import io.jans.as.common.service.common.EncryptionService;
+import io.jans.as.server.BaseTest;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import io.jans.as.common.service.common.EncryptionService;
-import io.jans.as.server.BaseTest;
+import javax.inject.Inject;
 
 /**
  * @author Javier Rojas Blum Date: 05.30.2012
  */
 public class KeyGenerationTest extends BaseTest {
 
-	@Inject
-	private EncryptionService encryptionService;
+    @Inject
+    private EncryptionService encryptionService;
 
-	@Parameters({ "ldapAdminPassword" })
-	@Test
-	public void encryptLdapPassword(final String ldapAdminPassword) throws Exception {
-		showTitle("TEST: encryptLdapPassword");
+    @Parameters({"ldapAdminPassword"})
+    @Test
+    public void encryptLdapPassword(final String ldapAdminPassword) throws Exception {
+        showTitle("TEST: encryptLdapPassword");
 
-		String password = encryptionService.encrypt(ldapAdminPassword);
-		System.out.println("Encrypted LDAP Password: " + password);
-	}
+        String password = encryptionService.encrypt(ldapAdminPassword);
+        System.out.println("Encrypted LDAP Password: " + password);
+    }
 
 }

@@ -5,7 +5,13 @@
  */
 package io.jans.as.client.ws.rs.jarm;
 
-import io.jans.as.client.*;
+import io.jans.as.client.AuthorizationRequest;
+import io.jans.as.client.AuthorizationResponse;
+import io.jans.as.client.AuthorizeClient;
+import io.jans.as.client.BaseTest;
+import io.jans.as.client.JwkClient;
+import io.jans.as.client.JwkResponse;
+import io.jans.as.client.RegisterResponse;
 import io.jans.as.client.model.authorize.Claim;
 import io.jans.as.client.model.authorize.ClaimValue;
 import io.jans.as.client.model.authorize.JwtAuthorizationRequest;
@@ -31,7 +37,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author Javier Rojas Blum

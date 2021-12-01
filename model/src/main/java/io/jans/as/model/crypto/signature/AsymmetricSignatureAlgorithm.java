@@ -21,7 +21,7 @@ import java.util.Map;
  * @author Javier Rojas Blum
  * @version August 20, 2019
  */
-public enum  AsymmetricSignatureAlgorithm implements HasParamName, AttributeEnum {
+public enum AsymmetricSignatureAlgorithm implements HasParamName, AttributeEnum {
 
     RS256("RS256", AlgorithmFamily.RSA, "SHA256WITHRSA"),
     RS384("RS384", AlgorithmFamily.RSA, "SHA384WITHRSA"),

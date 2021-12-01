@@ -8,13 +8,13 @@ package io.jans.as.server.exception.fido.u2f;
 
 public class BadConfigurationException extends RuntimeException {
 
-	private static final long serialVersionUID = -1914683110856700400L;
+    private static final long serialVersionUID = -1914683110856700400L;
 
-	public BadConfigurationException(String message) {
-		super(message);
-	}
+    public BadConfigurationException(String message) {
+        super(message);
+    }
 
-	public BadConfigurationException(String message, Throwable cause) {
-		super(message, cause);
-	}
+    public BadConfigurationException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

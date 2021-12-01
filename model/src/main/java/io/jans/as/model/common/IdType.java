@@ -16,7 +16,7 @@ import org.apache.commons.lang.StringUtils;
 public enum IdType {
 
     PEOPLE("people", "people", "0000", "New Unique People Inum Generator"),
-    ORGANIZATION("organization", "0001", "organization","New Unique Organization Inum Generator"),
+    ORGANIZATION("organization", "0001", "organization", "New Unique Organization Inum Generator"),
     CONFIGURATION("configuration", "configuration", "0002", "New Unique configuration Inum Generator"),
     GROUP("group", "group", "0003", "New Unique Group Inum Generator"),
     SERVER("server", "server", "0004", "New Unique Server Inum Generator"),

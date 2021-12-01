@@ -15,11 +15,11 @@ public class UmaConstants {
     }
 
     /*
-    * yuriyz 01/04/2013 : as it was emailed by Eve:
-    * We've been removing all the specialized content type extensions,
-    * and just sticking with application/json. I'll add an issue on our side
-    * to update the specs to remove those last few instances of application/xxx+json.
-    */
+     * yuriyz 01/04/2013 : as it was emailed by Eve:
+     * We've been removing all the specialized content type extensions,
+     * and just sticking with application/json. I'll add an issue on our side
+     * to update the specs to remove those last few instances of application/xxx+json.
+     */
     public static final String JSON_MEDIA_TYPE = "application/json";
 
     public static final String GATHERING_ID = "gathering_id";
