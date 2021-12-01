@@ -6,12 +6,6 @@
 
 package io.jans.as.server.service.fido.u2f.util;
 
-import java.util.Date;
-import java.util.UUID;
-
-import org.json.JSONObject;
-import org.python.icu.util.Calendar;
-
 import io.jans.as.model.crypto.Certificate;
 import io.jans.as.model.crypto.Key;
 import io.jans.as.model.crypto.signature.ECDSAKeyFactory;
@@ -20,6 +14,11 @@ import io.jans.as.model.crypto.signature.ECDSAPublicKey;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.jwk.Use;
 import io.jans.as.model.util.SecurityProviderUtility;
+import org.json.JSONObject;
+import org.python.icu.util.Calendar;
+
+import java.util.Date;
+import java.util.UUID;
 
 /**
  * @author Yuriy Movchan

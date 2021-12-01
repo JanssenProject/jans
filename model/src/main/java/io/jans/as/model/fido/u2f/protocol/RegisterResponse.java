@@ -25,59 +25,59 @@ import java.io.Serializable;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RegisterResponse implements Serializable {
 
-	private static final long serialVersionUID = -4192863815075074953L;
+    private static final long serialVersionUID = -4192863815075074953L;
 
-	/**
-	 * base64 (raw registration response message)
-	 */
-	@JsonProperty
-	private final String registrationData;
+    /**
+     * base64 (raw registration response message)
+     */
+    @JsonProperty
+    private final String registrationData;
 
-	/**
-	 * base64(UTF8(client data))
-	 */
-	@JsonProperty
-	private final String clientData;
+    /**
+     * base64(UTF8(client data))
+     */
+    @JsonProperty
+    private final String clientData;
 
-	/**
-	 * base64(UTF8(device data))
-	 */
-	@JsonProperty
-	private final String deviceData;
+    /**
+     * base64(UTF8(device data))
+     */
+    @JsonProperty
+    private final String deviceData;
 
-	@JsonIgnore
-	private final transient ClientData clientDataRef;
+    @JsonIgnore
+    private final transient ClientData clientDataRef;
 
-	public RegisterResponse(@JsonProperty("registrationData") String registrationData, @JsonProperty("clientData") String clientData, @JsonProperty("deviceData") String deviceData) throws BadInputException {
-		this.registrationData = registrationData;
-		this.clientData = clientData;
-		this.clientDataRef = new ClientData(clientData);
-		this.deviceData = deviceData;
-	}
+    public RegisterResponse(@JsonProperty("registrationData") String registrationData, @JsonProperty("clientData") String clientData, @JsonProperty("deviceData") String deviceData) throws BadInputException {
+        this.registrationData = registrationData;
+        this.clientData = clientData;
+        this.clientDataRef = new ClientData(clientData);
+        this.deviceData = deviceData;
+    }
 
-	public String getRegistrationData() {
-		return registrationData;
-	}
+    public String getRegistrationData() {
+        return registrationData;
+    }
 
-	public ClientData getClientData() {
-		return clientDataRef;
-	}
+    public ClientData getClientData() {
+        return clientDataRef;
+    }
 
-	public String getDeviceData() {
-		return deviceData;
-	}
+    public String getDeviceData() {
+        return deviceData;
+    }
 
-	@JsonIgnore
-	public String getRequestId() {
-		return getClientData().getChallenge();
-	}
+    @JsonIgnore
+    public String getRequestId() {
+        return getClientData().getChallenge();
+    }
 
-	@Override
-	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("RegisterResponse [registrationData=").append(registrationData).append(", clientData=").append(clientData).append(", deviceData=")
-				.append(deviceData).append("]");
-		return builder.toString();
-	}
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("RegisterResponse [registrationData=").append(registrationData).append(", clientData=").append(clientData).append(", deviceData=")
+                .append(deviceData).append("]");
+        return builder.toString();
+    }
 
 }

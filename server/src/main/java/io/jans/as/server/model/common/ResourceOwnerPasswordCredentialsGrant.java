@@ -32,8 +32,9 @@ import io.jans.as.model.common.GrantType;
  * @author Yuriy Movchan
  */
 public class ResourceOwnerPasswordCredentialsGrant extends AuthorizationGrant {
-	
-	public ResourceOwnerPasswordCredentialsGrant() {}
+
+    public ResourceOwnerPasswordCredentialsGrant() {
+    }
 
     /**
      * Constructs a resource owner password credentials grant.

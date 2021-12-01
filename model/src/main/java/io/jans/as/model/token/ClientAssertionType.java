@@ -24,7 +24,7 @@ public enum ClientAssertionType {
      *
      * @param param The client_assertion_type parameter.
      * @return The corresponding token type if found, otherwise
-     *         <code>null</code>.
+     * <code>null</code>.
      */
     public static ClientAssertionType fromString(String param) {
         if (param != null) {

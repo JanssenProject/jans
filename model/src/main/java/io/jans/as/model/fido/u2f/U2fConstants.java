@@ -8,15 +8,15 @@ package io.jans.as.model.fido.u2f;
 
 /**
  * Static FIDO U2F server variables
- * 
+ *
  * @author Yuriy Movchan Date: 05/14/2015
  */
 public class U2fConstants {
 
-	public static final String U2F_PROTOCOL_VERSION = "U2F_V2";
+    public static final String U2F_PROTOCOL_VERSION = "U2F_V2";
 
-	public static final String U2F_ENROLLMENT_CODE_ATTRIBUTE = "oxEnrollmentCode";
+    public static final String U2F_ENROLLMENT_CODE_ATTRIBUTE = "oxEnrollmentCode";
 
-	private U2fConstants() {
+    private U2fConstants() {
     }
 }

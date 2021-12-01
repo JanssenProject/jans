@@ -7,6 +7,7 @@
 package io.jans.as.client;
 
 import io.jans.as.model.userinfo.UserInfoErrorResponseType;
+
 import javax.ws.rs.core.Response;
 
 /**

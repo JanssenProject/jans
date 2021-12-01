@@ -35,7 +35,7 @@ public enum BlockEncryptionAlgorithm {
         this.messageDiggestAlgorithm = null;
         this.integrityValueAlgorithm = null;
         this.cmkLength = cmkLength;
-        this.initVectorLength=initVectorLength;
+        this.initVectorLength = initVectorLength;
         this.cekLength = null;
     }
 
@@ -47,7 +47,7 @@ public enum BlockEncryptionAlgorithm {
         this.messageDiggestAlgorithm = messageDiggestAlgorithm;
         this.integrityValueAlgorithm = integrityValueAlgorithm;
         this.cmkLength = cmkLength;
-        this.initVectorLength=initVectorLength;
+        this.initVectorLength = initVectorLength;
         this.cekLength = cekLength;
     }
 

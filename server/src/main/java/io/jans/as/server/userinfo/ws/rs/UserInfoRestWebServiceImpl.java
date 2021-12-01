@@ -40,7 +40,12 @@ import io.jans.as.server.audit.ApplicationAuditLogger;
 import io.jans.as.server.model.audit.Action;
 import io.jans.as.server.model.audit.OAuth2AuditLog;
 import io.jans.as.server.model.authorize.Claim;
-import io.jans.as.server.model.common.*;
+import io.jans.as.server.model.common.AbstractToken;
+import io.jans.as.server.model.common.AuthorizationGrant;
+import io.jans.as.server.model.common.AuthorizationGrantList;
+import io.jans.as.server.model.common.AuthorizationGrantType;
+import io.jans.as.server.model.common.DefaultScope;
+import io.jans.as.server.model.common.UnmodifiableAuthorizationGrant;
 import io.jans.as.server.model.userinfo.UserInfoParamsValidator;
 import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.ScopeService;
@@ -64,7 +69,12 @@ import javax.ws.rs.core.SecurityContext;
 import java.nio.charset.StandardCharsets;
 import java.security.PublicKey;
 import java.text.ParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Provides interface for User Info REST web services

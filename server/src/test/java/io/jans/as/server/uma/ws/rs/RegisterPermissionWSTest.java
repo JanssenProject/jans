@@ -38,90 +38,90 @@ import static org.testng.Assert.fail;
 
 public class RegisterPermissionWSTest extends BaseTest {
 
-	@ArquillianResource
-	private URI url;
+    @ArquillianResource
+    private URI url;
 
-	private static Token pat;
-	private static UmaResourceResponse resource;
-	private static String umaRegisterResourcePath;
-	private static String umaPermissionPath;
+    private static Token pat;
+    private static UmaResourceResponse resource;
+    private static String umaRegisterResourcePath;
+    private static String umaPermissionPath;
 
-	@Test
-	@Parameters({ "authorizePath", "tokenPath", "umaUserId", "umaUserSecret", "umaPatClientId", "umaPatClientSecret",
-			"umaRedirectUri", "umaRegisterResourcePath", "umaPermissionPath" })
-	public void init_(String authorizePath, String tokenPath, String umaUserId, String umaUserSecret,
-			String umaPatClientId, String umaPatClientSecret, String umaRedirectUri, String umaRegisterResourcePath,
-			String p_umaPermissionPath) {
-		RegisterPermissionWSTest.umaRegisterResourcePath = umaRegisterResourcePath;
-		umaPermissionPath = p_umaPermissionPath;
+    @Test
+    @Parameters({"authorizePath", "tokenPath", "umaUserId", "umaUserSecret", "umaPatClientId", "umaPatClientSecret",
+            "umaRedirectUri", "umaRegisterResourcePath", "umaPermissionPath"})
+    public void init_(String authorizePath, String tokenPath, String umaUserId, String umaUserSecret,
+                      String umaPatClientId, String umaPatClientSecret, String umaRedirectUri, String umaRegisterResourcePath,
+                      String p_umaPermissionPath) {
+        RegisterPermissionWSTest.umaRegisterResourcePath = umaRegisterResourcePath;
+        umaPermissionPath = p_umaPermissionPath;
 
-		pat = TUma.requestPat(url, authorizePath, tokenPath, umaUserId, umaUserSecret, umaPatClientId,
-				umaPatClientSecret, umaRedirectUri);
-		UmaTestUtil.assertIt(pat);
-	}
+        pat = TUma.requestPat(url, authorizePath, tokenPath, umaUserId, umaUserSecret, umaPatClientId,
+                umaPatClientSecret, umaRedirectUri);
+        UmaTestUtil.assertIt(pat);
+    }
 
-	@Test(dependsOnMethods = { "init_" })
-	public void init() {
-		resource = TUma.registerResource(url, pat, umaRegisterResourcePath, UmaTestUtil.createResource());
-		UmaTestUtil.assertIt(resource);
-	}
+    @Test(dependsOnMethods = {"init_"})
+    public void init() {
+        resource = TUma.registerResource(url, pat, umaRegisterResourcePath, UmaTestUtil.createResource());
+        UmaTestUtil.assertIt(resource);
+    }
 
-	@Test(dependsOnMethods = { "init" })
-	public void testRegisterPermission() throws Exception {
-		final UmaPermission r = new UmaPermission();
-		r.setResourceId(resource.getId());
-		r.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view"));
+    @Test(dependsOnMethods = {"init"})
+    public void testRegisterPermission() throws Exception {
+        final UmaPermission r = new UmaPermission();
+        r.setResourceId(resource.getId());
+        r.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view"));
 
-		final PermissionTicket ticket = TUma.registerPermission(url, pat, r, umaPermissionPath);
-		UmaTestUtil.assertIt(ticket);
-	}
+        final PermissionTicket ticket = TUma.registerPermission(url, pat, r, umaPermissionPath);
+        UmaTestUtil.assertIt(ticket);
+    }
 
-	@Test(dependsOnMethods = { "testRegisterPermission" })
-	public void testRegisterPermissionWithInvalidResource() {
-		final String path = umaPermissionPath;
-		try {
-			Builder request = ResteasyClientBuilder.newClient().target(url.toString() + path).request();
-			request.header("Accept", UmaConstants.JSON_MEDIA_TYPE);
-			request.header("Authorization", "Bearer " + pat.getAccessToken());
+    @Test(dependsOnMethods = {"testRegisterPermission"})
+    public void testRegisterPermissionWithInvalidResource() {
+        final String path = umaPermissionPath;
+        try {
+            Builder request = ResteasyClientBuilder.newClient().target(url.toString() + path).request();
+            request.header("Accept", UmaConstants.JSON_MEDIA_TYPE);
+            request.header("Authorization", "Bearer " + pat.getAccessToken());
 
-			String json = null;
-			try {
-				final UmaPermission r = new UmaPermission();
-				r.setResourceId(resource.getId() + "x");
+            String json = null;
+            try {
+                final UmaPermission r = new UmaPermission();
+                r.setResourceId(resource.getId() + "x");
 
-				json = ServerUtil.createJsonMapper().writeValueAsString(r);
-			} catch (IOException e) {
-				e.printStackTrace();
-				fail();
-			}
+                json = ServerUtil.createJsonMapper().writeValueAsString(r);
+            } catch (IOException e) {
+                e.printStackTrace();
+                fail();
+            }
 
-			Response response = request.post(Entity.json(json));
-			String entity = response.readEntity(String.class);
+            Response response = request.post(Entity.json(json));
+            String entity = response.readEntity(String.class);
 
-			BaseTest.showResponse("UMA : RegisterPermissionWSTest.testRegisterPermissionWithInvalidResource() : ",
-					response, entity);
+            BaseTest.showResponse("UMA : RegisterPermissionWSTest.testRegisterPermissionWithInvalidResource() : ",
+                    response, entity);
 
-			assertEquals(response.getStatus(), Response.Status.NOT_FOUND.getStatusCode(),
-					"Unexpected response code.");
-			try {
-				final PermissionTicket t = ServerUtil.createJsonMapper().readValue(entity, PermissionTicket.class);
-				Assert.assertNull(t);
-			} catch (Exception e) {
-				// it's ok if it fails here, we expect ticket as null.
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail();
-		}
-	}
+            assertEquals(response.getStatus(), Response.Status.NOT_FOUND.getStatusCode(),
+                    "Unexpected response code.");
+            try {
+                final PermissionTicket t = ServerUtil.createJsonMapper().readValue(entity, PermissionTicket.class);
+                Assert.assertNull(t);
+            } catch (Exception e) {
+                // it's ok if it fails here, we expect ticket as null.
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
 
-	// use normal test instead of @AfterClass because it will not work with
-	// ResourceRequestEnvironment seam class which is used
-	// behind TUma wrapper.
-	@Test(dependsOnMethods = {"testRegisterPermissionWithInvalidResource"})
-	public void cleanUp() {
-		if (resource != null) {
-			TUma.deleteResource(url, pat, umaRegisterResourcePath, resource.getId());
-		}
-	}
+    // use normal test instead of @AfterClass because it will not work with
+    // ResourceRequestEnvironment seam class which is used
+    // behind TUma wrapper.
+    @Test(dependsOnMethods = {"testRegisterPermissionWithInvalidResource"})
+    public void cleanUp() {
+        if (resource != null) {
+            TUma.deleteResource(url, pat, umaRegisterResourcePath, resource.getId());
+        }
+    }
 }

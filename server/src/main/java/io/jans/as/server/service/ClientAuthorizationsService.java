@@ -6,16 +6,6 @@
 
 package io.jans.as.server.service;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-
-import org.apache.commons.lang3.ArrayUtils;
-import org.slf4j.Logger;
-
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
@@ -24,6 +14,14 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.model.base.SimpleBranch;
 import io.jans.util.StringHelper;
+import org.apache.commons.lang3.ArrayUtils;
+import org.slf4j.Logger;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author Javier Rojas Blum
@@ -62,7 +60,7 @@ public class ClientAuthorizationsService {
     public void prepareBranch() {
         String baseDn = createDn(null);
         if (!ldapEntryManager.hasBranchesSupport(baseDn)) {
-        	return;
+            return;
         }
 
         // Create client authorizations branch if needed

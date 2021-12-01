@@ -15,8 +15,8 @@ import org.testng.annotations.Test;
 
 public class UtilityMethodsTest {
 
-	@Test
-	public void test() {
-	}
+    @Test
+    public void test() {
+    }
 
 }

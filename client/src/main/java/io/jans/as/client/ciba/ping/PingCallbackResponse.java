@@ -7,6 +7,7 @@
 package io.jans.as.client.ciba.ping;
 
 import io.jans.as.client.BaseResponse;
+
 import javax.ws.rs.core.Response;
 
 /**

@@ -6,11 +6,11 @@
 
 package io.jans.as.model.jws;
 
-import java.security.SignatureException;
-
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwt.Jwt;
+
+import java.security.SignatureException;
 
 /**
  * @author Javier Rojas Blum

@@ -6,14 +6,6 @@
 
 package io.jans.as.server.service;
 
-import java.util.List;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-
-import org.slf4j.Logger;
-
 import io.jans.as.common.service.common.UserService;
 import io.jans.as.model.common.PairwiseIdType;
 import io.jans.as.model.configuration.AppConfiguration;
@@ -23,6 +15,12 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.base.SimpleBranch;
 import io.jans.orm.search.filter.Filter;
 import io.jans.util.StringHelper;
+import org.slf4j.Logger;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.util.List;
 
 /**
  * @author Javier Rojas Blum
@@ -77,7 +75,7 @@ public class PairwiseIdentifierService {
 
             final Filter filter;
             if (appConfiguration.isShareSubjectIdBetweenClientsWithSameSectorId()) {
-            	Filter sectorIdentifierFilter = Filter.createEqualityFilter("jansSectorIdentifier", sectorIdentifier);
+                Filter sectorIdentifierFilter = Filter.createEqualityFilter("jansSectorIdentifier", sectorIdentifier);
                 Filter userInumFilter = Filter.createEqualityFilter("jansUsrId", userInum);
 
                 filter = Filter.createANDFilter(sectorIdentifierFilter, userInumFilter);

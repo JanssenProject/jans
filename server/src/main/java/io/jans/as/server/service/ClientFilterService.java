@@ -6,20 +6,18 @@
 
 package io.jans.as.server.service;
 
-import java.util.Map;
+import io.jans.as.common.model.registration.Client;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.exception.operation.SearchException;
+import org.apache.commons.lang.StringUtils;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
-
-import org.apache.commons.lang.StringUtils;
-
-import io.jans.as.common.model.registration.Client;
-import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.orm.PersistenceEntryManager;
-import io.jans.orm.exception.operation.SearchException;
+import java.util.Map;
 
 /**
  * @author Yuriy Zabrovarnyy

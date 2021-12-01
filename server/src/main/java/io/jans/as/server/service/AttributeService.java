@@ -6,10 +6,10 @@
 
 package io.jans.as.server.service;
 
+import io.jans.as.model.configuration.AppConfiguration;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-
-import io.jans.as.model.configuration.AppConfiguration;
 
 /**
  * @author Javier Rojas Blum
@@ -18,11 +18,11 @@ import io.jans.as.model.configuration.AppConfiguration;
 @ApplicationScoped
 public class AttributeService extends io.jans.as.common.service.AttributeService {
 
-	@Inject
-	private AppConfiguration appConfiguration;
+    @Inject
+    private AppConfiguration appConfiguration;
 
     protected boolean isUseLocalCache() {
-    	return appConfiguration.getUseLocalCache();
+        return appConfiguration.getUseLocalCache();
     }
 
 }

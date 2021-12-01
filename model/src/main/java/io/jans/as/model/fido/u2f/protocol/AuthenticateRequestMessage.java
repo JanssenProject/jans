@@ -6,14 +6,13 @@
 
 package io.jans.as.model.fido.u2f.protocol;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.jans.as.model.util.Util;
+
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import io.jans.as.model.util.Util;
 
 /**
  * FIDO U2F authentication request message
@@ -22,40 +21,41 @@ import io.jans.as.model.util.Util;
  */
 public class AuthenticateRequestMessage implements Serializable {
 
-	private static final long serialVersionUID = 5492097239884163697L;
+    private static final long serialVersionUID = 5492097239884163697L;
 
-	@JsonProperty
-	private List<AuthenticateRequest> authenticateRequests;
+    @JsonProperty
+    private List<AuthenticateRequest> authenticateRequests;
 
-	public AuthenticateRequestMessage() {}
+    public AuthenticateRequestMessage() {
+    }
 
-	public AuthenticateRequestMessage(@JsonProperty("authenticateRequests") List<AuthenticateRequest> authenticateRequests) {
-		this.authenticateRequests = authenticateRequests;
-	}
+    public AuthenticateRequestMessage(@JsonProperty("authenticateRequests") List<AuthenticateRequest> authenticateRequests) {
+        this.authenticateRequests = authenticateRequests;
+    }
 
-	public List<AuthenticateRequest> getAuthenticateRequests() {
-		return Collections.unmodifiableList(authenticateRequests);
-	}
+    public List<AuthenticateRequest> getAuthenticateRequests() {
+        return Collections.unmodifiableList(authenticateRequests);
+    }
 
-	public void setAuthenticateRequests(List<AuthenticateRequest> authenticateRequests) {
-		this.authenticateRequests = authenticateRequests;
-	}
+    public void setAuthenticateRequests(List<AuthenticateRequest> authenticateRequests) {
+        this.authenticateRequests = authenticateRequests;
+    }
 
-	@JsonIgnore
-	public String getRequestId() {
-		return Util.firstItem(authenticateRequests).getChallenge();
-	}
+    @JsonIgnore
+    public String getRequestId() {
+        return Util.firstItem(authenticateRequests).getChallenge();
+    }
 
-	@JsonIgnore
-	public String getAppId() {
-		return Util.firstItem(authenticateRequests).getAppId();
-	}
+    @JsonIgnore
+    public String getAppId() {
+        return Util.firstItem(authenticateRequests).getAppId();
+    }
 
-	@Override
-	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("AuthenticateRequestMessage [authenticateRequests=").append(authenticateRequests).append("]");
-		return builder.toString();
-	}
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("AuthenticateRequestMessage [authenticateRequests=").append(authenticateRequests).append("]");
+        return builder.toString();
+    }
 
 }
