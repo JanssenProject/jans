@@ -18,15 +18,13 @@ import org.bouncycastle.jce.provider.X509CertificateObject;
 import org.bouncycastle.openssl.PEMParser;
 import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-
-import javax.ws.rs.core.Response;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.client.ClientBuilder;
-
+import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.StringReader;
 import java.math.BigInteger;
@@ -179,21 +177,21 @@ public class JwtUtil {
         try {
             if (StringHelper.isEmpty(jwks)) {
                 javax.ws.rs.client.Client clientRequest = ClientBuilder.newClient();
-        		try {
-        			Response clientResponse = clientRequest.target(jwksUri).request().buildGet().invoke();
+                try {
+                    Response clientResponse = clientRequest.target(jwksUri).request().buildGet().invoke();
 
-	                int status = clientResponse.getStatus();
-	                log.debug(String.format("Status: %n%d", status));
+                    int status = clientResponse.getStatus();
+                    log.debug(String.format("Status: %n%d", status));
 
-	                if (status == 200) {
-	                    jwks = clientResponse.readEntity(String.class);
-	                    if (log.isDebugEnabled()) {
-	                    	log.debug(String.format("JWK: %s", jwks));
-	                    }
-	                }
-        		} finally {
-        			clientRequest.close();
-        		}
+                    if (status == 200) {
+                        jwks = clientResponse.readEntity(String.class);
+                        if (log.isDebugEnabled()) {
+                            log.debug(String.format("JWK: %s", jwks));
+                        }
+                    }
+                } finally {
+                    clientRequest.close();
+                }
             }
             if (StringHelper.isNotEmpty(jwks)) {
                 JSONObject jsonObject = new JSONObject(jwks);
@@ -229,28 +227,28 @@ public class JwtUtil {
         JSONObject jwks = null;
         try {
             if (!StringHelper.isEmpty(jwksUri)) {
-            	ClientBuilder clientBuilder = ClientBuilder.newBuilder();
-            	if (engine != null) {
-            		((ResteasyClientBuilder) clientBuilder).httpEngine(engine);
-            	}
+                ClientBuilder clientBuilder = ClientBuilder.newBuilder();
+                if (engine != null) {
+                    ((ResteasyClientBuilder) clientBuilder).httpEngine(engine);
+                }
 
-            	javax.ws.rs.client.Client clientRequest = clientBuilder.build();
-        		try {
-        			Response clientResponse = clientRequest.target(jwksUri).request().buildGet().invoke();
+                javax.ws.rs.client.Client clientRequest = clientBuilder.build();
+                try {
+                    Response clientResponse = clientRequest.target(jwksUri).request().buildGet().invoke();
 
-	                int status = clientResponse.getStatus();
-	                log.debug(String.format("Status: %n%d", status));
+                    int status = clientResponse.getStatus();
+                    log.debug(String.format("Status: %n%d", status));
 
-	                if (status == 200) {
-	                    jwks = fromJson(clientResponse.readEntity(String.class));
-	                    if (log.isDebugEnabled()) {
-	                    	log.debug(String.format("JWK: %s", jwks));
-	                    }
-	                }
-        		} finally {
-        			clientRequest.close();
-        		}
-        	}
+                    if (status == 200) {
+                        jwks = fromJson(clientResponse.readEntity(String.class));
+                        if (log.isDebugEnabled()) {
+                            log.debug(String.format("JWK: %s", jwks));
+                        }
+                    }
+                } finally {
+                    clientRequest.close();
+                }
+            }
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
         }
@@ -258,13 +256,13 @@ public class JwtUtil {
         return jwks;
     }
 
-	public static JSONObject fromJson(String json) throws IOException {
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.registerModule(new JsonOrgModule());
-		return mapper.readValue(json, JSONObject.class);
-	}
+    public static JSONObject fromJson(String json) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JsonOrgModule());
+        return mapper.readValue(json, JSONObject.class);
+    }
 
-	public static void transferIntoJwtClaims(JSONObject jsonObject, Jwt jwt) {
+    public static void transferIntoJwtClaims(JSONObject jsonObject, Jwt jwt) {
         if (jsonObject == null || jwt == null) {
             return;
         }

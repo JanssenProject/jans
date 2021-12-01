@@ -6,19 +6,6 @@
 
 package io.jans.as.server.model.uma;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.fail;
-
-import java.io.IOException;
-import java.net.URI;
-
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.Response;
-
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-
 import io.jans.as.model.common.Holder;
 import io.jans.as.model.uma.PermissionTicket;
 import io.jans.as.model.uma.UmaConstants;
@@ -27,6 +14,17 @@ import io.jans.as.model.uma.UmaTestUtil;
 import io.jans.as.model.uma.wrapper.Token;
 import io.jans.as.server.BaseTest;
 import io.jans.as.server.util.ServerUtil;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.net.URI;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.fail;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -35,43 +33,43 @@ import io.jans.as.server.util.ServerUtil;
 
 class TRegisterPermission {
 
-	private final URI baseUri;
+    private final URI baseUri;
 
-	public TRegisterPermission(URI baseUri) {
-		assertNotNull(baseUri); // must not be null
-		this.baseUri = baseUri;
-	}
+    public TRegisterPermission(URI baseUri) {
+        assertNotNull(baseUri); // must not be null
+        this.baseUri = baseUri;
+    }
 
-	public PermissionTicket registerPermission(final Token pat, final UmaPermission permission, String path) {
-		final Holder<PermissionTicket> ticketH = new Holder<>();
-		Builder request = ResteasyClientBuilder.newClient().target(baseUri.toString() + path).request();
-		request.header("Accept", UmaConstants.JSON_MEDIA_TYPE);
-		request.header("Authorization", "Bearer " + pat.getAccessToken());
+    public PermissionTicket registerPermission(final Token pat, final UmaPermission permission, String path) {
+        final Holder<PermissionTicket> ticketH = new Holder<>();
+        Builder request = ResteasyClientBuilder.newClient().target(baseUri.toString() + path).request();
+        request.header("Accept", UmaConstants.JSON_MEDIA_TYPE);
+        request.header("Authorization", "Bearer " + pat.getAccessToken());
 
-		String json = null;
-		try {
-			json = ServerUtil.createJsonMapper().writeValueAsString(permission);
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail();
-		}
+        String json = null;
+        try {
+            json = ServerUtil.createJsonMapper().writeValueAsString(permission);
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
 
-		Response response = request.post(Entity.json(json));
-		String entity = response.readEntity(String.class);
+        Response response = request.post(Entity.json(json));
+        String entity = response.readEntity(String.class);
 
-		BaseTest.showResponse("UMA : TRegisterPermission.registerPermission() : ", response, entity);
+        BaseTest.showResponse("UMA : TRegisterPermission.registerPermission() : ", response, entity);
 
-		assertEquals(response.getStatus(), Response.Status.CREATED.getStatusCode(), "Unexpected response code.");
-		try {
-			final PermissionTicket t = ServerUtil.createJsonMapper().readValue(entity, PermissionTicket.class);
-			UmaTestUtil.assertIt(t);
+        assertEquals(response.getStatus(), Response.Status.CREATED.getStatusCode(), "Unexpected response code.");
+        try {
+            final PermissionTicket t = ServerUtil.createJsonMapper().readValue(entity, PermissionTicket.class);
+            UmaTestUtil.assertIt(t);
 
-			ticketH.setT(t);
-		} catch (IOException e) {
-			e.printStackTrace();
-			fail();
-		}
+            ticketH.setT(t);
+        } catch (IOException e) {
+            e.printStackTrace();
+            fail();
+        }
 
-		return ticketH.getT();
-	}
+        return ticketH.getT();
+    }
 }

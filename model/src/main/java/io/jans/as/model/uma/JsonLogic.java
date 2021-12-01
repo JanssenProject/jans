@@ -6,18 +6,16 @@
 
 package io.jans.as.model.uma;
 
-import java.io.InputStream;
+import com.google.common.base.Preconditions;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
-
-import com.google.common.base.Preconditions;
+import java.io.InputStream;
 
 /**
  * @author yuriyz

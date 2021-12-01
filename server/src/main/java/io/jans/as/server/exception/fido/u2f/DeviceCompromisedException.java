@@ -10,21 +10,21 @@ import io.jans.as.server.model.fido.u2f.DeviceRegistration;
 
 public class DeviceCompromisedException extends Exception {
 
-	private static final long serialVersionUID = -2098466708327419261L;
+    private static final long serialVersionUID = -2098466708327419261L;
 
-	private final DeviceRegistration registration;
+    private final DeviceRegistration registration;
 
-	public DeviceCompromisedException(DeviceRegistration registration, String message, Throwable cause) {
-		super(message, cause);
-		this.registration = registration;
-	}
+    public DeviceCompromisedException(DeviceRegistration registration, String message, Throwable cause) {
+        super(message, cause);
+        this.registration = registration;
+    }
 
-	public DeviceCompromisedException(DeviceRegistration registration, String message) {
-		super(message);
-		this.registration = registration;
-	}
+    public DeviceCompromisedException(DeviceRegistration registration, String message) {
+        super(message);
+        this.registration = registration;
+    }
 
-	public DeviceRegistration getDeviceRegistration() {
-		return registration;
-	}
+    public DeviceRegistration getDeviceRegistration() {
+        return registration;
+    }
 }

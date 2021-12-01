@@ -6,27 +6,27 @@
 
 package io.jans.as.server.service;
 
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.model.ApplicationType;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
-
-import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.model.ApplicationType;
 
 @ApplicationScoped
 @Named("organizationService")
 public class OrganizationService extends io.jans.as.common.service.OrganizationService {
 
-	@Inject
-	private AppConfiguration appConfiguration;
+    @Inject
+    private AppConfiguration appConfiguration;
 
     protected boolean isUseLocalCache() {
-    	return appConfiguration.getUseLocalCache();
+        return appConfiguration.getUseLocalCache();
     }
 
-	@Override
-	public ApplicationType getApplicationType() {
-		return ApplicationType.OX_AUTH;
-	}
+    @Override
+    public ApplicationType getApplicationType() {
+        return ApplicationType.OX_AUTH;
+    }
 
 }

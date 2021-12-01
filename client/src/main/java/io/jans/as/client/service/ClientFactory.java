@@ -6,9 +6,6 @@
 
 package io.jans.as.client.service;
 
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.core.UriBuilder;
-
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -19,6 +16,9 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
+
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.core.UriBuilder;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -52,7 +52,7 @@ public class ClientFactory {
     public IntrospectionService createIntrospectionService(String url) {
         return createIntrospectionService(url, engine);
     }
-    
+
     public IntrospectionService createIntrospectionService(String url, ClientHttpEngine engine) {
         ResteasyClient client = ((ResteasyClientBuilder) ClientBuilder.newBuilder()).httpEngine(engine).build();
         ResteasyWebTarget target = client.target(UriBuilder.fromPath(url));
@@ -67,15 +67,15 @@ public class ClientFactory {
         return createEngine(200, 20, CookieSpecs.STANDARD, followRedirects);
     }
 
-	public ApacheHttpClient43Engine createEngine(int maxTotal, int defaultMaxPerRoute, String cookieSpec, boolean followRedirects) {
-	    PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
-	    CloseableHttpClient httpClient = HttpClients.custom()
-				.setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(cookieSpec).build())
-	    		.setConnectionManager(cm).build();
-	    cm.setMaxTotal(maxTotal);
-	    cm.setDefaultMaxPerRoute(defaultMaxPerRoute);
+    public ApacheHttpClient43Engine createEngine(int maxTotal, int defaultMaxPerRoute, String cookieSpec, boolean followRedirects) {
+        PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
+        CloseableHttpClient httpClient = HttpClients.custom()
+                .setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(cookieSpec).build())
+                .setConnectionManager(cm).build();
+        cm.setMaxTotal(maxTotal);
+        cm.setDefaultMaxPerRoute(defaultMaxPerRoute);
         final ApacheHttpClient43Engine client4Engine = new ApacheHttpClient43Engine(httpClient);
         client4Engine.setFollowRedirects(followRedirects);
         return client4Engine;
-	}
+    }
 }

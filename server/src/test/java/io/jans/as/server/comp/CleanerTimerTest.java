@@ -41,10 +41,16 @@ import org.testng.collections.Lists;
 
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
-import java.util.*;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.TimeZone;
+import java.util.UUID;
 
 import static org.junit.Assert.assertNotNull;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author Yuriy Zabrovarnyy

@@ -6,17 +6,15 @@
 
 package io.jans.as.server.model.common;
 
-import java.io.Serializable;
-import java.util.Date;
-import java.util.Set;
-
-import javax.enterprise.inject.Instance;
-
-import org.apache.commons.lang.StringUtils;
-
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.configuration.AppConfiguration;
+import org.apache.commons.lang.StringUtils;
+
+import javax.enterprise.inject.Instance;
+import java.io.Serializable;
+import java.util.Date;
+import java.util.Set;
 
 /**
  * @author yuriyz
@@ -257,7 +255,7 @@ public class CacheGrant implements Serializable {
 
     public CIBAGrant asCibaGrant(Instance<AbstractAuthorizationGrant> grantInstance) {
         CIBAGrant grant = grantInstance.select(CIBAGrant.class).get();
-        grant.init(user, AuthorizationGrantType.CIBA,  client, authenticationTime);
+        grant.init(user, AuthorizationGrantType.CIBA, client, authenticationTime);
         grant.setScopes(scopes);
         grant.setGrantId(grantId);
         grant.setSessionDn(sessionDn);
@@ -274,7 +272,7 @@ public class CacheGrant implements Serializable {
 
     public DeviceCodeGrant asDeviceCodeGrant(Instance<AbstractAuthorizationGrant> grantInstance) {
         DeviceCodeGrant grant = grantInstance.select(DeviceCodeGrant.class).get();
-        grant.init(user, AuthorizationGrantType.DEVICE_CODE,  client, authenticationTime);
+        grant.init(user, AuthorizationGrantType.DEVICE_CODE, client, authenticationTime);
         grant.setScopes(scopes);
         grant.setGrantId(grantId);
         grant.setSessionDn(sessionDn);

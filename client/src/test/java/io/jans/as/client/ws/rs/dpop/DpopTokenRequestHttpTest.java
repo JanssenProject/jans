@@ -5,10 +5,22 @@
  */
 package io.jans.as.client.ws.rs.dpop;
 
-import io.jans.as.client.*;
+import io.jans.as.client.AuthorizationRequest;
+import io.jans.as.client.AuthorizationResponse;
+import io.jans.as.client.BaseTest;
+import io.jans.as.client.RegisterClient;
+import io.jans.as.client.RegisterRequest;
+import io.jans.as.client.RegisterResponse;
+import io.jans.as.client.TokenClient;
+import io.jans.as.client.TokenRequest;
+import io.jans.as.client.TokenResponse;
 import io.jans.as.client.service.ClientFactory;
 import io.jans.as.client.service.IntrospectionService;
-import io.jans.as.model.common.*;
+import io.jans.as.model.common.AuthenticationMethod;
+import io.jans.as.model.common.GrantType;
+import io.jans.as.model.common.ResponseType;
+import io.jans.as.model.common.SubjectType;
+import io.jans.as.model.common.TokenType;
 import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.signature.AsymmetricSignatureAlgorithm;
 import io.jans.as.model.crypto.signature.EllipticEdvardsCurve;
@@ -38,7 +50,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author Javier Rojas Blum

@@ -37,14 +37,13 @@ import static org.apache.commons.lang3.BooleanUtils.isTrue;
 /**
  * @author Yuriy Movchan
  * @author Javier Rojas Blum
- * 
  * @version October 7, 2019
  */
 @Stateless
 @Named
 public class RequestParameterService {
 
-	// use only "acr" instead of "acr_values" #334
+    // use only "acr" instead of "acr_values" #334
     private static final List<String> ALLOWED_PARAMETER = Collections.unmodifiableList(Arrays.asList(
             AuthorizeRequestParam.SCOPE,
             AuthorizeRequestParam.RESPONSE_TYPE,
@@ -88,7 +87,7 @@ public class RequestParameterService {
     public Map<String, String> getAllowedParameters(@Nonnull final Map<String, String> requestParameterMap) {
         Set<String> authorizationRequestCustomAllowedParameters = appConfiguration.getAuthorizationRequestCustomAllowedParameters();
         if (authorizationRequestCustomAllowedParameters == null) {
-        	authorizationRequestCustomAllowedParameters = new HashSet<>(0);
+            authorizationRequestCustomAllowedParameters = new HashSet<>(0);
         }
 
         final Map<String, String> result = new HashMap<>();
@@ -111,7 +110,7 @@ public class RequestParameterService {
 
         final Map<String, String> result = new HashMap<>();
         if (authorizationRequestCustomAllowedParameters == null) {
-        	return result;
+            return result;
         }
 
         if (!requestParameterMap.isEmpty()) {
@@ -209,7 +208,8 @@ public class RequestParameterService {
 
     /**
      * Process a JWT Request instance and update Custom Parameters according to custom parameters sent.
-     * @param jwtRequest JWT processing
+     *
+     * @param jwtRequest       JWT processing
      * @param customParameters Custom parameters used in the authorization flow.
      */
     public void getCustomParameters(JwtAuthorizationRequest jwtRequest, Map<String, String> customParameters) {
@@ -221,7 +221,7 @@ public class RequestParameterService {
 
         JSONObject jsonPayload = jwtRequest.getJsonPayload();
         for (String customParam : authorizationRequestCustomAllowedParameters) {
-            if (jsonPayload.has( customParam )) {
+            if (jsonPayload.has(customParam)) {
                 customParameters.put(customParam, jsonPayload.getString(customParam));
             }
         }

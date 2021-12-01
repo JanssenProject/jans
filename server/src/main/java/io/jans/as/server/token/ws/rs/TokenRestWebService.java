@@ -30,41 +30,41 @@ public interface TokenRestWebService {
     @Produces({MediaType.APPLICATION_JSON})
     Response requestAccessToken(
             @FormParam("grant_type")
-            String grantType,
+                    String grantType,
             @FormParam("code")
-            String code,
+                    String code,
             @FormParam("redirect_uri")
-            String redirectUri,
+                    String redirectUri,
             @FormParam("username")
-            String username,
+                    String username,
             @FormParam("password")
-            String password,
+                    String password,
             @FormParam("scope")
-            String scope,
+                    String scope,
             @FormParam("assertion")
-            String assertion,
+                    String assertion,
             @FormParam("refresh_token")
-            String refreshToken,
+                    String refreshToken,
             @FormParam("client_id")
-            String clientId,
+                    String clientId,
             @FormParam("client_secret")
-            String clientSecret,
+                    String clientSecret,
             @FormParam("code_verifier")
-            String codeVerifier,
+                    String codeVerifier,
             @FormParam("ticket")
-            String ticket,
+                    String ticket,
             @FormParam("claim_token")
-            String claimToken,
+                    String claimToken,
             @FormParam("claim_token_format")
-            String claimTokenFormat,
+                    String claimTokenFormat,
             @FormParam("pct")
-            String pctCode,
+                    String pctCode,
             @FormParam("rpt")
-            String rptCode,
+                    String rptCode,
             @FormParam("auth_req_id")
-            String authReqId,
+                    String authReqId,
             @FormParam("device_code")
-            String deviceCode,
+                    String deviceCode,
             @Context HttpServletRequest request,
             @Context HttpServletResponse response,
             @Context SecurityContext sec);

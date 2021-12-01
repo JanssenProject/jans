@@ -10,8 +10,8 @@ import java.util.Arrays;
 
 /**
  * struct {
- *     TB_ExtensionType extension_type;
- *     opaque extension_data<0..2^16-1>;
+ * TB_ExtensionType extension_type;
+ * opaque extension_data<0..2^16-1>;
  * } TB_Extension;
  *
  * @author Yuriy Zabrovarnyy

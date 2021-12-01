@@ -20,8 +20,9 @@ import java.util.List;
 /**
  * @author yuriyz
  */
-@IgnoreMediaTypes("application/*+json") // try to ignore jettison as it's recommended here: http://docs.jboss.org/resteasy/docs/2.3.4.Final/userguide/html/json.html
-@JsonPropertyOrder({ "ticket" })
+@IgnoreMediaTypes("application/*+json")
+// try to ignore jettison as it's recommended here: http://docs.jboss.org/resteasy/docs/2.3.4.Final/userguide/html/json.html
+@JsonPropertyOrder({"ticket"})
 @XmlRootElement
 public class JsonLogicNode {
 

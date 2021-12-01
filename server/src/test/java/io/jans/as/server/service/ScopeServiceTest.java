@@ -24,7 +24,12 @@ import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.startsWith;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.isNull;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
@@ -174,8 +179,8 @@ public class ScopeServiceTest {
     @Test
     public void getClaims_DifferentDateFields_ClaimsReturnedWithRightFormat() throws Exception {
         final String userId = UUID.randomUUID().toString();
-        final Date createdAt = new Date(System.currentTimeMillis() - 24*60*60*1000);
-        final Date updatedAt = new Date(System.currentTimeMillis() - 12*60*60*1000);
+        final Date createdAt = new Date(System.currentTimeMillis() - 24 * 60 * 60 * 1000);
+        final Date updatedAt = new Date(System.currentTimeMillis() - 12 * 60 * 60 * 1000);
         final Date lastLogon = new Date();
 
         User user = buildRegularUser(userId, createdAt, updatedAt);

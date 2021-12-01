@@ -109,6 +109,7 @@ public class CibaRequestsProcessorJob {
 
     /**
      * Defines whether the job is still in process or it is free according to the time interval defined.
+     *
      * @return True in case it is free to start a new process.
      */
     private boolean jobIsFree() {
@@ -140,7 +141,7 @@ public class CibaRequestsProcessorJob {
                 CibaRequestCacheControl cibaRequest = cibaRequestService.getCibaRequest(expiredRequest.getAuthReqId());
                 if (cibaRequest != null) {
                     executorService.execute(() ->
-                        processExpiredRequest(cibaRequest, expiredRequest.getAuthReqId())
+                            processExpiredRequest(cibaRequest, expiredRequest.getAuthReqId())
                     );
                 }
                 cibaRequestService.removeCibaRequest(expiredRequest);
@@ -153,8 +154,9 @@ public class CibaRequestsProcessorJob {
     /**
      * Method responsible to process expired CIBA requests, set them as expired in cache
      * and send callbacks to the client
+     *
      * @param cibaRequest Object containing data related to the CIBA request.
-     * @param authReqId Authentication request id.
+     * @param authReqId   Authentication request id.
      */
     private void processExpiredRequest(CibaRequestCacheControl cibaRequest, String authReqId) {
         if (cibaRequest.getStatus() != CibaRequestStatus.PENDING

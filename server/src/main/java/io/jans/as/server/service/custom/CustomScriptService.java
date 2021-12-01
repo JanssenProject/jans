@@ -26,11 +26,11 @@ import java.nio.charset.StandardCharsets;
 @Alternative
 @Priority(Interceptor.Priority.APPLICATION + 1)
 public class CustomScriptService extends AbstractCustomScriptService {
-	
-	@Inject
-	private StaticConfiguration staticConfiguration;
 
-	private static final long serialVersionUID = -5283102477313448031L;
+    @Inject
+    private StaticConfiguration staticConfiguration;
+
+    private static final long serialVersionUID = -5283102477313448031L;
 
     public String baseDn() {
         return staticConfiguration.getBaseDn().getScripts();

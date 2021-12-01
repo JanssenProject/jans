@@ -26,44 +26,44 @@ import java.util.UUID;
 
 public class GrantServiceTest extends BaseComponentTest {
 
-	private static final String TEST_TOKEN_CODE = UUID.randomUUID().toString();
+    private static final String TEST_TOKEN_CODE = UUID.randomUUID().toString();
 
-	@Inject
-	private GrantService grantService;
+    @Inject
+    private GrantService grantService;
 
-	private static String clientId;
+    private static String clientId;
 
-	private static TokenEntity tokenEntity;
+    private static TokenEntity tokenEntity;
 
-	@Parameters(value = "clientId")
-	@Test
-	public void createTestToken(String clientId) {
-		GrantServiceTest.clientId = clientId;
-		tokenEntity = createTestToken();
-		grantService.persist(tokenEntity);
-	}
+    @Parameters(value = "clientId")
+    @Test
+    public void createTestToken(String clientId) {
+        GrantServiceTest.clientId = clientId;
+        tokenEntity = createTestToken();
+        grantService.persist(tokenEntity);
+    }
 
-	@Test(dependsOnMethods = "createTestToken")
-	public void removeTestTokens() {
-		final TokenEntity t = grantService.getGrantByCode(TEST_TOKEN_CODE);
-		if (t != null) {
-			grantService.remove(t);
-		}
-	}
+    @Test(dependsOnMethods = "createTestToken")
+    public void removeTestTokens() {
+        final TokenEntity t = grantService.getGrantByCode(TEST_TOKEN_CODE);
+        if (t != null) {
+            grantService.remove(t);
+        }
+    }
 
-	private TokenEntity createTestToken() {
-		final String grantId = GrantService.generateGrantId();
-		final String dn = grantService.buildDn(TokenHashUtil.hash(TEST_TOKEN_CODE));
+    private TokenEntity createTestToken() {
+        final String grantId = GrantService.generateGrantId();
+        final String dn = grantService.buildDn(TokenHashUtil.hash(TEST_TOKEN_CODE));
 
-		final TokenEntity t = new TokenEntity();
-		t.setDn(dn);
-		t.setGrantId(grantId);
-		t.setClientId(clientId);
-		t.setTokenCode(TokenHashUtil.hash(TEST_TOKEN_CODE));
-		t.setTokenType(TokenType.ACCESS_TOKEN.getValue());
-		t.setCreationDate(new Date());
-		t.setExpirationDate(new Date());
-		return t;
-	}
+        final TokenEntity t = new TokenEntity();
+        t.setDn(dn);
+        t.setGrantId(grantId);
+        t.setClientId(clientId);
+        t.setTokenCode(TokenHashUtil.hash(TEST_TOKEN_CODE));
+        t.setTokenType(TokenType.ACCESS_TOKEN.getValue());
+        t.setCreationDate(new Date());
+        t.setExpirationDate(new Date());
+        return t;
+    }
 
 }
