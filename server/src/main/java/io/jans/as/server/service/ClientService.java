@@ -281,7 +281,6 @@ public class ClientService {
         } catch (EntryPersistenceException epe) {
             log.error("Failed to update jansLastAccessTime and jansLastLogonTime of client '{}'", clientDn);
             log.trace("Failed to update user:", epe);
-            epe.printStackTrace();
         }
 
         removeFromCache(client);
