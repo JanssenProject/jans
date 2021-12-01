@@ -11,7 +11,7 @@ package io.jans.as.client;
  *
  * @author Javier Rojas Blum Date: 12.6.2011
  */
-public class OpenIdConfigurationRequest extends BaseRequest{
+public class OpenIdConfigurationRequest extends BaseRequest {
 
     @Override
     public String getQueryString() {

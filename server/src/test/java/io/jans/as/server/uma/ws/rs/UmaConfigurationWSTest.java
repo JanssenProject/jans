@@ -6,16 +6,15 @@
 
 package io.jans.as.server.uma.ws.rs;
 
-import java.net.URI;
-
-import org.jboss.arquillian.test.api.ArquillianResource;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-
 import io.jans.as.model.uma.UmaMetadata;
 import io.jans.as.model.uma.UmaTestUtil;
 import io.jans.as.server.BaseTest;
 import io.jans.as.server.model.uma.TUma;
+import org.jboss.arquillian.test.api.ArquillianResource;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
+import java.net.URI;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -24,13 +23,13 @@ import io.jans.as.server.model.uma.TUma;
 
 public class UmaConfigurationWSTest extends BaseTest {
 
-	@ArquillianResource
-	private URI url;
+    @ArquillianResource
+    private URI url;
 
-	@Parameters({ "umaConfigurationPath" })
-	@Test
-	public void configurationPresence(final String umaConfigurationPath) throws Exception {
-		final UmaMetadata c = TUma.requestConfiguration(url, umaConfigurationPath);
-		UmaTestUtil.assertIt(c);
-	}
+    @Parameters({"umaConfigurationPath"})
+    @Test
+    public void configurationPresence(final String umaConfigurationPath) throws Exception {
+        final UmaMetadata c = TUma.requestConfiguration(url, umaConfigurationPath);
+        UmaTestUtil.assertIt(c);
+    }
 }

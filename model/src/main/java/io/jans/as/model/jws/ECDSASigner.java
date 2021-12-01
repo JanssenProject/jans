@@ -76,7 +76,7 @@ public class ECDSASigner extends AbstractJwsSigner {
 
             byte[] signature = signer.sign();
             if (AlgorithmFamily.EC.equals(getSignatureAlgorithm().getFamily())) {
-            	int signatureLenght = ECDSA.getSignatureByteArrayLength(JWSAlgorithm.parse(getSignatureAlgorithm().getName()));
+                int signatureLenght = ECDSA.getSignatureByteArrayLength(JWSAlgorithm.parse(getSignatureAlgorithm().getName()));
                 signature = ECDSA.transcodeSignatureToConcat(signature, signatureLenght);
             }
 

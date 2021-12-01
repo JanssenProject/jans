@@ -60,8 +60,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import static io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType.*;
-import static io.jans.as.model.ciba.BackchannelAuthenticationResponseParam.*;
+import static io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType.INVALID_CLIENT;
+import static io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType.INVALID_REQUEST;
+import static io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType.UNAUTHORIZED_END_USER_DEVICE;
+import static io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType.UNKNOWN_USER_ID;
+import static io.jans.as.model.ciba.BackchannelAuthenticationResponseParam.AUTH_REQ_ID;
+import static io.jans.as.model.ciba.BackchannelAuthenticationResponseParam.EXPIRES_IN;
+import static io.jans.as.model.ciba.BackchannelAuthenticationResponseParam.INTERVAL;
 
 /**
  * Implementation for request backchannel authorization through REST web services.

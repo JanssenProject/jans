@@ -6,15 +6,14 @@
 
 package io.jans.as.client;
 
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation.Builder;
-
+import io.jans.as.model.common.TokenTypeHint;
+import io.jans.as.model.token.TokenRevocationRequestParam;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
-import io.jans.as.model.common.TokenTypeHint;
-import io.jans.as.model.token.TokenRevocationRequestParam;
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
 
 /**
  * Encapsulates functionality to make token revocation request calls to an authorization server via REST Services.

@@ -6,6 +6,15 @@
 
 package io.jans.as.model.crypto.signature;
 
+import io.jans.as.model.crypto.Certificate;
+import io.jans.as.model.crypto.KeyFactory;
+import io.jans.as.model.jwk.JSONWebKey;
+import org.apache.commons.lang.StringUtils;
+import org.bouncycastle.jcajce.provider.asymmetric.rsa.BCRSAPrivateCrtKey;
+import org.bouncycastle.jcajce.provider.asymmetric.rsa.BCRSAPublicKey;
+import org.bouncycastle.x509.X509V1CertificateGenerator;
+
+import javax.security.auth.x500.X500Principal;
 import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.security.InvalidParameterException;
@@ -19,17 +28,6 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-
-import javax.security.auth.x500.X500Principal;
-
-import org.apache.commons.lang.StringUtils;
-import org.bouncycastle.jcajce.provider.asymmetric.rsa.BCRSAPrivateCrtKey;
-import org.bouncycastle.jcajce.provider.asymmetric.rsa.BCRSAPublicKey;
-import org.bouncycastle.x509.X509V1CertificateGenerator;
-
-import io.jans.as.model.crypto.Certificate;
-import io.jans.as.model.crypto.KeyFactory;
-import io.jans.as.model.jwk.JSONWebKey;
 
 /**
  * Factory to create asymmetric Public and Private Keys for the RSA algorithm

@@ -11,13 +11,13 @@ package io.jans.as.model.fido.u2f.exception;
  */
 public class RegistrationNotAllowed extends RuntimeException {
 
-	private static final long serialVersionUID = -2738024707341148557L;
+    private static final long serialVersionUID = -2738024707341148557L;
 
-	public RegistrationNotAllowed(String message) {
-		super(message);
-	}
+    public RegistrationNotAllowed(String message) {
+        super(message);
+    }
 
-	public RegistrationNotAllowed(String message, Throwable cause) {
-		super(message, cause);
-	}
+    public RegistrationNotAllowed(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

@@ -257,9 +257,9 @@ public class KeyGenerator {
                     recs.add(getKeyNameFromAlgorithm(algorithm) + "=" + result.getString(KEY_ID));
                 }
             }
-            if(genTestPropFile) {
-                try(FileOutputStream fosTestPropFile = new FileOutputStream(testPropFile)) {
-                    for(String rec : recs) {
+            if (genTestPropFile) {
+                try (FileOutputStream fosTestPropFile = new FileOutputStream(testPropFile)) {
+                    for (String rec : recs) {
                         fosTestPropFile.write(rec.getBytes());
                         fosTestPropFile.write("\n".getBytes());
                     }

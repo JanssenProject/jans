@@ -14,11 +14,10 @@ import org.jetbrains.annotations.Nullable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import javax.ws.rs.core.Response;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.ws.rs.core.Response;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -50,6 +49,7 @@ public abstract class BaseResponseWithErrors<T extends IErrorType> extends BaseR
     public Map<String, List<String>> getClaimMap() {
         return claimMap;
     }
+
     public Map<String, String> getClaims() {
         Map<String, String> result = new HashMap<>();
         for (Map.Entry<String, List<String>> entry : claimMap.entrySet()) {

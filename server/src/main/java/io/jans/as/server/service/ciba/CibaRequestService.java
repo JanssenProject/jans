@@ -6,16 +6,6 @@
 
 package io.jans.as.server.service.ciba;
 
-import java.util.Date;
-import java.util.List;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-
-import org.apache.commons.lang.time.DateUtils;
-import org.slf4j.Logger;
-
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.config.StaticConfiguration;
@@ -26,6 +16,14 @@ import io.jans.as.server.model.ldap.CIBARequest;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.search.filter.Filter;
 import io.jans.service.CacheService;
+import org.apache.commons.lang.time.DateUtils;
+import org.slf4j.Logger;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Service used to access to the database for CibaRequest ObjectClass.
@@ -58,7 +56,8 @@ public class CibaRequestService {
 
     /**
      * Uses request data and expiration sent by the client and save request data in database.
-     * @param request Object containing information related to the request.
+     *
+     * @param request   Object containing information related to the request.
      * @param expiresIn Expiration time that end user has to answer.
      */
     public void persistRequest(CibaRequestCacheControl request, int expiresIn) {
@@ -78,6 +77,7 @@ public class CibaRequestService {
 
     /**
      * Load a CIBARequest entry from database.
+     *
      * @param authReqId Identifier of the entry.
      */
     public CIBARequest load(String authReqId) {
@@ -91,8 +91,9 @@ public class CibaRequestService {
 
     /**
      * Generates a list of requests that are expired and also filter them using a Status.
+     *
      * @param authorizationStatus Status used to filter entries.
-     * @param maxRequestsToGet Limit of requests that would be returned.
+     * @param maxRequestsToGet    Limit of requests that would be returned.
      */
     public List<CIBARequest> loadExpiredByStatus(CibaRequestStatus authorizationStatus,
                                                  int maxRequestsToGet) {
@@ -110,7 +111,8 @@ public class CibaRequestService {
 
     /**
      * Change the status field in database for a specific request.
-     * @param cibaRequest Entry containing information of the CIBA request.
+     *
+     * @param cibaRequest         Entry containing information of the CIBA request.
      * @param authorizationStatus New status.
      */
     public void updateStatus(CIBARequest cibaRequest, CibaRequestStatus authorizationStatus) {
@@ -124,6 +126,7 @@ public class CibaRequestService {
 
     /**
      * Removes a CibaRequest object from the database.
+     *
      * @param cibaRequest Object to be removed.
      */
     public void removeCibaRequest(CIBARequest cibaRequest) {
@@ -136,6 +139,7 @@ public class CibaRequestService {
 
     /**
      * Removes a CibaRequest from the database.
+     *
      * @param authReqId Identifier of the CibaRequest.
      */
     public void removeCibaRequest(String authReqId) {
@@ -149,7 +153,8 @@ public class CibaRequestService {
 
     /**
      * Register a new CibaRequestCacheControl instance in Cache and in the database.
-     * @param request New instance to be saved.
+     *
+     * @param request   New instance to be saved.
      * @param expiresIn Expiration time of the request in Cache and memory.
      */
     public void save(CibaRequestCacheControl request, int expiresIn) {
@@ -165,6 +170,7 @@ public class CibaRequestService {
 
     /**
      * Put in cache a CibaRequestCacheControl object, it uses same expiration time that it has.
+     *
      * @param request Object to be updated, replaced or created.
      */
     public void update(CibaRequestCacheControl request) {
@@ -178,6 +184,7 @@ public class CibaRequestService {
 
     /**
      * Get a CibaRequestCacheControl object from Cache service.
+     *
      * @param authReqId Identifier of the object to be gotten.
      */
     public CibaRequestCacheControl getCibaRequest(String authReqId) {
@@ -192,6 +199,7 @@ public class CibaRequestService {
 
     /**
      * Removes from cache a request.
+     *
      * @param cacheKey Object to be removed from Cache.
      */
     public void removeCibaCacheRequest(String cacheKey) {

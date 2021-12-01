@@ -6,6 +6,8 @@
 
 package io.jans.as.server.authorize.ws.rs;
 
+import io.jans.as.model.authorize.DeviceAuthorizationRequestParam;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.FormParam;
@@ -16,8 +18,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
-
-import io.jans.as.model.authorize.DeviceAuthorizationRequestParam;
 
 /**
  * <p>
@@ -33,7 +33,7 @@ public interface DeviceAuthorizationRestWebService {
      * in other rest services.
      *
      * @param clientId REQUIRED The client identifier as described in Section 2.2 of [RFC6749].
-     * @param scope The scope of the access request as defined by Section 3.3 of [RFC6749].
+     * @param scope    The scope of the access request as defined by Section 3.3 of [RFC6749].
      */
     @POST
     @Path("/device_authorization")

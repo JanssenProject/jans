@@ -41,14 +41,14 @@ import java.util.Set;
 
 /**
  * Integration with Resteasy
- * 
+ *
  * @author Yuriy Movchan
  * @version 0.1, 03/21/2017
  */
 @ApplicationPath("/restv1")
-public class ResteasyInitializer extends Application {	
+public class ResteasyInitializer extends Application {
 
-	@Override
+    @Override
     public Set<Class<?>> getClasses() {
         HashSet<Class<?>> classes = new HashSet<Class<?>>();
         classes.add(JansConfigurationWS.class);

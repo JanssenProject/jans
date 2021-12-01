@@ -6,7 +6,7 @@
 
 package io.jans.as.server.model.token;
 
-public enum  HttpAuthTokenType {
+public enum HttpAuthTokenType {
     Basic("Basic "),
     Bearer("Bearer "),
     AccessToken("AccessToken "),

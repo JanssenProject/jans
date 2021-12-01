@@ -40,9 +40,9 @@ public class PushTokenDeliveryClient extends BaseClient<PushTokenDeliveryRequest
     private PushTokenDeliveryResponse _exec() {
         try {
             // Prepare request parameters
-        	
-        	Builder clientRequest = webTarget.request();
-        	applyCookies(clientRequest);
+
+            Builder clientRequest = webTarget.request();
+            applyCookies(clientRequest);
 
             clientRequest.header("Content-Type", getRequest().getContentType());
 

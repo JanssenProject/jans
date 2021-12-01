@@ -6,15 +6,15 @@
 
 package io.jans.as.server.service.external;
 
-import javax.ejb.DependsOn;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Named;
-
 import io.jans.as.server.service.external.context.ExternalCibaEndUserNotificationContext;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.custom.script.type.ciba.EndUserNotificationType;
 import io.jans.service.custom.script.ExternalScriptService;
+
+import javax.ejb.DependsOn;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Named;
 
 /**
  * @author Milton BO

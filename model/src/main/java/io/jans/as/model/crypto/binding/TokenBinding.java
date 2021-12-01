@@ -10,13 +10,13 @@ import java.util.Arrays;
 
 /**
  * struct {
- *    TokenBindingType tokenbinding_type;
- *    TokenBindingID tokenbindingid;
- *    opaque signature<64..2^16-1>;  Signature over the concatenation
- *                                     of tokenbinding_type,
- *                                     key_parameters and exported
- *                                     keying material (EKM)
- *    TB_Extension extensions<0..2^16-1>;
+ * TokenBindingType tokenbinding_type;
+ * TokenBindingID tokenbindingid;
+ * opaque signature<64..2^16-1>;  Signature over the concatenation
+ * of tokenbinding_type,
+ * key_parameters and exported
+ * keying material (EKM)
+ * TB_Extension extensions<0..2^16-1>;
  * } TokenBinding;
  *
  * @author Yuriy Zabrovarnyy

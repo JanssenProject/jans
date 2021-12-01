@@ -6,24 +6,23 @@
 
 package io.jans.as.server.service;
 
-import java.util.HashSet;
-import java.util.Set;
+import io.jans.as.server.ws.rs.controller.HealthCheckController;
 
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
-
-import io.jans.as.server.ws.rs.controller.HealthCheckController;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Integration with Resteasy
- * 
+ *
  * @author Yuriy Movchan
  * @version 0.1, 11/13/2020
  */
 @ApplicationPath("/sys")
-public class SystemResteasyInitializer extends Application {	
+public class SystemResteasyInitializer extends Application {
 
-	@Override
+    @Override
     public Set<Class<?>> getClasses() {
         HashSet<Class<?>> classes = new HashSet<Class<?>>();
         classes.add(HealthCheckController.class);

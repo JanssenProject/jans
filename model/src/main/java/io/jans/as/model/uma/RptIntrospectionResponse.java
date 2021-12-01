@@ -22,7 +22,7 @@ import java.util.Map;
  *
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- *         Date: 10/24/2012
+ * Date: 10/24/2012
  */
 
 // ignore jettison as it's recommended here: http://docs.jboss.org/resteasy/docs/2.3.4.Final/userguide/html/json.html
