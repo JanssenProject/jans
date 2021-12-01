@@ -6,6 +6,17 @@
 
 package io.jans.as.model.jwt;
 
+import com.google.common.collect.Lists;
+import io.jans.as.model.exception.InvalidJwtException;
+import org.apache.commons.lang.StringUtils;
+import org.json.JSONObject;
+
+import java.net.URI;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+
 import static io.jans.as.model.jwt.JwtClaimName.AUDIENCE;
 import static io.jans.as.model.jwt.JwtClaimName.EXPIRATION_TIME;
 import static io.jans.as.model.jwt.JwtClaimName.ISSUED_AT;
@@ -14,19 +25,6 @@ import static io.jans.as.model.jwt.JwtClaimName.JWT_ID;
 import static io.jans.as.model.jwt.JwtClaimName.NOT_BEFORE;
 import static io.jans.as.model.jwt.JwtClaimName.SUBJECT_IDENTIFIER;
 import static io.jans.as.model.jwt.JwtClaimName.TYPE;
-
-import java.net.URI;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-
-import org.apache.commons.lang.StringUtils;
-import org.json.JSONObject;
-
-import com.google.common.collect.Lists;
-
-import io.jans.as.model.exception.InvalidJwtException;
 
 /**
  * @author Javier Rojas Blum Date: 11.09.2012

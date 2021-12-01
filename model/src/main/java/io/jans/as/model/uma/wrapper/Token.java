@@ -78,12 +78,12 @@ public class Token implements Serializable {
         return this;
     }
 
-	public Integer getExpiresIn() {
-		return expiresIn;
-	}
+    public Integer getExpiresIn() {
+        return expiresIn;
+    }
 
-	public void setExpiresIn(Integer expiresIn) {
-		this.expiresIn = expiresIn;
-	}
+    public void setExpiresIn(Integer expiresIn) {
+        this.expiresIn = expiresIn;
+    }
 
 }

@@ -39,17 +39,17 @@ public enum ResponseType implements HasParamName, AttributeEnum {
     /**
      * Used for the authorization code grant type.
      */
-	@JsonProperty("code")
+    @JsonProperty("code")
     CODE("code", "Authorization Code Grant Type"),
     /**
      * Used for the implicit grant type.
      */
-	@JsonProperty("token")
+    @JsonProperty("token")
     TOKEN("token", "Implicit Grant Type"),
     /**
      * Include an ID Token in the authorization response.
      */
-	@JsonProperty("id_token")
+    @JsonProperty("id_token")
     ID_TOKEN("id_token", "ID Token");
 
     private final String value;

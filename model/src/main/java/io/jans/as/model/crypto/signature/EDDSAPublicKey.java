@@ -5,19 +5,18 @@
  */
 package io.jans.as.model.crypto.signature;
 
-import static io.jans.as.model.jwk.JWKParameter.EXPONENT;
-import static io.jans.as.model.jwk.JWKParameter.MODULUS;
-import static io.jans.as.model.jwk.JWKParameter.X;
-
-import java.security.spec.X509EncodedKeySpec;
-
+import io.jans.as.model.crypto.PublicKey;
+import io.jans.as.model.util.Base64Util;
+import io.jans.as.model.util.StringUtils;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import io.jans.as.model.crypto.PublicKey;
-import io.jans.as.model.util.Base64Util;
-import io.jans.as.model.util.StringUtils;
+import java.security.spec.X509EncodedKeySpec;
+
+import static io.jans.as.model.jwk.JWKParameter.EXPONENT;
+import static io.jans.as.model.jwk.JWKParameter.MODULUS;
+import static io.jans.as.model.jwk.JWKParameter.X;
 
 /**
  * Edwards Curve Digital Signature Algorithm (EDDSA)
@@ -32,7 +31,7 @@ public class EDDSAPublicKey extends PublicKey {
 
     /**
      * Constructor
-     * 
+     *
      * @param signatureAlgorithm
      * @param publicKeyData
      */
@@ -43,23 +42,23 @@ public class EDDSAPublicKey extends PublicKey {
 
     /**
      * Copy Constructor
-     * 
+     *
      * @param eddsaPublicKey
      */
     public EDDSAPublicKey(final EDDSAPublicKey eddsaPublicKey) {
         setSignatureAlgorithm(eddsaPublicKey.getSignatureAlgorithm());
-        final byte[] inXEncoded = eddsaPublicKey.getPublicKeyEncoded();        
+        final byte[] inXEncoded = eddsaPublicKey.getPublicKeyEncoded();
         this.xEncoded = inXEncoded != null ? inXEncoded.clone() : null;
         setKeyId(eddsaPublicKey.getKeyId());
         setCertificate(eddsaPublicKey.getCertificate());
-    }    
+    }
 
     /**
      * get public key value array (X509 encoded) in X509EncodedKeySpec object;
      * X509EncodedKeySpec allows to get encoded array (byte[] getEncoded())
-     * 
+     *
      * @return public key value array (X509 encoded) in X509EncodedKeySpec object;
-     *         X509EncodedKeySpec allows to get encoded array (byte[] getEncoded());
+     * X509EncodedKeySpec allows to get encoded array (byte[] getEncoded());
      */
     public X509EncodedKeySpec getPublicKeySpec() {
         return new X509EncodedKeySpec(this.xEncoded);
@@ -68,15 +67,13 @@ public class EDDSAPublicKey extends PublicKey {
     /**
      * Returns original array (decoded) of the public key
      * (ED25519 - 32 byte, ED448 - 56 bytes)
-     * 
+     *
      * @return original array (decoded) of the public key;
-     * 
      */
     public byte[] getPublicKeyDecoded() {
-        if(this.xEncoded == null) {
-            return new byte[] {};
-        }
-        else {
+        if (this.xEncoded == null) {
+            return new byte[]{};
+        } else {
             SubjectPublicKeyInfo subjPubKeyInfo = SubjectPublicKeyInfo.getInstance(this.xEncoded);
             return subjPubKeyInfo.getPublicKeyData().getOctets();
         }
@@ -84,11 +81,11 @@ public class EDDSAPublicKey extends PublicKey {
 
     /**
      * Returns encoded public key
-     * 
+     *
      * @return
      */
     public byte[] getPublicKeyEncoded() {
-        return this.xEncoded != null ? this.xEncoded : new byte[] {};
+        return this.xEncoded != null ? this.xEncoded : new byte[]{};
     }
 
     /**

@@ -6,16 +6,16 @@
 
 package io.jans.as.client;
 
+import org.apache.log4j.Logger;
+
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
 
-import org.apache.log4j.Logger;
-
 /**
  * @author Yuriy Zabrovarnyy
  */
-public class RevokeSessionClient extends BaseClient<RevokeSessionRequest, RevokeSessionResponse>{
+public class RevokeSessionClient extends BaseClient<RevokeSessionRequest, RevokeSessionResponse> {
 
     private static final Logger LOG = Logger.getLogger(RevokeSessionClient.class);
 

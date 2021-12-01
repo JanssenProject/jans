@@ -6,8 +6,9 @@
 
 package io.jans.as.server.servlet;
 
-import java.io.IOException;
-import java.io.PrintWriter;
+import io.jans.as.server.service.SectorIdentifierService;
+import org.json.JSONArray;
+import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import javax.servlet.ServletException;
@@ -15,11 +16,8 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.json.JSONArray;
-import org.slf4j.Logger;
-
-import io.jans.as.server.service.SectorIdentifierService;
+import java.io.IOException;
+import java.io.PrintWriter;
 
 /**
  * @author Javier Rojas Blum
@@ -28,9 +26,9 @@ import io.jans.as.server.service.SectorIdentifierService;
 @WebServlet(urlPatterns = "/sectoridentifier/*")
 public class SectorIdentifier extends HttpServlet {
 
-	private static final long serialVersionUID = -1222077047492070618L;
+    private static final long serialVersionUID = -1222077047492070618L;
 
-	@Inject
+    @Inject
     private Logger log;
 
     @Inject

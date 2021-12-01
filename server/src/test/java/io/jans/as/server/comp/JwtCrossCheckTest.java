@@ -6,17 +6,6 @@
 
 package io.jans.as.server.comp;
 
-import static org.testng.Assert.assertTrue;
-import static org.testng.AssertJUnit.assertNotNull;
-
-import java.security.KeyStoreException;
-import java.security.interfaces.ECPublicKey;
-import java.util.Date;
-import java.util.List;
-
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.JWSSigner;
 import com.nimbusds.jose.JWSVerifier;
@@ -27,7 +16,6 @@ import com.nimbusds.jose.jwk.ECKey;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-
 import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.signature.AlgorithmFamily;
 import io.jans.as.model.crypto.signature.ECDSAPublicKey;
@@ -40,21 +28,31 @@ import io.jans.as.model.jws.RSASigner;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtType;
 import io.jans.as.server.BaseTest;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
+import java.security.KeyStoreException;
+import java.security.interfaces.ECPublicKey;
+import java.util.Date;
+import java.util.List;
+
+import static org.testng.Assert.assertTrue;
+import static org.testng.AssertJUnit.assertNotNull;
 
 /**
  * @author Yuriy Zabrovarnyy
  */
 public class JwtCrossCheckTest extends BaseTest {
 
-    @Parameters({ "dnName", "keyStoreFile", "keyStoreSecret" })
+    @Parameters({"dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
     public void rs256CrossCheck(final String dnName,
-                              final String keyStoreFile,
-                              final String keyStoreSecret) throws Exception {
+                                final String keyStoreFile,
+                                final String keyStoreSecret) throws Exception {
         crossCheck(new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName), SignatureAlgorithm.RS256);
     }
 
-    @Parameters({ "dnName", "keyStoreFile", "keyStoreSecret" })
+    @Parameters({"dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
     public void rs384CrossCheck(final String dnName,
                                 final String keyStoreFile,
@@ -62,7 +60,7 @@ public class JwtCrossCheckTest extends BaseTest {
         crossCheck(new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName), SignatureAlgorithm.RS384);
     }
 
-    @Parameters({ "dnName", "keyStoreFile", "keyStoreSecret" })
+    @Parameters({"dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
     public void rs512CrossCheck(final String dnName,
                                 final String keyStoreFile,
@@ -70,7 +68,7 @@ public class JwtCrossCheckTest extends BaseTest {
         crossCheck(new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName), SignatureAlgorithm.RS512);
     }
 
-    @Parameters({ "dnName", "keyStoreFile", "keyStoreSecret" })
+    @Parameters({"dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
     public void es256CrossCheck(final String dnName,
                                 final String keyStoreFile,
@@ -78,7 +76,7 @@ public class JwtCrossCheckTest extends BaseTest {
         crossCheck(new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName), SignatureAlgorithm.ES256);
     }
 
-    @Parameters({ "dnName", "keyStoreFile", "keyStoreSecret" })
+    @Parameters({"dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
     public void es384CrossCheck(final String dnName,
                                 final String keyStoreFile,
@@ -86,7 +84,7 @@ public class JwtCrossCheckTest extends BaseTest {
         crossCheck(new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName), SignatureAlgorithm.ES384);
     }
 
-    @Parameters({ "dnName", "keyStoreFile", "keyStoreSecret" })
+    @Parameters({"dnName", "keyStoreFile", "keyStoreSecret"})
     @Test
     public void es512CrossCheck(final String dnName,
                                 final String keyStoreFile,
@@ -193,7 +191,7 @@ public class JwtCrossCheckTest extends BaseTest {
     private static String getKeyIdByAlgorithm(SignatureAlgorithm algorithm, Use use, AuthCryptoProvider cryptoProvider) throws KeyStoreException {
         final List<String> aliases = cryptoProvider.getKeys();
         for (String keyId : aliases) {
-            if (keyId.endsWith(use.getParamName()  + "_" + algorithm.getName().toLowerCase())) {
+            if (keyId.endsWith(use.getParamName() + "_" + algorithm.getName().toLowerCase())) {
                 return keyId;
             }
         }

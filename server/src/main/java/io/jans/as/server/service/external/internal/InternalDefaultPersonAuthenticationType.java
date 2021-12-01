@@ -6,16 +6,15 @@
 
 package io.jans.as.server.service.external.internal;
 
-import java.util.Map;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import io.jans.as.server.service.AuthenticationService;
 import io.jans.model.SimpleCustomProperty;
 import io.jans.model.custom.script.type.auth.DummyPersonAuthenticationType;
 import io.jans.model.security.Credentials;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.util.Map;
 
 /**
  * Wrapper to call internal authentication method
@@ -26,41 +25,41 @@ import io.jans.model.security.Credentials;
 @Named
 public class InternalDefaultPersonAuthenticationType extends DummyPersonAuthenticationType {
 
-	@Inject
-	private AuthenticationService authenticationService;
+    @Inject
+    private AuthenticationService authenticationService;
 
-	@Inject
-	private Credentials credentials;
+    @Inject
+    private Credentials credentials;
 
-	public InternalDefaultPersonAuthenticationType() {
-	}
+    public InternalDefaultPersonAuthenticationType() {
+    }
 
-	@Override
-	public boolean authenticate(Map<String, SimpleCustomProperty> configurationAttributes, Map<String, String[]> requestParameters, int step) {
-		if (!credentials.isSet()) {
-			return false;
-		}
+    @Override
+    public boolean authenticate(Map<String, SimpleCustomProperty> configurationAttributes, Map<String, String[]> requestParameters, int step) {
+        if (!credentials.isSet()) {
+            return false;
+        }
 
-		return authenticationService.authenticate(credentials.getUsername(), credentials.getPassword());
-	}
+        return authenticationService.authenticate(credentials.getUsername(), credentials.getPassword());
+    }
 
-	@Override
-	public boolean prepareForStep(Map<String, SimpleCustomProperty> configurationAttributes, Map<String, String[]> requestParameters, int step) {
-		if (step == 1) {
-			return true;
-		}
-		
-		return super.prepareForStep(configurationAttributes, requestParameters, step);
-	}
+    @Override
+    public boolean prepareForStep(Map<String, SimpleCustomProperty> configurationAttributes, Map<String, String[]> requestParameters, int step) {
+        if (step == 1) {
+            return true;
+        }
 
-	@Override
-	public int getCountAuthenticationSteps(Map<String, SimpleCustomProperty> configurationAttributes) {
-		return 1;
-	}
+        return super.prepareForStep(configurationAttributes, requestParameters, step);
+    }
 
-	@Override
-	public boolean logout(Map<String, SimpleCustomProperty> configurationAttributes, Map<String, String[]> requestParameters) {
-		return true;
-	}
+    @Override
+    public int getCountAuthenticationSteps(Map<String, SimpleCustomProperty> configurationAttributes) {
+        return 1;
+    }
+
+    @Override
+    public boolean logout(Map<String, SimpleCustomProperty> configurationAttributes, Map<String, String[]> requestParameters) {
+        return true;
+    }
 
 }

@@ -49,7 +49,7 @@ public class GluuConfigurationClient extends BaseClient<GluuConfigurationRequest
         initClient();
 
         setRequest(new GluuConfigurationRequest());
-        
+
         Builder clientRequest = webTarget.request();
         applyCookies(clientRequest);
 

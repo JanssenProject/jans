@@ -131,7 +131,7 @@ public class ServerCryptoProvider extends AbstractCryptoProvider {
 
         return privateKey;
     }
-    
+
 
     @Override
     public PublicKey getPublicKey(String keyId) throws CryptoProviderException {
@@ -145,5 +145,5 @@ public class ServerCryptoProvider extends AbstractCryptoProvider {
         }
 
         return publicKey;
-    }    
+    }
 }

@@ -6,16 +6,15 @@
 
 package io.jans.as.server.model.common;
 
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import com.google.common.collect.Sets;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
-
-import com.google.common.collect.Sets;
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -52,7 +51,7 @@ public class SessionIdAccessMap implements Serializable {
     public Set<String> getClientIds(boolean granted) {
         Set<String> clientIds = Sets.newHashSet();
         for (Map.Entry<String, Boolean> entry : getPermissionGranted().entrySet()) {
-            if (entry.getValue().equals(granted) ) {
+            if (entry.getValue().equals(granted)) {
                 clientIds.add(entry.getKey());
             }
         }

@@ -5,14 +5,14 @@ package io.jans.as.server.service;
  * Copyright (c) 2020, Janssen Project
  */
 
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.util.StringHelper;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.ServletContext;
-
-import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.util.StringHelper;
 
 /**
  * OxAuthConfigurationService
@@ -23,41 +23,41 @@ import io.jans.util.StringHelper;
 @Named
 public class WebConfigurationService {
 
-	@Inject
-	private AppConfiguration appConfiguration;
-	
-	@Inject
-	private ServletContext context;
+    @Inject
+    private AppConfiguration appConfiguration;
 
-	public String getCssLocation() {
-		if (StringHelper.isEmpty(appConfiguration.getCssLocation())) {
-			FacesContext ctx = FacesContext.getCurrentInstance();
-			if (ctx == null) {
-				return "";
-			}
-			String contextPath = ctx.getExternalContext().getRequestContextPath();
-			return contextPath + "/stylesheet";
-		} else {
-			return appConfiguration.getCssLocation();
-		}
-	}
+    @Inject
+    private ServletContext context;
 
-	public String getJsLocation() {
-		if (StringHelper.isEmpty(appConfiguration.getJsLocation())) {
-			String contextPath = context.getContextPath();
-			return contextPath + "/js";
-		} else {
-			return appConfiguration.getJsLocation();
-		}
-	}
+    public String getCssLocation() {
+        if (StringHelper.isEmpty(appConfiguration.getCssLocation())) {
+            FacesContext ctx = FacesContext.getCurrentInstance();
+            if (ctx == null) {
+                return "";
+            }
+            String contextPath = ctx.getExternalContext().getRequestContextPath();
+            return contextPath + "/stylesheet";
+        } else {
+            return appConfiguration.getCssLocation();
+        }
+    }
 
-	public String getImgLocation() {
-		if (StringHelper.isEmpty(appConfiguration.getImgLocation())) {
-			String contextPath = context.getContextPath();
-			return contextPath + "/img";
-		} else {
-			return appConfiguration.getImgLocation();
-		}
-	}
+    public String getJsLocation() {
+        if (StringHelper.isEmpty(appConfiguration.getJsLocation())) {
+            String contextPath = context.getContextPath();
+            return contextPath + "/js";
+        } else {
+            return appConfiguration.getJsLocation();
+        }
+    }
+
+    public String getImgLocation() {
+        if (StringHelper.isEmpty(appConfiguration.getImgLocation())) {
+            String contextPath = context.getContextPath();
+            return contextPath + "/img";
+        } else {
+            return appConfiguration.getImgLocation();
+        }
+    }
 
 }

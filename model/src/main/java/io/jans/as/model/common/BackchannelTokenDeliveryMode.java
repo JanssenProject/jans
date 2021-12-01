@@ -33,7 +33,7 @@ public enum BackchannelTokenDeliveryMode implements HasParamName, AttributeEnum 
         }
     }
 
-    BackchannelTokenDeliveryMode (String value) {
+    BackchannelTokenDeliveryMode(String value) {
         this.value = value;
     }
 

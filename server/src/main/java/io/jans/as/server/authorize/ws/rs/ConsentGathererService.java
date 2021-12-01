@@ -6,28 +6,11 @@
 
 package io.jans.as.server.authorize.ws.rs;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.enterprise.context.RequestScoped;
-import javax.faces.application.FacesMessage;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.slf4j.Logger;
-
 import io.jans.as.common.service.common.UserService;
 import io.jans.as.model.authorize.AuthorizeRequestParam;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.util.StringUtils;
+import io.jans.as.persistence.model.Scope;
 import io.jans.as.server.i18n.LanguageBean;
 import io.jans.as.server.model.authorize.ScopeChecker;
 import io.jans.as.server.model.common.SessionId;
@@ -40,7 +23,22 @@ import io.jans.as.server.service.external.context.ConsentGatheringContext;
 import io.jans.jsf2.service.FacesService;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.util.StringHelper;
-import io.jans.as.persistence.model.Scope;
+import org.slf4j.Logger;
+
+import javax.enterprise.context.RequestScoped;
+import javax.faces.application.FacesMessage;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Yuriy Movchan Date: 10/30/2017
@@ -90,7 +88,7 @@ public class ConsentGathererService {
 
     private final Map<String, String> pageAttributes = new HashMap<String, String>();
     private ConsentGatheringContext context;
-    
+
     public boolean configure(String userDn, String clientId, String state) {
         final HttpServletRequest httpRequest = (HttpServletRequest) externalContext.getRequest();
         final HttpServletResponse httpResponse = (HttpServletResponse) externalContext.getResponse();
@@ -106,22 +104,22 @@ public class ConsentGathererService {
         sessionService.configure(session, script.getName(), clientId, state);
 
         this.context = new ConsentGatheringContext(script.getConfigurationAttributes(), httpRequest, httpResponse, session,
-        		pageAttributes, sessionService, userService, facesService, appConfiguration);
+                pageAttributes, sessionService, userService, facesService, appConfiguration);
         log.debug("Configuring consent-gathering script '{}'", script.getName());
 
         int step = sessionService.getStep(session);
         String redirectTo = external.getPageForStep(script, step, context);
         if (StringHelper.isEmpty(redirectTo)) {
             log.error("Failed to determine page for consent-gathering script");
-        	return false;
+            return false;
         }
 
         context.persist();
 
         log.trace("Redirecting to page: '{}'", redirectTo);
-		facesService.redirectWithExternal(redirectTo, null);
+        facesService.redirectWithExternal(redirectTo, null);
 
-		return true;
+        return true;
     }
 
     private CustomScriptConfiguration determineConsentScript(String clientId) {
@@ -150,21 +148,21 @@ public class ConsentGathererService {
             final SessionId session = sessionService.getConsentSession(httpRequest, httpResponse, null, false);
             if (session == null) {
                 log.error("Failed to restore claim-gathering session state");
-            	errorPage("consent.gather.invalid.session");
+                errorPage("consent.gather.invalid.session");
                 return false;
             }
 
             CustomScriptConfiguration script = getScript(session);
             if (script == null) {
                 log.error("Failed to find script '{}' in session:", sessionService.getScriptName(session));
-            	errorPage("consent.gather.failed");
+                errorPage("consent.gather.failed");
                 return false;
             }
 
             int step = sessionService.getStep(session);
             if (!sessionService.isPassedPreviousSteps(session, step)) {
                 log.error("There are consent-gathering steps not marked as passed. scriptName: '{}', step: '{}'", script.getName(), step);
-            	errorPage("consent.gather.invalid.step");
+                errorPage("consent.gather.invalid.step");
                 return false;
             }
 
@@ -175,8 +173,8 @@ public class ConsentGathererService {
 
             int overridenNextStep = external.getNextStep(script, step, context);
             if (!authorizeResult && overridenNextStep == -1) {
-            	SessionId connectSession = sessionService.getConnectSession(httpRequest);
-            	authorizeService.permissionDenied(connectSession);
+                SessionId connectSession = sessionService.getConnectSession(httpRequest);
+                authorizeService.permissionDenied(connectSession);
                 return false;
             }
 
@@ -201,9 +199,9 @@ public class ConsentGathererService {
                 context.persist();
 
                 log.trace("Redirecting to page: '{}'", redirectTo);
-    			facesService.redirectWithExternal(redirectTo, null);
+                facesService.redirectWithExternal(redirectTo, null);
 
-    			return true;
+                return true;
             }
 
             if (step == stepsCount) {
@@ -216,16 +214,16 @@ public class ConsentGathererService {
         }
 
         log.error("Failed to perform gather() method successfully.");
-    	errorPage("consent.gather.failed");
+        errorPage("consent.gather.failed");
         return false;
     }
 
     private void onSuccess(HttpServletRequest httpRequest, SessionId session, ConsentGatheringContext context) {
-    	sessionService.setAuthenticatedSessionState(httpRequest, context.getHttpResponse(), session);
-    	
-    	SessionId connectSessionId = sessionService.getConnectSession(httpRequest);
-    	
-    	authorizeService.permissionGranted(httpRequest, connectSessionId);
+        sessionService.setAuthenticatedSessionState(httpRequest, context.getHttpResponse(), session);
+
+        SessionId connectSessionId = sessionService.getConnectSession(httpRequest);
+
+        authorizeService.permissionGranted(httpRequest, connectSessionId);
     }
 
     public String prepareForStep() {
@@ -235,7 +233,7 @@ public class ConsentGathererService {
 
             final SessionId session = sessionService.getConsentSession(httpRequest, httpResponse, null, false);
             if (session == null || session.getSessionAttributes().isEmpty()) {
-            	log.error("Failed to restore claim-gathering session state");
+                log.error("Failed to restore claim-gathering session state");
                 return result(Constants.RESULT_EXPIRED);
             }
 
@@ -257,7 +255,7 @@ public class ConsentGathererService {
             }
 
             this.context = new ConsentGatheringContext(script.getConfigurationAttributes(), httpRequest, httpResponse, session,
-            		pageAttributes, sessionService, userService, facesService, appConfiguration);
+                    pageAttributes, sessionService, userService, facesService, appConfiguration);
             boolean result = external.prepareForStep(script, step, context);
             log.debug("Consent-gathering prepare for step result for script '{}', step: '{}', gatheredResult: '{}'", script.getName(), step, result);
             if (result) {
@@ -298,25 +296,25 @@ public class ConsentGathererService {
     }
 
     protected CustomScriptConfiguration getScript(final SessionId session) {
-		String scriptName = sessionService.getScriptName(session);
-		return external.getCustomScriptConfigurationByName(scriptName);
-	}
+        String scriptName = sessionService.getScriptName(session);
+        return external.getCustomScriptConfigurationByName(scriptName);
+    }
 
-	public boolean isConsentGathered() {
+    public boolean isConsentGathered() {
         final HttpServletRequest httpRequest = (HttpServletRequest) externalContext.getRequest();
         return sessionService.isSessionStateAuthenticated(httpRequest);
-	}
+    }
 
-	public ConsentGatheringContext getContext() {
-		return context;
-	}
+    public ConsentGatheringContext getContext() {
+        return context;
+    }
 
-	public List<Scope> getScopes() {
-    	if (context == null) {
-    		return Collections.emptyList();
-    	}
+    public List<Scope> getScopes() {
+        if (context == null) {
+            return Collections.emptyList();
+        }
 
-    	SessionId authenticatedSessionId = sessionIdService.getSessionId();
+        SessionId authenticatedSessionId = sessionIdService.getSessionId();
         // Fix the list of scopes in the authorization page. oxAuth #739
         Set<String> grantedScopes = scopeChecker.checkScopesPolicy(context.getClient(), authenticatedSessionId.getSessionAttributes().get(AuthorizeRequestParam.SCOPE));
         String allowedScope = StringUtils.implode(grantedScopes, " ");

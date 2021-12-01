@@ -20,7 +20,7 @@ public class AuthenticationProtectionConfiguration {
     private int maximumAllowedAttemptsWithoutDelay;
 
     private int delayTime;
-    
+
     private Boolean bruteForceProtectionEnabled;
 
     public final int getAttemptExpiration() {

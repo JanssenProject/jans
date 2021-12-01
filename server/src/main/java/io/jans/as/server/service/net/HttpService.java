@@ -47,6 +47,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Map;
 import java.util.Map.Entry;
+
 /**
  * Provides operations with http requests
  *
@@ -56,207 +57,207 @@ import java.util.Map.Entry;
 @Named
 public class HttpService implements Serializable {
 
-	private static final long serialVersionUID = -2398422090669045605L;
+    private static final long serialVersionUID = -2398422090669045605L;
 
-	@Inject
-	private Logger log;
+    @Inject
+    private Logger log;
 
-	private Base64 base64;
-	
-	@PostConstruct
-	public void init() {
-		this.base64 = new Base64();
-	}
+    private Base64 base64;
 
-	public HttpClient getHttpsClientTrustAll() {
-	    try {
-	        SSLSocketFactory sf = new SSLSocketFactory(new TrustStrategy(){
-	            @Override
-	            public boolean isTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-	                return true;
-	            }
-	        }, new AllowAllHostnameVerifier());
+    @PostConstruct
+    public void init() {
+        this.base64 = new Base64();
+    }
 
-	        PlainSocketFactory psf = PlainSocketFactory.getSocketFactory();
+    public HttpClient getHttpsClientTrustAll() {
+        try {
+            SSLSocketFactory sf = new SSLSocketFactory(new TrustStrategy() {
+                @Override
+                public boolean isTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+                    return true;
+                }
+            }, new AllowAllHostnameVerifier());
 
-	        SchemeRegistry registry = new SchemeRegistry();
-	        registry.register(new Scheme("http", 80, psf));
-	        registry.register(new Scheme("https", 443, sf));
-	        ClientConnectionManager ccm = new PoolingClientConnectionManager(registry);
-	        return new DefaultHttpClient(ccm);
-	    } catch (Exception ex) {
-	    	log.error("Failed to create TrustAll https client", ex);
-	        return new DefaultHttpClient();
-	    }
-	}
+            PlainSocketFactory psf = PlainSocketFactory.getSocketFactory();
 
-	public HttpClient getHttpsClient() {
-		return new SslDefaultHttpClient();
-	}
+            SchemeRegistry registry = new SchemeRegistry();
+            registry.register(new Scheme("http", 80, psf));
+            registry.register(new Scheme("https", 443, sf));
+            ClientConnectionManager ccm = new PoolingClientConnectionManager(registry);
+            return new DefaultHttpClient(ccm);
+        } catch (Exception ex) {
+            log.error("Failed to create TrustAll https client", ex);
+            return new DefaultHttpClient();
+        }
+    }
 
-	public HttpClient getHttpsClient(String trustStoreType, String trustStorePath, String trustStorePassword) {
-		return new SslDefaultHttpClient(trustStoreType, trustStorePath, trustStorePassword);
-	}
+    public HttpClient getHttpsClient() {
+        return new SslDefaultHttpClient();
+    }
 
-	public HttpClient getHttpsClient(String trustStoreType, String trustStorePath, String trustStorePassword,
-			String keyStoreType, String keyStorePath, String keyStorePassword) {
-		return new SslDefaultHttpClient(trustStoreType, trustStorePath, trustStorePassword, keyStoreType, keyStorePath, keyStorePassword);
-	}
-	
-	public HttpServiceResponse executePost(HttpClient httpClient, String uri, String authData, Map<String, String> headers, String postData, ContentType contentType) {
+    public HttpClient getHttpsClient(String trustStoreType, String trustStorePath, String trustStorePassword) {
+        return new SslDefaultHttpClient(trustStoreType, trustStorePath, trustStorePassword);
+    }
+
+    public HttpClient getHttpsClient(String trustStoreType, String trustStorePath, String trustStorePassword,
+                                     String keyStoreType, String keyStorePath, String keyStorePassword) {
+        return new SslDefaultHttpClient(trustStoreType, trustStorePath, trustStorePassword, keyStoreType, keyStorePath, keyStorePassword);
+    }
+
+    public HttpServiceResponse executePost(HttpClient httpClient, String uri, String authData, Map<String, String> headers, String postData, ContentType contentType) {
         HttpPost httpPost = new HttpPost(uri);
         if (StringHelper.isNotEmpty(authData)) {
-        	httpPost.setHeader("Authorization", "Basic " + authData);
+            httpPost.setHeader("Authorization", "Basic " + authData);
         }
-        
+
         if (headers != null) {
-        	for (Entry<String, String> headerEntry : headers.entrySet()) {
-            	httpPost.setHeader(headerEntry.getKey(), headerEntry.getValue());
-        	}
+            for (Entry<String, String> headerEntry : headers.entrySet()) {
+                httpPost.setHeader(headerEntry.getKey(), headerEntry.getValue());
+            }
         }
 
         StringEntity stringEntity = new StringEntity(postData, contentType);
-		httpPost.setEntity(stringEntity);
-		
+        httpPost.setEntity(stringEntity);
+
         try {
-        	HttpResponse httpResponse = httpClient.execute(httpPost);
+            HttpResponse httpResponse = httpClient.execute(httpPost);
 
-        	return new HttpServiceResponse(httpPost, httpResponse);
-		} catch (IOException ex) {
-	    	log.error("Failed to execute post request", ex);
-		}
-        
+            return new HttpServiceResponse(httpPost, httpResponse);
+        } catch (IOException ex) {
+            log.error("Failed to execute post request", ex);
+        }
+
         return null;
-	}
+    }
 
-	public HttpServiceResponse executePost(HttpClient httpClient, String uri, String authData, Map<String, String> headers, String postData) {
-		return executePost(httpClient, uri, authData, headers, postData, null);
-	}
+    public HttpServiceResponse executePost(HttpClient httpClient, String uri, String authData, Map<String, String> headers, String postData) {
+        return executePost(httpClient, uri, authData, headers, postData, null);
+    }
 
-	public HttpServiceResponse executePost(HttpClient httpClient, String uri, String authData, String postData, ContentType contentType) {
+    public HttpServiceResponse executePost(HttpClient httpClient, String uri, String authData, String postData, ContentType contentType) {
         return executePost(httpClient, uri, authData, null, postData, contentType);
-	}
+    }
 
-	public String encodeBase64(String value) {
+    public String encodeBase64(String value) {
         return new String(base64.encode((value).getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
-	}
+    }
 
-	public String encodeUrl(String value) {
-		try {
-			return URLEncoder.encode(value, Util.UTF8);
-		} catch (UnsupportedEncodingException ex) {
-	    	log.error("Failed to encode url '{}'", value, ex);
-		}
+    public String encodeUrl(String value) {
+        try {
+            return URLEncoder.encode(value, Util.UTF8);
+        } catch (UnsupportedEncodingException ex) {
+            log.error("Failed to encode url '{}'", value, ex);
+        }
 
-		return null;
-	}
+        return null;
+    }
 
-	public HttpServiceResponse executeGet(HttpClient httpClient, String requestUri, Map<String, String> headers) {
-		HttpGet httpGet = new HttpGet(requestUri);
-        
+    public HttpServiceResponse executeGet(HttpClient httpClient, String requestUri, Map<String, String> headers) {
+        HttpGet httpGet = new HttpGet(requestUri);
+
         if (headers != null) {
-        	for (Entry<String, String> headerEntry : headers.entrySet()) {
-        		httpGet.setHeader(headerEntry.getKey(), headerEntry.getValue());
-        	}
+            for (Entry<String, String> headerEntry : headers.entrySet()) {
+                httpGet.setHeader(headerEntry.getKey(), headerEntry.getValue());
+            }
         }
 
-		try {
-			HttpResponse httpResponse = httpClient.execute(httpGet);
+        try {
+            HttpResponse httpResponse = httpClient.execute(httpGet);
 
-			return new HttpServiceResponse(httpGet, httpResponse);
-		} catch (IOException ex) {
-	    	log.error("Failed to execute get request", ex);
-		}
+            return new HttpServiceResponse(httpGet, httpResponse);
+        } catch (IOException ex) {
+            log.error("Failed to execute get request", ex);
+        }
 
-		return null;
-	}
+        return null;
+    }
 
-	public HttpServiceResponse executeGet(HttpClient httpClient, String requestUri) {
-		return executeGet(httpClient, requestUri, null);
-	}
+    public HttpServiceResponse executeGet(HttpClient httpClient, String requestUri) {
+        return executeGet(httpClient, requestUri, null);
+    }
 
-	public byte[] getResponseContent(HttpResponse httpResponse) throws IOException {
+    public byte[] getResponseContent(HttpResponse httpResponse) throws IOException {
         if ((httpResponse == null) || (httpResponse.getStatusLine().getStatusCode() != HttpStatus.SC_OK)) {
-        	return null;
+            return null;
         }
 
         HttpEntity entity = httpResponse.getEntity();
-		byte[] responseBytes = new byte[0];
-		if (entity != null) {
-			responseBytes = EntityUtils.toByteArray(entity);
-		}
-
-    	// Consume response content
-		if (entity != null) {
-			EntityUtils.consume(entity);
-		}
-
-    	return responseBytes;
-	}
-
-	public void consume(HttpResponse httpResponse) throws IOException {
-        if ((httpResponse == null) || (httpResponse.getStatusLine().getStatusCode() != HttpStatus.SC_OK)) {
-        	return;
+        byte[] responseBytes = new byte[0];
+        if (entity != null) {
+            responseBytes = EntityUtils.toByteArray(entity);
         }
 
-    	// Consume response content
+        // Consume response content
+        if (entity != null) {
+            EntityUtils.consume(entity);
+        }
+
+        return responseBytes;
+    }
+
+    public void consume(HttpResponse httpResponse) throws IOException {
+        if ((httpResponse == null) || (httpResponse.getStatusLine().getStatusCode() != HttpStatus.SC_OK)) {
+            return;
+        }
+
+        // Consume response content
         HttpEntity entity = httpResponse.getEntity();
-		if (entity != null) {
-			EntityUtils.consume(entity);
-		}
-	}
+        if (entity != null) {
+            EntityUtils.consume(entity);
+        }
+    }
 
-	public String convertEntityToString(byte[] responseBytes) {
-		if (responseBytes == null) {
-			return null;
-		}
+    public String convertEntityToString(byte[] responseBytes) {
+        if (responseBytes == null) {
+            return null;
+        }
 
-		return new String(responseBytes);
-	}
+        return new String(responseBytes);
+    }
 
-	public String convertEntityToString(byte[] responseBytes, Charset charset) {
-		if (responseBytes == null) {
-			return null;
-		}
+    public String convertEntityToString(byte[] responseBytes, Charset charset) {
+        if (responseBytes == null) {
+            return null;
+        }
 
-		return new String(responseBytes, charset);
-	}
+        return new String(responseBytes, charset);
+    }
 
-	public String convertEntityToString(byte[] responseBytes, String charsetName) throws UnsupportedEncodingException {
-		if (responseBytes == null) {
-			return null;
-		}
+    public String convertEntityToString(byte[] responseBytes, String charsetName) throws UnsupportedEncodingException {
+        if (responseBytes == null) {
+            return null;
+        }
 
-		return new String(responseBytes, charsetName);
-	}
+        return new String(responseBytes, charsetName);
+    }
 
-	public boolean isResponseStastusCodeOk(HttpResponse httpResponse) {
-		int responseStastusCode = httpResponse.getStatusLine().getStatusCode();
+    public boolean isResponseStastusCodeOk(HttpResponse httpResponse) {
+        int responseStastusCode = httpResponse.getStatusLine().getStatusCode();
         return responseStastusCode == HttpStatus.SC_OK;
     }
-	
 
-	public boolean isContentTypeXml(HttpResponse httpResponse) {
-		Header contentType = httpResponse.getEntity().getContentType();
-		if (contentType == null) {
-			return false;
-		}
 
-		String contentTypeValue = contentType.getValue();
+    public boolean isContentTypeXml(HttpResponse httpResponse) {
+        Header contentType = httpResponse.getEntity().getContentType();
+        if (contentType == null) {
+            return false;
+        }
+
+        String contentTypeValue = contentType.getValue();
         return StringHelper.equals(contentTypeValue, ContentType.APPLICATION_XML.getMimeType()) || StringHelper.equals(contentTypeValue, ContentType.TEXT_XML.getMimeType());
     }
 
-	public String constructServerUrl(final HttpServletRequest request) {
-    	int serverPort = request.getServerPort();
+    public String constructServerUrl(final HttpServletRequest request) {
+        int serverPort = request.getServerPort();
 
-    	String redirectUrl;
-    	if ((serverPort == 80) || (serverPort == 443)) {
-    		redirectUrl = String.format("%s://%s%s", request.getScheme(), request.getServerName(), request.getContextPath());
-    	} else {
-    		redirectUrl = String.format("%s://%s:%s%s", request.getScheme(), request.getServerName(), request.getServerPort(), request.getContextPath());
-    	}
-    	
-    	return redirectUrl.toLowerCase();
+        String redirectUrl;
+        if ((serverPort == 80) || (serverPort == 443)) {
+            redirectUrl = String.format("%s://%s%s", request.getScheme(), request.getServerName(), request.getContextPath());
+        } else {
+            redirectUrl = String.format("%s://%s:%s%s", request.getScheme(), request.getServerName(), request.getServerPort(), request.getContextPath());
+        }
+
+        return redirectUrl.toLowerCase();
     }
 
 }

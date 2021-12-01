@@ -6,11 +6,11 @@
 
 package io.jans.as.server.model.common;
 
-import java.util.Date;
-
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.common.GrantType;
+
+import java.util.Date;
 
 /**
  * <p>
@@ -40,7 +40,8 @@ import io.jans.as.model.common.GrantType;
  */
 public class AuthorizationCodeGrant extends AuthorizationGrant {
 
-    public AuthorizationCodeGrant() {}
+    public AuthorizationCodeGrant() {
+    }
 
     /**
      * Constructs and authorization code grant.
@@ -54,7 +55,7 @@ public class AuthorizationCodeGrant extends AuthorizationGrant {
     public AuthorizationCodeGrant(User user, Client client, Date authenticationTime) {
         init(user, client, authenticationTime);
     }
-    
+
     public void init(User user, Client client, Date authenticationTime) {
         super.init(user, AuthorizationGrantType.AUTHORIZATION_CODE, client, authenticationTime);
         setAuthorizationCode(new AuthorizationCode(appConfiguration.getAuthorizationCodeLifetime()));

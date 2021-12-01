@@ -39,7 +39,7 @@ public enum Algorithm {
 
     ED25519("Ed25519", "id_token Ed25519 Sign Key", "Signature Key: EDDSA using Ed25519 with SHA-512", Use.SIGNATURE, AlgorithmFamily.ED),
     ED448("Ed448", "id_token Ed448 Sign Key", "Signature Key: EDDSA using Ed448 with SHA-3/SHAKE256", Use.SIGNATURE, AlgorithmFamily.ED),
-    
+
     // Encryption
     RSA1_5("RSA1_5", "id_token RSA1_5 Encryption Key", "Encryption Key: RSAES-PKCS1-v1_5",
             Use.ENCRYPTION, AlgorithmFamily.RSA),
@@ -52,9 +52,9 @@ public enum Algorithm {
             Use.ENCRYPTION, AlgorithmFamily.EC),
     ECDH_ES_PLUS_A128KW("ECDH-ES+A128KW", "id_token ECDH-ES+A128KW Encryption Key", "Encryption Key: ECDH-ES using Concat KDF and CEK wrapped with A128KW",
             Use.ENCRYPTION, AlgorithmFamily.EC),
-    ECDH_ES_PLUS_A192KW("ECDH-ES+A192KW", "id_token ECDH-ES+A192KW Encryption Key", "Encryption Key: ECDH-ES using Concat KDF and CEK wrapped with A192KW", 
+    ECDH_ES_PLUS_A192KW("ECDH-ES+A192KW", "id_token ECDH-ES+A192KW Encryption Key", "Encryption Key: ECDH-ES using Concat KDF and CEK wrapped with A192KW",
             Use.ENCRYPTION, AlgorithmFamily.EC),
-    ECDH_ES_PLUS_A256KW("ECDH-ES+A256KW", "id_token ECDH-ES+A256KW Encryption Key", "Encryption Key: ECDH-ES using Concat KDF and CEK wrapped with A256KW", 
+    ECDH_ES_PLUS_A256KW("ECDH-ES+A256KW", "id_token ECDH-ES+A256KW Encryption Key", "Encryption Key: ECDH-ES using Concat KDF and CEK wrapped with A256KW",
             Use.ENCRYPTION, AlgorithmFamily.EC),
 
     A128KW("A128KW", "id_token A128KW Encryption Key", "Encryption Key: AES Key Wrap with default initial value using 128-bit key",
@@ -88,7 +88,7 @@ public enum Algorithm {
     private final AlgorithmFamily family;
 
     Algorithm(final String paramName, final String outName, final String description,
-            final Use use, final AlgorithmFamily family) {
+              final Use use, final AlgorithmFamily family) {
         this.paramName = paramName;
         this.outName = outName;
         this.description = description;
@@ -99,10 +99,10 @@ public enum Algorithm {
     public String getParamName() {
         return paramName;
     }
-    
+
     public String getOutName() {
         return outName;
-    }    
+    }
 
     public String getDescription() {
         return description;

@@ -6,14 +6,14 @@
 
 package io.jans.as.client;
 
+import io.jans.as.model.common.TokenType;
+import io.jans.as.model.token.TokenErrorResponseType;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import javax.ws.rs.core.Response;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import io.jans.as.model.common.TokenType;
-import io.jans.as.model.token.TokenErrorResponseType;
+import javax.ws.rs.core.Response;
 
 /**
  * Represents a token response received from the authorization server.
