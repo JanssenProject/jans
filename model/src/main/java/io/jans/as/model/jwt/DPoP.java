@@ -34,7 +34,7 @@ public class DPoP extends Jwt {
 
     private static final Logger LOG = LoggerFactory.getLogger(DPoP.class);
 
-    private String keyId;
+    private final String keyId;
     private String encodedJwt;
 
     // Signature Key
