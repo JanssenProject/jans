@@ -42,8 +42,8 @@ public class RSAKeyFactory extends KeyFactory<RSAPrivateKey, RSAPublicKey> {
 
     public static final int DEF_KEYLENGTH = 2048;
 
-    private RSAPrivateKey rsaPrivateKey;
-    private RSAPublicKey rsaPublicKey;
+    private final RSAPrivateKey rsaPrivateKey;
+    private final RSAPublicKey rsaPublicKey;
     private Certificate certificate;
 
     @Deprecated
