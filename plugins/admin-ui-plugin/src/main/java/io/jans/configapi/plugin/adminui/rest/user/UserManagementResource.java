@@ -1,11 +1,11 @@
-package io.jans.configapi.plugin.adminui.rest.userManagement;
+package io.jans.configapi.plugin.adminui.rest.user;
 
 import io.jans.as.model.config.adminui.AdminPermission;
 import io.jans.as.model.config.adminui.AdminRole;
 import io.jans.as.model.config.adminui.RolePermissionMapping;
 import io.jans.configapi.filters.ProtectedApi;
 import io.jans.configapi.plugin.adminui.model.exception.ApplicationException;
-import io.jans.configapi.plugin.adminui.service.userManagement.UserManagementService;
+import io.jans.configapi.plugin.adminui.service.user.UserManagementService;
 import io.jans.configapi.plugin.adminui.utils.ErrorResponse;
 import io.jans.configapi.plugin.adminui.utils.PluginConstants;
 import org.slf4j.Logger;

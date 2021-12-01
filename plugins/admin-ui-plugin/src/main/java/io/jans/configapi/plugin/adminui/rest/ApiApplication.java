@@ -9,7 +9,7 @@ package io.jans.configapi.plugin.adminui.rest;
 import io.jans.configapi.plugin.adminui.rest.auth.OAuth2Resource;
 import io.jans.configapi.plugin.adminui.rest.license.LicenseResource;
 import io.jans.configapi.plugin.adminui.rest.logging.AuditLoggerResource;
-import io.jans.configapi.plugin.adminui.rest.userManagement.UserManagementResource;
+import io.jans.configapi.plugin.adminui.rest.user.UserManagementResource;
 
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
