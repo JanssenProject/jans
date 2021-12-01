@@ -60,8 +60,8 @@ public class UserManagementService {
             AdminConf adminConf = entryManager.find(AdminConf.class, CONFIG_DN);
 
             List<AdminRole> roles = adminConf.getDynamic().getRoles();
-            if (!roles.stream().anyMatch(ele -> ele.equals(roleArg))) {
-                log.error(ErrorResponse.ROLE_NOT_FOUND.getDescription() + "Role from request: {}", roleArg.getRole());
+            if (roles.stream().noneMatch(ele -> ele.equals(roleArg))) {
+                log.error(ErrorResponse.ROLE_NOT_FOUND.getDescription());
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.ROLE_NOT_FOUND.getDescription());
             }
             roles.removeIf(ele -> ele.equals(roleArg));
@@ -96,7 +96,7 @@ public class UserManagementService {
                     permissions = rolePermissionMappingOptional.get().getPermissions();
                 }
                 if (!permissions.isEmpty()) {
-                    log.error(ErrorResponse.UNABLE_TO_DELETE_ROLE_MAPPED_TO_PERMISSIONS.getDescription() + "Role from request: {}", roleArg.getRole());
+                    log.error(ErrorResponse.UNABLE_TO_DELETE_ROLE_MAPPED_TO_PERMISSIONS.getDescription());
                     throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.UNABLE_TO_DELETE_ROLE_MAPPED_TO_PERMISSIONS.getDescription());
                 }
             }
@@ -152,8 +152,8 @@ public class UserManagementService {
             AdminConf adminConf = entryManager.find(AdminConf.class, CONFIG_DN);
 
             List<AdminPermission> permissions = adminConf.getDynamic().getPermissions();
-            if (!permissions.stream().anyMatch(ele -> ele.equals(permissionArg))) {
-                log.error(ErrorResponse.PERMISSION_NOT_FOUND.getDescription() + "Permission from request: {}", permissionArg.getPermission());
+            if (permissions.stream().noneMatch(ele -> ele.equals(permissionArg))) {
+                log.error(ErrorResponse.PERMISSION_NOT_FOUND.getDescription());
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.PERMISSION_NOT_FOUND.getDescription());
             }
             permissions.removeIf(ele -> ele.equals(permissionArg));
@@ -217,11 +217,11 @@ public class UserManagementService {
             List<AdminRole> roles = adminConf.getDynamic().getRoles();
             List<AdminPermission> permissions = adminConf.getDynamic().getPermissions();
 
-            if (!roles.stream().anyMatch(ele -> ele.getRole().equals(rolePermissionMappingArg.getRole()))) {
+            if (roles.stream().noneMatch(ele -> ele.getRole().equals(rolePermissionMappingArg.getRole()))) {
                 log.error(ErrorResponse.ROLE_NOT_FOUND.getDescription());
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.ROLE_NOT_FOUND.getDescription());
             }
-            if (!permissions.stream().anyMatch(ele -> rolePermissionMappingArg.getPermissions().contains(ele.getPermission()))) {
+            if (permissions.stream().noneMatch(ele -> rolePermissionMappingArg.getPermissions().contains(ele.getPermission()))) {
                 log.error(ErrorResponse.PERMISSION_NOT_FOUND.getDescription());
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.PERMISSION_NOT_FOUND.getDescription());
             }
@@ -298,11 +298,11 @@ public class UserManagementService {
 
             return adminConf.getDynamic().getRolePermissionMapping();
         } catch (ApplicationException e) {
-            log.error(ErrorResponse.ERROR_IN_MAPPING_ROLE_PERMISSION.getDescription(), e);
+            log.error(ErrorResponse.ERROR_IN_DELETING_ROLE_PERMISSION.getDescription(), e);
             throw e;
         } catch (Exception e) {
-            log.error(ErrorResponse.ERROR_IN_MAPPING_ROLE_PERMISSION.getDescription(), e);
-            throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), ErrorResponse.ERROR_IN_MAPPING_ROLE_PERMISSION.getDescription());
+            log.error(ErrorResponse.ERROR_IN_DELETING_ROLE_PERMISSION.getDescription(), e);
+            throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), ErrorResponse.ERROR_IN_DELETING_ROLE_PERMISSION.getDescription());
         }
     }
 }
