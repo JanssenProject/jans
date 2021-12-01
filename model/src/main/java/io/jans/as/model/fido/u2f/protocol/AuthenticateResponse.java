@@ -25,60 +25,60 @@ import java.io.Serializable;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AuthenticateResponse implements Serializable {
 
-	private static final long serialVersionUID = -4854326288654670000L;
+    private static final long serialVersionUID = -4854326288654670000L;
 
-	/**
-	 * base64(UTF8(client data))
-	 */
-	@JsonProperty
-	private final String clientData;
+    /**
+     * base64(UTF8(client data))
+     */
+    @JsonProperty
+    private final String clientData;
 
-	@JsonIgnore
-	private final transient ClientData clientDataRef;
+    @JsonIgnore
+    private final transient ClientData clientDataRef;
 
-	/* base64(raw response from U2F device) */
-	@JsonProperty
-	private final String signatureData;
+    /* base64(raw response from U2F device) */
+    @JsonProperty
+    private final String signatureData;
 
-	/* keyHandle originally passed */
-	@JsonProperty
-	private final String keyHandle;
+    /* keyHandle originally passed */
+    @JsonProperty
+    private final String keyHandle;
 
-	public AuthenticateResponse(@JsonProperty("clientData") String clientData, @JsonProperty("signatureData") String signatureData,
-			@JsonProperty("keyHandle") String keyHandle) throws BadInputException {
-		this.clientData = clientData;
-		this.signatureData = signatureData;
-		this.keyHandle = keyHandle;
-		this.clientDataRef = new ClientData(clientData);
-	}
+    public AuthenticateResponse(@JsonProperty("clientData") String clientData, @JsonProperty("signatureData") String signatureData,
+                                @JsonProperty("keyHandle") String keyHandle) throws BadInputException {
+        this.clientData = clientData;
+        this.signatureData = signatureData;
+        this.keyHandle = keyHandle;
+        this.clientDataRef = new ClientData(clientData);
+    }
 
-	public ClientData getClientData() {
-		return clientDataRef;
-	}
+    public ClientData getClientData() {
+        return clientDataRef;
+    }
 
-	public String getClientDataRaw() {
-		return clientData;
-	}
+    public String getClientDataRaw() {
+        return clientData;
+    }
 
-	public String getSignatureData() {
-		return signatureData;
-	}
+    public String getSignatureData() {
+        return signatureData;
+    }
 
-	public String getKeyHandle() {
-		return keyHandle;
-	}
+    public String getKeyHandle() {
+        return keyHandle;
+    }
 
-	@JsonIgnore
-	public String getRequestId() {
-		return getClientData().getChallenge();
-	}
+    @JsonIgnore
+    public String getRequestId() {
+        return getClientData().getChallenge();
+    }
 
-	@Override
-	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("AuthenticateResponse [clientData=").append(clientData).append(", signatureData=").append(signatureData).append(", keyHandle=")
-				.append(keyHandle).append("]");
-		return builder.toString();
-	}
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("AuthenticateResponse [clientData=").append(clientData).append(", signatureData=").append(signatureData).append(", keyHandle=")
+                .append(keyHandle).append("]");
+        return builder.toString();
+    }
 
 }

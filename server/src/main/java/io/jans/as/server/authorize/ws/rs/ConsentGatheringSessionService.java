@@ -52,6 +52,7 @@ public class ConsentGatheringSessionService {
 
         return null;
     }
+
     public boolean hasCookie(HttpServletRequest httpRequest) {
         String cookieId = cookieService.getConsentSessionIdFromCookie(httpRequest);
 
@@ -70,7 +71,7 @@ public class ConsentGatheringSessionService {
             } else {
                 log.error("Failed to load consent_session_id from cookie: {}", cookieId);
             }
-        } else { 
+        } else {
             if (!create) {
                 log.error("consent_session_id cookie is not set.");
             }
@@ -96,7 +97,7 @@ public class ConsentGatheringSessionService {
 
     public boolean isSessionStateAuthenticated(HttpServletRequest httpRequest) {
         boolean hasSession = hasCookie(httpRequest);
-        
+
         if (hasSession) {
             final SessionId session = getConsentSession(httpRequest, null, null, false);
             return sessionIdService.isSessionIdAuthenticated(session);

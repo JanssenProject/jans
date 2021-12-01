@@ -7,7 +7,12 @@
 package io.jans.as.server.model.ldap;
 
 import io.jans.as.model.common.GrantType;
-import io.jans.orm.annotation.*;
+import io.jans.orm.annotation.AttributeName;
+import io.jans.orm.annotation.DN;
+import io.jans.orm.annotation.DataEntry;
+import io.jans.orm.annotation.Expiration;
+import io.jans.orm.annotation.JsonObject;
+import io.jans.orm.annotation.ObjectClass;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.Serializable;

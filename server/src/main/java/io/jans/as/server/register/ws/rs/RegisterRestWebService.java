@@ -63,7 +63,7 @@ public interface RegisterRestWebService {
     Response requestClientUpdate(
             String requestParams,
             @QueryParam("client_id")
-            String clientId,
+                    String clientId,
             @HeaderParam("Authorization") String authorization,
             @Context HttpServletRequest httpRequest,
             @Context SecurityContext securityContext);
@@ -80,7 +80,7 @@ public interface RegisterRestWebService {
     @Produces({MediaType.APPLICATION_JSON})
     Response requestClientRead(
             @QueryParam("client_id")
-            String clientId,
+                    String clientId,
             @HeaderParam("Authorization") String authorization,
             @Context HttpServletRequest httpRequest,
             @Context SecurityContext securityContext);

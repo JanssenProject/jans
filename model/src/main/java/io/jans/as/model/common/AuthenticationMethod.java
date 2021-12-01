@@ -76,7 +76,7 @@ public enum AuthenticationMethod {
      *
      * @param param The parameter.
      * @return The corresponding authentication method if found, otherwise
-     *         <code>null</code>.
+     * <code>null</code>.
      */
     @JsonCreator
     public static AuthenticationMethod fromString(String param) {

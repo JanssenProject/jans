@@ -13,20 +13,18 @@ import io.jans.as.model.config.Constants;
 import io.jans.as.model.util.Util;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.Response;
 import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 
 import javax.ws.rs.HttpMethod;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.Form;
 import javax.ws.rs.core.MediaType;
-
+import javax.ws.rs.core.Response;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -105,9 +103,9 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
     protected void addReqParam(String key, String value) {
         if (Util.allNotBlank(key, value)) {
             if (request.getAuthorizationMethod() == AuthorizationMethod.FORM_ENCODED_BODY_PARAMETER) {
-            	requestForm.param(key, value);
+                requestForm.param(key, value);
             } else {
-            	webTarget = webTarget.queryParam(key, value);
+                webTarget = webTarget.queryParam(key, value);
             }
         }
     }
@@ -237,16 +235,16 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
 
     protected void initClient() {
         if (this.executor == null) {
-        	resteasyClient = (ResteasyClient) ClientBuilder.newClient();
+            resteasyClient = (ResteasyClient) ClientBuilder.newClient();
         } else {
-        	resteasyClient = ((ResteasyClientBuilder) ClientBuilder.newBuilder()).httpEngine(executor).build();
+            resteasyClient = ((ResteasyClientBuilder) ClientBuilder.newBuilder()).httpEngine(executor).build();
         }
 
         webTarget = resteasyClient.target(getUrl());
     }
 
     protected void applyCookies(Builder clientRequest) {
-		for (Cookie cookie : cookies) {
+        for (Cookie cookie : cookies) {
             clientRequest.cookie(cookie);
         }
         for (Map.Entry<String, String> headerEntry : headers.entrySet()) {
@@ -278,12 +276,12 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
         return headers;
     }
 
-	protected Builder prepareAuthorizatedClientRequest(AuthorizationMethod authorizationMethod, String accessToken) {
-		Builder clientRequest = null;
+    protected Builder prepareAuthorizatedClientRequest(AuthorizationMethod authorizationMethod, String accessToken) {
+        Builder clientRequest = null;
         if (authorizationMethod == null
                 || authorizationMethod == AuthorizationMethod.AUTHORIZATION_REQUEST_HEADER_FIELD) {
             if (StringUtils.isNotBlank(accessToken)) {
-            	clientRequest = webTarget.request();
+                clientRequest = webTarget.request();
                 clientRequest.header("Authorization", "Bearer " + accessToken);
             }
         } else if (authorizationMethod == AuthorizationMethod.FORM_ENCODED_BODY_PARAMETER) {
@@ -295,11 +293,11 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
         }
 
         if (clientRequest == null) {
-        	clientRequest = webTarget.request();
+            clientRequest = webTarget.request();
         }
 
         clientRequest.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
-		return clientRequest;
-	}
+        return clientRequest;
+    }
 
 }

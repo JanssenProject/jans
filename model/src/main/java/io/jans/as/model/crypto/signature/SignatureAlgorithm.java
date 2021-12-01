@@ -172,7 +172,7 @@ public enum SignatureAlgorithm {
 
     /**
      * Returns this.jwsAlgorithm (JSON Web Signature (JWS) algorithm name)
-     * 
+     *
      * @return this.jwsAlgorithm (JSON Web Signature (JWS) algorithm name)
      */
     public JWSAlgorithm getJwsAlgorithm() {

@@ -6,14 +6,13 @@
 
 package io.jans.as.model.fido.u2f.protocol;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.jans.as.model.util.Util;
+
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import io.jans.as.model.util.Util;
 
 /**
  * FIDO U2F registration request message
@@ -22,44 +21,44 @@ import io.jans.as.model.util.Util;
  */
 public class RegisterRequestMessage implements Serializable {
 
-	private static final long serialVersionUID = -5554834606247337007L;
+    private static final long serialVersionUID = -5554834606247337007L;
 
-	@JsonProperty
-	private final List<AuthenticateRequest> authenticateRequests;
+    @JsonProperty
+    private final List<AuthenticateRequest> authenticateRequests;
 
-	@JsonProperty
-	private final List<RegisterRequest> registerRequests;
+    @JsonProperty
+    private final List<RegisterRequest> registerRequests;
 
-	public RegisterRequestMessage(@JsonProperty("authenticateRequests") List<AuthenticateRequest> authenticateRequests,
-			@JsonProperty("registerRequests") List<RegisterRequest> registerRequests) {
-		this.authenticateRequests = authenticateRequests;
-		this.registerRequests = registerRequests;
-	}
+    public RegisterRequestMessage(@JsonProperty("authenticateRequests") List<AuthenticateRequest> authenticateRequests,
+                                  @JsonProperty("registerRequests") List<RegisterRequest> registerRequests) {
+        this.authenticateRequests = authenticateRequests;
+        this.registerRequests = registerRequests;
+    }
 
-	public List<AuthenticateRequest> getAuthenticateRequests() {
-		return Collections.unmodifiableList(authenticateRequests);
-	}
+    public List<AuthenticateRequest> getAuthenticateRequests() {
+        return Collections.unmodifiableList(authenticateRequests);
+    }
 
-	public List<RegisterRequest> getRegisterRequests() {
-		return Collections.unmodifiableList(registerRequests);
-	}
+    public List<RegisterRequest> getRegisterRequests() {
+        return Collections.unmodifiableList(registerRequests);
+    }
 
-	@JsonIgnore
-	public RegisterRequest getRegisterRequest() {
-		return Util.firstItem(registerRequests);
-	}
+    @JsonIgnore
+    public RegisterRequest getRegisterRequest() {
+        return Util.firstItem(registerRequests);
+    }
 
-	@JsonIgnore
-	public String getRequestId() {
-		return Util.firstItem(registerRequests).getChallenge();
-	}
+    @JsonIgnore
+    public String getRequestId() {
+        return Util.firstItem(registerRequests).getChallenge();
+    }
 
-	@Override
-	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("RegisterRequestMessage [authenticateRequests=").append(authenticateRequests).append(", registerRequests=").append(registerRequests)
-				.append("]");
-		return builder.toString();
-	}
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("RegisterRequestMessage [authenticateRequests=").append(authenticateRequests).append(", registerRequests=").append(registerRequests)
+                .append("]");
+        return builder.toString();
+    }
 
 }

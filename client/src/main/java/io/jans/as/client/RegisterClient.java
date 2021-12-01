@@ -6,21 +6,19 @@
 
 package io.jans.as.client;
 
-import java.util.List;
+import io.jans.as.client.util.ClientUtil;
+import io.jans.as.model.register.ApplicationType;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.MediaType;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
-import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-
-import io.jans.as.client.util.ClientUtil;
-import io.jans.as.model.register.ApplicationType;
+import java.util.List;
 
 /**
  * Encapsulates functionality to make Register request calls to an authorization server via REST Services.
@@ -84,9 +82,9 @@ public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse
     @Deprecated
     public RegisterResponse exec(ClientHttpEngine engine) {
         resteasyClient = ((ResteasyClientBuilder) ClientBuilder.newBuilder()).httpEngine(engine).build();
-		webTarget = resteasyClient.target(getUrl());
+        webTarget = resteasyClient.target(getUrl());
 
-		return _exec();
+        return _exec();
     }
 
     private RegisterResponse _exec() {

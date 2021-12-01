@@ -6,12 +6,6 @@
 
 package io.jans.as.server.service.external;
 
-import java.util.List;
-
-import javax.ejb.DependsOn;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Named;
-
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.server.service.external.context.ExternalPostAuthnContext;
 import io.jans.model.custom.script.CustomScriptType;
@@ -19,13 +13,18 @@ import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.custom.script.type.postauthn.PostAuthnType;
 import io.jans.service.custom.script.ExternalScriptService;
 
+import javax.ejb.DependsOn;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Named;
+import java.util.List;
+
 /**
  * @author Yuriy Zabrovarnyy
  */
 @ApplicationScoped
 @DependsOn("appInitializer")
 @Named
-public class ExternalPostAuthnService  extends ExternalScriptService {
+public class ExternalPostAuthnService extends ExternalScriptService {
 
     public ExternalPostAuthnService() {
         super(CustomScriptType.POST_AUTHN);

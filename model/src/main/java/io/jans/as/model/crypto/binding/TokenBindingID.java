@@ -6,9 +6,8 @@
 
 package io.jans.as.model.crypto.binding;
 
-import org.apache.commons.codec.digest.DigestUtils;
-
 import io.jans.as.model.util.Base64Util;
+import org.apache.commons.codec.digest.DigestUtils;
 
 /**
  * <pre>

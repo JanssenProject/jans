@@ -33,8 +33,8 @@ public class BaseDnConfiguration {
     private String clients;
     @XmlElement(name = "sessions")
     private String sessions;
-	@XmlElement(name = "tokens")
-	private String tokens;
+    @XmlElement(name = "tokens")
+    private String tokens;
     @XmlElement(name = "authorizations")
     private String authorizations;
     @XmlElement(name = "scopes")
@@ -105,7 +105,7 @@ public class BaseDnConfiguration {
     }
 
     public void setConfiguration(String configuration) {
-    	this.configuration = configuration;
+        this.configuration = configuration;
     }
 
     public String getAttributes() {
@@ -141,14 +141,14 @@ public class BaseDnConfiguration {
     }
 
     public String getTokens() {
-		return tokens;
-	}
+        return tokens;
+    }
 
-	public void setTokens(String tokens) {
-		this.tokens = tokens;
-	}
+    public void setTokens(String tokens) {
+        this.tokens = tokens;
+    }
 
-	public String getPeople() {
+    public String getPeople() {
         return people;
     }
 

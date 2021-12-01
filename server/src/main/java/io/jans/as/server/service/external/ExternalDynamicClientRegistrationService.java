@@ -37,14 +37,14 @@ import java.security.cert.X509Certificate;
 @Named
 public class ExternalDynamicClientRegistrationService extends ExternalScriptService {
 
-	private static final long serialVersionUID = 1416361273036208688L;
+    private static final long serialVersionUID = 1416361273036208688L;
 
     @Inject
     private ErrorResponseFactory errorResponseFactory;
 
-	public ExternalDynamicClientRegistrationService() {
-		super(CustomScriptType.CLIENT_REGISTRATION);
-	}
+    public ExternalDynamicClientRegistrationService() {
+        super(CustomScriptType.CLIENT_REGISTRATION);
+    }
 
     public boolean executeExternalCreateClientMethod(CustomScriptConfiguration customScriptConfiguration, RegisterRequest registerRequest, Client client, HttpServletRequest httpRequest) {
         try {
@@ -72,7 +72,7 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
             log.error(ex.getMessage(), ex);
             saveScriptError(customScriptConfiguration.getCustomScript(), ex);
         }
-        
+
         return false;
     }
 
@@ -90,10 +90,10 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
         return result;
     }
 
-	public boolean executeExternalUpdateClientMethod(HttpServletRequest httpRequest, CustomScriptConfiguration script, RegisterRequest registerRequest, Client client) {
-		try {
-			log.trace("Executing python 'updateClient' method");
-			ClientRegistrationType externalClientRegistrationType = (ClientRegistrationType) script.getExternalType();
+    public boolean executeExternalUpdateClientMethod(HttpServletRequest httpRequest, CustomScriptConfiguration script, RegisterRequest registerRequest, Client client) {
+        try {
+            log.trace("Executing python 'updateClient' method");
+            ClientRegistrationType externalClientRegistrationType = (ClientRegistrationType) script.getExternalType();
 
             DynamicClientRegistrationContext context = new DynamicClientRegistrationContext(httpRequest, null, script, client);
             context.setRegisterRequest(registerRequest);
@@ -106,24 +106,24 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
         } catch (WebApplicationException e) {
             throw e;
         } catch (Exception ex) {
-			log.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
             saveScriptError(script.getCustomScript(), ex);
-		}
-		
-		return false;
-	}
+        }
 
-	public boolean executeExternalUpdateClientMethods(HttpServletRequest httpRequest, RegisterRequest registerRequest, Client client) {
-		boolean result = true;
-		for (CustomScriptConfiguration customScriptConfiguration : this.customScriptConfigurations) {
-			result &= executeExternalUpdateClientMethod(httpRequest, customScriptConfiguration, registerRequest, client);
-			if (!result) {
-				return result;
-			}
-		}
+        return false;
+    }
 
-		return result;
-	}
+    public boolean executeExternalUpdateClientMethods(HttpServletRequest httpRequest, RegisterRequest registerRequest, Client client) {
+        boolean result = true;
+        for (CustomScriptConfiguration customScriptConfiguration : this.customScriptConfigurations) {
+            result &= executeExternalUpdateClientMethod(httpRequest, customScriptConfiguration, registerRequest, client);
+            if (!result) {
+                return result;
+            }
+        }
+
+        return result;
+    }
 
     public JSONObject getSoftwareStatementJwks(HttpServletRequest httpRequest, JSONObject registerRequest, Jwt softwareStatement) {
         try {

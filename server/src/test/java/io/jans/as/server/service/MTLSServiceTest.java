@@ -18,7 +18,13 @@ import java.io.IOException;
 import java.io.StringReader;
 
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.isNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
@@ -77,7 +83,7 @@ public class MTLSServiceTest {
         assertFalse(result);
         verify(log).debug("Trying to authenticate client registration request via MTLS");
         verify(log).error(eq("Error getting TLS_CLIENT_AUTH_SUBJECT_DN field from request registration body"), any(IOException.class));
-        verify(log).debug(anyString(), (String)isNull());
+        verify(log).debug(anyString(), (String) isNull());
 
         verifyNoMoreInteractions(log);
     }

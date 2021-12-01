@@ -191,6 +191,7 @@ public class DeviceAuthorizationAction implements Serializable {
 
     /**
      * Prevents brute forcing for user code field from device_authorization page.
+     *
      * @param session Session used to keep data related to all attemps done.
      */
     private boolean preventBruteForcing(SessionId session) {
@@ -212,6 +213,7 @@ public class DeviceAuthorizationAction implements Serializable {
 
     /**
      * Ensures that the user code gotten from UI is well formatted.
+     *
      * @param userCode User code to be processed.
      */
     private boolean validateFormat(String userCode) {
@@ -221,6 +223,7 @@ public class DeviceAuthorizationAction implements Serializable {
 
     /**
      * Process data related to device authorization and redirects to the authorization page.
+     *
      * @param cacheData Data related to the device code request.
      */
     private void redirectToAuthorization(DeviceAuthorizationCacheControl cacheData) {

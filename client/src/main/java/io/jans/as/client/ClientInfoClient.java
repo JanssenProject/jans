@@ -75,10 +75,10 @@ public class ClientInfoClient extends BaseClient<ClientInfoRequest, ClientInfoRe
     @SuppressWarnings("java:S1133")
     @Deprecated
     public ClientInfoResponse exec(ClientHttpEngine engine) {
-    	resteasyClient = ((ResteasyClientBuilder) ClientBuilder.newBuilder()).httpEngine(engine).build();
-		webTarget = resteasyClient.target(getUrl());
+        resteasyClient = ((ResteasyClientBuilder) ClientBuilder.newBuilder()).httpEngine(engine).build();
+        webTarget = resteasyClient.target(getUrl());
 
-		return execInternal();
+        return execInternal();
     }
 
 

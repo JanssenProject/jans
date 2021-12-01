@@ -39,7 +39,7 @@ public class Base64Util {
     }
 
     public static String removePadding(String base64UrlEncoded) {
-		String s = base64UrlEncoded;
+        String s = base64UrlEncoded;
         s = s.replace('-', '+'); // 62nd char of encoding
         s = s.replace('_', '/'); // 63rd char of encoding
         switch (s.length() % 4) // Pad with trailing '='s
@@ -55,8 +55,8 @@ public class Base64Util {
             default:
                 throw new IllegalArgumentException("Illegal base64url string.");
         }
-		return s;
-	}
+        return s;
+    }
 
     public static String base64urlencodeUnsignedBigInt(BigInteger bigInteger) {
         byte[] array = bigInteger.toByteArray();

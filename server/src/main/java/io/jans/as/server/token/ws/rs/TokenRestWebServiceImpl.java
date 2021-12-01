@@ -12,7 +12,11 @@ import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.AttributeService;
 import io.jans.as.model.authorize.CodeVerifier;
-import io.jans.as.model.common.*;
+import io.jans.as.model.common.BackchannelTokenDeliveryMode;
+import io.jans.as.model.common.ComponentType;
+import io.jans.as.model.common.GrantType;
+import io.jans.as.model.common.ScopeConstants;
+import io.jans.as.model.common.TokenType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.binding.TokenBindingMessage;
 import io.jans.as.model.error.ErrorResponseFactory;
@@ -25,13 +29,34 @@ import io.jans.as.model.token.TokenRequestParam;
 import io.jans.as.server.audit.ApplicationAuditLogger;
 import io.jans.as.server.model.audit.Action;
 import io.jans.as.server.model.audit.OAuth2AuditLog;
-import io.jans.as.server.model.common.*;
+import io.jans.as.server.model.common.AbstractAuthorizationGrant;
+import io.jans.as.server.model.common.AccessToken;
+import io.jans.as.server.model.common.AuthorizationCodeGrant;
+import io.jans.as.server.model.common.AuthorizationGrant;
+import io.jans.as.server.model.common.AuthorizationGrantList;
+import io.jans.as.server.model.common.CIBAGrant;
+import io.jans.as.server.model.common.CibaRequestCacheControl;
+import io.jans.as.server.model.common.CibaRequestStatus;
+import io.jans.as.server.model.common.ClientCredentialsGrant;
+import io.jans.as.server.model.common.DeviceAuthorizationCacheControl;
+import io.jans.as.server.model.common.DeviceAuthorizationStatus;
+import io.jans.as.server.model.common.DeviceCodeGrant;
+import io.jans.as.server.model.common.ExecutionContext;
+import io.jans.as.server.model.common.IdToken;
+import io.jans.as.server.model.common.RefreshToken;
+import io.jans.as.server.model.common.ResourceOwnerPasswordCredentialsGrant;
+import io.jans.as.server.model.common.SessionId;
 import io.jans.as.server.model.config.Constants;
 import io.jans.as.server.model.session.SessionClient;
 import io.jans.as.server.model.token.JwrService;
 import io.jans.as.server.model.token.TokenParamsValidator;
 import io.jans.as.server.security.Identity;
-import io.jans.as.server.service.*;
+import io.jans.as.server.service.AuthenticationFilterService;
+import io.jans.as.server.service.AuthenticationService;
+import io.jans.as.server.service.DeviceAuthorizationService;
+import io.jans.as.server.service.GrantService;
+import io.jans.as.server.service.SessionIdService;
+import io.jans.as.server.service.UserService;
 import io.jans.as.server.service.ciba.CibaRequestService;
 import io.jans.as.server.service.external.ExternalResourceOwnerPasswordCredentialsService;
 import io.jans.as.server.service.external.ExternalUpdateTokenService;
@@ -64,7 +89,9 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.function.Function;
 
-import static io.jans.as.model.config.Constants.*;
+import static io.jans.as.model.config.Constants.OPENID;
+import static io.jans.as.model.config.Constants.REASON_CLIENT_NOT_AUTHORIZED;
+import static io.jans.as.model.config.Constants.X_CLIENTCERT;
 import static org.apache.commons.lang.BooleanUtils.isFalse;
 import static org.apache.commons.lang.BooleanUtils.isTrue;
 
@@ -321,7 +348,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                     executionContext.setPostProcessor(externalUpdateTokenService.buildModifyIdTokenProcessor(context));
 
                     idToken = authorizationGrant.createIdToken(
-                            null, null, accToken, null,null, executionContext);
+                            null, null, accToken, null, null, executionContext);
                 }
 
                 if (reToken != null && refreshToken != null) {
@@ -359,7 +386,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                     executionContext.setPostProcessor(externalUpdateTokenService.buildModifyIdTokenProcessor(context));
 
                     idToken = clientCredentialsGrant.createIdToken(
-                            null, null, null, null,null, executionContext);
+                            null, null, null, null, null, executionContext);
                 }
 
                 oAuth2AuditLog.updateOAuth2AuditLog(clientCredentialsGrant, true);
@@ -441,7 +468,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         executionContext.setPostProcessor(externalUpdateTokenService.buildModifyIdTokenProcessor(context));
 
                         idToken = resourceOwnerPasswordCredentialsGrant.createIdToken(
-                                null, null, null, null,null, executionContext);
+                                null, null, null, null, null, executionContext);
                     }
 
                     oAuth2AuditLog.updateOAuth2AuditLog(resourceOwnerPasswordCredentialsGrant, true);
@@ -487,7 +514,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                             executionContext.setPostProcessor(externalUpdateTokenService.buildModifyIdTokenProcessor(context));
 
                             IdToken idToken = cibaGrant.createIdToken(
-                                    null, null, accessToken, refToken,null, executionContext);
+                                    null, null, accessToken, refToken, null, executionContext);
 
                             cibaGrant.setTokensDelivered(true);
                             cibaGrant.save();
@@ -634,7 +661,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
             executionContext.setPostProcessor(externalUpdateTokenService.buildModifyIdTokenProcessor(context));
 
             IdToken idToken = deviceCodeGrant.createIdToken(
-                    null, null, accessToken, refToken,null, executionContext);
+                    null, null, accessToken, refToken, null, executionContext);
 
             deviceCodeGrant.checkScopesPolicy(scope);
 

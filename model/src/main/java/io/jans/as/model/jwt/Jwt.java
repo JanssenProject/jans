@@ -6,10 +6,9 @@
 
 package io.jans.as.model.jwt;
 
-import org.apache.commons.lang.StringUtils;
-
 import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.token.JsonWebResponse;
+import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

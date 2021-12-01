@@ -20,7 +20,15 @@ import io.jans.as.model.token.JsonWebResponse;
 import io.jans.as.persistence.model.Scope;
 import io.jans.as.server.model.authorize.Claim;
 import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
-import io.jans.as.server.model.common.*;
+import io.jans.as.server.model.common.AbstractToken;
+import io.jans.as.server.model.common.AccessToken;
+import io.jans.as.server.model.common.AuthorizationCode;
+import io.jans.as.server.model.common.CIBAGrant;
+import io.jans.as.server.model.common.ExecutionContext;
+import io.jans.as.server.model.common.IAuthorizationGrant;
+import io.jans.as.server.model.common.RefreshToken;
+import io.jans.as.server.model.common.SessionId;
+import io.jans.as.server.model.common.UnmodifiableAuthorizationGrant;
 import io.jans.as.server.service.ScopeService;
 import io.jans.as.server.service.SessionIdService;
 import io.jans.as.server.service.external.ExternalAuthenticationService;
@@ -40,7 +48,15 @@ import javax.ejb.Stateless;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 import static io.jans.as.model.common.ScopeType.DYNAMIC;
 
@@ -246,8 +262,9 @@ public class IdTokenFactory {
     /**
      * Filters some claims from id_token based on if access_token is issued or not.
      * openid-connect-core-1_0.html Section 5.4
-     * @param jwr Json object that contains all claims used in the id_token.
-     * @param accessToken Access token issued for this authorization.
+     *
+     * @param jwr               Json object that contains all claims used in the id_token.
+     * @param accessToken       Access token issued for this authorization.
      * @param authorizationCode Code issued for this authorization.
      */
     private void filterClaimsBasedOnAccessToken(JsonWebResponse jwr, AccessToken accessToken, AuthorizationCode authorizationCode) {
@@ -262,9 +279,10 @@ public class IdTokenFactory {
 
     /**
      * Process requested claims in the authorization request.
+     *
      * @param requestedClaims Json containing all claims listed in authz request.
-     * @param jwr Json that contains all claims that should go in id_token.
-     * @param user Authenticated user.
+     * @param jwr             Json that contains all claims that should go in id_token.
+     * @param user            Authenticated user.
      */
     private void setClaimsFromRequestedClaims(String requestedClaims, JsonWebResponse jwr, User user)
             throws InvalidClaimException {
