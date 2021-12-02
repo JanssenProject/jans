@@ -14,3 +14,4 @@ memberOf: inum=60B7,ou=groups,o=jans
 displayName: Default Admin User
 mail: admin@%(hostname)s
 emailVerified: true
+jansAdminUIRole: api-admin

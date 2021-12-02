@@ -5,7 +5,7 @@
 # !certs
 !conf
 !jetty
-# !libs
+!plugins
 !scripts
 !LICENSE
 !requirements.txt
