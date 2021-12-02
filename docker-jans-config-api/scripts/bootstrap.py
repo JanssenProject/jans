@@ -15,35 +15,13 @@ from jans.pycloudlib.persistence import sync_ldap_truststore
 from jans.pycloudlib.persistence import render_sql_properties
 from jans.pycloudlib.persistence import render_spanner_properties
 from jans.pycloudlib.utils import cert_to_truststore
-from jans.pycloudlib.utils import safe_render
 
-from utils import get_injected_urls
 from settings import LOGGING_CONFIG
+from plugins import AdminUiPlugin
+from plugins import discover_plugins
 
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("entrypoint")
-
-
-def render_app_properties(manager):
-    client_id = manager.config.get("jca_client_id")
-    client_encoded_pw = manager.secret.get("jca_client_encoded_pw")
-    hostname = manager.config.get("hostname")
-
-    approved_issuer = os.environ.get("CN_APPROVED_ISSUER") or f"https://{hostname}"
-
-    ctx = {
-        "jca_log_level": os.environ.get("CN_CONFIG_API_LOG_LEVEL", "INFO"),
-        "jca_client_id": client_id,
-        "jca_client_encoded_pw": client_encoded_pw,
-        "approved_issuer": approved_issuer,
-    }
-    ctx.update(get_injected_urls())
-
-    with open("/app/templates/application.properties.tmpl") as f:
-        txt = safe_render(f.read(), ctx)
-
-    with open("/opt/jans/jetty/jans-config-api/webapps/jans-config-api/WEB-INF/classes/application.properties", "w") as f:
-        f.write(txt)
 
 
 def main():
@@ -101,12 +79,17 @@ def main():
         "changeit",
     )
 
-    # render_app_properties(manager)
-
     modify_jetty_xml()
     modify_webdefault_xml()
     modify_server_ini()
     configure_logging()
+
+    plugins = discover_plugins()
+    modify_config_api_xml(plugins)
+
+    if "admin-ui" in plugins:
+        admin_ui_plugin = AdminUiPlugin(manager)
+        admin_ui_plugin.setup()
 
 
 def modify_jetty_xml():
@@ -207,6 +190,20 @@ def configure_logging():
     tmpl = Template(txt)
     with open(logfile, "w") as f:
         f.write(tmpl.safe_substitute(config))
+
+
+def modify_config_api_xml(plugins=None):
+    plugins = plugins or []
+    fn = "/opt/jans/jetty/jans-config-api/webapps/jans-config-api.xml"
+
+    with open(fn) as f:
+        txt = f.read()
+
+    with open(fn, "w") as f:
+        ctx = {
+            "extra_classpath": ",".join([f"./custom/libs/{plugin}-plugin.jar" for plugin in plugins])
+        }
+        f.write(txt % ctx)
 
 
 if __name__ == "__main__":
