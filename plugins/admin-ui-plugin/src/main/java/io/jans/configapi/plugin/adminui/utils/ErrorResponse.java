@@ -14,7 +14,22 @@ public enum ErrorResponse {
     LICENSE_VALIDITY_PERIOD_NOT_FOUND("Bad Request: License Validity Period not found in request."),
     INVALID_MAXIMUM_ACTIVATIONS("Bad Request: License Maximum Activations cannot be less than 1."),
     AUDIT_LOGGING_ERROR("Error in audit logging"),
-    ERROR_READING_CONFIG("Error in reading auiConfiguration");
+    ERROR_READING_CONFIG("Error in reading auiConfiguration"),
+    ERROR_READING_ROLE_PERMISSION_MAP("Error in reading role-permissions mapping from Auth Server."),
+    ROLE_NOT_FOUND("Bad Request: Admin UI Role not found in Auth Server."),
+    PERMISSION_NOT_FOUND("Bad Request: Admin UI permission not found in Auth Server."),
+    ERROR_IN_MAPPING_ROLE_PERMISSION("Error in mapping role-permission."),
+    ERROR_IN_DELETING_ROLE_PERMISSION("Error in deleting role-permission."),
+    GET_ADMIUI_ROLES_ERROR("Error in fetching Admin UI roles."),
+    SAVE_ADMIUI_ROLES_ERROR("Error in saving Admin UI roles."),
+    EDIT_ADMIUI_ROLES_ERROR("Error in editing Admin UI roles."),
+    DELETE_ADMIUI_ROLES_ERROR("Error in deleting Admin UI roles."),
+    GET_ADMIUI_PERMISSIONS_ERROR("Error in fetching Admin UI permissions."),
+    SAVE_ADMIUI_PERMISSIONS_ERROR("Error in saving Admin UI permissions."),
+    EDIT_ADMIUI_PERMISSIONS_ERROR("Error in editing Admin UI permissions."),
+    DELETE_ADMIUI_PERMISSIONS_ERROR("Error in deleting Admin UI permissions."),
+    UNABLE_TO_DELETE_ROLE_MAPPED_TO_PERMISSIONS("Role is mapped to permissions so cannot be deleted. Please remove the permissions mapped before deleting the role."),
+    UNABLE_TO_DELETE_PERMISSION_MAPPED_TO_ROLE("Permission is mapped to role so cannot be deleted. Please remove the permission mapped to the role before deleting it.");
 
     private final String description;
 
