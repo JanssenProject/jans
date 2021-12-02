@@ -181,6 +181,20 @@ objectClass: jansCustomScr
 jansEnabled: false
 jansProgLng: python
 
+dn: inum=BFD5-C87D,ou=scripts,o=jans
+description: Introspection Scopes From User Role
+displayName: introspection_scopes_from_user_role
+inum: BFD5-C87D
+jansLevel: 1
+jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+jansRevision: 1
+jansScr::%(introspection_introspection_scopes_from_user_role)s
+jansScrTyp: introspection
+objectClass: top
+objectClass: jansCustomScr
+jansEnabled: true
+jansProgLng: python
+
 dn: inum=2DAF-CA90,ou=scripts,o=jans
 description: Frontchannel logout Sample
 displayName: frontchannel_logout_sample

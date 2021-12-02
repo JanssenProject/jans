@@ -1,6 +1,6 @@
 {
   "configOauthEnabled": %(configOauthEnabled)s,
-  "apiApprovedIssuer": ["%(apiApprovedIssuer)s"],
+  "apiApprovedIssuer": [%(apiApprovedIssuer)s],
   "apiProtectionType": "%(apiProtectionType)s",
   "apiClientId": "%(jca_client_id)s",
   "apiClientPassword": "%(jca_client_encoded_pw)s",

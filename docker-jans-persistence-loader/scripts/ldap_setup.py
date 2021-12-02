@@ -97,7 +97,7 @@ class LDAPBackend:
         for _ in range(0, max_wait_time, sleep_duration):
             try:
                 added, msg = self.client.add(dn, attributes=attrs)
-                if not added:
+                if not added and "name already exists" not in msg:
                     logger.warning(f"Unable to add entry with DN {dn}; reason={msg}")
                 break
             except (LDAPSessionTerminatedByServerError, LDAPSocketOpenError) as exc:

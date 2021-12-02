@@ -22,5 +22,15 @@ LOGGING_CONFIG = {
             "level": "INFO",
             "propagate": False,
         },
+        "entrypoint": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "plugins": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
     },
 }
