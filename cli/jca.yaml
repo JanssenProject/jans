@@ -1802,6 +1802,27 @@ paths:
           in: query
           name: pattern
           description: Search pattern.
+        - schema:
+            type: integer
+            default: 1
+          in: query
+          name: startIndex
+          description: The 1-based index of the first query result.
+        - schema:
+            type: string
+            default: 1
+          in: query
+          name: sortBy
+          description: Attribute whose value will be used to order the returned response.
+        - schema:
+            type: string
+            default: 1
+            enum: 
+              - ascending
+              - descending
+          in: query
+          name: sortOrder
+          description: Order in which the sortBy param is applied. Allowed values are "ascending" and "descending".  
     post:
       tags:
         - OAuth - OpenID Connect - Clients
@@ -2785,7 +2806,7 @@ paths:
     get:
       summary: Returns auth server health status.
       description: Returns auth server health status.
-      operationId: get-config-health-ready
+      operationId: get-auth-server-health
       tags:
         - Auth Server Health - Check
       responses:
@@ -4255,9 +4276,6 @@ components:
         inum:
           description: XRI i-number. Identifier to uniquely identify the attribute.
           type: string
-        selected:
-          type: boolean
-          description: Boolean value to indicate if the atrribute is selected.
         name:
           type: string
           description: Name of the attribute.
@@ -4339,12 +4357,6 @@ components:
         oxMultiValuedAttribute:
           type: boolean
           description: Boolean value indicating if the attribute can hold multiple value.
-        custom:
-          type: boolean
-          description: Boolean value indicating if the attribute is a custom attribute
-        requred:
-          type: boolean
-          description: Boolean value indicating is a mandatory attribute
         attributeValidation:
           type: object
           description: Details of validations to be applied on the attribute
