@@ -98,7 +98,7 @@ class AdminUiPlugin:
         return txt.strip()
 
     def get_token_server_ctx(self):
-        hostname = os.environ.get("CN_TOKEN_SERVER_HOSTNAME") or self.manager.config.get("hostname")
+        hostname = os.environ.get("CN_TOKEN_SERVER_BASE_HOSTNAM") or self.manager.config.get("hostname")
         authz_endpoint = os.environ.get("CN_TOKEN_SERVER_AUTHZ_ENDPOINT") or "/jans-auth/authorize.htm"
         token_endpoint = os.environ.get("CN_TOKEN_SERVER_TOKEN_ENDPOINT") or "/jans-auth/restv1/token"
         introspection_endpoint = os.environ.get("CN_TOKEN_SERVER_INTROSPECTION_ENDPOINT") or "/jans-auth/restv1/introspection"
