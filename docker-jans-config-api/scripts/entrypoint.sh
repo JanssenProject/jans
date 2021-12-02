@@ -2,14 +2,24 @@
 
 set -e
 
+copy_builtin_plugins() {
+    if [ ! -f /opt/jans/jetty/jans-config-api/custom/libs/scim-plugin.jar ]; then
+        cp /usr/share/java/scim-plugin.jar /opt/jans/jetty/jans-config-api/custom/libs/
+    fi
+
+    if [ ! -f /opt/jans/jetty/jans-config-api/custom/libs/admin-ui-plugin.jar ]; then
+        cp /usr/share/java/admin-ui-plugin.jar /opt/jans/jetty/jans-config-api/custom/libs/
+    fi
+}
+
 python3 /app/scripts/wait.py
+
+copy_builtin_plugins
 
 if [ ! -f /deploy/touched  ]; then
     python3 /app/scripts/bootstrap.py
     touch /deploy/touched
 fi
-
-python3 /app/scripts/mod_context.py
 
 # run config-api
 mkdir -p /opt/jetty/temp

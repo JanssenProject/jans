@@ -5,7 +5,7 @@ FROM alpine:3.13.6
 # ===============
 
 RUN apk update \
-    && apk add --no-cache openssl py3-pip tini curl openjdk11-jre-headless py3-cryptography py3-grpcio \
+    && apk add --no-cache openssl py3-pip tini curl openjdk11-jre-headless py3-cryptography py3-grpcio py3-psycopg2 \
     && apk add --no-cache --virtual build-deps unzip wget git \
     && mkdir -p /usr/java/latest \
     && ln -sf /usr/lib/jvm/default-jvm/jre /usr/java/latest/jre
@@ -16,7 +16,7 @@ RUN apk update \
 
 ENV CN_VERSION=1.0.0-SNAPSHOT
 ENV CN_BUILD_DATE='2021-10-08 06:18'
-ENV CN_SOURCE_URL=https://maven.jans.io/maven/io/jans/jans-client-api-server/${CN_VERSION}/jans-client-api-server-${CN_VERSION}-distribution.zip
+ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-client-api-server/${CN_VERSION}/jans-client-api-server-${CN_VERSION}-distribution.zip
 
 RUN wget -q ${CN_SOURCE_URL} -O /tmp/client-api.zip \
     && mkdir -p /opt/client-api \

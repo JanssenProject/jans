@@ -3,11 +3,13 @@ import base64
 import json
 import os
 from urllib.parse import urlparse
+from uuid import uuid4
 
 from jans.pycloudlib.utils import as_boolean
 from jans.pycloudlib.utils import encode_text
 from jans.pycloudlib.utils import safe_render
 from jans.pycloudlib.utils import generate_base64_contents
+from jans.pycloudlib.utils import get_random_chars
 
 
 def render_ldif(src, dst, ctx):
@@ -176,6 +178,46 @@ def get_base_ctx(manager):
     # static kid
     ctx["staticKid"] = os.environ.get("CN_OB_STATIC_KID", "")
 
+    # admin-ui plugins
+    ctx["admin_ui_client_id"] = manager.config.get("admin_ui_client_id")
+    if not ctx["admin_ui_client_id"]:
+        ctx["admin_ui_client_id"] = f"1901.{uuid4()}"
+        manager.config.set("admin_ui_client_id", ctx["admin_ui_client_id"])
+
+    ctx["admin_ui_client_pw"] = manager.secret.get("admin_ui_client_pw")
+    if not ctx["admin_ui_client_pw"]:
+        ctx["admin_ui_client_pw"] = get_random_chars()
+        manager.secret.set("admin_ui_client_pw", ctx["admin_ui_client_pw"])
+
+    ctx["admin_ui_client_encoded_pw"] = manager.secret.get("admin_ui_client_encoded_pw")
+    if not ctx["admin_ui_client_encoded_pw"]:
+        ctx["admin_ui_client_encoded_pw"] = encode_text(ctx["admin_ui_client_pw"], manager.secret.get("encoded_salt")).decode()
+        manager.secret.set(
+            "admin_ui_client_encoded_pw",
+            ctx["admin_ui_client_encoded_pw"],
+        )
+
+    # token server client
+    ctx["token_server_admin_ui_client_id"] = manager.config.get("token_server_admin_ui_client_id")
+    if not ctx["token_server_admin_ui_client_id"]:
+        ctx["token_server_admin_ui_client_id"] = f"1901.{uuid4()}"
+        manager.config.set("token_server_admin_ui_client_id", ctx["token_server_admin_ui_client_id"])
+
+    ctx["token_server_admin_ui_client_pw"] = manager.secret.get("token_server_admin_ui_client_pw")
+    if not ctx["token_server_admin_ui_client_pw"]:
+        ctx["token_server_admin_ui_client_pw"] = get_random_chars()
+        manager.secret.set("token_server_admin_ui_client_pw", ctx["token_server_admin_ui_client_pw"])
+
+    ctx["token_server_admin_ui_client_encoded_pw"] = manager.secret.get("token_server_admin_ui_client_encoded_pw")
+    if not ctx["token_server_admin_ui_client_encoded_pw"]:
+        ctx["token_server_admin_ui_client_encoded_pw"] = encode_text(
+            ctx["token_server_admin_ui_client_pw"], manager.secret.get("encoded_salt"),
+        ).decode()
+        manager.secret.set(
+            "token_server_admin_ui_client_encoded_pw",
+            ctx["token_server_admin_ui_client_encoded_pw"],
+        )
+
     # finalize ctx
     return ctx
 
@@ -203,7 +245,6 @@ def merge_extension_ctx(ctx):
 def merge_auth_ctx(ctx):
     basedir = '/app/templates/jans-auth'
     file_mappings = {
-        # 'auth_config_base64': 'dynamic-conf.json',
         'auth_static_conf_base64': 'static-conf.json',
         'auth_error_base64': 'errors.json',
     }
@@ -246,35 +287,6 @@ def merge_scim_ctx(ctx):
         with open(file_path) as fp:
             ctx[key] = generate_base64_contents(fp.read() % ctx)
     return ctx
-
-
-# def merge_radius_ctx(ctx):
-#     basedir = "/app/static/radius"
-#     file_mappings = {
-#         "super_gluu_ro_session_script": "super_gluu_ro_session.py",
-#         "super_gluu_ro_script": "super_gluu_ro.py",
-#     }
-#
-#     for key, file_ in file_mappings.items():
-#         fn = os.path.join(basedir, file_)
-#         with open(fn) as f:
-#             ctx[key] = generate_base64_contents(f.read())
-#     return ctx
-
-
-# def merge_oxtrust_ctx(ctx):
-#     basedir = '/app/templates/oxtrust'
-#     file_mappings = {
-#         'oxtrust_cache_refresh_base64': 'oxtrust-cache-refresh.json',
-#         'oxtrust_config_base64': 'oxtrust-config.json',
-#         'oxtrust_import_person_base64': 'oxtrust-import-person.json',
-#     }
-#
-#     for key, file_ in file_mappings.items():
-#         file_path = os.path.join(basedir, file_)
-#         with open(file_path) as fp:
-#             ctx[key] = generate_base64_contents(fp.read() % ctx)
-#     return ctx
 
 
 # def merge_oxidp_ctx(ctx):
@@ -334,8 +346,13 @@ def merge_config_api_ctx(ctx):
             for url in urls
         }
 
+    approved_issuer = [ctx["hostname"]]
+    token_server_hostname = os.environ.get("CN_TOKEN_SERVER_BASE_HOSTNAM")
+    if token_server_hostname and token_server_hostname not in approved_issuer:
+        approved_issuer.append(token_server_hostname)
+
     local_ctx = {
-        "apiApprovedIssuer": os.environ.get("CN_CONFIG_API_APPROVED_ISSUER") or f"https://{ctx['hostname']}",
+        "apiApprovedIssuer": ",".join([f'"https://{issuer}"' for issuer in approved_issuer]),
         "apiProtectionType": "oauth2",
         "jca_client_id": ctx["jca_client_id"],
         "jca_client_encoded_pw": ctx["jca_client_encoded_pw"],
@@ -399,8 +416,9 @@ def get_ldif_mappings(optional_scopes=None):
 
         files += [
             "jans-config-api/configuration.ldif",
+            "jans-config-api/admin-ui-attributes.ldif",
+            "jans-config-api/admin-ui-clients.ldif",
             "jans-auth/configuration.ldif",
-            # "jans-auth/clients.ldif",
         ]
 
         if "scim" in optional_scopes:
