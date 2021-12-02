@@ -448,7 +448,7 @@ paths:
     parameters: []
   /jans-config-api/api/v1/config/database/ldap/{name}:
     parameters:
-      - name: name
+      - name: configId
         in: path
         required: true
         description: Name of LDAP configuration.
@@ -1621,6 +1621,7 @@ paths:
       summary: Puts/replaces JWKS
       description: Puts/replaces JSON Web Keys (JWKS).
       operationId: put-config-jwks
+      x-cli-getdata: _file
       requestBody:
         content:
           application/json:
@@ -4538,12 +4539,16 @@ components:
         - applicationType
         - logout
         - includeClaimsInIdToken
+        - displayName
       properties:
         dn:
           type: string
         inum:
           description: XRI i-number. Client Identifier to uniquely identify the client.
           type: string
+        displayName:
+            type: string
+            description: Name of the user suitable for display to end-users
         clientSecret:
           type: string
           description: The client secret.  The client MAY omit the parameter if the client secret is an empty string.
