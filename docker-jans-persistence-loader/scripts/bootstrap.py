@@ -7,6 +7,7 @@ from ldap_setup import LDAPBackend
 from couchbase_setup import CouchbaseBackend
 from sql_setup import SQLBackend
 from spanner_setup import SpannerBackend
+from upgrade import Upgrade
 
 
 def main():
@@ -28,6 +29,10 @@ def main():
 
     backend = backend_cls(manager)
     backend.initialize()
+
+    # run upgrade if needed
+    upgrade = Upgrade(manager)
+    upgrade.invoke()
 
 
 if __name__ == "__main__":

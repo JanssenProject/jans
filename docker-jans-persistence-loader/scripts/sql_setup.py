@@ -197,7 +197,7 @@ class SQLBackend:
 
         for i, custom in enumerate(self.sql_indexes.get(table_name, {}).get("custom", []), start=1):
             # jansPerson table has unsupported custom index expressions that need to be skipped if mysql < 8.0
-            if table_name == "jansPerson" and self.get_server_version() < "8.0":
+            if table_name == "jansPerson" and self.client.server_version < "8.0":
                 continue
             name = f"{table_name}_CustomIdx{i}"
             query = f"CREATE INDEX {self.client.quoted_id(name)} ON {self.client.quoted_id(table_name)} ({custom})"
@@ -259,6 +259,12 @@ class SQLBackend:
     def initialize(self):
         logger.info("Creating tables (if not exist)")
         self.create_tables()
+
+        logger.info("Updating schema (if required)")
+        self.update_schema()
+
+        # force-reload metadata as we may have changed the schema
+        self.client.adapter._metadata = None
 
         logger.info("Creating indexes (if not exist)")
         self.create_indexes()
@@ -348,15 +354,43 @@ class SQLBackend:
                     attr_mapping[attr] = value
                 yield table_name, attr_mapping
 
-    def get_server_version(self):
-        # TODO: remove this method once SQLClient has server_version attribute
-        if hasattr(self.client, "server_version"):
-            return self.client.server_version
+    def update_schema(self):
+        table_mapping = self.client.get_table_mapping()
 
-        if self.db_dialect == "mysql":
-            query = "SELECT VERSION()"
-        else:
-            query = "SHOW server_version"
+        # 1 - jansDefAcrValues is changed to multivalued (JSON type)
+        table_name = "jansClnt"
+        col_name = "jansDefAcrValues"
+        old_data_type = table_mapping[table_name][col_name]
+        data_type = self.get_data_type(col_name, table_name)
 
-        version = self.client.adapter.engine.scalar(query)
-        return version
+        if data_type != old_data_type:
+            # get the value first before updating column type
+            acr_values = {
+                row["doc_id"]: row[col_name]
+                for row in self.client.search(table_name, ["doc_id", col_name])
+            }
+
+            # to change the storage format of a JSON column, drop the column and
+            # add the column back specifying the new storage format
+            with self.client.adapter.engine.connect() as conn:
+                conn.execute(f"ALTER TABLE {self.client.quoted_id(table_name)} DROP COLUMN {self.client.quoted_id(col_name)}")
+                conn.execute(f"ALTER TABLE {self.client.quoted_id(table_name)} ADD COLUMN {self.client.quoted_id(col_name)} {data_type}")
+
+            # force-reload metadata as we may have changed the schema before migrating old data
+            self.client.adapter._metadata = None
+
+            for doc_id, value in acr_values.items():
+                if not value:
+                    value_list = []
+                else:
+                    value_list = [value]
+                self.client.update(table_name, doc_id, {col_name: {"v": value_list}})
+
+        # 2 - jansUsrDN column must be in jansToken table
+        table_name = "jansToken"
+        col_name = "jansUsrDN"
+
+        if col_name not in table_mapping[table_name]:
+            data_type = self.get_data_type(col_name, table_name)
+            with self.client.adapter.engine.connect() as conn:
+                conn.execute(f"ALTER TABLE {self.client.quoted_id(table_name)} ADD COLUMN {self.client.quoted_id(col_name)} {data_type}")

@@ -14,7 +14,7 @@ RUN apk update \
 
 COPY requirements.txt /app/requirements.txt
 RUN pip3 install -U pip \
-    && pip3 install --no-cache-dir -r /app/requirements.txt \
+    && pip3 install --no-cache-dir --default-timeout=300 -r /app/requirements.txt \
     && rm -rf /src/jans-pycloudlib/.git
 
 # =======
@@ -117,7 +117,7 @@ ENV CN_CACHE_TYPE=NATIVE_PERSISTENCE \
     GOOGLE_PROJECT_ID="" \
     GOOGLE_APPLICATION_CREDENTIALS=/etc/jans/conf/google-credentials.json \
     CN_AUTH_SERVER_URL="" \
-    CN_CONFIG_API_APPROVED_ISSUER=""
+    CN_TOKEN_SERVER_BASE_HOSTNAM=""
 
 # ====
 # misc
