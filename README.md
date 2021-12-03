@@ -10,6 +10,9 @@
 !!!note
 For local deployments like `minikube` and `microk8s` or cloud installations in demo mode, resources may be set to the minimum and hence can have `8GB RAM`, `4 CPU`, and `50GB disk` in total to run all services.
 
+
+Releases of images are in style 1.0.0-beta.0, 1.0.0-0
+
 Please calculate the minimum required resources as per services deployed. The following table contains default recommended resources to start with. Depending on the use of each service the resources may be increased or decreased.
 
 | Service           | CPU Unit | RAM   | Disk Space | Processor Type | Required                           |
