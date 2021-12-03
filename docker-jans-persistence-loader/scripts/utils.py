@@ -347,7 +347,7 @@ def merge_config_api_ctx(ctx):
         }
 
     approved_issuer = [ctx["hostname"]]
-    token_server_hostname = os.environ.get("CN_TOKEN_SERVER_BASE_HOSTNAM")
+    token_server_hostname = os.environ.get("CN_TOKEN_SERVER_BASE_HOSTNAME")
     if token_server_hostname and token_server_hostname not in approved_issuer:
         approved_issuer.append(token_server_hostname)
 
