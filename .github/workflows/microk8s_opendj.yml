@@ -1,11 +1,17 @@
 name: opendj
 on:
   push:
-    branches: [master]
+    branches:
+      - master
+      - main
+      - "!release-**"
     paths:
       - "charts/**"
   pull_request:
-    branches: [master]
+    branches:
+      - master
+      - main
+      - "!release-**"
     paths:
       - "charts/**"
   workflow_dispatch:
