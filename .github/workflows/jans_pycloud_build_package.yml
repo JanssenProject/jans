@@ -43,7 +43,7 @@ jobs:
         run: |
           dockerimages="auth-server certmanager client-api config-api configurator fido2 persistence-loader scim"
           for image in $dockerimages; do
-            sed -i '/git+https/c\git+https://github.com/${{ env.GITHUB_REPOSITORY }}@${{ env.PR_DOCKER_DEV_BRANCH_NAME }}#egg=jans-pycloudlib&subdirectory=jans-pycloudlib' ./docker-jans-$image/requirements.txt
+            sed -i '/git+https/c\git+https://github.com/${{ github.repository }}@${{ env.PR_DOCKER_DEV_BRANCH_NAME }}#egg=jans-pycloudlib&subdirectory=jans-pycloudlib' ./docker-jans-$image/requirements.txt
           done
 
       - name: Configure Git and open dev PR
@@ -62,7 +62,7 @@ jobs:
         run: |
           dockerimages="auth-server certmanager client-api config-api configurator fido2 persistence-loader scim"
           for image in $dockerimages; do
-            sed -i '/git+https/c\git+https://github.com/${{ env.GITHUB_REPOSITORY }}@${{ env.PR_DOCKER_STABLE_BRANCH_NAME }}#egg=jans-pycloudlib&subdirectory=jans-pycloudlib' ./docker-jans-$image/requirements.txt
+            sed -i '/git+https/c\git+https://github.com/${{ github.repository }}@${{ github.sha }}#egg=jans-pycloudlib&subdirectory=jans-pycloudlib' ./docker-jans-$image/requirements.txt
           done
 
       - name: Configure Git and open stable PR
