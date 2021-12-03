@@ -73,7 +73,7 @@ jobs:
     - uses: google-github-actions/release-please-action@v2
       id: release-please
       with:
-         path: ${{ matrix.docker-images }}
+         path: ${{ matrix.python-projects }}
          token: ${{ secrets.MOWORKFLOWTOKEN }}
          release-type: python
          package-name: ${{ matrix.python-projects }}
