@@ -9,6 +9,7 @@ on:
       - main
       # below branch is triggered by jenkins which triggers dev image
       - update-source-build-date
+      - "!release-**"
     paths:
       - "docker-jans-**/**"
   pull_request:
@@ -17,6 +18,7 @@ on:
       - main
       # below branch is triggered by jenkins which triggers dev image
       - update-source-build-dates
+      - "!release-**"
     paths:
       - "docker-jans-**/**"
   workflow_dispatch:
