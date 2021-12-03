@@ -8,8 +8,6 @@ on:
       - main
     paths:
       - "docker-jans-**/**"
-      - "!docker-jans-**/CHANGELOG.md"
-      - "!docker-jans-**/version.txt"
   pull_request:
     branches:
       - master
