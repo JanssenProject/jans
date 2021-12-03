@@ -1,2 +1,1 @@
-# Beta images in style 1.0.0-beta.0, 1.0.0-0
-1.0.0-beta.12
+1.0.0-beta.13
