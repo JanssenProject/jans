@@ -12,6 +12,8 @@ on:
       - "jans-pycloudlib/jans/**"
       - "jans-pycloudlib/tests/**"
       - "jans-pycloudlib/setup.py"
+      - "!jans-pycloudlib/CHANGELOG.md"
+      - "!jans-pycloudlib/jans/pycloudlib/version.py"
   pull_request:
     # The branches below must be a subset of the branches above
     branches: [master]
@@ -19,6 +21,8 @@ on:
       - "jans-pycloudlib/jans/**"
       - "jans-pycloudlib/tests/**"
       - "jans-pycloudlib/setup.py"
+      - "!jans-pycloudlib/CHANGELOG.md"
+      - "!jans-pycloudlib/jans/pycloudlib/version.py"
 
 jobs:
   analyze:

@@ -4,14 +4,12 @@ on:
     branches:
       - master
       - main
-      - "!release-**"
     paths:
       - "charts/**"
   pull_request:
     branches:
       - master
       - main
-      - "!release-**"
     paths:
       - "charts/**"
   workflow_dispatch:
