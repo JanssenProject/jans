@@ -5,16 +5,18 @@ on:
     branches:
       - master
       - main
-      - "!release-**"
     paths:
       - "jans-pycloudlib/**"
+      - "!jans-pycloudlib/CHANGELOG.md"
+      - "!jans-pycloudlib/jans/pycloudlib/version.py"
   pull_request:
     branches:
       - master
       - main
-      - "!release-**"
     paths:
       - "jans-pycloudlib/**"
+      - "!jans-pycloudlib/CHANGELOG.md"
+      - "!jans-pycloudlib/jans/pycloudlib/version.py"
   workflow_dispatch:
 
 jobs:
