@@ -8,8 +8,6 @@ on:
       - "jans-pycloudlib/jans/**"
       - "jans-pycloudlib/tests/**"
       - "jans-pycloudlib/setup.py"
-      - "!jans-pycloudlib/CHANGELOG.md"
-      - "!jans-pycloudlib/jans/pycloudlib/version.py"
   pull_request:
     branches:
       - master
