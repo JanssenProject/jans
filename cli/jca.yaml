@@ -4552,6 +4552,7 @@ components:
         - logout
         - includeClaimsInIdToken
         - displayName
+        - clientSecret
       properties:
         dn:
           type: string
@@ -4949,6 +4950,8 @@ components:
         - id
         - type
         - iconUri
+        - name
+        - description
       properties:
         dn:
           type: string

@@ -105,6 +105,7 @@ parser.add_argument("-j", help="Auth password file")
 
 parser.add_argument("-CC", "--config-api-mtls-client-cert", help="Path to SSL Certificate file")
 parser.add_argument("-CK", "--config-api-mtls-client-key", help="Path to SSL Key file")
+parser.add_argument("--key-password", help="Password for SSL Key file")
 parser.add_argument("-noverify", help="Ignore verifying the SSL certificate", action='store_true', default=True)
 
 parser.add_argument("--patch-add", help="Colon delimited key:value pair for add patch operation. For example loggingLevel:DEBUG")
@@ -294,8 +295,14 @@ class JCA_CLI:
                     json.dump(self.cfg_yml, w, indent=2)
         return self.cfg_yml
 
-    def check_connection(self):
+    def get_rest_client(self):
         rest = swagger_client.rest.RESTClientObject(self.swagger_configuration)
+        if args.key_password:
+            rest.pool_manager.connection_pool_kw['key_password'] = args.key_password
+        return rest
+
+    def check_connection(self):
+        rest = self.get_rest_client()
         headers = urllib3.make_headers(basic_auth='{}:{}'.format(self.client_id, self.client_secret))
         url = 'https://{}/jans-auth/restv1/token'.format(self.host)
         headers['Content-Type'] = 'application/x-www-form-urlencoded'
@@ -348,7 +355,7 @@ class JCA_CLI:
 
     def get_access_token(self, scope):
         sys.stderr.write("Getting access token for scope {}\n".format(scope))
-        rest = swagger_client.rest.RESTClientObject(self.swagger_configuration)
+        rest = self.get_rest_client()
         headers = urllib3.make_headers(basic_auth='{}:{}'.format(self.client_id, self.client_secret))
         url = 'https://{}/jans-auth/restv1/token'.format(self.host)
         headers['Content-Type'] = 'application/x-www-form-urlencoded'
@@ -656,7 +663,8 @@ class JCA_CLI:
                     itype=param['schema']['type'],
                     default=param['schema'].get('default'),
                     enforce=enforce,
-                    help_text=help_text
+                    help_text=help_text,
+                    example=param.get('example')
                 )
 
         return parameters
@@ -1039,8 +1047,7 @@ class JCA_CLI:
         if security.strip():
             self.get_access_token(security)
         client = getattr(swagger_client, self.get_api_class_name(endpoint.parent.name))
-
-        api_instance = client(swagger_client.ApiClient(self.swagger_configuration))
+        api_instance = self.get_api_instance(client)
         api_caller = getattr(api_instance, endpoint.info['operationId'].replace('-', '_'))
 
         return api_caller
@@ -1536,6 +1543,12 @@ class JCA_CLI:
 
         return data
 
+    def get_api_instance(self, client):
+        api_instance = client(swagger_client.ApiClient(self.swagger_configuration))
+        if args.key_password:
+            api_instance.api_client.rest_client.pool_manager.connection_pool_kw['key_password'] = args.key_password
+        return api_instance
+
     def get_path_api_caller_for_path(self, path):
 
         dummy_enpoint = Menu(name='', info=path)
@@ -1544,7 +1557,7 @@ class JCA_CLI:
             self.get_access_token(security)
         class_name = self.get_api_class_name(path['tags'][0])
         client = getattr(swagger_client, class_name)
-        api_instance = client(swagger_client.ApiClient(self.swagger_configuration))
+        api_instance = self.get_api_instance(client)
         api_caller = getattr(api_instance, path['operationId'].replace('-', '_'))
 
         return api_caller
