@@ -30,6 +30,10 @@
 		</resources>
 	</build>
 
+    <properties>
+        <sonar.cpd.exclusions>src/main/java/io/jans/model/custom/script/type/**/*</sonar.cpd.exclusions>
+    </properties>
+
 	<dependencies>
 		<!-- Gluu -->
 		<dependency>
