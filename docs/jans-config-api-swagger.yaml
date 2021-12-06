@@ -2821,7 +2821,7 @@ paths:
         '500':
           description: Internal Server Error
 
-  /jans-config-api/admin-ui/user/role:
+  /jans-config-api/admin-ui/user/roles:
     get:
       tags:
         - Admin UI - Role
@@ -2829,7 +2829,7 @@ paths:
       description: Get all admin ui roles.
       operationId: get-adminui-roles
       security:
-        - oauth2: [https://jans.io/adminui/user/permissions.read]
+        - oauth2: [https://jans.io/adminui/user/role.read]
       responses:
         '200':
           description: OK
@@ -2854,11 +2854,13 @@ paths:
       description: Add admin ui role.
       operationId: add-adminui-role
       security:
-        - oauth2: [https://jans.io/adminui/user/permissions.write]
+        - oauth2: [https://jans.io/adminui/user/role.write]
       requestBody:
         content:
           application/json:
             schema:
+              required:
+                - role
               $ref: '#/components/schemas/AdminRole'
       responses:
         '200':
@@ -2877,14 +2879,22 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '500':
           $ref: '#/components/responses/InternalServerError'
+  /jans-config-api/admin-ui/user/roles/{role}:
     put:
       tags:
         - Admin UI - Role
       summary: Edit admin ui role.
       description: Edit admin ui role.
       operationId: edit-adminui-role
+      parameters:
+        - in: path
+          name: role
+          schema:
+            type: string
+          required: true
+          description: role name
       security:
-        - oauth2: [https://jans.io/adminui/user/permissions.write]
+        - oauth2: [https://jans.io/adminui/user/role.write]
       requestBody:
         content:
           application/json:
@@ -2913,13 +2923,15 @@ paths:
       summary: Delete admin ui role.
       description: Delete admin ui role.
       operationId: delete-adminui-role
+      parameters:
+        - in: path
+          name: role
+          schema:
+            type: string
+          required: true
+          description: role name
       security:
-        - oauth2: [https://jans.io/adminui/user/permissions.write]
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AdminRole'
+        - oauth2: [https://jans.io/adminui/user/role.write]
       responses:
         '200':
           description: OK
@@ -2937,7 +2949,7 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '500':
           $ref: '#/components/responses/InternalServerError'
-  /jans-config-api/admin-ui/user/permission:
+  /jans-config-api/admin-ui/user/permissions:
     get:
       tags:
         - Admin UI - Permission
@@ -2945,7 +2957,7 @@ paths:
       description: Get admin ui permissions.
       operationId: get-adminui-permissions
       security:
-        - oauth2: [https://jans.io/adminui/user/permissions.read]
+        - oauth2: [https://jans.io/adminui/user/permission.read]
       responses:
         '200':
           description: OK
@@ -2970,11 +2982,13 @@ paths:
       description: Add admin ui permission.
       operationId: add-adminui-permission
       security:
-        - oauth2: [https://jans.io/adminui/user/permissions.write]
+        - oauth2: [https://jans.io/adminui/user/permission.write]
       requestBody:
         content:
           application/json:
             schema:
+              required:
+                - permission
               $ref: '#/components/schemas/AdminPermission'
       responses:
         '200':
@@ -2993,14 +3007,22 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '500':
           $ref: '#/components/responses/InternalServerError'
+  /jans-config-api/admin-ui/user/permissions/{permission}:
     put:
       tags:
         - Admin UI - Permission
       summary: Edit admin ui permission.
       description: Edit admin ui permission.
       operationId: edit-adminui-permission
+      parameters:
+        - in: path
+          name: permission
+          schema:
+            type: string
+          required: true
+          description: permission name
       security:
-        - oauth2: [https://jans.io/adminui/user/permissions.write]
+        - oauth2: [https://jans.io/adminui/user/permission.write]
       requestBody:
         content:
           application/json:
@@ -3029,13 +3051,15 @@ paths:
       summary: Delete admin ui permission.
       description: Delete admin ui permission.
       operationId: delete-adminui-permission
+      parameters:
+        - in: path
+          name: permission
+          schema:
+            type: string
+          required: true
+          description: permission name
       security:
-        - oauth2: [https://jans.io/adminui/user/permissions.write]
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AdminPermission'
+        - oauth2: [https://jans.io/adminui/user/permission.write]
       responses:
         '200':
           description: OK
@@ -3061,7 +3085,7 @@ paths:
       description: Get admin ui role-permissions mapping.
       operationId: get-adminui-role-permissions
       security:
-        - oauth2: [https://jans.io/adminui/user/permissions.read]
+        - oauth2: [https://jans.io/adminui/user/rolePermissionMapping.read]
       responses:
         '200':
           description: OK
@@ -3086,7 +3110,7 @@ paths:
       description: Map permissions to role.
       operationId: map-permissions-to-role
       security:
-        - oauth2: [https://jans.io/adminui/user/permissions.write]
+        - oauth2: [https://jans.io/adminui/user/rolePermissionMapping.write]
       requestBody:
         content:
           application/json:
@@ -3116,7 +3140,7 @@ paths:
       description: Remove role-permissions mapping.
       operationId: remove-role-permissions-permission
       security:
-        - oauth2: [https://jans.io/adminui/user/permissions.write]
+        - oauth2: [https://jans.io/adminui/user/rolePermissionMapping.write]
       requestBody:
         content:
           application/json:
