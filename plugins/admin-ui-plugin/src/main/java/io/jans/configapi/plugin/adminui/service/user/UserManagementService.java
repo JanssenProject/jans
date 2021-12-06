@@ -81,12 +81,12 @@ public class UserManagementService {
         }
     }
 
-    public List<AdminRole> deleteRole(AdminRole roleArg) throws ApplicationException {
+    public List<AdminRole> deleteRole(String role) throws ApplicationException {
         try {
             AdminConf adminConf = entryManager.find(AdminConf.class, CONFIG_DN);
 
             List<RolePermissionMapping> roleScopeMapping = adminConf.getDynamic().getRolePermissionMapping()
-                    .stream().filter(ele -> ele.getRole().equalsIgnoreCase(roleArg.getRole()))
+                    .stream().filter(ele -> ele.getRole().equalsIgnoreCase(role))
                     .collect(Collectors.toList());
 
             if (!roleScopeMapping.isEmpty()) {
@@ -102,7 +102,7 @@ public class UserManagementService {
             }
 
             List<AdminRole> roles = adminConf.getDynamic().getRoles();
-            roles.removeIf(ele -> ele.equals(roleArg));
+            roles.removeIf(ele -> ele.getRole().equals(role));
 
             adminConf.getDynamic().setRoles(roles);
             entryManager.merge(adminConf);
@@ -172,12 +172,12 @@ public class UserManagementService {
         }
     }
 
-    public List<AdminPermission> deletePermission(AdminPermission permissionArg) throws ApplicationException {
+    public List<AdminPermission> deletePermission(String permission) throws ApplicationException {
         try {
             AdminConf adminConf = entryManager.find(AdminConf.class, CONFIG_DN);
 
             boolean anyPermissionMapped = adminConf.getDynamic().getRolePermissionMapping()
-                    .stream().anyMatch(ele -> ele.getPermissions().contains(permissionArg.getPermission()));
+                    .stream().anyMatch(ele -> ele.getPermissions().contains(permission));
 
             if (anyPermissionMapped) {
                 log.error(ErrorResponse.UNABLE_TO_DELETE_PERMISSION_MAPPED_TO_ROLE.getDescription());
@@ -185,7 +185,7 @@ public class UserManagementService {
             }
 
             List<AdminPermission> permissions = adminConf.getDynamic().getPermissions();
-            permissions.removeIf(ele -> ele.equals(permissionArg));
+            permissions.removeIf(ele -> ele.getPermission().equals(permission));
 
             adminConf.getDynamic().setPermissions(permissions);
             entryManager.merge(adminConf);
