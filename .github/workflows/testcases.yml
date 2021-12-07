@@ -8,6 +8,7 @@ on:
       - "jans-pycloudlib/jans/**"
       - "jans-pycloudlib/tests/**"
       - "jans-pycloudlib/setup.py"
+      - "!**.md"
   pull_request:
     branches:
       - master
@@ -17,6 +18,7 @@ on:
       - "jans-pycloudlib/setup.py"
       - "!jans-pycloudlib/CHANGELOG.md"
       - "!jans-pycloudlib/jans/pycloudlib/version.py"
+      - "!**.md"
 jobs:
   build:
     runs-on: ubuntu-latest
