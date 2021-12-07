@@ -226,7 +226,7 @@ public class RegistrationService extends RequestService {
             return String.format("ou=registration_requests,%s", u2fBaseDn);
         }
 
-        return String.format("oxid=%s,ou=registration_requests,%s", jsId, u2fBaseDn);
+        return String.format("jansId=%s,ou=registration_requests,%s", jsId, u2fBaseDn);
     }
 
     public void merge(RequestMessageLdap request) {
