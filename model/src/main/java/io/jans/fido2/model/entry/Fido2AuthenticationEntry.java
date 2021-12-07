@@ -25,7 +25,7 @@ public class Fido2AuthenticationEntry extends Fido2Entry implements Serializable
     private static final long serialVersionUID = -2242931562244920584L;
 
     @JsonObject
-    @AttributeName(name = "jansenticationData")
+    @AttributeName(name = "jansAuthData")
     private Fido2AuthenticationData authenticationData;
 
     @JsonObject
