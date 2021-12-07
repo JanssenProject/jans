@@ -8,6 +8,7 @@ This module contains various helpers related to Couchbase persistence.
 import json
 import logging
 import os
+from contextlib import suppress
 from functools import partial
 from typing import NoReturn
 
@@ -17,11 +18,42 @@ from requests_toolbelt.adapters.host_header_ssl import HostHeaderSSLAdapter
 from jans.pycloudlib.utils import encode_text
 from jans.pycloudlib.utils import cert_to_truststore
 from jans.pycloudlib.utils import as_boolean
-from jans.pycloudlib.utils import secure_password_file
 
 CN_COUCHBASE_TRUSTSTORE_PASSWORD = "newsecret"
 
 logger = logging.getLogger(__name__)
+
+
+def _get_cb_password(manager, password_file, secret_name):
+    """Get Couchbase user's password.
+
+    Priority:
+
+    1. get from password file (for backward-compat)
+    2. get from secrets
+
+    :params manager: An instance of :class:`~jans.pycloudlib.manager._Manager`.
+    :params password_file: Path to file contains password.
+    :params secret_name: Name of the secrets to pull/push the password.
+    :returns: Plaintext password.
+    """
+
+    password = ""
+
+    with suppress(FileNotFoundError):
+        with open(password_file) as f:
+            password = f.read().strip()
+            manager.secret.set(secret_name, password)
+            logger.warning(
+                f"Found password file {password_file}. This feature is deprecated "
+                "and will be removed in future releases. Note that tje password "
+                f"has been saved to secrets with key {secret_name}."
+            )
+
+    if not password:
+        # get from secrets (if any)
+        password = manager.secret.get(secret_name)
+    return password
 
 
 def get_couchbase_user(manager=None) -> str:
@@ -43,9 +75,9 @@ def get_couchbase_password(manager) -> str:
     :params manager: An instance of :class:`~jans.pycloudlib.manager._Manager`.
     :returns: Plaintext password.
     """
+    secret_name = "couchbase_password"
     password_file = os.environ.get("CN_COUCHBASE_PASSWORD_FILE", "/etc/jans/conf/couchbase_password")
-    salt = manager.secret.get("encoded_salt")
-    return secure_password_file(password_file, salt)
+    return _get_cb_password(manager, password_file, secret_name)
 
 
 def get_couchbase_superuser(manager=None) -> str:
@@ -67,9 +99,9 @@ def get_couchbase_superuser_password(manager) -> str:
     :params manager: An instance of :class:`~jans.pycloudlib.manager._Manager`.
     :returns: Plaintext password.
     """
+    secret_name = "couchbase_superuser_password"
     password_file = os.environ.get("CN_COUCHBASE_SUPERUSER_PASSWORD_FILE", "/etc/jans/conf/couchbase_superuser_password")
-    salt = manager.secret.get("encoded_salt")
-    return secure_password_file(password_file, salt)
+    return _get_cb_password(manager, password_file, secret_name)
 
 
 def prefixed_couchbase_mappings():

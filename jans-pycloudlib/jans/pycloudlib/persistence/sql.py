@@ -7,6 +7,7 @@ This module contains various helpers related to SQL persistence.
 
 import logging
 import os
+from contextlib import suppress
 
 from sqlalchemy import create_engine
 from sqlalchemy import MetaData
@@ -15,7 +16,6 @@ from sqlalchemy import select
 
 from jans.pycloudlib import get_manager
 from jans.pycloudlib.utils import encode_text
-from jans.pycloudlib.utils import secure_password_file
 
 logger = logging.getLogger(__name__)
 
@@ -23,11 +23,31 @@ logger = logging.getLogger(__name__)
 def get_sql_password(manager) -> str:
     """Get password used for SQL database user.
 
+    Priority:
+
+    1. get from password file
+    2. get from secrets
+
     :returns: Plaintext password.
     """
+    secret_name = "sql_password"
+    password = ""
     password_file = os.environ.get("CN_SQL_PASSWORD_FILE", "/etc/jans/conf/sql_password")
-    salt = manager.secret.get("encoded_salt")
-    return secure_password_file(password_file, salt)
+
+    with suppress(FileNotFoundError):
+        with open(password_file) as f:
+            password = f.read().strip()
+            manager.secret.set(secret_name, password)
+            logger.warning(
+                f"Found password file {password_file}. This feature is deprecated "
+                "and will be removed in future releases. Note that the password "
+                f"has been saved to secrets with key {secret_name}."
+            )
+
+    if not password:
+        # get from secrets (if any)
+        password = manager.secret.get(secret_name)
+    return password
 
 
 class BaseClient:
