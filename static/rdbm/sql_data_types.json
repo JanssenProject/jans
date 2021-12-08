@@ -118,7 +118,7 @@
   },
   "userPassword": {
     "mysql": {
-      "size": 100,
+      "size": 256,
       "type": "VARCHAR"
     },
     "spanner": {
@@ -733,12 +733,11 @@
   },
   "jansUmaScope": {
     "mysql": {
-      "size": 128,
+      "size": 768,
       "type": "VARCHAR"
     },
     "spanner": {
-      "size": 128,
-      "type": "STRING"
+      "type": "STRING(MAX)"
     }
   },
   "jansSoftStatement": {

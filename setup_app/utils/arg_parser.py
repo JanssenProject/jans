@@ -25,7 +25,6 @@ def arg_parser():
     ldap_group = parser.add_mutually_exclusive_group()
     ldap_group.add_argument('--remote-ldap', help="Enables using remote LDAP server", action='store_true')
     ldap_group.add_argument('--disable-local-ldap', help="Disables installing local LDAP server", action='store_true')
-    #ldap_group.add_argument('--install-local-wrends', help="Installs local WrenDS", action='store_true')
 
     rdbm_group = parser.add_mutually_exclusive_group()
     rdbm_group.add_argument('-remote-rdbm', choices=['mysql', 'pgsql', 'spanner'], help="Enables using remote RDBM server")
