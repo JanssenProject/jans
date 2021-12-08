@@ -7,7 +7,6 @@ This module contains various helpers related to SQL persistence.
 
 import logging
 import os
-from contextlib import suppress
 
 from sqlalchemy import create_engine
 from sqlalchemy import MetaData
@@ -31,10 +30,9 @@ def get_sql_password(manager) -> str:
     :returns: Plaintext password.
     """
     secret_name = "sql_password"
-    password = ""
     password_file = os.environ.get("CN_SQL_PASSWORD_FILE", "/etc/jans/conf/sql_password")
 
-    with suppress(FileNotFoundError):
+    if os.path.isfile(password_file):
         with open(password_file) as f:
             password = f.read().strip()
             manager.secret.set(secret_name, password)
@@ -42,8 +40,7 @@ def get_sql_password(manager) -> str:
                 f"Loading password from {password_file} file is deprecated and will be removed in future releases. "
                 f"Note, the password has been saved to secrets with key {secret_name} for later usage."
             )
-
-    if not password:
+    else:
         # get from secrets (if any)
         password = manager.secret.get(secret_name)
     return password

@@ -8,7 +8,6 @@ This module contains various helpers related to Couchbase persistence.
 import json
 import logging
 import os
-from contextlib import suppress
 from functools import partial
 from typing import NoReturn
 
@@ -38,9 +37,7 @@ def _get_cb_password(manager, password_file, secret_name):
     :returns: Plaintext password.
     """
 
-    password = ""
-
-    with suppress(FileNotFoundError):
+    if os.path.isfile(password_file):
         with open(password_file) as f:
             password = f.read().strip()
             manager.secret.set(secret_name, password)
@@ -48,8 +45,7 @@ def _get_cb_password(manager, password_file, secret_name):
                 f"Loading password from {password_file} file is deprecated and will be removed in future releases. "
                 f"Note, the password has been saved to secrets with key {secret_name} for later usage."
             )
-
-    if not password:
+    else:
         # get from secrets (if any)
         password = manager.secret.get(secret_name)
     return password
