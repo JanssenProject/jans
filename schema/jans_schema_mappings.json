@@ -852,7 +852,7 @@
     "oxTrustStoreConf": "excludeStoreConf",
     "oxTrustTitle": "jansTitle",
     "oxTrustUserType": "jansUsrTyp",
-    "oxTrustedDevicesInfo": "excludeedDevicesInf",
+    "oxTrustedDevicesInfo": "jansTrustedDevices",
     "oxTrusthonorificPrefix": "jansHonorificPrefix",
     "oxTrusthonorificSuffix": "jansHonorificSuffix",
     "oxTrustnickname": "excludenickname",
