@@ -1,6 +1,6 @@
 {
    "issuer":"https://%(hostname)s",
-   "baseEndpoint":"https://%(hostname)s/fido2/restv1",
+   "baseEndpoint":"https://%(hostname)s/jans-fido2/restv1",
    "cleanServiceInterval":60,
    "cleanServiceBatchChunkSize":10000,
    "useLocalCache":true,
