@@ -267,7 +267,7 @@ public class AuthenticationService extends RequestService {
             return String.format("ou=authentication_requests,%s", u2fBaseDn);
         }
 
-        return String.format("oxid=%s,ou=authentication_requests,%s", jsId, u2fBaseDn);
+        return String.format("jansId=%s,ou=authentication_requests,%s", jsId, u2fBaseDn);
     }
 
 }
