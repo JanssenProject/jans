@@ -45,9 +45,8 @@ def _get_cb_password(manager, password_file, secret_name):
             password = f.read().strip()
             manager.secret.set(secret_name, password)
             logger.warning(
-                f"Found password file {password_file}. This feature is deprecated "
-                "and will be removed in future releases. Note that tje password "
-                f"has been saved to secrets with key {secret_name}."
+                f"Loading password from {password_file} file is deprecated and will be removed in future releases. "
+                f"Note, the password has been saved to secrets with key {secret_name} for later usage."
             )
 
     if not password:
