@@ -290,7 +290,7 @@ def do_installation():
 
             # Installing jans components
             if Config.profile == 'jans':
-                if Config.wrends_install:
+                if Config.opendj_install:
                     openDjInstaller.start_installation()
 
                 if Config.cb_install:
@@ -342,7 +342,7 @@ def do_installation():
         propertiesUtils.save_properties()
         time.sleep(2)
 
-        if Config.wrends_install:
+        if Config.opendj_install:
             openDjInstaller.restart()
 
         jansInstaller.post_install_tasks()

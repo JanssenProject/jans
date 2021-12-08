@@ -22,7 +22,7 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
         self.needdb = False # we don't need backend connection in this class
         self.app_type = AppType.SERVICE
         self.install_type = InstallOption.OPTONAL
-        self.install_var = 'wrends_install'
+        self.install_var = 'opendj_install'
         self.register_progess()
 
         self.openDjIndexJson = os.path.join(Config.install_dir, 'static/opendj/index.json')
@@ -44,7 +44,7 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
         self.createLdapPw()
 
         Config.pbar.progress(self.service_name, "Installing OpenDJ", False)
-        if Config.wrends_install == InstallTypes.LOCAL:
+        if Config.opendj_install == InstallTypes.LOCAL:
             self.install_opendj()
             Config.pbar.progress(self.service_name, "Setting up OpenDJ service", False)
             self.setup_opendj_service()
@@ -54,7 +54,7 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
         # it is time to bind OpenDJ
         self.dbUtils.bind()
 
-        if Config.wrends_install:
+        if Config.opendj_install:
             Config.pbar.progress(self.service_name, "Creating OpenDJ backends", False)
             self.create_backends()
             Config.pbar.progress(self.service_name, "Configuring OpenDJ", False)
@@ -81,7 +81,7 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
             self.dbUtils.import_ldif(ldif_files)
 
             Config.pbar.progress(self.service_name, "OpenDJ post installation", False)
-            if Config.wrends_install == InstallTypes.LOCAL:
+            if Config.opendj_install == InstallTypes.LOCAL:
                 self.post_install_opendj()
 
             self.enable()
@@ -99,7 +99,7 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
         realLdapBaseFolder = os.path.realpath(Config.ldapBaseFolder)
         self.run([paths.cmd_chown, '-R', 'ldap:ldap', realLdapBaseFolder])
 
-        if Config.wrends_install == InstallTypes.REMOTE:
+        if Config.opendj_install == InstallTypes.REMOTE:
             self.run([paths.cmd_ln, '-s', '/opt/opendj/template/config/', '/opt/opendj/config'])
 
     def create_user(self):
@@ -229,7 +229,7 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
                 ('cn=Access Control Handler,cn=config', 'ds-cfg-global-aci', '(targetattr!="userPassword||authPassword||debugsearchindex||changes||changeNumber||changeType||changeTime||targetDN||newRDN||newSuperior||deleteOldRDN")(version 3.0; acl "Anonymous read access"; allow (read,search,compare) userdn="ldap:///anyone";)', ldap3.MODIFY_DELETE),        
             ]
 
-        if (not Config.listenAllInterfaces) and (Config.wrends_install == InstallTypes.LOCAL):
+        if (not Config.listenAllInterfaces) and (Config.opendj_install == InstallTypes.LOCAL):
             opendj_config.append(('cn=LDAPS Connection Handler,cn=Connection Handlers,cn=config', 'ds-cfg-listen-address', '127.0.0.1', ldap3.MODIFY_REPLACE))
             opendj_config.append(('cn=Administration Connector,cn=config', 'ds-cfg-listen-address', '127.0.0.1', ldap3.MODIFY_REPLACE))
 
@@ -367,10 +367,10 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
 
     def installed(self):
         if os.path.exists(self.openDjSchemaFolder):
-            wrends_install = InstallTypes.LOCAL
+            opendj_install = InstallTypes.LOCAL
         elif os.path.exists(Config.opendj_p12_fn):
-            wrends_install = InstallTypes.REMOTE
+            opendj_install = InstallTypes.REMOTE
         else:
-            wrends_install = 0
+            opendj_install = 0
 
-        return wrends_install
+        return opendj_install
