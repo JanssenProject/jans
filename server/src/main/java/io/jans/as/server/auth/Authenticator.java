@@ -708,7 +708,7 @@ public class Authenticator {
     }
 
     public boolean authenticateBySessionId(String sessionIdentifier) {
-        if (StringUtils.isNotBlank(sessionIdentifier) && isTrue(appConfiguration.getSessionIdEnabled())) {
+        if (StringUtils.isNotBlank(sessionIdentifier)) {
             try {
                 SessionId sessionId = sessionIdService.getSessionId(sessionIdentifier);
                 return authenticateBySessionId(sessionId);
