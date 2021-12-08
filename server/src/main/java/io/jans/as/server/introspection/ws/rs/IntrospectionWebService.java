@@ -169,7 +169,7 @@ public class IntrospectionWebService {
             ExternalIntrospectionContext context = new ExternalIntrospectionContext(authorizationGrant, httpRequest, httpResponse, appConfiguration, attributeService);
             context.setGrantOfIntrospectionToken(grantOfIntrospectionToken);
             if (externalIntrospectionService.executeExternalModifyResponse(responseAsJsonObject, context)) {
-                log.trace("Successfully run extenal introspection scripts.");
+                log.trace("Successfully run external introspection scripts.");
             } else {
                 responseAsJsonObject = createResponseAsJsonObject(response, tokenToIntrospect);
                 log.trace("Canceled changes made by external introspection script since method returned `false`.");
