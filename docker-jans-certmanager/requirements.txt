@@ -1,2 +1,2 @@
 click==6.7
-git+https://github.com/JanssenProject/jans-cloud-native@3e226fe36da47353ed3c90b330f23bcb9a36342a#egg=jans-pycloudlib&subdirectory=jans-pycloudlib
+git+https://github.com/JanssenProject/jans-cloud-native@7738312d250c99275fe81acb58abccabf9cea71e#egg=jans-pycloudlib&subdirectory=jans-pycloudlib
