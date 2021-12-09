@@ -75,4 +75,4 @@ jobs:
           assignees: moabu
           reviewers: moabu
           delete-branch: true
-          base: ${{ github.base_ref }}
+          base: ${{ github.head_ref }}
