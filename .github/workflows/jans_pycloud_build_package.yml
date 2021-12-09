@@ -46,19 +46,23 @@ jobs:
             sed -i '/git+https/c\git+https://github.com/${{ github.repository }}@${{ github.sha }}#egg=jans-pycloudlib&subdirectory=jans-pycloudlib' ./docker-jans-$image/requirements.txt
           done
 
-      - name: Configure Git and open stable PR
+      - name: Configure Git
         run: |
           git config user.name "mo-auto"
           git config user.email "54212639+mo-auto@users.noreply.github.com"
           git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
           git add -A
           git commit -S -s -m "chore(jans-pycloudlib): updated build"
-
+          if [[ github.event_name == 'pull_request' ]]; then
+            echo "pushing to feature branch"
+            git push
+          fi
 
       # Buggy behaviour with gh pr command. Will use the following action until bugs have been fixed.
       #PR=$(gh pr create --head $PR_DOCKER_DEV_BRANCH_NAME --assignee "moabu" --base "master" --body "Updated build date. Auto-generated." --label "enhancement,bot" --reviewer "moabu" --title "chore(Dockerfile): updated build dates" || echo "PR Branch is already open")
       - name: Open PR
         uses: peter-evans/create-pull-request@v3
+        if: github.event_name != 'pull_request'
         with:
           token: ${{ secrets.MOWORKFLOWTOKEN }}
           committer: mo-auto <54212639+mo-auto@users.noreply.github.com>
