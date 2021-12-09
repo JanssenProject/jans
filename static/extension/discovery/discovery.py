@@ -7,18 +7,13 @@
 from io.jans.model.custom.script.type.discovery import DiscoveryType
 
 class Discovery(DiscoveryType):
-    def __init__(self, currentTimeMillis):
-        self.currentTimeMillis = currentTimeMillis
+    def __init__(self, millis):
+        self.currentTimeMillis = millis
 
-    def init(self, customScript, configurationAttributes):
-        print "Discovery script. Initializing ..."
-        print "Discovery script. Initialized successfully"
-
+    def init(self, custom_script, configuration_attributes):
         return True
 
-    def destroy(self, configurationAttributes):
-        print "Discovery script. Destroying ..."
-        print "Discovery script. Destroyed successfully"
+    def destroy(self, configuration_attributes):
         return True
 
     def getApiVersion(self):
@@ -29,10 +24,6 @@ class Discovery(DiscoveryType):
     # Note :
     # responseAsJsonObject - is org.json.JSONObject, you can use any method to manipulate JSON
     # context is reference of io.jans.as.server.model.common.ExecutionContext (in https://github.com/JanssenProject/jans-auth-server project, )
-    def modifyResponse(self, responseAsJsonObject, context):
-        print "Modify discovery response: %s" % responseAsJsonObject
-
-        responseAsJsonObject.accumulate("key_from_script", "value_from_script")
-
-        print "Discovery response modified. Response after modification: %s" % responseAsJsonObject
+    def modifyResponse(self, response, context):
+        response.accumulate("key_from_script", "value_from_script")
         return True
