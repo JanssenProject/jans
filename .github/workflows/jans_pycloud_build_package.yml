@@ -111,7 +111,7 @@ jobs:
           title: 'chore(Dockerfiles): updated janspycloud build'
           body: |
             - Always leave open
-            - Updated stable build
+            - Updated unstable build
             - Auto-generated.
           labels: |
             enhancement
@@ -119,3 +119,4 @@ jobs:
           assignees: moabu
           reviewers: moabu
           delete-branch: true
+          base: ${{ github.head_ref }}
