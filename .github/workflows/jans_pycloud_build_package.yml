@@ -119,4 +119,4 @@ jobs:
           assignees: moabu
           reviewers: moabu
           delete-branch: true
-          base: ${{ github.head_ref }}
+          base: ${{ github.base_ref }}
