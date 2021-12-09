@@ -28,11 +28,11 @@
   },
   "givenName": {
     "mysql": {
-      "size": 64,
+      "size": 128,
       "type": "VARCHAR"
     },
     "spanner": {
-      "size": 64,
+      "size": 128,
       "type": "STRING"
     }
   },
@@ -88,11 +88,11 @@
   },
   "sn": {
     "mysql": {
-      "size": 64,
+      "size": 128,
       "type": "VARCHAR"
     },
     "spanner": {
-      "size": 64,
+      "size": 128,
       "type": "STRING"
     }
   },
@@ -384,11 +384,11 @@
   },
   "jansStatus": {
     "mysql": {
-      "size": 64,
+      "size": 16,
       "type": "VARCHAR"
     },
     "spanner": {
-      "size": 64,
+      "size": 16,
       "type": "STRING"
     }
   },
@@ -486,16 +486,6 @@
     },
     "spanner": {
       "type": "STRING(MAX)"
-    }
-  },
-  "picture": {
-    "mysql": {
-      "size": 96,
-      "type": "VARCHAR"
-    },
-    "spanner": {
-      "size": 96,
-      "type": "STRING"
     }
   },
   "jansInitiateLoginURI": {
@@ -901,6 +891,122 @@
     },
     "spanner": {
       "type": "STRING(MAX)"
+    }
+  },
+  "cn": {
+    "mysql": {
+      "size": 128,
+      "type": "VARCHAR"
+    },
+    "spanner": {
+      "size": 128,
+      "type": "STRING"
+    }
+  },
+  "secretAnswer": {
+    "mysql": {
+      "type": "TINYTEXT"
+    },
+    "pgsql": {
+      "type": "TEXT"
+    },
+    "spanner": {
+      "type": "STRING(MAX)"
+    }
+  },
+  "secretQuestion": {
+    "mysql": {
+      "type": "TINYTEXT"
+    },
+    "pgsql": {
+      "type": "TEXT"
+    },
+    "spanner": {
+      "type": "STRING(MAX)"
+    }
+  },
+  "street": {
+    "mysql": {
+      "type": "TINYTEXT"
+    },
+    "pgsql": {
+      "type": "TEXT"
+    },
+    "spanner": {
+      "type": "STRING(MAX)"
+    }
+  },
+  "address": {
+    "mysql": {
+      "type": "TINYTEXT"
+    },
+    "pgsql": {
+      "type": "TEXT"
+    },
+    "spanner": {
+      "type": "STRING(MAX)"
+    }
+  },
+  "picture": {
+    "mysql": {
+      "type": "TINYTEXT"
+    },
+    "pgsql": {
+      "type": "TEXT"
+    },
+    "spanner": {
+      "type": "STRING(MAX)"
+    }
+  },
+  "postalCode": {
+    "mysql": {
+      "size": 16,
+      "type": "VARCHAR"
+    },
+    "spanner": {
+      "size": 16,
+      "type": "STRING"
+    }
+  },
+  "mail": {
+    "mysql": {
+      "size": 96,
+      "type": "VARCHAR"
+    },
+    "spanner": {
+      "size": 96,
+      "type": "STRING"
+    }
+  },
+  "gender": {
+    "mysql": {
+      "size": 32,
+      "type": "VARCHAR"
+    },
+    "spanner": {
+      "size": 32,
+      "type": "STRING"
+    }
+  },
+  "jansNameFormatted": {
+    "mysql": {
+      "type": "TINYTEXT"
+    },
+    "pgsql": {
+      "type": "TEXT"
+    },
+    "spanner": {
+      "type": "STRING(MAX)"
+    }
+  },
+  "jansExtId": {
+    "mysql": {
+      "size": 128,
+      "type": "VARCHAR"
+    },
+    "spanner": {
+      "size": 128,
+      "type": "STRING"
     }
   },
   "jansProfileURL": {
