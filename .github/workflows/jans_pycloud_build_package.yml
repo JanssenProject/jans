@@ -55,8 +55,7 @@ jobs:
           git commit -S -s -m "chore(jans-pycloudlib): updated build"
           if [[ "${{ github.event_name }}" == 'pull_request' ]]; then
             echo "pushing to feature branch"
-            git pull
-            git push origin HEAD:${{ github.head_ref }}
+            git push origin HEAD:${{ github.head_ref }} --force
           fi
 
       # Buggy behaviour with gh pr command. Will use the following action until bugs have been fixed.
