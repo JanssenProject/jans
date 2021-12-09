@@ -55,7 +55,7 @@ jobs:
           git commit -S -s -m "chore(jans-pycloudlib): updated build"
           if [[ "${{ github.event_name }}" == 'pull_request' ]]; then
             echo "pushing to feature branch"
-            git pull ${{ github.head_ref }}
+            git pull
             git push origin HEAD:${{ github.head_ref }}
           fi
 
