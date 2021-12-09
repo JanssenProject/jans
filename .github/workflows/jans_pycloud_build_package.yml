@@ -23,7 +23,7 @@ jobs:
   docker:
     runs-on: ubuntu-latest
     env:
-      PR_DOCKER_STABLE_BRANCH_NAME: update-jans-pycloudlib
+      PR_DOCKER_BRANCH_NAME: update-jans-pycloudlib
       GITHUB_TOKEN: ${{ secrets.MOWORKFLOWTOKEN }}
     steps:
       - name: Checkout
@@ -63,7 +63,7 @@ jobs:
           token: ${{ secrets.MOWORKFLOWTOKEN }}
           committer: mo-auto <54212639+mo-auto@users.noreply.github.com>
           author: mo-auto <54212639+mo-auto@users.noreply.github.com>
-          branch: ${{ env.PR_DOCKER_DEV_BRANCH_NAME }}
+          branch: ${{ env.PR_DOCKER_BRANCH_NAME }}
           title: 'chore(Dockerfiles): updated janspycloud build'
           body: |
             - Always leave open
