@@ -7,8 +7,6 @@ on:
     branches:
       # below branch is triggered by jenkins which triggers dev image
       - update-source-build-date
-      # below protected branche prefix only allows internal teams to push to it
-      - cn-*
     paths:
       - "docker-jans-**/**"
       - "!**.md"
@@ -23,6 +21,10 @@ on:
       - "!docker-jans-**/CHANGELOG.md"
       - "!docker-jans-**/version.txt"
       - "!**.md"
+  pull_request_target:
+    branches:
+      # below protected branches prefix only allows internal teams to push to it
+      - cn-*
   workflow_dispatch:
 
 jobs:
