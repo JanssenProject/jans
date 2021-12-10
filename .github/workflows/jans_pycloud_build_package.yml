@@ -63,7 +63,7 @@ jobs:
             git remote set-url origin https://x-access-token:${{ secrets.MOWORKFLOWTOKEN }}@github.com/${{ github.repository }}
             git commit -S -s -m "chore(jans-pycloudlib): updated build"
             git push
-          else; then
+          else
             echo "Comitting.."
             git commit -S -s -m "chore(jans-pycloudlib): updated build"
           fi
