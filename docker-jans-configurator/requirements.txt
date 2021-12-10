@@ -1,4 +1,4 @@
 click==6.7
 marshmallow==3.10.0
 fqdn==1.4.0
-git+https://github.com/JanssenProject/jans-cloud-native@7738312d250c99275fe81acb58abccabf9cea71e#egg=jans-pycloudlib&subdirectory=jans-pycloudlib
+git+https://github.com/JanssenProject/jans-cloud-native@e100cbeae0c49734101f12ae535e6b1cc659ff1c#egg=jans-pycloudlib&subdirectory=jans-pycloudlib
