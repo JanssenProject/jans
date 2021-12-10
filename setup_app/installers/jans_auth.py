@@ -31,6 +31,7 @@ class JansAuthInstaller(JettyInstaller):
         self.output_folder = os.path.join(Config.outputFolder, self.service_name)
 
         self.ldif_config = os.path.join(self.output_folder, 'configuration.ldif')
+        self.ldif_role_scope_mappings = os.path.join(self.output_folder, 'role-scope-mappings.ldif')
         self.oxauth_config_json = os.path.join(self.output_folder, 'jans-auth-config.json')
         self.oxauth_static_conf_json = os.path.join(self.templates_folder, 'jans-auth-static-conf.json')
         self.oxauth_error_json = os.path.join(self.templates_folder, 'jans-auth-errors.json')
@@ -88,9 +89,10 @@ class JansAuthInstaller(JettyInstaller):
 
         self.ldif_scripts = os.path.join(Config.outputFolder, 'scripts.ldif')
         self.renderTemplateInOut(self.ldif_scripts, Config.templateFolder, Config.outputFolder)
-        self.renderTemplateInOut(self.ldif_config, self.templates_folder, self.output_folder)
+        for temp in (self.ldif_config, self.ldif_role_scope_mappings):
+            self.renderTemplateInOut(temp, self.templates_folder, self.output_folder)
 
-        self.dbUtils.import_ldif([self.ldif_config, self.ldif_scripts])
+        self.dbUtils.import_ldif([self.ldif_config, self.ldif_scripts, self.ldif_role_scope_mappings])
         if Config.profile == 'jans':
             self.dbUtils.import_ldif([self.ldif_people, self.ldif_groups])
         if Config.profile == 'openbanking':
