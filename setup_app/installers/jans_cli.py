@@ -27,8 +27,11 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
         config_dir = home_dir.joinpath('.config')
         config_dir.mkdir(parents=True, exist_ok=True)
 
+        self.output_folder = os.path.join(Config.outputFolder, self.service_name)
         self.jans_cli_install_dir = os.path.join(Config.jansOptFolder, 'jans-cli')
         self.config_ini_fn = config_dir.joinpath('jans-cli.ini')
+        self.ldif_client = os.path.join(self.output_folder, 'client.ldif')
+        self.templates_folder = os.path.join(Config.templateFolder, self.service_name)
 
         if not base.snap:
             self.register_progess()
@@ -62,6 +65,12 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
             self.writeFile(init_fn, '')
             shutil.unpack_archive(self.source_files[i+1][0], swagger_cli_dir)
 
+    def generate_configuration(self):
+        self.check_clients([('role_based_client_id', '2000.')])
+        if not Config.get('role_based_client_pw'):
+            Config.role_based_client_pw = self.getPW()
+            Config.role_based_client_encoded_pw = self.obscure(Config.role_based_client_pw)
+
     def configure(self, options={}):
         config = configparser.ConfigParser()
         if self.config_ini_fn.exists():
@@ -80,8 +89,8 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
             config['DEFAULT'][key_] = options[key_]
 
         if Config.installConfigApi:
-            config['DEFAULT']['jca_client_id'] = Config.jca_client_id
-            config['DEFAULT']['jca_client_secret_enc'] = Config.jca_client_encoded_pw
+            config['DEFAULT']['jca_client_id'] = Config.role_based_client_id
+            config['DEFAULT']['jca_client_secret_enc'] = Config.role_based_client_encoded_pw
 
         if Config.get('installScimServer'):
             config['DEFAULT']['scim_client_id'] = Config.scim_client_id
@@ -89,3 +98,7 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
 
         config.write(self.config_ini_fn.open('w'))
 
+
+    def render_import_templates(self):
+        self.renderTemplateInOut(self.ldif_client, self.templates_folder, self.output_folder)
+        self.dbUtils.import_ldif([self.ldif_client])
