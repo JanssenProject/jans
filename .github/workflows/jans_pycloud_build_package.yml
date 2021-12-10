@@ -20,11 +20,10 @@ on:
   workflow_dispatch:
 
 jobs:
-  docker:
+  pycloud-updater:
     runs-on: ubuntu-latest
     env:
       PR_DOCKER_BRANCH_NAME: update-jans-pycloudlib
-      GITHUB_TOKEN: ${{ secrets.MOWORKFLOWTOKEN }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
