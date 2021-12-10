@@ -26,7 +26,7 @@ jobs:
       PR_DOCKER_BRANCH_NAME: update-jans-pycloudlib
     steps:
       - name: Checkout
-        if: github.actor == "mo-auto"
+        if: github.actor != 'mo-auto'
         uses: actions/checkout@v2
 
       - uses: actions/checkout@v2
@@ -36,7 +36,7 @@ jobs:
 
       - name: Import GPG key
         id: import_gpg
-        if: github.actor != "mo-auto"
+        if: github.actor != 'mo-auto'
         uses: crazy-max/ghaction-import-gpg@v4
         with:
           gpg_private_key: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY }}
@@ -45,7 +45,7 @@ jobs:
           git_commit_gpgsign: true
 
       - name: Update stable requriments in docker images
-        if: github.actor != "mo-auto"
+        if: github.actor != 'mo-auto'
         id: build_stable_reqs
         run: |
           dockerimages="auth-server certmanager client-api config-api configurator fido2 persistence-loader scim"
