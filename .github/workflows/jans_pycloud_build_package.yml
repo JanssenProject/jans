@@ -29,6 +29,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - uses: actions/checkout@v2
+        if: github.event_name == 'pull_request'
+        with:
+          ref: ${{ github.head_ref }}
+
       - name: Import GPG key
         id: import_gpg
         uses: crazy-max/ghaction-import-gpg@v4
@@ -56,7 +61,7 @@ jobs:
           git commit -S -s -m "chore(jans-pycloudlib): updated build"
           if [[ "${{ github.event_name }}" == 'pull_request' ]]; then
             echo "pushing to feature branch"
-            git push origin HEAD:${{ github.head_ref }} --force
+            git push
           fi
 
       # Buggy behaviour with gh pr command. Will use the following action until bugs have been fixed.
