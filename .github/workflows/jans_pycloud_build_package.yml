@@ -61,6 +61,7 @@ jobs:
       # Buggy behaviour with gh pr command. Will use the following action until bugs have been fixed.
       #PR=$(gh pr create --head $PR_DOCKER_DEV_BRANCH_NAME --assignee "moabu" --base "master" --body "Updated build date. Auto-generated." --label "enhancement,bot" --reviewer "moabu" --title "chore(Dockerfile): updated build dates" || echo "PR Branch is already open")
       - name: Open PR
+        id: cpr
         uses: peter-evans/create-pull-request@v3
         if: github.event_name == 'pull_request'
         with:
@@ -79,6 +80,14 @@ jobs:
           assignees: moabu
           delete-branch: true
           base: ${{ github.head_ref }}
+
+      - name: Enable Pull Request Automerge
+        if: steps.cpr.outputs.pull-request-operation == 'created'
+        uses: peter-evans/enable-pull-request-automerge@v1
+        with:
+          token: ${{ secrets.MOWORKFLOWTOKEN }}
+          pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
+          merge-method: squash
 
       # Buggy behaviour with gh pr command. Will use the following action until bugs have been fixed.
       #PR=$(gh pr create --head $PR_DOCKER_DEV_BRANCH_NAME --assignee "moabu" --base "master" --body "Updated build date. Auto-generated." --label "enhancement,bot" --reviewer "moabu" --title "chore(Dockerfile): updated build dates" || echo "PR Branch is already open")
