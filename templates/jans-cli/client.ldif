@@ -33,3 +33,4 @@ jansSignedRespAlg: RS256
 jansSubjectTyp: pairwise
 jansTknEndpointAuthMethod: client_secret_basic
 jansTrustedClnt: false
+jansAccessTknLife: 2592000
