@@ -1,2 +1,2 @@
 ldif==4.1.1
-git+https://github.com/JanssenProject/jans-cloud-native@7738312d250c99275fe81acb58abccabf9cea71e#egg=jans-pycloudlib&subdirectory=jans-pycloudlib
+git+https://github.com/JanssenProject/jans-cloud-native@bea4beaa42262082ad8859df7296508919b60ef8#egg=jans-pycloudlib&subdirectory=jans-pycloudlib
