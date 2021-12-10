@@ -24,7 +24,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       PR_DOCKER_BRANCH_NAME: update-jans-pycloudlib
-      GITHUB_TOKEN: ${{ secrets.MOWORKFLOWTOKEN }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -57,16 +56,15 @@ jobs:
           git config user.email "54212639+mo-auto@users.noreply.github.com"
           git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
           git add -A
+          git commit -S -s -m "chore(jans-pycloudlib): updated build"
 
-          if [[ "${{ github.event_name }}" == 'pull_request' ]]; then
-            echo "pushing to feature branch"
-            git remote set-url origin https://x-access-token:${{ secrets.MOWORKFLOWTOKEN }}@github.com/${{ github.repository }}
-            git commit -S -s -m "chore(jans-pycloudlib): updated build"
-            git push
-          else
-            echo "Comitting.."
-            git commit -S -s -m "chore(jans-pycloudlib): updated build"
-          fi
+
+      - name: Push changes
+        if: github.event_name == 'pull_request'
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.MOWORKFLOWTOKEN }}
+          branch: ${{ github.head_ref }}
 
       # Buggy behaviour with gh pr command. Will use the following action until bugs have been fixed.
       #PR=$(gh pr create --head $PR_DOCKER_DEV_BRANCH_NAME --assignee "moabu" --base "master" --body "Updated build date. Auto-generated." --label "enhancement,bot" --reviewer "moabu" --title "chore(Dockerfile): updated build dates" || echo "PR Branch is already open")
