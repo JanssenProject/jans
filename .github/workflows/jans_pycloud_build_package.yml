@@ -55,12 +55,11 @@ jobs:
           git config user.name "mo-auto"
           git config user.email "54212639+mo-auto@users.noreply.github.com"
           git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
-          git config --global github.token ${{ secrets.MOWORKFLOWTOKEN }}
           git add -A
           git commit -S -s -m "chore(jans-pycloudlib): updated build"
           if [[ "${{ github.event_name }}" == 'pull_request' ]]; then
             echo "pushing to feature branch"
-            git push
+            git push https://${{ secrets.MOWORKFLOWTOKEN }}@github.com/${{ github.repository }}.git
           fi
 
       # Buggy behaviour with gh pr command. Will use the following action until bugs have been fixed.
