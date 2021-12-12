@@ -78,7 +78,7 @@ public class DiscoveryService {
                 return r;
             }
             final OpenIdConfigurationClient client = opClientFactory.createOpenIdConfigurationClient(opConfigurationEndpoint);
-            client.setExecutor(httpService.getClientExecutor());
+            client.setExecutor(httpService.getClientEngine());
             final OpenIdConfigurationResponse response = client.execOpenIdConfiguration();
             LOG.trace("Discovery response: {} ", response.getEntity());
             if (StringUtils.isNotBlank(response.getEntity())) {

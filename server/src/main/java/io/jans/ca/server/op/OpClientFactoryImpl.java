@@ -5,13 +5,17 @@ import io.jans.as.client.uma.UmaClientFactory;
 import io.jans.as.model.crypto.signature.RSAPublicKey;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.jws.RSASigner;
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.core.UriBuilder;
 import io.jans.ca.server.introspection.ClientFactory;
 import io.jans.ca.rs.protect.resteasy.PatProvider;
 import io.jans.ca.rs.protect.resteasy.ResourceRegistrar;
 import io.jans.ca.rs.protect.resteasy.RptPreProcessInterceptor;
 import io.jans.ca.rs.protect.resteasy.ServiceProvider;
-import org.jboss.resteasy.client.ClientExecutor;
-import org.jboss.resteasy.client.ClientRequest;
+import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
+import org.jboss.resteasy.client.jaxrs.ResteasyClient;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 
 public class OpClientFactoryImpl implements OpClientFactory {
 
@@ -66,8 +70,12 @@ public class OpClientFactoryImpl implements OpClientFactory {
         return new RptPreProcessInterceptor(resourceRegistrar);
     }
 
-    public ClientRequest createClientRequest(String uriTemplate, ClientExecutor executor) throws Exception {
-        return new ClientRequest(uriTemplate, executor);
+    public Builder createClientRequest(String uriTemplate, ClientHttpEngine clientEngine) throws Exception {
+        final ResteasyClient client = ((ResteasyClientBuilder) ResteasyClientBuilder.newBuilder()).httpEngine(clientEngine).build();
+        final ResteasyWebTarget target = client.target(UriBuilder.fromPath(uriTemplate));
+
+        return target.request();
+
     }
 
 }
