@@ -237,7 +237,7 @@
     <dependency>
       <groupId>io.dropwizard</groupId>
       <artifactId>dropwizard-testing</artifactId>
-      <version>2.0.12</version>
+      <version>2.0.23</version>
       <scope>test</scope>
       <exclusions>
         <exclusion>
@@ -358,10 +358,6 @@
           <artifactId>gson-fire</artifactId>
           <groupId>io.gsonfire</groupId>
         </exclusion>
-        <exclusion>
-          <artifactId>threetenbp</artifactId>
-          <groupId>org.threeten</groupId>
-        </exclusion>
       </exclusions>
     </dependency>
     <dependency>
@@ -394,7 +390,7 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.13.1</version>
+      <version>4.13.2</version>
       <scope>test</scope>
       <exclusions>
         <exclusion>
@@ -406,24 +402,16 @@
     <dependency>
       <groupId>org.seleniumhq.selenium</groupId>
       <artifactId>selenium-remote-driver</artifactId>
-      <version>2.53.1</version>
+      <version>3.141.59</version>
       <scope>test</scope>
       <exclusions>
-        <exclusion>
-          <artifactId>cglib-nodep</artifactId>
-          <groupId>cglib</groupId>
-        </exclusion>
         <exclusion>
           <artifactId>selenium-api</artifactId>
           <groupId>org.seleniumhq.selenium</groupId>
         </exclusion>
         <exclusion>
-          <artifactId>jna</artifactId>
-          <groupId>net.java.dev.jna</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>jna-platform</artifactId>
-          <groupId>net.java.dev.jna</groupId>
+          <artifactId>byte-buddy</artifactId>
+          <groupId>net.bytebuddy</groupId>
         </exclusion>
       </exclusions>
     </dependency>
@@ -445,7 +433,7 @@
     </dependency>
     <dependency>
       <groupId>org.seleniumhq.selenium</groupId>
-      <artifactId>selenium-htmlunit-driver</artifactId>
+      <artifactId>htmlunit-driver</artifactId>
       <version>2.52.0</version>
       <scope>test</scope>
       <exclusions>
@@ -453,7 +441,57 @@
           <artifactId>htmlunit</artifactId>
           <groupId>net.sourceforge.htmlunit</groupId>
         </exclusion>
+        <exclusion>
+          <artifactId>selenium-api</artifactId>
+          <groupId>org.seleniumhq.selenium</groupId>
+        </exclusion>
       </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>net.sourceforge.htmlunit</groupId>
+      <artifactId>htmlunit</artifactId>
+      <version>2.52.0</version>
+      <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <artifactId>xalan</artifactId>
+          <groupId>xalan</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>httpmime</artifactId>
+          <groupId>org.apache.httpcomponents</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>htmlunit-core-js</artifactId>
+          <groupId>net.sourceforge.htmlunit</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>neko-htmlunit</artifactId>
+          <groupId>net.sourceforge.htmlunit</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>commons-net</artifactId>
+          <groupId>commons-net</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>dec</artifactId>
+          <groupId>org.brotli</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>salvation2</artifactId>
+          <groupId>com.shapesecurity</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>websocket-client</artifactId>
+          <groupId>org.eclipse.jetty.websocket</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>net.sourceforge.htmlunit</groupId>
+      <artifactId>htmlunit-cssparser</artifactId>
+      <version>1.9.0</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
   <dependencyManagement>
@@ -476,7 +514,7 @@
     <h2.version>1.4.194</h2.version>
     <dbcp.version>1.4</dbcp.version>
     <generate.windows.exe>false</generate.windows.exe>
-    <dropwizard.version>2.0.12</dropwizard.version>
+    <dropwizard.version>2.0.23</dropwizard.version>
     <commons-daemon.bin.version>1.2.1</commons-daemon.bin.version>
     <skip.swagger.client.generation>true</skip.swagger.client.generation>
     <jersey-test-framework-provider>2.29.1</jersey-test-framework-provider>

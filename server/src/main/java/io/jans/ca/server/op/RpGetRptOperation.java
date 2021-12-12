@@ -13,7 +13,7 @@ import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.Jackson2;
 import io.jans.ca.common.params.RpGetRptParams;
 import io.jans.ca.common.response.IOpResponse;
-import org.jboss.resteasy.client.ClientResponseFailure;
+import javax.ws.rs.ClientErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,9 +41,9 @@ public class RpGetRptOperation extends BaseOperation<RpGetRptParams> {
         try {
             validate(params);
             return getUmaTokenService().getRpt(params);
-        } catch (ClientResponseFailure ex) {
+        } catch (ClientErrorException ex) {
             LOG.trace(ex.getMessage(), ex);
-            String entity = (String) ex.getResponse().getEntity(String.class);
+            String entity = (String) ex.getResponse().readEntity(String.class);
             return handleRptError(ex.getResponse().getStatus(), entity);
         }
     }
