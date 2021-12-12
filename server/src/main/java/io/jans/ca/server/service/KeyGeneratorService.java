@@ -7,6 +7,7 @@ import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.exception.CryptoProviderException;
 import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.jwk.JSONWebKey;
 import io.jans.as.model.jwk.JSONWebKeySet;
@@ -82,7 +83,7 @@ public class KeyGeneratorService {
         for (Algorithm algorithm : signatureAlgorithms) {
             try {
                 SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(algorithm.name());
-                JSONObject result = this.cryptoProvider.generateKey(algorithm, calendar.getTimeInMillis(), Use.SIGNATURE);
+                JSONObject result = this.cryptoProvider.generateKey(algorithm, calendar.getTimeInMillis());
 
                 JSONWebKey key = JSONWebKey.fromJSONObject(result);
                 jwks.getKeys().add(key);
@@ -95,7 +96,7 @@ public class KeyGeneratorService {
             try {
                 KeyEncryptionAlgorithm encryptionAlgorithm = KeyEncryptionAlgorithm.fromName(algorithm.getParamName());
                 JSONObject result = this.cryptoProvider.generateKey(algorithm,
-                        calendar.getTimeInMillis(), Use.ENCRYPTION);
+                        calendar.getTimeInMillis());
 
                 JSONWebKey key = JSONWebKey.fromJSONObject(result);
                 jwks.getKeys().add(key);
@@ -152,7 +153,7 @@ public class KeyGeneratorService {
             }
             return kid;
 
-        } catch (KeyStoreException e) {
+        } catch (CryptoProviderException e) {
             LOG.error("Error in keyId generation");
 
         }

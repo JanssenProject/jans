@@ -86,7 +86,7 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
 
         final RegisterClient registerClient = new RegisterClient(rp.getClientRegistrationClientUri());
         registerClient.setRequest(registerRequest);
-        registerClient.setExecutor(getHttpService().getClientExecutor());
+        registerClient.setExecutor(getHttpService().getClientEngine());
         final RegisterResponse response = registerClient.exec();
         if (response != null) {
             if (response.getStatus() == 200) {

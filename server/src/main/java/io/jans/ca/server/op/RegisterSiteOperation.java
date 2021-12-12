@@ -472,7 +472,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
 
         final RegisterClient registerClient = getOpClientFactory().createRegisterClient(registrationEndpoint);
         registerClient.setRequest(request);
-        registerClient.setExecutor(getHttpService().getClientExecutor());
+        registerClient.setExecutor(getHttpService().getClientEngine());
         final RegisterResponse response = registerClient.exec();
         if (response != null) {
             if (!Strings.isNullOrEmpty(response.getClientId()) && !Strings.isNullOrEmpty(response.getClientSecret())) {
