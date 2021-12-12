@@ -66,7 +66,7 @@ public class AuthorizationCodeFlowOperation extends BaseOperation<AuthorizationC
 
         final AuthorizeClient authorizeClient = new AuthorizeClient(discovery.getAuthorizationEndpoint());
         authorizeClient.setRequest(request);
-        authorizeClient.setExecutor(getHttpService().getClientExecutor());
+        authorizeClient.setExecutor(getHttpService().getClientEngine());
         final AuthorizationResponse response1 = authorizeClient.exec();
 
         final String scope = response1.getScope();
@@ -84,7 +84,7 @@ public class AuthorizationCodeFlowOperation extends BaseOperation<AuthorizationC
             tokenRequest.setScope(scope);
 
             final TokenClient tokenClient1 = new TokenClient(discovery.getTokenEndpoint());
-            tokenClient1.setExecutor(getHttpService().getClientExecutor());
+            tokenClient1.setExecutor(getHttpService().getClientEngine());
             tokenClient1.setRequest(tokenRequest);
             final TokenResponse response2 = tokenClient1.exec();
 
