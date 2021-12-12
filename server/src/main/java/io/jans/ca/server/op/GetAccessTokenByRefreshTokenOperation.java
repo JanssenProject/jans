@@ -42,7 +42,7 @@ public class GetAccessTokenByRefreshTokenOperation extends BaseOperation<GetAcce
             validate(params);
             final Rp rp = getRp();
             final TokenClient tokenClient = new TokenClient(getDiscoveryService().getConnectDiscoveryResponse(rp).getTokenEndpoint());
-            tokenClient.setExecutor(getHttpService().getClientExecutor());
+            tokenClient.setExecutor(getHttpService().getClientEngine());
             final TokenResponse tokenResponse = tokenClient.execRefreshToken(scopeAsString(params), params.getRefreshToken(), rp.getClientId(), rp.getClientSecret());
             if (tokenResponse != null) {
                 if (Util.allNotBlank(tokenResponse.getAccessToken())) {
