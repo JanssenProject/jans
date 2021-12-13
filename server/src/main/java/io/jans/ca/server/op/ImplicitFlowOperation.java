@@ -3,6 +3,7 @@
  */
 package io.jans.ca.server.op;
 
+import com.google.api.client.util.Lists;
 import com.google.inject.Injector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,22 +46,22 @@ public class ImplicitFlowOperation extends BaseOperation<ImplicitFlowParams> {
 
     private ImplicitFlowResponse requestToken(OpenIdConfigurationResponse discovery, ImplicitFlowParams params) {
         // 1. Request authorization and receive the authorization code.
-        final List<ResponseType> responseTypes = new ArrayList<ResponseType>();
-        responseTypes.add(ResponseType.CODE);
-        responseTypes.add(ResponseType.ID_TOKEN);
-        final List<String> scopes = new ArrayList<String>();
+        final List<ResponseType> implicitResponseTypes = new ArrayList<ResponseType>();
+        implicitResponseTypes.add(ResponseType.CODE);
+        implicitResponseTypes.add(ResponseType.ID_TOKEN);
+        final List<String> scopes = Lists.newArrayList();
         scopes.add(params.getScope());
 
         String nonce = params.getNonce();
-        final AuthorizationRequest request = new AuthorizationRequest(responseTypes, params.getClientId(), scopes, params.getRedirectUrl(), nonce);
-        request.setState("af0ifjsldkj");
-        request.setAuthUsername(params.getUserId());
-        request.setAuthPassword(params.getUserSecret());
-        request.getPrompts().add(Prompt.NONE);
-        request.setNonce(UUID.randomUUID().toString());
+        final AuthorizationRequest implicitRequest = new AuthorizationRequest(implicitResponseTypes, params.getClientId(), scopes, params.getRedirectUrl(), nonce);
+        implicitRequest.setState("af0ifjsldkj");
+        implicitRequest.setAuthUsername(params.getUserId());
+        implicitRequest.setAuthPassword(params.getUserSecret());
+        implicitRequest.getPrompts().add(Prompt.NONE);
+        implicitRequest.setNonce(UUID.randomUUID().toString());
 
         final AuthorizeClient authorizeClient = new AuthorizeClient(discovery.getAuthorizationEndpoint());
-        authorizeClient.setRequest(request);
+        authorizeClient.setRequest(implicitRequest);
         authorizeClient.setExecutor(getHttpService().getClientEngine());
         final AuthorizationResponse response1 = authorizeClient.exec();
 
@@ -70,29 +71,29 @@ public class ImplicitFlowOperation extends BaseOperation<ImplicitFlowParams> {
         if (Util.allNotBlank(authorizationCode)) {
 
             // 2. Request access token using the authorization code.
-            final TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
-            tokenRequest.setCode(authorizationCode);
-            tokenRequest.setRedirectUri(params.getRedirectUrl());
-            tokenRequest.setAuthUsername(params.getClientId());
-            tokenRequest.setAuthPassword(params.getClientSecret());
-            tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
-            tokenRequest.setScope(scope);
+            final TokenRequest implicitTokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+            implicitTokenRequest.setCode(authorizationCode);
+            implicitTokenRequest.setRedirectUri(params.getRedirectUrl());
+            implicitTokenRequest.setAuthUsername(params.getClientId());
+            implicitTokenRequest.setAuthPassword(params.getClientSecret());
+            implicitTokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
+            implicitTokenRequest.setScope(scope);
 
             final TokenClient tokenClient1 = new TokenClient(discovery.getTokenEndpoint());
             tokenClient1.setExecutor(getHttpService().getClientEngine());
-            tokenClient1.setRequest(tokenRequest);
+            tokenClient1.setRequest(implicitTokenRequest);
             final TokenResponse response2 = tokenClient1.exec();
 
             if (response2.getStatus() == 200 || response2.getStatus() == 302) { // success or redirect
                 if (Util.allNotBlank(response2.getAccessToken(), response2.getRefreshToken())) {
-                    final ImplicitFlowResponse opResponse = new ImplicitFlowResponse();
-                    opResponse.setAccessToken(response2.getAccessToken());
-                    opResponse.setIdToken(response2.getIdToken());
-                    opResponse.setRefreshToken(response2.getRefreshToken());
-                    opResponse.setAuthorizationCode(authorizationCode);
-                    opResponse.setScope(scope);
-                    opResponse.setExpiresIn(response2.getExpiresIn());
-                    return opResponse;
+                    final ImplicitFlowResponse implicitFlowResponse = new ImplicitFlowResponse();
+                    implicitFlowResponse.setAccessToken(response2.getAccessToken());
+                    implicitFlowResponse.setIdToken(response2.getIdToken());
+                    implicitFlowResponse.setRefreshToken(response2.getRefreshToken());
+                    implicitFlowResponse.setAuthorizationCode(authorizationCode);
+                    implicitFlowResponse.setScope(scope);
+                    implicitFlowResponse.setExpiresIn(response2.getExpiresIn());
+                    return implicitFlowResponse;
                 }
             }
         } else {
