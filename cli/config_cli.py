@@ -293,7 +293,6 @@ class JCA_CLI:
         return rest
 
     def check_connection(self):
-        return True
         rest = self.get_rest_client()
         headers = urllib3.make_headers(basic_auth='{}:{}'.format(self.client_id, self.client_secret))
         url = 'https://{}/jans-auth/restv1/token'.format(self.host)
