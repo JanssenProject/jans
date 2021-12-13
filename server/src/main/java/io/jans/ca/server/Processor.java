@@ -16,8 +16,6 @@ import io.jans.ca.server.op.IOperation;
 import io.jans.ca.server.op.OperationFactory;
 import io.jans.ca.server.service.ValidationService;
 
-import javax.ws.rs.WebApplicationException;
-
 /**
  * oxD operation processor.
  *
@@ -56,8 +54,7 @@ public class Processor {
                     throw new HttpException(ErrorResponseCode.UNSUPPORTED_OPERATION);
                 }
             } catch (ClientErrorException e) {
-                LOG.error(e.getLocalizedMessage(), e);
-                throw new WebApplicationException((String) e.getResponse().readEntity(String.class), e.getResponse().getStatus());
+                throw new WebApplicationException(e.getResponse().readEntity(String.class), e.getResponse().getStatus());
             } catch (WebApplicationException e) {
                 LOG.error(e.getLocalizedMessage(), e);
                 throw e;

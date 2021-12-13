@@ -44,7 +44,7 @@ public class RptPreProcessInterceptor {
         this.serviceProvider = resourceRegistrar.getServiceProvider();
     }
 
-    public ServerResponse preProcess(HttpRequest request, ResourceMethodInvoker invoker) throws Failure, WebApplicationException {
+    public ServerResponse preProcess(HttpRequest request) throws Failure, WebApplicationException {
 
         String path = getPath(request);
         String httpMethod = request.getHttpMethod();

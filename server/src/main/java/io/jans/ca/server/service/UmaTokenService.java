@@ -92,11 +92,9 @@ public class UmaTokenService {
             }
         }
 
-        //ClientRequest client = opClientFactory.createClientRequest(discovery.getTokenEndpoint(), httpService.getClientExecutor());
         Builder client = opClientFactory.createClientRequest(discovery.getTokenEndpoint(), httpService.getClientEngine());
         client.header("Authorization", "Basic " + Utils.encodeCredentials(rp.getClientId(), rp.getClientSecret()));
-        /*client.formParameter("grant_type", GrantType.OXAUTH_UMA_TICKET.getValue());
-        client.formParameter("ticket", params.getTicket());*/
+
         Form formRequest = new Form();
         formRequest.param("grant_type", GrantType.OXAUTH_UMA_TICKET.getValue());
         formRequest.param("ticket", params.getTicket());
