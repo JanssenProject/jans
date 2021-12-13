@@ -3,11 +3,14 @@
 """Module containing the functions to parse the LDAP schema files.
 """
 
+import os
+import sys
 import re
 import logging
-
-from ldap.schema.models import ObjectClass, AttributeType
-
+from pathlib import Path
+my_path = Path(__file__)
+sys.path.append(my_path.parent.parent.joinpath('setup_app/pylib').as_posix())
+from schema import ObjectClass, AttributeType
 
 class LDAPSchemaParser(object):
     def __init__(self, filename):
