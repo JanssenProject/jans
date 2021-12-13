@@ -4,6 +4,8 @@ import io.jans.as.model.uma.UmaMetadata;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
+
+import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.UriBuilder;
 import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
 
@@ -21,40 +23,40 @@ public class ClientFactory {
     }
 
     public BackCompatibleIntrospectionService createBackCompatibleIntrospectionService(String url) {
-        final ResteasyClient client = (ResteasyClient) ResteasyClientBuilder.newClient();
+        final ResteasyClient client = (ResteasyClient) ClientBuilder.newClient();
         final ResteasyWebTarget target = client.target(UriBuilder.fromPath(url));
 
         return target.proxy(BackCompatibleIntrospectionService.class);
     }
 
     public BackCompatibleIntrospectionService createBackCompatibleIntrospectionService(String url, ClientHttpEngine clientEngine) {
-        final ResteasyClient client = ((ResteasyClientBuilder) ResteasyClientBuilder.newBuilder()).httpEngine(clientEngine).build();
+        final ResteasyClient client = ((ResteasyClientBuilder) ClientBuilder.newBuilder()).httpEngine(clientEngine).build();
         final ResteasyWebTarget target = client.target(UriBuilder.fromPath(url));
         return target.proxy(BackCompatibleIntrospectionService.class);
     }
 
     public BadRptIntrospectionService createBadRptStatusService(UmaMetadata metadata) {
-        final ResteasyClient client = (ResteasyClient) ResteasyClientBuilder.newClient();
+        final ResteasyClient client = (ResteasyClient) ClientBuilder.newClient();
         final ResteasyWebTarget target = client.target(UriBuilder.fromPath(metadata.getIntrospectionEndpoint()));
 
         return target.proxy(BadRptIntrospectionService.class);
     }
 
     public BadRptIntrospectionService createBadRptStatusService(UmaMetadata metadata, ClientHttpEngine clientEngine) {
-        final ResteasyClient client = ((ResteasyClientBuilder) ResteasyClientBuilder.newBuilder()).httpEngine(clientEngine).build();
+        final ResteasyClient client = ((ResteasyClientBuilder) ClientBuilder.newBuilder()).httpEngine(clientEngine).build();
         final ResteasyWebTarget target = client.target(UriBuilder.fromPath(metadata.getIntrospectionEndpoint()));
         return target.proxy(BadRptIntrospectionService.class);
     }
 
     public CorrectRptIntrospectionService createCorrectRptStatusService(UmaMetadata metadata) {
-        final ResteasyClient client = (ResteasyClient) ResteasyClientBuilder.newClient();
+        final ResteasyClient client = (ResteasyClient) ClientBuilder.newClient();
         final ResteasyWebTarget target = client.target(UriBuilder.fromPath(metadata.getIntrospectionEndpoint()));
 
         return target.proxy(CorrectRptIntrospectionService.class);
     }
 
     public CorrectRptIntrospectionService createCorrectRptStatusService(UmaMetadata metadata, ClientHttpEngine clientEngine) {
-        final ResteasyClient client = ((ResteasyClientBuilder) ResteasyClientBuilder.newBuilder()).httpEngine(clientEngine).build();
+        final ResteasyClient client = ((ResteasyClientBuilder) ClientBuilder.newBuilder()).httpEngine(clientEngine).build();
         final ResteasyWebTarget target = client.target(UriBuilder.fromPath(metadata.getIntrospectionEndpoint()));
         return target.proxy(CorrectRptIntrospectionService.class);
     }
