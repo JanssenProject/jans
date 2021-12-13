@@ -16,11 +16,13 @@ import importlib
 import code
 import traceback
 import ast
+import base64
 
 import pprint
 from pathlib import Path
 from urllib.parse import urlencode
 from collections import OrderedDict
+
 
 home_dir = Path.home()
 config_dir = home_dir.joinpath('.config')
@@ -59,6 +61,13 @@ client_secret = os.environ.get(my_op_mode + '_client_secret')
 debug = os.environ.get('jans_client_debug')
 debug_log_file = os.environ.get('jans_debug_log_file')
 error_log_file = os.path.join(cur_dir, 'error.log')
+
+def encode_decode(s, decode=False):
+    cmd = '/opt/jans/bin/encode.py '
+    if decode:
+        cmd += '-D '
+    result = os.popen(cmd + s).read()
+    return result.strip()
 
 
 # dummy api class to reach private ApiClient methods
@@ -99,10 +108,6 @@ parser.add_argument("--endpoint-args",
                     help="Arguments to pass endpoint separated by comma. For example limit:5,status:INACTIVE")
 parser.add_argument("--schema", help="Get sample json schema")
 
-parser.add_argument("--username", help="Auth username")
-parser.add_argument("--password", help="Auth password")
-parser.add_argument("-j", help="Auth password file")
-
 parser.add_argument("-CC", "--config-api-mtls-client-cert", help="Path to SSL Certificate file")
 parser.add_argument("-CK", "--config-api-mtls-client-key", help="Path to SSL Key file")
 parser.add_argument("--key-password", help="Password for SSL Key file")
@@ -134,7 +139,7 @@ if not (host and client_id and client_secret):
             client_secret = config['DEFAULT'][my_op_mode + '_client_secret']
         elif config['DEFAULT'].get(my_op_mode + '_client_secret_enc'):
             client_secret_enc = config['DEFAULT'][my_op_mode + '_client_secret_enc']
-            client_secret = os.popen('/opt/jans/bin/encode.py -D ' + client_secret_enc).read().strip()
+            client_secret = encode_decode(client_secret_enc, decode=True)
         debug = config['DEFAULT'].get('debug')
         debug_log_file = config['DEFAULT'].get('debug_log_file')
     else:
@@ -231,27 +236,13 @@ class JCA_CLI:
         self.host = host
         self.client_id = client_id
         self.client_secret = client_secret
-        self.auth_username = None
-        self.auth_password = None
-        self.askuser = get_bool(config['DEFAULT'].get('askuser'))
-        if self.askuser:
-            if args.username:
-                self.auth_username = args.username
-            if args.password:
-                self.auth_password = args.password
-            elif args.j:
-                if os.path.isfile(args.j):
-                    with open(args.j) as reader:
-                        self.auth_password = reader.read()
-                else:
-                    print(args.j, "does not exist. Exiting ...")
-                    sys.exit()
-            if not (self.auth_username and self.auth_password):
-                print("I need username and password. Exiting ...")
-                sys.exit()
-
         self.swagger_configuration = swagger_client.Configuration()
         self.swagger_configuration.host = 'https://{}'.format(self.host)
+        self.access_token = config['DEFAULT'].get('access_token')
+        if not self.access_token and config['DEFAULT'].get('access_token_enc'):
+            self.access_token = encode_decode(config['DEFAULT']['access_token_enc'], decode=True)
+
+
         if my_op_mode == 'scim':
             self.swagger_configuration.host += '/jans-scim/restv1/v2'
 
@@ -317,6 +308,25 @@ class JCA_CLI:
             raise ValueError(
                 self.colored_text("Unable to connect jans-auth server: {}".format(response.reason), error_color))
 
+
+    def check_access_token(self):
+        if not self.access_token:
+            print(self.colored_text("Access token was not found.", warning_color))
+            return
+
+        try:
+            jwt.decode(self.access_token,
+                    options={
+                            'verify_signature': False,
+                            'verify_exp': True,
+                            'verify_aud': False
+                             }
+                    )
+        except Exception as e:
+            print(self.colored_text("Unable to validate access token: {}".format(e), error_color))
+            self.access_token = None
+
+
     def guess_param_mapping(self, param_s):
         word_list = re.sub( r"([A-Z])", r" \1", param_s).split()
         word_list = [w.lower() for w in word_list]
@@ -353,36 +363,135 @@ class JCA_CLI:
 
         self.menu = menu
 
-    def get_access_token(self, scope):
-        sys.stderr.write("Getting access token for scope {}\n".format(scope))
+
+    def get_json_from_response(self, response):
+        js_data = {}
+        data = response.data
+        if data:
+            try:
+                js_data = json.loads(data.decode())
+            except:
+                pass
+        return js_data
+
+    def get_jwt_access_token(self):
+
         rest = self.get_rest_client()
-        headers = urllib3.make_headers(basic_auth='{}:{}'.format(self.client_id, self.client_secret))
-        url = 'https://{}/jans-auth/restv1/token'.format(self.host)
-        headers['Content-Type'] = 'application/x-www-form-urlencoded'
-        if self.askuser:
-            post_params = {"grant_type": "password", "scope": scope, "username": self.auth_username,
-                           "password": self.auth_password}
-        else:
-            post_params = {"grant_type": "client_credentials", "scope": scope}
 
+        """
+        STEP 1: Get device verification code
+        This fucntion requests user code from jans-auth, print result and
+        waits untill verification done.
+        """
+
+        headers_basic_auth = urllib3.make_headers(basic_auth='{}:{}'.format(self.client_id, self.client_secret))
+        headers_basic_auth['Content-Type'] = 'application/x-www-form-urlencoded'
         response = rest.POST(
-            url,
-            headers=headers,
-            post_params=post_params
-        )
+            'https://{}/jans-auth/restv1/device_authorization'.format(host),
+            headers=headers_basic_auth,
+            post_params={
+                'client_id': self.client_id,
+                'scope': 'openid+profile+email+offline_access'
+                }
+            )
 
-        try:
-            data = json.loads(response.data)
-            if 'access_token' in data:
-                self.swagger_configuration.access_token = data['access_token']
-            else:
-                sys.stderr.write("Error while getting access token")
-                sys.stderr.write(data)
-                sys.stderr.write('\n')
-        except:
-            print("Error while getting access token")
-            sys.stderr.write(response.data)
-            sys.stderr.write('\n')
+        if response.status != 200:
+            raise ValueError(
+                self.colored_text("Unable to get device authorization user code: {}".format(response.reason), error_color))
+
+        result = self.get_json_from_response(response.urllib3_response)
+
+        if 'verification_uri' in result and 'user_code' in result:
+
+            print("Please visit verification url {} and enter user code {} in {} secods".format(
+                    self.colored_text(result['verification_uri'], success_color),
+                    self.colored_text(result['user_code'], bold_color),
+                    result['expires_in']
+                    )
+                )
+
+            input(self.colored_text("Please press «Enter» when ready", warning_color))
+
+        else:
+            raise ValueError(self.colored_text("Unable to get device authorization user code"))
+
+        """
+        STEP 2: Get access token for retreiving user info
+        After device code was verified, we use it to retreive refresh token
+        """
+        response = rest.POST(
+            'https://{}/jans-auth/restv1/token'.format(host),
+            headers=headers_basic_auth,
+            post_params=[
+                ('client_id',self.client_id),
+                ('scope','openid+profile+email+offline_access'),
+                ('grant_type', 'urn:ietf:params:oauth:grant-type:device_code'),
+                ('grant_type', 'refresh_token'),
+                ('device_code',result['device_code'])
+                ]
+            )
+
+        if response.status != 200:
+            raise ValueError(
+                self.colored_text("Unable to get access token"))
+
+        result = self.get_json_from_response(response.urllib3_response)
+
+
+        """
+        STEP 3: Get user info
+        refresh token is used for retreiving user information to identify user roles
+        """
+        headers_bearer = urllib3.make_headers()
+        headers_bearer['Content-Type'] = 'application/x-www-form-urlencoded'
+        headers_bearer['Authorization'] = 'Bearer {}'.format(result['access_token'])
+        response = rest.POST(
+            'https://{}/jans-auth/restv1/userinfo'.format(host),
+            headers=headers_bearer,
+            post_params={
+                'access_token': result['access_token'],
+                },
+            )
+
+        if response.status != 200:
+            raise ValueError(
+                self.colored_text("Unable to get access token"))
+
+        result = response.urllib3_response.data.decode()
+
+        """
+        STEP 4: Get access token for config-api endpoints
+        Use client creditentials to retreive access token for client endpoints.
+        Since introception script will be executed, access token will have permissions with all scopes
+        """
+        response = rest.POST(
+            'https://{}/jans-auth/restv1/token'.format(host),
+            headers=headers_basic_auth,
+            post_params={
+                'grant_type': 'client_credentials',
+                'scope': 'openid',
+                'ujwt': result,
+                },
+            )
+
+        if response.status != 200:
+            raise ValueError(
+                self.colored_text("Unable to get access token"))
+
+        result = self.get_json_from_response(response.urllib3_response)
+
+        self.access_token = result['access_token']
+        access_token_enc = encode_decode(self.access_token)
+        config['DEFAULT']['access_token_enc'] = access_token_enc
+        with open(config_ini_fn, 'w') as w:
+            config.write(w)
+
+
+    def get_access_token(self, scope):
+        self.check_access_token()
+        if not self.access_token:
+            self.get_jwt_access_token()
+        self.swagger_configuration.access_token = self.access_token
 
     def print_exception(self, e):
         error_printed = False
