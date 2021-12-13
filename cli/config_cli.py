@@ -311,6 +311,10 @@ class JCA_CLI:
 
 
     def check_access_token(self):
+        if not self.access_token:
+            print(self.colored_text("Access token was not found.", warning_color))
+            return
+
         try:
             jwt.decode(self.access_token,
                     options={
@@ -319,7 +323,8 @@ class JCA_CLI:
                             'verify_aud': False
                              }
                     )
-        except:
+        except Exception as e:
+            print(self.colored_text("Unable to validate access token: {}".format(e), error_color))
             self.access_token = None
 
 
@@ -399,9 +404,10 @@ class JCA_CLI:
 
         if 'verification_uri' in result and 'user_code' in result:
 
-            print("Please visit verification url {} and enter user code {}".format(
+            print("Please visit verification url {} and enter user code {} in {} secods".format(
                     self.colored_text(result['verification_uri'], success_color),
-                    self.colored_text(result['user_code'], bold_color)
+                    self.colored_text(result['user_code'], bold_color),
+                    result['expires_in']
                     )
                 )
 
