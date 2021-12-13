@@ -43,7 +43,7 @@ public class RpGetRptOperation extends BaseOperation<RpGetRptParams> {
             return getUmaTokenService().getRpt(params);
         } catch (ClientErrorException ex) {
             LOG.trace(ex.getMessage(), ex);
-            String entity = (String) ex.getResponse().readEntity(String.class);
+            String entity = ex.getResponse().readEntity(String.class);
             return handleRptError(ex.getResponse().getStatus(), entity);
         }
     }
