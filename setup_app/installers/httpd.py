@@ -67,6 +67,10 @@ class HttpdInstaller(BaseInstaller, SetupUtils):
 
         # we only need these modules
         mods_enabled = ['env', 'proxy_http', 'access_compat', 'alias', 'authn_core', 'authz_core', 'authz_host', 'headers', 'mime', 'mpm_event', 'proxy', 'proxy_ajp', 'security2', 'reqtimeout', 'setenvif', 'socache_shmcb', 'ssl', 'unique_id', 'rewrite']
+        if base.clone_type == 'deb':
+            mods_enabled.insert(0, 'dir')
+        elif base.clone_type == 'rpm':
+            mods_enabled.insert(0, 'mod_dir')
 
         if base.snap:
             mods_enabled_dir = os.path.join(base.snap_common, 'etc/apache2/mods-enabled')
