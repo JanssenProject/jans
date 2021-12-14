@@ -14,7 +14,7 @@ from generator import SchemaGenerator
 localdir = os.path.dirname(os.path.abspath(__file__))
 
 
-def generate(infile, schema_type=None):
+def generate(infile, schema_type=None, out_file=None):
     """Function generates the LDAP schema definitions from the JSON data
 
     Args:
@@ -28,21 +28,25 @@ def generate(infile, schema_type=None):
         schema_str = gen.generate_ldif()
     else:
         schema_str = gen.generate_schema()
-    print(schema_str)
+    if out_file:
+        with open(out_file, 'w') as w:
+            w.write(schema_str)
+    else:
+        print(schema_str)
 
 
 def autogenerate():
     """Function that generates the LDAP schemas for OpenDJ from the
-    jans_schema.json and custom_schema.json and puts them in their respective
+    gluu_schema.json and custom_schema.json and puts them in their respective
     folders.
     """
     opendj_folder = os.path.join(os.path.dirname(localdir), 'static/opendj/')
 
-    fp = open(os.path.join(localdir, 'jans_schema.json'), 'r')
-    jans_json = fp.read()
+    fp = open(os.path.join(localdir, 'gluu_schema.json'), 'r')
+    gluu_json = fp.read()
     fp.close()
-    gen = SchemaGenerator(jans_json)
-    with open(os.path.join(opendj_folder, '101-jans.ldif'), 'w') as f:
+    gen = SchemaGenerator(gluu_json)
+    with open(os.path.join(opendj_folder, '101-ox.ldif'), 'w') as f:
         f.write(gen.generate_ldif())
 
     fp = open(os.path.join(localdir, 'custom_schema.json'), 'r')
@@ -105,7 +109,7 @@ def make_json(filename):
 
 
 def make_schema_docs():
-    schema = os.path.join(localdir, 'jans_schema.json')
+    schema = os.path.join(localdir, 'gluu_schema.json')
     f = open(schema)
     json_string = f.read()
     f.close()
