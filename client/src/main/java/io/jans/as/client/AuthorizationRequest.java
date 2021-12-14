@@ -25,6 +25,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static io.jans.as.model.util.StringUtils.addQueryStringParam;
+import static io.jans.as.model.util.Util.putNotBlank;
+
 /**
  * Represents an authorization request to send to the authorization server.
  *
@@ -543,113 +546,38 @@ public class AuthorizationRequest extends BaseRequest {
             final String promptsAsString = getPromptsAsString();
             final String customResponseHeadersAsString = getCustomResponseHeadersAsString();
 
-            if (StringUtils.isNotBlank(responseTypesAsString)) {
-                queryStringBuilder.append(AuthorizeRequestParam.RESPONSE_TYPE)
-                        .append("=").append(URLEncoder.encode(responseTypesAsString, Util.UTF8_STRING_ENCODING));
-            }
-            if (StringUtils.isNotBlank(clientId)) {
-                queryStringBuilder.append("&").append(AuthorizeRequestParam.CLIENT_ID)
-                        .append("=").append(URLEncoder.encode(clientId, Util.UTF8_STRING_ENCODING));
-            }
-            if (StringUtils.isNotBlank(scopesAsString)) {
-                queryStringBuilder.append("&").append(AuthorizeRequestParam.SCOPE)
-                        .append("=").append(URLEncoder.encode(scopesAsString, Util.UTF8_STRING_ENCODING));
-            }
-            if (StringUtils.isNotBlank(redirectUri)) {
-                queryStringBuilder.append("&").append(AuthorizeRequestParam.REDIRECT_URI)
-                        .append("=").append(URLEncoder.encode(redirectUri, Util.UTF8_STRING_ENCODING));
-            }
-            if (StringUtils.isNotBlank(state)) {
-                queryStringBuilder.append("&").append(AuthorizeRequestParam.STATE)
-                        .append("=").append(URLEncoder.encode(state, Util.UTF8_STRING_ENCODING));
-            }
-
             // OpenID Connect request parameters
             final String uiLocalesAsString = getUiLocalesAsString();
             final String claimLocalesAsString = getClaimsLocalesAsString();
             final String acrValuesAsString = getAcrValuesAsString();
             final String claimsAsString = getClaimsAsString();
 
-            if (responseMode != null) {
-                queryStringBuilder.append("&").append(AuthorizeRequestParam.RESPONSE_MODE)
-                        .append("=").append(URLEncoder.encode(responseMode.toString(), Util.UTF8_STRING_ENCODING));
-            }
-            if (StringUtils.isNotBlank(nonce)) {
-                queryStringBuilder.append("&").append(AuthorizeRequestParam.NONCE)
-                        .append("=").append(URLEncoder.encode(nonce, Util.UTF8_STRING_ENCODING));
-            }
-            if (display != null) {
-                queryStringBuilder.append("&").append(AuthorizeRequestParam.DISPLAY)
-                        .append("=").append(URLEncoder.encode(display.toString(), Util.UTF8_STRING_ENCODING));
-            }
-            if (StringUtils.isNotBlank(promptsAsString)) {
-                queryStringBuilder.append("&").append(AuthorizeRequestParam.PROMPT)
-                        .append("=").append(URLEncoder.encode(promptsAsString, Util.UTF8_STRING_ENCODING));
-            }
-            if (maxAge != null) {
-                queryStringBuilder.append("&").append(AuthorizeRequestParam.MAX_AGE)
-                        .append("=").append(maxAge);
-            }
-            if (StringUtils.isNotBlank(uiLocalesAsString)) {
-                queryStringBuilder.append("&").append(AuthorizeRequestParam.UI_LOCALES)
-                        .append("=").append(URLEncoder.encode(uiLocalesAsString, Util.UTF8_STRING_ENCODING));
-            }
-            if (StringUtils.isNotBlank(claimLocalesAsString)) {
-                queryStringBuilder.append("&").append(AuthorizeRequestParam.CLAIMS_LOCALES)
-                        .append("=").append(URLEncoder.encode(claimLocalesAsString, Util.UTF8_STRING_ENCODING));
-            }
-            if (StringUtils.isNotBlank(idTokenHint)) {
-                queryStringBuilder.append("&").append(AuthorizeRequestParam.ID_TOKEN_HINT)
-                        .append("=").append(idTokenHint);
-            }
-            if (StringUtils.isNotBlank(loginHint)) {
-                queryStringBuilder.append("&").append(AuthorizeRequestParam.LOGIN_HINT)
-                        .append("=").append(loginHint);
-            }
-            if (StringUtils.isNotBlank(acrValuesAsString)) {
-                queryStringBuilder.append("&").append(AuthorizeRequestParam.ACR_VALUES)
-                        .append("=").append(URLEncoder.encode(acrValuesAsString, Util.UTF8_STRING_ENCODING));
-            }
-            if (StringUtils.isNotBlank(claimsAsString)) {
-                queryStringBuilder.append("&").append(AuthorizeRequestParam.CLAIMS)
-                        .append("=").append(URLEncoder.encode(claimsAsString, Util.UTF8_STRING_ENCODING));
-            }
-            if (StringUtils.isNotBlank(registration)) {
-                queryStringBuilder.append("&").append(AuthorizeRequestParam.REGISTRATION)
-                        .append("=").append(registration);
-            }
-            if (StringUtils.isNotBlank(request)) {
-                queryStringBuilder.append("&").append(AuthorizeRequestParam.REQUEST)
-                        .append("=").append(URLEncoder.encode(request, Util.UTF8_STRING_ENCODING));
-            }
-            if (StringUtils.isNotBlank(requestUri)) {
-                queryStringBuilder.append("&").append(AuthorizeRequestParam.REQUEST_URI)
-                        .append("=").append(URLEncoder.encode(requestUri, Util.UTF8_STRING_ENCODING));
-            }
-            if (requestSessionId) {
-                queryStringBuilder.append("&").append(AuthorizeRequestParam.REQUEST_SESSION_ID)
-                        .append("=").append(URLEncoder.encode(Boolean.toString(requestSessionId), Util.UTF8_STRING_ENCODING));
-            }
-            if (StringUtils.isNotBlank(sessionId)) {
-                queryStringBuilder.append("&").append(AuthorizeRequestParam.SESSION_ID)
-                        .append("=").append(URLEncoder.encode(sessionId, Util.UTF8_STRING_ENCODING));
-            }
-            if (StringUtils.isNotBlank(accessToken)) {
-                queryStringBuilder.append("&").append(AuthorizeRequestParam.ACCESS_TOKEN)
-                        .append("=").append(URLEncoder.encode(accessToken, Util.UTF8_STRING_ENCODING));
-            }
-            if (StringUtils.isNotBlank(codeChallenge)) {
-                queryStringBuilder.append("&").append(AuthorizeRequestParam.CODE_CHALLENGE)
-                        .append("=").append(codeChallenge);
-            }
-            if (StringUtils.isNotBlank(codeChallengeMethod)) {
-                queryStringBuilder.append("&").append(AuthorizeRequestParam.CODE_CHALLENGE_METHOD)
-                        .append("=").append(codeChallengeMethod);
-            }
-            if (StringUtils.isNotBlank(customResponseHeadersAsString)) {
-                queryStringBuilder.append("&").append(AuthorizeRequestParam.CUSTOM_RESPONSE_HEADERS)
-                        .append("=").append(URLEncoder.encode(customResponseHeadersAsString, Util.UTF8_STRING_ENCODING));
-            }
+            addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.RESPONSE_TYPE, responseTypesAsString);
+            addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.CLIENT_ID, clientId);
+            addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.SCOPE, scopesAsString);
+            addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.REDIRECT_URI, redirectUri);
+            addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.STATE, state);
+            addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.RESPONSE_MODE, responseMode.toString());
+            addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.NONCE, nonce);
+            addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.DISPLAY, display.toString());
+            addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.PROMPT, promptsAsString);
+            addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.MAX_AGE, maxAge);
+            addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.UI_LOCALES, uiLocalesAsString);
+            addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.CLAIMS_LOCALES, claimLocalesAsString);
+            addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.ID_TOKEN_HINT, idTokenHint);
+            addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.LOGIN_HINT, loginHint);
+            addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.ACR_VALUES, acrValuesAsString);
+            addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.CLAIMS, claimsAsString);
+            addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.REGISTRATION, registration);
+            addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.REQUEST, request);
+            addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.REQUEST_URI, requestUri);
+            addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.REQUEST_SESSION_ID, requestSessionId);
+            addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.SESSION_ID, sessionId);
+            addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.ACCESS_TOKEN, accessToken);
+            addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.CODE_CHALLENGE, codeChallenge);
+            addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.CODE_CHALLENGE_METHOD, codeChallengeMethod);
+            addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.CUSTOM_RESPONSE_HEADERS, customResponseHeadersAsString);
+
             for (String key : getCustomParameters().keySet()) {
                 queryStringBuilder.append("&");
                 queryStringBuilder.append(key).append("=").append(getCustomParameters().get(key));
@@ -678,88 +606,37 @@ public class AuthorizationRequest extends BaseRequest {
             final String promptsAsString = getPromptsAsString();
             final String customResponseHeadersAsString = getCustomResponseHeadersAsString();
 
-            if (StringUtils.isNotBlank(responseTypesAsString)) {
-                parameters.put(AuthorizeRequestParam.RESPONSE_TYPE, responseTypesAsString);
-            }
-            if (StringUtils.isNotBlank(clientId)) {
-                parameters.put(AuthorizeRequestParam.CLIENT_ID, clientId);
-            }
-            if (StringUtils.isNotBlank(scopesAsString)) {
-                parameters.put(AuthorizeRequestParam.SCOPE, scopesAsString);
-            }
-            if (StringUtils.isNotBlank(redirectUri)) {
-                parameters.put(AuthorizeRequestParam.REDIRECT_URI, redirectUri);
-            }
-            if (StringUtils.isNotBlank(state)) {
-                parameters.put(AuthorizeRequestParam.STATE, state);
-            }
-
             // OpenID Connect request parameters
             final String uiLocalesAsString = getUiLocalesAsString();
             final String claimLocalesAsString = getClaimsLocalesAsString();
             final String acrValuesAsString = getAcrValuesAsString();
             final String claimsAsString = getClaimsAsString();
 
-            if (responseMode != null) {
-                parameters.put(AuthorizeRequestParam.RESPONSE_MODE, responseMode.toString());
-            }
-            if (StringUtils.isNotBlank(nonce)) {
-                parameters.put(AuthorizeRequestParam.NONCE, nonce);
-            }
-            if (display != null) {
-                parameters.put(AuthorizeRequestParam.DISPLAY, display.toString());
-            }
-            if (StringUtils.isNotBlank(promptsAsString)) {
-                parameters.put(AuthorizeRequestParam.PROMPT, promptsAsString);
-            }
-            if (maxAge != null) {
-                parameters.put(AuthorizeRequestParam.MAX_AGE, maxAge.toString());
-            }
-            if (StringUtils.isNotBlank(uiLocalesAsString)) {
-                parameters.put(AuthorizeRequestParam.UI_LOCALES, uiLocalesAsString);
-            }
-            if (StringUtils.isNotBlank(claimLocalesAsString)) {
-                parameters.put(AuthorizeRequestParam.CLAIMS_LOCALES, claimLocalesAsString);
-            }
-            if (StringUtils.isNotBlank(idTokenHint)) {
-                parameters.put(AuthorizeRequestParam.ID_TOKEN_HINT, idTokenHint);
-            }
-            if (StringUtils.isNotBlank(loginHint)) {
-                parameters.put(AuthorizeRequestParam.LOGIN_HINT, loginHint);
-            }
-            if (StringUtils.isNotBlank(acrValuesAsString)) {
-                parameters.put(AuthorizeRequestParam.ACR_VALUES, acrValuesAsString);
-            }
-            if (StringUtils.isNotBlank(claimsAsString)) {
-                parameters.put(AuthorizeRequestParam.CLAIMS, claimsAsString);
-            }
-            if (StringUtils.isNotBlank(registration)) {
-                parameters.put(AuthorizeRequestParam.REGISTRATION, registration);
-            }
-            if (StringUtils.isNotBlank(request)) {
-                parameters.put(AuthorizeRequestParam.REQUEST, request);
-            }
-            if (StringUtils.isNotBlank(requestUri)) {
-                parameters.put(AuthorizeRequestParam.REQUEST_URI, requestUri);
-            }
-            if (requestSessionId) {
-                parameters.put(AuthorizeRequestParam.REQUEST_SESSION_ID, Boolean.toString(requestSessionId));
-            }
-            if (StringUtils.isNotBlank(sessionId)) {
-                parameters.put(AuthorizeRequestParam.SESSION_ID, sessionId);
-            }
-            if (StringUtils.isNotBlank(accessToken)) {
-                parameters.put(AuthorizeRequestParam.ACCESS_TOKEN, accessToken);
-            }
-            if (StringUtils.isNotBlank(codeChallenge)) {
-                parameters.put(AuthorizeRequestParam.CODE_CHALLENGE, codeChallenge);
-            }
-            if (StringUtils.isNotBlank(codeChallengeMethod)) {
-                parameters.put(AuthorizeRequestParam.CODE_CHALLENGE_METHOD, codeChallengeMethod);
-            }
-            if (StringUtils.isNotBlank(customResponseHeadersAsString)) {
-                parameters.put(AuthorizeRequestParam.CUSTOM_RESPONSE_HEADERS, customResponseHeadersAsString);
-            }
+            putNotBlank(parameters, AuthorizeRequestParam.RESPONSE_TYPE, responseTypesAsString);
+            putNotBlank(parameters, AuthorizeRequestParam.CLIENT_ID, clientId);
+            putNotBlank(parameters, AuthorizeRequestParam.SCOPE, scopesAsString);
+            putNotBlank(parameters, AuthorizeRequestParam.REDIRECT_URI, redirectUri);
+            putNotBlank(parameters, AuthorizeRequestParam.STATE, state);
+            putNotBlank(parameters, AuthorizeRequestParam.RESPONSE_MODE, responseMode != null ? responseMode.toString() : null);
+            putNotBlank(parameters, AuthorizeRequestParam.NONCE, nonce);
+            putNotBlank(parameters, AuthorizeRequestParam.DISPLAY, display != null ? display.toString() : null);
+            putNotBlank(parameters, AuthorizeRequestParam.PROMPT, promptsAsString);
+            putNotBlank(parameters, AuthorizeRequestParam.MAX_AGE, maxAge != null ? maxAge.toString() : null);
+            putNotBlank(parameters, AuthorizeRequestParam.UI_LOCALES, uiLocalesAsString);
+            putNotBlank(parameters, AuthorizeRequestParam.CLAIMS_LOCALES, claimLocalesAsString);
+            putNotBlank(parameters, AuthorizeRequestParam.ID_TOKEN_HINT, idTokenHint);
+            putNotBlank(parameters, AuthorizeRequestParam.LOGIN_HINT, loginHint);
+            putNotBlank(parameters, AuthorizeRequestParam.ACR_VALUES, acrValuesAsString);
+            putNotBlank(parameters, AuthorizeRequestParam.CLAIMS, claimsAsString);
+            putNotBlank(parameters, AuthorizeRequestParam.REGISTRATION, registration);
+            putNotBlank(parameters, AuthorizeRequestParam.REQUEST, request);
+            putNotBlank(parameters, AuthorizeRequestParam.REQUEST_URI, requestUri);
+            putNotBlank(parameters, AuthorizeRequestParam.REQUEST_SESSION_ID, requestSessionId ? Boolean.toString(requestSessionId) : null);
+            putNotBlank(parameters, AuthorizeRequestParam.SESSION_ID, sessionId);
+            putNotBlank(parameters, AuthorizeRequestParam.ACCESS_TOKEN, accessToken);
+            putNotBlank(parameters, AuthorizeRequestParam.CODE_CHALLENGE, codeChallenge);
+            putNotBlank(parameters, AuthorizeRequestParam.CODE_CHALLENGE_METHOD, codeChallengeMethod);
+            putNotBlank(parameters, AuthorizeRequestParam.CUSTOM_RESPONSE_HEADERS, customResponseHeadersAsString);
 
             for (String key : getCustomParameters().keySet()) {
                 parameters.put(key, getCustomParameters().get(key));
