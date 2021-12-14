@@ -3,7 +3,6 @@
 """Module containing the functions to parse the LDAP schema files.
 """
 
-import os
 import sys
 import re
 import logging
