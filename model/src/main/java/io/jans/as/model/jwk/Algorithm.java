@@ -116,6 +116,10 @@ public enum Algorithm {
         return family;
     }
 
+    public boolean canGenerateKeys() { // based on currently supported generator, see io.jans.as.model.crypto.AuthCryptoProvider.generateKeyEncryption
+        return family == AlgorithmFamily.RSA || family == AlgorithmFamily.EC;
+    }
+
     /**
      * Returns the corresponding {@link Algorithm} for a parameter.
      *
