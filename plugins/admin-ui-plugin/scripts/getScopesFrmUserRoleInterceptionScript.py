@@ -9,6 +9,7 @@ from io.jans.service.cdi.util import CdiUtil
 from io.jans.as.model.crypto import AuthCryptoProvider
 from io.jans.orm import PersistenceEntryManager
 from io.jans.model.custom.script.type.introspection import IntrospectionType
+from io.jans.as.server.model.config import ConfigurationFactory
 from io.jans.as.model.config.adminui import AdminConf
 from java.net import HttpURLConnection, URL
 from org.json import JSONArray, JSONObject
@@ -50,43 +51,21 @@ class Introspection(IntrospectionType):
             # Getting user-info-jwt
             ujwt = context.getHttpRequest().getParameter("ujwt")
             print ujwt
-            jwks_url = System.getenv("ADMIN_UI_JWKS")
             if not ujwt:
                 print "UJWT is empty or null"
+                return True
+
             # Parse jwt
             userInfoJwt = Jwt.parse(ujwt)
-            # Get auth-server keys
-            url = URL("https://ce-dev6.gluu.org/jans-auth/restv1/jwks")
-            conn = url.openConnection()
-            conn.setDoOutput(True)
-            conn.setRequestMethod("GET")
-            conn.setRequestProperty("Content-type", "application/json")
-            if conn.getResponseCode() != 200:
-                print "Failed!!"
-                print conn.getResponseCode()
-                print conn.getResponseMessage()
-            else:
-                print "Success!! Able to connect for auth-server jwks"
-                print conn.getResponseCode()
-                print conn.getResponseMessage()
 
-            instr = conn.getInputStream()
-            instrreader = InputStreamReader(instr)
-            breader = BufferedReader(instrreader)
-            output = breader.readLine()
-            jsonResult = ""
-            while output != None:
-                if output != None:
-                    jsonResult += output
-                output = breader.readLine()
-            # JWKS
-            jwks = JSONObject(jsonResult)
-            conn.disconnect()
+            configObj = CdiUtil.bean(ConfigurationFactory)
+            jwksObj = configObj.getWebKeysConfiguration()
+            jwks = JSONObject(jwksObj)
 
             # Validate JWT
             authCryptoProvider = AuthCryptoProvider()
             validJwt = authCryptoProvider.verifySignature(userInfoJwt.getSigningInput(), userInfoJwt.getEncodedSignature(), userInfoJwt.getHeader().getKeyId(), jwks, None, userInfoJwt.getHeader().getSignatureAlgorithm())
-            print validJwt
+
 
             if validJwt == True:
                 print "user-info jwt is valid"
@@ -98,9 +77,8 @@ class Introspection(IntrospectionType):
                 scopes = None
                 try:
                     entryManager = CdiUtil.bean(PersistenceEntryManager)
-                    adminUIConfig = AdminConf()
-                    adminUIConfig = entryManager.find(adminUIConfig.getClass(), "ou=admin-ui,ou=configuration,o=jans")
-
+                    adminConf = AdminConf()
+                    adminUIConfig = entryManager.find(adminConf.getClass(), "ou=admin-ui,ou=configuration,o=jans")
                     roleScopeMapping = adminUIConfig.getDynamic().getRolePermissionMapping()
                     # roleScopeMapping = adminUIConfig.getDynamic()
                     print roleScopeMapping
@@ -112,7 +90,7 @@ class Introspection(IntrospectionType):
                     print "Error:  Failed to fetch/parse Admin UI roleScopeMapping from DB"
                     print e
 
-                print "Following scopes will be added in api token:" + scopes
+                print "Following scopes will be added in api token: {}".format(scopes)
 
             responseAsJsonObject.accumulate("scope", scopes)
         except Exception as e:
