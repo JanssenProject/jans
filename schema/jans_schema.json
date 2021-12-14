@@ -1,4 +1,5 @@
 {
+  "schemaFile": "101-jans.ldif",
   "attributeTypes": [
     {
       "desc": "Associate the dn of an OAuth2 client with a person or UMA Resource Set.",
@@ -2132,7 +2133,7 @@
       "x_origin": "OpenID Connect 1.0 Standard Claim"
     },
     {
-      "desc": "Birthday of the person, represented as an ISO 8601:2004 [ISO8601\u20112004] YYYY-MM-DD format",
+      "desc": "Birthday of the person, represented as an ISO 8601:2004 [ISO8601-2004] YYYY-MM-DD format",
       "equality": "generalizedTimeMatch",
       "names": [
         "birthdate"
