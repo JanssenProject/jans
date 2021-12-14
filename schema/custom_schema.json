@@ -1,4 +1,5 @@
 {
+  "schemaFile": "77-customAttributes.ldif",
   "attributeTypes": [],
   "objectClasses": [
     {
