@@ -11,7 +11,7 @@
 
     <properties>
         <dbcp.version>1.4</dbcp.version>
-        <h2.version>1.4.194</h2.version>
+        <h2.version>2.0.202</h2.version>
         <dropwizard.version>2.0.26</dropwizard.version>
         <jersey-test-framework-provider>2.29.1</jersey-test-framework-provider>
         <generate.windows.exe>false</generate.windows.exe>
@@ -315,6 +315,7 @@
         <dependency>
             <groupId>redis.clients</groupId>
             <artifactId>jedis</artifactId>
+            <version>3.6.2</version>
         </dependency>
         <dependency>
             <groupId>commons-dbcp</groupId>
@@ -383,23 +384,11 @@
         <dependency>
             <groupId>io.jans</groupId>
             <artifactId>jans-auth-model</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>net.minidev</groupId>
-                    <artifactId>json-smart</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-compress</artifactId>
             <version>1.21</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>net.minidev</groupId>
-            <artifactId>json-smart</artifactId>
-            <version>2.4.1</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -467,7 +456,7 @@
         <dependency>
             <groupId>io.jaegertracing</groupId>
             <artifactId>jaeger-core</artifactId>
-            <version>0.27.0</version>
+            <version>0.32.0</version>
         </dependency>
         <dependency>
             <groupId>io.opentracing.brave</groupId>
