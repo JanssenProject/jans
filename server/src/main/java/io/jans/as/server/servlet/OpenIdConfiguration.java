@@ -16,9 +16,11 @@ import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.persistence.model.Scope;
 import io.jans.as.persistence.model.ScopeAttributes;
 import io.jans.as.server.ciba.CIBAConfigurationService;
+import io.jans.as.server.model.common.ExecutionContext;
 import io.jans.as.server.service.LocalResponseCache;
 import io.jans.as.server.service.ScopeService;
 import io.jans.as.server.service.external.ExternalAuthenticationService;
+import io.jans.as.server.service.external.ExternalDiscoveryService;
 import io.jans.as.server.service.external.ExternalDynamicScopeService;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.model.GluuAttribute;
@@ -128,6 +130,9 @@ public class OpenIdConfiguration extends HttpServlet {
 
     @Inject
     private ExternalDynamicScopeService externalDynamicScopeService;
+
+    @Inject
+    private ExternalDiscoveryService externalDiscoveryService;
 
     @Inject
     private CIBAConfigurationService cibaConfigurationService;
@@ -426,6 +431,13 @@ public class OpenIdConfiguration extends HttpServlet {
 
             filterOutKeys(jsonObj);
             localResponseCache.putDiscoveryResponse(jsonObj);
+
+            JSONObject clone = new JSONObject(jsonObj.toString());
+
+            ExecutionContext context = new ExecutionContext(servletRequest, httpResponse);
+            if (!externalDiscoveryService.modifyDiscovery(jsonObj, context)) {
+                jsonObj = clone; // revert to original state if object was modified in script
+            }
 
             out.println(ServerUtil.toPrettyJson(jsonObj).replace("\\/", "/"));
         } catch (Exception e) {

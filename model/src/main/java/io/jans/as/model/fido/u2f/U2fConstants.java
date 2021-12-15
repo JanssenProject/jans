@@ -15,7 +15,7 @@ public class U2fConstants {
 
     public static final String U2F_PROTOCOL_VERSION = "U2F_V2";
 
-    public static final String U2F_ENROLLMENT_CODE_ATTRIBUTE = "oxEnrollmentCode";
+    public static final String U2F_ENROLLMENT_CODE_ATTRIBUTE = "jansEnrollmentCode";
 
     private U2fConstants() {
     }
