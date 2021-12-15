@@ -130,10 +130,18 @@ public abstract class AbstractCryptoProvider {
 
         for (Algorithm alg : Algorithm.values()) {
             try {
-                if (!allowedAlgs.isEmpty() && !allowedAlgs.contains(alg.getParamName())) {
-                    LOG.debug(String.format("Key generation for %s is skipped because it's not allowed by keyAlgsAllowedForGeneration configuration property.", alg.toString()));
+                final boolean isNotAllowed = !allowedAlgs.isEmpty() && !allowedAlgs.contains(alg.getParamName());
+                final boolean isNotSupported = !alg.canGenerateKeys();
+                if (isNotAllowed || isNotSupported) {
+                    if (isNotAllowed) {
+                        LOG.debug(String.format("Key generation for %s is skipped because it's not allowed by keyAlgsAllowedForGeneration configuration property.", alg.toString()));
+                    }
+                    if (isNotSupported) {
+                        LOG.trace(alg + " does not support keys re-generation.");
+                    }
                     continue;
                 }
+
                 keys.put(cryptoProvider.generateKey(alg, expiration));
             } catch (Exception ex) {
                 LOG.error(String.format("Algorithm: %s", alg), ex);
