@@ -557,9 +557,9 @@ public class AuthorizationRequest extends BaseRequest {
             addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.SCOPE, scopesAsString);
             addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.REDIRECT_URI, redirectUri);
             addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.STATE, state);
-            addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.RESPONSE_MODE, responseMode.toString());
+            addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.RESPONSE_MODE, responseMode != null ? responseMode.toString() : null);
             addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.NONCE, nonce);
-            addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.DISPLAY, display.toString());
+            addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.DISPLAY, display != null ? display.toString() : null);
             addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.PROMPT, promptsAsString);
             addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.MAX_AGE, maxAge);
             addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.UI_LOCALES, uiLocalesAsString);
