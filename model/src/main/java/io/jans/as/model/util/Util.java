@@ -59,6 +59,17 @@ public class Util {
     private Util() {
     }
 
+    @SuppressWarnings("java:S3740")
+    public static void putNotBlank(Map map, String key, Object value) {
+        if (map == null || key == null || value == null) {
+            return;
+        }
+        if (value instanceof String && StringUtils.isBlank((String) value)) {
+            return;
+        }
+        map.put(key, value);
+    }
+
     public static String escapeLog(Object param) {
         if (param == null)
             return "";
