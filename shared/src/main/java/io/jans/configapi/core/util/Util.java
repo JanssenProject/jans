@@ -6,13 +6,13 @@
 
 package io.jans.configapi.core.util;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import javax.enterprise.context.ApplicationScoped;
 
+@ApplicationScoped
 public class Util {
-
-    private static final Logger LOG = LoggerFactory.getLogger(Util.class);
-
+    
+    private Util() { }
+    
     public static String escapeLog(Object param) {
         if (param == null)
             return "";
