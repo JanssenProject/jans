@@ -5,13 +5,7 @@
  */
 package io.jans.as.client.ws.rs.jarm;
 
-import io.jans.as.client.AuthorizationRequest;
-import io.jans.as.client.AuthorizationResponse;
-import io.jans.as.client.AuthorizeClient;
-import io.jans.as.client.BaseTest;
-import io.jans.as.client.JwkClient;
-import io.jans.as.client.JwkResponse;
-import io.jans.as.client.RegisterResponse;
+import io.jans.as.client.*;
 import io.jans.as.client.model.authorize.Claim;
 import io.jans.as.client.model.authorize.ClaimValue;
 import io.jans.as.client.model.authorize.JwtAuthorizationRequest;
@@ -37,14 +31,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 /**
  * @author Javier Rojas Blum
- * @version November 26, 2021
+ * @version December 15, 2021
  */
 public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest extends BaseTest {
 
@@ -797,12 +788,12 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         privateKey = null; // Clear private key to do not affect to other tests
     }
 
-    @Parameters({"audience", "redirectUri", "redirectUris", "clientJwksUri", "RS256_keyId",
+    @Parameters({"audience", "redirectUri", "redirectUris", "clientJwksUri", "RSA_OAEP_keyId", "RS256_keyId",
             "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
     @Test(enabled = false) // Enable FAPI to run this test!
     public void ensureSignedRequestObjectWithRS256Fails(
             final String audience, final String redirectUri, final String redirectUris, final String clientJwksUri,
-            final String signingKeyId, final String dnName, final String keyStoreFile, final String keyStoreSecret,
+            final String encryptionKeyId, final String signingKeyId, final String dnName, final String keyStoreFile, final String keyStoreSecret,
             final String sectorIdentifierUri) throws Exception {
         showTitle("ensureSignedRequestObjectWithRS256Fails");
 
@@ -810,7 +801,7 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
 
         // 1. Dynamic Client Registration
         RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, sectorIdentifierUri, clientJwksUri,
-                SignatureAlgorithm.RS256, null, null);
+                SignatureAlgorithm.RS256, KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM);
 
         String clientId = registerResponse.getClientId();
 
@@ -821,20 +812,40 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scope, redirectUri, null);
 
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider1 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
-        JwtAuthorizationRequest jwsAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.RS256, cryptoProvider); // RS256 Request Object is not permitted by the FAPI-RW specification.
+        JwtAuthorizationRequest jwsAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.RS256, cryptoProvider1); // RS256 Request Object is not permitted by the FAPI-RW specification.
+
         jwsAuthorizationRequest.setKeyId(signingKeyId);
         jwsAuthorizationRequest.setAud(audience);
         jwsAuthorizationRequest.setIss(clientId);
+        jwsAuthorizationRequest.setScopes(scope);
+        jwsAuthorizationRequest.setResponseTypes(responseTypes);
         jwsAuthorizationRequest.setRedirectUri(redirectUri);
         jwsAuthorizationRequest.setResponseMode(ResponseMode.JWT);
+        jwsAuthorizationRequest.setClientId(clientId);
         jwsAuthorizationRequest.setState(state);
         jwsAuthorizationRequest.setNonce(nonce); // FAPI: nonce param is required
         jwsAuthorizationRequest.setNbf((int) Instant.now().getEpochSecond()); // FAPI: require the request object to contain an exp claim that has a lifetime of no longer than 60 minutes after the nbf claim
         jwsAuthorizationRequest.setExp(jwsAuthorizationRequest.getNbf() + 3600); // FAPI: require the request object to contain an exp claim that has a lifetime of no longer than 60 minutes after the nbf claim
+        Jwt authJws = Jwt.parse(jwsAuthorizationRequest.getEncodedJwt());
 
-        authorizationRequest.setRequest(jwsAuthorizationRequest.getEncodedJwt());
+        JwkClient jwkClient = new JwkClient(jwksUri);
+        JwkResponse jwkResponse = jwkClient.exec();
+        String serverKeyId = jwkResponse.getKeyId(Algorithm.RSA_OAEP);
+        assertNotNull(serverKeyId);
+
+        JSONObject jwks = JwtUtil.getJSONWebKeys(jwksUri);
+        AuthCryptoProvider cryptoProvider2 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        privateKey = cryptoProvider2.getPrivateKey(encryptionKeyId);
+
+        JwtAuthorizationRequest jweAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
+                KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM, cryptoProvider2);
+        jweAuthorizationRequest.setKeyId(serverKeyId);
+        jweAuthorizationRequest.setNestedPayload(authJws);
+        String authJwe = jweAuthorizationRequest.getEncodedJwt(jwks);
+
+        authorizationRequest.setRequest(authJwe);
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
         authorizeClient.setRequest(authorizationRequest);
@@ -843,7 +854,7 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         showClient(authorizeClient);
         assertNotNull(authorizationResponse.getResponse());
 
-        Jwt response = Jwt.parse(authorizationResponse.getResponse());
+        Jwe response = Jwe.parse(authorizationResponse.getResponse(), privateKey, null);
 
         assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.ISS));
         assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.AUD));
@@ -852,21 +863,24 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.CODE));
         assertNotNull(response.getClaims().getClaimAsString("error"));
         assertNotNull(response.getClaims().getClaimAsString("error_description"));
+
+        privateKey = null; // Clear private key to do not affect to other tests
     }
 
-    @Parameters({"redirectUri", "redirectUris", "clientJwksUri",
+    @Parameters({"audience", "redirectUri", "redirectUris", "clientJwksUri", "RSA_OAEP_keyId",
             "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
     @Test(enabled = false) // Enable FAPI to run this test!
     public void ensureRequestObjectSignatureAlgorithmIsNotNone(
-            final String redirectUri, final String redirectUris, final String clientJwksUri, final String dnName,
-            final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String audience, final String redirectUri, final String redirectUris, final String clientJwksUri,
+            final String encryptionKeyId, final String dnName, final String keyStoreFile, final String keyStoreSecret,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("ensureRequestObjectSignatureAlgorithmIsNotNone");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
 
         // 1. Dynamic Client Registration
         RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, sectorIdentifierUri, clientJwksUri,
-                SignatureAlgorithm.RS256, null, null);
+                SignatureAlgorithm.RS256, KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM);
 
         String clientId = registerResponse.getClientId();
 
@@ -878,17 +892,39 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scope, redirectUri, null);
         authorizationRequest.setState(state);
 
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider1 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
-        JwtAuthorizationRequest jwsAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.NONE, cryptoProvider); // none Request Object is not permitted by the FAPI-RW specification.
+        JwtAuthorizationRequest jwsAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.NONE, cryptoProvider1); // none Request Object is not permitted by the FAPI-RW specification.
+        jwsAuthorizationRequest.setAud(audience);
+        jwsAuthorizationRequest.setIss(clientId);
+        jwsAuthorizationRequest.setScopes(scope);
+        jwsAuthorizationRequest.setResponseTypes(responseTypes);
         jwsAuthorizationRequest.setRedirectUri(redirectUri);
         jwsAuthorizationRequest.setResponseMode(ResponseMode.JWT);
+        jwsAuthorizationRequest.setClientId(clientId);
         jwsAuthorizationRequest.setState(state);
         jwsAuthorizationRequest.setNonce(nonce); // FAPI: nonce param is required
         jwsAuthorizationRequest.setNbf((int) Instant.now().getEpochSecond()); // FAPI: require the request object to contain an exp claim that has a lifetime of no longer than 60 minutes after the nbf claim
         jwsAuthorizationRequest.setExp(jwsAuthorizationRequest.getNbf() + 3600); // FAPI: require the request object to contain an exp claim that has a lifetime of no longer than 60 minutes after the nbf claim
 
-        authorizationRequest.setRequest(jwsAuthorizationRequest.getEncodedJwt());
+        Jwt authJws = Jwt.parse(jwsAuthorizationRequest.getEncodedJwt());
+
+        JwkClient jwkClient = new JwkClient(jwksUri);
+        JwkResponse jwkResponse = jwkClient.exec();
+        String serverKeyId = jwkResponse.getKeyId(Algorithm.RSA_OAEP);
+        assertNotNull(serverKeyId);
+
+        JSONObject jwks = JwtUtil.getJSONWebKeys(jwksUri);
+        AuthCryptoProvider cryptoProvider2 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        privateKey = cryptoProvider2.getPrivateKey(encryptionKeyId);
+
+        JwtAuthorizationRequest jweAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
+                KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM, cryptoProvider2);
+        jweAuthorizationRequest.setKeyId(serverKeyId);
+        jweAuthorizationRequest.setNestedPayload(authJws);
+        String authJwe = jweAuthorizationRequest.getEncodedJwt(jwks);
+
+        authorizationRequest.setRequest(authJwe);
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
         authorizeClient.setRequest(authorizationRequest);
@@ -897,7 +933,7 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         showClient(authorizeClient);
         assertNotNull(authorizationResponse.getResponse());
 
-        Jwt response = Jwt.parse(authorizationResponse.getResponse());
+        Jwe response = Jwe.parse(authorizationResponse.getResponse(), privateKey, null);
 
         assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.ISS));
         assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.AUD));
@@ -906,6 +942,8 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.CODE));
         assertNotNull(response.getClaims().getClaimAsString("error"));
         assertNotNull(response.getClaims().getClaimAsString("error_description"));
+
+        privateKey = null; // Clear private key to do not affect to other tests
     }
 
     @Parameters({"redirectUri", "redirectUris", "clientJwksUri", "RSA_OAEP_keyId", "PS256_keyId",
@@ -938,6 +976,79 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         jwsAuthorizationRequest.setKeyId(signingKeyId);
         jwsAuthorizationRequest.setRedirectUri(null);
         jwsAuthorizationRequest.setResponseMode(ResponseMode.JWT);
+        jwsAuthorizationRequest.setState(state);
+        jwsAuthorizationRequest.setNonce(nonce); // FAPI: nonce param is required
+        jwsAuthorizationRequest.setNbf((int) Instant.now().getEpochSecond()); // FAPI: require the request object to contain an exp claim that has a lifetime of no longer than 60 minutes after the nbf claim
+        jwsAuthorizationRequest.setExp(jwsAuthorizationRequest.getNbf() + 3600); // FAPI: require the request object to contain an exp claim that has a lifetime of no longer than 60 minutes after the nbf claim
+        Jwt authJws = Jwt.parse(jwsAuthorizationRequest.getEncodedJwt());
+
+        JwkClient jwkClient = new JwkClient(jwksUri);
+        JwkResponse jwkResponse = jwkClient.exec();
+        String serverKeyId = jwkResponse.getKeyId(Algorithm.RSA_OAEP);
+        assertNotNull(serverKeyId);
+
+        JSONObject jwks = JwtUtil.getJSONWebKeys(jwksUri);
+        AuthCryptoProvider cryptoProvider2 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        privateKey = cryptoProvider2.getPrivateKey(encryptionKeyId);
+
+        JwtAuthorizationRequest jweAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
+                KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM, cryptoProvider2);
+        jweAuthorizationRequest.setKeyId(serverKeyId);
+        jweAuthorizationRequest.setNestedPayload(authJws);
+        String authJwe = jweAuthorizationRequest.getEncodedJwt(jwks);
+
+        authorizationRequest.setRequest(authJwe);
+
+        AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
+        authorizeClient.setRequest(authorizationRequest);
+        AuthorizationResponse authorizationResponse = authorizeClient.exec();
+
+        showClient(authorizeClient);
+
+        assertEquals(authorizationResponse.getStatus(), 400);
+        assertNotNull(authorizationResponse.getEntity());
+        assertNotNull(authorizationResponse.getErrorType());
+        assertNotNull(authorizationResponse.getErrorDescription());
+        assertEquals(authorizationResponse.getErrorType(), AuthorizeErrorResponseType.INVALID_REQUEST);
+
+        privateKey = null; // Clear private key to do not affect to other tests
+    }
+
+    @Parameters({"audience", "redirectUri", "redirectUris", "clientJwksUri", "RSA_OAEP_keyId", "PS256_keyId",
+            "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Test(enabled = false) // Enable FAPI to run this test!
+    public void ensureRegisteredRedirectUri(
+            final String audience, final String redirectUri, final String redirectUris, final String clientJwksUri,
+            final String encryptionKeyId, final String signingKeyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("ensureRegisteredRedirectUri");
+
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+
+        // 1. Dynamic Client Registration
+        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, sectorIdentifierUri, clientJwksUri,
+                SignatureAlgorithm.PS256, KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM);
+
+        String clientId = registerResponse.getClientId();
+
+        // 2. Request authorization
+        List<String> scope = Arrays.asList("openid", "profile", "address", "email");
+        String state = UUID.randomUUID().toString();
+        String nonce = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scope, redirectUri, null);
+
+        AuthCryptoProvider cryptoProvider1 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        JwtAuthorizationRequest jwsAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.PS256, cryptoProvider1);
+        jwsAuthorizationRequest.setKeyId(signingKeyId);
+        jwsAuthorizationRequest.setAud(audience);
+        jwsAuthorizationRequest.setIss(clientId);
+        jwsAuthorizationRequest.setScopes(scope);
+        jwsAuthorizationRequest.setResponseTypes(responseTypes);
+        jwsAuthorizationRequest.setRedirectUri(redirectUri);
+        jwsAuthorizationRequest.setResponseMode(ResponseMode.JWT);
+        jwsAuthorizationRequest.setClientId(clientId);
         jwsAuthorizationRequest.setState(state);
         jwsAuthorizationRequest.setNonce(nonce); // FAPI: nonce param is required
         jwsAuthorizationRequest.setNbf((int) Instant.now().getEpochSecond()); // FAPI: require the request object to contain an exp claim that has a lifetime of no longer than 60 minutes after the nbf claim
