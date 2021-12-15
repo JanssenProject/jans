@@ -49,6 +49,7 @@
 		<module>common</module>
 		<module>server</module>
 		<module>plugins</module>
+		<module>shared</module>
 	</modules>
 
 	<repositories>
