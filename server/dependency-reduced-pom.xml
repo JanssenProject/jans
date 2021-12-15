@@ -237,7 +237,7 @@
     <dependency>
       <groupId>io.dropwizard</groupId>
       <artifactId>dropwizard-testing</artifactId>
-      <version>2.0.23</version>
+      <version>2.0.26</version>
       <scope>test</scope>
       <exclusions>
         <exclusion>
@@ -511,12 +511,12 @@
     </dependencies>
   </dependencyManagement>
   <properties>
-    <h2.version>1.4.194</h2.version>
+    <skip.swagger.client.generation>true</skip.swagger.client.generation>
+    <dropwizard.version>2.0.26</dropwizard.version>
     <dbcp.version>1.4</dbcp.version>
     <generate.windows.exe>false</generate.windows.exe>
-    <dropwizard.version>2.0.23</dropwizard.version>
     <commons-daemon.bin.version>1.2.1</commons-daemon.bin.version>
-    <skip.swagger.client.generation>true</skip.swagger.client.generation>
+    <h2.version>2.0.202</h2.version>
     <jersey-test-framework-provider>2.29.1</jersey-test-framework-provider>
   </properties>
 </project>
