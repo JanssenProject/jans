@@ -46,7 +46,7 @@ public class GetClientTokenOperation extends BaseOperation<GetClientTokenParams>
             final AuthenticationMethod authenticationMethod = AuthenticationMethod.fromString(params.getAuthenticationMethod());
             final String tokenEndpoint = getDiscoveryService().getConnectDiscoveryResponse(params.getOpConfigurationEndpoint(), params.getOpHost(), params.getOpDiscoveryPath()).getTokenEndpoint();
             final TokenClient tokenClient = getOpClientFactory().createTokenClient(tokenEndpoint);
-            tokenClient.setExecutor(getHttpService().getClientExecutor());
+            tokenClient.setExecutor(getHttpService().getClientEngine());
 
             final TokenResponse tokenResponse;
             if (authenticationMethod == AuthenticationMethod.PRIVATE_KEY_JWT) {

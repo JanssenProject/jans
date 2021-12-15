@@ -4,7 +4,8 @@
 package io.jans.ca.server;
 
 import com.google.inject.Inject;
-import org.jboss.resteasy.client.ClientResponseFailure;
+import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.WebApplicationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.jans.ca.common.Command;
@@ -14,8 +15,6 @@ import io.jans.ca.common.response.IOpResponse;
 import io.jans.ca.server.op.IOperation;
 import io.jans.ca.server.op.OperationFactory;
 import io.jans.ca.server.service.ValidationService;
-
-import javax.ws.rs.WebApplicationException;
 
 /**
  * oxD operation processor.
@@ -54,9 +53,8 @@ public class Processor {
                     LOG.error("Operation is not supported!");
                     throw new HttpException(ErrorResponseCode.UNSUPPORTED_OPERATION);
                 }
-            } catch (ClientResponseFailure e) {
-                LOG.error(e.getLocalizedMessage(), e);
-                throw new WebApplicationException((String) e.getResponse().getEntity(String.class), e.getResponse().getStatus());
+            } catch (ClientErrorException e) {
+                throw new WebApplicationException(e.getResponse().readEntity(String.class), e.getResponse().getStatus());
             } catch (WebApplicationException e) {
                 LOG.error(e.getLocalizedMessage(), e);
                 throw e;
