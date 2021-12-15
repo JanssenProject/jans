@@ -54,7 +54,7 @@ import java.util.List;
 
 /**
  * @author Javier Rojas Blum
- * @version November 22, 2021
+ * @version December 15, 2021
  */
 public class JwtAuthorizationRequest {
 
@@ -99,6 +99,7 @@ public class JwtAuthorizationRequest {
     private final String encodedJwt;
     private String payload;
     private JSONObject jsonPayload;
+    private Jwt nestedJwt;
 
     private final AppConfiguration appConfiguration;
 
@@ -148,7 +149,7 @@ public class JwtAuthorizationRequest {
 
                 Jwe jwe = jweDecrypter.decrypt(encodedJwt);
 
-                final Jwt nestedJwt = jwe.getSignedJWTPayload();
+                nestedJwt = jwe.getSignedJWTPayload();
                 if (nestedJwt != null) {
                     keyId = nestedJwt.getHeader().getKeyId();
                     if (!validateSignature(cryptoProvider, nestedJwt.getHeader().getSignatureAlgorithm(), client, nestedJwt.getSigningInput(), nestedJwt.getEncodedSignature())) {
@@ -328,6 +329,10 @@ public class JwtAuthorizationRequest {
 
     public JSONObject getJsonPayload() {
         return jsonPayload;
+    }
+
+    public Jwt getNestedJwt() {
+        return nestedJwt;
     }
 
     public String getEncryptionAlgorithm() {
