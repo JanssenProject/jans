@@ -21,7 +21,6 @@
 
 		<jettison.version>1.3.2</jettison.version>
 
-		<log4j.version>2.13.3</log4j.version>
 		<slf4j.version>1.7.25</slf4j.version>
 
 		<omnifaces.version>2.6.9</omnifaces.version>
