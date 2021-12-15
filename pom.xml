@@ -16,8 +16,8 @@
         <jackson.version>2.10.1</jackson.version>
         <httpcomponents.version>4.1.2</httpcomponents.version>
         <jans-auth-server.version>1.0.0-SNAPSHOT</jans-auth-server.version>
-        <resteasy.version>2.3.7.Final</resteasy.version>
         <licensing.version>1.1.0</licensing.version>
+        <resteasy.version>4.6.1.Final</resteasy.version>
         <guice.version>3.0</guice.version>
         <guava.version>[24.1.1,)</guava.version>
         <selenium.version>3.141.59</selenium.version>
@@ -46,9 +46,14 @@
 
     <repositories>
         <repository>
-            <id>gluu</id>
+            <id>jans</id>
             <name>Jans repository</name>
             <url>https://maven.jans.io/maven</url>
+        </repository>
+        <repository>
+            <id>gluu</id>
+            <name>gluu repository</name>
+            <url>https://maven.gluu.org/maven</url>
         </repository>
         <repository>
             <id>central</id>

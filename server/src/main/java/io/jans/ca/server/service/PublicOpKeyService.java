@@ -16,7 +16,7 @@ import io.jans.as.model.jwk.JSONWebKeySet;
 import io.jans.as.model.jwk.Use;
 import io.jans.ca.server.op.OpClientFactory;
 import io.jans.util.Pair;
-import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
+import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,7 +55,7 @@ public class PublicOpKeyService {
         }
         //Request jwks from OP
         JwkClient jwkClient = opClientFactory.createJwkClient(jwkSetUrl);
-        jwkClient.setExecutor(new ApacheHttpClient4Executor(httpService.getHttpClient()));
+        jwkClient.setExecutor(new ApacheHttpClient43Engine(httpService.getHttpClient()));
 
         JwkResponse jwkResponse = jwkClient.exec();
         if (jwkResponse == null || jwkResponse.getStatus() != 200) {

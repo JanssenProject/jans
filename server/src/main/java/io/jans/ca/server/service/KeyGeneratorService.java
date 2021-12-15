@@ -7,6 +7,7 @@ import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.exception.CryptoProviderException;
 import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.jwk.JSONWebKey;
 import io.jans.as.model.jwk.JSONWebKeySet;
@@ -18,12 +19,9 @@ import io.jans.ca.common.ExpiredObjectType;
 import io.jans.ca.server.HttpException;
 import io.jans.ca.server.RpServerConfiguration;
 import io.jans.ca.server.persistence.service.PersistenceService;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.security.KeyStoreException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -72,7 +70,7 @@ public class KeyGeneratorService {
     }
 
     private JSONWebKeySet generateKeys(List<Algorithm> signatureAlgorithms,
-                                       List<Algorithm> encryptionAlgorithms, int expiration_hours) throws Exception, JSONException {
+                                       List<Algorithm> encryptionAlgorithms, int expiration_hours) {
         LOG.trace("Generating jwks keys...");
         JSONWebKeySet jwks = new JSONWebKeySet();
 
@@ -82,7 +80,7 @@ public class KeyGeneratorService {
         for (Algorithm algorithm : signatureAlgorithms) {
             try {
                 SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(algorithm.name());
-                JSONObject result = this.cryptoProvider.generateKey(algorithm, calendar.getTimeInMillis(), Use.SIGNATURE);
+                JSONObject result = this.cryptoProvider.generateKey(algorithm, calendar.getTimeInMillis());
 
                 JSONWebKey key = JSONWebKey.fromJSONObject(result);
                 jwks.getKeys().add(key);
@@ -95,7 +93,7 @@ public class KeyGeneratorService {
             try {
                 KeyEncryptionAlgorithm encryptionAlgorithm = KeyEncryptionAlgorithm.fromName(algorithm.getParamName());
                 JSONObject result = this.cryptoProvider.generateKey(algorithm,
-                        calendar.getTimeInMillis(), Use.ENCRYPTION);
+                        calendar.getTimeInMillis());
 
                 JSONWebKey key = JSONWebKey.fromJSONObject(result);
                 jwks.getKeys().add(key);
@@ -144,7 +142,7 @@ public class KeyGeneratorService {
         this.keys = keys;
     }
 
-    public String getKeyId(Algorithm algorithm, Use use) throws Exception {
+    public String getKeyId(Algorithm algorithm, Use use) {
         try {
             final String kid = cryptoProvider.getKeyId(getKeys(), algorithm, use);
             if (!cryptoProvider.getKeys().contains(kid)) {
@@ -152,7 +150,7 @@ public class KeyGeneratorService {
             }
             return kid;
 
-        } catch (KeyStoreException e) {
+        } catch (CryptoProviderException e) {
             LOG.error("Error in keyId generation");
 
         }

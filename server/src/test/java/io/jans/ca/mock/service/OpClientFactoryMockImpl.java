@@ -24,12 +24,13 @@ import io.jans.ca.server.op.OpClientFactory;
 import org.apache.commons.lang.StringUtils;
 import org.glassfish.jersey.message.internal.OutboundJaxrsResponse;
 import org.glassfish.jersey.message.internal.OutboundMessageContext;
-import org.jboss.resteasy.client.ClientExecutor;
-import org.jboss.resteasy.client.ClientRequest;
-import org.jboss.resteasy.client.ClientResponse;
+import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
+
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import javax.ws.rs.core.Form;
 import javax.ws.rs.core.Response;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -315,27 +316,28 @@ public class OpClientFactoryMockImpl implements OpClientFactory {
         return umaClientFactory;
     }
 
-    public synchronized ClientRequest createClientRequest(String uriTemplate, ClientExecutor executor) throws Exception {
-        Optional<ClientRequest> clientRequest = Optional.ofNullable((ClientRequest) opClientCache.getIfPresent("ClientRequest"));
-        Optional<ClientResponse> clientResponse = Optional.ofNullable((ClientResponse) opClientCache.getIfPresent("ClientResponse"));
-        ClientRequest client = null;
-        if (!clientRequest.isPresent() || !clientResponse.isPresent()) {
-            client = mock(ClientRequest.class);
+    public synchronized Builder createClientRequest(String uriTemplate, ClientHttpEngine engine) throws Exception {
+        Optional<Builder> Builder = Optional.ofNullable((Builder) opClientCache.getIfPresent("Builder"));
+        Optional<Response> Response = Optional.ofNullable((Response) opClientCache.getIfPresent("Response"));
+        Optional<Form> Form = Optional.ofNullable((Form) opClientCache.getIfPresent("Form"));
+        Builder client = null;
+        if (!Builder.isPresent() || !Response.isPresent() || !Form.isPresent()) {
+            client = mock(Builder.class);
 
-            ClientResponse<String> response = mock(ClientResponse.class);
-
+            Response response = mock(Response.class);
+            Form form = mock(Form.class);
             when(response.getEntity()).thenReturn("{ \"access_token\":\"d457e3de-30dd-400a-8698-2b98472b7a40\"," +
                     "\"token_type\":\"Bearer\"," +
                     "\"pct\":\"30dd\"" +
                     "}");
             when(client.header(any(), any())).thenReturn(client);
-            when(client.formParameter(any(), any())).thenReturn(client);
-            when(client.queryParameter(any(), any())).thenReturn(client);
-            when(client.post(String.class)).thenReturn(response);
-            opClientCache.put("ClientRequest", client);
-            opClientCache.put("ClientResponse", response);
+            when(form.param(any(), any())).thenReturn(form);
+            when(form.param(any(), any())).thenReturn(form);
+            when(client.buildPost(Entity.form(form)).invoke()).thenReturn(response);
+            opClientCache.put("Builder", client);
+            opClientCache.put("Response", response);
         } else {
-            client = (ClientRequest) opClientCache.getIfPresent("ClientRequest");
+            client = (Builder) opClientCache.getIfPresent("Builder");
         }
         return client;
     }

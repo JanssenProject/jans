@@ -262,6 +262,12 @@
             <groupId>io.gsonfire</groupId>
             <artifactId>gson-fire</artifactId>
             <version>${gson-fire-version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.google.code.gson</groupId>
+                    <artifactId>gson</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.threeten</groupId>

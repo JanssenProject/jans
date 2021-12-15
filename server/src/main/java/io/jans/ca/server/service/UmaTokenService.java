@@ -28,11 +28,13 @@ import io.jans.ca.server.model.TokenFactory;
 import io.jans.ca.server.op.OpClientFactory;
 import io.jans.ca.server.op.RpGetRptOperation;
 import org.apache.commons.lang.StringUtils;
-import org.jboss.resteasy.client.ClientRequest;
-import org.jboss.resteasy.client.ClientResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.core.Form;
+import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.*;
 
@@ -90,46 +92,56 @@ public class UmaTokenService {
             }
         }
 
-        ClientRequest client = opClientFactory.createClientRequest(discovery.getTokenEndpoint(), httpService.getClientExecutor());
+        Builder client = opClientFactory.createClientRequest(discovery.getTokenEndpoint(), httpService.getClientEngine());
         client.header("Authorization", "Basic " + Utils.encodeCredentials(rp.getClientId(), rp.getClientSecret()));
-        client.formParameter("grant_type", GrantType.OXAUTH_UMA_TICKET.getValue());
-        client.formParameter("ticket", params.getTicket());
+
+        Form formRequest = new Form();
+        formRequest.param("grant_type", GrantType.OXAUTH_UMA_TICKET.getValue());
+        formRequest.param("ticket", params.getTicket());
 
         if (params.getClaimToken() != null) {
-            client.formParameter("claim_token", params.getClaimToken());
+            formRequest.param("claim_token", params.getClaimToken());
         }
 
         if (params.getClaimTokenFormat() != null) {
-            client.formParameter("claim_token_format", params.getClaimTokenFormat());
+            formRequest.param("claim_token_format", params.getClaimTokenFormat());
         }
 
         if (params.getPct() != null) {
-            client.formParameter("pct", params.getPct());
+            formRequest.param("pct", params.getPct());
         }
 
         if (params.getRpt() != null) {
-            client.formParameter("rpt", params.getRpt());
+            formRequest.param("rpt", params.getRpt());
         }
 
         if (params.getScope() != null) {
-            client.formParameter("scope", Utils.joinAndUrlEncode(params.getScope()));
+            formRequest.param("scope", Utils.joinAndUrlEncode(params.getScope()));
         }
 
         if (params.getParams() != null && !params.getParams().isEmpty()) {
             for (Map.Entry<String, String> p : params.getParams().entrySet()) {
-                client.formParameter(p.getKey(), p.getValue());
+                formRequest.param(p.getKey(), p.getValue());
             }
         }
 
-        ClientResponse<String> response = null;
+        Response response = null;
         try {
-            response = client.post(String.class);
+            response = client.buildPost(Entity.form(formRequest)).invoke();
         } catch (Exception e) {
             LOG.error("Failed to receive RPT response for rp: " + rp, e);
             throw new HttpException(ErrorResponseCode.FAILED_TO_GET_RPT);
         }
 
-        final String entityResponse = response.getEntity();
+        String entityResponse = null;
+        try {
+            entityResponse = response.readEntity(String.class);
+        } catch (Exception e) {
+            LOG.error("Failed to read RPT response for rp: " + rp, e);
+            throw new HttpException(ErrorResponseCode.FAILED_TO_GET_RPT);
+        } finally {
+            response.close();
+        }
         UmaTokenResponse tokenResponse = asTokenResponse(entityResponse);
 
         if (tokenResponse != null && StringUtils.isNotBlank(tokenResponse.getAccessToken())) {
@@ -262,7 +274,7 @@ public class UmaTokenService {
 
     private Token obtainTokenWithClientCredentials(OpenIdConfigurationResponse discovery, Rp rp, UmaScopeType scopeType) {
         final TokenClient tokenClient = opClientFactory.createTokenClientWithUmaProtectionScope(discovery.getTokenEndpoint());
-        tokenClient.setExecutor(httpService.getClientExecutor());
+        tokenClient.setExecutor(httpService.getClientEngine());
         final TokenResponse response = tokenClient.execClientCredentialsGrant(scopesAsString(scopeType), rp.getClientId(), rp.getClientSecret());
         if (response != null) {
             if (Util.allNotBlank(response.getAccessToken())) {
@@ -319,7 +331,7 @@ public class UmaTokenService {
         request.getPrompts().add(Prompt.NONE);
 
         final AuthorizeClient authorizeClient = new AuthorizeClient(discovery.getAuthorizationEndpoint());
-        authorizeClient.setExecutor(httpService.getClientExecutor());
+        authorizeClient.setExecutor(httpService.getClientEngine());
         authorizeClient.setRequest(request);
         final AuthorizationResponse response1 = authorizeClient.exec();
 
@@ -342,7 +354,7 @@ public class UmaTokenService {
 
             final TokenClient tokenClient1 = new TokenClient(discovery.getTokenEndpoint());
             tokenClient1.setRequest(tokenRequest);
-            tokenClient1.setExecutor(httpService.getClientExecutor());
+            tokenClient1.setExecutor(httpService.getClientEngine());
             final TokenResponse response2 = tokenClient1.exec();
 
             if (response2.getStatus() == 200 && Util.allNotBlank(response2.getAccessToken())) {

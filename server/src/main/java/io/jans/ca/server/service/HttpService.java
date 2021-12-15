@@ -11,10 +11,8 @@ import org.apache.http.client.HttpClient;
 import io.jans.ca.common.CoreUtils;
 import io.jans.ca.common.Jackson2;
 import io.jans.ca.common.proxy.ProxyConfiguration;
-import org.jboss.resteasy.client.ClientExecutor;
-import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
 import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
-import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
+import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -105,12 +103,8 @@ public class HttpService {
         }
     }
 
-    public ClientExecutor getClientExecutor() {
-        return new ApacheHttpClient4Executor(getHttpClient());
-    }
-
     public ClientHttpEngine getClientEngine() {
-        return new ApacheHttpClient4Engine(getHttpClient());
+        return new ApacheHttpClient43Engine(getHttpClient());
     }
 
     private static String[] listToArray(List<String> input) {
