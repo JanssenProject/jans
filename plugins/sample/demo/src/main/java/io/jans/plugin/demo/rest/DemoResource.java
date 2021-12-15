@@ -26,18 +26,18 @@ public class DemoResource {
     @GET
 	@Path(Constants.ISSUER)
     public Response getIssuer() {
-        log.error(" DemoResource::getIssuer() - utils = "+utils+"\n\n");
+        log.debug(" DemoResource::getIssuer() - utils = "+utils+"\n\n");
         String issuer = utils.getIssuer();
-        log.error(" DemoResource::getIssuer() - issuer = "+issuer+"\n\n");
+        log.debug(" DemoResource::getIssuer() - issuer = "+issuer+"\n\n");
         return Response.ok(issuer).build();
     }
     
     @GET
     @Path(Constants.CLIENT + Constants.INUM_PATH)
     public Response getClient(@PathParam(Constants.INUM) @NotNull String inum) {
-        log.error("\n DemoResource::getClient() - log = "+log+" ,inum = "+inum+"\n\n");
+        log.debug("\n DemoResource::getClient() - log = "+log+" ,inum = "+inum+"\n\n");
         Client client = utils.getClient(inum);
-        log.error(" DemoResource::getClient() - client = "+client+"\n\n");
+        log.debug(" DemoResource::getClient() - client = "+client+"\n\n");
         return Response.ok(client).build();
     }       
 
