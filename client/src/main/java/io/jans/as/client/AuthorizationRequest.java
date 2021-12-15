@@ -552,7 +552,11 @@ public class AuthorizationRequest extends BaseRequest {
             final String acrValuesAsString = getAcrValuesAsString();
             final String claimsAsString = getClaimsAsString();
 
-            addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.RESPONSE_TYPE, responseTypesAsString);
+            if (StringUtils.isNotBlank(responseTypesAsString)) {
+                queryStringBuilder.append(AuthorizeRequestParam.RESPONSE_TYPE)
+                        .append("=").append(URLEncoder.encode(responseTypesAsString, Util.UTF8_STRING_ENCODING));
+            }
+
             addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.CLIENT_ID, clientId);
             addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.SCOPE, scopesAsString);
             addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.REDIRECT_URI, redirectUri);
