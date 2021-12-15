@@ -4,7 +4,7 @@ import brave.Tracing;
 import brave.opentracing.BraveTracer;
 import com.google.common.base.Strings;
 import io.jaegertracing.Configuration;
-import io.jaegertracing.samplers.ConstSampler;
+import io.jaegertracing.internal.samplers.ConstSampler;
 import io.opentracing.Scope;
 import io.opentracing.Tracer;
 import io.opentracing.noop.NoopTracerFactory;
