@@ -43,6 +43,13 @@
 			<groupId>io.jans</groupId>
 			<artifactId>jans-config-api-common</artifactId>
 		</dependency>
+<<<<<<< HEAD
+=======
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-core-timer-weld</artifactId>
+		</dependency>
+>>>>>>> 86fe39505e6bfc3de2bf8b58dec7b95b58e3ce4d
 
 		<!-- Weld -->
 		<dependency>
