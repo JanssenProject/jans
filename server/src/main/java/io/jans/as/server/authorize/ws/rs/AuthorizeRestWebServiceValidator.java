@@ -12,6 +12,7 @@ import io.jans.as.common.util.RedirectUri;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.server.model.authorize.AuthorizeParamsValidator;
 import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
@@ -37,18 +38,16 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.TimeZone;
+import java.util.*;
 
 import static io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType.INVALID_REQUEST;
+import static io.jans.as.model.crypto.signature.SignatureAlgorithm.NONE;
+import static io.jans.as.model.crypto.signature.SignatureAlgorithm.RS256;
 import static org.apache.commons.lang.BooleanUtils.isTrue;
 
 /**
  * @author Yuriy Zabrovarnyy
- * @version November 26, 2021
+ * @version December 15, 2021
  */
 @Named
 @Stateless
@@ -174,6 +173,13 @@ public class AuthorizeRestWebServiceValidator {
         }
 
         // FAPI related validation
+        if (jwtRequest.getNestedJwt() != null) {
+            SignatureAlgorithm nestedJwtSigAlg = jwtRequest.getNestedJwt().getHeader().getSignatureAlgorithm();
+            if (appConfiguration.isFapi() && (nestedJwtSigAlg == RS256 || nestedJwtSigAlg == NONE)) {
+                log.error("The Nested JWT signature algorithm is not valid.");
+                throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT);
+            }
+        }
         if (jwtRequest.getExp() == null) {
             log.error("The exp claim is not set");
             throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT);
