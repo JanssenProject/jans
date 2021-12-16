@@ -68,10 +68,11 @@ public class SqlPersistenceServiceImpl implements PersistenceService {
 
     public boolean createExpiredObject(ExpiredObject obj) {
         Connection conn = null;
+        PreparedStatement query = null;
         try {
             conn = provider.getConnection();
             conn.setAutoCommit(false);
-            PreparedStatement query = conn.prepareStatement("insert into expired_objects(obj_key, obj_value, type, iat, exp) values(?, ?, ?, ?, ?)");
+            query = conn.prepareStatement("insert into expired_objects(obj_key, obj_value, type, iat, exp) values(?, ?, ?, ?, ?)");
             query.setString(1, obj.getKey().trim());
             query.setString(2, obj.getValue().trim());
             query.setString(3, obj.getType().getValue());
@@ -89,6 +90,7 @@ public class SqlPersistenceServiceImpl implements PersistenceService {
             rollbackSilently(conn);
             return false;
         } finally {
+            IOUtils.closeSilently(query);
             IOUtils.closeSilently(conn);
         }
     }
@@ -174,10 +176,11 @@ public class SqlPersistenceServiceImpl implements PersistenceService {
     public ExpiredObject getExpiredObject(String key) {
 
         Connection conn = null;
+        PreparedStatement query = null;
         try {
             conn = provider.getConnection();
             conn.setAutoCommit(false);
-            PreparedStatement query = conn.prepareStatement("select obj_key, obj_value, type, iat, exp from expired_objects where obj_key = ?");
+            query = conn.prepareStatement("select obj_key, obj_value, type, iat, exp from expired_objects where obj_key = ?");
             query.setString(1, key.trim());
             ResultSet rs = query.executeQuery();
             ExpiredObject expiredObject = null;
@@ -202,6 +205,7 @@ public class SqlPersistenceServiceImpl implements PersistenceService {
             rollbackSilently(conn);
             return null;
         } finally {
+            IOUtils.closeSilently(query);
             IOUtils.closeSilently(conn);
         }
     }
@@ -304,11 +308,12 @@ public class SqlPersistenceServiceImpl implements PersistenceService {
 
     public boolean deleteExpiredObjectsByKey(String key) {
         Connection conn = null;
+        PreparedStatement query = null;
         try {
             conn = provider.getConnection();
             conn.setAutoCommit(false);
 
-            PreparedStatement query = conn.prepareStatement("delete from expired_objects where obj_key = ?");
+            query = conn.prepareStatement("delete from expired_objects where obj_key = ?");
             query.setString(1, key);
             query.executeUpdate();
             query.close();
@@ -321,6 +326,7 @@ public class SqlPersistenceServiceImpl implements PersistenceService {
             rollbackSilently(conn);
             return false;
         } finally {
+            IOUtils.closeSilently(query);
             IOUtils.closeSilently(conn);
         }
     }
