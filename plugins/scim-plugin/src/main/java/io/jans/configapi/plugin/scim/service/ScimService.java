@@ -1,6 +1,6 @@
 package io.jans.configapi.plugin.scim.service;
 
-import static io.jans.configapi.plugin.util.Util.escapeLog;
+import static io.jans.configapi.core.util.Util.escapeLog;
 import io.jans.configapi.util.AuthUtil;
 import io.jans.configapi.plugin.scim.model.config.ScimConfiguration;
 
