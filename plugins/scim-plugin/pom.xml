@@ -20,7 +20,7 @@
 		<!-- config api -->
 		<dependency>
 			<groupId>io.jans</groupId>
-			<artifactId>configapi-shared</artifactId>
+			<artifactId>jans-config-api-shared</artifactId>
 			<version>${jans.version}</version>
 		</dependency>
 		<dependency>
