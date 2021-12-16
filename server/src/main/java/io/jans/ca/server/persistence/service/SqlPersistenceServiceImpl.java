@@ -352,15 +352,4 @@ public class SqlPersistenceServiceImpl implements PersistenceService {
             IOUtils.closeSilently(conn);
         }
     }
-
-    private static String getKeyColumnName(ConfigurationService configurationService) {
-
-        JsonNode driverNode = configurationService.getConfiguration().getStorageConfiguration().get("driver");
-        String driverClass = driverNode != null ? driverNode.asText() : null;
-
-        if (!Strings.isNullOrEmpty(driverClass) && driverClass.contains("mysql")) {
-            return "`key`";
-        }
-        return "key";
-    }
 }
