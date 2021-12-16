@@ -556,13 +556,15 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
                 KeyEncryptionAlgorithm keyEncryptionAlgorithm = KeyEncryptionAlgorithm.fromName(algorithm.getParamName());
                 jsonObject.put(JWKParameter.CURVE, keyEncryptionAlgorithm.getCurve().getName());
             }
-            jsonObject.put(JWKParameter.X, Base64Util.base64urlencode(ecPublicKey.getW().getAffineX().toByteArray()));
-            jsonObject.put(JWKParameter.Y, Base64Util.base64urlencode(ecPublicKey.getW().getAffineY().toByteArray()));
+            jsonObject.put(JWKParameter.X, Base64Util.base64urlencodeUnsignedBigInt(ecPublicKey.getW().getAffineX()));
+            jsonObject.put(JWKParameter.Y, Base64Util.base64urlencodeUnsignedBigInt(ecPublicKey.getW().getAffineY()));
         } else if (use == Use.SIGNATURE && publicKey instanceof EdDSAPublicKey) {
             EdDSAPublicKey edDSAPublicKey = (EdDSAPublicKey) publicKey;
             SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(algorithm.getParamName());
             jsonObject.put(JWKParameter.CURVE, signatureAlgorithm.getCurve().getName());
             jsonObject.put(JWKParameter.X, Base64Util.base64urlencode(edDSAPublicKey.getEncoded()));
+            // EdDSA keys (EdDSAPublicKey, EDDSAPrivateKey) don't use BigInteger, but only byte[], 
+            // so Base64Util.base64urlencode, but not Base64Util.base64urlencodeUnsignedBigInt is used.
         }
 
         JSONArray x5c = new JSONArray();
