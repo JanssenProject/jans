@@ -27,13 +27,11 @@ public class SqlPersistenceServiceImpl implements PersistenceService {
 
     private SqlPersistenceProvider provider;
     private ConfigurationService configurationService;
-    private String expiredObjectColumnName;
 
     @Inject
     public SqlPersistenceServiceImpl(SqlPersistenceProvider provider, ConfigurationService configurationService) {
         this.provider = provider;
         this.configurationService = configurationService;
-        this.expiredObjectColumnName = getKeyColumnName(configurationService);
     }
 
     public void create() {
@@ -51,7 +49,7 @@ public class SqlPersistenceServiceImpl implements PersistenceService {
             Statement stmt = conn.createStatement();
 
             stmt.addBatch("create table if not exists rp(id varchar(36) primary key, data varchar(50000))");
-            stmt.addBatch("create table if not exists expired_objects( " + this.expiredObjectColumnName + " varchar(50), value varchar(50000), type varchar(20), iat TIMESTAMP NULL DEFAULT NULL, exp TIMESTAMP NULL DEFAULT NULL)");
+            stmt.addBatch("create table if not exists expired_objects( obj_key varchar(50), obj_value varchar(50000), type varchar(20), iat TIMESTAMP NULL DEFAULT NULL, exp TIMESTAMP NULL DEFAULT NULL)");
 
             stmt.executeBatch();
 
@@ -73,7 +71,7 @@ public class SqlPersistenceServiceImpl implements PersistenceService {
         try {
             conn = provider.getConnection();
             conn.setAutoCommit(false);
-            PreparedStatement query = conn.prepareStatement("insert into expired_objects(" + this.expiredObjectColumnName + ", value, type, iat, exp) values(?, ?, ?, ?, ?)");
+            PreparedStatement query = conn.prepareStatement("insert into expired_objects(obj_key, obj_value, type, iat, exp) values(?, ?, ?, ?, ?)");
             query.setString(1, obj.getKey().trim());
             query.setString(2, obj.getValue().trim());
             query.setString(3, obj.getType().getValue());
@@ -179,14 +177,14 @@ public class SqlPersistenceServiceImpl implements PersistenceService {
         try {
             conn = provider.getConnection();
             conn.setAutoCommit(false);
-            PreparedStatement query = conn.prepareStatement("select " + this.expiredObjectColumnName + ", value, type, iat, exp from expired_objects where " + this.expiredObjectColumnName + " = ?");
+            PreparedStatement query = conn.prepareStatement("select obj_key, obj_value, type, iat, exp from expired_objects where obj_key = ?");
             query.setString(1, key.trim());
             ResultSet rs = query.executeQuery();
             ExpiredObject expiredObject = null;
 
             rs.next();
-            if (!Strings.isNullOrEmpty(rs.getString("key"))) {
-                expiredObject = new ExpiredObject(rs.getString("key"), rs.getString("value"), ExpiredObjectType.fromValue(rs.getString("type")), new java.util.Date(rs.getTimestamp("iat").getTime()), new java.util.Date(rs.getTimestamp("exp").getTime()));
+            if (!Strings.isNullOrEmpty(rs.getString("obj_key"))) {
+                expiredObject = new ExpiredObject(rs.getString("obj_key"), rs.getString("obj_value"), ExpiredObjectType.fromValue(rs.getString("type")), new java.util.Date(rs.getTimestamp("iat").getTime()), new java.util.Date(rs.getTimestamp("exp").getTime()));
             }
 
             query.close();
@@ -310,7 +308,7 @@ public class SqlPersistenceServiceImpl implements PersistenceService {
             conn = provider.getConnection();
             conn.setAutoCommit(false);
 
-            PreparedStatement query = conn.prepareStatement("delete from expired_objects where " + this.expiredObjectColumnName + " = ?");
+            PreparedStatement query = conn.prepareStatement("delete from expired_objects where obj_key = ?");
             query.setString(1, key);
             query.executeUpdate();
             query.close();
