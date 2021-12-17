@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.Lists;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -68,6 +69,9 @@ public class ClientAttributes implements Serializable {
     @JsonProperty("rptClaimsScripts")
     private List<String> rptClaimsScripts;
 
+    @JsonProperty("ropcScripts")
+    private List<String> ropcScripts;
+
     @JsonProperty("parLifetime")
     private Integer parLifetime;
 
@@ -82,6 +86,15 @@ public class ClientAttributes implements Serializable {
 
     @JsonProperty("jansAuthEncRespEnc")
     private String authorizationEncryptedResponseEnc;
+
+    public List<String> getRopcScripts() {
+        if (ropcScripts == null) ropcScripts = new ArrayList<>();
+        return ropcScripts;
+    }
+
+    public void setRopcScripts(List<String> ropcScripts) {
+        this.ropcScripts = ropcScripts;
+    }
 
     public Boolean getRequirePar() {
         if (requirePar == null) requirePar = false;
