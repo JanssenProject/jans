@@ -22,6 +22,7 @@ import java.util.List;
  * @author Sergey Manoylo
  * @version September 13, 2021
  */
+@SuppressWarnings("java:S1874")
 public enum Algorithm {
 
     // Signature
@@ -89,9 +90,7 @@ public enum Algorithm {
     private final AlgorithmFamily family;
     private final int keyLength;            // in bits, for some Algorithms - max key Length;
                                             // keyLength is defined only for algorithms,
-                                            // which are used in KeyGenerator,
-                                            // i.e. where key is generated in the KeyStorage;
-                                            // can be defined for other (AES: A192KW,...);
+                                            // which are used in KeyGenerator;
 
     Algorithm(final String paramName, final String outName, final String description,
               final Use use, final AlgorithmFamily family, int keyLength) {
