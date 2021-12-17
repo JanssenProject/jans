@@ -88,9 +88,15 @@ public enum Algorithm {
     private final String description;
     private final Use use;
     private final AlgorithmFamily family;
-    private final int keyLength;            // in bits, for some Algorithms - max key Length;
-                                            // keyLength is defined only for algorithms,
-                                            // which are used in KeyGenerator;
+    /**
+     *  keyLength
+            in bits, for some Algorithms - max key Length;
+            keyLength is defined only for algorithms,
+            which are used in KeyGenerator,
+            i.e. where key is generated in the KeyStorage;
+            can be defined for other (AES: A192KW,...); 
+     */
+    private final int keyLength;
 
     Algorithm(final String paramName, final String outName, final String description,
               final Use use, final AlgorithmFamily family, int keyLength) {
