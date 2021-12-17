@@ -414,7 +414,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
                 if (!authenticated) {
                     if (externalResourceOwnerPasswordCredentialsService.isEnabled()) {
-                        final ExternalResourceOwnerPasswordCredentialsContext context = new ExternalResourceOwnerPasswordCredentialsContext(request, response, appConfiguration, attributeService, userService);
+                        final ExternalResourceOwnerPasswordCredentialsContext context = new ExternalResourceOwnerPasswordCredentialsContext(executionContext);
                         context.setUser(user);
                         if (externalResourceOwnerPasswordCredentialsService.executeExternalAuthenticate(context)) {
                             log.trace("RO PC - User is authenticated successfully by external script.");
