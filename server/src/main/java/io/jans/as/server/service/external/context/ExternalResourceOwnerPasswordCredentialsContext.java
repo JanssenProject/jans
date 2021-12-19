@@ -7,48 +7,30 @@
 package io.jans.as.server.service.external.context;
 
 import io.jans.as.common.model.common.User;
-import io.jans.as.common.service.AttributeService;
-import io.jans.as.common.service.common.UserService;
-import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.server.model.common.ExecutionContext;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * @author Yuriy Zabrovarnyy
  */
 public class ExternalResourceOwnerPasswordCredentialsContext extends ExternalScriptContext {
 
-    private final AppConfiguration appConfiguration;
-    private final AttributeService attributeService;
-    private final UserService userService;
+    private final ExecutionContext executionContext;
 
     private User user;
     private CustomScriptConfiguration script;
 
-    public ExternalResourceOwnerPasswordCredentialsContext(HttpServletRequest httpRequest, HttpServletResponse httpResponse,
-                                                           AppConfiguration appConfiguration, AttributeService attributeService, UserService userService) {
-        super(httpRequest, httpResponse);
-        this.appConfiguration = appConfiguration;
-        this.attributeService = attributeService;
-        this.userService = userService;
+    public ExternalResourceOwnerPasswordCredentialsContext(ExecutionContext executionContext) {
+        super(executionContext.getHttpRequest(), executionContext.getHttpResponse());
+        this.executionContext = executionContext;
+    }
+
+    public ExecutionContext getExecutionContext() {
+        return executionContext;
     }
 
     public void setUser(User user) {
         this.user = user;
-    }
-
-    public AppConfiguration getAppConfiguration() {
-        return appConfiguration;
-    }
-
-    public AttributeService getAttributeService() {
-        return attributeService;
-    }
-
-    public UserService getUserService() {
-        return userService;
     }
 
     public User getUser() {
@@ -68,6 +50,7 @@ public class ExternalResourceOwnerPasswordCredentialsContext extends ExternalScr
         return "ExternalResourceOwnerPasswordCredentialsContext{" +
                 "user=" + user +
                 "script=" + script +
+                "executionContext=" + executionContext +
                 "} " + super.toString();
     }
 }
