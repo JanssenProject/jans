@@ -33,14 +33,15 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         self.template_base = os.path.join(Config.templateFolder, 'test')
 
     def create_test_client_keystore(self):
-        self.logIt("Creating client_keystore.jks")
-        client_keystore_fn = os.path.join(Config.outputFolder, 'test/jans-auth/client/client_keystore.jks')
+        self.logIt("Creating client_keystore.p12")
+        client_keystore_fn = os.path.join(Config.outputFolder, 'test/jans-auth/client/client_keystore.p12')
         keys_json_fn =  os.path.join(Config.outputFolder, 'test/jans-auth/client/keys_client_keystore.json')
 
         args = [Config.cmd_keytool, '-genkey', '-alias', 'dummy', '-keystore', 
                     client_keystore_fn, '-storepass', 'secret', '-keypass', 
                     'secret', '-dname', 
-                    "'{}'".format(Config.default_openid_jks_dn_name)
+                    "'{}'".format(Config.default_openid_jks_dn_name),
+                    '-storetype', 'PKCS12'
                     ]
 
         self.run(' '.join(args), shell=True)
