@@ -87,7 +87,7 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
         }
 
         final TokenClient tokenClient = getOpClientFactory().createTokenClient(discoveryResponse.getTokenEndpoint());
-        tokenClient.setExecutor(getHttpService().getClientExecutor());
+        tokenClient.setExecutor(getHttpService().getClientEngine());
         tokenClient.setRequest(tokenRequest);
         final TokenResponse response = tokenClient.exec();
 
