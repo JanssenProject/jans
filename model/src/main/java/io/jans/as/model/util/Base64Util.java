@@ -13,7 +13,8 @@ import java.nio.charset.StandardCharsets;
 
 /**
  * @author Javier Rojas Blum
- * @version July 31, 2016
+ * @author Sergey Manoylo
+ * @version December 16, 2021
  */
 public class Base64Util {
 
@@ -58,15 +59,8 @@ public class Base64Util {
         return s;
     }
 
-    public static String base64urlencodeUnsignedBigInt(BigInteger bigInteger) {
-        byte[] array = bigInteger.toByteArray();
-        if (array[0] == 0) {
-            byte[] tmp = new byte[array.length - 1];
-            System.arraycopy(array, 1, tmp, 0, tmp.length);
-            array = tmp;
-        }
-
-        return Base64Util.base64urlencode(array);
+    public static String base64urlencodeUnsignedBigInt(final BigInteger bigInteger) {
+        return Base64Util.base64urlencode(bigIntegerToUnsignedByteArray(bigInteger));
     }
 
     public static byte[] unsignedToBytes(int[] plaintextUnsignedBytes) {
@@ -77,5 +71,23 @@ public class Base64Util {
         }
 
         return bytes;
+    }
+
+    public static String bytesToHex(byte[] bytes) {
+        StringBuilder result = new StringBuilder();
+        for (byte aByte : bytes) {
+            result.append(String.format("%02x", aByte));
+        }
+        return result.toString();
+    }
+
+    public static byte[] bigIntegerToUnsignedByteArray(final BigInteger bigInteger) {
+        byte[] array = bigInteger.toByteArray();
+        if (array[0] == 0) {
+            byte[] tmp = new byte[array.length - 1];
+            System.arraycopy(array, 1, tmp, 0, tmp.length);
+            array = tmp;
+        }
+        return array; 
     }
 }
