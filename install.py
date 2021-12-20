@@ -137,8 +137,7 @@ def download_gcs():
 setup_zip_file = os.path.join(jans_app_dir, 'jans-setup.zip')
 
 if not (argsp.u or argsp.uninstall):
-#    setup_url = 'https://github.com/JanssenProject/jans-setup/archive/master.zip'
-    setup_url = 'https://github.com/JanssenProject/jans-setup/archive/sergey_012_1.zip'
+    setup_url = 'https://github.com/JanssenProject/jans-setup/archive/master.zip'
     download(setup_url, setup_zip_file)
 
     download('https://corretto.aws/downloads/resources/{0}/amazon-corretto-{0}-linux-x64.tar.gz'.format(app_versions['AMAZON_CORRETTO_VERSION']), os.path.join(app_dir, 'amazon-corretto-{0}-linux-x64.tar.gz'.format(app_versions['AMAZON_CORRETTO_VERSION'])))
