@@ -20,6 +20,11 @@
 		<!-- config api -->
 		<dependency>
 			<groupId>io.jans</groupId>
+			<artifactId>jans-config-api-shared</artifactId>
+			<version>${jans.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.jans</groupId>
 			<artifactId>jans-config-api-server</artifactId>
 			<version>${jans.version}</version>
 		</dependency>

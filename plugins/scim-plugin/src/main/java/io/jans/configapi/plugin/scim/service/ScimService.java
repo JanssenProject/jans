@@ -1,7 +1,6 @@
 package io.jans.configapi.plugin.scim.service;
 
-import static io.jans.as.model.util.Util.escapeLog;
-import io.jans.configapi.service.auth.ConfigurationService;
+import static io.jans.configapi.core.util.Util.escapeLog;
 import io.jans.configapi.util.AuthUtil;
 import io.jans.configapi.plugin.scim.model.config.ScimConfiguration;
 
@@ -28,9 +27,6 @@ public class ScimService {
 
     @Inject
     ScimConfiguration scimConfiguration;
-
-    @Inject
-    ConfigurationService configurationService;
 
     public Response serachScimUser(String filter, Integer startIndex, Integer count, String sortBy, String sortOrder,
             String attrsList, String excludedAttrsList) throws Exception {

@@ -49,6 +49,7 @@
 		<module>common</module>
 		<module>server</module>
 		<module>plugins</module>
+		<module>shared</module>
 	</modules>
 
 	<repositories>
@@ -65,7 +66,7 @@
 		<repository>
 			<id>bouncycastle</id>
 			<name>Bouncy Castle</name>
-			<url>https://repo2.maven.org/maven2/org/bouncycastle</url>
+			<url>https://repo1.maven.org/maven2/org/bouncycastle</url>
 		</repository>
 		<repository>
 			<id>repository.jboss.org</id>
