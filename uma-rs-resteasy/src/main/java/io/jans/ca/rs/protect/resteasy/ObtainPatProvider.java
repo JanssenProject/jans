@@ -72,7 +72,7 @@ public class ObtainPatProvider implements PatProvider {
         }
 
         TokenClient tokenClient = new TokenClient(tokenUrl);
-        tokenClient.setExecutor(serviceProvider.getClientExecutor());
+        tokenClient.setExecutor(serviceProvider.getClientEngine());
         TokenResponse response = tokenClient.execClientCredentialsGrant(scope, umaClientId, umaClientSecret);
 
         if (response.getStatus() == 200) {
