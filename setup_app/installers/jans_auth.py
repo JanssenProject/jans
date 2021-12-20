@@ -36,7 +36,7 @@ class JansAuthInstaller(JettyInstaller):
         self.oxauth_static_conf_json = os.path.join(self.templates_folder, 'jans-auth-static-conf.json')
         self.oxauth_error_json = os.path.join(self.templates_folder, 'jans-auth-errors.json')
         self.oxauth_openid_jwks_fn = os.path.join(self.output_folder, 'jans-auth-keys.json')
-        self.oxauth_openid_jks_fn = os.path.join(Config.certFolder, 'jans-auth-keys.jks')
+        self.oxauth_openid_jks_fn = os.path.join(Config.certFolder, 'jans-auth-keys.p12')
         self.ldif_people = os.path.join(self.output_folder, 'people.ldif')
         self.ldif_groups = os.path.join(self.output_folder, 'groups.ldif')
 
