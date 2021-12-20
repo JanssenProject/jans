@@ -5,13 +5,13 @@ import io.jans.as.client.uma.UmaClientFactory;
 import io.jans.as.model.crypto.signature.RSAPublicKey;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.jws.RSASigner;
+import javax.ws.rs.client.Invocation.Builder;
 import io.jans.ca.rs.protect.resteasy.PatProvider;
 import io.jans.ca.rs.protect.resteasy.ResourceRegistrar;
 import io.jans.ca.rs.protect.resteasy.RptPreProcessInterceptor;
 import io.jans.ca.rs.protect.resteasy.ServiceProvider;
 import io.jans.ca.server.introspection.ClientFactory;
-import org.jboss.resteasy.client.ClientExecutor;
-import org.jboss.resteasy.client.ClientRequest;
+import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
 
 public interface OpClientFactory {
     public TokenClient createTokenClient(String url);
@@ -38,5 +38,5 @@ public interface OpClientFactory {
 
     public UmaClientFactory createUmaClientFactory();
 
-    public ClientRequest createClientRequest(String uriTemplate, ClientExecutor executor) throws Exception;
+    public Builder createClientRequest(String uriTemplate, ClientHttpEngine engine) throws Exception;
 }
