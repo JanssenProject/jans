@@ -190,6 +190,13 @@
 			<artifactId>json</artifactId>
 		</dependency>
 
+		<!-- jetty -->
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-deploy</artifactId>
+			<version>${jetty.version}</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>
