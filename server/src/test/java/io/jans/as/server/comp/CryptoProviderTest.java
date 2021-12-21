@@ -10,23 +10,30 @@ import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.jwk.Algorithm;
+import io.jans.as.model.jwk.JWKParameter;
+import io.jans.as.model.util.Base64Util;
 import io.jans.as.server.ConfigurableTest;
 import io.jans.as.server.model.config.ConfigurationFactory;
 import org.json.JSONObject;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import javax.inject.Inject;
+
+import java.security.interfaces.ECPrivateKey;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
 import static io.jans.eleven.model.GenerateKeyResponseParam.KEY_ID;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 /**
  * @author Javier Rojas Blum
- * @version February 12, 2019
+ * @author Sergey Manoylo
+ * @version December 16, 2021
  */
 public class CryptoProviderTest extends ConfigurableTest {
 
@@ -36,8 +43,12 @@ public class CryptoProviderTest extends ConfigurableTest {
     @Inject
     private AbstractCryptoProvider cryptoProvider;
 
-    private final String SIGNING_INPUT = "Signing Input";
-    private final String SHARED_SECRET = "secret";
+    private final static int NUM_KEY_GENS = 100;
+
+    private final static byte testByte01 = (byte)0x01;
+
+    private final static String SIGNING_INPUT = "Signing Input";
+    private final static String SHARED_SECRET = "secret";
 
     private static Long expirationTime;
     private static String hs256Signature;
@@ -372,6 +383,71 @@ public class CryptoProviderTest extends ConfigurableTest {
             cryptoProvider.deleteKey(es512Key);
         } catch (Exception e) {
             fail(e.getMessage(), e);
+        }
+    }
+
+    @DataProvider(name = "GenerateKeysDataProvider")
+    public Object[][] testGenerateKeysDataProvider() {
+        return new Object[][] {
+                { Algorithm.ES256 },
+                { Algorithm.ES384 },
+                { Algorithm.ES512 },
+        };
+    }
+
+    @Test(dependsOnMethods = {"testDeleteKeyRS256", "testDeleteKeyRS384", "testDeleteKeyRS512",
+            "testDeleteKeyES256", "testDeleteKeyES384", "testDeleteKeyES512" },
+            dataProvider = "GenerateKeysDataProvider")
+    public void testGenerateKeys(Algorithm algorithm) {
+        for(int i = 0; i < NUM_KEY_GENS; i++) {
+            System.out.println("----------------------");
+            System.out.println("Algorithm: " + algorithm);
+            try {
+                JSONObject response = cryptoProvider.generateKey(algorithm, expirationTime);
+                String keyId = response.optString(JWKParameter.KEY_ID);
+                ECPrivateKey ecPrivateKey = (ECPrivateKey)cryptoProvider.getPrivateKey(keyId);
+                cryptoProvider.deleteKey(response.optString(keyId));
+
+                byte[] s = Base64Util.bigIntegerToUnsignedByteArray(ecPrivateKey.getS());
+
+                System.out.println("s.length = " + s.length);
+                System.out.println("s (hex) = " + Base64Util.bytesToHex(s));
+
+                String keyX = (String)response.get(JWKParameter.X);
+                String keyY = (String)response.get(JWKParameter.Y);
+
+                System.out.println("keyX = " + keyX);
+                System.out.println("keyY = " + keyY);
+
+                byte[] x = Base64Util.base64urldecode(keyX);
+                byte[] y = Base64Util.base64urldecode(keyY);
+
+                System.out.println("x.length = " + x.length);
+                System.out.println("y.length = " + y.length);
+
+                System.out.println("x (hex) = " + Base64Util.bytesToHex(x));
+                System.out.println("y (hex) = " + Base64Util.bytesToHex(y));
+
+                assertTrue(s.length <= algorithm.getKeyLength());
+                assertTrue(x.length <= algorithm.getKeyLength());
+                assertTrue(y.length <= algorithm.getKeyLength());
+
+                if(algorithm == Algorithm.ES512) {
+                    if(s.length * 8 == algorithm.getKeyLength()) {
+                        assertEquals(s[0], testByte01);
+                    }
+                    if(x.length * 8 == algorithm.getKeyLength()) {
+                        assertEquals(x[0], testByte01);
+                    }
+                    if(y.length * 8 == algorithm.getKeyLength()) {
+                        assertEquals(y[0], testByte01);
+                    }
+                }
+
+            } catch (Exception e) {
+                fail(e.getMessage(), e);
+            }
+            System.out.println("----------------------");
         }
     }
 }
