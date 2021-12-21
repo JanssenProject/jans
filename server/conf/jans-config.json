@@ -333,7 +333,7 @@
     "webKeysStorage": "keystore",
     "oxElevenTestModeToken": "${config.oxeleven.testModeToken}",
     "dnName": "CN=Jans Auth CA Certificates",
-    "keyStoreFile": "./conf/keystore.jks",
+    "keyStoreFile": "./conf/keystore.p12",
     "keyStoreSecret": "secret",
     "endSessionWithAccessToken":false,
     "clientWhiteList": ["*"],
