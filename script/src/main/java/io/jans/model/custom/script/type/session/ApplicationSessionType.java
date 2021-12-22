@@ -23,4 +23,6 @@ public interface ApplicationSessionType extends BaseExternalType {
     boolean endSession(Object httpRequest, Object sessionState, Map<String, SimpleCustomProperty> configurationAttributes);
 
     void onEvent(Object event);
+
+    boolean modifyActiveSessionsResponse(Object jsonArray, Object context);
 }

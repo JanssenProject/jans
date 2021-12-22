@@ -48,5 +48,11 @@ public class DummyApplicationSessionType implements ApplicationSessionType {
 
     @Override
     public void onEvent(Object event) {
+        // empty
+    }
+
+    @Override
+    public boolean modifyActiveSessionsResponse(Object jsonArray, Object context) {
+        return false;
     }
 }
