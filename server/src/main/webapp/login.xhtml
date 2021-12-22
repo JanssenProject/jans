@@ -110,29 +110,6 @@
 			</h:panelGroup>
 		</div>
 		<script type="text/javascript">
-
-            window.onload = function () {
-                var userNameField = document.getElementById("loginForm:username");
-                var passwordField = document.getElementById("loginForm:password");
-
-                passwordField.value = "";
-                var userName = '#{!empty authorizeAction.loginHint ? authorizeAction.loginHint : ""}';
-                if (userName) {
-                    userNameField.value = userName;
-                    passwordField.focus();
-                } else {
-                    userNameField.focus();
-                }
-
-                var displayRegister = #{display_register_action or identity.sessionId.sessionAttributes['display_register_action']};
-                if (displayRegister) {
-                    var registerButton = document.getElementById("loginForm:registerId");
-                    if (registerButton != null) {
-                        registerButton.style.display = 'inline';
-                    }
-                }
-            };
-
     		$(document).ready(function () {
     			$('.other').click(function(){
     				$('#social_new').toggle();
@@ -150,6 +127,26 @@
                 });
 
                 fillPlatformField();
+
+				var userNameField = document.getElementById("loginForm:username");
+				var passwordField = document.getElementById("loginForm:password");
+
+				passwordField.value = "";
+				var userName = '#{!empty authorizeAction.loginHint ? authorizeAction.loginHint : ""}';
+				if (userName) {
+					userNameField.value = userName;
+					passwordField.focus();
+				} else {
+					userNameField.focus();
+				}
+
+				var displayRegister = #{display_register_action or identity.sessionId.sessionAttributes['display_register_action']};
+				if (displayRegister) {
+					var registerButton = document.getElementById("loginForm:registerId");
+					if (registerButton != null) {
+						registerButton.style.display = 'inline';
+					}
+				}
     		});
 
     		function checkRemembeMe() {
