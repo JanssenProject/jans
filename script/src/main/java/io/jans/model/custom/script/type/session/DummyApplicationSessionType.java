@@ -22,6 +22,7 @@ public class DummyApplicationSessionType implements ApplicationSessionType {
     public boolean init(Map<String, SimpleCustomProperty> configurationAttributes) {
         return true;
     }
+
     @Override
     public boolean init(CustomScript customScript, Map<String, SimpleCustomProperty> configurationAttributes) {
         return true;
