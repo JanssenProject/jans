@@ -6,6 +6,7 @@
 
 package io.jans.as.server.service.external;
 
+import io.jans.as.common.model.registration.Client;
 import io.jans.as.server.service.external.context.ExternalResourceOwnerPasswordCredentialsContext;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
@@ -15,6 +16,7 @@ import io.jans.service.custom.script.ExternalScriptService;
 import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Named;
+import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -31,14 +33,16 @@ public class ExternalResourceOwnerPasswordCredentialsService extends ExternalScr
     }
 
     public boolean executeExternalAuthenticate(ExternalResourceOwnerPasswordCredentialsContext context) {
-        if (customScriptConfigurations == null || customScriptConfigurations.isEmpty()) {
-            log.debug("There is no any external interception scripts defined.");
+        final Client client = context.getExecutionContext().getClient();
+        final List<CustomScriptConfiguration> scripts = getCustomScriptConfigurationsByDns(client.getAttributes().getRopcScripts());
+        if (scripts == null || scripts.isEmpty()) {
+            log.debug("There is no any external ROPC scripts assigned to client {}.", client.getClientId());
             return false;
         }
 
-        for (CustomScriptConfiguration script : customScriptConfigurations) {
+        for (CustomScriptConfiguration script : scripts) {
             if (!executeExternalAuthenticate(script, context)) {
-                log.debug("Stopped running external RO PC scripts because script {} returns false.", script.getName());
+                log.debug("Stopped running external ROPC scripts because script {} returns false.", script.getName());
                 return false;
             }
         }
@@ -55,7 +59,7 @@ public class ExternalResourceOwnerPasswordCredentialsService extends ExternalScr
             context.setScript(customScriptConfiguration);
 
             if (script == null) {
-                log.error("Failed to load script, name: " + customScriptConfiguration.getName());
+                log.error("Failed to load script, name: {}", customScriptConfiguration.getName());
                 return false;
             }
 
