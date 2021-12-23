@@ -664,6 +664,15 @@
 			    <artifactId>google-cloud-spanner</artifactId>
 			    <version>6.17.3</version>
 			</dependency>
+			<!-- Force to use latest grpc libs. We need to remove this once google-cloud-spanner will depend on grpc >= 1.43.0  -->
+			<dependency>
+			    <groupId>io.grpc</groupId>
+			    <artifactId>grpc-bom</artifactId>
+			    <version>1.43.0</version>
+			    <scope>import</scope>
+			    <type>pom</type>
+			</dependency>
+			<!-- Force to use this version because MySQL connector depends on older version -->
 			<dependency>
 			    <groupId>com.google.protobuf</groupId>
 			    <artifactId>protobuf-java</artifactId>
