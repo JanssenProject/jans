@@ -1,5 +1,6 @@
 import logging
 import logging.config
+from contextlib import suppress
 
 import click
 
@@ -29,6 +30,16 @@ PATCH_SERVICE_MAP = {
 PRUNE_SERVICE_MAP = {
     "auth": AuthHandler,
 }
+
+
+def _parse_opts(opts):
+    parsed_opts = {}
+    for opt in opts:
+        with suppress(ValueError):
+            k, v = opt.split(":", 1)
+            if k and v:
+                parsed_opts[k] = v
+    return parsed_opts
 
 
 # ============
@@ -61,18 +72,9 @@ def patch(service, dry_run, opts):
         logger.warning("Dry-run mode is enabled!")
 
     logger.info(f"Processing updates for service {service}")
-
-    _opts = {}
-    for opt in opts:
-        try:
-            k, v = opt.split(":", 1)
-            _opts[k] = v
-        except ValueError:
-            k = opt
-            v = ""
-
+    parsed_opts = _parse_opts(opts)
     callback_cls = PATCH_SERVICE_MAP[service]
-    callback_cls(manager, dry_run, **_opts).patch()
+    callback_cls(manager, dry_run, **parsed_opts).patch()
 
 
 @cli.command()
@@ -93,18 +95,9 @@ def prune(service, dry_run, opts):
         logger.warning("Dry-run mode is enabled!")
 
     logger.info(f"Processing updates for service {service}")
-
-    _opts = {}
-    for opt in opts:
-        try:
-            k, v = opt.split(":", 1)
-            _opts[k] = v
-        except ValueError:
-            k = opt
-            v = ""
-
+    parsed_opts = _parse_opts(opts)
     callback_cls = PRUNE_SERVICE_MAP[service]
-    callback_cls(manager, dry_run, **_opts).prune()
+    callback_cls(manager, dry_run, **parsed_opts).prune()
 
 
 if __name__ == "__main__":
