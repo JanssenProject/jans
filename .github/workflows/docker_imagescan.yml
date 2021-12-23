@@ -6,6 +6,7 @@ on:
     branches:
       - master
       - main
+      - "!update-pycloud-in-**"
     paths:
       - "docker-jans-**/**"
       - "!**.md"
@@ -13,6 +14,7 @@ on:
     branches:
       - master
       - main
+      - "!update-pycloud-in-**"
     paths:
       - "docker-jans-**/**"
       - "!docker-jans-**/CHANGELOG.md"
