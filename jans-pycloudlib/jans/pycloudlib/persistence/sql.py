@@ -15,7 +15,6 @@ from sqlalchemy import select
 
 from jans.pycloudlib import get_manager
 from jans.pycloudlib.utils import encode_text
-from jans.pycloudlib.utils import secure_password_file
 
 logger = logging.getLogger(__name__)
 
@@ -23,11 +22,28 @@ logger = logging.getLogger(__name__)
 def get_sql_password(manager) -> str:
     """Get password used for SQL database user.
 
+    Priority:
+
+    1. get from password file
+    2. get from secrets
+
     :returns: Plaintext password.
     """
+    secret_name = "sql_password"
     password_file = os.environ.get("CN_SQL_PASSWORD_FILE", "/etc/jans/conf/sql_password")
-    salt = manager.secret.get("encoded_salt")
-    return secure_password_file(password_file, salt)
+
+    if os.path.isfile(password_file):
+        with open(password_file) as f:
+            password = f.read().strip()
+            manager.secret.set(secret_name, password)
+            logger.warning(
+                f"Loading password from {password_file} file is deprecated and will be removed in future releases. "
+                f"Note, the password has been saved to secrets with key {secret_name} for later usage."
+            )
+    else:
+        # get from secrets (if any)
+        password = manager.secret.get(secret_name)
+    return password
 
 
 class BaseClient:
