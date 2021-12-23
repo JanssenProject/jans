@@ -341,16 +341,16 @@ class CouchbaseBackend:
 
         for _, mapping in bucket_mappings.items():
             for file_ in mapping["files"]:
+                logger.info(f"Importing {file_} file")
                 src = f"/app/templates/{file_}"
                 dst = f"/app/tmp/{file_}"
                 os.makedirs(os.path.dirname(dst), exist_ok=True)
 
                 render_ldif(src, dst, ctx)
-                parser = LDIFParser(open(dst, "rb"))
 
-                query_file = f"/app/tmp/{file_}.n1ql"
+                with open(dst, "rb") as fd:
+                    parser = LDIFParser(fd)
 
-                with open(query_file, "a+") as f:
                     for dn, entry in parser.parse():
                         if len(entry) <= 2:
                             continue
@@ -359,19 +359,11 @@ class CouchbaseBackend:
                         entry["dn"] = [dn]
                         entry = transform_entry(entry, attr_processor)
                         data = json.dumps(entry)
+
                         # using INSERT will cause duplication error, but the data is left intact
-                        query = 'INSERT INTO `%s` (KEY, VALUE) VALUES ("%s", %s);\n' % (mapping["bucket"], key, data)
-                        f.write(query)
-
-                # exec query
-                logger.info("Importing {} file into {} bucket (if needed)".format(file_, mapping["bucket"]))
-                with open(query_file) as f:
-                    for line in f:
-                        query = line.strip()
-                        if not query:
-                            continue
-
+                        query = 'INSERT INTO `%s` (KEY, VALUE) VALUES ("%s", %s)' % (mapping["bucket"], key, data)
                         req = self.client.exec_query(query)
+
                         if not req.ok:
                             logger.warning("Failed to execute query, reason={}".format(req.json()))
 
