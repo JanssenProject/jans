@@ -182,6 +182,7 @@ public class AppConfiguration implements Configuration {
      */
     private Integer sessionIdLifetime = DEFAULT_SESSION_ID_LIFETIME;
     private Integer serverSessionIdLifetime = sessionIdLifetime; // by default same as sessionIdLifetime
+    private String activeSessionAuthorizationScope;
     private int configurationUpdateInterval;
 
     private Boolean enableClientGrantTypeUpdate;
@@ -1965,6 +1966,14 @@ public class AppConfiguration implements Configuration {
 
     public void setSessionIdLifetime(Integer sessionIdLifetime) {
         this.sessionIdLifetime = sessionIdLifetime;
+    }
+
+    public String getActiveSessionAuthorizationScope() {
+        return activeSessionAuthorizationScope;
+    }
+
+    public void setActiveSessionAuthorizationScope(String activeSessionAuthorizationScope) {
+        this.activeSessionAuthorizationScope = activeSessionAuthorizationScope;
     }
 
     public Integer getServerSessionIdLifetime() {
