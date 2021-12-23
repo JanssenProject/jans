@@ -573,7 +573,7 @@
 			<dependency>
 				<groupId>redis.clients</groupId>
 				<artifactId>jedis</artifactId>
-				<version>2.10.2</version>
+				<version>3.7.0</version>
 			</dependency>
 
 			<!-- HTTP client -->
