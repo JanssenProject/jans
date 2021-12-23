@@ -21,6 +21,10 @@ on:
       - "!docker-jans-**/CHANGELOG.md"
       - "!docker-jans-**/version.txt"
       - "!**.md"
+  pull_request_target:
+    branches:
+      # below protected branches prefix only allows internal teams to push to it
+      - cn-*
   workflow_dispatch:
     inputs:
       services:
