@@ -33,7 +33,6 @@ class ClientApiHandler(BaseHandler):
 
     def _patch_connector(self, conn_type):
         suffix = f"client_api_{conn_type}"
-        cert_file, key_file = f"{suffix}.crt", f"{suffix}.key"
         cert_cn = self.opts.get(f"{conn_type}-cn", "localhost")
 
         cert_file, key_file = self.generate_x509(suffix, cert_cn)

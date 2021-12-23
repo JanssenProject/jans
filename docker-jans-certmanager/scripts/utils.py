@@ -50,7 +50,7 @@ def export_openid_keys(keystore, keypasswd, alias, export_file):
     cmd = " ".join([
         "java",
         "-Dlog4j.defaultInitOverride=true",
-        "-cp /app/javalibs/*"
+        "-cp /app/javalibs/*",
         "io.jans.as.client.util.KeyExporter",
         "-keystore {}".format(keystore),
         "-keypasswd {}".format(keypasswd),
