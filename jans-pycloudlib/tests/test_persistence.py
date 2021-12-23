@@ -136,12 +136,17 @@ def test_get_couchbase_user(monkeypatch, gmanager):
     assert get_couchbase_user(gmanager) == "root"
 
 
-def test_get_couchbase_password(monkeypatch, tmpdir, gmanager):
+def test_get_couchbase_password_from_file(monkeypatch, tmpdir, gmanager):
     from jans.pycloudlib.persistence.couchbase import get_couchbase_password
 
     passwd_file = tmpdir.join("couchbase_password")
     passwd_file.write("secret")
     monkeypatch.setenv("CN_COUCHBASE_PASSWORD_FILE", str(passwd_file))
+    assert get_couchbase_password(gmanager) == "secret"
+
+
+def test_get_couchbase_password_from_secrets(gmanager):
+    from jans.pycloudlib.persistence.couchbase import get_couchbase_password
     assert get_couchbase_password(gmanager) == "secret"
 
 
@@ -500,12 +505,17 @@ storage.couchbase.mapping: people, groups, authorizations, cache, tokens, sessio
 # ===
 
 
-def test_get_sql_password(monkeypatch, tmpdir, gmanager):
+def test_get_sql_password_from_file(monkeypatch, tmpdir, gmanager):
     from jans.pycloudlib.persistence.sql import get_sql_password
 
     src = tmpdir.join("sql_password")
     src.write("secret")
     monkeypatch.setenv("CN_SQL_PASSWORD_FILE", str(src))
+    assert get_sql_password(gmanager) == "secret"
+
+
+def test_get_sql_password_from_secrets(gmanager):
+    from jans.pycloudlib.persistence.sql import get_sql_password
     assert get_sql_password(gmanager) == "secret"
 
 

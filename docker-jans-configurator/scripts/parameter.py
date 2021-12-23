@@ -30,6 +30,7 @@ OPTIONAL_SCOPES = (
     "client-api",
     "couchbase",
     "redis",
+    "sql",
 )
 
 
@@ -54,7 +55,6 @@ class ParamSchema(Schema):
 
     email = Email(required=True)
 
-    # see validate_fqdn for validation
     hostname = Str(required=True)
 
     org_name = Str(required=True)
@@ -67,8 +67,17 @@ class ParamSchema(Schema):
         missing=[],
     )
 
-    # see validate_ldap_pw for validation
     ldap_pw = Str(missing="", default="")
+
+    sql_pw = Str(missing="", default="")
+
+    couchbase_pw = Str(missing="", default="")
+
+    couchbase_superuser_pw = Str(missing="", default="")
+
+    auth_sig_keys = Str(missing="")
+
+    auth_enc_keys = Str(missing="")
 
     @validates("hostname")
     def validate_fqdn(self, value):
@@ -82,7 +91,7 @@ class ParamSchema(Schema):
             raise ValidationError(
                 "Must be at least 6 characters and include "
                 "one uppercase letter, one lowercase letter, one digit, "
-                " and one special character."
+                "and one special character."
             )
 
     @validates_schema
@@ -92,6 +101,24 @@ class ParamSchema(Schema):
                 self.validate_password(data["ldap_pw"])
             except ValidationError as exc:
                 raise ValidationError({"ldap_pw": exc.messages})
+
+    @validates_schema
+    def validate_ext_persistence_pw(self, data, **kwargs):
+        err = {}
+        scope_attr_map = [
+            ("sql", "sql_pw"),
+            ("couchbase", "couchbase_pw"),
+        ]
+
+        for scope, attr in scope_attr_map:
+            # note we don't enforce custom password validation as cloud-based
+            # databases may use password that not conform to our policy
+            # hence we simply check for empty password only
+            if scope in data["optional_scopes"] and data[attr] == "":
+                err[attr] = ["Empty password isn't allowed"]
+
+        if err:
+            raise ValidationError(err)
 
 
 def params_from_file(path):

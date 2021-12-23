@@ -747,6 +747,8 @@ class CtxGenerator:
         # TODO: move this to persistence-loader?
         self.set_config("couchbaseTrustStoreFn", "/etc/certs/couchbase.pkcs12")
         self.set_secret("couchbase_shib_user_password", get_random_chars)
+        self.set_secret("couchbase_password", self.params["couchbase_pw"])
+        self.set_secret("couchbase_superuser_password", self.params["couchbase_superuser_pw"])
 
     def jackrabbit_ctx(self):
         # self.set_secret("jca_pw", get_random_chars())
@@ -756,6 +758,9 @@ class CtxGenerator:
     def fido2_ctx(self):
         # TODO: hardcoded in persistence-loader?
         self.set_config("fido2ConfigFolder", "/etc/jans/conf/fido2")
+
+    def sql_ctx(self):
+        self.set_secret("sql_password", self.params["sql_pw"])
 
     def generate(self):
         opt_scopes = self.params["optional_scopes"]
@@ -787,6 +792,9 @@ class CtxGenerator:
 
         if "fido2" in opt_scopes:
             self.fido2_ctx()
+
+        if "sql" in opt_scopes:
+            self.sql_ctx()
 
         # populated config
         return self.ctx
