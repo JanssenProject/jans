@@ -15,3 +15,7 @@ buildNumber.properties
 
 /.project
 /.settings
+
+# IntelliJ
+.idea
+*.iml
