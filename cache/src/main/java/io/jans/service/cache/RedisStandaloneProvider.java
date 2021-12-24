@@ -11,11 +11,14 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.http.conn.ssl.DefaultHostnameVerifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import redis.clients.jedis.*;
+import redis.clients.jedis.HostAndPort;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolConfig;
 
 import javax.annotation.PreDestroy;
 import javax.net.ssl.SSLParameters;
-import java.io.File;
+import javax.net.ssl.SSLSocketFactory;
 import java.io.Serializable;
 
 /**
@@ -41,20 +44,15 @@ public class RedisStandaloneProvider extends AbstractRedisProvider {
             HostAndPort hostAndPort = RedisClusterProvider.hosts(redisConfiguration.getServers()).iterator().next();
             String password = redisConfiguration.getPassword();
             if (redisConfiguration.getUseSSL()) {
-                if (StringUtils.isNotBlank(redisConfiguration.getSslTrustStoreFilePath())) {
-                    if (StringUtils.isBlank(password)) {
-                        pool = new JedisPool(poolConfig, hostAndPort.getHost(), hostAndPort.getPort(), true,
-                                RedisProviderFactory.createTrustStoreSslSocketFactory(new File(redisConfiguration.getSslTrustStoreFilePath())), new SSLParameters(), new DefaultHostnameVerifier());
-                    } else {
-                        pool = new JedisPool(poolConfig, hostAndPort.getHost(), hostAndPort.getPort(), redisConfiguration.getConnectionTimeout(), password, true,
-                                RedisProviderFactory.createTrustStoreSslSocketFactory(new File(redisConfiguration.getSslTrustStoreFilePath())), new SSLParameters(), new DefaultHostnameVerifier());
-                    }
+                if (StringUtils.isNotBlank(redisConfiguration.getSslTrustStoreFilePath())
+                        && StringUtils.isNotBlank(redisConfiguration.getSslKeyStoreFilePath())) {
+                    SSLSocketFactory sslSocketFactory = RedisProviderFactory.createSslSocketFactory(redisConfiguration);
+
+                    pool = new JedisPool(poolConfig, hostAndPort.getHost(), hostAndPort.getPort(), true,
+                            sslSocketFactory, new SSLParameters(), new DefaultHostnameVerifier());
                 } else {
-                    if (StringUtils.isBlank(password)) {
-                        pool = new JedisPool(poolConfig, hostAndPort.getHost(), hostAndPort.getPort(), true);
-                    } else {
-                        pool = new JedisPool(poolConfig, hostAndPort.getHost(), hostAndPort.getPort(), redisConfiguration.getConnectionTimeout(), password, true);
-                    }
+                    pool = new JedisPool(poolConfig, hostAndPort.getHost(), hostAndPort.getPort(),
+                            redisConfiguration.getConnectionTimeout(), password, true);
                 }
             } else {
                 pool = new JedisPool(poolConfig, hostAndPort.getHost(), hostAndPort.getPort(), redisConfiguration.getConnectionTimeout(), password);
@@ -63,6 +61,7 @@ public class RedisStandaloneProvider extends AbstractRedisProvider {
             testConnection();
             LOG.debug("RedisStandaloneProvider started.");
         } catch (Exception e) {
+            LOG.error("Problems connecting with Redis", e);
             throw new IllegalStateException("Error starting RedisStandaloneProvider", e);
         }
     }
