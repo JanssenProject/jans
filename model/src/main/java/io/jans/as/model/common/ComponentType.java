@@ -20,6 +20,7 @@ public enum ComponentType {
     INTROSPECTION("introspection"),
     REVOKE_TOKEN("revoke_token"),
     REVOKE_SESSION("revoke_session"),
+    ACTIVE_SESSION("active_session"),
     END_SESSION("end_session"),
     STATUS_SESSION("status_session"),
     JANS_CONFIGURATION("jans_configuration"), // /.well-known/jans-configuration
