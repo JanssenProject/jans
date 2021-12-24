@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
@@ -55,6 +56,7 @@ public class ExecutionContext {
 
     private Set<String> scopes;
     private String claimsAsString;
+    private List<SessionId> userSessions;
 
     @NotNull
     private final Map<String, String> attributes = new HashMap<>();
@@ -228,5 +230,13 @@ public class ExecutionContext {
 
     public void setState(String state) {
         this.state = state;
+    }
+
+    public List<SessionId> getUserSessions() {
+        return userSessions;
+    }
+
+    public void setUserSessions(List<SessionId> userSessions) {
+        this.userSessions = userSessions;
     }
 }
