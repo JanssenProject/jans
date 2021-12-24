@@ -91,6 +91,30 @@ jobs:
           echo ::set-output name=tags::${TAGS}
           echo ::set-output name=build::${BUILD}
 
+      # UPDATE BUILD DATES INSIDE THE DOCKERFILE BEFORE BUILDING THE DEV IMAGES TRIGGERED BY JENKINS
+      - name: Setup Python 3.7
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/setup-python@v2.3.1
+        with:
+          python-version: 3.7
+
+      - name: Install Python dependencies
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          sudo apt-get update
+          sudo python3 -m pip install --upgrade pip
+          sudo pip3 install setuptools --upgrade
+          sudo pip3 install -r ./automation/requirements.txt
+          sudo apt-get update
+          sudo apt-get install jq
+
+      - name: Update Build date in Dockerfile
+        if: github.event_name == 'workflow_dispatch'
+        id: update_build_date_in_dockerfile
+        run: |
+          sudo python3 ./automation/auto_update_build_date.py
+      #END UPDATE BUILD DATES INSIDE THE DOCKERFILE BEFORE BUILDING THE DEV IMAGES TRIGGERED BY JENKINS
+
       - name: Set up QEMU
         if: steps.build_docker_image.outputs.build && steps.prep.outputs.build
         uses: docker/setup-qemu-action@master
