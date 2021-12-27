@@ -53,6 +53,12 @@ jobs:
         run: |
           BUILD=true
           DEFAULT_ALL=${{ github.event.inputs.services }}
+          if [ -z "$DEFAULT_ALL" ]
+          then
+            DEFAULT_ALL="docker-jans-auth-server docker-jans-certmanager docker-jans-client-api docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim"
+          else
+            echo "$DEFAULT_ALL"
+          fi
           # Detect actual docker folders that changed if error arises default to all images
           DIRECTORIES_CHANGED=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | cut -d/ -f1 | sort -u | grep "docker-jans" || echo "$DEFAULT_ALL")
           if [[ "$DIRECTORIES_CHANGED" =~ "${{ matrix.docker-images }}" ]]; then
@@ -61,7 +67,7 @@ jobs:
           fi
 
       - name: Install dependencies
-        if: steps.build_docker_image.outputs.build
+        if: steps.build_docker_image.outputs.build || github.event_name == 'tags'
         run: |
           sudo apt-get update
           sudo python3 -m pip install --upgrade pip
@@ -71,7 +77,7 @@ jobs:
 
 
       - name: Prepare
-        if: steps.build_docker_image.outputs.build
+        if: steps.build_docker_image.outputs.build || github.event_name == 'tags'
         id: prep
         run: |
           MAIN_VERSION=$(python3 -c "from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('./docker-jans-${{ matrix.docker-images }}') ; print(dfparser.labels['version'])")
