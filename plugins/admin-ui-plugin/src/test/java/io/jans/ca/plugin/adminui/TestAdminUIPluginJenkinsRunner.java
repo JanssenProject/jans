@@ -25,7 +25,7 @@ import java.util.List;
 public class TestAdminUIPluginJenkinsRunner {
 
     @Test
-    public void testParallel() {
+    void testParallel() {
         System.setProperty("karate.env", "jenkins");
         Results results = Runner.path("src/test/resources/feature").tags("~@ignore").parallel(1);
         generateReport(results.getReportDir());

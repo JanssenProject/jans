@@ -14,6 +14,7 @@ public class ApplicationException extends Exception {
         return errorCode;
     }
 
+    @Override
     public String getMessage() {
         return message;
     }

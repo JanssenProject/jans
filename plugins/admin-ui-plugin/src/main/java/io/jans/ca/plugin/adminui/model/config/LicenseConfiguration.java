@@ -47,7 +47,7 @@ public class LicenseConfiguration {
                 licenseManager.initialize(licenseSpringConfiguration);
             }
         } catch (LicenseSpringException e) {
-            log.error("Error in initializing LicenseManager. ", e.getMessage());
+            log.error("Error in initializing LicenseManager. ");
             throw e;
         }
     }
