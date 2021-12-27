@@ -78,8 +78,14 @@ def gmanager(gconsul_config, gvault_secret):
             "encoded_ldapTrustStorePass": "YgH8NDxhxmA=",
             "ldap_pkcs12_base64": "YgH8NDxhxmA=",
             "encoded_salt": "7MEDWVFAG3DmakHRyjMqp5EE",
+            "sql_password": "secret",
+            "couchbase_password": "secret",
+            "couchbase_superuser_password": "secret",
         }
         return ctx.get(key) or default
+
+    def set_secret(key, value):
+        return
 
     gmanager = get_manager()
 
@@ -87,6 +93,7 @@ def gmanager(gconsul_config, gvault_secret):
     gmanager.config.adapter = gconsul_config
 
     gvault_secret.get = get_secret
+    gvault_secret.set = set_secret
     gmanager.secret.adapter = gvault_secret
 
     yield gmanager

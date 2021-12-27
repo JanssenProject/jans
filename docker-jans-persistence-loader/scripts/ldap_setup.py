@@ -86,9 +86,10 @@ class LDAPBackend:
 
                 render_ldif(src, dst, ctx)
 
-                parser = LDIFParser(open(dst, "rb"))
-                for dn, entry in parser.parse():
-                    self.add_entry(dn, entry)
+                with open(dst, "rb") as fd:
+                    parser = LDIFParser(fd)
+                    for dn, entry in parser.parse():
+                        self.add_entry(dn, entry)
 
     def add_entry(self, dn, attrs):
         max_wait_time = 300

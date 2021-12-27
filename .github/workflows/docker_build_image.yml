@@ -21,7 +21,19 @@ on:
       - "!docker-jans-**/CHANGELOG.md"
       - "!docker-jans-**/version.txt"
       - "!**.md"
+  pull_request_target:
+    branches:
+      # below protected branches prefix only allows internal teams to push to it
+      - cn-*
   workflow_dispatch:
+    inputs:
+      services:
+        description: 'One or set of the docker images. Format as following: "docker-jans-auth-server docker-jans-certmanager docker-jans-client-api docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim"'
+        required: true
+        default: 'docker-jans-auth-server docker-jans-certmanager docker-jans-client-api docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim'
+      tags:
+        description: 'Tags'
+        required: false
 
 jobs:
   docker:
@@ -40,7 +52,7 @@ jobs:
         id: build_docker_image
         run: |
           BUILD=true
-          DEFAULT_ALL="docker-jans-auth-server docker-jans-certmanager docker-jans-client-api docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim"
+          DEFAULT_ALL=${{ github.event.inputs.services }}
           # Detect actual docker folders that changed if error arises default to all images
           DIRECTORIES_CHANGED=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | cut -d/ -f1 | sort -u | grep "docker-jans" || echo "$DEFAULT_ALL")
           if [[ "$DIRECTORIES_CHANGED" =~ "${{ matrix.docker-images }}" ]]; then
@@ -78,6 +90,30 @@ jobs:
           fi
           echo ::set-output name=tags::${TAGS}
           echo ::set-output name=build::${BUILD}
+
+      # UPDATE BUILD DATES INSIDE THE DOCKERFILE BEFORE BUILDING THE DEV IMAGES TRIGGERED BY JENKINS
+      - name: Setup Python 3.7
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/setup-python@v2.3.1
+        with:
+          python-version: 3.7
+
+      - name: Install Python dependencies
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          sudo apt-get update
+          sudo python3 -m pip install --upgrade pip
+          sudo pip3 install setuptools --upgrade
+          sudo pip3 install -r ./automation/requirements.txt
+          sudo apt-get update
+          sudo apt-get install jq
+
+      - name: Update Build date in Dockerfile
+        if: github.event_name == 'workflow_dispatch'
+        id: update_build_date_in_dockerfile
+        run: |
+          sudo python3 ./automation/auto_update_build_date.py
+      #END UPDATE BUILD DATES INSIDE THE DOCKERFILE BEFORE BUILDING THE DEV IMAGES TRIGGERED BY JENKINS
 
       - name: Set up QEMU
         if: steps.build_docker_image.outputs.build && steps.prep.outputs.build
