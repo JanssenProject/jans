@@ -86,7 +86,7 @@ public class AUIConfigurationService {
             props.load(in);
             return props;
         } catch (IOException e) {
-            log.error(ErrorResponse.ERROR_READING_CONFIG.getDescription(), e.getMessage());
+            log.error(ErrorResponse.ERROR_READING_CONFIG.getDescription());
             throw e;
         }
     }

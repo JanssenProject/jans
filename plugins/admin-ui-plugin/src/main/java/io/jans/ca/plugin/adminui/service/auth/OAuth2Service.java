@@ -29,7 +29,6 @@ import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
-import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -71,7 +70,7 @@ public class OAuth2Service {
 
             return tokenResp;
         } catch (ApplicationException e) {
-            log.error(ErrorResponse.GET_ACCESS_TOKEN_ERROR.getDescription(), e.getMessage());
+            log.error(ErrorResponse.GET_ACCESS_TOKEN_ERROR.getDescription());
             throw e;
         } catch (Exception e) {
             log.error(ErrorResponse.GET_ACCESS_TOKEN_ERROR.getDescription(), e);
@@ -125,7 +124,7 @@ public class OAuth2Service {
             return tokenResp;
 
         } catch (ApplicationException e) {
-            log.error(ErrorResponse.GET_API_PROTECTION_TOKEN_ERROR.getDescription(), e.getMessage());
+            log.error(ErrorResponse.GET_API_PROTECTION_TOKEN_ERROR.getDescription());
             throw e;
         } catch (Exception e) {
             log.error(ErrorResponse.GET_API_PROTECTION_TOKEN_ERROR.getDescription(), e);
@@ -180,7 +179,7 @@ public class OAuth2Service {
             }
 
         } catch (ApplicationException e) {
-            log.error(ErrorResponse.GET_USER_INFO_ERROR.getDescription(), e.getMessage());
+            log.error(ErrorResponse.GET_USER_INFO_ERROR.getDescription());
             throw e;
         } catch (Exception e) {
             log.error(ErrorResponse.GET_USER_INFO_ERROR.getDescription(), e);
@@ -242,7 +241,7 @@ public class OAuth2Service {
             }
 
         } catch (Exception e) {
-            log.error("Problems processing token call", e.getMessage());
+            log.error("Problems processing token call");
             throw e;
 
         } finally {
