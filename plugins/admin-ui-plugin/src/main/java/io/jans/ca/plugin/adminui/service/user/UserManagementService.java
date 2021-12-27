@@ -73,7 +73,7 @@ public class UserManagementService {
             return adminConf.getDynamic().getRoles();
 
         } catch (ApplicationException e) {
-            log.error(ErrorResponse.EDIT_ADMIUI_ROLES_ERROR.getDescription(), e);
+            log.error(ErrorResponse.EDIT_ADMIUI_ROLES_ERROR.getDescription(), e.getMessage());
             throw e;
         } catch (Exception e) {
             log.error(ErrorResponse.EDIT_ADMIUI_ROLES_ERROR.getDescription(), e);
@@ -110,7 +110,7 @@ public class UserManagementService {
             return adminConf.getDynamic().getRoles();
 
         } catch (ApplicationException e) {
-            log.error(ErrorResponse.DELETE_ADMIUI_ROLES_ERROR.getDescription(), e);
+            log.error(ErrorResponse.DELETE_ADMIUI_ROLES_ERROR.getDescription(), e.getMessage());
             throw e;
         } catch (Exception e) {
             log.error(ErrorResponse.DELETE_ADMIUI_ROLES_ERROR.getDescription(), e);
@@ -164,7 +164,7 @@ public class UserManagementService {
 
             return adminConf.getDynamic().getPermissions();
         } catch (ApplicationException e) {
-            log.error(ErrorResponse.EDIT_ADMIUI_PERMISSIONS_ERROR.getDescription(), e);
+            log.error(ErrorResponse.EDIT_ADMIUI_PERMISSIONS_ERROR.getDescription(), e.getMessage());
             throw e;
         } catch (Exception e) {
             log.error(ErrorResponse.EDIT_ADMIUI_PERMISSIONS_ERROR.getDescription(), e);
@@ -193,7 +193,7 @@ public class UserManagementService {
             return adminConf.getDynamic().getPermissions();
 
         } catch (ApplicationException e) {
-            log.error(ErrorResponse.DELETE_ADMIUI_PERMISSIONS_ERROR.getDescription(), e);
+            log.error(ErrorResponse.DELETE_ADMIUI_PERMISSIONS_ERROR.getDescription(), e.getMessage());
             throw e;
         } catch (Exception e) {
             log.error(ErrorResponse.DELETE_ADMIUI_PERMISSIONS_ERROR.getDescription(), e);
@@ -263,7 +263,7 @@ public class UserManagementService {
             entryManager.merge(adminConf);
             return adminConf.getDynamic().getRolePermissionMapping();
         } catch (ApplicationException e) {
-            log.error(ErrorResponse.ERROR_IN_MAPPING_ROLE_PERMISSION.getDescription(), e);
+            log.error(ErrorResponse.ERROR_IN_MAPPING_ROLE_PERMISSION.getDescription(), e.getMessage());
             throw e;
         } catch (Exception e) {
             log.error(ErrorResponse.ERROR_IN_MAPPING_ROLE_PERMISSION.getDescription(), e);
@@ -298,7 +298,7 @@ public class UserManagementService {
 
             return adminConf.getDynamic().getRolePermissionMapping();
         } catch (ApplicationException e) {
-            log.error(ErrorResponse.ERROR_IN_DELETING_ROLE_PERMISSION.getDescription(), e);
+            log.error(ErrorResponse.ERROR_IN_DELETING_ROLE_PERMISSION.getDescription(), e.getMessage());
             throw e;
         } catch (Exception e) {
             log.error(ErrorResponse.ERROR_IN_DELETING_ROLE_PERMISSION.getDescription(), e);

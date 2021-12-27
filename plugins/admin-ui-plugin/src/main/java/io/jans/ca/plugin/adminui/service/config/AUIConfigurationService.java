@@ -38,31 +38,31 @@ public class AUIConfigurationService {
     }
 
     private AUIConfiguration addPropertiesToAUIConfiguration(Properties props) {
-        AUIConfiguration auiConfiguration = new AUIConfiguration();
-        auiConfiguration.setAuthServerHost(props.getProperty("authserver.host"));
-        auiConfiguration.setAuthServerClientId(props.getProperty("authserver.clientId"));
-        auiConfiguration.setAuthServerClientSecret(props.getProperty("authserver.clientSecret"));
-        auiConfiguration.setAuthServerScope(props.getProperty("authserver.scope"));
-        auiConfiguration.setAuthServerRedirectUrl(props.getProperty("authserver.redirectUrl"));
-        auiConfiguration.setAuthServerFrontChannelLogoutUrl(props.getProperty("authserver.frontChannelLogoutUrl"));
-        auiConfiguration.setAuthServerPostLogoutRedirectUri(props.getProperty("authserver.postLogoutRedirectUri"));
-        auiConfiguration.setAuthServerAuthzBaseUrl(props.getProperty("authserver.authzBaseUrl"));
-        auiConfiguration.setAuthServerTokenEndpoint(props.getProperty("authserver.tokenEndpoint"));
-        auiConfiguration.setAuthServerIntrospectionEndpoint(props.getProperty("authserver.introspectionEndpoint"));
-        auiConfiguration.setAuthServerUserInfoEndpoint(props.getProperty("authserver.userInfoEndpoint"));
-        auiConfiguration.setAuthServerEndSessionEndpoint(props.getProperty("authserver.endSessionEndpoint"));
+        AUIConfiguration auiConfig = new AUIConfiguration();
+        auiConfig.setAuthServerHost(props.getProperty("authserver.host"));
+        auiConfig.setAuthServerClientId(props.getProperty("authserver.clientId"));
+        auiConfig.setAuthServerClientSecret(props.getProperty("authserver.clientSecret"));
+        auiConfig.setAuthServerScope(props.getProperty("authserver.scope"));
+        auiConfig.setAuthServerRedirectUrl(props.getProperty("authserver.redirectUrl"));
+        auiConfig.setAuthServerFrontChannelLogoutUrl(props.getProperty("authserver.frontChannelLogoutUrl"));
+        auiConfig.setAuthServerPostLogoutRedirectUri(props.getProperty("authserver.postLogoutRedirectUri"));
+        auiConfig.setAuthServerAuthzBaseUrl(props.getProperty("authserver.authzBaseUrl"));
+        auiConfig.setAuthServerTokenEndpoint(props.getProperty("authserver.tokenEndpoint"));
+        auiConfig.setAuthServerIntrospectionEndpoint(props.getProperty("authserver.introspectionEndpoint"));
+        auiConfig.setAuthServerUserInfoEndpoint(props.getProperty("authserver.userInfoEndpoint"));
+        auiConfig.setAuthServerEndSessionEndpoint(props.getProperty("authserver.endSessionEndpoint"));
 
-        auiConfiguration.setTokenServerClientId(props.getProperty("tokenServer.clientId"));
-        auiConfiguration.setTokenServerClientSecret(props.getProperty("tokenServer.clientSecret"));
-        auiConfiguration.setTokenServerScope(props.getProperty("tokenServer.scope"));
-        auiConfiguration.setTokenServerRedirectUrl(props.getProperty("tokenServer.redirectUrl"));
-        auiConfiguration.setTokenServerFrontChannelLogoutUrl(props.getProperty("tokenServer.frontChannelLogoutUrl"));
-        auiConfiguration.setTokenServerPostLogoutRedirectUri(props.getProperty("tokenServer.postLogoutRedirectUri"));
-        auiConfiguration.setTokenServerAuthzBaseUrl(props.getProperty("tokenServer.authzBaseUrl"));
-        auiConfiguration.setTokenServerTokenEndpoint(props.getProperty("tokenServer.tokenEndpoint"));
-        auiConfiguration.setTokenServerIntrospectionEndpoint(props.getProperty("tokenServer.introspectionEndpoint"));
-        auiConfiguration.setTokenServerUserInfoEndpoint(props.getProperty("tokenServer.userInfoEndpoint"));
-        auiConfiguration.setTokenServerEndSessionEndpoint(props.getProperty("tokenServer.endSessionEndpoint"));
+        auiConfig.setTokenServerClientId(props.getProperty("tokenServer.clientId"));
+        auiConfig.setTokenServerClientSecret(props.getProperty("tokenServer.clientSecret"));
+        auiConfig.setTokenServerScope(props.getProperty("tokenServer.scope"));
+        auiConfig.setTokenServerRedirectUrl(props.getProperty("tokenServer.redirectUrl"));
+        auiConfig.setTokenServerFrontChannelLogoutUrl(props.getProperty("tokenServer.frontChannelLogoutUrl"));
+        auiConfig.setTokenServerPostLogoutRedirectUri(props.getProperty("tokenServer.postLogoutRedirectUri"));
+        auiConfig.setTokenServerAuthzBaseUrl(props.getProperty("tokenServer.authzBaseUrl"));
+        auiConfig.setTokenServerTokenEndpoint(props.getProperty("tokenServer.tokenEndpoint"));
+        auiConfig.setTokenServerIntrospectionEndpoint(props.getProperty("tokenServer.introspectionEndpoint"));
+        auiConfig.setTokenServerUserInfoEndpoint(props.getProperty("tokenServer.userInfoEndpoint"));
+        auiConfig.setTokenServerEndSessionEndpoint(props.getProperty("tokenServer.endSessionEndpoint"));
 
         LicenseConfiguration licenseConfiguration = new LicenseConfiguration();
         licenseConfiguration.setApiKey(props.getProperty("licenseSpring.apiKey"));
@@ -72,9 +72,9 @@ public class AUIConfigurationService {
         licenseConfiguration.setManagementKey(props.getProperty("licenseSpring.managementKey"));
         licenseConfiguration.initializeLicenseManager();
 
-        auiConfiguration.setLicenseConfiguration(licenseConfiguration);
+        auiConfig.setLicenseConfiguration(licenseConfiguration);
 
-        return auiConfiguration;
+        return auiConfig;
     }
 
     private Properties loadPropertiesFromFile() throws IOException {
@@ -86,7 +86,7 @@ public class AUIConfigurationService {
             props.load(in);
             return props;
         } catch (IOException e) {
-            log.error(ErrorResponse.ERROR_READING_CONFIG.getDescription(), e);
+            log.error(ErrorResponse.ERROR_READING_CONFIG.getDescription(), e.getMessage());
             throw e;
         }
     }

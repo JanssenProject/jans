@@ -47,7 +47,7 @@ public class OAuth2Service {
      */
     public TokenResponse getAccessToken(String code) throws ApplicationException {
         try {
-            log.debug("Getting access token with code: {}", code);
+            log.debug("Getting access token with code");
             if (Strings.isNullOrEmpty(code)) {
                 log.error(ErrorResponse.AUTHORIZATION_CODE_BLANK.getDescription());
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.AUTHORIZATION_CODE_BLANK.getDescription());
@@ -71,7 +71,7 @@ public class OAuth2Service {
 
             return tokenResp;
         } catch (ApplicationException e) {
-            log.error(ErrorResponse.GET_ACCESS_TOKEN_ERROR.getDescription(), e);
+            log.error(ErrorResponse.GET_ACCESS_TOKEN_ERROR.getDescription(), e.getMessage());
             throw e;
         } catch (Exception e) {
             log.error(ErrorResponse.GET_ACCESS_TOKEN_ERROR.getDescription(), e);
@@ -84,7 +84,7 @@ public class OAuth2Service {
      */
     public TokenResponse getApiProtectionToken(String userInfoJwt) throws ApplicationException {
         try {
-            log.debug("Getting api-protection token with userInfoJwt: {}", userInfoJwt);
+            log.debug("Getting api-protection token with userInfoJwt");
             if (Strings.isNullOrEmpty(userInfoJwt)) {
                 log.error(ErrorResponse.USER_INFO_JWT_BLANK.getDescription());
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.USER_INFO_JWT_BLANK.getDescription());
@@ -105,9 +105,9 @@ public class OAuth2Service {
             tokenResp.setAccessToken(tokenResponse.getAccessToken());
             tokenResp.setIdToken(tokenResponse.getIdToken());
             tokenResp.setRefreshToken(tokenResponse.getRefreshToken());
-
-            if (claims.get("scope") != null && claims.get("scope") instanceof List) {
-                tokenResp.setScopes((List) claims.get("scope"));
+            final String SCOPE = "scope";
+            if (claims.get(SCOPE) instanceof List) {
+                tokenResp.setScopes((List) claims.get(SCOPE));
             }
 
             if (claims.get("iat") != null) {
@@ -125,7 +125,7 @@ public class OAuth2Service {
             return tokenResp;
 
         } catch (ApplicationException e) {
-            log.error(ErrorResponse.GET_API_PROTECTION_TOKEN_ERROR.getDescription(), e);
+            log.error(ErrorResponse.GET_API_PROTECTION_TOKEN_ERROR.getDescription(), e.getMessage());
             throw e;
         } catch (Exception e) {
             log.error(ErrorResponse.GET_API_PROTECTION_TOKEN_ERROR.getDescription(), e);
@@ -138,8 +138,6 @@ public class OAuth2Service {
         try {
             log.debug("Getting User-Info from auth-server: {}", userInfoRequest.getAccessToken());
             AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
-
-            final URI userInfoUri = new URI(auiConfiguration.getAuthServerUserInfoEndpoint());
 
             String accessToken = org.apache.logging.log4j.util.Strings.isNotBlank(userInfoRequest.getAccessToken()) ? userInfoRequest.getAccessToken() : null;
 
@@ -182,7 +180,7 @@ public class OAuth2Service {
             }
 
         } catch (ApplicationException e) {
-            log.error(ErrorResponse.GET_USER_INFO_ERROR.getDescription(), e);
+            log.error(ErrorResponse.GET_USER_INFO_ERROR.getDescription(), e.getMessage());
             throw e;
         } catch (Exception e) {
             log.error(ErrorResponse.GET_USER_INFO_ERROR.getDescription(), e);
@@ -244,25 +242,23 @@ public class OAuth2Service {
             }
 
         } catch (Exception e) {
-            log.error("Problems processing token call", e);
+            log.error("Problems processing token call", e.getMessage());
             throw e;
 
         } finally {
-            if (engine != null) {
                 engine.close();
-            }
         }
         return null;
     }
 
     private Map<String, Object> getClaims(Jwt jwtObj) {
+        Map<String, Object> claims = Maps.newHashMap();
         if (jwtObj == null) {
-            return null;
+            return claims;
         }
         JwtClaims jwtClaims = jwtObj.getClaims();
-        Map<String, Object> claims = Maps.newHashMap();
         Set<String> keys = jwtClaims.keys();
-        keys.forEach((key) -> {
+        keys.forEach(key -> {
 
             if (jwtClaims.getClaim(key) instanceof String)
                 claims.put(key, jwtClaims.getClaim(key).toString());
@@ -277,7 +273,7 @@ public class OAuth2Service {
                 List<String> sourceArr = jwtClaims.getClaimAsStringList(key);
                 claims.put(key, sourceArr);
             } else if (jwtClaims.getClaim(key) instanceof JSONObject)
-                claims.put(key, ((JSONObject) jwtClaims.getClaim(key)));
+                claims.put(key, (jwtClaims.getClaim(key)));
         });
         return claims;
     }
