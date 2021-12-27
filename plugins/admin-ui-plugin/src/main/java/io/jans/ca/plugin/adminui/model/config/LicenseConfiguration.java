@@ -29,7 +29,7 @@ public class LicenseConfiguration {
         this.enabled = enabled;
         this.managementKey = managementKey;
 
-        if(this.enabled) {
+        if(Boolean.TRUE.equals(this.enabled)) {
             initializeLicenseManager();
         }
     }
@@ -47,7 +47,7 @@ public class LicenseConfiguration {
                 licenseManager.initialize(licenseSpringConfiguration);
             }
         } catch (LicenseSpringException e) {
-            log.error("Error in initializing LicenseManager. ", e);
+            log.error("Error in initializing LicenseManager. ", e.getMessage());
             throw e;
         }
     }

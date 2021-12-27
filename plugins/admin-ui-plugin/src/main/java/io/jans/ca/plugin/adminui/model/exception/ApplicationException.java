@@ -1,8 +1,8 @@
 package io.jans.ca.plugin.adminui.model.exception;
 
 public class ApplicationException extends Exception {
-    private int errorCode;
-    private String message;
+    private final int errorCode;
+    private final String message;
 
     public ApplicationException(int errorCode, String message) {
         super("Error Code: " + errorCode + ", Description: " + message);
@@ -14,16 +14,7 @@ public class ApplicationException extends Exception {
         return errorCode;
     }
 
-    public void setErrorCode(int errorCode) {
-        this.errorCode = errorCode;
-    }
-
-    @Override
     public String getMessage() {
         return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
     }
 }

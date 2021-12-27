@@ -25,7 +25,7 @@ public class ApiApplication extends Application {
 
     @Override
     public Set<Class<?>> getClasses() {
-        HashSet<Class<?>> classes = new HashSet<Class<?>>();
+        HashSet<Class<?>> classes = new HashSet<>();
 
         // General
         classes.add(OAuth2Resource.class);
