@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.0-beta.15](https://www.github.com/JanssenProject/jans-cloud-native/compare/jans-pycloudlib-v1.0.0-beta.14...jans-pycloudlib-v1.0.0-beta.15) (2021-12-28)
+
+
+### Miscellaneous Chores
+
+* change release to 1.0.0-beta.15 ([b4b2377](https://www.github.com/JanssenProject/jans-cloud-native/commit/b4b237788c042055c6010d45c92bd79355591e50))
+
 ## [1.0.0-beta.14](https://www.github.com/JanssenProject/jans-cloud-native/compare/jans-pycloudlib-v1.0.0-beta.13...jans-pycloudlib-v1.0.0-beta.14) (2021-12-27)
 
 
