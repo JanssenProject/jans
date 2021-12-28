@@ -871,18 +871,22 @@
   },
   "jansMobileDevices": {
     "mysql": {
-      "type": "JSON"
+      "size": 512,
+      "type": "VARCHAR"
     },
     "spanner": {
-      "type": "ARRAY<STRING(MAX)>"
+      "size": 512,
+      "type": "STRING"
     }
   },
   "jansOTPDevices": {
     "mysql": {
-      "type": "JSON"
+      "size": 512,
+      "type": "VARCHAR"
     },
     "spanner": {
-      "type": "ARRAY<STRING(MAX)>"
+      "size": 512,
+      "type": "STRING"
     }
   },
   "jansTrustedDevices": {
