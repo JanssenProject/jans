@@ -6,6 +6,7 @@
 
 package io.jans.as.server.service.external;
 
+import io.jans.as.server.model.common.ExecutionContext;
 import io.jans.as.server.model.common.SessionId;
 import io.jans.as.server.service.external.session.SessionEvent;
 import io.jans.model.SimpleCustomProperty;
@@ -13,6 +14,7 @@ import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.custom.script.type.session.ApplicationSessionType;
 import io.jans.service.custom.script.ExternalScriptService;
+import org.json.JSONArray;
 
 import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
@@ -103,7 +105,7 @@ public class ExternalApplicationSessionService extends ExternalScriptService {
 
     private void externalEvent(CustomScriptConfiguration scriptConfiguration, SessionEvent event) {
         try {
-            log.trace("Executing python 'onEvent' method of script: " + scriptConfiguration.getName() + ", event: " + event);
+            log.trace("Executing python 'onEvent' method of script: {}, event: {}", scriptConfiguration.getName(), event);
             event.setScriptConfiguration(scriptConfiguration);
             ApplicationSessionType applicationSessionType = (ApplicationSessionType) scriptConfiguration.getExternalType();
             applicationSessionType.onEvent(event);
@@ -113,4 +115,32 @@ public class ExternalApplicationSessionService extends ExternalScriptService {
         }
     }
 
+    public boolean modifyActiveSessionsResponse(JSONArray jsonArray, ExecutionContext executionContext) {
+        if (!isEnabled()) {
+            return false;
+        }
+
+        for (CustomScriptConfiguration script : this.customScriptConfigurations) {
+            if (!modifyActiveSessionsResponse(script, jsonArray, executionContext)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean modifyActiveSessionsResponse(CustomScriptConfiguration script, JSONArray jsonArray, ExecutionContext context) {
+        try {
+            log.trace("Executing python 'modifyActiveSessionsResponse' method, context: {}, jsonArray: {}", context, jsonArray);
+            context.setScript(script);
+            ApplicationSessionType sessionType = (ApplicationSessionType) script.getExternalType();
+            final boolean result = sessionType.modifyActiveSessionsResponse(jsonArray, context);
+            log.trace("Finished 'modifyActiveSessionsResponse' method, result: {}, context: {}, jsonArray: {}", result, context, jsonArray);
+            return result;
+        } catch (Exception ex) {
+            log.error(ex.getMessage(), ex);
+            saveScriptError(script.getCustomScript(), ex);
+        }
+
+        return false;
+    }
 }
