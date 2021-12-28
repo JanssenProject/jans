@@ -14,6 +14,7 @@ import io.jans.as.model.token.JsonWebResponse;
 import io.jans.as.server.model.token.JwrService;
 import io.jans.as.server.service.SectorIdentifierService;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.json.JSONObject;
 import org.msgpack.core.Preconditions;
 import org.slf4j.Logger;
@@ -58,7 +59,7 @@ public class LogoutTokenFactory {
             jwrService.encode(jwr, rpClient);
             return jwr;
         } catch (Exception e) {
-            log.error("Failed to create logout_token for client:" + rpClient.getClientId());
+            log.error("Failed to create logout_token for client: {}", rpClient.getClientId());
             return null;
         }
     }
@@ -77,7 +78,7 @@ public class LogoutTokenFactory {
         jwr.getClaims().setClaim("events", getLogoutTokenEvents());
         Audience.setAudience(jwr.getClaims(), client);
 
-        if (StringUtils.isNotBlank(outsideSid) && client.getAttributes().getBackchannelLogoutSessionRequired()) {
+        if (StringUtils.isNotBlank(outsideSid) && BooleanUtils.isTrue(client.getAttributes().getBackchannelLogoutSessionRequired())) {
             jwr.getClaims().setClaim("sid", outsideSid);
         }
 

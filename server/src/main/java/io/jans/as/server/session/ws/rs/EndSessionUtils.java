@@ -28,7 +28,7 @@ import static io.jans.as.server.util.ServerUtil.daemonThreadFactory;
  */
 public class EndSessionUtils {
 
-    private final static Logger log = LoggerFactory.getLogger(EndSessionUtils.class);
+    private static final Logger log = LoggerFactory.getLogger(EndSessionUtils.class);
 
     private EndSessionUtils() {
     }
@@ -41,9 +41,9 @@ public class EndSessionUtils {
         javax.ws.rs.client.Client client = ((ResteasyClientBuilder) ClientBuilder.newBuilder()).httpEngine(ClientFactory.instance().createEngine(true)).build();
         WebTarget target = client.target(backchannelLogoutUri);
 
-        log.debug("Calling RP with backchannel, backchannel_logout_uri: " + backchannelLogoutUri);
+        log.debug("Calling RP with backchannel, backchannel_logout_uri: {}", backchannelLogoutUri);
         try (Response response = target.request().post(Entity.form(new Form("logout_token", logoutToken)))) {
-            log.debug("Backchannel RP response, status: " + response.getStatus() + ", backchannel_logout_uri" + backchannelLogoutUri);
+            log.debug("Backchannel RP response, status: {}, backchannel_logout_uri: {}", response.getStatus(), backchannelLogoutUri);
         } catch (Exception e) {
             log.error("Failed to call backchannel_logout_uri" + backchannelLogoutUri + ", message: " + e.getMessage(), e);
         }

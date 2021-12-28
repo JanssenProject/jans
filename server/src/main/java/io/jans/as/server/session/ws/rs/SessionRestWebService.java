@@ -12,6 +12,7 @@ import io.jans.as.server.model.common.DefaultScope;
 import io.jans.as.server.model.common.ExecutionContext;
 import io.jans.as.server.model.common.SessionId;
 import io.jans.as.server.service.SessionIdService;
+import io.jans.as.server.service.external.ExternalApplicationSessionService;
 import io.jans.as.server.service.token.TokenService;
 import io.jans.as.server.util.ServerUtil;
 import org.apache.commons.lang3.BooleanUtils;
@@ -64,6 +65,9 @@ public class SessionRestWebService {
     @Inject
     private SessionIdService sessionIdService;
 
+    @Inject
+    private ExternalApplicationSessionService externalApplicationSessionService;
+
     @POST
     @Path("/active")
     @Produces({MediaType.APPLICATION_JSON})
@@ -83,6 +87,12 @@ public class SessionRestWebService {
             executionContext.setUserSessions(sessionIdList);
 
             JSONArray jsonArray = createJsonArray(executionContext);
+            if (!externalApplicationSessionService.modifyActiveSessionsResponse(jsonArray, executionContext)) {
+                log.trace("Successfully run external modifyActiveSessionsResponse scripts.");
+            } else {
+                jsonArray = createJsonArray(executionContext);
+                log.trace("Canceled changes made by external modifyActiveSessionsResponse script since method returned `false`.");
+            }
 
             return Response.ok()
                     .cacheControl(ServerUtil.cacheControlWithNoStoreTransformAndPrivate())
