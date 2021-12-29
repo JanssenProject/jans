@@ -67,9 +67,6 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
 
     def generate_configuration(self):
         self.check_clients([('role_based_client_id', '2000.')])
-        if not Config.get('role_based_client_pw'):
-            Config.role_based_client_pw = self.getPW()
-            Config.role_based_client_encoded_pw = self.obscure(Config.role_based_client_pw)
 
     def configure(self, options={}):
         config = configparser.ConfigParser()
