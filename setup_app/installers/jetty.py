@@ -363,9 +363,10 @@ class JettyInstaller(BaseInstaller, SetupUtils):
             shutil.move(tmp_war_fn+'.zip', war_file)
 
 
-    def add_extra_class(self, class_path):
-
-        tree = ET.parse(self.web_app_xml_fn)
+    def add_extra_class(self, class_path, xml_fn=None):
+        if not xml_fn:
+            xml_fn = self.web_app_xml_fn
+        tree = ET.parse(xml_fn)
         root = tree.getroot()
 
         for app_set in root.findall("Set"):
@@ -377,7 +378,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
             child.text = class_path
             root.append(child)
 
-            with open(self.web_app_xml_fn, 'wb') as f:
+            with open(xml_fn, 'wb') as f:
                 f.write(b'<?xml version="1.0"  encoding="ISO-8859-1"?>\n')
                 f.write(b'<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "http://www.eclipse.org/jetty/configure_9_0.dtd">\n')
                 f.write(ET.tostring(root, method='xml'))
