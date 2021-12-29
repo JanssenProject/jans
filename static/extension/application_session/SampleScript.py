@@ -75,6 +75,12 @@ class ApplicationSession(ApplicationSessionType):
         print "Application session. External session ended successfully"
         return True
 
+    # Application calls it during /session/active endpoint call to modify response if needed
+    #   jsonArray is org.json.JSONArray
+    #   context is io.jans.as.server.model.common.ExecutionContext
+    def modifyActiveSessionsResponse(self, jsonArray, context):
+        return False
+
     def isFirstSession(self, user_name):
         tokenLdap = TokenEntity()
         tokenLdap.setDn(self.staticConfiguration.getBaseDn().getClients())
