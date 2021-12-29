@@ -37,11 +37,19 @@ class ConfigApiInstaller(JettyInstaller):
         self.config_ldif_fn = os.path.join(self.output_folder, 'config.ldif')
         self.load_ldif_files = [self.config_ldif_fn, self.scope_ldif_fn]
         self.libDir = os.path.join(self.jetty_base, self.service_name, 'custom/libs/')
+        self.custom_config_dir = os.path.join(self.jetty_base, self.service_name, 'custom/config')
+        self.admin_ui_config_properties = os.path.join(self.output_folder, 'auiConfiguration.properties')
 
         self.source_files = [
                 (os.path.join(Config.distJansFolder, 'jans-config-api.war'), 'https://maven.jans.io/maven/io/jans/jans-config-api-server/{0}/jans-config-api-server-{0}.war'.format(Config.oxVersion)),
-                (os.path.join(Config.distJansFolder, 'scim-plugin.jar'), 'https://maven.jans.io/maven/io/jans/scim-plugin/{0}/scim-plugin-{0}-distribution.jar'.format(Config.oxVersion))
+                (os.path.join(Config.distJansFolder, 'scim-plugin.jar'), 'https://maven.jans.io/maven/io/jans/scim-plugin/{0}/scim-plugin-{0}-distribution.jar'.format(Config.oxVersion)),
+                (os.path.join(Config.distJansFolder, 'admin-ui-plugin-distribution.jar'), 'https://maven.jans.io/maven/io/jans/admin-ui-plugin/{0}/admin-ui-plugin-{0}-distribution.jar'.format(Config.oxVersion)),
+                (os.path.join(Config.distJansFolder, 'log4j2.xml'), 'https://raw.githubusercontent.com/JanssenProject/jans-config-api/master/server/src/main/resources/log4j2.xml'),
+                (os.path.join(Config.distJansFolder, 'log4j2-adminui.xml'), 'https://raw.githubusercontent.com/JanssenProject/jans-config-api/master/plugins/admin-ui-plugin/config/log4j2-adminui.xml'),
                 ]
+
+        
+
 
     def install(self):
         self.installJettyService(self.jetty_app_configuration[self.service_name], True)
@@ -59,7 +67,7 @@ class ConfigApiInstaller(JettyInstaller):
 
 
     def create_folders(self):
-        for d in (self.output_folder,):
+        for d in (self.output_folder, self.custom_config_dir):
             if not os.path.exists(d):
                 self.createDirs(d)
 
@@ -236,4 +244,15 @@ class ConfigApiInstaller(JettyInstaller):
         self.writeFile(out_fn, rendered_text)
         self.dbUtils.import_ldif([out_fn])
 
+    def service_post_setup(self):
+        if Config.installAdminUI:
+            self.logIt("Installing Jans Admin UI", pbar=self.service_name)
+            self.check_clients([('role_based_client_id', '2000.')])
+            self.renderTemplateInOut(self.admin_ui_config_properties, self.templates_folder, self.output_folder)
+            self.copyFile(self.source_files[2][0], self.libDir)
+            admin_ui_plugin_path = os.path.join(self.libDir, os.path.basename(self.source_files[2][0]))
+            self.add_extra_class(admin_ui_plugin_path)
+            self.copyFile(self.admin_ui_config_properties, self.custom_config_dir)
 
+            for logfn in (self.source_files[3][0], self.source_files[4][0]):
+                self.copyFile(logfn, self.custom_config_dir)
