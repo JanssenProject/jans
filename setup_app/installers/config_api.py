@@ -5,7 +5,7 @@ import json
 import ruamel.yaml
 import base64
 import shutil
-
+import zipfile
 from string import Template
 
 from setup_app import paths
@@ -46,10 +46,8 @@ class ConfigApiInstaller(JettyInstaller):
                 (os.path.join(Config.distJansFolder, 'admin-ui-plugin-distribution.jar'), 'https://maven.jans.io/maven/io/jans/admin-ui-plugin/{0}/admin-ui-plugin-{0}-distribution.jar'.format(Config.oxVersion)),
                 (os.path.join(Config.distJansFolder, 'log4j2.xml'), 'https://raw.githubusercontent.com/JanssenProject/jans-config-api/master/server/src/main/resources/log4j2.xml'),
                 (os.path.join(Config.distJansFolder, 'log4j2-adminui.xml'), 'https://raw.githubusercontent.com/JanssenProject/jans-config-api/master/plugins/admin-ui-plugin/config/log4j2-adminui.xml'),
+                (os.path.join(Config.distJansFolder, 'gluu-admin-ui.zip'), 'https://github.com/GluuFederation/gluu-admin-ui/archive/refs/heads/main.zip'),
                 ]
-
-        
-
 
     def install(self):
         self.installJettyService(self.jetty_app_configuration[self.service_name], True)
@@ -60,6 +58,7 @@ class ConfigApiInstaller(JettyInstaller):
         self.copyFile(self.source_files[1][0], self.libDir)
         scim_plugin_path = os.path.join(self.libDir, os.path.basename(self.source_files[1][0]))
         self.add_extra_class(scim_plugin_path)
+        self.install_admin_ui_frontend()
         self.enable()
 
     def installed(self):
@@ -256,3 +255,22 @@ class ConfigApiInstaller(JettyInstaller):
 
             for logfn in (self.source_files[3][0], self.source_files[4][0]):
                 self.copyFile(logfn, self.custom_config_dir)
+
+
+    def install_admin_ui_frontend(self):
+        package_zip = zipfile.ZipFile(self.source_files[5][0], "r")
+        package_par_dir = package_zip.namelist()[0]
+        source_dir = os.path.join(Config.outputFolder, package_par_dir)
+        package_zip.extractall(Config.outputFolder)
+
+        self.renderTemplateInOut(os.path.join(source_dir, '.env.tmp'), source_dir, source_dir)
+        self.copyFile(os.path.join(source_dir, '.env.tmp'), os.path.join(source_dir, '.env'))
+        self.run([paths.cmd_chown, '-R', 'node:node', source_dir])
+        cmd_path = 'PATH=$PATH:{}/bin:{}/bin'.format(Config.jre_home, Config.node_home)
+
+        for cmd in ('npm install @openapitools/openapi-generator-cli', 'npm run api', 'npm install', 'npm run build:prod'):
+            self.logIt("Executing command `{}`".format(cmd), pbar=self.service_name)
+            run_cmd = '{} {}'.format(cmd_path, cmd)
+            self.run(['/bin/su', 'node','-c', run_cmd], source_dir)
+
+        self.run(['cp', '-r', '-f', os.path.join(source_dir, 'dist'), '/var/www/html/admin'])

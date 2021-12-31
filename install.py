@@ -25,8 +25,8 @@ app_versions = {
   "JYTHON_VERSION": "2.7.3",
   "OPENDJ_VERSION": "4.4.12",
   "SETUP_BRANCH": "master",
-  "ADMIN_UI_FRONTEND_BRANCH": "master",
-  "NODE_VERSION": "v14.16.1"
+  "ADMIN_UI_FRONTEND_BRANCH": "main",
+  "NODE_VERSION": "v14.18.2"
 }
 
 jans_dir = '/opt/jans'
@@ -157,6 +157,8 @@ if not (argsp.u or argsp.uninstall):
     download(urljoin(maven_base_url, 'admin-ui-plugin/{0}{1}/admin-ui-plugin-{0}{1}-distribution.jar'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD'])), os.path.join(jans_app_dir, 'admin-ui-plugin-distribution.jar'))
     download('https://raw.githubusercontent.com/JanssenProject/jans-config-api/master/server/src/main/resources/log4j2.xml', os.path.join(jans_app_dir, 'log4j2.xml'))
     download('https://raw.githubusercontent.com/JanssenProject/jans-config-api/master/plugins/admin-ui-plugin/config/log4j2-adminui.xml', os.path.join(jans_app_dir, 'log4j2-adminui.xml'))
+    download('https://github.com/GluuFederation/gluu-admin-ui/archive/refs/heads/{}.zip'.format(app_versions['ADMIN_UI_FRONTEND_BRANCH']), os.path.join(jans_app_dir, 'gluu-admin-ui.zip'))
+
 
     if argsp.profile == 'jans':
         download('https://maven.gluu.org/maven/org/gluufederation/opendj/opendj-server-legacy/{0}/opendj-server-legacy-{0}.zip'.format(app_versions['OPENDJ_VERSION']), os.path.join(app_dir, 'opendj-server-legacy-{0}.zip'.format(app_versions['OPENDJ_VERSION'])))
