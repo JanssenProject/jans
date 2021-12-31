@@ -50,6 +50,7 @@ class BaseInstaller:
 
         self.render_import_templates()
         self.update_backend()
+        self.service_post_setup()
 
     def update_rendering_dict(self):
         mydict = {}
@@ -72,8 +73,9 @@ class BaseInstaller:
                 client_pw = cids[2]['pw']
                 client_encoded_pw = cids[2]['encoded']
             else:
-                client_pw = None
-                client_encoded_pw = None
+                tmp_ = client_var_name.split('_')
+                client_pw =  '_'.join(tmp_[:-1]) + '_pw'
+                client_encoded_pw = '_'.join(tmp_[:-1]) + '_encoded_pw'
 
             self.logIt("Checking ID for client {}".format(client_var_name))
             if not Config.get(client_var_name):
@@ -81,15 +83,21 @@ class BaseInstaller:
                 if result:
                     setattr(Config, client_var_name, result[field_name])
                     self.logIt("{} was found in backend as {}".format(client_var_name, result[field_name]))
-                    if client_encoded_pw:
-                        if 'jansClntSecret' in result:
-                            setattr(Config, client_encoded_pw, result['jansClntSecret'])
-                            setattr(Config, client_pw, self.unobscure(result['jansClntSecret']))
-
+                    if 'jansClntSecret' in result:
+                        setattr(Config, client_encoded_pw, result['jansClntSecret'])
+                        setattr(Config, client_pw, self.unobscure(result['jansClntSecret']))
             if not Config.get(client_var_name):
                 setattr(Config, client_var_name, client_id_prefix + str(uuid.uuid4()))
                 self.logIt("Client ID for {} was created as {}".format(client_var_name, Config.get(client_var_name)))
+            else:
+                self.logIt("Client {} exists in current configuration as {}".format(client_var_name, getattr(Config, client_var_name)))
 
+            if not Config.get(client_pw):
+                self.logIt("Generating password for {}".format(client_pw))
+                client_pw_s = self.getPW()
+                client_encoder_pw_s = self.obscure(client_pw_s)
+                setattr(Config, client_pw, client_pw_s)
+                setattr(Config, client_encoded_pw, client_encoder_pw_s)
 
     def check_scope(self, scope_id):
         search_filter = '(&(objectClass=jansScope)(jansId={}))'.format(scope_id)
@@ -202,4 +210,7 @@ class BaseInstaller:
         return None
     
     def check_need_for_download(self):
+        pass
+
+    def service_post_setup(self):
         pass
