@@ -21,6 +21,10 @@ jansLogoutSessRequired: false
 jansPersistClntAuthzs: true
 jansRedirectURI: https://%(hostname)s/admin-ui
 jansRedirectURI: http://localhost:4100
+jansLogoutURI: http://localhost:4100/logout
+jansLogoutURI: https://%(hostname)s/admin-ui/logout
+jansPostLogoutRedirectURI: http://localhost:4100
+jansPostLogoutRedirectURI: https://%(hostname)s/admin-ui
 jansRequireAuthTime: false
 jansRespTyp: code
 jansRptAsJwt: false
