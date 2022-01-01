@@ -279,4 +279,4 @@ class ConfigApiInstaller(JettyInstaller):
         if not os.path.exists(admin_ui_path):
             os.makedirs(admin_ui_path)
 
-        self.run(['cp', '-r', '-f', os.path.join(source_dir, 'dist/*'), '/var/www/html/admin'])
+        self.run(['cp', '-r', '-f', os.path.join(source_dir, 'dist/*'), admin_ui_path])
