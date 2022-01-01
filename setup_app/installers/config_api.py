@@ -258,6 +258,7 @@ class ConfigApiInstaller(JettyInstaller):
 
 
     def install_admin_ui_frontend(self):
+        self.logIt("Installing Jans Admin UI Frontend", pbar=self.service_name)
         package_zip = zipfile.ZipFile(self.source_files[5][0], "r")
         package_par_dir = package_zip.namelist()[0]
         source_dir = os.path.join(Config.outputFolder, package_par_dir)
