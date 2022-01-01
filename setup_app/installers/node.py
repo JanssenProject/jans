@@ -9,11 +9,13 @@ from setup_app.utils.setup_utils import SetupUtils
 from setup_app.installers.base import BaseInstaller
 
 class NodeInstaller(BaseInstaller, SetupUtils):
+    """This installer provides node installtion for Jans server."""
 
     node_base = os.path.join(Config.jansOptFolder, 'node')
     templates_rendered = False
 
     def __init__(self):
+        """Inits NodeInstaller instance"""
         self.service_name = 'node'
         self.needdb = False # we don't need backend connection in this class
         self.install_var = 'installNode'
@@ -40,8 +42,8 @@ class NodeInstaller(BaseInstaller, SetupUtils):
         try:
             self.logIt("Extracting %s into /opt" % nodeArchive)
             self.run([paths.cmd_tar, '-xJf', nodeArchive, '-C', '/opt/', '--no-xattrs', '--no-same-owner', '--no-same-permissions'])
-        except:
-            self.logIt("Error encountered while extracting archive %s" % nodeArchive)
+        except Exception as e:
+            self.logIt("Error encountered while extracting archive {}: {}".format(nodeArchive, e))
 
         nodeDestinationPath = max(glob.glob('/opt/node-*-linux-x64'))
 
