@@ -9,13 +9,14 @@ from setup_app.utils.setup_utils import SetupUtils
 from setup_app.installers.base import BaseInstaller
 
 class NodeInstaller(BaseInstaller, SetupUtils):
+
     """This installer provides node installtion for Jans server."""
 
     node_base = os.path.join(Config.jansOptFolder, 'node')
     templates_rendered = False
 
     def __init__(self):
-        """Inits NodeInstaller instance"""
+        """Inits NodeInstaller instance."""
         self.service_name = 'node'
         self.needdb = False # we don't need backend connection in this class
         self.install_var = 'installNode'
