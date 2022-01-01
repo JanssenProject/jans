@@ -10,7 +10,10 @@ from setup_app.installers.base import BaseInstaller
 
 class NodeInstaller(BaseInstaller, SetupUtils):
 
-    """This installer provides node installtion for Jans server."""
+    """This installer provides node installtion for Jans server.
+
+    No argument is required.
+    """
 
     node_base = os.path.join(Config.jansOptFolder, 'node')
     templates_rendered = False
