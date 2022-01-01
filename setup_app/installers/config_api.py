@@ -274,9 +274,4 @@ class ConfigApiInstaller(JettyInstaller):
             run_cmd = '{} {}'.format(cmd_path, cmd)
             self.run(['/bin/su', 'node','-c', run_cmd], source_dir)
 
-        admin_ui_path = '/var/www/html/admin'
-
-        if not os.path.exists(admin_ui_path):
-            os.makedirs(admin_ui_path)
-
-        self.run(['cp', '-r', '-f', os.path.join(source_dir, 'dist/*'), admin_ui_path])
+        self.copyTree(os.path.join(source_dir, 'dist'), '/var/www/html/admin')
