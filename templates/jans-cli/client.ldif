@@ -19,12 +19,12 @@ jansIdTknSignedRespAlg: RS256
 jansInclClaimsInIdTkn: false
 jansLogoutSessRequired: false
 jansPersistClntAuthzs: true
-jansRedirectURI: https://%(hostname)s/admin-ui
+jansRedirectURI: https://%(hostname)s/admin
 jansRedirectURI: http://localhost:4100
 jansLogoutURI: http://localhost:4100/logout
-jansLogoutURI: https://%(hostname)s/admin-ui/logout
+jansLogoutURI: https://%(hostname)s/admin/logout
 jansPostLogoutRedirectURI: http://localhost:4100
-jansPostLogoutRedirectURI: https://%(hostname)s/admin-ui
+jansPostLogoutRedirectURI: https://%(hostname)s/admin
 jansRequireAuthTime: false
 jansRespTyp: code
 jansRptAsJwt: false
