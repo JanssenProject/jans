@@ -9,7 +9,6 @@ from setup_app.utils.setup_utils import SetupUtils
 from setup_app.installers.base import BaseInstaller
 
 class NodeInstaller(BaseInstaller, SetupUtils):
-
     """This installer provides node installtion for Jans server.
 
     No argument is required.
