@@ -68,6 +68,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
 
             txt += 'Install Apache 2 web server'.ljust(30) + repr(Config.installHttpd).rjust(35) + (' *' if 'installHttpd' in Config.addPostSetupService else '') + "\n"
+            txt += 'Install Node'.ljust(30) + repr(Config.installAdminUI).rjust(35) + "\n"
             txt += 'Install Auth Server'.ljust(30) + repr(Config.installOxAuth).rjust(35) + "\n"
             txt += 'Install Jans Auth Config Api'.ljust(30) + repr(Config.installConfigApi).rjust(35) + "\n"
             txt += 'Install Jans Admin UI'.ljust(30) + repr(Config.installAdminUI).rjust(35) + "\n"            
