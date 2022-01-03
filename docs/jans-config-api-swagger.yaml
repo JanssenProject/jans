@@ -2921,14 +2921,7 @@ paths:
         content:
           application/json:
             schema:
-              required:
-                - role
-              type: object
-              properties:
-                role:
-                  type: string
-                  description: Admin UI role name.
-                  example: api-admin
+              $ref: '#/components/schemas/AdminRole'
       responses:
         '200':
           description: OK
@@ -3046,13 +3039,7 @@ paths:
         content:
           application/json:
             schema:
-              required:
-                - permission
-              properties:
-                permission:
-                  type: string
-                  description: Admin UI permission name.
-                  example: https://jans.io/adminui/user/permission.write
+              $ref: '#/components/schemas/AdminPermission'
       responses:
         '200':
           description: OK
