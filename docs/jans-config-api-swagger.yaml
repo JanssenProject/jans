@@ -2879,20 +2879,12 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '500':
           $ref: '#/components/responses/InternalServerError'
-  /jans-config-api/admin-ui/user/roles/{role}:
     put:
       tags:
         - Admin UI - Role
       summary: Edit admin ui role.
       description: Edit admin ui role.
       operationId: edit-adminui-role
-      parameters:
-        - in: path
-          name: role
-          schema:
-            type: string
-          required: true
-          description: role name
       security:
         - oauth2: [https://jans.io/adminui/user/role.write]
       requestBody:
@@ -2923,15 +2915,20 @@ paths:
       summary: Delete admin ui role.
       description: Delete admin ui role.
       operationId: delete-adminui-role
-      parameters:
-        - in: path
-          name: role
-          schema:
-            type: string
-          required: true
-          description: role name
       security:
         - oauth2: [https://jans.io/adminui/user/role.write]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+                - role
+              type: object
+              properties:
+                role:
+                  type: string
+                  description: Admin UI role name.
+                  example: api-admin
       responses:
         '200':
           description: OK
@@ -3007,20 +3004,12 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '500':
           $ref: '#/components/responses/InternalServerError'
-  /jans-config-api/admin-ui/user/permissions/{permission}:
     put:
       tags:
         - Admin UI - Permission
       summary: Edit admin ui permission.
       description: Edit admin ui permission.
       operationId: edit-adminui-permission
-      parameters:
-        - in: path
-          name: permission
-          schema:
-            type: string
-          required: true
-          description: permission name
       security:
         - oauth2: [https://jans.io/adminui/user/permission.write]
       requestBody:
@@ -3051,15 +3040,19 @@ paths:
       summary: Delete admin ui permission.
       description: Delete admin ui permission.
       operationId: delete-adminui-permission
-      parameters:
-        - in: path
-          name: permission
-          schema:
-            type: string
-          required: true
-          description: permission name
       security:
         - oauth2: [https://jans.io/adminui/user/permission.write]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+                - permission
+              properties:
+                permission:
+                  type: string
+                  description: Admin UI permission name.
+                  example: https://jans.io/adminui/user/permission.write
       responses:
         '200':
           description: OK
@@ -6266,6 +6259,8 @@ components:
     AdminRole:
       type: object
       description: Admin role
+      required:
+        - role
       properties:
         role:
           type: string
@@ -6276,6 +6271,8 @@ components:
     AdminPermission:
       type: object
       description: Admin permission
+      required:
+        - permission
       properties:
         permission:
           type: string
@@ -6286,6 +6283,8 @@ components:
     RolePermissionMapping:
       type: object
       description: Admin role-permission mapping
+      required:
+        - role
       properties:
         role:
           type: string
