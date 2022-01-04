@@ -443,11 +443,11 @@
   },
   "jansDeviceKeyHandle": {
     "mysql": {
-      "size": 96,
+      "size": 128,
       "type": "VARCHAR"
     },
     "spanner": {
-      "size": 96,
+      "size": 128,
       "type": "STRING"
     }
   },
@@ -1021,6 +1021,17 @@
     "spanner": {
       "size": 256,
       "type": "STRING"
+    }
+  },
+  "jansReq": {
+    "mysql": {
+      "type": "TEXT"
+    },
+    "pgsql": {
+      "type": "TEXT"
+    },
+    "spanner": {
+      "type": "STRING(MAX)"
     }
   }
 }
