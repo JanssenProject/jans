@@ -595,7 +595,7 @@ class PropertiesUtils(SetupUtils):
         if Config.installed_instance and Config.installAdminUI:
             return
 
-        promptForAdminUI = self.getPrompt("Install Gluu Admin UI?", 
+        promptForAdminUI = self.getPrompt("Install Jans Admin UI?", 
                             self.getDefaultOption(Config.installAdminUI)
                             )[0].lower()
 
@@ -844,10 +844,13 @@ class PropertiesUtils(SetupUtils):
             if Config.installHttpd:
                 Config.ip = self.get_ip()
 
-            detectedHostname = self.detect_hostname()
+            if base.argsp.host_name:
+                detectedHostname = base.argsp.host_name
+            else:
+                detectedHostname = self.detect_hostname()
 
-            if detectedHostname == 'localhost':
-                detectedHostname = None
+                if detectedHostname == 'localhost':
+                    detectedHostname = None
 
             while True:
                 if detectedHostname:
@@ -905,7 +908,7 @@ class PropertiesUtils(SetupUtils):
             Config.admin_password = adminPass
 
             self.promptForConfigApi()
-            #self.promptAdminUI()
+            self.promptAdminUI()
             self.promptForScimServer()
             self.promptForFido2Server()
             self.promptForEleven()
