@@ -55,6 +55,7 @@ from setup_app.installers.httpd import HttpdInstaller
 from setup_app.installers.jre import JreInstaller
 from setup_app.installers.jetty import JettyInstaller
 from setup_app.installers.jython import JythonInstaller
+from setup_app.installers.node import NodeInstaller
 from setup_app.installers.jans_auth import JansAuthInstaller
 
 if Config.profile == 'jans':
@@ -67,9 +68,6 @@ if Config.profile == 'jans':
 from setup_app.installers.config_api import ConfigApiInstaller
 from setup_app.installers.jans_cli import JansCliInstaller
 from setup_app.installers.rdbm import RDBMInstaller
-#from setup_app.installers.admin_ui import AdminUIInstaller
-
-
 # from setup_app.installers.oxd import OxdInstaller
 
 if base.snap:
@@ -158,19 +156,23 @@ propertiesUtils.check_properties()
 jreInstaller = JreInstaller()
 jettyInstaller = JettyInstaller()
 jythonInstaller = JythonInstaller()
+nodeInstaller = NodeInstaller()
+
 if Config.profile == 'jans':
     openDjInstaller = OpenDjInstaller()
     couchbaseInstaller = CouchbaseInstaller()
+
 rdbmInstaller = RDBMInstaller()
 httpdinstaller = HttpdInstaller()
 jansAuthInstaller = JansAuthInstaller()
 configApiInstaller = ConfigApiInstaller()
+
 if Config.profile == 'jans':
     fidoInstaller = FidoInstaller()
     scimInstaller = ScimInstaller()
     elevenInstaller = ElevenInstaller()
+
 jansCliInstaller = JansCliInstaller()
-#adminUIInstaller = AdminUIInstaller()
 
 # oxdInstaller = OxdInstaller()
 
@@ -268,6 +270,8 @@ def do_installation():
                 jreInstaller.start_installation()
                 jettyInstaller.start_installation()
                 jythonInstaller.start_installation()
+                if Config.installAdminUI:
+                    nodeInstaller.start_installation()
 
             jansInstaller.copy_scripts()
             jansInstaller.encode_passwords()
@@ -326,10 +330,6 @@ def do_installation():
             if (Config.installed_instance and elevenInstaller.install_var in Config.addPostSetupService) or (
                     not Config.installed_instance and Config.get(elevenInstaller.install_var)):
                 elevenInstaller.start_installation()
-
-        #if (Config.installed_instance and adminUIInstaller.install_var in Config.addPostSetupService) or (
-        #        not Config.installed_instance and Config.get(adminUIInstaller.install_var)):
-        #    adminUIInstaller.start_installation()
 
         if Config.installJansCli:
             jansCliInstaller.start_installation()

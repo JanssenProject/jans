@@ -443,11 +443,11 @@
   },
   "jansDeviceKeyHandle": {
     "mysql": {
-      "size": 96,
+      "size": 128,
       "type": "VARCHAR"
     },
     "spanner": {
-      "size": 96,
+      "size": 128,
       "type": "STRING"
     }
   },
@@ -871,18 +871,22 @@
   },
   "jansMobileDevices": {
     "mysql": {
-      "type": "JSON"
+      "size": 512,
+      "type": "VARCHAR"
     },
     "spanner": {
-      "type": "ARRAY<STRING(MAX)>"
+      "size": 512,
+      "type": "STRING"
     }
   },
   "jansOTPDevices": {
     "mysql": {
-      "type": "JSON"
+      "size": 512,
+      "type": "VARCHAR"
     },
     "spanner": {
-      "type": "ARRAY<STRING(MAX)>"
+      "size": 512,
+      "type": "STRING"
     }
   },
   "jansTrustedDevices": {
@@ -1017,6 +1021,17 @@
     "spanner": {
       "size": 256,
       "type": "STRING"
+    }
+  },
+  "jansReq": {
+    "mysql": {
+      "type": "TEXT"
+    },
+    "pgsql": {
+      "type": "TEXT"
+    },
+    "spanner": {
+      "type": "STRING(MAX)"
     }
   }
 }
