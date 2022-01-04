@@ -1,7 +1,7 @@
 import os
 import re
 import sys
-import datetime
+import time
 import sqlalchemy
 import shutil
 
@@ -342,10 +342,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
         self.dbUtils.import_ldif(ldif_files)
 
     def server_time_zone(self):
-        my_time_zone = str(datetime.datetime.now(datetime.timezone(datetime.timedelta(0))).astimezone().tzinfo)
-        if not my_time_zone == 'UTC':
-            my_time_zone = 'GMT'+my_time_zone
-        Config.templateRenderingDict['server_time_zone'] = my_time_zone
+        Config.templateRenderingDict['server_time_zone'] = 'UTC' + time.strftime("%z")
 
     def rdbmProperties(self):
         if Config.rdbm_type in ('sql', 'mysql'):
