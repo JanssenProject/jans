@@ -29,6 +29,6 @@ class RevokeToken(RevokeTokenType):
     # This method is called during Revoke Token call.
     # If True is returned, token is revoked. If False is returned, revoking is skipped.
     # Note :
-    # context is reference of org.gluu.oxauth.service.external.context.RevokeTokenContext(in https://github.com/GluuFederation/oxauth project, )
+    # context is reference of io.jans.as.server.model.common.ExecutionContextt(in https://github.com/JanssenProject/jans-auth-server project, )
     def revoke(self, context):
         return True
