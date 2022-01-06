@@ -50,6 +50,12 @@ public class CryptoProviderTest extends ConfigurableTest {
     private final static String SIGNING_INPUT = "Signing Input";
     private final static String SHARED_SECRET = "secret";
 
+    private final static Object[][] DEF_EC_ALGS_DATA = new Object[][] {
+        { Algorithm.ES256 },
+        { Algorithm.ES384 },
+        { Algorithm.ES512 },
+    };
+
     private static Long expirationTime;
     private static String hs256Signature;
     private static String hs384Signature;
@@ -388,11 +394,10 @@ public class CryptoProviderTest extends ConfigurableTest {
 
     @DataProvider(name = "GenerateKeysDataProvider")
     public Object[][] testGenerateKeysDataProvider() {
-        return new Object[][] {
-                { Algorithm.ES256 },
-                { Algorithm.ES384 },
-                { Algorithm.ES512 },
-        };
+        return ConfigurableTest.ArquillianDataProvider.provide(
+                "CryptoProviderTest#GenerateKeysDataProvider",
+                DEF_EC_ALGS_DATA
+            );
     }
 
     @Test(dependsOnMethods = {"testDeleteKeyRS256", "testDeleteKeyRS384", "testDeleteKeyRS512",
