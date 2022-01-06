@@ -63,8 +63,10 @@ class BaseInstaller:
         Config.templateRenderingDict.update(mydict)
 
 
-    def check_clients(self, client_var_id_list, resource=False):
+    def check_clients(self, client_var_id_list, resource=False, create=True):
         field_name, ou = ('jansId', 'resources') if resource else ('inum', 'clients')
+
+        ret_val = {}
 
         for cids in client_var_id_list:
             client_var_name = cids[0] 
@@ -78,6 +80,7 @@ class BaseInstaller:
                 client_encoded_pw = '_'.join(tmp_[:-1]) + '_encoded_pw'
 
             self.logIt("Checking ID for client {}".format(client_var_name))
+            rv = 1
             if not Config.get(client_var_name):
                 result = self.dbUtils.search('ou={},o=jans'.format(ou), '(&({}={}*)(objectClass=jansClnt))'.format(field_name, client_id_prefix))
                 if result:
@@ -86,18 +89,27 @@ class BaseInstaller:
                     if 'jansClntSecret' in result:
                         setattr(Config, client_encoded_pw, result['jansClntSecret'])
                         setattr(Config, client_pw, self.unobscure(result['jansClntSecret']))
-            if not Config.get(client_var_name):
-                setattr(Config, client_var_name, client_id_prefix + str(uuid.uuid4()))
-                self.logIt("Client ID for {} was created as {}".format(client_var_name, Config.get(client_var_name)))
-            else:
-                self.logIt("Client {} exists in current configuration as {}".format(client_var_name, getattr(Config, client_var_name)))
+                else:
+                    rv = -1
 
-            if not Config.get(client_pw):
-                self.logIt("Generating password for {}".format(client_pw))
-                client_pw_s = self.getPW()
-                client_encoder_pw_s = self.obscure(client_pw_s)
-                setattr(Config, client_pw, client_pw_s)
-                setattr(Config, client_encoded_pw, client_encoder_pw_s)
+            ret_val[client_id_prefix] = rv
+
+            if create:
+
+                if not Config.get(client_var_name):
+                    setattr(Config, client_var_name, client_id_prefix + str(uuid.uuid4()))
+                    self.logIt("Client ID for {} was created as {}".format(client_var_name, Config.get(client_var_name)))
+                else:
+                    self.logIt("Client {} exists in current configuration as {}".format(client_var_name, getattr(Config, client_var_name)))
+
+                if not Config.get(client_pw):
+                    self.logIt("Generating password for {}".format(client_pw))
+                    client_pw_s = self.getPW()
+                    client_encoder_pw_s = self.obscure(client_pw_s)
+                    setattr(Config, client_pw, client_pw_s)
+                    setattr(Config, client_encoded_pw, client_encoder_pw_s)
+
+        return ret_val
 
     def check_scope(self, scope_id):
         search_filter = '(&(objectClass=jansScope)(jansId={}))'.format(scope_id)
