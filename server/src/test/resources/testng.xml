@@ -3,7 +3,7 @@
 <suite name="jansAuthServer" parallel="false">
 
 	<listeners>
-		<listener class-name="io.jans.as.server.JansUnitTestsTestsListener" />
+		<listener class-name="io.jans.as.server.JansUnitTestsListener" />
 	</listeners>
 
     <test name="Unit Tests" enabled="true">
