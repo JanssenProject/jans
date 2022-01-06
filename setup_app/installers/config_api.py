@@ -58,7 +58,8 @@ class ConfigApiInstaller(JettyInstaller):
         self.copyFile(self.source_files[1][0], self.libDir)
         scim_plugin_path = os.path.join(self.libDir, os.path.basename(self.source_files[1][0]))
         self.add_extra_class(scim_plugin_path)
-        self.install_admin_ui_frontend()
+        if Config.installAdminUI:
+            self.install_admin_ui_frontend()
         self.enable()
 
     def installed(self):
@@ -195,7 +196,7 @@ class ConfigApiInstaller(JettyInstaller):
         if not self.installed():
             return
 
-        self.check_clients([('jca_test_client_id', '1802.')])
+        check_result = self.check_clients([('jca_test_client_id', '1802.')])
 
         result = self.dbUtils.search('ou=scopes,o=jans', search_filter='(&(inum=1800.*)(objectClass=jansScope))', fetchmany=True)
         scopes = []
@@ -219,16 +220,13 @@ class ConfigApiInstaller(JettyInstaller):
         Config.templateRenderingDict['config_api_scopes'] = '\n'.join(scopes)
         Config.templateRenderingDict['config_api_scopes_list'] = ' '.join(scopes_id_list)
 
-        if not Config.get('jca_test_client_pw'):
-            Config.jca_test_client_pw = self.getPW()
-            Config.jca_test_client_encoded_pw = self.obscure(Config.jca_test_client_pw)
-
-        else:
+        if check_result.get('1802.') == 1:
             warning = "Test data for Config Api was allready loaded."
             self.logIt(warning)
             if Config.installed_instance:
                 print(warning)
             return
+
 
         self.logIt("Loding Jans Config Api test data")
 

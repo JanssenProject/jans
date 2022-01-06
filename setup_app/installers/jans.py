@@ -71,7 +71,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
             txt += 'Install Node'.ljust(30) + repr(Config.installAdminUI).rjust(35) + "\n"
             txt += 'Install Auth Server'.ljust(30) + repr(Config.installOxAuth).rjust(35) + "\n"
             txt += 'Install Jans Auth Config Api'.ljust(30) + repr(Config.installConfigApi).rjust(35) + "\n"
-            txt += 'Install Jans Admin UI'.ljust(30) + repr(Config.installAdminUI).rjust(35) + "\n"            
+            txt += 'Install Jans Admin UI'.ljust(30) + repr(Config.installAdminUI).rjust(35) + "\n"
             if Config.profile == 'jans':
                 txt += 'Install Fido2 Server'.ljust(30) + repr(Config.installFido2).rjust(35) + (' *' if 'installFido2' in Config.addPostSetupService else '') + "\n"
                 txt += 'Install Scim Server'.ljust(30) + repr(Config.installScimServer).rjust(35) + (' *' if 'installScimServer' in Config.addPostSetupService else '') + "\n"
