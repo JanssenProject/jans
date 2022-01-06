@@ -27,9 +27,11 @@ import java.util.Map.Entry;
 import java.util.Properties;
 
 /**
- * Base class for all seam test which requre external configuration
+ * Base class for all seam test which require external configuration
  *
- * @author Yuriy Movchan Date: 05/16/2016
+ * @author Yuriy Movchan
+ * @author Sergey Manoylo
+ * @version December 29, 2021
  */
 @ArquillianSuiteDeployment
 public abstract class ConfigurableTest extends Arquillian {
@@ -81,6 +83,71 @@ public abstract class ConfigurableTest extends Arquillian {
         context.getSuite().getXmlSuite().setParameters(parameters);
 
         initialized = true;
+    }
+
+    /**
+     * Data Provider, that returns correct arrays, which should be used, when JEE testing platform Arquillian is used.
+     * 
+     * @author Sergey Manoylo
+     * @version December 29, 2021
+     */
+    public static class ArquillianDataProvider {
+
+        private static final Map<String, Integer> calls = new HashMap<String, Integer>();   // contains map: data provider - number of call (counter value) of the function 'provide'
+
+        /**
+         * Constructor.
+         * 
+         * Private, so only public static functions should be called.
+         * 
+         */
+        private ArquillianDataProvider() {
+        }
+
+        /**
+         * Returns Array of Data, that should be used by testing framework TestNG.
+         * 
+         * This function returns two-dimensional array, when this function
+         * is called 1-st time for some defined provider name.
+         * 
+         * This function returns row of the two-dimensional array, when this function
+         * is called 2-nd - N-st time.
+         * Number of the row of the two-dimensional array, == (number of call - 1).
+         * 
+         * @param providerName Provider Name.
+         * @param providerData Data of the provider (two-dimensional array).
+         * @return current array (two-dimensional array or row).
+         */
+        public synchronized static Object[][] provide(final String providerName, final Object[][] providerData) {
+            if (calls.containsKey(providerName)) {
+                // get instance and increase calls counter
+                Object[][] testCase = new Object[][] { providerData[calls.get(providerName)] };
+                calls.put(providerName, (calls.get(providerName) + 1) % providerData.length);
+                return testCase;
+            }
+            else {
+                calls.put(providerName, 0);
+                return providerData;
+            }
+        }
+
+        /**
+         * Clears counter of calls for all providers.
+         * 
+         */
+        public synchronized static void initCalls() {
+            calls.clear();
+        }
+
+        /**
+         * Clears counter of calls for some provider.
+         * 
+         * @param providerName Provider Name.
+         */
+        public synchronized static void initCalls(final String providerName) {
+            calls.put(providerName, 0);
+        }
+
     }
 
 }
