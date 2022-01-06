@@ -25,12 +25,36 @@ public class JansUnitTestsListener implements ITestListener {
     }
 
     @Override
-    public void onTestFailedButWithinSuccessPercentage(ITestResult context) {
+    public void onTestFailedButWithinSuccessPercentage(ITestResult result) {
+        Reporter.log("Test FAILED with Success Percentage: " + result.getName() + "." + result.getMethod().getMethodName(), true);        
+        testFailed(result);
     }
 
     @Override
     public void onTestFailure(ITestResult result) {
         Reporter.log("Test FAILED: " + result.getName() + "." + result.getMethod().getMethodName(), true);
+        testFailed(result);
+        Reporter.log("", true);
+    }
+
+    @Override
+    public void onTestSkipped(ITestResult result) {
+        Reporter.log("Test SKIPPED: " + result.getName() + "." + result.getMethod().getMethodName(), true);
+        Reporter.log("", true);
+    }
+
+    @Override
+    public void onTestStart(ITestResult result) {
+        Reporter.log("Test STARTED: " + result.getName() + "." + result.getMethod().getMethodName(), true);
+    }
+
+    @Override
+    public void onTestSuccess(ITestResult result) {
+        Reporter.log("Test SUCCESS: " + result.getName() + "." + result.getMethod().getMethodName(), true);
+        Reporter.log("", true);
+    }
+
+    private void testFailed(ITestResult result) {
         Object[] parameters = result.getParameters();
         if(parameters != null) {
             Reporter.log("Test Parameters: ", true);
@@ -45,20 +69,5 @@ public class JansUnitTestsListener implements ITestListener {
             Reporter.log(Throwables.getStackTraceAsString(result.getThrowable()), true);
             Reporter.log("", true);
         }
-    }
-
-    @Override
-    public void onTestSkipped(ITestResult result) {
-    }
-
-    @Override
-    public void onTestStart(ITestResult result) {
-        Reporter.log("Test STARTED: " + result.getName() + "." + result.getMethod().getMethodName(), true);
-    }
-
-    @Override
-    public void onTestSuccess(ITestResult result) {
-        Reporter.log("Test SUCCESS: " + result.getName() + "." + result.getMethod().getMethodName(), true);
-        Reporter.log("", true);
     }
 }
