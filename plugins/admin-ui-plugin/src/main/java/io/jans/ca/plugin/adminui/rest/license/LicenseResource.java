@@ -5,6 +5,7 @@ import io.jans.ca.plugin.adminui.model.auth.LicenseRequest;
 import io.jans.ca.plugin.adminui.model.auth.LicenseResponse;
 import io.jans.ca.plugin.adminui.service.license.LicenseDetailsService;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
+import io.jans.configapi.filters.ProtectedApi;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
@@ -19,8 +20,11 @@ public class LicenseResource {
 
     static final String CHECK_LICENSE = "/checkLicense";
     static final String ACTIVATE_LICENSE = "/activateLicense";
-    static final String GET_LICENSE_DETAILS = "/getLicenseDetails";
-    static final String UPDATE_LICENSE_DETAILS = "/updateLicenseDetails";
+    static final String LICENSE_DETAILS = "/licenseDetails";
+
+    public static final String SCOPE_OPENID = "openid";
+    static final String SCOPE_LICENSE_READ = "https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly";
+    static final String SCOPE_LICENSE_WRITE = "https://jans.io/oauth/jans-auth-server/config/adminui/license.write";
 
     @Inject
     Logger log;
@@ -30,6 +34,7 @@ public class LicenseResource {
 
     @GET
     @Path(CHECK_LICENSE)
+    @ProtectedApi(scopes={SCOPE_OPENID})
     @Produces(MediaType.APPLICATION_JSON)
     public Response checkLicense() {
         try {
@@ -45,6 +50,7 @@ public class LicenseResource {
 
     @POST
     @Path(ACTIVATE_LICENSE)
+    @ProtectedApi(scopes={SCOPE_OPENID})
     @Produces(MediaType.TEXT_PLAIN)
     public Response activateLicense(@Valid @NotNull LicenseRequest licenseRequest) {
         try {
@@ -59,7 +65,8 @@ public class LicenseResource {
     }
 
     @GET
-    @Path(GET_LICENSE_DETAILS)
+    @Path(LICENSE_DETAILS)
+    @ProtectedApi(scopes={SCOPE_LICENSE_READ})
     @Produces(MediaType.APPLICATION_JSON)
     public Response getLicenseDetails() {
         try {
@@ -73,7 +80,8 @@ public class LicenseResource {
     }
 
     @PUT
-    @Path(UPDATE_LICENSE_DETAILS)
+    @Path(LICENSE_DETAILS)
+    @ProtectedApi(scopes={SCOPE_LICENSE_WRITE})
     @Produces(MediaType.APPLICATION_JSON)
     public Response updateLicenseDetails(@Valid @NotNull LicenseRequest licenseRequest) {
         try {
