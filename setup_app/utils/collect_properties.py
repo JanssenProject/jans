@@ -165,10 +165,10 @@ class CollectProperties(SetupUtils, BaseInstaller):
                     ('scim_client_id', '1201.', {'pw': 'scim_client_pw', 'encoded':'scim_client_encoded_pw'}),
                     ('admin_ui_client_id', '1901.', {'pw': 'admin_ui_client_pw', 'encoded': 'admin_ui_client_encoded_pw'}),
                     ]
-        self.check_clients(client_var_id_list)
+        self.check_clients(client_var_id_list, create=False)
 
         result = dbUtils.search(
-                        search_base='inum={},ou=clients,o=jans'.format(Config.oxauth_client_id),
+                        search_base='inum={},ou=clients,o=jans'.format(Config.get('oxauth_client_id', '-1')),
                         search_filter='(objectClass=jansClnt)',
                         search_scope=ldap3.BASE,
                         )
