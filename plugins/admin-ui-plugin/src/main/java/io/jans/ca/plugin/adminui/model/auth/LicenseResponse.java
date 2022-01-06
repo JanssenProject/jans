@@ -1,25 +1,33 @@
 package io.jans.ca.plugin.adminui.model.auth;
 
 public class LicenseResponse {
-    private boolean isLicenseEnable;
+    private boolean licenseEnabled;
     private String productName;
     private String productCode;
     private String licenseType;
     private int maxActivations;
     private String licenseKey;
-    private boolean isLicenseActive;
+    private boolean licenseActive;
     private String validityPeriod;
     private String companyName;
     private String customerEmail;
     private String customerFirstName;
     private String customerLastName;
 
-    public boolean isLicenseEnable() {
-        return isLicenseEnable;
+    public boolean isLicenseEnabled() {
+        return licenseEnabled;
     }
 
-    public void setIsLicenseEnable(boolean isLicenseEnable) {
-        this.isLicenseEnable = isLicenseEnable;
+    public void setLicenseEnabled(boolean licenseEnabled) {
+        this.licenseEnabled = licenseEnabled;
+    }
+
+    public boolean isLicenseActive() {
+        return licenseActive;
+    }
+
+    public void setLicenseActive(boolean licenseActive) {
+        this.licenseActive = licenseActive;
     }
 
     public String getProductName() {
@@ -60,14 +68,6 @@ public class LicenseResponse {
 
     public void setLicenseKey(String licenseKey) {
         this.licenseKey = licenseKey;
-    }
-
-    public boolean isLicenseActive() {
-        return isLicenseActive;
-    }
-
-    public void setLicenseActive(boolean licenseActive) {
-        isLicenseActive = licenseActive;
     }
 
     public String getValidityPeriod() {
@@ -113,13 +113,13 @@ public class LicenseResponse {
     @Override
     public String toString() {
         return "LicenseResponse{" +
-                "isLicenseEnable=" + isLicenseEnable +
+                "licenseEnabled=" + licenseEnabled +
                 ", productName='" + productName + '\'' +
                 ", productCode='" + productCode + '\'' +
                 ", licenseType='" + licenseType + '\'' +
                 ", maxActivations=" + maxActivations +
                 ", licenseKey='" + licenseKey + '\'' +
-                ", isLicenseActive=" + isLicenseActive +
+                ", licenseActive=" + licenseActive +
                 ", validityPeriod='" + validityPeriod + '\'' +
                 ", companyName='" + companyName + '\'' +
                 ", customerEmail='" + customerEmail + '\'' +
