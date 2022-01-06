@@ -50,6 +50,8 @@ public class CryptoProviderTest extends ConfigurableTest {
     private final static String SIGNING_INPUT = "Signing Input";
     private final static String SHARED_SECRET = "secret";
 
+    private final static String DEF_GEN_KEYS_PROVIDER = "GenerateKeysDataProvider";
+
     private final static Object[][] DEF_EC_ALGS_DATA = new Object[][] {
         { Algorithm.ES256 },
         { Algorithm.ES384 },
@@ -392,17 +394,17 @@ public class CryptoProviderTest extends ConfigurableTest {
         }
     }
 
-    @DataProvider(name = "GenerateKeysDataProvider")
+    @DataProvider(name = DEF_GEN_KEYS_PROVIDER)
     public Object[][] testGenerateKeysDataProvider() {
         return ConfigurableTest.ArquillianDataProvider.provide(
-                "CryptoProviderTest#GenerateKeysDataProvider",
+                "CryptoProviderTest#" + DEF_GEN_KEYS_PROVIDER,
                 DEF_EC_ALGS_DATA
             );
     }
 
     @Test(dependsOnMethods = {"testDeleteKeyRS256", "testDeleteKeyRS384", "testDeleteKeyRS512",
             "testDeleteKeyES256", "testDeleteKeyES384", "testDeleteKeyES512" },
-            dataProvider = "GenerateKeysDataProvider")
+            dataProvider = DEF_GEN_KEYS_PROVIDER)
     public void testGenerateKeys(Algorithm algorithm) {
         for(int i = 0; i < NUM_KEY_GENS; i++) {
             System.out.println("----------------------");
