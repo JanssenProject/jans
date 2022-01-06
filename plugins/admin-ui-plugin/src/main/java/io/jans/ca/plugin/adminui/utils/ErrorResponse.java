@@ -20,6 +20,7 @@ public enum ErrorResponse {
     PERMISSION_NOT_FOUND("Bad Request: Admin UI permission not found in Auth Server."),
     ERROR_IN_MAPPING_ROLE_PERMISSION("Error in mapping role-permission."),
     ERROR_IN_DELETING_ROLE_PERMISSION("Error in deleting role-permission."),
+    ROLE_PERMISSION_MAPPING_PRESENT("Role permission mapping already present. Please use HTTP PUT request to modify mapping."),
     GET_ADMIUI_ROLES_ERROR("Error in fetching Admin UI roles."),
     SAVE_ADMIUI_ROLES_ERROR("Error in saving Admin UI roles."),
     EDIT_ADMIUI_ROLES_ERROR("Error in editing Admin UI roles."),
