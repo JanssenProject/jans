@@ -9,6 +9,7 @@ import io.jans.ca.plugin.adminui.model.exception.ApplicationException;
 import io.jans.ca.plugin.adminui.service.auth.OAuth2Service;
 import io.jans.ca.plugin.adminui.service.config.AUIConfigurationService;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
+import io.jans.configapi.filters.ProtectedApi;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
@@ -26,6 +27,8 @@ public class OAuth2Resource {
     static final String OAUTH2_API_PROTECTION_TOKEN = "/api-protection-token";
     static final String OAUTH2_API_USER_INFO = "/user-info";
 
+    public static final String SCOPE_OPENID = "openid";
+
     @Inject
     Logger log;
 
@@ -38,6 +41,7 @@ public class OAuth2Resource {
     @GET
     @Path(OAUTH2_CONFIG)
     @Produces(MediaType.APPLICATION_JSON)
+    @ProtectedApi(scopes = {SCOPE_OPENID})
     public Response getOAuth2Config() {
 
         AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
@@ -77,6 +81,7 @@ public class OAuth2Resource {
 
     @GET
     @Path(OAUTH2_API_PROTECTION_TOKEN)
+    @Produces(MediaType.APPLICATION_JSON)
     public Response getApiProtectionToken(@QueryParam("ujwt") String ujwt) {
         try {
             log.info("Api protection token request to Auth Server.");

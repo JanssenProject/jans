@@ -5,7 +5,7 @@ public enum ErrorResponse {
     GET_API_PROTECTION_TOKEN_ERROR("Error in getting api protection token."),
     GET_USER_INFO_ERROR("Error in getting User-Info."),
     AUTHORIZATION_CODE_BLANK("Bad Request: Authourization `code` blank or empty."),
-    USER_INFO_JWT_BLANK("Bad Request: User-Info jwt is blank or empty."),
+    USER_INFO_JWT_BLANK("User-Info jwt is blank or empty. Generating token with default scopes."),
     CODE_OR_TOKEN_REQUIRED("Bad Request: Either `code` or `access_token` is required."),
     CHECK_LICENSE_ERROR("Error in checking license status."),
     ACTIVATE_LICENSE_ERROR("Error in activating License."),
