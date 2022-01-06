@@ -251,7 +251,6 @@ public class UserManagementService {
             entryManager.merge(adminConf);
             return adminConf.getDynamic().getRolePermissionMapping();
         } catch (ApplicationException e) {
-            log.error(e.getMessage());
             throw e;
         } catch (Exception e) {
             log.error(ErrorResponse.ERROR_IN_MAPPING_ROLE_PERMISSION.getDescription(), e);
@@ -287,14 +286,9 @@ public class UserManagementService {
             }
 
             Optional<RolePermissionMapping> rolePermissionMappingOptional = roleScopeMappingList.stream().findFirst();
-            List<String> mappedPermissions = Lists.newArrayList();
-            if (rolePermissionMappingOptional.isPresent()) {
-                mappedPermissions = rolePermissionMappingOptional.get().getPermissions();
-            }
 
             //remove duplicate permissions
             Set<String> scopesSet = new LinkedHashSet<>(rolePermissionMappingArg.getPermissions());
-            //scopesSet.addAll(rolePermissionMappingArg.getPermissions());
             List<String> combinedScopes = new ArrayList<>(scopesSet);
 
             if (adminConf.getDynamic().getRolePermissionMapping()
@@ -311,7 +305,6 @@ public class UserManagementService {
             entryManager.merge(adminConf);
             return adminConf.getDynamic().getRolePermissionMapping();
         } catch (ApplicationException e) {
-            log.error(e.getMessage());
             throw e;
         } catch (Exception e) {
             log.error(ErrorResponse.ERROR_IN_MAPPING_ROLE_PERMISSION.getDescription(), e);
