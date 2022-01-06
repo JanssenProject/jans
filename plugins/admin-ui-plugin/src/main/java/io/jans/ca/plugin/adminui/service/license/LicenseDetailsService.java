@@ -79,17 +79,17 @@ public class LicenseDetailsService {
             Boolean isLicenseCheckEnabled = auiConfiguration.getLicenseConfiguration().getEnabled();
             if (!Boolean.TRUE.equals(isLicenseCheckEnabled)) {
                 log.debug("License configuration is disabled.");
-                licenseResponse.setIsLicenseEnable(false);
+                licenseResponse.setLicenseEnabled(false);
                 return licenseResponse;
             }
             License activeLicense = auiConfiguration.getLicenseConfiguration().getLicenseManager().getCurrent();
             if (activeLicense == null) {
                 log.debug("Active license for admin-ui not present ");
-                licenseResponse.setIsLicenseEnable(false);
+                licenseResponse.setLicenseEnabled(false);
                 return licenseResponse;
             } else {
                 log.debug("Active license for admin-ui found : {}", activeLicense.getProduct());
-                licenseResponse.setIsLicenseEnable(true);
+                licenseResponse.setLicenseEnabled(true);
                 licenseResponse.setProductName(activeLicense.getProduct().getProductName());
                 licenseResponse.setProductCode(activeLicense.getProduct().getShortCode());
                 licenseResponse.setLicenseType(activeLicense.getData().getLicenseType().name());
@@ -105,7 +105,7 @@ public class LicenseDetailsService {
             }
         } catch (Exception e) {
             log.error(ErrorResponse.GET_LICENSE_DETAILS_ERROR.getDescription(), e);
-            licenseResponse.setIsLicenseEnable(false);
+            licenseResponse.setLicenseEnabled(false);
             return licenseResponse;
         }
 
@@ -135,7 +135,7 @@ public class LicenseDetailsService {
             //search license by license-key
             License activeLicense = auiConfiguration.getLicenseConfiguration().getLicenseManager().getCurrent();
             if (activeLicense == null) {
-                licenseResponse.setIsLicenseEnable(false);
+                licenseResponse.setLicenseEnabled(false);
                 return licenseResponse;
             }
             SearchLicensesRequest request = SearchLicensesRequest.builder()
@@ -156,7 +156,7 @@ public class LicenseDetailsService {
             BackOfficeLicense updated = licenseService.updateLicense(response.getResults().get(0).getId(), update);
 
             //create LicenseResponse
-            licenseResponse.setIsLicenseEnable(true);
+            licenseResponse.setLicenseEnabled(true);
             licenseResponse.setProductName(activeLicense.getProduct().getProductName());
             licenseResponse.setProductCode(activeLicense.getProduct().getShortCode());
             licenseResponse.setLicenseType(activeLicense.getData().getLicenseType().name());
