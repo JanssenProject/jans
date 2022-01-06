@@ -14,49 +14,49 @@ import com.google.common.base.Throwables;
  * @author Sergey Manoylo
  * @version December 29, 2021
  */
-public class JansUnitTestsTestsListener implements ITestListener {
-    
-    @Override       
+public class JansUnitTestsListener implements ITestListener {
+
+    @Override
     public void onFinish(ITestContext context) {
-    }       
+    }
 
-    @Override       
+    @Override
     public void onStart(ITestContext context) {
-    }       
+    }
 
-    @Override       
+    @Override
     public void onTestFailedButWithinSuccessPercentage(ITestResult context) {
-    }       
+    }
 
-    @Override       
+    @Override
     public void onTestFailure(ITestResult result) {
         Reporter.log("Test FAILED: " + result.getName() + "." + result.getMethod().getMethodName(), true);
         Object[] parameters = result.getParameters();
         if(parameters != null) {
-            Reporter.log("Test Parameters: ", true);            
+            Reporter.log("Test Parameters: ", true);
             for(Object parameter : parameters) {
-                Reporter.log("parameter = " + parameter, true);           
+                Reporter.log("parameter = " + parameter, true);
             }
         }
         Throwable throwable = result.getThrowable();
         if(throwable != null) {
-            Reporter.log("", true);            
+            Reporter.log("", true);
             Reporter.log("Exception: ", true);
             Reporter.log(Throwables.getStackTraceAsString(result.getThrowable()), true);
-            Reporter.log("", true);            
+            Reporter.log("", true);
         }
-    }       
+    }
 
-    @Override       
+    @Override
     public void onTestSkipped(ITestResult result) {
-    }       
+    }
 
-    @Override       
+    @Override
     public void onTestStart(ITestResult result) {
         Reporter.log("Test STARTED: " + result.getName() + "." + result.getMethod().getMethodName(), true);
     }
-    
-    @Override       
+
+    @Override
     public void onTestSuccess(ITestResult result) {
         Reporter.log("Test SUCCESS: " + result.getName() + "." + result.getMethod().getMethodName(), true);
         Reporter.log("", true);
