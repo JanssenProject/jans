@@ -2,6 +2,7 @@ package io.jans.ca.plugin.adminui.service.auth;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import io.jans.as.client.TokenRequest;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.jwt.Jwt;
@@ -11,7 +12,9 @@ import io.jans.ca.plugin.adminui.model.exception.ApplicationException;
 import io.jans.ca.plugin.adminui.model.auth.TokenResponse;
 import io.jans.ca.plugin.adminui.model.auth.UserInfoRequest;
 import io.jans.ca.plugin.adminui.model.auth.UserInfoResponse;
+import io.jans.ca.plugin.adminui.rest.auth.OAuth2Resource;
 import io.jans.ca.plugin.adminui.service.config.AUIConfigurationService;
+import io.jans.ca.plugin.adminui.utils.CommonUtils;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
@@ -29,6 +32,8 @@ import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
+import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -83,11 +88,8 @@ public class OAuth2Service {
      */
     public TokenResponse getApiProtectionToken(String userInfoJwt) throws ApplicationException {
         try {
-            log.debug("Getting api-protection token with userInfoJwt");
-            if (Strings.isNullOrEmpty(userInfoJwt)) {
-                log.error(ErrorResponse.USER_INFO_JWT_BLANK.getDescription());
-                throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.USER_INFO_JWT_BLANK.getDescription());
-            }
+            log.debug("Getting api-protection token");
+
             AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
 
             TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
@@ -96,6 +98,10 @@ public class OAuth2Service {
             tokenRequest.setGrantType(GrantType.CLIENT_CREDENTIALS);
             tokenRequest.setRedirectUri(auiConfiguration.getTokenServerRedirectUrl());
 
+            if (Strings.isNullOrEmpty(userInfoJwt)) {
+                log.warn(ErrorResponse.USER_INFO_JWT_BLANK.getDescription());
+                tokenRequest.setScope(scopeAsString(Arrays.asList(OAuth2Resource.SCOPE_OPENID)));
+            }
             io.jans.as.client.TokenResponse tokenResponse = getToken(tokenRequest, auiConfiguration.getTokenServerTokenEndpoint(), userInfoJwt);
 
             final Jwt tokenJwt = Jwt.parse(tokenResponse.getAccessToken());
@@ -123,9 +129,6 @@ public class OAuth2Service {
 
             return tokenResp;
 
-        } catch (ApplicationException e) {
-            log.error(ErrorResponse.GET_API_PROTECTION_TOKEN_ERROR.getDescription());
-            throw e;
         } catch (Exception e) {
             log.error(ErrorResponse.GET_API_PROTECTION_TOKEN_ERROR.getDescription(), e);
             throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), ErrorResponse.GET_API_PROTECTION_TOKEN_ERROR.getDescription());
@@ -275,5 +278,11 @@ public class OAuth2Service {
                 claims.put(key, (jwtClaims.getClaim(key)));
         });
         return claims;
+    }
+
+    private static String scopeAsString(List<String> scopes) throws UnsupportedEncodingException {
+        Set<String> scope = Sets.newHashSet();
+        scope.addAll(scopes);
+        return CommonUtils.joinAndUrlEncode(scope);
     }
 }
