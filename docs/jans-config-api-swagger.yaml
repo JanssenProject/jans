@@ -3066,7 +3066,7 @@ paths:
       description: Get admin ui role-permissions mapping.
       operationId: get-adminui-role-permissions
       security:
-        - oauth2: [https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.read]
+        - oauth2: [https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.readonly]
       responses:
         '200':
           description: OK
@@ -3075,6 +3075,36 @@ paths:
               schema:
                 title: Get admin ui role-permissions mapping.
                 description: Get admin ui role-permissions mapping.
+                type: array
+                items:
+                  $ref: '#/components/schemas/RolePermissionMapping'
+        '400':
+          $ref: '#/components/responses/NotAcceptable'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      tags:
+        - Admin UI - Role-Permissions Mapping
+      summary: Add role-permissions mapping.
+      description: Add role-permissions mapping.
+      operationId: Add role-permissions mapping.
+      security:
+        - oauth2: [https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.write]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RolePermissionMapping'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: Add role-permissions mapping.
+                description: Add role-permissions mapping.
                 type: array
                 items:
                   $ref: '#/components/schemas/RolePermissionMapping'
@@ -3152,7 +3182,7 @@ paths:
       description: Get admin ui license details.
       operationId: get-adminui-license
       security:
-        - oauth2: [https://jans.io/oauth/jans-auth-server/config/adminui/license.read]
+        - oauth2: [https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly]
       responses:
         '200':
           description: OK
