@@ -303,10 +303,9 @@ public class UserManagementService {
     private List<RolePermissionMapping> getRolePermMapByRole(AdminConf adminConf, RolePermissionMapping rolePermissionMappingArg) throws ApplicationException {
         validateRolePermissionMapping(adminConf, rolePermissionMappingArg);
 
-        List<RolePermissionMapping> roleScopeMappingList = adminConf.getDynamic().getRolePermissionMapping()
+        return adminConf.getDynamic().getRolePermissionMapping()
                 .stream().filter(ele -> ele.getRole().equalsIgnoreCase(rolePermissionMappingArg.getRole()))
                 .collect(Collectors.toList());
-        return roleScopeMappingList;
     }
 
     private void validateRolePermissionMapping(AdminConf adminConf, RolePermissionMapping rolePermissionMappingArg) throws ApplicationException {
