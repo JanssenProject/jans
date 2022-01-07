@@ -207,6 +207,25 @@ public class UserManagementResource {
         }
     }
 
+    @POST
+    @Path(ROLE_PERMISSIONS_MAPPING)
+    @Produces(MediaType.APPLICATION_JSON)
+    @ProtectedApi(scopes = SCOPE_ROLE_PERMISSION_MAPPING_WRITE)
+    public Response addPermissionsToRole(@Valid @NotNull RolePermissionMapping rolePermissionMappingArg) {
+        try {
+            log.info("Adding role-permissions to Admin-UI.");
+            List<RolePermissionMapping> roleScopeMapping = userManagementService.addPermissionsToRole(rolePermissionMappingArg);
+            log.info("Added role-permissions to Admin-UI..");
+            return Response.ok(roleScopeMapping).build();
+        } catch (ApplicationException e) {
+            log.error(ErrorResponse.ERROR_IN_MAPPING_ROLE_PERMISSION.getDescription(), e);
+            return Response.status(e.getErrorCode()).entity(e.getMessage()).build();
+        } catch (Exception e) {
+            log.error(ErrorResponse.ERROR_IN_MAPPING_ROLE_PERMISSION.getDescription(), e);
+            return Response.serverError().entity(e.getMessage()).build();
+        }
+    }
+
     @PUT
     @Path(ROLE_PERMISSIONS_MAPPING)
     @Produces(MediaType.APPLICATION_JSON)

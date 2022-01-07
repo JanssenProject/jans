@@ -8,6 +8,7 @@ import io.jans.as.model.config.adminui.RolePermissionMapping;
 import io.jans.ca.plugin.adminui.model.exception.ApplicationException;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
 import io.jans.orm.PersistenceEntryManager;
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
@@ -211,24 +212,43 @@ public class UserManagementService {
         }
     }
 
+    public List<RolePermissionMapping> addPermissionsToRole(RolePermissionMapping rolePermissionMappingArg) throws ApplicationException {
+        try {
+            AdminConf adminConf = entryManager.find(AdminConf.class, CONFIG_DN);
+            List<RolePermissionMapping> roleScopeMappingList = getRolePermMapByRole(adminConf, rolePermissionMappingArg);
+
+            if (CollectionUtils.isNotEmpty(roleScopeMappingList)) {
+                log.warn(ErrorResponse.ROLE_PERMISSION_MAPPING_PRESENT.getDescription());
+                throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.ROLE_PERMISSION_MAPPING_PRESENT.getDescription());
+            }
+
+            //create new RolePermissionMapping
+            RolePermissionMapping rolePermissionMapping = new RolePermissionMapping();
+            //add role to it
+            rolePermissionMapping.setRole(rolePermissionMappingArg.getRole());
+            //remove duplicate permissions
+            Set<String> scopesSet = new LinkedHashSet<>(rolePermissionMappingArg.getPermissions());
+            List<String> combinedScopes = new ArrayList<>(scopesSet);
+            rolePermissionMapping.setPermissions(combinedScopes);
+            //add permission
+            roleScopeMappingList.add(rolePermissionMapping);
+            adminConf.getDynamic().getRolePermissionMapping().addAll(roleScopeMappingList);
+
+            entryManager.merge(adminConf);
+            return adminConf.getDynamic().getRolePermissionMapping();
+        } catch (ApplicationException e) {
+            log.error(ErrorResponse.ERROR_IN_MAPPING_ROLE_PERMISSION.getDescription());
+            throw e;
+        } catch (Exception e) {
+            log.error(ErrorResponse.ERROR_IN_MAPPING_ROLE_PERMISSION.getDescription(), e);
+            throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), ErrorResponse.ERROR_IN_MAPPING_ROLE_PERMISSION.getDescription());
+        }
+    }
+
     public List<RolePermissionMapping> mapPermissionsToRole(RolePermissionMapping rolePermissionMappingArg) throws ApplicationException {
         try {
             AdminConf adminConf = entryManager.find(AdminConf.class, CONFIG_DN);
-            List<AdminRole> roles = adminConf.getDynamic().getRoles();
-            List<AdminPermission> permissions = adminConf.getDynamic().getPermissions();
-
-            if (roles.stream().noneMatch(ele -> ele.getRole().equals(rolePermissionMappingArg.getRole()))) {
-                log.error(ErrorResponse.ROLE_NOT_FOUND.getDescription());
-                throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.ROLE_NOT_FOUND.getDescription());
-            }
-            if (permissions.stream().noneMatch(ele -> rolePermissionMappingArg.getPermissions().contains(ele.getPermission()))) {
-                log.error(ErrorResponse.PERMISSION_NOT_FOUND.getDescription());
-                throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.PERMISSION_NOT_FOUND.getDescription());
-            }
-
-            List<RolePermissionMapping> roleScopeMappingList = adminConf.getDynamic().getRolePermissionMapping()
-                    .stream().filter(ele -> ele.getRole().equalsIgnoreCase(rolePermissionMappingArg.getRole()))
-                    .collect(Collectors.toList());
+            List<RolePermissionMapping> roleScopeMappingList = getRolePermMapByRole(adminConf, rolePermissionMappingArg);
 
             if (roleScopeMappingList == null || roleScopeMappingList.isEmpty()) {
                 RolePermissionMapping rolePermissionMapping = new RolePermissionMapping();
@@ -238,15 +258,8 @@ public class UserManagementService {
                 roleScopeMappingList.add(rolePermissionMapping);
             }
 
-            Optional<RolePermissionMapping> rolePermissionMappingOptional = roleScopeMappingList.stream().findFirst();
-            List<String> mappedPermissions = Lists.newArrayList();
-            if (rolePermissionMappingOptional.isPresent()) {
-                mappedPermissions = rolePermissionMappingOptional.get().getPermissions();
-            }
-
             //remove duplicate permissions
-            Set<String> scopesSet = new LinkedHashSet<>(mappedPermissions);
-            scopesSet.addAll(rolePermissionMappingArg.getPermissions());
+            Set<String> scopesSet = new LinkedHashSet<>(rolePermissionMappingArg.getPermissions());
             List<String> combinedScopes = new ArrayList<>(scopesSet);
 
             if (adminConf.getDynamic().getRolePermissionMapping()
@@ -275,34 +288,37 @@ public class UserManagementService {
         try {
             AdminConf adminConf = entryManager.find(AdminConf.class, CONFIG_DN);
             List<RolePermissionMapping> roleScopeMapping = adminConf.getDynamic().getRolePermissionMapping()
-                    .stream().filter(ele -> ele.getRole().equalsIgnoreCase(rolePermissionMappingArg.getRole()))
+                    .stream().filter(ele -> !ele.getRole().equalsIgnoreCase(rolePermissionMappingArg.getRole()))
                     .collect(Collectors.toList());
-
-            if (roleScopeMapping == null || roleScopeMapping.isEmpty()) {
-                log.error(ErrorResponse.ROLE_NOT_FOUND.getDescription());
-                throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.ROLE_NOT_FOUND.getDescription());
-            }
-
-            Optional<RolePermissionMapping> rolePermissionMappingOptional = roleScopeMapping.stream().findFirst();
-
-            if (rolePermissionMappingOptional.isPresent()) {
-                List<String> permissions = rolePermissionMappingOptional.get().getPermissions();
-                permissions.removeIf(ele -> rolePermissionMappingArg.getPermissions().contains(ele));
-
-                adminConf.getDynamic().getRolePermissionMapping()
-                        .stream().filter(ele -> ele.getRole().equalsIgnoreCase(rolePermissionMappingArg.getRole()))
-                        .collect(Collectors.toList()).forEach(ele -> ele.setPermissions(permissions));
-
-                entryManager.merge(adminConf);
-            }
+            adminConf.getDynamic().setRolePermissionMapping(roleScopeMapping);
+            entryManager.merge(adminConf);
 
             return adminConf.getDynamic().getRolePermissionMapping();
-        } catch (ApplicationException e) {
-            log.error(ErrorResponse.ERROR_IN_DELETING_ROLE_PERMISSION.getDescription());
-            throw e;
         } catch (Exception e) {
             log.error(ErrorResponse.ERROR_IN_DELETING_ROLE_PERMISSION.getDescription(), e);
             throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), ErrorResponse.ERROR_IN_DELETING_ROLE_PERMISSION.getDescription());
+        }
+    }
+
+    private List<RolePermissionMapping> getRolePermMapByRole(AdminConf adminConf, RolePermissionMapping rolePermissionMappingArg) throws ApplicationException {
+        validateRolePermissionMapping(adminConf, rolePermissionMappingArg);
+
+        return adminConf.getDynamic().getRolePermissionMapping()
+                .stream().filter(ele -> ele.getRole().equalsIgnoreCase(rolePermissionMappingArg.getRole()))
+                .collect(Collectors.toList());
+    }
+
+    private void validateRolePermissionMapping(AdminConf adminConf, RolePermissionMapping rolePermissionMappingArg) throws ApplicationException {
+        List<AdminRole> roles = adminConf.getDynamic().getRoles();
+        List<AdminPermission> permissions = adminConf.getDynamic().getPermissions();
+
+        if (roles.stream().noneMatch(ele -> ele.getRole().equals(rolePermissionMappingArg.getRole()))) {
+            log.error(ErrorResponse.ROLE_NOT_FOUND.getDescription());
+            throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.ROLE_NOT_FOUND.getDescription());
+        }
+        if (permissions.stream().noneMatch(ele -> rolePermissionMappingArg.getPermissions().contains(ele.getPermission()))) {
+            log.error(ErrorResponse.PERMISSION_NOT_FOUND.getDescription());
+            throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.PERMISSION_NOT_FOUND.getDescription());
         }
     }
 }
