@@ -3,6 +3,7 @@ description: Welcome to oxTrust!
 displayName: %(orgName)s
 jansOrgShortName: %(orgName)s
 jansThemeColor: 166309
+jansManagerGrp: inum=60B7,ou=groups,o=jans
 o: jans
 objectClass: top
 objectClass: jansOrganization

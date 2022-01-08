@@ -27,8 +27,8 @@ def doc_id_from_dn(dn):
     parsed_dn = dnutils.parse_dn(dn)
     doc_id = parsed_dn[0][1]
 
-    if doc_id == "jans":
-        doc_id = "_"
+    # if doc_id == "jans":
+    #     doc_id = "_"
     return doc_id
 
 
@@ -60,6 +60,10 @@ class BaseBackend:
         self.jans_stat_scopes = [
             "inum=C4F7,ou=scopes,o=jans",  # jans_stat
         ]
+
+
+#: ID of base entry
+JANS_BASE_ID = "o=jans"
 
 
 class LDAPBackend(BaseBackend):
@@ -168,6 +172,16 @@ class LDAPBackend(BaseBackend):
                     "jansAttrs"] = self.jans_attrs
                 self.modify_entry(id_, entry.attrs, **kwargs)
 
+    def update_base_entries(self):
+        # add jansManagerGrp to base entry
+        entry = self.get_entry(JANS_BASE_ID)
+        if not entry:
+            return
+
+        if not entry.attrs.get("jansManagerGrp"):
+            entry.attrs["jansManagerGrp"] = "inum=60B7,ou=groups,o=jans"
+            self.modify_entry(JANS_BASE_ID, entry.attrs)
+
 
 class SQLBackend(BaseBackend):
     def __init__(self, manager):
@@ -260,6 +274,19 @@ class SQLBackend(BaseBackend):
                 entry.attrs[
                     "jansAttrs"] = self.jans_attrs
                 self.modify_entry(id_, entry.attrs, **kwargs)
+
+    def update_base_entries(self):
+        # add jansManagerGrp to base entry
+        id_ = doc_id_from_dn(JANS_BASE_ID)
+        kwargs = {"table_name": "jansOrganization"}
+
+        entry = self.get_entry(id_, **kwargs)
+        if not entry:
+            return
+
+        if not entry.attrs.get("jansManagerGrp"):
+            entry.attrs["jansManagerGrp"] = "inum=60B7,ou=groups,o=jans"
+            self.modify_entry(id_, entry.attrs, **kwargs)
 
 
 class CouchbaseBackend(BaseBackend):
@@ -414,6 +441,20 @@ class CouchbaseBackend(BaseBackend):
         # drop the index
         self.client.exec_query(f'DROP INDEX `{bucket}`.`def_jans_fix_oc`')
 
+    def update_base_entries(self):
+        # add jansManagerGrp to base entry
+        id_ = id_from_dn(JANS_BASE_ID)
+        bucket = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
+        kwargs = {"bucket": bucket}
+
+        entry = self.get_entry(id_, **kwargs)
+        if not entry:
+            return
+
+        if not entry.attrs.get("jansManagerGrp"):
+            entry.attrs["jansManagerGrp"] = "inum=60B7,ou=groups,o=jans"
+            self.modify_entry(id_, entry.attrs, **kwargs)
+
 
 class SpannerBackend(BaseBackend):
     def __init__(self, manager):
@@ -507,6 +548,19 @@ class SpannerBackend(BaseBackend):
                     "jansAttrs"] = self.jans_attrs
                 self.modify_entry(id_, entry.attrs, **kwargs)
 
+    def update_base_entries(self):
+        # add jansManagerGrp to base entry
+        id_ = doc_id_from_dn(JANS_BASE_ID)
+        kwargs = {"table_name": "jansOrganization"}
+
+        entry = self.get_entry(id_, **kwargs)
+        if not entry:
+            return
+
+        if not entry.attrs.get("jansManagerGrp"):
+            entry.attrs["jansManagerGrp"] = "inum=60B7,ou=groups,o=jans"
+            self.modify_entry(id_, entry.attrs, **kwargs)
+
 
 class Upgrade:
     def __init__(self, manager):
@@ -529,6 +583,7 @@ class Upgrade:
         self.backend.update_scopes_entries()
         self.backend.update_clients_entries()
         self.backend.update_scim_scopes_entries()
+        self.backend.update_base_entries()
 
         if hasattr(self.backend, "update_misc"):
             self.backend.update_misc()
