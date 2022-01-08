@@ -286,6 +286,7 @@ jansAttrOrigin: jansPerson
 jansAttrTyp: string
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
+jansClaimName: secret_question
 jansSAML1URI: urn:mace:dir:attribute-def:secretQuestion
 jansSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.306
 jansStatus: active
@@ -304,6 +305,7 @@ jansAttrOrigin: jansPerson
 jansAttrTyp: string
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
+jansClaimName: secret_answer
 jansSAML1URI: urn:mace:dir:attribute-def:secretAnswer
 jansSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.305
 jansStatus: active
@@ -323,6 +325,7 @@ jansAttrTyp: string
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
 jansAttrViewTyp: whitePages
+jansClaimName: preferred_language
 jansSAML1URI: urn:mace:dir:attribute-def:preferredLanguage
 jansSAML2URI: urn:oid:2.16.840.1.113730.3.1.39
 jansStatus: active
@@ -418,6 +421,7 @@ jansAttrOrigin: jansPerson
 jansAttrTyp: string
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
+jansClaimName: transient_id
 jansSAML1URI: urn:mace:dir:attribute-def:transientId
 jansSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.312
 jansStatus: active
@@ -436,6 +440,7 @@ jansAttrOrigin: jansPerson
 jansAttrTyp: string
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
+jansClaimName: persistent_id
 jansSAML1URI: urn:mace:dir:attribute-def:persistentId
 jansSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.291
 jansStatus: active
@@ -528,6 +533,7 @@ jansAttrOrigin: jansPerson
 jansAttrTyp: string
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
+jansClaimName: user_password
 jansSAML1URI: urn:mace:dir:attribute-def:userPassword
 jansSAML2URI: urn:oid:2.5.4.35
 jansStatus: active
@@ -545,6 +551,7 @@ jansAttrOrigin: jansCustomPerson
 jansAttrTyp: string
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
+jansClaimName: title
 jansSAML1URI: urn:mace:dir:attribute-def:title
 jansSAML2URI: urn:oid:2.5.4.12
 jansStatus: inactive
@@ -563,6 +570,7 @@ jansAttrOrigin: jansCustomPerson
 jansAttrTyp: string
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
+jansClaimName: car_license
 jansSAML1URI: urn:mace:dir:attribute-def:carLicense
 jansSAML2URI: urn:oid:2.16.840.1.113730.3.1.1
 jansStatus: inactive
@@ -581,6 +589,7 @@ jansAttrOrigin: jansCustomPerson
 jansAttrTyp: string
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
+jansClaimName: facsimile_telephone_number
 jansSAML1URI: urn:mace:dir:attribute-def:facsimileTelephoneNumber
 jansSAML2URI: urn:oid:2.5.4.23
 jansStatus: inactive
@@ -598,6 +607,7 @@ jansAttrOrigin: jansCustomPerson
 jansAttrTyp: string
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
+jansClaimName: department_number
 jansSAML1URI: urn:mace:dir:attribute-def:departmentNumber
 jansSAML2URI: urn:oid:2.16.840.1.113730.3.1.2
 jansStatus: inactive
@@ -614,6 +624,7 @@ jansAttrName: employeeType
 jansAttrOrigin: jansCustomPerson
 jansAttrTyp: string
 jansAttrViewTyp: admin
+jansClaimName: employee_type
 jansSAML1URI: urn:mace:dir:attribute-def:employeeType
 jansSAML2URI: urn:oid:2.16.840.1.113730.3.1.4
 jansStatus: inactive
@@ -632,6 +643,7 @@ jansAttrOrigin: jansCustomPerson
 jansAttrTyp: string
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
+jansClaimName: cn
 jansSAML1URI: urn:mace:dir:attribute-def:cn
 jansSAML2URI: urn:oid:2.5.4.3
 jansStatus: inactive
@@ -705,6 +717,7 @@ jansAttrName: manager
 jansAttrOrigin: jansCustomPerson
 jansAttrTyp: string
 jansAttrViewTyp: admin
+jansClaimName: manager
 jansSAML1URI: urn:mace:dir:attribute-def:manager
 jansSAML2URI: urn:oid:0.9.2342.19200300.100.1.10
 jansStatus: inactive
@@ -742,6 +755,7 @@ jansAttrOrigin: jansCustomPerson
 jansAttrTyp: string
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
+jansClaimName: post_office_box
 jansSAML1URI: urn:mace:dir:attribute-def:postOfficeBox
 jansSAML2URI: urn:oid:2.5.4.18
 jansStatus: inactive
@@ -758,6 +772,7 @@ jansAttrName: employeeNumber
 jansAttrOrigin: jansCustomPerson
 jansAttrTyp: string
 jansAttrViewTyp: admin
+jansClaimName: employee_number
 jansSAML1URI: urn:mace:dir:attribute-def:employeeNumber
 jansSAML2URI: urn:oid:2.16.840.1.113730.3.1.3
 jansStatus: inactive
@@ -774,6 +789,7 @@ jansAttrName: preferredDeliveryMethod
 jansAttrOrigin: jansCustomPerson
 jansAttrTyp: string
 jansAttrViewTyp: admin
+jansClaimName: preferred_delivery_method
 jansSAML1URI: urn:mace:dir:attribute-def:preferredDeliveryMethod
 jansSAML2URI: urn:oid:2.5.4.28
 jansStatus: inactive
@@ -792,6 +808,7 @@ jansAttrOrigin: jansCustomPerson
 jansAttrTyp: string
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
+jansClaimName: room_number
 jansSAML1URI: urn:mace:dir:attribute-def:roomNumber
 jansSAML2URI: urn:oid:0.9.2342.19200300.100.1.6
 jansStatus: inactive
@@ -808,6 +825,7 @@ jansAttrName: secretary
 jansAttrOrigin: jansCustomPerson
 jansAttrTyp: string
 jansAttrViewTyp: admin
+jansClaimName: secretary
 jansSAML1URI: urn:mace:dir:attribute-def:secretary
 jansSAML2URI: urn:oid:0.9.2342.19200300.100.1.21
 jansStatus: inactive
@@ -825,6 +843,7 @@ jansAttrOrigin: jansPerson
 jansAttrTyp: string
 jansAttrViewTyp: admin
 jansAttrViewTyp: user
+jansClaimName: jans_status
 jansSAML1URI: urn:mace:dir:attribute-def:jansStatus
 jansSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.97
 jansStatus: active
@@ -900,6 +919,7 @@ jansAttrOrigin: jansCustomPerson
 jansAttrTyp: string
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
+jansClaimName: description
 jansSAML1URI: urn:mace:dir:attribute-def:description
 jansSAML2URI: urn:oid:2.5.4.13
 jansStatus: inactive
@@ -916,6 +936,7 @@ jansAttrName: eduPersonAffiliation
 jansAttrOrigin: eduPerson
 jansAttrTyp: string
 jansAttrViewTyp: admin
+jansClaimName: edu_person_affiliation
 jansSAML1URI: urn:mace:dir:attribute-def:eduPersonAffiliation
 jansSAML2URI: urn:oid:1.3.6.1.4.1.5923.1.1.1.1
 jansStatus: inactive
@@ -932,6 +953,7 @@ jansAttrName: eduPersonNickName
 jansAttrOrigin: eduPerson
 jansAttrTyp: string
 jansAttrViewTyp: admin
+jansClaimName: edu_person_nick_name
 jansSAML1URI: urn:mace:dir:attribute-def:eduPersonNickName
 jansSAML2URI: urn:oid:1.3.6.1.4.1.5923.1.1.1.2
 jansStatus: inactive
@@ -948,6 +970,7 @@ jansAttrName: eduPersonOrgDN
 jansAttrOrigin: eduPerson
 jansAttrTyp: string
 jansAttrViewTyp: admin
+jansClaimName: edu_person_org_dn
 jansSAML1URI: urn:mace:dir:attribute-def:eduPersonOrgDN
 jansSAML2URI: urn:oid:1.3.6.1.4.1.5923.1.1.1.3
 jansStatus: inactive
@@ -964,6 +987,7 @@ jansAttrName: eduPersonOrgUnitDN
 jansAttrOrigin: eduPerson
 jansAttrTyp: string
 jansAttrViewTyp: admin
+jansClaimName: edu_person_org_unit_dn
 jansSAML1URI: urn:mace:dir:attribute-def:eduPersonOrgUnitDN
 jansSAML2URI: urn:oid:1.3.6.1.4.1.5923.1.1.1.4
 jansStatus: inactive
@@ -980,6 +1004,7 @@ jansAttrName: eduPersonPrimaryAffiliation
 jansAttrOrigin: eduPerson
 jansAttrTyp: string
 jansAttrViewTyp: admin
+jansClaimName: edu_person_primary_affiliation
 jansSAML1URI: urn:mace:dir:attribute-def:eduPersonPrimaryAffiliation
 jansSAML2URI: urn:oid:1.3.6.1.4.1.5923.1.1.1.5
 jansStatus: inactive
@@ -996,6 +1021,7 @@ jansAttrName: eduPersonPrincipalName
 jansAttrOrigin: eduPerson
 jansAttrTyp: string
 jansAttrViewTyp: admin
+jansClaimName: edu_person_principal_name
 jansSAML1URI: urn:mace:dir:attribute-def:eduPersonPrincipalName
 jansSAML2URI: urn:oid:1.3.6.1.4.1.5923.1.1.1.6
 jansStatus: inactive
@@ -1012,6 +1038,7 @@ jansAttrName: eduPersonEntitlement
 jansAttrOrigin: eduPerson
 jansAttrTyp: string
 jansAttrViewTyp: admin
+jansClaimName: edu_person_entitlement
 jansSAML1URI: urn:mace:dir:attribute-def:eduPersonEntitlement
 jansSAML2URI: urn:oid:1.3.6.1.4.1.5923.1.1.1.7
 jansStatus: inactive
@@ -1028,6 +1055,7 @@ jansAttrName: eduPersonPrimaryOrgUnitDN
 jansAttrOrigin: eduPerson
 jansAttrTyp: string
 jansAttrViewTyp: admin
+jansClaimName: edu_person_primary_org_unit_dn
 jansSAML1URI: urn:mace:dir:attribute-def:eduPersonPrimaryOrgUnitDN
 jansSAML2URI: urn:oid:1.3.6.1.4.1.5923.1.1.1.8
 jansStatus: inactive
@@ -1044,6 +1072,7 @@ jansAttrName: eduPersonScopedAffiliation
 jansAttrOrigin: eduPerson
 jansAttrTyp: string
 jansAttrViewTyp: admin
+jansClaimName: edu_person_scoped_affiliation
 jansSAML1URI: urn:mace:dir:attribute-def:eduPersonScopedAffiliation
 jansSAML2URI: urn:oid:1.3.6.1.4.1.5923.1.1.1.9
 jansStatus: inactive
@@ -1060,6 +1089,7 @@ jansAttrName: eduPersonTargetedID
 jansAttrOrigin: eduPerson
 jansAttrTyp: string
 jansAttrViewTyp: admin
+jansClaimName: edu_person_targeted_id
 jansSAML1URI: urn:mace:dir:attribute-def:eduPersonTargetedID
 jansSAML2URI: urn:oid:1.3.6.1.4.1.5923.1.1.1.10
 jansStatus: inactive
@@ -1076,6 +1106,7 @@ jansAttrName: eduPersonAssurance
 jansAttrOrigin: eduPerson
 jansAttrTyp: string
 jansAttrViewTyp: admin
+jansClaimName: edu_person_assurance
 jansSAML1URI: urn:mace:dir:attribute-def:eduPersonAssurance
 jansSAML2URI: urn:oid:1.3.6.1.4.1.5923.1.1.1.11
 jansStatus: inactive
@@ -1092,6 +1123,7 @@ jansAttrName: eduPersonPrincipalNamePrior
 jansAttrOrigin: eduPerson
 jansAttrTyp: string
 jansAttrViewTyp: admin
+jansClaimName: edu_person_principal_name_prior
 jansSAML1URI: urn:mace:dir:attribute-def:eduPersonPrincipalNamePrior
 jansSAML2URI: urn:oid:1.3.6.1.4.1.5923.1.1.1.12
 jansStatus: inactive
@@ -1108,6 +1140,7 @@ jansAttrName: eduPersonUniqueId
 jansAttrOrigin: eduPerson
 jansAttrTyp: string
 jansAttrViewTyp: admin
+jansClaimName: edu_person_unique_id
 jansSAML1URI: urn:mace:dir:attribute-def:eduPersonUniqueId
 jansSAML2URI: urn:oid:1.3.6.1.4.1.5923.1.1.1.13
 jansStatus: inactive
@@ -1124,6 +1157,7 @@ jansAttrName: eduPersonOrcid
 jansAttrOrigin: eduPerson
 jansAttrTyp: string
 jansAttrViewTyp: admin
+jansClaimName: edu_person_orcid
 jansSAML1URI: urn:mace:dir:attribute-def:eduPersonOrcid
 jansSAML2URI: urn:oid:1.3.6.1.4.1.5923.1.1.1.16
 jansStatus: inactive
@@ -1141,6 +1175,7 @@ jansAttrName: jansEnrollmentCode
 jansAttrOrigin: jansPerson
 jansAttrTyp: string
 jansAttrViewTyp: admin
+jansClaimName: jans_enrollment_code
 jansSAML1URI: urn:mace:dir:attribute-def:jansEnrollmentCode
 jansSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.239
 jansScimCustomAttr: true
@@ -1198,6 +1233,7 @@ jansAttrOrigin: jansPerson
 jansAttrTyp: certificate
 jansAttrViewTyp: admin
 jansAttrViewTyp: user
+jansClaimName: user_certificate
 jansSAML1URI: urn:mace:dir:attribute-def:userCertificate
 jansSAML2URI: urn:oid:2.5.4.36
 jansStatus: active
@@ -1217,6 +1253,7 @@ jansAttrOrigin: jansPerson
 jansAttrTyp: string
 jansAttrViewTyp: admin
 jansAttrViewTyp: user
+jansClaimName: jans_backchannel_device_registration_tkn
 jansStatus: active
 objectClass: top
 objectClass: jansAttr
@@ -1233,14 +1270,13 @@ jansAttrOrigin: jansPerson
 jansAttrTyp: string
 jansAttrViewTyp: admin
 jansAttrViewTyp: user
+jansClaimName: jans_backchannel_usr_code
 jansStatus: active
 objectClass: top
 objectClass: jansAttr
 urn: urn:mace:dir:attribute-def:jansBackchannelUsrCode
 
 dn: inum=4CF1,ou=attributes,o=jans
-objectClass: top
-objectClass: jansAttr
 description: jansAdminUIRole
 displayName: jansAdminUIRole
 inum: 4CF1
@@ -1258,4 +1294,7 @@ jansMultivaluedAttr: true
 jansSAML1URI: urn:mace:dir:attribute-def:jansAdminUIRole
 jansSAML2URI: urn:mace:dir:attribute-def:jansAdminUIRole
 jansStatus: active
+objectClass: top
+objectClass: jansAttr
 urn: sampleurn
+
