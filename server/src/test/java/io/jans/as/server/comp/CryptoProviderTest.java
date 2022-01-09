@@ -451,10 +451,6 @@ public class CryptoProviderTest extends ConfigurableTest {
                     }
                 }
 
-                if(algorithm == Algorithm.ES384 && i > (NUM_KEY_GENS - 10)) {
-                    assertTrue(false);
-                }
-
             } catch (Exception e) {
                 fail(e.getMessage(), e);
             }
