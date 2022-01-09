@@ -17,7 +17,32 @@ import com.google.common.base.Throwables;
 public class JansUnitTestsListener implements ITestListener {
 
     @Override
-    public void onFinish(ITestContext context) {
+    public void onTestStart(ITestResult result) {
+        Reporter.log("Test STARTED: " + getTestInfo(result), true);
+    }
+
+    @Override
+    public void onTestSuccess(ITestResult result) {
+        Reporter.log("Test SUCCESS: " + getTestInfo(result), true);
+        Reporter.log("", true); 
+    }
+
+    @Override
+    public void onTestFailure(ITestResult result) {
+        Reporter.log("Test FAILED: " + getTestInfo(result), true);
+        testFailed(result);
+    }
+
+    @Override
+    public void onTestSkipped(ITestResult result) {
+        Reporter.log("Test SKIPPED: " + getTestInfo(result), true);
+        Reporter.log("", true); 
+    }
+
+    @Override
+    public void onTestFailedButWithinSuccessPercentage(ITestResult result) {
+        Reporter.log("Test FAILED with Success Percentage: " + getTestInfo(result), true);
+        testFailed(result); 
     }
 
     @Override
@@ -25,33 +50,7 @@ public class JansUnitTestsListener implements ITestListener {
     }
 
     @Override
-    public void onTestFailedButWithinSuccessPercentage(ITestResult result) {
-        Reporter.log("Test FAILED with Success Percentage: " + result.getName() + "." + result.getMethod().getMethodName(), true);        
-        testFailed(result);
-    }
-
-    @Override
-    public void onTestFailure(ITestResult result) {
-        Reporter.log("Test FAILED: " + result.getName() + "." + result.getMethod().getMethodName(), true);
-        testFailed(result);
-        Reporter.log("", true);
-    }
-
-    @Override
-    public void onTestSkipped(ITestResult result) {
-        Reporter.log("Test SKIPPED: " + result.getName() + "." + result.getMethod().getMethodName(), true);
-        Reporter.log("", true);
-    }
-
-    @Override
-    public void onTestStart(ITestResult result) {
-        Reporter.log("Test STARTED: " + result.getName() + "." + result.getMethod().getMethodName(), true);
-    }
-
-    @Override
-    public void onTestSuccess(ITestResult result) {
-        Reporter.log("Test SUCCESS: " + result.getName() + "." + result.getMethod().getMethodName(), true);
-        Reporter.log("", true);
+    public void onFinish(ITestContext context) {
     }
 
     private void testFailed(ITestResult result) {
@@ -70,4 +69,16 @@ public class JansUnitTestsListener implements ITestListener {
             Reporter.log("", true);
         }
     }
+
+    private String getTestInfo(ITestResult result) {
+        String testInfo = null;
+        if(result.getClass() != null && result.getMethod() != null) {
+            testInfo = result.getClass().getName() + "." + result.getMethod().getMethodName();
+        }
+        else {
+            testInfo = result.getName();
+        }
+        return testInfo;
+    }
+
 }
