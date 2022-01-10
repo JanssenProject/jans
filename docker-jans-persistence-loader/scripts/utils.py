@@ -5,6 +5,8 @@ import os
 from urllib.parse import urlparse
 from uuid import uuid4
 
+from ldap3.utils import dn as dnutils
+
 from jans.pycloudlib.utils import as_boolean
 from jans.pycloudlib.utils import encode_text
 from jans.pycloudlib.utils import safe_render
@@ -495,3 +497,22 @@ def get_ldif_mappings(optional_scopes=None):
         "session": [],
     }
     return ldif_mappings
+
+
+def doc_id_from_dn(dn):
+    parsed_dn = dnutils.parse_dn(dn)
+    doc_id = parsed_dn[0][1]
+
+    if doc_id == "jans":
+        doc_id = "_"
+    return doc_id
+
+
+def id_from_dn(dn):
+    # for example: `"inum=29DA,ou=attributes,o=jans"`
+    # becomes `["29DA", "attributes"]`
+    dns = [i.split("=")[-1] for i in dn.split(",") if i != "o=jans"]
+    dns.reverse()
+
+    # the actual key
+    return '_'.join(dns) or "_"

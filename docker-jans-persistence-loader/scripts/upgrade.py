@@ -4,8 +4,6 @@ import logging.config
 import os
 from collections import namedtuple
 
-from ldap3.utils import dn as dnutils
-
 from jans.pycloudlib.persistence.couchbase import get_couchbase_user
 from jans.pycloudlib.persistence.couchbase import get_couchbase_superuser
 from jans.pycloudlib.persistence.couchbase import get_couchbase_password
@@ -16,27 +14,13 @@ from jans.pycloudlib.persistence.spanner import SpannerClient
 from jans.pycloudlib.persistence.sql import SQLClient
 
 from settings import LOGGING_CONFIG
+from utils import doc_id_from_dn
+from utils import id_from_dn
 
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("entrypoint")
 
 Entry = namedtuple("Entry", ["id", "attrs"])
-
-
-def doc_id_from_dn(dn):
-    parsed_dn = dnutils.parse_dn(dn)
-    doc_id = parsed_dn[0][1]
-    return doc_id
-
-
-def id_from_dn(dn):
-    # for example: `"inum=29DA,ou=attributes,o=jans"`
-    # becomes `["29DA", "attributes"]`
-    dns = [i.split("=")[-1] for i in dn.split(",") if i != "o=jans"]
-    dns.reverse()
-
-    # the actual key
-    return '_'.join(dns) or "_"
 
 
 class BaseBackend:

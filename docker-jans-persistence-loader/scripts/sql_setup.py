@@ -7,7 +7,6 @@ from collections import OrderedDict
 from collections import defaultdict
 from string import Template
 
-from ldap3.utils import dn as dnutils
 from ldif import LDIFParser
 
 from jans.pycloudlib.persistence.sql import SQLClient
@@ -16,6 +15,7 @@ from settings import LOGGING_CONFIG
 from utils import prepare_template_ctx
 from utils import render_ldif
 from utils import get_ldif_mappings
+from utils import doc_id_from_dn
 
 FIELD_RE = re.compile(r"[^0-9a-zA-Z\s]+")
 
@@ -324,9 +324,7 @@ class SQLBackend:
             parser = LDIFParser(fd)
 
             for dn, entry in parser.parse():
-                parsed_dn = dnutils.parse_dn(dn)
-                # rdn_name = parsed_dn[0][0]
-                doc_id = parsed_dn[0][1]
+                doc_id = doc_id_from_dn(dn)
 
                 oc = entry.get("objectClass") or entry.get("objectclass")
                 if oc:
