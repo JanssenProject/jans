@@ -26,9 +26,6 @@ Entry = namedtuple("Entry", ["id", "attrs"])
 def doc_id_from_dn(dn):
     parsed_dn = dnutils.parse_dn(dn)
     doc_id = parsed_dn[0][1]
-
-    # if doc_id == "jans":
-    #     doc_id = "_"
     return doc_id
 
 
@@ -64,6 +61,9 @@ class BaseBackend:
 
 #: ID of base entry
 JANS_BASE_ID = "o=jans"
+
+#: ID of manager group
+JANS_MANAGER_GROUP = "inum=60B7,ou=groups,o=jans"
 
 
 class LDAPBackend(BaseBackend):
@@ -179,7 +179,7 @@ class LDAPBackend(BaseBackend):
             return
 
         if not entry.attrs.get("jansManagerGrp"):
-            entry.attrs["jansManagerGrp"] = "inum=60B7,ou=groups,o=jans"
+            entry.attrs["jansManagerGrp"] = JANS_MANAGER_GROUP
             self.modify_entry(JANS_BASE_ID, entry.attrs)
 
 
@@ -285,7 +285,7 @@ class SQLBackend(BaseBackend):
             return
 
         if not entry.attrs.get("jansManagerGrp"):
-            entry.attrs["jansManagerGrp"] = "inum=60B7,ou=groups,o=jans"
+            entry.attrs["jansManagerGrp"] = JANS_MANAGER_GROUP
             self.modify_entry(id_, entry.attrs, **kwargs)
 
 
@@ -452,7 +452,7 @@ class CouchbaseBackend(BaseBackend):
             return
 
         if not entry.attrs.get("jansManagerGrp"):
-            entry.attrs["jansManagerGrp"] = "inum=60B7,ou=groups,o=jans"
+            entry.attrs["jansManagerGrp"] = JANS_MANAGER_GROUP
             self.modify_entry(id_, entry.attrs, **kwargs)
 
 
@@ -558,7 +558,7 @@ class SpannerBackend(BaseBackend):
             return
 
         if not entry.attrs.get("jansManagerGrp"):
-            entry.attrs["jansManagerGrp"] = "inum=60B7,ou=groups,o=jans"
+            entry.attrs["jansManagerGrp"] = JANS_MANAGER_GROUP
             self.modify_entry(id_, entry.attrs, **kwargs)
 
 
