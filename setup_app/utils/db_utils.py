@@ -756,7 +756,10 @@ class DBUtils:
 
     def get_doc_id_from_dn(self, dn):
         dn_parsed = dnutils.parse_dn(dn)
-        return dn_parsed[0][1]
+        doc_id = dn_parsed[0][1]
+        if doc_id == 'jans':
+            doc_id = '_'
+        return doc_id
 
     def get_spanner_table_for_dn(self, dn):
         tables = self.spanner.get_tables()
@@ -849,7 +852,7 @@ class DBUtils:
                         if objectClass.lower() == 'organizationalunit':
                             continue
 
-                        vals['doc_id'] = dn_parsed[0][1]
+                        vals['doc_id'] = self.get_doc_id_from_dn(dn)
                         vals['dn'] = dn
                         vals['objectClass'] = objectClass
 
@@ -888,7 +891,6 @@ class DBUtils:
 
                     if 'add' in  entry and 'changetype' in entry:
                         table = self.get_spanner_table_for_dn(dn)
-                        doc_id = self.get_doc_id_from_dn(dn)
                         change_attr = entry['add'][0]
                         if table:
                             doc_id = self.get_doc_id_from_dn(dn)
@@ -936,7 +938,7 @@ class DBUtils:
                         if objectClass.lower() == 'organizationalunit':
                             continue
 
-                        doc_id = dn_parsed[0][1]
+                        doc_id = self.get_doc_id_from_dn(dn)
                         vals['doc_id'] = doc_id
                         vals['dn'] = dn
                         vals['objectClass'] = objectClass
