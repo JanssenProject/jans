@@ -73,14 +73,7 @@ public class JansUnitTestsListener implements ITestListener {
     }
 
     private String getTestInfo(ITestResult result) {
-        String testInfo = null;
-        if(result.getClass() != null && result.getMethod() != null) {
-            testInfo = result.getClass().getName() + "." + result.getMethod().getMethodName();
-        }
-        else {
-            testInfo = result.getName();
-        }
-        return testInfo;
+        return result.getInstanceName() + "." + result.getName();
     }
 
 }
