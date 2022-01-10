@@ -157,8 +157,8 @@ def get_base_ctx(manager):
         "scim_client_id": manager.config.get("scim_client_id"),
         "scim_client_encoded_pw": manager.secret.get("scim_client_encoded_pw"),
         "casa_enable_script": str(as_boolean(casa_enabled)).lower(),
-        "oxd_hostname": "localhost",
-        "oxd_port": "8443",
+        # "oxd_hostname": "localhost",
+        # "oxd_port": "8443",
         "jca_client_id": manager.config.get("jca_client_id"),
         "jca_client_encoded_pw": manager.secret.get("jca_client_encoded_pw"),
     }
@@ -372,7 +372,31 @@ def merge_config_api_ctx(ctx):
     return ctx
 
 
+def merge_casa_ctx(manager, ctx):
+    # Casa client
+    ctx["casa_client_id"] = manager.config.get("casa_client_id")
+    if not ctx["casa_client_id"]:
+        ctx["casa_client_id"] = f"1902.{uuid4()}"
+        manager.config.set("casa_client_id", ctx["casa_client_id"])
+
+    ctx["casa_client_pw"] = manager.secret.get("casa_client_pw")
+    if not ctx["casa_client_pw"]:
+        ctx["casa_client_pw"] = get_random_chars()
+        manager.secret.set("casa_client_pw", ctx["casa_client_pw"])
+
+    ctx["casa_client_encoded_pw"] = manager.secret.get("casa_client_encoded_pw")
+    if not ctx["casa_client_encoded_pw"]:
+        ctx["casa_client_encoded_pw"] = encode_text(
+            ctx["casa_client_pw"], manager.secret.get("encoded_salt"),
+        ).decode()
+        manager.secret.set("casa_client_encoded_pw", ctx["casa_client_encoded_pw"])
+
+    return ctx
+
+
 def prepare_template_ctx(manager):
+    opt_scopes = json.loads(manager.config.get("optional_scopes", "[]"))
+
     ctx = get_base_ctx(manager)
     ctx = merge_extension_ctx(ctx)
     # ctx = merge_radius_ctx(ctx)
@@ -383,6 +407,9 @@ def prepare_template_ctx(manager):
     # ctx = merge_passport_ctx(ctx)
     ctx = merge_fido2_ctx(ctx)
     ctx = merge_scim_ctx(ctx)
+
+    if "casa" in opt_scopes:
+        ctx = merge_casa_ctx(manager, ctx)
     return ctx
 
 
@@ -431,6 +458,12 @@ def get_ldif_mappings(optional_scopes=None):
         if "fido2" in optional_scopes:
             files += [
                 "jans-fido2/configuration.ldif",
+            ]
+
+        if "casa" in optional_scopes:
+            files += [
+                "gluu-casa/configuration.ldif",
+                "gluu-casa/clients.ldif",
             ]
         return files
 
