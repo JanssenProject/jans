@@ -33,7 +33,6 @@ public class UmaRPT extends AbstractToken {
     @AttributeName(name = "jansUmaPermission")
     private List<String> permissions;
 
-    @AttributeName(name = "tknCde", consistency = true)
     private String notHashedCode;
 
     public UmaRPT() {
