@@ -17,6 +17,7 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.Response;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -31,6 +32,8 @@ public class ExecutionContext {
 
     private HttpServletRequest httpRequest;
     private HttpServletResponse httpResponse;
+
+    private Response.ResponseBuilder responseBuilder;
 
     private Client client;
     private AuthorizationGrant grant;
@@ -238,5 +241,13 @@ public class ExecutionContext {
 
     public void setUserSessions(List<SessionId> userSessions) {
         this.userSessions = userSessions;
+    }
+
+    public Response.ResponseBuilder getResponseBuilder() {
+        return responseBuilder;
+    }
+
+    public void setResponseBuilder(Response.ResponseBuilder responseBuilder) {
+        this.responseBuilder = responseBuilder;
     }
 }

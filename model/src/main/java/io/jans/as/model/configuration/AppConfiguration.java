@@ -74,6 +74,8 @@ public class AppConfiguration implements Configuration {
     private Boolean requireRequestObjectEncryption = false;
     private Boolean requirePkce = false;
 
+    private Boolean allowAllValueForRevokeEndpoint = false;
+
     private int sectorIdentifierCacheLifetimeInMinutes = 1440;
 
     private String umaConfigurationEndpoint;
@@ -317,6 +319,15 @@ public class AppConfiguration implements Configuration {
 
     public void setRequireRequestObjectEncryption(Boolean requireRequestObjectEncryption) {
         this.requireRequestObjectEncryption = requireRequestObjectEncryption;
+    }
+
+    public Boolean getAllowAllValueForRevokeEndpoint() {
+        if (allowAllValueForRevokeEndpoint == null) allowAllValueForRevokeEndpoint = false;
+        return allowAllValueForRevokeEndpoint;
+    }
+
+    public void setAllowAllValueForRevokeEndpoint(Boolean allowAllValueForRevokeEndpoint) {
+        this.allowAllValueForRevokeEndpoint = allowAllValueForRevokeEndpoint;
     }
 
     public Boolean getRequirePkce() {
