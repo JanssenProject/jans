@@ -1,3 +1,4 @@
+import sys
 import os
 import time
 import glob
@@ -82,6 +83,3 @@ while True:
             else:
                 print("Can't find \033[31m{}\033[0m".format(plugin_metadata_fn))
         print()
-
-with open(plugin_json_fn, 'w') as w:
-    json.dump(plugins, w, indent=2)
