@@ -9,6 +9,7 @@ package io.jans.as.model.common;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import io.jans.orm.annotation.AttributeEnum;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -71,6 +72,9 @@ public enum TokenTypeHint implements HasParamName, AttributeEnum {
     }
 
     public static TokenTypeHint getByValue(String value) {
+        if (StringUtils.isBlank(value)) {
+            return null;
+        }
         return mapByValues.get(value);
     }
 
