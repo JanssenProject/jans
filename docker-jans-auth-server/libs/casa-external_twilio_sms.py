@@ -1,22 +1,18 @@
-# This is a modified version of original twilio_sms Gluu's script to work with Casa
-
-from java.util import Arrays
-
-from javax.faces.application import FacesMessage
-
-from org.gluu.jsf2.message import FacesMessages
-from org.gluu.oxauth.security import Identity
-from org.gluu.oxauth.service import UserService, AuthenticationService
-from org.gluu.oxauth.util import ServerUtil
-from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
-from org.gluu.service.cdi.util import CdiUtil
-from org.gluu.util import StringHelper, ArrayHelper
-
 from com.google.common.base import Joiner
-
 from com.twilio import Twilio
 import com.twilio.rest.api.v2010.account.Message as TwMessage
 from com.twilio.type import PhoneNumber
+
+from java.util import Arrays
+from javax.faces.application import FacesMessage
+
+from io.jans.jsf2.message import FacesMessages
+from io.jans.as.server.security import Identity
+from io.jans.as.server.service import UserService, AuthenticationService
+from io.jans.as.server.util import ServerUtil
+from io.jans.model.custom.script.type.auth import PersonAuthenticationType
+from io.jans.service.cdi.util import CdiUtil
+from io.jans.util import StringHelper, ArrayHelper
 
 import random
 import sys
@@ -164,6 +160,9 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def sendMessage(self, code, numb):
         try:
+            if numb[:1] != "+":
+                numb = "+" + numb
+                
             print "TwilioSMS. Sending SMS message (%s) to %s" % (code, numb)
             msg = "%s is your passcode to access your account" % code
             message = TwMessage.creator(PhoneNumber(numb), PhoneNumber(self.from_no), msg).create()

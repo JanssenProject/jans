@@ -1,18 +1,14 @@
-# Based on oxAuth Fido2ExternalAuthenticator.py
-
-from javax.ws.rs.core import Response
-from org.jboss.resteasy.client import ClientResponseFailure
-from org.jboss.resteasy.client.exception import ResteasyClientException
-from javax.ws.rs.core import Response
-from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
-from org.gluu.fido2.client import Fido2ClientFactory
-from org.gluu.oxauth.security import Identity
-from org.gluu.oxauth.service import AuthenticationService, UserService, SessionIdService
-from org.gluu.oxauth.util import ServerUtil
-from org.gluu.service.cdi.util import CdiUtil
-from org.gluu.util import StringHelper
+from io.jans.model.custom.script.type.auth import PersonAuthenticationType
+from io.jans.fido2.client import Fido2ClientFactory
+from io.jans.as.server.security import Identity
+from io.jans.as.server.service import AuthenticationService, UserService, SessionIdService
+from io.jans.as.server.util import ServerUtil
+from io.jans.service.cdi.util import CdiUtil
+from io.jans.util import StringHelper
 
 from java.util.concurrent.locks import ReentrantLock
+from javax.ws.rs import ClientErrorException
+from javax.ws.rs.core import Response
 
 import java
 import sys
@@ -138,8 +134,8 @@ class PersonAuthentication(PersonAuthenticationType):
         elif (step == 2):
             print "Fido2. Prepare for step 2"
 
-            session_id = CdiUtil.bean(SessionIdService).getSessionIdFromCookie()
-            if StringHelper.isEmpty(session_id):
+            session_id = CdiUtil.bean(SessionIdService).getSessionId()
+            if session_id == None:
                 print "Fido2. Prepare for step 2. Failed to determine session_id"
                 return False
 
@@ -164,7 +160,11 @@ class PersonAuthentication(PersonAuthenticationType):
                     assertionService = Fido2ClientFactory.instance().createAssertionService(metaDataConfiguration)
                     assertionRequest = json.dumps({'username': userName}, separators=(',', ':'))
                     assertionResponse = assertionService.authenticate(assertionRequest).readEntity(java.lang.String)
-                except ClientResponseFailure, ex:
+                    if "internal" in assertionResponse:
+                        identity.setWorkingParameter("platformAuthenticatorAvailable", "true")
+                    else:
+                        identity.setWorkingParameter("platformAuthenticatorAvailable", "false")
+                except ClientErrorException, ex:
                     print "Fido2. Prepare for step 2. Failed to start assertion flow. Exception:", sys.exc_info()[1]
                     return False
             else:
@@ -174,7 +174,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     attestationService = Fido2ClientFactory.instance().createAttestationService(metaDataConfiguration)
                     attestationRequest = json.dumps({'username': userName, 'displayName': userName}, separators=(',', ':'))
                     attestationResponse = attestationService.register(attestationRequest).readEntity(java.lang.String)
-                except ClientResponseFailure, ex:
+                except ClientErrorException, ex:
                     print "Fido2. Prepare for step 2. Failed to start attestation flow. Exception:", sys.exc_info()[1]
                     return False
 
@@ -227,16 +227,9 @@ class PersonAuthentication(PersonAuthenticationType):
                 try:
                     self.metaDataConfiguration = metaDataConfigurationService.getMetadataConfiguration().readEntity(java.lang.String)
                     return self.metaDataConfiguration
-                except ClientResponseFailure, ex:
+                except ClientErrorException, ex:
                     # Detect if last try or we still get Service Unavailable HTTP error
                     if (attempt == max_attempts) or (ex.getResponse().getResponseStatus() != Response.Status.SERVICE_UNAVAILABLE):
-                        raise ex
-    
-                    java.lang.Thread.sleep(3000)
-                    print "Attempting to load metadata: %d" % attempt
-                except ResteasyClientException, ex:
-                    # Detect if last try or we still get Service Unavailable HTTP error
-                    if attempt == max_attempts:
                         raise ex
     
                     java.lang.Thread.sleep(3000)
