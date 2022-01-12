@@ -74,6 +74,7 @@ RUN wget -q https://repo1.maven.org/maven2/com/twilio/sdk/twilio/${TWILIO_VERSIO
 ARG JSMPP_VERSION=2.3.7
 RUN wget -q https://repo1.maven.org/maven2/org/jsmpp/jsmpp/${JSMPP_VERSION}/jsmpp-${JSMPP_VERSION}.jar -O /usr/share/java/jsmpp.jar
 
+# This will later be refactored and moved to be pulled from persitence or a central bucket
 ARG CASA_VERSION=5.0.0-SNAPSHOT
 ARG CASA_BUILD_DATE="2022-01-05 12:52"
 RUN wget -q https://jenkins.gluu.org/maven/org/gluu/casa-config/${CASA_VERSION}/casa-config-${CASA_VERSION}.jar -O /usr/share/java/casa-config.jar
