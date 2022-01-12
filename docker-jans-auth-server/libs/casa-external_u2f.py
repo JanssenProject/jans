@@ -1,20 +1,18 @@
-# Based on oxAuth U2fExternalAuthenticator.py
+from io.jans.model.custom.script.type.auth import PersonAuthenticationType
+from io.jans.as.client.fido.u2f import FidoU2fClientFactory
+from io.jans.as.model.config import Constants
+from io.jans.as.server.security import Identity
+from io.jans.as.server.service import AuthenticationService, SessionIdService, UserService
+from io.jans.as.server.service.fido.u2f import DeviceRegistrationService
+from io.jans.as.server.util import ServerUtil
+from io.jans.service.cdi.util import CdiUtil
+from io.jans.util import StringHelper
+
+from javax.ws.rs import ClientErrorException, WebApplicationException
+from javax.ws.rs.core import Response
 
 import java
 import sys
-from javax.ws.rs.core import Response
-from org.jboss.resteasy.client import ClientResponseFailure
-from org.jboss.resteasy.client.exception import ResteasyClientException
-from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
-from org.gluu.oxauth.client.fido.u2f import FidoU2fClientFactory
-from org.gluu.oxauth.model.config import Constants
-from org.gluu.oxauth.security import Identity
-from org.gluu.oxauth.service import AuthenticationService, SessionIdService
-from org.gluu.oxauth.service.common import UserService
-from org.gluu.oxauth.service.fido.u2f import DeviceRegistrationService
-from org.gluu.oxauth.util import ServerUtil
-from org.gluu.service.cdi.util import CdiUtil
-from org.gluu.util import StringHelper
 
 
 class PersonAuthentication(PersonAuthenticationType):
@@ -36,16 +34,9 @@ class PersonAuthentication(PersonAuthenticationType):
             try:
                 self.metaDataConfiguration = metaDataConfigurationService.getMetadataConfiguration()
                 break
-            except ClientResponseFailure, ex:
+            except WebApplicationException, ex:
                 # Detect if last try or we still get Service Unavailable HTTP error
-                if (attempt == max_attempts) or (ex.getResponse().getResponseStatus() != Response.Status.SERVICE_UNAVAILABLE):
-                    raise ex
-
-                java.lang.Thread.sleep(3000)
-                print "Attempting to load metadata: %d" % attempt
-            except ResteasyClientException, ex:
-                # Detect if last try or we still get Service Unavailable HTTP error
-                if attempt == max_attempts:
+                if (attempt == max_attempts) or (ex.getResponse().getStatus() != Response.Status.SERVICE_UNAVAILABLE.getStatusCode()):
                     raise ex
 
                 java.lang.Thread.sleep(3000)
@@ -150,8 +141,8 @@ class PersonAuthentication(PersonAuthenticationType):
         elif (step == 2):
             print "U2F. Prepare for step 2"
 
-            session_id = CdiUtil.bean(SessionIdService).getSessionIdFromCookie()
-            if StringHelper.isEmpty(session_id):
+            session_id = CdiUtil.bean(SessionIdService).getSessionId()
+            if session_id == None:
                 print "U2F. Prepare for step 2. Failed to determine session_id"
                 return False
 
@@ -177,15 +168,15 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 try:
                     authenticationRequestService = FidoU2fClientFactory.instance().createAuthenticationRequestService(self.metaDataConfiguration)
-                    authenticationRequest = authenticationRequestService.startAuthentication(user.getUserId(), None, u2f_application_id, session_id)
-                except ClientResponseFailure, ex:
+                    authenticationRequest = authenticationRequestService.startAuthentication(user.getUserId(), None, u2f_application_id, session_id.getId())
+                except ClientErrorException, ex:
                     if (ex.getResponse().getResponseStatus() != Response.Status.NOT_FOUND):
                         print "U2F. Prepare for step 2. Failed to start authentication workflow. Exception:", sys.exc_info()[1]
                         return False
             else:
                 print "U2F. Prepare for step 2. Call FIDO U2F in order to start registration workflow"
                 registrationRequestService = FidoU2fClientFactory.instance().createRegistrationRequestService(self.metaDataConfiguration)
-                registrationRequest = registrationRequestService.startRegistration(user.getUserId(), u2f_application_id, session_id)
+                registrationRequest = registrationRequestService.startRegistration(user.getUserId(), u2f_application_id, session_id.getId())
 
             identity.setWorkingParameter("fido_u2f_authentication_request", ServerUtil.asJson(authenticationRequest))
             identity.setWorkingParameter("fido_u2f_registration_request", ServerUtil.asJson(registrationRequest))
@@ -221,7 +212,7 @@ class PersonAuthentication(PersonAuthenticationType):
         inum = user.getAttribute("inum")
         devRegService = CdiUtil.bean(DeviceRegistrationService)
         app_id = configurationAttributes.get("u2f_application_id").getValue2()
-        userDevices = devRegService.findUserDeviceRegistrations(inum, app_id, "oxStatus")
+        userDevices = devRegService.findUserDeviceRegistrations(inum, app_id, "jansStatus")
 
         hasDevices = False
         for device in userDevices:

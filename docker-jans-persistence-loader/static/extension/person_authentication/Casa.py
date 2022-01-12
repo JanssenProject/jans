@@ -1,25 +1,24 @@
-# Author: Jose Gonzalez
-
-from java.util import Collections, HashMap, HashSet, ArrayList, Arrays, Date
-from java.nio.charset import Charset
-
-from org.apache.http.params import CoreConnectionPNames
-
-from org.oxauth.persistence.model.configuration import JanssenConfiguration
+from io.jans.as.persistence.model.configuration import GluuConfiguration
 from io.jans.as.server.security import Identity
 from io.jans.as.server.service import AuthenticationService, UserService
-from io.jans.as.service.common import EncryptionService
-from io.jans.as.service.custom import CustomScriptService
-from io.jans.as.service.net import HttpService
-from io.jans.as.util import ServerUtil
+from io.jans.as.common.service.common import EncryptionService
+from io.jans.as.server.service.custom import CustomScriptService
+from io.jans.as.server.service.net import HttpService
+from io.jans.as.server.util import ServerUtil
 from io.jans.model import SimpleCustomProperty
-from io.jans.model.casa import ApplicationConfiguration
 from io.jans.model.custom.script import CustomScriptType
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
-from io.jans.persist import PersistenceEntryManager
+from io.jans.orm import PersistenceEntryManager
 from io.jans.service import CacheService
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.util import StringHelper
+
+from java.lang import Integer
+from java.util import Collections, HashMap, HashSet, ArrayList, Arrays, Date
+from java.nio.charset import Charset
+
+from org.gluu.casa.model import ApplicationConfiguration
+from org.apache.http.params import CoreConnectionPNames
 
 try:
     import json
@@ -31,7 +30,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
-        self.ACR_SG = "super.jans.
+        self.ACR_SG = "super_gluu"
         self.ACR_U2F = "u2f"
 
         self.modulePrefix = "casa-external_"
@@ -43,7 +42,7 @@ class PersonAuthentication(PersonAuthenticationType):
         self.uid_attr = self.getLocalPrimaryKey()
 
         custScriptService = CdiUtil.bean(CustomScriptService)
-        self.scriptsList = custScriptService.findCustomScripts(Collections.singletonList(CustomScriptType.PERSON_AUTHENTICATION), "oxConfigurationProperty", "displayName", "jansEnabled", "oxLevel")
+        self.scriptsList = custScriptService.findCustomScripts(Collections.singletonList(CustomScriptType.PERSON_AUTHENTICATION), "jansConfProperty", "displayName", "jansEnabled", "jansLevel")
         dynamicMethods = self.computeMethods(self.scriptsList)
 
         if len(dynamicMethods) > 0:
@@ -62,7 +61,7 @@ class PersonAuthentication(PersonAuthenticationType):
                         u2f_application_id = configurationAttributes.get("u2f_app_id").getValue2()
                         configAttrs.put("u2f_application_id", SimpleCustomProperty("u2f_application_id", u2f_application_id))
                     elif acr == self.ACR_SG:
-                        application_id = configurationAttributes.get("supe.jans.app_id").getValue2()
+                        application_id = configurationAttributes.get("supergluu_app_id").getValue2()
                         configAttrs.put("application_id", SimpleCustomProperty("application_id", application_id))
 
                     if module.init(None, configAttrs):
@@ -123,13 +122,14 @@ class PersonAuthentication(PersonAuthenticationType):
                     print "Casa. authenticate for step 1. Unknown username"
                 else:
                     platform_data = self.parsePlatformData(requestParameters)
-                    mfaOff = foundUser.getAttribute("oxPreferredMethod") == None
+                    preferred = foundUser.getAttribute("jansPreferredMethod")
+                    mfaOff = preferred == None
                     logged_in = False
 
                     if mfaOff:
                         logged_in = authenticationService.authenticate(user_name, user_password)
                     else:
-                        acr = self.getSuitableAcr(foundUser, platform_data)
+                        acr = self.getSuitableAcr(foundUser, platform_data, preferred)
                         if acr != None:
                             module = self.authenticators[acr]
                             logged_in = module.authenticate(module.configAttrs, requestParameters, step)
@@ -184,7 +184,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 if tdi == None:
                     print "Casa. authenticate. List of user's trusted devices was not updated"
                 else:
-                    user.setAttribute("oxTrustedDevicesInfo", tdi)
+                    user.setAttribute("jansTrustedDevices", tdi)
                     userService.updateUser(user)
             else:
                 print "Casa. authenticate. 2FA authentication failed"
@@ -296,10 +296,10 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def getLocalPrimaryKey(self):
         entryManager = CdiUtil.bean(PersistenceEntryManager)
-        config = JanssenConfiguration()
-        config = entryManager.find(config.getClass(), "ou=configuration,o.jans.)
+        config = GluuConfiguration()
+        config = entryManager.find(config.getClass(), "ou=configuration,o=jans")
         #Pick (one) attribute where user id is stored (e.g. uid/mail)
-        uid_attr = config.getOxIDPAuthentication().get(0).getConfig().getPrimaryKey()
+        uid_attr = config.getIdpAuthn().get(0).getConfig().findValue("primaryKey").asText()
         print "Casa. init. uid attribute is '%s'" % uid_attr
         return uid_attr
 
@@ -307,11 +307,10 @@ class PersonAuthentication(PersonAuthenticationType):
     def getSettings(self):
         entryManager = CdiUtil.bean(PersistenceEntryManager)
         config = ApplicationConfiguration()
-        config = entryManager.find(config.getClass(), "ou=casa,ou=configuration,o.jans.)
-        settings = None
-        try:
-            settings = json.loads(config.getSettings())
-        except:
+        config = entryManager.find(config.getClass(), "ou=casa,ou=configuration,o=jans")
+        settings = config.getSettings()
+
+        if settings == None:
             print "Casa. getSettings. Failed to parse casa settings from DB"
         return settings
 
@@ -322,8 +321,8 @@ class PersonAuthentication(PersonAuthenticationType):
         mapping = {}
         cmConfigs = self.getSettings()
 
-        if cmConfigs != None and 'acr_plugin_mapping' in cmConfigs:
-            mapping = cmConfigs['acr_plugin_mapping']
+        if cmConfigs != None:
+            mapping = cmConfigs.getAcrPluginMap().keySet()
 
         for m in mapping:
             for customScript in scriptList:
@@ -371,34 +370,34 @@ class PersonAuthentication(PersonAuthenticationType):
 
 
     def prepareUIParams(self, identity):
-        
+
         print "Casa. prepareUIParams. Reading UI branding params"
         cacheService = CdiUtil.bean(CacheService)
         casaAssets = cacheService.get("casa_assets")
-            
+
         if casaAssets == None:
-            #This may happen when cache type is IN_MEMORY, where actual cache is merely a local variable 
+            #This may happen when cache type is IN_MEMORY, where actual cache is merely a local variable
             #(a expiring map) living inside Casa webapp, not oxAuth webapp
-            
+
             sets = self.getSettings()
-            
+
             custPrefix = "/custom"
             logoUrl = "/images/logo.png"
             faviconUrl = "/images/favicon.ico"
-            if ("extra_css" in sets and sets["extra_css"] != None) or sets["use_branding"]:
+            if (sets.getExtraCssSnippet() != None) or sets.isUseExternalBranding():
                 logoUrl = custPrefix + logoUrl
                 faviconUrl = custPrefix + faviconUrl
-            
-            prefix = custPrefix if sets["use_branding"] else ""
-            
+
+            prefix = custPrefix if sets.isUseExternalBranding() else ""
+
             casaAssets = {
                 "contextPath": "/casa",
                 "prefix" : prefix,
                 "faviconUrl" : faviconUrl,
-                "extraCss": sets["extra_css"] if "extra_css" in sets else None,
+                "extraCss": sets.getExtraCssSnippet(),
                 "logoUrl": logoUrl
             }
-        
+
         #Setting a single variable with the whole map does not work...
         identity.setWorkingParameter("casa_contextPath", casaAssets['contextPath'])
         identity.setWorkingParameter("casa_prefix", casaAssets['prefix'])
@@ -434,7 +433,7 @@ class PersonAuthentication(PersonAuthenticationType):
         return deviceInf
 
 
-    def getSuitableAcr(self, user, deviceInf):
+    def getSuitableAcr(self, user, deviceInf, preferred):
 
         onMobile = deviceInf != None and 'isMobile' in deviceInf and deviceInf['isMobile']
         id = user.getUserId()
@@ -444,9 +443,10 @@ class PersonAuthentication(PersonAuthenticationType):
 
         for s in self.scriptsList:
             name = s.getName()
-            if user_methods.contains(name) and name in self.authenticators and s.getLevel() > strongest and (not onMobile or name in self.mobile_methods):
+            level = Integer.MAX_VALUE if name == preferred else s.getLevel()
+            if user_methods.contains(name) and level > strongest and (not onMobile or name in self.mobile_methods):
                 acr = name
-                strongest = s.getLevel()
+                strongest = level
 
         print "Casa. getSuitableAcr. On mobile = %s" % onMobile
         if acr == None and onMobile:
@@ -466,17 +466,11 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Casa. determineSkip2FA. Failed to read policy_2fa"
             return False
 
-        missing = False
-        if not 'plugins_settings' in cmConfigs:
-            missing = True
-        elif not 'strong-authn-settings' in cmConfigs['plugins_settings']:
-            missing = True
-        else:
-            cmConfigs = cmConfigs['plugins_settings']['strong-authn-settings']
+        cmConfigs = cmConfigs.getPluginSettings().get('strong-authn-settings')
 
         policy2FA = 'EVERY_LOGIN'
-        if not missing and 'policy_2fa' in cmConfigs:
-            policy2FA = ','.join(cmConfigs['policy_2fa'])
+        if cmConfigs != None and cmConfigs.get('policy_2fa') != None:
+            policy2FA = ','.join(cmConfigs.get('policy_2fa'))
 
         print "Casa. determineSkip2FA with general policy %s" % policy2FA
         policy2FA += ','
@@ -484,7 +478,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         if 'CUSTOM,' in policy2FA:
             #read setting from user profile
-            policy = foundUser.getAttribute("oxStrongAuthPolicy")
+            policy = foundUser.getAttribute("jansStrongAuthPolicy")
             if policy == None:
                 policy = 'EVERY_LOGIN,'
             else:
@@ -510,7 +504,7 @@ class PersonAuthentication(PersonAuthenticationType):
                         #Update attribute if authentication will not have second step
                         devInf = identity.getWorkingParameter("trustedDevicesInfo")
                         if devInf != None:
-                            foundUser.setAttribute("oxTrustedDevicesInfo", devInf)
+                            foundUser.setAttribute("jansTrustedDevices", devInf)
                             userService.updateUser(foundUser)
             else:
                 print "Casa. determineSkip2FA. Unknown %s policy: cannot skip 2FA" % policy
@@ -522,7 +516,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         skip2FA = False
         #Retrieve user's devices info
-        devicesInfo = foundUser.getAttribute("oxTrustedDevicesInfo")
+        devicesInfo = foundUser.getAttribute("jansTrustedDevices")
 
         #do geolocation
         geodata = self.getGeolocation(identity)
@@ -661,7 +655,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         return None
 
-        
+
     def getLogoutExternalUrl(self, configurationAttributes, requestParameters):
         print "Get external logout URL call"
         return None
