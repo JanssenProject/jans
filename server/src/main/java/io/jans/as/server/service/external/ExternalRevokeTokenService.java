@@ -1,6 +1,6 @@
 package io.jans.as.server.service.external;
 
-import io.jans.as.server.service.external.context.RevokeTokenContext;
+import io.jans.as.server.model.common.ExecutionContext;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.custom.script.type.revoke.RevokeTokenType;
@@ -22,7 +22,7 @@ public class ExternalRevokeTokenService extends ExternalScriptService {
         super(CustomScriptType.REVOKE_TOKEN);
     }
 
-    public boolean revokeToken(CustomScriptConfiguration script, RevokeTokenContext context) {
+    public boolean revokeToken(CustomScriptConfiguration script, ExecutionContext context) {
         try {
             log.trace("Executing python 'revokeToken' method, context: {}", context);
             context.setScript(script);
@@ -38,12 +38,10 @@ public class ExternalRevokeTokenService extends ExternalScriptService {
         return false;
     }
 
-    public boolean revokeTokenMethods(RevokeTokenContext context) {
+    public boolean revokeTokenMethods(ExecutionContext context) {
         for (CustomScriptConfiguration script : this.customScriptConfigurations) {
-            if (script.getExternalType().getApiVersion() > 1) {
-                if (!revokeToken(script, context)) {
-                    return false;
-                }
+            if (script.getExternalType().getApiVersion() > 1 && !revokeToken(script, context)) {
+                return false;
             }
         }
         return true;
