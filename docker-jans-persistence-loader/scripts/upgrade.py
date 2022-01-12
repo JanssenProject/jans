@@ -4,8 +4,6 @@ import logging.config
 import os
 from collections import namedtuple
 
-from ldap3.utils import dn as dnutils
-
 from jans.pycloudlib.persistence.couchbase import get_couchbase_user
 from jans.pycloudlib.persistence.couchbase import get_couchbase_superuser
 from jans.pycloudlib.persistence.couchbase import get_couchbase_password
@@ -16,30 +14,13 @@ from jans.pycloudlib.persistence.spanner import SpannerClient
 from jans.pycloudlib.persistence.sql import SQLClient
 
 from settings import LOGGING_CONFIG
+from utils import doc_id_from_dn
+from utils import id_from_dn
 
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("entrypoint")
 
 Entry = namedtuple("Entry", ["id", "attrs"])
-
-
-def doc_id_from_dn(dn):
-    parsed_dn = dnutils.parse_dn(dn)
-    doc_id = parsed_dn[0][1]
-
-    if doc_id == "jans":
-        doc_id = "_"
-    return doc_id
-
-
-def id_from_dn(dn):
-    # for example: `"inum=29DA,ou=attributes,o=jans"`
-    # becomes `["29DA", "attributes"]`
-    dns = [i.split("=")[-1] for i in dn.split(",") if i != "o=jans"]
-    dns.reverse()
-
-    # the actual key
-    return '_'.join(dns) or "_"
 
 
 class BaseBackend:
@@ -60,6 +41,13 @@ class BaseBackend:
         self.jans_stat_scopes = [
             "inum=C4F7,ou=scopes,o=jans",  # jans_stat
         ]
+
+
+#: ID of base entry
+JANS_BASE_ID = "o=jans"
+
+#: ID of manager group
+JANS_MANAGER_GROUP = "inum=60B7,ou=groups,o=jans"
 
 
 class LDAPBackend(BaseBackend):
@@ -168,6 +156,16 @@ class LDAPBackend(BaseBackend):
                     "jansAttrs"] = self.jans_attrs
                 self.modify_entry(id_, entry.attrs, **kwargs)
 
+    def update_base_entries(self):
+        # add jansManagerGrp to base entry
+        entry = self.get_entry(JANS_BASE_ID)
+        if not entry:
+            return
+
+        if not entry.attrs.get("jansManagerGrp"):
+            entry.attrs["jansManagerGrp"] = JANS_MANAGER_GROUP
+            self.modify_entry(JANS_BASE_ID, entry.attrs)
+
 
 class SQLBackend(BaseBackend):
     def __init__(self, manager):
@@ -260,6 +258,19 @@ class SQLBackend(BaseBackend):
                 entry.attrs[
                     "jansAttrs"] = self.jans_attrs
                 self.modify_entry(id_, entry.attrs, **kwargs)
+
+    def update_base_entries(self):
+        # add jansManagerGrp to base entry
+        id_ = doc_id_from_dn(JANS_BASE_ID)
+        kwargs = {"table_name": "jansOrganization"}
+
+        entry = self.get_entry(id_, **kwargs)
+        if not entry:
+            return
+
+        if not entry.attrs.get("jansManagerGrp"):
+            entry.attrs["jansManagerGrp"] = JANS_MANAGER_GROUP
+            self.modify_entry(id_, entry.attrs, **kwargs)
 
 
 class CouchbaseBackend(BaseBackend):
@@ -414,6 +425,20 @@ class CouchbaseBackend(BaseBackend):
         # drop the index
         self.client.exec_query(f'DROP INDEX `{bucket}`.`def_jans_fix_oc`')
 
+    def update_base_entries(self):
+        # add jansManagerGrp to base entry
+        id_ = id_from_dn(JANS_BASE_ID)
+        bucket = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
+        kwargs = {"bucket": bucket}
+
+        entry = self.get_entry(id_, **kwargs)
+        if not entry:
+            return
+
+        if not entry.attrs.get("jansManagerGrp"):
+            entry.attrs["jansManagerGrp"] = JANS_MANAGER_GROUP
+            self.modify_entry(id_, entry.attrs, **kwargs)
+
 
 class SpannerBackend(BaseBackend):
     def __init__(self, manager):
@@ -507,6 +532,19 @@ class SpannerBackend(BaseBackend):
                     "jansAttrs"] = self.jans_attrs
                 self.modify_entry(id_, entry.attrs, **kwargs)
 
+    def update_base_entries(self):
+        # add jansManagerGrp to base entry
+        id_ = doc_id_from_dn(JANS_BASE_ID)
+        kwargs = {"table_name": "jansOrganization"}
+
+        entry = self.get_entry(id_, **kwargs)
+        if not entry:
+            return
+
+        if not entry.attrs.get("jansManagerGrp"):
+            entry.attrs["jansManagerGrp"] = JANS_MANAGER_GROUP
+            self.modify_entry(id_, entry.attrs, **kwargs)
+
 
 class Upgrade:
     def __init__(self, manager):
@@ -529,6 +567,7 @@ class Upgrade:
         self.backend.update_scopes_entries()
         self.backend.update_clients_entries()
         self.backend.update_scim_scopes_entries()
+        self.backend.update_base_entries()
 
         if hasattr(self.backend, "update_misc"):
             self.backend.update_misc()
