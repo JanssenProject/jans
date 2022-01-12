@@ -13,6 +13,7 @@ public class Constants {
     private Constants() {
     }
 
+    public static final String ALL = "all";
     public static final String SERVER_KEY_OF_CONFIGURATION_ENTRY = "jansAuth_ConfigurationEntryDN";
 
     public static final String BASE_PROPERTIES_FILE_NAME = "jans.properties";
