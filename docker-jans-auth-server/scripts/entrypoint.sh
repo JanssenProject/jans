@@ -18,14 +18,17 @@ get_debug_opt() {
 move_builtin_jars() {
     # move twilio lib
     if [ ! -f /opt/jans/jetty/jans-auth/custom/libs/twilio.jar ]; then
-        # mv /usr/share/java/twilio.jar /opt/jans/jetty/jans-auth/custom/libs/twilio.jar
         cp /usr/share/java/twilio.jar /opt/jans/jetty/jans-auth/custom/libs/twilio.jar
     fi
 
     # move jsmpp lib
     if [ ! -f /opt/jans/jetty/jans-auth/custom/libs/jsmpp.jar ]; then
-        # mv /usr/share/java/jsmpp.jar /opt/jans/jetty/jans-auth/custom/libs/jsmpp.jar
         cp /usr/share/java/jsmpp.jar /opt/jans/jetty/jans-auth/custom/libs/jsmpp.jar
+    fi
+
+    # move casa-config lib
+    if [ ! -f /opt/jans/jetty/jans-auth/custom/libs/casa-config.jar ]; then
+        cp /usr/share/java/casa-config.jar /opt/jans/jetty/jans-auth/custom/libs/casa-config.jar
     fi
 }
 
