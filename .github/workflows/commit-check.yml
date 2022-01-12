@@ -54,7 +54,7 @@ jobs:
       - run: |
           npm install --save-dev @commitlint/{config-conventional,cli}
           echo "module.exports = {extends: ['@commitlint/config-conventional']};" > commitlint.config.js
-
+*/$VERSION_NAME
         # If this workflow was triggered by a push then resolve the commit message from HEAD
       - name: "[Push] Check Commit Standard"
         if: github.event_name == 'push' || github.event_name == 'pull_request_target'
