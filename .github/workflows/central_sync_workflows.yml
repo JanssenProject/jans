@@ -30,7 +30,6 @@ jobs:
           REPOSITORIES: |
             JanssenProject/docs
             JanssenProject/jans-auth-server
-            JanssenProject/jans-bom
             JanssenProject/jans-cli
             JanssenProject/jans-client-api
             JanssenProject/jans-cloud-native
