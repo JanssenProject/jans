@@ -762,6 +762,14 @@ class CtxGenerator:
     def sql_ctx(self):
         self.set_secret("sql_password", self.params["sql_pw"])
 
+    def casa_ctx(self):
+        self.set_config("casa_client_id", lambda: f"1902.{uuid4()}")
+        casa_client_pw = self.set_secret("casa_client_pw", get_random_chars)
+        self.set_secret(
+            "casa_client_encoded_pw",
+            partial(encode_text, casa_client_pw, self.get_secret("encoded_salt"))
+        )
+
     def generate(self):
         opt_scopes = self.params["optional_scopes"]
 
@@ -795,6 +803,9 @@ class CtxGenerator:
 
         if "sql" in opt_scopes:
             self.sql_ctx()
+
+        if "casa" in opt_scopes:
+            self.casa_ctx()
 
         # populated config
         return self.ctx

@@ -2,24 +2,26 @@
 
 from com.google.android.gcm.server import Sender, Message
 from com.notnoop.apns import APNS
-from java.util import Arrays
-from org.apache.http.params import CoreConnectionPNames
-from org.gluu.service.cdi.util import CdiUtil
-from org.gluu.oxauth.security import Identity
-from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
-from org.gluu.oxauth.model.config import ConfigurationFactory
-from org.gluu.oxauth.service import AuthenticationService, UserService, SessionIdService
-from org.gluu.oxauth.service.common import EncryptionService
-from org.gluu.oxauth.service.fido.u2f import DeviceRegistrationService
-from org.gluu.oxauth.service.net import HttpService
-from org.gluu.oxauth.util import ServerUtil
-from org.gluu.util import StringHelper
-from org.gluu.service import MailService
-from org.gluu.oxauth.service.push.sns import PushPlatform, PushSnsService
-from org.gluu.oxnotify.client import NotifyClientFactory
+
+from io.jans.service.cdi.util import CdiUtil
+from io.jans.as.server.security import Identity
+from io.jans.model.custom.script.type.auth import PersonAuthenticationType
+from io.jans.as.model.config import ConfigurationFactory
+from io.jans.as.server.service import AuthenticationService, UserService, SessionIdService
+from io.jans.as.service.common import EncryptionService
+from io.jans.as.service.fido.u2f import DeviceRegistrationService
+from io.jans.as.service.net import HttpService
+from io.jans.as.server.util import ServerUtil
+from io.jans.util import StringHelper
+from io.jans.service import MailService
+from io.jans.as.service.push.sns import PushPlatform, PushSnsService 
+from io.jans.oxnotify.client import NotifyClientFactory
+
 from java.util import Arrays, HashMap, IdentityHashMap, Date
 from java.time import ZonedDateTime
 from java.time.format import DateTimeFormatter
+
+from org.apache.http.params import CoreConnectionPNames
 
 try:
     from org.gluu.oxd.license.client.js import Product
@@ -128,7 +130,7 @@ class PersonAuthentication(PersonAuthenticationType):
             # Validate license
             try:
                 self.license_content = LicenseValidator.validate(license["public-key"], license["public-password"], license["license-password"], license["license"],
-                                          Product.SUPER_CN, Date())
+                                          Product.SUPER_GLUU, Date())
                 self.valid_license = self.license_content.isValid()
             except:
                 print "Super-Gluu. Initialization. Failed to validate license. Exception: ", sys.exc_info()[1]
@@ -347,8 +349,8 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Super-Gluu. Prepare for step 1"
             if self.oneStep:
                 #This branch will never be taken (see note in getExtraParametersForStep)
-                session_id = CdiUtil.bean(SessionIdService).getSessionIdFromCookie()
-                if StringHelper.isEmpty(session_id):
+                session_id = CdiUtil.bean(SessionIdService).getSessionId()
+                if session_id == None:
                     print "Super-Gluu. Prepare for step 2. Failed to determine session_id"
                     return False
 
@@ -386,8 +388,8 @@ class PersonAuthentication(PersonAuthenticationType):
                    print "Super-Gluu. Prepare for step 2. Request was generated already"
                    return True
 
-            session_id = CdiUtil.bean(SessionIdService).getSessionIdFromCookie()
-            if StringHelper.isEmpty(session_id):
+            session_id = CdiUtil.bean(SessionIdService).getSessionId()
+            if session_id == None:
                 print "Super-Gluu. Prepare for step 2. Failed to determine session_id"
                 return False
 
@@ -1073,7 +1075,7 @@ class PersonAuthentication(PersonAuthenticationType):
         inum = user.getAttribute("inum")
         devRegService = CdiUtil.bean(DeviceRegistrationService)
         app_id = configurationAttributes.get("application_id").getValue2()
-        userDevices = devRegService.findUserDeviceRegistrations(inum, app_id, "oxStatus")
+        userDevices = devRegService.findUserDeviceRegistrations(inum, app_id, "jansStatus")
 
         hasDevices = False
         for device in userDevices:

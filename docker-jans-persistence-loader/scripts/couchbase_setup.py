@@ -17,6 +17,7 @@ from settings import LOGGING_CONFIG
 from utils import prepare_template_ctx
 from utils import render_ldif
 from utils import get_ldif_mappings
+from utils import id_from_dn
 
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("entrypoint")
@@ -71,16 +72,6 @@ def get_bucket_mappings(manager):
             if name != ldap_mapping
         }
     return bucket_mappings
-
-
-def get_key_from(dn):
-    # for example: `"inum=29DA,ou=attributes,o=jans"`
-    # becomes `["29DA", "attributes"]`
-    dns = [i.split("=")[-1] for i in dn.split(",") if i != "o=jans"]
-    dns.reverse()
-
-    # the actual key
-    return '_'.join(dns) or "_"
 
 
 class AttrProcessor(object):
@@ -355,7 +346,7 @@ class CouchbaseBackend:
                         if len(entry) <= 2:
                             continue
 
-                        key = get_key_from(dn)
+                        key = id_from_dn(dn)
                         entry["dn"] = [dn]
                         entry = transform_entry(entry, attr_processor)
                         data = json.dumps(entry)
