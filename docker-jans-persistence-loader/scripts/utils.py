@@ -5,6 +5,8 @@ import os
 from urllib.parse import urlparse
 from uuid import uuid4
 
+from ldap3.utils import dn as dnutils
+
 from jans.pycloudlib.utils import as_boolean
 from jans.pycloudlib.utils import encode_text
 from jans.pycloudlib.utils import safe_render
@@ -157,8 +159,8 @@ def get_base_ctx(manager):
         "scim_client_id": manager.config.get("scim_client_id"),
         "scim_client_encoded_pw": manager.secret.get("scim_client_encoded_pw"),
         "casa_enable_script": str(as_boolean(casa_enabled)).lower(),
-        "oxd_hostname": "localhost",
-        "oxd_port": "8443",
+        # "oxd_hostname": "localhost",
+        # "oxd_port": "8443",
         "jca_client_id": manager.config.get("jca_client_id"),
         "jca_client_encoded_pw": manager.secret.get("jca_client_encoded_pw"),
     }
@@ -372,7 +374,31 @@ def merge_config_api_ctx(ctx):
     return ctx
 
 
+def merge_casa_ctx(manager, ctx):
+    # Casa client
+    ctx["casa_client_id"] = manager.config.get("casa_client_id")
+    if not ctx["casa_client_id"]:
+        ctx["casa_client_id"] = f"1902.{uuid4()}"
+        manager.config.set("casa_client_id", ctx["casa_client_id"])
+
+    ctx["casa_client_pw"] = manager.secret.get("casa_client_pw")
+    if not ctx["casa_client_pw"]:
+        ctx["casa_client_pw"] = get_random_chars()
+        manager.secret.set("casa_client_pw", ctx["casa_client_pw"])
+
+    ctx["casa_client_encoded_pw"] = manager.secret.get("casa_client_encoded_pw")
+    if not ctx["casa_client_encoded_pw"]:
+        ctx["casa_client_encoded_pw"] = encode_text(
+            ctx["casa_client_pw"], manager.secret.get("encoded_salt"),
+        ).decode()
+        manager.secret.set("casa_client_encoded_pw", ctx["casa_client_encoded_pw"])
+
+    return ctx
+
+
 def prepare_template_ctx(manager):
+    opt_scopes = json.loads(manager.config.get("optional_scopes", "[]"))
+
     ctx = get_base_ctx(manager)
     ctx = merge_extension_ctx(ctx)
     # ctx = merge_radius_ctx(ctx)
@@ -383,6 +409,9 @@ def prepare_template_ctx(manager):
     # ctx = merge_passport_ctx(ctx)
     ctx = merge_fido2_ctx(ctx)
     ctx = merge_scim_ctx(ctx)
+
+    if "casa" in opt_scopes:
+        ctx = merge_casa_ctx(manager, ctx)
     return ctx
 
 
@@ -432,6 +461,12 @@ def get_ldif_mappings(optional_scopes=None):
             files += [
                 "jans-fido2/configuration.ldif",
             ]
+
+        if "casa" in optional_scopes:
+            files += [
+                "gluu-casa/configuration.ldif",
+                "gluu-casa/clients.ldif",
+            ]
         return files
 
     def user_files():
@@ -462,3 +497,22 @@ def get_ldif_mappings(optional_scopes=None):
         "session": [],
     }
     return ldif_mappings
+
+
+def doc_id_from_dn(dn):
+    parsed_dn = dnutils.parse_dn(dn)
+    doc_id = parsed_dn[0][1]
+
+    if doc_id == "jans":
+        doc_id = "_"
+    return doc_id
+
+
+def id_from_dn(dn):
+    # for example: `"inum=29DA,ou=attributes,o=jans"`
+    # becomes `["29DA", "attributes"]`
+    dns = [i.split("=")[-1] for i in dn.split(",") if i != "o=jans"]
+    dns.reverse()
+
+    # the actual key
+    return '_'.join(dns) or "_"

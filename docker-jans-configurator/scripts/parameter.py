@@ -31,6 +31,7 @@ OPTIONAL_SCOPES = (
     "couchbase",
     "redis",
     "sql",
+    "casa",
 )
 
 

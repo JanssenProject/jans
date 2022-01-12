@@ -1,5 +1,3 @@
-# Based on oxAuth OtpExternalAuthenticator.py
-
 # Requires the following custom properties and values:
 #   otp_type: totp/hotp
 #   issuer: Gluu Inc
@@ -10,9 +8,6 @@
 #   qr_options: { width: 400, height: 400 }
 #   registration_uri: https://ce-dev.gluu.org/identity/register
 
-import jarray
-import json
-import sys
 from com.google.common.io import BaseEncoding
 from com.lochbridge.oath.otp import HOTP
 from com.lochbridge.oath.otp import HOTPValidator
@@ -21,18 +16,23 @@ from com.lochbridge.oath.otp import TOTP
 from com.lochbridge.oath.otp.keyprovisioning import OTPAuthURIBuilder
 from com.lochbridge.oath.otp.keyprovisioning import OTPKey
 from com.lochbridge.oath.otp.keyprovisioning.OTPKey import OTPType
+
+from io.jans.jsf2.message import FacesMessages
+from io.jans.model.custom.script.type.auth import PersonAuthenticationType
+from io.jans.as.server.security import Identity
+from io.jans.as.server.service import AuthenticationService, UserService, SessionIdService
+from io.jans.as.server.util import ServerUtil
+from io.jans.service.cdi.util import CdiUtil
+from io.jans.util import StringHelper
+
 from java.security import SecureRandom
 from java.util import Arrays
 from java.util.concurrent import TimeUnit
 from javax.faces.application import FacesMessage
-from org.gluu.jsf2.message import FacesMessages
-from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
-from org.gluu.oxauth.security import Identity
-from org.gluu.oxauth.service import AuthenticationService, UserService, SessionIdService
-from org.gluu.oxauth.util import ServerUtil
-from org.gluu.service.cdi.util import CdiUtil
-from org.gluu.util import StringHelper
 
+import jarray
+import json
+import sys
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -351,12 +351,12 @@ class PersonAuthentication(PersonAuthenticationType):
         result = []
 
         userService = CdiUtil.bean(UserService)
-        user = userService.getUser(user_name, "oxExternalUid")
+        user = userService.getUser(user_name, "jansExtUid")
         if user == None:
             print "OTP. Find enrollments. Failed to find user"
             return result
 
-        user_custom_ext_attribute = userService.getCustomAttribute(user, "oxExternalUid")
+        user_custom_ext_attribute = userService.getCustomAttribute(user, "jansExtUid")
         if user_custom_ext_attribute == None:
             return result
 
@@ -377,8 +377,8 @@ class PersonAuthentication(PersonAuthenticationType):
         return result
 
     def validateSessionId(self, identity):
-        session_id = CdiUtil.bean(SessionIdService).getSessionIdFromCookie()
-        if StringHelper.isEmpty(session_id):
+        session_id = CdiUtil.bean(SessionIdService).getSessionId()
+        if session_id == None:
             print "OTP. Validate session id. Failed to determine session_id"
             return False
 
@@ -420,7 +420,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     otp_user_external_uid = "hotp:%s;%s" % ( otp_secret_key_encoded, validation_result["movingFactor"] )
 
                     # Add otp_user_external_uid to user's external GUID list
-                    find_user_by_external_uid = userService.addUserAttribute(user_name, "oxExternalUid", otp_user_external_uid, True)
+                    find_user_by_external_uid = userService.addUserAttribute(user_name, "jansExtUid", otp_user_external_uid, True)
                     if find_user_by_external_uid != None:
                         return True
 
@@ -433,7 +433,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     otp_user_external_uid = "totp:%s" % otp_secret_key_encoded
 
                     # Add otp_user_external_uid to user's external GUID list
-                    find_user_by_external_uid = userService.addUserAttribute(user_name, "oxExternalUid", otp_user_external_uid, True)
+                    find_user_by_external_uid = userService.addUserAttribute(user_name, "jansExtUid", otp_user_external_uid, True)
                     if find_user_by_external_uid != None:
                         return True
 
@@ -465,7 +465,7 @@ class PersonAuthentication(PersonAuthenticationType):
                         new_otp_user_external_uid = "hotp:%s;%s" % ( otp_secret_key_encoded, validation_result["movingFactor"] )
 
                         # Update moving factor in user entry
-                        find_user_by_external_uid = userService.replaceUserAttribute(user_name, "oxExternalUid", otp_user_external_uid, new_otp_user_external_uid, True)
+                        find_user_by_external_uid = userService.replaceUserAttribute(user_name, "jansExtUid", otp_user_external_uid, new_otp_user_external_uid, True)
                         if find_user_by_external_uid != None:
                             return True
 
@@ -580,7 +580,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         # Both hotp and totp are accounted
         hasEnrollments = False
-        values = user.getAttributeValues("oxExternalUid")
+        values = user.getAttributeValues("jansExtUid")
 
         if values != None:
             for extUid in values:
