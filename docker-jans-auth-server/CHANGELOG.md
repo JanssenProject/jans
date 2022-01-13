@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.0.0-beta.15](https://github.com/JanssenProject/jans-cloud-native/compare/docker-jans-auth-server-v1.0.0-beta.14...docker-jans-auth-server-v1.0.0-beta.15) (2022-01-13)
+
+
+### ⚠ BREAKING CHANGES
+
+* 1.0.0-beta.15
+
+### Features
+
+* add Gluu Casa support ([9d9ed25](https://github.com/JanssenProject/jans-cloud-native/commit/9d9ed255a3bbb220becf1d65e2e96dcfbdafa575))
+* add Gluu Casa support ([9d9ed25](https://github.com/JanssenProject/jans-cloud-native/commit/9d9ed255a3bbb220becf1d65e2e96dcfbdafa575))
+
+
+### Miscellaneous Chores
+
+* change release to 1.0.0-beta.15 ([b4b2377](https://github.com/JanssenProject/jans-cloud-native/commit/b4b237788c042055c6010d45c92bd79355591e50))
+
 ## 1.0.0-beta.14 (2021-12-27)
 
 
