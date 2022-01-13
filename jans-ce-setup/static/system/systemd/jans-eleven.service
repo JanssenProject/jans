@@ -1,0 +1,13 @@
+[Unit]
+Description=Janssen Eleven service
+After=jans-auth.service
+
+[Service]
+Type=forking
+ExecStart=/opt/dist/scripts/jans-eleven start
+ExecStop=/opt/dist/scripts/jans-eleven stop
+User=jetty
+Group=jetty
+
+[Install]
+WantedBy=multi-user.target
