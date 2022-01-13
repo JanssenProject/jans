@@ -18,7 +18,7 @@ CREATE TABLE jansClnt_Array (
 
 ```
 
-![](./img/array_data.png) <!-- .element height="50%" width="50%" -->
+![](img/array_data.png) <!-- .element height="50%" width="50%" -->
 
 2. DB with child interleave table
 
@@ -32,7 +32,7 @@ CREATE TABLE jansClnt_Array (
 
 ```
 
-![](./img/interleave_data.png) <!-- .element height="50%" width="50%" -->
+![](img/interleave_data.png) <!-- .element height="50%" width="50%" -->
 
 ### Java code which inserts 1M records into both DB structures
 ```
@@ -117,7 +117,7 @@ public class SpannerMultiValuedDataPopulatorTest {
 
 ### DB size comparision
 
-![](./img/db_size.png) <!-- .element height="50%" width="50%" -->
+![](img/db_size.png) <!-- .element height="50%" width="50%" -->
 
 ### SQL statement examples
 
@@ -142,7 +142,7 @@ LIMIT 100
 OFFSET 20000
 ```
 
-![](./img/sql_array_data.png) <!-- .element height="50%" width="50%" -->
+![](img/sql_array_data.png) <!-- .element height="50%" width="50%" -->
 
 
 2. DB with child interleave table
@@ -169,27 +169,27 @@ OFFSET 150000
 
 ```
 
-![](./img/sql_interleave_data.png) <!-- .element height="50%" width="50%" -->
+![](img/sql_interleave_data.png) <!-- .element height="50%" width="50%" -->
 
 ### Stats after 4 executions
 
 1. DB with ARRAY data type
 
-![](./img/sql_stat_array_data.png) <!-- .element height="50%" width="50%" -->
+![](img/sql_stat_array_data.png) <!-- .element height="50%" width="50%" -->
 
 2. DB with child interleave table
 
-![](./img/sql_stat_interleave_data.png) <!-- .element height="50%" width="50%" -->
+![](img/sql_stat_interleave_data.png) <!-- .element height="50%" width="50%" -->
 
 ### Queries explanations
 
 1. DB with ARRAY data type
 
-![](./img/sql_explained_array_data.png) <!-- .element height="50%" width="50%" -->
+![](img/sql_explained_array_data.png) <!-- .element height="50%" width="50%" -->
 
 2. DB with child interleave table
 
-![](./img/sql_explained_interleave_data.png) <!-- .element height="50%" width="50%" -->
+![](img/sql_explained_interleave_data.png) <!-- .element height="50%" width="50%" -->
 
 
 ## Conclusions
