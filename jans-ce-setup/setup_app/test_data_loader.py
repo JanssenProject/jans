@@ -94,7 +94,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
 
 
         config_oxauth_test_properties = self.fomatWithDict(
-            'server.name=%(hostname)s\nconfig.oxauth.issuer=http://localhost:80\nconfig.oxauth.contextPath=http://localhost:80\nconfig.oxauth.salt=%(encode_salt)s\nconfig.persistence.type=%(persistence_type)s\n\n',
+            'server.name=%(hostname)s\nconfig.oxauth.issuer=http://localhost:80\nconfig.oxauth.contextPath=http://localhost:80\nconfig.oxauth.salt=%(encode_salt)s\nconfig.oxauth.passw=%(encode_passw)s\nconfig.oxauth.alg=%(encode_alg)s\nconfig.persistence.type=%(persistence_type)s\n\n',
             self.merge_dicts(Config.__dict__, Config.templateRenderingDict)
             )
 
