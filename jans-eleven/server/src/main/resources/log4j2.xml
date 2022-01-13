@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<Configuration packages="org.gluu.log">
+	<Appenders>
+		<Console name="STDOUT" target="SYSTEM_OUT">
+			<PatternLayout pattern="%d %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
+		</Console>
+
+		<RollingFile name="FILE" fileName="${sys:log.base}/logs/oxeleven.log" filePattern="${sys:log.base}/logs/oxeleven-%d{yyyy-MM-dd}-%i.log">
+
+			<PatternLayout pattern="%d %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
+
+			<Policies>
+				<TimeBasedTriggeringPolicy interval="1" modulate="true" />
+				<SizeBasedTriggeringPolicy size="250 MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="30" />
+		</RollingFile>
+	</Appenders>
+
+	<Loggers>
+		<!-- ############### oxEleven ################# -->
+		<Logger name="org.gluu.oxeleven" level="${log4j.default.log.level}" />
+		<Logger name="org.gluu" level="${log4j.default.log.level}" />
+
+		<Root level="info">
+			<AppenderRef ref="FILE" />
+			<AppenderRef ref="STDOUT" />
+		</Root>
+	</Loggers>
+</Configuration>
