@@ -1,0 +1,410 @@
+.toggle_view_text,
+.open-app,
+.open-app a {
+    font-size: 12px;
+}
+
+a.toggle_view_link {
+    font-weight: 500;
+    font-family: Montserrat-Bold;
+    color: #19b2e6
+}
+
+.toggle_view_text {
+    color: #1a1a39
+}
+
+p.intro_msg {
+    margin-bottom: 0
+}
+
+.country-list {
+    z-index: 10001 !important;
+    max-width: 248px
+}
+
+.open-app {
+    width: 200px;
+    border-radius: 18px;
+    margin: auto;
+    color: #18182a;
+    background-color: #ffc23a;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, .11)
+}
+
+.open-app a {
+    line-height: 40px;
+    color: #18182a;
+    font-family: Montserrat-Medium;
+}
+
+#sms_result {
+    display: none;
+    color: #8b4513
+}
+
+.intl-tel-input {
+    border-left: 1px solid #ccc;
+    width: 100%
+}
+
+.db-b {
+    width: 190px;
+    margin: auto
+}
+
+/* .d-box .db-a {
+    float: left;
+    position: relative;
+    width: 50px
+}
+
+.db-a button,
+.db-a ul {
+    border: 1px solid #ccc
+}
+
+.db-a .d-arrow {
+    position: relative;
+    left: 4px
+}
+
+.db-a button {
+    display: inline-block;
+    background: #FFF;
+    width: 100%;
+    height: 36px
+}
+
+.db-a ul {
+    border-top: none;
+    position: absolute;
+    left: 0;
+    top: 36px;
+    right: 0;
+    background: #fff;
+    max-height: 250px;
+    overflow-y: auto;
+    width: 235px;
+    list-style: none;
+    padding: 0;
+    display: none
+} */
+
+.closeIcon,
+.logoIcon,
+.refreshImg {
+    background-repeat: no-repeat
+}
+/* 
+.db-a ul li {
+    padding: 7px;
+    border-bottom: 1px solid #f0f0f0
+}
+
+.db-a ul li img {
+    max-width: none
+}
+
+.db-a ul li span {
+    font-size: 14px;
+    position: relative;
+    color: #999;
+    font-weight: 400;
+    margin: 0 0 0 5px
+}
+
+.db-a ul li:hover {
+    background-color: #fafafa;
+    cursor: pointer
+} */
+
+.db-b input {
+    border: 1px solid #ccc;
+    height: 36px;
+    border-left: none;
+    max-width: 100%;
+    background-color: #fff;
+    width: auto !important
+}
+
+.ts_initiated {
+    opacity: 1;
+    position: absolute;
+    top: 105px;
+    width: 88%;
+    font-size: 15px;
+    font-weight: 700
+}
+
+.refreshTxt,
+.sucessMsg {
+    text-align: center;
+    color: #646464;
+    position: absolute;
+    top: 140px;
+    font-size: 11px;
+    width: 90%
+}
+
+.refreshTxt,
+.tsmodal {
+    width: 100%;
+    padding: 0
+}
+
+.sucessMsg {
+    top: 175px;
+    margin-left: 15px
+}
+
+.tsmodal {
+    position: fixed;
+    z-index: 1000;
+    padding-top: 100px;
+    left: 0;
+    top: 0;
+    height: 100%;
+    overflow: auto;
+    background-color: #000;
+    background-color: rgba(0, 0, 0, .4)
+}
+
+.item,
+.tsmodal-body,
+.tsmodal-content {
+    position: relative
+}
+
+.closeIcon,
+.overlay {
+    cursor: pointer;
+    position: absolute
+}
+
+.closeIcon {
+    height: 16px;
+    width: 16px;
+    right: -23px;
+    top: -15px;
+    background-image: url(https://thumbsignin.com/styles/img/del-white.png)
+}
+
+.tsmodal-content {
+    font-family: Montserrat;
+    background-color: #fefefe;
+    margin: auto;
+    text-align: center;
+    padding: 0;
+    width: 270px
+}
+
+.tsmodal-footer {
+    padding: 2px 16px 15px;
+    color: #4a4a4a
+}
+
+.tsmodal-footer p {
+    font-family: Montserrat-Bold;
+    font-size: 12px;
+    color: #1a1a39;
+    font-weight: 500;
+    margin: 5px auto
+}
+
+.tsmodal-footer span {
+    font-weight: 700;
+    color: #38adaa
+}
+
+.tsmodal-header {
+    padding: 2px 16px;
+    color: #fff;
+    background-image: linear-gradient(72deg, #48d2a0, #288bb3);
+    font-size: 18px;
+    text-transform: uppercase
+}
+
+.tsmodal-body {
+    padding: 2px 16px;
+    height: 180px
+}
+
+.overlay,
+.refreshImg {
+    height: 200px;
+    width: 100%
+}
+
+.overlay {
+    margin: 0 auto;
+    z-index: 1;
+    background-color: rgba(255, 255, 255, .9)
+}
+
+.refreshImg {
+    background-image: url(https://thumbsignin.com/styles/img/icons-8-refresh.png);
+    background-size: auto;
+    margin: auto;
+    background-position-x: 50%;
+    background-position-y: 51%
+}
+
+.logoIcon {
+    background-size: contain;
+    background-image: url(https://thumbsignin.com/styles/img/qr-code.png);
+    position: absolute;
+    width: 30px;
+    z-index: 0;
+    height: 30px;
+    top: 80px;
+    left: 46%
+}
+
+.intro-conatiner {
+    font-weight: 600;
+    margin-top: 20px;
+    z-index: 4;
+    font-family: Montserrat-Light;
+    font-size: 12px;
+    padding: 0;
+    color: #1a1a39
+}
+
+.qrcode img {
+    margin: 0 auto;
+    height: 200px
+}
+
+.open-app-icon {
+    width: 30px;
+    height: auto !important;
+    margin: 50px auto !important
+}
+
+.item h1 {
+    position: absolute;
+    width: 100%;
+    color: #434A54;
+    font-size: 15px
+}
+
+.circle_animation {
+    stroke-dasharray: 440;
+    stroke-dashoffset: 440;
+    transition: all 1s linear
+}
+
+p.icons {
+    margin: 0 auto
+}
+
+.circle-loader {
+    margin: 40px auto;
+    border: 2px solid rgba(0, 0, 0, .2);
+    border-left-color: #5cb85c;
+    animation-name: loader-spin;
+    animation-duration: 1s;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+    display: inline-block;
+}
+
+.circle-loader,
+.circle-loader:after {
+    border-radius: 50%;
+    width: 8em;
+    height: 8em
+}
+
+.load-complete {
+    -webkit-animation: none;
+    animation: none;
+    border-color: #5cb85c;
+    transition: border .5s ease-out
+}
+
+.checkmark {
+    display: none
+}
+
+.checkmark.draw:after {
+    animation-duration: .8s;
+    animation-timing-function: ease;
+    animation-name: checkmark;
+    transform: scaleX(-1) rotate(135deg)
+}
+
+.checkmark:after {
+    opacity: 1;
+    height: 4em;
+    width: 2em;
+    transform-origin: left top;
+    border-right: 2px solid #5cb85c;
+    border-top: 2px solid #5cb85c;
+    content: '';
+    left: 38%;
+    top: 48%;
+    position: absolute;
+}
+.hidden{
+    display: none;
+}
+.text-center{
+    text-align: center;
+}
+
+@media screen and (max-width:720px) {
+    .ts_initiated {
+        width: 95%
+    }
+    .checkmark:after {
+        left: 40%;
+        top: 50%;
+    }
+    .closeIcon {
+        right: 5px;
+        top: 16px
+    }
+    .tsmodal {
+        padding-top: 0
+    }
+    .tsmodal-content {
+        width: 100%;
+        height: 90%
+    }
+    .db-b img.d-arrow-b {
+        right: 70px
+    }
+    p.intro_msg {
+        padding: 0 10px
+    }
+}
+
+@keyframes loader-spin {
+    0% {
+        transform: rotate(0)
+    }
+    100% {
+        transform: rotate(360deg)
+    }
+}
+
+@keyframes checkmark {
+    0% {
+        height: 0;
+        width: 0;
+        opacity: 1
+    }
+    20% {
+        height: 0;
+        width: 2em;
+        opacity: 1
+    }
+    100%,
+    40% {
+        height: 4em;
+        width: 2em;
+        opacity: 1
+    }
+}
