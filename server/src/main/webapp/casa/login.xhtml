@@ -30,7 +30,13 @@
 					<h:commandButton class="f7-cust bw0 br1 ph4 pv2 bg-bsgreen-success white hover-bsgreen-success hover-white btn cust-primary-button"
 						value="#{msgs['login.login']}" action="#{authenticator.authenticate}" />
 				</div>
-				
+
+				<h:panelGroup layout="block" rendered="#{not empty facesContext.messageList and cookie['X-Correlation-Id'] != null}">
+					<br/>
+					<p style="font-size: 0.7em">
+						<strong>Correlation Id: </strong> <h:outputText value="#{cookie['X-Correlation-Id'].value}" />
+					</p>
+				</h:panelGroup>
 				<h:inputHidden id="platform" />
 			</h:form>
 		</section>

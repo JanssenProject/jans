@@ -292,6 +292,12 @@
                                             </div>                                        
                                     </div>
                                 </h:panelGroup>
+                                <h:panelGroup layout="block" rendered="#{not empty facesContext.messageList and cookie['X-Correlation-Id'] != null}">
+                                    <br/>
+                                    <p style="font-size: 0.7em">
+                                        <strong>Correlation Id: </strong> <h:outputText value="#{cookie['X-Correlation-Id'].value}" />
+                                    </p>
+                                </h:panelGroup>
                             </h:form>
                         </div>
                     </div>

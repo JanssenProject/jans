@@ -120,6 +120,12 @@ input.btn.btn-done {
 						<a target="_blank" href='#{client.getPolicyUri()}'>#{msgs['otp_sms.termsPrivacy']}</a>
 					</p>
 				</h:panelGroup>
+				<h:panelGroup layout="block" rendered="#{not empty facesContext.messageList and cookie['X-Correlation-Id'] != null}">
+					<br/>
+					<p style="font-size: 0.7em">
+						<strong>Correlation Id: </strong> <h:outputText value="#{cookie['X-Correlation-Id'].value}" />
+					</p>
+				</h:panelGroup>
 			</h:panelGroup>
 		</h:form>
 		<div class="footer-copyright text-center py-3"
