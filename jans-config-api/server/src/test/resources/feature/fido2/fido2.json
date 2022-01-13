@@ -1,0 +1,21 @@
+{
+  "serverMetadataFolder": "/etc/gluu/conf/fido2/server_metadata",
+  "authenticationHistoryExpiration": 1296000,
+  "requestedParties": [
+    {
+      "name": "https://pujavs3.infinity.com",
+      "domains": [
+        "pujavs3.infinity.com"
+      ]
+    }
+  ],
+  "mdsTocsFolder": "/etc/gluu/conf/fido2/mds/toc",
+  "requestedCredentialTypes": [
+    "RS256",
+    "ES256"
+  ],
+  "authenticatorCertsFolder": "/etc/gluu/conf/fido2/authenticator_cert",
+  "userAutoEnrollment": false,
+  "unfinishedRequestExpiration": 180,
+  "mdsCertsFolder": "/etc/gluu/conf/fido2/mds/cert"
+}
