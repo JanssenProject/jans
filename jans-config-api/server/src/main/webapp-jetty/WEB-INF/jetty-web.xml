@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "http://www.eclipse.org/jetty/configure.dtd">
+<Configure class="org.eclipse.jetty.webapp.WebAppContext">
+   <Call name="prependServerClass">
+      <Arg>-org.eclipse.jetty.util.Decorator</Arg>
+   </Call>
+   <Call name="prependServerClass">
+      <Arg>-org.eclipse.jetty.util.DecoratedObjectFactory</Arg>
+   </Call>
+   <Call name="prependServerClass">
+      <Arg>-org.eclipse.jetty.server.handler.ContextHandler.</Arg>
+   </Call>
+   <Call name="prependServerClass">
+      <Arg>-org.eclipse.jetty.server.handler.ContextHandler</Arg>
+   </Call>
+   <Call name="prependServerClass">
+      <Arg>-org.eclipse.jetty.servlet.ServletContextHandler</Arg>
+   </Call>
+</Configure>
