@@ -31,7 +31,6 @@ jobs:
             JanssenProject/docs
             JanssenProject/jans-auth-server
             JanssenProject/jans-cli
-            JanssenProject/jans-client-api
             JanssenProject/jans-cloud-native
             JanssenProject/jans-config-api
             JanssenProject/jans-core
