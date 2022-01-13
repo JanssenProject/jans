@@ -1,0 +1,31 @@
+{
+  "schemas": [
+    "urn:ietf:params:scim:api:messages:2.0:BulkRequest"
+  ],
+  "Operations": [
+    {
+      "method": "POST",
+      "path": "/Users",
+      "bulkId": "qwerty",
+      "data": {
+        "schemas": ["urn:ietf:params:scim:schemas:core:2.0:User"],
+        "userName": "scim_test_bjensen_1"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/Groups",
+      "bulkId": "ytrewq",
+      "data": {
+        "schemas": ["urn:ietf:params:scim:schemas:core:2.0:Group"],
+        "displayName": "Tour Guides",
+        "members": [
+          {
+            "type": "User",
+            "value": "bulkId:qwerty"
+          }
+        ]
+      }
+    }
+  ]
+}
