@@ -57,4 +57,6 @@ public class Constants {
     public static final String AUTHORIZATION_BASIC = "Authorization: Basic ";
 
     public static final String REASON_CLIENT_NOT_AUTHORIZED = "The client is not authorized.";
+
+    public static final String CORRELATION_ID_HEADER = "X-Correlation-Id";
 }

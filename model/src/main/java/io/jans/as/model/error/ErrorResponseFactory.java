@@ -12,6 +12,7 @@ import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType;
 import io.jans.as.model.clientinfo.ClientInfoErrorResponseType;
 import io.jans.as.model.common.ComponentType;
+import io.jans.as.model.config.Constants;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.configuration.Configuration;
 import io.jans.as.model.fido.u2f.U2fErrorResponseType;
@@ -22,6 +23,8 @@ import io.jans.as.model.token.TokenRevocationErrorResponseType;
 import io.jans.as.model.uma.UmaErrorResponseType;
 import io.jans.as.model.userinfo.UserInfoErrorResponseType;
 import io.jans.as.model.util.Util;
+import org.apache.commons.lang.StringUtils;
+import org.apache.logging.log4j.ThreadContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -32,6 +35,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -190,7 +194,12 @@ public class ErrorResponseFactory implements Configuration {
 
             if (list != null) {
                 final ErrorMessage m = getError(list, type);
-                response.setErrorDescription(m.getDescription());
+
+                String description = Optional.ofNullable(ThreadContext.get(Constants.CORRELATION_ID_HEADER))
+                        .map(id -> m.getDescription().concat(" CorrelationId: " + id))
+                        .orElse(m.getDescription());
+
+                response.setErrorDescription(description);
                 response.setErrorUri(m.getUri());
             }
         }

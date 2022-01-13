@@ -7,6 +7,7 @@ import io.jans.as.model.authorize.AuthorizeRequestParam;
 import io.jans.as.model.common.ComponentType;
 import io.jans.as.model.common.ResponseMode;
 import io.jans.as.model.common.ResponseType;
+import io.jans.as.model.config.Constants;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponse;
 import io.jans.as.model.error.ErrorResponseFactory;
@@ -19,6 +20,7 @@ import io.jans.as.server.service.RequestParameterService;
 import io.jans.as.server.util.QueryStringDecoder;
 import io.jans.as.server.util.ServerUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.ThreadContext;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
@@ -40,6 +42,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import java.net.URI;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Implementation based on https://datatracker.ietf.org/doc/html/draft-ietf-oauth-par-08
@@ -199,8 +203,16 @@ public class ParRestWebService {
         locationRedirect.parseQueryString(location.getQuery());
 
         final ErrorResponse response = new ErrorResponse();
-        response.setErrorCode(locationRedirect.getResponseParameter("error"));
-        response.setErrorDescription(locationRedirect.getResponseParameter("error_description"));
+
+        String errorDescription = locationRedirect.getResponseParameter("error_description");
+        errorDescription = Optional.ofNullable(errorDescription)
+                .map(description -> Optional.ofNullable(ThreadContext.get(Constants.CORRELATION_ID_HEADER))
+                        .map(id -> description.concat(" CorrelationId: " + id))
+                        .orElse(description))
+                .orElse(null);
+
+        response.setErrorCode(errorDescription);
+        response.setErrorDescription(errorDescription);
         return response;
     }
 
