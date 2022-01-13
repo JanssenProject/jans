@@ -1,0 +1,13 @@
+{
+  "schemas": [
+    "urn:ietf:params:scim:schemas:core:2.0:User",
+    "urn:ietf:params:scim:schemas:extension:gluu:2.0:User"
+  ],
+  "urn:ietf:params:scim:schemas:extension:gluu:2.0:User": {
+    "scimCustomSecond": [
+      "2016-02-23T15:35:22Z"
+    ],
+    "unknownCustomAttribute":"crash"
+  },
+  "userName": "scim_test_bjensen_1"
+}
