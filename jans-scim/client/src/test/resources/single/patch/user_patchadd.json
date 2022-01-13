@@ -1,0 +1,53 @@
+{
+  "schemas": [
+    "urn:ietf:params:scim:api:messages:2.0:PatchOp"
+  ],
+  "Operations": [
+    {
+      "op": "add",
+      "value": {
+        "nickName": "Babas",
+        "userType": "CEO"
+      }
+    },
+    {
+      "op": "add",
+      "path": "emails",
+      "value": {
+        "value": "bjane2@gluu.org",
+        "type": "other",
+        "primary": false
+      }
+    },
+    {
+      "op": "add",
+      "path": "phoneNumbers",
+      "value": [
+        {
+          "value": "555 123 8901",
+          "type": "other"
+        },
+        {
+          "value": "555 123 8902",
+          "type": "other"
+        }
+      ]
+    },
+    {
+      "op": "add",
+      "value": {
+        "ims": [
+          {
+            "value": "njnjtest_user",
+            "type": "Skype"
+          }
+        ]
+      }
+    },
+    {
+      "op": "add",
+      "path" : "roles.value",
+      "value": "Owner"
+    }
+  ]
+}

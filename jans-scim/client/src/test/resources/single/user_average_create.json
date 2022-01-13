@@ -1,0 +1,41 @@
+{
+  "schemas": ["urn:ietf:params:scim:schemas:core:2.0:User"],
+  "externalId": "scim_test_bjensen_1-external",
+  "userName": "scim_test_bjensen_1",
+  "name": {
+    "honorificPrefix": "prefix",
+    "honorificSuffix": "suffix",
+    "formatted":"Ms. Barbara J Jensen III",
+    "familyName":"Jensen",
+    "givenName":"Barbara",
+    "middleName":"Jane"
+  },
+  "displayName": "Brava",
+  "emails": [
+    {
+      "value": "bjane@gluu.org",
+      "type": "work",
+      "primary": true
+    }
+  ],
+  "addresses": [
+    {
+      "type": "other",
+      "streetAddress": "123 Evergreen skid row",
+      "locality": "Cartucho",
+      "region": "BO",
+      "postalCode": "54321",
+      "country": "CO",
+      "primary": true
+    }
+  ],
+  "phoneNumbers": [
+    {
+      "value": "555 123 4567",
+      "type": "home"
+    }
+  ],
+  "locale": "es_ES",
+  "active": true,
+  "password": "secret"
+}
