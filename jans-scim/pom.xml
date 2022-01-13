@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project
+	xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>io.jans</groupId>
+	<artifactId>jans-scim</artifactId>
+	<packaging>pom</packaging>
+	<version>1.0.0-SNAPSHOT</version>
+	<name>SCIM API</name>
+	<url>http://www.gluu.org</url>
+	
+	<properties>
+		<maven.min-version>3.3.9</maven.min-version>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		
+		<janssen.version>1.0.0-SNAPSHOT</janssen.version>
+		<gluu.version>1.0.0-SNAPSHOT</gluu.version>
+        <weld.version>3.1.2.Final</weld.version>
+
+		<jacoco.version>0.8.7</jacoco.version>
+
+		<sonar.projectKey>JanssenProject_jans-scim</sonar.projectKey>
+		<sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
+		<sonar.organization>janssenproject</sonar.organization>
+		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
+	</properties>
+
+	<prerequisites>
+		<maven>${maven.min-version}</maven>
+	</prerequisites>
+
+	<repositories>
+		<repository>
+			<id>repository.jboss.org</id>
+			<name>JBoss Repository</name>
+			<url>https://repository.jboss.org/nexus/content/groups/public-jboss/</url>
+		</repository>
+		<repository>
+			<id>jans</id>
+			<name>Janssen project repository</name>
+			<url>https://maven.jans.io/maven</url>
+		</repository>
+		<repository>
+			<id>gluu</id>
+			<name>Gluu project repository</name>
+			<url>https://maven.gluu.org/maven</url>
+		</repository>
+	</repositories>
+
+	<scm>
+		<url>https://github.com/JanssenProject/jans-scim</url>
+		<connection>scm:git:git://github.com/JanssenProject/jans-scim.git</connection>
+		<developerConnection>scm:git:git@github.com:JanssenProject/jans-scim.git</developerConnection>
+	</scm>
+
+	<modules>
+		<module>model</module>
+		<module>client</module>
+		<module>service</module>
+		<module>server</module>
+	</modules>
+	
+	<dependencyManagement>
+		<dependencies>
+			<!-- janssen -->
+			<dependency>
+				<groupId>io.jans</groupId>
+				<artifactId>jans-bom</artifactId>
+				<version>${janssen.version}</version>
+				<scope>import</scope>
+				<type>pom</type>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>3.1</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-clean-plugin</artifactId>
+					<version>2.5</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-deploy-plugin</artifactId>
+					<version>2.7</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-dependency-plugin</artifactId>
+					<version>2.8</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-install-plugin</artifactId>
+					<version>2.3.1</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-jar-plugin</artifactId>
+					<version>2.4</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-resources-plugin</artifactId>
+					<version>2.6</version>
+					<configuration>
+						<encoding>UTF-8</encoding>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-site-plugin</artifactId>
+					<version>2.1.1</version>
+				</plugin>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>findbugs-maven-plugin</artifactId>
+					<version>3.0.4</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-javadoc-plugin</artifactId>
+					<configuration>
+						<failOnError>false</failOnError>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.jacoco</groupId>
+					<artifactId>jacoco-maven-plugin</artifactId>
+					<version>${jacoco.version}</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+	
+</project>
