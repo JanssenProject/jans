@@ -6,11 +6,14 @@
 
 package io.jans.as.server;
 
-import org.testng.Assert;
-
-import javax.ws.rs.core.Response;
+import java.security.Security;
 import java.util.List;
 import java.util.Map.Entry;
+
+import javax.ws.rs.core.Response;
+
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.testng.Assert;
 
 /**
  * @author Javier Rojas
@@ -18,15 +21,21 @@ import java.util.Map.Entry;
  */
 public abstract class BaseTest extends ConfigurableTest {
 
-    public static void showTitle(String title) {
-        title = "TEST: " + title;
-
-        System.out.println("#######################################################");
-        System.out.println(title);
-        System.out.println("#######################################################");
+    static {
+        Security.addProvider(new BouncyCastleProvider());
     }
 
-    public void showResponse(String title, Response response) {
+	public static void showTitle(String title) {
+		title = "TEST: " + title;
+
+		System.out.println("#######################################################");
+		System.out.println(title);
+		System.out.println("#######################################################");
+	}
+
+	public void showResponse(String title, Response response) {
+		showResponse(title, response, null);
+	}
         showResponse(title, response, null);
     }
 

@@ -37,6 +37,8 @@ import io.jans.service.timer.event.TimerEvent;
 import io.jans.service.timer.schedule.TimerSchedule;
 import io.jans.util.StringHelper;
 import io.jans.util.properties.FileConfiguration;
+import io.jans.util.security.StringEncrypter;
+
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -145,6 +147,8 @@ public class ConfigurationFactory {
     private WebKeysConfiguration jwks;
     private ErrorResponseFactory errorResponseFactory;
     private String cryptoConfigurationSalt;
+    private String cryptoConfigurationPassw;
+    private String cryptoConfigurationAlg;
 
     private String contextPath;
     private String facesMapping;
@@ -329,6 +333,14 @@ public class ConfigurationFactory {
 
     public String getCryptoConfigurationSalt() {
         return cryptoConfigurationSalt;
+    }
+
+    public String getCryptoConfigurationPassw() {
+        return cryptoConfigurationPassw;
+    }
+
+    public String getCryptoConfigurationAlg() {
+        return cryptoConfigurationAlg;
     }
 
     private boolean createFromFile() {
@@ -579,6 +591,11 @@ public class ConfigurationFactory {
         try {
             FileConfiguration cryptoConfiguration = createFileConfiguration(saltFilePath, true);
             this.cryptoConfigurationSalt = cryptoConfiguration.getString("encodeSalt");
+            this.cryptoConfigurationPassw  = cryptoConfiguration.getString("encodePassw");
+            this.cryptoConfigurationAlg = cryptoConfiguration.getString("encodeAlg");
+            StringEncrypter.defaultInstance().init(this.cryptoConfigurationPassw,
+                    this.cryptoConfigurationSalt,
+                    this.cryptoConfigurationAlg);
         } catch (Exception ex) {
             if (log.isErrorEnabled())
                 log.error("Failed to load configuration from {}", saltFilePath, ex);

@@ -17,6 +17,13 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.Properties;
 
+import org.slf4j.Logger;
+
+import io.jans.util.StringHelper;
+import io.jans.util.exception.EncryptionException;
+import io.jans.util.security.PropertiesDecrypter;
+import io.jans.util.security.StringEncrypter;
+
 /**
  * Allows to encrypt/decrypt strings using a pre-configured key from oxCore.
  *
