@@ -1,0 +1,21 @@
+{
+  "dynamicRegistrationExpirationTime": 10,
+  "dynamicRegistrationScopesParamEnabled": true,
+  "dynamicRegistrationPersistClientAuthorizations": true,
+  "returnClientSecretOnRead": false,
+  "dynamicRegistrationPasswordGrantTypeEnabled": false,
+  "trustedClientEnabled": true,
+  "dynamicRegistrationCustomObjectClass": "MyDynamicRegistrationCustomObject",
+  "dynamicGrantTypeDefault": [
+    "REFRESH_TOKEN",
+    "OXAUTH_UMA_TICKET",
+    "IMPLICIT",
+    "CLIENT_CREDENTIALS",
+    "AUTHORIZATION_CODE"
+  ],
+  "dynamicRegistrationCustomAttributes": [
+    "jansTrustedClnt"
+  ],
+  "defaultSubjectType": "pairwise",
+  "legacyDynamicRegistrationScopeParam": false
+}
