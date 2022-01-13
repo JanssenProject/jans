@@ -1,0 +1,8 @@
+<!DOCTYPE suite SYSTEM "http://beust.com/testng/testng-1.0.dtd" >
+
+<suite name="Fido2 Client v1.0" parallel="false">
+
+    <parameter name="file" value="target/test-classes/testng.properties" />
+
+
+</suite>
