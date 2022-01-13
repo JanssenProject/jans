@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<f:template xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http:/jsf.exadel.com/template"
+	xmlns:u="http:/jsf.exadel.com/template/util">
+	<u:selector name="body">
+		<u:style name="font-family" skin="generalFamilyFont"/>
+		<u:style name="color" skin="generalTextColor"/>
+	</u:selector>
+	<u:selector name="h1">
+		<u:style name="font-family" skin="generalFamilyFont"/>
+		<u:style name="color" skin="tabDisabledTextColor"/>
+	</u:selector>
+	<u:selector name="a:active, a:link, a:visited">
+		<u:style name="color" skin="generalLinkColor"/>
+	</u:selector>
+	<u:selector name="a:hover">
+		<u:style name="color" skin="hoverLinkColor"/>
+	</u:selector>
+	<u:selector name="input[type=text], input[type=password], textarea, select">
+		<u:style name="background-color" skin="controlBackgroundColor"/>
+		<u:style name="color" skin="controlTextColor"/>
+		<u:style name="background-position" value="left top"/>
+		<u:style name="background-repeat" value="repeat-x"/>
+		<u:style name="background-image">
+			<f:resource f:key="org.richfaces.renderkit.html.images.SliderFieldGradient"/>
+		</u:style>
+		<u:style name="border" value="1px solid"/>
+		<u:style name="border-color" skin="tableBorderColor" />
+	</u:selector>
+	<u:selector name="select">
+		<u:style name="background-color" value="transparent"/>
+		<u:style name="background-image">
+			<f:resource f:key="org.richfaces.renderkit.html.images.SliderFieldGradient"/>
+		</u:style>
+	</u:selector>
+	<u:selector name="option">
+		<u:style name="background-color" skin="generalBackgroundColor"/>
+	</u:selector>
+	<u:selector name="select[multiple]">
+		<u:style name="background-color" skin="controlBackgroundColor"/>
+	</u:selector>
+	<u:selector name="select[multiple] option">
+		<u:style name="background-color" value="transparent"/>
+	</u:selector>
+	<u:selector name="input[type=submit], input[type=button]">
+		<u:style name="padding" value="1px 4px"/>
+		<u:style name="background-image">
+			<f:resource f:key="org.richfaces.renderkit.html.GradientA"/>
+		</u:style>
+		<u:style name="border" value="1px solid"/>
+		<u:style name="border-color" skin="headerBackgroundColor"/>
+		<u:style name="color" skin="headerTextColor"/>
+		<u:style name="font-weight" value="bold"/>
+	</u:selector>
+	<u:selector name="input[type=submit][disabled], input[type=button][disabled]">
+		<u:style name="opacity" value="0.33"/>
+	</u:selector>
+	<!-- hack for IE to just get rid of border since it doubles the border if you use one -->
+	<u:selector name="* html input[type=submit], * html input[type=button], *+html input[type=submit], *+html input[type=button]">
+		<u:style name="border" value="0"/>
+		<u:style name="font-size" value="11px"/>
+	</u:selector>
+	<u:selector name=".rich-table-subheadercell">
+		<u:style name="background-image">
+			<f:resource f:key="org.richfaces.renderkit.images.TabGradientB"/>
+		</u:style>
+	</u:selector>
+	<u:selector name=".rich-toolbar a:link, .rich-toolbar a:visited, .rich-toolbar a:active, .rich-toolbar a:hover">
+		<u:style name="color" skin="headerTextColor"/>
+	</u:selector>
+	<u:selector name=".rich-toolbar a:hover">
+		<u:style name="color" skin="generalTextColor"/>
+	</u:selector>
+	<u:selector name=".rich-toolbar .rich-menu-item, .rich-toolbar .rich-menu-item a, .rich-toolbar .rich-menu-item a:hover, .rich-toolbar .rich-menu-item a:visited">
+		<u:style name="color" skin="generalTextColor" />
+	</u:selector>
+	<u:selector name=".rich-table-subheadercell a:hover">
+		<u:style name="color" skin="calendarHolidaysTextColor"/>
+	</u:selector>
+	<!-- Define static styles in the CDATA block below (you can also move this block to the top) -->
+	<f:verbatim><![CDATA[
+]]></f:verbatim>
+</f:template>
