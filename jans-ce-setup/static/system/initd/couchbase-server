@@ -1,0 +1,131 @@
+#!/bin/sh
+#
+# Startup / shutdown script for the Couchbase Server
+#
+# Copyright (c) 2011, Couchbase, Inc.
+# All rights reserved
+#
+#
+### BEGIN INIT INFO
+# Provides:          couchbase-server
+# Required-Start:    $network $local_fs
+# Required-Stop:
+# Should-Start:      $named
+# Should-Stop:
+# Default-Start:        2 3 4 5
+# Default-Stop:         0 1 6
+# Short-Description:    Couchbase Server
+# Description:          Couchbase Server
+
+### END INIT INFO
+
+. /lib/lsb/init-functions
+
+if [ "$(id -u)" != "0" ]; then
+    log_failure_msg "Must run as root"
+    exit 1
+fi
+
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+
+DAEMON=/opt/couchbase/bin/couchbase-server
+PIDFILE=/opt/couchbase/var/lib/couchbase/couchbase-server.pid
+NODEFILE=/opt/couchbase/var/lib/couchbase/couchbase-server.node
+COOKIEFILE=/opt/couchbase/var/lib/couchbase/couchbase-server.cookie
+
+WAIT_TIMEOUT=60
+WAIT_INTERVAL=1
+
+test -f $DAEMON || exit 0
+
+start() {
+    touch $PIDFILE $NODEFILE $COOKIEFILE
+    chown couchbase $PIDFILE $NODEFILE $COOKIEFILE
+    cd /opt/couchbase/var/lib/couchbase
+    ulimit -n 70000
+    ulimit -l unlimited
+    start-stop-daemon --start --quiet --oknodo --chdir "$PWD" --chuid couchbase --pidfile /dev/null --startas /bin/sh  -- -c "$DAEMON -- -noinput -detached > /opt/couchbase/var/lib/couchbase/logs/start.log 2>&1"
+    errcode=$?
+    return $errcode
+}
+
+wait_running() {
+    time_elapsed=0
+    while [ $time_elapsed -lt $WAIT_TIMEOUT ]; do
+        if running; then
+            return 0
+        fi
+        sleep $WAIT_INTERVAL
+        time_elapsed=$((time_elapsed+WAIT_INTERVAL))
+    done
+    return 1
+}
+
+start_checking() {
+    start
+    if wait_running; then
+        true
+    else
+        log_failure_msg "Failed to start couchbase-server: timed out"
+        return 1
+    fi
+}
+
+stop() {
+    $DAEMON -k
+    errcode=$?
+    return $errcode
+}
+
+running() {
+    pidofproc -p $PIDFILE $DAEMON >/dev/null
+    errcode=$?
+    return $errcode
+}
+
+case $1 in
+    start)
+        if running ; then
+            log_warning_msg "couchbase-server is already started"
+            exit 0
+        fi
+        start_checking && log_success_msg "Started couchbase-server"
+        ;;
+    stop)
+        if stop; then
+            log_success_msg "Stopped couchbase-server"
+        else
+            log_failure_msg "Failed to stop couchbase-server"
+        fi
+        ;;
+    restart)
+        stop
+        log_success_msg "Stopped couchbase-server"
+        start
+        log_success_msg "Started couchbase-server"
+        ;;
+    status)
+        if running ; then
+            log_success_msg "couchbase-server is running"
+            exit 0
+        else
+            log_success_msg "couchbase-server is not running"
+            exit 3
+        fi
+        ;;
+    force-reload)
+        if running ; then
+            stop
+            if start_checking; then
+                log_success_msg "couchbase-server was restarted"
+            else
+                exit 1
+            fi
+        else
+            log_success_msg "couchbase-server is not running"
+        fi
+        ;;
+    *)
+        echo "Usage: /etc/init.d/couchbase-server {start|stop|restart|status|force-reload}" >&2
+        exit 3
+esac

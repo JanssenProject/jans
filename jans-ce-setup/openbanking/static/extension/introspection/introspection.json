@@ -1,0 +1,29 @@
+{
+  "dn": "inum=CABA-2222,ou=scripts,o=jans",
+  "inum": "CABA-2222",
+  "name": "introspection",
+  "aliases": null,
+  "description": "Openbanking Introspection Script",
+  "script": "_file IntrospectionScript.py",
+  "scriptType": "INTROSPECTION",
+  "programmingLanguage": "PYTHON",
+  "moduleProperties": [
+    {
+      "value1": "v1",
+      "value2": "v2",
+      "description": null
+    },
+    {
+      "value1": "location_type",
+      "value2": "ldap",
+      "description": null
+    }
+  ],
+  "configurationProperties": null,
+  "level": 102,
+  "revision": 1,
+  "enabled": true,
+  "scriptError": null,
+  "modified": false,
+  "internal": false
+}
