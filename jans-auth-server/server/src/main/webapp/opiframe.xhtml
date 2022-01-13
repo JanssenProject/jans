@@ -1,0 +1,49 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+<f:view transient="true" contentType="text/html">
+<h:head>
+    <meta charset="UTF-8"/>
+    <title>
+        oxAuth - OP iFrame
+    </title>
+    <script type="text/javascript" src="js/crypto-js-3.1.9-1/crypto-js.js"></script>
+    <script type="text/javascript">
+        //<![CDATA[
+        window.addEventListener("message", receiveMessage, false);
+
+        function receiveMessage(e) {
+            var message = e.data;
+            var clientId = message.split(' ')[0];
+            var sessionState = message.split(' ')[1];
+
+            var salt = sessionState.split('.')[1];
+            var opbs = getOpBrowserState();
+
+            var ss = CryptoJS.SHA256(clientId + ' ' + e.origin + ' ' + opbs + ' ' + salt) + "." + salt;
+
+            var stat = sessionState == ss ? "unchanged" : "changed";
+
+            e.source.postMessage(stat, e.origin);
+        }
+
+        function getOpBrowserState() {
+            var x, y, cookies = document.cookie.split(";");
+            for (var i = 0; i < cookies.length; i++) {
+                x = cookies[i].substr(0, cookies[i].indexOf("="));
+                y = cookies[i].substr(cookies[i].indexOf("=") + 1);
+                x = x.replace(/^\s+|\s+$/g, "");
+                if (x == "opbs") {
+                    return decodeURI(y);
+                }
+            }
+        }
+        //]]>
+    </script>
+</h:head>
+<h:body></h:body>
+</f:view>
+</html>
