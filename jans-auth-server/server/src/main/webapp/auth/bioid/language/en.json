@@ -1,0 +1,53 @@
+{
+  "titleEnrollment": "Enrollment",
+  "titleVerification": "Verification",
+  "titleIdentification": "Identification",
+  "titleLiveDetection": "Liveness Detection",
+
+  "introductionTitle": "How it works",
+  "introductionStep1": "Step 1",
+  "introductionStep1Desc1": "Before you start",
+  "introductionStep1Desc2": "come closer to the camera",
+  "introductionTooFarAway": "Too far away!",
+  "introductionTooClose": "Too close!",
+  "introductionPerfect": "Perfect!",
+  "introductionStep2": "Step 2",
+  "introductionStep2Desc1": "For Liveness Detection",
+  "introductionStep2Desc2": "nod your head slightly",
+  "introductionDontMoveDevice": "Please don't move the device!",
+  "introductionDontShowAgain": "GOT IT! Don't show the instruction again",
+
+  "buttonCancel": "back",
+  "buttonCancel.title": "Abort and navigate back to caller",
+  "buttonReadyToStart": "I'm ready to start",
+  "buttonContinue": "Skip biometrics",
+  "buttonMobileApp": "Start BioID app",
+
+  "prompt": "It seems like we don't have access to the camera. For performing biometric operations, please try the following:<br/>- Grant access to the camera.<br/>- Use a different browser (e.g. the most recent versions of Opera, Firefox, Chrome or Edge).",
+  "mobileapp": "If you have installed the BioID App on your mobile device, you can use this app for enrollment or verification.",
+
+  "uploadInfo": "Uploading...",
+
+  "capture-error": "We could not capture an image.<br />Sorry, but without access to the camera, facial recognition and liveness detection aren't possible!",
+  "nogetUserMedia": "Your browser does not support the HTML5 Media Capture and Streams API. Please use a different browser or the BioID mobile app.",
+  "permissionDenied": "Permission Denied!",
+  "webgl-error": "WebGL is disabled or unavailable. If possible activate WebGL or use another browser.",
+
+  "UserInstruction-CloseUp": "Come close and position your face<br />within the blue head before you start",
+  "UserInstruction-NodYourHead": "Please nod your head",
+  "UserInstruction-FollowMe": "Follow the blue head",
+  "UserInstruction-NoMovement": "Follow the head's movement",
+  "UserInstruction-PleaseWait": "Please wait",
+
+  "Perform-enrollment": "Training...",
+  "Perform-verification": "Verifying...",
+  "Perform-identification": "Identifying...",
+  "Perform-livenessdetection": "Processing...",
+
+  "NoMotionDetected": "We could not detect any motion.<br/>For Liveness Detection please nod your head slightly.",
+  "NoFaceFound": "We could not find a suitable face.<br/>Come close and look straight before you start.",
+  "MultipleFacesFound": "We found multiple faces or a strongly uneven background distracted us.<br/>Your face should fill the circle completely.",
+  "LiveDetectionFailed": "Liveness Detection failed.<br/>Look straight into the camera, then nod your head slightly.<br/>Please ensure constant lighting.",
+  "ChallengeResponseFailed": "Challenge-Response failed!<br/>Slowly follow the head's movement.",
+  "NotRecognized": "You have not been recognized!<br/>Please ensure constant lighting. For improving recognition, please enroll again."
+}

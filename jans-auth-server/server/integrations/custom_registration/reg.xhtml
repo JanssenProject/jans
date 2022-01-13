@@ -1,0 +1,264 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:f="http://xmlns.jcp.org/jsf/core" xmlns:ui="http://xmlns.jcp.org/jsf/facelets" xmlns:b="http://bootsfaces.net/ui" xmlns:h="http://xmlns.jcp.org/jsf/html" template="/WEB-INF/incl/layout/login-template.xhtml">
+    <f:metadata>
+        <f:viewAction action="#{authenticator.prepareAuthenticationForStep}" />
+        <f:viewParam name="login_hint" value="#{loginAction.loginHint}" />
+    </f:metadata>
+    <ui:define name="head">
+        <meta name="description" content="Gluu, Inc." />
+
+    </ui:define>
+    <ui:define name="pageTitle">
+        <h:outputText value="#{msgs['login.pageTitle']}" />
+    </ui:define>
+    <ui:define name="body">
+        <div class="container">
+            <h:panelGroup rendered="true">
+                <div class="login_bx_1" style="border-radius: 10px; margin-top: 0px; background: white; border: 1px solid #008b8b;">
+                    <div class="row">
+                        <h:messages class="text-center" style="color:#8b0000;margin:5px;margin-left:20px; font-size:2vw;" infoClass="text-center" errorClass="text-center" />
+                    </div>
+                    <b:form horizontal="true" id="loginForm" style="padding:30px;" onsubmit="return validateFun()">
+                        <h2 style="text-align: center;margin-bottom: 10px;">Register</h2>
+
+                        <div class="row" id="givenName" style="margin-top: 20px;">
+                            <div class="col-25" style="width: 25%;margin-top: 6px;">
+                                <label for="fname">First Name</label>
+                            </div>
+                            <div class="col-75" style="width: 75%;margin-top: 6px;">
+                                <input name="fnm" type="text" class="form-control" autocomplete="off" required="true" />
+                            </div>
+                        </div>
+                        <div class="row" id="sn" style="margin-top: 20px;">
+                            <div class="col-25" style="width: 25%;margin-top: 6px;">
+                                <label for="lname">Last Name</label>
+                            </div>
+                            <div class="col-75" style="width: 75%;margin-top: 6px;">
+                                <input name="lnm" type="text" class="form-control" autocomplete="off" required="true" />
+                            </div>
+                        </div>
+                        <div class="row" id="familyName" style="margin-top: 20px;">
+                            <div class="col-25" style="width: 25%;margin-top: 6px;">
+                                <label for="mname">Middle Name</label>
+                            </div>
+                            <div class="col-75" style="width: 75%;margin-top: 6px;">
+                                <input name="mnm" type="text" class="form-control" autocomplete="off" />
+                            </div>
+                        </div>
+                        <div class="row" id="mail" style="margin-top: 20px;">
+                            <div class="col-25" style="width: 25%;margin-top: 6px;">
+                                <label for="email">Email</label>
+                            </div>
+                            <div class="col-75" style="width: 75%;margin-top: 6px;">
+                                <input name="email" type="email" id="email" pattern=".+@gmail.com" class="form-control" autocomplete="off" required="true" />
+                            </div>
+                        </div>
+                    
+                        <div class="row" style="margin-top: 20px;">
+                            <div class="col-25" style="width: 25%;margin-top: 6px;">
+                                <label for="forpassword">Password</label>
+                            </div>
+                            <div class="col-75" style="width: 75%;margin-top: 6px;">
+                                <input name="pass" type="password" id="password" class="form-control" autocomplete="off" required="true" />
+                                <meter max="4" id="password-strength-meter" style="width: 75%;margin-top: 6px;"></meter>
+                                <p id="password-strength-text"></p>
+                            </div>
+                        </div>
+                        <div class="row" style="margin-top: 10px;">
+                            <div class="col-25" style="width: 25%;margin-top: 6px;">
+                                <label for="forrepassword">Re-type Password</label>
+                            </div>
+                            <div class="col-75" style="width: 75%;margin-top: 6px;">
+                                <input name="repass" type="password" id="repassword" class="form-control" autocomplete="off" required="true" />
+
+                            </div>
+                        </div>
+                        <div class="row" style="margin-top: 10px;">
+                            <div class="col-25" style="width: 25%;margin-top: 6px;">
+                                <label for="forrepassword">Captcha</label>
+                            </div>
+                            <div class="col-75" style="width: 75%;margin-top: 6px;">
+                                <input type="text" readonly="true" id="mainCaptcha" class="form-control" autocomplete="off" required="true" />
+                                <input type="button" id="refresh" value="Refresh" onclick="Captcha();" />
+                            </div>
+                        </div>
+                        <div class="row" style="margin-top: 10px;">
+                            <div class="col-25" style="width: 25%;margin-top: 6px;">
+                                <label for="forrepassword">Enter Captcha</label>
+                            </div>
+                            <div class="col-75" style="width: 75%;margin-top: 6px;">
+                                <input type="text" id="txtInput" class="form-control" autocomplete="off" required="true" />
+
+                            </div>
+                        </div>
+
+                        <!--
+							FirstName<input name="fnm" type="text" class="form-control" autocomplete="off" required="true"/>
+							LastName<input name="lnm" type="text" class="form-control" autocomplete="off" required="true"/>
+							Middle Name<input name="mnm" type="text" class="form-control" autocomplete="off" />
+							Email<input name="email" type="email" id="email" pattern=".+@gmail.com" class="form-control" autocomplete="off" required="true" />
+							Password<input name="pass" type="password" id="password" class="form-control" autocomplete="off" required="true"/>
+							Re-type Password<input name="repass" type="password" id="repassword" class="form-control" autocomplete="off" required="true"/><meter max="4" id="password-strength-meter"></meter><p id="password-strength-text"></p>
+						-->
+
+
+                        <div class="form-group row" style="margin-top: 20px; text-align: center;">
+                            <div class="col-sm-offset-1 offset-md-1 col-sm-8 col-md-8">
+                                <b:commandButton id="loginButton" style="background-color: #00BE79; color:white;" styleClass="btn col-sm-12" value="Register" onclick="checkRemembeMe()" iconAwesome="fa-sign-in" action="#{authenticator.authenticate}" />
+                            </div>
+                        </div>
+
+
+                        <!--<div class="form-group row">
+							<div class="col-sm-offset-3 offset-md-3 col-sm-7 col-md-7">
+								<div class="forgot_link">
+									<a href="/identity/person/passwordReminder.htm"
+										style="color: blue;"> <h:outputText
+											value="#{msgs['login.forgotYourPassword']}" />
+									</a>
+								</div>
+							</div>
+						</div> -->
+                        <h:inputHidden id="platform" />
+                    </b:form>
+                    <div class="row">
+                        <div align="center" class="col-sm-offset-4 col-sm-9">
+                            <ui:repeat value="#{identity.getWorkingParameter('download_url').entrySet().toArray()}" var="_entry">
+                                <ui:param name="app_name" value="#{_entry.key}" />
+                                <ui:param name="app_link" value="#{_entry.value}" />
+                                <h:outputLink style="margin-right:5px;" value="#{app_link}" title="#{app_name}">
+                                    <h:graphicImage value="img/#{app_name}.png" />
+                                </h:outputLink>
+                            </ui:repeat>
+                        </div>
+                        <h:panelGroup layout="block" rendered="#{external_registration_uri != Null}">
+                            <div class="reg_link">
+                                <a href="#{external_registration_uri}">
+                                    <h:outputText value="Register Now " />
+                                </a>
+                            </div>
+                        </h:panelGroup>
+                    </div>
+                </div>
+            </h:panelGroup>
+        </div>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/zxcvbn/4.2.0/zxcvbn.js"></script>
+        <!--<script src="/oxauth/custom/js/pass.js"></script>-->
+        <script type="text/javascript">
+            var passwordStrength;
+
+
+            function start() {
+                func1();
+                Captcha();
+              
+            }
+            window.onload = start;
+
+            function func1() {
+
+                var attributes = `#{identity.sessionId.sessionAttributes['CustomAtrributes']}`;
+                passwordStrength = `#{identity.sessionId.sessionAttributes['passStrength']}`;
+                console.log("passStrength:" + `#{identity.sessionId.sessionAttributes['passStrength']}`)
+                var nameArr = attributes.split(',');
+                var allIds = ['mail', 'givenName', "familyName", 'sn']
+                allIds = allIds.filter((el) => !nameArr.includes(el));
+                console.log(allIds);
+                for (var id in allIds)
+                    document.getElementById(allIds[id]).remove();
+            }
+
+            function Captcha() {
+
+
+                var a = Math.floor(Math.random() * 26)
+                var b = Math.floor(Math.random() * 26)
+                var c = Math.floor(Math.random() * 26)
+                var d = Math.floor(Math.random() * 26)
+
+                var cod = a + '' + b + '' + '' + c + '' + d;
+                document.getElementById("mainCaptcha").value = cod
+
+            }
+
+
+        
+            document.getElementById("password").addEventListener("input", myFunction);
+            var meter_value;
+
+            function myFunction() {
+
+                var strength = {
+                    0: "Worst ",
+                    1: "Bad ",
+                    2: "Weak ",
+                    3: "Good ",
+                    4: "Strong "
+                }
+
+                var password = document.getElementById('password');
+                var meter = document.getElementById('password-strength-meter');
+                var text = document.getElementById('password-strength-text');
+
+                var val = password.value;
+                var result = zxcvbn(val);
+
+                meter.value = result.score;
+                meter_value = meter.value
+                    // Update the text indicator
+                if (val !== "") {
+                    text.innerHTML = "Strength: " + strength[result.score];
+                } else {
+                    text.innerHTML = "";
+                }
+
+
+
+            }
+
+            function validateFun() {
+
+
+                var passfield = document.getElementById("password").value;
+                var repassfield = document.getElementById("repassword").value;
+
+                var passw = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/;
+
+                if (passfield != repassfield) {
+                    alert("Password Field must match!!!");
+                    return false;
+                } else {
+
+                    if (passfield.match(passw)) {
+                        if (meter_value >= 2) {
+
+                            var string1 = document.getElementById('mainCaptcha').value;
+                            var string2 = document.getElementById('txtInput').value;
+                            if (string1 == string2) {
+
+                                return true;
+                            } else {
+                                alert("invalid Captcha");
+                                return false;
+                            }
+
+
+                        } else {
+                            alert("Your Password is weak! Try a different Password");
+                        }
+
+                    } else {
+                        alert("Wrong Passord!!! Password must be 6 to 20 characters,at least one numeric digit, one uppercase and one lowercase letter.");
+                        return false;
+                    }
+                }
+
+
+
+
+
+            }
+        </script>
+    </ui:define>
+</ui:composition>
