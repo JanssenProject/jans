@@ -1,0 +1,11 @@
+{
+  "pkcs11Config": {
+    "name": "SoftHSM",
+    "library": "%(softhsm_path)s",
+    "slot": "310997351",
+    "showInfo": "true"
+  },
+  "pkcs11Pin": "1234",
+  "dnName": "CN=Jans Eleven CA Certificate",
+  "testModeToken": "5be64765-7052-466b-ad1a-bd7dddcfdee4"
+}
