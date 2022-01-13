@@ -36,7 +36,6 @@ jobs:
         JanssenProject/jans-auth-server
         JanssenProject/jans-config-api
         JanssenProject/jans-client-api
-        JanssenProject/jans-scim
         JanssenProject/jans-core
       NON_JVM_PROJECTS: |
         JanssenProject/jans-setup
@@ -75,8 +74,6 @@ jobs:
             "JanssenProject/jans-auth-server")
                     ;&
             "JanssenProject/jans-client-api")
-                    ;&
-            "JanssenProject/jans-scim")
                     ;&
             "JanssenProject/jans-config-api")
                   echo "Run Sonar analysis without test execution"
