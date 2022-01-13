@@ -34,7 +34,6 @@ jobs:
     env:
       JVM_PROJECTS: |
         JanssenProject/jans-auth-server
-        JanssenProject/jans-orm
         JanssenProject/jans-config-api
         JanssenProject/jans-client-api
         JanssenProject/jans-scim
