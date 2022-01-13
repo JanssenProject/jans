@@ -1,0 +1,209 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:f="http://xmlns.jcp.org/jsf/core"
+        xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+        xmlns:h="http://xmlns.jcp.org/jsf/html"
+        template="/WEB-INF/incl/layout/login-extended-template.xhtml">
+        <f:metadata>
+                <f:viewAction action="#{authenticator.prepareAuthenticationForStep}"
+                        if="#{not identity.loggedIn}" />
+        </f:metadata>
+        <ui:define name="head">
+                <script src="js/base64js.js" />
+                <script src="js/base64url.js" />
+                <script src="js/webauthn.js" />
+
+                <script>
+                        var assertion_request = ${identity.getWorkingParameter('fido2_assertion_request')};
+                        var attestation_request = ${identity.getWorkingParameter('fido2_attestation_request')};
+
+                        function setStatus(statusText) {
+                                  document.getElementById('status').textContent = statusText;
+                        }
+
+                        function addMessage(message) {
+                          const el = document.getElementById('messages');
+                          const p = document.createElement('p');
+                          p.appendChild(document.createTextNode(message));
+                          el.appendChild(p);
+                        }
+
+                        function addMessages(messages) {
+                          messages.forEach(addMessage);
+                        }
+
+                        function startAttestation() {
+                                console.log('Executing get attestation Fido2 request', attestation_request);
+
+                                request = JSON.parse(attestation_request);
+                                webauthn.createCredential(request).then(data => {
+                                        setStatus('Get attestation key data.');
+                                        document.getElementById('tokenResponse').value = JSON.stringify(webauthn.responseToObject(data));
+                                        document.getElementById('authMethod').value = 'enroll';
+                                        document.getElementById('fido2_form').submit();
+                                }).catch((err) => {
+                                        setStatus('Registration failed.');
+                                        console.error('Registration failed', err);
+
+                                        if (err.name === 'NotAllowedError') {
+                                                if (request.excludeCredentials &amp;&amp; (request.excludeCredentials.length > 0)) {
+                                                        addMessage('Credential creation failed, probably because an already registered credential is avaiable.');
+                                                } else {
+                                                        addMessage('Credential creation failed for an unknown reason.');
+                                                }
+                                        } else if (err.name === 'InvalidStateError') {
+                                                addMessage("This authenticator is not registered for the account '${identity.user.userId}'. Please try again with a registered authenticator.");
+                                        } else if (err.name === 'AbortError') {
+                                                addMessage('This operation is canceled by user.');
+                                    } else if (err.message) {
+                                                addMessage(err.name + ' : ' + err.message);
+                                        } else if (err.messages) {
+                                                addMessages(err.messages);
+                                        }
+
+                                        return false;
+                                });
+                        }
+
+                        function startAssertion() {
+                                console.log('Executing get assertion Fido2 request', assertion_request);
+
+                                if (assertion_request.indexOf("internal") !== -1 )
+                                	{
+                                                parentNode = document.getElementsByClassName('container')[0]; //.style.display = 'none';
+                                                document.getElementsByClassName('step_bx')[0].style.display = "none";
+
+                                	 	//const el = document.getElementById('messages');
+                          			const p = document.createElement('p');
+                        			p.appendChild(document.createTextNode("Platform authenticator (Touch ID) used to register this user is not present on this device. "));
+			                        parentNode.appendChild(p);
+						console.log ("Platform authenticator not present");
+						return false;
+                                	}
+                                else
+                                	{
+	                                	   request = JSON.parse(assertion_request);
+	                                       webauthn.getAssertion(request).then(data => {
+	                                               setStatus('Get assertion key data.');
+	                                               document.getElementById('tokenResponse').value = JSON.stringify(webauthn.responseToObject(data));
+	                                               document.getElementById('authMethod').value = 'authenticate';
+	
+	                                               document.getElementById('fido2_form').submit();
+	                                       }).catch((err) => {
+	                                               setStatus('Authentication failed.');
+	                                               console.error('Authentication failed', err);
+	
+	                                               if (err.name === 'InvalidStateError') {
+	                                                       addMessage("This authenticator is not registered for the account '${identity.user.userId}'. Please try again with a registered authenticator.");
+	                                               } else if (err.name === 'AbortError') {
+	                                                   addMessage('This operation is canceled by user.');
+	                                       } else if (err.message) {
+	                                                   addMessage(err.name + ' : ' + err.message);
+	                                       } else if (err.messages) {
+	                                                   addMessages(err.messages);
+	                                       }
+	
+	                                           return false;
+	                                   });
+                                	}
+                    }
+        window.onload = function() {
+                    if (assertion_request != null) {
+                            setTimeout(startAssertion(), 1000);
+                    } else {
+                            setTimeout(startAttestation(), 1000);
+                    }
+        };
+            </script>
+
+            <style type="text/css">
+.h4, .h5, .h6, h4, h5, h6 {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    color: black;
+}
+
+p {
+    margin: 0 0 15px !important;
+    margin: 0 !important;
+    padding: 10, 10 !important;
+}
+
+p {
+    display: block;
+    -webkit-margin-before: 1em !important;
+    -webkit-margin-after: 1em !important;
+    -webkit-margin-start: 0px !important;
+    -webkit-margin-end: 0px !important;
+}
+
+body {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+              line-height: 1.42857143;
+}
+
+.step_bx {
+        margin: 0 30% auto;
+        border-radius: 5px !important;
+        max-height: 80%;
+        margin-bottom: 100px;
+}
+</style>
+        </ui:define>
+
+        <ui:define name="pageTitle">oxAuth - Fido2 Login</ui:define>
+        <ui:define name="body">
+                <form method="post"     id="fido2_form" action="#{request.contextPath}/postlogin.htm" onsubmit="return false;">
+                        <input type="hidden" name="authMethod" id="authMethod" />
+                        <input type="hidden" name="tokenResponse" id="tokenResponse" />
+                </form>
+                <h:form id="loginForm">
+                        <h:panelGroup rendered="#{not identity.loggedIn}">
+                                <ui:param name="client"
+                                        value="#{clientService.getClient(identity.sessionId.sessionAttributes['client_id'])}" />
+
+                                <h:panelGroup rendered='#{!empty client.getLogoUri()}'>
+                                        <h:graphicImage url='#{client.getLogoUri()}' />
+                                </h:panelGroup>
+                                <div class="container">
+                                        <div class="step_bx">
+                                                <h2>#{msgs['fido2.verification.stepverification']}</h2>
+                                                <p>#{msgs['fido2.verification.usedevice']}</p>
+                                                <img
+                                                        src="#{oxAuthConfigurationService.getImgLocation()}/step_ver.png"
+                                                        alt="step_ver" />
+                                                <h4>#{msgs['fido2.verification.insertkey']}</h4>
+                                                <p>#{msgs['fido2.verification.useit']}</p>
+                                                <h:panelGroup>
+                                                    <p id="status"></p>
+                                                    <div id="messages"></div>
+                                                </h:panelGroup>
+                                        </div>
+                                </div>
+                                <h:panelGroup rendered='#{!empty client.getPolicyUri()}'>
+                                        <p>
+                                            <h:outputText value="#{msgs['common.agreePolicy']}" />
+                                                <a target="_blank" href='#{client.getPolicyUri()}'> <h:outputText
+                                                                value="#{msgs['common.privacyPolicy']}" />
+                                                </a>
+                                        </p>
+                                </h:panelGroup>
+
+                                <h:panelGroup rendered='#{!empty client.getTosUri()}'>
+                                        <p>
+                                                <h:outputText value="#{msgs['common.pleaseReadTheTos']}" />
+                                                <a target="_blank" href='#{client.getTosUri()}'> <h:outputText
+                                                                value="#{msgs['common.termsOfService']}" />
+                                                </a>
+                                        </p>
+                                </h:panelGroup>
+                                <div class="login-panel">
+                                        <h:panelGroup
+                                                rendered="fido2_assertion_request != 'null'}">
+                                        </h:panelGroup>
+                                </div>
+                        </h:panelGroup>
+                </h:form>
+        </ui:define>
+</ui:composition> 
