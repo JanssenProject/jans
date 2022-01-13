@@ -1,0 +1,30 @@
+{
+  "schemas": [
+    "urn:ietf:params:scim:api:messages:2.0:PatchOp"
+  ],
+  "Operations": [
+    {
+      "op": "replace",
+      "value": {
+        "displayName": "patched Brava"
+      }
+    },
+    {
+      "op": "replace",
+      "value": {
+        "name": {
+          "familyName": "patched Jensen",
+          "givenName": "patched Barbara",
+          "middleName": "patched Jane"
+        }
+      }
+    },
+    {
+      "op": "replace",
+      "value":{
+        "active": false,
+        "title": "patched CEO"
+      }
+    }
+  ]
+}
