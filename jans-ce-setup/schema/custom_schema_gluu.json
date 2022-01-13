@@ -1,0 +1,39 @@
+{
+    "attributeTypes": [],
+    "objectClasses": [
+        {
+            "kind": "AUXILIARY", 
+            "may": [
+                "telephoneNumber", 
+                "mobile",
+                "carLicense",
+                "facsimileTelephoneNumber",
+                "departmentNumber",
+                "employeeType",
+                "cn",
+                "st",
+                "manager",
+                "street",
+                "postOfficeBox",
+                "employeeNumber",
+                "preferredDeliveryMethod",
+                "roomNumber",
+                "secretary",
+                "homePostalAddress",
+                "l",
+                "postalCode",
+                "description",
+                "title"
+            ], 
+            "names": [
+                "gluuCustomPerson"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.4.101", 
+            "sup": [
+                "top"
+            ], 
+            "x_origin": "Gluu - Custom persom objectclass"
+        }
+    ], 
+    "oidMacros": {}
+}
