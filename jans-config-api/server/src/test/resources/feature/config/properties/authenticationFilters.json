@@ -1,0 +1,23 @@
+{
+   "authenticationFilters": [
+    {
+      "filter": "(&(mail=*{0}*)(inum={1}))",
+      "bind": false,
+      "bindPasswordAttribute": "",
+      "baseDn": "ou=people,o=gluu"
+    },
+    {
+      "filter": "uid={0}",
+      "bind": true,
+      "bindPasswordAttribute": "pwd",
+      "baseDn": "ou=people,o=gluu"
+    }
+	,
+    {
+      "filter": "uid={0}",
+      "bind": false,
+      "bindPasswordAttribute": "pwd",
+      "baseDn": "ou=people,o=gluu,uid=pujavs"
+    }
+  ]
+}
