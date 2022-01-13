@@ -1,0 +1,10 @@
+dn: o=site
+objectClass: top
+objectClass: organization
+o: site
+
+dn: ou=cache-refresh,o=site
+objectClass: top
+objectClass: organizationalUnit
+ou: people
+
