@@ -38,7 +38,6 @@ jobs:
         JanssenProject/jans-client-api
         JanssenProject/jans-scim
         JanssenProject/jans-core
-        JanssenProject/jans-notify
         JanssenProject/jans-fido2
         JanssenProject/jans-eleven
       NON_JVM_PROJECTS: |
