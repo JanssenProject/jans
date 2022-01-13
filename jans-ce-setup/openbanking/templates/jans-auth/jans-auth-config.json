@@ -68,6 +68,26 @@
     ],
     "defaultSubjectType": "pairwise",
     "keySignWithSameKeyButDiffAlg": true,
+    "jwksAlgorithmsSupported":[
+        "RS256",
+        "RS384",
+        "RS512",
+        "ES256",
+        "ES256K",
+        "ES384",
+        "ES512",
+        "PS256",
+        "PS384",
+        "PS512",
+        "RSA1_5",
+        "RSA-OAEP",
+        "Ed25519",
+        "Ed448",
+        "ECDH-ES",
+        "ECDH-ES+A128KW",
+        "ECDH-ES+A192KW",
+        "ECDH-ES+A256KW"
+    ],
     "authorizationSigningAlgValuesSupported":[
         "HS256",
         "HS384",
@@ -113,19 +133,6 @@
         "HS256",
         "RS256",
         "PS256"
-    ],
-    "jwksAlgorithmsSupported":[
-        "RS256",
-        "RS384",
-        "RS512",
-        "ES256",
-        "ES384",
-        "ES512",
-        "PS256",
-        "PS384",
-        "PS512",
-        "RSA1_5",
-        "RSA-OAEP"
     ],
     "requestObjectEncryptionAlgValuesSupported":[
     ],

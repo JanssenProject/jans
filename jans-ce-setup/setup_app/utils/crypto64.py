@@ -12,6 +12,8 @@ from setup_app import paths
 from setup_app import static
 from setup_app.config import Config
 
+pass_fmt = 'pass:%s'
+
 class Crypto64:
 
     def get_ssl_subject(self, ssl_fn):
@@ -49,58 +51,70 @@ class Crypto64:
             truststore_fn = Config.defaultTrustStoreFN
 
         self.run([paths.cmd_openssl,
-                  'genrsa',
-                  '-des3',
-                  '-out',
-                  key_with_password,
-                  '-passout',
-                  'pass:%s' % password,
-                  '2048'
-                  ])
+                'genpkey',
+                '-out',
+                key_with_password,
+                '-algorithm',
+                'EC',
+                '-pkeyopt',
+                'ec_paramgen_curve:P-384',
+                '-aes256',
+                '-pass',
+                pass_fmt % password
+                ])
+
         self.run([paths.cmd_openssl,
-                  'rsa',
-                  '-in',
-                  key_with_password,
-                  '-passin',
-                  'pass:%s' % password,
-                  '-out',
-                  key
-                  ])
+                'ec',
+                '-in',
+                key_with_password,
+                '-inform',
+                'PEM',
+                '-out',
+                key,
+                '-outform',
+                'PEM',
+                '-passin',
+                pass_fmt % password
+                ])
 
         certCn = cn
         if certCn == None:
             certCn = Config.hostname
 
         self.run([paths.cmd_openssl,
-                  'req',
-                  '-new',
-                  '-key',
-                  key,
-                  '-out',
-                  csr,
-                  '-subj',
-                  '/C=%s/ST=%s/L=%s/O=%s/CN=%s/emailAddress=%s' % (Config.countryCode, Config.state, Config.city, Config.orgName, certCn, Config.admin_email)
-                  ])
+                'req',
+                '-new',
+                '-key',
+                key,
+                '-out',
+                csr,
+                '-subj',
+                '/C=%s/ST=%s/L=%s/O=%s/CN=%s/emailAddress=%s' % (Config.countryCode, Config.state, Config.city, Config.orgName, certCn, Config.admin_email),
+                '-sha384'
+                ])
+
         self.run([paths.cmd_openssl,
-                  'x509',
-                  '-req',
-                  '-days',
-                  '365',
-                  '-in',
-                  csr,
-                  '-signkey',
-                  key,
-                  '-out',
-                  public_certificate
-                  ])
+                'x509',
+                '-req',
+                '-days',
+                '365',
+                '-sha384',
+                '-in',
+                csr,
+                '-signkey',
+                key,
+                '-out',
+                public_certificate
+                ])
+
         self.run([paths.cmd_chown, '%s:%s' % (user, user), key_with_password])
         self.run([paths.cmd_chmod, '700', key_with_password])
         self.run([paths.cmd_chown, '%s:%s' % (user, user), key])
         self.run([paths.cmd_chmod, '700', key])
 
         self.run([Config.cmd_keytool, "-import", "-trustcacerts", "-alias", "%s_%s" % (Config.hostname, suffix), \
-                  "-file", public_certificate, "-keystore", truststore_fn, \
-                  "-storepass", "changeit", "-noprompt"])
+                    "-file", public_certificate, "-keystore", truststore_fn, \
+                    "-storepass", "changeit", "-noprompt"])
 
     def prepare_base64_extension_scripts(self, extensions=[]):
         self.logIt("Preparing scripts")
@@ -153,7 +167,7 @@ class Crypto64:
                   '-name',
                   alias or Config.hostname,
                   '-passout',
-                  'pass:%s' % keystorePW
+                  pass_fmt % keystorePW
                   ])
         # Import p12 to keystore
         import_cmd = [Config.cmd_keytool,
