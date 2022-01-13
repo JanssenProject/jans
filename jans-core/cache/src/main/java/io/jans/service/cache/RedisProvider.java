@@ -6,6 +6,7 @@
 
 package io.jans.service.cache;
 
+import io.jans.util.exception.EncryptionException;
 import io.jans.util.security.StringEncrypter;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -77,7 +78,7 @@ public class RedisProvider extends AbstractCacheProvider<AbstractRedisProvider> 
                 redisConfiguration.setPassword(stringEncrypter.decrypt(encryptedPassword));
                 log.trace("Decrypted redis password successfully.");
             }
-        } catch (StringEncrypter.EncryptionException e) {
+        } catch (EncryptionException e) {
             log.error("Error during redis password decryption", e);
         }
     }
