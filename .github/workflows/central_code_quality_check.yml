@@ -38,8 +38,6 @@ jobs:
         JanssenProject/jans-client-api
         JanssenProject/jans-scim
         JanssenProject/jans-core
-        JanssenProject/jans-fido2
-        JanssenProject/jans-eleven
       NON_JVM_PROJECTS: |
         JanssenProject/jans-setup
         JanssenProject/jans-cli
@@ -79,8 +77,6 @@ jobs:
             "JanssenProject/jans-client-api")
                     ;&
             "JanssenProject/jans-scim")
-                    ;&
-            "JanssenProject/jans-eleven")
                     ;&
             "JanssenProject/jans-config-api")
                   echo "Run Sonar analysis without test execution"

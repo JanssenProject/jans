@@ -35,8 +35,6 @@ jobs:
             JanssenProject/jans-cloud-native
             JanssenProject/jans-config-api
             JanssenProject/jans-core
-            JanssenProject/jans-eleven
-            JanssenProject/jans-fido2
             JanssenProject/jans-scim
             JanssenProject/jans-setup
           WORKFLOW_FILES: |
