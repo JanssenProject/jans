@@ -4,7 +4,12 @@
 # These owners will be the default owners for everything in this branch of
 # the repo. Unless a later match takes precedence
 
-* @moabu
+/docker-jans-*/ @moabu
+/automation/ @moabu
+/charts/ @moabu
 /.github/ @moabu
-/jans-bom/ @yurem @yuriyz
+/jans-pycloudlib/ @moabu
 /docker-jans-*/requirments.txt @mo-auto
+/jans-bom/ @yurem @yuriyz
+/jans-core/ @yurem @yuriyz
+/jans-orm/ @yurem @yuriyz
