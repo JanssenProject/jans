@@ -1,0 +1,90 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+	<f:view transient="true">
+		<h:head>
+			<title><ui:insert name="pageTitle" /></title>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+			<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+			<!--link rel="icon" href="${identity.getWorkingParameter('casa_faviconUrl')}" /-->
+			<link rel="icon" href="#{request.contextPath}/servlet/favicon" type='image/x-icon' />
+			<script src="${identity.getWorkingParameter('casa_contextPath')}/scripts/jquery-3.5.1.min.js" />
+			<script src="${identity.getWorkingParameter('casa_contextPath')}/scripts/platform.js" />
+
+			<!-- order of stylesheets is important, do not change -->
+			<link rel="stylesheet" href="${identity.getWorkingParameter('casa_contextPath')}/styles/bootstrap.min.css" />
+			<link rel="stylesheet" href="${identity.getWorkingParameter('casa_contextPath')}${identity.getWorkingParameter('casa_prefix')}/styles/gluu/style.css" />
+			<link rel="stylesheet" href="${identity.getWorkingParameter('casa_contextPath')}/styles/tachyons.min.css" />
+
+			<!-- load custom branding css snippets -->
+			<style>${identity.getWorkingParameter('casa_extraCss')}</style>
+			<style>
+				.focused-label-big {
+					top: 0;
+					left: 0;
+					right: 0;
+					display: flex;
+					align-items: center;
+					position: absolute;
+					font-size: .9rem;
+					cursor: text;
+					transition: .2s ease-in-out;
+					box-sizing: border-box;
+					height: .6rem;
+					width: 100%;
+					pointer-events: none;
+					margin-top: .25rem;
+				}
+				.focused-text:valid + .focused-label-big,
+				.focused-text:focus + .focused-label-big {
+					top: -28px;
+					font-size: .7rem;
+					color: #15b565;
+				}
+				.media img {
+					width: 54px;
+					height: 54px;
+					border: 1px solid #dfdfdf;
+					background-color: #e7e7e7;
+					border-radius: 50%;
+				}
+				.mh-3r {
+					max-height: 3rem;
+				}
+			</style>
+
+			<script src="${identity.getWorkingParameter('casa_contextPath')}/scripts/gluu/main-util.js" />
+		</h:head>
+		<h:body class="bg-near-white cust-body-rule">
+			<div class="pa0 flex justify-center gray f6">
+				<div class="flex flex-column min-vh-100 miw-16r mw-60r w-100 bg-washed-blue2 cust-content-rule">
+					<header class="pv2 shadow-4 bg-blank cust-header">
+						<div class="w1-ns"></div>
+						<div class="w4 mh4-ns tc">
+							<!--img src="${identity.getWorkingParameter('casa_logoUrl')}" /-->
+							<img src="#{request.contextPath}/servlet/logo" class="mh-3r" />
+						</div>
+					</header>
+					<!-- grow horizontally and vertically as much as possible -->
+					<div class="flex flex-column justify-between w-100 h-100">
+						<h:panelGroup layout="block" class="flex flex-column items-center justify-center w-100 h-100 mv4" 
+							rendered="#{not identity.loggedIn}">
+							<ui:insert name="maincontent" />
+						</h:panelGroup>
+						<footer class="pa3 f7 dark-gray shadow-4 bg-blank cust-footer-rule">
+							<div class="cust-footer-msg-rule">
+								Powered by <a href="https://gluu.org" class="link blue">Gluu</a>.
+							</div>
+						</footer>
+					</div>
+				</div>
+			</div>
+			
+			<script>regenerateFooter()</script>
+		</h:body>
+	</f:view>
+</html>
