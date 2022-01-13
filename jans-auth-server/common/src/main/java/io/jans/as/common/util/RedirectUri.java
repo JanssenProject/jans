@@ -42,8 +42,11 @@ import static io.jans.as.model.authorize.AuthorizeResponseParam.ISS;
 import static io.jans.as.model.authorize.AuthorizeResponseParam.RESPONSE;
 
 /**
+ * Redirect URI.
+ * 
  * @author Javier Rojas Blum
- * @version September 9, 2021
+ * @author Sergey Manoylo
+ * @version September 13, 2021
  */
 public class RedirectUri {
 
@@ -286,7 +289,7 @@ public class RedirectUri {
             }
         } else {
             if (signatureAlgorithm == null) {
-                signatureAlgorithm = SignatureAlgorithm.RS256;
+                signatureAlgorithm = SignatureAlgorithm.ES384;
             }
 
             return getJwsResponse(false);
@@ -357,8 +360,14 @@ public class RedirectUri {
         }
 
         // Encryption
-        if (keyEncryptionAlgorithm == KeyEncryptionAlgorithm.RSA_OAEP
-                || keyEncryptionAlgorithm == KeyEncryptionAlgorithm.RSA1_5) {
+        if (keyEncryptionAlgorithm == KeyEncryptionAlgorithm.RSA1_5
+                || keyEncryptionAlgorithm == KeyEncryptionAlgorithm.RSA_OAEP
+                || keyEncryptionAlgorithm == KeyEncryptionAlgorithm.RSA_OAEP_256
+                || keyEncryptionAlgorithm == KeyEncryptionAlgorithm.ECDH_ES
+                || keyEncryptionAlgorithm == KeyEncryptionAlgorithm.ECDH_ES_PLUS_A128KW
+                || keyEncryptionAlgorithm == KeyEncryptionAlgorithm.ECDH_ES_PLUS_A192KW
+                || keyEncryptionAlgorithm == KeyEncryptionAlgorithm.ECDH_ES_PLUS_A256KW
+                ) {
             PublicKey publicKey = cryptoProvider.getPublicKey(keyId, jsonWebKeys, null);
 
             if (publicKey != null) {
@@ -368,7 +377,16 @@ public class RedirectUri {
                 throw new InvalidJweException("The public key is not valid");
             }
         } else if (keyEncryptionAlgorithm == KeyEncryptionAlgorithm.A128KW
-                || keyEncryptionAlgorithm == KeyEncryptionAlgorithm.A256KW) {
+                || keyEncryptionAlgorithm == KeyEncryptionAlgorithm.A192KW
+                || keyEncryptionAlgorithm == KeyEncryptionAlgorithm.A256KW
+                || keyEncryptionAlgorithm == KeyEncryptionAlgorithm.A128GCMKW
+                || keyEncryptionAlgorithm == KeyEncryptionAlgorithm.A192GCMKW
+                || keyEncryptionAlgorithm == KeyEncryptionAlgorithm.A256GCMKW
+                || keyEncryptionAlgorithm == KeyEncryptionAlgorithm.PBES2_HS256_PLUS_A128KW
+                || keyEncryptionAlgorithm == KeyEncryptionAlgorithm.PBES2_HS384_PLUS_A192KW
+                || keyEncryptionAlgorithm == KeyEncryptionAlgorithm.PBES2_HS512_PLUS_A256KW
+                || keyEncryptionAlgorithm == KeyEncryptionAlgorithm.DIR
+                ) {
             try {
                 JweEncrypter jweEncrypter = new JweEncrypterImpl(keyEncryptionAlgorithm, blockEncryptionAlgorithm, sharedSymmetricKey);
                 jwe = jweEncrypter.encrypt(jwe);

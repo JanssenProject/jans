@@ -66,7 +66,7 @@ public class EDDSAPublicKey extends PublicKey {
 
     /**
      * Returns original array (decoded) of the public key
-     * (ED25519 - 32 byte, ED448 - 56 bytes)
+     * (ED25519 - 32 bytes, ED448 - 56 bytes)
      *
      * @return original array (decoded) of the public key;
      */

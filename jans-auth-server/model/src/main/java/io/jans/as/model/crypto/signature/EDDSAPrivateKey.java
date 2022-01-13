@@ -93,9 +93,9 @@ public class EDDSAPrivateKey extends PrivateKey {
     }
 
     /**
-     * Returns original array (decoded) of the public key (ED25519 - 32 byte, ED448 - 56 bytes);
+     * Returns original array (decoded) of the public key (ED25519 - 32 bytes, ED448 - 56 bytes);
      *
-     * @return original array (decoded) of the public key (ED25519 - 32 byte, ED448 - 56 bytes);
+     * @return original array (decoded) of the public key (ED25519 - 32 bytes, ED448 - 56 bytes);
      * @throws IOException
      */
     public byte[] getPrivateKeyDecoded() throws IOException {
@@ -113,9 +113,9 @@ public class EDDSAPrivateKey extends PrivateKey {
     }
 
     /**
-     * Returns original array (decoded) of the public key (ED25519 - 32 byte, ED448 - 56 bytes);
+     * Returns original array (decoded) of the public key (ED25519 - 32 bytes, ED448 - 56 bytes);
      *
-     * @return original array (decoded) of the public key (ED25519 - 32 byte, ED448 - 56 bytes);
+     * @return original array (decoded) of the public key (ED25519 - 32 bytes, ED448 - 56 bytes);
      */
     public byte[] getPublicKeyDecoded() {
         if (this.xEncoded == null) {

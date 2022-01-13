@@ -16,6 +16,7 @@ import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.crypto.signature.AlgorithmFamily;
 import io.jans.as.model.crypto.signature.ECDSAPublicKey;
+import io.jans.as.model.crypto.signature.EDDSAPublicKey;
 import io.jans.as.model.crypto.signature.RSAPublicKey;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.error.DefaultErrorResponse;
@@ -23,6 +24,8 @@ import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.exception.InvalidClaimException;
 import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jws.ECDSASigner;
+import io.jans.as.model.jws.EDDSASigner;
+import io.jans.as.model.jws.JwsSigner;
 import io.jans.as.model.jws.RSASigner;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.server.audit.ApplicationAuditLogger;
@@ -72,7 +75,8 @@ import static io.jans.as.model.ciba.BackchannelAuthenticationResponseParam.INTER
  * Implementation for request backchannel authorization through REST web services.
  *
  * @author Javier Rojas Blum
- * @version April 22, 2020
+ * @author Sergey Manoylo
+ * @version September 13, 2021 
  */
 @Path("/")
 public class BackchannelAuthorizeRestWebServiceImpl implements BackchannelAuthorizeRestWebService {
@@ -240,15 +244,33 @@ public class BackchannelAuthorizeRestWebServiceImpl implements BackchannelAuthor
                 }
 
                 boolean validSignature = false;
-                if (algorithm.getFamily() == AlgorithmFamily.RSA) {
+                JwsSigner jwsSigner = null;
+
+                switch(algorithm.getFamily()) {
+                case RSA: {
                     RSAPublicKey publicKey = JwkClient.getRSAPublicKey(client.getJwksUri(), keyId);
-                    RSASigner rsaSigner = new RSASigner(algorithm, publicKey);
-                    validSignature = rsaSigner.validate(jwt);
-                } else if (algorithm.getFamily() == AlgorithmFamily.EC) {
-                    ECDSAPublicKey publicKey = JwkClient.getECDSAPublicKey(client.getJwksUri(), keyId);
-                    ECDSASigner ecdsaSigner = new ECDSASigner(algorithm, publicKey);
-                    validSignature = ecdsaSigner.validate(jwt);
+                    jwsSigner = new RSASigner(algorithm, publicKey);
+                    break;
                 }
+                case EC: {
+                    ECDSAPublicKey publicKey = JwkClient.getECDSAPublicKey(client.getJwksUri(), keyId);
+                    jwsSigner = new ECDSASigner(algorithm, publicKey);
+                    break;
+                }
+                case ED: {
+                    EDDSAPublicKey publicKey = JwkClient.getEDDSAPublicKey(client.getJwksUri(), keyId);
+                    jwsSigner = new EDDSASigner(algorithm, publicKey);
+                    break;
+                }
+                default: {
+                    break;
+                }
+                }
+
+                if(jwsSigner != null) {
+                    validSignature = jwsSigner.validate(jwt);
+                }
+
                 if (!validSignature) {
                     builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode()); // 400
                     builder.entity(errorResponseFactory.getErrorAsJson(UNKNOWN_USER_ID));

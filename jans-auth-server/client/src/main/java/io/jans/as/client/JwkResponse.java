@@ -9,12 +9,14 @@ package io.jans.as.client;
 import io.jans.as.model.crypto.PublicKey;
 import io.jans.as.model.crypto.signature.AlgorithmFamily;
 import io.jans.as.model.crypto.signature.ECDSAPublicKey;
+import io.jans.as.model.crypto.signature.EDDSAPublicKey;
 import io.jans.as.model.crypto.signature.RSAPublicKey;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.jwk.JSONWebKey;
 import io.jans.as.model.jwk.JSONWebKeySet;
 import io.jans.as.model.jwk.KeySelectionStrategy;
+import io.jans.as.model.util.Base64Util;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,7 +26,8 @@ import java.util.List;
  * Represents a JSON Web Key (JWK) received from the authorization server.
  *
  * @author Javier Rojas Blum
- * @version February 12, 2019
+ * @author Sergey Manoylo
+ * @version September 13, 2021
  */
 public class JwkResponse extends BaseResponse {
 
@@ -71,19 +74,28 @@ public class JwkResponse extends BaseResponse {
 
         if (JSONWebKey != null) {
             switch (JSONWebKey.getKty()) {
-                case RSA:
-                    publicKey = new RSAPublicKey(
-                            JSONWebKey.getN(),
-                            JSONWebKey.getE());
-                    break;
-                case EC:
-                    publicKey = new ECDSAPublicKey(
-                            SignatureAlgorithm.fromString(JSONWebKey.getAlg().getParamName()),
-                            JSONWebKey.getX(),
-                            JSONWebKey.getY());
-                    break;
-                default:
-                    break;
+            case RSA:
+                publicKey = new RSAPublicKey(
+                        JSONWebKey.getN(),
+                        JSONWebKey.getE());
+                break;
+            case EC:
+                publicKey = new ECDSAPublicKey(
+                            SignatureAlgorithm.fromString(
+                                    JSONWebKey.getAlg().getParamName()),
+                                    JSONWebKey.getX(),
+                                    JSONWebKey.getY());
+                break;
+            case OKP:
+                if (AlgorithmFamily.ED.equals(JSONWebKey.getAlg().getFamily())) {
+                    publicKey = new EDDSAPublicKey(
+                            SignatureAlgorithm.fromString(
+                                    JSONWebKey.getAlg().getParamName()),
+                                    Base64Util.base64urldecode(JSONWebKey.getX()));
+                }
+                break;
+            default:
+                break;
             }
         }
 
@@ -92,14 +104,8 @@ public class JwkResponse extends BaseResponse {
 
     public List<JSONWebKey> getKeys(Algorithm algorithm) {
         List<JSONWebKey> jsonWebKeys = new ArrayList<JSONWebKey>();
-
-        if (AlgorithmFamily.RSA.equals(algorithm.getFamily())) {
-            for (JSONWebKey jsonWebKey : jwks.getKeys()) {
-                if (jsonWebKey.getAlg().equals(algorithm)) {
-                    jsonWebKeys.add(jsonWebKey);
-                }
-            }
-        } else if (AlgorithmFamily.EC.equals(algorithm.getFamily())) {
+        AlgorithmFamily algorithmFamily = algorithm.getFamily();
+        if (AlgorithmFamily.RSA.equals(algorithmFamily) || AlgorithmFamily.EC.equals(algorithmFamily) || AlgorithmFamily.ED.equals(algorithmFamily)) {
             for (JSONWebKey jsonWebKey : jwks.getKeys()) {
                 if (jsonWebKey.getAlg().equals(algorithm)) {
                     jsonWebKeys.add(jsonWebKey);

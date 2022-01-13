@@ -13,6 +13,9 @@ import io.jans.as.model.crypto.signature.EllipticEdvardsCurve;
 import io.jans.as.model.jwk.Algorithm;
 
 /**
+ * Key Encryption Algorithm values;
+ * "alg" (Algorithm) Header Parameter Values for JWE (RFC 7518); 
+ * 
  * @author Javier Rojas Blum Date: 12.03.2012
  * @author Sergey Manoylo
  * @version September 13, 2021

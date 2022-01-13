@@ -18,6 +18,7 @@ import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
 import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
+import io.jans.as.model.crypto.signature.AlgorithmFamily;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.exception.InvalidClaimException;
@@ -27,6 +28,7 @@ import io.jans.as.model.jwe.JweEncrypter;
 import io.jans.as.model.jwe.JweEncrypterImpl;
 import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.jwk.JSONWebKeySet;
+import io.jans.as.model.jwk.JWKParameter;
 import io.jans.as.model.jwk.Use;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaims;
@@ -57,8 +59,12 @@ import io.jans.as.server.service.token.TokenService;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.model.GluuAttribute;
 import io.jans.orm.exception.EntryPersistenceException;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
+
+import com.nimbusds.jose.jwk.ECKey;
+import com.nimbusds.jose.jwk.JWK;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -80,7 +86,8 @@ import java.util.Map;
  * Provides interface for User Info REST web services
  *
  * @author Javier Rojas Blum
- * @version October 14, 2019
+ * @author Sergey Manoylo
+ * @version September 13, 2021
  */
 @Path("/")
 public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
@@ -275,7 +282,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
     public String getJweResponse(
             KeyEncryptionAlgorithm keyEncryptionAlgorithm, BlockEncryptionAlgorithm blockEncryptionAlgorithm,
             User user, AuthorizationGrant authorizationGrant, Collection<String> scopes) throws Exception {
-        log.trace("Building JWE reponse with next scopes {0} for user {1} and user custom attributes {0}", scopes, user.getUserId(), user.getCustomAttributes());
+        log.trace("Building JWE reponse with next scopes {} for user {} and user custom attributes {}", scopes, user.getUserId(), user.getCustomAttributes());
 
         Jwe jwe = new Jwe();
 
@@ -286,10 +293,9 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
 
         // Claims
         jwe.setClaims(createJwtClaims(user, authorizationGrant, scopes));
-
-        // Encryption
-        if (keyEncryptionAlgorithm == KeyEncryptionAlgorithm.RSA_OAEP
-                || keyEncryptionAlgorithm == KeyEncryptionAlgorithm.RSA1_5) {
+        final AlgorithmFamily keyEncryptionAlgorithmFamily = keyEncryptionAlgorithm.getFamily();
+        switch(keyEncryptionAlgorithmFamily) {
+        case RSA: {
             JSONObject jsonWebKeys = JwtUtil.getJSONWebKeys(authorizationGrant.getClient().getJwksUri());
             String keyId = new ServerCryptoProvider(cryptoProvider).getKeyId(JSONWebKeySet.fromJSONObject(jsonWebKeys),
                     Algorithm.fromString(keyEncryptionAlgorithm.getName()),
@@ -302,17 +308,48 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
             } else {
                 throw new InvalidJweException("The public key is not valid");
             }
-        } else if (keyEncryptionAlgorithm == KeyEncryptionAlgorithm.A128KW
-                || keyEncryptionAlgorithm == KeyEncryptionAlgorithm.A256KW) {
-            try {
-                byte[] sharedSymmetricKey = clientService.decryptSecret(authorizationGrant.getClient().getClientSecret()).getBytes(StandardCharsets.UTF_8);
-                JweEncrypter jweEncrypter = new JweEncrypterImpl(keyEncryptionAlgorithm, blockEncryptionAlgorithm, sharedSymmetricKey);
-                jwe = jweEncrypter.encrypt(jwe);
-            } catch (Exception e) {
-                throw new InvalidJweException(e);
-            }
+            break;
         }
-
+        case EC: {
+            JweEncrypter jweEncrypter = null;
+            JSONObject jsonWebKeys = JwtUtil.getJSONWebKeys(authorizationGrant.getClient().getJwksUri());
+            String keyId = new ServerCryptoProvider(cryptoProvider).getKeyId(JSONWebKeySet.fromJSONObject(jsonWebKeys),
+                    Algorithm.fromString(keyEncryptionAlgorithm.getName()), Use.ENCRYPTION);
+            JSONArray webKeys = jsonWebKeys.getJSONArray(JWKParameter.JSON_WEB_KEY_SET);
+            JSONObject key = null;
+            ECKey ecPublicKey = null;
+            for (int i = 0; i < webKeys.length(); i++) {
+                key = webKeys.getJSONObject(i);
+                if (keyId.equals(key.getString(JWKParameter.KEY_ID))) {
+                    ecPublicKey = (ECKey) (JWK.parse(key.toString()));
+                    break;
+                }
+            }
+            if (ecPublicKey == null) {
+                throw new InvalidJweException("jweEncrypter was not created.");
+            }
+            jweEncrypter = new JweEncrypterImpl(keyEncryptionAlgorithm, blockEncryptionAlgorithm, ecPublicKey);
+            jwe = jweEncrypter.encrypt(jwe);
+            break;
+        }
+        case AES:
+        case DIR: {
+            byte[] sharedSymmetricKey = clientService.decryptSecret(authorizationGrant.getClient().getClientSecret()).getBytes(StandardCharsets.UTF_8);
+            JweEncrypter jweEncrypter = new JweEncrypterImpl(keyEncryptionAlgorithm, blockEncryptionAlgorithm,sharedSymmetricKey);
+            jwe = jweEncrypter.encrypt(jwe);
+            break;
+        }
+        case PASSW: {
+            String sharedSymmetricPassword = clientService.decryptSecret(authorizationGrant.getClient().getClientSecret());
+            log.info("sharedSymmetricPassword = {}", sharedSymmetricPassword);
+            JweEncrypter jweEncrypter = new JweEncrypterImpl(keyEncryptionAlgorithm, blockEncryptionAlgorithm, sharedSymmetricPassword);
+            jwe = jweEncrypter.encrypt(jwe);
+            break;
+        }
+        default: {
+            throw new InvalidJweException("wrong AlgorithmFamily value.");
+        }
+        }
         return jwe.toString();
     }
 

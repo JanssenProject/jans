@@ -18,20 +18,40 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Asymmetric Signature Algorithms.
+ * Subset of signature algorithms, which use asymmetric algorithms
+ * (RSA, ECDSA, EDDSA).
+ * 
+ * JWS digital signature and MAC "alg" (algorithm) values
+ * (RFC 7518, A.1.  Digital Signature/MAC Algorithm Identifier
+ * Cross-Reference).
+ *
+ * CFRG Elliptic Curve Diffie-Hellman (ECDH) and Signatures
+ * in JSON Object Signing and Encryption (JOSE) signature
+ * algorithms "Ed25519" and "Ed448".
+ * 
  * @author Javier Rojas Blum
- * @version August 20, 2019
+ * @author Sergey Manoylo
+ * @version September 13, 2021
  */
 public enum AsymmetricSignatureAlgorithm implements HasParamName, AttributeEnum {
 
-    RS256("RS256", AlgorithmFamily.RSA, "SHA256WITHRSA"),
-    RS384("RS384", AlgorithmFamily.RSA, "SHA384WITHRSA"),
-    RS512("RS512", AlgorithmFamily.RSA, "SHA512WITHRSA"),
-    ES256("ES256", AlgorithmFamily.EC, "SHA256WITHECDSA", EllipticEdvardsCurve.P_256),
-    ES384("ES384", AlgorithmFamily.EC, "SHA384WITHECDSA", EllipticEdvardsCurve.P_384),
-    ES512("ES512", AlgorithmFamily.EC, "SHA512WITHECDSA", EllipticEdvardsCurve.P_521),
-    PS256("PS256", AlgorithmFamily.RSA, "SHA256withRSAandMGF1"),
-    PS384("PS384", AlgorithmFamily.RSA, "SHA384withRSAandMGF1"),
-    PS512("PS512", AlgorithmFamily.RSA, "SHA512withRSAandMGF1");
+    RS256(SignatureAlgorithm.DEF_RS256, AlgorithmFamily.RSA, SignatureAlgorithm.DEF_SHA256WITHRSA),
+    RS384(SignatureAlgorithm.DEF_RS384, AlgorithmFamily.RSA, SignatureAlgorithm.DEF_SHA384WITHRSA),
+    RS512(SignatureAlgorithm.DEF_RS512, AlgorithmFamily.RSA, SignatureAlgorithm.DEF_SHA512WITHRSA),
+    
+    ES256(SignatureAlgorithm.DEF_ES256, AlgorithmFamily.EC, SignatureAlgorithm.DEF_SHA256WITHECDSA, EllipticEdvardsCurve.P_256),
+    ES256K(SignatureAlgorithm.DEF_ES256K, AlgorithmFamily.EC, SignatureAlgorithm.DEF_SHA256WITHECDSA, EllipticEdvardsCurve.P_256K),    
+    ES384(SignatureAlgorithm.DEF_ES384, AlgorithmFamily.EC, SignatureAlgorithm.DEF_SHA384WITHECDSA, EllipticEdvardsCurve.P_384),
+    ES512(SignatureAlgorithm.DEF_ES512, AlgorithmFamily.EC, SignatureAlgorithm.DEF_SHA512WITHECDSA, EllipticEdvardsCurve.P_521),
+
+    PS256(SignatureAlgorithm.DEF_PS256, AlgorithmFamily.RSA, SignatureAlgorithm.DEF_SHA256WITHRSAANDMGF1),
+    PS384(SignatureAlgorithm.DEF_PS384, AlgorithmFamily.RSA, SignatureAlgorithm.DEF_SHA384WITHRSAANDMGF1),
+    PS512(SignatureAlgorithm.DEF_PS512, AlgorithmFamily.RSA, SignatureAlgorithm.DEF_SHA512WITHRSAANDMGF1),
+
+    ED25519(SignatureAlgorithm.DEF_ED25519, AlgorithmFamily.ED, SignatureAlgorithm.DEF_ED25519, EllipticEdvardsCurve.ED_25519),
+    ED448(SignatureAlgorithm.DEF_ED448,     AlgorithmFamily.ED, SignatureAlgorithm.DEF_ED448,   EllipticEdvardsCurve.ED_448),
+    EDDSA(SignatureAlgorithm.DEF_EDDDSA,    AlgorithmFamily.ED, SignatureAlgorithm.DEF_EDDDSA,  EllipticEdvardsCurve.ED_25519);
 
     private final String name;
     private final AlgorithmFamily family;

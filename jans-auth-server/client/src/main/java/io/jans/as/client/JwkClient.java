@@ -18,14 +18,24 @@ import javax.ws.rs.HttpMethod;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.MediaType;
 
-import static io.jans.as.model.jwk.JWKParameter.JSON_WEB_KEY_SET;
+import org.apache.commons.lang.StringUtils;
+// import org.jboss.resteasy.client.ClientExecutor;
+import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
+import org.json.JSONObject;
+
+import io.jans.as.model.crypto.PublicKey;
+import io.jans.as.model.crypto.signature.ECDSAPublicKey;
+import io.jans.as.model.crypto.signature.EDDSAPublicKey;
+import io.jans.as.model.crypto.signature.RSAPublicKey;
+import io.jans.as.model.jwk.JSONWebKeySet;
 
 /**
  * Encapsulates functionality to make JWK request calls to an authorization
  * server via REST Services.
  *
  * @author Javier Rojas Blum
- * @version December 26, 2016
+ * @author Sergey Manoylo
+ * @version September 13, 2021 
  */
 public class JwkClient extends BaseClient<JwkRequest, JwkResponse> {
 
@@ -39,6 +49,9 @@ public class JwkClient extends BaseClient<JwkRequest, JwkResponse> {
         super(url);
     }
 
+    /**
+     * Returns "GET" (HttpMethod.GET).
+     */
     @Override
     public String getHttpMethod() {
         return HttpMethod.GET;
@@ -93,10 +106,25 @@ public class JwkClient extends BaseClient<JwkRequest, JwkResponse> {
         return getResponse();
     }
 
+    /**
+     * Returns RSA public key.
+     * 
+     * @param jwkSetUri Url of the server, that returns jwks (JSON Web Keys), for example: https://ce.gluu.info/jans-auth/restv1/jwks.
+     * @param keyId Key Id (kid).
+     * @return RSA public key.
+     */
     public static RSAPublicKey getRSAPublicKey(String jwkSetUri, String keyId) {
         return getRSAPublicKey(jwkSetUri, keyId, null);
     }
 
+    /**
+     * Returns RSA public key.
+     * 
+     * @param jwkSetUri Url of the server, that returns jwks (JSON Web Keys), for example: https://ce.gluu.info/jans-auth/restv1/jwks.
+     * @param keyId Key Id (kid).
+     * @param engine ClientHttpEngine (request and response).
+     * @return RSA public key.
+     */
     public static RSAPublicKey getRSAPublicKey(String jwkSetUri, String keyId, ClientHttpEngine engine) {
         RSAPublicKey publicKey = null;
 
@@ -113,10 +141,25 @@ public class JwkClient extends BaseClient<JwkRequest, JwkResponse> {
         return publicKey;
     }
 
+    /**
+     * Returns ECDSA public key.
+     * 
+     * @param jwkSetUrl Url of the server, that returns jwks (JSON Web Keys), for example: https://ce.gluu.info/jans-auth/restv1/jwks.
+     * @param keyId Key Id (kid).
+     * @return ECDSA public key.
+     */
     public static ECDSAPublicKey getECDSAPublicKey(String jwkSetUrl, String keyId) {
         return getECDSAPublicKey(jwkSetUrl, keyId, null);
     }
 
+    /**
+     * Returns ECDSA public key.
+     * 
+     * @param jwkSetUrl Url of the server, that returns jwks (JSON Web Keys), for example: https://ce.gluu.info/jans-auth/restv1/jwks.
+     * @param keyId Key Id (kid).
+     * @param engine ClientHttpEngine (HTTP request and response).
+     * @return ECDSA public key.
+     */
     public static ECDSAPublicKey getECDSAPublicKey(String jwkSetUrl, String keyId, ClientHttpEngine engine) {
         ECDSAPublicKey publicKey = null;
 
@@ -129,6 +172,43 @@ public class JwkClient extends BaseClient<JwkRequest, JwkResponse> {
             PublicKey pk = jwkResponse.getPublicKey(keyId);
             if (pk instanceof ECDSAPublicKey) {
                 publicKey = (ECDSAPublicKey) pk;
+            }
+        }
+
+        return publicKey;
+    }
+
+    /**
+     * Returns EDDSA public key.
+     * 
+     * @param jwkSetUrl Url of the server, that returns jwks (JSON Web Keys), for example: https://ce.gluu.info/jans-auth/restv1/jwks.
+     * @param keyId Key Id (kid).
+     * @return EDDSA public key.
+     */
+    public static EDDSAPublicKey getEDDSAPublicKey(String jwkSetUrl, String keyId) {
+        return getEDDSAPublicKey(jwkSetUrl, keyId, null);
+    }
+
+    /**
+     * Returns EDDSA public key.
+     * 
+     * @param jwkSetUrl Url of the server, that returns jwks (JSON Web Keys), for example: https://ce.gluu.info/jans-auth/restv1/jwks.
+     * @param keyId Key Id (kid).
+     * @param engine ClientHttpEngine (HTTP request and response).
+     * @return EDDSA public key.
+     */
+    public static EDDSAPublicKey getEDDSAPublicKey(String jwkSetUrl, String keyId, ClientHttpEngine engine) {
+        EDDSAPublicKey publicKey = null;
+
+        JwkClient jwkClient = new JwkClient(jwkSetUrl);
+        if (engine != null) {
+            jwkClient.setExecutor(engine);
+        }
+        JwkResponse jwkResponse = jwkClient.exec();
+        if (jwkResponse != null && jwkResponse.getStatus() == 200) {
+            PublicKey pk = jwkResponse.getPublicKey(keyId);
+            if (pk instanceof EDDSAPublicKey) {
+                publicKey = (EDDSAPublicKey) pk;
             }
         }
 

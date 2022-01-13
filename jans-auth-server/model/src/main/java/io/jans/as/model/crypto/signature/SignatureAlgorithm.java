@@ -16,6 +16,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Signature Algorithms.
+ *
+ * JWS digital signature and MAC "alg" (algorithm) values
+ * (RFC 7518, A.1.  Digital Signature/MAC Algorithm Identifier
+ * Cross-Reference).
+ *
+ * CFRG Elliptic Curve Diffie-Hellman (ECDH) and Signatures
+ * in JSON Object Signing and Encryption (JOSE) signature
+ * algorithms "Ed25519" and "Ed448". 
+ *
  * @author Javier Rojas Blum
  * @author Sergey Manoylo
  * @version October 26, 2021

@@ -9,6 +9,7 @@ package io.jans.as.client;
 import io.jans.as.client.util.ClientUtil;
 import io.jans.as.model.common.AuthorizationMethod;
 import io.jans.as.model.crypto.AuthCryptoProvider;
+import io.jans.as.model.exception.InvalidJweException;
 import io.jans.as.model.jwe.Jwe;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.util.JwtUtil;
@@ -20,7 +21,6 @@ import org.json.JSONObject;
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
-import java.nio.charset.StandardCharsets;
 import java.security.PrivateKey;
 import java.util.Iterator;
 import java.util.List;
@@ -29,15 +29,45 @@ import java.util.List;
  * Encapsulates functionality to make user info request calls to an authorization server via REST Services.
  *
  * @author Javier Rojas Blum
- * @version December 26, 2016
+ * @author Sergey Manoylo
+ * @version September 13, 2021
  */
 public class UserInfoClient extends BaseClient<UserInfoRequest, UserInfoResponse> {
 
     private static final Logger LOG = Logger.getLogger(UserInfoClient.class);
 
-    private String sharedKey;
-    private PrivateKey privateKey;
-    private String jwksUri;
+    private String jwksUri; // Url of the server, that returns jwks (JSON Web Keys), for example: https://ce.gluu.info/jans-auth/restv1/jwks.
+
+    private PrivateKey privateKey = null;   // Private Asymmetric Key.
+    
+    private byte[] sharedKey = null;        // Shared Symmetric Key (byte []).
+    private String sharedPassword = null;   // Shared Symmetric Password (String).
+
+    // Note: Shared Key and Shared Password should be separated (distinguishable),
+    // so, sharedKey is a Byte Array and sharedPassword is a String.
+
+    // Shared Symmetric Key (sharedKey) is used, when are used follow KeyEncryptionAlgorithm values:
+        // A128KW
+        // A192KW
+        // A256KW
+        // A128GCMKW
+        // A192GCMKW
+        // A256GCMKW
+        // DIR
+
+    // Shared Symmetric Password (sharedPassword) is used, when are used follow KeyEncryptionAlgorithm values:
+        // PBES2_HS256_PLUS_A128KW
+        // PBES2_HS384_PLUS_A192KW
+        // PBES2_HS512_PLUS_A256KW
+
+    // PrivateKey is used,  when are used follow KeyEncryptionAlgorithm values:
+        // RSA1_5
+        // RSA_OAEP
+        // RSA_OAEP_256
+        // ECDH_ES
+        // ECDH_ES_PLUS_A128KW
+        // ECDH_ES_PLUS_A192KW
+        // ECDH_ES_PLUS_A256KW
 
     /**
      * Constructs an User Info client by providing a REST url where the service is located.
@@ -114,8 +144,16 @@ public class UserInfoClient extends BaseClient<UserInfoRequest, UserInfoResponse
         if (contentType != null && contentType.contains("application/jwt")) {
             String[] jwtParts = entity.split("\\.");
             if (jwtParts.length == 5) {
-                byte[] sharedSymmetricKey = sharedKey != null ? sharedKey.getBytes(StandardCharsets.UTF_8) : null;
-                Jwe jwe = Jwe.parse(entity, privateKey, sharedSymmetricKey);
+                Jwe jwe = null;
+                if (privateKey != null) {
+                    jwe = Jwe.parse(entity, privateKey);
+                } else if (sharedKey != null) {
+                    jwe = Jwe.parse(entity, null, sharedKey, null);
+                } else if (sharedPassword != null) {
+                    jwe = Jwe.parse(entity, null, null, sharedPassword);
+                } else {
+                    throw new InvalidJweException("privateKey, sharedKey, sharedPassword: keys aren't defined, jwe object hasn't been encrypted");
+                }
                 getResponse().getClaimMap().putAll(jwe.getClaims().toMap());
             } else {
                 parseJwt(entity);
@@ -137,7 +175,7 @@ public class UserInfoClient extends BaseClient<UserInfoRequest, UserInfoResponse
                 jwt.getEncodedSignature(),
                 jwt.getHeader().getKeyId(),
                 JwtUtil.getJSONWebKeys(jwksUri),
-                sharedKey,
+                (sharedKey != null) ? new String(sharedKey) : null,
                 jwt.getHeader().getSignatureAlgorithm());
 
         if (signatureVerified) {
@@ -158,10 +196,29 @@ public class UserInfoClient extends BaseClient<UserInfoRequest, UserInfoResponse
         }
     }
 
-    public void setSharedKey(String sharedKey) {
+    /**
+     * Sets Shared Key (byte[]) value.
+     * 
+     * @param sharedKey Shared Key (byte[]) value.
+     */
+    public void setSharedKey(byte[] sharedKey) {
         this.sharedKey = sharedKey;
     }
 
+    /**
+     * Sets Shared Password (String) value.
+     * 
+     * @param sharedPassword Shared Password (String) value.
+     */
+    public void setSharedPassword(String sharedPassword) {
+        this.sharedPassword = sharedPassword;
+    }
+
+    /**
+     * Sets Private Key (java.security.PrivateKey) value.
+     * 
+     * @param privateKey Private Key (java.security.PrivateKey) value.
+     */
     public void setPrivateKey(PrivateKey privateKey) {
         this.privateKey = privateKey;
     }

@@ -63,7 +63,7 @@ public class EDDSAKeyFactory extends KeyFactory<EDDSAPrivateKey, EDDSAPublicKey>
     private Certificate certificate;
 
     /**
-     * Constructor
+     * Constructor.
      *
      * @param signatureAlgorithm
      * @param dnName
@@ -116,7 +116,7 @@ public class EDDSAKeyFactory extends KeyFactory<EDDSAPrivateKey, EDDSAPublicKey>
     }
 
     /**
-     * Generates certificate X509 v3
+     * Generates certificate X509 v3.
      *
      * @param startDate
      * @param expirationDate
@@ -158,7 +158,7 @@ public class EDDSAKeyFactory extends KeyFactory<EDDSAPrivateKey, EDDSAPublicKey>
     }
 
     /**
-     * Returns EDDSA Public Key
+     * Returns EDDSA Public Key.
      */
     @Override
     public EDDSAPublicKey getPublicKey() {
@@ -166,7 +166,7 @@ public class EDDSAKeyFactory extends KeyFactory<EDDSAPrivateKey, EDDSAPublicKey>
     }
 
     /**
-     * Returns X509 Certificate
+     * Returns X509 Certificate.
      */
     @Override
     public Certificate getCertificate() {
@@ -174,7 +174,7 @@ public class EDDSAKeyFactory extends KeyFactory<EDDSAPrivateKey, EDDSAPublicKey>
     }
 
     /**
-     * Creates EDDSA public key from decoded array
+     * Creates EDDSA public key from decoded array.
      *
      * @param signatureAlgorithm
      * @param decodedPublicKey
@@ -187,7 +187,7 @@ public class EDDSAKeyFactory extends KeyFactory<EDDSAPrivateKey, EDDSAPublicKey>
     }
 
     /**
-     * Creates EDDSA private key from decoded array
+     * Creates EDDSA private key from decoded array.
      *
      * @param signatureAlgorithm
      * @param decodedPrivateKey
@@ -204,7 +204,7 @@ public class EDDSAKeyFactory extends KeyFactory<EDDSAPrivateKey, EDDSAPublicKey>
     }
 
     /**
-     * Returns encoded EDDSA public key (from decoded public key)
+     * Returns encoded EDDSA public key (from decoded public key).
      *
      * @param signatureAlgorithm
      * @param decodedPublicKey

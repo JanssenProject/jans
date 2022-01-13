@@ -9,9 +9,12 @@ package io.jans.as.model.util;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
 import io.jans.as.model.crypto.Certificate;
+import io.jans.as.model.crypto.signature.AlgorithmFamily;
 import io.jans.as.model.crypto.signature.ECDSAPublicKey;
+import io.jans.as.model.crypto.signature.EDDSAPublicKey;
 import io.jans.as.model.crypto.signature.RSAPublicKey;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.exception.InvalidParameterException;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.util.StringHelper;
 import org.bouncycastle.jce.provider.X509CertificateObject;
@@ -48,9 +51,13 @@ import static io.jans.as.model.jwk.JWKParameter.X;
 import static io.jans.as.model.jwk.JWKParameter.Y;
 
 /**
+ * Utility class (can't be instantiated), that provides suite of additional functions,
+ * which can be used, during JWT/JWE processing.
+ * 
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version December 8, 2018
+ * @author Sergey Manoylo
+ * @version December 5, 2021
  */
 public class JwtUtil {
 
@@ -100,6 +107,18 @@ public class JwtUtil {
         return getMessageDigest(data, "SHA-512");
     }
 
+    public static byte[] getMessageDigestSHA3_256(String data) throws NoSuchProviderException, NoSuchAlgorithmException {
+        return getMessageDigest(data, "SHA3-256");
+    }
+
+    public static byte[] getMessageDigestSHA3_384(String data) throws NoSuchProviderException, NoSuchAlgorithmException {
+        return getMessageDigest(data, "SHA3-384");
+    }
+
+    public static byte[] getMessageDigestSHA3_512(String data) throws NoSuchProviderException, NoSuchAlgorithmException {
+        return getMessageDigest(data, "SHA3-512");
+    }
+
     public static byte[] getMessageDigest(String data, String algorithm) throws NoSuchProviderException, NoSuchAlgorithmException {
         return MessageDigest.getInstance(algorithm, "BC").digest(data.getBytes(StandardCharsets.UTF_8));
     }
@@ -131,7 +150,9 @@ public class JwtUtil {
                 jsonPublicKey = jsonKeyValue.getJSONObject(PUBLIC_KEY);
             }
 
-            if (signatureAlgorithm == SignatureAlgorithm.RS256 || signatureAlgorithm == SignatureAlgorithm.RS384 || signatureAlgorithm == SignatureAlgorithm.RS512) {
+            AlgorithmFamily algorithmFamily = signatureAlgorithm.getFamily();
+
+            if(algorithmFamily == AlgorithmFamily.RSA) {
                 String exp = jsonPublicKey.getString(EXPONENT);
                 String mod = jsonPublicKey.getString(MODULUS);
 
@@ -139,7 +160,7 @@ public class JwtUtil {
                 BigInteger modulus = new BigInteger(1, Base64Util.base64urldecode(mod));
 
                 publicKey = new RSAPublicKey(modulus, publicExponent);
-            } else if (signatureAlgorithm == SignatureAlgorithm.ES256 || signatureAlgorithm == SignatureAlgorithm.ES384 || signatureAlgorithm == SignatureAlgorithm.ES512) {
+            } else if(algorithmFamily == AlgorithmFamily.EC) {
                 String xx = jsonPublicKey.getString(X);
                 String yy = jsonPublicKey.getString(Y);
 
@@ -147,9 +168,17 @@ public class JwtUtil {
                 BigInteger y = new BigInteger(1, Base64Util.base64urldecode(yy));
 
                 publicKey = new ECDSAPublicKey(signatureAlgorithm, x, y);
+            } else if(algorithmFamily == AlgorithmFamily.ED) {
+                String xx = jsonPublicKey.getString(X);
+
+                BigInteger x = new BigInteger(1, Base64Util.base64urldecode(xx));
+
+                publicKey = new EDDSAPublicKey(signatureAlgorithm, x.toByteArray());
+            } else {
+                throw new InvalidParameterException("Wrong value of the AlgorithmFamily: algorithmFamily = " + algorithmFamily);
             }
 
-            if (publicKey != null && jsonKeyValue.has(CERTIFICATE_CHAIN)) {
+            if (jsonKeyValue.has(CERTIFICATE_CHAIN)) {
                 final String BEGIN = "-----BEGIN CERTIFICATE-----";
                 final String END = "-----END CERTIFICATE-----";
 
@@ -161,10 +190,10 @@ public class JwtUtil {
                 io.jans.as.model.crypto.Certificate certificate = new Certificate(signatureAlgorithm, cert);
                 publicKey.setCertificate(certificate);
             }
-            if (publicKey != null) {
-                publicKey.setKeyId(resultKeyId);
-                publicKey.setSignatureAlgorithm(signatureAlgorithm);
-            }
+
+            publicKey.setKeyId(resultKeyId);
+            publicKey.setSignatureAlgorithm(signatureAlgorithm);
+ 
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
         }

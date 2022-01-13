@@ -53,8 +53,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Request Authorization, using encoded JWT/JWE (String format). 
+ * 
  * @author Javier Rojas Blum
- * @version December 15, 2021
+ * @author Sergey Manoylo
+ * @version September 13, 2021
  */
 public class JwtAuthorizationRequest {
 
@@ -123,42 +126,7 @@ public class JwtAuthorizationRequest {
 
             if (parts.length == 5) {
                 String encodedHeader = parts[0];
-
-                JwtHeader jwtHeader = new JwtHeader(encodedHeader);
-
-                keyId = jwtHeader.getKeyId();
-                KeyEncryptionAlgorithm keyEncryptionAlgorithm = KeyEncryptionAlgorithm.fromName(
-                        jwtHeader.getClaimAsString(JwtHeaderName.ALGORITHM));
-                BlockEncryptionAlgorithm blockEncryptionAlgorithm = BlockEncryptionAlgorithm.fromName(
-                        jwtHeader.getClaimAsString(JwtHeaderName.ENCRYPTION_METHOD));
-
-                JweDecrypterImpl jweDecrypter = null;
-                if (AlgorithmFamily.RSA.equals(keyEncryptionAlgorithm.getFamily())) {
-                    PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
-                    if (privateKey == null && StringUtils.isNotBlank(appConfiguration.getStaticDecryptionKid())) {
-                        privateKey = cryptoProvider.getPrivateKey(appConfiguration.getStaticDecryptionKid());
-                    }
-
-                    jweDecrypter = new JweDecrypterImpl(privateKey);
-                } else {
-                    ClientService clientService = CdiUtil.bean(ClientService.class);
-                    jweDecrypter = new JweDecrypterImpl(clientService.decryptSecret(client.getClientSecret()).getBytes(StandardCharsets.UTF_8));
-                }
-                jweDecrypter.setKeyEncryptionAlgorithm(keyEncryptionAlgorithm);
-                jweDecrypter.setBlockEncryptionAlgorithm(blockEncryptionAlgorithm);
-
-                Jwe jwe = jweDecrypter.decrypt(encodedJwt);
-
-                nestedJwt = jwe.getSignedJWTPayload();
-                if (nestedJwt != null) {
-                    keyId = nestedJwt.getHeader().getKeyId();
-                    if (!validateSignature(cryptoProvider, nestedJwt.getHeader().getSignatureAlgorithm(), client, nestedJwt.getSigningInput(), nestedJwt.getEncodedSignature())) {
-                        throw new InvalidJwtException("The Nested JWT signature is not valid");
-                    }
-                }
-
-                loadHeader(jwe.getHeader().toJsonString());
-                loadPayload(jwe.getClaims().toJsonString());
+                initEncryption(cryptoProvider, encodedJwt, client, encodedHeader);
             } else if (parts.length == 2 || parts.length == 3) {
                 String encodedHeader = parts[0];
                 String encodedClaim = parts[1];
@@ -166,23 +134,7 @@ public class JwtAuthorizationRequest {
                 if (parts.length == 3) {
                     encodedSignature = parts[2];
                 }
-
-                String signingInput = encodedHeader + "." + encodedClaim;
-                String header = new String(Base64Util.base64urldecode(encodedHeader), StandardCharsets.UTF_8);
-                String payloadString = new String(Base64Util.base64urldecode(encodedClaim), StandardCharsets.UTF_8);
-                payloadString = payloadString.replace("\\", "");
-
-                loadHeader(header);
-
-                SignatureAlgorithm sigAlg = SignatureAlgorithm.fromString(algorithm);
-                if (sigAlg == null) {
-                    throw new InvalidJwtException("The JWT algorithm is not supported");
-                }
-                if (!validateSignature(cryptoProvider, sigAlg, client, signingInput, encodedSignature)) {
-                    throw new InvalidJwtException("The JWT signature is not valid");
-                }
-
-                loadPayload(payloadString);
+                initSignature(cryptoProvider, client, encodedHeader, encodedClaim, encodedSignature);
             } else {
                 throw new InvalidJwtException("The JWT is not well formed");
             }
@@ -566,5 +518,94 @@ public class JwtAuthorizationRequest {
             throw new InvalidJwtException("exp claim is more then 60 in the future");
         }
 
+    }
+
+    /**
+     * 
+     * @param cryptoProvider
+     * @param encodedJwt
+     * @param client
+     * @param encodedHeader
+     * @throws Exception
+     */
+    private void initEncryption(AbstractCryptoProvider cryptoProvider, String encodedJwt, Client client, String encodedHeader) throws Exception {
+
+        JwtHeader jwtHeader = new JwtHeader(encodedHeader);
+
+        keyId = jwtHeader.getKeyId();
+
+        final KeyEncryptionAlgorithm keyEncryptionAlgorithm = KeyEncryptionAlgorithm
+                .fromName(jwtHeader.getClaimAsString(JwtHeaderName.ALGORITHM));
+        final BlockEncryptionAlgorithm blockEncryptionAlgorithm = BlockEncryptionAlgorithm
+                .fromName(jwtHeader.getClaimAsString(JwtHeaderName.ENCRYPTION_METHOD));
+        JweDecrypterImpl jweDecrypter = null;
+
+        final AlgorithmFamily keyEncryptionAlgorithmFamily = keyEncryptionAlgorithm.getFamily();
+        if (keyEncryptionAlgorithmFamily == AlgorithmFamily.RSA
+                || keyEncryptionAlgorithmFamily == AlgorithmFamily.EC) {
+            PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
+            if (privateKey == null && StringUtils.isNotBlank(appConfiguration.getStaticDecryptionKid())) {
+                privateKey = cryptoProvider.getPrivateKey(appConfiguration.getStaticDecryptionKid());
+            }
+            jweDecrypter = new JweDecrypterImpl(privateKey);
+        } else if (keyEncryptionAlgorithmFamily == AlgorithmFamily.AES
+                || keyEncryptionAlgorithmFamily == AlgorithmFamily.DIR) {
+            ClientService clientService = CdiUtil.bean(ClientService.class);
+            jweDecrypter = new JweDecrypterImpl(
+                    clientService.decryptSecret(client.getClientSecret()).getBytes(StandardCharsets.UTF_8));
+        } else if (keyEncryptionAlgorithmFamily == AlgorithmFamily.PASSW) {
+            ClientService clientService = CdiUtil.bean(ClientService.class);
+            jweDecrypter = new JweDecrypterImpl(clientService.decryptSecret(client.getClientSecret()));
+        } else {
+            throw new InvalidJwtException(
+                    "Wrong KeyEncryptionAlgorithm family" + keyEncryptionAlgorithm.getFamily());
+        }
+
+        jweDecrypter.setKeyEncryptionAlgorithm(keyEncryptionAlgorithm);
+        jweDecrypter.setBlockEncryptionAlgorithm(blockEncryptionAlgorithm);
+
+        Jwe jwe = jweDecrypter.decrypt(encodedJwt);
+
+        final Jwt nestedJwt = jwe.getSignedJWTPayload();
+        if (nestedJwt != null) {
+            keyId = nestedJwt.getHeader().getKeyId();
+            if (!validateSignature(cryptoProvider, nestedJwt.getHeader().getSignatureAlgorithm(), client, nestedJwt.getSigningInput(), nestedJwt.getEncodedSignature())) {
+                throw new InvalidJwtException("The Nested JWT signature is not valid");
+            }
+        }
+
+        loadHeader(jwe.getHeader().toJsonString());
+        loadPayload(jwe.getClaims().toJsonString());
+    }
+
+    /**
+     * 
+     * @param cryptoProvider
+     * @param client
+     * @param encodedHeader
+     * @param encodedClaim
+     * @param encodedSignature
+     * @throws Exception
+     */
+    private void initSignature(AbstractCryptoProvider cryptoProvider, Client client, String encodedHeader, String encodedClaim, String encodedSignature) throws Exception {
+        String signingInput = encodedHeader + "." + encodedClaim;
+        String header = new String(Base64Util.base64urldecode(encodedHeader), StandardCharsets.UTF_8);
+        String payload = new String(Base64Util.base64urldecode(encodedClaim), StandardCharsets.UTF_8);
+        payload = payload.replace("\\", "");
+
+        loadHeader(header);
+
+        SignatureAlgorithm sigAlg = SignatureAlgorithm.fromString(algorithm);
+        if (sigAlg == null) {
+            throw new InvalidJwtException("The JWT algorithm is not supported");
+        }
+        if (sigAlg == SignatureAlgorithm.NONE && appConfiguration.getFapiCompatibility()) {
+            throw new InvalidJwtException("None algorithm is not allowed for FAPI");
+        }
+        if (!validateSignature(cryptoProvider, sigAlg, client, signingInput, encodedSignature)) {
+            throw new InvalidJwtException("The JWT signature is not valid");
+        }
+
+        loadPayload(payload);
     }
 }

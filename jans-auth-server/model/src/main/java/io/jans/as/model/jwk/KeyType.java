@@ -48,6 +48,11 @@ public enum KeyType {
 
     private final String paramName;
 
+    /**
+     * Constructor
+     * 
+     * @param paramName value (key type)
+     */
     KeyType(String paramName) {
         this.paramName = paramName;
     }

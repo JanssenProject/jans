@@ -9,14 +9,19 @@ package io.jans.as.model.jwk;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import io.jans.as.model.crypto.signature.AlgorithmFamily;
-import io.jans.as.model.util.StringUtils;
 import io.jans.as.model.crypto.signature.RSAKeyFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Identifies the cryptographic algorithm used with the key.
+ * Identifies the cryptographic algorithm used with the key or shared password.
+ * 
+ * Contains all cryptographic algorithm () from:
+ * - io.jans.as.model.crypto.signature.SignatureAlgorithm
+ * - io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm.
+ * 
+ * Only algorithms, which use keys (symmetric or asymmetric) are included to this enum.
  *
  * @author Javier Rojas Blum
  * @author Sergey Manoylo
@@ -47,7 +52,7 @@ public enum Algorithm {
             Use.ENCRYPTION, AlgorithmFamily.RSA, RSAKeyFactory.DEF_KEYLENGTH),
     RSA_OAEP("RSA-OAEP", "id_token RSA-OAEP Encryption Key", "Encryption Key: RSAES OAEP using default parameters",
             Use.ENCRYPTION, AlgorithmFamily.RSA, RSAKeyFactory.DEF_KEYLENGTH),
-    RSA_OAEP_256("RSA-OAEP-256", "id_token RSA-OAEP-256 Encryption Key", "Encryption Key: RSAES OAEP using SHA-256 and MGF1 with SHA-256 ",
+    RSA_OAEP_256("RSA-OAEP-256", "id_token RSA-OAEP-256 Encryption Key", "Encryption Key: RSAES OAEP using SHA-256 and MGF1 with SHA-256",
             Use.ENCRYPTION, AlgorithmFamily.RSA, RSAKeyFactory.DEF_KEYLENGTH),
 
     ECDH_ES("ECDH-ES", "id_token ECDH-ES Encryption Key", "Encryption Key: Elliptic Curve Diffie-Hellman Ephemeral Static key agreement using Concat KDF",
@@ -148,6 +153,8 @@ public enum Algorithm {
             for (Algorithm algorithm : Algorithm.values()) {
                 if (param.equals(algorithm.paramName)) {
                     return algorithm;
+                } else if("EdDSA".equalsIgnoreCase(param)) {
+                    return ED25519;
                 }
             }
         }
@@ -161,8 +168,6 @@ public enum Algorithm {
             Algorithm algorithm = Algorithm.fromString(param);
             if (algorithm != null && algorithm.use == use) {
                 algorithms.add(algorithm);
-            } else if (StringUtils.equals("RSA_OAEP", param)) {
-                algorithms.add(RSA_OAEP);
             }
         }
 

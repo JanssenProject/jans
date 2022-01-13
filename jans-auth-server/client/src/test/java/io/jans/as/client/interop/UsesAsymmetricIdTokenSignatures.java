@@ -9,19 +9,16 @@ package io.jans.as.client.interop;
 import io.jans.as.client.AuthorizationRequest;
 import io.jans.as.client.AuthorizationResponse;
 import io.jans.as.client.BaseTest;
-import io.jans.as.client.JwkClient;
 import io.jans.as.client.RegisterClient;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
 import io.jans.as.model.common.ResponseType;
-import io.jans.as.model.crypto.signature.ECDSAPublicKey;
-import io.jans.as.model.crypto.signature.RSAPublicKey;
+import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
-import io.jans.as.model.jws.ECDSASigner;
-import io.jans.as.model.jws.RSASigner;
 import io.jans.as.model.jwt.Jwt;
-import io.jans.as.model.jwt.JwtHeaderName;
+import io.jans.as.model.jwt.JwtVerifier;
 import io.jans.as.model.register.ApplicationType;
+import io.jans.as.model.util.JwtUtil;
 import io.jans.as.model.util.StringUtils;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
@@ -38,7 +35,8 @@ import static org.testng.Assert.assertTrue;
  * OC5:FeatureTest-Uses Asymmetric ID Token Signatures
  *
  * @author Javier Rojas Blum
- * @version November 3, 2016
+ * @author Sergey Manoylo
+ * @version September 13, 2021
  */
 public class UsesAsymmetricIdTokenSignatures extends BaseTest {
 
@@ -90,11 +88,8 @@ public class UsesAsymmetricIdTokenSignatures extends BaseTest {
 
         // 3. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS256, publicKey);
-        assertTrue(rsaSigner.validate(jwt));
+        JwtVerifier jwtVerifyer = new JwtVerifier(new AuthCryptoProvider(), JwtUtil.getJSONWebKeys(jwksUri));
+        assertTrue(jwtVerifyer.verifyJwt(jwt));
     }
 
     @Parameters({"redirectUris", "userId", "userSecret", "redirectUri", "sectorIdentifierUri"})
@@ -145,11 +140,8 @@ public class UsesAsymmetricIdTokenSignatures extends BaseTest {
 
         // 3. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS384, publicKey);
-        assertTrue(rsaSigner.validate(jwt));
+        JwtVerifier jwtVerifyer = new JwtVerifier(new AuthCryptoProvider(), JwtUtil.getJSONWebKeys(jwksUri));
+        assertTrue(jwtVerifyer.verifyJwt(jwt));
     }
 
     @Parameters({"redirectUris", "userId", "userSecret", "redirectUri", "sectorIdentifierUri"})
@@ -200,11 +192,8 @@ public class UsesAsymmetricIdTokenSignatures extends BaseTest {
 
         // 3. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS512, publicKey);
-        assertTrue(rsaSigner.validate(jwt));
+        JwtVerifier jwtVerifyer = new JwtVerifier(new AuthCryptoProvider(), JwtUtil.getJSONWebKeys(jwksUri));
+        assertTrue(jwtVerifyer.verifyJwt(jwt));
     }
 
     @Parameters({"redirectUris", "userId", "userSecret", "redirectUri", "sectorIdentifierUri"})
@@ -255,11 +244,60 @@ public class UsesAsymmetricIdTokenSignatures extends BaseTest {
 
         // 3. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
-        ECDSAPublicKey publicKey = JwkClient.getECDSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        ECDSASigner ecdsaSigner = new ECDSASigner(SignatureAlgorithm.ES256, publicKey);
-        assertTrue(ecdsaSigner.validate(jwt));
+        JwtVerifier jwtVerifyer = new JwtVerifier(new AuthCryptoProvider(), JwtUtil.getJSONWebKeys(jwksUri));
+        assertTrue(jwtVerifyer.verifyJwt(jwt));
+    }
+
+    @Parameters({ "redirectUris", "userId", "userSecret", "redirectUri", "sectorIdentifierUri" })
+    @Test
+    public void usesAsymmetricIdTokenSignaturesES256K(final String redirectUris, final String userId,
+            final String userSecret, final String redirectUri, final String sectorIdentifierUri) throws Exception {
+        showTitle("OC5:FeatureTest-Uses Asymmetric ID Token Signatures ES256K");
+
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN);
+
+        // 1. Registration
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.ES256K);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+
+        // 2. Request Authorization
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+        String nonce = UUID.randomUUID().toString();
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes,
+                redirectUri, nonce);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(authorizationEndpoint,
+                authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation());
+        assertNotNull(authorizationResponse.getIdToken());
+        assertNotNull(authorizationResponse.getState());
+
+        String idToken = authorizationResponse.getIdToken();
+
+        // 3. Validate id_token
+        Jwt jwt = Jwt.parse(idToken);
+        JwtVerifier jwtVerifyer = new JwtVerifier(new AuthCryptoProvider(), JwtUtil.getJSONWebKeys(jwksUri));
+        assertTrue(jwtVerifyer.verifyJwt(jwt));
     }
 
     @Parameters({"redirectUris", "userId", "userSecret", "redirectUri", "sectorIdentifierUri"})
@@ -310,11 +348,8 @@ public class UsesAsymmetricIdTokenSignatures extends BaseTest {
 
         // 3. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
-        ECDSAPublicKey publicKey = JwkClient.getECDSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        ECDSASigner ecdsaSigner = new ECDSASigner(SignatureAlgorithm.ES384, publicKey);
-        assertTrue(ecdsaSigner.validate(jwt));
+        JwtVerifier jwtVerifyer = new JwtVerifier(new AuthCryptoProvider(), JwtUtil.getJSONWebKeys(jwksUri));
+        assertTrue(jwtVerifyer.verifyJwt(jwt));
     }
 
     @Parameters({"redirectUris", "userId", "userSecret", "redirectUri", "sectorIdentifierUri"})
@@ -365,10 +400,111 @@ public class UsesAsymmetricIdTokenSignatures extends BaseTest {
 
         // 3. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
-        ECDSAPublicKey publicKey = JwkClient.getECDSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        ECDSASigner ecdsaSigner = new ECDSASigner(SignatureAlgorithm.ES512, publicKey);
-        assertTrue(ecdsaSigner.validate(jwt));
+        JwtVerifier jwtVerifyer = new JwtVerifier(new AuthCryptoProvider(), JwtUtil.getJSONWebKeys(jwksUri));
+        assertTrue(jwtVerifyer.verifyJwt(jwt));
+    }
+
+    @Parameters({ "redirectUris", "userId", "userSecret", "redirectUri", "sectorIdentifierUri" })
+    @Test
+    public void usesAsymmetricIdTokenSignaturesED25519(final String redirectUris, final String userId,
+            final String userSecret, final String redirectUri, final String sectorIdentifierUri) throws Exception {
+        showTitle("OC5:FeatureTest-Uses Asymmetric ID Token Signatures ED25519");
+
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN);
+
+        // 1. Registration
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.ED25519);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+
+        // 2. Request Authorization
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+        String nonce = UUID.randomUUID().toString();
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes,
+                redirectUri, nonce);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(authorizationEndpoint,
+                authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation());
+        assertNotNull(authorizationResponse.getIdToken());
+        assertNotNull(authorizationResponse.getState());
+
+        String idToken = authorizationResponse.getIdToken();
+
+        // 3. Validate id_token
+        Jwt jwt = Jwt.parse(idToken);
+        JwtVerifier jwtVerifyer = new JwtVerifier(new AuthCryptoProvider(), JwtUtil.getJSONWebKeys(jwksUri));
+        assertTrue(jwtVerifyer.verifyJwt(jwt));
+    }
+
+    @Parameters({ "redirectUris", "userId", "userSecret", "redirectUri", "sectorIdentifierUri" })
+    @Test
+    public void usesAsymmetricIdTokenSignaturesED448(final String redirectUris, final String userId,
+            final String userSecret, final String redirectUri, final String sectorIdentifierUri) throws Exception {
+        showTitle("OC5:FeatureTest-Uses Asymmetric ID Token Signatures ed448");
+
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN);
+
+        // 1. Registration
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.ED448);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+
+        // 2. Request Authorization
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+        String nonce = UUID.randomUUID().toString();
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes,
+                redirectUri, nonce);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(authorizationEndpoint,
+                authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation());
+        assertNotNull(authorizationResponse.getIdToken());
+        assertNotNull(authorizationResponse.getState());
+
+        String idToken = authorizationResponse.getIdToken();
+
+        // 3. Validate id_token
+        Jwt jwt = Jwt.parse(idToken);
+        JwtVerifier jwtVerifyer = new JwtVerifier(new AuthCryptoProvider(), JwtUtil.getJSONWebKeys(jwksUri));
+        assertTrue(jwtVerifyer.verifyJwt(jwt));
     }
 }

@@ -17,10 +17,12 @@ import io.jans.as.model.config.Constants;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
 import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
+import io.jans.as.model.crypto.signature.AlgorithmFamily;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwe.Jwe;
 import io.jans.as.model.jwe.JweEncrypterImpl;
+import io.jans.as.model.jwk.JWKParameter;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaims;
 import io.jans.as.model.jwt.JwtHeader;
@@ -35,14 +37,21 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.PublicKey;
+import java.security.interfaces.ECPublicKey;
 import java.util.List;
+import java.text.ParseException;
 
-import static io.jans.as.model.util.StringUtils.base64urlencode;
+import com.nimbusds.jose.jwk.ECKey;
+import com.nimbusds.jose.jwk.JWK;
+
+import io.jans.as.model.util.Base64Util;
 
 /**
+ * JWT Authorization Request.
+ *
  * @author Javier Rojas Blum
- * @version November 23, 2021
- */
+ * @author Sergey Manoylo
+ * @version November 23, 2021 */
 public class JwtAuthorizationRequest {
 
     private static final Logger LOG = Logger.getLogger(JwtAuthorizationRequest.class);
@@ -450,52 +459,11 @@ public class JwtAuthorizationRequest {
     }
 
     public String getEncodedJwt(JSONObject jwks) throws Exception {
-        String encodedJwt = null;
-
         if (keyEncryptionAlgorithm != null && blockEncryptionAlgorithm != null) {
-            JweEncrypterImpl jweEncrypter;
-            if (cryptoProvider != null && jwks != null) {
-                PublicKey publicKey = cryptoProvider.getPublicKey(keyId, jwks, null);
-                jweEncrypter = new JweEncrypterImpl(keyEncryptionAlgorithm, blockEncryptionAlgorithm, publicKey);
-            } else {
-                jweEncrypter = new JweEncrypterImpl(keyEncryptionAlgorithm, blockEncryptionAlgorithm, sharedKey.getBytes(StandardCharsets.UTF_8));
-            }
-
-            String header = ClientUtil.toPrettyJson(headerToJSONObject());
-            String encodedHeader = base64urlencode(header);
-
-            Jwe jwe = new Jwe();
-            jwe.setHeader(new JwtHeader(encodedHeader));
-
-            if (nestedPayload == null) {
-                String claims = ClientUtil.toPrettyJson(payloadToJSONObject());
-                String encodedClaims = base64urlencode(claims);
-                jwe.setClaims(new JwtClaims(encodedClaims));
-            } else {
-                jwe.setSignedJWTPayload(nestedPayload);
-            }
-
-            jweEncrypter.encrypt(jwe);
-
-            encodedJwt = jwe.toString();
+            return getEncodedJwtEncrypting(jwks);
         } else {
-            if (cryptoProvider == null) {
-                throw new Exception("The Crypto Provider cannot be null.");
-            }
-
-            JSONObject headerJsonObject = headerToJSONObject();
-            JSONObject payloadJsonObject = payloadToJSONObject();
-            String headerString = ClientUtil.toPrettyJson(headerJsonObject);
-            String payloadString = ClientUtil.toPrettyJson(payloadJsonObject);
-            String encodedHeader = base64urlencode(headerString);
-            String encodedPayload = base64urlencode(payloadString);
-            String signingInput = encodedHeader + "." + encodedPayload;
-            String encodedSignature = cryptoProvider.sign(signingInput, keyId, sharedKey, signatureAlgorithm);
-
-            encodedJwt = encodedHeader + "." + encodedPayload + "." + encodedSignature;
+            return getEncodedJwtSigning();
         }
-
-        return encodedJwt;
     }
 
     public String getEncodedJwt() throws Exception {
@@ -660,4 +628,97 @@ public class JwtAuthorizationRequest {
         return obj;
     }
 
+    /**
+     * Calculates encrypted JWT (JWE) in the format: encodedHeader + "." + encodedEncryptedKey + "." + encodedInitializationVector + "." + encodedCiphertext + "." + encodedIntegrityValue.
+     *
+     * @param jwks JSON Web Keys.
+     * @return Encrypted JWT (JWE) in the format: encodedHeader + "." + encodedEncryptedKey + "." + encodedInitializationVector + "." + encodedCiphertext + "." + encodedIntegrityValue.
+     * @throws Exception
+     */
+    private String getEncodedJwtEncrypting(JSONObject jwks) throws Exception {
+        JweEncrypterImpl jweEncrypter = null;
+        if (cryptoProvider != null && jwks != null) {
+            PublicKey publicKey = cryptoProvider.getPublicKey(keyId, jwks, null);
+            if (publicKey instanceof ECPublicKey) {
+                JWK jwk = getKey(jwks);
+                if (jwk != null) {
+                    ECKey ecPublicKey = (ECKey) jwk;
+                    jweEncrypter = new JweEncrypterImpl(keyEncryptionAlgorithm, blockEncryptionAlgorithm, ecPublicKey);
+                } else {
+                    throw new InvalidJwtException("jweEncrypter was not created.");
+                }
+            } else {
+                jweEncrypter = new JweEncrypterImpl(keyEncryptionAlgorithm, blockEncryptionAlgorithm, publicKey);
+            }
+        } else {
+            if (keyEncryptionAlgorithm.getFamily() == AlgorithmFamily.PASSW) {
+                jweEncrypter = new JweEncrypterImpl(keyEncryptionAlgorithm, blockEncryptionAlgorithm, sharedKey);
+            } else {
+                jweEncrypter = new JweEncrypterImpl(keyEncryptionAlgorithm, blockEncryptionAlgorithm, sharedKey.getBytes(StandardCharsets.UTF_8));
+            }
+        }
+
+        String header = ClientUtil.toPrettyJson(headerToJSONObject());
+        String encodedHeader = Base64Util.base64urlencode(header.getBytes(StandardCharsets.UTF_8));
+
+        Jwe jwe = new Jwe();
+        jwe.setHeader(new JwtHeader(encodedHeader));
+
+        if (nestedPayload == null) {
+            String claims = ClientUtil.toPrettyJson(payloadToJSONObject());
+            String encodedClaims = Base64Util.base64urlencode(claims.getBytes(StandardCharsets.UTF_8));
+            jwe.setClaims(new JwtClaims(encodedClaims));
+        } else {
+            jwe.setSignedJWTPayload(nestedPayload);
+        }
+
+        jweEncrypter.encrypt(jwe);
+
+        return jwe.toString();
+    }
+
+    /**
+     * Calculates signed JWT (JWE) in the format: encodedHeader + "." + encodedPayload + "." + encodedSignature.
+     * 
+     * @return Signed JWT (JWE) in the format: encodedHeader + "." + encodedPayload + "." + encodedSignature.
+     * @throws Exception
+     */
+    private String getEncodedJwtSigning() throws Exception {
+
+        if (cryptoProvider == null) {
+            throw new Exception("The Crypto Provider cannot be null.");
+        }
+
+        JSONObject headerJsonObject = headerToJSONObject();
+        JSONObject payloadJsonObject = payloadToJSONObject();
+        String headerString = ClientUtil.toPrettyJson(headerJsonObject);
+        String payloadString = ClientUtil.toPrettyJson(payloadJsonObject);
+        String encodedHeader = Base64Util.base64urlencode(headerString.getBytes(StandardCharsets.UTF_8));
+        String encodedPayload = Base64Util.base64urlencode(payloadString.getBytes(StandardCharsets.UTF_8));
+        String signingInput = encodedHeader + "." + encodedPayload;
+        String encodedSignature = cryptoProvider.sign(signingInput, keyId, sharedKey, signatureAlgorithm);
+
+        return encodedHeader + "." + encodedPayload + "." + encodedSignature;
+    }
+
+    /**
+     * Returns JWK, that correspondents to the this.keyId value.
+     * 
+     * @param jwks JSON Web Keys.
+     * @return JWK, that correspondents to the this.keyId value.
+     * @throws ParseException
+     */
+    private JWK getKey(JSONObject jwks) throws ParseException {
+        JWK jwk = null;
+        JSONArray webKeys = jwks.getJSONArray(JWKParameter.JSON_WEB_KEY_SET);
+        JSONObject key = null;
+        for (int i = 0; i < webKeys.length(); i++) {
+            key = webKeys.getJSONObject(i);
+            if (keyId.equals(key.getString(JWKParameter.KEY_ID))) {
+                jwk = JWK.parse(key.toString());
+                break;
+            }
+        }
+        return jwk; 
+    }
 }

@@ -13,10 +13,12 @@ import io.jans.as.client.RegisterClient;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
 import io.jans.as.model.common.ResponseType;
+import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
-import io.jans.as.model.jws.HMACSigner;
 import io.jans.as.model.jwt.Jwt;
+import io.jans.as.model.jwt.JwtVerifier;
 import io.jans.as.model.register.ApplicationType;
+import io.jans.as.model.util.JwtUtil;
 import io.jans.as.model.util.StringUtils;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
@@ -33,7 +35,8 @@ import static org.testng.Assert.assertTrue;
  * OC5:FeatureTest-Accept Valid Symmetric ID Token Signature
  *
  * @author Javier Rojas Blum
- * @version November 2, 2016
+ * @author Sergey Manoylo
+ * @version September 13, 2021
  */
 public class AcceptValidSymmetricIdTokenSignature extends BaseTest {
 
@@ -86,7 +89,7 @@ public class AcceptValidSymmetricIdTokenSignature extends BaseTest {
 
         // 3. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
-        HMACSigner hmacSigner = new HMACSigner(SignatureAlgorithm.HS256, clientSecret);
-        assertTrue(hmacSigner.validate(jwt));
+        JwtVerifier jwtVerifyer = new JwtVerifier(new AuthCryptoProvider(), JwtUtil.getJSONWebKeys(jwksUri));
+        assertTrue(jwtVerifyer.verifyJwt(jwt, clientSecret));
     }
 }

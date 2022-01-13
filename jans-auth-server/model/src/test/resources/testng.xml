@@ -22,10 +22,15 @@
             <class name="io.jans.as.model.util.CertUtilsTest"/>
         </classes>
     </test>
-
+    <test name="HashUtil Test" enabled="true">
+        <classes>
+            <class name="io.jans.as.model.util.HashUtilTest"/>
+        </classes>
+    </test>
     <test name="JWK Thumbprint Computation Test" enabled="true">
         <classes>
             <class name="io.jans.as.model.jwk.JSONWebKeyTest"/>
         </classes>
     </test>
+
 </suite>

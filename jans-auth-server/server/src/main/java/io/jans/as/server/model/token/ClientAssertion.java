@@ -31,7 +31,8 @@ import java.util.List;
 
 /**
  * @author Javier Rojas Blum
- * @version February 12, 2019
+ * @author Sergey Manoylo
+ * @version September 13, 2021
  */
 public class ClientAssertion {
 
@@ -102,7 +103,8 @@ public class ClientAssertion {
 
                                 if (jwtType != null && signatureAlgorithm != null && signatureAlgorithm.getFamily() != null &&
                                         ((authenticationMethod == AuthenticationMethod.CLIENT_SECRET_JWT && AlgorithmFamily.HMAC.equals(signatureAlgorithm.getFamily()))
-                                                || (authenticationMethod == AuthenticationMethod.PRIVATE_KEY_JWT && (AlgorithmFamily.RSA.equals(signatureAlgorithm.getFamily()) || AlgorithmFamily.EC.equals(signatureAlgorithm.getFamily()))))) {
+                                                || (authenticationMethod == AuthenticationMethod.PRIVATE_KEY_JWT
+                                                && (AlgorithmFamily.RSA.equals(signatureAlgorithm.getFamily()) || AlgorithmFamily.EC.equals(signatureAlgorithm.getFamily()) || AlgorithmFamily.ED.equals(signatureAlgorithm.getFamily()))))) {
                                     if (client.getTokenEndpointAuthSigningAlg() == null || SignatureAlgorithm.fromString(client.getTokenEndpointAuthSigningAlg()).equals(signatureAlgorithm)) {
                                         clientSecret = clientService.decryptSecret(client.getClientSecret());
 

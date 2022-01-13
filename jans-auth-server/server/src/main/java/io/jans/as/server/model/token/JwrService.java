@@ -6,18 +6,23 @@
 
 package io.jans.as.server.model.token;
 
+import com.nimbusds.jose.jwk.ECKey;
+import com.nimbusds.jose.jwk.JWK;
+
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
 import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
+import io.jans.as.model.crypto.signature.AlgorithmFamily;
 import io.jans.as.model.exception.InvalidJweException;
 import io.jans.as.model.jwe.Jwe;
 import io.jans.as.model.jwe.JweEncrypter;
 import io.jans.as.model.jwe.JweEncrypterImpl;
 import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.jwk.JSONWebKeySet;
+import io.jans.as.model.jwk.JWKParameter;
 import io.jans.as.model.jwk.Use;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtType;
@@ -29,6 +34,7 @@ import io.jans.as.server.service.SectorIdentifierService;
 import io.jans.as.server.service.ServerCryptoProvider;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
+import org.json.JSONArray;
 import org.slf4j.Logger;
 
 import javax.ejb.Stateless;
@@ -41,8 +47,10 @@ import java.util.function.Function;
 import static io.jans.as.model.jwt.JwtHeaderName.ALGORITHM;
 
 /**
+ * 
  * @author Yuriy Zabrovarnyy
- * @version April 10, 2020
+ * @author Sergey Manoylo
+ * @version September 13, 2021
  */
 @Stateless
 @Named
@@ -90,39 +98,62 @@ public class JwrService {
     }
 
     private Jwe encryptJwe(Jwe jwe, Client client) throws Exception {
-
+        
         if (appConfiguration.getUseNestedJwtDuringEncryption()) {
             JwtSigner jwtSigner = JwtSigner.newJwtSigner(appConfiguration, webKeysConfiguration, client);
             Jwt jwt = jwtSigner.newJwt();
             jwt.setClaims(jwe.getClaims());
             jwe.setSignedJWTPayload(signJwt(jwt, client));
         }
-
-        KeyEncryptionAlgorithm keyEncryptionAlgorithm = KeyEncryptionAlgorithm.fromName(jwe.getHeader().getClaimAsString(ALGORITHM));
+        final KeyEncryptionAlgorithm keyEncryptionAlgorithm = KeyEncryptionAlgorithm
+                .fromName(jwe.getHeader().getClaimAsString(ALGORITHM));
         final BlockEncryptionAlgorithm encryptionMethod = jwe.getHeader().getEncryptionMethod();
-
-        if (keyEncryptionAlgorithm == KeyEncryptionAlgorithm.RSA_OAEP || keyEncryptionAlgorithm == KeyEncryptionAlgorithm.RSA1_5) {
+        final AlgorithmFamily keyEncryptionAlgorithmFamily = keyEncryptionAlgorithm.getFamily();
+        if (keyEncryptionAlgorithmFamily == AlgorithmFamily.RSA) {
             JSONObject jsonWebKeys = JwtUtil.getJSONWebKeys(client.getJwksUri());
             String keyId = new ServerCryptoProvider(cryptoProvider).getKeyId(JSONWebKeySet.fromJSONObject(jsonWebKeys),
-                    Algorithm.fromString(keyEncryptionAlgorithm.getName()),
-                    Use.ENCRYPTION);
+                    Algorithm.fromString(keyEncryptionAlgorithm.getName()), Use.ENCRYPTION);
             PublicKey publicKey = cryptoProvider.getPublicKey(keyId, jsonWebKeys, null);
             jwe.getHeader().setKeyId(keyId);
-
             if (publicKey == null) {
                 throw new InvalidJweException("The public key is not valid");
             }
-
             JweEncrypter jweEncrypter = new JweEncrypterImpl(keyEncryptionAlgorithm, encryptionMethod, publicKey);
             return jweEncrypter.encrypt(jwe);
-        }
-        if (keyEncryptionAlgorithm == KeyEncryptionAlgorithm.A128KW || keyEncryptionAlgorithm == KeyEncryptionAlgorithm.A256KW) {
-            byte[] sharedSymmetricKey = clientService.decryptSecret(client.getClientSecret()).getBytes(StandardCharsets.UTF_8);
-            JweEncrypter jweEncrypter = new JweEncrypterImpl(keyEncryptionAlgorithm, encryptionMethod, sharedSymmetricKey);
+        } else if (keyEncryptionAlgorithmFamily == AlgorithmFamily.EC) {
+            JweEncrypter jweEncrypter = null;
+            JSONObject jsonWebKeys = JwtUtil.getJSONWebKeys(client.getJwksUri());
+            String keyId = new ServerCryptoProvider(cryptoProvider).getKeyId(JSONWebKeySet.fromJSONObject(jsonWebKeys),
+                    Algorithm.fromString(keyEncryptionAlgorithm.getName()), Use.ENCRYPTION);
+            JSONArray webKeys = jsonWebKeys.getJSONArray(JWKParameter.JSON_WEB_KEY_SET);
+            JSONObject key = null;
+            ECKey ecPublicKey = null;
+            for (int i = 0; i < webKeys.length(); i++) {
+                key = webKeys.getJSONObject(i);
+                if (keyId.equals(key.getString(JWKParameter.KEY_ID))) {
+                    ecPublicKey = (ECKey) (JWK.parse(key.toString()));
+                    break;
+                }
+            }
+            if (ecPublicKey == null) {
+                throw new InvalidJweException("jweEncrypter was not created.");
+            }
+            jweEncrypter = new JweEncrypterImpl(keyEncryptionAlgorithm, encryptionMethod, ecPublicKey);
+            return jweEncrypter.encrypt(jwe);
+        } else if (keyEncryptionAlgorithmFamily == AlgorithmFamily.AES
+                || keyEncryptionAlgorithmFamily == AlgorithmFamily.DIR) {
+            byte[] sharedSymmetricKey = clientService.decryptSecret(client.getClientSecret())
+                    .getBytes(StandardCharsets.UTF_8);
+            JweEncrypter jweEncrypter = new JweEncrypterImpl(keyEncryptionAlgorithm, encryptionMethod,
+                    sharedSymmetricKey);
+            return jweEncrypter.encrypt(jwe);
+        } else if (keyEncryptionAlgorithmFamily == AlgorithmFamily.PASSW) {
+            String sharedSymmetricPassword = clientService.decryptSecret(client.getClientSecret());
+            JweEncrypter jweEncrypter = new JweEncrypterImpl(keyEncryptionAlgorithm, encryptionMethod,
+                    sharedSymmetricPassword);
             return jweEncrypter.encrypt(jwe);
         }
-
-        throw new IllegalArgumentException("Unsupported encryption algorithm: " + keyEncryptionAlgorithm);
+        throw new IllegalArgumentException("Unsupported encryption algorithm: " + keyEncryptionAlgorithm);        
     }
 
     public io.jans.as.model.token.JsonWebResponse createJwr(Client client) {

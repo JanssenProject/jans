@@ -15,7 +15,11 @@ import java.security.Security;
 import static org.testng.Assert.assertEquals;
 
 /**
+ * HashUtilTest Unit Tests (HashUtil).
+ * 
  * @author Yuriy Zabrovarnyy
+ * @author Sergey Manoylo
+ * @version December 5, 2021
  */
 public class HashUtilTest {
 
@@ -28,6 +32,7 @@ public class HashUtilTest {
     @Test
     public void s256Hash() {
         assertEquals("hhNHO19gwnEguTE5SAK-GA", HashUtil.getHash(INPUT, SignatureAlgorithm.ES256));
+        assertEquals("hhNHO19gwnEguTE5SAK-GA", HashUtil.getHash(INPUT, SignatureAlgorithm.ES256K));
         assertEquals("hhNHO19gwnEguTE5SAK-GA", HashUtil.getHash(INPUT, SignatureAlgorithm.HS256));
         assertEquals("hhNHO19gwnEguTE5SAK-GA", HashUtil.getHash(INPUT, SignatureAlgorithm.PS256));
         assertEquals("hhNHO19gwnEguTE5SAK-GA", HashUtil.getHash(INPUT, SignatureAlgorithm.RS256));
@@ -47,5 +52,11 @@ public class HashUtilTest {
         assertEquals("CCmNwrkP_FbnPPpQ5f96xpXTDuzHSeGd3jGZ_JrPJo4", HashUtil.getHash(INPUT, SignatureAlgorithm.HS512));
         assertEquals("CCmNwrkP_FbnPPpQ5f96xpXTDuzHSeGd3jGZ_JrPJo4", HashUtil.getHash(INPUT, SignatureAlgorithm.PS512));
         assertEquals("CCmNwrkP_FbnPPpQ5f96xpXTDuzHSeGd3jGZ_JrPJo4", HashUtil.getHash(INPUT, SignatureAlgorithm.RS512));
+        assertEquals("CCmNwrkP_FbnPPpQ5f96xpXTDuzHSeGd3jGZ_JrPJo4", HashUtil.getHash(INPUT, SignatureAlgorithm.ED25519));
+    }
+
+    @Test
+    public void s3_256Hash() {
+        assertEquals("Kb25OPhgGOtB1Rb8crNbcA", HashUtil.getHash(INPUT, SignatureAlgorithm.ED448));
     }
 }

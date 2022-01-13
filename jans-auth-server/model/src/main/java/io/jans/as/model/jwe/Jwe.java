@@ -7,15 +7,17 @@
 package io.jans.as.model.jwe;
 
 import io.jans.as.model.exception.InvalidJweException;
-import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.token.JsonWebResponse;
 
 import java.security.PrivateKey;
 
 /**
+ * Encrypted and Signed JWT.
+ * 
  * @author Javier Rojas Blum
- * @version July 29, 2016
+ * @author Sergey Manoylo
+ * @version September 13, 2021
  */
 public class Jwe extends JsonWebResponse {
 
@@ -35,18 +37,28 @@ public class Jwe extends JsonWebResponse {
         encodedIntegrityValue = null;
     }
 
-    public static Jwe parse(String encodedJwe, PrivateKey privateKey, byte[] sharedSymmetricKey) throws InvalidJweException, InvalidJwtException {
+    public static Jwe parse(String encodedJwe, PrivateKey privateKey, byte[] sharedSymmetricKey, String sharedSymmetricPassword) throws InvalidJweException {
         Jwe jwe = null;
-
+        JweDecrypter jweDecrypter = null;
         if (privateKey != null) {
-            JweDecrypter jweDecrypter = new JweDecrypterImpl(privateKey);
-            jwe = jweDecrypter.decrypt(encodedJwe);
+            jweDecrypter = new JweDecrypterImpl(privateKey);
         } else if (sharedSymmetricKey != null) {
-            JweDecrypter jweDecrypter = new JweDecrypterImpl(sharedSymmetricKey);
-            jwe = jweDecrypter.decrypt(encodedJwe);
+            jweDecrypter = new JweDecrypterImpl(sharedSymmetricKey);
+        } else if (sharedSymmetricPassword != null) {
+            jweDecrypter = new JweDecrypterImpl(sharedSymmetricPassword);
+        } else {
+            throw new InvalidJweException("privateKey, sharedSymmetricKey, sharedSymmetricPassword: keys aren't defined");
         }
-
+        jwe = jweDecrypter.decrypt(encodedJwe);
         return jwe;
+    }
+
+    public static Jwe parse(String encodedJwe, PrivateKey privateKey, byte[] sharedSymmetricKey) throws InvalidJweException {
+        return parse(encodedJwe, privateKey, sharedSymmetricKey, null);
+    }
+
+    public static Jwe parse(String encodedJwe, PrivateKey privateKey) throws InvalidJweException {
+        return parse(encodedJwe, privateKey, null, null);
     }
 
     public String getEncodedHeader() {
