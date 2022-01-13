@@ -1,0 +1,19 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+
+<suite name="jansAuthClientBenchmark" parallel="false">
+
+    <!-- Authorization Benchmark test -->
+    <test name="Authorization Benchmark tests" enabled="true">
+        <classes>
+            <class name="io.jans.as.client.load.benchmark.BenchmarkRequestAuthorization"/>
+        </classes>
+    </test>
+
+    <!-- Access Token Benchmark test -->
+    <test name="Access Token Benchmark test" enabled="true">
+        <classes>
+            <class name="io.jans.as.client.load.benchmark.BenchmarkRequestAccessToken"/>
+        </classes>
+    </test>
+
+</suite>
