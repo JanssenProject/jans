@@ -1,0 +1,28 @@
+{
+  "schemas": [
+    "urn:ietf:params:scim:api:messages:2.0:PatchOp"
+  ],
+  "Operations": [
+    {
+      "op": "replace",
+      "path" : "emails[type eq \"hobby\"].display",
+      "value": "bjane"
+    },
+    {
+      "op": "replace",
+      "path" : "emails[value co \"gluu\" and primary eq true]",
+      "value": {
+        "value" : "bjane@gluu.com",
+        "display" : "bjane",
+        "type" : "hobby"
+      }
+    },
+    {
+      "op": "replace",
+      "path" : "phoneNumbers[(not(type ge \"home\") and value ew \"9\") and display ne null or primary eq null]",
+      "value": {
+        "value": "+1 1234 56789"
+      }
+    }
+  ]
+}
