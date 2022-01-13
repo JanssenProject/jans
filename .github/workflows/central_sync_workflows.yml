@@ -37,7 +37,6 @@ jobs:
             JanssenProject/jans-core
             JanssenProject/jans-eleven
             JanssenProject/jans-fido2
-            JanssenProject/jans-notify
             JanssenProject/jans-scim
             JanssenProject/jans-setup
           WORKFLOW_FILES: |
