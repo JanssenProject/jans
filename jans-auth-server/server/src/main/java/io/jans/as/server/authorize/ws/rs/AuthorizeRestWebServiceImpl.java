@@ -296,7 +296,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
         SessionId sessionUser = identity.getSessionId();
         User user = sessionIdService.getUser(sessionUser);
-
+        
         try {
             Map<String, String> customResponseHeaders = Util.jsonObjectArrayStringAsMap(customRespHeaders);
 
@@ -307,7 +307,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             redirectUri = authorizeRestWebServiceValidator.validateRedirectUri(client, redirectUri, state, deviceAuthzUserCode, httpRequest);
             checkAcrChanged(acrValuesStr, prompts, sessionUser); // check after redirect uri is validated
 
-            RedirectUriResponse redirectUriResponse = new RedirectUriResponse(new RedirectUri(redirectUri, responseTypes, responseMode), state, httpRequest, errorResponseFactory);
+            RedirectUriResponse redirectUriResponse = new RedirectUriResponse(new RedirectUri(redirectUri, responseTypes, responseMode), state, httpRequest, errorResponseFactory);            
             redirectUriResponse.setFapiCompatible(appConfiguration.isFapi());
 
             Set<String> scopes = scopeChecker.checkScopesPolicy(client, scope);
@@ -398,7 +398,10 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     throw e;
                 } catch (Exception e) {
                     log.error("Invalid JWT authorization request. Message : " + e.getMessage(), e);
-                    throw authorizeRestWebServiceValidator.createInvalidJwtRequestException(redirectUriResponse, "Invalid JWT authorization request");
+                    if (responseMode == ResponseMode.JWT)
+                        log.info("INVALID JWT SIGNATURE");
+                    else 
+                        throw authorizeRestWebServiceValidator.createInvalidJwtRequestException(redirectUriResponse, "Invalid JWT authorization request");
                 }
             }
 
@@ -776,7 +779,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             applicationAuditLogger.sendMessage(oAuth2AuditLog);
             if (log.isErrorEnabled())
                 log.error(e.getMessage(), e);
-            throw e;
+            	throw e;
         } catch (AcrChangedException e) { // Acr changed
             log.error("ACR is changed, please provide a supported and enabled acr value");
             log.error(e.getMessage(), e);
