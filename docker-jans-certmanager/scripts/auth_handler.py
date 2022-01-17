@@ -434,6 +434,8 @@ class AuthHandler(BaseHandler):
                 logger.info(f"Waiting for private key push delay ({int(self.privkey_push_delay)} seconds) ...")
                 time.sleep(int(self.privkey_push_delay))
                 for container in auth_containers:
+                    logger.info(f"creating backup of {name}:{jks_fn}")
+                    self.meta_client.exec_cmd(container, f"cp {jks_fn} {jks_fn}.backup")
                     logger.info(f"creating new {name}:{jks_fn}")
                     self.meta_client.copy_to_container(container, jks_fn)
 
