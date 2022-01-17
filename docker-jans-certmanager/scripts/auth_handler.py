@@ -439,9 +439,11 @@ class AuthHandler(BaseHandler):
                     logger.info(f"creating new {name}:{jks_fn}")
                     self.meta_client.copy_to_container(container, jks_fn)
 
-                # key selection is changed
-                if self.privkey_push_strategy != self.key_strategy:
-                    rev = rev + 1
+                    # as new JKS pushed to container, we need to tell auth-server to reload the private keys
+                    # by increasing jansRevision again; note that as jansRevision may have been modified externally
+                    # we need to ensure we have fresh jansRevision value to increase to
+                    config = self.backend.get_auth_config()
+                    rev = int(config["jansRevision"]) + 1
                     conf_dynamic.update({
                         "keySelectionStrategy": self.privkey_push_strategy,
                     })
