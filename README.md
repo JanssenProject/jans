@@ -34,10 +34,10 @@ Start a fresh ubuntu `18.04` or `20.04` and execute the following
 
 ```bash
 sudo su -
-wget https://raw.githubusercontent.com/JanssenProject/jans-cloud-native/master/automation/startdemo.sh && chmod u+x startdemo.sh && ./startdemo.sh
+wget https://raw.githubusercontent.com/JanssenProject/jans-cloud-native/master/automation/startopenbankingdemo.sh && chmod u+x startopenbankingdemo.sh && ./startopenbankingdemo.sh
 ```
 
-This will install docker, microk8s, helm and Janssen with the default settings the can be found inside [values.yaml](charts/jans/values.yaml). Please map the `ip` of the instance running ubuntu to `demoexample.jans.io` and then access the endpoints at your browser such in the example in the table below.
+This will install docker, microk8s, helm and Janssen with the default settings the can be found inside [values.yaml](helm/jans/values.yaml). Please map the `ip` of the instance running ubuntu to `demoexample.jans.io` and then access the endpoints at your browser such in the example in the table below.
 
 | Service     | Example endpoint                                               |
 | ----------- | -------------------------------------------------------------- |
@@ -45,4 +45,6 @@ This will install docker, microk8s, helm and Janssen with the default settings t
 | fido2       | `https://demoexample.jans.io/.well-known/fido2-configuration`  |
 | scim        | `https://demoexample.jans.io/.well-known/scim-configuration`   |
 
-For more information follow [here](charts/jans/README.md).
+For more information follow [here](helm/jans/README.md).
+
+Helm charts are located 
