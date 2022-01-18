@@ -72,8 +72,7 @@
         "RSA1_5",
         "RSA-OAEP",
         "RSA-OAEP-256",
-        "Ed25519",
-        "Ed448",
+        "EdDSA",
         "ECDH-ES",
         "ECDH-ES+A128KW",
         "ECDH-ES+A192KW",
@@ -95,8 +94,7 @@
         "PS256",
         "PS384",
         "PS512",
-        "Ed25519",
-        "Ed448"
+        "EdDSA"
     ],    
     "authorizationEncryptionAlgValuesSupported":[
         "RSA1_5",
@@ -142,8 +140,7 @@
         "PS256",
         "PS384",
         "PS512",
-        "Ed25519",
-        "Ed448"
+        "EdDSA"
     ],
     "userInfoEncryptionAlgValuesSupported":[
         "RSA1_5",
@@ -189,8 +186,7 @@
         "PS256",
         "PS384",
         "PS512",
-        "Ed25519",
-        "Ed448"
+        "EdDSA"
     ],
     "idTokenEncryptionAlgValuesSupported":[
         "RSA1_5",
@@ -236,8 +232,7 @@
         "PS256",
         "PS384",
         "PS512",
-        "Ed25519",
-        "Ed448"
+        "EdDSA"
     ],
     "requestObjectEncryptionAlgValuesSupported":[
         "RSA1_5",
@@ -291,8 +286,7 @@
         "PS256",
         "PS384",
         "PS512",
-        "Ed25519",
-        "Ed448"
+        "EdDSA"
     ],    
     "dpopSigningAlgValuesSupported":[
         "none",
@@ -309,8 +303,7 @@
         "PS256",
         "PS384",
         "PS512",
-        "Ed25519",
-        "Ed448"
+        "EdDSA"
     ],
     "dpopTimeframe": 5,
     "dpopJtiCacheTime": 3600,
@@ -507,8 +500,7 @@
         "PS256",
         "PS384",
         "PS512",
-        "Ed25519",
-        "Ed448"
+        "EdDSA"
      ],     
     "backchannelClientId": "",
     "backchannelRedirectUri": "https://%(hostname)s/jans-auth/ciba/home.htm",

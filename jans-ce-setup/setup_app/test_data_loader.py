@@ -33,15 +33,15 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         self.template_base = os.path.join(Config.templateFolder, 'test')
 
     def create_test_client_keystore(self):
-        self.logIt("Creating client_keystore.p12")
-        client_keystore_fn = os.path.join(Config.outputFolder, 'test/jans-auth/client/client_keystore.p12')
-        keys_json_fn =  os.path.join(Config.outputFolder, 'test/jans-auth/client/keys_client_keystore.json')
+        self.logIt("Creating client_keystore.jks")
+        client_keystore_fn = os.path.join(Config.outputFolder, 'test/jans-auth/client/client_keystore.jks')
+        keys_json_fn = os.path.join(Config.outputFolder, 'test/jans-auth/client/keys_client_keystore.json')
+        keys_props_fn = os.path.join(Config.outputFolder, 'test/jans-auth/client/keys_client_keystore.properties')
 
         args = [Config.cmd_keytool, '-genkey', '-alias', 'dummy', '-keystore', 
                     client_keystore_fn, '-storepass', 'secret', '-keypass', 
                     'secret', '-dname', 
-                    "'{}'".format(Config.default_openid_jks_dn_name),
-                    '-storetype', 'PKCS12'
+                    "'{}'".format(Config.default_openid_jks_dn_name)
                     ]
 
         self.run(' '.join(args), shell=True)
@@ -53,7 +53,9 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                 '-sig_keys', Config.default_sig_key_algs,
                 '-enc_keys', Config.default_enc_key_algs,
                 '-dnname', "'{}'".format(Config.default_openid_jks_dn_name),
-                '-expiration', '365','>', keys_json_fn]
+                '-expiration', '365',
+                '-test_prop_file', keys_props_fn,
+                '>', keys_json_fn]
 
         cmd = ' '.join(args)
 
@@ -61,6 +63,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
 
         self.copyFile(client_keystore_fn, os.path.join(Config.outputFolder, 'test/jans-auth/server'))
         self.copyFile(keys_json_fn, os.path.join(Config.outputFolder, 'test/jans-auth/server'))
+        self.copyFile(keys_props_fn, os.path.join(Config.outputFolder, 'test/jans-auth/server'))
 
     def load_test_data(self):
         Config.pbar.progress(self.service_name, "Loading Test Data", False)
@@ -193,6 +196,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
 
         # Client keys deployment
         base.download('https://raw.githubusercontent.com/JanssenProject/jans-auth-server/master/client/src/test/resources/jans_test_client_keys.zip', '/var/www/html/jans_test_client_keys.zip')
+        #base.download('https://jans-ce.smansoft.net/jans_test_client_keys.zip', '/var/www/html/jans_test_client_keys.zip')
         self.run([paths.cmd_unzip, '-o', '/var/www/html/jans_test_client_keys.zip', '-d', '/var/www/html/'])
         self.run([paths.cmd_rm, '-rf', 'jans_test_client_keys.zip'])
         self.run([paths.cmd_chown, '-R', 'root:'+apache_user, '/var/www/html/jans-auth-client'])
@@ -202,7 +206,6 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                                     'dynamicRegistrationCustomObjectClass':  'jansClntCustomAttributes',
                                     'dynamicRegistrationCustomAttributes': [ "jansTrustedClnt", "myCustomAttr1", "myCustomAttr2", "jansInclClaimsInIdTkn" ],
                                     'dynamicRegistrationExpirationTime': 86400,
-                                    'grantTypesAndResponseTypesAutofixEnabled': True,
                                     'dynamicGrantTypeDefault': [ "authorization_code", "implicit", "password", "client_credentials", "refresh_token", "urn:ietf:params:oauth:grant-type:uma-ticket", "urn:openid:params:grant-type:ciba", "urn:ietf:params:oauth:grant-type:device_code" ],
                                     'legacyIdTokenClaims': True,
                                     'authenticationFiltersEnabled': True,
@@ -213,16 +216,26 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                                     'dynamicRegistrationPasswordGrantTypeEnabled' : True,
                                     'cibaEnabled': True,
                                     'backchannelTokenDeliveryModesSupported': ["poll", "ping", "push"],
-                                    'backchannelAuthenticationRequestSigningAlgValuesSupported': [ "RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "PS256", "PS384", "PS512" ],
+                                    'jwksAlgorithmsSupported':[ "RS256", "RS384", "RS512", "ES256", "ES256K", "ES384", "ES512", "PS256", "PS384", "PS512", "RSA1_5", "RSA-OAEP", "RSA-OAEP-256", "EdDSA", "ECDH-ES", "ECDH-ES+A128KW", "ECDH-ES+A192KW", "ECDH-ES+A256KW" ],
+                                    'authorizationSigningAlgValuesSupported':[ "none", "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "ES256", "ES256K", "ES384", "ES512", "ES512", "PS256", "PS384", "PS512", "EdDSA" ],
+                                    'authorizationEncryptionAlgValuesSupported':[ "RSA1_5", "RSA-OAEP", "A128KW", "A256KW", "RSA-OEAP-256", "ECDH-ES", "ECDH-ES+A128KW", "ECDH-ES+A192KW", "ECDH-ES+A256KW", "A192KW", "A128GCMKW", "A192GCMKW", "A256GCMKW", "PBES2-HS256+A128KW", "PBES2-HS384+A192KW", "PBES2-HS512+A256KW", "dir" ],
+                                    'authorizationEncryptionEncValuesSupported':[ "A128CBC+HS256", "A256CBC+HS512", "A128CBC-HS256", "A192CBC-HS384", "A256CBC-HS512", "A128GCM", "A192GCM", "A256GCM" ],
+                                    'backchannelAuthenticationRequestSigningAlgValuesSupported': [ "none", "RS256", "RS384", "RS512", "ES256", "ES256K", "ES384", "ES512", "PS256", "PS384", "PS512", "EdDSA" ],
                                     'backchannelClientId': '123-123-123',
                                     'backchannelUserCodeParameterSupported': True,
-                                    'tokenEndpointAuthSigningAlgValuesSupported': [ 'HS256', 'HS384', 'HS512', 'RS256', 'RS384', 'RS512', 'ES256', 'ES384', 'ES512', 'PS256', 'PS384', 'PS512' ],
-                                    'userInfoSigningAlgValuesSupported': [ 'none', 'HS256', 'HS384', 'HS512', 'RS256', 'RS384', 'RS512', 'ES256', 'ES384', 'ES512', 'PS256', 'PS384', 'PS512' ],
+                                    'tokenEndpointAuthSigningAlgValuesSupported':[ "none", "HS256", "HS384", "HS512", "RS256","RS384", "RS512", "ES256", "ES256K", "ES384", "ES512", "PS256", "PS384", "PS512", "EdDSA" ],
+                                    'userInfoSigningAlgValuesSupported':[ "none", "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "ES256", "ES256K", "ES384", "ES512", "PS256", "PS384", "PS512", "EdDSA" ],
+                                    'userInfoEncryptionAlgValuesSupported':[ "RSA1_5", "RSA-OAEP", "A128KW", "A256KW", "RSA-OEAP-256", "ECDH-ES", "ECDH-ES+A128KW", "ECDH-ES+A192KW", "ECDH-ES+A256KW", "A192KW", "A128GCMKW", "A192GCMKW", "A256GCMKW", "PBES2-HS256+A128KW", "PBES2-HS384+A192KW", "PBES2-HS512+A256KW", "dir" ],
+                                    'userInfoEncryptionEncValuesSupported':[ "A128CBC+HS256", "A256CBC+HS512", "A128CBC-HS256", "A192CBC-HS384", "A256CBC-HS512", "A128GCM", "A192GCM", "A256GCM" ],
                                     'consentGatheringScriptBackwardCompatibility': False,
                                     'claimsParameterSupported': True,
                                     'grantTypesSupported': [ 'urn:openid:params:grant-type:ciba', 'authorization_code', 'urn:ietf:params:oauth:grant-type:uma-ticket', 'urn:ietf:params:oauth:grant-type:device_code', 'client_credentials', 'implicit', 'refresh_token', 'password' ],
-                                    'idTokenSigningAlgValuesSupported': [ 'none', 'HS256', 'HS384', 'HS512', 'RS256', 'RS384', 'RS512', 'ES256', 'ES384', 'ES512', 'PS256', 'PS384', 'PS512' ],
-                                    'requestObjectSigningAlgValuesSupported': [ 'none', 'HS256', 'HS384', 'HS512', 'RS256', 'RS384', 'RS512', 'ES256', 'ES384', 'ES512', 'PS256', 'PS384', 'PS512' ],
+                                    'idTokenSigningAlgValuesSupported':[ "none", "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "ES256", "ES256K", "ES384", "ES512", "PS256", "PS384", "PS512", "EdDSA" ],
+                                    'idTokenEncryptionAlgValuesSupported':[ "RSA1_5", "RSA-OAEP", "A128KW", "A256KW", "RSA-OEAP-256", "ECDH-ES", "ECDH-ES+A128KW", "ECDH-ES+A192KW", "ECDH-ES+A256KW", "A192KW", "A128GCMKW", "A192GCMKW", "A256GCMKW", "PBES2-HS256+A128KW", "PBES2-HS384+A192KW", "PBES2-HS512+A256KW", "dir" ],
+                                    'idTokenEncryptionEncValuesSupported':[ "A128CBC+HS256", "A256CBC+HS512", "A128CBC-HS256", "A192CBC-HS384", "A256CBC-HS512", "A128GCM", "A192GCM", "A256GCM" ],
+                                    'requestObjectSigningAlgValuesSupported':[ "none", "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "ES256", "ES256K", "ES384", "ES512", "PS256", "PS384", "PS512", "EdDSA" ],
+                                    'requestObjectEncryptionAlgValuesSupported':[ "RSA1_5", "RSA-OAEP", "A128KW", "A256KW", "RSA-OEAP-256", "ECDH-ES", "ECDH-ES+A128KW", "ECDH-ES+A192KW", "ECDH-ES+A256KW", "A192KW", "A128GCMKW", "A192GCMKW", "A256GCMKW", "PBES2-HS256+A128KW", "PBES2-HS384+A192KW", "PBES2-HS512+A256KW", "dir" ],
+                                    'requestObjectEncryptionEncValuesSupported':[ "A128CBC+HS256", "A256CBC+HS512", "A128CBC-HS256", "A192CBC-HS384", "A256CBC-HS512", "A128GCM", "A192GCM", "A256GCM" ],
                                     'softwareStatementValidationClaimName': 'jwks_uri',
                                     'softwareStatementValidationType': 'jwks_uri',
                                     'umaGrantAccessIfNoPolicies': True,
@@ -235,8 +248,8 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                                     'tokenEndpointAuthMethodsSupported': [ 'client_secret_basic', 'client_secret_post', 'client_secret_jwt', 'private_key_jwt', 'tls_client_auth', 'self_signed_tls_client_auth', 'none' ],
                                     'sessionIdRequestParameterEnabled': True,
                                     'skipRefreshTokenDuringRefreshing': False,
-                                    'enabledComponents': ['unknown', 'health_check', 'userinfo', 'clientinfo', 'id_generation', 'registration', 'introspection', 'revoke_token', 'revoke_session', 'end_session', 'status_session', 'jans_configuration', 'ciba', 'uma', 'u2f', 'device_authz', 'stat', 'par'],
-                                    'cleanServiceInterval':7200
+                                    'enabledComponents': ['unknown', 'health_check', 'userinfo', 'clientinfo', 'id_generation', 'registration', 'introspection', 'revoke_token', 'revoke_session', 'end_session', 'status_session', 'jans_configuration', 'ciba', 'uma', 'u2f', 'device_authz', 'stat', 'par' ],
+                                    'cleanServiceInterval': 7200
                                     }
 
         if Config.get('config_patch_creds'):
