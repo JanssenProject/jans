@@ -28,7 +28,7 @@ import java.util.Map;
  *
  * CFRG Elliptic Curve Diffie-Hellman (ECDH) and Signatures
  * in JSON Object Signing and Encryption (JOSE) signature
- * algorithms "Ed25519" and "Ed448".
+ * algorithm "Ed25519".
  * 
  * @author Javier Rojas Blum
  * @author Sergey Manoylo
@@ -49,9 +49,7 @@ public enum AsymmetricSignatureAlgorithm implements HasParamName, AttributeEnum 
     PS384(SignatureAlgorithm.DEF_PS384, AlgorithmFamily.RSA, SignatureAlgorithm.DEF_SHA384WITHRSAANDMGF1),
     PS512(SignatureAlgorithm.DEF_PS512, AlgorithmFamily.RSA, SignatureAlgorithm.DEF_SHA512WITHRSAANDMGF1),
 
-    ED25519(SignatureAlgorithm.DEF_ED25519, AlgorithmFamily.ED, SignatureAlgorithm.DEF_ED25519, EllipticEdvardsCurve.ED_25519),
-    ED448(SignatureAlgorithm.DEF_ED448,     AlgorithmFamily.ED, SignatureAlgorithm.DEF_ED448,   EllipticEdvardsCurve.ED_448),
-    EDDSA(SignatureAlgorithm.DEF_EDDDSA,    AlgorithmFamily.ED, SignatureAlgorithm.DEF_EDDDSA,  EllipticEdvardsCurve.ED_25519);
+    EDDSA(SignatureAlgorithm.DEF_EDDDSA,    AlgorithmFamily.ED, SignatureAlgorithm.DEF_EDDDSA,  EllipticEdvardsCurve.ED_448);
 
     private final String name;
     private final AlgorithmFamily family;
