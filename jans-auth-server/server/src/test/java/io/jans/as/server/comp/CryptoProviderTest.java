@@ -20,7 +20,6 @@ import java.util.TimeZone;
 
 import javax.inject.Inject;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.testng.annotations.Test;
 
@@ -28,7 +27,6 @@ import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.jwk.Algorithm;
-import io.jans.as.model.jwk.JWKParameter;
 import io.jans.as.server.ConfigurableTest;
 import io.jans.as.server.model.config.ConfigurationFactory;
 
@@ -69,13 +67,9 @@ public class CryptoProviderTest extends ConfigurableTest {
 	private static String es512Key;
 	private static String es512Signature;
 
-    private static String ed25519Key;
-    private static String ed25519Signature;
-    private static JSONObject ed25519Jwks;
-
-    private static String ed448Key;
-    private static String ed448Signature;
-    private static JSONObject ed448Jwks;
+    private static String edDSAKey;
+    private static String edDSASignature;
+    private static JSONObject edDSAJwks;
 
 	@Test
 	public void configuration() {
@@ -478,106 +472,49 @@ public class CryptoProviderTest extends ConfigurableTest {
 	}
 
     @Test(dependsOnMethods = {"configuration"})
-    public void testGenerateKeyED25519() {
+    public void testGenerateKeyEdDSA() {
         try {
-            JSONObject response = cryptoProvider.generateKey(Algorithm.ED25519, expirationTime);
-            ed25519Key = response.optString(KEY_ID);
+            JSONObject response = cryptoProvider.generateKey(Algorithm.EDDSA, expirationTime);
+            edDSAKey = response.optString(KEY_ID);
         } catch (Exception e) {
             fail(e.getMessage(), e);
         }
     }
 
-    @Test(dependsOnMethods = {"testGenerateKeyED25519"})
-    public void testSignED25519() {
+    @Test(dependsOnMethods = {"testGenerateKeyEdDSA"})
+    public void testSignEdDSA() {
         try {
-            ed25519Signature = cryptoProvider.sign(SIGNING_INPUT, ed25519Key, null, SignatureAlgorithm.ED25519);
-            assertNotNull(ed25519Signature);
+            edDSASignature = cryptoProvider.sign(SIGNING_INPUT, edDSAKey, null, SignatureAlgorithm.EDDSA);
+            assertNotNull(edDSASignature);
         } catch (Exception e) {
             fail(e.getMessage(), e);
         }
     }
 
-    @Test(dependsOnMethods = {"testSignED25519"})
-    public void testVerifyED25519() {
+    @Test(dependsOnMethods = {"testSignEdDSA"})
+    public void testVerifyEdDSA() {
         try {
-            boolean signatureVerified = cryptoProvider.verifySignature(SIGNING_INPUT, ed25519Signature, ed25519Key, null, null, SignatureAlgorithm.ED25519);
+            boolean signatureVerified = cryptoProvider.verifySignature(SIGNING_INPUT, edDSASignature, edDSAKey, null, null, SignatureAlgorithm.EDDSA);
             assertTrue(signatureVerified);
         } catch (Exception e) {
             fail(e.getMessage(), e);
         }
     }
 
-    @Test(dependsOnMethods = {"testSignED25519"})
-    public void testVerifyED25519Jwks() {
+    @Test(dependsOnMethods = {"testSignEdDSA"})
+    public void testVerifyEdDSAJwks() {
         try {
-            boolean signatureVerified = cryptoProvider.verifySignature(SIGNING_INPUT, ed25519Signature, ed25519Key, ed25519Jwks, null, SignatureAlgorithm.ED25519);
+            boolean signatureVerified = cryptoProvider.verifySignature(SIGNING_INPUT, edDSASignature, edDSAKey, edDSAJwks, null, SignatureAlgorithm.EDDSA);
             assertTrue(signatureVerified);
         } catch (Exception e) {
             fail(e.getMessage(), e);
         }
     }
 
-    @Test(dependsOnMethods = {"testVerifyED25519"})
-    public void testDeleteKeyED25519() {
+    @Test(dependsOnMethods = {"testVerifyEdDSA"})
+    public void testDeleteKeyEdDSA() {
         try {
-            cryptoProvider.deleteKey(ed25519Key);
-        } catch (Exception e) {
-            fail(e.getMessage(), e);
-        }
-    }
-
-    @Test(dependsOnMethods = {"configuration"})
-    public void testGenerateKeyED448() {
-        try {
-            JSONObject response = cryptoProvider.generateKey(Algorithm.ED448, expirationTime);
-            ed448Key = response.optString(KEY_ID);
-
-            JSONArray keys = new JSONArray();
-            keys.put(response); 
-
-            ed448Jwks = new JSONObject();
-            ed448Jwks.put(JWKParameter.JSON_WEB_KEY_SET, keys);
-
-            System.out.println("ed448Jwks.toString() = " + ed448Jwks.toString());
-        } catch (Exception e) {
-            fail(e.getMessage(), e);
-        }
-    }
-
-    @Test(dependsOnMethods = {"testGenerateKeyED448"})
-    public void testSignED448() {
-        try {
-            ed448Signature = cryptoProvider.sign(SIGNING_INPUT, ed448Key, null, SignatureAlgorithm.ED448);
-            assertNotNull(ed448Signature);
-        } catch (Exception e) {
-            fail(e.getMessage(), e);
-        }
-    }
-
-    @Test(dependsOnMethods = {"testSignED448"})
-    public void testVerifyED448() {
-        try {
-            boolean signatureVerified = cryptoProvider.verifySignature(SIGNING_INPUT, ed448Signature, ed448Key, null, null, SignatureAlgorithm.ED448);
-            assertTrue(signatureVerified);
-        } catch (Exception e) {
-            fail(e.getMessage(), e);
-        }
-    }
-
-    @Test(dependsOnMethods = {"testSignED448"})
-    public void testVerifyED448Jwks() {
-        try {
-            boolean signatureVerified = cryptoProvider.verifySignature(SIGNING_INPUT, ed448Signature, ed448Key, ed448Jwks, null, SignatureAlgorithm.ED448);
-            assertTrue(signatureVerified);
-        } catch (Exception e) {
-            fail(e.getMessage(), e);
-        }
-    }
-
-    @Test(dependsOnMethods = {"testVerifyED448"})
-    public void testDeleteKeyED448() {
-        try {
-            cryptoProvider.deleteKey(ed448Key);
+            cryptoProvider.deleteKey(edDSAKey);
         } catch (Exception e) {
             fail(e.getMessage(), e);
         }

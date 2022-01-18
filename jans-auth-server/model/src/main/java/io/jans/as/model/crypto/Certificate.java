@@ -37,7 +37,7 @@ public class Certificate {
     /**
      * Constructor.
      * 
-     * @param signatureAlgorithm Signature algorithm (RS256, RS384, RS512, ES256, ES256K, ES384, ES512, PS256, PS384, PS512, ED25519, ED448, EDDSA). 
+     * @param signatureAlgorithm Signature algorithm (RS256, RS384, RS512, ES256, ES256K, ES384, ES512, PS256, PS384, PS512, EDDSA/Ed25519). 
      * @param x509Certificate X509 certificate.
      */
     public Certificate(SignatureAlgorithm signatureAlgorithm, X509Certificate x509Certificate) {

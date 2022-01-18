@@ -406,9 +406,9 @@ public class UsesAsymmetricIdTokenSignatures extends BaseTest {
 
     @Parameters({ "redirectUris", "userId", "userSecret", "redirectUri", "sectorIdentifierUri" })
     @Test
-    public void usesAsymmetricIdTokenSignaturesED25519(final String redirectUris, final String userId,
+    public void usesAsymmetricIdTokenSignaturesEdDSA(final String redirectUris, final String userId,
             final String userSecret, final String redirectUri, final String sectorIdentifierUri) throws Exception {
-        showTitle("OC5:FeatureTest-Uses Asymmetric ID Token Signatures ED25519");
+        showTitle("OC5:FeatureTest-Uses Asymmetric ID Token Signatures EdDSA/Ed25519");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN);
 
@@ -416,59 +416,7 @@ public class UsesAsymmetricIdTokenSignatures extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
-        registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.ED25519);
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse registerResponse = registerClient.exec();
-
-        showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
-
-        String clientId = registerResponse.getClientId();
-
-        // 2. Request Authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
-        String nonce = UUID.randomUUID().toString();
-        String state = UUID.randomUUID().toString();
-
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes,
-                redirectUri, nonce);
-        authorizationRequest.setState(state);
-
-        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(authorizationEndpoint,
-                authorizationRequest, userId, userSecret);
-
-        assertNotNull(authorizationResponse.getLocation());
-        assertNotNull(authorizationResponse.getIdToken());
-        assertNotNull(authorizationResponse.getState());
-
-        String idToken = authorizationResponse.getIdToken();
-
-        // 3. Validate id_token
-        Jwt jwt = Jwt.parse(idToken);
-        JwtVerifier jwtVerifyer = new JwtVerifier(new AuthCryptoProvider(), JwtUtil.getJSONWebKeys(jwksUri));
-        assertTrue(jwtVerifyer.verifyJwt(jwt));
-    }
-
-    @Parameters({ "redirectUris", "userId", "userSecret", "redirectUri", "sectorIdentifierUri" })
-    @Test
-    public void usesAsymmetricIdTokenSignaturesED448(final String redirectUris, final String userId,
-            final String userSecret, final String redirectUri, final String sectorIdentifierUri) throws Exception {
-        showTitle("OC5:FeatureTest-Uses Asymmetric ID Token Signatures ed448");
-
-        List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN);
-
-        // 1. Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setResponseTypes(responseTypes);
-        registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.ED448);
+        registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.EDDSA);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);

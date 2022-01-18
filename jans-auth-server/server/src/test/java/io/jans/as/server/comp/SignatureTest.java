@@ -25,7 +25,6 @@ import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
 import org.bouncycastle.jce.spec.ECPrivateKeySpec;
 import org.bouncycastle.jce.spec.ECPublicKeySpec;
 import org.bouncycastle.math.ec.rfc8032.Ed25519;
-import org.bouncycastle.math.ec.rfc8032.Ed448;
 import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.math.ec.custom.sec.SecP256K1Curve;
 import org.bouncycastle.math.ec.custom.sec.SecP256R1Curve;
@@ -1646,9 +1645,9 @@ public class SignatureTest extends BaseTest {
     /**
      * Unit Test:
      * 
-     * Generating ED25519 Keys.
+     * Generating EdDSA/Ed25519 Keys.
      * 
-     * signatureAlgorithm == SignatureAlgorithm.ED25519.
+     * signatureAlgorithm == SignatureAlgorithm.EDDSA.
      * 
      * 1. generation asymmetric keypair and certificate (public key in X509Certificate format);     
      * 
@@ -1673,12 +1672,12 @@ public class SignatureTest extends BaseTest {
      * .
      * 
      * @throws Exception
-     */
+     */    
     @Test
-    public void generateED25519Keys() throws Exception {
-        showTitle("generateED25519Keys");
+    public void generateEdDSAKeys() throws Exception {
+        showTitle("generateEdDSAKeys");
 
-        SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.ED25519;
+        SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.EDDSA;
 
         KeyFactory<EDDSAPrivateKey, EDDSAPublicKey> keyFactory = new EDDSAKeyFactory(signatureAlgorithm, DEF_CERTIFICATE_OWN);
         EDDSAPrivateKey privateKey = keyFactory.getPrivateKey();
@@ -1700,9 +1699,6 @@ public class SignatureTest extends BaseTest {
         EDDSASigner ecdsaSigner2 = new EDDSASigner(signatureAlgorithm, publicKey);
         assertTrue(ecdsaSigner2.validateSignature(signingInput, signature));
 
-        ecdsaSigner2 = new EDDSASigner(signatureAlgorithm, publicKey);
-        assertTrue(ecdsaSigner2.validateSignature(signingInput, signature));
-
         EDDSASigner ecdsaSigner3 = new EDDSASigner(signatureAlgorithm, certificate);
         assertTrue(ecdsaSigner3.validateSignature(signingInput, signature));
 
@@ -1722,6 +1718,7 @@ public class SignatureTest extends BaseTest {
 
         String signingInputWrong = signingInput + 'z';
 
+        ecdsaSigner2 = new EDDSASigner(signatureAlgorithm, publicKey);
         assertTrue(ecdsaSigner2.validateSignature(signingInput, signature));
 
         assertFalse(ecdsaSigner2.validateSignature(signingInputWrong, signature));
@@ -1729,6 +1726,8 @@ public class SignatureTest extends BaseTest {
         assertFalse(ecdsaSigner2.validateSignature(signingInputWrong, signatureWrong));
 
         EDDSASigner ecdsaSigner4 = new EDDSASigner(signatureAlgorithm, publicKeyWrong);
+        assertFalse(ecdsaSigner4.validateSignature(signingInput, signature));
+
         assertFalse(ecdsaSigner4.validateSignature(signingInput, signature));
         assertFalse(ecdsaSigner4.validateSignature(signingInputWrong, signature));
         assertFalse(ecdsaSigner4.validateSignature(signingInput, signatureWrong));
@@ -1744,9 +1743,9 @@ public class SignatureTest extends BaseTest {
     /**
      * Unit Test:
      * 
-     * Reading ED25519 Keys from the KeyStorage.
+     * Reading EdDSA/Ed25519 Keys from the KeyStorage.
      * 
-     * signatureAlgorithm == SignatureAlgorithm.ED25519. 
+     * signatureAlgorithm == SignatureAlgorithm.EDDSA. 
      * 
      * 1. loads  asymmetric keypair and certificate (public key in X509Certificate format);     
      * 
@@ -1776,12 +1775,12 @@ public class SignatureTest extends BaseTest {
      * @param kid keyID (Alias name).
      * @throws Exception
      */
-    @Parameters({ "dnName", "keyStoreFile", "keyStoreSecret", "Ed25519_keyId" })
+    @Parameters({ "dnName", "keyStoreFile", "keyStoreSecret", "EdDSA_keyId" })
     @Test
-    public void readED25519Keys(final String dnName, final String keyStoreFile, final String keyStoreSecret, final String kid) throws Exception {
-        showTitle("readED25519Keys");
+    public void readEdDSAKeys(final String dnName, final String keyStoreFile, final String keyStoreSecret, final String kid) throws Exception {
+        showTitle("readEdDSAKeys");
 
-        SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.ED25519;
+        SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.EDDSA;
 
         TestKeys testKeys = loadTestKeys(signatureAlgorithm, keyStoreFile, keyStoreSecret, dnName, kid);
 
@@ -1819,213 +1818,6 @@ public class SignatureTest extends BaseTest {
 
         assertTrue(Ed25519.SECRET_KEY_SIZE == privKeyLen);
         assertTrue(Ed25519.PUBLIC_KEY_SIZE == pubKeyLen);
-
-        KeyFactory<EDDSAPrivateKey, EDDSAPublicKey> keyFactory = new EDDSAKeyFactory(signatureAlgorithm, DEF_CERTIFICATE_OWN);
-        EDDSAPublicKey publicKeyWrong = keyFactory.getPublicKey();
-        Certificate certificateWrong = keyFactory.getCertificate();
-
-        byte[] signatureArray = Base64Util.base64urldecode(signature);
-        signatureArray[signatureArray.length - 1] = (byte) (~signatureArray[signatureArray.length - 1]);
-        String signatureWrong = Base64Util.base64urlencode(signatureArray);
-
-        String signingInputWrong = signingInput + 'z';
-
-        ecdsaSigner2 = new EDDSASigner(signatureAlgorithm, pubKey);
-        assertTrue(ecdsaSigner2.validateSignature(signingInput, signature));
-
-        assertFalse(ecdsaSigner2.validateSignature(signingInputWrong, signature));
-        assertFalse(ecdsaSigner2.validateSignature(signingInput, signatureWrong));
-        assertFalse(ecdsaSigner2.validateSignature(signingInputWrong, signatureWrong));
-
-        EDDSASigner ecdsaSigner4 = new EDDSASigner(signatureAlgorithm, publicKeyWrong);
-        assertFalse(ecdsaSigner4.validateSignature(signingInput, signature));
-        assertFalse(ecdsaSigner4.validateSignature(signingInputWrong, signature));
-        assertFalse(ecdsaSigner4.validateSignature(signingInput, signatureWrong));
-        assertFalse(ecdsaSigner4.validateSignature(signingInputWrong, signatureWrong));
-
-        EDDSASigner ecdsaSigner5 = new EDDSASigner(signatureAlgorithm, certificateWrong);
-        assertFalse(ecdsaSigner5.validateSignature(signingInput, signature));
-        assertFalse(ecdsaSigner5.validateSignature(signingInputWrong, signature));
-        assertFalse(ecdsaSigner5.validateSignature(signingInput, signatureWrong));
-        assertFalse(ecdsaSigner5.validateSignature(signingInputWrong, signatureWrong));
-    }
-
-    /**
-     * Unit Test:
-     * 
-     * Generating ED448 Keys.
-     * 
-     * signatureAlgorithm == SignatureAlgorithm.ED448.
-     * 
-     * 1. generation asymmetric keypair and certificate (public key in X509Certificate format);     
-     * 
-     * 2. generation the signature (using private key);
-     * 3. verification the signature (using public key);
-     * 4. verification the signature (using certificate - public key in X509Certificate format);
-     * 
-     * 5. true verification the signature (public key);
-     * 6. fail verification the signature (wrong sign input);
-     * 7. fail verification the signature (wrong signature);
-     * 8. fail verification the signature (wrong sign input, wrong signature);       
-     * 
-     * 9. fail verification the signature (wrong public key);
-     * 10. fail verification the signature (wrong public key, wrong sign input);
-     * 11. fail verification the signature (wrong public key, wrong signature);
-     * 12. fail verification the signature (wrong public key, wrong sign input, wrong signature);
-     *
-     * 13. fail verification the signature (wrong certificate);
-     * 14. fail verification the signature (wrong certificate, wrong sign input);
-     * 15. fail verification the signature (wrong certificate, wrong signature);
-     * 16. fail verification the signature (wrong certificate, wrong sign input, wrong signature);
-     * .
-     * 
-     * @throws Exception
-     */    
-    @Test
-    public void generateED448Keys() throws Exception {
-        showTitle("generateED448Keys");
-
-        SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.ED448;
-
-        KeyFactory<EDDSAPrivateKey, EDDSAPublicKey> keyFactory = new EDDSAKeyFactory(signatureAlgorithm, DEF_CERTIFICATE_OWN);
-        EDDSAPrivateKey privateKey = keyFactory.getPrivateKey();
-        EDDSAPublicKey publicKey = keyFactory.getPublicKey();
-        Certificate certificate = keyFactory.getCertificate();
-
-        System.out.println("PRIVATE KEY");
-        System.out.println(privateKey);
-        System.out.println("PUBLIC KEY");
-        System.out.println(publicKey);
-        System.out.println("CERTIFICATE");
-        System.out.println(certificate);
-
-        String signingInput = DEF_INPUT;
-        EDDSASigner eddsaSigner1 = new EDDSASigner(signatureAlgorithm, privateKey);
-        String signature = eddsaSigner1.generateSignature(signingInput);
-        assertTrue(signature.length() > 0);
-
-        EDDSASigner ecdsaSigner2 = new EDDSASigner(signatureAlgorithm, publicKey);
-        assertTrue(ecdsaSigner2.validateSignature(signingInput, signature));
-
-        EDDSASigner ecdsaSigner3 = new EDDSASigner(signatureAlgorithm, certificate);
-        assertTrue(ecdsaSigner3.validateSignature(signingInput, signature));
-
-        int privateKeyLen = getDecodedKeysLength(privateKey);
-        int publicKeyLen = getDecodedKeysLength(publicKey);
-
-        assertTrue(Ed448.SECRET_KEY_SIZE == privateKeyLen);
-        assertTrue(Ed448.PUBLIC_KEY_SIZE == publicKeyLen);
-
-        keyFactory = new EDDSAKeyFactory(signatureAlgorithm, DEF_CERTIFICATE_OWN);
-        EDDSAPublicKey publicKeyWrong = keyFactory.getPublicKey();
-        Certificate certificateWrong = keyFactory.getCertificate();
-
-        byte[] signatureArray = Base64Util.base64urldecode(signature);
-        signatureArray[signatureArray.length - 1] = (byte) (~signatureArray[signatureArray.length - 1]);
-        String signatureWrong = Base64Util.base64urlencode(signatureArray);
-
-        String signingInputWrong = signingInput + 'z';
-
-        ecdsaSigner2 = new EDDSASigner(signatureAlgorithm, publicKey);
-        assertTrue(ecdsaSigner2.validateSignature(signingInput, signature));
-
-        assertFalse(ecdsaSigner2.validateSignature(signingInputWrong, signature));
-        assertFalse(ecdsaSigner2.validateSignature(signingInput, signatureWrong));
-        assertFalse(ecdsaSigner2.validateSignature(signingInputWrong, signatureWrong));
-
-        EDDSASigner ecdsaSigner4 = new EDDSASigner(signatureAlgorithm, publicKeyWrong);
-        assertFalse(ecdsaSigner4.validateSignature(signingInput, signature));
-
-        assertFalse(ecdsaSigner4.validateSignature(signingInput, signature));
-        assertFalse(ecdsaSigner4.validateSignature(signingInputWrong, signature));
-        assertFalse(ecdsaSigner4.validateSignature(signingInput, signatureWrong));
-        assertFalse(ecdsaSigner4.validateSignature(signingInputWrong, signatureWrong));
-
-        EDDSASigner ecdsaSigner5 = new EDDSASigner(signatureAlgorithm, certificateWrong);
-        assertFalse(ecdsaSigner5.validateSignature(signingInput, signature));
-        assertFalse(ecdsaSigner5.validateSignature(signingInputWrong, signature));
-        assertFalse(ecdsaSigner5.validateSignature(signingInput, signatureWrong));
-        assertFalse(ecdsaSigner5.validateSignature(signingInputWrong, signatureWrong));
-    }
-
-    /**
-     * Unit Test:
-     * 
-     * Reading ED448 Keys from the KeyStorage.
-     * 
-     * signatureAlgorithm == SignatureAlgorithm.ED448. 
-     * 
-     * 1. loads  asymmetric keypair and certificate (public key in X509Certificate format);     
-     * 
-     * 2. generation the signature (using private key);
-     * 3. verification the signature (using public key);
-     * 4. verification the signature (using certificate - public key in X509Certificate format);
-     * 
-     * 5. true verification the signature (public key);
-     * 6. fail verification the signature (wrong sign input);
-     * 7. fail verification the signature (wrong signature);
-     * 8. fail verification the signature (wrong sign input, wrong signature);       
-     * 
-     * 9. fail verification the signature (wrong public key);
-     * 10. fail verification the signature (wrong public key, wrong sign input);
-     * 11. fail verification the signature (wrong public key, wrong signature);
-     * 12. fail verification the signature (wrong public key, wrong sign input, wrong signature);
-     *
-     * 13. fail verification the signature (wrong certificate);
-     * 14. fail verification the signature (wrong certificate, wrong sign input);
-     * 15. fail verification the signature (wrong certificate, wrong signature);
-     * 16. fail verification the signature (wrong certificate, wrong sign input, wrong signature);
-     * .
-     * 
-     * @param dnName Issuer of the generated Certificate.
-     * @param keyStoreFile Key Store (file).
-     * @param keyStoreSecret Password for access to the Key Store (file).
-     * @param kid keyID (Alias name).
-     * @throws Exception
-     */
-    @Parameters({ "dnName", "keyStoreFile", "keyStoreSecret", "Ed448_keyId" })
-    @Test
-    public void readED448Keys(final String dnName, final String keyStoreFile, final String keyStoreSecret, final String kid) throws Exception {
-        showTitle("readED448Keys");
-
-        SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.ED448;
-
-        TestKeys testKeys = loadTestKeys(signatureAlgorithm, keyStoreFile, keyStoreSecret, dnName, kid);
-
-        BCEdDSAPrivateKey privateKey = (BCEdDSAPrivateKey) testKeys.privateKey;
-        BCEdDSAPublicKey publicKey = (BCEdDSAPublicKey) testKeys.publicKey;
-        java.security.cert.Certificate certificate = testKeys.certificate;
-
-        EDDSAPrivateKey privKey = new EDDSAPrivateKey(signatureAlgorithm, privateKey.getEncoded(), publicKey.getEncoded());
-        EDDSAPublicKey pubKey = new EDDSAPublicKey(signatureAlgorithm, publicKey.getEncoded());
-        Certificate cert = new Certificate(signatureAlgorithm, (X509Certificate) certificate);
-
-        System.out.println("PRIVATE KEY");
-        System.out.println(privKey);
-        System.out.println("PUBLIC KEY");
-        System.out.println(pubKey);
-        System.out.println("CERTIFICATE");
-        System.out.println(cert);
-
-        String signingInput = DEF_INPUT;
-        EDDSASigner eddsaSigner1 = new EDDSASigner(signatureAlgorithm, privKey);
-        String signature = eddsaSigner1.generateSignature(signingInput);
-        assertTrue(signature.length() > 0);
-
-        EDDSASigner ecdsaSigner2 = new EDDSASigner(signatureAlgorithm, pubKey);
-        assertTrue(ecdsaSigner2.validateSignature(signingInput, signature));
-
-        ecdsaSigner2 = new EDDSASigner(signatureAlgorithm, pubKey);
-        assertTrue(ecdsaSigner2.validateSignature(signingInput, signature));
-
-        EDDSASigner ecdsaSigner3 = new EDDSASigner(signatureAlgorithm, cert);
-        assertTrue(ecdsaSigner3.validateSignature(signingInput, signature));
-
-        int privKeyLen = getDecodedKeysLength(privKey);
-        int pubKeyLen = getDecodedKeysLength(pubKey);
-
-        assertTrue(Ed448.SECRET_KEY_SIZE == privKeyLen);
-        assertTrue(Ed448.PUBLIC_KEY_SIZE == pubKeyLen);
 
         KeyFactory<EDDSAPrivateKey, EDDSAPublicKey> keyFactory = new EDDSAKeyFactory(signatureAlgorithm, DEF_CERTIFICATE_OWN);
         EDDSAPublicKey publicKeyWrong = keyFactory.getPublicKey();

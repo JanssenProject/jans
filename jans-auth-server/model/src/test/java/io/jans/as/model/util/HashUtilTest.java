@@ -52,11 +52,6 @@ public class HashUtilTest {
         assertEquals("CCmNwrkP_FbnPPpQ5f96xpXTDuzHSeGd3jGZ_JrPJo4", HashUtil.getHash(INPUT, SignatureAlgorithm.HS512));
         assertEquals("CCmNwrkP_FbnPPpQ5f96xpXTDuzHSeGd3jGZ_JrPJo4", HashUtil.getHash(INPUT, SignatureAlgorithm.PS512));
         assertEquals("CCmNwrkP_FbnPPpQ5f96xpXTDuzHSeGd3jGZ_JrPJo4", HashUtil.getHash(INPUT, SignatureAlgorithm.RS512));
-        assertEquals("CCmNwrkP_FbnPPpQ5f96xpXTDuzHSeGd3jGZ_JrPJo4", HashUtil.getHash(INPUT, SignatureAlgorithm.ED25519));
-    }
-
-    @Test
-    public void s3_256Hash() {
-        assertEquals("Kb25OPhgGOtB1Rb8crNbcA", HashUtil.getHash(INPUT, SignatureAlgorithm.ED448));
+        assertEquals("CCmNwrkP_FbnPPpQ5f96xpXTDuzHSeGd3jGZ_JrPJo4", HashUtil.getHash(INPUT, SignatureAlgorithm.EDDSA));
     }
 }

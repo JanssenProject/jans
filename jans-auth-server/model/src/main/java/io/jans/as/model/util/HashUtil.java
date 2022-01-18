@@ -6,8 +6,9 @@
 
 package io.jans.as.model.util;
 
-import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import org.apache.log4j.Logger;
+
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 
 /**
  * Hash Tool, that calculates Hash Code, using Hashing Algorithm, defined by the Signature Algorithm.
@@ -57,13 +58,9 @@ public class HashUtil {
                 case HS512:
                 case RS512:
                 case PS512:
-                case ES512:
-                case ED25519: {
+                case ES512: 
+                case EDDSA: {
                     digest = JwtUtil.getMessageDigestSHA512(input);
-                    break;
-                }
-                case ED448: {
-                    digest = JwtUtil.getMessageDigestSHA3_256(input);
                     break;
                 }
                 default: {

@@ -24,7 +24,7 @@ import java.util.List;
  *
  * CFRG Elliptic Curve Diffie-Hellman (ECDH) and Signatures
  * in JSON Object Signing and Encryption (JOSE) signature
- * algorithms "Ed25519" and "Ed448". 
+ * algorithm "Ed25519". 
  *
  * @author Javier Rojas Blum
  * @author Sergey Manoylo
@@ -51,8 +51,6 @@ public enum SignatureAlgorithm {
     PS384(SignatureAlgorithm.DEF_PS384, AlgorithmFamily.RSA, SignatureAlgorithm.DEF_SHA384WITHRSAANDMGF1, JWSAlgorithm.PS384),
     PS512(SignatureAlgorithm.DEF_PS512, AlgorithmFamily.RSA, SignatureAlgorithm.DEF_SHA512WITHRSAANDMGF1, JWSAlgorithm.PS512),
 
-    ED25519(SignatureAlgorithm.DEF_ED25519, AlgorithmFamily.ED, SignatureAlgorithm.DEF_ED25519, EllipticEdvardsCurve.ED_25519, JWSAlgorithm.EdDSA),
-    ED448(SignatureAlgorithm.DEF_ED448, AlgorithmFamily.ED, SignatureAlgorithm.DEF_ED448, EllipticEdvardsCurve.ED_448, JWSAlgorithm.EdDSA),
     EDDSA(SignatureAlgorithm.DEF_EDDDSA, AlgorithmFamily.ED, SignatureAlgorithm.DEF_ED25519, EllipticEdvardsCurve.ED_25519, JWSAlgorithm.EdDSA);
 
     public static final String DEF_HS256 = "HS256";
@@ -72,8 +70,7 @@ public enum SignatureAlgorithm {
     public static final String DEF_PS384 = "PS384";
     public static final String DEF_PS512 = "PS512";
 
-    public static final String DEF_ED25519 = "Ed25519";
-    public static final String DEF_ED448 = "Ed448";
+    public static final String DEF_ED25519 = "Ed25519";    
     public static final String DEF_EDDDSA = "EdDSA";
 
     public static final String DEF_HMACSHA256 = "HMACSHA256";
@@ -182,7 +179,7 @@ public enum SignatureAlgorithm {
 
     /**
      * Returns this.jwsAlgorithm (JSON Web Signature (JWS) algorithm name)
-     *
+     * 
      * @return this.jwsAlgorithm (JSON Web Signature (JWS) algorithm name)
      */
     public JWSAlgorithm getJwsAlgorithm() {

@@ -220,10 +220,10 @@ public class AcceptValidAsymmetricIdTokenSignature extends BaseTest {
 
     @Parameters({ "redirectUris", "userId", "userSecret", "redirectUri", "postLogoutRedirectUri", "clientJwksUri" })
     @Test
-    public void acceptValidAsymmetricIdTokenSignatureED25519(final String redirectUris, final String userId,
+    public void acceptValidAsymmetricIdTokenSignatureEdDSA(final String redirectUris, final String userId,
             final String userSecret, final String redirectUri, final String postLogoutRedirectUri,
             final String clientJwksUri) throws Exception {
-        showTitle("OC5:FeatureTest-Accept Valid Asymmetric ID Token Signature ed25519");
+        showTitle("OC5:FeatureTest-Accept Valid Asymmetric ID Token Signature EdDSA/Ed25519");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN);
 
@@ -233,68 +233,7 @@ public class AcceptValidAsymmetricIdTokenSignature extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, null,
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
-        registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.ED25519);
-        registerRequest.setPostLogoutRedirectUris(StringUtils.spaceSeparatedToList(postLogoutRedirectUri));
-        registerRequest.setJwksUri(clientJwksUri);
-        registerRequest.setSubjectType(SubjectType.PUBLIC);
-        registerRequest.setRequireAuthTime(true);
-        registerRequest.setDefaultMaxAge(3600);
-        registerRequest.setGrantTypes(grantTypes);
-
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse registerResponse = registerClient.exec();
-
-        showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
-
-        String clientId = registerResponse.getClientId();
-
-        // 2. Request Authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
-        String nonce = UUID.randomUUID().toString();
-        String state = UUID.randomUUID().toString();
-
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes,
-                redirectUri, nonce);
-        authorizationRequest.setState(state);
-
-        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(authorizationEndpoint,
-                authorizationRequest, userId, userSecret);
-
-        assertNotNull(authorizationResponse.getLocation());
-        assertNotNull(authorizationResponse.getIdToken());
-        assertNotNull(authorizationResponse.getState());
-        assertEquals(authorizationResponse.getState(), state);
-
-        String idToken = authorizationResponse.getIdToken();
-
-        // 3. Validate id_token
-        Jwt jwt = Jwt.parse(idToken);
-        JwtVerifier jwtVerifyer = new JwtVerifier(new AuthCryptoProvider(), JwtUtil.getJSONWebKeys(jwksUri));
-        assertTrue(jwtVerifyer.verifyJwt(jwt));
-    }
-
-    @Parameters({ "redirectUris", "userId", "userSecret", "redirectUri", "postLogoutRedirectUri", "clientJwksUri" })
-    @Test
-    public void acceptValidAsymmetricIdTokenSignatureED448(final String redirectUris, final String userId,
-            final String userSecret, final String redirectUri, final String postLogoutRedirectUri,
-            final String clientJwksUri) throws Exception {
-        showTitle("OC5:FeatureTest-Accept Valid Asymmetric ID Token Signature ed448");
-
-        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN);
-
-        List<GrantType> grantTypes = Arrays.asList(GrantType.AUTHORIZATION_CODE);
-
-        // 1. Registration
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, null,
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setResponseTypes(responseTypes);
-        registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.ED448);
+        registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.EDDSA);
         registerRequest.setPostLogoutRedirectUris(StringUtils.spaceSeparatedToList(postLogoutRedirectUri));
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSubjectType(SubjectType.PUBLIC);
