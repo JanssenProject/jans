@@ -30,30 +30,29 @@ on:
   workflow_dispatch:
 
 jobs:
-
-  create-matrix:
+  prepare:
     name: Create matrix
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.get-changed-modules.outputs.changed-modules }}
+      modules: ${{ steps.get_modules.outputs.modules }}
     steps:
     - name: check out code
       uses: actions/checkout@v2
       with:
         fetch-depth: 0
     - name: create matrix
-      id: get-changed-modules
+      id: get_modules
       run: |
         # get list of root directories where changed files are located
-        echo "::set-output name=changed-modules::$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | cut -d/ -f1 | sort -u| sed -z 's/\n/,/g;s/^/[/;s/,$/]/;s/$/\n/')"
+        echo "::set-output name=modules::$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | cut -d/ -f1 | sort -u| sed -z 's/\n/,/g;s/^/[/;s/,$/]/;s/$/\n/')"
         
-  analyse-modules:
+  anlayze:
     name: Analyse modules
     runs-on: ubuntu-latest
-    needs: create-matrix
+    needs: prepare
     strategy:
-      matrix: 
-        changed_modules: ${{ needs.create-matrix.outputs.matrix }}
+      matrix:
+        changed_modules: ${{ needs.prepare.outputs.modules }}
     env:
       JVM_PROJECTS: |
         JanssenProject/jans-auth-server
