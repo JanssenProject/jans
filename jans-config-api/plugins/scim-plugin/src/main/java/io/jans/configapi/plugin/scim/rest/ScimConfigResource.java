@@ -33,11 +33,11 @@ public class ScimConfigResource {
     @GET
     //@ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_CONFIG_READ_ACCESS })
     public Response getAppConfiguration() {
-        //GluuConfiguration configuration = scimConfigService.getConfiguration();
-       // log.error("SCIM configuration - " + configuration);
-        //return Response.ok(configuration).build();
-        log.error("SCIM configuration - ");
-        return Response.ok("OK_NEW").build();
+        GluuConfiguration configuration = scimConfigService.getConfiguration();
+        log.error("SCIM configuration - " + configuration);
+        return Response.ok(configuration).build();
+        //log.error("SCIM configuration - ");
+        //return Response.ok("OK_NEW").build();
     }
 
     

@@ -23,11 +23,11 @@
 			<artifactId>jans-config-api-shared</artifactId>
 			<version>${jans.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>io.jans</groupId>
-			<artifactId>jans-config-api-server</artifactId>
-			<version>${jans.version}</version>
-		</dependency>
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-config-api-server</artifactId>
+            <scope>compile</scope>
+        </dependency>
 		<dependency>
 			<groupId>io.jans</groupId>
 			<artifactId>jans-scim-model</artifactId>
@@ -207,6 +207,7 @@
 									<artifact>io.jans:jans-scim-service</artifact>
 									<includes>
 										<include>io/jans/scim/model/*</include>
+										<include>io/jans/scim/model/**</include>
 									</includes>
 									<excludes>
 										<exclude>io/jans/scim/service/**</exclude>									

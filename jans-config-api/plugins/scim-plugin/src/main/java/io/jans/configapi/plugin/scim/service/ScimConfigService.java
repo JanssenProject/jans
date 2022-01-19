@@ -31,7 +31,6 @@ public class ScimConfigService {
     }
     
     
-    
     /**
      * Get configuration
      * 
@@ -50,13 +49,13 @@ public class ScimConfigService {
      * @param configuration
      *            GluuConfiguration
      */
-    /*public void updateConfiguration(GluuConfiguration configuration) {
+  public void updateConfiguration(GluuConfiguration configuration) {
         try {
             persistenceEntryManager.merge(configuration);
         } catch (Exception e) {
             log.info("", e);
         }
-    }*/
+    }
     
     /**
      * Build DN string for configuration
@@ -67,7 +66,7 @@ public class ScimConfigService {
      */
     public String getDnForConfiguration() {
         //String baseDn = organizationService.getBaseDn();
-        String baseDn = "o=jans";
-        return String.format("ou=configuration,%s", null);
+        String baseDn = "ou=jans-scim,ou=configuration,o=jans";
+        return String.format("ou=configuration,%s", baseDn);
     }
 }

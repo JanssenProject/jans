@@ -57,14 +57,18 @@ public class ScimConfigurationFactory {
     @Inject
     private Event<String> event;
 
-    @Inject
-    private Instance<PersistenceEntryManager> persistenceEntryManagerInstance;
+    //@Inject
+    //private Instance<PersistenceEntryManager> persistenceEntryManagerInstance;
 
     @Inject
     private PersistanceFactoryService persistanceFactoryService;
 
     @Inject
     private Instance<Configuration> configurationInstance;
+    
+
+    @Inject
+    private PersistenceEntryManager entryManager;
 
     public final static String PERSISTENCE_CONFIGUARION_RELOAD_EVENT_TYPE = "persistenceConfigurationReloadEvent";
     public final static String BASE_CONFIGUARION_RELOAD_EVENT_TYPE = "baseConfigurationReloadEvent";
@@ -115,11 +119,14 @@ public class ScimConfigurationFactory {
     public void init() {
         this.isActive = new AtomicBoolean(true);
         try {
+            log.error(" ScimConfigurationFactory::init() - persistenceEntryManager:{}",persistenceEntryManager);
             this.persistenceConfiguration = persistanceFactoryService.loadPersistenceConfiguration(APP_PROPERTIES_FILE);
+            log.error(" ScimConfigurationFactory::init() - this.persistenceConfiguration:{}",this.persistenceConfiguration);
+            
             loadBaseConfiguration();
 
             this.confDir = confDir();
-
+            log.error(" ScimConfigurationFactory::init() - this.confDir:{}",this.confDir);
             String certsDir = this.baseConfiguration.getString("certsDir");
             if (StringHelper.isEmpty(certsDir)) {
                 certsDir = confDir;
@@ -258,7 +265,7 @@ public class ScimConfigurationFactory {
     }
 
     private boolean createFromDb() {
-        log.info("Loading configuration from '{}' DB...", baseConfiguration.getString("persistence.type"));
+        log.error("Loading configuration from '{}' DB...", baseConfiguration.getString("persistence.type"));
         try {
             final Conf c = loadConfigurationFromLdap();
             if (c != null) {
@@ -287,11 +294,14 @@ public class ScimConfigurationFactory {
     }
 
     private Conf loadConfigurationFromLdap(String... returnAttributes) {
-        final PersistenceEntryManager persistenceEntryManager = persistenceEntryManagerInstance.get();
+        //final PersistenceEntryManager persistenceEntryManager = persistenceEntryManagerInstance.get();
+        log.error("\n\n loadConfigurationFromLdap() - persistenceEntryManagerInstance.get():{}, persistenceEntryManager:{}" ,persistenceEntryManagerInstance.get(),persistenceEntryManager);
         final String dn = getConfigurationDn();
+        log.error(" ScimConfigurationFactory::loadConfigurationFromLdap() - dn:{}",dn);
         try {
+            log.error(" ScimConfigurationFactory::loadConfigurationFromLdap() - persistenceEntryManager:{}",persistenceEntryManager);
             final Conf conf = persistenceEntryManager.find(dn, Conf.class, returnAttributes);
-
+            log.error(" ScimConfigurationFactory::loadConfigurationFromLdap() - conf:{}",conf);
             return conf;
         } catch (BasePersistenceException ex) {
             log.error(ex.getMessage());
@@ -316,8 +326,9 @@ public class ScimConfigurationFactory {
     }
 
     private void loadBaseConfiguration() {
+        log.error(" ScimConfigurationFactory::loadBaseConfiguration() - Entry");
         this.baseConfiguration = createFileConfiguration(BASE_PROPERTIES_FILE, true);
-
+        log.error(" ScimConfigurationFactory::loadBaseConfiguration() - baseConfiguration:{} ",baseConfiguration);
         File baseConfiguration = new File(BASE_PROPERTIES_FILE);
         this.baseConfigurationFileLastModifiedTime = baseConfiguration.lastModified();
     }
@@ -334,9 +345,10 @@ public class ScimConfigurationFactory {
     }
 
     private FileConfiguration createFileConfiguration(String fileName, boolean isMandatory) {
+        log.error(" ScimConfigurationFactory::createFileConfiguration() - Entry");
         try {
             FileConfiguration fileConfiguration = new FileConfiguration(fileName);
-
+            log.error(" ScimConfigurationFactory::loadBaseConfiguration() - fileConfiguration:{}",fileConfiguration);
             return fileConfiguration;
         } catch (Exception ex) {
             if (isMandatory) {
