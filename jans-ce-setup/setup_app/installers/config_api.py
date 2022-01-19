@@ -47,9 +47,12 @@ class ConfigApiInstaller(JettyInstaller):
                 (os.path.join(Config.distJansFolder, 'log4j2.xml'), 'https://raw.githubusercontent.com/JanssenProject/jans-config-api/master/server/src/main/resources/log4j2.xml'),
                 (os.path.join(Config.distJansFolder, 'log4j2-adminui.xml'), 'https://raw.githubusercontent.com/JanssenProject/jans-config-api/master/plugins/admin-ui-plugin/config/log4j2-adminui.xml'),
                 (os.path.join(Config.distJansFolder, 'gluu-admin-ui.zip'), 'https://github.com/GluuFederation/gluu-admin-ui/archive/refs/heads/main.zip'),
+                (os.path.join(Config.distJansFolder, 'facter'), 'https://raw.githubusercontent.com/GluuFederation/gluu-snap/master/facter/facter'),
                 ]
 
     def install(self):
+        self.copyFile(self.source_files[6][0], '/usr/sbin')
+        self.run([paths.cmd_chmod, '+x', '/usr/sbin/facter'])
         self.installJettyService(self.jetty_app_configuration[self.service_name], True)
         self.logIt("Copying fido.war into jetty webapps folder...")
         jettyServiceWebapps = os.path.join(self.jetty_base, self.service_name, 'webapps')
