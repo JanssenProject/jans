@@ -38,5 +38,7 @@ public interface ClientRegistrationType extends BaseExternalType {
 
     boolean modifyPutResponse(Object responseAsJsonObject, Object executionContext);
 
+    boolean modifyReadResponse(Object responseAsJsonObject, Object executionContext);
+
     boolean modifyPostResponse(Object responseAsJsonObject, Object executionContext);
 }
