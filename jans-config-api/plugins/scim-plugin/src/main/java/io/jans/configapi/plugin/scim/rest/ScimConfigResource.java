@@ -4,9 +4,10 @@ import static io.jans.as.model.util.Util.escapeLog;
 
 import io.jans.configapi.filters.ProtectedApi;
 import io.jans.configapi.plugin.scim.service.ScimConfigService;
+import io.jans.configapi.plugin.scim.model.config.AppConfiguration;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.plugin.scim.util.Constants;
-import io.jans.scim.model.GluuConfiguration;
+
 import io.jans.scim.model.scim2.SearchRequest;
 import io.jans.scim.model.scim2.patch.PatchRequest;
 import io.jans.scim.model.scim2.user.UserResource;
@@ -33,7 +34,7 @@ public class ScimConfigResource {
     @GET
     //@ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_CONFIG_READ_ACCESS })
     public Response getAppConfiguration() {
-        GluuConfiguration configuration = scimConfigService.getConfiguration();
+        AppConfiguration configuration = scimConfigService.getConfiguration();
         log.error("SCIM configuration - " + configuration);
         return Response.ok(configuration).build();
         //log.error("SCIM configuration - ");

@@ -43,6 +43,11 @@
 			<artifactId>jans-scim-service</artifactId>
 			<version>${jans.version}</version>
 		</dependency>
+				<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-core-standalone</artifactId>
+			<version>${jans.version}</version>
+		</dependency>
 
 
 		<!-- Microprofile -->
@@ -185,45 +190,6 @@
 							<failIfNoTests>false</failIfNoTests>
 							<excludedGroups>!integration</excludedGroups>
 							<groups>integration</groups>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-shade-plugin</artifactId>
-				<version>2.4.3</version>
-				<executions>
-					<execution>
-						<phase>package</phase>
-						<goals>
-							<goal>shade</goal>
-						</goals>
-						<configuration>
-							<filters>
-								<filter>
-									<artifact>io.jans:jans-scim-service</artifact>
-									<includes>
-										<include>io/jans/scim/model/*</include>
-										<include>io/jans/scim/model/**</include>
-									</includes>
-									<excludes>
-										<exclude>io/jans/scim/service/**</exclude>									
-									</excludes>
-								</filter>
-							</filters>
-							<artifactSet>
-								<includes>
-									<include>io.jans:jans-scim-client</include>
-									<include>io.jans:jans-scim-model</include>
-									<include>io.jans:jans-scim-service</include>
-								</includes>
-								<excludes>
-									<exclude>io/jans/scim/service/*</exclude>
-								</excludes>
-							</artifactSet>
 						</configuration>
 					</execution>
 				</executions>
