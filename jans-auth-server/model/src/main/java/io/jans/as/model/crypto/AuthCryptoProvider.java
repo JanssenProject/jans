@@ -461,7 +461,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
                 break;
             }
             case ED: {
-                EdDSAParameterSpec edSpec = new EdDSAParameterSpec(signatureAlgorithm.getName());
+                EdDSAParameterSpec edSpec = new EdDSAParameterSpec(signatureAlgorithm.getCurve().getAlias());
                 keyGen = KeyPairGenerator.getInstance(signatureAlgorithm.getName(), "BC");
                 keyGen.initialize(edSpec, new SecureRandom());
                 break;

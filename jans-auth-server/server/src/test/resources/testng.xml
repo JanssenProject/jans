@@ -285,6 +285,12 @@
         </classes>
     </test>
 
+    <test name="JWT signer-verifyer test" enabled="true">
+        <classes>
+            <class name="io.jans.as.server.comp.JwtSignerVerifyerTest" />
+        </classes>
+    </test>
+
 	<parameter name="serverUri" value="https://${test.server.name}" />
 	<parameter name="authorizePath" value="restv1/authorize" />
 	<parameter name="introspectionPath" value="restv1/introspection" />
