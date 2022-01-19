@@ -20,6 +20,7 @@ import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
 import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
 import io.jans.as.model.crypto.signature.AlgorithmFamily;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.exception.CryptoProviderException;
 import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwe.Jwe;
 import io.jans.as.model.jwe.JweDecrypterImpl;
@@ -32,8 +33,8 @@ import io.jans.as.model.util.Util;
 import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.RedirectUriResponse;
 import io.jans.service.cdi.util.CdiUtil;
+import io.jans.util.security.StringEncrypter;
 import org.apache.commons.lang.StringUtils;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -54,7 +55,7 @@ import java.util.List;
 
 /**
  * @author Javier Rojas Blum
- * @version December 15, 2021
+ * @version December 18, 2021
  */
 public class JwtAuthorizationRequest {
 
@@ -98,8 +99,12 @@ public class JwtAuthorizationRequest {
 
     private final String encodedJwt;
     private String payload;
+    private String signingInput;
+    private String encodedSignature;
     private JSONObject jsonPayload;
     private Jwt nestedJwt;
+    private AbstractCryptoProvider cryptoProvider;
+    private Client client;
 
     private final AppConfiguration appConfiguration;
 
@@ -110,6 +115,8 @@ public class JwtAuthorizationRequest {
             this.scopes = new ArrayList<>();
             this.prompts = new ArrayList<>();
             this.encodedJwt = encodedJwt;
+            this.cryptoProvider = cryptoProvider;
+            this.client = client;
 
             if (StringUtils.isEmpty(encodedJwt)) {
                 throw new InvalidJwtException("The JWT is null or empty");
@@ -152,9 +159,6 @@ public class JwtAuthorizationRequest {
                 nestedJwt = jwe.getSignedJWTPayload();
                 if (nestedJwt != null) {
                     keyId = nestedJwt.getHeader().getKeyId();
-                    if (!validateSignature(cryptoProvider, nestedJwt.getHeader().getSignatureAlgorithm(), client, nestedJwt.getSigningInput(), nestedJwt.getEncodedSignature())) {
-                        throw new InvalidJwtException("The Nested JWT signature is not valid");
-                    }
                 }
 
                 loadHeader(jwe.getHeader().toJsonString());
@@ -162,12 +166,12 @@ public class JwtAuthorizationRequest {
             } else if (parts.length == 2 || parts.length == 3) {
                 String encodedHeader = parts[0];
                 String encodedClaim = parts[1];
-                String encodedSignature = StringUtils.EMPTY;
+                encodedSignature = StringUtils.EMPTY;
                 if (parts.length == 3) {
                     encodedSignature = parts[2];
                 }
 
-                String signingInput = encodedHeader + "." + encodedClaim;
+                signingInput = encodedHeader + "." + encodedClaim;
                 String header = new String(Base64Util.base64urldecode(encodedHeader), StandardCharsets.UTF_8);
                 String payloadString = new String(Base64Util.base64urldecode(encodedClaim), StandardCharsets.UTF_8);
                 payloadString = payloadString.replace("\\", "");
@@ -177,9 +181,6 @@ public class JwtAuthorizationRequest {
                 SignatureAlgorithm sigAlg = SignatureAlgorithm.fromString(algorithm);
                 if (sigAlg == null) {
                     throw new InvalidJwtException("The JWT algorithm is not supported");
-                }
-                if (!validateSignature(cryptoProvider, sigAlg, client, signingInput, encodedSignature)) {
-                    throw new InvalidJwtException("The JWT signature is not valid");
                 }
 
                 loadPayload(payloadString);
@@ -318,7 +319,7 @@ public class JwtAuthorizationRequest {
         }
     }
 
-    private boolean validateSignature(@NotNull AbstractCryptoProvider cryptoProvider, SignatureAlgorithm signatureAlgorithm, Client client, String signingInput, String signature) throws Exception {
+    public boolean validateSignature(SignatureAlgorithm signatureAlgorithm, String signingInput, String signature) throws StringEncrypter.EncryptionException, CryptoProviderException {
         ClientService clientService = CdiUtil.bean(ClientService.class);
         String sharedSecret = clientService.decryptSecret(client.getClientSecret());
         JSONObject jwks = Strings.isNullOrEmpty(client.getJwks()) ?
@@ -402,6 +403,14 @@ public class JwtAuthorizationRequest {
 
     public String getPayload() {
         return payload;
+    }
+
+    public String getSigningInput() {
+        return signingInput;
+    }
+
+    public String getEncodedSignature() {
+        return encodedSignature;
     }
 
     public String getIss() {

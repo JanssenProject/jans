@@ -14,6 +14,8 @@ import io.jans.as.model.common.Prompt;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.as.model.exception.CryptoProviderException;
+import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.server.model.authorize.AuthorizeParamsValidator;
 import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.server.model.common.DeviceAuthorizationCacheControl;
@@ -26,6 +28,7 @@ import io.jans.as.server.service.RedirectionUriService;
 import io.jans.as.server.util.RedirectUtil;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.orm.exception.EntryPersistenceException;
+import io.jans.util.security.StringEncrypter;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -47,7 +50,7 @@ import static org.apache.commons.lang.BooleanUtils.isTrue;
 
 /**
  * @author Yuriy Zabrovarnyy
- * @version December 15, 2021
+ * @version December 18, 2021
  */
 @Named
 @Stateless
@@ -150,7 +153,7 @@ public class AuthorizeRestWebServiceValidator {
             if (redirectUri != null && redirectionUriService.validateRedirectionUri(client, redirectUri) != null) {
                 RedirectUri redirectUriResponse = new RedirectUri(redirectUri, responseTypes, responseMode);
                 redirectUriResponse.parseQueryString(errorResponseFactory.getErrorAsQueryString(
-                        AuthorizeErrorResponseType.INVALID_REQUEST, state));
+                		AuthorizeErrorResponseType.INVALID_REQUEST, state));
                 throw new WebApplicationException(RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest).build());
             } else {
                 throw new WebApplicationException(Response
@@ -162,10 +165,18 @@ public class AuthorizeRestWebServiceValidator {
         }
     }
 
-    public void validateRequestObject(JwtAuthorizationRequest jwtRequest, RedirectUriResponse redirectUriResponse) {
+    public void validateRequestObject(JwtAuthorizationRequest jwtRequest, RedirectUriResponse redirectUriResponse) throws InvalidJwtException, StringEncrypter.EncryptionException, CryptoProviderException {
         if (!jwtRequest.getAud().isEmpty() && !jwtRequest.getAud().contains(appConfiguration.getIssuer())) {
             log.error("Failed to match aud to AS, aud: {}", jwtRequest.getAud());
             throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT);
+        }
+
+        if (jwtRequest.getNestedJwt() != null && !jwtRequest.validateSignature(jwtRequest.getNestedJwt().getHeader().getSignatureAlgorithm(),
+                jwtRequest.getNestedJwt().getSigningInput(), jwtRequest.getNestedJwt().getEncodedSignature())) {
+            throw new InvalidJwtException("The Nested JWT signature is not valid");
+        } else if (StringUtils.isNotBlank(jwtRequest.getAlgorithm()) &&
+                !jwtRequest.validateSignature(SignatureAlgorithm.fromString(jwtRequest.getAlgorithm()), jwtRequest.getSigningInput(), jwtRequest.getEncodedSignature())) {
+            throw new InvalidJwtException("The JWT signature is not valid");
         }
 
         if (!appConfiguration.isFapi()) {
@@ -173,12 +184,27 @@ public class AuthorizeRestWebServiceValidator {
         }
 
         // FAPI related validation
+        validateRequestObjectFapi(jwtRequest, redirectUriResponse);
+    }
+
+    private void validateRequestObjectFapi(JwtAuthorizationRequest jwtRequest, RedirectUriResponse redirectUriResponse) throws StringEncrypter.EncryptionException, CryptoProviderException{
         if (jwtRequest.getNestedJwt() != null) {
             SignatureAlgorithm nestedJwtSigAlg = jwtRequest.getNestedJwt().getHeader().getSignatureAlgorithm();
             if (appConfiguration.isFapi() && (nestedJwtSigAlg == RS256 || nestedJwtSigAlg == NONE)) {
                 log.error("The Nested JWT signature algorithm is not valid.");
                 throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT);
             }
+        }
+        if (StringUtils.isNotBlank(jwtRequest.getAlgorithm()) &&
+                !jwtRequest.validateSignature(SignatureAlgorithm.fromString(jwtRequest.getAlgorithm()), jwtRequest.getSigningInput(), jwtRequest.getEncodedSignature())) {
+            log.error("Invalid signature");
+        	throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT);
+        }
+        String redirectUri=jwtRequest.getRedirectUri();
+        Client client= clientService.getClient(jwtRequest.getClientId());
+        if (redirectUri != null && redirectionUriService.validateRedirectionUri(client, redirectUri) == null) {
+            log.error(" unregistered redirect uri");
+        	throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT);
         }
         if (jwtRequest.getExp() == null) {
             log.error("The exp claim is not set");
