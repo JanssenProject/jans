@@ -70,7 +70,7 @@ while True:
                 pn = int(plugin_number) - 1
                 for i, p in enumerate(plugins):
                     if i == pn:
-                        exec_command('npm run plugin:remove {}'.format(choice_str, p['key']))
+                        exec_command('npm run plugin:remove {}'.format(p['key']))
                         plugins = read_plugins()
                         break
         elif choice == 'a':
