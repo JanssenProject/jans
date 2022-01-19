@@ -34,6 +34,7 @@ jobs:
     name: sonar scan
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         module: [.github, jans-auth-server, jans-config-api, jans-core, jans-setup, jans-cli, jans-client-api, jans-fido2, jans-notify, jans-orm, jans-scim, jans-eleven]
     env:
