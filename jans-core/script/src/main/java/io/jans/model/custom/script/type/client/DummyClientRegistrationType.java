@@ -76,6 +76,11 @@ public class DummyClientRegistrationType implements ClientRegistrationType {
     }
 
     @Override
+    public boolean modifyReadResponse(Object responseAsJsonObject, Object executionContext) {
+        return false;
+    }
+
+    @Override
     public boolean modifyPostResponse(Object responseAsJsonObject, Object executionContext) {
         return false;
     }
