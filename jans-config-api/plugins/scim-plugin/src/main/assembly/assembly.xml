@@ -15,6 +15,7 @@
 			<includes>
 				<include>io.jans:jans-scim-model</include>
 				<include>io.jans:jans-scim-client</include>
+				<include>io.jans:jans-scim-service</include>
 			</includes>
 			<scope>runtime</scope>
 		</dependencySet>

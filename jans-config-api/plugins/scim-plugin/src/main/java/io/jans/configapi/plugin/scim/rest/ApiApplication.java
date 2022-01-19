@@ -14,7 +14,8 @@ public class ApiApplication extends Application {
 
         // General
         classes.add(ScimResource.class);
-
+        classes.add(ScimConfigResource.class);
+        
         return classes;
     }
 }
