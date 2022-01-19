@@ -61,7 +61,7 @@ jobs:
 
       - name: find changed directories
         run: |
-          echo "CHANGED_DIR=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | cut -d/ -f1 | sort -u| sed -z 's/\n/,/g;s/^/[/;s/,$/]/;s/$/\n/')" >>${GITHUB_ENV}
+          echo "CHANGED_DIR=$(git diff --name-only ${{ github.event.before }} ${{ github.event.pull_request.head.sha }} | cut -d/ -f1 | sort -u| sed -z 's/\n/,/g;s/^/[/;s/,$/]/;s/$/\n/')" >>${GITHUB_ENV}
 
       - name: check env
         run: |
