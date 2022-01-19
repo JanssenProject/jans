@@ -69,4 +69,14 @@ public class DummyClientRegistrationType implements ClientRegistrationType {
     public boolean isCertValidForClient(Object cert, Object context) {
         return false;
     }
+
+    @Override
+    public boolean modifyPutResponse(Object responseAsJsonObject, Object executionContext) {
+        return false;
+    }
+
+    @Override
+    public boolean modifyPostResponse(Object responseAsJsonObject, Object executionContext) {
+        return false;
+    }
 }
