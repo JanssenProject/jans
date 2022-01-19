@@ -64,9 +64,8 @@ RUN wget -q ${ADMIN_UI_SOURCE_URL} -O /usr/share/java/admin-ui-plugin.jar
 # ======
 
 COPY requirements.txt /app/requirements.txt
-RUN pip3 install -U pip \
-    && pip3 install --no-cache-dir --default-timeout=300 -r /app/requirements.txt \
-    && rm -rf /src/jans-pycloudlib/.git
+RUN pip3 install -U pip wheel \
+    && pip3 install --no-cache-dir --default-timeout=300 -r /app/requirements.txt
 
 # =======
 # Cleanup
