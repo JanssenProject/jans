@@ -36,7 +36,7 @@ public abstract class BaseRequest {
     private final Map<String, String> customParameters;
 
     protected BaseRequest() {
-        customParameters = new HashMap<String, String>();
+        customParameters = new HashMap<>();
     }
 
     public String getContentType() {
