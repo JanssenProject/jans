@@ -63,6 +63,11 @@ jobs:
         run: |
           echo "CHANGED_DIR=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | cut -d/ -f1 | sort -u| sed -z 's/\n/,/g;s/^/[/;s/,$/]/;s/$/\n/')" >>${GITHUB_ENV}
 
+      - name: check env
+        run: |
+          echo ${{ env.CHANGED_DIR }}
+          echo ${{ matrix.module }}
+
       - name: Set up JDK 11
         # JanssenProject/jans-cli is too similar to JanssenProject/jans-client-api as the contains function is returning it belonging to the JVM_PROJECT
         if: contains(env.CHANGED_DIR, matrix.module) && contains(env.JVM_PROJECTS, matrix.module) && matrix.module != 'jans-cli'
