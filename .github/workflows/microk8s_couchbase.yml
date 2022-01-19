@@ -5,13 +5,13 @@ on:
       - master
       - main
     paths:
-      - "charts/**"
+      - "helm/**"
   pull_request:
     branches:
       - master
       - main
     paths:
-      - "charts/**"
+      - "helm/**"
   workflow_dispatch:
 jobs:
   build:
