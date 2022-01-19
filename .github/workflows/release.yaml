@@ -35,7 +35,7 @@ jobs:
         git config user.email "54212639+mo-auto@users.noreply.github.com"
         git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
 
-    - uses: google-github-actions/release-please-action@v3
+    - uses: google-github-actions/release-please-action@v3.0.1
       id: release-please
       with:
          path: ${{ matrix.docker-images }}
@@ -48,7 +48,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-projects: ["jans-pycloudlib"]
+        python-projects: ["jans-pycloudlib", "jans-cli"]
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -70,7 +70,7 @@ jobs:
         git config user.email "54212639+mo-auto@users.noreply.github.com"
         git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
 
-    - uses: google-github-actions/release-please-action@v3
+    - uses: google-github-actions/release-please-action@v3.0.1
       id: release-please
       with:
          path: ${{ matrix.python-projects }}
