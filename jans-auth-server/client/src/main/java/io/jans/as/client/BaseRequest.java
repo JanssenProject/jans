@@ -24,7 +24,7 @@ import java.util.Map;
  */
 public abstract class BaseRequest {
 
-    private static final Map<String, String> EMPTY_MAP = new HashMap<String, String>();
+    private static final Map<String, String> EMPTY_MAP = new HashMap<>();
     private static final JSONObject EMPTY_JSON_OBJECT = new JSONObject();
 
     private String contentType;
