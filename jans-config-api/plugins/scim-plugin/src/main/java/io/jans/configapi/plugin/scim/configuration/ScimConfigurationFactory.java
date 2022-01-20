@@ -18,12 +18,14 @@ import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 
 import org.apache.commons.lang.StringUtils;
-import io.jans.exception.ConfigurationException;
+import org.slf4j.Logger;
+
 import io.jans.as.model.config.BaseDnConfiguration;
 import io.jans.as.model.config.StaticConfiguration;
+import io.jans.config.oxtrust.Configuration;
 import io.jans.configapi.plugin.scim.model.config.AppConfiguration;
 import io.jans.configapi.plugin.scim.model.config.ScimConfigurationEntry;
-import io.jans.config.oxtrust.Configuration;
+import io.jans.exception.ConfigurationException;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.BasePersistenceException;
 import io.jans.orm.model.PersistenceConfiguration;
@@ -34,11 +36,8 @@ import io.jans.service.cdi.event.ConfigurationEvent;
 import io.jans.service.cdi.event.ConfigurationUpdate;
 import io.jans.service.cdi.event.LdapConfigurationReload;
 import io.jans.service.cdi.event.Scheduled;
-import io.jans.service.timer.event.TimerEvent;
-import io.jans.service.timer.schedule.TimerSchedule;
 import io.jans.util.StringHelper;
 import io.jans.util.properties.FileConfiguration;
-import org.slf4j.Logger;
 
 @ApplicationScoped
 public class ScimConfigurationFactory {
@@ -53,12 +52,16 @@ public class ScimConfigurationFactory {
 
     @Inject
     private Event<String> event;
-
+    
     @Inject
+    //@Named(ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME)
     private Instance<PersistenceEntryManager> persistenceEntryManagerInstance;
+    
+    @Inject
+    private PersistanceFactoryService persistanceFactoryService;
 
     @Inject
-    private PersistanceFactoryService persistanceFactoryService;    
+    private PersistenceEntryManager entryManager;
 
     @Inject
     private Instance<Configuration> configurationInstance;
@@ -112,11 +115,15 @@ public class ScimConfigurationFactory {
     public void init() {
         this.isActive = new AtomicBoolean(true);
         try {
+            log.error("ScimConfigurationFactory::loadConfigurationFromLdap() - persistanceFactoryService:{} ",persistanceFactoryService);
             this.persistenceConfiguration = persistanceFactoryService.loadPersistenceConfiguration(APP_PROPERTIES_FILE);
             loadBaseConfiguration();
 
             this.confDir = confDir();
+            
+            create();
 
+            /*
             String certsDir = this.baseConfiguration.getString("certsDir");
             if (StringHelper.isEmpty(certsDir)) {
                 certsDir = confDir;
@@ -124,6 +131,7 @@ public class ScimConfigurationFactory {
             this.saltFilePath = confDir + SALT_FILE_NAME;
 
             loadCryptoConfigurationSalt();
+            */
         } finally {
             this.isActive.set(false);
         }
@@ -284,11 +292,14 @@ public class ScimConfigurationFactory {
     }
 
     private ScimConfigurationEntry loadConfigurationFromLdap(String... returnAttributes) {
+        log.error("ScimConfigurationFactory::loadConfigurationFromLdap() - returnAttributes:{}, entryManager:{}, ",returnAttributes,entryManager);
         final PersistenceEntryManager persistenceEntryManager = persistenceEntryManagerInstance.get();
+        
+        log.error("ScimConfigurationFactory::loadConfigurationFromLdap() - returnAttributes:{}, entryManager:{}, ",returnAttributes,entryManager);
         final String dn = getConfigurationDn();
         try {
-            final ScimConfigurationEntry conf = persistenceEntryManager.find(dn, ScimConfigurationEntry.class, returnAttributes);
-
+            final ScimConfigurationEntry conf = entryManager.find(dn, ScimConfigurationEntry.class, returnAttributes);
+            log.error("ScimConfigurationFactory::loadConfigurationFromLdap() - conf:{} ",conf);
             return conf;
         } catch (BasePersistenceException ex) {
             log.error(ex.getMessage());
