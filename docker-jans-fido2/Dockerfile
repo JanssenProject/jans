@@ -51,8 +51,7 @@ RUN wget -q ${CN_SOURCE_URL} -O /tmp/fido2.war \
 
 COPY requirements.txt /app/requirements.txt
 RUN pip3 install -U pip wheel \
-    && pip3 install --no-cache-dir -r /app/requirements.txt \
-    && rm -rf /src/jans-pycloudlib/.git
+    && pip3 install --no-cache-dir -r /app/requirements.txt
 
 # =======
 # Cleanup

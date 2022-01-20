@@ -1,1 +1,2 @@
+libcst<0.4
 git+https://github.com/JanssenProject/jans-cloud-native@f415213cfd992363f3fb85005df16e963a6ed8ff#egg=jans-pycloudlib&subdirectory=jans-pycloudlib
