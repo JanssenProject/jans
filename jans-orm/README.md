@@ -1,4 +1,14 @@
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/4cce596a5a9448ab8b5e811ef77e3177)](https://www.codacy.com/gh/JanssenProject/jans-orm/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=JanssenProject/jans-orm&amp;utm_campaign=Badge_Grade)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_jans-orm&metric=bugs)](https://sonarcloud.io/dashboard?id=JanssenProject_jans-orm)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_jans-orm&metric=code_smells)](https://sonarcloud.io/dashboard?id=JanssenProject_jans-orm)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_jans-orm&metric=coverage)](https://sonarcloud.io/dashboard?id=JanssenProject_jans-orm)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_jans-orm&metric=duplicated_lines_density)](https://sonarcloud.io/dashboard?id=JanssenProject_jans-orm)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_jans-orm&metric=ncloc)](https://sonarcloud.io/dashboard?id=JanssenProject_jans-orm)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_jans-orm&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=JanssenProject_jans-orm)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_jans-orm&metric=alert_status)](https://sonarcloud.io/dashboard?id=JanssenProject_jans-orm)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_jans-orm&metric=reliability_rating)](https://sonarcloud.io/dashboard?id=JanssenProject_jans-orm)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_jans-orm&metric=security_rating)](https://sonarcloud.io/dashboard?id=JanssenProject_jans-orm)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_jans-orm&metric=sqale_index)](https://sonarcloud.io/dashboard?id=JanssenProject_jans-orm)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_jans-orm&metric=vulnerabilities)](https://sonarcloud.io/dashboard?id=JanssenProject_jans-orm)
 
 # Janssen ORM
 
