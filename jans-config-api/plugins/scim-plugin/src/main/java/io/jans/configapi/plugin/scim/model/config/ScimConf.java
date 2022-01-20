@@ -6,7 +6,6 @@
 
 package io.jans.configapi.plugin.scim.model.config;
 
-
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DN;
@@ -16,14 +15,14 @@ import io.jans.orm.annotation.ObjectClass;
 
 @DataEntry
 @ObjectClass(value = "jansAppConf")
-public class ScimConfigurationEntry {
+public class ScimConf {
 
     @DN
     private String dn;
 
     @JsonObject
     @AttributeName(name = "jansConfDyn")
-    private AppConfiguration dynamicConf;
+    private ScimAppConfiguration dynamicConf;
 
     @JsonObject
     @AttributeName(name = "jansConfStatic")
@@ -31,9 +30,6 @@ public class ScimConfigurationEntry {
 
     @AttributeName(name = "jansRevision")
     private long revision;
-
-    public ScimConfigurationEntry() {
-    }
 
     public String getDn() {
         return dn;
@@ -43,11 +39,11 @@ public class ScimConfigurationEntry {
         dn = p_dn;
     }
 
-    public AppConfiguration getDynamicConf() {
+    public ScimAppConfiguration getDynamicConf() {
         return dynamicConf;
     }
 
-    public void setDynamicConf(AppConfiguration dynamicConf) {
+    public void setDynamicConf(ScimAppConfiguration dynamicConf) {
         this.dynamicConf = dynamicConf;
     }
 
@@ -69,7 +65,7 @@ public class ScimConfigurationEntry {
 
     @Override
     public String toString() {
-        return "ScimConfigurationEntry [dn=" + dn + ", dynamicConf=" + dynamicConf + ", staticConf=" + staticConf + ", revision="
+        return "ScimConf [dn=" + dn + ", dynamicConf=" + dynamicConf + ", staticConf=" + staticConf + ", revision="
                 + revision + "]";
     }
 }

@@ -2,11 +2,10 @@ package io.jans.configapi.plugin.scim.model.config;
 
 import io.jans.config.oxtrust.Configuration;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import java.io.Serializable;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AppConfiguration implements Configuration,Serializable {
+public class ScimAppConfiguration implements Configuration,Serializable {
 
     private static final long serialVersionUID = -1832522737483366789L;
 
@@ -166,7 +165,7 @@ public class AppConfiguration implements Configuration,Serializable {
 
     @Override
     public String toString() {
-        return "AppConfiguration [baseDN=" + baseDN + ", applicationUrl=" + applicationUrl + ", baseEndpoint="
+        return "ScimAppConfiguration [baseDN=" + baseDN + ", applicationUrl=" + applicationUrl + ", baseEndpoint="
                 + baseEndpoint + ", personCustomObjectClass=" + personCustomObjectClass + ", oxAuthIssuer="
                 + oxAuthIssuer + ", protectionMode=" + protectionMode + ", maxCount=" + maxCount
                 + ", userExtensionSchemaURI=" + userExtensionSchemaURI + ", loggingLevel=" + loggingLevel

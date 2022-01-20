@@ -12,19 +12,17 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
 import io.jans.as.model.config.BaseDnConfiguration;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.config.oxtrust.Configuration;
-import io.jans.configapi.plugin.scim.model.config.AppConfiguration;
-import io.jans.configapi.plugin.scim.model.config.ScimConfigurationEntry;
+import io.jans.configapi.plugin.scim.model.config.ScimAppConfiguration;
+import io.jans.configapi.plugin.scim.model.config.ScimConf;
 import io.jans.exception.ConfigurationException;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.BasePersistenceException;
@@ -48,13 +46,12 @@ public class ScimConfigurationFactory {
     private Logger log;
 
     @Inject
-    private Event<AppConfiguration> configurationUpdateEvent;
+    private Event<ScimAppConfiguration> configurationUpdateEvent;
 
     @Inject
     private Event<String> event;
     
     @Inject
-    //@Named(ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME)
     private Instance<PersistenceEntryManager> persistenceEntryManagerInstance;
     
     @Inject
@@ -100,7 +97,7 @@ public class ScimConfigurationFactory {
     private FileConfiguration baseConfiguration;
     
     private PersistenceConfiguration persistenceConfiguration;
-    private AppConfiguration dynamicConf;
+    private ScimAppConfiguration dynamicConf;
     private StaticConfiguration staticConf;
     private String cryptoConfigurationSalt;
 
@@ -117,21 +114,11 @@ public class ScimConfigurationFactory {
         try {
             log.error("ScimConfigurationFactory::loadConfigurationFromLdap() - persistanceFactoryService:{} ",persistanceFactoryService);
             this.persistenceConfiguration = persistanceFactoryService.loadPersistenceConfiguration(APP_PROPERTIES_FILE);
+            
             loadBaseConfiguration();
-
-            this.confDir = confDir();
             
             create();
-
-            /*
-            String certsDir = this.baseConfiguration.getString("certsDir");
-            if (StringHelper.isEmpty(certsDir)) {
-                certsDir = confDir;
-            }
-            this.saltFilePath = confDir + SALT_FILE_NAME;
-
-            loadCryptoConfigurationSalt();
-            */
+          
         } finally {
             this.isActive.set(false);
         }
@@ -145,84 +132,7 @@ public class ScimConfigurationFactory {
             log.info("Configuration loaded successfully.");
         }
     }
-
-   /* public void initTimer() {
-        log.debug("Initializing Configuration Timer");
-
-        final int delay = 30;
-        final int interval = DEFAULT_INTERVAL;
-
-        timerEvent.fire(new TimerEvent(new TimerSchedule(delay, interval), new ConfigurationEvent(),
-                Scheduled.Literal.INSTANCE));
-    }*/
     
-    @Asynchronous
-    public void reloadConfigurationTimerEvent(@Observes @Scheduled ConfigurationEvent configurationEvent) {
-        if (this.isActive.get()) {
-            return;
-        }
-
-        if (!this.isActive.compareAndSet(false, true)) {
-            return;
-        }
-
-        try {
-            reloadConfiguration();
-        } catch (Throwable ex) {
-            log.error("Exception happened while reloading application configuration", ex);
-        } finally {
-            this.isActive.set(false);
-        }
-    }
-
-    private void reloadConfiguration() {
-        // Reload LDAP configuration if needed
-        PersistenceConfiguration newPersistenceConfiguration = persistanceFactoryService.loadPersistenceConfiguration(APP_PROPERTIES_FILE);
-
-        if (newPersistenceConfiguration != null) {
-            if (!StringHelper.equalsIgnoreCase(this.persistenceConfiguration.getFileName(), newPersistenceConfiguration.getFileName()) || (newPersistenceConfiguration.getLastModifiedTime() > this.persistenceConfiguration.getLastModifiedTime())) {
-                // Reload configuration only if it was modified
-                this.persistenceConfiguration = newPersistenceConfiguration;
-                event.select(LdapConfigurationReload.Literal.INSTANCE).fire(PERSISTENCE_CONFIGUARION_RELOAD_EVENT_TYPE);
-            }
-        }
-
-        // Reload Base configuration if needed
-        File baseConfiguration = new File(BASE_PROPERTIES_FILE);
-        if (baseConfiguration.exists()) {
-            final long lastModified = baseConfiguration.lastModified();
-            if (lastModified > baseConfigurationFileLastModifiedTime) {
-                // Reload configuration only if it was modified
-                loadBaseConfiguration();
-                event.select(BaseConfigurationReload.Literal.INSTANCE).fire(BASE_CONFIGUARION_RELOAD_EVENT_TYPE);
-            }
-        }
-
-        if (!loadedFromLdap) {
-            return;
-        }
-        
-        reloadConfFromLdap();
-    }
-
-    private boolean isRevisionIncreased() {
-        final ScimConfigurationEntry conf = loadConfigurationFromLdap("jansRevision");
-        if (conf == null) {
-            return false;
-        }
-
-        log.trace("LDAP revision: " + conf.getRevision() + ", server revision:" + loadedRevision);
-        return conf.getRevision() > this.loadedRevision;
-    }
-
-    private String confDir() {
-        final String confDir = this.baseConfiguration.getString("confDir", null);
-        if (StringUtils.isNotBlank(confDir)) {
-            return confDir;
-        }
-
-        return DIR;
-    }
 
     public FileConfiguration getBaseConfiguration() {
         return baseConfiguration;
@@ -236,7 +146,7 @@ public class ScimConfigurationFactory {
 
     @Produces
     @ApplicationScoped
-    public AppConfiguration getAppConfiguration() {
+    public ScimAppConfiguration getAppConfiguration() {
         return dynamicConf;
     }
 
@@ -254,26 +164,14 @@ public class ScimConfigurationFactory {
         return cryptoConfigurationSalt;
     }
 
-    public boolean reloadConfFromLdap() {
-        if (!isRevisionIncreased()) {
-            return false;
-        }
-
-        return createFromDb();
-    }
-
     private boolean createFromDb() {
         log.info("Loading configuration from '{}' DB...", baseConfiguration.getString("persistence.type"));
         try {
-            final ScimConfigurationEntry c = loadConfigurationFromLdap();
+            final ScimConf c = loadConfigurationFromLdap();
             if (c != null) {
                 init(c);
 
-                // Destroy old configuration
-                if (this.loaded) {
-                    destroy(AppConfiguration.class);
-                }
-
+              
                 this.loaded = true;
                 configurationUpdateEvent.select(ConfigurationUpdate.Literal.INSTANCE).fire(dynamicConf);
 
@@ -286,19 +184,12 @@ public class ScimConfigurationFactory {
         throw new ConfigurationException("Unable to find configuration in DB... ");
     }
 
-    public void destroy(Class<? extends Configuration> clazz) {
-        Instance<? extends Configuration> confInstance = configurationInstance.select(clazz);
-        configurationInstance.destroy(confInstance.get());
-    }
-
-    private ScimConfigurationEntry loadConfigurationFromLdap(String... returnAttributes) {
+    private ScimConf loadConfigurationFromLdap(String... returnAttributes) {
         log.error("ScimConfigurationFactory::loadConfigurationFromLdap() - returnAttributes:{}, entryManager:{}, ",returnAttributes,entryManager);
-        final PersistenceEntryManager persistenceEntryManager = persistenceEntryManagerInstance.get();
-        
-        log.error("ScimConfigurationFactory::loadConfigurationFromLdap() - returnAttributes:{}, entryManager:{}, ",returnAttributes,entryManager);
+       
         final String dn = getConfigurationDn();
         try {
-            final ScimConfigurationEntry conf = entryManager.find(dn, ScimConfigurationEntry.class, returnAttributes);
+            final ScimConf conf = entryManager.find(dn, ScimConf.class, returnAttributes);
             log.error("ScimConfigurationFactory::loadConfigurationFromLdap() - conf:{} ",conf);
             return conf;
         } catch (BasePersistenceException ex) {
@@ -312,12 +203,12 @@ public class ScimConfigurationFactory {
         return this.baseConfiguration.getString(CONFIGURATION_ENTRY_DN);
     }
 
-    private void init(ScimConfigurationEntry conf) {
+    private void init(ScimConf conf) {
         initConfigurationConf(conf);
         this.loadedRevision = conf.getRevision();
     }
 
-    private void initConfigurationConf(ScimConfigurationEntry conf) {
+    private void initConfigurationConf(ScimConf conf) {
         if (conf.getDynamicConf() != null) {
             dynamicConf = conf.getDynamicConf();
         }
@@ -325,21 +216,10 @@ public class ScimConfigurationFactory {
 
     private void loadBaseConfiguration() {
         this.baseConfiguration = createFileConfiguration(BASE_PROPERTIES_FILE, true);
-
         File baseConfiguration = new File(BASE_PROPERTIES_FILE);
         this.baseConfigurationFileLastModifiedTime = baseConfiguration.lastModified();
     }
 
-    public void loadCryptoConfigurationSalt() {
-        try {
-            FileConfiguration cryptoConfiguration = createFileConfiguration(saltFilePath, true);
-
-            this.cryptoConfigurationSalt = cryptoConfiguration.getString("encodeSalt");
-        } catch (Exception ex) {
-            log.error("Failed to load configuration from {}", saltFilePath, ex);
-            throw new ConfigurationException("Failed to load configuration from " + saltFilePath, ex);
-        }
-    }
 
     private FileConfiguration createFileConfiguration(String fileName, boolean isMandatory) {
         try {

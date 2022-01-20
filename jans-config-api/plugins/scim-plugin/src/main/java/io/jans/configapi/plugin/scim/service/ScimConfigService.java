@@ -1,14 +1,12 @@
 package io.jans.configapi.plugin.scim.service;
 
 import io.jans.configapi.plugin.scim.configuration.ScimConfigurationFactory;
-import io.jans.configapi.plugin.scim.model.config.AppConfiguration;
-import io.jans.configapi.plugin.scim.model.config.ScimConfigurationEntry;
+import io.jans.configapi.plugin.scim.model.config.ScimAppConfiguration;
+import io.jans.configapi.plugin.scim.model.config.ScimConf;
 import io.jans.orm.PersistenceEntryManager;
-import io.jans.util.StringHelper;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.inject.Named;
 
 import org.slf4j.Logger;
 
@@ -25,28 +23,23 @@ public class ScimConfigService {
     ScimConfigurationFactory scimConfigurationFactory;        
     
    
-   public AppConfiguration getConfiguration() {
+   public ScimAppConfiguration getConfiguration() {
         return scimConfigurationFactory.getAppConfiguration();
     }
    
-   public ScimConfigurationEntry findConf() {
+   public ScimConf findConf() {
        final String dn = scimConfigurationFactory.getConfigurationDn();
-       return persistenceManager.find(dn, ScimConfigurationEntry.class, null);
+       return persistenceManager.find(dn, ScimConf.class, null);
    }
 
-   public void merge(ScimConfigurationEntry conf) {
+   public void merge(ScimConf conf) {
        conf.setRevision(conf.getRevision() + 1);
        persistenceManager.merge(conf);
    }
    
-   
-   public AppConfiguration find() {
-       final ScimConfigurationEntry conf = findConf();
+   public ScimAppConfiguration find() {
+       final ScimConf conf = findConf();
        return conf.getDynamicConf();
-   }
-   
-   public String getPersistenceType() {
-       return scimConfigurationFactory.getBaseConfiguration().getString("persistence.type");
    }
     
  }

@@ -45,7 +45,8 @@ function() {
         
         
         //scim
-        scim_url: baseUrl + '/jans-config-api/scim/user',
+        scim_user_url: baseUrl + '/jans-config-api/scim/user',
+		scim_config_url: baseUrl + '/jans-config-api/scim/config',
     };
 
     karate.configure('connectTimeout', 30000);

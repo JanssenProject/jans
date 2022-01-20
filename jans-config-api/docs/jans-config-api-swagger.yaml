@@ -34,6 +34,7 @@ tags:
   - name: Statistics - User
   - name: Health - Check
   - name: SCIM - User Management
+  - name: SCIM - Config Management
   - name: Auth Server Health - Check
   - name: Admin UI - Role
   - name: Admin UI - Permission
@@ -2805,6 +2806,60 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
       security:
         - oauth2: [https://jans.io/oauth/config/scim/users.read https://jans.io/scim/users.read]
+		
+ /jans-config-api/scim/config:
+    get:
+      summary: Retrieves SCIM App configuration.
+      description: Retrieves SCIM configuration.
+      operationId: get-scim-config
+      security:
+        - oauth2: [https://jans.io/scim/config.readonly]
+      tags:
+        - SCIM - Config Management
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: ScimAppConfiguration
+                description:  SCIM App configuration.
+                $ref: '#/components/schemas/ScimAppConfiguration'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    patch:
+      summary: Partially modifies SCIM App configuration.
+      description: Partially modifies SCIM App configuration.
+      operationId: patch-scim-config
+      security:
+        - oauth2: [https://jans.io/scim/config.write]
+      tags:
+        - SCIM - Config Management
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/PatchRequest'
+                description: String representing patch-document.
+                example: '[ {op:replace, path: loggingLevel, value: DEBUG } ]'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: ScimAppConfiguration
+                description: SCIM App configuration.
+                $ref: '#/components/schemas/ScimAppConfiguration'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+		  
   /jans-config-api/api/v1/jans-auth-server/health:
     get:
       summary: Returns auth server health status.
@@ -3279,6 +3334,8 @@ components:
             https://jans.io/oauth/config/stats.readonly: Vew server with basic statistic
             https://jans.io/oauth/config/scim/users.read: Vew scim user related information
             https://jans.io/oauth/config/scim/users.write: Manage scim user related information
+            https://jans.io/scim/config.readonly: Vew SCIM App configuration
+            https://jans.io/scim/config.write: Manage SCIM App configuration
 
   responses:
     Found:
