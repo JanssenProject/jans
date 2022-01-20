@@ -278,4 +278,27 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
         }
         return false;
     }
+
+    public boolean modifyReadResponse(JSONObject responseAsJsonObject, ExecutionContext context) {
+        CustomScriptConfiguration script = defaultExternalCustomScript;
+
+        try {
+            if (log.isTraceEnabled()) {
+                log.trace("Executing python 'modifyReadResponse' method, script name: {}, context: {}, response: {}", script.getName(), context, responseAsJsonObject.toString());
+            }
+            context.setScript(script);
+
+            ClientRegistrationType type = (ClientRegistrationType) script.getExternalType();
+            final boolean result = type.modifyReadResponse(responseAsJsonObject, context);
+            if (log.isTraceEnabled()) {
+                log.trace("Finished 'modifyReadResponse' method, script name: {}, context: {}, result: {}, response: {}", script.getName(), context, result, responseAsJsonObject.toString());
+            }
+
+            return result;
+        } catch (Exception ex) {
+            log.error(ex.getMessage(), ex);
+            saveScriptError(script.getCustomScript(), ex);
+        }
+        return false;
+    }
 }
