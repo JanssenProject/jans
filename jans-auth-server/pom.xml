@@ -23,7 +23,7 @@
 
 		<slf4j.version>1.7.25</slf4j.version>
 
-		<omnifaces.version>2.6.9</omnifaces.version>
+		<omnifaces.version>3.12</omnifaces.version>
 
 		<swagger.version>1.3.13</swagger.version>
 
