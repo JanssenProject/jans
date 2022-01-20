@@ -2807,7 +2807,7 @@ paths:
       security:
         - oauth2: [https://jans.io/oauth/config/scim/users.read https://jans.io/scim/users.read]
 		
- /jans-config-api/scim/config:
+  /jans-config-api/scim/config:
     get:
       summary: Retrieves SCIM App configuration.
       description: Retrieves SCIM configuration.
@@ -6480,3 +6480,67 @@ components:
         customerLastName:
           type: string
           description: The customer last name.
+    ScimAppConfiguration:
+      type: object
+      properties:
+        baseDN:
+          type: string
+          description: Application config Base DN
+        applicationUrl:
+          type: string
+          description: Application base URL
+        baseEndpoint:
+          type: string
+          description: SCIM base endpoint URL
+        personCustomObjectClass:
+          type: string
+          description: Person Object Class
+        oxAuthIssuer:
+          type: string
+          description: Jans Auth - Issuer identifier. 
+        protectionMode:
+          type: string
+          enum:
+            - OAUTH
+            - BYPASS
+          description: SCIM Protection Mode 
+        maxCount:
+          type: integer
+          example: Maximum number of results per page
+        userExtensionSchemaURI:
+          type: string
+          description: User Extension Schema URI
+        loggingLevel:
+          type: string
+          description: Logging level for scim logger.
+          enum:
+            - TRACE
+            - DEBUG
+            - INFO
+            - WARN
+            - ERROR
+            - FATAL
+            - OFF
+        loggingLayout:
+          type: string
+          description: Logging layout used for Server loggers.
+        externalLoggerConfiguration:
+          type: string
+          description: Path to external log4j2 logging configuration.
+        metricReporterInterval:
+          type: integer
+          description: The interval for metric reporter in seconds.
+        metricReporterKeepDataDays:
+          type: integer
+          description: The days to keep metric reported data.
+        metricReporterEnabled:
+          type: boolean
+          description: Metric reported data enabled flag.
+        disableJdkLogger:
+          type: boolean
+          description: Boolean value specifying whether to enable JDK Loggers.
+        useLocalCache:
+          type: boolean
+          description: Boolean value specifying whether to enable local in-memory cache.
+		  
+		  

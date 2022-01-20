@@ -6,21 +6,8 @@
 
 package io.jans.configapi.plugin.scim.configuration;
 
-import java.io.File;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Event;
-import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.Produces;
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-
 import io.jans.as.model.config.BaseDnConfiguration;
 import io.jans.as.model.config.StaticConfiguration;
-import io.jans.config.oxtrust.Configuration;
 import io.jans.configapi.plugin.scim.model.config.ScimAppConfiguration;
 import io.jans.configapi.plugin.scim.model.config.ScimConf;
 import io.jans.exception.ConfigurationException;
@@ -28,14 +15,19 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.BasePersistenceException;
 import io.jans.orm.model.PersistenceConfiguration;
 import io.jans.orm.service.PersistanceFactoryService;
-import io.jans.service.cdi.async.Asynchronous;
-import io.jans.service.cdi.event.BaseConfigurationReload;
-import io.jans.service.cdi.event.ConfigurationEvent;
 import io.jans.service.cdi.event.ConfigurationUpdate;
-import io.jans.service.cdi.event.LdapConfigurationReload;
-import io.jans.service.cdi.event.Scheduled;
-import io.jans.util.StringHelper;
 import io.jans.util.properties.FileConfiguration;
+
+import java.io.File;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
+import javax.enterprise.inject.Produces;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
 
 @ApplicationScoped
 public class ScimConfigurationFactory {
@@ -49,24 +41,13 @@ public class ScimConfigurationFactory {
     private Event<ScimAppConfiguration> configurationUpdateEvent;
 
     @Inject
-    private Event<String> event;
-    
-    @Inject
-    private Instance<PersistenceEntryManager> persistenceEntryManagerInstance;
-    
-    @Inject
     private PersistanceFactoryService persistanceFactoryService;
 
     @Inject
     private PersistenceEntryManager entryManager;
 
-    @Inject
-    private Instance<Configuration> configurationInstance;
-
     public final static String PERSISTENCE_CONFIGUARION_RELOAD_EVENT_TYPE = "persistenceConfigurationReloadEvent";
     public final static String BASE_CONFIGUARION_RELOAD_EVENT_TYPE = "baseConfigurationReloadEvent";
-
-    private final static int DEFAULT_INTERVAL = 30; // 30 seconds
 
     static {
         if (System.getProperty("jans.base") != null) {
@@ -84,27 +65,19 @@ public class ScimConfigurationFactory {
 
     private static final String BASE_DIR;
     private static final String DIR = BASE_DIR + File.separator + "conf" + File.separator;
-
     private static final String BASE_PROPERTIES_FILE = DIR + "jans.properties";
     private static final String APP_PROPERTIES_FILE = DIR + "scim.properties";
 
-    private final String SALT_FILE_NAME = "salt";
-
-    private String confDir, saltFilePath;
 
     private boolean loaded = false;
-
-    private FileConfiguration baseConfiguration;
-    
+    private FileConfiguration baseConfiguration;    
     private PersistenceConfiguration persistenceConfiguration;
     private ScimAppConfiguration dynamicConf;
     private StaticConfiguration staticConf;
     private String cryptoConfigurationSalt;
 
     private AtomicBoolean isActive;
-
     private long baseConfigurationFileLastModifiedTime;
-
     private long loadedRevision = -1;
     private boolean loadedFromLdap = true;
 
@@ -117,7 +90,7 @@ public class ScimConfigurationFactory {
             
             loadBaseConfiguration();
             
-            create();
+            //create();
           
         } finally {
             this.isActive.set(false);
