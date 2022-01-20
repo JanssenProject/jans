@@ -1,3 +1,3 @@
 ldif==4.1.1
 libcst<0.4
-git+https://github.com/JanssenProject/jans@90f3106f003d6e90c83fa94aa1c6638cab81c170#egg=jans-pycloudlib&subdirectory=jans-pycloudlib
+git+https://github.com/JanssenProject/jans@ec0787973077308ceeeb63b611bd8ec21fe1bbe4#egg=jans-pycloudlib&subdirectory=jans-pycloudlib
