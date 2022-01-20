@@ -164,4 +164,18 @@ public class AppConfiguration implements Configuration,Serializable {
 		this.useLocalCache = useLocalCache;
 	}
 
+    @Override
+    public String toString() {
+        return "AppConfiguration [baseDN=" + baseDN + ", applicationUrl=" + applicationUrl + ", baseEndpoint="
+                + baseEndpoint + ", personCustomObjectClass=" + personCustomObjectClass + ", oxAuthIssuer="
+                + oxAuthIssuer + ", protectionMode=" + protectionMode + ", maxCount=" + maxCount
+                + ", userExtensionSchemaURI=" + userExtensionSchemaURI + ", loggingLevel=" + loggingLevel
+                + ", loggingLayout=" + loggingLayout + ", externalLoggerConfiguration=" + externalLoggerConfiguration
+                + ", metricReporterInterval=" + metricReporterInterval + ", metricReporterKeepDataDays="
+                + metricReporterKeepDataDays + ", metricReporterEnabled=" + metricReporterEnabled
+                + ", disableJdkLogger=" + disableJdkLogger + ", useLocalCache=" + useLocalCache + "]";
+    }
+	
+	
+
 }
