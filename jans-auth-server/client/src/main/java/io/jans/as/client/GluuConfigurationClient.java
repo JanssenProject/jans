@@ -99,7 +99,7 @@ public class GluuConfigurationClient extends BaseClient<GluuConfigurationRequest
     }
 
     private Map<Integer, Set<String>> mapJsonToAuthLevelMapping(JSONObject jsonObject) {
-        Map<Integer, Set<String>> authLevelMapping = new HashMap<Integer, Set<String>>();
+        Map<Integer, Set<String>> authLevelMapping = new HashMap<>();
 
         Iterator<?> keys = jsonObject.keys();
         while (keys.hasNext()) {
