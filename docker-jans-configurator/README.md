@@ -1,4 +1,14 @@
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/482d45faeed647d4a2a9a48adb400441)](https://www.codacy.com/gh/JanssenProject/docker-jans-configurator/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=JanssenProject/docker-jans-configurator&amp;utm_campaign=Badge_Grade)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_docker-jans-configurator&metric=bugs)](https://sonarcloud.io/dashboard?id=JanssenProject_docker-jans-configurator)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_docker-jans-configurator&metric=code_smells)](https://sonarcloud.io/dashboard?id=JanssenProject_docker-jans-configurator)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_docker-jans-configurator&metric=coverage)](https://sonarcloud.io/dashboard?id=JanssenProject_docker-jans-configurator)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_docker-jans-configurator&metric=duplicated_lines_density)](https://sonarcloud.io/dashboard?id=JanssenProject_docker-jans-configurator)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_docker-jans-configurator&metric=ncloc)](https://sonarcloud.io/dashboard?id=JanssenProject_docker-jans-configurator)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_docker-jans-configurator&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=JanssenProject_docker-jans-configurator)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_docker-jans-configurator&metric=alert_status)](https://sonarcloud.io/dashboard?id=JanssenProject_docker-jans-configurator)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_docker-jans-configurator&metric=reliability_rating)](https://sonarcloud.io/dashboard?id=JanssenProject_docker-jans-configurator)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_docker-jans-configurator&metric=security_rating)](https://sonarcloud.io/dashboard?id=JanssenProject_docker-jans-configurator)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_docker-jans-configurator&metric=sqale_index)](https://sonarcloud.io/dashboard?id=JanssenProject_docker-jans-configurator)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_docker-jans-configurator&metric=vulnerabilities)](https://sonarcloud.io/dashboard?id=JanssenProject_docker-jans-configurator)
 
 ## Overview
 
