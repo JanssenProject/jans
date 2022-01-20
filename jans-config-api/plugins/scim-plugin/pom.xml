@@ -23,11 +23,11 @@
 			<artifactId>jans-config-api-shared</artifactId>
 			<version>${jans.version}</version>
 		</dependency>
-        <dependency>
-            <groupId>io.jans</groupId>
-            <artifactId>jans-config-api-server</artifactId>
-            <scope>compile</scope>
-        </dependency>
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-config-api-server</artifactId>
+			<scope>compile</scope>
+		</dependency>
 		<dependency>
 			<groupId>io.jans</groupId>
 			<artifactId>jans-scim-model</artifactId>
@@ -38,16 +38,6 @@
 			<artifactId>jans-scim-client</artifactId>
 			<version>${jans.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>io.jans</groupId>
-			<artifactId>jans-scim-service</artifactId>
-			<version>${jans.version}</version>
-		</dependency>
-				<dependency>
-			<groupId>io.jans</groupId>
-			<artifactId>jans-core-standalone</artifactId>
-			<version>${jans.version}</version>
-		</dependency>
 
 
 		<!-- Microprofile -->
@@ -56,7 +46,6 @@
 			<artifactId>smallrye-config</artifactId>
 			<version>1.5.0</version>
 		</dependency>
-
 
 		<!-- Others -->
 		<dependency>
@@ -75,12 +64,6 @@
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpcore-nio</artifactId>
 			<version>${httpcore.version}</version>
-		</dependency>
-
-		<!-- Quartz -->
-		<dependency>
-			<groupId>org.quartz-scheduler</groupId>
-			<artifactId>quartz</artifactId>
 		</dependency>
 
 		<!-- Testing -->

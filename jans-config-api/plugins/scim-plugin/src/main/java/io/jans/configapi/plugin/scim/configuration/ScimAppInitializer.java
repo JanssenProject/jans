@@ -30,11 +30,11 @@ public class ScimAppInitializer {
         logger.info("SCIM configuration initializing...");
         
 
-        //scimConfigurationFactory.create();
+        scimConfigurationFactory.create();
         
         logger.info("SCIM timer initializing...");
         
-        scimConfigurationFactory.initTimer();
+        //scimConfigurationFactory.initTimer();
        
 
     }

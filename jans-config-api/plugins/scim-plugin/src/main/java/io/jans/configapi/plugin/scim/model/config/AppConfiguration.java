@@ -1,9 +1,12 @@
 package io.jans.configapi.plugin.scim.model.config;
 
+import io.jans.config.oxtrust.Configuration;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import java.io.Serializable;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AppConfiguration extends io.jans.conf.model.AppConfiguration {
+public class AppConfiguration implements Configuration,Serializable {
 
     private static final long serialVersionUID = -1832522737483366789L;
 

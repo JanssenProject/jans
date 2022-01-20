@@ -6,22 +6,70 @@
 
 package io.jans.configapi.plugin.scim.model.config;
 
-import io.jans.conf.model.AppConfigurationEntry;
 
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.orm.annotation.AttributeName;
+import io.jans.orm.annotation.DN;
 import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.JsonObject;
 import io.jans.orm.annotation.ObjectClass;
 
 @DataEntry
 @ObjectClass(value = "jansAppConf")
-public class ScimConfigurationEntry extends AppConfigurationEntry{
+public class ScimConfigurationEntry {
 
-    private static final long serialVersionUID = 6101723502950147256L;
-    
+    @DN
+    private String dn;
+
+    @JsonObject
+    @AttributeName(name = "jansConfDyn")
+    private AppConfiguration dynamicConf;
+
     @JsonObject
     @AttributeName(name = "jansConfStatic")
     private StaticConfiguration staticConf;
 
+    @AttributeName(name = "jansRevision")
+    private long revision;
+
+    public ScimConfigurationEntry() {
+    }
+
+    public String getDn() {
+        return dn;
+    }
+
+    public void setDn(String p_dn) {
+        dn = p_dn;
+    }
+
+    public AppConfiguration getDynamicConf() {
+        return dynamicConf;
+    }
+
+    public void setDynamicConf(AppConfiguration dynamicConf) {
+        this.dynamicConf = dynamicConf;
+    }
+
+    public StaticConfiguration getStaticConf() {
+        return staticConf;
+    }
+
+    public void setStaticConf(StaticConfiguration staticConf) {
+        this.staticConf = staticConf;
+    }
+
+    public long getRevision() {
+        return revision;
+    }
+
+    public void setRevision(long revision) {
+        this.revision = revision;
+    }
+
+    @Override
+    public String toString() {
+        return "ScimConfigurationEntry [dn=" + dn + ", dynamicConf=" + dynamicConf + ", staticConf=" + staticConf + ", revision="
+                + revision + "]";
+    }
 }
