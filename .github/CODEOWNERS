@@ -22,3 +22,4 @@
 /jans-config-api/ @pujavs @yuriyz
 /jans-cli/ @mbaser
 /jans-ce-setup/ @mbaser @smansoft
+/jans-ce-setup/static/scripts/admin_ui_plugin.py @mbaser @duttarnab
