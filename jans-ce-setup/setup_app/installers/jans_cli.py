@@ -37,7 +37,7 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
             self.register_progess()
 
         self.source_files = [
-                (os.path.join(Config.distJansFolder, 'jans-cli.tgz'), 'https://api.github.com/repos/JanssenProject/jans-cli/tarball/main'.format(Config.oxVersion)),
+                (os.path.join(Config.distJansFolder, 'jans-cli.zip'), 'https://api.github.com/repos/JanssenProject/jans-cli/tarball/main'.format(Config.oxVersion)),
                 (os.path.join(Config.distJansFolder, 'jca-swagger-client.tgz'), 'https://ox.gluu.org/icrby8xcvbcv/cli-swagger/jca.tgz'),
                 (os.path.join(Config.distJansFolder, 'scim-swagger-client.tgz'), 'https://ox.gluu.org/icrby8xcvbcv/cli-swagger/scim.tgz'),
                 ]
@@ -47,13 +47,8 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
         self.logIt("Installing Jans Cli", pbar=self.service_name)
 
         #extract jans-cli tgz archieve
-        cli_tar = tarfile.open(self.source_files[0][0])
-        par_dir = cli_tar.firstmember.name
-        tmp_dir = os.path.join(Config.outputFolder, 'jans-cli-' + os.urandom(5).hex())
-        cli_tar.extractall(tmp_dir)
-        shutil.move(os.path.join(tmp_dir, par_dir, 'cli'), self.jans_cli_install_dir)
-        cli_tar.close()
-        shutil.rmtree(tmp_dir)
+        base.extract_from_zip(self.source_files[0][0], 'cli', self.jans_cli_install_dir)
+
         self.run([paths.cmd_ln, '-s', os.path.join(self.jans_cli_install_dir, 'config_cli.py'), os.path.join(self.jans_cli_install_dir, 'config-cli.py')])
         self.run([paths.cmd_ln, '-s', os.path.join(self.jans_cli_install_dir, 'config_cli.py'), os.path.join(self.jans_cli_install_dir, 'scim-cli.py')])
         self.run([paths.cmd_chmod, '+x', os.path.join(self.jans_cli_install_dir, 'config_cli.py')])
