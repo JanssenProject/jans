@@ -22,7 +22,7 @@ import io.jans.as.model.token.ClientAssertionType;
 import io.jans.as.model.util.JwtUtil;
 import io.jans.as.server.service.ClientService;
 import io.jans.service.cdi.util.CdiUtil;
-import io.jans.util.security.StringEncrypter;
+import io.jans.util.exception.EncryptionException;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
 
@@ -44,7 +44,7 @@ public class ClientAssertion {
             if (!load(appConfiguration, cryptoProvider, clientId, clientAssertionType, encodedAssertion)) {
                 throw new InvalidJwtException("Cannot load the JWT");
             }
-        } catch (StringEncrypter.EncryptionException e) {
+        } catch (EncryptionException e) {
             throw new InvalidJwtException(e.getMessage(), e);
         } catch (Exception e) {
             throw new InvalidJwtException("Cannot verify the JWT", e);

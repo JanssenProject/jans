@@ -14,6 +14,7 @@ import io.jans.as.server.BaseComponentTest;
 import io.jans.as.server.model.token.HandleTokenFactory;
 import io.jans.as.server.service.ClientService;
 import io.jans.as.server.uma.service.UmaResourceService;
+import io.jans.util.exception.EncryptionException;
 import io.jans.util.security.StringEncrypter;
 import org.testng.annotations.Test;
 import org.testng.collections.Lists;
@@ -41,7 +42,7 @@ public class UmaResourceServiceTest extends BaseComponentTest {
     private UmaResourceService umaResourceService;
 
     @Test
-    public void umaResource_independentFromDeletableFlag_shouldBeSearchable() throws StringEncrypter.EncryptionException {
+    public void umaResource_independentFromDeletableFlag_shouldBeSearchable() throws EncryptionException {
         final Client client = createClient();
 
         clientService.persist(client);
@@ -78,11 +79,11 @@ public class UmaResourceServiceTest extends BaseComponentTest {
         umaResourceService.remove(resource);
     }
 
-    private Client createClient() throws StringEncrypter.EncryptionException {
+    private Client createClient() throws EncryptionException {
         return createClient(true);
     }
 
-    private Client createClient(boolean deletable) throws StringEncrypter.EncryptionException {
+    private Client createClient(boolean deletable) throws EncryptionException {
         String clientsBaseDN = staticConfiguration.getBaseDn().getClients();
 
         String inum = inumService.generateClientInum();

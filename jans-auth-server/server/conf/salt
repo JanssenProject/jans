@@ -1,1 +1,3 @@
-encodeSalt=${config.oxauth.salt}
+encodeSalt = ${config.oxauth.salt}
+encodePassw = ${config.oxauth.passw}
+encodeAlg = ${config.oxauth.alg}
