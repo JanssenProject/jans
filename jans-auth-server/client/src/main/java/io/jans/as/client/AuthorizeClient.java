@@ -84,7 +84,7 @@ public class AuthorizeClient extends BaseClient<AuthorizationRequest, Authorizat
     public AuthorizationResponse execAuthorizationCodeGrant(
             String clientId, List<String> scopes, String redirectUri, String nonce,
             String state, String req, String reqUri, Display display, List<Prompt> prompt) {
-        List<ResponseType> responseTypes = new ArrayList<ResponseType>();
+        List<ResponseType> responseTypes = new ArrayList<>();
         responseTypes.add(ResponseType.CODE);
         setRequest(new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce));
         getRequest().setRedirectUri(redirectUri);
@@ -148,7 +148,7 @@ public class AuthorizeClient extends BaseClient<AuthorizationRequest, Authorizat
     public AuthorizationResponse execImplicitGrant(
             String clientId, List<String> scopes, String redirectUri, String nonce,
             String state, String req, String reqUri, Display display, List<Prompt> prompt) {
-        List<ResponseType> responseTypes = new ArrayList<ResponseType>();
+        List<ResponseType> responseTypes = new ArrayList<>();
         responseTypes.add(ResponseType.TOKEN);
         setRequest(new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce));
         getRequest().setRedirectUri(redirectUri);

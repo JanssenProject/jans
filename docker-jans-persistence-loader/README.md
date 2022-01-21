@@ -1,4 +1,14 @@
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/4d9915b7bd2347829a16a5375955dc94)](https://www.codacy.com/gh/JanssenProject/docker-jans-persistence-loader/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=JanssenProject/docker-jans-persistence-loader&amp;utm_campaign=Badge_Grade)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_docker-jans-persistence-loader&metric=bugs)](https://sonarcloud.io/dashboard?id=JanssenProject_docker-jans-persistence-loader)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_docker-jans-persistence-loader&metric=code_smells)](https://sonarcloud.io/dashboard?id=JanssenProject_docker-jans-persistence-loader)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_docker-jans-persistence-loader&metric=coverage)](https://sonarcloud.io/dashboard?id=JanssenProject_docker-jans-persistence-loader)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_docker-jans-persistence-loader&metric=duplicated_lines_density)](https://sonarcloud.io/dashboard?id=JanssenProject_docker-jans-persistence-loader)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_docker-jans-persistence-loader&metric=ncloc)](https://sonarcloud.io/dashboard?id=JanssenProject_docker-jans-persistence-loader)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_docker-jans-persistence-loader&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=JanssenProject_docker-jans-persistence-loader)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_docker-jans-persistence-loader&metric=alert_status)](https://sonarcloud.io/dashboard?id=JanssenProject_docker-jans-persistence-loader)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_docker-jans-persistence-loader&metric=reliability_rating)](https://sonarcloud.io/dashboard?id=JanssenProject_docker-jans-persistence-loader)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_docker-jans-persistence-loader&metric=security_rating)](https://sonarcloud.io/dashboard?id=JanssenProject_docker-jans-persistence-loader)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_docker-jans-persistence-loader&metric=sqale_index)](https://sonarcloud.io/dashboard?id=JanssenProject_docker-jans-persistence-loader)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_docker-jans-persistence-loader&metric=vulnerabilities)](https://sonarcloud.io/dashboard?id=JanssenProject_docker-jans-persistence-loader)
 
 ## Overview
 
