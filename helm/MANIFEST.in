@@ -1,0 +1,3 @@
+recursive-include pygluu/kubernetes/templates *
+recursive-include pygluu/kubernetes/gui/templates *
+recursive-include pygluu/kubernetes/gui/static *

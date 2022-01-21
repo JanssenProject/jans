@@ -7,7 +7,7 @@ buttons:
     href: /jans-cloud-native
   - b1:
     text: Helm Chart
-    href: /jans-cloud-native/charts/jans
+    href: /jans-cloud-native/helm/pygluu/kubernetes/helm
   - b2:
     text: Debugging Interception scripts
     href: /jans-cloud-native/docs/interception-script-debug
