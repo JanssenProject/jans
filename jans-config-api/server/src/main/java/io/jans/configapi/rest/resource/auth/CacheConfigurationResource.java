@@ -13,7 +13,7 @@ import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
-import io.jans.configapi.util.Jackson;
+import io.jans.configapi.core.util.Jackson;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.service.cache.*;
 

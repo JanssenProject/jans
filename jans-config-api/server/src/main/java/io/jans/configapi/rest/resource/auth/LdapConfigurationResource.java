@@ -12,7 +12,7 @@ import io.jans.configapi.service.auth.LdapConfigurationService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.util.ConnectionStatus;
-import io.jans.configapi.util.Jackson;
+import io.jans.configapi.core.util.Jackson;
 import io.jans.model.ldap.GluuLdapConfiguration;
 import org.slf4j.Logger;
 

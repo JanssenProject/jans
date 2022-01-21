@@ -6,13 +6,7 @@
 
 package io.jans.configapi.plugin.scim.configuration;
 
-import io.jans.as.model.config.BaseDnConfiguration;
-import io.jans.as.model.config.StaticConfiguration;
-import io.jans.configapi.plugin.scim.model.config.ScimAppConfiguration;
-import io.jans.configapi.plugin.scim.model.config.ScimConf;
 import io.jans.exception.ConfigurationException;
-import io.jans.orm.PersistenceEntryManager;
-import io.jans.orm.exception.BasePersistenceException;
 import io.jans.orm.model.PersistenceConfiguration;
 import io.jans.orm.service.PersistanceFactoryService;
 import io.jans.util.properties.FileConfiguration;

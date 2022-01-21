@@ -16,7 +16,7 @@ import io.jans.configapi.service.auth.ClientService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.util.AttributeNames;
-import io.jans.configapi.util.Jackson;
+import io.jans.configapi.core.util.Jackson;
 import io.jans.orm.model.PagedResult;
 import io.jans.util.StringHelper;
 import io.jans.util.security.StringEncrypter.EncryptionException;

@@ -14,7 +14,7 @@ import io.jans.configapi.service.auth.ScopeService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.util.AttributeNames;
-import io.jans.configapi.util.Jackson;
+import io.jans.configapi.core.util.Jackson;
 import io.jans.util.StringHelper;
 
 import javax.inject.Inject;
