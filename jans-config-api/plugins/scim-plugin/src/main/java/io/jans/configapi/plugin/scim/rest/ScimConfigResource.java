@@ -31,7 +31,7 @@ public class ScimConfigResource {
     @ProtectedApi(scopes = { "https://jans.io/scim/config.readonly" })
     public Response getAppConfiguration() {
         ScimAppConfiguration appConfiguration = scimConfigService.find();
-        log.error("SCIM appConfiguration:{}", appConfiguration);
+        log.debug("SCIM appConfiguration:{}", appConfiguration);
         return Response.ok(appConfiguration).build();
     }
     
@@ -39,17 +39,18 @@ public class ScimConfigResource {
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { "https://jans.io/scim/config.write" })
     public Response patchAppConfigurationProperty(@NotNull String requestString) throws Exception {
-        log.error("AUTH CONF details to patch - requestString:{}", requestString);
+        log.debug("AUTH CONF details to patch - requestString:{}", requestString);
         ScimConf conf = scimConfigService.findConf();
         ScimAppConfiguration appConfiguration = scimConfigService.find();
-        log.error("AUTH CONF details BEFORE patch - conf:{}, appConfiguration:{}", conf, appConfiguration);
+        log.trace("AUTH CONF details BEFORE patch - conf:{}, appConfiguration:{}", conf, appConfiguration);
+        
         appConfiguration = Jackson.applyPatch(requestString, conf.getDynamicConf());
-        log.error("AUTH CONF details BEFORE patch merge - appConfiguration:{}" ,appConfiguration);
+        log.trace("AUTH CONF details BEFORE patch merge - appConfiguration:{}" ,appConfiguration);
         conf.setDynamicConf(appConfiguration);
 
         scimConfigService.merge(conf);
         appConfiguration = scimConfigService.find();
-        log.error("AUTH CONF details AFTER patch merge - appConfiguration:{}", appConfiguration);
+        log.debug("AUTH CONF details AFTER patch merge - appConfiguration:{}", appConfiguration);
         return Response.ok(appConfiguration).build();
     }
 

@@ -85,12 +85,10 @@ public class ScimConfigurationFactory {
     public void init() {
         this.isActive = new AtomicBoolean(true);
         try {
-            log.error("ScimConfigurationFactory::loadConfigurationFromLdap() - persistanceFactoryService:{} ",persistanceFactoryService);
+            log.trace("ScimConfigurationFactory::loadConfigurationFromLdap() - persistanceFactoryService:{} ",persistanceFactoryService);
             this.persistenceConfiguration = persistanceFactoryService.loadPersistenceConfiguration(APP_PROPERTIES_FILE);
             
             loadBaseConfiguration();
-            
-            //create();
           
         } finally {
             this.isActive.set(false);
@@ -158,12 +156,12 @@ public class ScimConfigurationFactory {
     }
 
     private ScimConf loadConfigurationFromLdap(String... returnAttributes) {
-        log.error("ScimConfigurationFactory::loadConfigurationFromLdap() - returnAttributes:{}, entryManager:{}, ",returnAttributes,entryManager);
+        log.debug("ScimConfigurationFactory::loadConfigurationFromLdap() - returnAttributes:{}, entryManager:{}, ",returnAttributes,entryManager);
        
         final String dn = getConfigurationDn();
         try {
             final ScimConf conf = entryManager.find(dn, ScimConf.class, returnAttributes);
-            log.error("ScimConfigurationFactory::loadConfigurationFromLdap() - conf:{} ",conf);
+            log.trace("ScimConfigurationFactory::loadConfigurationFromLdap() - conf:{} ",conf);
             return conf;
         } catch (BasePersistenceException ex) {
             log.error(ex.getMessage());
