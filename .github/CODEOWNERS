@@ -4,7 +4,7 @@
 # These owners will be the default owners for everything in this branch of
 # the repo. Unless a later match takes precedence
 
-/docker-jans-*/ @moabu
+/docker-jans-*/ @moabu @iromli
 /automation/ @moabu
 /charts/ @moabu
 /.github/ @moabu
@@ -22,3 +22,4 @@
 /jans-config-api/ @pujavs @yuriyz
 /jans-cli/ @mbaser
 /jans-ce-setup/ @mbaser @smansoft
+/jans-ce-setup/static/scripts/admin_ui_plugin.py @mbaser @duttarnab
