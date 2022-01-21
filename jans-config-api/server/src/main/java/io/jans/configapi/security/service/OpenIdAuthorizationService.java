@@ -48,7 +48,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
 
     public String processAuthorization(String token, String issuer, ResourceInfo resourceInfo, String method,
             String path) throws Exception {
-        log.debug("oAuth  Authorization parameters , token:{}, issuer:{}, resourceInfo:{}, method: {}, path: {} ",
+        log.error("oAuth  Authorization parameters , token:{}, issuer:{}, resourceInfo:{}, method: {}, path: {} ",
                 token, issuer, resourceInfo, method, path);
 
         if (StringUtils.isBlank(token)) {
@@ -102,14 +102,14 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
     }
 
     private String validateScope(List<String> tokenScopes, ResourceInfo resourceInfo, String issuer) throws Exception {
-        log.debug("Validate scope, tokenScopes:{}, resourceInfo: {}, issuer: {}", tokenScopes, resourceInfo, issuer);
+        log.error("Validate scope, tokenScopes:{}, resourceInfo: {}, issuer: {}", tokenScopes, resourceInfo, issuer);
         String accessToken = null;
         // Get resource scope
         List<String> resourceScopes = getRequestedScopes(resourceInfo);
 
         // Check if resource requires auth server specific scope
         List<String> authSpecificScope = getAuthSpecificScopeRequired(resourceInfo);
-        log.debug(" resourceScopes = " + resourceScopes + " ,authSpecificScope = " + authSpecificScope);
+        log.error(" resourceScopes = " + resourceScopes + " ,authSpecificScope = " + authSpecificScope);
 
         // If No auth scope required OR if token contains the authSpecificScope
         if ((authSpecificScope == null || authSpecificScope.size() == 0)) {

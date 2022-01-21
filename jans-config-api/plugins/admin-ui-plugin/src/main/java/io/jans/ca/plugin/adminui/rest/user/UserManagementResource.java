@@ -3,7 +3,7 @@ package io.jans.ca.plugin.adminui.rest.user;
 import io.jans.as.model.config.adminui.AdminPermission;
 import io.jans.as.model.config.adminui.AdminRole;
 import io.jans.as.model.config.adminui.RolePermissionMapping;
-import io.jans.configapi.filters.ProtectedApi;
+import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.ca.plugin.adminui.model.exception.ApplicationException;
 import io.jans.ca.plugin.adminui.service.user.UserManagementService;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;

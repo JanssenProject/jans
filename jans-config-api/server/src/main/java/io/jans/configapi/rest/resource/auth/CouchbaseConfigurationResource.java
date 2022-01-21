@@ -8,7 +8,7 @@ package io.jans.configapi.rest.resource.auth;
 
 import com.couchbase.client.java.env.DefaultCouchbaseEnvironment;
 import com.google.common.base.Joiner;
-import io.jans.configapi.filters.ProtectedApi;
+import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.service.auth.CouchbaseConfService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;

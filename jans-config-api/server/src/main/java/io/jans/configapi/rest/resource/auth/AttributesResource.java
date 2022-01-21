@@ -7,7 +7,7 @@
 package io.jans.configapi.rest.resource.auth;
 
 import com.github.fge.jsonpatch.JsonPatchException;
-import io.jans.configapi.filters.ProtectedApi;
+import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.service.auth.AttributeService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;

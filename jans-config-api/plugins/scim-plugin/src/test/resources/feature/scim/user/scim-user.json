@@ -6,7 +6,7 @@
             "resourceType": "User",
             "location": "https://jans.server1/jans-scim/restv1/v2/Users/48b44f61-ef93-40ff-b1e1-bc00be97225d"
         },
-        "userName": "test-admin",
+        "userName": "test-admin-test1",
         "name": {
             "familyName": "User",
             "givenName": "TestAdmin",
@@ -18,7 +18,7 @@
         "active": true,
         "emails": [
             {
-                "value": "test.admin@jans.server1",
+                "value": "test.admin@jans.server",
                 "primary": false
             }
         ],

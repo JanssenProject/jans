@@ -6,7 +6,7 @@
 
 package io.jans.configapi.rest.resource.auth;
 
-import io.jans.configapi.filters.ProtectedApi;
+import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.model.custom.script.CustomScriptType;

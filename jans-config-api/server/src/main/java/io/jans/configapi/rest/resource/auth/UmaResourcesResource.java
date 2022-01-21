@@ -8,7 +8,7 @@ package io.jans.configapi.rest.resource.auth;
 
 import com.github.fge.jsonpatch.JsonPatchException;
 import io.jans.as.model.uma.persistence.UmaResource;
-import io.jans.configapi.filters.ProtectedApi;
+import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.service.auth.UmaResourceService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;

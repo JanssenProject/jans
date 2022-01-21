@@ -10,7 +10,7 @@ import io.jans.as.persistence.model.Scope;
 import io.jans.configapi.security.api.ApiProtectionCache;
 import io.jans.configapi.security.client.AuthClientFactory;
 import io.jans.configapi.configuration.ConfigurationFactory;
-import io.jans.configapi.filters.ProtectedApi;
+import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.service.auth.ClientService;
 import io.jans.configapi.service.auth.ScopeService;
@@ -325,11 +325,11 @@ public class AuthUtil {
     }
 
     public List<String> getAuthSpecificScopeRequired(ResourceInfo resourceInfo) {
-        log.debug("\n\n AuthUtil:::getAuthSpecificScopeRequired() - resourceInfo = " + resourceInfo);
+        log.error("\n\n AuthUtil:::getAuthSpecificScopeRequired() - resourceInfo = " + resourceInfo);
 
         // Get required oauth scopes for the endpoint
         List<String> resourceScopes = getRequestedScopes(resourceInfo);
-        log.debug("\n\n AuthUtil:::getAuthSpecificScopeRequired(resourceInfo) - resourceScopes = " + resourceScopes
+        log.error("\n\n AuthUtil:::getAuthSpecificScopeRequired(resourceInfo) - resourceScopes = " + resourceScopes
                 + " , this.configurationFactory.getApiAppConfiguration().getExclusiveAuthScopes() ="
                 + this.configurationFactory.getApiAppConfiguration().getExclusiveAuthScopes());
 
@@ -343,7 +343,7 @@ public class AuthUtil {
                     .collect(Collectors.toList());
         }
 
-        log.debug("\n\n AuthUtil:::getAuthSpecificScopeRequired(resourceInfo) - exclusiveAuthScopesToReq = "
+        log.error("\n\n AuthUtil:::getAuthSpecificScopeRequired(resourceInfo) - exclusiveAuthScopesToReq = "
                 + exclusiveAuthScopesToReq);
         return exclusiveAuthScopesToReq;
     }

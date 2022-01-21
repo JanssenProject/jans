@@ -10,7 +10,7 @@ import com.github.fge.jsonpatch.JsonPatchException;
 import io.jans.as.model.config.Conf;
 import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.jwk.JSONWebKey;
-import io.jans.configapi.filters.ProtectedApi;
+import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;

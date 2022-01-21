@@ -29,7 +29,8 @@ Scenario: Patch config properties
     And print response    
     And print response.maxCount
     Given url mainUrl
-	And header Authorization = 'Bearer ' + accessToken 
+  	And header Authorization = 'Bearer ' + accessToken
+    And header Content-Type = 'application/json-patch+json'
 	And def request_body = (response.maxCount == null ? "[ {\"op\":\"add\", \"path\": \"/maxCount\", \"value\":null } ]" : "[ {\"op\":\"replace\", \"path\": \"/maxCount\", \"value\":\""+response.maxCount+"\" } ]")
     And print request_body
     And request request_body
@@ -49,7 +50,8 @@ Scenario: Patch loggingLevel properties
     And print response    
     And print response.loggingLevel
     Given url mainUrl
-	And header Authorization = 'Bearer ' + accessToken 
+  	And header Authorization = 'Bearer ' + accessToken
+    And header Content-Type = 'application/json-patch+json'
 	And def request_body = (response.loggingLevel == null ? "[ {\"op\":\"add\", \"path\": \"/loggingLevel\", \"value\":null } ]" : "[ {\"op\":\"replace\", \"path\": \"/loggingLevel\", \"value\":\""+response.loggingLevel+"\" } ]")
     And print request_body
     And request request_body
@@ -68,7 +70,8 @@ Scenario: Patch userExtensionSchemaURI properties
     And print response    
     And print response.userExtensionSchemaURI
     Given url mainUrl
-	And header Authorization = 'Bearer ' + accessToken 
+  	And header Authorization = 'Bearer ' + accessToken
+    And header Content-Type = 'application/json-patch+json'
 	And def request_body = (response.userExtensionSchemaURI == null ? "[ {\"op\":\"add\", \"path\": \"/userExtensionSchemaURI\", \"value\":null } ]" : "[ {\"op\":\"replace\", \"path\": \"/userExtensionSchemaURI\", \"value\":\""+response.userExtensionSchemaURI+"\" } ]")
     And print request_body
     And request request_body
