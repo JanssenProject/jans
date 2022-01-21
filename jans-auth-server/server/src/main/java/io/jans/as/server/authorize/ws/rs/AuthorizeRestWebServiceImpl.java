@@ -396,61 +396,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                         }
                     }
                     requestParameterService.getCustomParameters(jwtRequest, customParameters);
-                } catch (WebApplicationException e) {
-
-                    /*redirectUriResponse.getRedirectUri().setIssuer(appConfiguration.getIssuer());
-                    redirectUriResponse.getRedirectUri().setAudience(clientId);
-                    redirectUriResponse.getRedirectUri().setAuthorizationCodeLifetime(appConfiguration.getAuthorizationCodeLifetime());
-                    redirectUriResponse.getRedirectUri().setSignatureAlgorithm(SignatureAlgorithm.fromString(client.getAttributes().getAuthorizationSignedResponseAlg()));
-                    redirectUriResponse.getRedirectUri().setKeyEncryptionAlgorithm(KeyEncryptionAlgorithm.fromName(client.getAttributes().getAuthorizationEncryptedResponseAlg()));
-                    redirectUriResponse.getRedirectUri().setBlockEncryptionAlgorithm(BlockEncryptionAlgorithm.fromName(client.getAttributes().getAuthorizationEncryptedResponseEnc()));
-                    redirectUriResponse.getRedirectUri().setCryptoProvider(cryptoProvider);
-
-
-                    String keyId = null;
-                    if (client.getAttributes().getAuthorizationEncryptedResponseAlg() != null && client.getAttributes().getAuthorizationEncryptedResponseEnc() != null) {
-                        if (client.getAttributes().getAuthorizationSignedResponseAlg() != null) { // Signed then Encrypted response
-                            SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(client.getAttributes().getAuthorizationSignedResponseAlg());
-
-                            String nestedKeyId = new ServerCryptoProvider(cryptoProvider).getKeyId(webKeysConfiguration,
-                                    Algorithm.fromString(signatureAlgorithm.getName()), Use.SIGNATURE);
-
-                            JSONObject jsonWebKeys = JwtUtil.getJSONWebKeys(client.getJwksUri());
-                            redirectUriResponse.getRedirectUri().setNestedJsonWebKeys(jsonWebKeys);
-
-                            String clientSecret = clientService.decryptSecret(client.getClientSecret());
-                            redirectUriResponse.getRedirectUri().setNestedSharedSecret(clientSecret);
-                            redirectUriResponse.getRedirectUri().setNestedKeyId(nestedKeyId);
-                        }
-
-                        // Encrypted response
-                        JSONObject jsonWebKeys = JwtUtil.getJSONWebKeys(client.getJwksUri());
-                        if (jsonWebKeys != null) {
-                            keyId = new ServerCryptoProvider(cryptoProvider).getKeyId(JSONWebKeySet.fromJSONObject(jsonWebKeys),
-                                    Algorithm.fromString(client.getAttributes().getAuthorizationEncryptedResponseAlg()),
-                                    Use.ENCRYPTION);
-                        }
-                        String sharedSecret = clientService.decryptSecret(client.getClientSecret());
-                        byte[] sharedSymmetricKey = sharedSecret.getBytes(StandardCharsets.UTF_8);
-                        redirectUriResponse.getRedirectUri().setSharedSymmetricKey(sharedSymmetricKey);
-                        redirectUriResponse.getRedirectUri().setJsonWebKeys(jsonWebKeys);
-                        redirectUriResponse.getRedirectUri().setKeyId(keyId);
-                    }  else { // Signed response
-                        SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.RS256;
-                        if (client.getAttributes().getAuthorizationSignedResponseAlg() != null) {
-                            signatureAlgorithm = SignatureAlgorithm.fromString(client.getAttributes().getAuthorizationSignedResponseAlg());
-                        }
-
-                        keyId = new ServerCryptoProvider(cryptoProvider).getKeyId(webKeysConfiguration,
-                                Algorithm.fromString(signatureAlgorithm.getName()), Use.SIGNATURE);
-
-                        JSONObject jsonWebKeys = JwtUtil.getJSONWebKeys(client.getJwksUri());
-                        redirectUriResponse.getRedirectUri().setJsonWebKeys(jsonWebKeys);
-
-                        String clientSecret = clientService.decryptSecret(client.getClientSecret());
-                        redirectUriResponse.getRedirectUri().setSharedSecret(clientSecret);
-                        redirectUriResponse.getRedirectUri().setKeyId(keyId);
-                    }*/   
+                } catch (WebApplicationException e) {   
                         
                     fillRedirectUriResponseforJARM(redirectUriResponse, clientId, client);
                 	String[] parts = request.split("\\.");
