@@ -311,3 +311,31 @@ def download(url, dst):
         else:
             break
 
+def extract_from_zip(zip_file, sub_dir, target_dir):
+    zipobj = zipfile.ZipFile(zip_file, "r")
+    parent_dir = zipobj.namelist()[0]
+
+    if sub_dir and not sub_dir.endswith('/'):
+        sub_dir += '/'
+
+    parent_sub_dir = os.path.join(parent_dir, sub_dir)
+    target_dir_path = Path(target_dir)
+
+    if target_dir_path.exists():
+        shutil.rmtree(target_dir_path)
+
+    target_dir_path.mkdir(parents=True)
+
+    for member in zipobj.infolist():
+        if member.filename.startswith(parent_sub_dir):
+            p = Path(member.filename)
+            pr = p.relative_to(parent_sub_dir)
+            target_fn = target_dir_path.joinpath(pr)
+            if member.is_dir():
+                if not target_fn.exists():
+                    target_fn.mkdir(parents=True)
+            else:
+                if not target_fn.parent.exists():
+                    target_fn.parent.mkdir(parents=True)
+                target_fn.write_bytes(zipobj.read(member))
+    zipobj.close()
