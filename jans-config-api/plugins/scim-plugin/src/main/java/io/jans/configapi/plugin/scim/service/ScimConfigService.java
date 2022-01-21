@@ -21,12 +21,7 @@ public class ScimConfigService {
     
     @Inject
     ScimConfigurationFactory scimConfigurationFactory;        
-    
-   
-   public ScimAppConfiguration getConfiguration() {
-        return scimConfigurationFactory.getAppConfiguration();
-    }
-   
+
    public ScimConf findConf() {
        final String dn = scimConfigurationFactory.getConfigurationDn();
        return persistenceManager.find(dn, ScimConf.class, null);

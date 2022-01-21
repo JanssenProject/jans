@@ -8,6 +8,8 @@ package io.jans.configapi.plugin.scim.util;
 
 public class Constants {
 
+    private Constants() {}
+    
     public static final String SCIM_CONFIGURATION_ENTRY = "scim_ConfigurationEntryDN";
     public static final String BASE_API_URL = "/";
     public static final String SCIM = "/scim";
