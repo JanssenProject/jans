@@ -29,6 +29,7 @@ public class HashUtilTest {
     public void s256Hash() {
         assertEquals("hhNHO19gwnEguTE5SAK-GA", HashUtil.getHash(INPUT, SignatureAlgorithm.ES256));
         assertEquals("hhNHO19gwnEguTE5SAK-GA", HashUtil.getHash(INPUT, SignatureAlgorithm.HS256));
+        assertEquals("hhNHO19gwnEguTE5SAK-GA", HashUtil.getHash(INPUT, SignatureAlgorithm.ES256K));        
         assertEquals("hhNHO19gwnEguTE5SAK-GA", HashUtil.getHash(INPUT, SignatureAlgorithm.PS256));
         assertEquals("hhNHO19gwnEguTE5SAK-GA", HashUtil.getHash(INPUT, SignatureAlgorithm.RS256));
     }
@@ -47,5 +48,6 @@ public class HashUtilTest {
         assertEquals("CCmNwrkP_FbnPPpQ5f96xpXTDuzHSeGd3jGZ_JrPJo4", HashUtil.getHash(INPUT, SignatureAlgorithm.HS512));
         assertEquals("CCmNwrkP_FbnPPpQ5f96xpXTDuzHSeGd3jGZ_JrPJo4", HashUtil.getHash(INPUT, SignatureAlgorithm.PS512));
         assertEquals("CCmNwrkP_FbnPPpQ5f96xpXTDuzHSeGd3jGZ_JrPJo4", HashUtil.getHash(INPUT, SignatureAlgorithm.RS512));
+        assertEquals("CCmNwrkP_FbnPPpQ5f96xpXTDuzHSeGd3jGZ_JrPJo4", HashUtil.getHash(INPUT, SignatureAlgorithm.EDDSA));
     }
 }
