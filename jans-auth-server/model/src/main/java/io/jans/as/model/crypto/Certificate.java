@@ -31,8 +31,8 @@ import java.util.Arrays;
  */
 public class Certificate {
 
-    private SignatureAlgorithm signatureAlgorithm;
-    private X509Certificate x509Certificate;
+    private final SignatureAlgorithm signatureAlgorithm;
+    private final X509Certificate x509Certificate;
 
     /**
      * Constructor.
