@@ -109,3 +109,18 @@ class ClientRegistration(ClientRegistrationType):
     # context refers to io.jans.as.server.service.external.context.DynamicClientRegistrationContext - see https://github.com/JanssenProject/jans-auth-server/blob/e083818272ac48813eca8525e94f7bd73a7a9f1b/server/src/main/java/io/jans/as/server/service/external/context/DynamicClientRegistrationContext.java#L24
     def isCertValidForClient(self, cert, context):
         return False
+
+        # responseAsJsonObject - is org.json.JSONObject, you can use any method to manipulate json
+    # context is reference of io.jans.as.server.model.common.ExecutionContext
+    def modifyPutResponse(self, responseAsJsonObject, executionContext):
+        return False
+
+    # responseAsJsonObject - is org.json.JSONObject, you can use any method to manipulate json
+    # context is reference of io.jans.as.server.model.common.ExecutionContext
+    def modifyReadResponse(self, responseAsJsonObject, executionContext):
+        return False
+
+    # responseAsJsonObject - is org.json.JSONObject, you can use any method to manipulate json
+    # context is reference of io.jans.as.server.model.common.ExecutionContext
+    def modifyPostResponse(self, responseAsJsonObject, executionContext):
+        return False

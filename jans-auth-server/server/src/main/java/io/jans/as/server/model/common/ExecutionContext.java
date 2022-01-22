@@ -94,8 +94,9 @@ public class ExecutionContext {
         return client;
     }
 
-    public void setClient(Client client) {
+    public ExecutionContext setClient(Client client) {
         this.client = client;
+        return this;
     }
 
     public void setHttpRequest(HttpServletRequest httpRequest) {

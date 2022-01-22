@@ -53,32 +53,30 @@ def build_copy():
 
 while True:
     print_plugins()
-    user_input = input('Enable/Disable/Add/Finish/Quit [\033[92me\033[0m/d/a/f/q]: ')
+    user_input = input('Add/Remove/Finish/Quit [a/r/f/q]: ')
     if user_input:
         choice = user_input.lower()[0]
         if choice == 'q':
-           print("Exiting without modification")
+           print("Exiting without modification.")
            break
 
         elif choice == 'f':
             build_copy()
             break
 
-        elif choice in ('e', 'd'):
-            pactive = True if choice == 'e' else False
-            choice_str = {'e': 'enable', 'd':'disable'}[choice]
-            plugin_number = input('Enter plugin number to {} :'.format(choice_str))
+        elif choice == 'r':
+            plugin_number = input('Enter plugin number to remove :')
             if plugin_number.isdigit() and int(plugin_number) <= len(plugins):
                 pn = int(plugin_number) - 1
                 for i, p in enumerate(plugins):
                     if i == pn:
-                        exec_command('npm run plugin:{} {}'.format(choice_str, p['key']))
+                        exec_command('npm run plugin:remove {}'.format(p['key']))
                         plugins = read_plugins()
                         break
         elif choice == 'a':
             plugin_fn = input('Enter path of plugin: ')
             if plugin_fn.lower().endswith('.zip'):
-                exec_command('npm run plugin:install {}'.format(plugin_fn))
+                exec_command('npm run plugin:add {}'.format(plugin_fn))
                 plugins = read_plugins()
             else:
                 print("Can't find \033[31m{}\033[0m".format(plugin_metadata_fn))

@@ -36,9 +36,8 @@ RUN wget -q ${CN_SOURCE_URL} -P /app/javalibs/
 # ======
 
 COPY requirements.txt /app/requirements.txt
-RUN pip3 install --no-cache-dir -U pip \
-    && pip3 install --no-cache-dir -r /app/requirements.txt \
-    && rm -rf /src/jans-pycloudlib/.git
+RUN pip3 install --no-cache-dir -U pip wheel \
+    && pip3 install --no-cache-dir -r /app/requirements.txt
 
 # =======
 # Cleanup
