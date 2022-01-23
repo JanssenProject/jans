@@ -113,7 +113,7 @@ def main():
     cert_to_truststore(
         "web_https",
         "/etc/certs/web_https.crt",
-        "/usr/lib/jvm/default-jvm/jre/lib/security/cacerts",
+        "/usr/java/latest/jre/lib/security/cacerts",
         "changeit",
     )
 
@@ -160,14 +160,14 @@ def main():
         cert_to_truststore(
             "OpenBankingJwksUri",
             "/etc/certs/obextjwksuri.crt",
-            "/usr/lib/jvm/default-jvm/jre/lib/security/cacerts",
+            "/usr/java/latest/jre/lib/security/cacerts",
             "changeit",
         )
 
         cert_to_truststore(
             ob_ext_alias,
             ext_cert,
-            "/usr/lib/jvm/default-jvm/jre/lib/security/cacerts",
+            "/usr/java/latest/jre/lib/security/cacerts",
             "changeit",
         )
 
@@ -191,7 +191,7 @@ def main():
             cert_to_truststore(
                 ob_transport_alias,
                 ob_transport_cert,
-                "/usr/lib/jvm/default-jvm/jre/lib/security/cacerts",
+                "/usr/java/latest/jre/lib/security/cacerts",
                 "changeit",
             )
 

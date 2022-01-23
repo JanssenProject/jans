@@ -131,6 +131,6 @@ class AdminUiPlugin:
         cert_to_truststore(
             "token_server",
             cert_file,
-            "/usr/lib/jvm/default-jvm/jre/lib/security/cacerts",
+            "/usr/java/latest/jre/lib/security/cacerts",
             "changeit",
         )
