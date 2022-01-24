@@ -83,7 +83,6 @@ This will install docker, microk8s, helm and Janssen with the default settings t
 
 For more information follow [here](helm/README.md).
 
-
 ## Design Goals
 
 The Janssen Project is aligned with the goals of cloud native infrastructure to enable:
