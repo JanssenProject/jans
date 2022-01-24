@@ -50,19 +50,23 @@ For a more generic setup you may use Rancher UI to deploy the setup. For this qu
 
 Summary of steps :
 
-1. Provision a linux 4 CPU, 16 GB RAM, and 50GB SSD VM with ports `443` and `80` open. Save the VM ip address. For development environments, VM can be setup using VMWare workstation player or VirtualBox with Ubuntu 20.0.4 operating system running on VM
+1. Provision a linux 4 CPU, 16 GB RAM, and 50GB SSD VM with ports `443` and `80` open. Save the VM IP address. For development environments, the VM can be set up using VMWare Workstation Player or VirtualBox with Ubuntu 20.0.4 operating system running on VM.
 2. Install [Docker](https://docs.docker.com/engine/install/).
 3. Execute
     ```bash
     docker run -d --restart=unless-stopped -p 80:80 -p 443:443 --privileged rancher/rancher:latest
     ```
+    The final line of the returned text is the `container-id`, which you'll need for the next step.
 4. Execute the following command to get the [boostrap password](https://rancher.com/docs/rancher/v2.6/en/installation/resources/bootstrap-password/#specifying-the-bootstrap-password-in-docker-installs) for login.
     ```bash
-    docker logs  container-id  2>&1 | grep "Bootstrap Password:"
+    docker logs  <container-id>  2>&1 | grep "Bootstrap Password:"
     ```
 5. Head to `https://<VM-IP-ADDRESS-FROM-FIRST-STEP>` and login with the username `admin` and the password from the previous step.
 6. After logging in from the top-left menu select `Apps & Marketplace` and you will be taken to the Charts page.
-7. Search for `Gluu` and begin your installation !!!
+7. Search for `Gluu` and begin your installation.
+8. During Step 1 of installation, be sure to select the `Customize Helm options before install` options.
+9. In Step 2, customize the settings for the Janssen installation
+10. In Step 3, unselect the `Wait` option
 
 ## Design Goals
 
