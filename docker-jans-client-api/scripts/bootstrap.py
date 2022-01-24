@@ -34,7 +34,7 @@ def get_web_cert():
     cert_to_truststore(
         "web_https",
         "/etc/certs/web_https.crt",
-        "/usr/lib/jvm/default-jvm/jre/lib/security/cacerts",
+        "/usr/java/latest/jre/lib/security/cacerts",
         "changeit",
     )
 
