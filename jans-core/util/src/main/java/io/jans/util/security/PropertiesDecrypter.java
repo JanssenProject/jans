@@ -9,7 +9,8 @@ package io.jans.util.security;
 import java.util.Properties;
 
 import io.jans.util.StringHelper;
-import io.jans.util.security.StringEncrypter.EncryptionException;
+import io.jans.util.exception.EncryptionException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,6 +18,8 @@ import org.slf4j.LoggerFactory;
  * Decrypt encripted properties
  *
  * @author Yuriy Movchan Date: 04/24/2013
+ * @author Sergey Manoylo
+ * @version 2021-10-21 
  */
 public final class PropertiesDecrypter {
 
@@ -27,9 +30,9 @@ public final class PropertiesDecrypter {
 
     private PropertiesDecrypter() { }
 
-    public static Properties decryptProperties(Properties properties, String encryptionKey) {
+    public static Properties decryptProperties(Properties properties) {
         try {
-            return decryptProperties(StringEncrypter.defaultInstance(), properties, encryptionKey);
+            return decryptProperties(StringEncrypter.defaultInstance(), properties);
         } catch (EncryptionException ex) {
             LOG.error(String.format("Failed to decript '%s' property", PropertiesDecrypter.BIND_PASSWORD), ex);
         }
@@ -38,67 +41,51 @@ public final class PropertiesDecrypter {
     }
 
     public static Properties decryptProperties(StringEncrypter stringEncrypter, Properties properties) {
-        return decryptProperties(stringEncrypter, properties, null);
-    }
-
-    public static Properties decryptProperties(StringEncrypter stringEncrypter, Properties properties,
-            String encryptionKey) {
         if (properties == null) {
             return properties;
         }
 
         Properties clondedProperties = (Properties) properties.clone();
-        decriptProperty(stringEncrypter, clondedProperties, encryptionKey, PropertiesDecrypter.BIND_PASSWORD, true);
-        decriptProperty(stringEncrypter, clondedProperties, encryptionKey, PropertiesDecrypter.TRUST_STORE_PIN, true);
+
+        decryptProperty(stringEncrypter, clondedProperties, PropertiesDecrypter.BIND_PASSWORD, true);
+        decryptProperty(stringEncrypter, clondedProperties, PropertiesDecrypter.TRUST_STORE_PIN, true);
 
         return clondedProperties;
     }
 
     public static Properties decryptAllProperties(StringEncrypter stringEncrypter, Properties properties) {
-        return decryptAllProperties(stringEncrypter, properties, null);
-    }
-
-    public static Properties decryptAllProperties(StringEncrypter stringEncrypter, Properties properties,
-            String encryptionKey) {
         if (properties == null) {
             return properties;
         }
 
         Properties clondedProperties = (Properties) properties.clone();
+
         for (Object key : clondedProperties.keySet()) {
             String propertyName = (String) key;
-            decriptProperty(stringEncrypter, clondedProperties, encryptionKey, propertyName, true);
+            decryptProperty(stringEncrypter, clondedProperties, propertyName, true);
         }
 
         return clondedProperties;
     }
 
-    private static void decriptProperty(StringEncrypter stringEncrypter, Properties properties, String encryptionKey,
-            String propertyName, boolean silent) {
+    private static void decryptProperty(StringEncrypter stringEncrypter, Properties properties, String propertyName, boolean silent) {
         String propertyValue = properties.getProperty(propertyName);
         if (StringHelper.isEmpty(propertyValue)) {
             return;
         }
-
         try {
-            String decryptedProperty;
-            if (StringHelper.isEmpty(encryptionKey)) {
-                decryptedProperty = stringEncrypter.decrypt(propertyValue, silent);
-            } else {
-                decryptedProperty = stringEncrypter.decrypt(propertyValue, encryptionKey, silent);
-            }
-
+            String decryptedProperty = stringEncrypter.decrypt(propertyValue, silent);
             if (StringHelper.isEmpty(decryptedProperty)) {
                 decryptedProperty = propertyValue;
             }
-
             properties.put(propertyName, decryptedProperty);
-        } catch (EncryptionException ex) {
+        } catch (Exception ex) {
             LOG.error(String.format("Failed to decript '%s' property", propertyName), ex);
         }
     }
 
-    public static String decryptProperty(String encryptedValue, boolean returnSource, String encryptionKey) {
+    public static String decryptProperty(String encryptedValue, boolean returnSource, String encryptionKey,
+            String encryptionSalt, String encryptionAlg) {
         if (encryptedValue == null) {
             return encryptedValue;
         }
@@ -111,7 +98,8 @@ public final class PropertiesDecrypter {
         }
 
         try {
-            resultValue = StringEncrypter.defaultInstance().decrypt(encryptedValue, encryptionKey);
+            StringEncrypter stringEncrypter = StringEncrypter.instance(encryptionKey, encryptionSalt, encryptionAlg);
+            resultValue = stringEncrypter.decrypt(encryptedValue);
         } catch (Exception ex) {
             if (!returnSource) {
                 LOG.error(String.format("Failed to decrypt value: '%s'", encryptedValue, ex));
