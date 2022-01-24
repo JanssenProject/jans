@@ -14,7 +14,6 @@ from urllib import request
 from urllib.parse import urljoin
 from pathlib import Path
 
-setup_package_name = 'master.zip'
 maven_base_url = 'https://maven.jans.io/maven/io/jans/'
 
 app_versions = {
@@ -24,7 +23,7 @@ app_versions = {
   "AMAZON_CORRETTO_VERSION": "11.0.13.8.1", 
   "JYTHON_VERSION": "2.7.3",
   "OPENDJ_VERSION": "4.4.12",
-  "SETUP_BRANCH": "master",
+  "SETUP_BRANCH": "main",
   "ADMIN_UI_FRONTEND_BRANCH": "main",
   "NODE_VERSION": "v14.18.2"
 }
@@ -89,6 +88,67 @@ except:
     os.system('apt install -y python3-distutils')
 
 
+def extract_subdir(zip_fn, sub_dir, target_dir, zipf=None):
+    zip_obj = zipfile.ZipFile(zip_fn, "r")
+    par_dir = zip_obj.namelist()[0]
+
+    if not sub_dir.endswith('/'):
+        sub_dir += '/'
+
+    if zipf:
+        target_zip_obj = zipfile.ZipFile(zipf, "w")
+
+    ssub_dir = os.path.join(par_dir, sub_dir)
+    target_dir_path = Path(target_dir)
+
+    if target_dir_path.exists():
+        shutil.rmtree(target_dir_path)
+
+    target_dir_path.mkdir(parents=True)
+
+    for member in zip_obj.infolist():
+        if member.filename.startswith(ssub_dir):
+            p = Path(member.filename)
+            pr = p.relative_to(ssub_dir)
+            target_fn = target_dir_path.joinpath(pr)
+            if member.is_dir():
+                if zipf:
+                    z_dirn = target_fn.as_posix()
+                    if not z_dirn.endswith('/'):
+                        z_dirn += '/'
+                    zinfodir = zipfile.ZipInfo(filename=z_dirn)
+                    zinfodir.external_attr=0x16
+                    target_zip_obj.writestr(zinfodir, '')
+                elif not target_fn.exists():
+                    target_fn.mkdir(parents=True)
+            else:
+                if zipf:
+                    target_zip_obj.writestr(target_fn.as_posix(), zip_obj.read(member))
+                else:
+                    if not target_fn.parent.exists():
+                        target_fn.parent.mkdir(parents=True)
+                    target_fn.write_bytes(zip_obj.read(member))
+    if zipf:
+        target_zip_obj.close()
+
+    zip_obj.close()
+
+def extract_file(zip_fn, source, target, ren=False):
+    zip_obj = zipfile.ZipFile(zip_fn, "r")
+    for member in zip_obj.infolist():
+        if not member.is_dir() and member.filename.endswith(source):
+            if ren:
+                target_p = Path(target)
+            else:
+                p = Path(member.filename)
+                target_p = Path(target).joinpath(p.name)
+                if not target_p.parent.exists():
+                    target_p.parent.mkdir(parents=True)
+            target_p.write_bytes(zip_obj.read(member))
+            break
+    zip_obj.close()
+
+
 def download(url, target_fn):
     dst = target_fn if target_fn.startswith('/') else os.path.join(app_dir, target_fn)
     pardir, fn = os.path.split(dst)
@@ -136,11 +196,13 @@ def download_gcs():
         shutil.rmtree(tmp_dir)
 
 
-setup_zip_file = os.path.join(jans_app_dir, 'jans-setup.zip')
+jans_zip_file = os.path.join(jans_app_dir, 'jans.zip')
+sqlalchemy_zip_file = os.path.join(jans_app_dir, 'sqlalchemy.zip')
 
 if not (argsp.u or argsp.uninstall):
-    setup_url = 'https://github.com/JanssenProject/jans-setup/archive/refs/heads/{}.zip'.format(app_versions['SETUP_BRANCH'])
-    download(setup_url, setup_zip_file)
+
+    setup_url = 'https://github.com/JanssenProject/jans/archive/refs/heads/{}.zip'.format(app_versions['SETUP_BRANCH'])
+    download(setup_url, jans_zip_file)
 
     download('https://corretto.aws/downloads/resources/{0}/amazon-corretto-{0}-linux-x64.tar.gz'.format(app_versions['AMAZON_CORRETTO_VERSION']), os.path.join(app_dir, 'amazon-corretto-{0}-linux-x64.tar.gz'.format(app_versions['AMAZON_CORRETTO_VERSION'])))
     download('https://repo1.maven.org/maven2/org/eclipse/jetty/{1}/{0}/{1}-{0}.tar.gz'.format(app_versions['JETTY_VERSION'], jetty_dist_string), os.path.join(app_dir,'{1}-{0}.tar.gz'.format(app_versions['JETTY_VERSION'], jetty_dist_string)))
@@ -149,17 +211,13 @@ if not (argsp.u or argsp.uninstall):
     download(urljoin(maven_base_url, 'jans-auth-server/{0}{1}/jans-auth-server-{0}{1}.war'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD'])), os.path.join(jans_app_dir, 'jans-auth.war'))
     download(urljoin(maven_base_url, 'jans-auth-client/{0}{1}/jans-auth-client-{0}{1}-jar-with-dependencies.jar'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD'])), os.path.join(jans_app_dir, 'jans-auth-client-jar-with-dependencies.jar'))
     download(urljoin(maven_base_url, 'jans-config-api-server/{0}{1}/jans-config-api-server-{0}{1}.war'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD'])), os.path.join(jans_app_dir, 'jans-config-api.war'))
-    download('https://api.github.com/repos/JanssenProject/jans-cli/tarball/main', os.path.join(jans_app_dir, 'jans-cli.tgz'))
-    download('https://github.com/sqlalchemy/sqlalchemy/archive/rel_1_3_23.zip', os.path.join(jans_app_dir, 'sqlalchemy.zip'))
+    download('https://github.com/sqlalchemy/sqlalchemy/archive/rel_1_3_23.zip', sqlalchemy_zip_file)
     download(urljoin(maven_base_url, 'scim-plugin/{0}{1}/scim-plugin-{0}{1}-distribution.jar'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD'])), os.path.join(jans_app_dir, 'scim-plugin.jar'))
     download('https://ox.gluu.org/icrby8xcvbcv/cli-swagger/jca.tgz', os.path.join(jans_app_dir, 'jca-swagger-client.tgz'))
     download('https://ox.gluu.org/icrby8xcvbcv/cli-swagger/scim.tgz', os.path.join(jans_app_dir, 'scim-swagger-client.tgz'))
     download(urljoin(maven_base_url, 'admin-ui-plugin/{0}{1}/admin-ui-plugin-{0}{1}-distribution.jar'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD'])), os.path.join(jans_app_dir, 'admin-ui-plugin-distribution.jar'))
-    download('https://raw.githubusercontent.com/JanssenProject/jans-config-api/master/server/src/main/resources/log4j2.xml', os.path.join(jans_app_dir, 'log4j2.xml'))
-    download('https://raw.githubusercontent.com/JanssenProject/jans-config-api/master/plugins/admin-ui-plugin/config/log4j2-adminui.xml', os.path.join(jans_app_dir, 'log4j2-adminui.xml'))
     download('https://github.com/GluuFederation/gluu-admin-ui/archive/refs/heads/{}.zip'.format(app_versions['ADMIN_UI_FRONTEND_BRANCH']), os.path.join(jans_app_dir, 'gluu-admin-ui.zip'))
     download('https://raw.githubusercontent.com/GluuFederation/gluu-snap/master/facter/facter', os.path.join(jans_app_dir, 'facter'))
-    
 
     if argsp.profile == 'jans':
         download('https://maven.gluu.org/maven/org/gluufederation/opendj/opendj-server-legacy/{0}/opendj-server-legacy-{0}.zip'.format(app_versions['OPENDJ_VERSION']), os.path.join(app_dir, 'opendj-server-legacy-{0}.zip'.format(app_versions['OPENDJ_VERSION'])))
@@ -293,33 +351,22 @@ else:
 
     print("Extracting jans-setup package")
 
-    setup_zip = zipfile.ZipFile(setup_zip_file, "r")
-    setup_par_dir = setup_zip.namelist()[0]
+    extract_subdir(jans_zip_file, 'jans-ce-setup', setup_dir)
+    extract_subdir(sqlalchemy_zip_file, 'lib/sqlalchemy', os.path.join(setup_dir, 'setup_app/pylib/sqlalchemy'))
 
-    for filename in setup_zip.namelist():
-        setup_zip.extract(filename, jans_dir)
-
-    shutil.move(os.path.join(jans_dir,setup_par_dir), setup_dir)
-
-    sqlalchemy_zfn = os.path.join(jans_app_dir, 'sqlalchemy.zip')
-    sqlalchemy_zip = zipfile.ZipFile(sqlalchemy_zfn, "r")
-    sqlalchemy_par_dir = sqlalchemy_zip.namelist()[0]
-    tmp_dir = os.path.join('/tmp', os.urandom(2).hex())
-    sqlalchemy_zip.extractall(tmp_dir)
-    shutil.copytree(
-            os.path.join(tmp_dir, sqlalchemy_par_dir, 'lib/sqlalchemy'), 
-            os.path.join(setup_dir, 'setup_app/pylib/sqlalchemy')
-            )
-    shutil.rmtree(tmp_dir)
-
-    download('https://raw.githubusercontent.com/JanssenProject/jans-config-api/master/docs/jans-config-api-swagger.yaml', os.path.join(setup_dir, 'setup_app/data/jans-config-api-swagger.yaml'))
+    extract_file(jans_zip_file, 'jans-config-api/docs/jans-config-api-swagger.yaml', os.path.join(setup_dir, 'setup_app/data'))
 
     if argsp.profile == 'jans':
         download_gcs()
-        download('https://raw.githubusercontent.com/JanssenProject/jans-scim/master/server/src/main/resources/jans-scim-openapi.yaml'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD']), os.path.join(setup_dir, 'setup_app/data/jans-scim-openapi.yaml'))
-
-    if argsp.profile != 'jans':
+        extract_file(jans_zip_file, 'jans-scim/server/src/main/resources/jans-scim-openapi.yaml', os.path.join(setup_dir, 'setup_app/data'))
+    else:
         profile_setup()
+
+    extract_file(jans_zip_file, 'jans-config-api/server/src/main/resources/log4j2.xml', jans_app_dir)
+    extract_file(jans_zip_file, 'jans-config-api/plugins/admin-ui-plugin/config/log4j2-adminui.xml', jans_app_dir)
+
+    print("Preparing jans-cli package")
+    extract_subdir(jans_zip_file, 'jans-cli', 'jans-cli', os.path.join(jans_app_dir, 'jans-cli.zip'))
 
     print("Launching Janssen Setup")
 

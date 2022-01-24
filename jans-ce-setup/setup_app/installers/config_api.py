@@ -270,7 +270,7 @@ class ConfigApiInstaller(JettyInstaller):
         self.run([paths.cmd_chown, '-R', 'node:node', source_dir])
         cmd_path = 'PATH=$PATH:{}/bin:{}/bin'.format(Config.jre_home, Config.node_home)
 
-        for cmd in ('npm install @openapitools/openapi-generator-cli', 'npm run api', 'npm install', 'npm run build:prod'):
+        for cmd in ('npm install @openapitools/openapi-generator-cli', 'npm run api', 'npm install', 'npm run plugin:clean', 'npm run build:prod'):
             self.logIt("Executing `{}`".format(cmd), pbar=self.service_name)
             run_cmd = '{} {}'.format(cmd_path, cmd)
             self.run(['/bin/su', 'node','-c', run_cmd], source_dir)

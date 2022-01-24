@@ -1,4 +1,14 @@
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/b6e9b72a8c484d13a22b315de52a68c5)](https://www.codacy.com/gh/JanssenProject/docker-jans-certmanager/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=JanssenProject/docker-jans-certmanager&amp;utm_campaign=Badge_Grade)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_docker-jans-certmanager&metric=bugs)](https://sonarcloud.io/dashboard?id=JanssenProject_docker-jans-certmanager)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_docker-jans-certmanager&metric=code_smells)](https://sonarcloud.io/dashboard?id=JanssenProject_docker-jans-certmanager)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_docker-jans-certmanager&metric=coverage)](https://sonarcloud.io/dashboard?id=JanssenProject_docker-jans-certmanager)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_docker-jans-certmanager&metric=duplicated_lines_density)](https://sonarcloud.io/dashboard?id=JanssenProject_docker-jans-certmanager)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_docker-jans-certmanager&metric=ncloc)](https://sonarcloud.io/dashboard?id=JanssenProject_docker-jans-certmanager)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_docker-jans-certmanager&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=JanssenProject_docker-jans-certmanager)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_docker-jans-certmanager&metric=alert_status)](https://sonarcloud.io/dashboard?id=JanssenProject_docker-jans-certmanager)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_docker-jans-certmanager&metric=reliability_rating)](https://sonarcloud.io/dashboard?id=JanssenProject_docker-jans-certmanager)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_docker-jans-certmanager&metric=security_rating)](https://sonarcloud.io/dashboard?id=JanssenProject_docker-jans-certmanager)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_docker-jans-certmanager&metric=sqale_index)](https://sonarcloud.io/dashboard?id=JanssenProject_docker-jans-certmanager)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_docker-jans-certmanager&metric=vulnerabilities)](https://sonarcloud.io/dashboard?id=JanssenProject_docker-jans-certmanager)
 
 ## Overview
 

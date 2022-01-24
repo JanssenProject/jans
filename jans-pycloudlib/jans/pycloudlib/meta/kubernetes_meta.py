@@ -77,7 +77,7 @@ class KubernetesMeta(BaseMeta):
             self.client.connect_get_namespaced_pod_exec,
             container.metadata.name,
             container.metadata.namespace,
-            command=["tar", "xvf", "-", "-C", "/"],
+            command=["tar", "xmvf", "-", "-C", "/"],
             container=self._get_main_container_name(container),
             stderr=True,
             stdin=True,

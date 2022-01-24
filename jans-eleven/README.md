@@ -1,4 +1,14 @@
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/002d76c3ba8b4cf39b066fa6eab9d75d)](https://www.codacy.com/gh/JanssenProject/jans-eleven/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=JanssenProject/jans-eleven&amp;utm_campaign=Badge_Grade)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_jans-eleven&metric=bugs)](https://sonarcloud.io/dashboard?id=JanssenProject_jans-eleven)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_jans-eleven&metric=code_smells)](https://sonarcloud.io/dashboard?id=JanssenProject_jans-eleven)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_jans-eleven&metric=coverage)](https://sonarcloud.io/dashboard?id=JanssenProject_jans-eleven)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_jans-eleven&metric=duplicated_lines_density)](https://sonarcloud.io/dashboard?id=JanssenProject_jans-eleven)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_jans-eleven&metric=ncloc)](https://sonarcloud.io/dashboard?id=JanssenProject_jans-eleven)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_jans-eleven&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=JanssenProject_jans-eleven)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_jans-eleven&metric=alert_status)](https://sonarcloud.io/dashboard?id=JanssenProject_jans-eleven)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_jans-eleven&metric=reliability_rating)](https://sonarcloud.io/dashboard?id=JanssenProject_jans-eleven)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_jans-eleven&metric=security_rating)](https://sonarcloud.io/dashboard?id=JanssenProject_jans-eleven)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_jans-eleven&metric=sqale_index)](https://sonarcloud.io/dashboard?id=JanssenProject_jans-eleven)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_jans-eleven&metric=vulnerabilities)](https://sonarcloud.io/dashboard?id=JanssenProject_jans-eleven)
 
 # oxEleven
 
