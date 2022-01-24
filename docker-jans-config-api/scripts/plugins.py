@@ -75,10 +75,10 @@ class AdminUiPlugin:
             "admin_ui_client_pw": self.manager.secret.get("admin_ui_client_pw"),
             "hostname": self.manager.config.get("hostname"),
 
-            "admin_ui_license_api_key": self.read_from_file("/etc/jans/conf/admin_ui_api_key"),
-            "admin_ui_license_product_code": self.read_from_file("/etc/jans/conf/admin_ui_product_code"),
-            "admin_ui_license_shared_key": self.read_from_file("/etc/jans/conf/admin_ui_shared_key"),
-            "admin_ui_license_management_key": self.read_from_file("/etc/jans/conf/admin_ui_management_key"),
+            "admin_ui_license_api_key": self.read_from_file(os.environ.get("CN_LICENSE_ADMIN_UI_API_KEY")),
+            "admin_ui_license_product_code": self.read_from_file(os.environ.get("CN_LICENSE_ADMIN_UI_PRODUCT_CODE")),
+            "admin_ui_license_shared_key": self.read_from_file(os.environ.get("CN_LICENSE_ADMIN_UI_SHARED_KEY")),
+            "admin_ui_license_management_key": self.read_from_file(os.environ.get("CN_LICENSE_ADMIN_UI_MANAGEMENT_KEY")),
         }
         ctx.update(self.get_token_server_ctx())
 

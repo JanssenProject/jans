@@ -155,8 +155,11 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_WAIT_SLEEP_DURATION=10 \
     CN_JAVA_OPTIONS="" \
     GOOGLE_PROJECT_ID="" \
-    GOOGLE_APPLICATION_CREDENTIALS=/etc/jans/conf/google-credentials.json
-
+    GOOGLE_APPLICATION_CREDENTIALS=/etc/jans/conf/google-credentials.json \
+    CN_LICENSE_ADMIN_UI_API_KEY=/etc/jans/conf/admin_ui_api_key \
+    CN_LICENSE_ADMIN_UI_PRODUCT_CODE=/etc/jans/conf/admin_ui_product_code \
+    CN_LICENSE_ADMIN_UI_SHARED_KEY=/etc/jans/conf/admin_ui_shared_key \
+    CN_LICENSE_ADMIN_UI_MANAGEMENT_KEY=/etc/jans/conf/admin_ui_management_key
 # ====
 # misc
 # ====
