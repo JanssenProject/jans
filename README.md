@@ -1,4 +1,3 @@
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/50c5d12c3c0c4601a276cfe4f39955c9)](https://www.codacy.com/gh/JanssenProject/jans-cloud-native/dashboard?utm_source=github.com&utm_medium=referral&utm_content=JanssenProject/jans-cloud-native&utm_campaign=Badge_Grade)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/4353/badge)](https://bestpractices.coreinfrastructure.org/projects/4353)
 
 ## Welcome to the Janssen Project
