@@ -6,7 +6,8 @@ import json
 from collections import OrderedDict
 from pathlib import Path
 
-from setup_app.pylib.pyDes import triple_des, ECB, PAD_PKCS5
+from Crypto.Cipher import AES
+from setup_app.pylib.pyAes import AESCipher, AESKeyLength, AES_CBC_P, AES_ECB_P, AES_GCM_NP
 
 from setup_app import paths
 from setup_app import static
@@ -27,17 +28,14 @@ class Crypto64:
         return retDict
 
     def obscure(self, data=""):
-        engine = triple_des(Config.encode_salt, ECB, pad=None, padmode=PAD_PKCS5)
-        data = data.encode('utf-8')
+        engine = self.get_engine()
         en_data = engine.encrypt(data)
-        encoded_pw = base64.b64encode(en_data)
-        return encoded_pw.decode('utf-8')
+        return base64.b64encode(en_data).decode()
 
-    def unobscure(self, data=""):
-        engine = triple_des(Config.encode_salt, ECB, pad=None, padmode=PAD_PKCS5)
-        cipher = triple_des(Config.encode_salt)
-        decrypted = cipher.decrypt(base64.b64decode(data), padmode=PAD_PKCS5)
-        return decrypted.decode('utf-8')
+    def unobscure(self, s=""):
+        engine = self.get_engine()
+        decrypted = engine.decrypt(base64.b64decode(s))
+        return decrypted.decode()
 
     def gen_cert(self, suffix, password, user='root', cn=None, truststore_fn=None):
         self.logIt('Generating Certificate for %s' % suffix)
@@ -327,3 +325,35 @@ class Crypto64:
             Config.templateRenderingDict['oxauthClient_4_encoded_pw'] = self.obscure(Config.templateRenderingDict['oxauthClient_4_pw'])
         except:
             self.logIt("Error encoding test passwords", True)
+
+    def get_engine(self):
+        if Config.encode_alg is None or len(Config.encode_alg) == 0:
+            return self.get_aes_engine(AES_GCM_NP, '256')
+        alg_sep_array = re.split(":", Config.encode_alg)
+        if len(alg_sep_array) == 0 or len(alg_sep_array) == 1 and alg_sep_array[0] == 'AES':
+            return self.get_aes_engine(AES_GCM_NP, '256')
+        elif len(alg_sep_array) == 3 and alg_sep_array[0] == 'AES':
+            return self.get_aes_engine(alg_sep_array[1], alg_sep_array[2])
+        else:
+            raise AttributeError("wrong alg value: alg = " + alg)
+
+    def get_aes_engine(self, mode, key_length):
+        eff_mode = None
+        eff_key_length = None
+        if key_length == '128':
+            eff_key_length = AESKeyLength.KL128
+        elif key_length == '192':
+            eff_key_length = AESKeyLength.KL192
+        elif key_length == '256':
+            eff_key_length = AESKeyLength.KL256
+        else:
+            raise AttributeError("wrong key_length value: key_length = " + key_length)
+        if mode == AES_CBC_P:
+            eff_mode = AES.MODE_CBC
+        elif mode == AES_GCM_NP:
+            eff_mode = AES.MODE_GCM
+        elif mode == AES_ECB_P:
+            eff_mode = AES.MODE_ECB
+        else:
+            raise AttributeError("this mode isn't supported: mode = " + mode)
+        return AESCipher(eff_mode, eff_key_length, Config.encode_passw, Config.encode_salt) 

@@ -222,6 +222,8 @@ class Config:
         self.admin_email = None
         self.encoded_ox_ldap_pw = None
         self.encode_salt = None
+        self.encode_passw = None
+        self.encode_alg = None
         self.admin_inum = None
 
         self.jans_max_mem = int(base.current_mem_size * .85 * 1000) # 85% of physical memory
