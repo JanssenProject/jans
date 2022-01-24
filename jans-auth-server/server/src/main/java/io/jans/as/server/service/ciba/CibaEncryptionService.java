@@ -9,7 +9,7 @@ package io.jans.as.server.service.ciba;
 import io.jans.util.StringHelper;
 import io.jans.util.security.PropertiesDecrypter;
 import io.jans.util.security.StringEncrypter;
-import io.jans.util.security.StringEncrypter.EncryptionException;
+import io.jans.util.exception.EncryptionException;
 import org.slf4j.Logger;
 
 import javax.enterprise.context.ApplicationScoped;

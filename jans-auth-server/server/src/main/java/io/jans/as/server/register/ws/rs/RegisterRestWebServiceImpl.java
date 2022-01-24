@@ -56,7 +56,7 @@ import io.jans.model.GluuAttribute;
 import io.jans.model.metric.MetricType;
 import io.jans.orm.model.base.CustomAttribute;
 import io.jans.util.StringHelper;
-import io.jans.util.security.StringEncrypter;
+import io.jans.util.exception.EncryptionException;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
@@ -386,7 +386,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             oAuth2AuditLog.setClientId(client.getClientId());
             oAuth2AuditLog.setScope(clientScopesToString(client));
             oAuth2AuditLog.setSuccess(true);
-        } catch (StringEncrypter.EncryptionException e) {
+        } catch (EncryptionException e) {
             builder = internalErrorResponse("Encryption exception occured.");
             log.error(e.getMessage(), e);
         } catch (JSONException e) {
@@ -1077,7 +1077,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         } catch (JSONException e) {
             log.error(e.getMessage(), e);
             throw errorResponseFactory.createWebApplicationException(Response.Status.INTERNAL_SERVER_ERROR, RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Failed to parse json.");
-        } catch (StringEncrypter.EncryptionException e) {
+        } catch (EncryptionException e) {
             log.error(e.getMessage(), e);
             throw errorResponseFactory.createWebApplicationException(Response.Status.INTERNAL_SERVER_ERROR, RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Encryption exception occurred.");
         }
@@ -1088,11 +1088,12 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         return builder.build();
     }
 
-    private static String jsonObjectToString(JSONObject jsonObject) throws JSONException {
+    private String clientAsEntity(Client client) throws JSONException, EncryptionException {
+        final JSONObject jsonObject = getJSONObject(client);
         return jsonObject.toString(4).replace("\\/", "/");
     }
 
-    private JSONObject getJSONObject(Client client) throws JSONException, StringEncrypter.EncryptionException {
+    private JSONObject getJSONObject(Client client) throws JSONException, EncryptionException {
         JSONObject responseJsonObject = new JSONObject();
 
         JsonApplier.getInstance().apply(client, responseJsonObject);
