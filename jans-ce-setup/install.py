@@ -77,15 +77,29 @@ if getattr(argsp, 'jetty_version', None):
     else:
         print("Can't determine Jetty Version. Continuing with version {}".format(app_versions['JETTY_VERSION']))
 
+
+package_installer = shutil.which('apt') or shutil.which('dnf') or shutil.which('yum') or shutil.which('zypper')
+
+package_dependencies = []
+
 try:
     from distutils import dist
 except:
-    if not argsp.n:
-        install_dist = input('python3-disutils package is needed. Install now? [Y/n] ')
-        if install_dist.lower().startswith('n'):
-            print("Can't continue...")
-            sys.exit()
-    os.system('apt install -y python3-distutils')
+    package_dependencies.append('python3-distutils')
+
+try:
+    import ldap3
+except:
+    package_dependencies.append('python3-ldap3')
+
+
+if package_dependencies and not argsp.n:
+    install_dist = input('Required package(s): {}. Install now? [Y/n] '.format(', '.join(package_dependencies)))
+    if install_dist.lower().startswith('n'):
+        print("Can't continue...")
+        sys.exit()
+
+os.system('{} install -y {}'.format(package_installer, ' '.join(package_dependencies)))
 
 
 def extract_subdir(zip_fn, sub_dir, target_dir, zipf=None):
