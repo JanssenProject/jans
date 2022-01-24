@@ -1088,8 +1088,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         return builder.build();
     }
 
-    private String clientAsEntity(Client client) throws JSONException, EncryptionException {
-        final JSONObject jsonObject = getJSONObject(client);
+    private static String jsonObjectToString(JSONObject jsonObject) throws JSONException {
         return jsonObject.toString(4).replace("\\/", "/");
     }
 
@@ -1331,21 +1330,21 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         }
     }
 
-    private JSONObject modifyPostScript(JSONObject jsonObject, ExecutionContext executionContext) throws StringEncrypter.EncryptionException {
+    private JSONObject modifyPostScript(JSONObject jsonObject, ExecutionContext executionContext) throws EncryptionException {
         if (!externalDynamicClientRegistrationService.modifyPostResponse(jsonObject, executionContext)) {
             return getJSONObject(executionContext.getClient()); // script forbids modification, re-create json object
         }
         return jsonObject;
     }
 
-    private JSONObject modifyPutScript(JSONObject jsonObject, ExecutionContext executionContext) throws StringEncrypter.EncryptionException {
+    private JSONObject modifyPutScript(JSONObject jsonObject, ExecutionContext executionContext) throws EncryptionException {
         if (!externalDynamicClientRegistrationService.modifyPutResponse(jsonObject, executionContext)) {
             return getJSONObject(executionContext.getClient()); // script forbids modification, re-create json object
         }
         return jsonObject;
     }
 
-    private JSONObject modifyReadScript(JSONObject jsonObject, ExecutionContext executionContext) throws StringEncrypter.EncryptionException {
+    private JSONObject modifyReadScript(JSONObject jsonObject, ExecutionContext executionContext) throws EncryptionException {
         if (!externalDynamicClientRegistrationService.modifyReadResponse(jsonObject, executionContext)) {
             return getJSONObject(executionContext.getClient()); // script forbids modification, re-create json object
         }
