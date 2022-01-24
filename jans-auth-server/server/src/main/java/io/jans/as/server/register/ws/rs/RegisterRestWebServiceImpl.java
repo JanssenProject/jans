@@ -43,6 +43,7 @@ import io.jans.as.server.model.audit.OAuth2AuditLog;
 import io.jans.as.server.model.common.AbstractToken;
 import io.jans.as.server.model.common.AuthorizationGrant;
 import io.jans.as.server.model.common.AuthorizationGrantList;
+import io.jans.as.server.model.common.ExecutionContext;
 import io.jans.as.server.model.registration.RegisterParamsValidator;
 import io.jans.as.server.model.token.HandleTokenFactory;
 import io.jans.as.server.service.ClientService;
@@ -374,7 +375,10 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             clientService.persist(client);
 
             JSONObject jsonObject = getJSONObject(client);
-            builder.entity(jsonObject.toString(4).replace("\\/", "/"));
+
+            jsonObject = modifyPostScript(jsonObject, new ExecutionContext(httpRequest, null).setClient(client));
+
+            builder.entity(jsonObjectToString(jsonObject));
 
             log.info("Client registered: clientId = {}, applicationType = {}, clientName = {}, redirectUris = {}, sectorIdentifierUri = {}",
                     client.getClientId(), client.getApplicationType(), client.getClientName(), client.getRedirectUris(), client.getSectorIdentifierUri());
@@ -946,10 +950,16 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                         if (updateClient) {
                             clientService.merge(client);
 
+                            JSONObject jsonObject = getJSONObject(client);
+                            jsonObject = modifyPutScript(jsonObject, new ExecutionContext(httpRequest, null).setClient(client));
+
+                            final Response response = Response.ok().entity(jsonObjectToString(jsonObject)).build();
+
                             oAuth2AuditLog.setScope(clientScopesToString(client));
                             oAuth2AuditLog.setSuccess(true);
                             applicationAuditLogger.sendMessage(oAuth2AuditLog);
-                            return Response.ok().entity(clientAsEntity(client)).build();
+
+                            return response;
                         } else {
                             clientService.removeFromCache(client); // clear cache to force reload from persistence
                             log.trace("The Access Token is not valid for the Client ID, returns invalid_token error, client_id: {}", clientId);
@@ -1051,7 +1061,10 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                 if (client != null) {
                     oAuth2AuditLog.setScope(clientScopesToString(client));
                     oAuth2AuditLog.setSuccess(true);
-                    builder.entity(clientAsEntity(client));
+
+                    JSONObject jsonObject = getJSONObject(client);
+                    jsonObject = modifyReadScript(jsonObject, new ExecutionContext(httpRequest, null).setClient(client));
+                    builder.entity(jsonObjectToString(jsonObject));
                 } else {
                     log.trace("The Access Token is not valid for the Client ID, returns invalid_token error.");
                     builder = Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).type(MediaType.APPLICATION_JSON_TYPE);
@@ -1075,8 +1088,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         return builder.build();
     }
 
-    private String clientAsEntity(Client client) throws JSONException, StringEncrypter.EncryptionException {
-        final JSONObject jsonObject = getJSONObject(client);
+    private static String jsonObjectToString(JSONObject jsonObject) throws JSONException {
         return jsonObject.toString(4).replace("\\/", "/");
     }
 
@@ -1316,6 +1328,27 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                 Util.addToJSONObjectIfNotNull(responseJsonObject, attribute.getName(), attribute.getValue());
             }
         }
+    }
+
+    private JSONObject modifyPostScript(JSONObject jsonObject, ExecutionContext executionContext) throws StringEncrypter.EncryptionException {
+        if (!externalDynamicClientRegistrationService.modifyPostResponse(jsonObject, executionContext)) {
+            return getJSONObject(executionContext.getClient()); // script forbids modification, re-create json object
+        }
+        return jsonObject;
+    }
+
+    private JSONObject modifyPutScript(JSONObject jsonObject, ExecutionContext executionContext) throws StringEncrypter.EncryptionException {
+        if (!externalDynamicClientRegistrationService.modifyPutResponse(jsonObject, executionContext)) {
+            return getJSONObject(executionContext.getClient()); // script forbids modification, re-create json object
+        }
+        return jsonObject;
+    }
+
+    private JSONObject modifyReadScript(JSONObject jsonObject, ExecutionContext executionContext) throws StringEncrypter.EncryptionException {
+        if (!externalDynamicClientRegistrationService.modifyReadResponse(jsonObject, executionContext)) {
+            return getJSONObject(executionContext.getClient()); // script forbids modification, re-create json object
+        }
+        return jsonObject;
     }
 
 }
