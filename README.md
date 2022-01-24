@@ -64,7 +64,6 @@ Summary of steps :
 6. After logging in from the top-left menu select `Apps & Marketplace` and you will be taken to the Charts page.
 7. Search for `Gluu` and begin your installation !!!
 
-
 ## Design Goals
 
 The Janssen Project is aligned with the goals of cloud native infrastructure to enable:
