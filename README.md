@@ -64,6 +64,25 @@ Summary of steps :
 6. After logging in from the top-left menu select `Apps & Marketplace` and you will be taken to the Charts page.
 7. Search for `Gluu` and begin your installation !!!
 
+### Quickstart Janssen with microk8s
+
+Start a fresh ubuntu `18.04` or `20.04` and execute the following
+
+```bash
+sudo su -
+wget https://raw.githubusercontent.com/JanssenProject/jans/master/automation/startopenbankingdemo.sh && chmod u+x startopenbankingdemo.sh && ./startopenbankingdemo.sh
+```
+
+This will install docker, microk8s, helm and Janssen with the default settings the can be found inside [values.yaml](helm/pygluu/kubernetes/templates/gluu/values.yaml). Please map the `ip` of the instance running ubuntu to `demoexample.jans.io` and then access the endpoints at your browser such in the example in the table below.
+
+| Service     | Example endpoint                                               |
+| ----------- | -------------------------------------------------------------- |
+| Auth server | `https://demoexample.jans.io/.well-known/openid-configuration` |
+| fido2       | `https://demoexample.jans.io/.well-known/fido2-configuration`  |
+| scim        | `https://demoexample.jans.io/.well-known/scim-configuration`   |
+
+For more information follow [here](helm/README.md).
+
 ## Design Goals
 
 The Janssen Project is aligned with the goals of cloud native infrastructure to enable:
