@@ -7,31 +7,23 @@ import java.io.Serializable;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ScimAppConfiguration implements Configuration,Serializable {
 
-    private static final long serialVersionUID = -1832522737483366789L;
-
-    private String baseDN;
-
-    private String applicationUrl;
-
-    private String baseEndpoint;
-
-    private String personCustomObjectClass;
-
-    private String oxAuthIssuer;
+    private static final long serialVersionUID = 7620150845020446557L;
     
+    private String baseDN;
+    private String applicationUrl;
+    private String baseEndpoint;
+    private String personCustomObjectClass;
+    private String oxAuthIssuer;    
     private String protectionMode;
     private int maxCount;
     private String userExtensionSchemaURI;
-
     private String loggingLevel;
     private String loggingLayout;
     private String externalLoggerConfiguration;
-
     private int metricReporterInterval;
     private int metricReporterKeepDataDays;
     private Boolean metricReporterEnabled;
     private Boolean disableJdkLogger = true;
-
     private Boolean useLocalCache = false;
 
     public String getBaseDN() {
