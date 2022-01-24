@@ -60,6 +60,8 @@ with open(os_release_fn) as f:
                     os_type = 'red'
                 elif 'ubuntu-core' in os_type:
                     os_type = 'ubuntu'
+                elif ('sles' in os_type) or ('opensuse' in os_type):
+                    os_type = 'suse'
             elif row[0] == 'VERSION_ID':
                 os_version = row[1].split('.')[0]
 
@@ -71,7 +73,7 @@ os_name = os_type + os_version
 deb_sysd_clone = os_name in ('ubuntu18', 'ubuntu20', 'debian9', 'debian10')
 
 # Determine service path
-if (os_type in ('centos', 'red', 'fedora') and os_initdaemon == 'systemd') or deb_sysd_clone:
+if (os_type in ('centos', 'red', 'fedora', 'suse') and os_initdaemon == 'systemd') or deb_sysd_clone:
     service_path = shutil.which('systemctl')
 elif os_type in ['debian', 'ubuntu']:
     service_path = '/usr/sbin/service'
@@ -81,9 +83,13 @@ else:
 if os_type in ('centos', 'red', 'fedora'):
     clone_type = 'rpm'
     httpd_name = 'httpd'
+elif os_type == 'suse':
+    clone_type = 'rpm'
+    httpd_name = 'apache2'
 else:
     clone_type = 'deb'
     httpd_name = 'apache2'
+
 
 if snap:
     snapctl = shutil.which('snapctl')
