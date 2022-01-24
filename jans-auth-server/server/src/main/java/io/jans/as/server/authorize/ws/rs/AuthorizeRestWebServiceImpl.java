@@ -27,6 +27,8 @@ import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.jwk.JSONWebKeySet;
 import io.jans.as.model.jwk.Use;
+import io.jans.as.model.jwt.Jwt;
+import io.jans.as.model.jwt.JwtClaims;
 import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.token.JsonWebResponse;
 import io.jans.as.model.util.JwtUtil;
@@ -396,28 +398,24 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                         }
                     }
                     requestParameterService.getCustomParameters(jwtRequest, customParameters);
-                } catch (WebApplicationException e) {   
-                        
-                    fillRedirectUriResponseforJARM(redirectUriResponse, clientId, client);
-                	String[] parts = request.split("\\.");
-                	String encodedClaim = parts[1];
-                	String payloadString = new String(Base64Util.base64urldecode(encodedClaim), StandardCharsets.UTF_8);
-                	payloadString = payloadString.replace("\\", "");
-                	JSONObject tempPayload = new JSONObject(payloadString);
-                    if (tempPayload.has("redirect_uri")) {
-                    	 redirectUriResponse.getRedirectUri().setBaseRedirectUri(URLDecoder.decode(tempPayload.getString("redirect_uri"), "UTF-8"));
-                    }
-                	if (tempPayload.has("response_mode")) {
-                		
-                        responseMode = ResponseMode.getByValue(tempPayload.optString("response_mode"));
-                        redirectUriResponse.getRedirectUri().setResponseMode(responseMode);
-                    }
-                	if (tempPayload.has("state")) {
-                		state=tempPayload.optString("state");
-                		redirectUriResponse.setState(state);
-                    }
-                	if (responseMode == ResponseMode.JWT) {
-                        authorizeRestWebServiceValidator.createInvalidJwtRequestExceptionAsJwtMode(redirectUriResponse, "Invalid JWT authorization request", state, httpRequest);
+                } catch (WebApplicationException e) {
+					Jwt jwt = Jwt.parseSilently(request);
+					JwtClaims jwtClaims = jwt.getClaims();
+					responseMode = ResponseMode.getByValue(jwtClaims.getClaimAsString("response_mode"));
+					if (responseMode == ResponseMode.JWT) {
+						fillRedirectUriResponseforJARM(redirectUriResponse, clientId, client);
+						String tempRedirectUri = jwtClaims.getClaimAsString("redirect_uri");
+						if (tempRedirectUri != null) {
+							redirectUriResponse.getRedirectUri()
+									.setBaseRedirectUri(URLDecoder.decode(tempRedirectUri, "UTF-8"));
+						}
+						redirectUriResponse.getRedirectUri().setResponseMode(responseMode);
+						state = jwtClaims.getClaimAsString("state");
+						if (state != null) {
+							redirectUriResponse.setState(state);
+						}
+						authorizeRestWebServiceValidator.createInvalidJwtRequestExceptionAsJwtMode(redirectUriResponse,
+								"Invalid JWT authorization request", state, httpRequest);
                 	} else {
                 	     throw e;
                 	}
@@ -784,62 +782,69 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
     private void fillRedirectUriResponseforJARM(RedirectUriResponse redirectUriResponse, String clientId, Client client) {
     	try {
-	    	redirectUriResponse.getRedirectUri().setIssuer(appConfiguration.getIssuer());
-	        redirectUriResponse.getRedirectUri().setAudience(clientId);
-	        redirectUriResponse.getRedirectUri().setAuthorizationCodeLifetime(appConfiguration.getAuthorizationCodeLifetime());
-	        redirectUriResponse.getRedirectUri().setSignatureAlgorithm(SignatureAlgorithm.fromString(client.getAttributes().getAuthorizationSignedResponseAlg()));
-	        redirectUriResponse.getRedirectUri().setKeyEncryptionAlgorithm(KeyEncryptionAlgorithm.fromName(client.getAttributes().getAuthorizationEncryptedResponseAlg()));
-	        redirectUriResponse.getRedirectUri().setBlockEncryptionAlgorithm(BlockEncryptionAlgorithm.fromName(client.getAttributes().getAuthorizationEncryptedResponseEnc()));
-	        redirectUriResponse.getRedirectUri().setCryptoProvider(cryptoProvider);
-	
-	        String keyId = null;
-	        if (client.getAttributes().getAuthorizationEncryptedResponseAlg() != null && client.getAttributes().getAuthorizationEncryptedResponseEnc() != null) {
-	            if (client.getAttributes().getAuthorizationSignedResponseAlg() != null) { // Signed then Encrypted response
-	                SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(client.getAttributes().getAuthorizationSignedResponseAlg());
-	
-	                String nestedKeyId = new ServerCryptoProvider(cryptoProvider).getKeyId(webKeysConfiguration,
-	                        Algorithm.fromString(signatureAlgorithm.getName()), Use.SIGNATURE);
-	
-	                JSONObject jsonWebKeys = JwtUtil.getJSONWebKeys(client.getJwksUri());
-	                redirectUriResponse.getRedirectUri().setNestedJsonWebKeys(jsonWebKeys);
-	
-	                String clientSecret = clientService.decryptSecret(client.getClientSecret());
-	                redirectUriResponse.getRedirectUri().setNestedSharedSecret(clientSecret);
-	                redirectUriResponse.getRedirectUri().setNestedKeyId(nestedKeyId);
-	            }
-	
-	            // Encrypted response
-	            JSONObject jsonWebKeys = JwtUtil.getJSONWebKeys(client.getJwksUri());
-	            if (jsonWebKeys != null) {
-	                keyId = new ServerCryptoProvider(cryptoProvider).getKeyId(JSONWebKeySet.fromJSONObject(jsonWebKeys),
-	                        Algorithm.fromString(client.getAttributes().getAuthorizationEncryptedResponseAlg()),
-	                        Use.ENCRYPTION);
-	            }
-	            String sharedSecret = clientService.decryptSecret(client.getClientSecret());
-	            byte[] sharedSymmetricKey = sharedSecret.getBytes(StandardCharsets.UTF_8);
-	            redirectUriResponse.getRedirectUri().setSharedSymmetricKey(sharedSymmetricKey);
-	            redirectUriResponse.getRedirectUri().setJsonWebKeys(jsonWebKeys);
-	            redirectUriResponse.getRedirectUri().setKeyId(keyId);
-	        } else { // Signed response
-	            SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.RS256;
-	            if (client.getAttributes().getAuthorizationSignedResponseAlg() != null) {
-	                signatureAlgorithm = SignatureAlgorithm.fromString(client.getAttributes().getAuthorizationSignedResponseAlg());
-	            }
-	
-	            keyId = new ServerCryptoProvider(cryptoProvider).getKeyId(webKeysConfiguration,
-	                    Algorithm.fromString(signatureAlgorithm.getName()), Use.SIGNATURE);
-	
-	            JSONObject jsonWebKeys = JwtUtil.getJSONWebKeys(client.getJwksUri());
-	            redirectUriResponse.getRedirectUri().setJsonWebKeys(jsonWebKeys);
-	
-	            String clientSecret = clientService.decryptSecret(client.getClientSecret());
-	            redirectUriResponse.getRedirectUri().setSharedSecret(clientSecret);
-	            redirectUriResponse.getRedirectUri().setKeyId(keyId);
-	        }
-    	}catch (Exception e) {
-            log.error(e.getMessage(), e);
-    	}
-    	
+			redirectUriResponse.getRedirectUri().setIssuer(appConfiguration.getIssuer());
+			redirectUriResponse.getRedirectUri().setAudience(clientId);
+			redirectUriResponse.getRedirectUri()
+					.setAuthorizationCodeLifetime(appConfiguration.getAuthorizationCodeLifetime());
+			redirectUriResponse.getRedirectUri().setSignatureAlgorithm(
+					SignatureAlgorithm.fromString(client.getAttributes().getAuthorizationSignedResponseAlg()));
+			redirectUriResponse.getRedirectUri().setKeyEncryptionAlgorithm(
+					KeyEncryptionAlgorithm.fromName(client.getAttributes().getAuthorizationEncryptedResponseAlg()));
+			redirectUriResponse.getRedirectUri().setBlockEncryptionAlgorithm(
+					BlockEncryptionAlgorithm.fromName(client.getAttributes().getAuthorizationEncryptedResponseEnc()));
+			redirectUriResponse.getRedirectUri().setCryptoProvider(cryptoProvider);
+
+			String keyId = null;
+			if (client.getAttributes().getAuthorizationEncryptedResponseAlg() != null
+					&& client.getAttributes().getAuthorizationEncryptedResponseEnc() != null) {
+				if (client.getAttributes().getAuthorizationSignedResponseAlg() != null) { // Signed then Encrypted
+																							// response
+					SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm
+							.fromString(client.getAttributes().getAuthorizationSignedResponseAlg());
+
+					String nestedKeyId = new ServerCryptoProvider(cryptoProvider).getKeyId(webKeysConfiguration,
+							Algorithm.fromString(signatureAlgorithm.getName()), Use.SIGNATURE);
+
+					JSONObject jsonWebKeys = JwtUtil.getJSONWebKeys(client.getJwksUri());
+					redirectUriResponse.getRedirectUri().setNestedJsonWebKeys(jsonWebKeys);
+
+					String clientSecret = clientService.decryptSecret(client.getClientSecret());
+					redirectUriResponse.getRedirectUri().setNestedSharedSecret(clientSecret);
+					redirectUriResponse.getRedirectUri().setNestedKeyId(nestedKeyId);
+				}
+
+				// Encrypted response
+				JSONObject jsonWebKeys = JwtUtil.getJSONWebKeys(client.getJwksUri());
+				if (jsonWebKeys != null) {
+					keyId = new ServerCryptoProvider(cryptoProvider).getKeyId(JSONWebKeySet.fromJSONObject(jsonWebKeys),
+							Algorithm.fromString(client.getAttributes().getAuthorizationEncryptedResponseAlg()),
+							Use.ENCRYPTION);
+				}
+				String sharedSecret = clientService.decryptSecret(client.getClientSecret());
+				byte[] sharedSymmetricKey = sharedSecret.getBytes(StandardCharsets.UTF_8);
+				redirectUriResponse.getRedirectUri().setSharedSymmetricKey(sharedSymmetricKey);
+				redirectUriResponse.getRedirectUri().setJsonWebKeys(jsonWebKeys);
+				redirectUriResponse.getRedirectUri().setKeyId(keyId);
+			} else { // Signed response
+				SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.RS256;
+				if (client.getAttributes().getAuthorizationSignedResponseAlg() != null) {
+					signatureAlgorithm = SignatureAlgorithm
+							.fromString(client.getAttributes().getAuthorizationSignedResponseAlg());
+				}
+
+				keyId = new ServerCryptoProvider(cryptoProvider).getKeyId(webKeysConfiguration,
+						Algorithm.fromString(signatureAlgorithm.getName()), Use.SIGNATURE);
+
+				JSONObject jsonWebKeys = JwtUtil.getJSONWebKeys(client.getJwksUri());
+				redirectUriResponse.getRedirectUri().setJsonWebKeys(jsonWebKeys);
+
+				String clientSecret = clientService.decryptSecret(client.getClientSecret());
+				redirectUriResponse.getRedirectUri().setSharedSecret(clientSecret);
+				redirectUriResponse.getRedirectUri().setKeyId(keyId);
+			}
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}    	
     }
     
     private void validateJwtRequest(String clientId, String state, HttpServletRequest httpRequest, List<ResponseType> responseTypes, RedirectUriResponse redirectUriResponse, JwtAuthorizationRequest jwtRequest) {

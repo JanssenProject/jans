@@ -45,7 +45,7 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
 	
     @Parameters({"redirectUri", "redirectUris", "clientJwksUri", "RSA_OAEP_keyId", "PS256_keyId",
         "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
-        @Test(enabled = false) // Enable FAPI to run this test!
+        @Test//(enabled = false) // Enable FAPI to run this test!
     public void userDeniedAuthentiation(
         final String redirectUri, final String redirectUris, final String clientJwksUri,
         final String encryptionKeyId, final String signingKeyId, final String dnName, final String keyStoreFile,
@@ -119,34 +119,6 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
 
 	    
 	    String authJwe = jweAuthorizationRequest.getEncodedJwt(jwks);
-	
-/*	    jweAuthorizationRequest.setKeyId(signingKeyId);
-	    jweAuthorizationRequest.setResponseMode(ResponseMode.JWT);
-	    jweAuthorizationRequest.setState(state);
-	    jweAuthorizationRequest.setScopes(scope);
-	    jwsAuthorizationRequest.setAud(clientId); 
-	    jwsAuthorizationRequest.setIss("https://demoexample.jans.io");
-	    jweAuthorizationRequest.setResponseTypes(responseTypes);
-	    jweAuthorizationRequest.setRedirectUri(redirectUri);
-	    jweAuthorizationRequest.setNonce(nonce); // FAPI: nonce param is required
-	    jweAuthorizationRequest.setNbf((int) Instant.now().getEpochSecond()); // FAPI: require the request object to contain an exp claim that has a lifetime of no longer than 60 minutes after the nbf claim
-	    jweAuthorizationRequest.setExp(jwsAuthorizationRequest.getNbf()+3600); // Added invalid exp value to request object which is 70 minutes in the future	    
-	    
-	    JSONObject headerJsonObject = jweAuthorizationRequest.headerToJSONObject();
-	    JSONObject payloadJsonObject = jweAuthorizationRequest.payloadToJSONObject();
-	    System.out.println("JSON PAYLOAD: @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@:::"+payloadJsonObject+":::@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-	    String headerString = ClientUtil.toPrettyJson(headerJsonObject);
-	    String payloadString = ClientUtil.toPrettyJson(payloadJsonObject);
-	    String encodedHeader = base64urlencode(headerString);
-	    String encodedPayload = base64urlencode(payloadString);
-	    String signingInput = encodedHeader + "." + encodedPayload;
-	    String encodedSignature = cryptoProvider2.sign(signingInput, signingKeyId, signingKeyId, SignatureAlgorithm.PS256 );
-	    System.out.println("Original Signature: @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@:::"+encodedSignature+":::@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-	
-	    //encodedSignature = encodedSignature.substring(0,encodedSignature.length()-1) + "2";
-	    //System.out.println("Signature with error @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@:::"+encodedSignature+":::@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-	
-	    String authJwe = encodedHeader + "." + encodedPayload + "." + encodedSignature;*/
 	    
 	    authorizationRequest.setRequest(authJwe);
 	
@@ -243,20 +215,7 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
 	    jweAuthorizationRequest.setNonce(nonce); // FAPI: nonce param is required
 	    jweAuthorizationRequest.setNbf((int) Instant.now().getEpochSecond()); // FAPI: require the request object to contain an exp claim that has a lifetime of no longer than 60 minutes after the nbf claim
 	    jweAuthorizationRequest.setExp(jwsAuthorizationRequest.getNbf()+3600); // Added invalid exp value to request object which is 70 minutes in the future	    
-	    
-	    JSONObject headerJsonObject = jweAuthorizationRequest.headerToJSONObject();
-	    JSONObject payloadJsonObject = jweAuthorizationRequest.payloadToJSONObject();
-	    String headerString = ClientUtil.toPrettyJson(headerJsonObject);
-	    String payloadString = ClientUtil.toPrettyJson(payloadJsonObject);
-	    String encodedHeader = base64urlencode(headerString);
-	    String encodedPayload = base64urlencode(payloadString);
-	    String signingInput = encodedHeader + "." + encodedPayload;
-	    String encodedSignature = cryptoProvider2.sign(signingInput, signingKeyId, signingKeyId, SignatureAlgorithm.PS256 );
-	
-	    //encodedSignature = encodedSignature.substring(0,encodedSignature.length()-1) + "2";
-	    //System.out.println("Signature with error @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@:::"+encodedSignature+":::@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-	
-	    String authJwe = encodedHeader + "." + encodedPayload + "." + encodedSignature;
+	    String authJwe = jweAuthorizationRequest.getEncodedJwt(jwks);
 	    
 	    authorizationRequest.setRequest(authJwe);
 	
@@ -352,17 +311,7 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
 	    jweAuthorizationRequest.setNbf((int) Instant.now().getEpochSecond()); // FAPI: require the request object to contain an exp claim that has a lifetime of no longer than 60 minutes after the nbf claim
 	    jweAuthorizationRequest.setExp(jwsAuthorizationRequest.getNbf()+3600); // Added invalid exp value to request object which is 70 minutes in the future	    
 	    
-	    JSONObject headerJsonObject = jweAuthorizationRequest.headerToJSONObject();
-	    JSONObject payloadJsonObject = jweAuthorizationRequest.payloadToJSONObject();
-	    String headerString = ClientUtil.toPrettyJson(headerJsonObject);
-	    String payloadString = ClientUtil.toPrettyJson(payloadJsonObject);
-	    String encodedHeader = base64urlencode(headerString);
-	    String encodedPayload = base64urlencode(payloadString);
-	    String signingInput = encodedHeader + "." + encodedPayload;
-	    String encodedSignature = cryptoProvider2.sign(signingInput, signingKeyId, signingKeyId, SignatureAlgorithm.PS256 );
-	
-	
-	    String authJwe = encodedHeader + "." + encodedPayload + "." + encodedSignature;
+	    String authJwe = jweAuthorizationRequest.getEncodedJwt(jwks); 
 	    
 	    authorizationRequest.setRequest(authJwe);
 	
@@ -458,17 +407,7 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
 	    jweAuthorizationRequest.setNbf((int) Instant.now().getEpochSecond()); // FAPI: require the request object to contain an exp claim that has a lifetime of no longer than 60 minutes after the nbf claim
 	    jweAuthorizationRequest.setExp(jwsAuthorizationRequest.getNbf()+3600); // Added invalid exp value to request object which is 70 minutes in the future	    
 	    
-	    JSONObject headerJsonObject = jweAuthorizationRequest.headerToJSONObject();
-	    JSONObject payloadJsonObject = jweAuthorizationRequest.payloadToJSONObject();
-	    String headerString = ClientUtil.toPrettyJson(headerJsonObject);
-	    String payloadString = ClientUtil.toPrettyJson(payloadJsonObject);
-	    String encodedHeader = base64urlencode(headerString);
-	    String encodedPayload = base64urlencode(payloadString);
-	    String signingInput = encodedHeader + "." + encodedPayload;
-	    String encodedSignature = cryptoProvider2.sign(signingInput, signingKeyId, signingKeyId, SignatureAlgorithm.PS256 );
-	
-	
-	    String authJwe = encodedHeader + "." + encodedPayload + "." + encodedSignature;
+	    String authJwe = jweAuthorizationRequest.getEncodedJwt(jwks);
 	    
 	    authorizationRequest.setRequest(authJwe);
 	
@@ -572,20 +511,9 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
 	    jweAuthorizationRequest.setNbf((int) Instant.now().getEpochSecond()); // FAPI: require the request object to contain an exp claim that has a lifetime of no longer than 60 minutes after the nbf claim
 	    jweAuthorizationRequest.setExp(jwsAuthorizationRequest.getNbf()+3600); // Added invalid exp value to request object which is 70 minutes in the future	    
 	    
-	    JSONObject headerJsonObject = jweAuthorizationRequest.headerToJSONObject();
-	    JSONObject payloadJsonObject = jweAuthorizationRequest.payloadToJSONObject();
-	    String headerString = ClientUtil.toPrettyJson(headerJsonObject);
-	    String payloadString = ClientUtil.toPrettyJson(payloadJsonObject);
-	    String encodedHeader = base64urlencode(headerString);
-	    String encodedPayload = base64urlencode(payloadString);
-	    String signingInput = encodedHeader + "." + encodedPayload;
-	    String encodedSignature = cryptoProvider2.sign(signingInput, signingKeyId, signingKeyId, SignatureAlgorithm.PS256 );
-	
-	    encodedSignature = encodedSignature.substring(0,encodedSignature.length()-1) + "2";
-	
-	    String authJwe = encodedHeader + "." + encodedPayload + "." + encodedSignature;
+	    String authJwe = jweAuthorizationRequest.getEncodedJwt(jwks);
 	    
-	    authorizationRequest.setRequest(authJwe);
+	    authorizationRequest.setRequest(authJwe+"wrongSignature");
 	
 	    AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
 	    authorizeClient.setRequest(authorizationRequest);
@@ -609,7 +537,7 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
 
     @Parameters({"redirectUri", "redirectUris", "clientJwksUri", "RSA_OAEP_keyId", "PS256_keyId",
         "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
-    @Test//(enabled = false) // Enable FAPI to run this test!
+    @Test(enabled = false) // Enable FAPI to run this test!
     public void ensureRequestObjectWithoutEncryptionFails(
             final String redirectUri, final String redirectUris, final String clientJwksUri,
             final String encryptionKeyId, final String signingKeyId, final String dnName, final String keyStoreFile,
@@ -676,21 +604,7 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
     	    jweAuthorizationRequest.setNonce(nonce); // FAPI: nonce param is required
     	    jweAuthorizationRequest.setNbf((int) Instant.now().getEpochSecond()); // FAPI: require the request object to contain an exp claim that has a lifetime of no longer than 60 minutes after the nbf claim
     	    jweAuthorizationRequest.setExp(jwsAuthorizationRequest.getNbf()+3600); // Added invalid exp value to request object which is 70 minutes in the future	    
-    	    
-    	    JSONObject headerJsonObject = jweAuthorizationRequest.headerToJSONObject();
-    	    JSONObject payloadJsonObject = jweAuthorizationRequest.payloadToJSONObject();
-    	    String headerString = ClientUtil.toPrettyJson(headerJsonObject);
-    	    String payloadString = ClientUtil.toPrettyJson(payloadJsonObject);
-    	    String encodedHeader = base64urlencode(headerString);
-    	    String encodedPayload = base64urlencode(payloadString);
-    	    String signingInput = encodedHeader + "." + encodedPayload;
-    	    
-    	    String encodedSignature = cryptoProvider2.sign(signingInput, signingKeyId, signingKeyId, SignatureAlgorithm.PS256 );
-    	
-    	    //encodedSignature = encodedSignature.substring(0,encodedSignature.length()-1) + "2";
-    	
-    	    String authJwe = encodedHeader + "." + encodedPayload + "." + encodedSignature;
-    	    String authJweNoEncryption = encodedHeader + "." + encodedPayload ;
+    	    String authJwe = jweAuthorizationRequest.getEncodedJwt(jwks); 	    
     	    
     	    authorizationRequest.setRequest(authJwe);
     	    //authorizationRequest.setRequest(authJweNoEncryption); 

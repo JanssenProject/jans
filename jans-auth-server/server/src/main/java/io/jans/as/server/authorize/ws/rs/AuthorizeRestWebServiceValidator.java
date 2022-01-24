@@ -180,12 +180,12 @@ public class AuthorizeRestWebServiceValidator {
                 throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT);
             }
         }      
-        String redirectUri=jwtRequest.getRedirectUri();
-        Client client= clientService.getClient(jwtRequest.getClientId());
-        if (redirectUri != null && redirectionUriService.validateRedirectionUri(client, redirectUri) == null) {
-            log.error(" unregistered redirect uri");
-        	throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT);
-        }
+		String redirectUri = jwtRequest.getRedirectUri();
+		Client client = clientService.getClient(jwtRequest.getClientId());
+		if (redirectUri != null && redirectionUriService.validateRedirectionUri(client, redirectUri) == null) {
+			log.error(" unregistered redirect uri");
+			throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT);
+		}
         if (jwtRequest.getExp() == null) {
             log.error("The exp claim is not set");
             throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT);
@@ -324,15 +324,16 @@ public class AuthorizeRestWebServiceValidator {
                 .build());
     }
 
-    public void createInvalidJwtRequestExceptionAsJwtMode(RedirectUriResponse redirectUriResponse, String reason, String state, HttpServletRequest httpRequest) {
-        if (appConfiguration.isFapi()) {
-            log.debug(reason); // in FAPI case log reason but don't send it since it's `reason` is not known
-            log.debug("Invalid JWT authorization request. HKMEHTA");
-            redirectUriResponse.getRedirectUri().parseQueryString(errorResponseFactory.getErrorAsQueryString(
-                    AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT, state));
-            throw new WebApplicationException(RedirectUtil.getRedirectResponseBuilder(redirectUriResponse.getRedirectUri(), httpRequest).build());
-        }
-    }
+	public void createInvalidJwtRequestExceptionAsJwtMode(RedirectUriResponse redirectUriResponse, String reason,
+			String state, HttpServletRequest httpRequest) {
+		if (appConfiguration.isFapi()) {
+			log.debug(reason); // in FAPI case log reason but don't send it since it's `reason` is not known
+			redirectUriResponse.getRedirectUri().parseQueryString(errorResponseFactory
+					.getErrorAsQueryString(AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT, state));
+			throw new WebApplicationException(
+					RedirectUtil.getRedirectResponseBuilder(redirectUriResponse.getRedirectUri(), httpRequest).build());
+		}
+	}
     
     public WebApplicationException createInvalidJwtRequestException(RedirectUriResponse redirectUriResponse, String reason) {
         if (appConfiguration.isFapi()) {

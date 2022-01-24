@@ -259,10 +259,10 @@ public class AuthorizeService {
             processDeviceAuthDeniedResponse(sessionAttribute);
         }
 
-        if (responseMode == ResponseMode.JWT) { 
-        	String clientId = session.getSessionAttributes().get(AuthorizeRequestParam.CLIENT_ID);
-        	Client client=clientService.getClient(clientId);        	
-            facesService.redirectToExternalURL(createJarmRedirectUri(redirectUri, client, session));
+		if (responseMode == ResponseMode.JWT) {
+			String clientId = session.getSessionAttributes().get(AuthorizeRequestParam.CLIENT_ID);
+			Client client = clientService.getClient(clientId);
+			facesService.redirectToExternalURL(createJarmRedirectUri(redirectUri, client, session));
         }   
         else 
         	facesService.redirectToExternalURL(redirectUri.toString());
@@ -270,33 +270,33 @@ public class AuthorizeService {
     
     private String createJarmRedirectUri(RedirectUri redirectUri, Client client, final SessionId session)
     {
-    	String jarmRedirectUri=redirectUri.toString();  
-    	SignatureAlgorithm signatureAlgorithm=SignatureAlgorithm.fromString(client.getAttributes().getAuthorizationSignedResponseAlg());
-    	redirectUri.setSignatureAlgorithm(signatureAlgorithm);
-        redirectUri.addResponseParameter("error", "access_denied"); 
-        redirectUri.addResponseParameter("error_description", "User Denied the Access");
-        redirectUri.setIssuer(appConfiguration.getIssuer());
-        redirectUri.setAudience(client.getClientId());
-        redirectUri.setCryptoProvider(cryptoProvider);
-        String keyId=null;
-        try {
-        	String clientSecret = clientService.decryptSecret(client.getClientSecret());
-        	redirectUri.setSharedSecret(clientSecret);
-        	keyId = new ServerCryptoProvider(cryptoProvider).getKeyId(webKeysConfiguration,
-        			Algorithm.fromString(signatureAlgorithm.getName()), Use.SIGNATURE);
-        } catch(CryptoProviderException e) {
-        	log.error(e.getMessage(), e);
-        } 
-        catch (StringEncrypter.EncryptionException e) {
-        	log.error(e.getMessage(), e);            	
-        }
-        redirectUri.setKeyId(keyId);
-        
-        String jarmQueryString=redirectUri.getQueryString();
-        log.info("The JARM Query Response:"+jarmQueryString);
-        jarmRedirectUri=jarmRedirectUri+"response="+jarmQueryString;
-    	
-    	return jarmRedirectUri;
+		String jarmRedirectUri = redirectUri.toString();
+		SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm
+				.fromString(client.getAttributes().getAuthorizationSignedResponseAlg());
+		redirectUri.setSignatureAlgorithm(signatureAlgorithm);
+		redirectUri.addResponseParameter("error", "access_denied");
+		redirectUri.addResponseParameter("error_description", "User Denied the Access");
+		redirectUri.setIssuer(appConfiguration.getIssuer());
+		redirectUri.setAudience(client.getClientId());
+		redirectUri.setCryptoProvider(cryptoProvider);
+		String keyId = null;
+		try {
+			String clientSecret = clientService.decryptSecret(client.getClientSecret());
+			redirectUri.setSharedSecret(clientSecret);
+			keyId = new ServerCryptoProvider(cryptoProvider).getKeyId(webKeysConfiguration,
+					Algorithm.fromString(signatureAlgorithm.getName()), Use.SIGNATURE);
+		} catch (CryptoProviderException e) {
+			log.error(e.getMessage(), e);
+		} catch (StringEncrypter.EncryptionException e) {
+			log.error(e.getMessage(), e);
+		}
+		redirectUri.setKeyId(keyId);
+
+		String jarmQueryString = redirectUri.getQueryString();
+		log.info("The JARM Query Response:" + jarmQueryString);
+		jarmRedirectUri = jarmRedirectUri + jarmQueryString;
+
+		return jarmRedirectUri;
     }
     
     private void authenticationFailedSessionInvalid() {
