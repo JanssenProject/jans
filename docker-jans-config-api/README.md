@@ -88,6 +88,10 @@ The following environment variables are supported by the container:
 - `CN_TOKEN_SERVER_USERINFO_ENDPOINT`: User info endpoint at token server (default to `/jans-auth/restv1/userinfo`).
 - `CN_TOKEN_SERVER_CLIENT_ID`: Client ID registered at token server.
 - `CN_TOKEN_SERVER_CERT_FILE`: Path to token server certificate (default to `/etc/certs/token_server.crt`).
+- `CN_LICENSE_ADMIN_UI_API_KEY`: Path to admin-ui license api key (default to `/etc/jans/conf/admin_ui_api_key`).
+- `CN_LICENSE_ADMIN_UI_PRODUCT_CODE`: Path to admin-ui license product code (default to `/etc/jans/conf/admin_ui_product_code`).
+- `CN_LICENSE_ADMIN_UI_SHARED_KEY`: Path to admin-ui license shared key (default to `/etc/jans/conf/admin_ui_shared_key`).
+- `CN_LICENSE_ADMIN_UI_MANAGEMENT_KEY`: Path to admin-ui license management key (default to `/etc/jans/conf/admin_ui_management_key`).
 
 ### Configure app loggers
 
