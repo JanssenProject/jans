@@ -298,7 +298,7 @@ class PropertiesUtils(SetupUtils):
                 if obj_name.startswith('cmd_'):
                     continue
 
-                
+
                 if not obj_name.startswith('__') and (not callable(obj)):
 
                     if obj_name == 'mappingLocations':
@@ -313,15 +313,15 @@ class PropertiesUtils(SetupUtils):
 
             # TODO: uncomment later
             return
-            
+
             self.run([paths.cmd_openssl, 'enc', '-aes-256-cbc', '-in', prop_fn, '-out', prop_fn+'.enc', '-k', Config.admin_password])
-            
+
             Config.post_messages.append(
                 "Encrypted properties file saved to {0}.enc with password {1}\nDecrypt the file with the following command if you want to re-use:\nopenssl enc -d -aes-256-cbc -in {2}.enc -out {3}".format(
                 prop_fn,  Config.admin_password, os.path.basename(prop_fn), os.path.basename(Config.setup_properties_fn)))
-            
+
             self.run(['rm', '-f', prop_fn])
-            
+
         except:
             self.logIt("Error saving properties", True)
 
@@ -383,7 +383,7 @@ class PropertiesUtils(SetupUtils):
         return retval
 
     def prompt_remote_couchbase(self):
-    
+
         while True:
             Config.couchbase_hostname = self.getPrompt("    Couchbase hosts", Config.get('couchbase_hostname'))
             Config.couchebaseClusterAdmin = self.getPrompt("    Couchbase User", Config.get('couchebaseClusterAdmin'))
@@ -625,17 +625,17 @@ class PropertiesUtils(SetupUtils):
 
     def prompt_for_backend(self):
         print('Chose Backend Type:')
-        
+
         backend_types = ['Local OpenDj',
                          'Remote OpenDj',
-                         'Remote Couchbase',
                          'Local MySQL',
                          'Remote MySQL',
-                         'Cloud Spanner',
                          ]
 
-        if 'couchbase' in self.getBackendTypes():
-            backend_types.insert(2, 'Local Couchbase')
+        if not os.path.exists(os.path.join(Config.install_dir, 'package')):
+            backend_types += ['Remote Couchbase', 'Cloud Spanner']
+            if 'couchbase' in self.getBackendTypes():
+                backend_types.insert(2, 'Local Couchbase')
 
         nlist = []
         for i, btype in enumerate(backend_types):
