@@ -6,7 +6,7 @@ Janssen enables organizations to build a scalable centralized authentication and
 
 ## Quick Start
 
-Try first, ask questions later? Go to the [Janssen Project Wiki](https://github.com/JanssenProject/jans/wiki/Rancher-Installation) right now!
+Try first, ask questions later? Go to the [Janssen Project Wiki](https://github.com/JanssenProject/jans/wiki/) right now!
 
 ## Project Goal
 
@@ -51,5 +51,4 @@ We have setup a [community chat on Gitter](https://gitter.im/JanssenProject/Lobb
 You can subscribe to the [Janssen Google Group](https://groups.google.com/u/2/g/janssen_project)
 and post messages there.
 
-If you find a bug in a Janssen project, or you would like to suggest a new feature, try the chat first. Then raise an issue on the respective repository. If you have a "howto" or "usage" question, [raise the issue](https://github.com/JanssenProject/jans/issues)! 
-
+If you find a bug in a Janssen project, or you would like to suggest a new feature, try the chat first. Then raise an issue on the respective repository. If you have a "howto" or "usage" question, [raise the issue](https://github.com/JanssenProject/jans/issues)!
