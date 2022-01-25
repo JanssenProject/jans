@@ -589,22 +589,6 @@ class PropertiesUtils(SetupUtils):
         if Config.installed_instance and Config.installConfigApi:
             Config.addPostSetupService.append('installConfigApi')
 
-
-
-    def promptAdminUI(self):
-        if Config.installed_instance and Config.installAdminUI:
-            return
-
-        promptForAdminUI = self.getPrompt("Install Jans Admin UI?", 
-                            self.getDefaultOption(Config.installAdminUI)
-                            )[0].lower()
-
-        Config.installAdminUI = True if promptForAdminUI == 'y' else False
-
-        if Config.installed_instance and Config.promptForAdminUI:
-            Config.addPostSetupService.append('installAdminUI')
-
-
     def prompt_for_rdbm(self):
         while True:
             Config.rdbm_type = self.getPrompt("RDBM Type", Config.rdbm_type)
@@ -908,7 +892,6 @@ class PropertiesUtils(SetupUtils):
             Config.admin_password = adminPass
 
             self.promptForConfigApi()
-            self.promptAdminUI()
             self.promptForScimServer()
             self.promptForFido2Server()
             self.promptForEleven()
