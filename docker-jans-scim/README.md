@@ -1,15 +1,3 @@
-[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_docker-jans-scim&metric=bugs)](https://sonarcloud.io/dashboard?id=JanssenProject_docker-jans-scim)
-[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_docker-jans-scim&metric=code_smells)](https://sonarcloud.io/dashboard?id=JanssenProject_docker-jans-scim)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_docker-jans-scim&metric=coverage)](https://sonarcloud.io/dashboard?id=JanssenProject_docker-jans-scim)
-[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_docker-jans-scim&metric=duplicated_lines_density)](https://sonarcloud.io/dashboard?id=JanssenProject_docker-jans-scim)
-[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_docker-jans-scim&metric=ncloc)](https://sonarcloud.io/dashboard?id=JanssenProject_docker-jans-scim)
-[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_docker-jans-scim&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=JanssenProject_docker-jans-scim)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_docker-jans-scim&metric=alert_status)](https://sonarcloud.io/dashboard?id=JanssenProject_docker-jans-scim)
-[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_docker-jans-scim&metric=reliability_rating)](https://sonarcloud.io/dashboard?id=JanssenProject_docker-jans-scim)
-[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_docker-jans-scim&metric=security_rating)](https://sonarcloud.io/dashboard?id=JanssenProject_docker-jans-scim)
-[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_docker-jans-scim&metric=sqale_index)](https://sonarcloud.io/dashboard?id=JanssenProject_docker-jans-scim)
-[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_docker-jans-scim&metric=vulnerabilities)](https://sonarcloud.io/dashboard?id=JanssenProject_docker-jans-scim)
-
 # Overview
 
 Docker image packaging for SCIM.

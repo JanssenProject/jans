@@ -24,8 +24,6 @@ app_versions = {
   "JYTHON_VERSION": "2.7.3",
   "OPENDJ_VERSION": "4.4.12",
   "SETUP_BRANCH": "main",
-  "ADMIN_UI_FRONTEND_BRANCH": "main",
-  "NODE_VERSION": "v14.18.2"
 }
 
 jans_dir = '/opt/jans'
@@ -50,6 +48,7 @@ parser.add_argument('--profile', help="Setup profile", choices=['jans', 'openban
 parser.add_argument('--jans-app-version', help="Version for Jannses applications")
 parser.add_argument('--jans-build', help="Buid version for Janssen applications")
 parser.add_argument('--setup-branch', help="Jannsen setup github branch")
+parser.add_argument('--no-setup', help="Do not launch setup", action='store_true')
 
 if '-a' in sys.argv:
     parser.add_argument('--jetty-version', help="Jetty verison. For example 11.0.6")
@@ -77,15 +76,29 @@ if getattr(argsp, 'jetty_version', None):
     else:
         print("Can't determine Jetty Version. Continuing with version {}".format(app_versions['JETTY_VERSION']))
 
+
+package_installer = shutil.which('apt') or shutil.which('dnf') or shutil.which('yum') or shutil.which('zypper')
+
+package_dependencies = []
+
 try:
     from distutils import dist
 except:
-    if not argsp.n:
-        install_dist = input('python3-disutils package is needed. Install now? [Y/n] ')
-        if install_dist.lower().startswith('n'):
-            print("Can't continue...")
-            sys.exit()
-    os.system('apt install -y python3-distutils')
+    package_dependencies.append('python3-distutils')
+
+try:
+    import ldap3
+except:
+    package_dependencies.append('python3-ldap3')
+
+
+if package_dependencies and not argsp.n:
+    install_dist = input('Required package(s): {}. Install now? [Y/n] '.format(', '.join(package_dependencies)))
+    if install_dist.lower().startswith('n'):
+        print("Can't continue...")
+        sys.exit()
+
+    os.system('{} install -y {}'.format(package_installer, ' '.join(package_dependencies)))
 
 
 def extract_subdir(zip_fn, sub_dir, target_dir, zipf=None):
@@ -207,7 +220,6 @@ if not (argsp.u or argsp.uninstall):
     download('https://corretto.aws/downloads/resources/{0}/amazon-corretto-{0}-linux-x64.tar.gz'.format(app_versions['AMAZON_CORRETTO_VERSION']), os.path.join(app_dir, 'amazon-corretto-{0}-linux-x64.tar.gz'.format(app_versions['AMAZON_CORRETTO_VERSION'])))
     download('https://repo1.maven.org/maven2/org/eclipse/jetty/{1}/{0}/{1}-{0}.tar.gz'.format(app_versions['JETTY_VERSION'], jetty_dist_string), os.path.join(app_dir,'{1}-{0}.tar.gz'.format(app_versions['JETTY_VERSION'], jetty_dist_string)))
     download('https://maven.gluu.org/maven/org/gluufederation/jython-installer/{0}/jython-installer-{0}.jar'.format(app_versions['JYTHON_VERSION']), os.path.join(app_dir, 'jython-installer-{0}.jar'.format(app_versions['JYTHON_VERSION'])))
-    download('https://nodejs.org/dist/{0}/node-{0}-linux-x64.tar.xz'.format(app_versions['NODE_VERSION']), os.path.join(app_dir, 'node-{0}-linux-x64.tar.xz'.format(app_versions['NODE_VERSION'])))
     download(urljoin(maven_base_url, 'jans-auth-server/{0}{1}/jans-auth-server-{0}{1}.war'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD'])), os.path.join(jans_app_dir, 'jans-auth.war'))
     download(urljoin(maven_base_url, 'jans-auth-client/{0}{1}/jans-auth-client-{0}{1}-jar-with-dependencies.jar'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD'])), os.path.join(jans_app_dir, 'jans-auth-client-jar-with-dependencies.jar'))
     download(urljoin(maven_base_url, 'jans-config-api-server/{0}{1}/jans-config-api-server-{0}{1}.war'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD'])), os.path.join(jans_app_dir, 'jans-config-api.war'))
@@ -215,8 +227,8 @@ if not (argsp.u or argsp.uninstall):
     download(urljoin(maven_base_url, 'scim-plugin/{0}{1}/scim-plugin-{0}{1}-distribution.jar'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD'])), os.path.join(jans_app_dir, 'scim-plugin.jar'))
     download('https://ox.gluu.org/icrby8xcvbcv/cli-swagger/jca.tgz', os.path.join(jans_app_dir, 'jca-swagger-client.tgz'))
     download('https://ox.gluu.org/icrby8xcvbcv/cli-swagger/scim.tgz', os.path.join(jans_app_dir, 'scim-swagger-client.tgz'))
-    download(urljoin(maven_base_url, 'admin-ui-plugin/{0}{1}/admin-ui-plugin-{0}{1}-distribution.jar'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD'])), os.path.join(jans_app_dir, 'admin-ui-plugin-distribution.jar'))
-    download('https://github.com/GluuFederation/gluu-admin-ui/archive/refs/heads/{}.zip'.format(app_versions['ADMIN_UI_FRONTEND_BRANCH']), os.path.join(jans_app_dir, 'gluu-admin-ui.zip'))
+    download('https://raw.githubusercontent.com/GluuFederation/gluu-snap/master/facter/facter', os.path.join(jans_app_dir, 'facter'))
+    download('https://github.com/jpadilla/pyjwt/archive/refs/tags/2.3.0.zip', os.path.join(app_dir, 'pyjwt.zip'))
 
     if argsp.profile == 'jans':
         download('https://maven.gluu.org/maven/org/gluufederation/opendj/opendj-server-legacy/{0}/opendj-server-legacy-{0}.zip'.format(app_versions['OPENDJ_VERSION']), os.path.join(app_dir, 'opendj-server-legacy-{0}.zip'.format(app_versions['OPENDJ_VERSION'])))
@@ -333,7 +345,7 @@ elif argsp.uninstall:
         print("Stopping OpenDj Server")
         os.system('/opt/opendj/bin/stop-ds')
 
-    remove_list = ['/etc/certs', '/etc/jans', '/opt/jans', '/opt/amazon-corretto*', '/opt/node*', '/opt/jre', '/opt/jetty*', '/opt/jython*']
+    remove_list = ['/etc/certs', '/etc/jans', '/opt/jans', '/opt/amazon-corretto*', '/opt/jre', '/opt/jetty*', '/opt/jython*']
     if argsp.profile == 'jans':
         remove_list.append('/opt/opendj')
     if not argsp.keep_downloads:
@@ -362,16 +374,16 @@ else:
         profile_setup()
 
     extract_file(jans_zip_file, 'jans-config-api/server/src/main/resources/log4j2.xml', jans_app_dir)
-    extract_file(jans_zip_file, 'jans-config-api/plugins/admin-ui-plugin/config/log4j2-adminui.xml', jans_app_dir)
 
     print("Preparing jans-cli package")
     extract_subdir(jans_zip_file, 'jans-cli', 'jans-cli', os.path.join(jans_app_dir, 'jans-cli.zip'))
 
-    print("Launching Janssen Setup")
+    if not argsp.no_setup:
+        print("Launching Janssen Setup")
 
-    setup_cmd = 'python3 {}/setup.py'.format(setup_dir)
+        setup_cmd = 'python3 {}/setup.py'.format(setup_dir)
 
-    if argsp.args:
-        setup_cmd += ' ' + argsp.args
+        if argsp.args:
+            setup_cmd += ' ' + argsp.args
 
-    os.system(setup_cmd)
+        os.system(setup_cmd)
