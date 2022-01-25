@@ -4,6 +4,10 @@
 
 Janssen enables organizations to build a scalable centralized authentication and authorization service using free open source software. The components of the project include client and server implementations of the OAuth, OpenID Connect, SCIM and FIDO standards. New digital identity components may be added as the technology evolves.
 
+## Quick Start
+
+Try first, ask questions later? Go to the [Janssen Project Wiki](https://github.com/JanssenProject/jans/wiki/Rancher-Installation) right now!
+
 ## Project Goal
 
 Using the Janssen Project components, you can build a world class cloud native identity and access management ("IAM") platform. But why should you?
@@ -17,73 +21,6 @@ Through the Janssen project, we can coalesce a community. Open source developmen
 ## Project Structure
 
 Janssen is a Linux Foundation project, governed according to the [charter](./community/charter.md). Technical oversight of the project is the responsibility of the Technical Steering Committee ("TSC"). Day to day decision making is in the hands of the Contributors. The TSC helps to guide the direction of the project and to improve the quality and security of the development process.
-
-## Quick Start
-
-Try first, ask questions later? Here's how to deploy Janssen
-
-### System Requirements for cloud deployments
-
-Note:  
-For local deployments like `minikube` and `microk8s` or cloud installations in demo mode, resources may be set to the minimum and hence can have `8GB RAM`, `4 CPU`, and `50GB disk` in total to run all services.
-
-Releases of images are in style 1.0.0-beta.0, 1.0.0-0
-
-Please calculate the minimum required resources as per services deployed. The following table contains default recommended resources to start with. Depending on the use of each service the resources may be increased or decreased.
-
-| Service           | CPU Unit | RAM   | Disk Space | Processor Type | Required                           |
-| ----------------- | -------- | ----- | ---------- | -------------- | ---------------------------------- |
-| Auth server       | 2.5      | 2.5GB | N/A        | 64 Bit         | Yes                                |
-| LDAP (OpenDJ)     | 1.5      | 2GB   | 10GB       | 64 Bit         | Only if couchbase is not installed |
-| fido2             | 0.5      | 0.5GB | N/A        | 64 Bit         | No                                 |
-| scim              | 1.0      | 1.0GB | N/A        | 64 Bit         | No                                 |
-| config - job      | 0.5      | 0.5GB | N/A        | 64 Bit         | Yes on fresh installs              |
-| persistence - job | 0.5      | 0.5GB | N/A        | 64 Bit         | Yes on fresh installs              |
-| client-api        | 1        | 0.4GB | N/A        | 64 Bit         | No                                 |
-| nginx             | 1        | 1GB   | N/A        | 64 Bit         | Yes if not ALB                     |
-| auth-key-rotation | 0.3      | 0.3GB | N/A        | 64 Bit         | No [Strongly recommended]          |
-| config-api        | 0.5      | 0.5GB | N/A        | 64 Bit         | No                                 |
-
-### Quickstart Janssen with Rancher
-
-For a more generic setup you may use Rancher UI to deploy the setup. For this quick start we will use a [single node kubernetes install in docker with a self-signed certificate](https://rancher.com/docs/rancher/v2.6/en/installation/other-installation-methods/single-node-docker/). For more options please follow this [link](https://rancher.com/docs/rancher/v2.6/en/installation/).
-
-Summary of steps :
-
-1. Provision a linux 4 CPU, 16 GB RAM, and 50GB SSD VM with ports `443` and `80` open. Save the VM IP address. For development environments, the VM can be set up using VMWare Workstation Player or VirtualBox with Ubuntu 20.0.4 operating system running on VM.
-2. Install [Docker](https://docs.docker.com/engine/install/).
-3. Execute
-    ```bash
-    docker run -d --restart=unless-stopped -p 80:80 -p 443:443 --privileged rancher/rancher:latest
-    ```
-    The final line of the returned text is the `container-id`, which you'll need for the next step.
-4. Execute the following command to get the [boostrap password](https://rancher.com/docs/rancher/v2.6/en/installation/resources/bootstrap-password/#specifying-the-bootstrap-password-in-docker-installs) for login.
-    ```bash
-    docker logs  <container-id>  2>&1 | grep "Bootstrap Password:"
-    ```
-5. Head to `https://<VM-IP-ADDRESS-FROM-FIRST-STEP>` and login with the username `admin` and the password from the previous step.
-6. After logging in from the top-left menu select `Apps & Marketplace` and you will be taken to the Charts page.
-7. Search for `Gluu` and begin your installation.
-8. During Step 1 of installation, be sure to select the `Customize Helm options before install` options.
-9. In Step 2, customize the settings for the Janssen installation
-10. In Step 3, unselect the `Wait` option
-
-### Quickstart Janssen with microk8s
-
-Start a fresh ubuntu `18.04` or `20.04` 4 CPU, 16 GB RAM, and 50GB SSD VM with ports `443` and `80` open. Then execute the following
-
-```bash
-sudo su -
-wget https://raw.githubusercontent.com/JanssenProject/jans/main/automation/startjanssendemo.sh && chmod u+x startjanssendemo.sh && ./startjanssendemo.sh
-```
-
-This will install docker, microk8s, helm and Janssen with the default settings that can be found inside [values.yaml](https://github.com/GluuFederation/flex/blob/flex/pygluu/kubernetes/templates/helm/gluu/values.yaml).  The installer will automatically add a record to your hosts record in the VM but if you want access the endpoints outside the VM you must  map the `ip` of the instance running ubuntu to the FQDN you provided and then access the endpoints at your browser such in the example in the table below.
-
-| Service     | Example endpoint                                              |
-| ----------- |---------------------------------------------------------------|
-| Auth server | `https://FQDN/.well-known/openid-configuration`                 |
-| fido2       | `https://FQDN/.well-known/fido2-configuration` |
-| scim        | `https://FQDN/.well-known/scim-configuration`  |
 
 ## Design Goals
 
