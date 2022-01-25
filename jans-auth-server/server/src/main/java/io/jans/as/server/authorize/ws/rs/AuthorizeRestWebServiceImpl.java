@@ -91,7 +91,7 @@ import static org.apache.commons.lang3.BooleanUtils.isTrue;
  * Implementation for request authorization through REST web services.
  *
  * @author Javier Rojas Blum
- * @version December 15, 2021
+ *  @version January 24, 2022
  */
 @Path("/")
 public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
@@ -591,7 +591,16 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                             idTokenHint, loginHint, acrValues, amrValues, request, requestUri, originHeaders,
                             codeChallenge, codeChallengeMethod, sessionId, claims, authReqId, customParameters, oAuth2AuditLog, httpRequest);
                 }
-                if (client.getTrustedClient()) {
+                // There is no need to present the consent page:
+                // If Client is a Trusted Client.
+                // If a client is configured for pairwise identifiers, and the openid scope is the only scope requested.
+                // Also, we should make sure that the claims request is not enabled.
+                final boolean isPairwiseWithOnlyOpenIdScope = client.getSubjectType() == SubjectType.PAIRWISE
+                        && scopes.size() == 1
+                        && scopes.contains(DefaultScope.OPEN_ID.toString())
+                        && claims == null
+                        && (jwtRequest == null || (jwtRequest.getUserInfoMember() == null && jwtRequest.getIdTokenMember() == null));
+                if (client.getTrustedClient() || isPairwiseWithOnlyOpenIdScope) {
                     sessionUser.addPermission(clientId, true);
                     sessionIdService.updateSessionId(sessionUser);
                 } else {
