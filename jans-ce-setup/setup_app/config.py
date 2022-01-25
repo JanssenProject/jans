@@ -23,7 +23,6 @@ class Config:
     etc_hostname = '/etc/hostname'
     osDefault = '/etc/default'
     sysemProfile = '/etc/profile'
-    node_home = '/opt/node'
     jython_home = '/opt/jython'
     ldapBaseFolder = '/opt/opendj'
     network = '/etc/sysconfig/network'
@@ -171,7 +170,6 @@ class Config:
         self.installJans = True
         self.installJre = True
         self.installJetty = True
-        self.installNode = False
         self.installJython = True
         self.installOxAuth = True
         self.installOxTrust = True
@@ -189,7 +187,6 @@ class Config:
         self.installJansCli = False
         self.loadTestData = False
         self.allowPreReleasedFeatures = False
-        self.installAdminUI = False
 
         # backward compatibility
         self.os_type = base.os_type
