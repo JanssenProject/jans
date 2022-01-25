@@ -739,10 +739,10 @@ class PropertiesUtils(SetupUtils):
             Config.rdbm_install_type = InstallTypes.LOCAL
             Config.rdbm_type = 'mysql'
             Config.rdbm_host = 'localhost'
-            Config.rdbm_user = 'gluu'
+            Config.rdbm_user = 'jans'
             Config.rdbm_password = self.getPW(special='.*=+-()[]{}')
             Config.rdbm_port = 3306
-            Config.rdbm_db = 'gluudb'
+            Config.rdbm_db = 'jansdb'
 
         elif backend_type_str == 'Remote MySQL':
             Config.opendj_install = InstallTypes.NONE

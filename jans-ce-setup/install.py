@@ -50,6 +50,7 @@ parser.add_argument('--profile', help="Setup profile", choices=['jans', 'openban
 parser.add_argument('--jans-app-version', help="Version for Jannses applications")
 parser.add_argument('--jans-build', help="Buid version for Janssen applications")
 parser.add_argument('--setup-branch', help="Jannsen setup github branch")
+parser.add_argument('--no-setup', help="Do not launch setup", action='store_true')
 
 if '-a' in sys.argv:
     parser.add_argument('--jetty-version', help="Jetty verison. For example 11.0.6")
@@ -99,7 +100,7 @@ if package_dependencies and not argsp.n:
         print("Can't continue...")
         sys.exit()
 
-os.system('{} install -y {}'.format(package_installer, ' '.join(package_dependencies)))
+    os.system('{} install -y {}'.format(package_installer, ' '.join(package_dependencies)))
 
 
 def extract_subdir(zip_fn, sub_dir, target_dir, zipf=None):
@@ -382,11 +383,12 @@ else:
     print("Preparing jans-cli package")
     extract_subdir(jans_zip_file, 'jans-cli', 'jans-cli', os.path.join(jans_app_dir, 'jans-cli.zip'))
 
-    print("Launching Janssen Setup")
+    if not argsp.no_setup:
+        print("Launching Janssen Setup")
 
-    setup_cmd = 'python3 {}/setup.py'.format(setup_dir)
+        setup_cmd = 'python3 {}/setup.py'.format(setup_dir)
 
-    if argsp.args:
-        setup_cmd += ' ' + argsp.args
+        if argsp.args:
+            setup_cmd += ' ' + argsp.args
 
-    os.system(setup_cmd)
+        os.system(setup_cmd)

@@ -54,7 +54,9 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
             packageUtils.check_and_install_packages()
 
             if Config.rdbm_type == 'mysql':
-                if base.clone_type == 'rpm':
+                if base.os_type == 'suse':
+                    self.restart('mysql')
+                elif base.clone_type == 'rpm':
                     self.restart('mysqld')
                 result, conn = self.dbUtils.mysqlconnection(log=False)
                 if not result:
