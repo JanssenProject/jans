@@ -1,15 +1,3 @@
-[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_jans-eleven&metric=bugs)](https://sonarcloud.io/dashboard?id=JanssenProject_jans-eleven)
-[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_jans-eleven&metric=code_smells)](https://sonarcloud.io/dashboard?id=JanssenProject_jans-eleven)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_jans-eleven&metric=coverage)](https://sonarcloud.io/dashboard?id=JanssenProject_jans-eleven)
-[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_jans-eleven&metric=duplicated_lines_density)](https://sonarcloud.io/dashboard?id=JanssenProject_jans-eleven)
-[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_jans-eleven&metric=ncloc)](https://sonarcloud.io/dashboard?id=JanssenProject_jans-eleven)
-[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_jans-eleven&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=JanssenProject_jans-eleven)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_jans-eleven&metric=alert_status)](https://sonarcloud.io/dashboard?id=JanssenProject_jans-eleven)
-[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_jans-eleven&metric=reliability_rating)](https://sonarcloud.io/dashboard?id=JanssenProject_jans-eleven)
-[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_jans-eleven&metric=security_rating)](https://sonarcloud.io/dashboard?id=JanssenProject_jans-eleven)
-[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_jans-eleven&metric=sqale_index)](https://sonarcloud.io/dashboard?id=JanssenProject_jans-eleven)
-[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_jans-eleven&metric=vulnerabilities)](https://sonarcloud.io/dashboard?id=JanssenProject_jans-eleven)
-
 # oxEleven
 
 Java web application providing REST API's for a PKCS #11 interface.
