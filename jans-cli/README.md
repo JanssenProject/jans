@@ -1,15 +1,3 @@
-[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_jans-cli&metric=bugs)](https://sonarcloud.io/dashboard?id=JanssenProject_jans-cli)
-[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_jans-cli&metric=code_smells)](https://sonarcloud.io/dashboard?id=JanssenProject_jans-cli)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_jans-cli&metric=coverage)](https://sonarcloud.io/dashboard?id=JanssenProject_jans-cli)
-[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_jans-cli&metric=duplicated_lines_density)](https://sonarcloud.io/dashboard?id=JanssenProject_jans-cli)
-[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_jans-cli&metric=ncloc)](https://sonarcloud.io/dashboard?id=JanssenProject_jans-cli)
-[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_jans-cli&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=JanssenProject_jans-cli)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_jans-cli&metric=alert_status)](https://sonarcloud.io/dashboard?id=JanssenProject_jans-cli)
-[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_jans-cli&metric=reliability_rating)](https://sonarcloud.io/dashboard?id=JanssenProject_jans-cli)
-[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_jans-cli&metric=security_rating)](https://sonarcloud.io/dashboard?id=JanssenProject_jans-cli)
-[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_jans-cli&metric=sqale_index)](https://sonarcloud.io/dashboard?id=JanssenProject_jans-cli)
-[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_jans-cli&metric=vulnerabilities)](https://sonarcloud.io/dashboard?id=JanssenProject_jans-cli)
-
 # _Janssen Command Line Interface_
 `jans-cli` is a **Command Line Interface** for Janssen Configuration. It also has `menu-driven` interface that makes it easier to understand how to use [Janssen Server](https://github.com/JanssenProject/home) through the Interactive Mode.
 
