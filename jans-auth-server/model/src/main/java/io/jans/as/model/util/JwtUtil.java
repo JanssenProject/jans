@@ -139,8 +139,7 @@ public class JwtUtil {
             }
 
             AlgorithmFamily algorithmFamily = signatureAlgorithm.getFamily();
-
-            if(algorithmFamily == AlgorithmFamily.RSA) {
+            if (algorithmFamily == AlgorithmFamily.RSA) {
                 String exp = jsonPublicKey.getString(EXPONENT);
                 String mod = jsonPublicKey.getString(MODULUS);
 

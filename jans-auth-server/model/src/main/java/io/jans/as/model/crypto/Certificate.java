@@ -77,16 +77,17 @@ public class Certificate {
      * @return RSA Public Key from X509 Certificate.
      */
     public RSAPublicKey getRsaPublicKey() {
+        if(x509Certificate == null) {
+            return null;
+        }
         RSAPublicKey rsaPublicKey = null;
-        if (x509Certificate != null) {
-            if (x509Certificate.getPublicKey() instanceof BCRSAPublicKey) {
-                BCRSAPublicKey publicKey = (BCRSAPublicKey) x509Certificate.getPublicKey();
-                rsaPublicKey = new RSAPublicKey(publicKey.getModulus(), publicKey.getPublicExponent());
-            } else if (x509Certificate.getPublicKey() instanceof java.security.interfaces.RSAPublicKey) {
-                java.security.interfaces.RSAPublicKey publicKey = (java.security.interfaces.RSAPublicKey) x509Certificate
-                        .getPublicKey();
-                rsaPublicKey = new RSAPublicKey(publicKey.getModulus(), publicKey.getPublicExponent());
-            }
+        if (x509Certificate.getPublicKey() instanceof BCRSAPublicKey) {
+            BCRSAPublicKey publicKey = (BCRSAPublicKey) x509Certificate.getPublicKey();
+            rsaPublicKey = new RSAPublicKey(publicKey.getModulus(), publicKey.getPublicExponent());
+        } else if (x509Certificate.getPublicKey() instanceof java.security.interfaces.RSAPublicKey) {
+            java.security.interfaces.RSAPublicKey publicKey = (java.security.interfaces.RSAPublicKey) x509Certificate
+                    .getPublicKey();
+            rsaPublicKey = new RSAPublicKey(publicKey.getModulus(), publicKey.getPublicExponent());
         }
         return rsaPublicKey;
     }
@@ -97,18 +98,19 @@ public class Certificate {
      * @return ECDSA Public Key from X509 Certificate.
      */
     public ECDSAPublicKey getEcdsaPublicKey() {
+        if(x509Certificate == null) {
+            return null;
+        }
         ECDSAPublicKey ecdsaPublicKey = null;
-        if (x509Certificate != null) {
-            if (x509Certificate.getPublicKey() instanceof BCECPublicKey) {
-                BCECPublicKey publicKey = (BCECPublicKey) x509Certificate.getPublicKey();
-                ecdsaPublicKey = new ECDSAPublicKey(signatureAlgorithm, publicKey.getQ().getXCoord().toBigInteger(),
-                        publicKey.getQ().getYCoord().toBigInteger());
-            } else if (x509Certificate.getPublicKey() instanceof java.security.interfaces.ECPublicKey) {
-                java.security.interfaces.ECPublicKey publicKey = (java.security.interfaces.ECPublicKey) x509Certificate
-                        .getPublicKey();
-                ecdsaPublicKey = new ECDSAPublicKey(signatureAlgorithm, publicKey.getW().getAffineX(),
-                        publicKey.getW().getAffineY());
-            }
+        if (x509Certificate.getPublicKey() instanceof BCECPublicKey) {
+            BCECPublicKey publicKey = (BCECPublicKey) x509Certificate.getPublicKey();
+            ecdsaPublicKey = new ECDSAPublicKey(signatureAlgorithm, publicKey.getQ().getXCoord().toBigInteger(),
+                    publicKey.getQ().getYCoord().toBigInteger());
+        } else if (x509Certificate.getPublicKey() instanceof java.security.interfaces.ECPublicKey) {
+            java.security.interfaces.ECPublicKey publicKey = (java.security.interfaces.ECPublicKey) x509Certificate
+                    .getPublicKey();
+            ecdsaPublicKey = new ECDSAPublicKey(signatureAlgorithm, publicKey.getW().getAffineX(),
+                    publicKey.getW().getAffineY());
         }
         return ecdsaPublicKey;
     }
@@ -124,7 +126,6 @@ public class Certificate {
             BCEdDSAPublicKey publicKey = (BCEdDSAPublicKey) x509Certificate.getPublicKey();
             eddsaPublicKey = new EDDSAPublicKey(signatureAlgorithm, publicKey.getEncoded());
         }
-
         return eddsaPublicKey;
     }
 
@@ -142,13 +143,10 @@ public class Certificate {
     public String toString() {
         try {
             StringWriter stringWriter = new StringWriter();
-            JcaPEMWriter pemWriter = new JcaPEMWriter(stringWriter);
-            try {
+            try (JcaPEMWriter pemWriter = new JcaPEMWriter(stringWriter)) {
                 pemWriter.writeObject(x509Certificate);
                 pemWriter.flush();
                 return stringWriter.toString();
-            } finally {
-                pemWriter.close();
             }
         } catch (Exception e) {
             return StringUtils.EMPTY_STRING;

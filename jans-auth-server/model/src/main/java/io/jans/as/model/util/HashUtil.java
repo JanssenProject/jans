@@ -40,33 +40,33 @@ public class HashUtil {
             byte[] digest = null;
             if (signatureAlgorithm != null) {
                 switch (signatureAlgorithm) {
-                case HS256:
-                case RS256:
-                case PS256:
-                case ES256:
-                case ES256K: {
-                    digest = JwtUtil.getMessageDigestSHA256(input);
-                    break;
-                }
-                case HS384:
-                case RS384:
-                case PS384:
-                case ES384: {
-                    digest = JwtUtil.getMessageDigestSHA384(input);
-                    break;
-                }
-                case HS512:
-                case RS512:
-                case PS512:
-                case ES512: 
-                case EDDSA: {
-                    digest = JwtUtil.getMessageDigestSHA512(input);
-                    break;
-                }
-                default: {
-                    digest = JwtUtil.getMessageDigestSHA256(input);
-                    break;
-                }
+                    case HS256:
+                    case RS256:
+                    case PS256:
+                    case ES256:
+                    case ES256K: {
+                        digest = JwtUtil.getMessageDigestSHA256(input);
+                        break;
+                    }
+                    case HS384:
+                    case RS384:
+                    case PS384:
+                    case ES384: {
+                        digest = JwtUtil.getMessageDigestSHA384(input);
+                        break;
+                    }
+                    case HS512:
+                    case RS512:
+                    case PS512:
+                    case ES512: 
+                    case EDDSA: {
+                        digest = JwtUtil.getMessageDigestSHA512(input);
+                        break;
+                    }
+                    default: {
+                        digest = JwtUtil.getMessageDigestSHA256(input);
+                        break;
+                    }
                 }
             } else {
                 digest = JwtUtil.getMessageDigestSHA256(input);

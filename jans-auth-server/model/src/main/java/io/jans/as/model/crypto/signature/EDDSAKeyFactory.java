@@ -213,15 +213,15 @@ public class EDDSAKeyFactory extends KeyFactory<EDDSAPrivateKey, EDDSAPublicKey>
     private static byte[] getEncodedPubKey(final SignatureAlgorithm signatureAlgorithm, final byte[] decodedPublicKey) throws SignatureException {
         byte[] encodedPubKey = null;
         switch(signatureAlgorithm) {
-        case EDDSA: {
-            encodedPubKey = new byte[Ed25519Prefix.length + Ed25519PublicKeyParameters.KEY_SIZE];
-            System.arraycopy(Ed25519Prefix, 0, encodedPubKey, 0, Ed25519Prefix.length);
-            System.arraycopy(decodedPublicKey, 0, encodedPubKey, Ed25519Prefix.length, decodedPublicKey.length);
-            break;
-        }
-        default: {
-            throw new SignatureException(String.format("Wrong type of the signature algorithm (SignatureAlgorithm): %s", signatureAlgorithm.toString()));
-        }
+            case EDDSA: {
+                encodedPubKey = new byte[Ed25519Prefix.length + Ed25519PublicKeyParameters.KEY_SIZE];
+                System.arraycopy(Ed25519Prefix, 0, encodedPubKey, 0, Ed25519Prefix.length);
+                System.arraycopy(decodedPublicKey, 0, encodedPubKey, Ed25519Prefix.length, decodedPublicKey.length);
+                break;
+            }
+            default: {
+                throw new SignatureException(String.format("Wrong type of the signature algorithm (SignatureAlgorithm): %s", signatureAlgorithm.toString()));
+            }
         }
         return encodedPubKey;
     }
