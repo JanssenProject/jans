@@ -68,6 +68,23 @@ Summary of steps :
 9. In Step 2, customize the settings for the Janssen installation
 10. In Step 3, unselect the `Wait` option
 
+### Quickstart Janssen with microk8s
+
+Start a fresh ubuntu `18.04` or `20.04` 4 CPU, 16 GB RAM, and 50GB SSD VM with ports `443` and `80` open. Then execute the following
+
+```bash
+sudo su -
+wget https://raw.githubusercontent.com/JanssenProject/jans/main/automation/startjanssendemo.sh && chmod u+x startjanssendemo.sh && ./startjanssendemo.sh
+```
+
+This will install docker, microk8s, helm and Janssen with the default settings that can be found inside [values.yaml](https://github.com/GluuFederation/flex/blob/flex/pygluu/kubernetes/templates/helm/gluu/values.yaml).  The installer will automatically add a record to your hosts record in the VM but if you want access the endpoints outside the VM you must  map the `ip` of the instance running ubuntu to the FQDN you provided and then access the endpoints at your browser such in the example in the table below.
+
+| Service     | Example endpoint                                              |
+| ----------- |---------------------------------------------------------------|
+| Auth server | `https://FQDN/.well-known/openid-configuration`                 |
+| fido2       | `https://FQDN/.well-known/fido2-configuration` |
+| scim        | `https://FQDN/.well-known/scim-configuration`  |
+
 ## Design Goals
 
 The Janssen Project is aligned with the goals of cloud native infrastructure to enable:
