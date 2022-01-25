@@ -51,23 +51,24 @@ public class Certificate {
      * @return Public Key from X509 Certificate.
      */
     public PublicKey getPublicKey() {
+        if(x509Certificate == null) {
+            return null; 
+        }
         PublicKey publicKey = null;
-
-        if (x509Certificate != null && x509Certificate.getPublicKey() instanceof BCRSAPublicKey) {
+        if (x509Certificate.getPublicKey() instanceof BCRSAPublicKey) {
             BCRSAPublicKey jcersaPublicKey = (BCRSAPublicKey) x509Certificate.getPublicKey();
 
             publicKey = new RSAPublicKey(jcersaPublicKey.getModulus(), jcersaPublicKey.getPublicExponent());
-        } else if (x509Certificate != null && x509Certificate.getPublicKey() instanceof BCECPublicKey) {
+        } else if (x509Certificate.getPublicKey() instanceof BCECPublicKey) {
             BCECPublicKey jceecPublicKey = (BCECPublicKey) x509Certificate.getPublicKey();
 
             publicKey = new ECDSAPublicKey(signatureAlgorithm, jceecPublicKey.getQ().getXCoord().toBigInteger(),
                     jceecPublicKey.getQ().getYCoord().toBigInteger());
-        } else if (x509Certificate != null && x509Certificate.getPublicKey() instanceof BCEdDSAPublicKey) {
+        } else if (x509Certificate.getPublicKey() instanceof BCEdDSAPublicKey) {
             BCEdDSAPublicKey jceedPublicKey = (BCEdDSAPublicKey) x509Certificate.getPublicKey();
 
             publicKey = new EDDSAPublicKey(signatureAlgorithm, jceedPublicKey.getEncoded());
         }
-
         return publicKey;
     }
 
