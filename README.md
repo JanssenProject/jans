@@ -6,7 +6,7 @@ Janssen enables organizations to build a scalable centralized authentication and
 
 ## Quick Start
 
-Try first, ask questions later? Go to the [Janssen Project Wiki](https://github.com/JanssenProject/jans/wiki/Rancher-Installation) right now!
+Try first, ask questions later? Go to the [Janssen Project Wiki](https://github.com/JanssenProject/jans/wiki/) right now!
 
 ## Project Goal
 
