@@ -36,11 +36,11 @@ class HttpdInstaller(BaseInstaller, SetupUtils):
         self.apache2_ssl_24_conf = os.path.join(self.output_folder, 'https_jans.conf')
 
         if base.os_type == 'suse':
-            self.https_gluu_fn = '/etc/apache2/vhosts.d/_https_gluu.conf'
+            self.https_jans_fn = '/etc/apache2/vhosts.d/_https_gluu.conf'
         elif base.clone_type == 'rpm':
-            self.https_gluu_fn = '/etc/httpd/conf.d/https_gluu.conf'
+            self.https_jans_fn = '/etc/httpd/conf.d/https_gluu.conf'
         else:
-            self.https_gluu_fn = '/etc/apache2/sites-available/https_gluu.conf'
+            self.https_jans_fn = '/etc/apache2/sites-available/https_gluu.conf'
 
 
     def configure(self):
@@ -180,15 +180,15 @@ class HttpdInstaller(BaseInstaller, SetupUtils):
             self.copyFile(self.apache2_ssl_24_conf, '/etc/httpd/conf.d/https_gluu.conf')
 
         if base.os_type == 'suse':
-            self.copyFile(self.apache2_ssl_conf, self.https_gluu_fn)
+            self.copyFile(self.apache2_ssl_conf, self.https_jans_fn)
 
         elif base.clone_type == 'rpm' and base.os_initdaemon == 'init':
             self.copyFile(self.apache2_conf, '/etc/httpd/conf/httpd.conf')
-            self.copyFile(self.apache2_ssl_conf, self.https_gluu_fn)
+            self.copyFile(self.apache2_ssl_conf, self.https_jans_fn)
 
         elif base.clone_type == 'deb':
-            self.copyFile(self.apache2_ssl_conf, self.https_gluu_fn)
-            self.run([paths.cmd_ln, '-s', self.https_gluu_fn,
+            self.copyFile(self.apache2_ssl_conf, self.https_jans_fn)
+            self.run([paths.cmd_ln, '-s', self.https_jans_fn,
                       '/etc/apache2/sites-enabled/https_gluu.conf'])
 
     def installed(self):

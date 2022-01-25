@@ -82,8 +82,6 @@ def arg_parser():
 
     parser.add_argument('-approved-issuer', help="Api Approved Issuer")
 
-    parser.add_argument('--install-admin-ui', help="Install Gluu Admin UI", action='store_true')
-
     argsp = parser.parse_args()
 
     return argsp

@@ -39,6 +39,7 @@ class DBUtils:
     Base = None
     session = None
     cbm = None
+    mariadb = False
 
     def bind(self, use_ssl=True, force=False):
 
@@ -118,8 +119,16 @@ class DBUtils:
             Session = sqlalchemy.orm.sessionmaker(bind=self.engine)
             self.session = Session()
             self.metadata = sqlalchemy.MetaData()
-            self.session.connection()
+            myconn = self.session.connection()
+
+            # are we running on MariaDB?
+            query = myconn.execute("select version()")
+            result = query.first()
+            if result and 'mariadb' in result[0].lower():
+                self.mariadb = True
+
             base.logIt("{} Connection was successful".format(Config.rdbm_type.upper()))
+            
             return True, self.session
 
         except Exception as e:
@@ -129,6 +138,8 @@ class DBUtils:
 
     @property
     def json_dialects_instance(self):
+        if self.mariadb:
+            return sqlalchemy.dialects.mysql.LONGTEXT
         return sqlalchemy.dialects.mysql.json.JSON if Config.rdbm_type == 'mysql' else sqlalchemy.dialects.postgresql.json.JSON
 
     def mysqlconnection(self, log=True):
@@ -880,7 +891,10 @@ class DBUtils:
                         sqlalchObj = sqlalchCls()
 
                         for v in vals:
-                            setattr(sqlalchObj, v, vals[v])
+                            vval = vals[v]
+                            if self.mariadb and isinstance(vval, dict):
+                                vval = json.dumps(vals[v])
+                            setattr(sqlalchObj, v, vval)
 
                         base.logIt("Adding {}".format(sqlalchObj.doc_id))
                         self.session.add(sqlalchObj)
