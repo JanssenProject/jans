@@ -1,15 +1,3 @@
-[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_docker-jans-config-api&metric=bugs)](https://sonarcloud.io/dashboard?id=JanssenProject_docker-jans-config-api)
-[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_docker-jans-config-api&metric=code_smells)](https://sonarcloud.io/dashboard?id=JanssenProject_docker-jans-config-api)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_docker-jans-config-api&metric=coverage)](https://sonarcloud.io/dashboard?id=JanssenProject_docker-jans-config-api)
-[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_docker-jans-config-api&metric=duplicated_lines_density)](https://sonarcloud.io/dashboard?id=JanssenProject_docker-jans-config-api)
-[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_docker-jans-config-api&metric=ncloc)](https://sonarcloud.io/dashboard?id=JanssenProject_docker-jans-config-api)
-[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_docker-jans-config-api&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=JanssenProject_docker-jans-config-api)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_docker-jans-config-api&metric=alert_status)](https://sonarcloud.io/dashboard?id=JanssenProject_docker-jans-config-api)
-[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_docker-jans-config-api&metric=reliability_rating)](https://sonarcloud.io/dashboard?id=JanssenProject_docker-jans-config-api)
-[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_docker-jans-config-api&metric=security_rating)](https://sonarcloud.io/dashboard?id=JanssenProject_docker-jans-config-api)
-[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_docker-jans-config-api&metric=sqale_index)](https://sonarcloud.io/dashboard?id=JanssenProject_docker-jans-config-api)
-[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=JanssenProject_docker-jans-config-api&metric=vulnerabilities)](https://sonarcloud.io/dashboard?id=JanssenProject_docker-jans-config-api)
-
 # Overview
 
 Docker image packaging for config-api.
