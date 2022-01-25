@@ -1,5 +1,13 @@
 #!/bin/bash
 set -e
+if [[ ! "$JANS_FQDN" ]]; then
+  read -rp "Enter Hostname [demoexample.jans.io]:                           " JANS_FQDN
+fi
+if ! [[ $JANS_FQDN == *"."*"."* ]]; then
+  echo "[E] Hostname provided is invalid or empty.
+    Please enter a FQDN with the format demoexample.jans.io"
+  exit 1
+fi
 sudo apt-get update
 sudo apt-get install python3-pip -y
 sudo pip3 install pip --upgrade
@@ -25,40 +33,71 @@ chmod 700 get_helm.sh
 sudo apt-get install docker-ce docker-ce-cli containerd.io -y
 sudo microk8s config > config
 KUBECONFIG="$PWD"/config
-sudo microk8s.kubectl create namespace gluu --kubeconfig="$KUBECONFIG" || echo "namespace exists"
+sudo microk8s.kubectl create namespace jans --kubeconfig="$KUBECONFIG" || echo "namespace exists"
 sudo helm repo add bitnami https://charts.bitnami.com/bitnami
 sudo microk8s.kubectl get po --kubeconfig="$KUBECONFIG"
-sudo helm install my-release --set auth.rootPassword=Test1234#,auth.database=jans bitnami/mysql -n gluu --kubeconfig="$KUBECONFIG"
+sudo helm install my-release --set auth.rootPassword=Test1234#,auth.database=jans bitnami/mysql -n jans --kubeconfig="$KUBECONFIG"
 EXT_IP=$(dig +short myip.opendns.com @resolver1.opendns.com)
-sudo echo "$EXT_IP demoexample.gluu.org" >> /etc/hosts
+sudo echo "$EXT_IP $JANS_FQDN" >> /etc/hosts
 cat << EOF > override.yaml
 config:
+  countryCode: US
+  email: support@gluu.org
+  orgName: Gluu
+  city: Austin
   configmap:
-    cnSqlDbHost: my-release-mysql.gluu.svc
+    cnSqlDbName: jans
+    cnSqlDbPort: 3306
+    cnSqlDbDialect: mysql
+    cnSqlDbHost: my-release-mysql.jans.svc
     cnSqlDbUser: root
+    cnSqlDbTimezone: UTC
+    cnSqldbUserPassword: Test1234#
 nginx-ingress:
   ingress:
-    #/jans-auth/restv1/token
+    adminUiEnabled: false
+    openidConfigEnabled: true
+    uma2ConfigEnabled: true
+    webfingerEnabled: true
+    webdiscoveryEnabled: true
+    scimConfigEnabled: false
+    scimEnabled: false
+    configApiEnabled: true
+    u2fConfigEnabled: true
+    fido2ConfigEnabled: false
+    authServerEnabled: true
+    path: /
+    hosts:
+    - $JANS_FQDN
+    # -- Secrets holding HTTPS CA cert and key.
+    tls:
+    - secretName: tls-certificate
+      hosts:
+      - $JANS_FQDN
     authServerProtectedToken: true
-    #/jans-auth/restv1/register
     authServerProtectedRegister: true
-      # in the format of {cert-manager.io/cluster-issuer: nameOfClusterIssuer, kubernetes.io/tls-acme: "true"}
     additionalAnnotations:
-      # Enable client certificate authentication
       nginx.ingress.kubernetes.io/auth-tls-verify-client: "optional"
-      # Create the secret containing the trusted ca certificates
       nginx.ingress.kubernetes.io/auth-tls-secret: "gluu/ca-secret"
-      # Specify the verification depth in the client certificates chain
       nginx.ingress.kubernetes.io/auth-tls-verify-depth: "1"
-      # Specify if certificates are passed to upstream server
       nginx.ingress.kubernetes.io/auth-tls-pass-certificate-to-upstream: "true"
 global:
+  auth-server-key-rotation:
+    enabled: false
+  client-api:
+    enabled: false
+  config-api:
+    enabled: true
+  fido2:
+    enabled: false
+  scim:
+    enabled: false
   isFqdnRegistered: false
   lbIp: $EXT_IP
 EOF
-sudo helm repo add gluu https://gluufederation.github.io/cloud-native-edition/pygluu/kubernetes/templates/helm
+sudo helm repo add jans https://gluufederation.github.io/flex/pygluu/kubernetes/templates/helm
 sudo helm repo update
-sudo helm install gluu gluu/gluu -n gluu --version=5.0.2 -f override.yaml --kubeconfig="$KUBECONFIG"
+sudo helm install jans jans/gluu -n jans --version=5.0.2 -f override.yaml --kubeconfig="$KUBECONFIG"
 echo "Waiting for auth-server to come up....Please do not cancel out...This will wait for the auth-server to be ready.."
 sleep 120
 cat << EOF > testendpoints.sh
@@ -92,6 +131,6 @@ echo -e "Testing protected endpoint /register with client crt and key. This shou
 curl -X POST -k --cert client.crt --key client.key -u $TESTCLIENT:$TESTCLIENTSECRET https://demoexample.gluu.org/jans-auth/restv1/register
 cd ..
 EOF
-sudo microk8s.kubectl -n gluu wait --for=condition=available --timeout=600s deploy/gluu-auth-server --kubeconfig="$KUBECONFIG"
+sudo microk8s.kubectl -n jans wait --for=condition=available --timeout=600s deploy/jans-auth-server --kubeconfig="$KUBECONFIG"
 sudo bash testendpoints.sh
 echo -e "You may re-execute bash testendpoints.sh to do a quick test to protected endpoints and openid-configuration endpoint."
