@@ -12,6 +12,7 @@ import io.jans.as.client.page.AbstractPage;
 import io.jans.as.client.page.PageConfig;
 import io.jans.as.client.par.ParClient;
 import io.jans.as.client.par.ParRequest;
+import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseMode;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.common.SubjectType;
@@ -1166,6 +1167,41 @@ public abstract class BaseTest {
 
         return registerResponse;
     }
+    
+	public RegisterResponse registerClient(final String redirectUris, final List<ResponseType> responseTypes,
+			final List<GrantType> grantTypes, final String sectorIdentifierUri, final String clientJwksUri,
+			final SignatureAlgorithm signatureAlgorithm, final KeyEncryptionAlgorithm keyEncryptionAlgorithm,
+			final BlockEncryptionAlgorithm blockEncryptionAlgorithm) {
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
+                io.jans.as.model.util.StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setGrantTypes(grantTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setAuthorizationSignedResponseAlg(signatureAlgorithm);
+        registerRequest.setAuthorizationEncryptedResponseAlg(keyEncryptionAlgorithm);
+        registerRequest.setAuthorizationEncryptedResponseEnc(blockEncryptionAlgorithm);
+        registerRequest.setRequestObjectSigningAlg(signatureAlgorithm);
+        registerRequest.setRequestObjectEncryptionAlg(keyEncryptionAlgorithm);
+        registerRequest.setRequestObjectEncryptionEnc(blockEncryptionAlgorithm);
+        registerRequest.setUserInfoSignedResponseAlg(signatureAlgorithm);
+        registerRequest.setUserInfoEncryptedResponseAlg(keyEncryptionAlgorithm);
+        registerRequest.setUserInfoEncryptedResponseEnc(blockEncryptionAlgorithm);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        return registerResponse;
+	}
 
     public AuthorizationResponse authorizationRequest(
             final List<ResponseType> responseTypes, final ResponseMode responseMode, final ResponseMode expectedResponseMode,
