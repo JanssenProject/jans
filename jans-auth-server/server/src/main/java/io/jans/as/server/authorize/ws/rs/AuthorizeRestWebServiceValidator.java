@@ -179,13 +179,13 @@ public class AuthorizeRestWebServiceValidator {
                 log.error("The Nested JWT signature algorithm is not valid.");
                 throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT);
             }
-        }      
-		String redirectUri = jwtRequest.getRedirectUri();
-		Client client = clientService.getClient(jwtRequest.getClientId());
-		if (redirectUri != null && redirectionUriService.validateRedirectionUri(client, redirectUri) == null) {
-			log.error(" unregistered redirect uri");
-			throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT);
-		}
+        } 
+        String redirectUri = jwtRequest.getRedirectUri();
+        Client client = clientService.getClient(jwtRequest.getClientId());
+        if (redirectUri != null && redirectionUriService.validateRedirectionUri(client, redirectUri) == null) {
+            log.error(" unregistered redirect uri");
+            throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT);
+        }
         if (jwtRequest.getExp() == null) {
             log.error("The exp claim is not set");
             throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT);

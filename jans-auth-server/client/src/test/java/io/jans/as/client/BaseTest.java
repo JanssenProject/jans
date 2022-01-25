@@ -1163,15 +1163,15 @@ public abstract class BaseTest {
         assertNotNull(registerResponse.getClientSecret());
         assertNotNull(registerResponse.getRegistrationAccessToken());
         assertNotNull(registerResponse.getClientIdIssuedAt());
-        //assertNotNull(registerResponse.getClientSecretExpiresAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
 
         return registerResponse;
     }
     
-    public RegisterResponse registerClient(
-            final String redirectUris, final List<ResponseType> responseTypes, final List<GrantType> grantTypes, final String sectorIdentifierUri,
-            final String clientJwksUri, final SignatureAlgorithm signatureAlgorithm,
-            final KeyEncryptionAlgorithm keyEncryptionAlgorithm, final BlockEncryptionAlgorithm blockEncryptionAlgorithm) {
+	public RegisterResponse registerClient(final String redirectUris, final List<ResponseType> responseTypes,
+			final List<GrantType> grantTypes, final String sectorIdentifierUri, final String clientJwksUri,
+			final SignatureAlgorithm signatureAlgorithm, final KeyEncryptionAlgorithm keyEncryptionAlgorithm,
+			final BlockEncryptionAlgorithm blockEncryptionAlgorithm) {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 io.jans.as.model.util.StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
@@ -1198,10 +1198,10 @@ public abstract class BaseTest {
         assertNotNull(registerResponse.getClientSecret());
         assertNotNull(registerResponse.getRegistrationAccessToken());
         assertNotNull(registerResponse.getClientIdIssuedAt());
-        //assertNotNull(registerResponse.getClientSecretExpiresAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
 
         return registerResponse;
-    }
+	}
 
     public AuthorizationResponse authorizationRequest(
             final List<ResponseType> responseTypes, final ResponseMode responseMode, final ResponseMode expectedResponseMode,
