@@ -40,6 +40,7 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
                 (os.path.join(Config.distJansFolder, 'jans-cli.zip'), 'https://api.github.com/repos/JanssenProject/jans-cli/tarball/main'.format(Config.oxVersion)),
                 (os.path.join(Config.distJansFolder, 'jca-swagger-client.tgz'), 'https://ox.gluu.org/icrby8xcvbcv/cli-swagger/jca.tgz'),
                 (os.path.join(Config.distJansFolder, 'scim-swagger-client.tgz'), 'https://ox.gluu.org/icrby8xcvbcv/cli-swagger/scim.tgz'),
+                (os.path.join(Config.distAppFolder, 'pyjwt.zip'), 'https://github.com/jpadilla/pyjwt/archive/refs/tags/2.3.0.zip'),
                 ]
 
     def install(self):
@@ -59,6 +60,10 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
             init_fn = os.path.join(swagger_cli_dir, '__init__.py')
             self.writeFile(init_fn, '')
             shutil.unpack_archive(self.source_files[i+1][0], swagger_cli_dir)
+
+        #extract pyjwt from archieve
+        base.extract_from_zip(self.source_files[3][0], 'jwt', os.path.join(self.jans_cli_install_dir, 'pylib/jwt'))
+
 
     def generate_configuration(self):
         self.check_clients([('role_based_client_id', '2000.')])

@@ -55,7 +55,6 @@ from setup_app.installers.httpd import HttpdInstaller
 from setup_app.installers.jre import JreInstaller
 from setup_app.installers.jetty import JettyInstaller
 from setup_app.installers.jython import JythonInstaller
-from setup_app.installers.node import NodeInstaller
 from setup_app.installers.jans_auth import JansAuthInstaller
 
 if Config.profile == 'jans':
@@ -156,7 +155,6 @@ propertiesUtils.check_properties()
 jreInstaller = JreInstaller()
 jettyInstaller = JettyInstaller()
 jythonInstaller = JythonInstaller()
-nodeInstaller = NodeInstaller()
 
 if Config.profile == 'jans':
     openDjInstaller = OpenDjInstaller()
@@ -270,8 +268,6 @@ def do_installation():
                 jreInstaller.start_installation()
                 jettyInstaller.start_installation()
                 jythonInstaller.start_installation()
-                if Config.installAdminUI:
-                    nodeInstaller.start_installation()
 
             jansInstaller.copy_scripts()
             jansInstaller.encode_passwords()
