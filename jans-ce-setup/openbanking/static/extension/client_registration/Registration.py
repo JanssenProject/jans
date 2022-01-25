@@ -411,4 +411,19 @@ class ClientRegistration(ClientRegistrationType):
                         print "Client Registration. Failed to get CN of AS from the transport keystore. Exception: ", sys.exc_info()[1]
                         return None
 
+    # responseAsJsonObject - is org.json.JSONObject, you can use any method to manipulate json
+    # context is reference of io.jans.as.server.model.common.ExecutionContext
+    def modifyPutResponse(self, responseAsJsonObject, executionContext):
+        return False
+
+    # responseAsJsonObject - is org.json.JSONObject, you can use any method to manipulate json
+    # context is reference of io.jans.as.server.model.common.ExecutionContext
+    def modifyReadResponse(self, responseAsJsonObject, executionContext):
+        return False
+
+    # responseAsJsonObject - is org.json.JSONObject, you can use any method to manipulate json
+    # context is reference of io.jans.as.server.model.common.ExecutionContext
+    def modifyPostResponse(self, responseAsJsonObject, executionContext):
+        return False
+
     

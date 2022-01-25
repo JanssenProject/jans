@@ -77,15 +77,29 @@ if getattr(argsp, 'jetty_version', None):
     else:
         print("Can't determine Jetty Version. Continuing with version {}".format(app_versions['JETTY_VERSION']))
 
+
+package_installer = shutil.which('apt') or shutil.which('dnf') or shutil.which('yum') or shutil.which('zypper')
+
+package_dependencies = []
+
 try:
     from distutils import dist
 except:
-    if not argsp.n:
-        install_dist = input('python3-disutils package is needed. Install now? [Y/n] ')
-        if install_dist.lower().startswith('n'):
-            print("Can't continue...")
-            sys.exit()
-    os.system('apt install -y python3-distutils')
+    package_dependencies.append('python3-distutils')
+
+try:
+    import ldap3
+except:
+    package_dependencies.append('python3-ldap3')
+
+
+if package_dependencies and not argsp.n:
+    install_dist = input('Required package(s): {}. Install now? [Y/n] '.format(', '.join(package_dependencies)))
+    if install_dist.lower().startswith('n'):
+        print("Can't continue...")
+        sys.exit()
+
+os.system('{} install -y {}'.format(package_installer, ' '.join(package_dependencies)))
 
 
 def extract_subdir(zip_fn, sub_dir, target_dir, zipf=None):
@@ -217,6 +231,7 @@ if not (argsp.u or argsp.uninstall):
     download('https://ox.gluu.org/icrby8xcvbcv/cli-swagger/scim.tgz', os.path.join(jans_app_dir, 'scim-swagger-client.tgz'))
     download(urljoin(maven_base_url, 'admin-ui-plugin/{0}{1}/admin-ui-plugin-{0}{1}-distribution.jar'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD'])), os.path.join(jans_app_dir, 'admin-ui-plugin-distribution.jar'))
     download('https://github.com/GluuFederation/gluu-admin-ui/archive/refs/heads/{}.zip'.format(app_versions['ADMIN_UI_FRONTEND_BRANCH']), os.path.join(jans_app_dir, 'gluu-admin-ui.zip'))
+    download('https://raw.githubusercontent.com/GluuFederation/gluu-snap/master/facter/facter', os.path.join(jans_app_dir, 'facter'))
 
     if argsp.profile == 'jans':
         download('https://maven.gluu.org/maven/org/gluufederation/opendj/opendj-server-legacy/{0}/opendj-server-legacy-{0}.zip'.format(app_versions['OPENDJ_VERSION']), os.path.join(app_dir, 'opendj-server-legacy-{0}.zip'.format(app_versions['OPENDJ_VERSION'])))

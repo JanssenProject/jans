@@ -118,3 +118,18 @@ class ClientRegistration(ClientRegistrationType):
             i = i + 1
 
         return clientRedirectUrisSet
+
+    # responseAsJsonObject - is org.json.JSONObject, you can use any method to manipulate json
+    # context is reference of io.jans.as.server.model.common.ExecutionContext
+    def modifyPutResponse(self, responseAsJsonObject, executionContext):
+        return False
+
+    # responseAsJsonObject - is org.json.JSONObject, you can use any method to manipulate json
+    # context is reference of io.jans.as.server.model.common.ExecutionContext
+    def modifyReadResponse(self, responseAsJsonObject, executionContext):
+        return False
+
+    # responseAsJsonObject - is org.json.JSONObject, you can use any method to manipulate json
+    # context is reference of io.jans.as.server.model.common.ExecutionContext
+    def modifyPostResponse(self, responseAsJsonObject, executionContext):
+        return False

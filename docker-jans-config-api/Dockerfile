@@ -1,14 +1,15 @@
-FROM alpine:3.13.6
+FROM bellsoft/liberica-openjre-alpine:11
 
 # ===============
 # Alpine packages
 # ===============
 
 RUN apk update \
-    && apk add --no-cache openssl py3-pip tini curl openjdk11-jre-headless py3-cryptography py3-grpcio py3-psycopg2 \
+    && apk add --no-cache openssl py3-pip tini curl py3-cryptography py3-psycopg2 \
+    && apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/v3.15/community py3-grpcio \
     && apk add --no-cache --virtual build-deps wget git \
     && mkdir -p /usr/java/latest \
-    && ln -sf /usr/lib/jvm/default-jvm/jre /usr/java/latest/jre
+    && ln -sf /usr/lib/jvm/jre /usr/java/latest/jre
 
 # =====
 # Jetty
@@ -31,7 +32,7 @@ RUN wget -q https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/${JETTY_
 # ==========
 
 ENV CN_VERSION=1.0.0-SNAPSHOT
-ENV CN_BUILD_DATE='2021-12-23 08:48'
+ENV CN_BUILD_DATE='2022-01-25 07:53'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api-server/${CN_VERSION}/jans-config-api-server-${CN_VERSION}.war
 
 # Install Jans Config API
@@ -51,11 +52,11 @@ EXPOSE 8074
 
 RUN mkdir -p /usr/share/java
 
-ENV SCIM_PLUGIN_BUILD_DATE='2021-12-23 08:48'
+ENV SCIM_PLUGIN_BUILD_DATE='2022-01-25 07:54'
 ENV SCIM_PLUGIN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/scim-plugin/${CN_VERSION}/scim-plugin-${CN_VERSION}-distribution.jar
 RUN wget -q ${SCIM_PLUGIN_SOURCE_URL} -O /usr/share/java/scim-plugin.jar
 
-ENV ADMIN_UI_PLUGIN_BUILD_DATE='2021-12-23 08:48'
+ENV ADMIN_UI_PLUGIN_BUILD_DATE='2022-01-25 07:53'
 ENV ADMIN_UI_SOURCE_URL=https://maven.jans.io/maven/io/jans/admin-ui-plugin/${CN_VERSION}/admin-ui-plugin-${CN_VERSION}-distribution.jar
 RUN wget -q ${ADMIN_UI_SOURCE_URL} -O /usr/share/java/admin-ui-plugin.jar
 
@@ -78,8 +79,7 @@ RUN apk del build-deps \
 # License
 # =======
 
-RUN mkdir -p /licenses
-COPY LICENSE /licenses/
+COPY LICENSE /licenses/LICENSE
 
 # ==========
 # Config ENV
@@ -155,8 +155,11 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_WAIT_SLEEP_DURATION=10 \
     CN_JAVA_OPTIONS="" \
     GOOGLE_PROJECT_ID="" \
-    GOOGLE_APPLICATION_CREDENTIALS=/etc/jans/conf/google-credentials.json
-
+    GOOGLE_APPLICATION_CREDENTIALS=/etc/jans/conf/google-credentials.json \
+    CN_LICENSE_ADMIN_UI_API_KEY=/etc/jans/conf/admin_ui_api_key \
+    CN_LICENSE_ADMIN_UI_PRODUCT_CODE=/etc/jans/conf/admin_ui_product_code \
+    CN_LICENSE_ADMIN_UI_SHARED_KEY=/etc/jans/conf/admin_ui_shared_key \
+    CN_LICENSE_ADMIN_UI_MANAGEMENT_KEY=/etc/jans/conf/admin_ui_management_key
 # ====
 # misc
 # ====
@@ -195,7 +198,7 @@ RUN chown -R 1000:1000 /opt/jans/jetty \
     && chgrp -R 0 /deploy && chmod -R g=u /deploy \
     && chgrp -R 0 /etc/certs && chmod -R g=u /etc/certs \
     && chgrp -R 0 /etc/jans && chmod -R g=u /etc/jans \
-    && chmod -R +w /etc/ssl/certs/java/cacerts && chgrp -R 0 /etc/ssl/certs/java/cacerts && chmod -R g=u /etc/ssl/certs/java/cacerts \
+    && chmod -R +w /usr/java/latest/jre/lib/security/cacerts && chgrp -R 0 /usr/java/latest/jre/lib/security/cacerts && chmod -R g=u /usr/java/latest/jre/lib/security/cacerts \
     && chmod 664 /opt/jetty/etc/jetty.xml \
     && chmod 664 /opt/jetty/etc/webdefault.xml
 
