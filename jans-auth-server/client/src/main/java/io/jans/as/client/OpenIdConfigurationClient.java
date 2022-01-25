@@ -114,6 +114,7 @@ public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationReq
      * @return The service response.
      */
     private OpenIdConfigurationResponse exec() {
+        LOG.error("\n\n\n OpenIdConfigurationResponse:::exec() - Entry \n\n\n" );
         setRequest(new OpenIdConfigurationRequest());
 
         // Call REST Service and handle response
@@ -138,6 +139,7 @@ public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationReq
             getResponse().setEntity(entity);
             getResponse().setHeaders(clientResponse.getMetadata());
             parse(entity, getResponse());
+            LOG.error("\n\n\n OpenIdConfigurationResponse:::exec() - Exit \n\n\n" );
         } catch (JSONException e) {
             LOG.error("There is an error in the JSON response. Check if there is a syntax error in the JSON response or there is a wrong key", e);
             if (entity != null) {
@@ -154,6 +156,7 @@ public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationReq
     }
 
     public static void parse(String json, OpenIdConfigurationResponse response) {
+        LOG.error("\n\n\n OpenIdConfigurationResponse:::parse() - Entry - json = "+json+", response = "+response);
         if (StringUtils.isBlank(json)) {
             return;
         }
@@ -248,11 +251,15 @@ public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationReq
         if (jsonObj.has(BACKCHANNEL_USER_CODE_PAREMETER_SUPPORTED)) {
             response.setBackchannelUserCodeParameterSupported(jsonObj.getBoolean(BACKCHANNEL_USER_CODE_PAREMETER_SUPPORTED));
         }
+        
+        LOG.error("\n\n\n OpenIdConfigurationResponse:::parse() - Exit - json = "+json+", response = "+response);
     }
 
     public static OpenIdConfigurationResponse parse(String json) {
+        LOG.error("\n\n\n OpenIdConfigurationResponse:::parse() - Entry-2 - json = "+json);
         OpenIdConfigurationResponse response = new OpenIdConfigurationResponse();
         parse(json, response);
+        LOG.error("\n\n\n OpenIdConfigurationResponse:::parse() - Exit - response = "+response);
         return response;
     }
 }
