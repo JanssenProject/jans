@@ -127,8 +127,12 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
     }
 
     public JSONObject getSoftwareStatementJwks(HttpServletRequest httpRequest, JSONObject registerRequest, Jwt softwareStatement) {
+        if (defaultExternalCustomScript == null) {
+            return null;
+        }
+
         try {
-            log.info("Executing python 'getSoftwareStatementJwks' method, script name:" + defaultExternalCustomScript.getName());
+            log.info("Executing python 'getSoftwareStatementJwks' method, script name: {}", defaultExternalCustomScript.getName());
 
             DynamicClientRegistrationContext context = new DynamicClientRegistrationContext(httpRequest, registerRequest, defaultExternalCustomScript);
             context.setSoftwareStatement(softwareStatement);
@@ -137,7 +141,7 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
             ClientRegistrationType externalType = (ClientRegistrationType) defaultExternalCustomScript.getExternalType();
             final String result = externalType.getSoftwareStatementJwks(context);
             context.throwWebApplicationExceptionIfSet();
-            log.info("Result of python 'getSoftwareStatementJwks' method: " + result);
+            log.info("Result of python 'getSoftwareStatementJwks' method: {}", result);
             return new JSONObject(result);
         } catch (WebApplicationException e) {
             throw e;
@@ -149,6 +153,10 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
     }
 
     public String getSoftwareStatementHmacSecret(HttpServletRequest httpRequest, JSONObject registerRequest, Jwt softwareStatement) {
+        if (defaultExternalCustomScript == null) {
+            return "";
+        }
+
         try {
             log.trace("Executing python 'getSoftwareStatementHmacSecret' method");
 
@@ -159,7 +167,7 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
             ClientRegistrationType externalType = (ClientRegistrationType) defaultExternalCustomScript.getExternalType();
             final String result = externalType.getSoftwareStatementHmacSecret(context);
             context.throwWebApplicationExceptionIfSet();
-            log.trace("Result of python 'getSoftwareStatementHmacSecret' method: " + result);
+            log.trace("Result of python 'getSoftwareStatementHmacSecret' method: {}", result);
             return result;
         } catch (WebApplicationException e) {
             throw e;
@@ -171,6 +179,10 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
     }
 
     public JSONObject getDcrJwks(HttpServletRequest httpRequest, Jwt dcr) {
+        if (defaultExternalCustomScript == null) {
+            return null;
+        }
+
         try {
             log.trace("Executing python 'getDcrJwks' method");
 
@@ -181,7 +193,7 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
             ClientRegistrationType externalType = (ClientRegistrationType) defaultExternalCustomScript.getExternalType();
             final String result = externalType.getDcrJwks(context);
             context.throwWebApplicationExceptionIfSet();
-            log.trace("Result of python 'getDcrJwks' method: " + result);
+            log.trace("Result of python 'getDcrJwks' method: {}", result);
             return new JSONObject(result);
         } catch (WebApplicationException e) {
             throw e;
@@ -193,6 +205,10 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
     }
 
     public String getDcrHmacSecret(HttpServletRequest httpRequest, Jwt dcr) {
+        if (defaultExternalCustomScript == null) {
+            return "";
+        }
+
         try {
             log.trace("Executing python 'getDcrHmacSecret' method");
 
@@ -203,7 +219,7 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
             ClientRegistrationType externalType = (ClientRegistrationType) defaultExternalCustomScript.getExternalType();
             final String result = externalType.getDcrHmacSecret(context);
             context.throwWebApplicationExceptionIfSet();
-            log.trace("Result of python 'getDcrHmacSecret' method: " + result);
+            log.trace("Result of python 'getDcrHmacSecret' method: {}", result);
             return result;
         } catch (WebApplicationException e) {
             throw e;
@@ -215,6 +231,10 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
     }
 
     public boolean isCertValidForClient(X509Certificate cert, DynamicClientRegistrationContext context) {
+        if (defaultExternalCustomScript == null) {
+            return true;
+        }
+
         try {
             log.trace("Executing python 'isCertValidForClient' method");
             context.setScript(defaultExternalCustomScript);
@@ -222,7 +242,7 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
             ClientRegistrationType externalType = (ClientRegistrationType) defaultExternalCustomScript.getExternalType();
             final boolean result = externalType.isCertValidForClient(cert, context);
             context.throwWebApplicationExceptionIfSet();
-            log.trace("Result of python 'isCertValidForClient' method: " + result);
+            log.trace("Result of python 'isCertValidForClient' method: {}", result);
             return result;
         } catch (WebApplicationException e) {
             throw e;
@@ -234,6 +254,10 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
     }
 
     public boolean modifyPostResponse(JSONObject responseAsJsonObject, ExecutionContext context) {
+        if (defaultExternalCustomScript == null) {
+            return false;
+        }
+
         CustomScriptConfiguration script = defaultExternalCustomScript;
 
         try {
@@ -257,6 +281,10 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
     }
 
     public boolean modifyPutResponse(JSONObject responseAsJsonObject, ExecutionContext context) {
+        if (defaultExternalCustomScript == null) {
+            return false;
+        }
+
         CustomScriptConfiguration script = defaultExternalCustomScript;
 
         try {
@@ -280,6 +308,10 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
     }
 
     public boolean modifyReadResponse(JSONObject responseAsJsonObject, ExecutionContext context) {
+        if (defaultExternalCustomScript == null) {
+            return false;
+        }
+
         CustomScriptConfiguration script = defaultExternalCustomScript;
 
         try {
