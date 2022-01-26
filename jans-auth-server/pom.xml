@@ -63,13 +63,11 @@
 			<name>Janssen project repository</name>
 			<url>https://maven.jans.io/maven</url>
 		</repository>
-<!--
 		<repository>
 			<id>gluu</id>
 			<name>Gluu project repository</name>
 			<url>https://maven.gluu.org/maven</url>
 		</repository>
--->
 		<repository>
 			<id>bouncycastle</id>
 			<name>Bouncy Castle</name>
