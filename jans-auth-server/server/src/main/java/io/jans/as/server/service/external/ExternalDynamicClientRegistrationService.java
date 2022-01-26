@@ -30,6 +30,7 @@ import java.security.cert.X509Certificate;
 @ApplicationScoped
 @DependsOn("appInitializer")
 @Named
+@SuppressWarnings("java:S1172")
 public class ExternalDynamicClientRegistrationService extends ExternalScriptService {
 
     private static final long serialVersionUID = 1416361273036208688L;
