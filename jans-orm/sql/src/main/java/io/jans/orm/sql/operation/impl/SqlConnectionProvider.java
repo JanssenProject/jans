@@ -435,5 +435,9 @@ public class SqlConnectionProvider {
         	throw new ConnectionException("Failed to get database metadata", ex);
         }
 	}
-	
+
+	public boolean isMariaDb() {
+		return mariaDb;
+	}
+
 }

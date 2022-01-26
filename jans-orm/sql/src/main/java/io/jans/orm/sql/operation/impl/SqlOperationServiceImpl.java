@@ -83,6 +83,8 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 
 	private boolean disableAttributeMapping = false;
 
+	private boolean mariaDb = false;
+
 	private PersistenceExtension persistenceExtension;
 
 	private SQLQueryFactory sqlQueryFactory;
@@ -104,6 +106,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 	private void init() {
 		this.sqlQueryFactory = connectionProvider.getSqlQueryFactory();
 		this.schemaName = connectionProvider.getSchemaName();
+		this.mariaDb = connectionProvider.isMariaDb();
 	}
 
     @Override
@@ -872,6 +875,10 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 	private boolean isJsonColumn(String tableName, String columnTypeName) {
 		if (columnTypeName == null) {
 			return false;
+		}
+		
+		if (mariaDb && "longtext".equals(columnTypeName)) {
+			return true;
 		}
 		
 //		String engineType = connectionProvider.getEngineType(tableName);
