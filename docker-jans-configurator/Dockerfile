@@ -1,14 +1,15 @@
-FROM alpine:3.13.6
+FROM bellsoft/liberica-openjre-alpine:11
 
 # ===============
 # Alpine packages
 # ===============
 
 RUN apk update \
-    && apk add --no-cache openssl py3-pip curl tini openjdk11-jre-headless py3-cryptography py3-grpcio py3-psycopg2 \
+    && apk add --no-cache openssl py3-pip curl tini py3-cryptography py3-psycopg2 \
+    && apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/v3.15/community py3-grpcio \
     && apk add --no-cache --virtual build-deps wget git \
     && mkdir -p /usr/java/latest \
-    && ln -sf /usr/lib/jvm/default-jvm/jre /usr/java/latest/jre
+    && ln -sf /usr/lib/jvm/jre /usr/java/latest/jre
 
 # ===========
 # Auth client
@@ -16,7 +17,7 @@ RUN apk update \
 
 # JAR files required to generate OpenID Connect keys
 ENV CN_VERSION=1.0.0-SNAPSHOT
-ENV CN_BUILD_DATE='2021-12-23 11:47'
+ENV CN_BUILD_DATE='2022-01-25 09:43'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-client/${CN_VERSION}/jans-auth-client-${CN_VERSION}-jar-with-dependencies.jar
 
 RUN wget -q ${CN_SOURCE_URL} -P /app/javalibs/
@@ -50,8 +51,7 @@ RUN apk del build-deps \
 # License
 # =======
 
-RUN mkdir -p /licenses
-COPY LICENSE /licenses/
+COPY LICENSE /licenses/LICENSE
 
 # ==========
 # Config ENV
@@ -131,7 +131,7 @@ RUN chown -R 1000:1000 /tmp \
     && chgrp -R 0 /app/db && chmod -R g=u /app/db \
     && chgrp -R 0 /tmp && chmod -R g=u /tmp \
     && chgrp -R 0 /etc/certs && chmod -R g=u /etc/certs \
-    && chmod -R +w /etc/ssl/certs/java/cacerts && chgrp -R 0 /etc/ssl/certs/java/cacerts && chmod -R g=u /etc/ssl/certs/java/cacerts
+    && chmod -R +w /usr/java/latest/jre/lib/security/cacerts && chgrp -R 0 /usr/java/latest/jre/lib/security/cacerts && chmod -R g=u /usr/java/latest/jre/lib/security/cacerts
 
 USER 1000
 

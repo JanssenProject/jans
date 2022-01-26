@@ -23,7 +23,6 @@ class Config:
     etc_hostname = '/etc/hostname'
     osDefault = '/etc/default'
     sysemProfile = '/etc/profile'
-    node_home = '/opt/node'
     jython_home = '/opt/jython'
     ldapBaseFolder = '/opt/opendj'
     network = '/etc/sysconfig/network'
@@ -171,7 +170,6 @@ class Config:
         self.installJans = True
         self.installJre = True
         self.installJetty = True
-        self.installNode = False
         self.installJython = True
         self.installOxAuth = True
         self.installOxTrust = True
@@ -189,7 +187,6 @@ class Config:
         self.installJansCli = False
         self.loadTestData = False
         self.allowPreReleasedFeatures = False
-        self.installAdminUI = False
 
         # backward compatibility
         self.os_type = base.os_type
@@ -295,7 +292,7 @@ class Config:
 
         # OpenID key generation default setting
         self.default_openid_jks_dn_name = 'CN=Jans Auth CA Certificates'
-        self.default_sig_key_algs = 'RS256 RS384 RS512 ES256 ES256K ES384 ES512 PS256 PS384 PS512 Ed25519 Ed448'
+        self.default_sig_key_algs = 'RS256 RS384 RS512 ES256 ES256K ES384 ES512 PS256 PS384 PS512 EdDSA'
         self.default_enc_key_algs = 'RSA1_5 RSA-OAEP ECDH-ES'
         self.default_key_expiration = 365
 

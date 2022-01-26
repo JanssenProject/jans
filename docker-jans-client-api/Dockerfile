@@ -1,14 +1,15 @@
-FROM alpine:3.13.6
+FROM bellsoft/liberica-openjre-alpine:11
 
 # ===============
 # Alpine packages
 # ===============
 
 RUN apk update \
-    && apk add --no-cache openssl py3-pip tini curl openjdk11-jre-headless py3-cryptography py3-grpcio py3-psycopg2 \
+    && apk add --no-cache openssl py3-pip tini curl py3-cryptography py3-psycopg2 \
+    && apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/v3.15/community py3-grpcio \
     && apk add --no-cache --virtual build-deps unzip wget git \
     && mkdir -p /usr/java/latest \
-    && ln -sf /usr/lib/jvm/default-jvm/jre /usr/java/latest/jre
+    && ln -sf /usr/lib/jvm/jre /usr/java/latest/jre
 
 # ==========
 # Client API
@@ -45,8 +46,7 @@ RUN apk del build-deps \
 # License
 # =======
 
-RUN mkdir -p /licenses
-COPY LICENSE /licenses/
+COPY LICENSE /licenses/LICENSE
 
 # ==========
 # Config ENV
@@ -161,7 +161,7 @@ RUN chown -R 1000:1000 /app/templates \
     && chgrp -R 0 /etc/certs && chmod -R g=u /etc/certs \
     && chgrp -R 0 /etc/jans && chmod -R g=u /etc/jans \
     && chgrp -R 0 /opt/client-api && chmod -R g=u /opt/client-api \
-    && chmod -R +w /etc/ssl/certs/java/cacerts && chgrp -R 0 /etc/ssl/certs/java/cacerts && chmod -R g=u /etc/ssl/certs/java/cacerts
+    && chmod -R +w /usr/java/latest/jre/lib/security/cacerts && chgrp -R 0 /usr/java/latest/jre/lib/security/cacerts && chmod -R g=u /usr/java/latest/jre/lib/security/cacerts
 
 USER 1000
 
