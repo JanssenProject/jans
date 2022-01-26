@@ -39,7 +39,6 @@ class DBUtils:
     Base = None
     session = None
     cbm = None
-    mariadb = False
 
     def bind(self, use_ssl=True, force=False):
 
@@ -121,12 +120,6 @@ class DBUtils:
             self.metadata = sqlalchemy.MetaData()
             myconn = self.session.connection()
 
-            # are we running on MariaDB?
-            query = myconn.execute("select version()")
-            result = query.first()
-            if result and 'mariadb' in result[0].lower():
-                self.mariadb = True
-
             base.logIt("{} Connection was successful".format(Config.rdbm_type.upper()))
             
             return True, self.session
@@ -138,8 +131,6 @@ class DBUtils:
 
     @property
     def json_dialects_instance(self):
-        if self.mariadb:
-            return sqlalchemy.dialects.mysql.LONGTEXT
         return sqlalchemy.dialects.mysql.json.JSON if Config.rdbm_type == 'mysql' else sqlalchemy.dialects.postgresql.json.JSON
 
     def mysqlconnection(self, log=True):
@@ -687,6 +678,12 @@ class DBUtils:
         self.Base = sqlalchemy.ext.automap.automap_base(metadata=self.metadata)
         self.Base.prepare()
 
+        # fix JSON type for mariadb
+        for tbl in self.Base.classes:
+            for col in tbl.__table__.columns:
+                if isinstance(col.type, sqlalchemy.dialects.mysql.LONGTEXT) and col.comment.lower() == 'json':
+                    col.type = sqlalchemy.dialects.mysql.json.JSON()
+
         base.logIt("Reflected tables {}".format(list(self.metadata.tables.keys())))
 
     def get_sqlalchObj_for_dn(self, dn):
@@ -891,10 +888,7 @@ class DBUtils:
                         sqlalchObj = sqlalchCls()
 
                         for v in vals:
-                            vval = vals[v]
-                            if self.mariadb and isinstance(vval, dict):
-                                vval = json.dumps(vals[v])
-                            setattr(sqlalchObj, v, vval)
+                            setattr(sqlalchObj, v, vals[v])
 
                         base.logIt("Adding {}".format(sqlalchObj.doc_id))
                         self.session.add(sqlalchObj)
