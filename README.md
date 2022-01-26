@@ -20,7 +20,7 @@ Through the Janssen project, we can coalesce a community. Open source developmen
 
 ## Project Structure
 
-Janssen is a Linux Foundation project, governed according to the [charter](./community/charter.md). Technical oversight of the project is the responsibility of the Technical Steering Committee ("TSC"). Day to day decision making is in the hands of the Contributors. The TSC helps to guide the direction of the project and to improve the quality and security of the development process.
+Janssen is a Linux Foundation project, governed according to the [charter](./resources/community/charter.md). Technical oversight of the project is the responsibility of the Technical Steering Committee ("TSC"). Day to day decision making is in the hands of the Contributors. The TSC helps to guide the direction of the project and to improve the quality and security of the development process.
 
 ## Design Goals
 
@@ -44,7 +44,7 @@ Pigeons (or doves if you like...) are universally regarded as a symbol of peace.
 
 ## Support
 
-[Docs](https://janssenproject.github.io/docs/) are a work in progress. You may want to also check Gluu Server [docs](https://gluu.org/docs), which have a lot in common with Janssen.
+Docs are currently being written, but drafts are available in the [Janssen Project Wiki](https://github.com/JanssenProject/jans/wiki/). You may want to also check Gluu Server [docs](https://gluu.org/docs), which have a lot in common with Janssen.
 
 We have setup a [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). You can register for free their with your Github identity.
 
