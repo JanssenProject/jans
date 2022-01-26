@@ -26,6 +26,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Date;
 
+import org.slf4j.Logger;
+
 @WebServlet(urlPatterns = "/servlet/favicon")
 public class FaviconServlet extends HttpServlet {
 
@@ -40,20 +42,25 @@ public class FaviconServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse response)
             throws ServletException, IOException {
+        log.error("\n\n FaviconServlet::doGet() - httpServletRequest = "+httpServletRequest+" , response = "+response);
         response.setContentType("image/x-icon");
         response.setDateHeader("Expires", new Date().getTime() + 1000L * 1800);
         GluuOrganization organization = organizationService.getOrganization();
+        log.error("\n\n FaviconServlet::doGet() - organization = "+organization);
         boolean hasSucceed = readCustomFavicon(response, organization);
+        log.error("\n\n FaviconServlet::doGet() - hasSucceed = "+hasSucceed);
         if (!hasSucceed) {
             readDefaultFavicon(response);
         }
     }
 
     private boolean readDefaultFavicon(HttpServletResponse response) {
+        log.error("\n\n FaviconServlet::readDefaultFavicon() - response = "+response);
         String defaultFaviconFileName = "/WEB-INF/static/favicon.ico";
         try (InputStream in = getServletContext().getResourceAsStream(defaultFaviconFileName);
              OutputStream out = response.getOutputStream()) {
             IOUtils.copy(in, out);
+            log.error("\n\n FaviconServlet::readDefaultFavicon() - out = "+out);
             return true;
         } catch (IOException e) {
             log.debug("Error loading default favicon: " + e.getMessage());
@@ -62,6 +69,7 @@ public class FaviconServlet extends HttpServlet {
     }
 
     private boolean readCustomFavicon(HttpServletResponse response, GluuOrganization organization) {
+        log.error("\n\n FaviconServlet::readCustomFavicon() - response = "+response+" , organization = "+organization);
         if (organization.getJsFaviconPath() == null || StringUtils.isEmpty(organization.getJsFaviconPath())) {
             return false;
         }
@@ -74,6 +82,7 @@ public class FaviconServlet extends HttpServlet {
         if (!faviconPath.exists()) {
             return false;
         }
+        log.error("\n\n FaviconServlet::readCustomFavicon() - faviconPath = "+faviconPath);
         try (InputStream in = new FileInputStream(faviconPath); OutputStream out = response.getOutputStream()) {
             IOUtils.copy(in, out);
             return true;
