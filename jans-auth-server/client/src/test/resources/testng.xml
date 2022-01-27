@@ -274,6 +274,12 @@
         </classes>
     </test>
 
+    <test name="Turn off consent for pairwise / openid-only scope" enabled="true">
+        <classes>
+            <class name="io.jans.as.client.ws.rs.TurnOffConsentForPairwiseOpenIdOnlyConsentTest"></class>
+        </classes>
+    </test>
+
     <!-- User Authentication Filter test -->
     <test name="User Authentication Filter test (HTTP)" enabled="true">
         <classes>

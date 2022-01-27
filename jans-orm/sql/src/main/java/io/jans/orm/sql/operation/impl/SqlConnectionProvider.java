@@ -8,14 +8,17 @@ package io.jans.orm.sql.operation.impl;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Set;
 
 import org.apache.commons.dbcp2.ConnectionFactory;
 import org.apache.commons.dbcp2.DriverManagerConnectionFactory;
@@ -52,7 +55,12 @@ import io.jans.orm.util.StringHelper;
  */
 public class SqlConnectionProvider {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SqlConnectionProvider.class);
+    private static final String JSON_TYPE_NAME = "json";
+
+	private static final Logger LOG = LoggerFactory.getLogger(SqlConnectionProvider.class);
+
+    private static final String QUERY_ENGINE_TYPE =
+    		"SELECT TABLE_NAME, ENGINE FROM information_schema.tables WHERE table_schema = ?";
 
     private static final String DRIVER_PROPERTIES_PREFIX = "connection.driver-property";
 
@@ -71,6 +79,10 @@ public class SqlConnectionProvider {
     private PasswordEncryptionMethod passwordEncryptionMethod;
 
 	private String dbType;
+	private String dbVersion;
+
+	private boolean mariaDb = false;
+
 	private String schemaName;
 
 	private SQLTemplates sqlTemplates;
@@ -78,6 +90,8 @@ public class SqlConnectionProvider {
 	private SQLQueryFactory sqlQueryFactory;
 	
 	private Map<String, Map<String, String>> tableColumnsMap;
+	private Map<String, String> tableEnginesMap = new HashMap<>();
+
 
     protected SqlConnectionProvider() {
     }
@@ -183,28 +197,53 @@ public class SqlConnectionProvider {
         try (Connection con = this.poolingDataSource.getConnection()) {
         	DatabaseMetaData databaseMetaData = con.getMetaData();
         	this.dbType = databaseMetaData.getDatabaseProductName().toLowerCase();
+        	this.dbVersion = databaseMetaData.getDatabaseProductVersion().toLowerCase();
+        	if ((this.dbVersion != null) && this.dbVersion.toLowerCase().contains("mariadb")) {
+        		this.mariaDb = true;
+        	}
             LOG.debug("Database product name: '{}'", dbType);
-            loadTableMetaData(databaseMetaData);
+            loadTableMetaData(databaseMetaData, con);
         } catch (Exception ex) {
-            throw new ConnectionException("Failed to detect database product name", ex);
+            throw new ConnectionException("Failed to detect database product name and load metadata", ex);
         }
 
         this.creationResultCode = ResultCode.SUCCESS_INT_VALUE;
     }
 
-    private void loadTableMetaData(DatabaseMetaData databaseMetaData) throws SQLException {
-        LOG.info("Scanning DB metadata...");
-
+    private void loadTableMetaData(DatabaseMetaData databaseMetaData, Connection con) throws SQLException {
         long takes = System.currentTimeMillis();
-    	ResultSet tableResultSet = databaseMetaData.getTables(null, schemaName, null, new String[]{"TABLE"});
+
+        LOG.info("Detecting engine types...");
+    	PreparedStatement preparedStatement = con.prepareStatement(QUERY_ENGINE_TYPE);
+    	preparedStatement.setString(1, schemaName);
+
+    	ResultSet tableEnginesResultSet = preparedStatement.executeQuery();
+    	while (tableEnginesResultSet.next()) {
+    		String tableName = tableEnginesResultSet.getString("TABLE_NAME");
+    		String engineName = tableEnginesResultSet.getString("ENGINE");
+
+        	tableEnginesMap.put(tableName, engineName);
+    	}
+
+        LOG.info("Scanning DB metadata...");
+        ResultSet tableResultSet = databaseMetaData.getTables(null, schemaName, null, new String[]{"TABLE"});
     	while (tableResultSet.next()) {
     		String tableName = tableResultSet.getString("TABLE_NAME");
     		Map<String, String> tableColumns = new HashMap<>();
     		
+    		String engineType = tableEnginesMap.get(tableName);
+    		
             LOG.debug("Found table: '{}'.", tableName);
             ResultSet columnResultSet = databaseMetaData.getColumns(null, schemaName, tableName, null);
         	while (columnResultSet.next()) {
-        		tableColumns.put(columnResultSet.getString("COLUMN_NAME").toLowerCase(), columnResultSet.getString("TYPE_NAME").toLowerCase());
+        		String columnName = columnResultSet.getString("COLUMN_NAME").toLowerCase();
+				String columTypeName = columnResultSet.getString("TYPE_NAME").toLowerCase();
+
+				String remark = columnResultSet.getString("REMARKS");
+        		if (mariaDb && "longtext".equalsIgnoreCase(columTypeName) && "json".equalsIgnoreCase(remark)) {
+        			columTypeName = JSON_TYPE_NAME;
+        		}
+				tableColumns.put(columnName, columTypeName);
         	}
 
         	tableColumnsMap.put(tableName, tableColumns);
@@ -374,6 +413,12 @@ public class SqlConnectionProvider {
 		return tableMapping;
 	}
 
+	public String getEngineType(String objectClass) {
+		String tableName = objectClass;
+
+		return tableEnginesMap.get(tableName);
+	}
+
 	public Connection getConnection() {
         try {
 			return this.poolingDataSource.getConnection();
@@ -390,5 +435,9 @@ public class SqlConnectionProvider {
         	throw new ConnectionException("Failed to get database metadata", ex);
         }
 	}
-	
+
+	public boolean isMariaDb() {
+		return mariaDb;
+	}
+
 }
