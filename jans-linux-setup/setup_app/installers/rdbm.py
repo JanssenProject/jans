@@ -55,7 +55,8 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 
             if Config.rdbm_type == 'mysql':
                 if base.os_type == 'suse':
-                    self.restart('mysql')
+                    self.restart('mariadb')
+                    self.enable('mariadb')
                 elif base.clone_type == 'rpm':
                     self.restart('mysqld')
                 result, conn = self.dbUtils.mysqlconnection(log=False)
