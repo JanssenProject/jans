@@ -792,14 +792,11 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
     private void fillRedirectUriResponseforJARM(RedirectUriResponse redirectUriResponse, Jwt jwt, Client client) {
         try {
-            if (jwt == null) {
-                return;
-            }
-
-            JwtClaims jwtClaims = jwt.getClaims();
-            String tempRedirectUri = jwtClaims.getClaimAsString("redirect_uri");
-            if (tempRedirectUri != null) {
-                redirectUriResponse.getRedirectUri().setBaseRedirectUri(URLDecoder.decode(tempRedirectUri, "UTF-8"));
+            if (jwt != null) {
+                String tempRedirectUri = jwt.getClaims().getClaimAsString("redirect_uri");
+                if (StringUtils.isNotBlank(tempRedirectUri)) {
+                    redirectUriResponse.getRedirectUri().setBaseRedirectUri(URLDecoder.decode(tempRedirectUri, "UTF-8"));
+                }
             }
             redirectUriResponse.getRedirectUri().setResponseMode(ResponseMode.JWT);
             String clientId = client.getClientId();
