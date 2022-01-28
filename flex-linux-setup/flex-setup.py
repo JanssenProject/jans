@@ -104,3 +104,5 @@ for logfn in (log4j2_adminui_path, log4j2_path):
 
 print("Restarting Janssen Config Api")
 configApiInstaller.restart()
+
+print("Installation was completed. Browse https://{}/admin".format(Config.hostname))
