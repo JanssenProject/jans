@@ -1,4 +1,4 @@
-package io.jans.configapi.model.configuration;
+package io.jans.configapi.core.model;
 
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.orm.annotation.AttributeName;
@@ -9,21 +9,21 @@ import io.jans.orm.annotation.ObjectClass;
 
 @DataEntry
 @ObjectClass(value = "jansAppConf")
-public class Conf {
+public class Conf <C>{
 
     @DN
-    private String dn;
+    protected String dn;
 
     @JsonObject
     @AttributeName(name = "jansConfDyn")
-    private ApiAppConfiguration dynamicConf;
+    protected C dynamicConf;
 
     @JsonObject
     @AttributeName(name = "jansConfStatic")
-    private StaticConfiguration staticConf;
+    protected StaticConfiguration staticConf;
 
     @AttributeName(name = "jansRevision")
-    private long revision;
+    protected long revision;
 
     public Conf() {
     }
@@ -36,11 +36,11 @@ public class Conf {
         this.dn = dn;
     }
 
-    public ApiAppConfiguration getDynamicConf() {
+    public C getDynamicConf() {
         return dynamicConf;
     }
 
-    public void setDynamicConf(ApiAppConfiguration dynamicConf) {
+    public void setDynamicConf(C dynamicConf) {
         this.dynamicConf = dynamicConf;
     }
 

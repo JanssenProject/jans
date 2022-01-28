@@ -23,7 +23,8 @@ public class ScimConfigService {
     ScimConfigurationFactory scimConfigurationFactory;        
 
    public ScimConf findConf() {
-       final String dn = scimConfigurationFactory.getConfigurationDn();
+       final String dn = scimConfigurationFactory.getScimConfigurationDn();
+       log.error("\n\n ScimConfigService::findConf() - dn:{} ",dn );
        return persistenceManager.find(dn, ScimConf.class, null);
    }
 
@@ -33,7 +34,9 @@ public class ScimConfigService {
    }
    
    public ScimAppConfiguration find() {
+       log.error("\n\n ScimConfigService::find() " );
        final ScimConf conf = findConf();
+       log.error("\n\n ScimConfigService::find() - conf:{}",conf );
        return conf.getDynamicConf();
    }
     

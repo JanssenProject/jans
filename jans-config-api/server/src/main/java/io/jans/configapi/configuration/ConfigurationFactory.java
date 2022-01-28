@@ -213,9 +213,13 @@ public class ConfigurationFactory {
 
         throw new ConfigurationException("Unable to find configuration in DB... ");
     }
-
+    
     public String getConfigurationDn() {
         return this.baseConfiguration.getString(Constants.SERVER_KEY_OF_CONFIGURATION_ENTRY);
+    }
+
+    public String getConfigurationDn(String key) {
+        return this.baseConfiguration.getString(key);
     }
 
     private Conf loadAuthConfigurationFromDb() {

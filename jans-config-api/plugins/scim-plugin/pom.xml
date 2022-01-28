@@ -12,12 +12,6 @@
 	<properties>
 		<httpcore.version>4.4.14</httpcore.version>
 		<httpclient.version>4.5.13</httpclient.version>
-
-		<sonarcube.cpd.exclusions>
-			io.jans.configapi.plugin\**
-			io.jans.configapi.plugin.scim.model.config\**
-		</sonarcube.cpd.exclusions>
-
 	</properties>
 
 
@@ -51,7 +45,6 @@
 			<artifactId>smallrye-config</artifactId>
 			<version>1.5.0</version>
 		</dependency>
-
 
 		<!-- Others -->
 		<dependency>
