@@ -39,8 +39,7 @@ public enum Algorithm {
     PS384("PS384", "id_token PS384 Sign Key", "Signature Key: RSASSA-PSS using SHA-384 and MGF1 with SHA-384", Use.SIGNATURE, AlgorithmFamily.RSA, RSAKeyFactory.DEF_KEYLENGTH),
     PS512("PS512", "id_token PS512 Sign Key", "Signature Key: RSASSA-PSS using SHA-512 and MGF1 with SHA-512", Use.SIGNATURE, AlgorithmFamily.RSA, RSAKeyFactory.DEF_KEYLENGTH),
 
-    ED25519("Ed25519", "id_token Ed25519 Sign Key", "Signature Key: EDDSA using Ed25519 with SHA-512", Use.SIGNATURE, AlgorithmFamily.ED, 256),
-    ED448("Ed448", "id_token Ed448 Sign Key", "Signature Key: EDDSA using Ed448 with SHA-3/SHAKE256", Use.SIGNATURE, AlgorithmFamily.ED, 456),
+    EDDSA("EdDSA", "id_token EdDSA Sign Key", "Signature Key: EdDSA using Ed25519 with SHA-512", Use.SIGNATURE, AlgorithmFamily.ED, 256),
 
     // Encryption
     RSA1_5("RSA1_5", "id_token RSA1_5 Encryption Key", "Encryption Key: RSAES-PKCS1-v1_5",
@@ -133,7 +132,7 @@ public enum Algorithm {
     }
 
     public boolean canGenerateKeys() { // based on currently supported generator, see io.jans.as.model.crypto.AuthCryptoProvider.generateKeyEncryption
-        return family == AlgorithmFamily.RSA || family == AlgorithmFamily.EC;
+        return family == AlgorithmFamily.RSA || family == AlgorithmFamily.EC || family == AlgorithmFamily.ED;
     }
 
     /**

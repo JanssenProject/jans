@@ -83,6 +83,8 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 
 	private boolean disableAttributeMapping = false;
 
+	private boolean mariaDb = false;
+
 	private PersistenceExtension persistenceExtension;
 
 	private SQLQueryFactory sqlQueryFactory;
@@ -104,6 +106,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 	private void init() {
 		this.sqlQueryFactory = connectionProvider.getSqlQueryFactory();
 		this.schemaName = connectionProvider.getSchemaName();
+		this.mariaDb = connectionProvider.isMariaDb();
 	}
 
     @Override
@@ -179,7 +182,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 
 			for (AttributeData attribute : attributes) {
 				String attributeType = columTypes.get(attribute.getName().toLowerCase());
-				boolean multiValued = (attributeType != null) && "json".equals(attributeType);
+				boolean multiValued = (attributeType != null) && isJsonColumn(tableMapping.getTableName(), attributeType);
 
 				sqlInsertQuery.columns(Expressions.stringPath(attribute.getName()));
 				if (multiValued || Boolean.TRUE.equals(attribute.getMultiValued())) {
@@ -222,7 +225,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 				Path path = Expressions.stringPath(attribute.getName());
 
 				String attributeType = columTypes.get(attribute.getName().toLowerCase());
-				boolean multiValued = (attributeType != null) && "json".equals(attributeType);
+				boolean multiValued = (attributeType != null) && isJsonColumn(tableMapping.getTableName(), attributeType);
 				
 				AttributeModificationType type = attributeMod.getModificationType();
                 if ((AttributeModificationType.ADD == type) || (AttributeModificationType.FORCE_UPDATE == type)) {
@@ -362,7 +365,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 					.where(whereExp).limit(1);
 			
 			try (ResultSet resultSet = sqlSelectQuery.getResults();) {
-				List<AttributeData> result = getAttributeDataList(resultSet, true);
+				List<AttributeData> result = getAttributeDataList(tableMapping, resultSet, true);
 				if (result != null) {
 					return result;
 				}
@@ -441,7 +444,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 	                    LOG.debug("Executing query: '" + queryStr + "'");
 
 	                    try (ResultSet resultSet = query.getResults()) {
-	                    	lastResult = getEntryDataList(resultSet);
+	                    	lastResult = getEntryDataList(tableMapping, resultSet);
 	                    }
 
 		    			lastCountRows = lastResult.size();
@@ -484,7 +487,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
                     LOG.debug("Execution query: '" + queryStr + "'");
 
                     try (ResultSet resultSet = query.getResults()) {
-		    			lastResult = getEntryDataList(resultSet);
+		    			lastResult = getEntryDataList(tableMapping, resultSet);
 		    			searchResultList.addAll(lastResult);
                     }
         		} catch (QueryException ex) {
@@ -551,7 +554,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
         return results;
     }
 
-    private List<AttributeData> getAttributeDataList(ResultSet resultSet, boolean skipDn) throws EntryConvertationException {
+    private List<AttributeData> getAttributeDataList(TableMapping tableMapping, ResultSet resultSet, boolean skipDn) throws EntryConvertationException {
         try {
             if ((resultSet == null)) {
                 return null;
@@ -593,7 +596,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 	                	continue;
 	                }
 	            } else {
-	            	if ("json".equals(columnTypeName)) {
+	            	if (isJsonColumn(tableMapping.getTableName(), columnTypeName)) {
 	            		attributeValueObjects = convertDbJsonToValue(attributeObject.toString());
 	            		multiValued = Boolean.TRUE;
 	            	} else if (attributeObject instanceof Integer) {
@@ -641,12 +644,12 @@ public class SqlOperationServiceImpl implements SqlOperationService {
         }
     }
 
-    private List<EntryData> getEntryDataList(ResultSet resultSet) throws EntryConvertationException, SQLException {
+    private List<EntryData> getEntryDataList(TableMapping tableMapping, ResultSet resultSet) throws EntryConvertationException, SQLException {
     	List<EntryData> entryDataList = new LinkedList<>();
 
     	List<AttributeData> attributeDataList = null;
     	while (!resultSet.isLast()) {
-    		attributeDataList = getAttributeDataList(resultSet, false);
+    		attributeDataList = getAttributeDataList(tableMapping, resultSet, false);
     		if (attributeDataList == null) {
     			break;
     		}
@@ -867,6 +870,24 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 			LOG.error("Failed to convert json value '{}' to array:", jsonValue, ex);
 			throw new MappingException(String.format("Failed to convert json value '%s' to array", jsonValue));
 		}
+	}
+
+	private boolean isJsonColumn(String tableName, String columnTypeName) {
+		if (columnTypeName == null) {
+			return false;
+		}
+		
+		if (mariaDb && "longtext".equals(columnTypeName)) {
+			return true;
+		}
+		
+//		String engineType = connectionProvider.getEngineType(tableName);
+//		if ((engineType != null) && engineType.equalsIgnoreCase("mariadb")) {
+//			return "longtext".equals(columnTypeName);
+//		}
+
+		return "json".equals(columnTypeName);
+		
 	}
 
 }
