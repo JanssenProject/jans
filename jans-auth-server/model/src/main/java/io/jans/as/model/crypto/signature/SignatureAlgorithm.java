@@ -51,7 +51,7 @@ public enum SignatureAlgorithm {
     PS384(SignatureAlgorithm.DEF_PS384, AlgorithmFamily.RSA, SignatureAlgorithm.DEF_SHA384WITHRSAANDMGF1, JWSAlgorithm.PS384),
     PS512(SignatureAlgorithm.DEF_PS512, AlgorithmFamily.RSA, SignatureAlgorithm.DEF_SHA512WITHRSAANDMGF1, JWSAlgorithm.PS512),
 
-    EDDSA(SignatureAlgorithm.DEF_EDDDSA, AlgorithmFamily.ED, SignatureAlgorithm.DEF_EDDDSA, EllipticEdvardsCurve.ED_25519, JWSAlgorithm.EdDSA);
+    EDDSA(SignatureAlgorithm.DEF_EDDDSA, AlgorithmFamily.ED, SignatureAlgorithm.DEF_ED25519, EllipticEdvardsCurve.ED_25519, JWSAlgorithm.EdDSA);
 
     public static final String DEF_HS256 = "HS256";
     public static final String DEF_HS384 = "HS384";
@@ -70,6 +70,7 @@ public enum SignatureAlgorithm {
     public static final String DEF_PS384 = "PS384";
     public static final String DEF_PS512 = "PS512";
 
+    public static final String DEF_ED25519 = "Ed25519";
     public static final String DEF_EDDDSA = "EdDSA";
 
     public static final String DEF_HMACSHA256 = "HMACSHA256";
