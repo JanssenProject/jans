@@ -9,7 +9,7 @@ import io.jans.orm.annotation.ObjectClass;
 
 @DataEntry
 @ObjectClass(value = "jansAppConf")
-public class Conf <C>{
+public class Conf<C> {
 
     @DN
     protected String dn;
@@ -37,10 +37,12 @@ public class Conf <C>{
     }
 
     public C getDynamicConf() {
+        System.out.println(" Conf<C>-getDynamicConf() - dynamicConf.getClass() =" +dynamicConf.getClass());
         return dynamicConf;
     }
 
     public void setDynamicConf(C dynamicConf) {
+        System.out.println(" Conf<C>-setDynamicConf() - dynamicConf.getClass() =" +dynamicConf.getClass());
         this.dynamicConf = dynamicConf;
     }
 
