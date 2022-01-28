@@ -402,6 +402,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     responseMode = extractResponseMode(request);
                     if (responseMode == ResponseMode.JWT) {
                         Jwt jwt = Jwt.parseSilently(request);
+                        redirectUriResponse.getRedirectUri().setResponseMode(ResponseMode.JWT);
                         fillRedirectUriResponseforJARM(redirectUriResponse, jwt, client);
                         if (appConfiguration.isFapi()) {
                             authorizeRestWebServiceValidator.throwInvalidJwtRequestExceptionAsJwtMode(redirectUriResponse,
@@ -798,18 +799,13 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     redirectUriResponse.getRedirectUri().setBaseRedirectUri(URLDecoder.decode(tempRedirectUri, "UTF-8"));
                 }
             }
-            redirectUriResponse.getRedirectUri().setResponseMode(ResponseMode.JWT);
             String clientId = client.getClientId();
             redirectUriResponse.getRedirectUri().setIssuer(appConfiguration.getIssuer());
             redirectUriResponse.getRedirectUri().setAudience(clientId);
-            redirectUriResponse.getRedirectUri()
-                    .setAuthorizationCodeLifetime(appConfiguration.getAuthorizationCodeLifetime());
-            redirectUriResponse.getRedirectUri().setSignatureAlgorithm(
-                    SignatureAlgorithm.fromString(client.getAttributes().getAuthorizationSignedResponseAlg()));
-            redirectUriResponse.getRedirectUri().setKeyEncryptionAlgorithm(
-                    KeyEncryptionAlgorithm.fromName(client.getAttributes().getAuthorizationEncryptedResponseAlg()));
-            redirectUriResponse.getRedirectUri().setBlockEncryptionAlgorithm(
-                    BlockEncryptionAlgorithm.fromName(client.getAttributes().getAuthorizationEncryptedResponseEnc()));
+            redirectUriResponse.getRedirectUri().setAuthorizationCodeLifetime(appConfiguration.getAuthorizationCodeLifetime());
+            redirectUriResponse.getRedirectUri().setSignatureAlgorithm(SignatureAlgorithm.fromString(client.getAttributes().getAuthorizationSignedResponseAlg()));
+            redirectUriResponse.getRedirectUri().setKeyEncryptionAlgorithm(KeyEncryptionAlgorithm.fromName(client.getAttributes().getAuthorizationEncryptedResponseAlg()));
+            redirectUriResponse.getRedirectUri().setBlockEncryptionAlgorithm(BlockEncryptionAlgorithm.fromName(client.getAttributes().getAuthorizationEncryptedResponseEnc()));
             redirectUriResponse.getRedirectUri().setCryptoProvider(cryptoProvider);
 
             String keyId = null;
