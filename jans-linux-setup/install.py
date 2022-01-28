@@ -345,7 +345,7 @@ elif argsp.uninstall:
         print("Stopping OpenDj Server")
         os.system('/opt/opendj/bin/stop-ds')
 
-    remove_list = ['/etc/certs', '/etc/jans', '/opt/jans', '/opt/amazon-corretto*', '/opt/jre', '/opt/jetty*', '/opt/jython*']
+    remove_list = ['/etc/certs', '/etc/jans', '/opt/jans', '/opt/amazon-corretto*', '/opt/jre', '/opt/node*', '/opt/jetty*', '/opt/jython*']
     if argsp.profile == 'jans':
         remove_list.append('/opt/opendj')
     if not argsp.keep_downloads:
