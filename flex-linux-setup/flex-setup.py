@@ -35,10 +35,10 @@ collectProperties.collect()
 
 maven_base_url = 'https://maven.jans.io/maven/io/jans/'
 app_versions = {
-  "SETUP_BRANCH": "main",
+  "SETUP_BRANCH": argsp.setup_branch,
   "JANS_APP_VERSION": "1.0.0",
   "JANS_BUILD": "-SNAPSHOT", 
-  "ADMIN_UI_FRONTEND_BRANCH": argsp.setup_branch,
+  "ADMIN_UI_FRONTEND_BRANCH": "main",
   "NODE_VERSION": "v14.18.2"
 }
 
