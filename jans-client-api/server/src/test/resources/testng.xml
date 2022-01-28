@@ -4,7 +4,7 @@
 
     <parameter name="host" value="http://localhost"/>
     <parameter name="opHost" value="https://${test.server.name}"/>
-    <parameter name="authServer" value="https://ce-dev6.gluu.org"/>
+    <parameter name="authServer" value="https://jenkins-build.jans.io"/>
     <parameter name="opDiscoveryPath" value=""/>
     <parameter name="emailWebfingerInput" value="${swd.resource}"/>
     <parameter name="urlWebfingerInput" value="https://${test.server.name}/admin"/>
