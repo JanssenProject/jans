@@ -27,6 +27,7 @@ class Config:
     ldapBaseFolder = '/opt/opendj'
     network = '/etc/sysconfig/network'
     jetty_home = '/opt/jetty'
+    node_home = '/opt/node'
     jetty_base = os.path.join(jansOptFolder, 'jetty')
     installed_instance = False
     profile = 'jans'
