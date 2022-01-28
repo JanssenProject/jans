@@ -149,7 +149,7 @@ if not (host and client_id and client_secret):
                              'scim_client_id': 'your jans scim client id',
                              'scim_client_secret': 'client secret for your jans scim client'}
 
-        config.write(config_ini_fn.open('w'))
+        self.write_config()
 
         print(
             "Pelase fill {} or set environmental variables jans_host, jans_client_id ,and jans_client_secret and re-run".format(config_ini_fn)
@@ -285,6 +285,10 @@ class JCA_CLI:
                 with open(debug_json, 'w') as w:
                     json.dump(self.cfg_yml, w, indent=2)
         return self.cfg_yml
+
+    def write_config(self):
+        with open(config_ini_fn, 'w') as w:
+            config.write(w)
 
     def get_rest_client(self):
         rest = swagger_client.rest.RESTClientObject(self.swagger_configuration)
@@ -483,8 +487,7 @@ class JCA_CLI:
         self.access_token = result['access_token']
         access_token_enc = encode_decode(self.access_token)
         config['DEFAULT']['access_token_enc'] = access_token_enc
-        with open(config_ini_fn, 'w') as w:
-            config.write(w)
+        self.write_config()
 
 
     def get_access_token(self, scope):
@@ -554,7 +557,8 @@ class JCA_CLI:
                   help_text=None, sitype=None, enforce='__true__',
                   example=None, spacing=0
                   ):
-        print(self.colored_text("b: back, q: quit", grey_color))
+        if 'b' in values and 'q' in values and 'x' in values:
+            print(self.colored_text("b: back, q: quit x: lougout and quit", grey_color))
         print()
         type_text = ''
         if itype:
@@ -608,14 +612,6 @@ class JCA_CLI:
                     print(self.colored_text("File {} does not exist".format(fname), warning_color))
                     continue
 
-            if selection == '_x':
-                if self.current_menu.parent:
-                    self.display_menu(self.current_menu.parent)
-                else:
-                    print("Quiting...")
-                    sys.exit()
-                break
-
             if itype == 'boolean' and not selection:
                 return False
 
@@ -633,6 +629,16 @@ class JCA_CLI:
             if 'q' in values and selection == 'q':
                 print("Quiting...")
                 sys.exit()
+
+            if 'x' in values and selection == 'x':
+                print("Logging out...")
+                if 'access_token_enc' in config['DEFAULT']:
+                    config['DEFAULT'].pop('access_token_enc')
+                    self.write_config()
+                print("Quiting...")
+                sys.exit()
+                break
+
 
             if itype == 'object' and sitype:
                 try:
@@ -926,7 +932,7 @@ class JCA_CLI:
                 return api_response
             return False
 
-        selections = ['q', 'b']
+        selections = ['q', 'x', 'b']
         item_counters = []
         tabulated = False
 
@@ -1197,7 +1203,7 @@ class JCA_CLI:
                         fields_numbers.append(str(i + 1))
 
                     while True:
-                        optional_selection = self.get_input(values=['q', 'c'] + fields_numbers,
+                        optional_selection = self.get_input(values=['q', 'x', 'c'] + fields_numbers,
                                                             help_text="c: continue, #: populate field")
                         if optional_selection == 'c':
                             break
@@ -1211,7 +1217,7 @@ class JCA_CLI:
             model_unmapped = self.unmap_model(model)
             self.print_colored_output(model_unmapped)
 
-            selection = self.get_input(values=['q', 'b', 'y', 'n'], text='Continue?')
+            selection = self.get_input(values=['q', 'x', 'b', 'y', 'n'], text='Continue?')
 
         else:
             selection = 'y'
@@ -1234,7 +1240,7 @@ class JCA_CLI:
                 except:
                     print(self.colored_text(str(api_response), success_color))
 
-        selection = self.get_input(values=['q', 'b'])
+        selection = self.get_input(values=['q', 'x', 'b'])
         if selection in ('b', 'n'):
             self.display_menu(endpoint.parent)
 
@@ -1245,7 +1251,7 @@ class JCA_CLI:
         else:
             url_param_val = ''
         selection = self.get_input(text="Are you sure want to delete {} ?".format(url_param_val),
-                                   values=['b', 'y', 'n', 'q'])
+                                   values=['b', 'y', 'n', 'q', 'x'])
         if selection in ('b', 'n'):
             self.display_menu(endpoint.parent)
         elif selection == 'y':
@@ -1261,7 +1267,7 @@ class JCA_CLI:
             if api_response is None:
                 print(self.colored_text("\nEntry {} was deleted successfully\n".format(url_param_val), success_color))
 
-        selection = self.get_input(['b', 'q'])
+        selection = self.get_input(['b', 'q', 'x'])
         if selection == 'b':
             self.display_menu(endpoint.parent)
 
@@ -1433,7 +1439,7 @@ class JCA_CLI:
                     api_response_unmapped = self.unmap_model(api_response)
                     self.print_colored_output(api_response_unmapped)
 
-                selection = self.get_input(values=['q', 'b'])
+                selection = self.get_input(values=['q', 'x', 'b'])
                 if selection == 'b':
                     self.display_menu(endpoint.parent)
 
@@ -1460,7 +1466,7 @@ class JCA_CLI:
 
                 print_fields()
                 changed_items = []
-                selection_list = ['q', 'b', 'v', 's', 'l'] + item_numbers
+                selection_list = ['q', 'x', 'b', 'v', 's', 'l'] + item_numbers
                 help_text = 'q: quit, v: view, s: save, l: list fields #: update field'
 
                 while True:
@@ -1511,7 +1517,7 @@ class JCA_CLI:
                                 break
 
                 if go_back:
-                    selection = self.get_input(values=['q', 'b'])
+                    selection = self.get_input(values=['q', 'x', 'b'])
                     if selection == 'b':
                         self.display_menu(endpoint.parent)
                 else:
@@ -1524,7 +1530,7 @@ class JCA_CLI:
 
         self.print_underlined(menu.name)
 
-        selection_values = ['q', 'b']
+        selection_values = ['q', 'x', 'b']
 
         menu_numbering = {}
 
