@@ -38,7 +38,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.TimeZone;
 
 import static io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType.INVALID_REQUEST;
 import static io.jans.as.model.crypto.signature.SignatureAlgorithm.NONE;
@@ -324,17 +328,14 @@ public class AuthorizeRestWebServiceValidator {
                 .build());
     }
 
-	public void createInvalidJwtRequestExceptionAsJwtMode(RedirectUriResponse redirectUriResponse, String reason,
-			String state, HttpServletRequest httpRequest) {
-		if (appConfiguration.isFapi()) {
-			log.debug(reason); // in FAPI case log reason but don't send it since it's `reason` is not known
-			log.debug("Invalid JWT authorization request.");
-			redirectUriResponse.getRedirectUri().parseQueryString(errorResponseFactory
-					.getErrorAsQueryString(AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT, state));
-			throw new WebApplicationException(
-					RedirectUtil.getRedirectResponseBuilder(redirectUriResponse.getRedirectUri(), httpRequest).build());
-		}
-	}
+    public void throwInvalidJwtRequestExceptionAsJwtMode(RedirectUriResponse redirectUriResponse, String reason, String state, HttpServletRequest httpRequest) {
+        log.debug(reason); // in FAPI case log reason but don't send it since it's `reason` is not known
+        log.debug("Invalid JWT authorization request.");
+        redirectUriResponse.getRedirectUri().parseQueryString(errorResponseFactory
+                .getErrorAsQueryString(AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT, state));
+        throw new WebApplicationException(
+                RedirectUtil.getRedirectResponseBuilder(redirectUriResponse.getRedirectUri(), httpRequest).build());
+    }
     
     public WebApplicationException createInvalidJwtRequestException(RedirectUriResponse redirectUriResponse, String reason) {
         if (appConfiguration.isFapi()) {
