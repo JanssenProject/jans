@@ -47,7 +47,7 @@ public class LicenseDetailsService {
                 License updatedLicense = auiConfiguration.getLicenseConfiguration()
                         .getLicenseManager()
                         .checkLicense(activeLicense);
-                return updatedLicense != null;
+                return updatedLicense != null && !activeLicense.getData().isExpired();
             }
         } catch (Exception e) {
             log.error(ErrorResponse.CHECK_LICENSE_ERROR.getDescription(), e);
@@ -115,17 +115,11 @@ public class LicenseDetailsService {
         LicenseResponse licenseResponse = new LicenseResponse();
         log.debug("LicenseRequest params: {}", licenseRequest);
         try {
-            if (Strings.isNullOrEmpty(licenseRequest.getValidityPeriod())) {
-                log.error(ErrorResponse.LICENSE_VALIDITY_PERIOD_NOT_FOUND.getDescription());
-                throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.LICENSE_VALIDITY_PERIOD_NOT_FOUND.getDescription());
-            }
             if (licenseRequest.getMaxActivations() < 1) {
                 log.error(ErrorResponse.INVALID_MAXIMUM_ACTIVATIONS.getDescription());
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.INVALID_MAXIMUM_ACTIVATIONS.getDescription());
             }
-            if (licenseRequest.getValidityPeriod().length() > 10) {
-                licenseRequest.setValidityPeriod(licenseRequest.getValidityPeriod().substring(0, 10));
-            }
+
             AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
 
             ManagementConfiguration configuration = ManagementConfiguration.builder()
@@ -148,9 +142,7 @@ public class LicenseDetailsService {
             //update license details
             UpdateLicenseRequest update = UpdateLicenseRequest.builder()
                     .isTrial(false)
-                    .validityPeriod(licenseRequest.getValidityPeriod())
                     .maxActivations(licenseRequest.getMaxActivations())
-                    .enabled(licenseRequest.getLicenseActive())
                     .build();
 
             BackOfficeLicense updated = licenseService.updateLicense(response.getResults().get(0).getId(), update);
