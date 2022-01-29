@@ -27,6 +27,7 @@ class HttpdInstaller(BaseInstaller, SetupUtils):
         self.httpdKeyFn = os.path.join(Config.certFolder, 'httpd.key')
         self.httpdCertFn = os.path.join(Config.certFolder, 'httpd.crt')
 
+
         self.templates_folder = os.path.join(Config.templateFolder, 'apache')
         self.output_folder = os.path.join(Config.outputFolder, 'apache')
 
@@ -35,13 +36,21 @@ class HttpdInstaller(BaseInstaller, SetupUtils):
         self.apache2_24_conf = os.path.join(self.output_folder, 'httpd_2.4.conf')
         self.apache2_ssl_24_conf = os.path.join(self.output_folder, 'https_jans.conf')
 
+        self.server_root = '/var/www/html'
+
         if base.os_type == 'suse':
             self.https_jans_fn = '/etc/apache2/vhosts.d/_https_jans.conf'
+            self.server_root = '/srv/www/htdocs'
+            self.apache_user = 'wwwrun'
+            self.apache_group = 'wwwrun'
         elif base.clone_type == 'rpm':
             self.https_jans_fn = '/etc/httpd/conf.d/https_jans.conf'
+            self.apache_user = 'apache'
+            self.apache_group = 'apache'
         else:
             self.https_jans_fn = '/etc/apache2/sites-available/https_jans.conf'
-
+            self.apache_user = 'www-data'
+            self.apache_group = 'www-data'
 
     def configure(self):
         self.logIt(self.pbar_text, pbar=self.service_name)
@@ -49,7 +58,7 @@ class HttpdInstaller(BaseInstaller, SetupUtils):
 
         self.write_httpd_config()
 
-        self.writeFile('/var/www/html/index.html', 'OK')
+        self.writeFile(os.path.join(self.server_root, 'index.html'), 'OK')
 
         if base.snap:
             icons_conf_fn = '/etc/apache2/mods-available/alias.conf'
@@ -72,10 +81,10 @@ class HttpdInstaller(BaseInstaller, SetupUtils):
         error_templates = glob.glob(os.path.join(self.templates_folder,'error_pages/*.html'))
 
         for tmp_fn in error_templates:
-            self.copyFile(tmp_fn, '/var/www/html')
+            self.copyFile(tmp_fn, self.server_root)
 
         # we only need these modules
-        mods_enabled = ['env', 'log_config', 'proxy', 'proxy_http', 'access_compat', 'alias', 'authn_core', 'authz_core', 'authz_host', 'headers', 'mime', 'mpm_event', 'proxy_ajp', 'security2', 'reqtimeout', 'setenvif', 'socache_shmcb', 'ssl', 'unique_id', 'rewrite']
+        mods_enabled = ['env', 'log_config', 'proxy', 'proxy_http', 'access_compat', 'alias', 'authn_core', 'authz_core', 'authz_host', 'headers', 'mime', 'mpm_event', 'proxy_ajp', 'security2', 'reqtimeout', 'setenvif', 'socache_shmcb', 'ssl', 'unique_id', 'rewrite', 'mod_dir']
 
         cmd_a2enmod = shutil.which('a2enmod')
         cmd_a2dismod = shutil.which('a2dismod')
@@ -122,16 +131,6 @@ class HttpdInstaller(BaseInstaller, SetupUtils):
                     self.run([cmd_a2enmod, amod])
             cmd_a2enflag = shutil.which('a2enflag')
             self.run([cmd_a2enflag, 'SSL'])
-
-            httpd_conf_fn = '/etc/apache2/httpd.conf'
-            httpd_conf_txt = self.readFile(httpd_conf_fn)
-            httpd_conf = httpd_conf_txt.splitlines()
-
-            for i, l in enumerate(httpd_conf[:]):
-                if l.strip().startswith('DirectoryIndex'):
-                    httpd_conf[i] = l.replace('DirectoryIndex', '#DirectoryIndex')
-
-            self.writeFile(httpd_conf_fn, '\n'.join(httpd_conf))
 
         else:
             modules_config_dir = '/etc/apache2/sysconfig.d' if base.os_type == 'suse' else '/etc/httpd/conf.modules.d'
