@@ -9,6 +9,11 @@ from urllib.parse import urljoin
 jans_setup_dir = '/opt/jans/jans-setup'
 sys.path.append(jans_setup_dir)
 
+if not (os.path.join(jans_setup_dir) and ('/etc/jans/conf/jans.properties')):
+    print("Please install Jans server then execute this script.")
+    sys.exit()
+
+
 from setup_app import paths
 paths.LOG_FILE = os.path.join(jans_setup_dir, 'logs/flex-setup.log')
 paths.LOG_ERROR_FILE = os.path.join(jans_setup_dir, 'logs/flex-setup-error.log')
