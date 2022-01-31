@@ -483,10 +483,10 @@ public abstract class BaseTest {
                 authorizationResponseStr = waitForPageSwitch(currentDriver, authorizationResponseStr);
             }
         } else {
-            if (authorizationResponseStr.contains("#code=")) {
+            if (authorizationResponseStr.contains("code=") || authorizationResponseStr.contains("access_token=")) {
                 return authorizationResponseStr;
             }
-            fail("The authorization form was expected to be shown.");
+            fail("The authorization form was expected to be shown. authorizationResponseStr:" + authorizationResponseStr);
         }
 
         return authorizationResponseStr;
