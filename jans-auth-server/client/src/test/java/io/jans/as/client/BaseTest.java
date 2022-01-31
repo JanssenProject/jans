@@ -483,6 +483,9 @@ public abstract class BaseTest {
                 authorizationResponseStr = waitForPageSwitch(currentDriver, authorizationResponseStr);
             }
         } else {
+            if (authorizationResponseStr.contains("#code=")) {
+                return authorizationResponseStr;
+            }
             fail("The authorization form was expected to be shown.");
         }
 
