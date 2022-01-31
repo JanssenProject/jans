@@ -9,14 +9,10 @@ import io.jans.orm.annotation.ObjectClass;
 
 @DataEntry
 @ObjectClass(value = "jansAppConf")
-public class Conf<C> {
+public class Conf {
 
     @DN
     protected String dn;
-
-    @JsonObject
-    @AttributeName(name = "jansConfDyn")
-    protected C dynamicConf;
 
     @JsonObject
     @AttributeName(name = "jansConfStatic")
@@ -34,16 +30,6 @@ public class Conf<C> {
 
     public void setDn(String dn) {
         this.dn = dn;
-    }
-
-    public C getDynamicConf() {
-        System.out.println(" Conf<C>-getDynamicConf() - dynamicConf.getClass() =" +dynamicConf.getClass());
-        return dynamicConf;
-    }
-
-    public void setDynamicConf(C dynamicConf) {
-        System.out.println(" Conf<C>-setDynamicConf() - dynamicConf.getClass() =" +dynamicConf.getClass());
-        this.dynamicConf = dynamicConf;
     }
 
     public StaticConfiguration getStaticConf() {
@@ -64,7 +50,6 @@ public class Conf<C> {
 
     @Override
     public String toString() {
-        return "Conf [dn=" + dn + ", dynamicConf=" + dynamicConf + ", staticConf=" + staticConf + ", revision="
-                + revision + "]";
+        return "Conf [dn=" + dn + ", staticConf=" + staticConf + ", revision=" + revision + "]";
     }
 }

@@ -44,10 +44,10 @@ public class ScimConfigResource {
     public Response patchAppConfigurationProperty(@NotNull String requestString) throws IOException,JsonPatchException {
         log.debug("AUTH CONF details to patch - requestString:{}", requestString);
         ScimConf conf = scimConfigService.findConf();
-        ScimAppConfiguration appConfiguration = scimConfigService.find();
+        ScimAppConfiguration appConfiguration = conf.getDynamicConf();
         log.trace("AUTH CONF details BEFORE patch - conf:{}, appConfiguration:{}", conf, appConfiguration);
         
-        appConfiguration = Jackson.applyPatch(requestString, conf.getDynamicConf());
+        appConfiguration = Jackson.applyPatch(requestString, appConfiguration);
         log.trace("AUTH CONF details BEFORE patch merge - appConfiguration:{}" ,appConfiguration);
         conf.setDynamicConf(appConfiguration);
 

@@ -36,9 +36,12 @@ public class ScimConfigService {
    public ScimAppConfiguration find() {
        log.error("\n\n ScimConfigService::find() " );
        final ScimConf conf = findConf();
-       //log.error("\n\n ScimConfigService::find() - conf.class:{}, conf.getDynamicConf.class:{}", conf.getClass(), conf.getDynamicConf().getClass());
        log.error("\n\n ScimConfigService::find() - new - conf.getDn:{}, conf.getDynamicConf:{}, conf.getStaticConf:{}, conf.getRevision:{}",conf.getDn(), conf.getDynamicConf(), conf.getStaticConf(), conf.getRevision());
-       return (ScimAppConfiguration) conf.getDynamicConf();
+       
+       ScimAppConfiguration scimAppConfiguration = (ScimAppConfiguration)conf.getDynamicConf();
+      // log.error("\n\n ScimConfigService::find() - conf.class:{}, conf.getDynamicConf.class:{}", conf.getClass(), (ScimAppConfiguration) conf.getDynamicConf().getClass());
+       
+       return scimAppConfiguration;
    }
     
  }

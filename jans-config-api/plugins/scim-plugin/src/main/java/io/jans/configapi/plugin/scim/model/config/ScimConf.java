@@ -16,8 +16,24 @@ import io.jans.orm.annotation.ObjectClass;
 
 @DataEntry
 @ObjectClass(value = "jansAppConf")
-public class ScimConf extends Conf<ScimAppConfiguration> {
+public class ScimConf extends Conf {
    
+
+    @JsonObject
+    @AttributeName(name = "jansConfDyn")
+    protected ScimAppConfiguration dynamicConf;
+    
+    public ScimAppConfiguration getDynamicConf() {
+        System.out.println(" ScimConf::getDynamicConf() - dynamicConf.getClass() =" +dynamicConf.getClass());
+        return dynamicConf;
+    }
+
+    public void setDynamicConf(ScimAppConfiguration dynamicConf) {
+        System.out.println(" ScimConf::setDynamicConf() - dynamicConf.getClass() =" +dynamicConf.getClass());
+        this.dynamicConf = dynamicConf;
+    }
+    
+    
     @Override
     public String toString() {
         return "ScimConf [dn=" + dn + ", dynamicConf=" + dynamicConf + ", staticConf=" + staticConf + ", revision="

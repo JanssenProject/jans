@@ -3,7 +3,8 @@ package io.jans.configapi.core.model;
 import java.io.Serializable;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-/*public class AppConf implements Serializable {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class AppConf implements Serializable {
 
     private static final long serialVersionUID = 5654645607723356029L;
     
@@ -17,6 +18,4 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
         this.applicationName = applicationName;
     }
 
-}*/
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class AppConf {}
+}
