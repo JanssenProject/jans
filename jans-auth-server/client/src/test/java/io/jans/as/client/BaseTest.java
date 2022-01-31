@@ -456,6 +456,10 @@ public abstract class BaseTest {
     protected String acceptAuthorization(WebDriver currentDriver, String redirectUri) {
         String authorizationResponseStr = currentDriver.getCurrentUrl();
 
+        if (authorizationResponseStr.contains("code=") || authorizationResponseStr.contains("access_token=")) {
+            return authorizationResponseStr;
+        }
+
         // Check for authorization form if client has no persistent authorization
         if (!authorizationResponseStr.contains("#")) {
             WebElement allowButton = waitForRequredElementLoad(currentDriver, authorizeFormAllowButton);
