@@ -325,11 +325,11 @@ public class AuthUtil {
     }
 
     public List<String> getAuthSpecificScopeRequired(ResourceInfo resourceInfo) {
-        log.error("\n\n AuthUtil:::getAuthSpecificScopeRequired() - resourceInfo = " + resourceInfo);
+        log.debug("\n\n AuthUtil:::getAuthSpecificScopeRequired() - resourceInfo = " + resourceInfo);
 
         // Get required oauth scopes for the endpoint
         List<String> resourceScopes = getRequestedScopes(resourceInfo);
-        log.error("\n\n AuthUtil:::getAuthSpecificScopeRequired(resourceInfo) - resourceScopes = " + resourceScopes
+        log.debug("\n\n AuthUtil:::getAuthSpecificScopeRequired(resourceInfo) - resourceScopes = " + resourceScopes
                 + " , this.configurationFactory.getApiAppConfiguration().getExclusiveAuthScopes() ="
                 + this.configurationFactory.getApiAppConfiguration().getExclusiveAuthScopes());
 
@@ -343,7 +343,7 @@ public class AuthUtil {
                     .collect(Collectors.toList());
         }
 
-        log.error("\n\n AuthUtil:::getAuthSpecificScopeRequired(resourceInfo) - exclusiveAuthScopesToReq = "
+        log.debug("\n\n AuthUtil:::getAuthSpecificScopeRequired(resourceInfo) - exclusiveAuthScopesToReq = "
                 + exclusiveAuthScopesToReq);
         return exclusiveAuthScopesToReq;
     }
