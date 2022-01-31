@@ -21,9 +21,6 @@ public class Conf {
     @AttributeName(name = "jansRevision")
     protected long revision;
 
-    public Conf() {
-    }
-
     public String getDn() {
         return dn;
     }
