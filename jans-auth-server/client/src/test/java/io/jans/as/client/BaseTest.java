@@ -456,7 +456,7 @@ public abstract class BaseTest {
     protected String acceptAuthorization(WebDriver currentDriver, String redirectUri) {
         String authorizationResponseStr = currentDriver.getCurrentUrl();
 
-        if (authorizationResponseStr.contains("code=") || authorizationResponseStr.contains("access_token=")) {
+        if ((authorizationResponseStr.contains("code=") || authorizationResponseStr.contains("access_token=")) && !authorizationResponseStr.contains("user_code")) {
             return authorizationResponseStr;
         }
 
