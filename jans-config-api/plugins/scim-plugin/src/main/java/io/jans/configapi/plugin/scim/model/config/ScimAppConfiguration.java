@@ -1,7 +1,9 @@
 package io.jans.configapi.plugin.scim.model.config;
 
 import io.jans.config.oxtrust.Configuration;
+import io.jans.orm.annotation.AttributeName;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -9,29 +11,47 @@ public class ScimAppConfiguration implements Configuration, Serializable {
 
     private static final long serialVersionUID = 7620150845020446557L;
     
-    private String baseDN;
+    @JsonProperty("baseDN")
+    @AttributeName(name = "baseDN")
+    private String baseDn;
+        
     private String applicationUrl;
     private String baseEndpoint;
     private String personCustomObjectClass;
-    private String oxAuthIssuer;
+    
+    @AttributeName(name = "oxAuthIssuer")
+    private String authIssuer;
+    
     private String protectionMode;
     private int maxCount;
     private String userExtensionSchemaURI;
+    
     private String loggingLevel;
     private String loggingLayout;
     private String externalLoggerConfiguration;
-    private int metricReporterInterval;
-    private int metricReporterKeepDataDays;
-    private Boolean metricReporterEnabled;
+    
+    @JsonProperty("metricReporterInterval")
+    @AttributeName(name = "metricReporterInterval")
+    private int metricReportInterval;
+    
+    @JsonProperty("metricReporterKeepDataDays")
+    @AttributeName(name = "metricReporterKeepDataDays")
+    private int metricReportKeepDataDays;
+    
+    @JsonProperty("metricReporterEnabled")
+    @AttributeName(name = "metricReporterEnabled")
+    private Boolean metricReportEnabled;
+    
     private Boolean disableJdkLogger = true;
     private Boolean useLocalCache = false;
 
-    public String getBaseDN() {
-        return baseDN;
+
+    public String getBaseDn() {
+        return baseDn;
     }
 
-    public void setBaseDN(String baseDN) {
-        this.baseDN = baseDN;
+    public void setBaseDn(String baseDn) {
+        this.baseDn = baseDn;
     }
 
     public String getApplicationUrl() {
@@ -58,12 +78,12 @@ public class ScimAppConfiguration implements Configuration, Serializable {
         this.personCustomObjectClass = personCustomObjectClass;
     }
 
-    public String getOxAuthIssuer() {
-        return oxAuthIssuer;
+    public String getAuthIssuer() {
+        return authIssuer;
     }
 
-    public void setOxAuthIssuer(String oxAuthIssuer) {
-        this.oxAuthIssuer = oxAuthIssuer;
+    public void setAuthIssuer(String authIssuer) {
+        this.authIssuer = authIssuer;
     }
 
     public String getProtectionMode() {
@@ -112,30 +132,30 @@ public class ScimAppConfiguration implements Configuration, Serializable {
 
     public void setExternalLoggerConfiguration(String externalLoggerConfiguration) {
         this.externalLoggerConfiguration = externalLoggerConfiguration;
+    }    
+
+    public int getMetricReportInterval() {
+        return metricReportInterval;
     }
 
-    public int getMetricReporterInterval() {
-        return metricReporterInterval;
+    public void setMetricReportInterval(int metricReportInterval) {
+        this.metricReportInterval = metricReportInterval;
     }
 
-    public void setMetricReporterInterval(int metricReporterInterval) {
-        this.metricReporterInterval = metricReporterInterval;
+    public int getMetricReportKeepDataDays() {
+        return metricReportKeepDataDays;
     }
 
-    public int getMetricReporterKeepDataDays() {
-        return metricReporterKeepDataDays;
+    public void setMetricReportKeepDataDays(int metricReportKeepDataDays) {
+        this.metricReportKeepDataDays = metricReportKeepDataDays;
     }
 
-    public void setMetricReporterKeepDataDays(int metricReporterKeepDataDays) {
-        this.metricReporterKeepDataDays = metricReporterKeepDataDays;
+    public Boolean getMetricReportEnabled() {
+        return metricReportEnabled;
     }
 
-    public Boolean getMetricReporterEnabled() {
-        return metricReporterEnabled;
-    }
-
-    public void setMetricReporterEnabled(Boolean metricReporterEnabled) {
-        this.metricReporterEnabled = metricReporterEnabled;
+    public void setMetricReportEnabled(Boolean metricReportEnabled) {
+        this.metricReportEnabled = metricReportEnabled;
     }
 
     public Boolean getDisableJdkLogger() {
@@ -156,13 +176,13 @@ public class ScimAppConfiguration implements Configuration, Serializable {
 
     @Override
     public String toString() {
-        return "ScimAppConfiguration [baseDN=" + baseDN + ", applicationUrl=" + applicationUrl + ", baseEndpoint="
-                + baseEndpoint + ", personCustomObjectClass=" + personCustomObjectClass + ", oxAuthIssuer="
-                + oxAuthIssuer + ", protectionMode=" + protectionMode + ", maxCount=" + maxCount
+        return "ScimAppConfiguration [baseDn=" + baseDn + ", applicationUrl=" + applicationUrl + ", baseEndpoint="
+                + baseEndpoint + ", personCustomObjectClass=" + personCustomObjectClass + ", authIssuer="
+                + authIssuer + ", protectionMode=" + protectionMode + ", maxCount=" + maxCount
                 + ", userExtensionSchemaURI=" + userExtensionSchemaURI + ", loggingLevel=" + loggingLevel
                 + ", loggingLayout=" + loggingLayout + ", externalLoggerConfiguration=" + externalLoggerConfiguration
-                + ", metricReporterInterval=" + metricReporterInterval + ", metricReporterKeepDataDays="
-                + metricReporterKeepDataDays + ", metricReporterEnabled=" + metricReporterEnabled
+                + ", metricReportInterval=" + metricReportInterval + ", metricReportKeepDataDays="
+                + metricReportKeepDataDays + ", metricReportEnabled=" + metricReportEnabled
                 + ", disableJdkLogger=" + disableJdkLogger + ", useLocalCache=" + useLocalCache + "]";
     }
 
