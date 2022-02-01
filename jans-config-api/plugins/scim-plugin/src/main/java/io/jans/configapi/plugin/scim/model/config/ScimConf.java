@@ -21,12 +21,10 @@ public class ScimConf extends Conf {
     protected ScimAppConfiguration dynamicConf;
 
     public ScimAppConfiguration getDynamicConf() {
-        System.out.println(" ScimConf::getDynamicConf() - dynamicConf.getClass() =" + dynamicConf.getClass());
         return dynamicConf;
     }
 
     public void setDynamicConf(ScimAppConfiguration dynamicConf) {
-        System.out.println(" ScimConf::setDynamicConf() - dynamicConf.getClass() =" + dynamicConf.getClass());
         this.dynamicConf = dynamicConf;
     }
 
