@@ -9,42 +9,64 @@ import java.io.Serializable;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ScimAppConfiguration implements Configuration, Serializable {
 
-    private static final long serialVersionUID = 7620150845020446557L;
-    
+    private static final long serialVersionUID = 1244429172476500948L;
+
     @JsonProperty("baseDN")
     @AttributeName(name = "baseDN")
     private String baseDn;
-        
-    private String applicationUrl;
-    private String baseEndpoint;
-    private String personCustomObjectClass;
-    
+
+    @JsonProperty("applicationUrl")
+    @AttributeName(name = "applicationUrl")
+    private String appUrl;
+
+    @JsonProperty("baseEndpoint")
+    @AttributeName(name = "baseEndpoint")
+    private String baseUrl;
+
+    @JsonProperty("personCustomObjectClass")
+    @AttributeName(name = "personCustomObjectClass")
+    private String personCustomObjClass;
+
+    @JsonProperty("oxAuthIssuer")
     @AttributeName(name = "oxAuthIssuer")
     private String authIssuer;
-    
-    private String protectionMode;
+
+    @JsonProperty("protectionMode")
+    @AttributeName(name = "protectionMode")
+    private String protectionScimMode;
+
     private int maxCount;
-    private String userExtensionSchemaURI;
-    
-    private String loggingLevel;
-    private String loggingLayout;
-    private String externalLoggerConfiguration;
-    
+
+    @JsonProperty("userExtensionSchemaURI")
+    @AttributeName(name = "userExtensionSchemaURI")
+    private String userExtSchemaURI;
+
+    @JsonProperty("loggingLevel")
+    @AttributeName(name = "loggingLevel")
+    private String logLevel;
+
+    @JsonProperty("loggingLayout")
+    @AttributeName(name = "loggingLayout")
+    private String logLayout;
+
+    @JsonProperty("externalLoggerConfiguration")
+    @AttributeName(name = "externalLoggerConfiguration")
+    private String externalLoggerConfig;
+
     @JsonProperty("metricReporterInterval")
     @AttributeName(name = "metricReporterInterval")
     private int metricReportInterval;
-    
+
     @JsonProperty("metricReporterKeepDataDays")
     @AttributeName(name = "metricReporterKeepDataDays")
     private int metricReportKeepDataDays;
-    
+
     @JsonProperty("metricReporterEnabled")
     @AttributeName(name = "metricReporterEnabled")
     private Boolean metricReportEnabled;
-    
+
     private Boolean disableJdkLogger = true;
     private Boolean useLocalCache = false;
-
 
     public String getBaseDn() {
         return baseDn;
@@ -54,28 +76,28 @@ public class ScimAppConfiguration implements Configuration, Serializable {
         this.baseDn = baseDn;
     }
 
-    public String getApplicationUrl() {
-        return applicationUrl;
+    public String getAppUrl() {
+        return appUrl;
     }
 
-    public void setApplicationUrl(String applicationUrl) {
-        this.applicationUrl = applicationUrl;
+    public void setAppUrl(String appUrl) {
+        this.appUrl = appUrl;
     }
 
-    public String getBaseEndpoint() {
-        return baseEndpoint;
+    public String getBaseUrl() {
+        return baseUrl;
     }
 
-    public void setBaseEndpoint(String baseEndpoint) {
-        this.baseEndpoint = baseEndpoint;
+    public void setBaseUrl(String baseUrl) {
+        this.baseUrl = baseUrl;
     }
 
-    public String getPersonCustomObjectClass() {
-        return personCustomObjectClass;
+    public String getPersonCustomObjClass() {
+        return personCustomObjClass;
     }
 
-    public void setPersonCustomObjectClass(String personCustomObjectClass) {
-        this.personCustomObjectClass = personCustomObjectClass;
+    public void setPersonCustomObjClass(String personCustomObjClass) {
+        this.personCustomObjClass = personCustomObjClass;
     }
 
     public String getAuthIssuer() {
@@ -86,53 +108,53 @@ public class ScimAppConfiguration implements Configuration, Serializable {
         this.authIssuer = authIssuer;
     }
 
-    public String getProtectionMode() {
-        return protectionMode;
+    public String getProtectionScimMode() {
+        return protectionScimMode;
     }
 
-    public void setProtectionMode(String protectionMode) {
-        this.protectionMode = protectionMode;
+    public void setProtectionScimMode(String protectionScimMode) {
+        this.protectionScimMode = protectionScimMode;
     }
 
     public int getMaxCount() {
-        return this.maxCount;
+        return maxCount;
     }
 
     public void setMaxCount(int maxCount) {
         this.maxCount = maxCount;
     }
 
-    public String getUserExtensionSchemaURI() {
-        return userExtensionSchemaURI;
+    public String getUserExtSchemaURI() {
+        return userExtSchemaURI;
     }
 
-    public void setUserExtensionSchemaURI(String userExtensionSchemaURI) {
-        this.userExtensionSchemaURI = userExtensionSchemaURI;
+    public void setUserExtSchemaURI(String userExtSchemaURI) {
+        this.userExtSchemaURI = userExtSchemaURI;
     }
 
-    public String getLoggingLevel() {
-        return loggingLevel;
+    public String getLogLevel() {
+        return logLevel;
     }
 
-    public void setLoggingLevel(String loggingLevel) {
-        this.loggingLevel = loggingLevel;
+    public void setLogLevel(String logLevel) {
+        this.logLevel = logLevel;
     }
 
-    public String getLoggingLayout() {
-        return loggingLayout;
+    public String getLogLayout() {
+        return logLayout;
     }
 
-    public void setLoggingLayout(String loggingLayout) {
-        this.loggingLayout = loggingLayout;
+    public void setLogLayout(String logLayout) {
+        this.logLayout = logLayout;
     }
 
-    public String getExternalLoggerConfiguration() {
-        return externalLoggerConfiguration;
+    public String getExternalLoggerConfig() {
+        return externalLoggerConfig;
     }
 
-    public void setExternalLoggerConfiguration(String externalLoggerConfiguration) {
-        this.externalLoggerConfiguration = externalLoggerConfiguration;
-    }    
+    public void setExternalLoggerConfig(String externalLoggerConfig) {
+        this.externalLoggerConfig = externalLoggerConfig;
+    }
 
     public int getMetricReportInterval() {
         return metricReportInterval;
@@ -176,14 +198,14 @@ public class ScimAppConfiguration implements Configuration, Serializable {
 
     @Override
     public String toString() {
-        return "ScimAppConfiguration [baseDn=" + baseDn + ", applicationUrl=" + applicationUrl + ", baseEndpoint="
-                + baseEndpoint + ", personCustomObjectClass=" + personCustomObjectClass + ", authIssuer="
-                + authIssuer + ", protectionMode=" + protectionMode + ", maxCount=" + maxCount
-                + ", userExtensionSchemaURI=" + userExtensionSchemaURI + ", loggingLevel=" + loggingLevel
-                + ", loggingLayout=" + loggingLayout + ", externalLoggerConfiguration=" + externalLoggerConfiguration
-                + ", metricReportInterval=" + metricReportInterval + ", metricReportKeepDataDays="
-                + metricReportKeepDataDays + ", metricReportEnabled=" + metricReportEnabled
-                + ", disableJdkLogger=" + disableJdkLogger + ", useLocalCache=" + useLocalCache + "]";
+        return "ScimAppConfiguration [baseDn=" + baseDn + ", appUrl=" + appUrl + ", baseUrl=" + baseUrl
+                + ", personCustomObjClass=" + personCustomObjClass + ", authIssuer=" + authIssuer
+                + ", protectionScimMode=" + protectionScimMode + ", maxCount=" + maxCount + ", userExtSchemaURI="
+                + userExtSchemaURI + ", logLevel=" + logLevel + ", logLayout=" + logLayout + ", externalLoggerConfig="
+                + externalLoggerConfig + ", metricReportInterval=" + metricReportInterval
+                + ", metricReportKeepDataDays=" + metricReportKeepDataDays + ", metricReportEnabled="
+                + metricReportEnabled + ", disableJdkLogger=" + disableJdkLogger + ", useLocalCache=" + useLocalCache
+                + "]";
     }
 
 }
