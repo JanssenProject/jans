@@ -56,6 +56,11 @@ public class LocalDocumentStoreProvider extends DocumentStoreProvider<LocalDocum
     	log.debug("Starting LocalDocumentStoreProvider ...");
 
     	if (StringHelper.isEmpty(localDocumentStoreConfiguration.getBaseLocation())) {
+    		String osName = System.getProperty("os.name");
+    		if (StringHelper.isNotEmpty(osName) && osName.toLowerCase().startsWith("windows")) {
+    			baseLocation = "";
+    			return;
+    		}
         	throw new IllegalArgumentException("Base location should not be empty");
     	}
     	
