@@ -66,6 +66,7 @@ import io.jans.util.StringHelper;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
@@ -86,7 +87,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.function.Function;
-import io.jans.as.model.util.Base64Util;
 
 import static io.jans.as.model.util.StringUtils.implode;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
@@ -402,15 +402,15 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     responseMode = extractResponseMode(request);
                     if (responseMode == ResponseMode.JWT) {
                         Jwt jwt = Jwt.parseSilently(request);
+                        redirectUriResponse.getRedirectUri().setResponseMode(ResponseMode.JWT);
                         fillRedirectUriResponseforJARM(redirectUriResponse, jwt, client);
-                        state = jwt.getClaims().getClaimAsString("state"); // state is needed by the
-                                                                           // craeteInvalidJwtRequestExceptionWithJarm
-                                                                           // to pass with error
-                        authorizeRestWebServiceValidator.createInvalidJwtRequestExceptionAsJwtMode(redirectUriResponse,
-                                "Invalid JWT authorization request", state, httpRequest);
-                    } else {
-                        throw e;
+                        if (appConfiguration.isFapi()) {
+                            authorizeRestWebServiceValidator.throwInvalidJwtRequestExceptionAsJwtMode(redirectUriResponse,
+                                    "Invalid JWT authorization request", jwt.getClaims().getClaimAsString("state"), httpRequest);
+                        }
                     }
+
+                    throw e;
                 } catch (Exception e) {
                     log.error("Invalid JWT authorization request. Message : " + e.getMessage(), e);
                     throw authorizeRestWebServiceValidator.createInvalidJwtRequestException(redirectUriResponse, "Invalid JWT authorization request");
@@ -780,31 +780,32 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         applicationAuditLogger.sendMessage(oAuth2AuditLog);
         return builder.build();
     }
-    
+
+    @Nullable
     private ResponseMode extractResponseMode(String request) {
-        JwtClaims jwtClaims = Jwt.parseSilently(request).getClaims();
+        final Jwt jwt = Jwt.parseSilently(request);
+        if (jwt == null) {
+            return null;
+        }
+        JwtClaims jwtClaims = jwt.getClaims();
         return ResponseMode.getByValue(jwtClaims.getClaimAsString("response_mode"));
     }
 
     private void fillRedirectUriResponseforJARM(RedirectUriResponse redirectUriResponse, Jwt jwt, Client client) {
         try {
-            JwtClaims jwtClaims = jwt.getClaims();
-            String tempRedirectUri = jwtClaims.getClaimAsString("redirect_uri");
-            if (tempRedirectUri != null) {
-                redirectUriResponse.getRedirectUri().setBaseRedirectUri(URLDecoder.decode(tempRedirectUri, "UTF-8"));
+            if (jwt != null) {
+                String tempRedirectUri = jwt.getClaims().getClaimAsString("redirect_uri");
+                if (StringUtils.isNotBlank(tempRedirectUri)) {
+                    redirectUriResponse.getRedirectUri().setBaseRedirectUri(URLDecoder.decode(tempRedirectUri, "UTF-8"));
+                }
             }
-            redirectUriResponse.getRedirectUri().setResponseMode(ResponseMode.JWT);
             String clientId = client.getClientId();
             redirectUriResponse.getRedirectUri().setIssuer(appConfiguration.getIssuer());
             redirectUriResponse.getRedirectUri().setAudience(clientId);
-            redirectUriResponse.getRedirectUri()
-                    .setAuthorizationCodeLifetime(appConfiguration.getAuthorizationCodeLifetime());
-            redirectUriResponse.getRedirectUri().setSignatureAlgorithm(
-                    SignatureAlgorithm.fromString(client.getAttributes().getAuthorizationSignedResponseAlg()));
-            redirectUriResponse.getRedirectUri().setKeyEncryptionAlgorithm(
-                    KeyEncryptionAlgorithm.fromName(client.getAttributes().getAuthorizationEncryptedResponseAlg()));
-            redirectUriResponse.getRedirectUri().setBlockEncryptionAlgorithm(
-                    BlockEncryptionAlgorithm.fromName(client.getAttributes().getAuthorizationEncryptedResponseEnc()));
+            redirectUriResponse.getRedirectUri().setAuthorizationCodeLifetime(appConfiguration.getAuthorizationCodeLifetime());
+            redirectUriResponse.getRedirectUri().setSignatureAlgorithm(SignatureAlgorithm.fromString(client.getAttributes().getAuthorizationSignedResponseAlg()));
+            redirectUriResponse.getRedirectUri().setKeyEncryptionAlgorithm(KeyEncryptionAlgorithm.fromName(client.getAttributes().getAuthorizationEncryptedResponseAlg()));
+            redirectUriResponse.getRedirectUri().setBlockEncryptionAlgorithm(BlockEncryptionAlgorithm.fromName(client.getAttributes().getAuthorizationEncryptedResponseEnc()));
             redirectUriResponse.getRedirectUri().setCryptoProvider(cryptoProvider);
 
             String keyId = null;

@@ -31,10 +31,10 @@ keystore_fn = 'jans-auth-keys.jks'
 oxauth_keys_json_fn = 'jans-keys.json'
 
 algs_for_versions = {
-    '1.0.0': {'sig_keys': 'RS256 RS384 RS512 ES256 ES256K ES384 ES512 PS256 PS384 PS512 EdDSA', 'enc_keys': 'RSA1_5 RSA-OAEP ECDH-ES'},
+    '1.0.0': {'sig_keys': 'RS256 RS384 RS512 ES256 ES256K ES384 ES512 PS256 PS384 PS512', 'enc_keys': 'RSA1_5 RSA-OAEP ECDH-ES'},
 }
 
-sig_keys = 'RS256 RS384 RS512 ES256 ES256K ES384 ES512 PS256 PS384 PS512 EdDSA'
+sig_keys = 'RS256 RS384 RS512 ES256 ES256K ES384 ES512 PS256 PS384 PS512'
 enc_keys = 'RSA1_5 RSA-OAEP ECDH-ES'
 
 

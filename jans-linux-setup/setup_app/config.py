@@ -27,6 +27,7 @@ class Config:
     ldapBaseFolder = '/opt/opendj'
     network = '/etc/sysconfig/network'
     jetty_home = '/opt/jetty'
+    node_home = '/opt/node'
     jetty_base = os.path.join(jansOptFolder, 'jetty')
     installed_instance = False
     profile = 'jans'
@@ -290,7 +291,7 @@ class Config:
 
         # OpenID key generation default setting
         self.default_openid_jks_dn_name = 'CN=Jans Auth CA Certificates'
-        self.default_sig_key_algs = 'RS256 RS384 RS512 ES256 ES256K ES384 ES512 PS256 PS384 PS512 EdDSA'
+        self.default_sig_key_algs = 'RS256 RS384 RS512 ES256 ES256K ES384 ES512 PS256 PS384 PS512'
         self.default_enc_key_algs = 'RSA1_5 RSA-OAEP ECDH-ES'
         self.default_key_expiration = 365
 
