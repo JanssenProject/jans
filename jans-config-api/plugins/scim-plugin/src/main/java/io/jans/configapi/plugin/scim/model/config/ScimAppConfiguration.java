@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ScimAppConfiguration implements Configuration,Serializable {
+public class ScimAppConfiguration implements Configuration, Serializable {
 
     private static final long serialVersionUID = 7620150845020446557L;
     
@@ -13,7 +13,7 @@ public class ScimAppConfiguration implements Configuration,Serializable {
     private String applicationUrl;
     private String baseEndpoint;
     private String personCustomObjectClass;
-    private String oxAuthIssuer;    
+    private String oxAuthIssuer;
     private String protectionMode;
     private int maxCount;
     private String userExtensionSchemaURI;
@@ -27,20 +27,20 @@ public class ScimAppConfiguration implements Configuration,Serializable {
     private Boolean useLocalCache = false;
 
     public String getBaseDN() {
-		return baseDN;
-	}
+        return baseDN;
+    }
 
-	public void setBaseDN(String baseDN) {
-		this.baseDN = baseDN;
-	}
+    public void setBaseDN(String baseDN) {
+        this.baseDN = baseDN;
+    }
 
-	public String getApplicationUrl() {
-		return applicationUrl;
-	}
+    public String getApplicationUrl() {
+        return applicationUrl;
+    }
 
-	public void setApplicationUrl(String applicationUrl) {
-		this.applicationUrl = applicationUrl;
-	}
+    public void setApplicationUrl(String applicationUrl) {
+        this.applicationUrl = applicationUrl;
+    }
 
     public String getBaseEndpoint() {
         return baseEndpoint;
@@ -89,7 +89,7 @@ public class ScimAppConfiguration implements Configuration,Serializable {
     public void setUserExtensionSchemaURI(String userExtensionSchemaURI) {
         this.userExtensionSchemaURI = userExtensionSchemaURI;
     }
-    
+
     public String getLoggingLevel() {
         return loggingLevel;
     }
@@ -107,21 +107,20 @@ public class ScimAppConfiguration implements Configuration,Serializable {
     }
 
     public String getExternalLoggerConfiguration() {
-		return externalLoggerConfiguration;
-	}
+        return externalLoggerConfiguration;
+    }
 
-	public void setExternalLoggerConfiguration(String externalLoggerConfiguration) {
-		this.externalLoggerConfiguration = externalLoggerConfiguration;
-	}
+    public void setExternalLoggerConfiguration(String externalLoggerConfiguration) {
+        this.externalLoggerConfiguration = externalLoggerConfiguration;
+    }
 
-	public int getMetricReporterInterval() {
+    public int getMetricReporterInterval() {
         return metricReporterInterval;
     }
 
     public void setMetricReporterInterval(int metricReporterInterval) {
         this.metricReporterInterval = metricReporterInterval;
     }
-
 
     public int getMetricReporterKeepDataDays() {
         return metricReporterKeepDataDays;
@@ -147,13 +146,13 @@ public class ScimAppConfiguration implements Configuration,Serializable {
         this.disableJdkLogger = disableJdkLogger;
     }
 
-	public Boolean getUseLocalCache() {
-		return useLocalCache;
-	}
+    public Boolean getUseLocalCache() {
+        return useLocalCache;
+    }
 
-	public void setUseLocalCache(Boolean useLocalCache) {
-		this.useLocalCache = useLocalCache;
-	}
+    public void setUseLocalCache(Boolean useLocalCache) {
+        this.useLocalCache = useLocalCache;
+    }
 
     @Override
     public String toString() {
@@ -166,7 +165,5 @@ public class ScimAppConfiguration implements Configuration,Serializable {
                 + metricReporterKeepDataDays + ", metricReporterEnabled=" + metricReporterEnabled
                 + ", disableJdkLogger=" + disableJdkLogger + ", useLocalCache=" + useLocalCache + "]";
     }
-	
-	
 
 }
