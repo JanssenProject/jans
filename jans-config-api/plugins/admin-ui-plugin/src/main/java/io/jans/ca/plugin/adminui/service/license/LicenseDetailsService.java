@@ -64,7 +64,7 @@ public class LicenseDetailsService {
             ActivationLicense keyBased = ActivationLicense.fromKey(licenseRequest.getLicenseKey());
             License license = licenseManager.activateLicense(keyBased);
             log.debug("License activated : {} ", license.getProduct());
-            return true;
+            return !license.getData().isExpired();
         } catch (Exception e) {
             log.error(ErrorResponse.ACTIVATE_LICENSE_ERROR.getDescription(), e);
             return false;
