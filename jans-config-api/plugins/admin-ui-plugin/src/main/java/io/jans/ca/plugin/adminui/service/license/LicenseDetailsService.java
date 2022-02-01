@@ -47,7 +47,7 @@ public class LicenseDetailsService {
                 License updatedLicense = auiConfiguration.getLicenseConfiguration()
                         .getLicenseManager()
                         .checkLicense(activeLicense);
-                return updatedLicense != null;
+                return updatedLicense != null && !activeLicense.getData().isExpired();
             }
         } catch (Exception e) {
             log.error(ErrorResponse.CHECK_LICENSE_ERROR.getDescription(), e);

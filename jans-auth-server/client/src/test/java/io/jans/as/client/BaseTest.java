@@ -456,6 +456,10 @@ public abstract class BaseTest {
     protected String acceptAuthorization(WebDriver currentDriver, String redirectUri) {
         String authorizationResponseStr = currentDriver.getCurrentUrl();
 
+        if ((authorizationResponseStr.contains("code=") || authorizationResponseStr.contains("access_token=")) && !authorizationResponseStr.contains("user_code")) {
+            return authorizationResponseStr;
+        }
+
         // Check for authorization form if client has no persistent authorization
         if (!authorizationResponseStr.contains("#")) {
             WebElement allowButton = waitForRequredElementLoad(currentDriver, authorizeFormAllowButton);
@@ -483,10 +487,10 @@ public abstract class BaseTest {
                 authorizationResponseStr = waitForPageSwitch(currentDriver, authorizationResponseStr);
             }
         } else {
-            if (authorizationResponseStr.contains("#code=")) {
+            if (authorizationResponseStr.contains("code=") || authorizationResponseStr.contains("access_token=")) {
                 return authorizationResponseStr;
             }
-            fail("The authorization form was expected to be shown.");
+            fail("The authorization form was expected to be shown. authorizationResponseStr:" + authorizationResponseStr);
         }
 
         return authorizationResponseStr;
