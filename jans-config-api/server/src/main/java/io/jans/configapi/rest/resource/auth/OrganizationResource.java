@@ -6,13 +6,16 @@
 
 package io.jans.configapi.rest.resource.auth;
 
-import io.jans.configapi.service.auth.OrganizationService;
+import io.jans.configapi.service.auth.ConfigurationService;
+import io.jans.as.client.service.OrgConfigurationService;
 import io.jans.as.persistence.model.GluuOrganization;
+import io.jans.configapi.service.auth.OrganizationService;
 import io.jans.configapi.filters.ProtectedApi;
 import io.jans.configapi.rest.model.AuthenticationMethod;
 import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
+import io.jans.configapi.util.AuthUtil;
 import io.jans.configapi.util.Jackson;
 import io.jans.model.GluuAttribute;
 import io.jans.util.io.FileDownloader;
@@ -34,7 +37,6 @@ import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
-import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.servlet.http.HttpServletRequest;
@@ -52,26 +54,26 @@ public class OrganizationResource extends BaseResource {
 
     @Inject
     Logger log;
-
+  
+    @Inject
+    AuthUtil authUtil;
+  
     @Inject
     OrganizationService organizationService;
 
-    @Inject
-    HttpServletRequest request;
-
-    @Inject
-    HttpServletResponse response;
-
-    public static final String BASE_AUTH_FAVICON_PATH = "/opt/jans/jetty/jans-auth/custom/static/favicon/";
-    public static final String BASE_AUTH_LOGO_PATH = "/opt/jans/jetty/jans-auth/custom/static/logo/";
-
+    private static final String ORG_URL = "/jans-auth/restv1/internal/org";
+    
     @GET
     // @ProtectedApi(scopes = { ApiAccessConstants.ACRS_READ_ACCESS })
-    public Response getGluuOrganization() {
-        final GluuOrganization gluuOrganization = organizationService.getOrganization();
-        log.error("\n\n OrganizationResource::getGluuOrganization() - gluuOrganization:{} ", gluuOrganization);
-
-        return Response.ok(gluuOrganization).build();
+    public Response getGluuOrganization(@HeaderParam("Authorization") String authorization) {
+        final OrgConfigurationService orgConfigurationService = organizationService.getOrgConfigurationService(getOrganizationServiceUrl());
+        log.error("\n\n OrganizationResource::getGluuOrganization() - orgConfigurationService:{} ", orgConfigurationService);
+        
+        // GET - Psudeo
+        // Get GluuOrganization from DB 
+        // Read the icon and save file in server
+        // Return GluuOrganization
+        return Response.ok(orgConfigurationService.getOrg(authorization)).build();
     }
 
     @PATCH
@@ -84,8 +86,18 @@ public class OrganizationResource extends BaseResource {
         organizationService.updateOrganization(gluuOrganization);
         return Response.ok(gluuOrganization).build();
     }
+    
+    private String getOrganizationServiceUrl() {
+        return this.authUtil.getServiceUrl(ORG_URL);        
+    }
 
+/*
     private void saveLogo(FileUploadWrapper uploadedFile) {
+        // Update LogoFile
+        // Save file on server
+        // Update GluuOrganization
+        // Return GluuOrganization
+        
         String fileName = saveFile(uploadedFile, BASE_AUTH_LOGO_PATH);
         final GluuOrganization gluuOrganization = organizationService.getOrganization();
         log.error("\n\n OrganizationResource::saveLogo() - gluuOrganization:{} ", gluuOrganization);
@@ -110,6 +122,7 @@ public class OrganizationResource extends BaseResource {
         organizationService.updateOrganization(gluuOrganization);
 
     }
+    */
     
     private String saveFile(FileUploadWrapper fileUploadWrapper, String basePath) {
         log.error("\n\n OrganizationResource::saveFile() - fileUploadWrapper:{} , basePath:{} ", fileUploadWrapper,
@@ -139,6 +152,7 @@ public class OrganizationResource extends BaseResource {
         return null;
     }
 
+    /*
     private boolean readDefaultFavicon() {
         log.error("\n\n OrganizationResource::readDefaultFavicon() - response:{}", response);
         // String defaultFaviconFileName = "/WEB-INF/static/favicon.ico";
@@ -153,6 +167,8 @@ public class OrganizationResource extends BaseResource {
             log.debug("Error loading default favicon: " + e.getMessage());
             return false;
         }
-    }
+    }*/
+    
+
 
 }
