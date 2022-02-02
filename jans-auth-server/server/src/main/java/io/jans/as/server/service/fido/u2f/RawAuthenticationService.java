@@ -8,6 +8,7 @@ package io.jans.as.server.service.fido.u2f;
 
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
+import org.apache.commons.codec.binary.Hex;
 import io.jans.as.model.exception.SignatureException;
 import io.jans.as.model.fido.u2f.exception.BadInputException;
 import io.jans.as.model.fido.u2f.message.RawAuthenticateResponse;
@@ -17,6 +18,7 @@ import io.jans.as.server.crypto.signature.SHA256withECDSASignatureVerification;
 import io.jans.util.io.ByteDataInputStream;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
+
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -59,6 +61,9 @@ public class RawAuthenticationService {
 
         byte[] signedBytes = packBytesToSign(signatureVerification.hash(appId), rawAuthenticateResponse.getUserPresence(),
                 rawAuthenticateResponse.getCounter(), signatureVerification.hash(rawClientData));
+
+        log.debug("Packed bytes to sign in HEX '{}'", Hex.encodeHexString(signedBytes));
+        log.debug("Signature from authentication response in HEX '{}'", Hex.encodeHexString(rawAuthenticateResponse.getSignature()));
         try {
             boolean isValid = signatureVerification.checkSignature(signatureVerification.decodePublicKey(publicKey),
                     signedBytes, rawAuthenticateResponse.getSignature());
