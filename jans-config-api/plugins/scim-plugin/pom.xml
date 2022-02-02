@@ -14,7 +14,6 @@
 		<httpclient.version>4.5.13</httpclient.version>
 	</properties>
 
-
 	<dependencies>
 
 		<!-- config api -->
@@ -26,6 +25,11 @@
 		<dependency>
 			<groupId>io.jans</groupId>
 			<artifactId>jans-config-api-server</artifactId>
+			<version>${jans.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-orm-annotation</artifactId>
 			<version>${jans.version}</version>
 		</dependency>
 		<dependency>
@@ -45,7 +49,6 @@
 			<artifactId>smallrye-config</artifactId>
 			<version>1.5.0</version>
 		</dependency>
-
 
 		<!-- Others -->
 		<dependency>
@@ -173,6 +176,31 @@
 							<failIfNoTests>false</failIfNoTests>
 							<excludedGroups>!integration</excludedGroups>
 							<groups>integration</groups>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>3.1.0</version>
+				<executions>
+					<execution>
+						<id>deploy-to-local-folder</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>../target/plugins</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${project.build.directory}</directory>
+									<include>*-distribution.jar</include>
+									<filtering>false</filtering>
+								</resource>
+							</resources>
 						</configuration>
 					</execution>
 				</executions>

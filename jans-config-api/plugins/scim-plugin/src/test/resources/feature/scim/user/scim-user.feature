@@ -2,7 +2,7 @@
 Feature: Scim Users 
 
 Background:
-* def mainUrl = scim_url
+* def mainUrl = scim_user_url
 
 
 Scenario: Fetch scim users without bearer token 
