@@ -26,7 +26,7 @@ import java.util.Base64;
  */
 public class NotifyClientFactory {
 
-	private final static NotifyClientFactory instance = new NotifyClientFactory();
+	private static final NotifyClientFactory instance = new NotifyClientFactory();
 	private ResteasyClient client;
 	private ResteasyClient pooledClient;
 
