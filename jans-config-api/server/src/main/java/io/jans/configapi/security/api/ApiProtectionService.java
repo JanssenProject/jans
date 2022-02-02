@@ -10,7 +10,7 @@ import io.jans.as.persistence.model.Scope;
 import io.jans.configapi.configuration.ConfigurationFactory;
 import io.jans.configapi.service.auth.ClientService;
 import io.jans.configapi.service.auth.ScopeService;
-import io.jans.configapi.util.Jackson;
+import io.jans.configapi.core.util.Jackson;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -656,6 +656,23 @@
                 ]
             }            
         ]
+    },
+    {
+        "path":"/jans-config-api/scim/config",
+        "conditions":[
+            {
+                "httpMethods":["GET"],
+                "scopes":[
+                    "https://jans.io/scim/config.readonly"
+                ]
+            },
+            {
+                "httpMethods":["PATCH"],
+                "scopes":[
+                    "https://jans.io/scim/config.write"
+                ]
+            }
+        ]
     }
 ]
 }

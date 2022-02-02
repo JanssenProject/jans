@@ -9,12 +9,12 @@ package io.jans.configapi.rest.resource.auth;
 import com.github.fge.jsonpatch.JsonPatchException;
 import io.jans.as.model.common.ScopeType;
 import io.jans.as.persistence.model.Scope;
-import io.jans.configapi.filters.ProtectedApi;
+import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.service.auth.ScopeService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.util.AttributeNames;
-import io.jans.configapi.util.Jackson;
+import io.jans.configapi.core.util.Jackson;
 import io.jans.util.StringHelper;
 
 import javax.inject.Inject;

@@ -39,10 +39,7 @@
 			<groupId>io.jans</groupId>
 			<artifactId>jans-client-api</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>io.jans</groupId>
-			<artifactId>jans-config-api-common</artifactId>
-		</dependency>
+
 
 		<!-- Weld -->
 		<dependency>

@@ -8,11 +8,11 @@ package io.jans.configapi.rest.resource.auth;
 
 import io.jans.as.model.config.Conf;
 import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.configapi.filters.ProtectedApi;
+import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
-import io.jans.configapi.util.Jackson;
+import io.jans.configapi.core.util.Jackson;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
