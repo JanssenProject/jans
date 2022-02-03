@@ -30,6 +30,7 @@ import javax.inject.Inject;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -65,7 +66,7 @@ import static io.jans.as.model.util.Util.escapeLog;
 @Path("/internal/org")
 public class OrganizationConfigWS {
 
-    private static final int DEFAULT_WS_INTERVAL_LIMIT_IN_SECONDS = 60;
+    public static final String BASE_AUTH_FAVICON_PATH = "/opt/jans/jetty/jans-auth/custom/static/favicon/";
 
     @Inject
     private Logger log;
@@ -76,13 +77,14 @@ public class OrganizationConfigWS {
     @Inject
     private OrganizationService organizationService;
 
-    public static final String BASE_OXAUTH_FAVICON_PATH = "/opt/jans/jetty/jans-auth/custom/static/favicon/";
+    @Context
+    HttpServletRequest request;
     
     @GET
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
-    Response getOrg(@HeaderParam("Authorization") String authorization) {
-        log.error("\n\n OrganizationConfigWS::getOrg() - authorization:{}", authorization);
+    public Response getOrg(@HeaderParam("Authorization") String authorization) {
+        log.error("\n\n OrganizationConfigWS::getOrg() - authorization:{}, request:{}", authorization, request);
         GluuOrganization gluuOrganization = organizationService.getOrganization();
         log.error("\n\n OrganizationConfigWS::getOrg() - gluuOrganization:{}", gluuOrganization);
         return Response.ok(gluuOrganization).build();
@@ -91,7 +93,7 @@ public class OrganizationConfigWS {
     @PUT
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
-    Response updateOrg(@HeaderParam("Authorization") String authorization, GluuOrganization gluuOrganization) {
+    public Response updateOrg(@HeaderParam("Authorization") String authorization, GluuOrganization gluuOrganization) {
         log.error("\n\n OrganizationConfigWS::updateOrg() - gluuOrganization:{}", gluuOrganization);
         organizationService.updateOrganization(gluuOrganization);
         gluuOrganization = organizationService.getOrganization();
@@ -103,20 +105,18 @@ public class OrganizationConfigWS {
     @Path("{imageType}")
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
-    Response updateImageResource(@HeaderParam("Authorization") String authorization, @PathParam("imageType") String imageType, FileUploadWrapper fileUploadWrapper) {
+    public Response updateImageResource(@HeaderParam("Authorization") String authorization, @PathParam("imageType") String imageType, FileUploadWrapper fileUploadWrapper) {
         log.error("\n\n OrganizationConfigWS::updateImageResource() - authorization:{}, imageType:{}, fileUploadWrapper:{}", authorization, imageType, fileUploadWrapper);
         GluuOrganization gluuOrganization = organizationService.getOrganization();
         return Response.ok(gluuOrganization).build();
     }
 
-    /*
     private boolean readDefaultFavicon(HttpServletResponse response) {
-        log.error("\n\n FaviconServlet::readDefaultFavicon() - response = "+response);
         String defaultFaviconFileName = "/WEB-INF/static/favicon.ico";
-        try (InputStream in = getServletContext().getResourceAsStream(defaultFaviconFileName);
+       
+        try (InputStream in =  request.getServletContext().getResourceAsStream(defaultFaviconFileName);
              OutputStream out = response.getOutputStream()) {
             IOUtils.copy(in, out);
-            log.error("\n\n FaviconServlet::readDefaultFavicon() - out = "+out);
             return true;
         } catch (IOException e) {
             log.debug("Error loading default favicon: " + e.getMessage());
@@ -125,12 +125,11 @@ public class OrganizationConfigWS {
     }
 
     private boolean readCustomFavicon(HttpServletResponse response, GluuOrganization organization) {
-        log.error("\n\n FaviconServlet::readCustomFavicon() - response = "+response+" , organization = "+organization);
         if (organization.getJsFaviconPath() == null || StringUtils.isEmpty(organization.getJsFaviconPath())) {
             return false;
         }
 
-        File directory = new File(BASE_OXAUTH_FAVICON_PATH);
+        File directory = new File(BASE_AUTH_FAVICON_PATH);
         if (!directory.exists()) {
             directory.mkdir();
         }
@@ -138,7 +137,6 @@ public class OrganizationConfigWS {
         if (!faviconPath.exists()) {
             return false;
         }
-        log.error("\n\n FaviconServlet::readCustomFavicon() - faviconPath = "+faviconPath);
         try (InputStream in = new FileInputStream(faviconPath); OutputStream out = response.getOutputStream()) {
             IOUtils.copy(in, out);
             return true;
@@ -146,6 +144,6 @@ public class OrganizationConfigWS {
             log.debug("Error loading custom favicon: " + e.getMessage());
             return false;
         }
-    }*/
+    }
    
 }

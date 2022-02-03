@@ -150,8 +150,6 @@ public class OpenIdConfiguration extends HttpServlet {
      */
     @SuppressWarnings("deprecation")
     protected void processRequest(HttpServletRequest servletRequest, HttpServletResponse httpResponse) throws IOException {
-        
-        log.error("\n\n OpenIdConfiguration::processRequest() - servletRequest = "+servletRequest+" , httpResponse = "+httpResponse);
         if (!(externalAuthenticationService.isLoaded() && externalDynamicScopeService.isLoaded())) {
             httpResponse.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
             log.error("Jans Auth still starting up!");
@@ -568,8 +566,6 @@ public class OpenIdConfiguration extends HttpServlet {
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
-        
-        log.error("\n\n OpenIdConfiguration::processRequest() - scopeToClaimMapping+" , scopeToClaimMapping);
         return scopeToClaimMapping;
     }
 
@@ -610,7 +606,6 @@ public class OpenIdConfiguration extends HttpServlet {
      */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        log.error("\n\n OpenIdConfiguration::doGet() - request = "+request+" , response = "+response);
         processRequest(request, response);
     }
 
@@ -623,7 +618,6 @@ public class OpenIdConfiguration extends HttpServlet {
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        log.error("\n\n OpenIdConfiguration::doPost() - request = "+request+" , response = "+response);
         processRequest(request, response);
     }
 
@@ -634,7 +628,6 @@ public class OpenIdConfiguration extends HttpServlet {
      */
     @Override
     public String getServletInfo() {
-        log.error("\n\n OpenIdConfiguration::doPost() - getServletInfo() ");
         return "OpenID Provider Configuration Information";
     }
 

@@ -10,7 +10,6 @@ import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.security.service.AuthorizationService;
 import io.jans.configapi.util.ApiConstants;
 
-import io.jans.configapi.security.service.OpenIdConfigService;
 import javax.annotation.Priority;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -54,9 +53,6 @@ public class AuthorizationFilter implements ContainerRequestFilter {
 
     @Inject
     AuthorizationService authorizationService;
-    
-    @Inject
-    OpenIdConfigService openIdConfigService;
 
     @SuppressWarnings({ "all" })
     public void filter(ContainerRequestContext context) {
@@ -79,10 +75,8 @@ public class AuthorizationFilter implements ContainerRequestFilter {
             log.info("====== Authorization Granted...====== ");
             return;
         }
-        
-        String introspectionEndpoint = openIdConfigService.getOpenIdConfiguration().getIntrospectionEndpoint();
 
-        log.info("\n\n\n AuthorizationFilter::filter() - Config Api OAuth Valdation Enabled - introspectionEndpoint = "+introspectionEndpoint);
+        log.info("\n\n\n AuthorizationFilter::filter() - Config Api OAuth Valdation Enabled");
         if (!isTokenBasedAuthentication(authorizationHeader)) {
             abortWithUnauthorized(context);
             log.info("======ONLY TOKEN BASED AUTHORIZATION IS SUPPORTED======================");

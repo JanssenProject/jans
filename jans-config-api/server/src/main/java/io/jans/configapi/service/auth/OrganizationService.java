@@ -7,11 +7,16 @@ import io.jans.model.ApplicationType;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+
 /**
  * @author Yuriy Zabrovarnyy
  */
 @ApplicationScoped
 public class OrganizationService extends io.jans.as.common.service.OrganizationService {
+    
+    @Inject
+    Logger log;
     
     @Inject
     AuthClientFactory authClientFactory;

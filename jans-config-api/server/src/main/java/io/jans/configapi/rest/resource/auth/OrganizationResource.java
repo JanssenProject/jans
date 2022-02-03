@@ -10,13 +10,13 @@ import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.as.client.service.OrgConfigurationService;
 import io.jans.as.persistence.model.GluuOrganization;
 import io.jans.configapi.service.auth.OrganizationService;
-import io.jans.configapi.filters.ProtectedApi;
+import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.rest.model.AuthenticationMethod;
 import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.util.AuthUtil;
-import io.jans.configapi.util.Jackson;
+import io.jans.configapi.core.util.Jackson;
 import io.jans.model.GluuAttribute;
 import io.jans.util.io.FileDownloader;
 import io.jans.util.io.DownloadWrapper;
@@ -37,6 +37,7 @@ import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.servlet.http.HttpServletRequest;
@@ -52,6 +53,8 @@ import com.github.fge.jsonpatch.JsonPatchException;
 @Produces(MediaType.APPLICATION_JSON)
 public class OrganizationResource extends BaseResource {
 
+    private static final String ORG_URL = "/jans-auth/restv1/internal/org";
+    
     @Inject
     Logger log;
   
@@ -61,19 +64,23 @@ public class OrganizationResource extends BaseResource {
     @Inject
     OrganizationService organizationService;
 
-    private static final String ORG_URL = "/jans-auth/restv1/internal/org";
+    @Context
+    HttpServletRequest request;
+    
+    @Context
+    HttpServletResponse response;
+
     
     @GET
     // @ProtectedApi(scopes = { ApiAccessConstants.ACRS_READ_ACCESS })
-    public Response getGluuOrganization(@HeaderParam("Authorization") String authorization) {
+    public Response getGluuOrganization(@HeaderParam("Authorization") String authorization ) {
         final OrgConfigurationService orgConfigurationService = organizationService.getOrgConfigurationService(getOrganizationServiceUrl());
-        log.error("\n\n OrganizationResource::getGluuOrganization() - orgConfigurationService:{} ", orgConfigurationService);
+        log.error("\n\n OrganizationResource::getGluuOrganization() - orgConfigurationService:{}, request:{}, response:{} ", orgConfigurationService, request, response);
         
-        // GET - Psudeo
-        // Get GluuOrganization from DB 
-        // Read the icon and save file in server
-        // Return GluuOrganization
-        return Response.ok(orgConfigurationService.getOrg(authorization)).build();
+        GluuOrganization gluuOrganization = orgConfigurationService.getOrg(authorization);
+        log.error("\n\n OrganizationResource::getGluuOrganization() - gluuOrganization:{} ", gluuOrganization);
+        
+        return Response.ok(gluuOrganization).build();
     }
 
     @PATCH
@@ -151,24 +158,43 @@ public class OrganizationResource extends BaseResource {
     public FileUploadWrapper getFileUploadWrapper(String file) {
         return null;
     }
-
+    
     /*
-    private boolean readDefaultFavicon() {
-        log.error("\n\n OrganizationResource::readDefaultFavicon() - response:{}", response);
-        // String defaultFaviconFileName = "/WEB-INF/static/favicon.ico";
-        String defaultFaviconFileName = "/WEB-INF/static/favicon.ico";
+    private boolean readCustomFavicon(HttpServletResponse response, GluuOrganization organization) {
+        if (organization.getJsFaviconPath() == null || StringUtils.isEmpty(organization.getJsFaviconPath())) {
+            return false;
+        }
 
+        File directory = new File(BASE_OXAUTH_FAVICON_PATH);
+        if (!directory.exists()) {
+            directory.mkdir();
+        }
+        File faviconPath = new File(organization.getJsFaviconPath());
+        if (!faviconPath.exists()) {
+            return false;
+        }
+        try (InputStream in = new FileInputStream(faviconPath); OutputStream out = response.getOutputStream()) {
+            IOUtils.copy(in, out);
+            return true;
+        } catch (IOException e) {
+            log.debug("Error loading custom favicon: " + e.getMessage());
+            return false;
+        }
+    }
+
+
+    private boolean readDefaultFavicon(HttpServletResponse response) {
+        String defaultFaviconFileName = "/WEB-INF/static/favicon.ico";
+        
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        try (InputStream input = loader.getResourceAsStream(defaultFaviconFileName);
-                OutputStream out = response.getOutputStream()) {
-            IOUtils.copy(input, out);
+                try (InputStream in = loader.getResourceAsStream(defaultFaviconFileName);
+             OutputStream out = response.getOutputStream()) {
+            IOUtils.copy(in, out);
             return true;
         } catch (IOException e) {
             log.debug("Error loading default favicon: " + e.getMessage());
             return false;
         }
     }*/
-    
-
 
 }

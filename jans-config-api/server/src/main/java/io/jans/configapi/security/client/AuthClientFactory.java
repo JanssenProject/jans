@@ -92,10 +92,11 @@ public class AuthClientFactory {
         if (log.isDebugEnabled()) {
             log.debug("Organization Configuration - url:{} ", escapeLog(url));
         }
+        log.error("\n\n Organization Configuration  - url:{} ", url);
         RestClientBuilder restClientBuilder = getRestClientBuilder(url);
-        //RestClientBuilder restClientBuilder = getRestClientBuilder(url).register(JacksonJsonProvider.class);
         ResteasyWebTarget webTarget = (ResteasyWebTarget) ClientBuilder.newClient(restClientBuilder.getConfiguration())
         .property(CONTENT_TYPE, MediaType.APPLICATION_JSON).target(url);
+        
         return webTarget.proxy(OrgConfigurationService.class);   
     }
 

@@ -195,12 +195,12 @@
 				<groupId>io.jans</groupId>
 				<artifactId>jans-client-api</artifactId>
 				<version>${jans.version}</version>
-				<exclusions>
+<!-- 				<exclusions>
 					<exclusion>
 						<artifactId>org.jboss.resteasy</artifactId>
 						<groupId>*</groupId>
 					</exclusion>
-				</exclusions>
+				</exclusions> -->
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>

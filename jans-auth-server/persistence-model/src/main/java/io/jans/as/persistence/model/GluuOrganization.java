@@ -8,6 +8,7 @@ package io.jans.as.persistence.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.jans.model.GluuStatus;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DataEntry;
@@ -26,6 +27,7 @@ import java.io.Serializable;
 @DataEntry(sortBy = {"displayName"})
 @ObjectClass(value = "jansOrganization")
 @JsonInclude(Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class GluuOrganization extends Entry implements Serializable {
 
     private static final long serialVersionUID = -8284018077740582699L;
