@@ -90,7 +90,6 @@ public class AppConfiguration implements Configuration {
     private Boolean umaRestrictResourceToAssociatedClient = false;
 
     private int statTimerIntervalInSeconds;
-    private int statWebServiceIntervalLimitInSeconds;
     private String statAuthorizationScope;
 
     private int spontaneousScopeLifetime;
@@ -1158,14 +1157,6 @@ public class AppConfiguration implements Configuration {
 
     public void setUserInfoEncryptionAlgValuesSupported(List<String> userInfoEncryptionAlgValuesSupported) {
         this.userInfoEncryptionAlgValuesSupported = userInfoEncryptionAlgValuesSupported;
-    }
-
-    public int getStatWebServiceIntervalLimitInSeconds() {
-        return statWebServiceIntervalLimitInSeconds;
-    }
-
-    public void setStatWebServiceIntervalLimitInSeconds(int statWebServiceIntervalLimitInSeconds) {
-        this.statWebServiceIntervalLimitInSeconds = statWebServiceIntervalLimitInSeconds;
     }
 
     public int getStatTimerIntervalInSeconds() {
