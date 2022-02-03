@@ -795,31 +795,29 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
     @Nullable
     private JsonWebResponse parseRequestToJwr(String request) {
-        if (request != null) {
-            String[] parts = request.split("\\.");
-            try {
-                if (parts.length == 5) {
-                    String encodedHeader = parts[0];
-                    JwtHeader jwtHeader = new JwtHeader(encodedHeader);
-                    String keyId = jwtHeader.getKeyId();
-                    PrivateKey privateKey = null;
-                    KeyEncryptionAlgorithm keyEncryptionAlgorithm = KeyEncryptionAlgorithm
-                            .fromName(jwtHeader.getClaimAsString(JwtHeaderName.ALGORITHM));
-                    if (AlgorithmFamily.RSA.equals(keyEncryptionAlgorithm.getFamily())) {
-                        privateKey = cryptoProvider.getPrivateKey(keyId);
-                    }
-                    Jwe jwe = Jwe.parse(request, privateKey, null);
-                    if (jwe == null) {
-                        return null;
-                    }
-                    return jwe;
-                }
-                return Jwt.parseSilently(request);
-            } catch (Exception e) {
-                log.error(e.getMessage(), e);
-            }
+        if (request == null) {
+            return null;
         }
-        return null;
+        String[] parts = request.split("\\.");
+        try {
+            if (parts.length == 5) {
+                String encodedHeader = parts[0];
+                JwtHeader jwtHeader = new JwtHeader(encodedHeader);
+                String keyId = jwtHeader.getKeyId();
+                PrivateKey privateKey = null;
+                KeyEncryptionAlgorithm keyEncryptionAlgorithm = KeyEncryptionAlgorithm
+                        .fromName(jwtHeader.getClaimAsString(JwtHeaderName.ALGORITHM));
+                if (AlgorithmFamily.RSA.equals(keyEncryptionAlgorithm.getFamily())) {
+                    privateKey = cryptoProvider.getPrivateKey(keyId);
+                }
+                Jwe jwe = Jwe.parse(request, privateKey, null);
+                return jwe;
+            }
+            return Jwt.parseSilently(request);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return null;
+        }
     }
 
     private void fillRedirectUriResponseforJARM(RedirectUriResponse redirectUriResponse, JsonWebResponse jwr, Client client) {
