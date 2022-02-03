@@ -28,7 +28,7 @@ import java.util.Set;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version September 30, 2021
+ * @version February 2, 2022
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AppConfiguration implements Configuration {
@@ -90,7 +90,6 @@ public class AppConfiguration implements Configuration {
     private Boolean umaRestrictResourceToAssociatedClient = false;
 
     private int statTimerIntervalInSeconds;
-    private int statWebServiceIntervalLimitInSeconds;
     private String statAuthorizationScope;
 
     private int spontaneousScopeLifetime;
@@ -239,7 +238,7 @@ public class AppConfiguration implements Configuration {
     private Boolean logClientIdOnClientAuthentication;
     private Boolean logClientNameOnClientAuthentication;
     private Boolean disableJdkLogger = true;
-    private Set<String> authorizationRequestCustomAllowedParameters;
+    private Set<AuthorizationRequestCustomParameter> authorizationRequestCustomAllowedParameters;
     private Boolean openidScopeBackwardCompatibility = false;
     private Boolean disableU2fEndpoint = false;
 
@@ -1160,14 +1159,6 @@ public class AppConfiguration implements Configuration {
         this.userInfoEncryptionAlgValuesSupported = userInfoEncryptionAlgValuesSupported;
     }
 
-    public int getStatWebServiceIntervalLimitInSeconds() {
-        return statWebServiceIntervalLimitInSeconds;
-    }
-
-    public void setStatWebServiceIntervalLimitInSeconds(int statWebServiceIntervalLimitInSeconds) {
-        this.statWebServiceIntervalLimitInSeconds = statWebServiceIntervalLimitInSeconds;
-    }
-
     public int getStatTimerIntervalInSeconds() {
         return statTimerIntervalInSeconds;
     }
@@ -2019,11 +2010,11 @@ public class AppConfiguration implements Configuration {
         this.externalLoggerConfiguration = externalLoggerConfiguration;
     }
 
-    public Set<String> getAuthorizationRequestCustomAllowedParameters() {
+    public Set<AuthorizationRequestCustomParameter> getAuthorizationRequestCustomAllowedParameters() {
         return authorizationRequestCustomAllowedParameters;
     }
 
-    public void setAuthorizationRequestCustomAllowedParameters(Set<String> authorizationRequestCustomAllowedParameters) {
+    public void setAuthorizationRequestCustomAllowedParameters(Set<AuthorizationRequestCustomParameter> authorizationRequestCustomAllowedParameters) {
         this.authorizationRequestCustomAllowedParameters = authorizationRequestCustomAllowedParameters;
     }
 
