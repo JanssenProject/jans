@@ -188,10 +188,7 @@ public class AuthorizeRestWebServiceValidator {
         Client client = clientService.getClient(jwtRequest.getClientId());
         if (redirectUri != null && redirectionUriService.validateRedirectionUri(client, redirectUri) == null) {
             log.error(" unregistered redirect uri");
-            throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST)
-                    .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST_REDIRECT_URI,
-                            jwtRequest.getState(), "The request has unregistered request_uri"))
-                    .type(MediaType.APPLICATION_JSON_TYPE).build());
+            throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT);
         }
         if (jwtRequest.getExp() == null) {
             log.error("The exp claim is not set");
