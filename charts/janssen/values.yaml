@@ -264,29 +264,6 @@ config:
     # -- Couchbase restricted user. Used only when global.cnPersistenceType is hybrid or couchbase.
     cnCouchbaseUser: janssen
     # -- Document store type to use for shibboleth files JCA or LOCAL. Note that if JCA is selected Apache Jackrabbit will be used. Jackrabbit also enables loading custom files across all services easily.
-    cnDocumentStoreType: JCA
-    # -- Jackrabbit admin uid.
-    cnJackrabbitAdminId: admin
-    # -- The location of the Jackrabbit admin uid config.cnJackrabbitAdminId. The file path must end with jackrabbit_admin_id.
-    cnJackrabbitAdminIdFile: /etc/janssen/conf/jackrabbit_admin_id
-    # -- The location of the Jackrabbit admin password jackrabbit.secrets.cnJackrabbitAdminPassword. The file path must end with jackrabbit_admin_password.
-    cnJackrabbitAdminPasswordFile: /etc/janssen/conf/jackrabbit_admin_password
-    # -- Jackrabbit postgres database name.
-    cnJackrabbitPostgresDatabaseName: jackrabbit
-    # -- Postgres url
-    cnJackrabbitPostgresHost: postgresql.postgres.svc.cluster.local
-    # -- The location of the Jackrabbit postgres password file jackrabbit.secrets.cnJackrabbitPostgresPassword. The file path must end with postgres_password.
-    cnJackrabbitPostgresPasswordFile: /etc/janssen/conf/postgres_password
-    # -- Jackrabbit Postgres port
-    cnJackrabbitPostgresPort: 5432
-    # -- Jackrabbit Postgres uid
-    cnJackrabbitPostgresUser: jackrabbit
-    # -- Interval between files sync (default to 300 seconds).
-    cnJackrabbitSyncInterval: 300
-    # -- Jackrabbit internal url. Normally left as default.
-    cnJackrabbitUrl: "http://jackrabbit:8080"
-    # [google_envs] Envs related to using Google
-    # -- Service account with roles roles/secretmanager.admin base64 encoded string. This is used often inside the services to reach the configuration layer. Used only when global.configAdapterName and global.configSecretAdapter is set to google.
     cnGoogleSecretManagerServiceAccount: SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo=
     # -- Project id of the google project the secret manager belongs to. Used only when global.configAdapterName and global.configSecretAdapter is set to google.
     cnGoogleProjectId: google-project-to-save-config-and-secrets-to
@@ -316,8 +293,6 @@ config:
     # -- SCIM protection mode OAUTH|TEST|UMA
     cnScimProtectionMode: "OAUTH"
     # -- Boolean flag to enable/disable passport chart
-    cnPassportEnabled: false
-    # -- Specify data that should be saved in LDAP (one of default, user, cache, site, token, or session; default to default). Note this environment only takes effect when `global.cnPersistenceType`  is set to `hybrid`.
     cnPersistenceLdapMapping: default
     # -- Redis Sentinel Group. Often set when `config.configmap.cnRedisType` is set to `SENTINEL`. Can be used when  `config.configmap.cnCacheType` is set to `REDIS`.
     cnRedisSentinelGroup: ""
@@ -330,8 +305,6 @@ config:
     # -- Boolean to use SSL in Redis. Can be used when  `config.configmap.cnCacheType` is set to `REDIS`.
     cnRedisUseSsl: false
     # -- Enable SAML-related features; UI menu, etc.
-    cnSamlEnabled: false
-    # -- Kubernetes secret name holding configuration keys. Used when global.configSecretAdapter is set to kubernetes which is the default.
     cnSecretKubernetesSecret: cn
     # -- Loadbalancer address for AWS if the FQDN is not registered.
     lbAddr: ""
@@ -374,17 +347,6 @@ config:
   dnsPolicy: ""
   # -- Add custom dns config
   dnsConfig: {}
-  # -- CE to CN Migration section
-  migration:
-   # -- Boolean flag to enable migration from CE
-    enabled: false
-   # -- Directory holding all migration files
-    migrationDir: /ce-migration
-   # -- migration data-format depending on persistence backend.
-   # Supported data formats are ldif, couchbase+json, spanner+avro, postgresql+json, and mysql+json.
-    migrationDataFormat: ldif
-
-  # -- Additional labels that will be added across the gateway in the format of {mylabel: "myapp"}
   additionalLabels: {}
   # -- Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
   additionalAnnotations: {}
@@ -554,29 +516,6 @@ global:
     # -- Activates ALB ingress
     ingress: false
 
-  admin-ui:
-    # -- Boolean flag to enable/disable the admin-ui chart and admin ui config api plugin.
-    enabled: false
-    # -- Name of the admin-ui service. Please keep it as default.
-    adminUiServiceName: admin-ui
-    # License parameters
-    # -- Admin UI license API key.
-    adminUiApiKey: xxxxxxxxxxx
-    # -- Admin UI license API key mount location.
-    adminUiApiKeyFile: /etc/jans/conf/admin_ui_api_key
-    # -- Admin UI license product code.
-    adminUiProductCode: xxxxxxxxxxx
-    # -- Admin UI license product code mount location.
-    adminUiProductCodeFile: /etc/jans/conf/admin_ui_product_code
-    # -- Admin UI license shared key.
-    adminUiSharedKey: xxxxxxxxxxx
-    # -- Admin UI license shared key mount location.
-    adminUiSharedKeyFile: /etc/jans/conf/admin_ui_shared_key
-    # -- Admin UI license management key.
-    adminUiManagementKey: xxxxxxxxxxx
-    # -- Admin UI license management key mount location.
-    adminUiManagementKeyFile: /etc/jans/conf/admin_ui_management_key
-
   auth-server:
     # -- Name of the auth-server service. Please keep it as default.
     authServerServiceName: auth-server
@@ -626,9 +565,6 @@ global:
   azureStorageAccountType: Standard_LRS
   # -- Azure storage kind if using Azure disks
   azureStorageKind: Managed
-  casa:
-    # -- Name of the casa service. Please keep it as default.
-    casaServiceName: casa
   client-api:
     # -- Name of the client-api service. Please keep it as default.
     clientApiServerServiceName: client-api
@@ -644,31 +580,8 @@ global:
     # -- Boolean flag if enabled will strip resources requests and limits from all services.
     testEnviroment: false
   # -- Boolean flag if enabled will enable jackrabbit in cluster mode with Postgres.
-  cnJackrabbitCluster: false
-  # -- Persistence backend to run Janssen with ldap|couchbase|hybrid|sql|spanner.
   cnPersistenceType: sql
   # -- Open banking external signing jwks uri. Used in SSA Validation.
-  cnObExtSigningJwksUri: ""
-  # -- Open banking external signing jwks AS certificate authority string. Used in SSA Validation. This must be encoded using base64.. Used when `.global.cnObExtSigningJwksUri` is set.
-  cnObExtSigningJwksCrt: ""
-  # -- Open banking external signing jwks AS key string. Used in SSA Validation. This must be encoded using base64. Used when `.global.cnObExtSigningJwksUri` is set.
-  cnObExtSigningJwksKey: ""
-  # -- Open banking external signing jwks AS key passphrase to unlock provided key. This must be encoded using base64. Used when `.global.cnObExtSigningJwksUri` is set.
-  cnObExtSigningJwksKeyPassPhrase: ""
-  # -- Open banking external signing AS Alias. This is a kid value.Used in SSA Validation, kid used while encoding a JWT sent to token URL i.e XkwIzWy44xWSlcWnMiEc8iq9s2G
-  cnObExtSigningAlias: ""
-  # -- Open banking  signing AS kid to force the AS to use a specific signing key. i.e Wy44xWSlcWnMiEc8iq9s2G
-  cnObStaticSigningKeyKid: ""
-  # -- Open banking AS transport crt. Used in SSA Validation. This must be encoded using base64.
-  cnObTransportCrt: ""
-  # -- Open banking AS transport key. Used in SSA Validation. This must be encoded using base64.
-  cnObTransportKey: ""
-  # -- Open banking AS transport key pas`sphrase to unlock AS transport key. This must be encoded using base64.
-  cnObTransportKeyPassPhrase: ""
-  # -- Open banking transport Alias used inside the JVM.
-  cnObTransportAlias: ""
-  # -- Open banking AS transport truststore crt. This is normally generated from the OB issuing CA, OB Root CA and Signing CA. Used when .global.cnObExtSigningJwksUri is set. Used in SSA Validation. This must be encoded using base64.
-  cnObTransportTrustStore: ""
   config:
     # -- Boolean flag to enable/disable the configuration chart. This normally should never be false
     enabled: true
@@ -714,19 +627,11 @@ global:
     # -- Boolean flag that enables using istio side cars with Janssen services.
     enabled: false
     # -- Boolean flag that enables using istio gateway for Janssen. This assumes istio ingress is installed and hence the LB is available.
-    ingress: false
-    # -- The namespace istio is deployed in. The is normally istio-system.
     namespace: istio-system
     # -- Additional labels that will be added across the gateway in the format of {mylabel: "myapp"}
     additionalLabels: {}
     # -- Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
     additionalAnnotations: {}
-  jackrabbit:
-    # -- Boolean flag to enable/disable the jackrabbit chart. For more information on how it is used inside Janssen https://jans.io/4.2/installation-guide/install-kubernetes/#working-with-jackrabbit. If disabled oxShibboleth cannot be run.
-    enabled: false
-    # -- Name of the Jackrabbit service. Please keep it as default.
-    jackRabbitServiceName: jackrabbit
-  # -- The Loadbalancer IP created by nginx or istio on clouds that provide static IPs. This is not needed if `global.fqdn` is globally resolvable.
   lbIp: 22.22.22.22
   nginx-ingress:
     # -- Boolean flag to enable/disable the nginx-ingress definitions chart.
@@ -736,16 +641,6 @@ global:
     enabled: false
     # -- Name of the OpenDJ service. Please keep it as default.
     ldapServiceName: opendj
-  oxpassport:
-    # -- Name of the oxPassport service. Please keep it as default.
-    oxPassportServiceName: oxpassport
-  oxshibboleth:
-    # -- Name of the oxShibboleth service. Please keep it as default.
-    oxShibbolethServiceName: oxshibboleth
-    # -- Boolean flag to enable/disable the oxShibbboleth chart.
-    enabled: false
-  # --  Janssen distributions supported are: default|openbanking.
-  distribution: default
   persistence:
     # -- Boolean flag to enable/disable the persistence chart.
     enabled: true
@@ -802,11 +697,6 @@ global:
 nginx-ingress:
   ingress:
     # -- Enable Admin UI endpoints. COMING SOON.
-    adminUiEnabled: false
-    # -- Admin UI ingress resource labels. key app is taken.
-    adminUiLabels: {}
-    # -- openid-configuration ingress resource additional annotations.
-    adminUiAdditionalAnnotations: {}
     # -- Enable endpoint /.well-known/openid-configuration
     openidConfigEnabled: true
     # -- openid-configuration ingress resource labels. key app is taken
@@ -867,18 +757,6 @@ nginx-ingress:
     authServerLabels: {}
     # -- Auth server ingress resource additional annotations.
     authServerAdditionalAnnotations: {}
-    # -- Enable mTLS on Auth server endpoint /jans-auth/restv1/token
-    authServerProtectedToken: false
-    # -- Auth server protected token ingress resource labels. key app is taken
-    authServerProtectedTokenLabels: {}
-    # -- Auth server protected token ingress resource additional annotations.
-    authServerProtectedTokenAdditionalAnnotations: {}
-    # -- Enable mTLS onn Auth server endpoint /jans-auth/restv1/register
-    authServerProtectedRegister: false
-    # -- Auth server protected token ingress resource labels. key app is taken
-    authServerProtectedRegisterLabels: {}
-    # -- Auth server protected register ingress resource additional annotations.
-    authServerProtectedRegisterAdditionalAnnotations: {}
     # -- Additional labels that will be added across all ingress definitions in the format of {mylabel: "myapp"}
     additionalLabels: {}
     # -- Additional annotations that will be added across all ingress definitions in the format of {cert-manager.io/issuer: "letsencrypt-prod"}

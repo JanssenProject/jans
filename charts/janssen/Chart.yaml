@@ -31,15 +31,15 @@ annotations:
     catalog.cattle.io/display-name: Janssen Cloud Identity and Access Management
 apiVersion: v2
 appVersion: "1.0.0"
-icon: https://jans.io/favicon.ico
+icon: https://github.com/JanssenProject/jans/raw/main/docs/logo/janssen_project_favicon_transparent_50px_50px.png
 home: https://jans.io
 sources:
   - https://jans.io
-  - https://github.com/JanssenFederation/cloud-native-edition
+  - https://github.com/JanssenProject/jans/charts/janssen
 maintainers:
   - name: moabu
     email: support@jans.io
-description: Janssen Access and Identity Management OpenBanking distribution
+description: Janssen Access and Identity Management
 name: janssen
 version: 1.0.0-beta.14
 dependencies:

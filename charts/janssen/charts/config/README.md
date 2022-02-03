@@ -4,7 +4,7 @@
 
 Configuration parameters for setup and initial configuration secret and config layers used by Janssen services.
 
-**Homepage:** <https://github.com/JanssenProject/jans/docker-jans-configurator>
+**Homepage:** </docker-jans-configurator>
 
 ## Maintainers
 
@@ -14,7 +14,7 @@ Configuration parameters for setup and initial configuration secret and config l
 
 ## Source Code
 
-* <https://github.com/JanssenProject/jans/docker-jans-configurator>
+* </docker-jans-configurator>
 * <https://github.com/JanssenProject/jans/docker-jans-configurator>
 * <https://github.com/JanssenFederation/flex/tree/main/flex-cn-setup/pyjanssen/kubernetes/templates/helm/janssen/charts/config>
 

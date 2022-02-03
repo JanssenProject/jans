@@ -9,14 +9,14 @@ type: application
 keywords:
   - configuration
   - secrets
-home: https://github.com/JanssenProject/jans/docker-jans-configurator
+home: /docker-jans-configurator
 sources:
-  - https://github.com/JanssenProject/jans/docker-jans-configurator
+  - /docker-jans-configurator
   - https://github.com/JanssenProject/jans/docker-jans-configurator
   - https://github.com/JanssenFederation/flex/tree/main/flex-cn-setup/pyjanssen/kubernetes/templates/helm/janssen/charts/config
 maintainers:
   - name: Mohammad Abudayyeh
     email: support@jans.io
     url: https://github.com/moabu
-icon: https://jans.io/favicon.ico
+icon: https://github.com/JanssenProject/jans/raw/main/docs/logo/janssen_project_favicon_transparent_50px_50px.png
 appVersion: "1.0.0"
