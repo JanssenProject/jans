@@ -140,15 +140,22 @@ public class OrganizationConfigWS {
         }
 
         File directory = new File(BASE_AUTH_FAVICON_PATH);
+        log.error("\n\n OrganizationConfigWS::readCustomFavicon() - directory.getName():{}, directory.getAbsolutePath():{}", directory.getName(), directory.getAbsolutePath());
         if (!directory.exists()) {
             directory.mkdir();
         }
         File faviconPath = new File(organization.getJsFaviconPath());
+        log.error("\n\n OrganizationConfigWS::readCustomFavicon() - faviconPath:{}, faviconPath.exists():{} ", faviconPath, faviconPath.exists() );
         if (!faviconPath.exists()) {
+            log.error("\n\n OrganizationConfigWS::readCustomFavicon() - faviconPath.exists() block ");
             return false;
         }
+        
+        log.error("\n\n OrganizationConfigWS::readCustomFavicon() - Copy faviconPath  ");
         try (InputStream in = new FileInputStream(faviconPath); OutputStream out = response.getOutputStream()) {
+            log.error("\n\n OrganizationConfigWS::readCustomFavicon() - IOUtils.copy block - start ");
             IOUtils.copy(in, out);
+            log.error("\n\n OrganizationConfigWS::readCustomFavicon() - IOUtils.copy block - end ");
             return true;
         } catch (IOException e) {
             log.debug("Error loading custom favicon: " + e.getMessage());

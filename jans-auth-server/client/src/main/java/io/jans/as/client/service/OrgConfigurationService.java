@@ -24,17 +24,16 @@ public interface OrgConfigurationService {
     @GET
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
-    public Response getOrg(@HeaderParam("Authorization") String authorization);
+    public GluuOrganization getOrg(@HeaderParam("Authorization") String authorization);
 
     @PUT
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
-    public Response updateOrg(@HeaderParam("Authorization") String authorization, GluuOrganization gluuOrganization);
+    public GluuOrganization updateOrg(@HeaderParam("Authorization") String authorization, GluuOrganization gluuOrganization);
     
     @PUT
     @Path("{imageType}")
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
     public Response updateImageResource(@HeaderParam("Authorization") String authorization, @PathParam("imageType") String imageType, FileUploadWrapper fileUploadWrapper);
-
 }

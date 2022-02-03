@@ -79,11 +79,8 @@ public class OrganizationResource extends BaseResource {
         final OrgConfigurationService orgConfigurationService = organizationService.getOrgConfigurationService(getOrganizationServiceUrl());
         log.error("\n\n OrganizationResource::getGluuOrganization() - orgConfigurationService:{}, request:{}, response:{} ", orgConfigurationService, request, response);
         
-        Response response = orgConfigurationService.getOrg(authorization);
-        GluuOrganization gluuOrganization = null;
-        if (response.getStatus() == 200) {
-            gluuOrganization = response.readEntity(GluuOrganization.class);
-        }
+        GluuOrganization gluuOrganization = orgConfigurationService.getOrg(authorization);
+        
         log.error("\n\n OrganizationResource::getGluuOrganization() - gluuOrganization:{} ", gluuOrganization);
         
         return Response.ok(gluuOrganization).build();
