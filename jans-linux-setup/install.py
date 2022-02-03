@@ -366,6 +366,7 @@ else:
     extract_subdir(sqlalchemy_zip_file, 'lib/sqlalchemy', os.path.join(setup_dir, 'setup_app/pylib/sqlalchemy'))
 
     extract_file(jans_zip_file, 'jans-config-api/docs/jans-config-api-swagger.yaml', os.path.join(setup_dir, 'setup_app/data'))
+    extract_file(jans_zip_file, 'jans-auth-server/server/integrations/duo/lib/duo_web.py', os.path.join(setup_dir, 'static/auth/lib/'))
 
     if argsp.profile == 'jans':
         download_gcs()
