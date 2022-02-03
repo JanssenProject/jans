@@ -3,7 +3,7 @@
 kubeVersion: ">=v1.21.0-0"
 annotations:
     artifacthub.io/changes: |
-        - Update always
+        - Initial release of Janssen helm charts
     artifacthub.io/containsSecurityUpdates: "true"
     artifacthub.io/images: |
         - name: auth-server
