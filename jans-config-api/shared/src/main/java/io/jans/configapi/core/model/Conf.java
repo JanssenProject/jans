@@ -1,4 +1,4 @@
-package io.jans.configapi.model.configuration;
+package io.jans.configapi.core.model;
 
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.orm.annotation.AttributeName;
@@ -12,36 +12,21 @@ import io.jans.orm.annotation.ObjectClass;
 public class Conf {
 
     @DN
-    private String dn;
-
-    @JsonObject
-    @AttributeName(name = "jansConfDyn")
-    private ApiAppConfiguration dynamicConf;
+    protected String dn;
 
     @JsonObject
     @AttributeName(name = "jansConfStatic")
-    private StaticConfiguration staticConf;
+    protected StaticConfiguration staticConf;
 
     @AttributeName(name = "jansRevision")
-    private long revision;
-
-    public Conf() {
-    }
+    protected long revision;
 
     public String getDn() {
         return dn;
     }
 
-    public void setDn(String p_dn) {
-        dn = p_dn;
-    }
-
-    public ApiAppConfiguration getDynamicConf() {
-        return dynamicConf;
-    }
-
-    public void setDynamicConf(ApiAppConfiguration dynamicConf) {
-        this.dynamicConf = dynamicConf;
+    public void setDn(String dn) {
+        this.dn = dn;
     }
 
     public StaticConfiguration getStaticConf() {
@@ -62,7 +47,6 @@ public class Conf {
 
     @Override
     public String toString() {
-        return "Conf [dn=" + dn + ", dynamicConf=" + dynamicConf + ", staticConf=" + staticConf + ", revision="
-                + revision + "]";
+        return "Conf [dn=" + dn + ", staticConf=" + staticConf + ", revision=" + revision + "]";
     }
 }

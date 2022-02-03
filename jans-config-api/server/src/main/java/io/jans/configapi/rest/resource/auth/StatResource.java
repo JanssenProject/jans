@@ -2,7 +2,7 @@ package io.jans.configapi.rest.resource.auth;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import io.jans.configapi.filters.ProtectedApi;
+import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.service.auth.AuthService;
 import io.jans.configapi.util.ApiAccessConstants;

@@ -14,6 +14,7 @@ import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.util.SecurityProviderUtility;
+import io.jans.configapi.model.configuration.ApiConf;
 import io.jans.configapi.model.configuration.ApiAppConfiguration;
 import io.jans.configapi.model.configuration.CorsConfiguration;
 import io.jans.configapi.model.configuration.CorsConfigurationFilter;
@@ -89,7 +90,6 @@ public class ConfigurationFactory {
 
     private ApiAppConfiguration apiAppConfiguration;
     private CorsConfigurationFilter corsConfigurationFilter;
-    private StaticConfiguration apiAppStaticConf;
     private long loadedRevision = -1;
 
     private String apiProtectionType;
@@ -130,7 +130,7 @@ public class ConfigurationFactory {
                         this.corsConfigurationFilter.getCorsSupportCredentials().toString(),
                         Long.toString(this.corsConfigurationFilter.getCorsPreflightMaxAge()),
                         this.corsConfigurationFilter.getCorsRequestDecorate().toString());
-                log.debug("\n\n Initializing CorsConfiguration = " + corsConfiguration);
+                log.debug("\n\n Initializing CorsConfiguration:{} ", corsConfiguration);
                 return corsConfiguration;
             }
 
@@ -194,6 +194,7 @@ public class ConfigurationFactory {
         }
 
         loadApiAppConfigurationFromDb();
+        log.info("Configuration loadedRevision:{}", this.loadedRevision);
 
         installSecurityProvider();
 
@@ -218,6 +219,10 @@ public class ConfigurationFactory {
         return this.baseConfiguration.getString(Constants.SERVER_KEY_OF_CONFIGURATION_ENTRY);
     }
 
+    public String getConfigurationDn(String key) {
+        return this.baseConfiguration.getString(key);
+    }
+
     private Conf loadAuthConfigurationFromDb() {
         log.info("loading Auth Server Configuration From DB....");
         return this.loadConfigurationFromDb(this.getConfigurationDn());
@@ -225,29 +230,28 @@ public class ConfigurationFactory {
 
     private void loadApiAppConfigurationFromDb() {
         log.info("loading Api App Configuration From DB....");
-        io.jans.configapi.model.configuration.Conf conf = null;
+        ApiConf apiConf = null;
         final PersistenceEntryManager persistenceEntryManager = persistenceEntryManagerInstance.get();
         try {
-            conf = persistenceEntryManager.find(io.jans.configapi.model.configuration.Conf.class,
+            apiConf = persistenceEntryManager.find(ApiConf.class,
                     this.baseConfiguration.getString("configApi_ConfigurationEntryDN"));
         } catch (BasePersistenceException ex) {
             log.error(ex.getMessage());
         }
 
-        if (conf == null) {
-            throw new ConfigurationException("Failed to Api App Configuration From DB " + conf);
+        if (apiConf == null) {
+            throw new ConfigurationException("Failed to Api App Configuration From DB " + apiConf);
         }
         log.info("ApiAppConfigurationFromDb = ....");
-        if (conf.getDynamicConf() != null) {
-            this.apiAppConfiguration = conf.getDynamicConf();
+        if (apiConf.getDynamicConf() != null) {
+            this.apiAppConfiguration = apiConf.getDynamicConf();
         }
-        if (conf.getStaticConf() != null) {
-            this.apiAppStaticConf = conf.getStaticConf();
-        }
-        this.loadedRevision = conf.getRevision();
 
-        log.debug("\n\n\n *** ConfigurationFactory::loadApiAppConfigurationFromDb() - this.apiAppConfiguration = "
-                + this.apiAppConfiguration + " *** \n\n\n");
+        this.loadedRevision = apiConf.getRevision();
+
+        log.debug(
+                "\n\n\n *** ConfigurationFactory::loadApiAppConfigurationFromDb() - apiAppConfiguration:{}, loadedRevision:{} ",
+                this.apiAppConfiguration, loadedRevision);
         this.setApiConfigurationProperties();
     }
 
@@ -257,8 +261,8 @@ public class ConfigurationFactory {
             throw new ConfigurationException("Failed to load Configuration properties " + this.apiAppConfiguration);
         }
 
-        log.debug("\n\n\n *** ConfigurationFactory::setApiConfigurationProperties() - this.apiAppConfiguration = "
-                + this.apiAppConfiguration + " *** \n\n\n");
+        log.debug("\n\n\n *** ConfigurationFactory::setApiConfigurationProperties() - this.apiAppConfiguration:{}",
+                this.apiAppConfiguration);
         this.apiApprovedIssuer = this.apiAppConfiguration.getApiApprovedIssuer();
         this.apiProtectionType = this.apiAppConfiguration.getApiProtectionType();
         this.apiClientId = this.apiAppConfiguration.getApiClientId();
@@ -266,24 +270,24 @@ public class ConfigurationFactory {
         this.configOauthEnabled = this.apiAppConfiguration.isConfigOauthEnabled();
 
         if (this.apiAppConfiguration.getCorsConfigurationFilters() != null
-                && this.apiAppConfiguration.getCorsConfigurationFilters().size() > 0) {
+                && !this.apiAppConfiguration.getCorsConfigurationFilters().isEmpty()) {
             this.corsConfigurationFilter = this.apiAppConfiguration.getCorsConfigurationFilters().stream()
                     .filter(x -> "CorsFilter".equals(x.getFilterName())).findAny().orElse(null);
         }
 
-        log.debug("Properties set, this.apiApprovedIssuer = " + this.apiApprovedIssuer + " , this.apiProtectionType = "
-                + this.apiProtectionType + " , this.apiClientId = " + this.apiClientId + " , this.apiClientPassword = "
-                + this.apiClientPassword + " , this.corsConfigurationFilter = " + this.corsConfigurationFilter
-                + " , this.configOauthEnabled =" + this.configOauthEnabled);
+        log.debug(
+                "Properties set, this.apiApprovedIssuer:{}, , this.apiProtectionType:{}, this.apiClientId :{}, this.apiClientPassword:{}, this.corsConfigurationFilter:{}, this.configOauthEnabled:{} ",
+                this.apiApprovedIssuer, this.apiProtectionType, this.apiClientId, this.apiClientPassword,
+                this.corsConfigurationFilter, this.configOauthEnabled);
 
         // Populate corsConfigurationFilter object
         CorsConfiguration corsConfiguration = this.getCorsConfiguration();
-        log.debug("CorsConfiguration Produced " + corsConfiguration);
+        log.debug("CorsConfiguration Produced :{} ", corsConfiguration);
         getCorsConfigurationFilters();
     }
 
     private Conf loadConfigurationFromDb(String returnAttribute) {
-        log.info("loadConfigurationFromDb " + returnAttribute);
+        log.info("loadConfigurationFromDb returnAttribute:{}", returnAttribute);
         final PersistenceEntryManager persistenceEntryManager = persistenceEntryManagerInstance.get();
         try {
             return persistenceEntryManager.find(Conf.class, returnAttribute);
@@ -294,9 +298,9 @@ public class ConfigurationFactory {
     }
 
     private void loadBaseConfiguration() {
-        log.info("Loading base configuration " + BASE_PROPERTIES_FILE);
+        log.info("Loading base configuration - BASE_PROPERTIES_FILE:{}", BASE_PROPERTIES_FILE);
         this.baseConfiguration = createFileConfiguration(BASE_PROPERTIES_FILE);
-        log.info("Loaded base configuration:" + baseConfiguration.getProperties());
+        log.info("Loaded base configuration:{}", baseConfiguration.getProperties());
     }
 
     private String confDir() {
@@ -312,27 +316,29 @@ public class ConfigurationFactory {
         try {
             return new FileConfiguration(fileName);
         } catch (Exception ex) {
-            log.error("Failed to load configuration from {}", fileName, ex);
+            if (log.isErrorEnabled()) {
+                log.error("Failed to load configuration from {}", fileName, ex);
+            }
             throw new ConfigurationException("Failed to load configuration from " + fileName, ex);
         }
     }
 
-    private void init(Conf p_conf) {
-        initConfigurationConf(p_conf);
+    private void init(Conf conf) {
+        initConfigurationConf(conf);
     }
 
-    private void initConfigurationConf(Conf p_conf) {
-        if (p_conf.getDynamic() != null) {
-            appConfiguration = p_conf.getDynamic();
+    private void initConfigurationConf(Conf conf) {
+        if (conf.getDynamic() != null) {
+            appConfiguration = conf.getDynamic();
         }
-        if (p_conf.getStatics() != null) {
-            staticConf = p_conf.getStatics();
+        if (conf.getStatics() != null) {
+            staticConf = conf.getStatics();
         }
-        if (p_conf.getWebKeys() != null) {
-            jwks = p_conf.getWebKeys();
+        if (conf.getWebKeys() != null) {
+            jwks = conf.getWebKeys();
         }
-        if (p_conf.getErrors() != null) {
-            errorResponseFactory = new ErrorResponseFactory(p_conf.getErrors(), p_conf.getDynamic());
+        if (conf.getErrors() != null) {
+            errorResponseFactory = new ErrorResponseFactory(conf.getErrors(), conf.getDynamic());
         }
     }
 
@@ -342,7 +348,8 @@ public class ConfigurationFactory {
 
             this.cryptoConfigurationSalt = cryptoConfiguration.getString("encodeSalt");
         } catch (Exception ex) {
-            log.error("Failed to load configuration from {}", saltFilePath, ex);
+            if (log.isErrorEnabled())
+                log.error("Failed to load configuration from {}", saltFilePath, ex);
             throw new ConfigurationException("Failed to load configuration from " + saltFilePath, ex);
         }
     }

@@ -1,7 +1,7 @@
 package io.jans.configapi.plugin.scim.rest;
 
 import static io.jans.as.model.util.Util.escapeLog;
-import io.jans.configapi.filters.ProtectedApi;
+import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.plugin.scim.service.ScimService;
 import io.jans.scim.model.scim2.SearchRequest;
 import io.jans.scim.model.scim2.patch.PatchRequest;

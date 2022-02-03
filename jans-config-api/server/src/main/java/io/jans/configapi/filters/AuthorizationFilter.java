@@ -6,6 +6,7 @@
 
 package io.jans.configapi.filters;
 
+import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.security.service.AuthorizationService;
 import io.jans.configapi.util.ApiConstants;
 

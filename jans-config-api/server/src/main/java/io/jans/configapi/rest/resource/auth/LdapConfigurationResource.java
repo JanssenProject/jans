@@ -7,12 +7,12 @@
 package io.jans.configapi.rest.resource.auth;
 
 import com.github.fge.jsonpatch.JsonPatchException;
-import io.jans.configapi.filters.ProtectedApi;
+import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.service.auth.LdapConfigurationService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.util.ConnectionStatus;
-import io.jans.configapi.util.Jackson;
+import io.jans.configapi.core.util.Jackson;
 import io.jans.model.ldap.GluuLdapConfiguration;
 import org.slf4j.Logger;
 

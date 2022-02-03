@@ -21,7 +21,7 @@ import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.IntrospectionResponse;
 import io.jans.as.model.jwk.JSONWebKeySet;
 import static io.jans.as.model.jwk.JWKParameter.JSON_WEB_KEY_SET;
-import io.jans.configapi.util.Jackson;
+import io.jans.configapi.core.util.Jackson;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
 

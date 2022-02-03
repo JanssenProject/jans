@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.configapi.util;
+package io.jans.configapi.core.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.AnnotationIntrospector;
@@ -57,20 +57,12 @@ public class Jackson {
 
     @SuppressWarnings("unchecked")
     public static <T> T read(InputStream inputStream, T obj) throws IOException {
-        try {
-
-            Preconditions.checkNotNull(inputStream);
-            ObjectMapper objectMapper = JacksonUtils.newMapper()
-                    .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            return (T) JacksonUtils.newMapper().readValue(inputStream, obj.getClass());
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            throw ex;
-        }
+        Preconditions.checkNotNull(inputStream);
+        return (T) JacksonUtils.newMapper().readValue(inputStream, obj.getClass());
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> T getObject(String jsonString, T obj) throws JsonPatchException, IOException {
+    public static <T> T getObject(String jsonString, T obj) throws IOException {
         ObjectMapper objectMapper = JacksonUtils.newMapper()
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         return (T) objectMapper.readValue(jsonString, obj.getClass());
@@ -96,7 +88,7 @@ public class Jackson {
         }
     }
 
-    public <T> String getJsonString(T obj) throws JsonPatchException, IOException {
+    public <T> String getJsonString(T obj) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         return mapper.writeValueAsString(obj);
     }

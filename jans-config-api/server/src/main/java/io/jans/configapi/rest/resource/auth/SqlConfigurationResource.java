@@ -8,11 +8,11 @@ package io.jans.configapi.rest.resource.auth;
 
 import com.google.common.base.Joiner;
 import io.jans.orm.sql.model.SqlConnectionConfiguration;
-import io.jans.configapi.filters.ProtectedApi;
+import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.service.auth.SqlConfService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
-import io.jans.configapi.util.Jackson;
+import io.jans.configapi.core.util.Jackson;
 import io.jans.orm.sql.operation.impl.SqlConnectionProvider;
 import org.slf4j.Logger;
 

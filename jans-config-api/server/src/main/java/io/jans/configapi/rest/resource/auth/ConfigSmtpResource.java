@@ -9,7 +9,7 @@ package io.jans.configapi.rest.resource.auth;
 import io.jans.as.common.service.common.ConfigurationService;
 import io.jans.as.common.service.common.EncryptionService;
 import io.jans.as.persistence.model.configuration.GluuConfiguration;
-import io.jans.configapi.filters.ProtectedApi;
+import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.model.SmtpConfiguration;
