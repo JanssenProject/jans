@@ -359,9 +359,26 @@
     "logClientIdOnClientAuthentication": true,
     "logClientNameOnClientAuthentication": false,
     "authorizationRequestCustomAllowedParameters" : [
-        "customParam1",
-        "customParam2",
-        "customParam3"
+        {
+            "paramName": "customParam1",
+            "returnInResponse": false
+        },
+        {
+            "paramName": "customParam2",
+            "returnInResponse": false
+        },
+        {
+            "paramName": "customParam3",
+            "returnInResponse": false
+        },
+        {
+            "paramName": "customParam4",
+            "returnInResponse": true
+        },
+        {
+            "paramName": "customParam5",
+            "returnInResponse": true
+        }
     ],
     "legacyDynamicRegistrationScopeParam": false,
     "openidScopeBackwardCompatibility": false,

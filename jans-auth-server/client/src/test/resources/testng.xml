@@ -90,6 +90,12 @@
         </classes>
     </test>
 
+    <test name="Authorization Support Custom Params" enabled="true">
+        <classes>
+            <class name="io.jans.as.client.ws.rs.AuthorizationSupportCustomParams"></class>
+        </classes>
+    </test>
+
     <!-- Authorize test -->
     <test name="Authorize test (HTTP)" enabled="true">
         <classes>
