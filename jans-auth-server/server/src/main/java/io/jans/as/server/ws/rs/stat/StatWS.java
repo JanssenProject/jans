@@ -1,5 +1,7 @@
 package io.jans.as.server.ws.rs.stat;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import io.jans.as.common.model.stat.StatEntry;
 import io.jans.as.model.common.ComponentType;
 import io.jans.as.model.config.Constants;
@@ -39,6 +41,7 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static io.jans.as.model.util.Util.escapeLog;
 
@@ -53,8 +56,6 @@ import static io.jans.as.model.util.Util.escapeLog;
 @ApplicationScoped
 @Path("/internal/stat")
 public class StatWS {
-
-    private static final int DEFAULT_WS_INTERVAL_LIMIT_IN_SECONDS = 60;
 
     @Inject
     private Logger log;
@@ -74,7 +75,10 @@ public class StatWS {
     @Inject
     private TokenService tokenService;
 
-    private long lastProcessedAt;
+    private final Cache<String, StatResponse> responseCache = CacheBuilder
+            .newBuilder()
+            .expireAfterWrite(1, TimeUnit.HOURS)
+            .build();
 
     public static String createOpenMetricsResponse(StatResponse statResponse) throws IOException {
         Writer writer = new StringWriter();
@@ -169,13 +173,6 @@ public class StatWS {
         validateAuthorization(authorization);
         final List<String> months = validateMonth(month);
 
-        if (!allowToRun()) {
-            log.trace("Interval request limit exceeded. Request is rejected. Current interval limit: {} (or 60 seconds if not set).", appConfiguration.getStatWebServiceIntervalLimitInSeconds());
-            throw errorResponseFactory.createWebApplicationException(Response.Status.FORBIDDEN, TokenErrorResponseType.ACCESS_DENIED, "Interval request limit exceeded.");
-        }
-
-        lastProcessedAt = System.currentTimeMillis();
-
         try {
             if (log.isTraceEnabled())
                 log.trace("Recognized months: {}", escapeLog(months));
@@ -203,6 +200,12 @@ public class StatWS {
     }
 
     private StatResponse buildResponse(List<String> months) {
+        final String cacheKey = months.toString();
+        final StatResponse cachedResponse = responseCache.getIfPresent(cacheKey);
+        if (cachedResponse != null) {
+            return cachedResponse;
+        }
+
         StatResponse response = new StatResponse();
         for (String month : months) {
             final StatResponseItem responseItem = buildItem(month);
@@ -211,6 +214,7 @@ public class StatWS {
             }
         }
 
+        responseCache.put(cacheKey, response);
         return response;
     }
 
@@ -325,18 +329,5 @@ public class StatWS {
         }
 
         return months;
-    }
-
-    private boolean allowToRun() {
-        int interval = appConfiguration.getStatWebServiceIntervalLimitInSeconds();
-        if (interval <= 0) {
-            interval = DEFAULT_WS_INTERVAL_LIMIT_IN_SECONDS;
-        }
-
-        long timerInterval = interval * 1000L;
-
-        long timeDiff = System.currentTimeMillis() - lastProcessedAt;
-
-        return timeDiff >= timerInterval;
     }
 }
