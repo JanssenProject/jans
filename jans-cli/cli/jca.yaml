@@ -33,8 +33,13 @@ tags:
   - name: OAuth - Scopes
   - name: Statistics - User
   - name: Health - Check
-  - name: SCIM - User Management 
+  - name: SCIM - User Management
+  - name: SCIM - Config Management
   - name: Auth Server Health - Check
+  - name: Admin UI - Role
+  - name: Admin UI - Permission
+  - name: Admin UI - Role-Permissions Mapping
+  - name: Admin UI - License
 paths:
   /jans-config-api/api/v1/jans-auth-server/config:
     get:
@@ -354,7 +359,7 @@ paths:
         content:
           application/json:
             schema:
-                $ref: '#/components/schemas/AuthenticationMethod'
+              $ref: '#/components/schemas/AuthenticationMethod'
       responses:
         '200':
           description: OK
@@ -549,14 +554,14 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-      - oauth2: [https://jans.io/oauth/config/database/ldap.readonly]
+        - oauth2: [https://jans.io/oauth/config/database/ldap.readonly]
   /jans-config-api/api/v1/config/database/sql:
     get:
       summary: Gets list of existing sql configurations.
       description: Gets list of existing sql configurations.
       operationId: get-config-database-sql
       tags:
-      - Database - Sql configuration
+        - Database - Sql configuration
       responses:
         '200':
           description: OK
@@ -572,7 +577,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-      - oauth2: [https://jans.io/oauth/config/database/sql.readonly]
+        - oauth2: [https://jans.io/oauth/config/database/sql.readonly]
     post:
       summary: Adds a new Sql configuration.
       description: Adds a new Sql configuration.
@@ -597,7 +602,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-      - oauth2: [https://jans.io/oauth/config/database/sql.write]
+        - oauth2: [https://jans.io/oauth/config/database/sql.write]
     put:
       summary: Updates Sql configuration.
       description: Updates Sql configuration.
@@ -624,7 +629,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-      - oauth2: [https://jans.io/oauth/config/database/sql.write]
+        - oauth2: [https://jans.io/oauth/config/database/sql.write]
     parameters: []
   /jans-config-api/api/v1/config/database/sql/{name}:
     parameters:
@@ -654,7 +659,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-      - oauth2: [https://jans.io/oauth/config/database/sql.readonly]
+        - oauth2: [https://jans.io/oauth/config/database/sql.readonly]
     patch:
       summary: Partially modify an Sql configuration.
       description: Partially modify an Sql configuration.
@@ -684,7 +689,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-      - oauth2: [https://jans.io/oauth/config/database/sql.write]
+        - oauth2: [https://jans.io/oauth/config/database/sql.write]
     delete:
       summary: Deletes a Sql configurations by name.
       description: Deletes a Sql configurations by name.
@@ -699,7 +704,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-      - oauth2: [https://jans.io/oauth/config/database/sql.delete]
+        - oauth2: [https://jans.io/oauth/config/database/sql.delete]
   /jans-config-api/api/v1/config/database/sql/test:
     post:
       summary: Tests a Sql configuration.
@@ -727,7 +732,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-      - oauth2: [https://jans.io/oauth/config/database/sql.readonly]
+        - oauth2: [https://jans.io/oauth/config/database/sql.readonly]
   /jans-config-api/api/v1/config/database/couchbase:
     get:
       summary: Gets list of existing Couchbase configurations.
@@ -862,7 +867,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
-      - oauth2: [https://jans.io/oauth/config/database/couchbase.write]
+        - oauth2: [https://jans.io/oauth/config/database/couchbase.write]
     delete:
       summary: Deletes a Couchbase configurations by name.
       description: Deletes a Couchbase configurations by name.
@@ -1621,7 +1626,6 @@ paths:
       summary: Puts/replaces JWKS
       description: Puts/replaces JSON Web Keys (JWKS).
       operationId: put-config-jwks
-      x-cli-getdata: _file
       requestBody:
         content:
           application/json:
@@ -1783,7 +1787,7 @@ paths:
                 title: OpenID Clients.
                 description: List of OpenID clients.
                 items:
-                 $ref: '#/components/schemas/Client'
+                  $ref: '#/components/schemas/Client'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -1817,12 +1821,12 @@ paths:
         - schema:
             type: string
             default: 1
-            enum: 
+            enum:
               - ascending
               - descending
           in: query
           name: sortOrder
-          description: Order in which the sortBy param is applied. Allowed values are "ascending" and "descending".  
+          description: Order in which the sortBy param is applied. Allowed values are "ascending" and "descending".
     post:
       tags:
         - OAuth - OpenID Connect - Clients
@@ -1969,7 +1973,7 @@ paths:
                 title: UMA Resource list.
                 description: List of UMA Resource.
                 items:
-                 $ref: '#/components/schemas/UmaResource'
+                  $ref: '#/components/schemas/UmaResource'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -2235,7 +2239,7 @@ paths:
         '500':
           description: Internal Server Error
       security:
-      - oauth2: ['https://jans.io/oauth/config/scopes.readonly']
+        - oauth2: ['https://jans.io/oauth/config/scopes.readonly']
     delete:
       tags:
         - OAuth - Scopes
@@ -2313,11 +2317,11 @@ paths:
           in: query
           name: month
           description: Month for which the stat report is to be fetched.
-          example:  202012 (2020 Dec) 202101 (2021 Jan)) 
+          example:  202012 (2020 Dec) 202101 (2021 Jan))
           required: true
         - schema:
             type: string
-            enum: 
+            enum:
               - json
               - openmetrics
             default: json
@@ -2456,23 +2460,23 @@ paths:
 
     post:
       tags:
-      - SCIM - User Management
+        - SCIM - User Management
       operationId: post-create-user
       summary: Create a SCIM user.
       description: Allows creating a User resource via POST (see section 3.3 of RFC 7644)
       security:
         - oauth2: [https://jans.io/oauth/config/scim/users.write https://jans.io/scim/users.write]
       parameters:
-      - name: attributes
-        in: query
-        description: A comma-separated list of attribute names to return in the response
-        schema:
-          type: string
-      - name: excludedAttributes
-        in: query
-        description: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list)
-        schema:
-          type: string
+        - name: attributes
+          in: query
+          description: A comma-separated list of attribute names to return in the response
+          schema:
+            type: string
+        - name: excludedAttributes
+          in: query
+          description: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list)
+          schema:
+            type: string
       requestBody:
         description: Payload that represents the Group to create
         content:
@@ -2521,32 +2525,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  
+
   /jans-config-api/scim/user/{id}:
     get:
       tags:
-      - SCIM - User Management
+        - SCIM - User Management
       operationId: get-user-by-id
       summary: Retrieves SCIM user by Id.
       description: Retrieves a User resource by Id (see section 3.4.1 of RFC 7644)
       security:
         - oauth2: [https://jans.io/oauth/config/scim/users.read https://jans.io/scim/users.read]
       parameters:
-      - name: attributes
-        in: query
-        description: A comma-separated list of attribute names to return in the response
-        schema:
-          type: string
-      - name: excludedAttributes
-        in: query
-        description: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list)
-        schema:
-          type: string
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
+        - name: attributes
+          in: query
+          description: A comma-separated list of attribute names to return in the response
+          schema:
+            type: string
+        - name: excludedAttributes
+          in: query
+          description: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list)
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
       responses:
         200:
           description: Successful operation
@@ -2577,7 +2581,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
     put:
       tags:
-      - SCIM - User Management
+        - SCIM - User Management
       operationId: put-update-user-by-id
       summary: Updates an SCIM user.
       description: "Updates a User resource (see section 3.5.1 of RFC 7644). Update\
@@ -2587,21 +2591,21 @@ paths:
       security:
         - oauth2: [https://jans.io/oauth/config/scim/users.write https://jans.io/scim/users.write]
       parameters:
-      - name: attributes
-        in: query
-        description: A comma-separated list of attribute names to return in the response
-        schema:
-          type: string
-      - name: excludedAttributes
-        in: query
-        description: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list)
-        schema:
-          type: string
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
+        - name: attributes
+          in: query
+          description: A comma-separated list of attribute names to return in the response
+          schema:
+            type: string
+        - name: excludedAttributes
+          in: query
+          description: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list)
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
       requestBody:
         description: Payload with the data to replace in the existing user identified
           by the id param
@@ -2663,19 +2667,19 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
     delete:
       tags:
-      - SCIM - User Management
+        - SCIM - User Management
       operationId: delete-user-by-id
       summary: Deletes a SCIM user.
       description: Deletes a user resource
       security:
         - oauth2: [https://jans.io/oauth/config/scim/users.write https://jans.io/scim/users.write]
       parameters:
-      - name: id
-        in: path
-        description: Identifier of the resource to delete
-        required: true
-        schema:
-          type: string
+        - name: id
+          in: path
+          description: Identifier of the resource to delete
+          required: true
+          schema:
+            type: string
       responses:
         204:
           description: Successful operation. Empty response
@@ -2700,7 +2704,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
     patch:
       tags:
-      - SCIM - User Management
+        - SCIM - User Management
       operationId: patch-user-by-id
       summary: Patches SCIM User attributes.
       description: "Updates one or more attributes of a User resource using a sequence\
@@ -2709,21 +2713,21 @@ paths:
       security:
         - oauth2: [https://jans.io/oauth/config/scim/users.write https://jans.io/scim/users.write]
       parameters:
-      - name: attributes
-        in: query
-        description: A comma-separated list of attribute names to return in the response
-        schema:
-          type: string
-      - name: excludedAttributes
-        in: query
-        description: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list)
-        schema:
-          type: string
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
+        - name: attributes
+          in: query
+          description: A comma-separated list of attribute names to return in the response
+          schema:
+            type: string
+        - name: excludedAttributes
+          in: query
+          description: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list)
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
       requestBody:
         description: Payload describing the patch operations to apply upon the resource
           identified by param id
@@ -2802,6 +2806,60 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
       security:
         - oauth2: [https://jans.io/oauth/config/scim/users.read https://jans.io/scim/users.read]
+		
+  /jans-config-api/scim/config:
+    get:
+      summary: Retrieves SCIM App configuration.
+      description: Retrieves SCIM configuration.
+      operationId: get-scim-config
+      security:
+        - oauth2: [https://jans.io/scim/config.readonly]
+      tags:
+        - SCIM - Config Management
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: ScimAppConfiguration
+                description:  SCIM App configuration.
+                $ref: '#/components/schemas/ScimAppConfiguration'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    patch:
+      summary: Partially modifies SCIM App configuration.
+      description: Partially modifies SCIM App configuration.
+      operationId: patch-scim-config
+      security:
+        - oauth2: [https://jans.io/scim/config.write]
+      tags:
+        - SCIM - Config Management
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/PatchRequest'
+                description: String representing patch-document.
+                example: '[ {op:replace, path: loggingLevel, value: DEBUG } ]'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: ScimAppConfiguration
+                description: SCIM App configuration.
+                $ref: '#/components/schemas/ScimAppConfiguration'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+		  
   /jans-config-api/api/v1/jans-auth-server/health:
     get:
       summary: Returns auth server health status.
@@ -2818,6 +2876,413 @@ paths:
                 $ref: '#/components/schemas/AuthHealthStatus'
         '500':
           description: Internal Server Error
+
+  /jans-config-api/admin-ui/user/roles:
+    get:
+      tags:
+        - Admin UI - Role
+      summary: Get all admin ui roles.
+      description: Get all admin ui roles.
+      operationId: get-adminui-roles
+      security:
+        - oauth2: [https://jans.io/oauth/jans-auth-server/config/adminui/user/role.read]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: Get admin ui roles.
+                description: Get admin ui roles.
+                type: array
+                items:
+                  $ref: '#/components/schemas/AdminRole'
+        '400':
+          $ref: '#/components/responses/NotAcceptable'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      tags:
+        - Admin UI - Role
+      summary: Add admin ui role.
+      description: Add admin ui role.
+      operationId: add-adminui-role
+      security:
+        - oauth2: [https://jans.io/oauth/jans-auth-server/config/adminui/user/role.write]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+                - role
+              $ref: '#/components/schemas/AdminRole'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: Add admin ui role.
+                description: Add admin ui role.
+                type: array
+                items:
+                  $ref: '#/components/schemas/AdminRole'
+        '400':
+          $ref: '#/components/responses/NotAcceptable'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      tags:
+        - Admin UI - Role
+      summary: Edit admin ui role.
+      description: Edit admin ui role.
+      operationId: edit-adminui-role
+      security:
+        - oauth2: [https://jans.io/oauth/jans-auth-server/config/adminui/user/role.write]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminRole'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: Edit admin ui role.
+                description: Edit admin ui role.
+                type: array
+                items:
+                  $ref: '#/components/schemas/AdminRole'
+        '400':
+          $ref: '#/components/responses/NotAcceptable'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      tags:
+        - Admin UI - Role
+      summary: Delete admin ui role.
+      description: Delete admin ui role.
+      operationId: delete-adminui-role
+      security:
+        - oauth2: [https://jans.io/oauth/jans-auth-server/config/adminui/user/role.write]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminRole'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: Delete admin ui role.
+                description: Delete admin ui role.
+                type: array
+                items:
+                  $ref: '#/components/schemas/AdminRole'
+        '400':
+          $ref: '#/components/responses/NotAcceptable'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /jans-config-api/admin-ui/user/permissions:
+    get:
+      tags:
+        - Admin UI - Permission
+      summary: Get admin ui permissions.
+      description: Get admin ui permissions.
+      operationId: get-adminui-permissions
+      security:
+        - oauth2: [https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.read]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: Get admin ui permissions.
+                description: Get admin ui permissions.
+                type: array
+                items:
+                  $ref: '#/components/schemas/AdminPermission'
+        '400':
+          $ref: '#/components/responses/NotAcceptable'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      tags:
+        - Admin UI - Permission
+      summary: Add admin ui permission.
+      description: Add admin ui permission.
+      operationId: add-adminui-permission
+      security:
+        - oauth2: [https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.write]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+                - permission
+              $ref: '#/components/schemas/AdminPermission'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: Add admin ui permission.
+                description: Add admin ui permission.
+                type: array
+                items:
+                  $ref: '#/components/schemas/AdminPermission'
+        '400':
+          $ref: '#/components/responses/NotAcceptable'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      tags:
+        - Admin UI - Permission
+      summary: Edit admin ui permission.
+      description: Edit admin ui permission.
+      operationId: edit-adminui-permission
+      security:
+        - oauth2: [https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.write]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminPermission'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: Edit admin ui permission.
+                description: Edit admin ui permission.
+                type: array
+                items:
+                  $ref: '#/components/schemas/AdminPermission'
+        '400':
+          $ref: '#/components/responses/NotAcceptable'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      tags:
+        - Admin UI - Permission
+      summary: Delete admin ui permission.
+      description: Delete admin ui permission.
+      operationId: delete-adminui-permission
+      security:
+        - oauth2: [https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.write]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminPermission'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: Delete admin ui permission.
+                description: Delete admin ui permission.
+                type: array
+                items:
+                  $ref: '#/components/schemas/AdminPermission'
+        '400':
+          $ref: '#/components/responses/NotAcceptable'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /jans-config-api/admin-ui/user/rolePermissionsMapping:
+    get:
+      tags:
+        - Admin UI - Role-Permissions Mapping
+      summary: Get admin ui role-permissions mapping.
+      description: Get admin ui role-permissions mapping.
+      operationId: get-adminui-role-permissions
+      security:
+        - oauth2: [https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.readonly]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: Get admin ui role-permissions mapping.
+                description: Get admin ui role-permissions mapping.
+                type: array
+                items:
+                  $ref: '#/components/schemas/RolePermissionMapping'
+        '400':
+          $ref: '#/components/responses/NotAcceptable'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      tags:
+        - Admin UI - Role-Permissions Mapping
+      summary: Add role-permissions mapping.
+      description: Add role-permissions mapping.
+      operationId: Add role-permissions mapping.
+      security:
+        - oauth2: [https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.write]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RolePermissionMapping'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: Add role-permissions mapping.
+                description: Add role-permissions mapping.
+                type: array
+                items:
+                  $ref: '#/components/schemas/RolePermissionMapping'
+        '400':
+          $ref: '#/components/responses/NotAcceptable'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      tags:
+        - Admin UI - Role-Permissions Mapping
+      summary: Map permissions to role.
+      description: Map permissions to role.
+      operationId: map-permissions-to-role
+      security:
+        - oauth2: [https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.write]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RolePermissionMapping'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: Map permissions to role.
+                description: Map permissions to role.
+                type: array
+                items:
+                  $ref: '#/components/schemas/RolePermissionMapping'
+        '400':
+          $ref: '#/components/responses/NotAcceptable'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      tags:
+        - Admin UI - Role-Permissions Mapping
+      summary: Remove role-permissions mapping.
+      description: Remove role-permissions mapping.
+      operationId: remove-role-permissions-permission
+      security:
+        - oauth2: [https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.write]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RolePermissionMapping'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: Remove role-permissions mapping.
+                description: Remove role-permissions mapping.
+                type: array
+                items:
+                  $ref: '#/components/schemas/RolePermissionMapping'
+        '400':
+          $ref: '#/components/responses/NotAcceptable'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /jans-config-api/admin-ui/license/licenseDetails:
+    get:
+      tags:
+        - Admin UI - License
+      summary: Get admin ui license details.
+      description: Get admin ui license details.
+      operationId: get-adminui-license
+      security:
+        - oauth2: [https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: Get admin ui license details.
+                description: Get admin ui license details.
+                $ref: '#/components/schemas/LicenseResponse'
+        '400':
+          $ref: '#/components/responses/NotAcceptable'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      tags:
+        - Admin UI - License
+      summary: Edit admin ui license details.
+      description: Edit admin ui license details.
+      operationId: edit-adminui-license
+      security:
+        - oauth2: [https://jans.io/oauth/jans-auth-server/config/adminui/license.write]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+                - role
+              $ref: '#/components/schemas/LicenseRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: Edit admin ui license details.
+                description: Edit admin ui license details.
+                $ref: '#/components/schemas/LicenseResponse'
+        '400':
+          $ref: '#/components/responses/NotAcceptable'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 components:
   securitySchemes:
     oauth2:
@@ -2869,6 +3334,8 @@ components:
             https://jans.io/oauth/config/stats.readonly: Vew server with basic statistic
             https://jans.io/oauth/config/scim/users.read: Vew scim user related information
             https://jans.io/oauth/config/scim/users.write: Manage scim user related information
+            https://jans.io/scim/config.readonly: Vew SCIM App configuration
+            https://jans.io/scim/config.write: Manage SCIM App configuration
 
   responses:
     Found:
@@ -2931,6 +3398,7 @@ components:
         - script
         - scriptType
         - programmingLanguage
+        - moduleProperties
         - level
       properties:
         dn:
@@ -3021,7 +3489,7 @@ components:
           type: boolean
           description: boolean value indicating if the script is internal.
           default: false
-  
+
     LdapConfiguration:
       type: object
       required:
@@ -3291,7 +3759,7 @@ components:
         y:
           type: string
           description: The y member contains the y coordinate for the elliptic curve point. It is represented as the base64url encoding of the coordinate's big endian representation.
-   
+
     PersistenceConfiguration:
       title: PersistenceConfiguration
       description: Persistence configuration properties.
@@ -3300,11 +3768,11 @@ components:
           type: string
           description: Jans Auth Server persistence type configured.
           enum:
-          - ldap
-          - couchbase
-          - sql
-          - spanner
-          - hybrid
+            - ldap
+            - couchbase
+            - sql
+            - spanner
+            - hybrid
 
     AppConfiguration:
       title: AppConfiguration
@@ -4098,8 +4566,8 @@ components:
           type: string
           description: A list of possible error handling methods.
           enum:
-           - internal
-           - remote
+            - internal
+            - remote
         keepAuthenticatorAttributesOnAcrChange:
           type: boolean
           description: Boolean value specifying whether to keep authenticator attributes on ACR change.
@@ -4263,13 +4731,13 @@ components:
       description: Attribute.
       type: object
       required:
-      - name
-      - description
-      - displayName
-      - dataType
-      - status
-      - viewType
-      - editType
+        - name
+        - description
+        - displayName
+        - dataType
+        - status
+        - viewType
+        - editType
       properties:
         dn:
           type: string
@@ -4320,22 +4788,22 @@ components:
           items:
             type: string
             enum:
-            - ADMIN
-            - OWNER
-            - MANAGER
-            - USER
-            - WHITEPAGES
+              - ADMIN
+              - OWNER
+              - MANAGER
+              - USER
+              - WHITEPAGES
         viewType:
           type: array
           description: GluuUserRole
           items:
             type: string
             enum:
-            - ADMIN
-            - OWNER
-            - MANAGER
-            - USER
-            - WHITEPAGES
+              - ADMIN
+              - OWNER
+              - MANAGER
+              - USER
+              - WHITEPAGES
         usageType:
           type: object
           description: GluuAttributeUsageType
@@ -4376,25 +4844,25 @@ components:
     PatchRequest:
       description: A JSONPatch document as defined by RFC 6902
       required:
-       - "op"
-       - "path"
+        - "op"
+        - "path"
       properties:
-       op:
-        type: string
-        description: The operation to be performed
-        enum:
-         - "add"
-         - "remove"
-         - "replace"
-         - "move"
-         - "copy"
-         - "test"
-       path:
-        type: string
-        description: A JSON-Pointer
-       value:
-        type: object
-        description: The value to be used within the operations.
+        op:
+          type: string
+          description: The operation to be performed
+          enum:
+            - "add"
+            - "remove"
+            - "replace"
+            - "move"
+            - "copy"
+            - "test"
+        path:
+          type: string
+          description: A JSON-Pointer
+        value:
+          type: object
+          description: The value to be used within the operations.
     Scope:
       title: Scope
       description: Auth Scope.
@@ -4552,7 +5020,6 @@ components:
         - logout
         - includeClaimsInIdToken
         - displayName
-        - clientSecret
       properties:
         dn:
           type: string
@@ -4560,8 +5027,8 @@ components:
           description: XRI i-number. Client Identifier to uniquely identify the client.
           type: string
         displayName:
-            type: string
-            description: Name of the user suitable for display to end-users
+          type: string
+          description: Name of the user suitable for display to end-users
         clientSecret:
           type: string
           description: The client secret.  The client MAY omit the parameter if the client secret is an empty string.
@@ -4950,8 +5417,6 @@ components:
         - id
         - type
         - iconUri
-        - name
-        - description
       properties:
         dn:
           type: string
@@ -5013,7 +5478,7 @@ components:
       type: object
       description: Sector Identifier Details.
       required:
-      - id
+        - id
       properties:
         id:
           description: XRI i-number. Sector Identifier to uniquely identify the sector.
@@ -5425,21 +5890,21 @@ components:
           description: A flag to control if CORS specific attributes should be added to the HttpServletRequest object.
 
     AuthenticationProtectionConfiguration:
-          type: object
-          description: Authentication Brute Force Protection Configuration.
-          properties:
-            attemptExpiration:
-              type: integer
-              description: How long store in cache information about particular login attempt. It's needed to count login attempts withing specified period of time.
-            maximumAllowedAttemptsWithoutDelay:
-              type: integer
-              description: How many attempts application allow without delay.
-            delayTime:
-              type: integer
-              description: Delay time in seconds after reaching maximumAllowedAttemptsWithoutDelay limit.
-            bruteForceProtectionEnabled:
-              type: boolean
-              description: Enable or disable service, This functionality can be enabled dynamically.
+      type: object
+      description: Authentication Brute Force Protection Configuration.
+      properties:
+        attemptExpiration:
+          type: integer
+          description: How long store in cache information about particular login attempt. It's needed to count login attempts withing specified period of time.
+        maximumAllowedAttemptsWithoutDelay:
+          type: integer
+          description: How many attempts application allow without delay.
+        delayTime:
+          type: integer
+          description: Delay time in seconds after reaching maximumAllowedAttemptsWithoutDelay limit.
+        bruteForceProtectionEnabled:
+          type: boolean
+          description: Enable or disable service, This functionality can be enabled dynamically.
 
     CIBAEndUserNotificationConfig:
       type: object
@@ -5533,7 +5998,7 @@ components:
       type: object
       description: Search Parameters.
       properties:
-        schemas: 
+        schemas:
           type: array
           items:
             type: string
@@ -5565,18 +6030,18 @@ components:
           type: integer
           format: int32
           description: total count of records
-    
+
     UserListResponse:
       description: Results for users search. See section 3.4.2.4 of RFC 7644
       allOf:
-      - $ref: '#/components/schemas/BasicListResponse'
-      - type: object
-      - type: object
-        properties:
-          Resources:
-            type: array
-            items:
-              $ref: '#/components/schemas/UserResource'
+        - $ref: '#/components/schemas/BasicListResponse'
+        - type: object
+        - type: object
+          properties:
+            Resources:
+              type: array
+              items:
+                $ref: '#/components/schemas/UserResource'
     BasicListResponse:
       type: object
       properties:
@@ -5598,89 +6063,89 @@ components:
     UserResource:
       description: Represents a user resource. See section 4.1 of RFC 7643
       allOf:
-      - $ref: '#/components/schemas/BaseResource'
-      - type: object
-      - type: object
-        properties:
-          externalId:
-            type: string
-            description: Identifier of the resource useful from the perspective of the provisioning client. See section 3.1 of RFC 7643
-          userName:
-            type: string
-            description: Identifier for the user, typically used by the user to directly authenticate (id and externalId are opaque identifiers generally not known by users)
-          name:
-            $ref: '#/components/schemas/Name'
-          displayName:
-            type: string
-            description: Name of the user suitable for display to end-users
-          nickName:
-            type: string
-            description: Casual way to address the user in real life
-          profileUrl:
-            type: string
-            description: URI pointing to a location representing the User's online profile
-          title:
-            type: string
-            example: Vice President
-          userType:
-            type: string
-            description: Used to identify the relationship between the organization and the user
-            example: Contractor
-          preferredLanguage:
-            type: string
-            description: Preferred language as used in the Accept-Language HTTP header
-            example: en
-          locale:
-            type: string
-            description: Used for purposes of localizing items such as currency and dates
-            example: en-US
-          timezone:
-            type: string
-            example: America/Los_Angeles
-          active:
-            type: boolean
-          password:
-            type: string
-          emails:
-            type: array
-            items:
-              $ref: '#/components/schemas/Email'
-          phoneNumbers:
-            type: array
-            items:
-              $ref: '#/components/schemas/PhoneNumber'
-          ims:
-            type: array
-            items:
-              $ref: '#/components/schemas/InstantMessagingAddress'
-          photos:
-            type: array
-            items:
-              $ref: '#/components/schemas/Photo'
-          addresses:
-            type: array
-            items:
-              $ref: '#/components/schemas/Address'
-          groups:
-            type: array
-            items:
-              $ref: '#/components/schemas/Group'
-          entitlements:
-            type: array
-            items:
-              $ref: '#/components/schemas/Entitlement'
-          roles:
-            type: array
-            items:
-              $ref: '#/components/schemas/Role'
-          x509Certificates:
-            type: array
-            items:
-              $ref: '#/components/schemas/X509Certificate'
-          urn:ietf:params:scim:schemas:extension:gluu:2.0:User:
-            type: object
-            properties: {}
-            description: Extended attributes
+        - $ref: '#/components/schemas/BaseResource'
+        - type: object
+        - type: object
+          properties:
+            externalId:
+              type: string
+              description: Identifier of the resource useful from the perspective of the provisioning client. See section 3.1 of RFC 7643
+            userName:
+              type: string
+              description: Identifier for the user, typically used by the user to directly authenticate (id and externalId are opaque identifiers generally not known by users)
+            name:
+              $ref: '#/components/schemas/Name'
+            displayName:
+              type: string
+              description: Name of the user suitable for display to end-users
+            nickName:
+              type: string
+              description: Casual way to address the user in real life
+            profileUrl:
+              type: string
+              description: URI pointing to a location representing the User's online profile
+            title:
+              type: string
+              example: Vice President
+            userType:
+              type: string
+              description: Used to identify the relationship between the organization and the user
+              example: Contractor
+            preferredLanguage:
+              type: string
+              description: Preferred language as used in the Accept-Language HTTP header
+              example: en
+            locale:
+              type: string
+              description: Used for purposes of localizing items such as currency and dates
+              example: en-US
+            timezone:
+              type: string
+              example: America/Los_Angeles
+            active:
+              type: boolean
+            password:
+              type: string
+            emails:
+              type: array
+              items:
+                $ref: '#/components/schemas/Email'
+            phoneNumbers:
+              type: array
+              items:
+                $ref: '#/components/schemas/PhoneNumber'
+            ims:
+              type: array
+              items:
+                $ref: '#/components/schemas/InstantMessagingAddress'
+            photos:
+              type: array
+              items:
+                $ref: '#/components/schemas/Photo'
+            addresses:
+              type: array
+              items:
+                $ref: '#/components/schemas/Address'
+            groups:
+              type: array
+              items:
+                $ref: '#/components/schemas/Group'
+            entitlements:
+              type: array
+              items:
+                $ref: '#/components/schemas/Entitlement'
+            roles:
+              type: array
+              items:
+                $ref: '#/components/schemas/Role'
+            x509Certificates:
+              type: array
+              items:
+                $ref: '#/components/schemas/X509Certificate'
+            urn:ietf:params:scim:schemas:extension:gluu:2.0:User:
+              type: object
+              properties: {}
+              description: Extended attributes
 
     Name:
       type: object
@@ -5729,7 +6194,7 @@ components:
           example: fax
         primary:
           type: boolean
-          description: Denotes if this is the preferred phone number among others, if any 
+          description: Denotes if this is the preferred phone number among others, if any
       description: See section 4.1.2 of RFC 7643
     InstantMessagingAddress:
       type: object
@@ -5788,7 +6253,7 @@ components:
         primary:
           type: boolean
           description: Denotes if this is the preferred address among others, if any
-      description: Physical mailing address for this user. See section 4.1.2 of RFC 7643  
+      description: Physical mailing address for this user. See section 4.1.2 of RFC 7643
     Role:
       type: object
       properties:
@@ -5875,19 +6340,19 @@ components:
         location:
           type: string
       description: See section 3.1 of RFC 7643
-  
+
     ScimPatchOperation:
       required:
-      - op
+        - op
       type: object
       properties:
         op:
           type: string
           description: The kind of operation to perform
           enum:
-          - add
-          - remove
-          - replace
+            - add
+            - remove
+            - replace
         path:
           type: string
           description: Required when op is remove, optional otherwise
@@ -5895,11 +6360,11 @@ components:
           $ref: '#/components/schemas/AnyValue'
           description: Only required when op is add or replace
       description: See section 3.5.2 of RFC 7644
-    
+
     ScimPatchRequest:
       description: Stores one or more patch operations
       required:
-      - operations
+        - operations
       type: object
       properties:
         schemas:
@@ -5913,9 +6378,169 @@ components:
             $ref: '#/components/schemas/ScimPatchOperation'
     AnyValue:
       description: Can be any value - string, number, boolean, array or object
-  
+
     AuthHealthStatus:
       type: object
       description: Auth Server health data
       additionalProperties:
         type: string
+
+    AdminRole:
+      type: object
+      description: Admin role
+      required:
+        - role
+      properties:
+        role:
+          type: string
+          description: role
+        description:
+          type: string
+          description: role description
+    AdminPermission:
+      type: object
+      description: Admin permission
+      required:
+        - permission
+      properties:
+        permission:
+          type: string
+          description: permission
+        description:
+          type: string
+          description: permission description
+    RolePermissionMapping:
+      type: object
+      description: Admin role-permission mapping
+      required:
+        - role
+      properties:
+        role:
+          type: string
+          description: role
+        permissions:
+          type: array
+          items:
+            type: string
+          description: permissions
+    LicenseRequest:
+      type: object
+      description: Admin license request
+      required:
+        - validityPeriod
+      properties:
+        validityPeriod:
+          type: string
+          description: The license will expire on following date.
+        maxActivations:
+          type: string
+          description: The maximum allowed activations of this license on different machines.
+        licenseActive:
+          type: string
+          description: Is license active?
+    LicenseResponse:
+      type: object
+      description: Admin license response
+      properties:
+        licenseEnabled:
+          type: boolean
+          description: Is license module enabled in admin-ui application?
+          default: false
+        productName:
+          type: string
+          description: The license is registered under following product.
+        productCode:
+          type: string
+          description: The short code is used in our API calls in order to identify the product.
+        licenseType:
+          type: string
+          description: The type of license (eg Perpetual, Time-based, Subscription, and Consumption-based licenses).
+        maxActivations:
+          type: integer
+          description: The license key.
+        licenseKey:
+          type: string
+          description: The license key.
+        licenseActive:
+          type: boolean
+          description: Is license active?
+          default: false
+        validityPeriod:
+          type: string
+          description: The license validity period
+        companyName:
+          type: string
+          description: The company name of the registered license.
+        customerEmail:
+          type: string
+          description: The customer email address of the registered license.
+        customerFirstName:
+          type: string
+          description: The customer first name.
+        customerLastName:
+          type: string
+          description: The customer last name.
+    ScimAppConfiguration:
+      type: object
+      properties:
+        baseDN:
+          type: string
+          description: Application config Base DN
+        applicationUrl:
+          type: string
+          description: Application base URL
+        baseEndpoint:
+          type: string
+          description: SCIM base endpoint URL
+        personCustomObjectClass:
+          type: string
+          description: Person Object Class
+        oxAuthIssuer:
+          type: string
+          description: Jans Auth - Issuer identifier. 
+        protectionMode:
+          type: string
+          enum:
+            - OAUTH
+            - BYPASS
+          description: SCIM Protection Mode 
+        maxCount:
+          type: integer
+          example: Maximum number of results per page
+        userExtensionSchemaURI:
+          type: string
+          description: User Extension Schema URI
+        loggingLevel:
+          type: string
+          description: Logging level for scim logger.
+          enum:
+            - TRACE
+            - DEBUG
+            - INFO
+            - WARN
+            - ERROR
+            - FATAL
+            - OFF
+        loggingLayout:
+          type: string
+          description: Logging layout used for Server loggers.
+        externalLoggerConfiguration:
+          type: string
+          description: Path to external log4j2 logging configuration.
+        metricReporterInterval:
+          type: integer
+          description: The interval for metric reporter in seconds.
+        metricReporterKeepDataDays:
+          type: integer
+          description: The days to keep metric reported data.
+        metricReporterEnabled:
+          type: boolean
+          description: Metric reported data enabled flag.
+        disableJdkLogger:
+          type: boolean
+          description: Boolean value specifying whether to enable JDK Loggers.
+        useLocalCache:
+          type: boolean
+          description: Boolean value specifying whether to enable local in-memory cache.
+		  
+		  
