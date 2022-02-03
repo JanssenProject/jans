@@ -801,7 +801,6 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     redirectUriResponse.getRedirectUri().setBaseRedirectUri(URLDecoder.decode(tempRedirectUri, "UTF-8"));
                 }
             }
-            redirectUriResponse.getRedirectUri().setResponseMode(ResponseMode.JWT);
             String clientId = client.getClientId();
             redirectUriResponse.getRedirectUri().setIssuer(appConfiguration.getIssuer());
             redirectUriResponse.getRedirectUri().setAudience(clientId);
