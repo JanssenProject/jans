@@ -23,12 +23,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.*;
 
 /**
  * @author Javier Rojas Blum
- * @version November 23, 2017
+ * @version February 2, 2022
  */
 public class AuthorizationSupportCustomParams extends BaseTest {
 
@@ -68,9 +67,11 @@ public class AuthorizationSupportCustomParams extends BaseTest {
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
-        authorizationRequest.addCustomParameter("customParam1", "value1");
-        authorizationRequest.addCustomParameter("customParam2", "value2");
-        authorizationRequest.addCustomParameter("customParam3", "value3");
+        authorizationRequest.addCustomParameter("customParam1", "value1"); // returnInResponse = false
+        authorizationRequest.addCustomParameter("customParam2", "value2"); // returnInResponse = false
+        authorizationRequest.addCustomParameter("customParam3", "value3"); // returnInResponse = false
+        authorizationRequest.addCustomParameter("customParam4", "value4"); // returnInResponse = true
+        authorizationRequest.addCustomParameter("customParam5", "value5"); // returnInResponse = true
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
         authorizeClient.setRequest(authorizationRequest);
@@ -83,6 +84,15 @@ public class AuthorizationSupportCustomParams extends BaseTest {
         assertNotNull(authorizationResponse.getTokenType(), "The tokenType is null");
         assertNotNull(authorizationResponse.getIdToken(), "The idToken is null");
         assertNotNull(authorizationResponse.getState(), "The state is null");
+
+        assertNotNull(authorizationResponse.getCustomParams());
+        assertFalse(authorizationResponse.getCustomParams().containsKey("customParam1"));
+        assertFalse(authorizationResponse.getCustomParams().containsKey("customParam2"));
+        assertFalse(authorizationResponse.getCustomParams().containsKey("customParam3"));
+        assertTrue(authorizationResponse.getCustomParams().containsKey("customParam4"));
+        assertTrue(authorizationResponse.getCustomParams().containsKey("customParam5"));
+        assertEquals(authorizationResponse.getCustomParams().get("customParam4"), "value4");
+        assertEquals(authorizationResponse.getCustomParams().get("customParam5"), "value5");
 
         // NOTE: After complete successfully this test, check whether the stored session in LDAP has the 3 custom params
         // stored in its session attributes list.
