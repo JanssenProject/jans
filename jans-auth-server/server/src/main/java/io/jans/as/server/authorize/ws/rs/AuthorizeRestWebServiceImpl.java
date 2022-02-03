@@ -404,16 +404,16 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     }
                     requestParameterService.getCustomParameters(jwtRequest, customParameters);
                 } catch (WebApplicationException e) {
-                    JsonWebResponse jwe = parseRequestToJweJwt(request);
-                    if (jwe != null) {
-                        responseMode = ResponseMode.getByValue(jwe.getClaims().getClaimAsString("response_mode"));
+                    JsonWebResponse jwr = parseRequestToJwr(request);
+                    if (jwr != null) {
+                        responseMode = ResponseMode.getByValue(jwr.getClaims().getClaimAsString("response_mode"));
                         if (responseMode == ResponseMode.JWT) {
                             redirectUriResponse.getRedirectUri().setResponseMode(ResponseMode.JWT);
-                            fillRedirectUriResponseforJARM(redirectUriResponse, jwe, client);
+                            fillRedirectUriResponseforJARM(redirectUriResponse, jwr, client);
                             if (appConfiguration.isFapi()) {
                                 authorizeRestWebServiceValidator.throwInvalidJwtRequestExceptionAsJwtMode(
                                         redirectUriResponse, "Invalid JWT authorization request",
-                                        jwe.getClaims().getClaimAsString("state"), httpRequest);
+                                        jwr.getClaims().getClaimAsString("state"), httpRequest);
                             }
                         }
                     }
@@ -427,7 +427,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             // JARM
             if (responseMode == ResponseMode.QUERY_JWT || responseMode == ResponseMode.FRAGMENT_JWT ||
                     responseMode == ResponseMode.JWT || responseMode == ResponseMode.FORM_POST_JWT) {
-                JsonWebResponse jwe = parseRequestToJweJwt(request);
+                JsonWebResponse jwe = parseRequestToJwr(request);
                 fillRedirectUriResponseforJARM(redirectUriResponse, jwe, client);
             }
             // Validate JWT request object after JARM check, because we want to return errors well formatted (JSON/JWT).
@@ -790,40 +790,38 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     }
 
     @Nullable
-    private JsonWebResponse parseRequestToJweJwt(String request) {
-        String[] parts = request.split("\\.");
-        try {
-            if (parts.length == 5) {
-                String encodedHeader = parts[0];
-                JwtHeader jwtHeader = new JwtHeader(encodedHeader);
-                String keyId = jwtHeader.getKeyId();
-                PrivateKey privateKey = null;
-                KeyEncryptionAlgorithm keyEncryptionAlgorithm = KeyEncryptionAlgorithm
-                        .fromName(jwtHeader.getClaimAsString(JwtHeaderName.ALGORITHM));
-                if (AlgorithmFamily.RSA.equals(keyEncryptionAlgorithm.getFamily())) {
-                    privateKey = cryptoProvider.getPrivateKey(keyId);
+    private JsonWebResponse parseRequestToJwr(String request) {
+        if (request != null) {
+            String[] parts = request.split("\\.");
+            try {
+                if (parts.length == 5) {
+                    String encodedHeader = parts[0];
+                    JwtHeader jwtHeader = new JwtHeader(encodedHeader);
+                    String keyId = jwtHeader.getKeyId();
+                    PrivateKey privateKey = null;
+                    KeyEncryptionAlgorithm keyEncryptionAlgorithm = KeyEncryptionAlgorithm
+                            .fromName(jwtHeader.getClaimAsString(JwtHeaderName.ALGORITHM));
+                    if (AlgorithmFamily.RSA.equals(keyEncryptionAlgorithm.getFamily())) {
+                        privateKey = cryptoProvider.getPrivateKey(keyId);
+                    }
+                    Jwe jwe = Jwe.parse(request, privateKey, null);
+                    if (jwe == null) {
+                        return null;
+                    }
+                    return jwe;
                 }
-                Jwe jwe = Jwe.parse(request, privateKey, null);
-                if (jwe == null) {
-                    return null;
-                }
-                return jwe;
+                return Jwt.parseSilently(request);
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
             }
-            final Jwt jwt = Jwt.parseSilently(request);
-            if (jwt == null) {
-                return null;
-            }
-            return jwt;
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            return null;
         }
+        return null;
     }
 
-    private void fillRedirectUriResponseforJARM(RedirectUriResponse redirectUriResponse, JsonWebResponse jwt, Client client) {
+    private void fillRedirectUriResponseforJARM(RedirectUriResponse redirectUriResponse, JsonWebResponse jwr, Client client) {
         try {
-            if (jwt != null) {
-                String tempRedirectUri = jwt.getClaims().getClaimAsString("redirect_uri");
+            if (jwr != null) {
+                String tempRedirectUri = jwr.getClaims().getClaimAsString("redirect_uri");
                 if (StringUtils.isNotBlank(tempRedirectUri)) {
                     redirectUriResponse.getRedirectUri().setBaseRedirectUri(URLDecoder.decode(tempRedirectUri, "UTF-8"));
                 }
