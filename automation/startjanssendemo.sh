@@ -70,7 +70,6 @@ global:
 # -- Nginx ingress definitions chart
 nginx-ingress:
   ingress:
-    adminUiEnabled: false
     openidConfigEnabled: true
     uma2ConfigEnabled: true
     webfingerEnabled: true
@@ -90,9 +89,9 @@ nginx-ingress:
       hosts:
       - $JANS_FQDN
 EOF
-sudo helm repo add jans https://gluufederation.github.io/flex/flex-cn-setup/pygluu/kubernetes/templates/helm
+sudo helm repo add janssen https://https://janssenproject.github.io/jans/charts
 sudo helm repo update
-sudo helm install jans jans/gluu -n jans --version=5.0.2 -f override.yaml --kubeconfig="$KUBECONFIG"
+sudo helm install janssen janssen/janssen -n jans -f override.yaml --kubeconfig="$KUBECONFIG"
 echo "Waiting for auth-server to come up. This may take 5-10 mins....Please do not cancel out...This will wait for the auth-server to be ready.."
 sleep 120
 cat << EOF > testendpoints.sh
