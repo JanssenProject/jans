@@ -46,6 +46,8 @@ import org.apache.commons.io.IOUtils;
 
 import org.slf4j.Logger;
 import org.apache.commons.lang.StringUtils;
+
+import com.fasterxml.jackson.databind.JsonNode;
 import com.github.fge.jsonpatch.JsonPatchException;
 
 @Path(ApiConstants.ORG)
@@ -77,7 +79,11 @@ public class OrganizationResource extends BaseResource {
         final OrgConfigurationService orgConfigurationService = organizationService.getOrgConfigurationService(getOrganizationServiceUrl());
         log.error("\n\n OrganizationResource::getGluuOrganization() - orgConfigurationService:{}, request:{}, response:{} ", orgConfigurationService, request, response);
         
-        GluuOrganization gluuOrganization = orgConfigurationService.getOrg(authorization);
+        Response response = orgConfigurationService.getOrg(authorization);
+        GluuOrganization gluuOrganization = null;
+        if (response.getStatus() == 200) {
+            gluuOrganization = response.readEntity(GluuOrganization.class);
+        }
         log.error("\n\n OrganizationResource::getGluuOrganization() - gluuOrganization:{} ", gluuOrganization);
         
         return Response.ok(gluuOrganization).build();

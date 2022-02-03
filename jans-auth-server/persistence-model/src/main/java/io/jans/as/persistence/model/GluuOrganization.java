@@ -8,6 +8,7 @@ package io.jans.as.persistence.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.jans.model.GluuStatus;
 import io.jans.orm.annotation.AttributeName;
@@ -17,6 +18,9 @@ import io.jans.orm.model.base.Entry;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+
+import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
+
 import java.io.Serializable;
 
 /**
@@ -28,6 +32,7 @@ import java.io.Serializable;
 @ObjectClass(value = "jansOrganization")
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
+@IgnoreMediaTypes("application/*+json")
 public class GluuOrganization extends Entry implements Serializable {
 
     private static final long serialVersionUID = -8284018077740582699L;

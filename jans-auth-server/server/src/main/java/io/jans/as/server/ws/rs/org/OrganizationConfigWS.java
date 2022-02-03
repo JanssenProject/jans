@@ -80,6 +80,9 @@ public class OrganizationConfigWS {
     @Context
     HttpServletRequest request;
     
+    @Context
+    HttpServletResponse response;
+    
     @GET
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
@@ -87,6 +90,12 @@ public class OrganizationConfigWS {
         log.error("\n\n OrganizationConfigWS::getOrg() - authorization:{}, request:{}", authorization, request);
         GluuOrganization gluuOrganization = organizationService.getOrganization();
         log.error("\n\n OrganizationConfigWS::getOrg() - gluuOrganization:{}", gluuOrganization);
+        boolean hasSucceed = readCustomFavicon(response, gluuOrganization);
+        log.error("\n\n OrganizationConfigWS::getOrg() - hasSucceed:{}", hasSucceed);
+        if (!hasSucceed) {
+            hasSucceed = readDefaultFavicon(response);
+            log.error("\n\n OrganizationConfigWS::getOrg() - readDefaultFavicon:{}", hasSucceed);
+        }
         return Response.ok(gluuOrganization).build();
     }
     
@@ -113,7 +122,7 @@ public class OrganizationConfigWS {
 
     private boolean readDefaultFavicon(HttpServletResponse response) {
         String defaultFaviconFileName = "/WEB-INF/static/favicon.ico";
-       
+        log.error("\n\n OrganizationConfigWS::readDefaultFavicon() - defaultFaviconFileName:{}", defaultFaviconFileName);
         try (InputStream in =  request.getServletContext().getResourceAsStream(defaultFaviconFileName);
              OutputStream out = response.getOutputStream()) {
             IOUtils.copy(in, out);
@@ -125,6 +134,7 @@ public class OrganizationConfigWS {
     }
 
     private boolean readCustomFavicon(HttpServletResponse response, GluuOrganization organization) {
+        log.error("\n\n OrganizationConfigWS::readCustomFavicon() - response:{}, organization:{}", response, organization);
         if (organization.getJsFaviconPath() == null || StringUtils.isEmpty(organization.getJsFaviconPath())) {
             return false;
         }

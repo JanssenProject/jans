@@ -19,12 +19,12 @@ public interface OrgConfigurationClient {
     @GET
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
-    public GluuOrganization getOrg(@HeaderParam("Authorization") String authorization);
+    public Response getOrg(@HeaderParam("Authorization") String authorization);
 
     @PUT
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
-    public GluuOrganization updateOrg(@HeaderParam("Authorization") String authorization, GluuOrganization gluuOrganization);
+    public Response updateOrg(@HeaderParam("Authorization") String authorization, GluuOrganization gluuOrganization);
     
     @PUT
     @Path("{imageType}")
