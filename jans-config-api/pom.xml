@@ -195,12 +195,8 @@
 				<groupId>io.jans</groupId>
 				<artifactId>jans-client-api</artifactId>
 				<version>${jans.version}</version>
-<!-- 				<exclusions>
-					<exclusion>
-						<artifactId>org.jboss.resteasy</artifactId>
-						<groupId>*</groupId>
-					</exclusion>
-				</exclusions> -->
+				<!-- <exclusions> <exclusion> <artifactId>org.jboss.resteasy</artifactId> 
+					<groupId>*</groupId> </exclusion> </exclusions> -->
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
@@ -302,6 +298,12 @@
 				<artifactId>resteasy-json-p-provider</artifactId>
 				<version>${resteasy.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>org.jboss.resteasy</groupId>
+				<artifactId>resteasy-multipart-provider</artifactId>
+				<version>6.0.0.Final</version>
+			</dependency>
+
 
 			<!-- jetty -->
 			<dependency>

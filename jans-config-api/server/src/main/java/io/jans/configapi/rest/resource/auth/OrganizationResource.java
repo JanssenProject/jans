@@ -6,9 +6,13 @@
 
 package io.jans.configapi.rest.resource.auth;
 
-import io.jans.configapi.service.auth.ConfigurationService;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.github.fge.jsonpatch.JsonPatchException;
+
 import io.jans.as.client.service.OrgConfigurationService;
+import io.jans.as.model.common.Image;
 import io.jans.as.persistence.model.GluuOrganization;
+import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.service.auth.OrganizationService;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.rest.model.AuthenticationMethod;
@@ -21,17 +25,18 @@ import io.jans.model.GluuAttribute;
 import io.jans.util.io.FileDownloader;
 import io.jans.util.io.DownloadWrapper;
 import io.jans.util.io.FileUploadWrapper;
+import io.jans.util.StringHelper;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
 import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import io.jans.util.StringHelper;
+import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
@@ -42,13 +47,17 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.io.IOUtils;
-
-import org.slf4j.Logger;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.github.fge.jsonpatch.JsonPatchException;
+import javax.ws.rs.core.MultivaluedMap;
+import org.jboss.resteasy.plugins.providers.multipart.InputPart;
+import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
+
+
+
 
 @Path(ApiConstants.ORG)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -76,6 +85,8 @@ public class OrganizationResource extends BaseResource {
     @GET
     // @ProtectedApi(scopes = { ApiAccessConstants.ACRS_READ_ACCESS })
     public Response getGluuOrganization(@HeaderParam("Authorization") String authorization ) {
+        log.error("\n\n OrganizationResource::getGluuOrganization() - authorization:{} ", authorization);
+        
         final OrgConfigurationService orgConfigurationService = organizationService.getOrgConfigurationService(getOrganizationServiceUrl());
         log.error("\n\n OrganizationResource::getGluuOrganization() - orgConfigurationService:{}, request:{}, response:{} ", orgConfigurationService, request, response);
         
@@ -85,7 +96,44 @@ public class OrganizationResource extends BaseResource {
         
         return Response.ok(gluuOrganization).build();
     }
+    
+    @PUT
+    // @ProtectedApi(scopes = { ApiAccessConstants.ACRS_READ_ACCESS })
+    public Response updateOrg(@HeaderParam("Authorization") String authorization, GluuOrganization gluuOrganization) {
+        log.error("\n\n OrganizationResource::updateOrg() - authorization:{}, gluuOrganization:{} ", authorization, gluuOrganization);
+        
+        final OrgConfigurationService orgConfigurationService = organizationService.getOrgConfigurationService(getOrganizationServiceUrl());
+        log.error("\n\n OrganizationResource::updateOrg() - orgConfigurationService:{}, request:{}, response:{} ", orgConfigurationService, request, response);
+        
+        gluuOrganization = orgConfigurationService.updateOrg(authorization, gluuOrganization);
+        
+        log.error("\n\n OrganizationResource::updateOrg() - gluuOrganization:{} ", gluuOrganization);
+        
+        return Response.ok(gluuOrganization).build();
+    }
 
+    @PUT
+    // @ProtectedApi(scopes = { ApiAccessConstants.ACRS_READ_ACCESS })
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Path("{imageType}")
+    public Response updateImageResource(@HeaderParam("Authorization") String authorization, @PathParam("imageType") Image image, FileUploadWrapper fileUploadWrapper) {
+        log.error("\n\n OrganizationResource::updateImageResource() - authorization:{}, image:{}, fileUploadWrapper:{}", authorization, image, fileUploadWrapper);
+        
+        final OrgConfigurationService orgConfigurationService = organizationService.getOrgConfigurationService(getOrganizationServiceUrl());
+        log.error("\n\n OrganizationResource::updateImageResource() - orgConfigurationService:{}, request:{}, response:{} ", orgConfigurationService, request, response);
+        
+        //to test - start
+     //   fileUploadWrapper = 
+              //to test - start        
+                
+        GluuOrganization gluuOrganization = orgConfigurationService.updateImageResource(authorization, image, fileUploadWrapper);
+        
+        log.error("\n\n OrganizationResource::updateImageResource() - gluuOrganization:{} ", gluuOrganization);
+        
+        return Response.ok(gluuOrganization).build();
+    }
+    
+    
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     // @ProtectedApi(scopes = { ApiAccessConstants.ATTRIBUTES_WRITE_ACCESS })
@@ -158,11 +206,31 @@ public class OrganizationResource extends BaseResource {
         return fileName;
     }
 
-    public FileUploadWrapper getFileUploadWrapper(String file) {
-        return null;
+    public FileUploadWrapper getFileUploadWrapper() {
+        String file = "";
+
+        try {
+            InputStream is = new FileInputStream(file);
+        }catch(Exception ex) {
+            log.error("Error while uploading file" );
+        }
+           
+           return null;
     }
     
+  
     /*
+     
+     
+       public void load() throws IOException, NoSuchAlgorithmException, CertificateException {
+        try (InputStream is = new FileInputStream(keyStoreFile)) {
+            keyStore.load(is, keyStoreSecret.toCharArray());
+            LOG.debug("Loaded keys from JKS.");
+            LOG.trace("Loaded keys:" + getKeys());
+        }
+    }
+    
+    
     private boolean readCustomFavicon(HttpServletResponse response, GluuOrganization organization) {
         if (organization.getJsFaviconPath() == null || StringUtils.isEmpty(organization.getJsFaviconPath())) {
             return false;
@@ -200,4 +268,61 @@ public class OrganizationResource extends BaseResource {
         }
     }*/
 
+    @POST
+    @Path("/upload")
+    @Consumes("multipart/form-data")
+    public Response uploadFile(MultipartFormDataInput input) {
+        log.error("\n\n OrganizationResource::uploadFile() - input:{} ", input);
+        String fileName = "";
+ 
+        Map<String, List<InputPart>> formParts = input.getFormDataMap();
+        log.error("\n\n OrganizationResource::uploadFile() - formParts:{} ", formParts);
+        
+        List<InputPart> inPart = formParts.get("file");
+        log.error("\n\n OrganizationResource::uploadFile() - inPart:{} ", inPart);
+        for (InputPart inputPart : inPart) {
+ 
+             try {
+ 
+                // Retrieve headers, read the Content-Disposition header to obtain the original name of the file
+                MultivaluedMap<String, String> headers = (MultivaluedMap) inputPart.getHeaders();
+                
+                fileName = parseFileName(headers);
+                log.error("\n\n OrganizationResource::uploadFile() - fileName:{} ", fileName);
+                // Handle the body of that part with an InputStream
+                InputStream istream = inputPart.getBody(InputStream.class,null);
+ 
+                log.error("\n\n OrganizationResource::uploadFile() - istream:{} ", istream);
+ 
+              } catch (IOException e) {
+                e.printStackTrace();
+              }
+ 
+            }
+ 
+                String output = "File saved to server location : " + fileName;
+ 
+        return Response.status(200).entity(output).build();
+    }
+ 
+    // Parse Content-Disposition header to get the original file name
+    private String parseFileName(MultivaluedMap<String, String> headers) {
+ 
+        String[] contentDispositionHeader = headers.getFirst("Content-Disposition").split(";");
+ 
+        for (String name : contentDispositionHeader) {
+ 
+            if ((name.trim().startsWith("filename"))) {
+ 
+                String[] tmp = name.split("=");
+ 
+                String fileName = tmp[1].trim().replaceAll("\"","");
+ 
+                return fileName;
+            }
+        }
+        return "randomName";
+    }
+ 
+ 
 }

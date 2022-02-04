@@ -1,5 +1,6 @@
 package io.jans.configapi.security.client;
 
+import io.jans.as.model.common.Image;
 import io.jans.as.persistence.model.GluuOrganization;
 import io.jans.util.io.FileUploadWrapper;
 
@@ -30,6 +31,6 @@ public interface OrgConfigurationClient {
     @Path("{imageType}")
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
-    public Response updateImageResource(@HeaderParam("Authorization") String authorization, @PathParam("imageType") String imageType, FileUploadWrapper fileUploadWrapper);
+    public GluuOrganization updateImageResource(@HeaderParam("Authorization") String authorization, @PathParam("imageType") Image image, FileUploadWrapper fileUploadWrapper);
     
 }
