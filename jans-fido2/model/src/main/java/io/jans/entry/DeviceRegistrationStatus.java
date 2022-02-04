@@ -25,7 +25,7 @@ public enum DeviceRegistrationStatus implements AttributeEnum {
     private final String value;
 	private final String displayName;
 
-	private static Map<String, DeviceRegistrationStatus> mapByValues = new HashMap<String, DeviceRegistrationStatus>();
+	private static Map<String, DeviceRegistrationStatus> mapByValues = new HashMap<>();
 
 	static {
 		for (DeviceRegistrationStatus enumType : values()) {
