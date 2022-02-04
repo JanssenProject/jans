@@ -28,8 +28,8 @@ import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.jwk.JSONWebKeySet;
 import io.jans.as.model.jwk.Use;
 import io.jans.as.model.jwt.Jwt;
-import io.jans.as.model.jwt.JwtClaims;
 import io.jans.as.model.jwt.JwtClaimName;
+import io.jans.as.model.jwt.JwtClaims;
 import io.jans.as.model.token.JsonWebResponse;
 import io.jans.as.model.util.JwtUtil;
 import io.jans.as.model.util.Util;
@@ -66,7 +66,6 @@ import io.jans.util.StringHelper;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
-import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
@@ -95,7 +94,7 @@ import static org.apache.commons.lang3.BooleanUtils.isTrue;
  * Implementation for request authorization through REST web services.
  *
  * @author Javier Rojas Blum
- *  @version January 24, 2022
+ * @version February 2, 2022
  */
 @Path("/")
 public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
@@ -708,6 +707,10 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 redirectUriResponse.getRedirectUri().addResponseParameter(AuthorizeResponseParam.ACR_VALUES, acrValuesStr);
             }
 
+            for (Map.Entry<String, String> customParam : requestParameterService.getCustomParameters(customParameters, true).entrySet()) {
+                redirectUriResponse.getRedirectUri().addResponseParameter(customParam.getKey(), customParam.getValue());
+            }
+
             if (sessionUser.getId() == null) {
                 final SessionId newSessionUser = sessionIdService.generateAuthenticatedSessionId(httpRequest, sessionUser.getUserDn(), prompt);
                 String newSessionId = newSessionUser.getId();
@@ -781,7 +784,6 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         return builder.build();
     }
 
-    @Nullable
     private ResponseMode extractResponseMode(String request) {
         final Jwt jwt = Jwt.parseSilently(request);
         if (jwt == null) {
@@ -812,7 +814,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             if (client.getAttributes().getAuthorizationEncryptedResponseAlg() != null
                     && client.getAttributes().getAuthorizationEncryptedResponseEnc() != null) {
                 if (client.getAttributes().getAuthorizationSignedResponseAlg() != null) { // Signed then Encrypted
-                                                                                          // response
+                    // response
                     SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm
                             .fromString(client.getAttributes().getAuthorizationSignedResponseAlg());
 
@@ -860,7 +862,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             log.error(e.getMessage(), e);
         }
     }
-    
+
     private void validateJwtRequest(String clientId, String state, HttpServletRequest httpRequest, List<ResponseType> responseTypes, RedirectUriResponse redirectUriResponse, JwtAuthorizationRequest jwtRequest) {
         try {
             jwtRequest.validate();

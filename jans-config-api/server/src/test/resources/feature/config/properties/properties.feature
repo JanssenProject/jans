@@ -52,7 +52,7 @@ Feature: Verify Auth configuration endpoint
     Then status 200
     And print response
     
-
+    @ignore
     Scenario: Patch dcrSignatureValidationSoftwareStatementJwksURIClaim configuration
     Given url  mainUrl
     And  header Authorization = 'Bearer ' + accessToken
@@ -72,7 +72,7 @@ Feature: Verify Auth configuration endpoint
     Then status 200
     And print response
     
-
+    @ignore
     @auth-config-softwareStatementValidationType-patch
   	Scenario: Patch softwareStatementValidationType Auth configuration
   	Given url  mainUrl
@@ -116,7 +116,7 @@ Feature: Verify Auth configuration endpoint
     Then status 200
     And print response
     
-    
+    @ignore
     @auth-config-statistical-patch
   	Scenario: Patch statistical Auth configuration
   	Given url  mainUrl
@@ -135,7 +135,7 @@ Feature: Verify Auth configuration endpoint
     Then status 200
     And print response
     
-        
+    @ignore        
     @auth-config-patch
   	Scenario: Patch loggingLevel Auth configuration
   	Given url  mainUrl
@@ -154,7 +154,7 @@ Feature: Verify Auth configuration endpoint
     Then status 200
     And print response
     
-  
+    @ignore
     @auth-config-patch
   	Scenario: Patch clientBlackList Auth configuration
   	Given url  mainUrl
@@ -176,7 +176,7 @@ Feature: Verify Auth configuration endpoint
     Then status 200
     And print response    
    
-
+    @ignore
     @auth-config-patch
   	Scenario: Patch clientAuthenticationFilters Auth configuration
     Given url  mainUrl
@@ -198,7 +198,7 @@ Feature: Verify Auth configuration endpoint
     Then status 200
     And print response
     
-
+    @ignore
     @auth-config-patch
   	Scenario: Patch authenticationFilters Auth configuration
     Given url  mainUrl
@@ -219,7 +219,7 @@ Feature: Verify Auth configuration endpoint
     Then status 200
     And print response
     
-   
+   @ignore
    @auth-config-patch
     Scenario: Patch keyAlgsAllowedForGeneration Auth configuration
     Given url  mainUrl
@@ -240,7 +240,7 @@ Feature: Verify Auth configuration endpoint
     Then status 200
     And print response
     
-    
+    @ignore
     @auth-config-patch-discoveryAllowedKeys
     Scenario: Patch discoveryAllowedKeys Auth configuration
     Given url  mainUrl
@@ -261,7 +261,7 @@ Feature: Verify Auth configuration endpoint
     Then status 200
     And print response
         
-
+    @ignore
     @auth-config-patch-dcrSignatureValidationSharedSecret -field
     Scenario: Patch dcrSignatureValidationSharedSecret  Auth configuration
     Given url  mainUrl
@@ -281,7 +281,7 @@ Feature: Verify Auth configuration endpoint
     Then status 200
     And print response
     
-
+    @ignore
     @auth-config-patch-dcrSkipSignatureValidation -field
     Scenario: Patch dcrSkipSignatureValidation  Auth configuration
     Given url  mainUrl
@@ -301,7 +301,7 @@ Feature: Verify Auth configuration endpoint
     Then status 200
     And print response
     
-    
+    @ignore
     @auth-config-patch-allowIdTokenWithoutImplicitGrantType
     Scenario: Patch allowIdTokenWithoutImplicitGrantType Auth configuration
     Given url  mainUrl
@@ -321,7 +321,7 @@ Feature: Verify Auth configuration endpoint
     Then status 200
     And print response
     
-    
+    @ignore
     @auth-config-patch-keySignWithSameKeyButDiffAlg
     Scenario: Patch keySignWithSameKeyButDiffAlg Auth configuration
     Given url  mainUrl
@@ -341,7 +341,7 @@ Feature: Verify Auth configuration endpoint
     Then status 200
     And print response
     
-    
+    @ignore
     @auth-config-patch-staticKid
     Scenario: Patch staticKid Auth configuration
     Given url  mainUrl
