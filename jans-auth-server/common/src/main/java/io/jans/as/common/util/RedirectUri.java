@@ -12,7 +12,9 @@ import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
 import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.exception.CryptoProviderException;
 import io.jans.as.model.exception.InvalidJweException;
+import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwe.Jwe;
 import io.jans.as.model.jwe.JweEncrypter;
 import io.jans.as.model.jwe.JweEncrypterImpl;
@@ -67,12 +69,14 @@ public class RedirectUri {
     private String nestedSharedSecret;
     private JSONObject nestedJsonWebKeys;
     private AbstractCryptoProvider cryptoProvider;
+    private Jwe jwtForEncrypt;
 
     public RedirectUri(String baseRedirectUri) {
         this.baseRedirectUri = baseRedirectUri;
         this.responseMode = ResponseMode.QUERY;
 
-        responseParameters = new HashMap<String, String>();
+        this.responseParameters = new HashMap<String, String>();
+        this.jwtForEncrypt = new Jwe();
     }
 
     public RedirectUri(String baseRedirectUri, List<ResponseType> responseTypes, ResponseMode responseMode) {
@@ -103,9 +107,21 @@ public class RedirectUri {
         }
     }
 
+    public void setJwtForEncrypt(Jwe jwtForEncrypt) {
+        this.jwtForEncrypt = jwtForEncrypt;
+    }
+
     @Nullable
     public String getResponseParameter(@NotNull String key) {
         return responseParameters.get(key);
+    }
+
+    public int getResponseParamentersSize() {
+        int size = 0;
+        if (responseParameters != null) {
+            size = responseParameters.size();
+        }
+        return size;
     }
 
     public String getIssuer() {
@@ -267,8 +283,6 @@ public class RedirectUri {
                     }
                 }
             }
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -276,7 +290,7 @@ public class RedirectUri {
         return sb.toString();
     }
 
-    private String getJarmResponse() throws Exception {
+    private String getJarmResponse() throws InvalidJweException, InvalidJwtException, CryptoProviderException {
         if (keyEncryptionAlgorithm != null && blockEncryptionAlgorithm != null) {
             if (signatureAlgorithm != null) {
                 String jws = getJwsResponse(true);
@@ -293,7 +307,7 @@ public class RedirectUri {
         }
     }
 
-    private String getJwsResponse(boolean nested) throws Exception {
+    private String getJwsResponse(boolean nested) throws InvalidJwtException, CryptoProviderException {
         Jwt jwt = new Jwt();
 
         // Header
@@ -325,11 +339,10 @@ public class RedirectUri {
         // Signature
         String signature = cryptoProvider.sign(jwt.getSigningInput(), jwt.getHeader().getKeyId(), nested ? nestedSharedSecret : sharedSecret, signatureAlgorithm);
         jwt.setEncodedSignature(signature);
-
         return jwt.toString();
     }
 
-    private String getJweResponse(String nestedJws) throws Exception {
+    private String getJweResponse(String nestedJws) throws InvalidJweException, InvalidJwtException, CryptoProviderException {
         Jwe jwe = new Jwe();
 
         // Header
@@ -356,25 +369,20 @@ public class RedirectUri {
             jwe.setSignedJWTPayload(jwt);
         }
 
-        // Encryption
+        //Encryption
         if (keyEncryptionAlgorithm == KeyEncryptionAlgorithm.RSA_OAEP
                 || keyEncryptionAlgorithm == KeyEncryptionAlgorithm.RSA1_5) {
             PublicKey publicKey = cryptoProvider.getPublicKey(keyId, jsonWebKeys, null);
-
-            if (publicKey != null) {
-                JweEncrypter jweEncrypter = new JweEncrypterImpl(keyEncryptionAlgorithm, blockEncryptionAlgorithm, publicKey);
-                jwe = jweEncrypter.encrypt(jwe);
-            } else {
+            if (publicKey == null) {
                 throw new InvalidJweException("The public key is not valid");
             }
+
+            JweEncrypter jweEncrypter = new JweEncrypterImpl(keyEncryptionAlgorithm, blockEncryptionAlgorithm, publicKey);
+            jwe = jwtForEncrypt.encryptJwe(jwe, jweEncrypter);
         } else if (keyEncryptionAlgorithm == KeyEncryptionAlgorithm.A128KW
                 || keyEncryptionAlgorithm == KeyEncryptionAlgorithm.A256KW) {
-            try {
-                JweEncrypter jweEncrypter = new JweEncrypterImpl(keyEncryptionAlgorithm, blockEncryptionAlgorithm, sharedSymmetricKey);
-                jwe = jweEncrypter.encrypt(jwe);
-            } catch (Exception e) {
-                throw new InvalidJweException(e);
-            }
+            JweEncrypter jweEncrypter = new JweEncrypterImpl(keyEncryptionAlgorithm, blockEncryptionAlgorithm, sharedSymmetricKey);
+            jwe = jwtForEncrypt.encryptJwe(jwe, jweEncrypter);
         }
 
         return jwe.toString();
@@ -399,52 +407,57 @@ public class RedirectUri {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder(baseRedirectUri);
-
-        if (responseParameters.size() > 0) {
-            if (responseMode == ResponseMode.FORM_POST) {
-                sb = new StringBuilder();
-                sb.append("<html>");
-                sb.append("<head><title>Submit This Form</title></head>");
-                sb.append("<body onload=\"javascript:document.forms[0].submit()\">");
-                sb.append("<form method=\"post\" action=\"").append(baseRedirectUri).append("\">");
-                for (Map.Entry<String, String> entry : responseParameters.entrySet()) {
-                    String entryValue = StringEscapeUtils.escapeHtml(entry.getValue());
-                    sb.append("<input type=\"hidden\" name=\"").append(entry.getKey()).append("\" value=\"").append(entryValue).append("\"/>");
-                }
-                sb.append("</form>");
-                sb.append("</body>");
-                sb.append("</html>");
-            } else if (responseMode == ResponseMode.FORM_POST_JWT) {
-                sb = new StringBuilder();
-                sb.append("<html>");
-                sb.append("<head><title>Submit This Form</title></head>");
-                sb.append("<body onload=\"javascript:document.forms[0].submit()\">");
-                sb.append("<form method=\"post\" action=\"").append(baseRedirectUri).append("\">");
-                sb.append("<input type=\"hidden\" name=\"response\"").append(" value=\"").append(getQueryString()).append("\"/>");
-                sb.append("</form>");
-                sb.append("</body>");
-                sb.append("</html>");
-            } else {
-                if (responseMode != null) {
-                    if (responseMode == ResponseMode.QUERY || responseMode == ResponseMode.QUERY_JWT) {
-                        appendQuerySymbol(sb);
-                    } else if (responseMode == ResponseMode.FRAGMENT || responseMode == ResponseMode.FRAGMENT_JWT) {
-                        appendFragmentSymbol(sb);
-                    } else if (responseTypes != null && responseMode == ResponseMode.JWT) {
-                        if (responseTypes.contains(ResponseType.TOKEN)) {
-                            appendFragmentSymbol(sb);
-                        } else if (responseTypes.contains(ResponseType.CODE)) {
-                            appendQuerySymbol(sb);
-                        }
-                    }
-                } else if (responseTypes != null && (responseTypes.contains(ResponseType.TOKEN) || responseTypes.contains(ResponseType.ID_TOKEN))) {
-                    appendFragmentSymbol(sb);
-                } else {
-                    appendQuerySymbol(sb);
-                }
-                sb.append(getQueryString());
+        if (responseParameters.isEmpty()) {
+            return sb.toString();
+        }
+        if (responseMode == ResponseMode.FORM_POST) {
+            sb = new StringBuilder();
+            sb.append("<html>");
+            sb.append("<head><title>Submit This Form</title></head>");
+            sb.append("<body onload=\"javascript:document.forms[0].submit()\">");
+            sb.append("<form method=\"post\" action=\"").append(baseRedirectUri).append("\">");
+            for (Map.Entry<String, String> entry : responseParameters.entrySet()) {
+                String entryValue = StringEscapeUtils.escapeHtml(entry.getValue());
+                sb.append("<input type=\"hidden\" name=\"").append(entry.getKey()).append("\" value=\"").append(entryValue).append("\"/>");
             }
+            sb.append("</form>");
+            sb.append("</body>");
+            sb.append("</html>");
+        } else if (responseMode == ResponseMode.FORM_POST_JWT) {
+            sb = new StringBuilder();
+            sb.append("<html>");
+            sb.append("<head><title>Submit This Form</title></head>");
+            sb.append("<body onload=\"javascript:document.forms[0].submit()\">");
+            sb.append("<form method=\"post\" action=\"").append(baseRedirectUri).append("\">");
+            sb.append("<input type=\"hidden\" name=\"response\"").append(" value=\"").append(getQueryString()).append("\"/>");
+            sb.append("</form>");
+            sb.append("</body>");
+            sb.append("</html>");
+        } else if (responseMode == null) {
+            if (responseTypes != null && (responseTypes.contains(ResponseType.TOKEN) || responseTypes.contains(ResponseType.ID_TOKEN))) {
+                appendFragmentSymbol(sb);
+            } else {
+                appendQuerySymbol(sb);
+            }
+            sb.append(getQueryString());
+        } else {
+            appendDeafultToString(sb);
         }
         return sb.toString();
+    }
+
+    private void appendDeafultToString(StringBuilder sb) {
+        if (responseMode == ResponseMode.QUERY || responseMode == ResponseMode.QUERY_JWT) {
+            appendQuerySymbol(sb);
+        } else if (responseMode == ResponseMode.FRAGMENT || responseMode == ResponseMode.FRAGMENT_JWT) {
+            appendFragmentSymbol(sb);
+        } else if (responseTypes != null && responseMode == ResponseMode.JWT) {
+            if (responseTypes.contains(ResponseType.TOKEN)) {
+                appendFragmentSymbol(sb);
+            } else if (responseTypes.contains(ResponseType.CODE)) {
+                appendQuerySymbol(sb);
+            }
+        }
+        sb.append(getQueryString());
     }
 }

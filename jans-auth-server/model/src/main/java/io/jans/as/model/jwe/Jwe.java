@@ -49,6 +49,10 @@ public class Jwe extends JsonWebResponse {
         return jwe;
     }
 
+    public Jwe encryptJwe(Jwe jwe, JweEncrypter jweEncrypter) throws InvalidJweException {
+        return jweEncrypter.encrypt(jwe);
+    }
+
     public String getEncodedHeader() {
         return encodedHeader;
     }
