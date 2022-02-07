@@ -120,7 +120,7 @@ public class GluuConfigurationClient extends BaseClient<GluuConfigurationRequest
     }
 
     private Map<String, Set<String>> mapJsonToScopeToClaimsMapping(JSONObject jsonObject) {
-        Map<String, Set<String>> scopeToClaimsMapping = new HashMap<String, Set<String>>();
+        Map<String, Set<String>> scopeToClaimsMapping = new HashMap<>();
         Iterator<?> keys = jsonObject.keys();
         while (keys.hasNext()) {
             try {
