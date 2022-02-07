@@ -7,12 +7,9 @@ from java.util import Arrays
 from javax.faces.application import FacesMessage
 
 from io.jans.jsf2.message import FacesMessages
-from io.jans.as.server.security
-import Identity
-from io.jans.as.server.service
-import UserService, AuthenticationService
-from io.jans.as.server.util
-import ServerUtil
+from io.jans.as.server.security import Identity
+from io.jans.as.server.service import UserService, AuthenticationService
+from io.jans.as.server.util import ServerUtil
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.util import StringHelper, ArrayHelper
@@ -20,19 +17,16 @@ from io.jans.util import StringHelper, ArrayHelper
 import random
 import sys
 
-
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
 
     def init(self, customScript, configurationAttributes):
-        print
-        "Twilio SMS. Initialized"
+        print "Twilio SMS. Initialized"
         return True
 
     def destroy(self, configurationAttributes):
-        print
-        "Twilio SMS. Destroyed successfully"
+        print "Twilio SMS. Destroyed successfully"
         return True
 
     def getApiVersion(self):
@@ -49,8 +43,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def authenticate(self, configurationAttributes, requestParameters, step):
 
-        print
-        "TwilioSMS. Authenticate for Step %s" % str(step)
+        print "TwilioSMS. Authenticate for Step %s" % str(step)
         identity = CdiUtil.bean(Identity)
         authenticationService = CdiUtil.bean(AuthenticationService)
         user = authenticationService.getAuthenticatedUser()
@@ -69,7 +62,7 @@ class PersonAuthentication(PersonAuthenticationType):
             if user == None:
                 return False
 
-            # Attempt to send message now if user has only one mobile number
+            #Attempt to send message now if user has only one mobile number
             mobiles = user.getAttributeValues("mobile")
 
             if mobiles == None:
@@ -89,9 +82,9 @@ class PersonAuthentication(PersonAuthenticationType):
                     chopped = ""
                     for numb in mobiles:
                         l = len(numb)
-                        chopped += "," + numb[max(0, l - 4): l]
+                        chopped += "," + numb[max(0, l-4) : l]
 
-                    # converting to comma-separated list (identity does not remember lists in 3.1.3)
+                    #converting to comma-separated list (identity does not remember lists in 3.1.3)
                     identity.setWorkingParameter("numbers", Joiner.on(",").join(mobiles.toArray()))
                     identity.setWorkingParameter("choppedNos", chopped[1:])
 
@@ -105,7 +98,7 @@ class PersonAuthentication(PersonAuthenticationType):
             numbers = session_attributes.get("numbers")
 
             if step == 2 and numbers != None:
-                # Means the selection number page was used
+                #Means the selection number page was used
                 idx = ServerUtil.getFirstValue(requestParameters, "OtpSmsloginForm:indexOfNumber")
                 if idx != None and code != None:
                     sendToNumber = numbers.split(",")[int(idx)]
@@ -118,8 +111,7 @@ class PersonAuthentication(PersonAuthenticationType):
             form_passcode = ServerUtil.getFirstValue(requestParameters, "OtpSmsloginForm:passcode")
 
             if form_passcode != None and code == form_passcode:
-                print
-                "TwilioSMS. authenticate. 6-digit code matches with code sent via SMS"
+                print "TwilioSMS. authenticate. 6-digit code matches with code sent via SMS"
                 success = True
             else:
                 facesMessages = CdiUtil.bean(FacesMessages)
@@ -130,8 +122,7 @@ class PersonAuthentication(PersonAuthenticationType):
             return success
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
-        print
-        "TwilioSMS. Prepare for Step %s" % str(step)
+        print "TwilioSMS. Prepare for Step %s" % str(step)
         return True
 
     def getExtraParametersForStep(self, configurationAttributes, step):
@@ -140,8 +131,7 @@ class PersonAuthentication(PersonAuthenticationType):
         return None
 
     def getCountAuthenticationSteps(self, configurationAttributes):
-        print
-        "TwilioSMS. getCountAuthenticationSteps called"
+        print "TwilioSMS. getCountAuthenticationSteps called"
 
         if CdiUtil.bean(Identity).getWorkingParameter("numbers") == None:
             return 2
@@ -149,10 +139,8 @@ class PersonAuthentication(PersonAuthenticationType):
             return 3
 
     def getPageForStep(self, configurationAttributes, step):
-        print
-        "TwilioSMS. getPageForStep called %s" % step
-        print
-        "numbers are %s" % CdiUtil.bean(Identity).getWorkingParameter("numbers")
+        print "TwilioSMS. getPageForStep called %s" % step
+        print "numbers are %s" % CdiUtil.bean(Identity).getWorkingParameter("numbers")
 
         defPage = "/casa/otp_sms.xhtml"
         if step == 2:
@@ -175,12 +163,9 @@ class PersonAuthentication(PersonAuthenticationType):
             if numb[:1] != "+":
                 numb = "+" + numb
 
-            print
-            "TwilioSMS. Sending SMS message (%s) to %s" % (code, numb)
+            print "TwilioSMS. Sending SMS message (%s) to %s" % (code, numb)
             msg = "%s is your passcode to access your account" % code
             message = TwMessage.creator(PhoneNumber(numb), PhoneNumber(self.from_no), msg).create()
-            print
-            "TwilioSMS. Message Sid: %s" % message.getSid()
+            print "TwilioSMS. Message Sid: %s" % message.getSid()
         except:
-            print
-            "TwilioSMS. Error sending message", sys.exc_info()[1]
+            print "TwilioSMS. Error sending message", sys.exc_info()[1]

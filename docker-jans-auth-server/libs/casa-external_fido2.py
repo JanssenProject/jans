@@ -1,11 +1,8 @@
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from io.jans.fido2.client import Fido2ClientFactory
-from io.jans.as.server.security
-import Identity
-from io.jans.as.server.service
-import AuthenticationService, UserService, SessionIdService
-from io.jans.as.server.util
-import ServerUtil
+from io.jans.as.server.security import Identity
+from io.jans.as.server.service import AuthenticationService, UserService, SessionIdService
+from io.jans.as.server.util import ServerUtil
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.util import StringHelper
 
@@ -17,38 +14,32 @@ import java
 import sys
 import json
 
-
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
 
     def init(self, customScript, configurationAttributes):
-        print
-        "Fido2. Initialization"
+        print "Fido2. Initialization"
 
         if not configurationAttributes.containsKey("fido2_server_uri"):
-            print
-            "fido2_server_uri. Initialization. Property fido2_server_uri is not specified"
+            print "fido2_server_uri. Initialization. Property fido2_server_uri is not specified"
             return False
 
         self.fido2_server_uri = configurationAttributes.get("fido2_server_uri").getValue2()
 
-        # self.fido2_domain = None
-        # if configurationAttributes.containsKey("fido2_domain"):
+        #self.fido2_domain = None
+        #if configurationAttributes.containsKey("fido2_domain"):
         #    self.fido2_domain = configurationAttributes.get("fido2_domain").getValue2()
 
         self.metaDataLoaderLock = ReentrantLock()
         self.metaDataConfiguration = None
 
-        print
-        "Fido2. Initialized successfully"
+        print "Fido2. Initialized successfully"
         return True
 
     def destroy(self, configurationAttributes):
-        print
-        "Fido2. Destroy"
-        print
-        "Fido2. Destroyed successfully"
+        print "Fido2. Destroy"
+        print "Fido2. Destroyed successfully"
         return True
 
     def getApiVersion(self):
@@ -72,8 +63,7 @@ class PersonAuthentication(PersonAuthenticationType):
         user_name = credentials.getUsername()
 
         if (step == 1):
-            print
-            "Fido2. Authenticate for step 1"
+            print "Fido2. Authenticate for step 1"
 
             if authenticationService.getAuthenticatedUser() != None:
                 return True
@@ -89,56 +79,47 @@ class PersonAuthentication(PersonAuthenticationType):
 
             return True
         elif (step == 2):
-            print
-            "Fido2. Authenticate for step 2"
+            print "Fido2. Authenticate for step 2"
 
             token_response = ServerUtil.getFirstValue(requestParameters, "tokenResponse")
             if token_response == None:
-                print
-                "Fido2. Authenticate for step 2. tokenResponse is empty"
+                print "Fido2. Authenticate for step 2. tokenResponse is empty"
                 return False
 
             auth_method = ServerUtil.getFirstValue(requestParameters, "authMethod")
             if auth_method == None:
-                print
-                "Fido2. Authenticate for step 2. authMethod is empty"
+                print "Fido2. Authenticate for step 2. authMethod is empty"
                 return False
 
             authenticationService = CdiUtil.bean(AuthenticationService)
             user = authenticationService.getAuthenticatedUser()
             if (user == None):
-                print
-                "Fido2. Prepare for step 2. Failed to determine user name"
+                print "Fido2. Prepare for step 2. Failed to determine user name"
                 return False
 
             if (auth_method == 'authenticate'):
-                print
-                "Fido2. Prepare for step 2. Call Fido2 in order to finish authentication flow"
+                print "Fido2. Prepare for step 2. Call Fido2 in order to finish authentication flow"
                 assertionService = Fido2ClientFactory.instance().createAssertionService(self.metaDataConfiguration)
                 assertionStatus = assertionService.verify(token_response)
                 authenticationStatusEntity = assertionStatus.readEntity(java.lang.String)
 
                 if (assertionStatus.getStatus() != Response.Status.OK.getStatusCode()):
-                    print
-                    "Fido2. Authenticate for step 2. Get invalid authentication status from Fido2 server"
+                    print "Fido2. Authenticate for step 2. Get invalid authentication status from Fido2 server"
                     return False
 
                 return True
             elif (auth_method == 'enroll'):
-                print
-                "Fido2. Prepare for step 2. Call Fido2 in order to finish registration flow"
+                print "Fido2. Prepare for step 2. Call Fido2 in order to finish registration flow"
                 attestationService = Fido2ClientFactory.instance().createAttestationService(self.metaDataConfiguration)
                 attestationStatus = attestationService.verify(token_response)
 
                 if (attestationStatus.getStatus() != Response.Status.OK.getStatusCode()):
-                    print
-                    "Fido2. Authenticate for step 2. Get invalid registration status from Fido2 server"
+                    print "Fido2. Authenticate for step 2. Get invalid registration status from Fido2 server"
                     return False
 
                 return True
             else:
-                print
-                "Fido2. Prepare for step 2. Authentication method is invalid"
+                print "Fido2. Prepare for step 2. Authentication method is invalid"
                 return False
 
             return False
@@ -151,20 +132,17 @@ class PersonAuthentication(PersonAuthenticationType):
         if (step == 1):
             return True
         elif (step == 2):
-            print
-            "Fido2. Prepare for step 2"
+            print "Fido2. Prepare for step 2"
 
             session_id = CdiUtil.bean(SessionIdService).getSessionId()
             if session_id == None:
-                print
-                "Fido2. Prepare for step 2. Failed to determine session_id"
+                print "Fido2. Prepare for step 2. Failed to determine session_id"
                 return False
 
             authenticationService = CdiUtil.bean(AuthenticationService)
             user = authenticationService.getAuthenticatedUser()
             if (user == None):
-                print
-                "Fido2. Prepare for step 2. Failed to determine user name"
+                print "Fido2. Prepare for step 2. Failed to determine user name"
                 return False
 
             userName = user.getUserId()
@@ -176,8 +154,7 @@ class PersonAuthentication(PersonAuthenticationType):
             # Check if user have registered devices
             count = CdiUtil.bean(UserService).countFido2RegisteredDevices(userName)
             if (count > 0):
-                print
-                "Fido2. Prepare for step 2. Call Fido2 endpoint in order to start assertion flow"
+                print "Fido2. Prepare for step 2. Call Fido2 endpoint in order to start assertion flow"
 
                 try:
                     assertionService = Fido2ClientFactory.instance().createAssertionService(metaDataConfiguration)
@@ -188,33 +165,26 @@ class PersonAuthentication(PersonAuthenticationType):
                     else:
                         identity.setWorkingParameter("platformAuthenticatorAvailable", "false")
                 except ClientErrorException, ex:
-                    print
-                    "Fido2. Prepare for step 2. Failed to start assertion flow. Exception:", sys.exc_info()[1]
+                    print "Fido2. Prepare for step 2. Failed to start assertion flow. Exception:", sys.exc_info()[1]
                     return False
             else:
-                print
-                "Fido2. Prepare for step 2. Call Fido2 endpoint in order to start attestation flow"
+                print "Fido2. Prepare for step 2. Call Fido2 endpoint in order to start attestation flow"
 
                 try:
                     attestationService = Fido2ClientFactory.instance().createAttestationService(metaDataConfiguration)
-                    attestationRequest = json.dumps({'username': userName, 'displayName': userName},
-                                                    separators=(',', ':'))
+                    attestationRequest = json.dumps({'username': userName, 'displayName': userName}, separators=(',', ':'))
                     attestationResponse = attestationService.register(attestationRequest).readEntity(java.lang.String)
                 except ClientErrorException, ex:
-                    print
-                    "Fido2. Prepare for step 2. Failed to start attestation flow. Exception:", sys.exc_info()[1]
+                    print "Fido2. Prepare for step 2. Failed to start attestation flow. Exception:", sys.exc_info()[1]
                     return False
 
             identity.setWorkingParameter("fido2_assertion_request", ServerUtil.asJson(assertionResponse))
             identity.setWorkingParameter("fido2_attestation_request", ServerUtil.asJson(attestationResponse))
-            print
-            "Fido2. Prepare for step 2. Successfully start flow with next requests.\nfido2_assertion_request: '%s'\nfido2_attestation_request: '%s'" % (
-            assertionResponse, attestationResponse)
+            print "Fido2. Prepare for step 2. Successfully start flow with next requests.\nfido2_assertion_request: '%s'\nfido2_attestation_request: '%s'" % ( assertionResponse, attestationResponse )
 
             return True
         elif (step == 3):
-            print
-            "Fido2. Prepare for step 3"
+            print "Fido2. Prepare for step 3"
 
             return True
         else:
@@ -228,7 +198,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def getPageForStep(self, configurationAttributes, step):
         if (step == 2):
-            # Modified for Casa compliance
+            #Modified for Casa compliance
             return "/casa/fido2.xhtml"
 
         return ""
@@ -246,29 +216,24 @@ class PersonAuthentication(PersonAuthenticationType):
             return self.metaDataConfiguration
 
         try:
-            print
-            "Fido2. Initialization. Downloading Fido2 metadata"
+            print "Fido2. Initialization. Downloading Fido2 metadata"
             self.fido2_server_metadata_uri = self.fido2_server_uri + "/.well-known/fido2-configuration"
-            # self.fido2_server_metadata_uri = self.fido2_server_uri + "/oxauth/restv1/fido2/configuration"
+            #self.fido2_server_metadata_uri = self.fido2_server_uri + "/oxauth/restv1/fido2/configuration"
 
-            metaDataConfigurationService = Fido2ClientFactory.instance().createMetaDataConfigurationService(
-                self.fido2_server_metadata_uri)
+            metaDataConfigurationService = Fido2ClientFactory.instance().createMetaDataConfigurationService(self.fido2_server_metadata_uri)
 
             max_attempts = 10
             for attempt in range(1, max_attempts + 1):
                 try:
-                    self.metaDataConfiguration = metaDataConfigurationService.getMetadataConfiguration().readEntity(
-                        java.lang.String)
+                    self.metaDataConfiguration = metaDataConfigurationService.getMetadataConfiguration().readEntity(java.lang.String)
                     return self.metaDataConfiguration
                 except ClientErrorException, ex:
                     # Detect if last try or we still get Service Unavailable HTTP error
-                    if (attempt == max_attempts) or (
-                            ex.getResponse().getResponseStatus() != Response.Status.SERVICE_UNAVAILABLE):
+                    if (attempt == max_attempts) or (ex.getResponse().getResponseStatus() != Response.Status.SERVICE_UNAVAILABLE):
                         raise ex
 
                     java.lang.Thread.sleep(3000)
-                    print
-                    "Attempting to load metadata: %d" % attempt
+                    print "Attempting to load metadata: %d" % attempt
         finally:
             self.metaDataLoaderLock.unlock()
 
