@@ -144,6 +144,7 @@ public class JwtAuthorizationRequest {
                     ClientService clientService = CdiUtil.bean(ClientService.class);
                     jweDecrypter = new JweDecrypterImpl(clientService.decryptSecret(client.getClientSecret()).getBytes(StandardCharsets.UTF_8));
                 }
+                jweDecrypter.setFapi(appConfiguration.getFapiCompatibility());                
                 jweDecrypter.setKeyEncryptionAlgorithm(keyEncryptionAlgorithm);
                 jweDecrypter.setBlockEncryptionAlgorithm(blockEncryptionAlgorithm);
 
