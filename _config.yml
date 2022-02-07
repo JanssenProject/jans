@@ -1,12 +1,15 @@
-theme: jekyll-theme-hacker
 title: 'Janssen Authorization Server'
-favicon: https://github.com/JanssenProject/jans/raw/main/docs/logo/janssen_project_favicon_transparent_50px_50px.png
+remote_theme: benc-uk/theme-msdark
+favicon: https://avatars.githubusercontent.com/u/68292770?s=200&v=4
 buttons:
   - b0:
     text: Main Docs
-    href: /docs
+    href: /jans/docs
   - b1:
     text: Helm Chart
     href: /jans/charts
+  - b2:
+    text: Debugging Interception scripts
+    href: /jans/docs/interception-script-debug
 gems:
-  - jekyll-seo-ta
+  - jekyll-seo-tag
