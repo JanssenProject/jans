@@ -30,12 +30,12 @@ class PersonAuthentication(PersonAuthenticationType):
         #self.fido2_domain = None
         #if configurationAttributes.containsKey("fido2_domain"):
         #    self.fido2_domain = configurationAttributes.get("fido2_domain").getValue2()
-            
+
         self.metaDataLoaderLock = ReentrantLock()
         self.metaDataConfiguration = None
-        
+
         print "Fido2. Initialized successfully"
-        return True   
+        return True
 
     def destroy(self, configurationAttributes):
         print "Fido2. Destroy"
@@ -205,13 +205,13 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def logout(self, configurationAttributes, requestParameters):
         return True
-    
+
     def getMetaDataConfiguration(self):
         if self.metaDataConfiguration != None:
             return self.metaDataConfiguration
-        
+
         self.metaDataLoaderLock.lock()
-        # Make sure that another thread not loaded configuration already          
+        # Make sure that another thread not loaded configuration already
         if self.metaDataConfiguration != None:
             return self.metaDataConfiguration
 
@@ -221,7 +221,7 @@ class PersonAuthentication(PersonAuthenticationType):
             #self.fido2_server_metadata_uri = self.fido2_server_uri + "/oxauth/restv1/fido2/configuration"
 
             metaDataConfigurationService = Fido2ClientFactory.instance().createMetaDataConfigurationService(self.fido2_server_metadata_uri)
-    
+
             max_attempts = 10
             for attempt in range(1, max_attempts + 1):
                 try:
@@ -231,12 +231,12 @@ class PersonAuthentication(PersonAuthenticationType):
                     # Detect if last try or we still get Service Unavailable HTTP error
                     if (attempt == max_attempts) or (ex.getResponse().getResponseStatus() != Response.Status.SERVICE_UNAVAILABLE):
                         raise ex
-    
+
                     java.lang.Thread.sleep(3000)
                     print "Attempting to load metadata: %d" % attempt
         finally:
             self.metaDataLoaderLock.unlock()
-            
+
     # Added for Casa compliance
 
     def hasEnrollments(self, configurationAttributes, user):
