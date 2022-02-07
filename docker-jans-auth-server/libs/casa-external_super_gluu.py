@@ -14,7 +14,7 @@ from io.jans.as.service.net import HttpService
 from io.jans.as.server.util import ServerUtil
 from io.jans.util import StringHelper
 from io.jans.service import MailService
-from io.jans.as.service.push.sns import PushPlatform, PushSnsService 
+from io.jans.as.service.push.sns import PushPlatform, PushSnsService
 from io.jans.oxnotify.client import NotifyClientFactory
 
 from java.util import Arrays, HashMap, IdentityHashMap, Date
@@ -113,7 +113,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 self.audit_attribute = configurationAttributes.get("audit_attribute").getValue2()
 
         self.valid_license = False
-        # Removing or altering this block validation is against the terms of the license. 
+        # Removing or altering this block validation is against the terms of the license.
         if has_license_api and configurationAttributes.containsKey("license_file"):
             license_file = configurationAttributes.get("license_file").getValue2()
 
@@ -126,7 +126,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 return False
             finally:
                 f.close()
-            
+
             # Validate license
             try:
                 self.license_content = LicenseValidator.validate(license["public-key"], license["public-password"], license["license-password"], license["license"],

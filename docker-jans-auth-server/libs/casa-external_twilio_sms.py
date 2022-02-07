@@ -162,7 +162,7 @@ class PersonAuthentication(PersonAuthenticationType):
         try:
             if numb[:1] != "+":
                 numb = "+" + numb
-                
+
             print "TwilioSMS. Sending SMS message (%s) to %s" % (code, numb)
             msg = "%s is your passcode to access your account" % code
             message = TwMessage.creator(PhoneNumber(numb), PhoneNumber(self.from_no), msg).create()
