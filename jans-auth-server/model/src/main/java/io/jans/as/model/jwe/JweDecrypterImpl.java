@@ -127,9 +127,10 @@ public class JweDecrypterImpl extends AbstractJweDecrypter {
             throw new InvalidJweException(e);
         }
     }
+
     private void validateNestedJwt(String base64encodedPayload) throws InvalidJwtException {
-        final Jwt jwt=Jwt.parseSilently(base64encodedPayload);
-        if (jwt!=null && jwt.getHeader().getSignatureAlgorithm() == SignatureAlgorithm.NONE && isFapi()) {
+        final Jwt jwt = Jwt.parseSilently(base64encodedPayload);
+        if (jwt != null && jwt.getHeader().getSignatureAlgorithm() == SignatureAlgorithm.NONE && isFapi()) {
             throw new InvalidJwtException("The None algorithm in nested JWT is not allowed for FAPI");
         }
     }
