@@ -22,6 +22,7 @@ import javax.validation.constraints.Size;
 import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 /**
  * Group
@@ -190,5 +191,16 @@ public class GluuOrganization extends Entry implements Serializable {
     public void setTitle(String title) {
         this.title = title;
     }
+
+    @Override
+    public String toString() {
+        return "GluuOrganization [displayName=" + displayName + ", description=" + description + ", member=" + member
+                + ", countryName=" + countryName + ", organization=" + organization + ", status=" + status
+                + ", managerGroup=" + managerGroup + ", themeColor=" + themeColor + ", shortName=" + shortName
+                + ", customMessages=" + Arrays.toString(customMessages) + ", title=" + title + ", jsLogoPath="
+                + jsLogoPath + ", jsFaviconPath=" + jsFaviconPath + "]";
+    }
+    
+    
 
 }

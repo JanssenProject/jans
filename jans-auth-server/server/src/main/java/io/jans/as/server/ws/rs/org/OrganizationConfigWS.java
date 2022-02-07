@@ -88,18 +88,37 @@ public class OrganizationConfigWS {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response getOrg(@HeaderParam("Authorization") String authorization) {
-        log.error("\n\n OrganizationConfigWS::getOrg() - authorization:{}, request:{}", authorization, request);
+    public Response getOrgData(@HeaderParam("Authorization") String authorization) {
+        log.error("\n\n OrganizationConfigWS::getOrgData() - authorization:{}, request:{}", authorization, request);
         GluuOrganization gluuOrganization = organizationService.getOrganization();
-        log.error("\n\n OrganizationConfigWS::getOrg() - gluuOrganization:{}", gluuOrganization);
+        log.error("\n\n OrganizationConfigWS::getOrgData() - new - gluuOrganization:{}", gluuOrganization);
+        return Response.ok(gluuOrganization).build();
+     }
+    
+    @GET
+    @Path("{imageType}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public Response getImage(@HeaderParam("Authorization") String authorization, @PathParam("imageType") String imageType) {
+        log.error("\n\n OrganizationConfigWS::getImage() - authorization:{}, imageType:{}", authorization, imageType);
+        
+        if (StringUtils.isBlank(imageType)) {
+            throw errorResponseFactory.createWebApplicationException(Response.Status.INTERNAL_SERVER_ERROR,
+                    AuthorizeErrorResponseType.SERVER_ERROR, "Image type cannot blank.");
+        }
+        
+        GluuOrganization gluuOrganization = organizationService.getOrganization();
+        log.error("\n\n OrganizationConfigWS::getImage() - new - gluuOrganization:{}", gluuOrganization);
+        if(imageType.equalsIgnoreCase(Image.FAVICON.toString())) {
         boolean hasSucceed = readCustomFavicon(response, gluuOrganization);
-        log.error("\n\n OrganizationConfigWS::getOrg() - hasSucceed:{}", hasSucceed);
+        log.error("\n\n OrganizationConfigWS::getImage() - hasSucceed:{}", hasSucceed);
         if (!hasSucceed) {
             hasSucceed = readDefaultFavicon(response);
-            log.error("\n\n OrganizationConfigWS::getOrg() - readDefaultFavicon:{}", hasSucceed);
+            log.error("\n\n OrganizationConfigWS::getImage() - readDefaultFavicon:{}", hasSucceed);
+        }
         }
         return Response.ok(gluuOrganization).build();
-    }
+     }
 
     @PUT
     @Consumes({ MediaType.APPLICATION_JSON })

@@ -53,10 +53,8 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
 import javax.ws.rs.core.MultivaluedMap;
-import org.jboss.resteasy.plugins.providers.multipart.InputPart;
-import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
-
-
+//import org.jboss.resteasy.plugins.providers.multipart.InputPart;
+//import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 
 
 @Path(ApiConstants.ORG)
@@ -87,14 +85,7 @@ public class OrganizationResource extends BaseResource {
     public Response getGluuOrganization(@HeaderParam("Authorization") String authorization ) {
         log.error("\n\n OrganizationResource::getGluuOrganization() - authorization:{} ", authorization);
         
-        final OrgConfigurationService orgConfigurationService = organizationService.getOrgConfigurationService(getOrganizationServiceUrl());
-        log.error("\n\n OrganizationResource::getGluuOrganization() - orgConfigurationService:{}, request:{}, response:{} ", orgConfigurationService, request, response);
-        
-        GluuOrganization gluuOrganization = orgConfigurationService.getOrg(authorization);
-        
-        log.error("\n\n OrganizationResource::getGluuOrganization() - gluuOrganization:{} ", gluuOrganization);
-        
-        return Response.ok(gluuOrganization).build();
+        return Response.ok(getGluuOrganizationData(authorization)).build();
     }
     
     @PUT
@@ -114,7 +105,7 @@ public class OrganizationResource extends BaseResource {
 
     @PUT
     // @ProtectedApi(scopes = { ApiAccessConstants.ACRS_READ_ACCESS })
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
+   @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Path("{imageType}")
     public Response updateImageResource(@HeaderParam("Authorization") String authorization, @PathParam("imageType") Image image, FileUploadWrapper fileUploadWrapper) {
         log.error("\n\n OrganizationResource::updateImageResource() - authorization:{}, image:{}, fileUploadWrapper:{}", authorization, image, fileUploadWrapper);
@@ -137,7 +128,6 @@ public class OrganizationResource extends BaseResource {
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     // @ProtectedApi(scopes = { ApiAccessConstants.ATTRIBUTES_WRITE_ACCESS })
-    @Path(ApiConstants.INUM_PATH)
     public Response patchGluuOrganization(@NotNull String pathString) throws JsonPatchException, IOException {
         GluuOrganization gluuOrganization = organizationService.getOrganization();
         gluuOrganization = Jackson.applyPatch(pathString, gluuOrganization);
@@ -147,6 +137,11 @@ public class OrganizationResource extends BaseResource {
     
     private String getOrganizationServiceUrl() {
         return this.authUtil.getServiceUrl(ORG_URL);        
+    }
+    
+    private GluuOrganization getGluuOrganizationData(String authorization) {
+        final OrgConfigurationService orgConfigurationService = organizationService.getOrgConfigurationService(getOrganizationServiceUrl());
+        return orgConfigurationService.getOrg(authorization);        
     }
 
 /*
@@ -268,6 +263,7 @@ public class OrganizationResource extends BaseResource {
         }
     }*/
 
+    /*
     @POST
     @Path("/upload")
     @Consumes("multipart/form-data")
@@ -304,6 +300,8 @@ public class OrganizationResource extends BaseResource {
  
         return Response.status(200).entity(output).build();
     }
+    
+    */
  
     // Parse Content-Disposition header to get the original file name
     private String parseFileName(MultivaluedMap<String, String> headers) {

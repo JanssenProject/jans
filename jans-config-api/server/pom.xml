@@ -58,11 +58,6 @@
 			<groupId>io.jans</groupId>
 			<artifactId>jans-core-timer-weld</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>resteasy-multipart-provider</artifactId>
-		</dependency>
-
 
 		<!-- Weld -->
 		<dependency>
@@ -142,10 +137,6 @@
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
 			<artifactId>resteasy-json-p-provider</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>resteasy-multipart-provider</artifactId>
 		</dependency>
 
 		<!-- Java -->
