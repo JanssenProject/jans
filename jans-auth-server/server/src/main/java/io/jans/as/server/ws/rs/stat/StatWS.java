@@ -1,8 +1,5 @@
 package io.jans.as.server.ws.rs.stat;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import io.jans.as.common.model.stat.StatEntry;
 import io.jans.as.model.common.ComponentType;
 import io.jans.as.model.config.Constants;
 import io.jans.as.model.configuration.AppConfiguration;
@@ -10,15 +7,13 @@ import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.token.TokenErrorResponseType;
 import io.jans.as.server.model.common.AbstractToken;
 import io.jans.as.server.model.common.AuthorizationGrant;
+import io.jans.as.server.service.stat.StatResponseService;
 import io.jans.as.server.service.stat.StatService;
 import io.jans.as.server.service.token.TokenService;
 import io.jans.as.server.util.ServerUtil;
-import io.jans.orm.PersistenceEntryManager;
-import io.jans.orm.search.filter.Filter;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Counter;
 import io.prometheus.client.exporter.common.TextFormat;
-import net.agkn.hll.HLL;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
@@ -38,10 +33,8 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import static io.jans.as.model.util.Util.escapeLog;
 
@@ -61,7 +54,7 @@ public class StatWS {
     private Logger log;
 
     @Inject
-    private PersistenceEntryManager entryManager;
+    private StatResponseService statResponseService;
 
     @Inject
     private ErrorResponseFactory errorResponseFactory;
@@ -74,11 +67,6 @@ public class StatWS {
 
     @Inject
     private TokenService tokenService;
-
-    private final Cache<String, StatResponse> responseCache = CacheBuilder
-            .newBuilder()
-            .expireAfterWrite(1, TimeUnit.HOURS)
-            .build();
 
     public static String createOpenMetricsResponse(StatResponse statResponse) throws IOException {
         Writer writer = new StringWriter();
@@ -176,7 +164,7 @@ public class StatWS {
         try {
             if (log.isTraceEnabled())
                 log.trace("Recognized months: {}", escapeLog(months));
-            final StatResponse statResponse = buildResponse(months);
+            final StatResponse statResponse = statResponseService.buildResponse(months);
 
             final String responseAsStr;
             if ("openmetrics".equalsIgnoreCase(format)) {
@@ -196,90 +184,6 @@ public class StatWS {
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_JSON_TYPE).build();
-        }
-    }
-
-    private StatResponse buildResponse(List<String> months) {
-        final String cacheKey = months.toString();
-        final StatResponse cachedResponse = responseCache.getIfPresent(cacheKey);
-        if (cachedResponse != null) {
-            return cachedResponse;
-        }
-
-        StatResponse response = new StatResponse();
-        for (String month : months) {
-            final StatResponseItem responseItem = buildItem(month);
-            if (responseItem != null) {
-                response.getResponse().put(month, responseItem);
-            }
-        }
-
-        responseCache.put(cacheKey, response);
-        return response;
-    }
-
-    private StatResponseItem buildItem(String month) {
-        try {
-            String monthlyDn = String.format("ou=%s,%s", escapeLog(month), statService.getBaseDn());
-
-            final List<StatEntry> entries = entryManager.findEntries(monthlyDn, StatEntry.class, Filter.createPresenceFilter("jansId"));
-            if (entries == null || entries.isEmpty()) {
-                log.trace("Can't find stat entries for month: {}", monthlyDn);
-                return null;
-            }
-
-            final StatResponseItem responseItem = new StatResponseItem();
-            responseItem.setMonthlyActiveUsers(userCardinality(entries));
-            responseItem.setMonth(month);
-
-            unionTokenMapIntoResponseItem(entries, responseItem);
-
-            return responseItem;
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            return null;
-        }
-    }
-
-    private void unionTokenMapIntoResponseItem(List<StatEntry> entries, StatResponseItem responseItem) {
-        for (StatEntry entry : entries) {
-            entry.getStat().getTokenCountPerGrantType().entrySet().stream().filter(en -> en.getValue() != null).forEach(en -> {
-                final Map<String, Long> tokenMap = responseItem.getTokenCountPerGrantType().get(en.getKey());
-                if (tokenMap == null) {
-                    responseItem.getTokenCountPerGrantType().put(en.getKey(), en.getValue());
-                    return;
-                }
-                for (Map.Entry<String, Long> tokenEntry : en.getValue().entrySet()) {
-                    final Long counter = tokenMap.get(tokenEntry.getKey());
-                    if (counter == null) {
-                        tokenMap.put(tokenEntry.getKey(), tokenEntry.getValue());
-                        continue;
-                    }
-
-                    tokenMap.put(tokenEntry.getKey(), counter + tokenEntry.getValue());
-                }
-            });
-        }
-    }
-
-    private long userCardinality(List<StatEntry> entries) {
-        HLL hll = decodeHll(entries.get(0));
-
-        // Union hll
-        if (entries.size() > 1) {
-            for (int i = 1; i < entries.size(); i++) {
-                hll.union(decodeHll(entries.get(i)));
-            }
-        }
-        return hll.cardinality();
-    }
-
-    private HLL decodeHll(StatEntry entry) {
-        try {
-            return HLL.fromBytes(Base64.getDecoder().decode(entry.getUserHllData()));
-        } catch (Exception e) {
-            log.error("Failed to decode HLL data, entry dn: {}, data: {}", entry.getDn(), entry.getUserHllData());
-            return statService.newHll();
         }
     }
 
