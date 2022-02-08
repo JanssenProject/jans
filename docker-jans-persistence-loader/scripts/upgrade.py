@@ -1,4 +1,5 @@
 import contextlib
+import itertools
 import json
 import logging.config
 import os
@@ -48,6 +49,48 @@ JANS_BASE_ID = "o=jans"
 
 #: ID of manager group
 JANS_MANAGER_GROUP = "inum=60B7,ou=groups,o=jans"
+
+#: ID of jans-auth config
+JANS_AUTH_CONFIG_ID = "ou=jans-auth,ou=configuration,o=jans"
+
+
+def _transform_auth_dynamic_config(conf):
+    should_update = False
+
+    if all([
+        os.environ.get("CN_DISTRIBUTION", "default") == "openbanking",
+        "dcrAuthorizationWithMTLS" not in conf,
+    ]):
+        conf["dcrAuthorizationWithMTLS"] = False
+        should_update = True
+
+    if "grantTypesAndResponseTypesAutofixEnabled" not in conf:
+        conf["grantTypesAndResponseTypesAutofixEnabled"] = False
+        should_update = True
+
+    if "sessionIdEnabled" in conf:
+        conf.pop("sessionIdEnabled")
+        should_update = True
+
+    # assert the authorizationRequestCustomAllowedParameters contains dict values instead of string
+    params_with_dict = list(itertools.takewhile(
+        lambda x: isinstance(x, dict), conf["authorizationRequestCustomAllowedParameters"]
+    ))
+    if not params_with_dict:
+        conf["authorizationRequestCustomAllowedParameters"] = list(map(
+            lambda p: {"paramName": p[0], "returnInResponse": p[1]},
+            [
+                ("customParam1", False),
+                ("customParam2", False),
+                ("customParam3", False),
+                ("customParam4", True),
+                ("customParam5", True),
+            ]
+        ))
+        should_update = True
+
+    # return the conf and flag to determine whether it needs update or not
+    return conf, should_update
 
 
 class LDAPBackend(BaseBackend):
@@ -166,6 +209,17 @@ class LDAPBackend(BaseBackend):
             entry.attrs["jansManagerGrp"] = JANS_MANAGER_GROUP
             self.modify_entry(JANS_BASE_ID, entry.attrs)
 
+    def update_auth_dynamic_config(self):
+        entry = self.get_entry(JANS_AUTH_CONFIG_ID)
+        if not entry:
+            return
+
+        conf, should_update = _transform_auth_dynamic_config(json.loads(entry.attrs["jansConfDyn"]))
+        if should_update:
+            entry.attrs["jansConfDyn"] = json.dumps(conf)
+            entry.attrs["jansRevision"] += 1
+            self.modify_entry(entry.id, entry.attrs)
+
 
 class SQLBackend(BaseBackend):
     def __init__(self, manager):
@@ -271,6 +325,18 @@ class SQLBackend(BaseBackend):
         if not entry.attrs.get("jansManagerGrp"):
             entry.attrs["jansManagerGrp"] = JANS_MANAGER_GROUP
             self.modify_entry(id_, entry.attrs, **kwargs)
+
+    def update_auth_dynamic_config(self):
+        kwargs = {"table_name": "jansAppConf"}
+        entry = self.get_entry(doc_id_from_dn(JANS_AUTH_CONFIG_ID), **kwargs)
+        if not entry:
+            return
+
+        conf, should_update = _transform_auth_dynamic_config(json.loads(entry.attrs["jansConfDyn"]))
+        if should_update:
+            entry.attrs["jansConfDyn"] = json.dumps(conf)
+            entry.attrs["jansRevision"] += 1
+            self.modify_entry(entry.id, entry.attrs, **kwargs)
 
 
 class CouchbaseBackend(BaseBackend):
@@ -439,6 +505,18 @@ class CouchbaseBackend(BaseBackend):
             entry.attrs["jansManagerGrp"] = JANS_MANAGER_GROUP
             self.modify_entry(id_, entry.attrs, **kwargs)
 
+    def update_auth_dynamic_config(self):
+        kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
+        entry = self.get_entry(id_from_dn(JANS_AUTH_CONFIG_ID), **kwargs)
+        if not entry:
+            return
+
+        conf, should_update = _transform_auth_dynamic_config(entry.attrs["jansConfDyn"])
+        if should_update:
+            entry.attrs["jansConfDyn"] = conf
+            entry.attrs["jansRevision"] += 1
+            self.modify_entry(entry.id, entry.attrs, **kwargs)
+
 
 class SpannerBackend(BaseBackend):
     def __init__(self, manager):
@@ -545,6 +623,18 @@ class SpannerBackend(BaseBackend):
             entry.attrs["jansManagerGrp"] = JANS_MANAGER_GROUP
             self.modify_entry(id_, entry.attrs, **kwargs)
 
+    def update_auth_dynamic_config(self):
+        kwargs = {"table_name": "jansAppConf"}
+        entry = self.get_entry(doc_id_from_dn(JANS_AUTH_CONFIG_ID), **kwargs)
+        if not entry:
+            return
+
+        conf, should_update = _transform_auth_dynamic_config(json.loads(entry.attrs["jansConfDyn"]))
+        if should_update:
+            entry.attrs["jansConfDyn"] = json.dumps(conf)
+            entry.attrs["jansRevision"] += 1
+            self.modify_entry(entry.id, entry.attrs, **kwargs)
+
 
 class Upgrade:
     def __init__(self, manager):
@@ -571,3 +661,5 @@ class Upgrade:
 
         if hasattr(self.backend, "update_misc"):
             self.backend.update_misc()
+
+        self.backend.update_auth_dynamic_config()
