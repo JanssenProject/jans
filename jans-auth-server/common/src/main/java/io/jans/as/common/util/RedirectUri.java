@@ -16,7 +16,6 @@ import io.jans.as.model.exception.CryptoProviderException;
 import io.jans.as.model.exception.InvalidJweException;
 import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwe.Jwe;
-import io.jans.as.model.jwe.JweEncrypter;
 import io.jans.as.model.jwe.JweEncrypterImpl;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtType;
@@ -31,17 +30,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.security.PublicKey;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.StringTokenizer;
+import java.util.*;
 
-import static io.jans.as.model.authorize.AuthorizeResponseParam.AUD;
-import static io.jans.as.model.authorize.AuthorizeResponseParam.EXP;
-import static io.jans.as.model.authorize.AuthorizeResponseParam.EXPIRES_IN;
-import static io.jans.as.model.authorize.AuthorizeResponseParam.ISS;
-import static io.jans.as.model.authorize.AuthorizeResponseParam.RESPONSE;
+import static io.jans.as.model.authorize.AuthorizeResponseParam.*;
 
 /**
  * @author Javier Rojas Blum
@@ -75,8 +66,7 @@ public class RedirectUri {
         this.baseRedirectUri = baseRedirectUri;
         this.responseMode = ResponseMode.QUERY;
 
-        this.responseParameters = new HashMap<String, String>();
-        this.jwtForEncrypt = new Jwe();
+        this.responseParameters = new HashMap<>();
     }
 
     public RedirectUri(String baseRedirectUri, List<ResponseType> responseTypes, ResponseMode responseMode) {
@@ -117,11 +107,7 @@ public class RedirectUri {
     }
 
     public int getResponseParamentersSize() {
-        int size = 0;
-        if (responseParameters != null) {
-            size = responseParameters.size();
-        }
-        return size;
+        return responseParameters != null ? responseParameters.size() : 0;
     }
 
     public String getIssuer() {
@@ -377,12 +363,12 @@ public class RedirectUri {
                 throw new InvalidJweException("The public key is not valid");
             }
 
-            JweEncrypter jweEncrypter = new JweEncrypterImpl(keyEncryptionAlgorithm, blockEncryptionAlgorithm, publicKey);
-            jwe = jwtForEncrypt.encryptJwe(jwe, jweEncrypter);
+            JweEncrypterImpl jweEncrypter = new JweEncrypterImpl(keyEncryptionAlgorithm, blockEncryptionAlgorithm, publicKey);
+            jwe = jweEncrypter.encrypt(jwe);
         } else if (keyEncryptionAlgorithm == KeyEncryptionAlgorithm.A128KW
                 || keyEncryptionAlgorithm == KeyEncryptionAlgorithm.A256KW) {
-            JweEncrypter jweEncrypter = new JweEncrypterImpl(keyEncryptionAlgorithm, blockEncryptionAlgorithm, sharedSymmetricKey);
-            jwe = jwtForEncrypt.encryptJwe(jwe, jweEncrypter);
+            JweEncrypterImpl jweEncrypter = new JweEncrypterImpl(keyEncryptionAlgorithm, blockEncryptionAlgorithm, sharedSymmetricKey);
+            jwe = jweEncrypter.encrypt(jwe);
         }
 
         return jwe.toString();
@@ -433,7 +419,27 @@ public class RedirectUri {
             sb.append("</form>");
             sb.append("</body>");
             sb.append("</html>");
-        } else if (responseMode == null) {
+        } else if (responseMode == ResponseMode.QUERY || responseMode == ResponseMode.QUERY_JWT) {
+            appendQuerySymbol(sb);
+            sb.append(getQueryString());
+        } else if (responseMode == ResponseMode.FRAGMENT || responseMode == ResponseMode.FRAGMENT_JWT) {
+            appendFragmentSymbol(sb);
+            sb.append(getQueryString());
+        } else if (responseTypes != null && responseMode == ResponseMode.JWT) {
+            if (responseTypes.contains(ResponseType.TOKEN)) {
+                appendFragmentSymbol(sb);
+            } else if (responseTypes.contains(ResponseType.CODE)) {
+                appendQuerySymbol(sb);
+            }
+            sb.append(getQueryString());
+        } else {
+            appendDefaultToString(sb);
+        }
+        return sb.toString();
+    }
+
+    private void appendDefaultToString(StringBuilder sb) {
+        if (responseMode == null) {
             if (responseTypes != null && (responseTypes.contains(ResponseType.TOKEN) || responseTypes.contains(ResponseType.ID_TOKEN))) {
                 appendFragmentSymbol(sb);
             } else {
@@ -443,7 +449,7 @@ public class RedirectUri {
         } else {
             appendDeafultToString(sb);
         }
-        return sb.toString();
+        sb.append(getQueryString());
     }
 
     private void appendDeafultToString(StringBuilder sb) {

@@ -19,6 +19,7 @@ import io.jans.as.model.exception.InvalidJweException;
 import io.jans.as.model.jwe.Jwe;
 import io.jans.as.model.util.Util;
 import org.mockito.Mock;
+import io.jans.as.model.util.Util;
 import org.mockito.Mockito;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.Listeners;
@@ -39,64 +40,97 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.RSAPublicKeySpec;
+import java.util.ArrayList;
+import java.util.List;
+
+import static io.jans.as.model.authorize.AuthorizeRequestParam.*;
+import static io.jans.as.model.authorize.AuthorizeResponseParam.EXPIRES_IN;
+import static io.jans.as.model.authorize.AuthorizeResponseParam.RESPONSE;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
+import static org.testng.Assert.*;
 
 @Listeners(MockitoTestNGListener.class)
 public class RedirectUriTest {
 
-    @Mock
-    private AbstractCryptoProvider cryptoProvider;
-
     @Test
-    public void parseQueryString_queryStringNull_EmptyResult() throws CryptoProviderException {
+    public void parseQueryString_queryStringNull_EmptyResult() {
         RedirectUri redirectUri = getRedirectUriTemplateGetQueryString(null, null, null, null);
         redirectUri.parseQueryString(null);
         assertEquals(redirectUri.getResponseParamentersSize(), 0);
     }
 
     @Test
-    public void parseQueryString_oneParam_size1() throws CryptoProviderException {
+    public void parseQueryString_oneParam_size1() throws UnsupportedEncodingException {
         RedirectUri redirectUri = getRedirectUriTemplateGetQueryString(null, null, null, null);
-        redirectUri.parseQueryString(AuthorizeResponseParam.EXPIRES_IN + "=");
+        redirectUri.parseQueryString(encodeUTF8(AuthorizeResponseParam.EXPIRES_IN) + "=");
         assertEquals(redirectUri.getResponseParamentersSize(), 1);
+        assertNull(redirectUri.getResponseParameter(AuthorizeResponseParam.EXPIRES_IN));
     }
 
     @Test
-    public void parseQueryString_threeParams_size3() throws CryptoProviderException {
+    public void parseQueryString_threeParams_size3() throws UnsupportedEncodingException {
         RedirectUri redirectUri = getRedirectUriTemplateGetQueryString(null, null, null, null);
-        redirectUri.parseQueryString(AuthorizeResponseParam.CODE + "=Pcode&" + AuthorizeResponseParam.EXPIRES_IN + "=3000&" + AuthorizeResponseParam.ACCESS_TOKEN + "=tk123");
+        String p_code = encodeUTF8(AuthorizeResponseParam.CODE);
+        String p_exp = encodeUTF8(AuthorizeResponseParam.EXPIRES_IN);
+        String p_tk = encodeUTF8(AuthorizeResponseParam.ACCESS_TOKEN);
+        String code = encodeUTF8("12345");
+        String exp = encodeUTF8("30000");
+        String tk = encodeUTF8("tk123");
+        redirectUri.parseQueryString(p_code + "=" + code + "&" + p_exp + "=" + exp + "&" + p_tk + "=" + tk);
         assertEquals(redirectUri.getResponseParamentersSize(), 3);
+        assertEquals(redirectUri.getResponseParameter(p_code), code);
+        assertEquals(redirectUri.getResponseParameter(p_exp), exp);
+        assertEquals(redirectUri.getResponseParameter(p_tk), tk);
     }
 
     @Test
-    public void parseQueryString_threeParamsOneNull_size3() throws CryptoProviderException {
+    public void parseQueryString_threeParamsOneNull_size3() throws UnsupportedEncodingException {
         RedirectUri redirectUri = getRedirectUriTemplateGetQueryString(null, null, null, null);
-        redirectUri.parseQueryString(AuthorizeResponseParam.CODE + "=Pcode&" + AuthorizeResponseParam.EXPIRES_IN + "=&" + AuthorizeResponseParam.ACCESS_TOKEN + "=tk123");
+        String p_code = encodeUTF8(AuthorizeResponseParam.CODE);
+        String p_exp = encodeUTF8(AuthorizeResponseParam.EXPIRES_IN);
+        String p_tk = encodeUTF8(AuthorizeResponseParam.ACCESS_TOKEN);
+        String code = encodeUTF8("12345");
+        String tk = encodeUTF8("tk123");
+        redirectUri.parseQueryString(p_code + "=" + code + "&" + p_exp + "=&" + p_tk + "=" + tk);
         assertEquals(redirectUri.getResponseParamentersSize(), 3);
+        assertEquals(redirectUri.getResponseParameter(p_code), code);
+        assertNull(redirectUri.getResponseParameter(p_exp));
+        assertEquals(redirectUri.getResponseParameter(p_tk), tk);
     }
 
     @Test
-    public void getQueryString_noResponseMode_responseParametersEncoded() throws UnsupportedEncodingException, CryptoProviderException {
+    public void getQueryString_noResponseMode_responseParametersEncoded() throws UnsupportedEncodingException {
         RedirectUri redirectUri = getRedirectUriTemplateGetQueryString(null, null, null, null);
-        redirectUri.addResponseParameter(AuthorizeResponseParam.CODE, "123");
-        redirectUri.addResponseParameter(AuthorizeResponseParam.EXPIRES_IN, "3000");
-        redirectUri.addResponseParameter(AuthorizeResponseParam.ACCESS_TOKEN, "tk123");
+        redirectUri.addResponseParameter(AuthorizeResponseParam.CODE, "12345");
+        redirectUri.addResponseParameter(AuthorizeResponseParam.EXPIRES_IN, "30000");
+        redirectUri.addResponseParameter(AuthorizeResponseParam.ACCESS_TOKEN, "tk12345");
         String queryResult = redirectUri.getQueryString();
-
+        System.out.println(queryResult);
         assertNoEmptyQueryString(queryResult, AuthorizeResponseParam.CODE, 3);
+        assertEquals(queryResult, "access_token=tk12345&code=12345&expires_in=30000");
     }
 
-    @Test()
-    public void getQueryString_responseModeFormPostJWT_NoEmpty() throws CryptoProviderException {
+    @Test
+    public void getQueryString_responseModeFormPostJWT_responseEncodedNoEmpty() throws CryptoProviderException {
         RedirectUri redirectUri = getRedirectUriTemplateGetQueryString(ResponseMode.FORM_POST_JWT, null, null, null);
         AbstractCryptoProvider cryptoProvider = mock(AbstractCryptoProvider.class);
         when(cryptoProvider.sign(anyString(), anyString(), anyString(), Mockito.any())).thenReturn("12345");
         redirectUri.setCryptoProvider(cryptoProvider);
+        redirectUri.addResponseParameter(AuthorizeResponseParam.EXPIRES_IN, "3000");
         String queryResult = redirectUri.getQueryString();
+        System.out.println(queryResult);
         //No empty Result
         assertTrue(queryResult.length() > 0);
+        assertEquals(queryResult, "eyJraWQiOiJrZXkxMjMiLCJ0eXAiOiJqd3QiLCJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJ1c2VyMTIzIiwiZXhwIjoiMzAwMCIsImV4cGlyZXNfaW4iOiIzMDAwIn0.12345");
     }
 
-    @Test()
+    @Test
     public void getQueryString_withEncriptionAlgorithm128PublicKeyInvalid_responseEmptyThrowInvalid() throws CryptoProviderException {
         RedirectUri redirectUri = getRedirectUriTemplateGetQueryString(ResponseMode.JWT, KeyEncryptionAlgorithm.RSA1_5, BlockEncryptionAlgorithm.A256GCM, null);
 
@@ -105,158 +139,194 @@ public class RedirectUriTest {
         redirectUri.setCryptoProvider(cryptoProvider);
 
         String queryResult = redirectUri.getQueryString();
+        System.out.println(queryResult);
         assertEquals(queryResult, "");
     }
 
-    @Test()
-    public void getQueryString_withEncriptionAlgorithmRSANoSignatureAlgorithm_responseEncoded() throws UnsupportedEncodingException, CryptoProviderException, InvalidJweException {
+    @Test
+    public void getQueryString_withEncriptionAlgorithmRSANoSignatureAlgorithm_responseEncoded() throws CryptoProviderException, UnsupportedEncodingException, NoSuchAlgorithmException, InvalidKeySpecException {
         RedirectUri redirectUri = getRedirectUriTemplateGetQueryString(ResponseMode.JWT, KeyEncryptionAlgorithm.RSA1_5, BlockEncryptionAlgorithm.A256GCM, null);
         AbstractCryptoProvider cryptoProvider = mock(AbstractCryptoProvider.class);
         when(cryptoProvider.getPublicKey(anyString(), Mockito.any(), Mockito.any())).thenReturn(getRSAPublicKey());
-        Jwe jwe = mock(Jwe.class);
-        when(jwe.encryptJwe(any(), any())).thenReturn(new Jwe());
+
         redirectUri.setCryptoProvider(cryptoProvider);
-        redirectUri.setJwtForEncrypt(jwe);
-        redirectUri.addResponseParameter(AuthorizeResponseParam.EXPIRES_IN, "3000");
+        redirectUri.addResponseParameter(AuthorizeResponseParam.EXPIRES_IN, "1644270473301");
 
         String queryResult = redirectUri.getQueryString();
-
+        System.out.println(queryResult);
         assertNoEmptyQueryString(queryResult, RESPONSE, 1);
+        assertTrue(queryResult.startsWith("response=eyJ0eXAiOiJqd3QiLCJlbmMiOiJBMjU2R0NNIiwiYWxnIjoiUlNBMV81In0."));
     }
 
-    @Test()
-    public void getQueryString_withEncriptionAlgorithm128NoSignatureAlgorithm_responseEncoded() throws UnsupportedEncodingException, CryptoProviderException, InvalidJweException {
-        RedirectUri redirectUri = getRedirectUriTemplateGetQueryString(ResponseMode.JWT, KeyEncryptionAlgorithm.RSA1_5, BlockEncryptionAlgorithm.A256GCM, null);
-        Jwe jwe = mock(Jwe.class);
+    @Test
+    public void getQueryString_withEncriptionAlgorithm128NoSignatureAlgorithm_responseEncoded() throws UnsupportedEncodingException {
+        RedirectUri redirectUri = getRedirectUriTemplateGetQueryString(ResponseMode.JWT, KeyEncryptionAlgorithm.A128KW, BlockEncryptionAlgorithm.A128GCM, null);
         AbstractCryptoProvider cryptoProvider = mock(AbstractCryptoProvider.class);
-        when(cryptoProvider.getPublicKey(anyString(), Mockito.any(), Mockito.any())).thenReturn(getRSAPublicKey());
-        when(jwe.encryptJwe(any(), any())).thenReturn(new Jwe());
-        redirectUri.setJwtForEncrypt(jwe);
+
         redirectUri.setCryptoProvider(cryptoProvider);
+        redirectUri.setNestedKeyId("nestedKey123");
+        redirectUri.setNestedSharedSecret("nested_shared_secret");
+        redirectUri.setSharedSymmetricKey("0123456789012345".getBytes());
+        redirectUri.addResponseParameter(EXPIRES_IN, "1644270473301");
 
         String queryResult = redirectUri.getQueryString();
+        System.out.println(queryResult);
         assertNoEmptyQueryString(queryResult, RESPONSE, 1);
+        assertTrue(queryResult.startsWith("response=eyJ0eXAiOiJqd3QiLCJlbmMiOiJBMTI4R0NNIiwiYWxnIjoiQTEyOEtXIn0."));
     }
 
-    @Test()
-    public void getQueryString_withEncriptionAlgorithmRSAAndSignatureAlgorithm_responseEncoded() throws UnsupportedEncodingException, CryptoProviderException, InvalidJweException {
+    @Test
+    public void getQueryString_withEncriptionAlgorithmRSAAndSignatureAlgorithm_responseEncoded() throws UnsupportedEncodingException, CryptoProviderException, NoSuchAlgorithmException, InvalidKeySpecException {
         RedirectUri redirectUri = getRedirectUriTemplateGetQueryString(ResponseMode.JWT, KeyEncryptionAlgorithm.RSA1_5, BlockEncryptionAlgorithm.A256GCM, SignatureAlgorithm.HS256);
         AbstractCryptoProvider cryptoProvider = mock(AbstractCryptoProvider.class);
         when(cryptoProvider.getPublicKey(anyString(), Mockito.any(), Mockito.any())).thenReturn(getRSAPublicKey());
-        when(cryptoProvider.sign(anyString(), anyString(), anyString(), anyObject())).thenReturn("12345");
+        when(cryptoProvider.sign(anyString(), anyString(), anyString(), any())).thenReturn("12345");
 
-        Jwe jwe = mock(Jwe.class);
-        when(jwe.encryptJwe(any(), any())).thenReturn(new Jwe());
         redirectUri.setCryptoProvider(cryptoProvider);
-        redirectUri.setJwtForEncrypt(jwe);
         redirectUri.setNestedKeyId("nestedKey123");
         redirectUri.setNestedSharedSecret("nested_shared_secret");
 
         String queryResult = redirectUri.getQueryString();
-
+        System.out.println(queryResult);
         assertNoEmptyQueryString(queryResult, RESPONSE, 1);
+        assertTrue(queryResult.startsWith("response=eyJjdHkiOiJqd3QiLCJ0eXAiOiJqd3QiLCJlbmMiOiJBMjU2R0NNIiwiYWxnIjoiUlNBMV81In0."));
     }
 
-    @Test()
-    public void getQueryString_withEncriptionAlgorithm128KWAndSignatureAlgorithm_responseEncoded() throws UnsupportedEncodingException, CryptoProviderException, InvalidJweException {
+    @Test
+    public void getQueryString_withEncriptionAlgorithm128KWAndSignatureAlgorithm_responseEncoded() throws UnsupportedEncodingException, CryptoProviderException {
         RedirectUri redirectUri = getRedirectUriTemplateGetQueryString(ResponseMode.JWT, KeyEncryptionAlgorithm.A128KW, BlockEncryptionAlgorithm.A128GCM, SignatureAlgorithm.HS256);
-
         AbstractCryptoProvider cryptoProvider = mock(AbstractCryptoProvider.class);
-        Jwe jwe = mock(Jwe.class);
         when(cryptoProvider.sign(anyString(), anyString(), anyString(), any(SignatureAlgorithm.class))).thenReturn("12345");
-        when(jwe.encryptJwe(any(), any())).thenReturn(new Jwe());
 
         redirectUri.setCryptoProvider(cryptoProvider);
-        redirectUri.setJwtForEncrypt(jwe);
         redirectUri.setNestedKeyId("nestedKey123");
         redirectUri.setNestedSharedSecret("nested_shared_secret");
+        redirectUri.setSharedSymmetricKey("0123456789012345".getBytes());
+        redirectUri.addResponseParameter(EXPIRES_IN, "1644270473301");
 
         String queryResult = redirectUri.getQueryString();
+        System.out.println(queryResult);
 
         assertNoEmptyQueryString(queryResult, RESPONSE, 1);
-
+        assertTrue(queryResult.startsWith("response=eyJjdHkiOiJqd3QiLCJ0eXAiOiJqd3QiLCJlbmMiOiJBMTI4R0NNIiwiYWxnIjoiQTEyOEtXIn0."));
     }
 
-    @Test()
-    public void getQueryString_noEncriptionAlgorithmNoSignatureAlgorithm_responseEncoded() throws UnsupportedEncodingException, CryptoProviderException, InvalidJweException {
+    @Test
+    public void getQueryString_noEncriptionAlgorithmNoSignatureAlgorithm_responseEncoded() throws UnsupportedEncodingException, CryptoProviderException {
         RedirectUri redirectUri = getRedirectUriTemplateGetQueryString(ResponseMode.JWT, null, null, null);
-
         AbstractCryptoProvider cryptoProvider = mock(AbstractCryptoProvider.class);
         when(cryptoProvider.sign(anyString(), anyString(), anyString(), any(SignatureAlgorithm.class))).thenReturn("12345");
         redirectUri.setCryptoProvider(cryptoProvider);
 
         String queryResult = redirectUri.getQueryString();
+        System.out.println(queryResult);
 
         assertNoEmptyQueryString(queryResult, RESPONSE, 1);
-
+        assertTrue(queryResult.startsWith("response=eyJraWQiOiJrZXkxMjMiLCJ0eXAiOiJqd3QiLCJhbGciOiJSUzI1NiJ9."));
     }
 
-    @Test()
-    public void toString_withResponseModeFormPostJwtAndNoParams_NoEmpty() {
-
+    @Test
+    public void toString_withResponseModeFormPostJwt_validHtmlFormResponse() throws CryptoProviderException {
+        String valTestCase = "<html><head><title>Submit This Form</title></head><body onload=\"javascript:document.forms[0].submit()\"><form method=\"post\" action=\"http://redirecturl.com/\"><input type=\"hidden\" name=\"response\" value=\"eyJraWQiOiJrZXkxMjMiLCJ0eXAiOiJqd3QiLCJhbGciOiJSUzI1NiJ9.eyJzY29wZSI6Im9wZW5pZCIsInJlc3BvbnNlX3R5cGUiOiJ0b2tlbiBpZF90b2tlbiIsInJlZGlyZWN0X3VyaSI6Imh0dHA6Ly9yZWRpcmVjdHVybC5jb20vIiwic3RhdGUiOiJjOTU1NzBkMS01YWI4LTQ2OGItOWMwMS05Y2M2MGUwMmIwMjMiLCJleHAiOiIxNjQ0MjcwNDczMzAxIiwibm9uY2UiOiIwZGEwZDA0Yi1hNmJkLTRkOWUtOGJkOS0yMTE2NWYwZDNiYjciLCJleHBpcmVzX2luIjoiMTY0NDI3MDQ3MzMwMSIsImNsaWVudF9pZCI6IjEyMyJ9.12345\"/></form></body></html>";
         RedirectUri redirectUri = getRedirectUriTemplateToString();
         redirectUri.setResponseMode(ResponseMode.FORM_POST_JWT);
+        AbstractCryptoProvider cryptoProvider = mock(AbstractCryptoProvider.class);
+        when(cryptoProvider.sign(anyString(), anyString(), anyString(), any(SignatureAlgorithm.class))).thenReturn("12345");
         redirectUri.setCryptoProvider(cryptoProvider);
+        redirectUri.setKeyId("key123");
+        redirectUri.setSharedSecret("shared_secret");
+        redirectUri.setNestedSharedSecret("nested_shared_secret");
 
-        assertTrue(redirectUri.toString().length() > 0, "Is Empty");
+        assertEquals(redirectUri.toString(), valTestCase);
     }
 
-    @Test()
-    public void toString_withResponseModeFormPostAndNoParams_NoEmpty() {
-
+    @Test
+    public void toString_withResponseModeFormPost_validHtmlFormResponse() {
+        String valTestCase = "<html><head><title>Submit This Form</title></head><body onload=\"javascript:document.forms[0].submit()\"><form method=\"post\" action=\"http://redirecturl.com/\"><input type=\"hidden\" name=\"scope\" value=\"openid\"/><input type=\"hidden\" name=\"response_type\" value=\"token id_token\"/><input type=\"hidden\" name=\"redirect_uri\" value=\"http://redirecturl.com/\"/><input type=\"hidden\" name=\"state\" value=\"c95570d1-5ab8-468b-9c01-9cc60e02b023\"/><input type=\"hidden\" name=\"nonce\" value=\"0da0d04b-a6bd-4d9e-8bd9-21165f0d3bb7\"/><input type=\"hidden\" name=\"expires_in\" value=\"1644270473301\"/><input type=\"hidden\" name=\"client_id\" value=\"123\"/></form></body></html>";
         RedirectUri redirectUri = getRedirectUriTemplateToString();
         redirectUri.setResponseMode(ResponseMode.FORM_POST);
-        assertTrue(redirectUri.toString().length() > 0, "is Empty");
+
+        assertEquals(redirectUri.toString(), valTestCase);
     }
 
-    @Test()
-    public void toString_withResponseModeFragmentAndNoParams_NoEmpty() {
+    @Test
+    public void toString_withResponseModeFragment_validURLFragmentString() {
+        String valTestCase = "http://redirecturl.com/#scope=openid&response_type=token+id_token&redirect_uri=http%3A%2F%2Fredirecturl.com%2F&state=c95570d1-5ab8-468b-9c01-9cc60e02b023&nonce=0da0d04b-a6bd-4d9e-8bd9-21165f0d3bb7&expires_in=1644270473301&client_id=123";
         RedirectUri redirectUri = getRedirectUriTemplateToString();
         redirectUri.setResponseMode(ResponseMode.FRAGMENT);
-        redirectUri.setCryptoProvider(cryptoProvider);
 
-        assertTrue(redirectUri.toString().length() > 0, "is Empty");
+        assertEquals(redirectUri.toString(), valTestCase);
     }
 
-    @Test()
-    public void toString_withResponseModeQueryAndNoParams_NoEmpty() {
+    @Test
+    public void toString_withResponseModeQuery_validURLQueryString() {
+        String valTestCase = "http://redirecturl.com/?scope=openid&response_type=token+id_token&redirect_uri=http%3A%2F%2Fredirecturl.com%2F&state=c95570d1-5ab8-468b-9c01-9cc60e02b023&nonce=0da0d04b-a6bd-4d9e-8bd9-21165f0d3bb7&expires_in=1644270473301&client_id=123";
         RedirectUri redirectUri = getRedirectUriTemplateToString();
-        redirectUri.setResponseMode(ResponseMode.FRAGMENT);
-        redirectUri.setCryptoProvider(cryptoProvider);
+        redirectUri.setResponseMode(ResponseMode.QUERY);
 
-        assertTrue(redirectUri.toString().length() > 0, "is Empty");
+        assertEquals(redirectUri.toString(), valTestCase);
     }
 
-    @Test()
-    public void toString_withResponseModeJwtAndNoParams_NoEmpty() {
-        String baseUri = "http://redirecturl.com/";
+    @Test
+    public void toString_withResponseModeJwtAndresponseTypeToken_validURLFragmentString() throws CryptoProviderException {
+        String valTestCase = "http://redirecturl.com/#response=eyJraWQiOiJrZXkxMjMiLCJ0eXAiOiJqd3QiLCJhbGciOiJSUzI1NiJ9.eyJleHAiOiIxNjQ0MjcwNDczMzAxIiwiZXhwaXJlc19pbiI6IjE2NDQyNzA0NzMzMDEiLCJjbGllbnRfaWQiOiIxMjMifQ.12345";
         List<ResponseType> typeList = new ArrayList<>();
         typeList.add(ResponseType.TOKEN);
-        RedirectUri redirectUri = new RedirectUri(baseUri, typeList, null);
+        RedirectUri redirectUri = new RedirectUri("http://redirecturl.com/", typeList, ResponseMode.JWT);
         redirectUri.addResponseParameter(CLIENT_ID, "123");
-        redirectUri.setResponseMode(ResponseMode.JWT);
+        redirectUri.addResponseParameter(EXPIRES_IN, "1644270473301");
+        redirectUri.setKeyId("key123");
+        redirectUri.setSharedSecret("shared_secret");
+        redirectUri.setNestedSharedSecret("nested_shared_secret");
+
+        AbstractCryptoProvider cryptoProvider = mock(AbstractCryptoProvider.class);
+        when(cryptoProvider.sign(anyString(), anyString(), anyString(), any(SignatureAlgorithm.class))).thenReturn("12345");
         redirectUri.setCryptoProvider(cryptoProvider);
 
-        assertTrue(redirectUri.toString().length() > 0, "is Empty");
+        assertEquals(redirectUri.toString(), valTestCase);
     }
 
-    @Test()
-    public void toString_withResponseModeNullAndResponseParams_NoEmpty() {
-        RedirectUri redirectUri = getRedirectUriTemplateToString();
-        assertTrue(redirectUri.toString().length() > 0, "is Empty");
+    @Test
+    public void toString_withResponseModeJwtAndresponseTypeCode_validURLQueryString() throws CryptoProviderException {
+        String valTestCase = "http://redirecturl.com/?response=eyJraWQiOiJrZXkxMjMiLCJ0eXAiOiJqd3QiLCJhbGciOiJSUzI1NiJ9.eyJleHAiOiIxNjQ0MjcwNDczMzAxIiwiZXhwaXJlc19pbiI6IjE2NDQyNzA0NzMzMDEiLCJjbGllbnRfaWQiOiIxMjMifQ.12345";
+        List<ResponseType> typeList = new ArrayList<>();
+        typeList.add(ResponseType.CODE);
+        RedirectUri redirectUri = new RedirectUri("http://redirecturl.com/", typeList, ResponseMode.JWT);
+        redirectUri.setKeyId("key123");
+        redirectUri.setSharedSecret("shared_secret");
+        redirectUri.addResponseParameter(CLIENT_ID, "123");
+        redirectUri.addResponseParameter(EXPIRES_IN, "1644270473301");
+
+        AbstractCryptoProvider cryptoProvider = mock(AbstractCryptoProvider.class);
+        when(cryptoProvider.sign(anyString(), anyString(), anyString(), any(SignatureAlgorithm.class))).thenReturn("12345");
+        redirectUri.setCryptoProvider(cryptoProvider);
+
+        assertEquals(redirectUri.toString(), valTestCase);
     }
 
-    @Test()
-    public void toString_withResponseModeNullWithTokenResponseType_NoEmpty() {
-        String baseUri = "http://redirecturl.com/";
+    @Test
+    public void toString_nullResponseModeResponseTypeToken_validURLFragmentString() {
+        String valTestCase = "http://redirecturl.com/#expires_in=1644270473301&client_id=123";
         List<ResponseType> typeList = new ArrayList<>();
         typeList.add(ResponseType.TOKEN);
-        RedirectUri redirectUri = new RedirectUri(baseUri, typeList, null);
+        RedirectUri redirectUri = new RedirectUri("http://redirecturl.com/", typeList, null);
         redirectUri.addResponseParameter(CLIENT_ID, "123");
-        assertTrue(redirectUri.toString().length() > 0, "is Empty");
+        redirectUri.addResponseParameter(EXPIRES_IN, "1644270473301");
+
+        assertEquals(redirectUri.toString(), valTestCase);
     }
 
-    @Test()
+    @Test
+    public void toString_nullResponseModeNoResponseType_validURLQueryString() {
+        String valTestCase = "http://redirecturl.com/?expires_in=1644270473301&client_id=123";
+        RedirectUri redirectUri = new RedirectUri("http://redirecturl.com/", null, null);
+        redirectUri.addResponseParameter(CLIENT_ID, "123");
+        redirectUri.addResponseParameter(EXPIRES_IN, "1644270473301");
+
+        assertEquals(redirectUri.toString(), valTestCase);
+    }
+
+    @Test
     public void toString_NoResponseParams_sameBaseUri() {
         String baseUri = "http://redirecturl.com/";
         RedirectUri redirectUri = new RedirectUri(baseUri);
@@ -267,16 +337,17 @@ public class RedirectUriTest {
         String clientId = "123";
         String responseType = "token id_token";
         String scope = "openid";
-        String state = UUID.randomUUID().toString();
-        String nonce = UUID.randomUUID().toString();
+        String state = "c95570d1-5ab8-468b-9c01-9cc60e02b023";
+        String nonce = "0da0d04b-a6bd-4d9e-8bd9-21165f0d3bb7";
 
-        RedirectUri redirectUri = new RedirectUri("http://redirecturl.com/");
+        RedirectUri redirectUri = spy(new RedirectUri("http://redirecturl.com/"));
         redirectUri.addResponseParameter(CLIENT_ID, clientId);
         redirectUri.addResponseParameter(REDIRECT_URI, redirectUri.getBaseRedirectUri());
         redirectUri.addResponseParameter(RESPONSE_TYPE, responseType);
         redirectUri.addResponseParameter(SCOPE, scope);
         redirectUri.addResponseParameter(STATE, state);
         redirectUri.addResponseParameter(NONCE, nonce);
+        redirectUri.addResponseParameter(EXPIRES_IN, "1644270473301");
         redirectUri.setAuthorizationCodeLifetime(1000);
         redirectUri.setBlockEncryptionAlgorithm(null);
         redirectUri.setNestedKeyId("nki");
@@ -284,8 +355,8 @@ public class RedirectUriTest {
         return redirectUri;
     }
 
-    private RedirectUri getRedirectUriTemplateGetQueryString(ResponseMode responseMode, KeyEncryptionAlgorithm keyEncryptionAlgorithm, BlockEncryptionAlgorithm blockEncryptionAlgorithm, SignatureAlgorithm signatureAlgorithm) throws CryptoProviderException {
-        RedirectUri redirectUri = new RedirectUri("http://redirecturl.com/", new ArrayList<>(), responseMode);
+    private RedirectUri getRedirectUriTemplateGetQueryString(ResponseMode responseMode, KeyEncryptionAlgorithm keyEncryptionAlgorithm, BlockEncryptionAlgorithm blockEncryptionAlgorithm, SignatureAlgorithm signatureAlgorithm) {
+        RedirectUri redirectUri = spy(new RedirectUri("http://redirecturl.com/", new ArrayList<>(), responseMode));
         redirectUri.setKeyEncryptionAlgorithm(keyEncryptionAlgorithm);
         redirectUri.setBlockEncryptionAlgorithm(blockEncryptionAlgorithm);
         redirectUri.setSignatureAlgorithm(signatureAlgorithm);
@@ -293,40 +364,10 @@ public class RedirectUriTest {
         redirectUri.setKeyId("key123");
         redirectUri.setSharedSecret("shared_secret");
         redirectUri.setJsonWebKeys(null);
-        redirectUri.setCryptoProvider(cryptoProvider);
         return redirectUri;
     }
 
-    private RSAPublicKey getRSAPublicKey() {
-        return new RSAPublicKey() {
-            @Override
-            public BigInteger getPublicExponent() {
-                return null;
-            }
-
-            @Override
-            public String getAlgorithm() {
-                return null;
-            }
-
-            @Override
-            public String getFormat() {
-                return null;
-            }
-
-            @Override
-            public byte[] getEncoded() {
-                return new byte[0];
-            }
-
-            @Override
-            public BigInteger getModulus() {
-                return null;
-            }
-        };
-    }
-
-    private void assertNoEmptyQueryString(String queryResult, String paramToVerify, int paramsSize) throws UnsupportedEncodingException, CryptoProviderException {
+    private void assertNoEmptyQueryString(String queryResult, String paramToVerify, int paramsSize) throws UnsupportedEncodingException {
         //No empty result
         assertTrue(queryResult.length() > 0);
 
@@ -339,4 +380,15 @@ public class RedirectUriTest {
         assertEquals(redirectUri2.getResponseParamentersSize(), paramsSize);
     }
 
+    private String encodeUTF8(String input) throws UnsupportedEncodingException {
+        return URLEncoder.encode(input, Util.UTF8_STRING_ENCODING);
+    }
+
+    private RSAPublicKey getRSAPublicKey() throws NoSuchAlgorithmException, InvalidKeySpecException {
+        String big1 = "00e0b509f6259df8642dbc35662901477df22677ec152b5ff68ace615bb7b725152b3ab17a876aea8a5aa76d2e417629ec4ee341f56135fccf695280104e0312ecbda92557c93870114af6c9d05c4f7f0c3685b7a46bee255932575cce10b424d813cfe4875d3e82047b97ddef52741d546b8e289dc6935b3ece0462db0a22b8e7";
+        String big2 = "010001";
+        RSAPublicKeySpec rsaPubKS = new RSAPublicKeySpec(new BigInteger(big1, 16), new BigInteger(big2, 16));
+        KeyFactory kf = KeyFactory.getInstance("RSA");
+        return (RSAPublicKey) kf.generatePublic(rsaPubKS);
+    }
 }
