@@ -50,6 +50,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -68,7 +69,10 @@ import static io.jans.as.model.util.Util.escapeLog;
 public class OrganizationConfigWS {
 
     public static final String BASE_AUTH_FAVICON_PATH = "/opt/jans/jetty/jans-auth/custom/static/favicon/";
+    public static final String DEFAULT_FAVICON_FILENAME = "/WEB-INF/static/favicon.ico";
+
     public static final String BASE_AUTH_LOGO_PATH = "/opt/jans/jetty/jans-auth/custom/static/logo/";
+    public static final String DEFAULT_LOGO_FILENAME = "/WEB-INF/static/logo.png";
 
     @Inject
     private Logger log;
@@ -85,6 +89,9 @@ public class OrganizationConfigWS {
     @Context
     HttpServletResponse response;
 
+    @Context
+    private ServletContext context;
+
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
@@ -93,32 +100,32 @@ public class OrganizationConfigWS {
         GluuOrganization gluuOrganization = organizationService.getOrganization();
         log.error("\n\n OrganizationConfigWS::getOrgData() - new - gluuOrganization:{}", gluuOrganization);
         return Response.ok(gluuOrganization).build();
-     }
-    
+    }
+
     @GET
     @Path("{imageType}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response getImage(@HeaderParam("Authorization") String authorization, @PathParam("imageType") String imageType) {
+    public Response getImage(@HeaderParam("Authorization") String authorization,
+            @PathParam("imageType") Image imageType) {
         log.error("\n\n OrganizationConfigWS::getImage() - authorization:{}, imageType:{}", authorization, imageType);
-        
-        if (StringUtils.isBlank(imageType)) {
+
+        if (imageType == null) {
             throw errorResponseFactory.createWebApplicationException(Response.Status.INTERNAL_SERVER_ERROR,
                     AuthorizeErrorResponseType.SERVER_ERROR, "Image type cannot blank.");
         }
-        
+
         GluuOrganization gluuOrganization = organizationService.getOrganization();
-        log.error("\n\n OrganizationConfigWS::getImage() - new - gluuOrganization:{}", gluuOrganization);
-        if(imageType.equalsIgnoreCase(Image.FAVICON.toString())) {
-        boolean hasSucceed = readCustomFavicon(response, gluuOrganization);
-        log.error("\n\n OrganizationConfigWS::getImage() - hasSucceed:{}", hasSucceed);
-        if (!hasSucceed) {
-            hasSucceed = readDefaultFavicon(response);
-            log.error("\n\n OrganizationConfigWS::getImage() - readDefaultFavicon:{}", hasSucceed);
-        }
-        }
-        return Response.ok(gluuOrganization).build();
-     }
+        log.error("\n\n OrganizationConfigWS::getImage() - gluuOrganization:{}", gluuOrganization);
+
+        DownloadWrapper downloadWrapper = readImage(imageType, gluuOrganization);
+        log.error("\n\n OrganizationConfigWS::getImage() - downloadWrapper:{}", downloadWrapper);
+
+        boolean success = readDefaultFavicon(response);
+        log.error("\n\n OrganizationConfigWS::getImage() - success:{}", success);
+
+        return Response.ok(downloadWrapper).build();
+    }
 
     @PUT
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -127,7 +134,7 @@ public class OrganizationConfigWS {
         log.error("\n\n OrganizationConfigWS::updateOrg() - gluuOrganization:{}", gluuOrganization);
         organizationService.updateOrganization(gluuOrganization);
         gluuOrganization = organizationService.getOrganization();
-        log.error("\n\n OrganizationConfigWS::getOrg() - gluuOrganization:{}", gluuOrganization);
+        log.error("\n\n OrganizationConfigWS::updateOrg() - gluuOrganization:{}", gluuOrganization);
         return Response.ok(gluuOrganization).build();
     }
 
@@ -151,17 +158,17 @@ public class OrganizationConfigWS {
         // Return GluuOrganization
 
         String basePath = getBasePath(image);
-        log.error("\n\n OrganizationResource::saveImage() - basePath:{} ", basePath);
+        log.error("\n\n OrganizationConfigWS::saveImage() - basePath:{} ", basePath);
         if (StringUtils.isBlank(basePath)) {
             throw errorResponseFactory.createWebApplicationException(Response.Status.INTERNAL_SERVER_ERROR,
                     AuthorizeErrorResponseType.SERVER_ERROR, "Error while uploading image - base path blank.");
         }
 
         String fileName = saveFile(uploadedFile, basePath);
-        log.error("\n\n OrganizationResource::saveImage() - fileName:{} ", fileName);
+        log.error("\n\n OrganizationConfigWS::saveImage() - fileName:{} ", fileName);
 
         final GluuOrganization gluuOrganization = organizationService.getOrganization();
-        log.error("\n\n OrganizationResource::saveImage() - gluuOrganization:{} ", gluuOrganization);
+        log.error("\n\n OrganizationConfigWS::saveImage() - gluuOrganization:{} ", gluuOrganization);
 
         if (image == Image.FAVICON) {
             gluuOrganization.setJsFaviconPath(basePath + fileName);
@@ -175,11 +182,11 @@ public class OrganizationConfigWS {
     }
 
     private String saveFile(FileUploadWrapper fileUploadWrapper, String basePath) {
-        log.error("\n\n OrganizationResource::saveFile() - fileUploadWrapper:{} , basePath:{} ", fileUploadWrapper,
+        log.error("\n\n OrganizationConfigWS::saveFile() - fileUploadWrapper:{} , basePath:{} ", fileUploadWrapper,
                 basePath);
 
         String fileName = fileUploadWrapper.getFileName();
-        log.error("\n\n OrganizationResource::saveFile() - fileName:{} ", fileName);
+        log.error("\n\n OrganizationConfigWS::saveFile() - fileName:{} ", fileName);
         if (StringUtils.isBlank(fileName)) {
             throw errorResponseFactory.createWebApplicationException(Response.Status.INTERNAL_SERVER_ERROR,
                     AuthorizeErrorResponseType.SERVER_ERROR, "Error while uploading image - file name blank.");
@@ -206,7 +213,6 @@ public class OrganizationConfigWS {
     }
 
     private String getBasePath(Image image) {
-
         switch (image) {
         case FAVICON:
             return BASE_AUTH_FAVICON_PATH;
@@ -217,13 +223,89 @@ public class OrganizationConfigWS {
 
     }
 
+    private String getCustomFileName(Image image, GluuOrganization gluuOrganization) {
+        switch (image) {
+        case FAVICON:
+            return gluuOrganization.getJsFaviconPath();
+        case LOGO:
+            return gluuOrganization.getJsLogoPath();
+        }
+        return null;
+    }
+
+    private String getDefaultFileName(Image image) {
+        switch (image) {
+        case FAVICON:
+            return DEFAULT_FAVICON_FILENAME;
+        case LOGO:
+            return DEFAULT_LOGO_FILENAME;
+        }
+        return null;
+    }
+
+    private DownloadWrapper readImage(Image imageType, GluuOrganization gluuOrganization) {
+        log.error("\n\n OrganizationConfigWS::readImage() - imageType:{}, gluuOrganization:{}", imageType,
+                gluuOrganization);
+
+        DownloadWrapper downloadWrapper = readCustomImage(imageType, gluuOrganization);
+        log.error("\n\n OrganizationConfigWS::readImage() - 1 - downloadWrapper:{} ", downloadWrapper);
+        if (downloadWrapper == null || downloadWrapper.getStream() == null) {
+            log.error(" Reading default image as custom image is null ");
+            downloadWrapper = readDefaultImage(imageType);
+            log.error("\n\n OrganizationConfigWS::readImage() - 2 - downloadWrapper:{} ", downloadWrapper);
+        }
+
+        return downloadWrapper;
+
+    }
+
+    private DownloadWrapper readCustomImage(Image imageType, GluuOrganization gluuOrganization) {
+        log.error("\n\n OrganizationConfigWS::readCustomImage() - imageType:{}, gluuOrganization:{}", imageType,
+                gluuOrganization);
+        String fileName = getCustomFileName(imageType, gluuOrganization);
+        if (StringUtils.isBlank(fileName)) {
+            return null;
+        }
+
+        log.error("\n\n OrganizationConfigWS::readCustomImage() - 1");
+        File directory = new File(getBasePath(imageType));
+        if (!directory.exists()) {
+            directory.mkdir();
+        }
+
+        log.error("\n\n OrganizationConfigWS::readCustomImage() - 2");
+        File file = new File(fileName);
+        if (!file.exists()) {
+            return null;
+        }
+
+        try (InputStream in = getClass().getClassLoader().getResourceAsStream(fileName)) {
+            log.error("\n\n OrganizationConfigWS::readCustomImage() - 3 - InputStream:{}", in);
+            // IOUtils.copy(in, out);
+            return (new DownloadWrapper(in, fileName, null, new Date(file.lastModified())));
+        } catch (IOException e) {
+            log.error("Error loading custom image - imageType:{}, fileName:{}, exception:{} ", imageType, fileName,
+                    e.getMessage());
+            return null;
+        }
+
+        /*
+         * try (InputStream in = new FileInputStream(fileName)) {
+         * log.error("\n\n OrganizationConfigWS::readCustomImage() - 3 - InputStream:{}"
+         * , in); return (new DownloadWrapper(in, fileName, null, new
+         * Date(file.lastModified()))); } catch (IOException e) { log.
+         * error("Error loading custom image - imageType:{}, fileName:{}, exception:{} "
+         * , imageType, fileName, e.getMessage()); return null; }
+         */
+    }
+
     private boolean readDefaultFavicon(HttpServletResponse response) {
         String defaultFaviconFileName = "/WEB-INF/static/favicon.ico";
-        log.error("\n\n OrganizationConfigWS::readDefaultFavicon() - defaultFaviconFileName:{}",
-                defaultFaviconFileName);
-        try (InputStream in = request.getServletContext().getResourceAsStream(defaultFaviconFileName);
+        try (InputStream in = context.getResourceAsStream(defaultFaviconFileName);
                 OutputStream out = response.getOutputStream()) {
+            log.error("\n\n OrganizationConfigWS::readDefaultFavicon() - in:{}", in);
             IOUtils.copy(in, out);
+            log.error("\n\n OrganizationConfigWS::readDefaultFavicon() - out:{}", out);
             return true;
         } catch (IOException e) {
             log.debug("Error loading default favicon: " + e.getMessage());
@@ -231,37 +313,64 @@ public class OrganizationConfigWS {
         }
     }
 
-    private boolean readCustomFavicon(HttpServletResponse response, GluuOrganization organization) {
-        log.error("\n\n OrganizationConfigWS::readCustomFavicon() - response:{}, organization:{}", response,
-                organization);
-        if (organization.getJsFaviconPath() == null || StringUtils.isEmpty(organization.getJsFaviconPath())) {
-            return false;
-        }
+    private DownloadWrapper readDefaultImage(Image imageType) {
+        log.error("\n\n OrganizationConfigWS::readDefaultImage() - new - imageType:{}", imageType);
+        String fileName = getDefaultFileName(imageType);
 
-        File directory = new File(BASE_AUTH_FAVICON_PATH);
+        File file = new File(fileName);
+        log.error("\n\n OrganizationConfigWS::readDefaultImage() - file.exists(1):{}", file.exists());
+
         log.error(
-                "\n\n OrganizationConfigWS::readCustomFavicon() - directory.getName():{}, directory.getAbsolutePath():{}",
-                directory.getName(), directory.getAbsolutePath());
-        if (!directory.exists()) {
-            directory.mkdir();
-        }
-        File faviconPath = new File(organization.getJsFaviconPath());
-        log.error("\n\n OrganizationConfigWS::readCustomFavicon() - faviconPath:{}, faviconPath.exists():{} ",
-                faviconPath, faviconPath.exists());
-        if (!faviconPath.exists()) {
-            log.error("\n\n OrganizationConfigWS::readCustomFavicon() - faviconPath.exists() block ");
-            return false;
+                "\n\n OrganizationConfigWS::readDefaultImage() - context.getContextPath():{} , context.getContextPath()+fileName:{} ",
+                context.getContextPath(), context.getContextPath() + fileName);
+        file = new File(context.getContextPath() + fileName);
+        log.error("\n\n OrganizationConfigWS::readDefaultImage() - file.exists(2):{}", file.exists());
+
+        if (file.exists()) {
+            try {
+                log.error(
+                        "\n\n OrganizationConfigWS::readDefaultImage() - 0 - File exists - file.getPath():{}, file.canRead():{}, file.getCanonicalPath(),  file.toURI():{}",
+                        file.getPath(), file.canRead(), file.getCanonicalPath(), file.toURI());
+            } catch (IOException e) {
+                log.error(
+                        "Error loading reading file properties for DefaultImage - imageType:{}, fileName:{}, exception:{} ",
+                        imageType, fileName, e.getMessage());
+                return null;
+            }
         }
 
-        log.error("\n\n OrganizationConfigWS::readCustomFavicon() - Copy faviconPath  ");
-        try (InputStream in = new FileInputStream(faviconPath); OutputStream out = response.getOutputStream()) {
-            log.error("\n\n OrganizationConfigWS::readCustomFavicon() - IOUtils.copy block - start ");
-            IOUtils.copy(in, out);
-            log.error("\n\n OrganizationConfigWS::readCustomFavicon() - IOUtils.copy block - end ");
-            return true;
+        log.error(
+                "\n\n OrganizationConfigWS::readDefaultImage() - 1 -  file.getAbsolutePath():{}, file.getAbsoluteFile():{}",
+                file.getAbsolutePath(), file.getAbsoluteFile());
+
+        InputStream inputStream = getClass().getClassLoader().getResourceAsStream(fileName);
+        log.error("\n\n OrganizationConfigWS::readDefaultImage() - 2 -  getClass().getClassLoader() - inputStream:{}",
+                inputStream);
+
+        inputStream = getClass().getClassLoader().getResourceAsStream(file.getAbsolutePath());
+        log.error("\n\n OrganizationConfigWS::readDefaultImage() - 2 -  file.getAbsolutePath():{}, inputStream:{}",
+                file.getAbsolutePath(), inputStream);
+
+        inputStream = context.getResourceAsStream("/WEB-INF/test/foo.txt");
+        log.error("\n\n OrganizationConfigWS::readDefaultImage() - 4 -  context.getResourceAsStream  inputStream:{}",
+                inputStream);
+
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        inputStream = classLoader.getResourceAsStream(fileName);
+        log.error("\n\n OrganizationConfigWS::readDefaultImage() - 5 -  context.getResourceAsStream  inputStream:{}",
+                inputStream);
+
+        InputStreamReader isr = new InputStreamReader(
+                OrganizationConfigWS.class.getClassLoader().getResourceAsStream(fileName));
+        log.error("\n\n OrganizationConfigWS::readDefaultImage() - 6 -  InputStreamReader  isr:{}", isr);
+
+        try (InputStream in = new FileInputStream(fileName)) {
+            log.error("\n\n OrganizationConfigWS::readDefaultImage() - 7 - InputStream:{}", in);
+            return (new DownloadWrapper(in, fileName, null, new Date(file.lastModified())));
         } catch (IOException e) {
-            log.debug("Error loading custom favicon: " + e.getMessage());
-            return false;
+            log.error("Error loading default image - imageType:{}, fileName:{}, exception:{} ", imageType, fileName,
+                    e.getMessage());
+            return null;
         }
     }
 

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import io.jans.as.model.common.Image;
 import io.jans.as.persistence.model.GluuOrganization;
+import io.jans.util.io.DownloadWrapper;
 import io.jans.util.io.FileUploadWrapper;
 
 import javax.ws.rs.Consumes;
@@ -26,6 +27,12 @@ public interface OrgConfigurationService {
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
     public GluuOrganization getOrg(@HeaderParam("Authorization") String authorization);
+    
+    @GET
+    @Path("{imageType}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public DownloadWrapper getImage(@HeaderParam("Authorization") String authorization, @PathParam("imageType") Image imageType);
 
     @PUT
     @Consumes({MediaType.APPLICATION_JSON})
