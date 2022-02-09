@@ -1,5 +1,5 @@
-# oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
-# Copyright (c) 2016, Janssen
+# Janssen Project software is available under the Apache 2.0 License (2004). See http://www.apache.org/licenses/ for full text.
+# Copyright (c) 2020, Janssen Project
 #
 # Author: Yuriy Movchan
 #
@@ -32,12 +32,12 @@ from javax.faces.application import FacesMessage
 from io.jans.jsf2.message import FacesMessages
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from io.jans.as.server.security import Identity
-from io.jans.as.server.service import AuthenticationService, SessionIdService
+from io.jans.as.server.service import AuthenticationService
+from io.jans.as.server.service import SessionIdService
 from io.jans.as.server.service import UserService
-from io.jans.as.util import ServerUtil
+from io.jans.as.server.util import ServerUtil
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.util import StringHelper
-
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -98,7 +98,7 @@ class PersonAuthentication(PersonAuthenticationType):
         if retry_current_step:
             print "OTP. Get next step. Retrying current step %s" % step
             # Remove old QR code
-            #identity.setWorkingParameter("super.jans.request", "timeout")
+            #identity.setWorkingParameter("super_gluu_request", "timeout")
             resultStep = step
             return resultStep
         return -1
@@ -371,12 +371,12 @@ class PersonAuthentication(PersonAuthenticationType):
         result = []
 
         userService = CdiUtil.bean(UserService)
-        user = userService.getUser(user_name, "oxExternalUid")
+        user = userService.getUser(user_name, "jansExtUid")
         if user == None:
             print "OTP. Find enrollments. Failed to find user"
             return result
         
-        user_custom_ext_attribute = userService.getCustomAttribute(user, "oxExternalUid")
+        user_custom_ext_attribute = userService.getCustomAttribute(user, "jansExtUid")
         if user_custom_ext_attribute == None:
             return result
 
@@ -439,7 +439,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     otp_user_external_uid = "hotp:%s;%s" % ( otp_secret_key_encoded, validation_result["movingFactor"] )
 
                     # Add otp_user_external_uid to user's external GUID list
-                    find_user_by_external_uid = userService.addUserAttribute(user_name, "oxExternalUid", otp_user_external_uid)
+                    find_user_by_external_uid = userService.addUserAttribute(user_name, "jansExtUid", otp_user_external_uid, True)
                     if find_user_by_external_uid != None:
                         return True
 
@@ -452,7 +452,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     otp_user_external_uid = "totp:%s" % otp_secret_key_encoded
 
                     # Add otp_user_external_uid to user's external GUID list
-                    find_user_by_external_uid = userService.addUserAttribute(user_name, "oxExternalUid", otp_user_external_uid)
+                    find_user_by_external_uid = userService.addUserAttribute(user_name, "jansExtUid", otp_user_external_uid, True)
                     if find_user_by_external_uid != None:
                         return True
 
@@ -482,7 +482,7 @@ class PersonAuthentication(PersonAuthenticationType):
                         new_otp_user_external_uid = "hotp:%s;%s" % ( otp_secret_key_encoded, validation_result["movingFactor"] )
     
                         # Update moving factor in user entry
-                        find_user_by_external_uid = userService.replaceUserAttribute(user_name, "oxExternalUid", otp_user_external_uid, new_otp_user_external_uid)
+                        find_user_by_external_uid = userService.replaceUserAttribute(user_name, "jansExtUid", otp_user_external_uid, new_otp_user_external_uid, True)
                         if find_user_by_external_uid != None:
                             return True
     
@@ -566,20 +566,20 @@ class PersonAuthentication(PersonAuthenticationType):
         if StringHelper.equals(localTotpKey, totpKey) and not StringHelper.equals(localTotpKey, cachedOTP):
             userService = CdiUtil.bean(UserService)
             if cachedOTP is None:
-                userService.addUserAttribute(user_name, "oxOTPCache",localTotpKey)
+                userService.addUserAttribute(user_name, "jansOTPCache",localTotpKey)
             else :
-                userService.replaceUserAttribute(user_name, "oxOTPCache", cachedOTP, localTotpKey)
+                userService.replaceUserAttribute(user_name, "jansOTPCache", cachedOTP, localTotpKey)
             print "OTP. Caching OTP: '%s'" % localTotpKey
             return { "result": True }
         return { "result": False }
 	
     def getCachedOTP(self, user_name):
         userService = CdiUtil.bean(UserService)
-        user = userService.getUser(user_name, "oxOTPCache")
+        user = userService.getUser(user_name, "jansOTPCache")
         if user is None:
             print "OTP. Get Cached OTP. Failed to find OTP"
             return None
-        customAttribute = userService.getCustomAttribute(user, "oxOTPCache")
+        customAttribute = userService.getCustomAttribute(user, "jansOTPCache")
         
         if customAttribute is None:
             print "OTP. Custom attribute is null"
@@ -613,5 +613,3 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def fromBase64Url(self, chars):
         return BaseEncoding.base64Url().decode(chars)
-
-

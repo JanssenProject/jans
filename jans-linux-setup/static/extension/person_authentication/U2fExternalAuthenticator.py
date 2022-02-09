@@ -1,5 +1,5 @@
-# oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
-# Copyright (c) 2016, Janssen
+# Janssen Project software is available under the Apache 2.0 License (2004). See http://www.apache.org/licenses/ for full text.
+# Copyright (c) 2020, Janssen Project
 #
 # Author: Yuriy Movchan
 #
@@ -7,16 +7,16 @@
 import java
 import sys
 from javax.ws.rs.core import Response
-from javax.ws.rs import WebApplicationException
-from org.jboss.resteasy.client.exception import ResteasyClientException
+from javax.ws.rs import ClientErrorException, WebApplicationException
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from io.jans.as.client.fido.u2f import FidoU2fClientFactory
 from io.jans.as.model.config import Constants
 from io.jans.as.server.security import Identity
-from io.jans.as.server.service import AuthenticationService, SessionIdService
+from io.jans.as.server.service import AuthenticationService
+from io.jans.as.server.service import SessionIdService
 from io.jans.as.server.service import UserService
-from io.jans.as.service.fido.u2f import DeviceRegistrationService
-from io.jans.as.util import ServerUtil
+from io.jans.as.server.service.fido.u2f import DeviceRegistrationService
+from io.jans.as.server.util import ServerUtil
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.util import StringHelper
 
@@ -171,7 +171,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 try:
                     authenticationRequestService = FidoU2fClientFactory.instance().createAuthenticationRequestService(self.metaDataConfiguration)
                     authenticationRequest = authenticationRequestService.startAuthentication(user.getUserId(), None, u2f_application_id, session.getId())
-                except ClientResponseFailure, ex:
+                except ClientErrorException, ex:
                     if (ex.getResponse().getResponseStatus() != Response.Status.NOT_FOUND):
                         print "U2F. Prepare for step 2. Failed to start authentication workflow. Exception:", sys.exc_info()[1]
                         return False

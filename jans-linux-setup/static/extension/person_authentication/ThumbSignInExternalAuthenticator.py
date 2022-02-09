@@ -5,7 +5,7 @@ from io.jans.as.server.security import Identity
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from io.jans.as.server.service import AuthenticationService
 from io.jans.util import StringHelper
-from io.jans.as.util import ServerUtil
+from io.jans.as.server.util import ServerUtil
 from com.pramati.ts.thumbsignin_java_sdk import ThumbsigninApiController
 from org.json import JSONObject
 from io.jans.as.model.util import Base64Util

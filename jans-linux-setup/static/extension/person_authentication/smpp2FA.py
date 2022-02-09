@@ -1,5 +1,5 @@
-# oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
-# Copyright (c) 2018, Janssen
+# Janssen Project software is available under the Apache 2.0 License (2004). See http://www.apache.org/licenses/ for full text.
+# Copyright (c) 2020, Janssen Project
 # Copyright (c) 2019, Tele2
 
 # Author: Jose Gonzalez
@@ -15,8 +15,9 @@ from io.jans.as.server.security import Identity
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from io.jans.as.server.service import AuthenticationService
 from io.jans.as.server.service import UserService
-from io.jans.as.util import ServerUtil
-from io.jans.util import StringHelper, ArrayHelper
+from io.jans.as.server.util import ServerUtil
+from io.jans.util import ArrayHelper
+from io.jans.util import StringHelper
 from javax.faces.application import FacesMessage
 from io.jans.jsf2.message import FacesMessages
 
