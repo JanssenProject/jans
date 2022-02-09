@@ -209,6 +209,7 @@
     "dcrSignatureValidationJwksUri": null,
     "dcrAuthorizationWithClientCredentials": false,
     "dcrSkipSignatureValidation": true,
+    "dcrAuthorizationWithMTLS": false,
     "softwareStatementValidationType": "script",
     "softwareStatementValidationClaimName": "jwks_uri",
     "dynamicRegistrationEnabled":true,
@@ -227,13 +228,13 @@
     "invalidateSessionCookiesAfterAuthorizationFlow":false,
     "clientAuthenticationFiltersEnabled":false,
     "clientRegDefaultToCodeFlowWithRefresh": true,
+    "grantTypesAndResponseTypesAutofixEnabled": false,
     "authenticationFilters":[
     ],
     "clientAuthenticationFilters":[
     ],
     "sessionIdUnusedLifetime":86400,
     "sessionIdUnauthenticatedUnusedLifetime":120,
-    "sessionIdEnabled":true,
     "changeSessionIdOnAuthentication":true,
     "returnClientSecretOnRead": true,
     "sessionIdPersistOnPromptNone":true,
@@ -282,9 +283,26 @@
     "httpLoggingExludePaths": [],
     "externalLoggerConfiguration": "",
     "authorizationRequestCustomAllowedParameters" : [
-        "customParam1",
-        "customParam2",
-        "customParam3"
+        {
+            "paramName": "customParam1",
+            "returnInResponse": false
+        },
+        {
+            "paramName": "customParam2",
+            "returnInResponse": false
+        },
+        {
+            "paramName": "customParam3",
+            "returnInResponse": false
+        },
+        {
+            "paramName": "customParam4",
+            "returnInResponse": true
+        },
+        {
+            "paramName": "customParam5",
+            "returnInResponse": true
+        }
     ],
     "legacyDynamicRegistrationScopeParam": false,
     "openidScopeBackwardCompatibility": false,
