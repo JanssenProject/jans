@@ -9,10 +9,8 @@ package io.jans.configapi.security.client;
 import static io.jans.as.model.util.Util.escapeLog;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 
 import io.jans.as.client.service.StatService;
-import io.jans.as.client.service.OrgConfigurationService;
 import io.jans.as.client.JwkResponse;
 import io.jans.as.client.TokenRequest;
 import io.jans.as.client.TokenResponse;
@@ -54,10 +52,6 @@ public class AuthClientFactory {
     @Inject
     @RestClient
     StatClient statClient;
-    
-    @Inject
-    @RestClient
-    OrgConfigurationClient orgConfigurationClient;
 
     private static Logger log = LoggerFactory.getLogger(AuthClientFactory.class);
 
@@ -86,18 +80,6 @@ public class AuthClientFactory {
                 .target(url);
         StatService statService = webTarget.proxy(StatService.class);
         return statService.stat(token, month, format);
-    }
-    
-    public static OrgConfigurationService getOrgConfigService(String url) {
-        if (log.isDebugEnabled()) {
-            log.debug("Organization Configuration - url:{} ", escapeLog(url));
-        }
-        log.error("\n\n Organization Configuration  - url:{} ", url);
-        RestClientBuilder restClientBuilder = getRestClientBuilder(url);
-        ResteasyWebTarget webTarget = (ResteasyWebTarget) ClientBuilder.newClient(restClientBuilder.getConfiguration())
-        .property(CONTENT_TYPE, MediaType.APPLICATION_JSON).target(url);
-        
-        return webTarget.proxy(OrgConfigurationService.class);   
     }
 
     public static JsonNode getHealthCheckResponse(String url) {

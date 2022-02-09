@@ -33,7 +33,6 @@ import io.jans.as.server.ws.rs.fido.u2f.U2fAuthenticationWS;
 import io.jans.as.server.ws.rs.fido.u2f.U2fConfigurationWS;
 import io.jans.as.server.ws.rs.fido.u2f.U2fRegistrationWS;
 import io.jans.as.server.ws.rs.stat.StatWS;
-import io.jans.as.server.ws.rs.org.OrganizationConfigWS;
 
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
@@ -86,8 +85,6 @@ public class ResteasyInitializer extends Application {
         classes.add(BackchannelDeviceRegistrationRestWebServiceImpl.class);
 
         classes.add(StatWS.class);
-        
-        classes.add(OrganizationConfigWS.class);
 
         return classes;
     }

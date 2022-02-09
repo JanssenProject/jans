@@ -110,14 +110,6 @@
 			<groupId>io.jans</groupId>
 			<artifactId>jans-auth-model</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>io.jans</groupId>
-			<artifactId>jans-auth-persistence-model</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>io.jans</groupId>
-			<artifactId>jans-core-util</artifactId>
-		</dependency>
 		<!-- RestEasy -->
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>

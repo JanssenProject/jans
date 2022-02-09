@@ -9,7 +9,6 @@ package io.jans.configapi.rest.resource.auth;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.fge.jsonpatch.JsonPatchException;
 
-import io.jans.as.model.common.Image;
 import io.jans.as.persistence.model.GluuOrganization;
 import io.jans.configapi.service.auth.OrganizationService;
 import io.jans.configapi.core.rest.ProtectedApi;
