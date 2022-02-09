@@ -406,6 +406,14 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 } catch (WebApplicationException e) {
                     JsonWebResponse jwr = parseRequestToJwr(request);
                     if (jwr != null) {
+                        String checkForAlg = jwr.getClaims().getClaimAsString("alg"); // to handle Jans Issue#310
+                        if ("none".equals(checkForAlg)) {
+                            throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST)
+                                    .entity(errorResponseFactory.getErrorAsJson(
+                                            AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT, "",
+                                            "The None algorithm in nested JWT is not allowed for FAPI"))
+                                    .type(MediaType.APPLICATION_JSON_TYPE).build());
+                        }                        
                         responseMode = ResponseMode.getByValue(jwr.getClaims().getClaimAsString("response_mode"));
                         if (responseMode == ResponseMode.JWT) {
                             redirectUriResponse.getRedirectUri().setResponseMode(ResponseMode.JWT);
