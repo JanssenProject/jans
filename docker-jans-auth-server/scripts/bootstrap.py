@@ -18,7 +18,6 @@ from jans.pycloudlib.persistence import render_sql_properties
 from jans.pycloudlib.persistence import render_spanner_properties
 from jans.pycloudlib.utils import cert_to_truststore
 from jans.pycloudlib.utils import get_server_certificate
-# from jans.pycloudlib.utils import as_boolean
 from jans.pycloudlib.utils import generate_keystore
 
 from keystore_mod import modify_keystore_path
@@ -214,8 +213,6 @@ def main():
         keystore_path = "/etc/certs/ob-ext-signing.jks"
         jwks_uri = ext_jwks_uri
     else:
-        # sync_enabled = as_boolean(os.environ.get("CN_SYNC_JKS_ENABLED", False))
-        # if not sync_enabled:
         manager.secret.to_file(
             "auth_jks_base64",
             "/etc/certs/auth-keys.jks",
