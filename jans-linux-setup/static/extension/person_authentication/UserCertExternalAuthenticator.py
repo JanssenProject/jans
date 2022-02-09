@@ -1,6 +1,6 @@
 #
-# oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
-# Copyright (c) 2016, Janssen
+# Janssen Project software is available under the Apache 2.0 License (2004). See http://www.apache.org/licenses/ for full text.
+# Copyright (c) 2020, Janssen Project
 #
 # Author: Yuriy Movchan
 #
@@ -12,15 +12,18 @@ from io.jans.as.server.security import Identity
 from io.jans.as.server.service import AuthenticationService
 from io.jans.as.server.service import UserService
 from io.jans.util import StringHelper
-from io.jans.as.util import ServerUtil
-from io.jans.as.service.common import EncryptionService
+from io.jans.as.server.util import ServerUtil
+from io.jans.as.common.service.common import EncryptionService
 from java.util import Arrays
-from io.jans.as.cert.fingerprint import FingerprintHelper
-from io.jans.as.cert.validation import GenericCertificateVerifier, PathCertificateVerifier, OCSPCertificateVerifier, CRLCertificateVerifier
-from io.jans.as.cert.validation.model import ValidationStatus
-from io.jans.as.util import CertUtil
+from io.jans.as.common.cert.fingerprint import FingerprintHelper
+from io.jans.as.common.cert.validation import GenericCertificateVerifier
+from io.jans.as.common.cert.validation import PathCertificateVerifier
+from io.jans.as.common.cert.validation import OCSPCertificateVerifier
+from io.jans.as.common.cert.validation import CRLCertificateVerifier
+from io.jans.as.common.cert.validation.model import ValidationStatus
+from io.jans.as.server.util import CertUtil
 from io.jans.as.model.util import CertUtils
-from io.jans.as.service.net import HttpService
+from io.jans.as.server.service.net import HttpService
 from org.apache.http.params import CoreConnectionPNames
 
 import sys
@@ -167,9 +170,9 @@ class PersonAuthentication(PersonAuthenticationType):
             
             # Attempt to find user by certificate fingerprint
             cert_user_external_uid = "cert:%s" % x509CertificateFingerprint
-            print "Cert. Authenticate for step 2. Attempting to find user by oxExternalUid attribute value %s" % cert_user_external_uid
+            print "Cert. Authenticate for step 2. Attempting to find user by jansExtUid attribute value %s" % cert_user_external_uid
 
-            find_user_by_external_uid = userService.getUserByAttribute("oxExternalUid", cert_user_external_uid)
+            find_user_by_external_uid = userService.getUserByAttribute("jansExtUid", cert_user_external_uid)
             if find_user_by_external_uid == None:
                 print "Cert. Authenticate for step 2. Failed to find user"
                 
@@ -213,10 +216,10 @@ class PersonAuthentication(PersonAuthenticationType):
             # Double check just to make sure. We did checking in previous step
             # Check if there is user which has cert_user_external_uid
             # Avoid mapping user cert to more than one IDP account
-            find_user_by_external_uid = userService.getUserByAttribute("oxExternalUid", cert_user_external_uid)
+            find_user_by_external_uid = userService.getUserByAttribute("jansExtUid", cert_user_external_uid)
             if find_user_by_external_uid == None:
                 # Add cert_user_external_uid to user's external GUID list
-                find_user_by_external_uid = userService.addUserAttribute(user_name, "oxExternalUid", cert_user_external_uid)
+                find_user_by_external_uid = userService.addUserAttribute(user_name, "jansExtUid", cert_user_external_uid)
                 if find_user_by_external_uid == None:
                     print "Cert. Authenticate for step 3. Failed to update current user"
                     return False

@@ -1,5 +1,5 @@
-# oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
-# Copyright (c) 2016, Janssen
+# Janssen Project software is available under the Apache 2.0 License (2004). See http://www.apache.org/licenses/ for full text.
+# Copyright (c) 2020, Janssen Project
 #
 # Author: Yuriy Movchan
 #
@@ -16,14 +16,16 @@
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.as.server.security import Identity
-from io.jans.as.server.service import AuthenticationService, SessionIdService
+from io.jans.as.server.service import AuthenticationService
+from io.jans.as.server.service import SessionIdService
 from io.jans.as.server.service import UserService
-from io.jans.util import StringHelper, ArrayHelper
-from io.jans.as.util import ServerUtil
+from io.jans.util import StringHelper
+from io.jans.util import ArrayHelper
+from io.jans.as.server.util import ServerUtil
 from io.jans.as.model.config import Constants
 from javax.ws.rs.core import Response
 from java.util import Arrays
-from io.jans.as.service.net import HttpService
+from io.jans.as.server.service.net import HttpService
 from org.apache.http.params import CoreConnectionPNames
 
 import sys
@@ -206,10 +208,10 @@ class PersonAuthentication(PersonAuthenticationType):
                 # Double check just to make sure. We did checking in previous step
                 # Check if there is user which has uaf_user_external_uid
                 # Avoid mapping user cert to more than one IDP account
-                find_user_by_external_uid = userService.getUserByAttribute("oxExternalUid", uaf_user_external_uid)
+                find_user_by_external_uid = userService.getUserByAttribute("jansExtUid", uaf_user_external_uid)
                 if find_user_by_external_uid == None:
                     # Add uaf_user_external_uid to user's external GUID list
-                    find_user_by_external_uid = userService.addUserAttribute(user_name, "oxExternalUid", uaf_user_external_uid)
+                    find_user_by_external_uid = userService.addUserAttribute(user_name, "jansExtUid", uaf_user_external_uid)
                     if find_user_by_external_uid == None:
                         print "UAF. Authenticate for step 2. Failed to update current user"
                         return False
@@ -351,12 +353,12 @@ class PersonAuthentication(PersonAuthenticationType):
 
         userService = CdiUtil.bean(UserService)
         user_name = credentials.getUsername()
-        user = userService.getUser(user_name, "oxExternalUid")
+        user = userService.getUser(user_name, "jansExtUid")
         if user == None:
             print "UAF. Find enrollments. Failed to find user"
             return result
         
-        user_custom_ext_attribute = userService.getCustomAttribute(user, "oxExternalUid")
+        user_custom_ext_attribute = userService.getCustomAttribute(user, "jansExtUid")
         if user_custom_ext_attribute == None:
             return result
         

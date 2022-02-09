@@ -1,30 +1,26 @@
-# oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
-# Copyright (c) 2018, Janssen
+# Janssen Project software is available under the Apache 2.0 License (2004). See http://www.apache.org/licenses/ for full text.
+# Copyright (c) 2020, Janssen Project
 #
 # Author: Yuriy Movchan
 #
 
-from javax.ws.rs.core import Response
-from org.jboss.resteasy.client import ClientResponseFailure
-from org.jboss.resteasy.client.exception import ResteasyClientException
-from javax.ws.rs.core import Response
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from io.jans.fido2.client import Fido2ClientFactory
 from io.jans.as.server.security import Identity
-from io.jans.as.server.service import AuthenticationService, SessionIdService
+from io.jans.as.server.service import AuthenticationService
 from io.jans.as.server.service import UserService
-from io.jans.as.util import ServerUtil
+from io.jans.as.server.service import SessionIdService
+from io.jans.as.server.util import ServerUtil
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.util import StringHelper
 
 from java.util.concurrent.locks import ReentrantLock
+from javax.ws.rs import ClientErrorException
+from javax.ws.rs.core import Response
 
 import java
 import sys
-try:
-    import json
-except ImportError:
-    import simplejson as json
+import json
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -42,7 +38,7 @@ class PersonAuthentication(PersonAuthenticationType):
         self.fido2_domain = None
         if configurationAttributes.containsKey("fido2_domain"):
             self.fido2_domain = configurationAttributes.get("fido2_domain").getValue2()
-
+            
         self.metaDataLoaderLock = ReentrantLock()
         self.metaDataConfiguration = None
         
@@ -56,10 +52,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def getApiVersion(self):
         return 11
-        
-    def getAuthenticationMethodClaims(self, requestParameters):
-        return None
-        
+
     def isValidAuthenticationMethod(self, usageType, configurationAttributes):
         return True
 
@@ -157,21 +150,20 @@ class PersonAuthentication(PersonAuthenticationType):
             userName = user.getUserId()
 
             metaDataConfiguration = self.getMetaDataConfiguration()
-            
+
             assertionResponse = None
             attestationResponse = None
 
             # Check if user have registered devices
-            userService = CdiUtil.bean(UserService)
-            countFido2Devices = userService.countFidoAndFido2Devices(userName, self.fido2_domain)
-            if countFido2Devices > 0:
+            count = CdiUtil.bean(UserService).countFido2RegisteredDevices(userName, self.fido2_domain)
+            if count > 0:
                 print "Fido2. Prepare for step 2. Call Fido2 endpoint in order to start assertion flow"
 
                 try:
                     assertionService = Fido2ClientFactory.instance().createAssertionService(metaDataConfiguration)
                     assertionRequest = json.dumps({'username': userName}, separators=(',', ':'))
                     assertionResponse = assertionService.authenticate(assertionRequest).readEntity(java.lang.String)
-                except ClientResponseFailure, ex:
+                except ClientErrorException, ex:
                     print "Fido2. Prepare for step 2. Failed to start assertion flow. Exception:", sys.exc_info()[1]
                     return False
             else:
@@ -179,9 +171,9 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 try:
                     attestationService = Fido2ClientFactory.instance().createAttestationService(metaDataConfiguration)
-                    attestationRequest = json.dumps({'username': userName, 'displayName': userName, 'attestation' : 'direct'}, separators=(',', ':'))
+                    attestationRequest = json.dumps({'username': userName, 'displayName': userName, 'attestation': 'direct'}, separators=(',', ':'))
                     attestationResponse = attestationService.register(attestationRequest).readEntity(java.lang.String)
-                except ClientResponseFailure, ex:
+                except ClientErrorException, ex:
                     print "Fido2. Prepare for step 2. Failed to start attestation flow. Exception:", sys.exc_info()[1]
                     return False
 
@@ -221,8 +213,7 @@ class PersonAuthentication(PersonAuthenticationType):
     def getLogoutExternalUrl(self, configurationAttributes, requestParameters):
         print "Get external logout URL call"
         return None    
-        
-        
+    
     def getMetaDataConfiguration(self):
         if self.metaDataConfiguration != None:
             return self.metaDataConfiguration
@@ -235,7 +226,6 @@ class PersonAuthentication(PersonAuthenticationType):
         try:
             print "Fido2. Initialization. Downloading Fido2 metadata"
             self.fido2_server_metadata_uri = self.fido2_server_uri + "/.well-known/fido2-configuration"
-            #self.fido2_server_metadata_uri = self.fido2_server_uri + "/fido2/restv1/fido2/configuration"
 
             metaDataConfigurationService = Fido2ClientFactory.instance().createMetaDataConfigurationService(self.fido2_server_metadata_uri)
     
@@ -244,20 +234,12 @@ class PersonAuthentication(PersonAuthenticationType):
                 try:
                     self.metaDataConfiguration = metaDataConfigurationService.getMetadataConfiguration().readEntity(java.lang.String)
                     return self.metaDataConfiguration
-                except ClientResponseFailure, ex:
+                except ClientErrorException, ex:
                     # Detect if last try or we still get Service Unavailable HTTP error
                     if (attempt == max_attempts) or (ex.getResponse().getResponseStatus() != Response.Status.SERVICE_UNAVAILABLE):
                         raise ex
     
                     java.lang.Thread.sleep(3000)
                     print "Attempting to load metadata: %d" % attempt
-                except ResteasyClientException, ex:
-                    # Detect if last try or we still get Service Unavailable HTTP error
-                    if attempt == max_attempts:
-                        raise ex
-    
-                    java.lang.Thread.sleep(3000)
-                    print "Attempting to load metadata: %d" % attempt
         finally:
             self.metaDataLoaderLock.unlock()
-            
