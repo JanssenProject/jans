@@ -1,5 +1,5 @@
-# oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
-# Copyright (c) 2016, Janssen
+# Janssen Project software is available under the Apache 2.0 License (2004). See http://www.apache.org/licenses/ for full text.
+# Copyright (c) 2020, Janssen Project
 #
 # Author: Yuriy Movchan
 # Author: Gasmyr Mougang
@@ -29,7 +29,7 @@ class PersonAuthentication(PersonAuthenticationType):
     def init(self, customScript,  configurationAttributes):
         print "Basic (lock account). Initialization"
 
-        self.invalidLoginCountAttribute = "oxCountInvalidLogin"
+        self.invalidLoginCountAttribute = "jansCountInvalidLogin"
         if configurationAttributes.containsKey("invalid_login_count_attribute"):
             self.invalidLoginCountAttribute = configurationAttributes.get("invalid_login_count_attribute").getValue2()
         else:
@@ -232,15 +232,14 @@ class PersonAuthentication(PersonAuthenticationType):
         if (find_user_by_uid == None):
             return None
 
-        status_attribute_value = userService.getCustomAttribute(find_user_by_uid, "jansStatus")
+        status_attribute_value = userService.getCustomAttribute(find_user_by_uid, "gluuStatus")
         if status_attribute_value != None:
             user_status = status_attribute_value.getValue()
             if StringHelper.equals(user_status, "inactive"):
                 print "Basic (lock account). Lock user. User '%s' locked already" % user_name
                 return
         
-        userService.setCustomAttribute(find_user_by_uid, "jansStatus", "inactive")
-        userService.setCustomAttribute(find_user_by_uid, "oxTrustActive", "false")
+        userService.setCustomAttribute(find_user_by_uid, "gluuStatus", "inactive")
         updated_user = userService.updateUser(find_user_by_uid)
 
         object_to_store = json.dumps({'locked': True, 'created': LocalDateTime.now().toString()}, separators=(',',':'))
@@ -265,7 +264,6 @@ class PersonAuthentication(PersonAuthenticationType):
         cacheService.put(StringHelper.toString(self.lockExpirationTime), "lock_user_"+user_name, object_to_store);
 
         userService.setCustomAttribute(find_user_by_uid, "jansStatus", "active")
-        userService.setCustomAttribute(find_user_by_uid, "oxTrustActive", "true")
         userService.setCustomAttribute(find_user_by_uid, self.invalidLoginCountAttribute, None)
         updated_user = userService.updateUser(find_user_by_uid)
 
