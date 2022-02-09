@@ -302,12 +302,6 @@
 				<artifactId>resteasy-json-p-provider</artifactId>
 				<version>${resteasy.version}</version>
 			</dependency>
-			<dependency>
-				<groupId>org.jboss.resteasy</groupId>
-				<artifactId>resteasy-multipart-provider</artifactId>
-				<version>6.0.0.Final</version>
-			</dependency>
-
 
 			<!-- jetty -->
 			<dependency>

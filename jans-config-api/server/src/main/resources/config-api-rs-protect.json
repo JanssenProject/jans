@@ -673,6 +673,23 @@
                 ]
             }
         ]
+    },
+    {
+        "path":"/jans-config-api/api/v1/org",
+        "conditions":[
+            {
+                "httpMethods":["GET"],
+                "scopes":[
+                    "https://jans.io/oauth/config/organization.readonly"
+                ]
+            },
+            {
+                "httpMethods":["PATCH"],
+                "scopes":[
+                    "https://jans.io/oauth/config/organization.write"
+                ]
+            }
+        ]
     }
 ]
 }

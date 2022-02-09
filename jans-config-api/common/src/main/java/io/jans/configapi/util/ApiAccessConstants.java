@@ -2,6 +2,9 @@ package io.jans.configapi.util;
 
 public class ApiAccessConstants {
 
+    private ApiAccessConstants() {
+    }
+
     public static final String JANS_AUTH_CONFIG_READ_ACCESS = "https://jans.io/oauth/jans-auth-server/config/properties.readonly";
     public static final String JANS_AUTH_CONFIG_WRITE_ACCESS = "https://jans.io/oauth/jans-auth-server/config/properties.write";
 
@@ -58,5 +61,8 @@ public class ApiAccessConstants {
 
     public static final String STATS_USER_READ_ACCESS = "https://jans.io/oauth/config/stats.readonly";
     public static final String JANS_STAT = "jans_stat";
+
+    public static final String ORG_CONFIG_READ_ACCESS = "https://jans.io/oauth/config/organization.readonly";
+    public static final String ORG_CONFIG_WRITE_ACCESS = "https://jans.io/oauth/config/organization.write";
 
 }

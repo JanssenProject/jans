@@ -2867,7 +2867,7 @@ paths:
       description: Retrieves organization configuration.
       operationId: get-organization-config
       security:
-        - oauth2: [ https://jans.io/oauth/config/organization.readonly]
+        - oauth2: [https://jans.io/oauth/config/organization.readonly]
       tags:
         - Organization Configuration
       responses:
@@ -3392,8 +3392,6 @@ components:
             https://jans.io/scim/config.write: Manage SCIM App configuration
             https://jans.io/oauth/config/organization.readonly: View organization configuration information
             https://jans.io/oauth/config/organization.write: Manage organization configuration information
-            https://jans.io/oauth/config/organization.delete: Delete organization configuration information
-			
 
   responses:
     Found:

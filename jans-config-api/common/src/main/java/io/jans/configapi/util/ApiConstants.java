@@ -7,6 +7,8 @@
 package io.jans.configapi.util;
 
 public class ApiConstants {
+    
+    private ApiConstants() {}
 
     public static final String BASE_API_URL = "/";
     public static final String CONFIG = "/config";
