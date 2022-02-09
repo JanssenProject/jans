@@ -193,13 +193,12 @@ LABEL name="Janssen Authorization Server" \
     maintainer="Janssen Project <support@jans.io>" \
     vendor="Janssen Project" \
     version="1.0.0" \
-    release="b12" \
+    release="beta.15" \
     summary="Janssen Authorization Server" \
     description="OAuth 2.0 server and client; OpenID Connect Provider (OP) & UMA Authorization Server (AS)"
 
-RUN mkdir -p /etc/certs /deploy \
-    /opt/jans/python/libs \
-    ${JETTY_BASE}/jans-auth/custom/pages ${JETTY_BASE}/jans-auth/custom/static \
+RUN mkdir -p ${JETTY_BASE}/jans-auth/custom/pages \
+    ${JETTY_BASE}/jans-auth/custom/static \
     ${JETTY_BASE}/jans-auth/custom/libs \
     ${JETTY_BASE}/jans-auth/custom/i18n \
     /etc/jans/conf \
@@ -221,12 +220,10 @@ RUN adduser -s /bin/sh -D -G root -u 1000 jetty
  # adjust ownership
 RUN chown -R 1000:1000 /opt/jans/jetty \
     && chown -R 1000:1000 /opt/jetty \
-    && chown -R 1000:1000 /deploy \
     && chown -R 1000:1000 /tmp \
     && chgrp -R 0 /opt/jans/jetty && chmod -R g=u /opt/jans/jetty \
     && chgrp -R 0 /opt/jetty && chmod -R g=u /opt/jetty \
     && chgrp -R 0 /tmp && chmod -R g=u /tmp \
-    && chgrp -R 0 /deploy && chmod -R g=u /deploy \
     && chgrp -R 0 /etc/certs && chmod -R g=u /etc/certs \
     && chgrp -R 0 /etc/jans && chmod -R g=u /etc/jans \
     && chmod -R +w /usr/java/latest/jre/lib/security/cacerts && chgrp -R 0 /usr/java/latest/jre/lib/security/cacerts && chmod -R g=u /usr/java/latest/jre/lib/security/cacerts \
