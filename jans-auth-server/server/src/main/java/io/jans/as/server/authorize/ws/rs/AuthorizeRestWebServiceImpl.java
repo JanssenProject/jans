@@ -407,7 +407,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     JsonWebResponse jwr = parseRequestToJwr(request);
                     if (jwr != null) {
                         String checkForAlg = jwr.getClaims().getClaimAsString("alg"); // to handle Jans Issue#310
-                        if (checkForAlg.equals("none")) {
+                        if ("none".equals(checkForAlg)) {
                             throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST)
                                     .entity(errorResponseFactory.getErrorAsJson(
                                             AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT, "",
