@@ -117,12 +117,14 @@ public class OrganizationConfigWS {
 
         GluuOrganization gluuOrganization = organizationService.getOrganization();
         log.error("\n\n OrganizationConfigWS::getImage() - gluuOrganization:{}", gluuOrganization);
+        
+        boolean success = readDefaultFavicon(response);
+        log.error("\n\n OrganizationConfigWS::getImage() - success:{}", success);
 
         DownloadWrapper downloadWrapper = readImage(imageType, gluuOrganization);
         log.error("\n\n OrganizationConfigWS::getImage() - downloadWrapper:{}", downloadWrapper);
 
-        boolean success = readDefaultFavicon(response);
-        log.error("\n\n OrganizationConfigWS::getImage() - success:{}", success);
+        
 
         return Response.ok(downloadWrapper).build();
     }
@@ -314,14 +316,14 @@ public class OrganizationConfigWS {
     }
 
     private DownloadWrapper readDefaultImage(Image imageType) {
-        log.error("\n\n OrganizationConfigWS::readDefaultImage() - new - imageType:{}", imageType);
+        log.error("\n\n OrganizationConfigWS::readDefaultImage() - 1 - imageType:{}", imageType);
         String fileName = getDefaultFileName(imageType);
 
         File file = new File(fileName);
-        log.error("\n\n OrganizationConfigWS::readDefaultImage() - file.exists(1):{}", file.exists());
+        log.error("\n\n OrganizationConfigWS::readDefaultImage() - 2 - file.exists(1):{}", file.exists());
 
         log.error(
-                "\n\n OrganizationConfigWS::readDefaultImage() - context.getContextPath():{} , context.getContextPath()+fileName:{} ",
+                "\n\n OrganizationConfigWS::readDefaultImage() - 3 - context.getContextPath():{} , context.getContextPath()+fileName:{} ",
                 context.getContextPath(), context.getContextPath() + fileName);
         file = new File(context.getContextPath() + fileName);
         log.error("\n\n OrganizationConfigWS::readDefaultImage() - file.exists(2):{}", file.exists());
@@ -329,7 +331,7 @@ public class OrganizationConfigWS {
         if (file.exists()) {
             try {
                 log.error(
-                        "\n\n OrganizationConfigWS::readDefaultImage() - 0 - File exists - file.getPath():{}, file.canRead():{}, file.getCanonicalPath(),  file.toURI():{}",
+                        "\n\n OrganizationConfigWS::readDefaultImage() - 4 -  File exists - file.getPath():{}, file.canRead():{}, file.getCanonicalPath(),  file.toURI():{}",
                         file.getPath(), file.canRead(), file.getCanonicalPath(), file.toURI());
             } catch (IOException e) {
                 log.error(
@@ -340,32 +342,38 @@ public class OrganizationConfigWS {
         }
 
         log.error(
-                "\n\n OrganizationConfigWS::readDefaultImage() - 1 -  file.getAbsolutePath():{}, file.getAbsoluteFile():{}",
+                "\n\n OrganizationConfigWS::readDefaultImage() - 5 - file.getAbsolutePath():{}, file.getAbsoluteFile():{}",
                 file.getAbsolutePath(), file.getAbsoluteFile());
 
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream(fileName);
-        log.error("\n\n OrganizationConfigWS::readDefaultImage() - 2 -  getClass().getClassLoader() - inputStream:{}",
+        log.error("\n\n OrganizationConfigWS::readDefaultImage() - 6 - getClass().getClassLoader() - inputStream:{}",
                 inputStream);
 
         inputStream = getClass().getClassLoader().getResourceAsStream(file.getAbsolutePath());
-        log.error("\n\n OrganizationConfigWS::readDefaultImage() - 2 -  file.getAbsolutePath():{}, inputStream:{}",
+        log.error("\n\n OrganizationConfigWS::readDefaultImage() - 7 - file.getAbsolutePath():{}, inputStream:{}",
                 file.getAbsolutePath(), inputStream);
 
         inputStream = context.getResourceAsStream("/WEB-INF/test/foo.txt");
-        log.error("\n\n OrganizationConfigWS::readDefaultImage() - 4 -  context.getResourceAsStream  inputStream:{}",
+        log.error("\n\n OrganizationConfigWS::readDefaultImage() - 8 -  context.getResourceAsStream  inputStream:{}",
                 inputStream);
 
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         inputStream = classLoader.getResourceAsStream(fileName);
-        log.error("\n\n OrganizationConfigWS::readDefaultImage() - 5 -  context.getResourceAsStream  inputStream:{}",
+        log.error("\n\n OrganizationConfigWS::readDefaultImage() - 9 - context.getResourceAsStream  inputStream:{}",
                 inputStream);
 
         InputStreamReader isr = new InputStreamReader(
                 OrganizationConfigWS.class.getClassLoader().getResourceAsStream(fileName));
-        log.error("\n\n OrganizationConfigWS::readDefaultImage() - 6 -  InputStreamReader  isr:{}", isr);
+        log.error("\n\n OrganizationConfigWS::readDefaultImage() - 10 - InputStreamReader  isr:{}", isr);
+        
+        
+        String path = Thread.currentThread().getContextClassLoader().getResource(fileName).getPath();
+        File f = new File(path);
+        log.error("\n\n OrganizationConfigWS::readDefaultImage() - 11 -  fileName:{}, path:{}, f.getAbsolutePath():{}", fileName, path, f.getAbsolutePath());
+        
 
         try (InputStream in = new FileInputStream(fileName)) {
-            log.error("\n\n OrganizationConfigWS::readDefaultImage() - 7 - InputStream:{}", in);
+            log.error("\n\n OrganizationConfigWS::readDefaultImage() - 12 - InputStream:{}", in);
             return (new DownloadWrapper(in, fileName, null, new Date(file.lastModified())));
         } catch (IOException e) {
             log.error("Error loading default image - imageType:{}, fileName:{}, exception:{} ", imageType, fileName,

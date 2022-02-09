@@ -9,10 +9,8 @@ package io.jans.configapi.rest.resource.auth;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.fge.jsonpatch.JsonPatchException;
 
-import io.jans.as.client.service.OrgConfigurationService;
 import io.jans.as.model.common.Image;
 import io.jans.as.persistence.model.GluuOrganization;
-import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.service.auth.OrganizationService;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.rest.model.AuthenticationMethod;
@@ -80,76 +78,16 @@ public class OrganizationResource extends BaseResource {
 
     @GET
     // @ProtectedApi(scopes = { ApiAccessConstants.ORG_READ_ACCESS })
-    public Response getGluuOrganization(@HeaderParam("Authorization") String authorization) {
-        log.error("\n\n OrganizationResource::getGluuOrganization() - authorization:{} ", authorization);
-
-        return Response.ok(getGluuOrganizationData(authorization)).build();
-    }
-
-    @GET
-    @Path("{imageType}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public Response getImage(@HeaderParam("Authorization") String authorization,
-            @PathParam("imageType") Image imageType) {
-        log.error("\n\n OrganizationResource::getImage() - authorization:{}, imageType:{} ", authorization, imageType);
-
-        GluuOrganization gluuOrganization = getGluuOrganizationData(authorization);
-        log.error("\n\n OrganizationResource::getImage() - gluuOrganization:{} ", gluuOrganization);
-
-        final OrgConfigurationService orgConfigurationService = organizationService
-                .getOrgConfigurationService(getOrganizationServiceUrl());
-
-        DownloadWrapper downloadWrapper = orgConfigurationService.getImage(authorization, imageType);
-
-        log.error("\n\n OrganizationResource::getImage() - downloadWrapper:{} ", downloadWrapper);
-
-        return Response.ok(downloadWrapper).build();
+    public Response getGluuOrganization() {
+        return Response.ok(organizationService.getOrganization()).build();
     }
 
     @PUT
     // @ProtectedApi(scopes = { ApiAccessConstants.ORG_WRITE_ACCESS })
-    public Response updateOrg(@HeaderParam("Authorization") String authorization, GluuOrganization gluuOrganization) {
-        log.error("\n\n OrganizationResource::updateOrg() - authorization:{}, gluuOrganization:{} ", authorization,
-                gluuOrganization);
-
-        final OrgConfigurationService orgConfigurationService = organizationService
-                .getOrgConfigurationService(getOrganizationServiceUrl());
-        log.error("\n\n OrganizationResource::updateOrg() - orgConfigurationService:{}, request:{}, response:{} ",
-                orgConfigurationService, request, response);
-
-        gluuOrganization = orgConfigurationService.updateOrg(authorization, gluuOrganization);
-
-        log.error("\n\n OrganizationResource::updateOrg() - gluuOrganization:{} ", gluuOrganization);
-
-        return Response.ok(gluuOrganization).build();
-    }
-
-    @PUT
-    // @ProtectedApi(scopes = { ApiAccessConstants.ORG_WRITE_ACCESS })
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
-    @Path("{imageType}")
-    public Response updateImageResource(@HeaderParam("Authorization") String authorization,
-            @PathParam("imageType") Image image, FileUploadWrapper fileUploadWrapper) {
-        log.error("\n\n OrganizationResource::updateImageResource() - authorization:{}, image:{}, fileUploadWrapper:{}",
-                authorization, image, fileUploadWrapper);
-
-        final OrgConfigurationService orgConfigurationService = organizationService
-                .getOrgConfigurationService(getOrganizationServiceUrl());
-        log.error(
-                "\n\n OrganizationResource::updateImageResource() - orgConfigurationService:{}, request:{}, response:{} ",
-                orgConfigurationService, request, response);
-
-        // to test - start
-        // fileUploadWrapper =
-        // to test - start
-
-        GluuOrganization gluuOrganization = orgConfigurationService.updateImageResource(authorization, image,
-                fileUploadWrapper);
-
-        log.error("\n\n OrganizationResource::updateImageResource() - gluuOrganization:{} ", gluuOrganization);
-
-        return Response.ok(gluuOrganization).build();
+    public Response updateOrg(GluuOrganization organization) {
+        log.error("\n\n OrganizationResource::updateOrg() -  organization:{} ", organization);
+        organizationService.updateOrganization(organization);
+        return Response.ok(organizationService.getOrganization()).build();
     }
 
     @PATCH
@@ -161,46 +99,6 @@ public class OrganizationResource extends BaseResource {
         organizationService.updateOrganization(gluuOrganization);
         return Response.ok(gluuOrganization).build();
     }
-
-    private String getOrganizationServiceUrl() {
-        return this.authUtil.getServiceUrl(ORG_URL);
-    }
-
-    private GluuOrganization getGluuOrganizationData(String authorization) {
-        final OrgConfigurationService orgConfigurationService = organizationService
-                .getOrgConfigurationService(getOrganizationServiceUrl());
-        return orgConfigurationService.getOrg(authorization);
-    }
-
-    /*
-     * private void saveLogo(FileUploadWrapper uploadedFile) { // Update LogoFile //
-     * Save file on server // Update GluuOrganization // Return GluuOrganization
-     * 
-     * String fileName = saveFile(uploadedFile, BASE_AUTH_LOGO_PATH); final
-     * GluuOrganization gluuOrganization = organizationService.getOrganization();
-     * log.error("\n\n OrganizationResource::saveLogo() - gluuOrganization:{} ",
-     * gluuOrganization);
-     * 
-     * if (StringUtils.isEmpty(fileName)) { throw new
-     * InternalServerErrorException(getInternalServerException("Error loading logo")
-     * ); } gluuOrganization.setJsLogoPath(BASE_AUTH_LOGO_PATH + fileName);
-     * organizationService.updateOrganization(gluuOrganization);
-     * 
-     * }
-     * 
-     * private void saveFavIcon(FileUploadWrapper uploadedFile) { String fileName =
-     * saveFile(uploadedFile, BASE_AUTH_FAVICON_PATH); final GluuOrganization
-     * gluuOrganization = organizationService.getOrganization();
-     * log.error("\n\n OrganizationResource::saveFavIcon() - gluuOrganization:{} ",
-     * gluuOrganization);
-     * 
-     * if (StringUtils.isEmpty(fileName)) { throw new InternalServerErrorException(
-     * getInternalServerException("Error loading favicon")); }
-     * gluuOrganization.setJsFaviconPath(BASE_AUTH_LOGO_PATH + fileName);
-     * organizationService.updateOrganization(gluuOrganization);
-     * 
-     * }
-     */
 
     private String saveFile(FileUploadWrapper fileUploadWrapper, String basePath) {
         log.error("\n\n OrganizationResource::saveFile() - fileUploadWrapper:{} , basePath:{} ", fileUploadWrapper,
@@ -226,52 +124,6 @@ public class OrganizationResource extends BaseResource {
         return fileName;
     }
 
-    public FileUploadWrapper getFileUploadWrapper() {
-        String file = "";
-        FileUploadWrapper FileUploadWrapper = new FileUploadWrapper();
-        try {
-            InputStream is = new FileInputStream(file);
-        } catch (Exception ex) {
-            log.error("Error while uploading file");
-        }
-
-        return null;
-    }
-
-    /*
-     * 
-     * 
-     * public void load() throws IOException, NoSuchAlgorithmException,
-     * CertificateException { try (InputStream is = new
-     * FileInputStream(keyStoreFile)) { keyStore.load(is,
-     * keyStoreSecret.toCharArray()); LOG.debug("Loaded keys from JKS.");
-     * LOG.trace("Loaded keys:" + getKeys()); } }
-     * 
-     * 
-     * private boolean readCustomFavicon(HttpServletResponse response,
-     * GluuOrganization organization) { if (organization.getJsFaviconPath() == null
-     * || StringUtils.isEmpty(organization.getJsFaviconPath())) { return false; }
-     * 
-     * File directory = new File(BASE_OXAUTH_FAVICON_PATH); if (!directory.exists())
-     * { directory.mkdir(); } File faviconPath = new
-     * File(organization.getJsFaviconPath()); if (!faviconPath.exists()) { return
-     * false; } try (InputStream in = new FileInputStream(faviconPath); OutputStream
-     * out = response.getOutputStream()) { IOUtils.copy(in, out); return true; }
-     * catch (IOException e) { log.debug("Error loading custom favicon: " +
-     * e.getMessage()); return false; } }
-     * 
-     * 
-     * private boolean readDefaultFavicon(HttpServletResponse response) { String
-     * defaultFaviconFileName = "/WEB-INF/static/favicon.ico";
-     * 
-     * ClassLoader loader = Thread.currentThread().getContextClassLoader(); try
-     * (InputStream in = loader.getResourceAsStream(defaultFaviconFileName);
-     * OutputStream out = response.getOutputStream()) { IOUtils.copy(in, out);
-     * return true; } catch (IOException e) {
-     * log.debug("Error loading default favicon: " + e.getMessage()); return false;
-     * } }
-     */
-
     /*
      * @POST
      * 
@@ -292,14 +144,14 @@ public class OrganizationResource extends BaseResource {
      * 
      * try {
      * 
-     * // Retrieve headers, read the Content-Disposition header to obtain the
+     * // Retrieve headers, read the Content-Disposition header to obtain the //
      * original name of the file MultivaluedMap<String, String> headers =
      * (MultivaluedMap) inputPart.getHeaders();
      * 
      * fileName = parseFileName(headers);
      * log.error("\n\n OrganizationResource::uploadFile() - fileName:{} ",
      * fileName); // Handle the body of that part with an InputStream InputStream
-     * istream = inputPart.getBody(InputStream.class,null);
+     * InputStream istream = inputPart.getBody(InputStream.class, null);
      * 
      * log.error("\n\n OrganizationResource::uploadFile() - istream:{} ", istream);
      * 
