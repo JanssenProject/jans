@@ -59,6 +59,7 @@ function() {
         smtp_url: baseUrl + '/jans-config-api/api/v1/config/smtp', 
         logging_url: baseUrl + '/jans-config-api/api/v1/logging',
         auth_health_url: baseUrl + '/jans-config-api/api/v1/jans-auth-server/health',
+		org_configuration_url: baseUrl + '/jans-config-api/api/v1/org',
     };
 
     karate.configure('connectTimeout', 30000);

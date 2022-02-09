@@ -67,6 +67,10 @@ public class AuthUtil {
         return this.configurationService.find().getIssuer();
     }
     
+    public String getServiceUrl(String url) {
+        return this.getIssuer() + url;
+    }
+    
     public String getClientId() {
         return this.configurationFactory.getApiClientId();
     }

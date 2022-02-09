@@ -94,8 +94,14 @@ public class BaseResource {
 
     protected static Response getBadRequestException(String msg) {
         ApiError error = new ApiError.ErrorBuilder()
-                .withCode(String.valueOf(Response.Status.NOT_ACCEPTABLE.getStatusCode())).withMessage(msg).build();
+                .withCode(String.valueOf(Response.Status.BAD_REQUEST.getStatusCode())).withMessage(msg).build();
         return Response.status(Response.Status.BAD_REQUEST).entity(error).build();
+    }
+    
+    protected static Response getInternalServerException(String msg) {
+        ApiError error = new ApiError.ErrorBuilder()
+                .withCode(String.valueOf(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode())).withMessage(msg).build();
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(error).build();
     }
 
     protected SearchRequest createSearchRequest(String schemas, String filter, String sortBy, String sortOrder,

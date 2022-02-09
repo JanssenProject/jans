@@ -7,6 +7,8 @@
 package io.jans.configapi.util;
 
 public class ApiConstants {
+    
+    private ApiConstants() {}
 
     public static final String BASE_API_URL = "/";
     public static final String CONFIG = "/config";
@@ -69,6 +71,7 @@ public class ApiConstants {
     public static final String READY = "/ready";
     public static final String STATISTICS = "/stat";
     public static final String USER = "/user";
+    public static final String ORG = "/org";
 
     public static final String LIMIT = "limit";
     public static final String START_INDEX = "startIndex";
