@@ -38,14 +38,10 @@ move_builtin_jars() {
 
 move_builtin_jars
 python3 /app/scripts/wait.py
-
-if [ ! -f /deploy/touched ]; then
-    python3 /app/scripts/bootstrap.py
-    touch /deploy/touched
-fi
-
+python3 /app/scripts/bootstrap.py
 python3 /app/scripts/jks_sync.py &
 python3 /app/scripts/mod_context.py
+python3 /app/scripts/auth_conf.py
 
 # run auth-server
 cd /opt/jans/jetty/jans-auth
