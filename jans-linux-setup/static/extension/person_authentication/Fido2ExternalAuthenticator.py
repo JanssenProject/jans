@@ -13,7 +13,7 @@ from io.jans.as.server.service import SessionIdService
 from io.jans.as.server.util import ServerUtil
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.util import StringHelper
-
+from java.util import Arrays
 from java.util.concurrent.locks import ReentrantLock
 from javax.ws.rs import ClientErrorException
 from javax.ws.rs.core import Response
@@ -38,12 +38,12 @@ class PersonAuthentication(PersonAuthenticationType):
         self.fido2_domain = None
         if configurationAttributes.containsKey("fido2_domain"):
             self.fido2_domain = configurationAttributes.get("fido2_domain").getValue2()
-            
+
         self.metaDataLoaderLock = ReentrantLock()
         self.metaDataConfiguration = None
-        
+
         print "Fido2. Initialized successfully"
-        return True   
+        return True
 
     def destroy(self, configurationAttributes):
         print "Fido2. Destroy"
@@ -69,6 +69,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         if step == 1:
             print "Fido2. Authenticate for step 1"
+            identity.setWorkingParameter("platformAuthenticatorAvailable",ServerUtil.getFirstValue(requestParameters, "loginForm:platformAuthenticator"))
 
             user_password = credentials.getPassword()
             logged_in = False
@@ -163,6 +164,12 @@ class PersonAuthentication(PersonAuthenticationType):
                     assertionService = Fido2ClientFactory.instance().createAssertionService(metaDataConfiguration)
                     assertionRequest = json.dumps({'username': userName}, separators=(',', ':'))
                     assertionResponse = assertionService.authenticate(assertionRequest).readEntity(java.lang.String)
+                    # if device has only platform authenticator and assertion is expecting a security key
+                    if "internal" in assertionResponse:
+                        identity.setWorkingParameter("platformAuthenticatorAvailable", "true")
+                    else:
+                        identity.setWorkingParameter("platformAuthenticatorAvailable", "false")
+
                 except ClientErrorException, ex:
                     print "Fido2. Prepare for step 2. Failed to start assertion flow. Exception:", sys.exc_info()[1]
                     return False
@@ -171,7 +178,20 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 try:
                     attestationService = Fido2ClientFactory.instance().createAttestationService(metaDataConfiguration)
-                    attestationRequest = json.dumps({'username': userName, 'displayName': userName, 'attestation': 'direct'}, separators=(',', ':'))
+                    platformAuthenticatorAvailable = identity.getWorkingParameter("platformAuthenticatorAvailable") == "true"
+                    basic_json = {'username': userName, 'displayName': userName, 'attestation' : 'direct'}
+                    print "% s" % identity.getWorkingParameter("platformAuthenticatorAvailable")
+                    if platformAuthenticatorAvailable is True:
+                       # the reason behind userVerification = discouraged  --> https://chromium.googlesource.com/chromium/src/+/master/content/browser/webauth/uv_preferred.md
+                       platform_json = {"authenticatorSelection":{"authenticatorAttachment":"platform","requireResidentKey" : "false", "userVerification" : "discouraged" } }
+                       basic_json.update(platform_json)
+
+                       # also need to add this --> excludeCredentials : [//registered ids]
+                    print " basic_json %s" % basic_json
+
+                    attestationRequest = json.dumps(basic_json)
+                    #, separators=(',', ':'))
+
                     attestationResponse = attestationService.register(attestationRequest).readEntity(java.lang.String)
                 except ClientErrorException, ex:
                     print "Fido2. Prepare for step 2. Failed to start attestation flow. Exception:", sys.exc_info()[1]
@@ -190,7 +210,7 @@ class PersonAuthentication(PersonAuthenticationType):
             return False
 
     def getExtraParametersForStep(self, configurationAttributes, step):
-        return None
+        return Arrays.asList( "platformAuthenticatorAvailable")
 
     def getCountAuthenticationSteps(self, configurationAttributes):
         return 2
@@ -199,9 +219,14 @@ class PersonAuthentication(PersonAuthenticationType):
         return -1
 
     def getPageForStep(self, configurationAttributes, step):
-        if step == 2:
-            return "/auth/fido2/login.xhtml"
-
+        if step == 1:
+            return "/auth/fido2/step1.xhtml"
+        elif step == 2:
+            identity = CdiUtil.bean(Identity)
+            if identity.getWorkingParameter("platformAuthenticatorAvailable") == "true":
+                return "/auth/fido2/platform.xhtml"
+            else:
+                return "/auth/fido2/secKeys.xhtml"
         return ""
 
     def logout(self, configurationAttributes, requestParameters):
@@ -209,17 +234,17 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def getAuthenticationMethodClaims(self, requestParameters):
         return None
-        
+
     def getLogoutExternalUrl(self, configurationAttributes, requestParameters):
         print "Get external logout URL call"
-        return None    
-    
+        return None
+
     def getMetaDataConfiguration(self):
         if self.metaDataConfiguration != None:
             return self.metaDataConfiguration
-        
+
         self.metaDataLoaderLock.lock()
-        # Make sure that another thread not loaded configuration already          
+        # Make sure that another thread not loaded configuration already
         if self.metaDataConfiguration != None:
             return self.metaDataConfiguration
 
@@ -228,7 +253,7 @@ class PersonAuthentication(PersonAuthenticationType):
             self.fido2_server_metadata_uri = self.fido2_server_uri + "/.well-known/fido2-configuration"
 
             metaDataConfigurationService = Fido2ClientFactory.instance().createMetaDataConfigurationService(self.fido2_server_metadata_uri)
-    
+
             max_attempts = 10
             for attempt in range(1, max_attempts + 1):
                 try:
@@ -238,7 +263,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     # Detect if last try or we still get Service Unavailable HTTP error
                     if (attempt == max_attempts) or (ex.getResponse().getResponseStatus() != Response.Status.SERVICE_UNAVAILABLE):
                         raise ex
-    
+
                     java.lang.Thread.sleep(3000)
                     print "Attempting to load metadata: %d" % attempt
         finally:
