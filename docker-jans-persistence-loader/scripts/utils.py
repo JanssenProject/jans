@@ -448,6 +448,7 @@ def get_ldif_mappings(optional_scopes=None):
             "jans-config-api/admin-ui-attributes.ldif",
             "jans-config-api/admin-ui-clients.ldif",
             "jans-auth/configuration.ldif",
+            "jans-auth/role-scope-mappings.ldif",
         ]
 
         if "scim" in optional_scopes:
