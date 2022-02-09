@@ -19,8 +19,6 @@ import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
-import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
-import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.exception.CryptoProviderException;
@@ -39,7 +37,7 @@ import io.jans.as.server.security.Identity;
 import io.jans.as.server.service.ciba.CibaRequestService;
 import io.jans.jsf2.message.FacesMessages;
 import io.jans.jsf2.service.FacesService;
-import io.jans.util.security.StringEncrypter;
+import io.jans.util.exception.EncryptionException;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -287,7 +285,7 @@ public class AuthorizeService {
 					Algorithm.fromString(signatureAlgorithm.getName()), Use.SIGNATURE);
 		} catch (CryptoProviderException e) {
 			log.error(e.getMessage(), e);
-		} catch (StringEncrypter.EncryptionException e) {
+		} catch (EncryptionException e) {
 			log.error(e.getMessage(), e);
 		}
 		redirectUri.setKeyId(keyId);

@@ -35,6 +35,7 @@ import io.jans.as.server.uma.service.UmaResourceService;
 import io.jans.as.server.uma.service.UmaRptService;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.service.CacheService;
+import io.jans.util.exception.EncryptionException;
 import io.jans.util.security.StringEncrypter;
 import org.testng.annotations.Test;
 import org.testng.collections.Lists;
@@ -85,7 +86,7 @@ public class CleanerTimerTest extends BaseComponentTest {
     private DeviceRegistrationService deviceRegistrationService;
 
     @Test(enabled = false) // disabled temporarily. It works perfectly locally but fails on jenkins. Reason is unclear.
-    public void client_whichIsExpiredAndDeletable_MustBeRemoved() throws StringEncrypter.EncryptionException {
+    public void client_whichIsExpiredAndDeletable_MustBeRemoved() throws EncryptionException {
         // 1. create client
         final Client client = createClient(true);
 
@@ -109,7 +110,7 @@ public class CleanerTimerTest extends BaseComponentTest {
     }
 
     @Test
-    public void client_whichIsExpiredAndNotDeletable_MustNotBeRemoved() throws StringEncrypter.EncryptionException {
+    public void client_whichIsExpiredAndNotDeletable_MustNotBeRemoved() throws EncryptionException {
         // 1. create client
         final Client client = createClient(false);
 
@@ -139,7 +140,7 @@ public class CleanerTimerTest extends BaseComponentTest {
     }
 
     @Test
-    public void client_whichIsNotExpiredAndDeletable_MustNotBeRemoved() throws StringEncrypter.EncryptionException {
+    public void client_whichIsNotExpiredAndDeletable_MustNotBeRemoved() throws EncryptionException {
 
         // 1. create client
         final Client client = createClient(true);
@@ -158,7 +159,7 @@ public class CleanerTimerTest extends BaseComponentTest {
     }
 
     @Test
-    public void u2fDevice_whichIsExpiredAndDeletable_MustBeRemoved() throws StringEncrypter.EncryptionException {
+    public void u2fDevice_whichIsExpiredAndDeletable_MustBeRemoved() throws EncryptionException {
         final Client client = createClient();
         clientService.persist(client);
 
@@ -203,7 +204,7 @@ public class CleanerTimerTest extends BaseComponentTest {
     }
 
     @Test
-    public void u2fRequest_whichIsExpiredAndDeletable_MustBeRemoved() throws StringEncrypter.EncryptionException {
+    public void u2fRequest_whichIsExpiredAndDeletable_MustBeRemoved() throws EncryptionException {
         final Client client = createClient();
         clientService.persist(client);
 
@@ -242,7 +243,7 @@ public class CleanerTimerTest extends BaseComponentTest {
     }
 
     @Test
-    public void token_whichIsExpiredAndDeletable_MustBeRemoved() throws StringEncrypter.EncryptionException {
+    public void token_whichIsExpiredAndDeletable_MustBeRemoved() throws EncryptionException {
         final Client client = createClient();
         clientService.persist(client);
 
@@ -276,7 +277,7 @@ public class CleanerTimerTest extends BaseComponentTest {
     }
 
     @Test
-    public void umaRpt_whichIsExpiredAndDeletable_MustBeRemoved() throws StringEncrypter.EncryptionException {
+    public void umaRpt_whichIsExpiredAndDeletable_MustBeRemoved() throws EncryptionException {
         final Client client = createClient();
 
         clientService.persist(client);
@@ -312,7 +313,7 @@ public class CleanerTimerTest extends BaseComponentTest {
     }
 
     @Test
-    public void umaResource_whichIsExpiredAndDeletable_MustBeRemoved() throws StringEncrypter.EncryptionException {
+    public void umaResource_whichIsExpiredAndDeletable_MustBeRemoved() throws EncryptionException {
         final Client client = createClient();
 
         clientService.persist(client);
@@ -359,7 +360,7 @@ public class CleanerTimerTest extends BaseComponentTest {
     }
 
     @Test
-    public void umaPermission_whichIsExpiredAndDeletable_MustBeRemoved() throws StringEncrypter.EncryptionException {
+    public void umaPermission_whichIsExpiredAndDeletable_MustBeRemoved() throws EncryptionException {
         final Client client = createClient();
 
         clientService.persist(client);
@@ -400,7 +401,7 @@ public class CleanerTimerTest extends BaseComponentTest {
     }
 
     @Test
-    public void umaPct_whichIsExpiredAndDeletable_MustBeRemoved() throws StringEncrypter.EncryptionException {
+    public void umaPct_whichIsExpiredAndDeletable_MustBeRemoved() throws EncryptionException {
         final Client client = createClient();
         clientService.persist(client);
 
@@ -432,11 +433,11 @@ public class CleanerTimerTest extends BaseComponentTest {
         assertNull(umaPctService.getByCode(pct.getCode()));
     }
 
-    private Client createClient() throws StringEncrypter.EncryptionException {
+    private Client createClient() throws EncryptionException {
         return createClient(true);
     }
 
-    private Client createClient(boolean deletable) throws StringEncrypter.EncryptionException {
+    private Client createClient(boolean deletable) throws EncryptionException {
         String clientsBaseDN = staticConfiguration.getBaseDn().getClients();
 
         String inum = inumService.generateClientInum();

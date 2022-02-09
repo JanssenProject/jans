@@ -16,6 +16,7 @@ import io.jans.orm.service.PersistanceFactoryService;
 import io.jans.orm.service.StandalonePersistanceFactoryService;
 import io.jans.util.StringHelper;
 import io.jans.util.exception.ConfigurationException;
+import io.jans.util.exception.EncryptionException;
 import io.jans.orm.util.properties.FileConfiguration;
 import io.jans.util.security.PropertiesDecrypter;
 import io.jans.util.security.StringEncrypter;
@@ -34,7 +35,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Base OpenId configuration
  * 
  * @author Yuriy Movchan
- * @version 0.1, 11/02/2015
+ * @author Sergey Manoylo
+ * @version 2021-10-21
  */
 public abstract class ConfigurationFactory<C extends AppConfiguration, L extends AppConfigurationEntry> {
 
@@ -73,7 +75,10 @@ public abstract class ConfigurationFactory<C extends AppConfiguration, L extends
 	private PersistanceFactoryService persistanceFactoryService;
 	private PersistenceConfiguration persistenceConfiguration;
 
-	private String cryptoConfigurationSalt;
+    private String cryptoConfigurationSalt;
+    private String cryptoConfigurationPassw;
+    private String cryptoConfigurationAlg;
+
 	private StringEncrypter stringEncrypter;
 
 	private PersistenceEntryManager persistenceEntryManager;
@@ -106,7 +111,7 @@ public abstract class ConfigurationFactory<C extends AppConfiguration, L extends
 		this.confDir = confDir();
 		this.saltFilePath = confDir + SALT_FILE_NAME;
 
-		this.cryptoConfigurationSalt = loadCryptoConfigurationSalt();
+		loadCryptoConfigurationSalt();
 		this.stringEncrypter = createStringEncrypter();
 
 		this.persistenceEntryManager = createPersistenceEntryManager();
@@ -149,15 +154,23 @@ public abstract class ConfigurationFactory<C extends AppConfiguration, L extends
 		return fileConfiguration;
 	}
 
-	private String loadCryptoConfigurationSalt() {
+	private void loadCryptoConfigurationSalt() {
 		try {
-			FileConfiguration cryptoConfiguration = new FileConfiguration(this.saltFilePath);
-
-			return cryptoConfiguration.getString("encodeSalt");
+		    FileConfiguration cryptoConfiguration = new FileConfiguration(this.saltFilePath);
+		    if(cryptoConfiguration.isKeyExist("encodeSalt")) {
+		        cryptoConfigurationSalt = cryptoConfiguration.getString("encodeSalt");
+		    }
+		    if(cryptoConfiguration.isKeyExist("encodePassw")) {
+		        cryptoConfigurationPassw  = cryptoConfiguration.getString("encodePassw");
+		    }
+		    if(cryptoConfiguration.isKeyExist("encodeAlg")) {
+		        cryptoConfigurationAlg = cryptoConfiguration.getString("encodeAlg");
+		    }
+		    StringEncrypter.defaultInstance().init(cryptoConfigurationPassw, cryptoConfigurationSalt, cryptoConfigurationAlg);
 		} catch (Exception ex) {
 			LOG.error("Failed to load configuration from {}", saltFilePath, ex);
 			throw new ConfigurationException("Failed to load configuration from " + saltFilePath, ex);
-		}
+		}		
 	}
 
 	private CacheConfiguration loadCacheConfiguration() {
@@ -227,8 +240,8 @@ public abstract class ConfigurationFactory<C extends AppConfiguration, L extends
 
 		Properties decryptedConnectionProperties;
 		try {
-			decryptedConnectionProperties = PropertiesDecrypter.decryptAllProperties(StringEncrypter.defaultInstance(), connectionProperties, this.cryptoConfigurationSalt);
-        } catch (StringEncrypter.EncryptionException ex) {
+			decryptedConnectionProperties = PropertiesDecrypter.decryptAllProperties(StringEncrypter.defaultInstance(), connectionProperties);
+        } catch (EncryptionException ex) {
         	throw new ConfigurationException("Failed to decript configuration properties", ex);
         }
 
@@ -264,12 +277,13 @@ public abstract class ConfigurationFactory<C extends AppConfiguration, L extends
 		}
 
 		try {
-			StringEncrypter stringEncrypter = StringEncrypter.instance(encodeSalt);
-
-			return stringEncrypter;
-		} catch (StringEncrypter.EncryptionException ex) {
+            return StringEncrypter.instance(this.cryptoConfigurationPassw,
+                    this.cryptoConfigurationSalt,
+                    this.cryptoConfigurationAlg
+                    );
+		} catch (Exception ex) {
 			throw new ConfigurationException("Failed to create StringEncrypter instance");
-		}
+		}		
 	}
 
 	public StringEncrypter getStringEncrypter() {

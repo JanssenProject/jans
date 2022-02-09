@@ -16,6 +16,7 @@ import org.apache.jackrabbit.commons.JcrUtils;
 import org.apache.jackrabbit.rmi.repository.URLRemoteRepository;
 import io.jans.service.document.store.conf.DocumentStoreType;
 import io.jans.util.StringHelper;
+import io.jans.util.exception.EncryptionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -304,7 +305,7 @@ public class JcaDocumentStoreProvider extends DocumentStoreProvider<JcaDocumentS
             	jcaDocumentStoreConfiguration.setDecryptedPassword(stringEncrypter.decrypt(encryptedPassword));
                 log.trace("Decrypted JCA password successfully.");
             }
-        } catch (StringEncrypter.EncryptionException ex) {
+        } catch (EncryptionException ex) {
             log.error("Error during JCA password decryption", ex);
         }
     }

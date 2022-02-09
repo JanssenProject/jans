@@ -54,7 +54,6 @@ import io.jans.service.timer.schedule.TimerSchedule;
 import io.jans.util.OxConstants;
 import io.jans.util.StringHelper;
 import io.jans.util.security.StringEncrypter;
-import io.jans.util.security.StringEncrypter.EncryptionException;
 import org.jboss.weld.util.reflection.ParameterizedTypeImpl;
 import org.slf4j.Logger;
 
@@ -260,16 +259,13 @@ public class AppInitializer {
     @Produces
     @ApplicationScoped
     public StringEncrypter getStringEncrypter() {
-        String encodeSalt = configurationFactory.getCryptoConfigurationSalt();
-
-        if (StringHelper.isEmpty(encodeSalt)) {
-            throw new ConfigurationException("Encode salt isn't defined");
-        }
-
         try {
-            return StringEncrypter.instance(encodeSalt);
-        } catch (EncryptionException ex) {
-            throw new ConfigurationException("Failed to create StringEncrypter instance");
+            return StringEncrypter.instance(
+                    configurationFactory.getCryptoConfigurationPassw(),
+                    configurationFactory.getCryptoConfigurationSalt(),
+                    configurationFactory.getCryptoConfigurationAlg());
+        } catch (Exception ex) {
+            throw new ConfigurationException("Failed to create StringEncrypter instance", ex);
         }
     }
 

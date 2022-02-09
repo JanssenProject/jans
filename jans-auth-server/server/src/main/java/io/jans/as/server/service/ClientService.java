@@ -21,8 +21,7 @@ import io.jans.service.BaseCacheService;
 import io.jans.service.CacheService;
 import io.jans.service.LocalCacheService;
 import io.jans.util.StringHelper;
-import io.jans.util.security.StringEncrypter;
-import io.jans.util.security.StringEncrypter.EncryptionException;
+import io.jans.util.exception.EncryptionException;
 import org.json.JSONArray;
 import org.python.jline.internal.Preconditions;
 import org.slf4j.Logger;
@@ -105,7 +104,7 @@ public class ClientService {
             }
             String decryptedClientSecret = decryptSecret(client.getClientSecret());
             authenticated = decryptedClientSecret != null && decryptedClientSecret.equals(password);
-        } catch (StringEncrypter.EncryptionException e) {
+        } catch (EncryptionException e) {
             log.error(e.getMessage(), e);
         }
 

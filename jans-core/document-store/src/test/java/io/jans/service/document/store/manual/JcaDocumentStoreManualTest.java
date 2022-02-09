@@ -7,6 +7,8 @@
 package io.jans.service.document.store.manual;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.jans.util.exception.EncryptionException;
 import io.jans.util.security.StringEncrypter;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -29,8 +31,8 @@ public class JcaDocumentStoreManualTest {
 		
 	}
 
-	public static void main(String[] args) throws RepositoryException, IOException, StringEncrypter.EncryptionException {
-		StringEncrypter se = new StringEncrypter(StringEncrypter.DESEDE_ENCRYPTION_SCHEME, "Zqvw62DEFdhxoL4csi9hpVI4");
+	public static void main(String[] args) throws RepositoryException, IOException, EncryptionException {
+		StringEncrypter se = new StringEncrypter(StringEncrypter.DEF_DES_EDE_ENCRYPTION_SCHEME, "Zqvw62DEFdhxoL4csi9hpVI4");
 		DocumentStoreConfiguration dsc = new DocumentStoreConfiguration();
 		dsc.setDocumentStoreType(DocumentStoreType.JCA);
 		
