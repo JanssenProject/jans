@@ -46,6 +46,7 @@ public class ApiApplication extends Application {
         classes.add(UmaResourcesResource.class);
         classes.add(StatResource.class);
         classes.add(HealthCheckResource.class);
+        classes.add(OrganizationResource.class);
 
         return classes;
     }
