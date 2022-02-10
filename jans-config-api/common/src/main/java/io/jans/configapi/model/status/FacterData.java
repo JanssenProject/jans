@@ -29,6 +29,7 @@ public class FacterData {
 	@JsonProperty("load_average")
 	private String loadAverage;
 
+	
 	@JsonProperty("memoryfree")
 	public String getMemoryfree() {
 		return memoryfree;

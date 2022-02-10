@@ -32,7 +32,7 @@ public class ConfigurationService {
     @Inject
     ConfigurationFactory configurationFactory;
     
-    private StatsData statsData; //To remove??
+    private StatsData statsData;
 
     public Conf findConf() {
         final String dn = configurationFactory.getConfigurationDn();

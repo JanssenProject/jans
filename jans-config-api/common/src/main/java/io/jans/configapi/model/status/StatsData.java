@@ -7,31 +7,17 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import java.util.Date;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({ "auth_server_status", "db_type", "db_status", "facter_data", "last-update" })
+@JsonPropertyOrder({ "dbType", "lastUpdate", "facterData", })
 public class StatsData {
 
-    @JsonProperty("auth_server_status")
-    private String authServerStatus;
-
-    @JsonProperty("db_type")
+    @JsonProperty("dbType")
     private String dbType;
 
-    @JsonProperty("db_status")
-    private String dbStatus;
-
-    @JsonProperty("facter_data")
-    private FacterData facterData;
-    
-    @JsonProperty("last-update")
+    @JsonProperty("lastUpdate")
     private Date lastUpdate;
 
-    public String getAuthServerStatus() {
-        return authServerStatus;
-    }
-
-    public void setAuthServerStatus(String authServerStatus) {
-        this.authServerStatus = authServerStatus;
-    }
+    @JsonProperty("facterData")
+    private FacterData facterData;
 
     public String getDbType() {
         return dbType;
@@ -39,22 +25,6 @@ public class StatsData {
 
     public void setDbType(String dbType) {
         this.dbType = dbType;
-    }
-
-    public String getDbStatus() {
-        return dbStatus;
-    }
-
-    public void setDbStatus(String dbStatus) {
-        this.dbStatus = dbStatus;
-    }
-
-    public FacterData getFacterData() {
-        return facterData;
-    }
-
-    public void setFacterData(FacterData facterData) {
-        this.facterData = facterData;
     }
 
     public Date getLastUpdate() {
@@ -65,10 +35,17 @@ public class StatsData {
         this.lastUpdate = lastUpdate;
     }
 
+    public FacterData getFacterData() {
+        return facterData;
+    }
+
+    public void setFacterData(FacterData facterData) {
+        this.facterData = facterData;
+    }
+
     @Override
     public String toString() {
-        return "StatsData [authServerStatus=" + authServerStatus + ", dbType=" + dbType + ", dbStatus=" + dbStatus
-                + ", facterData=" + facterData + ", lastUpdate=" + lastUpdate + "]";
+        return "StatsData [dbType=" + dbType + ", lastUpdate=" + lastUpdate + ", facterData=" + facterData + "]";
     }
 
 }

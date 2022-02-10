@@ -75,8 +75,9 @@ public class AppInitializer {
     private QuartzSchedulerManager quartzSchedulerManager;
 
     public void onStart(@Observes @Initialized(ApplicationScoped.class) Object init) {
-        log.error("========================== Initializing - App =======================================");
-        log.error("=============  STARTING API APPLICATION  ========================");
+        log.info("========================== Initializing - App =======================================");
+        log.info("=============  STARTING API APPLICATION  ========================");
+        log.info("init:{}",init);
         System.setProperty(ResteasyContextParameters.RESTEASY_PATCH_FILTER_DISABLED, "true");
         this.configurationFactory.create();
         persistenceEntryManagerInstance.get();
@@ -95,13 +96,14 @@ public class AppInitializer {
         RegisterBuiltin.register(instance);
         instance.registerProvider(ResteasyJackson2Provider.class);
 
-        log.error("==============  APPLICATION IS UP AND RUNNING ===================");
-        log.error("========================== App - Initialized =======================================");
+        log.info("==============  APPLICATION IS UP AND RUNNING ===================");
+        log.info("========================== App - Initialized =======================================");
     }
 
     public void destroy(@Observes @BeforeDestroyed(ApplicationScoped.class) ServletContext init) {
         log.info("================================================================");
         log.info("===========  API APPLICATION STOPPED  ==========================");
+        log.info("init:{}",init);
         log.info("================================================================");
     }
 
@@ -150,8 +152,8 @@ public class AppInitializer {
         closePersistenceEntryManager();
         PersistenceEntryManager ldapEntryManager = persistenceEntryManagerInstance.get();
         persistenceEntryManagerInstance.destroy(ldapEntryManager);
-        log.debug("Recreated instance {} with operation service: {}", ldapEntryManager,
-                ldapEntryManager.getOperationService());
+        log.debug("Recreated instance {} with operation service: {} - event:{}", ldapEntryManager,
+                ldapEntryManager.getOperationService(), event);
     }
 
     private void closePersistenceEntryManager() {

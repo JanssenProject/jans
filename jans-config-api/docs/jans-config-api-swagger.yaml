@@ -33,6 +33,7 @@ tags:
   - name: OAuth - Scopes
   - name: Statistics - User
   - name: Health - Check
+  - name: Server Stats
   - name: SCIM - User Management
   - name: SCIM - Config Management
   - name: Organization Configuration
@@ -2376,6 +2377,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HealthStatusItem'
+        '500':
+          description: Internal Server Error
+		  
+  /jans-config-api/api/v1/health/server-stat:
+    get:
+      summary: Returns application server status.
+      description: Returns application server status.
+      operationId: get-server-stat
+      tags:
+        - Health - Check
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatsData'
         '500':
           description: Internal Server Error
 
@@ -6640,5 +6658,46 @@ components:
         jsFaviconPath:
           type: string
           description: Path to organization favicon image
+		  
+		  
+    FacterData:
+      type: object
+      properties:
+        memoryfree:
+          type: string
+          description: Server free memory
+        swapfree:
+          type: string
+          description: Server swap free
+        hostname:
+          type: string
+          description: Server hostname
+        ipaddress:
+          type: string
+          description: Server ipaddress
+        uptime:
+          type: string
+          description: Server uptime
+        free_disk_space:
+          type: string
+          description: Server free disk space
+        load_average:
+          type: string
+          description: Server average load time
+
+
+    StatsData:
+      type: object
+      properties:
+        dbType:
+          type: string
+          description: Jans Server DB type
+        lastUpdate:
+          type: string
+          description: Stats update time
+        facterData:
+          type: object
+          $ref: '#/components/schemas/FacterData'
+          description: Underlying Server stats
 
 		  

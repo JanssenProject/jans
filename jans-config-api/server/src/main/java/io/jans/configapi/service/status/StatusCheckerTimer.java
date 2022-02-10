@@ -75,11 +75,11 @@ public class StatusCheckerTimer {
 
     @PostConstruct
     public void create() {
-        log.error("Creating Status Cheker Timer");
+        log.debug("Creating Status Cheker Timer");
     }
 
     public void initTimer() {
-        log.error("Initializing Status Checker Timer");
+        log.debug("Initializing Status Checker Timer");
         this.isActive = new AtomicBoolean(false);
 
         final int delay = 1 * 60;
@@ -91,7 +91,7 @@ public class StatusCheckerTimer {
 
     @Asynchronous
     public void process(@Observes @Scheduled StatusCheckerTimerEvent statusCheckerTimerEvent) {
-        log.error("Status Checker Timer Process");
+        log.debug("Status Checker Timer Process");
         if (this.isActive.get()) {
             return;
         }
@@ -114,7 +114,7 @@ public class StatusCheckerTimer {
      * @param interval Interval
      */
     private void processInt() {
-        log.error("Starting update of sever status");
+        log.debug("Starting update of sever status");
 
         StatsData statsData = new StatsData();
         Date currentDateTime = new Date();
@@ -123,11 +123,11 @@ public class StatusCheckerTimer {
         statsData.setDbType(configurationService.getPersistenceType());
         
         configurationService.setStatsData(statsData);
-        log.error("Configuration status update finished");
+        log.debug("Configuration status update finished");
     }
 
     private FacterData getFacterData() {
-        log.error("Getting Server status");
+        log.debug("Getting Server status");
         FacterData facterData = new FacterData();
         ObjectMapper mapper = new ObjectMapper();
         if (!isLinux()) {
@@ -149,7 +149,7 @@ public class StatusCheckerTimer {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        log.error("Server status - facterData:{}", facterData);
+        log.debug("Server status - facterData:{}", facterData);
         return facterData;
     }
 
