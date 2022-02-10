@@ -4,6 +4,7 @@
     <test name="Audience Test" enabled="true">
         <classes>
             <class name="io.jans.as.common.AudienceTest"/>
+            <class name="io.jans.as.common.util.RedirectUriTest"/>
         </classes>
     </test>
 </suite>
