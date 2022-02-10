@@ -204,6 +204,7 @@ public class ParRestWebService {
 
         final ErrorResponse response = new ErrorResponse();
 
+        String error = locationRedirect.getResponseParameter("error");
         String errorDescription = locationRedirect.getResponseParameter("error_description");
         errorDescription = Optional.ofNullable(errorDescription)
                 .map(description -> Optional.ofNullable(ThreadContext.get(Constants.CORRELATION_ID_HEADER))
@@ -211,7 +212,7 @@ public class ParRestWebService {
                         .orElse(description))
                 .orElse(null);
 
-        response.setErrorCode(errorDescription);
+        response.setErrorCode(error);
         response.setErrorDescription(errorDescription);
         return response;
     }
