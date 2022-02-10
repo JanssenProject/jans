@@ -92,7 +92,7 @@
 
     <test name="Authorization Support Custom Params" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.AuthorizationSupportCustomParams"></class>
+            <class name="io.jans.as.client.ws.rs.AuthorizationSupportCustomParams"/>
         </classes>
     </test>
 
@@ -238,6 +238,12 @@
         </classes>
     </test>
 
+    <test name="set Public Subject Identifier per Client" enabled="true">
+        <classes>
+            <class name="io.jans.as.client.ws.rs.SetPublicSubjectIdentifierPerClient"/>
+        </classes>
+    </test>
+    
     <!-- SSO with Multiple Backend Services test -->
     <test name="SSO with Multiple Backend Services test (HTTP)" enabled="true">
         <classes>
@@ -282,7 +288,7 @@
 
     <test name="Turn off consent for pairwise / openid-only scope" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.TurnOffConsentForPairwiseOpenIdOnlyConsentTest"></class>
+            <class name="io.jans.as.client.ws.rs.TurnOffConsentForPairwiseOpenIdOnlyConsentTest"/>
         </classes>
     </test>
 
