@@ -47,6 +47,7 @@ public class ApiApplication extends Application {
         classes.add(StatResource.class);
         classes.add(HealthCheckResource.class);
         classes.add(OrganizationResource.class);
+        classes.add(SqlConfigurationResource.class);
 
         return classes;
     }
