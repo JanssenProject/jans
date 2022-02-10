@@ -11,6 +11,7 @@ import io.jans.as.model.config.Conf;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.persistence.model.configuration.GluuConfiguration;
 import io.jans.configapi.configuration.ConfigurationFactory;
+import io.jans.configapi.model.status.StatsData;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.util.StringHelper;
 
@@ -30,6 +31,8 @@ public class ConfigurationService {
 
     @Inject
     ConfigurationFactory configurationFactory;
+    
+    private StatsData statsData; //To remove??
 
     public Conf findConf() {
         final String dn = configurationFactory.getConfigurationDn();
@@ -61,4 +64,13 @@ public class ConfigurationService {
     public String getPersistenceType() {
         return configurationFactory.getBaseConfiguration().getString("persistence.type");
     }
+
+    public StatsData getStatsData() {
+        return statsData;
+    }
+
+    public void setStatsData(StatsData statsData) {
+        this.statsData = statsData;
+    }    
+  
 }
