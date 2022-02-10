@@ -31,7 +31,6 @@ import io.jans.configapi.model.status.FacterData;
 import io.jans.util.process.ProcessHelper;
 
 import io.jans.configapi.configuration.ConfigurationFactory;
-//import io.jans.configapi.model.configuration.ApiAppConfiguration;
 import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.service.cdi.event.StatusCheckerTimerEvent;
 import io.jans.service.cdi.async.Asynchronous;
@@ -115,17 +114,15 @@ public class StatusCheckerTimer {
      * @param interval Interval
      */
     private void processInt() {
-        log.error("Starting update of configuration status");
-        //ApiAppConfiguration apiAppConfiguration = configurationFactory.getApiAppConfiguration();
+        log.error("Starting update of sever status");
 
-        log.error("Setting FactorAttributes");
         StatsData statsData = new StatsData();
         Date currentDateTime = new Date();
         statsData.setLastUpdate(currentDateTime);
         statsData.setFacterData(getFacterData());
         statsData.setDbType(configurationService.getPersistenceType());
         
-        configurationService.setStatsData(statsData); //TODO????
+        configurationService.setStatsData(statsData);
         log.error("Configuration status update finished");
     }
 
