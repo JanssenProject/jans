@@ -29,7 +29,7 @@ import java.util.UUID;
 
 /**
  * @author Javier Rojas Blum
- * @version February 10, 2022
+ * @version February 11, 2022
  */
 @Stateless
 @Named
@@ -151,7 +151,8 @@ public class SectorIdentifierService {
         }
 
         String openidSubAttribute = appConfiguration.getOpenidSubAttribute();
-        if (appConfiguration.getPublicSubjectIdentifierPerClientEnabled() && StringUtils.isNotBlank(client.getAttributes().getPublicSubjectIdentifierAttribute())) {
+        if (Boolean.TRUE.equals(appConfiguration.getPublicSubjectIdentifierPerClientEnabled())
+                && StringUtils.isNotBlank(client.getAttributes().getPublicSubjectIdentifierAttribute())) {
             openidSubAttribute = client.getAttributes().getPublicSubjectIdentifierAttribute();
         }
         if (StringHelper.equalsIgnoreCase(openidSubAttribute, "uid")) {

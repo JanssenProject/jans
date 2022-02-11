@@ -84,7 +84,7 @@ import static org.apache.commons.lang3.BooleanUtils.isTrue;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version February 10, 2022
+ * @version February 11, 2022
  */
 @Path("/")
 public class RegisterRestWebServiceImpl implements RegisterRestWebService {
@@ -239,31 +239,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                 throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_REDIRECT_URI, "Failed to validate redirect uris.");
             }
 
-            if (StringUtils.isNotBlank(r.getSubjectIdentifierAttribute())) {
-                if (!appConfiguration.getPublicSubjectIdentifierPerClientEnabled()) {
-                    throw errorResponseFactory.createWebApplicationException(
-                            Response.Status.BAD_REQUEST,
-                            RegisterErrorResponseType.INVALID_PUBLIC_SUBJECT_IDENTIFIER_ATTRIBUTE,
-                            "The public subject identifier per client is disabled."
-                    );
-                }
-
-                if (r.getSubjectType() != SubjectType.PUBLIC) {
-                    throw errorResponseFactory.createWebApplicationException(
-                            Response.Status.BAD_REQUEST,
-                            RegisterErrorResponseType.INVALID_PUBLIC_SUBJECT_IDENTIFIER_ATTRIBUTE,
-                            "The custom subject identifier requires public subject type."
-                    );
-                }
-
-                if (!appConfiguration.getSubjectIdentifiersPerClientSupported().contains(r.getSubjectIdentifierAttribute())) {
-                    throw errorResponseFactory.createWebApplicationException(
-                            Response.Status.BAD_REQUEST,
-                            RegisterErrorResponseType.INVALID_PUBLIC_SUBJECT_IDENTIFIER_ATTRIBUTE,
-                            "Invalid subject identifier attribute."
-                    );
-                }
-            }
+            validateSubjectIdentifierAttribute(r);
 
             if (!cibaRegisterParamsValidatorService.validateParams(
                     r.getBackchannelTokenDeliveryMode(),
@@ -360,6 +336,34 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         builder.type(MediaType.APPLICATION_JSON_TYPE);
         applicationAuditLogger.sendMessage(oAuth2AuditLog);
         return builder.build();
+    }
+
+    private void validateSubjectIdentifierAttribute(RegisterRequest registerRequest) {
+        if (StringUtils.isNotBlank(registerRequest.getSubjectIdentifierAttribute())) {
+            if (Boolean.FALSE.equals(appConfiguration.getPublicSubjectIdentifierPerClientEnabled())) {
+                throw errorResponseFactory.createWebApplicationException(
+                        Response.Status.BAD_REQUEST,
+                        RegisterErrorResponseType.INVALID_PUBLIC_SUBJECT_IDENTIFIER_ATTRIBUTE,
+                        "The public subject identifier per client is disabled."
+                );
+            }
+
+            if (registerRequest.getSubjectType() != SubjectType.PUBLIC) {
+                throw errorResponseFactory.createWebApplicationException(
+                        Response.Status.BAD_REQUEST,
+                        RegisterErrorResponseType.INVALID_PUBLIC_SUBJECT_IDENTIFIER_ATTRIBUTE,
+                        "The custom subject identifier requires public subject type."
+                );
+            }
+
+            if (!appConfiguration.getSubjectIdentifiersPerClientSupported().contains(registerRequest.getSubjectIdentifierAttribute())) {
+                throw errorResponseFactory.createWebApplicationException(
+                        Response.Status.BAD_REQUEST,
+                        RegisterErrorResponseType.INVALID_PUBLIC_SUBJECT_IDENTIFIER_ATTRIBUTE,
+                        "Invalid subject identifier attribute."
+                );
+            }
+        }
     }
 
     private void setClientName(RegisterRequest r, Client client) {
@@ -1309,5 +1313,4 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         }
         return jsonObject;
     }
-
 }
