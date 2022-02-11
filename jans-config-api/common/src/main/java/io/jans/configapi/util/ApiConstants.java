@@ -72,6 +72,7 @@ public class ApiConstants {
     public static final String STATISTICS = "/stat";
     public static final String USER = "/user";
     public static final String ORG = "/org";
+    public static final String SERVER_STAT = "/server-stat";
 
     public static final String LIMIT = "limit";
     public static final String START_INDEX = "startIndex";
