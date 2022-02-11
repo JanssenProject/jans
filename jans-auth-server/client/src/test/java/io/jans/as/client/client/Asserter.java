@@ -11,6 +11,7 @@ import io.jans.as.client.JwkClient;
 import io.jans.as.client.RegisterResponse;
 import io.jans.as.client.TokenResponse;
 import io.jans.as.client.par.ParResponse;
+import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.crypto.signature.RSAPublicKey;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.exception.InvalidJwtException;
@@ -24,15 +25,15 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
+import java.util.List;
 
 import static io.jans.as.client.BaseTest.clientEngine;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 /**
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 25/03/2016
+ * @author Javier Rojas Blum
+ * @version February 11, 2022
  */
 
 public class Asserter {
@@ -52,6 +53,13 @@ public class Asserter {
         assertNotNull(response.getClientSecret());
         assertNotNull(response.getClientIdIssuedAt());
         assertNotNull(response.getClientSecretExpiresAt());
+    }
+
+    public static void assertBadRequest(RegisterResponse registerResponse) {
+        assertEquals(registerResponse.getStatus(), 400, "Unexpected response code");
+        assertNotNull(registerResponse.getEntity());
+        assertNotNull(registerResponse.getErrorType());
+        assertNotNull(registerResponse.getErrorDescription());
     }
 
     public static void assertTokenResponse(TokenResponse response) {
@@ -75,6 +83,26 @@ public class Asserter {
         assertNotNull(response.getScope(), "The scope is null");
         if (checkState) {
             assertNotNull(response.getState(), "The state is null");
+        }
+    }
+
+    public static void assertAuthorizationResponse(AuthorizationResponse authorizationResponse, List<ResponseType> responseTypes, boolean checkState) {
+        assertNotNull(authorizationResponse);
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        if (checkState) {
+            assertNotNull(authorizationResponse.getState(), "The state is null");
+        }
+        if (responseTypes.contains(ResponseType.CODE)) {
+            assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        }
+        if (responseTypes.contains(ResponseType.TOKEN)) {
+            assertNotNull(authorizationResponse.getAccessToken(), "The access_token is null");
+            assertNotNull(authorizationResponse.getTokenType());
+            assertNotNull(authorizationResponse.getExpiresIn());
+        }
+        if (responseTypes.contains(ResponseType.ID_TOKEN)) {
+            assertNotNull(authorizationResponse.getIdToken(), "The id_token is null");
         }
     }
 

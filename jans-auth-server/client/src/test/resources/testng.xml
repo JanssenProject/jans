@@ -240,7 +240,7 @@
 
     <test name="set Public Subject Identifier per Client" enabled="true">
         <classes>
-            <class name="io.jans.as.client.ws.rs.SetPublicSubjectIdentifierPerClient"/>
+            <class name="io.jans.as.client.ws.rs.SetPublicSubjectIdentifierPerClientTest"/>
         </classes>
     </test>
     

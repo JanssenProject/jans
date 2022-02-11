@@ -7,6 +7,7 @@
 package io.jans.as.client.ws.rs;
 
 import io.jans.as.client.*;
+import io.jans.as.client.client.Asserter;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.crypto.signature.RSAPublicKey;
@@ -28,23 +29,21 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static org.testng.Assert.*;
+import static io.jans.as.model.common.ResponseType.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author Javier Rojas Blum
- * @version February 10, 2022
+ * @version February 11, 2022
  */
-public class SetPublicSubjectIdentifierPerClient extends BaseTest {
+public class SetPublicSubjectIdentifierPerClientTest extends BaseTest {
 
     @Test(dataProvider = "dataMethod")
     public void setPublicSubjectIdentifierPerClient(
-            final String redirectUri, final String userId, final String userSecret,
+            final String redirectUri, final List<ResponseType> responseTypes, final String userId, final String userSecret,
             final String subjectIdentifierAttribute, final String expectedSubValue) throws InvalidJwtException {
         showTitle("setPublicSubjectIdentifierPerClient");
-
-        List<ResponseType> responseTypes = Arrays.asList(
-                ResponseType.TOKEN,
-                ResponseType.ID_TOKEN);
 
         RegisterResponse registerResponse = clientRegistration(redirectUri, responseTypes,
                 SubjectType.PUBLIC, subjectIdentifierAttribute, false);
@@ -61,10 +60,7 @@ public class SetPublicSubjectIdentifierPerClient extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertNotNull(authorizationResponse.getLocation());
-        assertNotNull(authorizationResponse.getAccessToken());
-        assertNotNull(authorizationResponse.getState());
-        assertNotNull(authorizationResponse.getScope());
+        Asserter.assertAuthorizationResponse(authorizationResponse, responseTypes, true);
 
         String idToken = authorizationResponse.getIdToken();
 
@@ -119,16 +115,9 @@ public class SetPublicSubjectIdentifierPerClient extends BaseTest {
         showClient(registerClient);
 
         if (checkError) {
-            assertEquals(registerResponse.getStatus(), 400);
-            assertNotNull(registerResponse.getEntity());
-            assertNotNull(registerResponse.getErrorType());
-            assertNotNull(registerResponse.getErrorDescription());
+            Asserter.assertBadRequest(registerResponse);
         } else {
-            assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-            assertNotNull(registerResponse.getClientId());
-            assertNotNull(registerResponse.getClientSecret());
-            assertNotNull(registerResponse.getRegistrationAccessToken());
-            assertNotNull(registerResponse.getClientSecretExpiresAt());
+            Asserter.assertOk(registerResponse);
         }
 
         return registerResponse;
@@ -141,8 +130,10 @@ public class SetPublicSubjectIdentifierPerClient extends BaseTest {
         final String userSecret = context.getCurrentXmlTest().getParameter("userSecret");
 
         return new Object[][]{
-                {redirectUri, userId, userSecret, "mail", "test_user@test.org"},
-                {redirectUri, userId, userSecret, "uid", "test_user"}
+                {redirectUri, Arrays.asList(TOKEN, ID_TOKEN), userId, userSecret, "mail", "test_user@test.org"},
+                {redirectUri, Arrays.asList(TOKEN, ID_TOKEN), userId, userSecret, "uid", "test_user"},
+                {redirectUri, Arrays.asList(CODE, TOKEN, ID_TOKEN), userId, userSecret, "mail", "test_user@test.org"},
+                {redirectUri, Arrays.asList(CODE, TOKEN, ID_TOKEN), userId, userSecret, "uid", "test_user"}
         };
     }
 }
