@@ -43,7 +43,7 @@ public class RedirectUriResponse {
 
     public WebApplicationException createWebException(IErrorType errorType, String reason) {
         if (fapiCompatible) {
-            log.trace("Reason: " + reason); // print reason and set it to null since FAPI does not allow unknown fields in response
+            log.trace("Reason: {}", reason); // print reason and set it to null since FAPI does not allow unknown fields in response
             reason = null;
         }
         redirectUri.parseQueryString(errorFactory.getErrorAsQueryString(errorType, state, reason));
