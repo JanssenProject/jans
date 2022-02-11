@@ -146,12 +146,6 @@
 			<scope>provided</scope>
 		</dependency>
 
-		<!-- Logging -->
-		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-api</artifactId>
-		</dependency>
-
 		<!-- Testing -->
 		<dependency>
 			<groupId>io.rest-assured</groupId>
@@ -199,6 +193,12 @@
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-deploy</artifactId>
 			<version>${jetty.version}</version>
+		</dependency>
+
+		<!-- Jython -->
+		<dependency>
+			<groupId>org.gluufederation</groupId>
+			<artifactId>jython-standalone</artifactId>
 		</dependency>
 
 	</dependencies>
