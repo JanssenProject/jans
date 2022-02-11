@@ -201,6 +201,12 @@
 			<version>${jetty.version}</version>
 		</dependency>
 
+		<!-- Jython -->
+		<dependency>
+			<groupId>org.gluufederation</groupId>
+			<artifactId>jython-standalone</artifactId>
+		</dependency>
+
 	</dependencies>
 
 	<build>
