@@ -400,17 +400,29 @@ class SpannerBackend:
                 )
 
     def update_schema(self):
-        table_mapping = self.client.get_table_mapping()
+        """Updates schema (may include data migration)"""
 
-        # 1 - jansDefAcrValues is changed to multivalued (JSON type)
-        table_name = "jansClnt"
-        col_name = "jansDefAcrValues"
-        old_data_type = table_mapping[table_name][col_name]
-        data_type = self.get_data_type(col_name, table_name)
+        table_mapping = {}
 
-        if not old_data_type.startswith("ARRAY"):
+        # TODO: this should be replacing the one in jans-pycloudlib
+        for table in self.client.database.list_tables():
+            with self.client.database.snapshot() as snapshot:
+                result = snapshot.execute_sql(
+                    f"select column_name, spanner_type "
+                    "from information_schema.columns "
+                    f"where table_name = '{table.table_id}'"
+                )
+                table_mapping[table.table_id] = dict(result)
+
+        def column_to_array(table_name, col_name):
+            old_data_type = table_mapping[table_name][col_name]
+            data_type = self.get_data_type(col_name, table_name)
+
+            if data_type == old_data_type:
+                return
+
             # get the value first before updating column type
-            acr_values = {
+            values = {
                 row["doc_id"]: row[col_name]
                 for row in self.client.search(table_name, ["doc_id", col_name])
             }
@@ -424,23 +436,132 @@ class SpannerBackend:
                 f"ALTER TABLE {self.client.quoted_id(table_name)} ADD COLUMN {self.client.quoted_id(col_name)} {data_type}"
             ])
 
-            for doc_id, value in acr_values.items():
+            # pre-populate the modified column
+            for doc_id, value in values.items():
                 if not value:
                     value_list = []
                 else:
                     value_list = [value]
+
                 self.client.update(
                     table_name,
                     doc_id,
                     {col_name: self.transform_value(col_name, value_list)}
                 )
 
-        # 2 - jansUsrDN column must be in jansToken table
-        table_name = "jansToken"
-        col_name = "jansUsrDN"
+        def add_column(table_name, col_name):
+            if col_name in table_mapping[table_name]:
+                return
 
-        if col_name not in table_mapping[table_name]:
             data_type = self.get_data_type(col_name, table_name)
             self.client.database.update_ddl([
                 f"ALTER TABLE {self.client.quoted_id(table_name)} ADD COLUMN {self.client.quoted_id(col_name)} {data_type}"
             ])
+
+        def change_column_type(table_name, col_name):
+            old_data_type = table_mapping[table_name][col_name]
+            data_type = self.get_data_type(col_name, table_name)
+
+            if data_type == old_data_type:
+                return
+
+            query = f"ALTER TABLE {self.client.quoted_id(table_name)} " \
+                    f"ALTER COLUMN {self.client.quoted_id(col_name)} {data_type}"
+            self.client.database.update_ddl([query])
+
+        def column_from_array(table_name, col_name):
+            old_data_type = table_mapping[table_name][col_name]
+            data_type = self.get_data_type(col_name, table_name)
+
+            if data_type == old_data_type:
+                return
+
+            # get the value first before updating column type
+            values = {
+                row["doc_id"]: row[col_name]
+                for row in self.client.search(table_name, ["doc_id", col_name])
+            }
+
+            # to change the storage format of a JSON column, drop the column and
+            # add the column back specifying the new storage format
+            self.client.database.update_ddl([
+                f"ALTER TABLE {self.client.quoted_id(table_name)} DROP COLUMN {self.client.quoted_id(col_name)}"
+            ])
+            self.client.database.update_ddl([
+                f"ALTER TABLE {self.client.quoted_id(table_name)} ADD COLUMN {self.client.quoted_id(col_name)} {data_type}"
+            ])
+
+            # pre-populate the modified column
+            for doc_id, value in values.items():
+                # pass the list as its value and let transform_value
+                # determines the actual value
+                if value:
+                    new_value = value  # [0]
+                else:
+                    new_value = [""]
+                self.client.update(
+                    table_name,
+                    doc_id,
+                    {col_name: self.transform_value(col_name, new_value)}
+                )
+
+        # the following columns are changed to multivalued (ARRAY type)
+        for mod in [
+            ("jansClnt", "jansDefAcrValues"),
+            ("jansClnt", "jansLogoutURI"),
+            ("jansPerson", "role"),
+        ]:
+            column_to_array(mod[0], mod[1])
+
+        # the following columns must be added to respective tables
+        for mod in [
+            ("jansToken", "jansUsrDN"),
+            ("jansPerson", "jansTrustedDevices"),
+            ("jansUmaRPT", "dpop"),
+            ("jansUmaPCT", "dpop"),
+        ]:
+            add_column(mod[0], mod[1])
+
+        # change column type (except from/to multivalued)
+        for mod in [
+            ("jansPerson", "givenName"),
+            ("jansPerson", "sn"),
+            ("jansPerson", "userPassword"),
+            ("jansAppConf", "userPassword"),
+            ("jansPerson", "jansStatus"),
+            ("jansPerson", "cn"),
+            ("jansPerson", "secretAnswer"),
+            ("jansPerson", "secretQuestion"),
+            ("jansPerson", "street"),
+            ("jansPerson", "address"),
+            ("jansPerson", "picture"),
+            ("jansPerson", "mail"),
+            ("jansPerson", "gender"),
+            ("jansPerson", "jansNameFormatted"),
+            ("jansPerson", "jansExtId"),
+            ("jansGrp", "jansStatus"),
+            ("jansOrganization", "jansStatus"),
+            ("jansOrganization", "street"),
+            ("jansOrganization", "postalCode"),
+            ("jansOrganization", "mail"),
+            ("jansAppConf", "jansStatus"),
+            ("jansAttr", "jansStatus"),
+            ("jansUmaResourcePermission", "jansStatus"),
+            ("jansUmaResourcePermission", "jansUmaScope"),
+            ("jansDeviceRegistration", "jansStatus"),
+            ("jansFido2AuthnEntry", "jansStatus"),
+            ("jansFido2RegistrationEntry", "jansStatus"),
+            ("jansCibaReq", "jansStatus"),
+            ("jansInumMap", "jansStatus"),
+            ("jansDeviceRegistration", "jansDeviceKeyHandle"),
+            ("jansUmaResource", "jansUmaScope"),
+            ("jansU2fReq", "jansReq"),
+        ]:
+            change_column_type(mod[0], mod[1])
+
+        # columns are changed from multivalued
+        for mod in [
+            ("jansPerson", "jansMobileDevices"),
+            ("jansPerson", "jansOTPDevices"),
+        ]:
+            column_from_array(mod[0], mod[1])
