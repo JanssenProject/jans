@@ -16,6 +16,8 @@ import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
+ * @author Javier Rojas Blum
+ * @version February 10, 2022
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ClientAttributes implements Serializable {
@@ -86,6 +88,9 @@ public class ClientAttributes implements Serializable {
 
     @JsonProperty("jansAuthEncRespEnc")
     private String authorizationEncryptedResponseEnc;
+
+    @JsonProperty("jansSubAttr")
+    private String publicSubjectIdentifierAttribute;
 
     public List<String> getRopcScripts() {
         if (ropcScripts == null) ropcScripts = new ArrayList<>();
@@ -268,6 +273,26 @@ public class ClientAttributes implements Serializable {
         this.authorizationEncryptedResponseEnc = authorizationEncryptedResponseEnc;
     }
 
+    /**
+     * Return the custom subject identifier attribute. It is used for public subject type.
+     * If null, the default is used. Else use the custom attribute per client basis.
+     *
+     * @return The custom subject identifier attribute.
+     */
+    public String getPublicSubjectIdentifierAttribute() {
+        return publicSubjectIdentifierAttribute;
+    }
+
+    /**
+     * Sets the custom subject identifier attribute. It is used for public subject type.
+     * if null, the default is used. Else use the custom attribute per client basis.
+     *
+     * @param publicSubjectIdentifierAttribute The custom subject identifier attribute.
+     */
+    public void setPublicSubjectIdentifierAttribute(String publicSubjectIdentifierAttribute) {
+        this.publicSubjectIdentifierAttribute = publicSubjectIdentifierAttribute;
+    }
+
     @Override
     public String toString() {
         return "ClientAttributes{" +
@@ -288,6 +313,7 @@ public class ClientAttributes implements Serializable {
                 ", authorizationSignedResponseAlg=" + authorizationSignedResponseAlg +
                 ", authorizationEncryptedResponseAlg=" + authorizationEncryptedResponseAlg +
                 ", authorizationEncryptedResponseEnc=" + authorizationEncryptedResponseEnc +
+                ", publicSubjectIdentifierAttribute=" + publicSubjectIdentifierAttribute +
                 '}';
     }
 }
