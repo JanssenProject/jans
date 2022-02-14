@@ -1,5 +1,4 @@
-# License terms and conditions for Janssen Cloud Native Edition:
-# https://www.apache.org/licenses/LICENSE-2.0
+
 # -- OpenDJ is a directory server which implements a wide range of Lightweight Directory Access Protocol and related standards, including full compliance with LDAPv3 but also support for Directory Service Markup Language (DSMLv2).Written in Java, OpenDJ offers multi-master replication, access control, and many extensions.
 # -- Configure the HorizontalPodAutoscaler
 hpa:

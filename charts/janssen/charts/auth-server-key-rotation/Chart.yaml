@@ -1,5 +1,4 @@
-# License terms and conditions for Janssen Cloud Native Edition:
-# https://www.apache.org/licenses/LICENSE-2.0
+
 apiVersion: v2
 name: auth-server-key-rotation
 version: 1.0.0-beta.14

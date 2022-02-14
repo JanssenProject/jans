@@ -1,5 +1,4 @@
-# License terms and conditions for Janssen Cloud Native Edition:
-# https://www.apache.org/licenses/LICENSE-2.0
+
 # -- Middleware API to help application developers call an OAuth, OpenID or UMA server. You may wonder why this is necessary. It makes it easier for client developers to use OpenID signing and encryption features, without becoming crypto experts. This API provides some high level endpoints to do some of the heavy lifting.
 # -- Configure the HorizontalPodAutoscaler
 hpa:
