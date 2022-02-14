@@ -1,0 +1,39 @@
+title Google+ oxAuth external authenticator plugin
+
+User Agent -> oxTrust: Access site protected by mod_ox/shibboleth
+
+oxTrust -> oxAuth: Redirect for user authentication
+
+oxAuth -> User Agent: Show login form with Google+ widget
+
+User Agent -> Google Server: Log into Google account
+
+Google Server -> User Agent: Returns OAuth2 code, id_token, etc..
+
+User Agent -> oxAuth: Send OAuth2 code to Google+ oxAuth external authenticator
+
+oxAuth -> Google Server: Get OAuth2 id_token by code
+
+Google Server -> oxAuth: Returns id_token
+
+oxAuth -> oxAuth: Get Subject Identifier (Google persistent Id) from id_token
+
+oxAuth -> oxAuth: Check if there is IDP user with oxExternalUid: "gplus:" + google_persistent_id (Google persistent Id)
+
+oxAuth -> oxTrust: Allow access if user with gplus:google_persistent_id exists
+
+oxTrust -> User Agent: Allow access to resource
+
+oxAuth -> oxAuth : Start enrollment if user with gplus:google_persistent_id not exists
+
+oxAuth -> Google Server: Get OAuth2 user profile
+
+Google Server -> oxAuth: Returns OAuth2 claims
+
+oxAuth -> oxAuth: Add new user with gplus:google_persistent_id. Map user claims to user attributes. Set status of new user to "register".
+
+oxAuth -> oxTrust: Allow access to resource
+
+oxTrust -> oxTrust: Show user registration form
+
+oxTrust -> User Agent: Allow access to resource

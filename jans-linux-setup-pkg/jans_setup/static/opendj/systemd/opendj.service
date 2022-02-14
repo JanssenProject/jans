@@ -1,0 +1,14 @@
+[Unit]
+Description=OpenDJ Directory Service
+After=syslog.target
+
+[Service]
+Environment=OPENDJ_JAVA_HOME=/opt/jre
+Type=forking
+ExecStart=/opt/opendj/bin/start-ds
+ExecStop=/opt/opendj/bin/stop-ds
+User=ldap
+Group=ldap
+
+[Install]
+WantedBy=multi-user.target
