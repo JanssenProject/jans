@@ -43,5 +43,10 @@ public class DummyConfigApiType implements ConfigApiType {
     public boolean authorize(Object context) {
         return false;
     }
+    
+    @Override
+    public boolean modifyResponse(Object responseAsJsonObject, Object introspectionContext) {
+        return false;
+    }
 
 }

@@ -11,5 +11,5 @@ import io.jans.model.custom.script.type.BaseExternalType;
 public interface ConfigApiType extends BaseExternalType {
 
     boolean authorize(Object context);
-    
+    boolean modifyResponse(Object responseAsJsonObject, Object introspectionContext);
 }
