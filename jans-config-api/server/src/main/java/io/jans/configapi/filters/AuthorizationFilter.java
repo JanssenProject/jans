@@ -7,12 +7,15 @@
 package io.jans.configapi.filters;
 
 import io.jans.configapi.core.rest.ProtectedApi;
+import io.jans.configapi.configuration.ConfigurationFactory;
+import io.jans.configapi.security.service.ExternalInterceptionService;
 import io.jans.configapi.security.service.AuthorizationService;
 import io.jans.configapi.util.ApiConstants;
 
 import javax.annotation.Priority;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
@@ -23,7 +26,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.Provider;
 
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
 /**
@@ -44,6 +46,9 @@ public class AuthorizationFilter implements ContainerRequestFilter {
 
     @Context
     HttpServletRequest request;
+    
+    @Context
+    HttpServletResponse httpServletResponse;
 
     @Context
     private HttpHeaders httpHeaders;
@@ -53,6 +58,12 @@ public class AuthorizationFilter implements ContainerRequestFilter {
 
     @Inject
     AuthorizationService authorizationService;
+    
+    @Inject
+    ConfigurationFactory configurationFactory;
+    
+    @Inject 
+    ExternalInterceptionService externalInterceptionService;
 
     @SuppressWarnings({ "all" })
     public void filter(ContainerRequestContext context) {
@@ -90,6 +101,16 @@ public class AuthorizationFilter implements ContainerRequestFilter {
                 context.getHeaders().remove(HttpHeaders.AUTHORIZATION);
                 context.getHeaders().add(HttpHeaders.AUTHORIZATION, authorizationHeader);
             }
+            
+            //Custom authorization            
+            boolean isAuthorized = isAuthorized(request, httpServletResponse, authorizationHeader, issuer,  context.getMethod(), info.getPath());
+            log.info("\n\n\n Custom authorization - isAuthorized:{}",isAuthorized);
+            if (!isAuthorized) {
+                abortWithUnauthorized(context);
+                log.info("======Custom authorization FAILED======================");
+                return;
+            }
+            
             log.info("======AUTHORIZATION  GRANTED===========================================");
         } catch (Exception ex) {
             log.error("======AUTHORIZATION  FAILED ===========================================", ex);
@@ -106,6 +127,12 @@ public class AuthorizationFilter implements ContainerRequestFilter {
     private void abortWithUnauthorized(ContainerRequestContext requestContext) {
         requestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED)
                 .header(HttpHeaders.WWW_AUTHENTICATE, AUTHENTICATION_SCHEME).build());
+    }
+    
+     private boolean isAuthorized(HttpServletRequest request, HttpServletResponse response, String token, String issuer, String method,
+                String path) throws Exception {
+            log.debug("Authorization script params -  request:{}, response:{}, token:{}, issuer:{}, method:{}, path:{} ", request, response, token, issuer, method, path);
+        return externalInterceptionService.authorization(request, response, this.configurationFactory.getApiAppConfiguration(), token, issuer, method, path);
     }
 
 }

@@ -146,6 +146,12 @@
 			<scope>provided</scope>
 		</dependency>
 
+		<!-- Quartz -->
+		<dependency>
+			<groupId>org.quartz-scheduler</groupId>
+			<artifactId>quartz</artifactId>
+		</dependency>
+
 		<!-- Testing -->
 		<dependency>
 			<groupId>io.rest-assured</groupId>

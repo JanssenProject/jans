@@ -321,4 +321,17 @@ public class CustomScript extends BaseEntry {
         this.scriptError = scriptError;
     }
 
+    
+    @Override
+    public String toString() {
+        return "CustomScript [inum=" + inum
+                + ", name=" + name 
+                + ", description=" + description
+                + ", programmingLanguage=" + programmingLanguage
+                + ", scriptType=" + scriptType
+                + ", level=" + level
+                + ", revision=" + revision
+                + ", enabled=" + enabled
+                + "]";
+    }
 }
