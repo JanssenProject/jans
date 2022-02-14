@@ -225,14 +225,10 @@ config:
     cnSqlDbUser: jans
     # -- SQL database timezone.
     cnSqlDbTimezone: UTC
-    # -- SQL password file holding password from config.configmap.cnSqldbUserPassword .
-    cnSqlPasswordFile: /etc/jans/conf/sql_password
-    # -- SQL password  injected as config.configmap.cnSqlPasswordFile .
+    # -- SQL password  injected the secrets .
     cnSqldbUserPassword: Test1234#
     # -- Cache type. `NATIVE_PERSISTENCE`, `REDIS`. or `IN_MEMORY`. Defaults to `NATIVE_PERSISTENCE` .
     cnCacheType: NATIVE_PERSISTENCE
-    # -- Enable Casa flag .
-    cnCasaEnabled: false
     # -- Client-api OAuth client admin certificate common name. This should be left to the default value client-api .
     cnClientApiAdminCertCn: client-api
     # -- Client-api OAuth client application certificate common name. This should be left to the default value client-api.
@@ -243,27 +239,22 @@ config:
     cnConfigKubernetesConfigMap: cn
     # -- The prefix of couchbase buckets. This helps with separation in between different environments and allows for the same couchbase cluster to be used by different setups of Janssen.
     cnCouchbaseBucketPrefix: jans
-    # -- Location of `couchbase.crt` used by Couchbase SDK for tls termination. The file path must end with couchbase.crt. In mTLS setups this is not required.
-    cnCouchbaseCertFile: /etc/certs/couchbase.crt
     # -- Couchbase certificate authority string. This must be encoded using base64. This can also be found in your couchbase UI Security > Root Certificate. In mTLS setups this is not required.
     cnCouchbaseCrt: SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo=
     # -- The number of replicas per index created. Please note that the number of index nodes must be one greater than the number of index replicas. That means if your couchbase cluster only has 2 index nodes you cannot place the number of replicas to be higher than 1.
     cnCouchbaseIndexNumReplica: 0
     # -- Couchbase password for the restricted user config.configmap.cnCouchbaseUser  that is often used inside the services. The password must contain one digit, one uppercase letter, one lower case letter and one symbol .
     cnCouchbasePassword: P@ssw0rd
-    # -- The location of the Couchbase restricted user config.configmap.cnCouchbaseUser password. The file path must end with couchbase_password
-    cnCouchbasePasswordFile: /etc/janssen/conf/couchbase_password
     # -- The Couchbase super user (admin) user name. This user is used during initialization only.
     cnCouchbaseSuperUser: admin
     # -- Couchbase password for the super user config.configmap.cnCouchbaseSuperUser  that is used during the initialization process. The password must contain one digit, one uppercase letter, one lower case letter and one symbol
     cnCouchbaseSuperUserPassword: Test1234#
-    # -- The location of the Couchbase restricted user config.configmap.cnCouchbaseSuperUser password. The file path must end with couchbase_superuser_password.
-    cnCouchbaseSuperUserPasswordFile: /etc/janssen/conf/couchbase_superuser_password
     # -- Couchbase URL. Used only when global.cnPersistenceType is hybrid or couchbase. This should be in FQDN format for either remote or local Couchbase clusters. The address can be an internal address inside the kubernetes cluster
     cnCouchbaseUrl: cbjanssen.default.svc.cluster.local
     # -- Couchbase restricted user. Used only when global.cnPersistenceType is hybrid or couchbase.
     cnCouchbaseUser: janssen
-    # -- Document store type to use for shibboleth files JCA or LOCAL. Note that if JCA is selected Apache Jackrabbit will be used. Jackrabbit also enables loading custom files across all services easily.
+    # [google_envs] Envs related to using Google
+    # -- Service account with roles roles/secretmanager.admin base64 encoded string. This is used often inside the services to reach the configuration layer. Used only when global.configAdapterName and global.configSecretAdapter is set to google.
     cnGoogleSecretManagerServiceAccount: SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo=
     # -- Project id of the google project the secret manager belongs to. Used only when global.configAdapterName and global.configSecretAdapter is set to google.
     cnGoogleProjectId: google-project-to-save-config-and-secrets-to
@@ -292,7 +283,7 @@ config:
     cnMaxRamPercent: "75.0"
     # -- SCIM protection mode OAUTH|TEST|UMA
     cnScimProtectionMode: "OAUTH"
-    # -- Boolean flag to enable/disable passport chart
+    # -- Specify data that should be saved in LDAP (one of default, user, cache, site, token, or session; default to default). Note this environment only takes effect when `global.cnPersistenceType`  is set to `hybrid`.
     cnPersistenceLdapMapping: default
     # -- Redis Sentinel Group. Often set when `config.configmap.cnRedisType` is set to `SENTINEL`. Can be used when  `config.configmap.cnCacheType` is set to `REDIS`.
     cnRedisSentinelGroup: ""
@@ -304,7 +295,7 @@ config:
     cnRedisUrl: "redis.redis.svc.cluster.local:6379"
     # -- Boolean to use SSL in Redis. Can be used when  `config.configmap.cnCacheType` is set to `REDIS`.
     cnRedisUseSsl: false
-    # -- Enable SAML-related features; UI menu, etc.
+    # -- Kubernetes secret name holding configuration keys. Used when global.configSecretAdapter is set to kubernetes which is the default.
     cnSecretKubernetesSecret: cn
     # -- Loadbalancer address for AWS if the FQDN is not registered.
     lbAddr: ""
@@ -579,7 +570,9 @@ global:
   cloud:
     # -- Boolean flag if enabled will strip resources requests and limits from all services.
     testEnviroment: false
-  # -- Boolean flag if enabled will enable jackrabbit in cluster mode with Postgres.
+  # -- Document store type to use for shibboleth files LOCAL.
+  cnDocumentStoreType: LOCAL
+  # -- Persistence backend to run Janssen with ldap|couchbase|hybrid|sql|spanner.
   cnPersistenceType: sql
   # -- Open banking external signing jwks uri. Used in SSA Validation.
   config:
@@ -632,6 +625,7 @@ global:
     additionalLabels: {}
     # -- Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
     additionalAnnotations: {}
+  # -- The Loadbalancer IP created by nginx or istio on clouds that provide static IPs. This is not needed if `global.fqdn` is globally resolvable.
   lbIp: 22.22.22.22
   nginx-ingress:
     # -- Boolean flag to enable/disable the nginx-ingress definitions chart.
@@ -671,7 +665,7 @@ global:
       scriptLogTarget: "FILE"
       # -- jans-scim_script.log level
       scriptLogLevel: "INFO"
-  # -- StorageClass section for Jackrabbit and OpenDJ charts. This is not currently used by the openbanking distribution. You may specify custom parameters as needed.
+  # -- StorageClass section for OpenDJ charts. This is not currently used by the openbanking distribution. You may specify custom parameters as needed.
   storageClass:
     allowVolumeExpansion: true
     allowedTopologies: []
@@ -691,8 +685,6 @@ global:
     # -- Boolean flag used when running upgrading through versions command. Used when upgrading with LDAP as the persistence to load the 101x ldif.
     enabled: false
 
-# -- Jackrabbit Oak is a complementary implementation of the JCR specification. It is an effort to implement a scalable and performant hierarchical content repository for use as the foundation of modern world-class web sites and other demanding content applications
-# https://jackrabbit.apache.org/jcr/index.html
 # -- Nginx ingress definitions chart
 nginx-ingress:
   ingress:

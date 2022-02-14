@@ -1,5 +1,4 @@
-# License terms and conditions for Janssen Cloud Native Edition:
-# https://www.apache.org/licenses/LICENSE-2.0
+
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -69,11 +68,6 @@ spec:
           {{- with .Values.volumeMounts }}
 {{- toYaml . | nindent 10 }}
           {{- end }}
-        {{- if .Values.global.jackrabbit.enabled }}
-          - name: cn-jackrabbit-admin-pass
-            mountPath: /etc/janssen/conf/jackrabbit_admin_password
-            subPath: jackrabbit_admin_password
-        {{- end }}
         {{ if or (eq .Values.global.configSecretAdapter "google") (eq .Values.global.cnPersistenceType "spanner") }}
           - mountPath: {{ .Values.global.cnGoogleApplicationCredentials }}
             name: google-sa
@@ -89,11 +83,6 @@ spec:
       volumes:
       {{- with .Values.volumes }}
 {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- if .Values.global.jackrabbit.enabled }}
-        - name: cn-jackrabbit-admin-pass
-          secret:
-            secretName: cn-jackrabbit-admin-pass
       {{- end }}
       {{ if or (eq .Values.global.configSecretAdapter "google") (eq .Values.global.cnPersistenceType "spanner") }}
         - name: google-sa
