@@ -11,11 +11,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import io.jans.as.client.model.SoftwareStatement;
 import io.jans.as.client.util.ClientUtil;
-import io.jans.as.model.common.AuthenticationMethod;
-import io.jans.as.model.common.BackchannelTokenDeliveryMode;
-import io.jans.as.model.common.GrantType;
-import io.jans.as.model.common.ResponseType;
-import io.jans.as.model.common.SubjectType;
+import io.jans.as.model.common.*;
 import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
 import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
@@ -31,78 +27,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.ws.rs.core.MediaType;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-import static io.jans.as.client.util.ClientUtil.booleanOrNull;
-import static io.jans.as.client.util.ClientUtil.extractListByKey;
-import static io.jans.as.client.util.ClientUtil.integerOrNull;
-import static io.jans.as.model.register.RegisterRequestParam.ACCESS_TOKEN_AS_JWT;
-import static io.jans.as.model.register.RegisterRequestParam.ACCESS_TOKEN_LIFETIME;
-import static io.jans.as.model.register.RegisterRequestParam.ACCESS_TOKEN_SIGNING_ALG;
-import static io.jans.as.model.register.RegisterRequestParam.ALLOW_SPONTANEOUS_SCOPES;
-import static io.jans.as.model.register.RegisterRequestParam.APPLICATION_TYPE;
-import static io.jans.as.model.register.RegisterRequestParam.AUTHORIZATION_ENCRYPTED_RESPONSE_ALG;
-import static io.jans.as.model.register.RegisterRequestParam.AUTHORIZATION_ENCRYPTED_RESPONSE_ENC;
-import static io.jans.as.model.register.RegisterRequestParam.AUTHORIZATION_SIGNED_RESPONSE_ALG;
-import static io.jans.as.model.register.RegisterRequestParam.AUTHORIZED_ORIGINS;
-import static io.jans.as.model.register.RegisterRequestParam.BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG;
-import static io.jans.as.model.register.RegisterRequestParam.BACKCHANNEL_CLIENT_NOTIFICATION_ENDPOINT;
-import static io.jans.as.model.register.RegisterRequestParam.BACKCHANNEL_LOGOUT_SESSION_REQUIRED;
-import static io.jans.as.model.register.RegisterRequestParam.BACKCHANNEL_LOGOUT_URI;
-import static io.jans.as.model.register.RegisterRequestParam.BACKCHANNEL_TOKEN_DELIVERY_MODE;
-import static io.jans.as.model.register.RegisterRequestParam.BACKCHANNEL_USER_CODE_PARAMETER;
-import static io.jans.as.model.register.RegisterRequestParam.CLAIMS;
-import static io.jans.as.model.register.RegisterRequestParam.CLAIMS_REDIRECT_URIS;
-import static io.jans.as.model.register.RegisterRequestParam.CLIENT_NAME;
-import static io.jans.as.model.register.RegisterRequestParam.CLIENT_URI;
-import static io.jans.as.model.register.RegisterRequestParam.CONTACTS;
-import static io.jans.as.model.register.RegisterRequestParam.DEFAULT_ACR_VALUES;
-import static io.jans.as.model.register.RegisterRequestParam.DEFAULT_MAX_AGE;
-import static io.jans.as.model.register.RegisterRequestParam.FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED;
-import static io.jans.as.model.register.RegisterRequestParam.FRONT_CHANNEL_LOGOUT_URI;
-import static io.jans.as.model.register.RegisterRequestParam.GRANT_TYPES;
-import static io.jans.as.model.register.RegisterRequestParam.ID_TOKEN_ENCRYPTED_RESPONSE_ALG;
-import static io.jans.as.model.register.RegisterRequestParam.ID_TOKEN_ENCRYPTED_RESPONSE_ENC;
-import static io.jans.as.model.register.RegisterRequestParam.ID_TOKEN_SIGNED_RESPONSE_ALG;
-import static io.jans.as.model.register.RegisterRequestParam.ID_TOKEN_TOKEN_BINDING_CNF;
-import static io.jans.as.model.register.RegisterRequestParam.INITIATE_LOGIN_URI;
-import static io.jans.as.model.register.RegisterRequestParam.JWKS;
-import static io.jans.as.model.register.RegisterRequestParam.JWKS_URI;
-import static io.jans.as.model.register.RegisterRequestParam.KEEP_CLIENT_AUTHORIZATION_AFTER_EXPIRATION;
-import static io.jans.as.model.register.RegisterRequestParam.LOGO_URI;
-import static io.jans.as.model.register.RegisterRequestParam.PAR_LIFETIME;
-import static io.jans.as.model.register.RegisterRequestParam.POLICY_URI;
-import static io.jans.as.model.register.RegisterRequestParam.POST_LOGOUT_REDIRECT_URIS;
-import static io.jans.as.model.register.RegisterRequestParam.REDIRECT_URIS;
-import static io.jans.as.model.register.RegisterRequestParam.REQUEST_OBJECT_ENCRYPTION_ALG;
-import static io.jans.as.model.register.RegisterRequestParam.REQUEST_OBJECT_ENCRYPTION_ENC;
-import static io.jans.as.model.register.RegisterRequestParam.REQUEST_OBJECT_SIGNING_ALG;
-import static io.jans.as.model.register.RegisterRequestParam.REQUEST_URIS;
-import static io.jans.as.model.register.RegisterRequestParam.REQUIRE_AUTH_TIME;
-import static io.jans.as.model.register.RegisterRequestParam.REQUIRE_PAR;
-import static io.jans.as.model.register.RegisterRequestParam.RESPONSE_TYPES;
-import static io.jans.as.model.register.RegisterRequestParam.RPT_AS_JWT;
-import static io.jans.as.model.register.RegisterRequestParam.RUN_INTROSPECTION_SCRIPT_BEFORE_ACCESS_TOKEN_CREATION_AS_JWT_AND_INCLUDE_CLAIMS;
-import static io.jans.as.model.register.RegisterRequestParam.SCOPE;
-import static io.jans.as.model.register.RegisterRequestParam.SECTOR_IDENTIFIER_URI;
-import static io.jans.as.model.register.RegisterRequestParam.SOFTWARE_ID;
-import static io.jans.as.model.register.RegisterRequestParam.SOFTWARE_STATEMENT;
-import static io.jans.as.model.register.RegisterRequestParam.SOFTWARE_VERSION;
-import static io.jans.as.model.register.RegisterRequestParam.SPONTANEOUS_SCOPES;
-import static io.jans.as.model.register.RegisterRequestParam.SUBJECT_TYPE;
-import static io.jans.as.model.register.RegisterRequestParam.TLS_CLIENT_AUTH_SUBJECT_DN;
-import static io.jans.as.model.register.RegisterRequestParam.TOKEN_ENDPOINT_AUTH_METHOD;
-import static io.jans.as.model.register.RegisterRequestParam.TOKEN_ENDPOINT_AUTH_SIGNING_ALG;
-import static io.jans.as.model.register.RegisterRequestParam.TOS_URI;
-import static io.jans.as.model.register.RegisterRequestParam.USERINFO_ENCRYPTED_RESPONSE_ALG;
-import static io.jans.as.model.register.RegisterRequestParam.USERINFO_ENCRYPTED_RESPONSE_ENC;
-import static io.jans.as.model.register.RegisterRequestParam.USERINFO_SIGNED_RESPONSE_ALG;
+import static io.jans.as.client.util.ClientUtil.*;
+import static io.jans.as.model.register.RegisterRequestParam.*;
 import static io.jans.as.model.util.StringUtils.implode;
 import static io.jans.as.model.util.StringUtils.toJSONArray;
 
@@ -111,7 +39,7 @@ import static io.jans.as.model.util.StringUtils.toJSONArray;
  *
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
- * @version July 28, 2021
+ * @version February 10, 2022
  */
 public class RegisterRequest extends BaseRequest {
 
@@ -154,6 +82,7 @@ public class RegisterRequest extends BaseRequest {
     private Boolean runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims;
     private Boolean keepClientAuthorizationAfterExpiration;
     private SubjectType subjectType;
+    private String subjectIdentifierAttribute;
     private Boolean rptAsJwt;
     private Boolean accessTokenAsJwt;
     private SignatureAlgorithm accessTokenSigningAlg;
@@ -695,6 +624,14 @@ public class RegisterRequest extends BaseRequest {
      */
     public void setSubjectType(SubjectType subjectType) {
         this.subjectType = subjectType;
+    }
+
+    public String getSubjectIdentifierAttribute() {
+        return subjectIdentifierAttribute;
+    }
+
+    public void setSubjectIdentifierAttribute(String subjectIdentifierAttribute) {
+        this.subjectIdentifierAttribute = subjectIdentifierAttribute;
     }
 
     public Boolean getRptAsJwt() {
@@ -1305,6 +1242,9 @@ public class RegisterRequest extends BaseRequest {
         if (subjectType != null) {
             parameters.put(SUBJECT_TYPE.toString(), subjectType.toString());
         }
+        if (StringUtils.isNotBlank(subjectIdentifierAttribute)) {
+            parameters.put(PUBLIC_SUBJECT_IDENTIFIER_ATTRIBUTE.getName(), subjectIdentifierAttribute);
+        }
         if (rptAsJwt != null) {
             parameters.put(RPT_AS_JWT.toString(), rptAsJwt.toString());
         }
@@ -1521,6 +1461,7 @@ public class RegisterRequest extends BaseRequest {
         result.setJwks(requestObject.optString(JWKS.toString()));
         result.setSectorIdentifierUri(requestObject.optString(SECTOR_IDENTIFIER_URI.toString()));
         result.setSubjectType(SubjectType.fromString(requestObject.optString(SUBJECT_TYPE.toString())));
+        result.setSubjectIdentifierAttribute(requestObject.optString(PUBLIC_SUBJECT_IDENTIFIER_ATTRIBUTE.getName()));
         result.setSoftwareId(requestObject.optString(SOFTWARE_ID.toString()));
         result.setSoftwareVersion(requestObject.optString(SOFTWARE_VERSION.toString()));
         result.setSoftwareStatement(requestObject.optString(SOFTWARE_STATEMENT.toString()));
@@ -1615,6 +1556,9 @@ public class RegisterRequest extends BaseRequest {
         }
         if (subjectType != null) {
             parameters.put(SUBJECT_TYPE.toString(), subjectType.toString());
+        }
+        if (StringUtils.isNotBlank(subjectIdentifierAttribute)) {
+            parameters.put(PUBLIC_SUBJECT_IDENTIFIER_ATTRIBUTE.getName(), subjectIdentifierAttribute);
         }
         if (rptAsJwt != null) {
             parameters.put(RPT_AS_JWT.toString(), rptAsJwt.toString());
