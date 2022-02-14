@@ -188,7 +188,7 @@ public class AuthorizeRestWebServiceValidator {
         if (redirectUri != null && redirectionUriService.validateRedirectionUri(client, redirectUri) == null) {
             log.error(" unregistered redirect uri");
             throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST)
-                    .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST_REDIRECT_URI,
+                    .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT,
                             jwtRequest.getState(), "The request has unregistered request_uri"))
                     .type(MediaType.APPLICATION_JSON_TYPE).build());
         }
