@@ -1,5 +1,4 @@
-# License terms and conditions for Janssen Cloud Native Edition:
-# https://www.apache.org/licenses/LICENSE-2.0
+
 apiVersion: v1
 kind: ConfigMap
 metadata: 
@@ -44,7 +43,6 @@ data:
   CN_SQL_DB_NAME: {{ .Values.configmap.cnSqlDbName }}
   CN_SQL_DB_USER: {{ .Values.configmap.cnSqlDbUser }}
   CN_SQL_DB_TIMEZONE: {{ .Values.configmap.cnSqlDbTimezone }}
-  CN_SQL_PASSWORD_FILE: {{ .Values.configmap.cnSqlPasswordFile }}
   CN_CONFIG_ADAPTER: {{ .Values.global.configAdapterName }}
   CN_SECRET_ADAPTER: {{ .Values.global.configSecretAdapter }}
   CN_CONFIG_KUBERNETES_NAMESPACE: {{ .Release.Namespace | quote }}
@@ -54,11 +52,7 @@ data:
   CN_CONTAINER_METADATA: {{ .Values.configmap.containerMetadataName | quote }}
   CN_MAX_RAM_PERCENTAGE: {{ .Values.configmap.cnMaxRamPercent | quote }}
   CN_CACHE_TYPE: {{ .Values.configmap.cnCacheType | quote }}
-  {{- if not .Values.global.jackrabbit.enabled }}
-  CN_DOCUMENT_STORE_TYPE: LOCAL
-  {{- else }}
-  CN_DOCUMENT_STORE_TYPE: {{ .Values.configmap.cnDocumentStoreType | quote }}
-  {{- end }}
+  CN_DOCUMENT_STORE_TYPE: {{ .Values.global.cnDocumentStoreType | quote }}
   DOMAIN: {{ .Values.global.fqdn | quote }}
   CN_AUTH_SERVER_BACKEND: {{ cat ( index .Values "global" "auth-server" "authServerServiceName" ) ":8080" | quote | nospace }}
   CN_AUTH_APP_LOGGERS: {{ index .Values "global" "auth-server" "appLoggers"
@@ -114,10 +108,7 @@ data:
   CN_COUCHBASE_BUCKET_PREFIX: {{ .Values.configmap.cnCouchbaseBucketPrefix }}
   CN_COUCHBASE_INDEX_NUM_REPLICA: {{ .Values.configmap.cnCouchbaseIndexNumReplica | quote }}
   CN_COUCHBASE_USER: {{ .Values.configmap.cnCouchbaseUser }}
-  CN_COUCHBASE_CERT_FILE: {{ .Values.configmap.cnCouchbaseCertFile | quote }}
-  CN_COUCHBASE_PASSWORD_FILE: {{ .Values.configmap.cnCouchbasePasswordFile | quote }}
   CN_COUCHBASE_SUPERUSER: {{ .Values.configmap.cnCouchbaseSuperUser }}
-  CN_COUCHBASE_SUPERUSER_PASSWORD_FILE: {{ .Values.configmap.cnCouchbaseSuperUserPasswordFile | quote }}
   {{- end }}
   CN_KEY_ROTATION_FORCE: "false"
   CN_KEY_ROTATION_CHECK: "3600"

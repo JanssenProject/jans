@@ -1,5 +1,4 @@
-# License terms and conditions for Janssen Cloud Native Edition:
-# https://www.apache.org/licenses/LICENSE-2.0
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -68,20 +67,6 @@ spec:
           {{- with .Values.volumeMounts }}
 {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- if index .Values "global" "admin-ui" "enabled" }}
-            - mountPath: {{ index .Values "global" "admin-ui" "adminUiApiKeyFile" }}
-              name: admin-ui-license-api-key
-              subPath: admin_ui_api_key
-            - mountPath: {{ index .Values "global" "admin-ui" "adminUiProductCodeFile" }}
-              name: admin-ui-license-product-code
-              subPath: admin_ui_product_code
-            - mountPath: {{ index .Values "global" "admin-ui" "adminUiSharedKeyFile" }}
-              name: admin-ui-license-shared-key
-              subPath: admin_ui_shared_key
-            - mountPath: {{ index .Values "global" "admin-ui" "adminUiManagementKeyFile" }}
-              name: admin-ui-license-management-key
-              subPath: admin_ui_management_key
-          {{- end }}
           {{ if or (eq .Values.global.configSecretAdapter "google") (eq .Values.global.cnPersistenceType "spanner") }}
             - mountPath: {{ .Values.global.cnGoogleApplicationCredentials }}
               name: google-sa
@@ -110,32 +95,6 @@ spec:
       volumes:
       {{- with .Values.volumes }}
 {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- if index .Values "global" "admin-ui" "enabled" }}
-        - name: admin-ui-license-api-key
-          secret:
-            secretName: {{ .Release.Name }}-admin-ui-license
-            items:
-              - key: admin_ui_api_key
-                path: admin_ui_api_key
-        - name: admin-ui-license-product-code
-          secret:
-            secretName: {{ .Release.Name }}-admin-ui-license
-            items:
-              - key: admin_ui_product_code
-                path: admin_ui_product_code
-        - name: admin-ui-license-shared-key
-          secret:
-            secretName: {{ .Release.Name }}-admin-ui-license
-            items:
-              - key: admin_ui_shared_key
-                path: admin_ui_shared_key
-        - name: admin-ui-license-management-key
-          secret:
-            secretName: {{ .Release.Name }}-admin-ui-license
-            items:
-              - key: admin_ui_management_key
-                path: admin_ui_management_key
       {{- end }}
       {{ if or (eq .Values.global.configSecretAdapter "google") (eq .Values.global.cnPersistenceType "spanner") }}
         - name: google-sa

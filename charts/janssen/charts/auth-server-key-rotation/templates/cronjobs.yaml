@@ -1,5 +1,3 @@
-# License terms and conditions for Janssen Cloud Native Edition:
-# https://www.apache.org/licenses/LICENSE-2.0
 kind: CronJob
 apiVersion: batch/v1beta1
 metadata:

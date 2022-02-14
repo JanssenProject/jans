@@ -1,5 +1,4 @@
-# License terms and conditions for Janssen Cloud Native Edition:
-# https://www.apache.org/licenses/LICENSE-2.0
+
 # Required environment variables for generating Janssen server initial config
 # -- Add custom normal and secret envs to the service.
 usrEnvs:
@@ -28,9 +27,7 @@ configmap:
   cnSqlDbUser: jans
   # -- SQL database timezone.
   cnSqlDbTimezone: UTC
-  # -- SQL password file holding password from config.configmap.cnSqldbUserPassword .
-  cnSqlPasswordFile: /etc/jans/conf/sql_password
-  # -- SQL password  injected as config.configmap.cnSqlPasswordFile .
+  # -- SQL password  injected in the secrets.
   cnSqldbUserPassword: Test1234#
   # -- Cache type. `NATIVE_PERSISTENCE`, `REDIS`. or `IN_MEMORY`. Defaults to `NATIVE_PERSISTENCE` .
   cnCacheType: NATIVE_PERSISTENCE
@@ -45,48 +42,20 @@ configmap:
   cnConfigKubernetesConfigMap: cn
   # -- The prefix of couchbase buckets. This helps with separation in between different environments and allows for the same couchbase cluster to be used by different setups of Janssen.
   cnCouchbaseBucketPrefix: jans
-  # -- Location of `couchbase.crt` used by Couchbase SDK for tls termination. The file path must end with couchbase.crt. In mTLS setups this is not required.
-  cnCouchbaseCertFile: /etc/certs/couchbase.crt
   # -- Couchbase certificate authority string. This must be encoded using base64. This can also be found in your couchbase UI Security > Root Certificate. In mTLS setups this is not required.
   cnCouchbaseCrt: SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo=
   # -- The number of replicas per index created. Please note that the number of index nodes must be one greater than the number of index replicas. That means if your couchbase cluster only has 2 index nodes you cannot place the number of replicas to be higher than 1.
   cnCouchbaseIndexNumReplica: 0
   # -- Couchbase password for the restricted user config.configmap.cnCouchbaseUser  that is often used inside the services. The password must contain one digit, one uppercase letter, one lower case letter and one symbol .
   cnCouchbasePassword: P@ssw0rd
-  # -- The location of the Couchbase restricted user config.configmap.cnCouchbaseUser password. The file path must end with couchbase_password
-  cnCouchbasePasswordFile: /etc/janssen/conf/couchbase_password
   # -- The Couchbase super user (admin) user name. This user is used during initialization only.
   cnCouchbaseSuperUser: admin
   # -- Couchbase password for the super user config.configmap.cnCouchbaseSuperUser  that is used during the initialization process. The password must contain one digit, one uppercase letter, one lower case letter and one symbol
   cnCouchbaseSuperUserPassword: Test1234#
-  # -- The location of the Couchbase restricted user config.configmap.cnCouchbaseSuperUser password. The file path must end with couchbase_superuser_password.
-  cnCouchbaseSuperUserPasswordFile: /etc/janssen/conf/couchbase_superuser_password
   # -- Couchbase URL. Used only when global.cnPersistenceType is hybrid or couchbase. This should be in FQDN format for either remote or local Couchbase clusters. The address can be an internal address inside the kubernetes cluster
   cnCouchbaseUrl: cbjanssen.default.svc.cluster.local
   # -- Couchbase restricted user. Used only when global.cnPersistenceType is hybrid or couchbase.
   cnCouchbaseUser: janssen
-  # -- Document store type to use for shibboleth files JCA or LOCAL. Note that if JCA is selected Apache Jackrabbit will be used. Jackrabbit also enables loading custom files across all services easily.
-  cnDocumentStoreType: JCA
-  # -- Jackrabbit admin uid.
-  cnJackrabbitAdminId: admin
-  # -- The location of the Jackrabbit admin uid config.cnJackrabbitAdminId. The file path must end with jackrabbit_admin_id.
-  cnJackrabbitAdminIdFile: /etc/janssen/conf/jackrabbit_admin_id
-  # -- The location of the Jackrabbit admin password jackrabbit.secrets.cnJackrabbitAdminPassword. The file path must end with jackrabbit_admin_password.
-  cnJackrabbitAdminPasswordFile: /etc/janssen/conf/jackrabbit_admin_password
-  # -- Jackrabbit postgres database name.
-  cnJackrabbitPostgresDatabaseName: jackrabbit
-  # -- Postgres url
-  cnJackrabbitPostgresHost: postgresql.postgres.svc.cluster.local
-  # -- The location of the Jackrabbit postgres password file jackrabbit.secrets.cnJackrabbitPostgresPassword. The file path must end with postgres_password.
-  cnJackrabbitPostgresPasswordFile: /etc/janssen/conf/postgres_password
-  # -- Jackrabbit Postgres port
-  cnJackrabbitPostgresPort: 5432
-  # -- Jackrabbit Postgres uid
-  cnJackrabbitPostgresUser: jackrabbit
-  # -- Interval between files sync (default to 300 seconds).
-  cnJackrabbitSyncInterval: 300
-  # -- Jackrabbit internal url. Normally left as default.
-  cnJackrabbitUrl: "http://jackrabbit:8080"
   # [google_envs] Envs related to using Google
   # -- Service account with roles roles/secretmanager.admin base64 encoded string. This is used often inside the services to reach the configuration layer. Used only when global.configAdapterName and global.configSecretAdapter is set to google.
   cnGoogleSecretManagerServiceAccount: SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo=
@@ -115,7 +84,6 @@ configmap:
   cnLdapUrl: "opendj:1636"
   # -- Value passed to Java option -XX:MaxRAMPercentage
   cnMaxRamPercent: "75.0"
-  # -- Boolean flag to enable/disable passport chart
   # -- Specify data that should be saved in LDAP (one of default, user, cache, site, token, or session; default to default). Note this environment only takes effect when `global.cnPersistenceType`  is set to `hybrid`.
   cnPersistenceLdapMapping: default
   # -- Redis Sentinel Group. Often set when `config.configmap.cnRedisType` is set to `SENTINEL`. Can be used when  `config.configmap.cnCacheType` is set to `REDIS`.
@@ -128,8 +96,6 @@ configmap:
   cnRedisUrl: "redis.redis.svc.cluster.local:6379"
   # -- Boolean to use SSL in Redis. Can be used when  `config.configmap.cnCacheType` is set to `REDIS`.
   cnRedisUseSsl: false
-  # -- Enable SAML-related features; UI menu, etc.
-  cnSamlEnabled: false
   # -- Kubernetes secret name holding configuration keys. Used when global.configSecretAdapter is set to kubernetes which is the default.
   cnSecretKubernetesSecret: cn
   # -- Loadbalancer address for AWS if the FQDN is not registered.
