@@ -168,7 +168,6 @@ LABEL name="Persistence" \
 RUN mkdir -p /app/tmp /etc/certs /etc/jans/conf
 
 COPY scripts /app/scripts
-# COPY static /app/static
 COPY templates /app/templates
 RUN chmod +x /app/scripts/entrypoint.sh
 
