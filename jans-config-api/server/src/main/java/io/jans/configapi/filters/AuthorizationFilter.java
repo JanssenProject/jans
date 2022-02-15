@@ -113,7 +113,7 @@ public class AuthorizationFilter implements ContainerRequestFilter {
             }
             
             //Custom authorization   
-            log.info("\n\n\n AuthorizationFilter::filter() - Custom - authorizationHeader = "+authorizationHeader+"\n");
+            /*log.info("\n\n\n AuthorizationFilter::filter() - Custom - authorizationHeader = "+authorizationHeader+"\n");
             boolean isAuthorized = isAuthorized(request, httpServletResponse, authorizationHeader, issuer,  context.getMethod(), info.getPath());
             log.error("\n\n\n Custom authorization - isAuthorized:{}",isAuthorized);
             if (!isAuthorized) {
@@ -121,7 +121,7 @@ public class AuthorizationFilter implements ContainerRequestFilter {
                 log.info("======Custom authorization FAILED======================");
                 return;
             }
-            
+            */
             log.info("======AUTHORIZATION  GRANTED===========================================");
         } catch (Exception ex) {
             log.error("======AUTHORIZATION  FAILED ===========================================", ex);
@@ -144,7 +144,7 @@ public class AuthorizationFilter implements ContainerRequestFilter {
                 String path) throws Exception {
             log.debug("Authorization script params -  request:{}, response:{}, token:{}, issuer:{}, method:{}, path:{} ", request, response, token, issuer, method, path);
         return externalInterceptionService.authorization(request, response, this.configurationFactory.getApiAppConfiguration(), token, issuer, method, path);
-    }*/
+    }
      
      private boolean isAuthorized(HttpServletRequest request, HttpServletResponse response, String token, String issuer, String method,
              String path) throws Exception {
@@ -158,6 +158,6 @@ public class AuthorizationFilter implements ContainerRequestFilter {
          log.error("\n\n Authorization script params - responseAsJsonObject = "+responseAsJsonObject+"\n\n\n");
          log.error("Authorization script params -  request:{}, response:{}, requestParameters:{}, responseAsJsonObject:{} ", request, response, requestParameters, responseAsJsonObject);
      return externalInterceptionService.authorization(request, response, this.configurationFactory.getApiAppConfiguration(), requestParameters, responseAsJsonObject);
- }
+ }*/
 
 }

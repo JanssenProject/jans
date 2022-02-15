@@ -15,12 +15,11 @@ import io.jans.service.custom.script.ExternalScriptService;
 
 import java.util.Map;
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.json.JSONObject;
-
-import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 
 @ApplicationScoped
@@ -28,7 +27,8 @@ public class ExternalConfigService extends ExternalScriptService {
 
     private static final long serialVersionUID = 1767751544454591666L;
 
-    Logger log = LoggerFactory.getLogger(ExternalConfigService.class);
+    @Inject
+    Logger logger;
 
     public ExternalConfigService() {
         super(CustomScriptType.CONFIG_API);
@@ -39,34 +39,42 @@ public class ExternalConfigService extends ExternalScriptService {
                 .orElse(null);
     }
 
-    private void logAndSave(CustomScriptConfiguration customScriptConfiguration, Exception e) {
-        log.error(e.getMessage(), e);
-        saveScriptError(customScriptConfiguration.getCustomScript(), e);
+    private void logAndSave(CustomScriptConfiguration customScriptConfiguration, Exception ex) {
+        logger.error(ex.getMessage(), ex);
+        saveScriptError(customScriptConfiguration.getCustomScript(), ex);
     }
 
     public boolean checkAuthorization(HttpServletRequest request, HttpServletResponse response,
-            ApiAppConfiguration apiAppConfiguration, Map<String, Object> requestParameters, JSONObject responseAsJsonObject) {
-        log.error(
-                "\n\n External Config Authorization script params -  request:{}, response:{}, apiAppConfiguration:{}, requestParameters:{}, responseAsJsonObject:{}, this.customScriptConfigurations:{} ",
-                request, response, apiAppConfiguration, requestParameters, responseAsJsonObject, this.customScriptConfigurations);
-        boolean result = true;
+            ApiAppConfiguration apiAppConfiguration, Map<String, Object> requestParameters,
+            JSONObject responseAsJsonObject) {
         for (CustomScriptConfiguration customScriptConfiguration : this.customScriptConfigurations) {
-            ConfigApiType externalType = (ConfigApiType) customScriptConfiguration.getExternalType();
-            ConfigAuthContext context = new ConfigAuthContext(request, response, apiAppConfiguration, requestParameters, customScriptConfiguration);
-            
-            log.error(
-                    "\n\n External Config Authorization script params - externalType:{} ",externalType);
-            result = externalType.modifyResponse(requestParameters,responseAsJsonObject, context);
-            
-            //result = externalType.authorize(context);
-            log.error("\n\n External Config Authorization script result:{}, responseAsJsonObject:{} ",result, responseAsJsonObject);
-
-            if (!result) {
-                return result;
+            if (!executeAuthorizeMethod(request, response, apiAppConfiguration, requestParameters, responseAsJsonObject,
+                    customScriptConfiguration)) {
+                return false;
             }
-
         }
-        return result;
+        return true;
+    }
+
+    private boolean executeAuthorizeMethod(HttpServletRequest request, HttpServletResponse response,
+            ApiAppConfiguration apiAppConfiguration, Map<String, Object> requestParameters,
+            JSONObject responseAsJsonObject, CustomScriptConfiguration customScriptConfiguration) {
+        boolean isAuthorized = false;
+        logger.error(
+                "\n\n External Config Authorization script params -  request:{}, response:{}, apiAppConfiguration:{}, requestParameters:{}, responseAsJsonObject:{}, this.customScriptConfigurations:{} ",
+                request, response, apiAppConfiguration, requestParameters, responseAsJsonObject,
+                this.customScriptConfigurations);
+
+        try {
+            ConfigApiType externalType = (ConfigApiType) customScriptConfiguration.getExternalType();
+            ConfigAuthContext context = new ConfigAuthContext(request, response, apiAppConfiguration, requestParameters,
+                    customScriptConfiguration);
+            return externalType.authorize(responseAsJsonObject, context);
+
+        } catch (Exception ex) {
+            logAndSave(customScriptConfiguration, ex);
+            return isAuthorized;
+        }
     }
 
 }

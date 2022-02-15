@@ -8,7 +8,6 @@ package io.jans.configapi.security.service;
 
 import io.jans.configapi.external.service.ExternalConfigService;
 import io.jans.configapi.model.configuration.ApiAppConfiguration;
-import io.jans.configapi.util.AuthUtil;
 
 import java.util.Map;
 import java.io.Serializable;
@@ -33,16 +32,12 @@ public class ExternalInterceptionService implements Serializable {
     @Inject
     ExternalConfigService externalConfigService;
 
-    @Inject
-    AuthUtil AuthUtil;
-
     public boolean authorization(HttpServletRequest request, HttpServletResponse response,
-            ApiAppConfiguration apiAppConfiguration, Map<String, Object> requestParameters, JSONObject responseAsJsonObject)
-            throws Exception {
+            ApiAppConfiguration apiAppConfiguration, Map<String, Object> requestParameters,
+            JSONObject responseAsJsonObject) {
         log.error(
-                "External Interception Service - Authorization script params -  request:{}, response:{}, apiAppConfiguration:{}, requestParameters:{}, responseAsJsonObject:{}, externalConfigService{} ",
-                request, response, apiAppConfiguration, requestParameters, responseAsJsonObject, externalConfigService);
-        log.error("External Interception Service - externalConfigService.isEnabled():{}",
+                "External Interception Service - Authorization script params -  request:{}, response:{}, apiAppConfiguration:{}, requestParameters:{}, responseAsJsonObject:{}, externalConfigService{}, externalConfigService.isEnabled():{} ",
+                request, response, apiAppConfiguration, requestParameters, responseAsJsonObject, externalConfigService,
                 externalConfigService.isEnabled());
         if (externalConfigService.isEnabled()) {
             return externalConfigService.checkAuthorization(request, response, apiAppConfiguration, requestParameters,

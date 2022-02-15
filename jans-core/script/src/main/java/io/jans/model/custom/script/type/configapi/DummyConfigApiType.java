@@ -6,18 +6,15 @@
 
 package io.jans.model.custom.script.type.configapi;
 
-import java.util.Map;
-
 import io.jans.model.SimpleCustomProperty;
 import io.jans.model.custom.script.model.CustomScript;
-import io.jans.model.custom.script.type.scim.DummyScimType;
-import java.util.Map;
 
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class DummyConfigApiType implements ConfigApiType {
-    
+
     Logger log = LoggerFactory.getLogger(DummyConfigApiType.class);
 
     @Override
@@ -41,12 +38,7 @@ public class DummyConfigApiType implements ConfigApiType {
     }
 
     @Override
-    public boolean authorize(Object context) {
-        return false;
-    }
-    
-    @Override
-    public boolean modifyResponse(Map<String, Object> requestParameters,Object responseAsJsonObject, Object introspectionContext) {
+    public boolean authorize(Object responseAsJsonObject, Object introspectionContext) {
         return false;
     }
 

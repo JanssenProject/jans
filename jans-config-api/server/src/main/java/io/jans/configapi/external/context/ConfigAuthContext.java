@@ -18,29 +18,26 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 
 public class ConfigAuthContext extends ExternalScriptContext {
 
-    private static final Logger log = LoggerFactory.getLogger(ConfigAuthContext.class);
-
     private CustomScriptConfiguration script;
     private ApiAppConfiguration apiAppConfiguration;
-    final Map<String, Object> parmeters;
+    private Map<String, Object> requestParameters;
     private final Map<String, SimpleCustomProperty> configurationAttributes;
 
-    public ConfigAuthContext(HttpServletRequest httpRequest, HttpServletResponse httpResponse, ApiAppConfiguration apiAppConfiguration, Map<String, Object> parmeters, CustomScriptConfiguration script) {
-        this(httpRequest, httpResponse, apiAppConfiguration, parmeters, script, null);
+    public ConfigAuthContext(HttpServletRequest httpRequest, HttpServletResponse httpResponse,
+            ApiAppConfiguration apiAppConfiguration, Map<String, Object> requestParameters,
+            CustomScriptConfiguration script) {
+        this(httpRequest, httpResponse, apiAppConfiguration, requestParameters, script, null);
     }
 
-    public ConfigAuthContext(HttpServletRequest httpRequest, HttpServletResponse httpResponse, ApiAppConfiguration apiAppConfiguration, Map<String, Object> parmeters, CustomScriptConfiguration script,
-            Map<String, SimpleCustomProperty> configurationAttributes) {
-        super(httpRequest,httpResponse);
+    public ConfigAuthContext(HttpServletRequest httpRequest, HttpServletResponse httpResponse,
+            ApiAppConfiguration apiAppConfiguration, Map<String, Object> requestParameters,
+            CustomScriptConfiguration script, Map<String, SimpleCustomProperty> configurationAttributes) {
+        super(httpRequest, httpResponse);
         this.apiAppConfiguration = apiAppConfiguration;
-        this.parmeters = parmeters;
+        this.requestParameters = requestParameters;
         this.script = script;
         this.configurationAttributes = configurationAttributes;
     }
@@ -61,8 +58,8 @@ public class ConfigAuthContext extends ExternalScriptContext {
         this.apiAppConfiguration = apiAppConfiguration;
     }
 
-    public Map<String, Object> getParmeters() {
-        return parmeters;
+    public Map<String, Object> getRequestParameters() {
+        return requestParameters;
     }
 
     public Map<String, SimpleCustomProperty> getConfigurationAttributes() {
@@ -85,8 +82,9 @@ public class ConfigAuthContext extends ExternalScriptContext {
 
     @Override
     public String toString() {
-        return "ConfigAuthContext [script=" + script + ", apiAppConfiguration=" + apiAppConfiguration + ", parmeters="
-                + parmeters + ", configurationAttributes=" + configurationAttributes + "]";
+        return "ConfigAuthContext [script=" + script + ", apiAppConfiguration=" + apiAppConfiguration
+                + ", requestParameters=" + requestParameters + ", configurationAttributes=" + configurationAttributes
+                + "]";
     }
 
 }

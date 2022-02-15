@@ -8,23 +8,32 @@ package io.jans.configapi.security.service;
 
 import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwt.Jwt;
+import io.jans.configapi.core.util.Jackson;
+import io.jans.configapi.security.service.ExternalInterceptionService;
 import io.jans.configapi.util.*;
 import io.jans.as.model.common.IntrospectionResponse;
-
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
 
 import javax.annotation.Priority;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Alternative;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ResourceInfo;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.lang.StringUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.slf4j.Logger;
 
 @ApplicationScoped
 @Named("openIdAuthorizationService")
@@ -36,15 +45,27 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
 
     @Inject
     Logger log;
+    
+    @Context
+    HttpServletRequest request;
+    
+    @Context
+    HttpServletResponse response;
 
     @Inject
     AuthUtil authUtil;
 
     @Inject
-    JwtUtil jwtUtil;
+    JwtUtil jwtUtil;    
+    
+    @Inject 
+    Jackson jackson;
 
     @Inject
     OpenIdService openIdService;
+    
+    @Inject 
+    ExternalInterceptionService externalInterceptionService;
 
     public String processAuthorization(String token, String issuer, ResourceInfo resourceInfo, String method,
             String path) throws Exception {
@@ -98,7 +119,12 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
 
         tokenScopes = introspectionResponse.getScope();
         // Validate Scopes
-        return this.validateScope(acccessToken, tokenScopes, resourceInfo, issuer);
+        acccessToken = validateScope(acccessToken, tokenScopes, resourceInfo, issuer);
+        
+        boolean isAuthorized = externalAuthorization(token, issuer,  method, path);
+        log.error("\n\n\n Custom authorization - isAuthorized:{}",isAuthorized);
+        
+        return acccessToken;
     }
 
     private String validateScope(String accessToken, List<String> tokenScopes, ResourceInfo resourceInfo, String issuer) throws Exception {
@@ -159,5 +185,20 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
         log.info("Token scopes Valid");
         return "Bearer " + accessToken;
     }
+    
+    private boolean externalAuthorization(String token, String issuer, String method,
+            String path) throws Exception {
+        log.error("\n\n External Authorization script params -  request:{}, response:{}, token:{}, issuer:{}, method:{}, path:{} ", request, response, token, issuer, method, path);
+        Map<String, Object> requestParameters = new HashMap<>();
+        requestParameters.put("ISSUER",issuer);
+        requestParameters.put("TOKEN",token);
+        requestParameters.put("METHOD",method);
+        requestParameters.put("PATH",path);
+        JSONObject responseAsJsonObject = jackson.createJSONObject(requestParameters);
+        log.error("\n\n Authorization script params - responseAsJsonObject = "+responseAsJsonObject+"\n\n\n");
+        log.error("Authorization script params -  request:{}, response:{}, requestParameters:{}, responseAsJsonObject:{} ", request, response, requestParameters, responseAsJsonObject);
+        return externalInterceptionService.authorization(request, response, this.configurationFactory.getApiAppConfiguration(), requestParameters, responseAsJsonObject);
+}
+
 
 }
