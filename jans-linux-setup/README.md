@@ -43,7 +43,7 @@ Scripts and templates to automate deployment and configuration of the Janssen Pr
     make zipapp
     ```
 
-    This command will generate executable called `jans-setup.pyz` under the same directory.
+    This command will generate executable called `jans-linux-setup.pyz` under the same directory.
 
 Installing Janssen Server
 -----------------------
@@ -64,8 +64,8 @@ Execute installer with `-uninstall` argument
 
 Run
 
-    `python3 jans-setup.pyz -uninstall`
-    
+    `python3 jans-linux-setup.pyz -uninstall`
+
     or if you used the `make install` command run `jans-setup -uninstall`.
     
 Reinstalling Janssen Server
