@@ -298,7 +298,7 @@ def extract_setup():
     if os.path.exists(setup_dir):
         shutil.move(setup_dir, setup_dir + '-back.' + time.ctime())
     print("Extracting jans-setup package")
-    extract_subdir(jans_zip_file, 'jans-linux-setup', setup_dir)
+    extract_subdir(jans_zip_file, 'jans-linux-setup/jans_setup', setup_dir)
     extract_subdir(sqlalchemy_zip_file, 'lib/sqlalchemy', os.path.join(setup_dir, 'setup_app/pylib/sqlalchemy'))
 
     target_setup = os.path.join(setup_dir, 'setup.py')
