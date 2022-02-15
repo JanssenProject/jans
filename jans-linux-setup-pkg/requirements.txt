@@ -1,8 +1,0 @@
-setuptools>=59.6.0
-pyasn1==0.4.8
-ruamel.yaml>=0.16.5
-sqlalchemy==1.4.31
-google-cloud-spanner==3.13.0
-ldap3
-PyMySQL
-pycrypto
