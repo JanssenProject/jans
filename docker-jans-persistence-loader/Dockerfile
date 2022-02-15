@@ -7,7 +7,7 @@ FROM alpine:3.14.3
 RUN apk update \
     && apk add --no-cache py3-pip curl tini py3-cryptography py3-psycopg2 \
     && apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/v3.15/community py3-grpcio \
-    && apk add --no-cache --virtual build-deps git
+    && apk add --no-cache --virtual build-deps git wget
 
 # ======
 # Python
@@ -16,6 +16,41 @@ RUN apk update \
 COPY requirements.txt /app/requirements.txt
 RUN pip3 install -U pip wheel \
     && pip3 install --no-cache-dir --default-timeout=300 -r /app/requirements.txt
+
+# =====================
+# jans-linux-setup sync
+# =====================
+
+ARG JANS_LINUX_SETUP_VERSION=493337f94045be705386b8f2b59dda29f85762e6
+ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
+
+# note that as we're pulling from a monorepo (with multiple project in it)
+# we are using partial-clone and sparse-checkout to get the jans-linux-setup code
+RUN git clone --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
+    && cd /tmp/jans \
+    && git sparse-checkout init --cone \
+    && git checkout ${JANS_LINUX_SETUP_VERSION} \
+    && git sparse-checkout set ${JANS_SETUP_DIR}
+
+# sync files from linux-setup
+RUN mkdir -p /app/static /app/schema /app/openbanking/static \
+    && cd /tmp/jans \
+    && cp -R ${JANS_SETUP_DIR}/static/extension /app/static/extension \
+    && cp -R ${JANS_SETUP_DIR}/openbanking/static/extension /app/openbanking/static/extension \
+    && mkdir -p /app/static/couchbase \
+    && cp ${JANS_SETUP_DIR}/static/couchbase/index.json /app/static/couchbase/index.json \
+    && cp ${JANS_SETUP_DIR}/schema/opendj_types.json /app/schema/opendj_types.json \
+    && cp -R ${JANS_SETUP_DIR}/static/rdbm /app/static/rdbm \
+    && mkdir -p /app/schema \
+    && cp ${JANS_SETUP_DIR}/schema/jans_schema.json /app/schema/jans_schema.json \
+    && cp ${JANS_SETUP_DIR}/schema/custom_schema.json /app/schema/custom_schema.json
+
+# TODO: casa should be moved from this image
+ARG GLUU_CASA_VERSION=e703c4b62e60d3cd299ea84f471417290987bdef
+RUN wget -q https://github.com/GluuFederation/flex/raw/${GLUU_CASA_VERSION}/casa/extras/Casa.py -O /app/static/extension/person_authentication/Casa.py
+
+# cleanup
+RUN rm -rf /tmp/jans
 
 # =======
 # Cleanup
@@ -126,14 +161,14 @@ LABEL name="Persistence" \
     maintainer="Janssen <support@jans.io>" \
     vendor="Janssen Project" \
     version="1.0.0" \
-    release="b12" \
+    release="beta.15" \
     summary="Janssen Authorization Server Persistence loader" \
     description="Generate initial data for persistence layer"
 
 RUN mkdir -p /app/tmp /etc/certs /etc/jans/conf
 
 COPY scripts /app/scripts
-COPY static /app/static
+# COPY static /app/static
 COPY templates /app/templates
 RUN chmod +x /app/scripts/entrypoint.sh
 

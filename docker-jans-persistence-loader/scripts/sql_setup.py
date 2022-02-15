@@ -29,13 +29,13 @@ class SQLBackend:
 
         self.db_dialect = os.environ.get("CN_SQL_DB_DIALECT", "mysql")
         self.schema_files = [
-            "/app/static/jans_schema.json",
-            "/app/static/custom_schema.json",
+            "/app/schema/jans_schema.json",
+            "/app/schema/custom_schema.json",
         ]
 
         self.client = SQLClient()
 
-        with open("/app/static/sql/sql_data_types.json") as f:
+        with open("/app/static/rdbm/sql_data_types.json") as f:
             self.sql_data_types = json.loads(f.read())
 
         self.attr_types = []
@@ -44,18 +44,18 @@ class SQLBackend:
                 schema = json.loads(f.read())
             self.attr_types += schema["attributeTypes"]
 
-        with open("/app/static/sql/opendj_attributes_syntax.json") as f:
+        with open("/app/static/rdbm/opendj_attributes_syntax.json") as f:
             self.opendj_attr_types = json.loads(f.read())
 
-        with open("/app/static/sql/ldap_sql_data_type_mapping.json") as f:
+        with open("/app/static/rdbm/ldap_sql_data_type_mapping.json") as f:
             self.sql_data_types_mapping = json.loads(f.read())
 
         if self.db_dialect == "mysql":
             index_fn = "mysql_index.json"
         else:
-            index_fn = "postgresql_index.json"
+            index_fn = "pgsql_index.json"
 
-        with open(f"/app/static/sql/{index_fn}") as f:
+        with open(f"/app/static/rdbm/{index_fn}") as f:
             self.sql_indexes = json.loads(f.read())
 
     def get_attr_syntax(self, attr):

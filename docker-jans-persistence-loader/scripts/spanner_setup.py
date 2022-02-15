@@ -29,13 +29,13 @@ class SpannerBackend:
         self.db_dialect = "spanner"
 
         self.schema_files = [
-            "/app/static/jans_schema.json",
-            "/app/static/custom_schema.json",
+            "/app/schema/jans_schema.json",
+            "/app/schema/custom_schema.json",
         ]
 
         self.client = SpannerClient()
 
-        with open("/app/static/sql/sql_data_types.json") as f:
+        with open("/app/static/rdbm/sql_data_types.json") as f:
             self.sql_data_types = json.loads(f.read())
 
         self.attr_types = []
@@ -44,14 +44,14 @@ class SpannerBackend:
                 schema = json.loads(f.read())
             self.attr_types += schema["attributeTypes"]
 
-        with open("/app/static/sql/opendj_attributes_syntax.json") as f:
+        with open("/app/static/rdbm/opendj_attributes_syntax.json") as f:
             self.opendj_attr_types = json.loads(f.read())
 
-        with open("/app/static/sql/ldap_sql_data_type_mapping.json") as f:
+        with open("/app/static/rdbm/ldap_sql_data_type_mapping.json") as f:
             self.sql_data_types_mapping = json.loads(f.read())
 
         index_fn = "spanner_index.json"
-        with open(f"/app/static/sql/{index_fn}") as f:
+        with open(f"/app/static/rdbm/{index_fn}") as f:
             self.sql_indexes = json.loads(f.read())
 
         # with open("/app/static/couchbase/index.json") as f:
@@ -59,7 +59,7 @@ class SpannerBackend:
         #     txt = f.read()  # .replace("!bucket_prefix!", prefix)
         #     self.cb_indexes = json.loads(txt)
 
-        with open("/app/static/sql/sub_tables.json") as f:
+        with open("/app/static/rdbm/sub_tables.json") as f:
             self.sub_tables = json.loads(f.read()).get(self.db_dialect) or {}
 
     def get_attr_syntax(self, attr):

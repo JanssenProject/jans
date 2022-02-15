@@ -2,6 +2,7 @@ import contextlib
 import base64
 import json
 import os
+from pathlib import Path
 from urllib.parse import urlparse
 from uuid import uuid4
 
@@ -228,19 +229,15 @@ def merge_extension_ctx(ctx):
     basedir = "/app/static/extension"
 
     if os.environ.get("CN_DISTRIBUTION", "default") == "openbanking":
-        basedir = "/app/static/ob_extension"
+        basedir = "/app/openbanking/static/extension"
 
-    for ext_type in os.listdir(basedir):
-        ext_type_dir = os.path.join(basedir, ext_type)
+    filepath = Path(basedir)
+    for ext_path in filepath.glob("**/*.py"):
+        if not ext_path.is_file():
+            continue
 
-        for fname in os.listdir(ext_type_dir):
-            filepath = os.path.join(ext_type_dir, fname)
-            ext_name = "{}_{}".format(
-                ext_type, os.path.splitext(fname)[0].lower()
-            )
-
-            with open(filepath) as fd:
-                ctx[ext_name] = generate_base64_contents(fd.read())
+        ext_name = f"{ext_path.parent.name.lower()}_{ext_path.stem.lower()}"
+        ctx[ext_name] = generate_base64_contents(ext_path.read_text())
     return ctx
 
 
