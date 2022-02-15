@@ -14,11 +14,11 @@ from io.jans.model.custom.script.type.configapi import ConfigApiType
 from io.jans.configapi.model.configuration import ApiAppConfiguration
 from org.json import JSONObject
 from java.lang import String
-from javax.servlet.http import HttpServletRequest;
-from javax.servlet.http import HttpServletResponse;
+from javax.servlet.http import HttpServletRequest
+from javax.servlet.http import HttpServletResponse
 
 
-class ConfigAuthentication(ConfigApiType):
+class ConfigApiAuthorization(ConfigApiType):
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
 
@@ -39,27 +39,44 @@ class ConfigAuthentication(ConfigApiType):
     # or not.
     def authorize(self, context):
         print 'Config Authentication process'
-        request = context.httpRequest;
-        response = context.httpResponse;
+        request = context.httpRequest
+        response = context.httpResponse
         print " request = : %s" % request
         print " response = : %s" % response
 
-        appConfiguration = context.getApiAppConfiguration();
-        customScriptConfiguration = context.getScript();
-        token = context.getToken();
-        issuer = context.getIssuer();
-        method = context.getMethod();
-        path = context.getPath();
+        appConfiguration = context.getApiAppConfiguration()
+        customScriptConfiguration = context.getScript()
+        token = context.getToken()
+        issuer = context.getIssuer()
+        method = context.getMethod()
+        path = context.getPath()
       
-        print " requese2: %s" % request;
-        print " response2 new: %s" % response;
-        print "ConfigApiType.appConfiguration: %s" % appConfiguration;
-        print "ConfigApiType.customScriptConfiguration: %s" % customScriptConfiguration;
-        print "ConfigApiType.token: %s" % token;
-        print "ConfigApiType.issuer: %s" % issuer;
-        print "ConfigApiType.method: %s" % method;
-        print "ConfigApiType.path: %s" % path;
-		
-        return True;
+        print " requese2: %s" % request
+        print " response2 new: %s" % response
+        print "ConfigApiType.appConfiguration: %s" % appConfiguration
+        print "ConfigApiType.customScriptConfiguration: %s" % customScriptConfiguration
+        print "ConfigApiType.token: %s" % token
+        print "ConfigApiType.issuer: %s" % issuer
+        print "ConfigApiType.method: %s" % method
+        print "ConfigApiType.path: %s" % path
+
+        return True
 		#TODO validation
+
+    # Returns boolean, true - apply introspection method, false - ignore it.
+    # This method is called after introspection response is ready. This method can modify introspection response.
+    # Note :
+    # responseAsJsonObject - is org.codehaus.jettison.json.JSONObject, you can use any method to manipulate json
+    # context is reference of io.jans.as.service.external.context.ExternalIntrospectionContext (in https://github.com/JanssenFederation/oxauth project, )
+    def modifyResponse(self, requestParameters, responseAsJsonObject, context):
+        print " requestParameters: %s" % requestParameters
+        print " responseAsJsonObject: %s" % responseAsJsonObject
+        print " context: %s" % context
+
+        responseAsJsonObject.accumulate("key_from_script", "value_from_script")
+        print " final responseAsJsonObject: %s" % responseAsJsonObject
+        return True
+
+
+
 

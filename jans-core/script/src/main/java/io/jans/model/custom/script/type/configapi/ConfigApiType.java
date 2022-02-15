@@ -7,9 +7,10 @@
 package io.jans.model.custom.script.type.configapi;
 
 import io.jans.model.custom.script.type.BaseExternalType;
+import java.util.Map;
 
 public interface ConfigApiType extends BaseExternalType {
 
     boolean authorize(Object context);
-    boolean modifyResponse(Object responseAsJsonObject, Object introspectionContext);
+    boolean modifyResponse(Map<String, Object> requestParameters,Object responseAsJsonObject, Object introspectionContext);
 }

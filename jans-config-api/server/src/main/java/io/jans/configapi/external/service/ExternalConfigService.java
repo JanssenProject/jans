@@ -13,19 +13,22 @@ import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.custom.script.type.configapi.ConfigApiType;
 import io.jans.service.custom.script.ExternalScriptService;
 
+import java.util.Map;
 import javax.enterprise.context.ApplicationScoped;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.json.JSONObject;
+
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
 @ApplicationScoped
 public class ExternalConfigService extends ExternalScriptService {
 
     private static final long serialVersionUID = 1767751544454591666L;
 
-    Logger log = LogManager.getLogger(ExternalConfigService.class);
+    Logger log = LoggerFactory.getLogger(ExternalConfigService.class);
 
     public ExternalConfigService() {
         super(CustomScriptType.CONFIG_API);
@@ -42,16 +45,22 @@ public class ExternalConfigService extends ExternalScriptService {
     }
 
     public boolean checkAuthorization(HttpServletRequest request, HttpServletResponse response,
-            ApiAppConfiguration apiAppConfiguration, String token, String issuer, String method, String path) {
-        log.debug(
-                "External Config Authorization script params -  request:{}, response:{}, apiAppConfiguration:{}, token:{}, issuer:{}, method:{}, path:{}, this.customScriptConfigurations:{} ",
-                request, response, apiAppConfiguration, token, issuer, method, path, this.customScriptConfigurations);
+            ApiAppConfiguration apiAppConfiguration, Map<String, Object> requestParameters, JSONObject responseAsJsonObject) {
+        log.error(
+                "\n\n External Config Authorization script params -  request:{}, response:{}, apiAppConfiguration:{}, requestParameters:{}, responseAsJsonObject:{}, this.customScriptConfigurations:{} ",
+                request, response, apiAppConfiguration, requestParameters, responseAsJsonObject, this.customScriptConfigurations);
         boolean result = true;
         for (CustomScriptConfiguration customScriptConfiguration : this.customScriptConfigurations) {
             ConfigApiType externalType = (ConfigApiType) customScriptConfiguration.getExternalType();
-            ConfigAuthContext context = new ConfigAuthContext(request, response, apiAppConfiguration, token, issuer,
-                    method, path, customScriptConfiguration);
-            result &= externalType.authorize(context);
+            ConfigAuthContext context = new ConfigAuthContext(request, response, apiAppConfiguration, requestParameters, customScriptConfiguration);
+            
+            log.error(
+                    "\n\n External Config Authorization script params - externalType:{} ",externalType);
+            result = externalType.modifyResponse(requestParameters,responseAsJsonObject, context);
+            
+            //result = externalType.authorize(context);
+            log.error("\n\n External Config Authorization script result:{}, responseAsJsonObject:{} ",result, responseAsJsonObject);
+
             if (!result) {
                 return result;
             }

@@ -6,12 +6,15 @@
 
 package io.jans.configapi.filters;
 
-import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.configuration.ConfigurationFactory;
+import io.jans.configapi.core.rest.ProtectedApi;
+import io.jans.configapi.core.util.Jackson;
 import io.jans.configapi.security.service.ExternalInterceptionService;
 import io.jans.configapi.security.service.AuthorizationService;
 import io.jans.configapi.util.ApiConstants;
 
+import java.util.Map;
+import java.util.HashMap;
 import javax.annotation.Priority;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -26,6 +29,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.Provider;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 
 /**
@@ -63,6 +68,9 @@ public class AuthorizationFilter implements ContainerRequestFilter {
     ConfigurationFactory configurationFactory;
     
     @Inject 
+    Jackson jackson;
+    
+    @Inject 
     ExternalInterceptionService externalInterceptionService;
 
     @SuppressWarnings({ "all" })
@@ -88,23 +96,26 @@ public class AuthorizationFilter implements ContainerRequestFilter {
         }
 
         log.info("\n\n\n AuthorizationFilter::filter() - Config Api OAuth Valdation Enabled");
+        
         if (!isTokenBasedAuthentication(authorizationHeader)) {
             abortWithUnauthorized(context);
             log.info("======ONLY TOKEN BASED AUTHORIZATION IS SUPPORTED======================");
             return;
         }
         try {
+            log.info("\n\n\n AuthorizationFilter::filter() - before - authorizationHeader = "+authorizationHeader+"\n");
             authorizationHeader = this.authorizationService.processAuthorization(authorizationHeader, issuer,
                     resourceInfo, context.getMethod(), request.getRequestURI());
-
+            log.info("\n\n\n AuthorizationFilter::filter() - after - authorizationHeader = "+authorizationHeader+"\n");
             if (authorizationHeader != null && authorizationHeader.trim().length() > 0) {
                 context.getHeaders().remove(HttpHeaders.AUTHORIZATION);
                 context.getHeaders().add(HttpHeaders.AUTHORIZATION, authorizationHeader);
             }
             
-            //Custom authorization            
+            //Custom authorization   
+            log.info("\n\n\n AuthorizationFilter::filter() - Custom - authorizationHeader = "+authorizationHeader+"\n");
             boolean isAuthorized = isAuthorized(request, httpServletResponse, authorizationHeader, issuer,  context.getMethod(), info.getPath());
-            log.info("\n\n\n Custom authorization - isAuthorized:{}",isAuthorized);
+            log.error("\n\n\n Custom authorization - isAuthorized:{}",isAuthorized);
             if (!isAuthorized) {
                 abortWithUnauthorized(context);
                 log.info("======Custom authorization FAILED======================");
@@ -129,10 +140,24 @@ public class AuthorizationFilter implements ContainerRequestFilter {
                 .header(HttpHeaders.WWW_AUTHENTICATE, AUTHENTICATION_SCHEME).build());
     }
     
-     private boolean isAuthorized(HttpServletRequest request, HttpServletResponse response, String token, String issuer, String method,
+     /*private boolean isAuthorized(HttpServletRequest request, HttpServletResponse response, String token, String issuer, String method,
                 String path) throws Exception {
             log.debug("Authorization script params -  request:{}, response:{}, token:{}, issuer:{}, method:{}, path:{} ", request, response, token, issuer, method, path);
         return externalInterceptionService.authorization(request, response, this.configurationFactory.getApiAppConfiguration(), token, issuer, method, path);
-    }
+    }*/
+     
+     private boolean isAuthorized(HttpServletRequest request, HttpServletResponse response, String token, String issuer, String method,
+             String path) throws Exception {
+         log.error("\n\n Authorization script params -  request:{}, response:{}, token:{}, issuer:{}, method:{}, path:{} ", request, response, token, issuer, method, path);
+         Map<String, Object> requestParameters = new HashMap<>();
+         requestParameters.put("ISSUER",issuer);
+         requestParameters.put("TOKEN",token);
+         requestParameters.put("METHOD",method);
+         requestParameters.put("PATH",path);
+         JSONObject responseAsJsonObject = jackson.createJSONObject(requestParameters);
+         log.error("\n\n Authorization script params - responseAsJsonObject = "+responseAsJsonObject+"\n\n\n");
+         log.error("Authorization script params -  request:{}, response:{}, requestParameters:{}, responseAsJsonObject:{} ", request, response, requestParameters, responseAsJsonObject);
+     return externalInterceptionService.authorization(request, response, this.configurationFactory.getApiAppConfiguration(), requestParameters, responseAsJsonObject);
+ }
 
 }

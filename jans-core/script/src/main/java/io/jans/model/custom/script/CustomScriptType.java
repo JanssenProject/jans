@@ -106,7 +106,7 @@ public enum CustomScriptType implements AttributeEnum {
     IDP("idp", "Idp Extension", IdpType.class, CustomScript.class, "IdpExtension", new DummyIdpType()),
     DISCOVERY("discovery", "Discovery", DiscoveryType.class, CustomScript.class, "Discovery", new DummyDiscoveryType()),
     UPDATE_TOKEN("update_token", "Update Token", UpdateTokenType.class, CustomScript.class, "UpdateToken", new DummyUpdateTokenType()),
-    CONFIG_API("config_auth", "Config Auth", ConfigApiType.class, CustomScript.class,"ConfigAuthentication", new DummyConfigApiType());
+    CONFIG_API("config_api_auth", "Config Api Auth", ConfigApiType.class, CustomScript.class,"ConfigApiAuthorization", new DummyConfigApiType());
 
     private String value;
     private String displayName;

@@ -115,7 +115,7 @@ public class AppInitializer {
         statusCheckerTimer.initTimer();
 
         // Schedule timer tasks
-        loggerService.initTimer();
+        //loggerService.initTimer();
 
         // Schedule timer tasks
         // configurationFactory.initTimer();

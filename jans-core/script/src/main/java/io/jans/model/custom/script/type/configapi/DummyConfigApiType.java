@@ -11,6 +11,7 @@ import java.util.Map;
 import io.jans.model.SimpleCustomProperty;
 import io.jans.model.custom.script.model.CustomScript;
 import io.jans.model.custom.script.type.scim.DummyScimType;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +46,7 @@ public class DummyConfigApiType implements ConfigApiType {
     }
     
     @Override
-    public boolean modifyResponse(Object responseAsJsonObject, Object introspectionContext) {
+    public boolean modifyResponse(Map<String, Object> requestParameters,Object responseAsJsonObject, Object introspectionContext) {
         return false;
     }
 

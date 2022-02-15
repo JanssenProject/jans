@@ -16,9 +16,6 @@ import io.jans.configapi.service.auth.ClientService;
 import io.jans.configapi.service.auth.ScopeService;
 import io.jans.util.security.StringEncrypter.EncryptionException;
 
-import org.apache.commons.collections4.CollectionUtils;
-import org.slf4j.Logger;
-
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -33,6 +30,9 @@ import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.Response;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.slf4j.Logger;
 
 @ApplicationScoped
 public class AuthUtil {

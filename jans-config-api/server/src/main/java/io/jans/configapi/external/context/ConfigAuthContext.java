@@ -11,14 +11,17 @@ import io.jans.configapi.util.ApiConstants;
 import io.jans.model.SimpleCustomProperty;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.service.external.context.ExternalScriptContext;
+
+import java.util.HashMap;
+import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.lang3.StringUtils;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.util.HashMap;
-import java.util.Map;
 
 public class ConfigAuthContext extends ExternalScriptContext {
 
@@ -26,26 +29,18 @@ public class ConfigAuthContext extends ExternalScriptContext {
 
     private CustomScriptConfiguration script;
     private ApiAppConfiguration apiAppConfiguration;
-    private String token;
-    private String issuer;
-    private String method;
-    private String path;
+    final Map<String, Object> parmeters;
     private final Map<String, SimpleCustomProperty> configurationAttributes;
 
-    public ConfigAuthContext(HttpServletRequest httpRequest, HttpServletResponse httpResponse, ApiAppConfiguration apiAppConfiguration, String token,
-            String issuer, String method, String path, CustomScriptConfiguration script) {
-        this(httpRequest, httpResponse, apiAppConfiguration, token, issuer, method, path, script, null);
+    public ConfigAuthContext(HttpServletRequest httpRequest, HttpServletResponse httpResponse, ApiAppConfiguration apiAppConfiguration, Map<String, Object> parmeters, CustomScriptConfiguration script) {
+        this(httpRequest, httpResponse, apiAppConfiguration, parmeters, script, null);
     }
 
-    public ConfigAuthContext(HttpServletRequest httpRequest, HttpServletResponse httpResponse, ApiAppConfiguration apiAppConfiguration, String token,
-            String issuer, String method, String path, CustomScriptConfiguration script,
+    public ConfigAuthContext(HttpServletRequest httpRequest, HttpServletResponse httpResponse, ApiAppConfiguration apiAppConfiguration, Map<String, Object> parmeters, CustomScriptConfiguration script,
             Map<String, SimpleCustomProperty> configurationAttributes) {
         super(httpRequest,httpResponse);
         this.apiAppConfiguration = apiAppConfiguration;
-        this.token = token;
-        this.issuer = issuer;
-        this.method = method;
-        this.path = path;
+        this.parmeters = parmeters;
         this.script = script;
         this.configurationAttributes = configurationAttributes;
     }
@@ -65,37 +60,9 @@ public class ConfigAuthContext extends ExternalScriptContext {
     public void setApiAppConfiguration(ApiAppConfiguration apiAppConfiguration) {
         this.apiAppConfiguration = apiAppConfiguration;
     }
-    
-    public String getToken() {
-        return token;
-    }
 
-    public void setToken(String token) {
-        this.token = token;
-    }
-
-    public String getIssuer() {
-        return issuer;
-    }
-
-    public void setIssuer(String issuer) {
-        this.issuer = issuer;
-    }
-
-    public String getMethod() {
-        return method;
-    }
-
-    public void setMethod(String method) {
-        this.method = method;
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
+    public Map<String, Object> getParmeters() {
+        return parmeters;
     }
 
     public Map<String, SimpleCustomProperty> getConfigurationAttributes() {
@@ -118,11 +85,8 @@ public class ConfigAuthContext extends ExternalScriptContext {
 
     @Override
     public String toString() {
-        return "ConfigAuthContext [script=" + script
-                +" , apiAppConfiguration=" + apiAppConfiguration
-                + ", token="
-                + token + ", issuer=" + issuer + ", method=" + method + ", path="
-                + path + ", configurationAttributes=" + configurationAttributes + "]";
+        return "ConfigAuthContext [script=" + script + ", apiAppConfiguration=" + apiAppConfiguration + ", parmeters="
+                + parmeters + ", configurationAttributes=" + configurationAttributes + "]";
     }
 
 }
