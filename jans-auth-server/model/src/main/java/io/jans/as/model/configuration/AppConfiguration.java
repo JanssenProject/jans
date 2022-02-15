@@ -8,12 +8,7 @@ package io.jans.as.model.configuration;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.common.collect.Lists;
-import io.jans.as.model.common.ComponentType;
-import io.jans.as.model.common.GrantType;
-import io.jans.as.model.common.ResponseMode;
-import io.jans.as.model.common.ResponseType;
-import io.jans.as.model.common.SoftwareStatementValidationType;
-import io.jans.as.model.common.WebKeyStorage;
+import io.jans.as.model.common.*;
 import io.jans.as.model.error.ErrorHandlingMethod;
 import io.jans.as.model.jwk.KeySelectionStrategy;
 
@@ -28,7 +23,7 @@ import java.util.Set;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version February 2, 2022
+ * @version February 10, 2022
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AppConfiguration implements Configuration {
@@ -94,6 +89,8 @@ public class AppConfiguration implements Configuration {
 
     private int spontaneousScopeLifetime;
     private String openidSubAttribute;
+    private Boolean publicSubjectIdentifierPerClientEnabled = false;
+    private List<String> subjectIdentifiersPerClientSupported;
     private Set<Set<ResponseType>> responseTypesSupported;
     private Set<ResponseMode> responseModesSupported;
     private Set<GrantType> grantTypesSupported;
@@ -1026,6 +1023,30 @@ public class AppConfiguration implements Configuration {
 
     public void setOpenidSubAttribute(String openidSubAttribute) {
         this.openidSubAttribute = openidSubAttribute;
+    }
+
+    public Boolean getPublicSubjectIdentifierPerClientEnabled() {
+        if (publicSubjectIdentifierPerClientEnabled == null) {
+            publicSubjectIdentifierPerClientEnabled = false;
+        }
+
+        return publicSubjectIdentifierPerClientEnabled;
+    }
+
+    public void setPublicSubjectIdentifierPerClientEnabled(Boolean publicSubjectIdentifierPerClientEnabled) {
+        this.publicSubjectIdentifierPerClientEnabled = publicSubjectIdentifierPerClientEnabled;
+    }
+
+    public List<String> getSubjectIdentifiersPerClientSupported() {
+        if (subjectIdentifiersPerClientSupported == null) {
+            subjectIdentifiersPerClientSupported = new ArrayList<>();
+        }
+
+        return subjectIdentifiersPerClientSupported;
+    }
+
+    public void setSubjectIdentifiersPerClientSupported(List<String> subjectIdentifiersPerClientSupported) {
+        this.subjectIdentifiersPerClientSupported = subjectIdentifiersPerClientSupported;
     }
 
     public String getIdGenerationEndpoint() {

@@ -41,7 +41,7 @@ displayName: admin-ui-client
 inum: %(token_server_admin_ui_client_id)s
 jansAccessTknAsJwt: true
 jansAccessTknSigAlg: RS256
-jansAttrs: {"tlsClientAuthSubjectDn":"","runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims":true,"keepClientAuthorizationAfterExpiration":false,"allowSpontaneousScopes":false,"spontaneousScopes":[],"spontaneousScopeScriptDns":[],"backchannelLogoutUri":[],"backchannelLogoutSessionRequired":false,"additionalAudience":[],"postAuthnScripts":[],"consentGatheringScripts":[],"introspectionScripts":["inum=BFD5-C87D,ou=scripts,o=jans"],"rptClaimsScripts":[],"parLifetime":600,"requirePar":false,"jansAuthSignedRespAlg":"RS256","jansAuthEncRespAlg":null,"jansAuthEncRespEnc":null}
+jansAttrs: {"tlsClientAuthSubjectDn":"","runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims":true,"keepClientAuthorizationAfterExpiration":false,"allowSpontaneousScopes":false,"spontaneousScopes":[],"spontaneousScopeScriptDns":[],"backchannelLogoutUri":[],"backchannelLogoutSessionRequired":false,"additionalAudience":[],"postAuthnScripts":[],"consentGatheringScripts":[],"introspectionScripts":["inum=A44E-4F3D,ou=scripts,o=jans"],"rptClaimsScripts":[],"parLifetime":600,"requirePar":false,"jansAuthSignedRespAlg":"RS256","jansAuthEncRespAlg":null,"jansAuthEncRespEnc":null}
 jansAppTyp: web
 jansClntSecret: %(token_server_admin_ui_client_encoded_pw)s
 jansDefAcrValues: simple_password_auth

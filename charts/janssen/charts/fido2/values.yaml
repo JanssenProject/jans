@@ -1,5 +1,4 @@
-# License terms and conditions for Janssen Cloud Native Edition:
-# https://www.apache.org/licenses/LICENSE-2.0
+
 # -- FIDO 2.0 (FIDO2) is an open authentication standard that enables leveraging common devices to authenticate to online services in both mobile and desktop environments.
 
 # -- Configure the HorizontalPodAutoscaler

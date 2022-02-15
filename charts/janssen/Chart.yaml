@@ -1,9 +1,7 @@
-# License terms and conditions for Janssen Cloud Native Edition:
-# https://www.apache.org/licenses/LICENSE-2.0
 kubeVersion: ">=v1.21.0-0"
 annotations:
     artifacthub.io/changes: |
-        - Initial release of Janssen helm charts
+        - Update always
     artifacthub.io/containsSecurityUpdates: "true"
     artifacthub.io/images: |
         - name: auth-server
@@ -19,7 +17,7 @@ annotations:
         - name: fido2
           image: janssenproject/fido2:1.0.0-beta.14
         - name: opendj
-          image: janssenfederation/opendj:1.0.0_dev
+          image: gluufederation/opendj:5.0.0_dev
         - name: persistence
           image: janssenproject/persistence-loader:1.0.0-beta.14
         - name: scim
