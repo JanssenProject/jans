@@ -315,6 +315,52 @@ def prepare_jans_cli_package():
     print("Preparing jans-cli package")
     extract_subdir(jans_zip_file, 'jans-cli', 'jans-cli', os.path.join(jans_app_dir, 'jans-cli.zip'))
 
+
+def uninstall_jans():
+    check_installation()
+    print('\033[31m')
+    print("This process is irreversible.")
+    print("You will lose all data related to Janssen Server.")
+    print('\033[0m')
+    print()
+    while True:
+        print('\033[31m \033[1m')
+        response = input("Are you sure to uninstall Janssen Server? [yes/N] ")
+        print('\033[0m')
+        if response.lower() in ('yes', 'n', 'no'):
+            if not response.lower() == 'yes':
+                sys.exit()
+            else:
+                break
+        else:
+            print("Please type \033[1m yes \033[0m to uninstall")
+
+    print("Uninstalling Jannsen Server...")
+    for service in jetty_services:
+        if os.path.exists(os.path.join(jetty_home, service)):
+            default_fn = os.path.join('/etc/default/', service)
+            if os.path.exists(default_fn):
+                print("Removing", default_fn)
+                os.remove(default_fn)
+            print("Stopping", service)
+            os.system('systemctl stop ' + service)
+
+    if argsp.profile == 'jans':
+        print("Stopping OpenDj Server")
+        os.system('/opt/opendj/bin/stop-ds')
+
+    remove_list = ['/etc/certs', '/etc/jans', '/opt/jans', '/opt/amazon-corretto*', '/opt/jre', '/opt/node*', '/opt/jetty*', '/opt/jython*']
+    if argsp.profile == 'jans':
+        remove_list.append('/opt/opendj')
+    if not argsp.keep_downloads:
+        remove_list.append('/opt/dist')
+
+    for p in remove_list:
+        cmd = 'rm -r -f ' + p
+        print("Executing", cmd)
+        os.system('rm -r -f ' + p)
+
+
 def main():
 
     check_install_dependencies()
@@ -346,48 +392,8 @@ def main():
             os.system('systemctl restart jans-config-api')
 
     elif argsp.uninstall:
-        check_installation()
-        print('\033[31m')
-        print("This process is irreversible.")
-        print("You will lose all data related to Janssen Server.")
-        print('\033[0m')
-        print()
-        while True:
-            print('\033[31m \033[1m')
-            response = input("Are you sure to uninstall Janssen Server? [yes/N] ")
-            print('\033[0m')
-            if response.lower() in ('yes', 'n', 'no'):
-                if not response.lower() == 'yes':
-                    sys.exit()
-                else:
-                    break
-            else:
-                print("Please type \033[1m yes \033[0m to uninstall")
 
-        print("Uninstalling Jannsen Server...")
-        for service in jetty_services:
-            if os.path.exists(os.path.join(jetty_home, service)):
-                default_fn = os.path.join('/etc/default/', service)
-                if os.path.exists(default_fn):
-                    print("Removing", default_fn)
-                    os.remove(default_fn)
-                print("Stopping", service)
-                os.system('systemctl stop ' + service)
-
-        if argsp.profile == 'jans':
-            print("Stopping OpenDj Server")
-            os.system('/opt/opendj/bin/stop-ds')
-
-        remove_list = ['/etc/certs', '/etc/jans', '/opt/jans', '/opt/amazon-corretto*', '/opt/jre', '/opt/node*', '/opt/jetty*', '/opt/jython*']
-        if argsp.profile == 'jans':
-            remove_list.append('/opt/opendj')
-        if not argsp.keep_downloads:
-            remove_list.append('/opt/dist')
-
-        for p in remove_list:
-            cmd = 'rm -r -f ' + p
-            print("Executing", cmd)
-            os.system('rm -r -f ' + p)
+        uninstall_jans()
 
     else:
 

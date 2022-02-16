@@ -22,13 +22,17 @@ queue = Queue()
 dir_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(dir_path)
 
-if not (os.path.exists('/opt/dist/jans/jans.zip') or os.path.exists('jans-auth.war')):
+if not (os.path.exists('/opt/dist/jans/jans.zip') or os.path.exists('jans-auth.war')) or '-uninstall' in sys.argv:
     import install
     install.setup_dir = dir_path
-    print("Downloading Files")
-    install.download_files()
-    install.extract_yaml_files()
-    install.prepare_jans_cli_package()
+    if '-uninstall' in sys.argv:
+        install.uninstall_jans()
+        sys.exit()
+    else:
+        print("Downloading Files")
+        install.download_files()
+        install.extract_yaml_files()
+        install.prepare_jans_cli_package()
 
 os.environ['LC_ALL'] = 'C'
 from setup_app.utils.arg_parser import arg_parser
