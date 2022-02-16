@@ -4,7 +4,6 @@
 
 - [Overview](#overview)
 - [Setup Janssen server](#setup-janssen-server)
-- [Setup Apache](#setup-apache)
 - [Setup mod-auth-openidc](#setup-mod-auth-openidc)
 - [Test Complete Flow](#test-complete-flow)
 
@@ -19,11 +18,12 @@ Majority of the web applications use a reverse proxy, like Apache, to avail func
 
 #### Hardware configuration
 
-> TBD
+For development and POC purposes, 4GB RAM and 10 GB HDD should be available for Janssen Server. For PROD deployments, please refer installation guide documents.
   
 
-#### Assumptions
-For this guide we will assume that application resources located at `https://my-app/example` URL will be protected using authentication. Also, there is a protected vanity URL `https://my-app/example/redirect_uri` which does not point to any content.
+#### Prerequisites
+- For this guide we will assume that setup with Apache reverse proxy already exists with SSL enabled. Application resources which need to be protected using authentication are accessed via reverse proxy.
+-  For the simplicity of the instruction set, we will use one of the webpage hosted by Apache server itself as application resource and configure authentication for the same.
 
 ## Setup Janssen server 
 
@@ -74,65 +74,13 @@ Use steps below to configure Janssen server.
    ```
    - Output of this command would be a JSON response. Save this response for reference as some of these value will be required when configuring *mod-auth-openidc*.
  
-- create test users and scopes `TODO: add steps`
+- create test users and scopes 
+> TODO: add steps
 
-
-
-
-## Setup Apache
-
-As mentioned earlier, Apache server with mod-auth-openidc module acts as relying party (RP).
-
-### Install Apache
-Run following commands to install Apache server.
-```
-sudo apt-get update
-sudo apt-get install apache2
-```
-
-Run following command to see the Apache services are active
-```
-sudo systemctl status apache2.service
-```
-
-Configure Apache server as a reverse proxy for your module and also enable ssl module. 
-> TODO: Give resource URL to guide through this step
-
-### Add protected resource
-For the purpose of this tutorial, we will secure a simple CGI script with mod_auth_openidc to send authentication requests to the Gluu Server. Details for setting up the sample CGI script and mod_auth_openidc are below. 
-
-#### Configure CGI script 
-
- - `vim -N /usr/lib/cgi-bin/printHeaders.cgi`
- - Then paste below code and save: 
-
-```
-#!/usr/bin/python
-
-import os
-
-d = os.environ
-k = d.keys()
-k.sort()
-
-print "Content-type: text/html\n\n"
-
-print "<HTML><Head><TITLE>Print Env Variables</TITLE></Head><BODY>"
-print "<h1>Environment Variables</H1>"
-for item in k:
-    print "<p><B>%s</B>: %s </p>" % (item, d[item])
-print "</BODY></HTML>"
-
-```
-Now run the following commands: 
-
- - `chown www-data:www-data /usr/lib/cgi-bin/printHeaders.cgi`   
- - `chmod ug+x /usr/lib/cgi-bin/printHeaders.cgi`   
- - `a2enmod cgid`
 
 ## Setup *mod-auth-openidc* 
 
-### Install *mod-auth-openidc* 
+#### Install *mod-auth-openidc* 
 
 Add mod-auth-openidc using steps below
 ```
@@ -140,7 +88,7 @@ sudo apt-get install libapache2-mod-auth-openidc
 sudo a2enmod auth_openidc
 service apache2 restart
 ```
-### Configure *mod-auth-openidc* 
+#### Configure *mod-auth-openidc* 
 - Open `/etc/apache2/sites-available/default-ssl.conf`. Find more configuration options for mod-auth-openidc [here](https://github.com/zmartzone/mod_auth_openidc/blob/master/auth_openidc.conf). 
 - Add configuration parameters given below for virtual host `_default_:443`.
 - This will enable authentication for any resource under `/` context root.
@@ -161,45 +109,10 @@ OIDCCryptoPassphrase my-crypto-passphrase
 </Location>
 
 ```
+
 Restart Apache service
 
 
 ## Test Complete Flow
 
-### Configure Apache to use Janssen server
-
-Configure `mod_auth_openidc` to protect the resource
-
- - `vim -N /etc/apache2/sites-available/default-ssl.conf`
- - Add the following details, substituting your values in placeholders below:
-
-```
-....
-....
-                BrowserMatch "MSIE [17-9]" ssl-unclean-shutdown
-
-
-OIDCProviderMetadataURL https://[your_gluu_hostname]/.well-known/openid-configuration
-OIDCClientID inum_of_your_client
-OIDCClientSecret your_client_secret
-OIDCResponseType code
-OIDCProviderTokenEndpointAuth client_secret_basic
-OIDCSSLValidateServer Off
-OIDCProviderIssuer https://[Gluu_server_hostname]
-OIDCRedirectURI https://[RP_hostname]/callback
-OIDCCryptoPassphrase something_you_want
-<Location "/">
-    Require valid-user
-    AuthType openid-connect
-</Location>
-
-    </VirtualHost>
-    ...
-.....
-....
-
-``` 
-
- - Restart apache2 
-
-> TODO
+- Accessing `https://test.local.rp.io/` should redirect to Janssen authentication screen. Upon successful authentication, browser should be redirected to `https://test.local.rp.io/redirect`. 
