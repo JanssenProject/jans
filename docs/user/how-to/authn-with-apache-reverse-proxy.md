@@ -9,7 +9,7 @@
 
 This guide describes steps to enable authentication for web applications using Janssen server which is an OpenID Connect Provider (OP). 
 
-Majority of the web applications use a reverse proxy, like Apache, to avail functionalities like load-balancing etc. We will configure  [mod_auth_openidc](https://github.com/zmartzone/mod_auth_openidc) Apache server module to add Relying Party(RP) functionality to existing Apache reverse proxy. RP is implements authentication flows of OpenID Connect specification. For each incoming request, RP ensures that the request is authenticated. If request is not pre-authenticated, then RP will coordinate with Janssen server to integrate authentication.
+Majority of the web applications use a reverse proxy, like Apache, to avail functionalities like load-balancing etc. We will configure  [mod_auth_openidc](https://github.com/zmartzone/mod_auth_openidc) Apache server module to add Relying Party(RP) functionality to existing Apache reverse proxy. RP implements authentication flows from OpenID Connect specification. For each incoming request, RP ensures that the request is authenticated. If request is not pre-authenticated, then RP will coordinate with Janssen server to integrate authentication.
 
 #### Hardware configuration
 
@@ -17,7 +17,7 @@ For development and POC purposes, 4GB RAM and 10 GB HDD should be available for 
   
 
 #### Prerequisites
-- Existing Apache reverse proxy that is SSL enabled. Application resources which need to be protected using authentication are accessed via this reverse proxy.
+- Existing Apache reverse proxy that is SSL enabled. Application resources which need to be protected using authentication are accessed via this reverse proxy. Also, we will assume that Apache proxy server is accessible at FQDN `https://test.apache.rp.io/`
 - For simplicity, we will use one of the web page hosted directly on Apache server as application resource and configure authentication for the same.
 
 ## Setup Janssen server 
@@ -57,7 +57,7 @@ Use steps below to configure Janssen server.
     clientSecret: <secret-of-your-choice>
     subjectType: public
     tokenEndpointAuthMethod: client_secret_basic
-    redirectUris: <app-url-post-authn>
+    redirectUris: https://test.apache.rp.io/redirect
     scopes: email openid profile
     responseTypes: code
     grantTypes: authorization_code
@@ -95,8 +95,8 @@ OIDCClientSecret my-client-secret
 OIDCResponseType code
 OIDCProviderTokenEndpointAuth client_secret_basic
 OIDCSSLValidateServer Off
-OIDCProviderIssuer https://jans-install-mysql.lxc.jans.io
-OIDCRedirectURI https://test.local.rp.io/redirect
+OIDCProviderIssuer https://janssen.op.io
+OIDCRedirectURI https://test.apache.rp.io/redirect
 OIDCCryptoPassphrase my-crypto-passphrase
 <Location "/">
     Require valid-user
@@ -110,4 +110,4 @@ Restart Apache service
 
 ## Test Complete Flow
 
-- Accessing `https://test.apache.rp.io/` should redirect to Janssen authentication screen. Upon successful authentication, browser should be redirected to redirect URI.
+- Accessing `https://test.apache.rp.io/` should redirect to Janssen authentication screen. Upon successful authentication, browser should be redirected to `https://test.apache.rp.io/redirect`.
