@@ -170,7 +170,7 @@ public class ConfigurationFactory {
                         this.corsConfigurationFilter.getCorsSupportCredentials().toString(),
                         Long.toString(this.corsConfigurationFilter.getCorsPreflightMaxAge()),
                         this.corsConfigurationFilter.getCorsRequestDecorate().toString());
-                log.debug("\n\n Initializing CorsConfiguration:{} ", corsConfiguration);
+                log.debug("Initializing CorsConfiguration:{} ", corsConfiguration);
                 return corsConfiguration;
             }
 
@@ -251,7 +251,7 @@ public class ConfigurationFactory {
 
     @PostConstruct
     public void init() {
-        log.error("\n\n Initializing ConfigurationFactory \n\n\n");
+        log.info("Initializing ConfigurationFactory ");
         this.isActive = new AtomicBoolean(true);
         try {
             this.persistenceConfiguration = persistanceFactoryService.loadPersistenceConfiguration(APP_PROPERTIES_FILE);
@@ -267,14 +267,14 @@ public class ConfigurationFactory {
     }
 
     public void create() {
-        log.error("\n\n Loading Configuration \n\n\n");
+        log.info("Loading Configuration");
         
         // load auth config from DB
         if (!loadAuthConfigFromDb()) {
             log.error("Failed to load auth configuration from persistence. Please fix it!!!.");
             throw new ConfigurationException("Failed to load auth configuration from persistence.");
         } else {
-            log.error("Auth Configuration loaded successfully - authLoadedRevision:{}", this.authLoadedRevision);
+            log.info("Auth Configuration loaded successfully - authLoadedRevision:{}", this.authLoadedRevision);
         }
 
         // load api config from DB
@@ -282,7 +282,7 @@ public class ConfigurationFactory {
             log.error("Failed to load api configuration from persistence. Please fix it!!!.");
             throw new ConfigurationException("Failed to load api configuration from persistence.");
         } else {
-            log.error("Api Configuration loaded successfully - apiLoadedRevision:{}", this.apiLoadedRevision);
+            log.info("Api Configuration loaded successfully - apiLoadedRevision:{}", this.apiLoadedRevision);
         }
     }
 
@@ -295,12 +295,12 @@ public class ConfigurationFactory {
     }
 
     private void loadBaseConfiguration() {
-        log.error("Loading base configuration - BASE_PROPERTIES_FILE:{}", BASE_PROPERTIES_FILE);
+        log.info("Loading base configuration - BASE_PROPERTIES_FILE:{}", BASE_PROPERTIES_FILE);
 
         this.baseConfiguration = createFileConfiguration(BASE_PROPERTIES_FILE);
         this.baseConfigurationFileLastModifiedTime = new File(BASE_PROPERTIES_FILE).lastModified();
 
-        log.error("Loaded base configuration:{}", baseConfiguration.getProperties());
+        log.debug("Loaded base configuration:{}", baseConfiguration.getProperties());
     }
 
     private String confDir() {
@@ -324,7 +324,7 @@ public class ConfigurationFactory {
     }
 
     private boolean loadAuthConfigFromDb() {
-        log.error("Loading Auth configuration from '{}' DB...", baseConfiguration.getString("persistence.type"));
+        log.debug("Loading Auth configuration from '{}' DB...", baseConfiguration.getString("persistence.type"));
         try {
             final Conf c = loadConfigurationFromDb(getConfigurationDn(Constants.SERVER_KEY_OF_CONFIGURATION_ENTRY),
                     new Conf());
@@ -348,7 +348,7 @@ public class ConfigurationFactory {
     }
 
     private boolean loadApiConfigFromDb() {
-        log.error("Loading Api configuration from '{}' DB...", baseConfiguration.getString("persistence.type"));
+        log.debug("Loading Api configuration from '{}' DB...", baseConfiguration.getString("persistence.type"));
         try {
             final ApiConf apiConf = loadConfigurationFromDb(getConfigurationDn(CONFIGAPI_CONFIGURATION_ENTRY),
                     new ApiConf());
@@ -372,7 +372,7 @@ public class ConfigurationFactory {
     }
 
     private void initApiAuthConf(ApiConf apiConf) {
-        log.error("Initializing Api App Configuration From DB.... apiConf:{}", apiConf);
+        log.debug("Initializing Api App Configuration From DB.... apiConf:{}", apiConf);
 
         if (apiConf == null) {
             throw new ConfigurationException("Failed to load Api App Configuration From DB " + apiConf);
@@ -385,19 +385,19 @@ public class ConfigurationFactory {
 
         this.apiLoadedRevision = apiConf.getRevision();
 
-        log.error(
-                "\n\n\n *** ConfigurationFactory::loadApiAppConfigurationFromDb() - apiAppConfiguration:{}, apiLoadedRevision:{} ",
+        log.debug(
+                "*** ConfigurationFactory::loadApiAppConfigurationFromDb() - apiAppConfiguration:{}, apiLoadedRevision:{} ",
                 this.apiAppConfiguration, apiLoadedRevision);
         this.setApiConfigurationProperties();
     }
 
     private void setApiConfigurationProperties() {
-        log.error("setApiConfigurationProperties ");
+        log.debug("setApiConfigurationProperties");
         if (this.apiAppConfiguration == null) {
             throw new ConfigurationException("Failed to load Configuration properties " + this.apiAppConfiguration);
         }
 
-        log.debug("\n\n\n *** ConfigurationFactory::setApiConfigurationProperties() - this.apiAppConfiguration:{}",
+        log.debug("*** ConfigurationFactory::setApiConfigurationProperties() - this.apiAppConfiguration:{}",
                 this.apiAppConfiguration);
         this.apiApprovedIssuer = this.apiAppConfiguration.getApiApprovedIssuer();
         this.apiProtectionType = this.apiAppConfiguration.getApiProtectionType();
@@ -411,7 +411,7 @@ public class ConfigurationFactory {
                     .filter(x -> "CorsFilter".equals(x.getFilterName())).findAny().orElse(null);
         }
 
-        log.error(
+        log.debug(
                 "Properties set, this.apiApprovedIssuer:{}, , this.apiProtectionType:{}, this.apiClientId :{}, this.apiClientPassword:{}, this.corsConfigurationFilter:{}, this.configOauthEnabled:{} ",
                 this.apiApprovedIssuer, this.apiProtectionType, this.apiClientId, this.apiClientPassword,
                 this.corsConfigurationFilter, this.configOauthEnabled);
@@ -423,7 +423,7 @@ public class ConfigurationFactory {
     }
 
     private <T> T loadConfigurationFromDb(String dn, T obj, String... returnAttributes) {
-        log.error("loadConfigurationFromDb dn:{}, clazz:{}, returnAttributes:{}", dn, obj, returnAttributes);
+        log.debug("loadConfigurationFromDb dn:{}, clazz:{}, returnAttributes:{}", dn, obj, returnAttributes);
         final PersistenceEntryManager persistenceEntryManager = persistenceEntryManagerInstance.get();
         try {
             return (T) persistenceEntryManager.find(dn, obj.getClass(), returnAttributes);
@@ -441,7 +441,7 @@ public class ConfigurationFactory {
     private void initAuthConfiguration(Conf conf) {
         if (conf.getDynamic() != null) {
             appConfiguration = conf.getDynamic();
-            log.error("\n\n Auth Config - appConfiguration: {}", appConfiguration);
+            log.error("Auth Config - appConfiguration: {}", appConfiguration);
         }
         if (conf.getStatics() != null) {
             staticConf = conf.getStatics();
@@ -511,7 +511,7 @@ public class ConfigurationFactory {
     }
 
     public boolean reloadAuthConfFromLdap() {
-        log.error("\n\n Reload auth configuration TimerEvent");
+        log.error("Reload auth configuration TimerEvent");
         if (!isAuthRevisionIncreased()) {
             return false;
         }
@@ -519,7 +519,7 @@ public class ConfigurationFactory {
     }
 
     public boolean reloadApiConfFromLdap() {
-        log.error("\n\n Reload api configuration TimerEvent");
+        log.error("Reload api configuration TimerEvent");
         if (!isApiRevisionIncreased()) {
             return false;
         }
@@ -542,7 +542,7 @@ public class ConfigurationFactory {
 
     @Asynchronous
     public void reloadConfigurationTimerEvent(@Observes @Scheduled ConfigurationEvent configurationEvent) {
-        log.error("\n\n Config reload configuration TimerEvent - baseConfigurationFileLastModifiedTime:{}",
+        log.error("Config reload configuration TimerEvent - baseConfigurationFileLastModifiedTime:{}",
                 baseConfigurationFileLastModifiedTime);
 
         // Reload Base configuration if needed

@@ -63,7 +63,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
 
     public String processAuthorization(String token, String issuer, ResourceInfo resourceInfo, String method,
             String path) throws Exception {
-        logger.error("oAuth  Authorization parameters , token:{}, issuer:{}, resourceInfo:{}, method: {}, path: {} ",
+        logger.debug("oAuth  Authorization parameters , token:{}, issuer:{}, resourceInfo:{}, method: {}, path: {} ",
                 token, issuer, resourceInfo, method, path);
 
         if (StringUtils.isBlank(token)) {
@@ -114,14 +114,14 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
         acccessToken = validateScope(acccessToken, tokenScopes, resourceInfo, issuer);
 
         boolean isAuthorized = externalAuthorization(token, issuer, method, path);
-        logger.error("Custom authorization - isAuthorized:{}", isAuthorized);
+        logger.debug("Custom authorization - isAuthorized:{}", isAuthorized);
 
         return acccessToken;
     }
 
     private String validateScope(String accessToken, List<String> tokenScopes, ResourceInfo resourceInfo, String issuer)
             throws Exception {
-        logger.error("Validate scope, accessToken:{}, tokenScopes:{}, resourceInfo: {}, issuer: {}", accessToken,
+        logger.debug("Validate scope, accessToken:{}, tokenScopes:{}, resourceInfo: {}, issuer: {}", accessToken,
                 tokenScopes, resourceInfo, issuer);
 
         // Get resource scope
@@ -160,7 +160,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
         // Generate token with required resourceScopes
         resourceScopes.addAll(authSpecificScope);
         accessToken = openIdService.requestAccessToken(authUtil.getClientId(), resourceScopes);
-        logger.error("Introspecting new accessToken:{}", accessToken);
+        logger.debug("Introspecting new accessToken:{}", accessToken);
 
         // Introspect
         IntrospectionResponse introspectionResponse = openIdService
@@ -175,13 +175,12 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
                     Response.status(Response.Status.UNAUTHORIZED).build());
         }
 
-        logger.error("Returning accessToken:{}", accessToken);
-        logger.info("Token scopes Valid");
+        logger.info("Token scopes Valid Returning accessToken:{}", accessToken);
         return AUTHENTICATION_SCHEME + accessToken;
     }
 
     private boolean externalAuthorization(String token, String issuer, String method, String path) {
-        logger.error(
+        logger.debug(
                 "External Authorization script params -  request:{}, response:{}, token:{}, issuer:{}, method:{}, path:{} ",
                 request, response, token, issuer, method, path);
         Map<String, Object> requestParameters = new HashMap<>();
