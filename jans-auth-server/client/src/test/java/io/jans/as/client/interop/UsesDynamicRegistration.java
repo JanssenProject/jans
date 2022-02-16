@@ -10,6 +10,7 @@ import io.jans.as.client.BaseTest;
 import io.jans.as.client.RegisterClient;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
+import io.jans.as.client.client.Asserter;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
@@ -52,12 +53,8 @@ public class UsesDynamicRegistration extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(response.getStatus(), 201, "Unexpected response code: " + response.getEntity());
-        assertNotNull(response.getClientId());
-        assertNotNull(response.getClientSecret());
-        assertNotNull(response.getRegistrationAccessToken());
-        assertNotNull(response.getRegistrationClientUri());
+        Asserter.assertOk(response);
         assertNotNull(response.getClientIdIssuedAt());
-        assertNotNull(response.getClientSecretExpiresAt());
+        assertNotNull(response.getRegistrationClientUri());
     }
 }

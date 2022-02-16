@@ -12,6 +12,7 @@ import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
 import io.jans.as.client.TokenClient;
 import io.jans.as.client.TokenResponse;
+import io.jans.as.client.client.Asserter;
 import io.jans.as.client.model.SoftwareStatement;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
@@ -134,11 +135,7 @@ public class RegistrationWithSoftwareStatementTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(response.getStatus(), 201, "Unexpected response code: " + response.getEntity());
-        assertNotNull(response.getClientId());
-        assertNotNull(response.getClientSecret());
-        assertNotNull(response.getRegistrationAccessToken());
-        assertNotNull(response.getClientSecretExpiresAt());
+        Asserter.assertOk(response);
         assertNotNull(response.getFirstClaim(SCOPE.toString()));
         assertNotNull(response.getFirstClaim(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString()));
         assertTrue(Boolean.parseBoolean(response.getFirstClaim(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString())));
@@ -242,11 +239,7 @@ public class RegistrationWithSoftwareStatementTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(response.getStatus(), 201, "Unexpected response code: " + response.getEntity());
-        assertNotNull(response.getClientId());
-        assertNotNull(response.getClientSecret());
-        assertNotNull(response.getRegistrationAccessToken());
-        assertNotNull(response.getClientSecretExpiresAt());
+        Asserter.assertOk(response);
         assertNotNull(response.getFirstClaim(SCOPE.toString()));
         assertNotNull(response.getFirstClaim(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString()));
         assertTrue(Boolean.parseBoolean(response.getFirstClaim(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString())));

@@ -59,7 +59,7 @@ public class RevokeSessionHttpTest extends BaseTest {
 
         showClient(registerClient);
         assertOk(registerResponse);
-        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
 
         // 3. Request authorization
         List<String> scopes = Arrays.asList(
