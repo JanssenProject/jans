@@ -32,7 +32,10 @@ cur_dir = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(cur_dir)
 
 from pylib.tabulate.tabulate import tabulate
-from pylib import jwt
+try:
+    import jwt
+except:
+    from pylib import jwt
 
 tabulate_endpoints = {
     'jca.get-config-scripts': ['scriptType', 'name', 'enabled', 'inum'],
