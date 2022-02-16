@@ -239,7 +239,7 @@ class Config:
         self.ldapCertFn = self.opendj_cert_fn = os.path.join(self.certFolder, 'opendj.crt')
         self.ldapTrustStoreFn = self.opendj_p12_fn = os.path.join(self.certFolder, 'opendj.p12')
 
-        self.oxd_package = base.determine_package(os.path.join(Config.distJansFolder, 'oxd-server*.tgz'))
+        self.oxd_package = base.determine_package(os.path.join(self.distJansFolder, 'oxd-server*.tgz'))
 
         self.opendj_p12_pass = None
 
