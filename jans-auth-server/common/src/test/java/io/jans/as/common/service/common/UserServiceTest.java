@@ -24,7 +24,7 @@ import static org.testng.Assert.*;
 public class UserServiceTest {
 
     @InjectMocks
-    protected UserServiceImpl userService;
+    protected TestUserService userService;
     @Mock
     protected PersistenceEntryManager persistenceEntryManager;
     @Mock
@@ -186,7 +186,7 @@ public class UserServiceTest {
     private void addDefaultUser_withUidNoEmptyPersonCustomObject_user() {
         String uid = UUID.randomUUID().toString();
         User user = getBasicUser(uid, "dn123");
-        user.setCustomObjectClasses(UserServiceImpl.DEFAULT_PERSON_CUSTOM_OBJECT_CLASS_LIST);
+        user.setCustomObjectClasses(TestUserService.DEFAULT_PERSON_CUSTOM_OBJECT_CLASS_LIST);
         doNothing().when(persistenceEntryManager).persist(any());
         when(dataSourceTypeService.isSpanner(anyString())).thenReturn(true);
         when(persistenceEntryManager.findEntries(anyString(), any(), any(), any())).thenReturn(getListBasicOneUser(user));
