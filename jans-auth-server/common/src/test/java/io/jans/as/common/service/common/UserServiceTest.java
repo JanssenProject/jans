@@ -1,12 +1,10 @@
 package io.jans.as.common.service.common;
 
 import io.jans.as.common.model.common.User;
-import io.jans.as.model.jwk.Use;
 import io.jans.model.GluuStatus;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.base.CustomAttribute;
 import io.jans.orm.model.base.CustomObjectAttribute;
-import io.jans.orm.search.filter.Filter;
 import io.jans.service.DataSourceTypeService;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -26,7 +24,7 @@ import static org.testng.Assert.*;
 public class UserServiceTest {
 
     @InjectMocks
-    protected UserServiceImplTest userService;
+    protected UserServiceImpl userService;
     @Mock
     protected PersistenceEntryManager persistenceEntryManager;
     @Mock
@@ -188,7 +186,7 @@ public class UserServiceTest {
     private void addDefaultUser_withUidNoEmptyPersonCustomObject_user() {
         String uid = UUID.randomUUID().toString();
         User user = getBasicUser(uid, "dn123");
-        user.setCustomObjectClasses(UserServiceImplTest.DEFAULT_PERSON_CUSTOM_OBJECT_CLASS_LIST);
+        user.setCustomObjectClasses(UserServiceImpl.DEFAULT_PERSON_CUSTOM_OBJECT_CLASS_LIST);
         doNothing().when(persistenceEntryManager).persist(any());
         when(dataSourceTypeService.isSpanner(anyString())).thenReturn(true);
         when(persistenceEntryManager.findEntries(anyString(), any(), any(), any())).thenReturn(getListBasicOneUser(user));

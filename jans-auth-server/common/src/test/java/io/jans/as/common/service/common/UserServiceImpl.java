@@ -3,7 +3,7 @@ package io.jans.as.common.service.common;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UserServiceImplTest extends UserService {
+public class UserServiceImpl extends UserService {
 
     private boolean returnTestListPersonCustomObjectClassList = false;
     public static final String[] DEFAULT_PERSON_CUSTOM_OBJECT_CLASS_LIST = {"personCustomObjectClass1", "personCustomObjectClass2"};
