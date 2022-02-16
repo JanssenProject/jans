@@ -7,7 +7,6 @@
 package io.jans.as.client;
 
 import com.google.common.collect.Maps;
-import io.jans.as.client.client.Asserter;
 import io.jans.as.client.dev.HostnameVerifierType;
 import io.jans.as.client.page.AbstractPage;
 import io.jans.as.client.page.PageConfig;
@@ -83,6 +82,7 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.UUID;
 
+import static io.jans.as.client.client.Asserter.assertOk;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
@@ -1133,8 +1133,7 @@ public abstract class BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        Asserter.assertOk(registerResponse);
-        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertOk(registerResponse);
         return registerResponse;
     }
 
@@ -1162,8 +1161,7 @@ public abstract class BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        Asserter.assertOk(registerResponse);
-        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertOk(registerResponse);
 
         return registerResponse;
     }
@@ -1193,8 +1191,7 @@ public abstract class BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        Asserter.assertOk(registerResponse);
-        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertOk(registerResponse);
 
         return registerResponse;
 	}

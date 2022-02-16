@@ -10,7 +10,7 @@ import io.jans.as.client.BaseTest;
 import io.jans.as.client.RegisterResponse;
 import io.jans.as.client.TokenClient;
 import io.jans.as.client.TokenResponse;
-import io.jans.as.client.client.Asserter;
+
 import io.jans.as.client.load.benchmark.suite.BenchmarkTestListener;
 import io.jans.as.client.load.benchmark.suite.BenchmarkTestSuiteListener;
 import io.jans.as.model.common.ResponseType;
@@ -23,6 +23,7 @@ import org.testng.annotations.Test;
 import java.util.Arrays;
 import java.util.List;
 
+import static io.jans.as.client.client.Asserter.assertOk;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
@@ -47,8 +48,7 @@ public class BenchmarkRequestAccessToken extends BaseTest {
 
         RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, scopes, sectorIdentifierUri);
 
-        Asserter.assertOk(registerResponse);
-        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertOk(registerResponse);
 
         this.clientId = registerResponse.getClientId();
         this.clientSecret = registerResponse.getClientSecret();

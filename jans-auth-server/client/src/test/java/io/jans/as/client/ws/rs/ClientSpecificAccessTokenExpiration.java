@@ -17,7 +17,7 @@ import io.jans.as.client.TokenRequest;
 import io.jans.as.client.TokenResponse;
 import io.jans.as.client.UserInfoClient;
 import io.jans.as.client.UserInfoResponse;
-import io.jans.as.client.client.Asserter;
+
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
@@ -32,6 +32,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import static io.jans.as.client.client.Asserter.assertOk;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
@@ -68,8 +69,7 @@ public class ClientSpecificAccessTokenExpiration extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        Asserter.assertOk(registerResponse);
-        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertOk(registerResponse);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();

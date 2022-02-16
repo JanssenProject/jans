@@ -53,17 +53,13 @@ public class Asserter {
         assertNotNull(response.getClientSecret());
         assertNotNull(response.getClientSecretExpiresAt());
         assertNotNull(response.getRegistrationAccessToken());
+        assertNotNull(response.getClientIdIssuedAt());
+        assertNotNull(response.getRegistrationClientUri());
     }
 
     public static void assertBadRequest(RegisterResponse registerResponse) {
         assertEquals(registerResponse.getStatus(), 400, "Unexpected response code: " + registerResponse.getEntity());
         assertNotNull(registerResponse.getEntity(), "The entity is null");
-        assertNotNull(registerResponse.getErrorType(), "The error type is null");
-        assertNotNull(registerResponse.getErrorDescription(), "The error description is null");
-    }
-
-    public static void assertBadRequestStatus(RegisterResponse registerResponse) {
-        assertEquals(registerResponse.getStatus(), 400, "Unexpected response code: " + registerResponse.getStatus());
         assertNotNull(registerResponse.getErrorType(), "The error type is null");
         assertNotNull(registerResponse.getErrorDescription(), "The error description is null");
     }

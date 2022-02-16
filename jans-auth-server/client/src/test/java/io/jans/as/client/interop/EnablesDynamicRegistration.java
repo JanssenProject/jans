@@ -10,7 +10,7 @@ import io.jans.as.client.BaseTest;
 import io.jans.as.client.RegisterClient;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
-import io.jans.as.client.client.Asserter;
+
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
@@ -21,6 +21,7 @@ import org.testng.annotations.Test;
 
 import java.util.Arrays;
 
+import static io.jans.as.client.client.Asserter.assertOk;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
@@ -53,8 +54,6 @@ public class EnablesDynamicRegistration extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        Asserter.assertOk(response);
-        assertNotNull(response.getClientIdIssuedAt());
-        assertNotNull(response.getRegistrationClientUri());
+        assertOk(response);
     }
 }

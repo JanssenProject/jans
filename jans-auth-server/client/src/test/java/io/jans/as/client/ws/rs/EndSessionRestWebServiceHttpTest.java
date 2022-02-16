@@ -15,7 +15,7 @@ import io.jans.as.client.EndSessionResponse;
 import io.jans.as.client.RegisterClient;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
-import io.jans.as.client.client.Asserter;
+
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.register.ApplicationType;
@@ -30,6 +30,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import static io.jans.as.client.client.Asserter.assertOk;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
@@ -66,7 +67,7 @@ public class EndSessionRestWebServiceHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        Asserter.assertOk(response);
+        assertOk(response);
 
         String clientId = response.getClientId();
 
@@ -156,7 +157,7 @@ public class EndSessionRestWebServiceHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        Asserter.assertOk(response);
+        assertOk(response);
 
         String clientId = response.getClientId();
 

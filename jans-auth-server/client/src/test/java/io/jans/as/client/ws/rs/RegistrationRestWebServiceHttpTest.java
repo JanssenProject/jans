@@ -11,7 +11,7 @@ import io.jans.as.client.BaseTest;
 import io.jans.as.client.RegisterClient;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
-import io.jans.as.client.client.Asserter;
+
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
@@ -33,6 +33,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import static io.jans.as.client.client.Asserter.assertBadRequest;
+import static io.jans.as.client.client.Asserter.assertOk;
 import static io.jans.as.model.common.GrantType.AUTHORIZATION_CODE;
 import static io.jans.as.model.common.GrantType.CLIENT_CREDENTIALS;
 import static io.jans.as.model.common.GrantType.IMPLICIT;
@@ -120,7 +122,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-Asserter.assertOk(registerResponse);
+        assertOk(registerResponse);
 
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
         String registrationClientUri = registerResponse.getRegistrationClientUri();
@@ -209,7 +211,7 @@ Asserter.assertOk(registerResponse);
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        Asserter.assertOk(response);
+        assertOk(response);
         assertNotNull(response.getClaims().get(SCOPE.toString()));
         assertTrue(Boolean.parseBoolean(response.getClaims().get(BACKCHANNEL_LOGOUT_SESSION_REQUIRED.toString())));
         assertEquals(logoutUri, new JSONArray(response.getClaims().get(BACKCHANNEL_LOGOUT_URI.toString())).getString(0));
@@ -282,7 +284,7 @@ Asserter.assertOk(registerResponse);
         registerClient.setRequest(registerRequest);
         RegisterResponse response = registerClient.exec();
         showClient(registerClient);
-        Asserter.assertOk(response);
+        assertOk(response);
         assertTrue(response.getClaims().containsKey(SOFTWARE_ID.toString()));
         assertEquals(response.getClaims().get(SOFTWARE_ID.toString()), softwareId);
         assertTrue(response.getClaims().containsKey(SOFTWARE_VERSION.toString()));
@@ -376,7 +378,7 @@ Asserter.assertOk(registerResponse);
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        Asserter.assertOk(response);
+        assertOk(response);
         assertNotNull(response.getClaims().get(SCOPE.toString()));
         assertNotNull(response.getClaims().get(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString()));
         assertTrue(Boolean.parseBoolean(response.getClaims().get(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString())));
@@ -464,7 +466,7 @@ Asserter.assertOk(registerResponse);
         final RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        Asserter.assertOk(response);
+        assertOk(response);
     }
 
     @Test
@@ -480,7 +482,7 @@ Asserter.assertOk(registerResponse);
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        Asserter.assertBadRequest(response);
+        assertBadRequest(response);
     }
 
     @Test
@@ -492,7 +494,7 @@ Asserter.assertOk(registerResponse);
                 Arrays.asList("https://client.example.com/cb#fail_fragment"));
 
         showClient(registerClient);
-        Asserter.assertBadRequest(response);
+        assertBadRequest(response);
     }
 
     @Parameters({"redirectUris"})
@@ -534,7 +536,7 @@ Asserter.assertOk(registerResponse);
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        Asserter.assertOk(response);
+        assertOk(response);
     }
 
     @Parameters({"redirectUris", "sectorIdentifierUri"})
@@ -556,7 +558,7 @@ Asserter.assertOk(registerResponse);
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        Asserter.assertOk(response);
+        assertOk(response);
     }
 
     @Parameters({"redirectUris"})
@@ -577,7 +579,7 @@ Asserter.assertOk(registerResponse);
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        Asserter.assertOk(response);
+        assertOk(response);
     }
 
     @Parameters({"redirectUris"})
@@ -598,7 +600,7 @@ Asserter.assertOk(registerResponse);
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        Asserter.assertOk(response);
+        assertOk(response);
     }
 
     @Parameters({"redirectUris"})
@@ -641,7 +643,7 @@ Asserter.assertOk(registerResponse);
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        Asserter.assertOk(response);
+        assertOk(response);
 
         registerRequest = new RegisterRequest(response.getRegistrationAccessToken());
         registerRequest.setHttpMethod(HttpMethod.DELETE);

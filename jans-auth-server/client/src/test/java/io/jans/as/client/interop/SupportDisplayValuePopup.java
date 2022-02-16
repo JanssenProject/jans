@@ -23,7 +23,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static org.testng.Assert.assertEquals;
+import static io.jans.as.client.client.Asserter.assertOk;
 import static org.testng.Assert.assertNotNull;
 
 /**
@@ -54,11 +54,7 @@ public class SupportDisplayValuePopup extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertOk(registerResponse);
 
         String clientId = registerResponse.getClientId();
 

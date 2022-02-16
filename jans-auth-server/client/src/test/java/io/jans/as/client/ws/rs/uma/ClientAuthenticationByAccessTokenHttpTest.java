@@ -16,7 +16,7 @@ import io.jans.as.client.RegisterResponse;
 import io.jans.as.client.TokenClient;
 import io.jans.as.client.TokenRequest;
 import io.jans.as.client.TokenResponse;
-import io.jans.as.client.client.Asserter;
+
 import io.jans.as.client.uma.UmaClientFactory;
 import io.jans.as.client.uma.UmaRptIntrospectionService;
 import io.jans.as.client.uma.UmaTokenService;
@@ -44,6 +44,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import static io.jans.as.client.client.Asserter.assertOk;
 import static io.jans.as.model.uma.UmaTestUtil.assertIt;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -112,7 +113,7 @@ public class ClientAuthenticationByAccessTokenHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        Asserter.assertOk(response);
+        assertOk(response);
 
         clientId = response.getClientId();
         clientSecret = response.getClientSecret();

@@ -18,7 +18,7 @@ import io.jans.as.client.RegisterResponse;
 import io.jans.as.client.UserInfoClient;
 import io.jans.as.client.UserInfoRequest;
 import io.jans.as.client.UserInfoResponse;
-import io.jans.as.client.client.Asserter;
+
 import io.jans.as.client.model.authorize.Claim;
 import io.jans.as.client.model.authorize.ClaimValue;
 import io.jans.as.client.model.authorize.JwtAuthorizationRequest;
@@ -50,6 +50,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import static io.jans.as.client.client.Asserter.assertOk;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
@@ -86,8 +87,7 @@ public class AddressClaimsTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        Asserter.assertOk(registerResponse);
-        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertOk(registerResponse);
 
         String clientId = registerResponse.getClientId();
 
@@ -197,8 +197,7 @@ public class AddressClaimsTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        Asserter.assertOk(registerResponse);
-        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertOk(registerResponse);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -306,8 +305,7 @@ public class AddressClaimsTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        Asserter.assertOk(registerResponse);
-        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertOk(registerResponse);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -415,8 +413,7 @@ public class AddressClaimsTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        Asserter.assertOk(registerResponse);
-        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertOk(registerResponse);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -526,8 +523,7 @@ public class AddressClaimsTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        Asserter.assertOk(registerResponse);
-        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertOk(registerResponse);
 
         String clientId = registerResponse.getClientId();
 
@@ -641,8 +637,7 @@ public class AddressClaimsTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        Asserter.assertOk(registerResponse);
-        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertOk(registerResponse);
 
         String clientId = registerResponse.getClientId();
 
@@ -756,8 +751,7 @@ public class AddressClaimsTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        Asserter.assertOk(registerResponse);
-        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertOk(registerResponse);
 
         String clientId = registerResponse.getClientId();
 
@@ -871,8 +865,7 @@ public class AddressClaimsTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        Asserter.assertOk(registerResponse);
-        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertOk(registerResponse);
 
         String clientId = registerResponse.getClientId();
 
@@ -986,8 +979,7 @@ public class AddressClaimsTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        Asserter.assertOk(registerResponse);
-        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertOk(registerResponse);
 
         String clientId = registerResponse.getClientId();
 
@@ -1101,8 +1093,7 @@ public class AddressClaimsTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        Asserter.assertOk(registerResponse);
-        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertOk(registerResponse);
 
         String clientId = registerResponse.getClientId();
 
@@ -1216,8 +1207,7 @@ public class AddressClaimsTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        Asserter.assertOk(registerResponse);
-        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertOk(registerResponse);
 
         String clientId = registerResponse.getClientId();
 
@@ -1331,8 +1321,7 @@ public class AddressClaimsTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        Asserter.assertOk(registerResponse);
-        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertOk(registerResponse);
 
         String clientId = registerResponse.getClientId();
 
@@ -1446,8 +1435,7 @@ public class AddressClaimsTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        Asserter.assertOk(registerResponse);
-        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertOk(registerResponse);
 
         String clientId = registerResponse.getClientId();
 
@@ -1561,8 +1549,7 @@ public class AddressClaimsTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        Asserter.assertOk(registerResponse);
-        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertOk(registerResponse);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1671,8 +1658,7 @@ public class AddressClaimsTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        Asserter.assertOk(registerResponse);
-        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertOk(registerResponse);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1785,8 +1771,7 @@ public class AddressClaimsTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        Asserter.assertOk(registerResponse);
-        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertOk(registerResponse);
 
         String clientId = registerResponse.getClientId();
 
@@ -1907,8 +1892,7 @@ public class AddressClaimsTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        Asserter.assertOk(registerResponse);
-        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertOk(registerResponse);
 
         String clientId = registerResponse.getClientId();
 
@@ -2029,8 +2013,7 @@ public class AddressClaimsTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        Asserter.assertOk(registerResponse);
-        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertOk(registerResponse);
 
         String clientId = registerResponse.getClientId();
 

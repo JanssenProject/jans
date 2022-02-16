@@ -15,7 +15,7 @@ import io.jans.as.client.RegisterResponse;
 import io.jans.as.client.TokenClient;
 import io.jans.as.client.TokenRequest;
 import io.jans.as.client.TokenResponse;
-import io.jans.as.client.client.Asserter;
+
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
@@ -30,6 +30,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import static io.jans.as.client.client.Asserter.assertOk;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
@@ -62,8 +63,7 @@ public class CanMakeAccessTokenRequestWithPrivateKeyJwtAuthentication extends Ba
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        Asserter.assertOk(registerResponse);
-        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertOk(registerResponse);
 
         String clientId = registerResponse.getClientId();
 

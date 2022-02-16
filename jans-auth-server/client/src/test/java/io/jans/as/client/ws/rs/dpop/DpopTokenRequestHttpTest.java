@@ -14,7 +14,7 @@ import io.jans.as.client.RegisterResponse;
 import io.jans.as.client.TokenClient;
 import io.jans.as.client.TokenRequest;
 import io.jans.as.client.TokenResponse;
-import io.jans.as.client.client.Asserter;
+
 import io.jans.as.client.service.ClientFactory;
 import io.jans.as.client.service.IntrospectionService;
 import io.jans.as.model.common.AuthenticationMethod;
@@ -51,6 +51,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import static io.jans.as.client.client.Asserter.assertOk;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
@@ -637,8 +638,7 @@ public class DpopTokenRequestHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        Asserter.assertOk(registerResponse);
-        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertOk(registerResponse);
 
         return registerResponse.getClientId();
     }

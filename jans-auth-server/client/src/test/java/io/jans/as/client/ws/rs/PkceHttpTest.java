@@ -71,7 +71,6 @@ public class PkceHttpTest extends BaseTest {
 
         showClient(registerClient);
         assertOk(registerResponse);
-        assertNotNull(registerResponse.getClientIdIssuedAt());
 
         // 3. Request authorization
         List<String> scopes = Arrays.asList(
@@ -159,7 +158,6 @@ public class PkceHttpTest extends BaseTest {
 
         showClient(registerClient);
         assertOk(registerResponse);
-        assertNotNull(registerResponse.getClientIdIssuedAt());
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);

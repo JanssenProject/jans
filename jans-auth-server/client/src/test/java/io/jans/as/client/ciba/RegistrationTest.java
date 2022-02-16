@@ -12,7 +12,7 @@ import io.jans.as.client.JwkResponse;
 import io.jans.as.client.RegisterClient;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
-import io.jans.as.client.client.Asserter;
+
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.BackchannelTokenDeliveryMode;
 import io.jans.as.model.common.GrantType;
@@ -27,6 +27,8 @@ import javax.ws.rs.HttpMethod;
 import java.util.Arrays;
 import java.util.Collections;
 
+import static io.jans.as.client.client.Asserter.assertBadRequest;
+import static io.jans.as.client.client.Asserter.assertOk;
 import static io.jans.as.model.register.RegisterRequestParam.APPLICATION_TYPE;
 import static io.jans.as.model.register.RegisterRequestParam.BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG;
 import static io.jans.as.model.register.RegisterRequestParam.BACKCHANNEL_CLIENT_NOTIFICATION_ENDPOINT;
@@ -70,7 +72,7 @@ public class RegistrationTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        Asserter.assertOk(registerResponse);
+        assertOk(registerResponse);
 
         assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()));
         assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()));
@@ -131,7 +133,7 @@ public class RegistrationTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-Asserter.assertOk(registerResponse);
+        assertOk(registerResponse);
 
         assertTrue(registerResponse.getClaims().containsKey(JWKS_URI.toString()));
         assertTrue(registerResponse.getClaims().containsKey(SECTOR_IDENTIFIER_URI.toString()));
@@ -195,7 +197,7 @@ Asserter.assertOk(registerResponse);
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-Asserter.assertOk(registerResponse);
+        assertOk(registerResponse);
 
         assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()));
         assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()));
@@ -248,7 +250,7 @@ Asserter.assertOk(registerResponse);
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-Asserter.assertOk(registerResponse);
+        assertOk(registerResponse);
 
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
         String registrationClientUri = registerResponse.getRegistrationClientUri();
@@ -339,7 +341,7 @@ Asserter.assertOk(registerResponse);
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-Asserter.assertOk(registerResponse);
+        assertOk(registerResponse);
         assertNotNull(registerResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(registerResponse.getClaims().get(SUBJECT_TYPE.toString()));
         assertNotNull(registerResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
@@ -419,7 +421,7 @@ Asserter.assertOk(registerResponse);
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-Asserter.assertOk(registerResponse);
+        assertOk(registerResponse);
 
         assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()));
         assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()));
@@ -484,7 +486,7 @@ Asserter.assertOk(registerResponse);
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-Asserter.assertOk(registerResponse);
+        assertOk(registerResponse);
 
         assertTrue(registerResponse.getClaims().containsKey(JWKS_URI.toString()));
         assertTrue(registerResponse.getClaims().containsKey(SECTOR_IDENTIFIER_URI.toString()));
@@ -552,7 +554,7 @@ Asserter.assertOk(registerResponse);
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-Asserter.assertOk(registerResponse);
+        assertOk(registerResponse);
 
         assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()));
         assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()));
@@ -608,7 +610,7 @@ Asserter.assertOk(registerResponse);
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-Asserter.assertOk(registerResponse);
+        assertOk(registerResponse);
 
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
         String registrationClientUri = registerResponse.getRegistrationClientUri();
@@ -703,7 +705,7 @@ Asserter.assertOk(registerResponse);
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-Asserter.assertOk(registerResponse);
+        assertOk(registerResponse);
         assertNotNull(registerResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(registerResponse.getClaims().get(SUBJECT_TYPE.toString()));
         assertNotNull(registerResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
@@ -781,7 +783,7 @@ Asserter.assertOk(registerResponse);
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-Asserter.assertOk(registerResponse);
+        assertOk(registerResponse);
 
         assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()));
         assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()));
@@ -843,7 +845,7 @@ Asserter.assertOk(registerResponse);
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-Asserter.assertOk(registerResponse);
+        assertOk(registerResponse);
 
         assertTrue(registerResponse.getClaims().containsKey(SECTOR_IDENTIFIER_URI.toString()));
         assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()));
@@ -908,7 +910,7 @@ Asserter.assertOk(registerResponse);
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-Asserter.assertOk(registerResponse);
+        assertOk(registerResponse);
 
         assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()));
         assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()));
@@ -963,7 +965,7 @@ Asserter.assertOk(registerResponse);
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-Asserter.assertOk(registerResponse);
+        assertOk(registerResponse);
 
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
         String registrationClientUri = registerResponse.getRegistrationClientUri();
@@ -1047,7 +1049,7 @@ Asserter.assertOk(registerResponse);
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        Asserter.assertBadRequest(response);
+        assertBadRequest(response);
     }
 
     @Parameters({"clientJwksUri"})
@@ -1069,7 +1071,7 @@ Asserter.assertOk(registerResponse);
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        Asserter.assertBadRequest(response);
+        assertBadRequest(response);
     }
 
     @Parameters({"clientJwksUri"})
@@ -1091,7 +1093,7 @@ Asserter.assertOk(registerResponse);
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        Asserter.assertBadRequest(response);
+        assertBadRequest(response);
     }
 
     @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint"})
@@ -1113,7 +1115,7 @@ Asserter.assertOk(registerResponse);
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        Asserter.assertBadRequest(response);
+        assertBadRequest(response);
     }
 
     @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint"})
@@ -1135,7 +1137,7 @@ Asserter.assertOk(registerResponse);
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        Asserter.assertBadRequest(response);
+        assertBadRequest(response);
     }
 
     @Parameters({"backchannelClientNotificationEndpoint"})
@@ -1157,7 +1159,7 @@ Asserter.assertOk(registerResponse);
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        Asserter.assertBadRequest(response);
+        assertBadRequest(response);
     }
 
     @Parameters({"backchannelClientNotificationEndpoint"})
@@ -1179,6 +1181,6 @@ Asserter.assertOk(registerResponse);
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        Asserter.assertBadRequest(response);
+        assertBadRequest(response);
     }
 }
