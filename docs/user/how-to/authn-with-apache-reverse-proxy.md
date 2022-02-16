@@ -22,14 +22,12 @@ For development and POC purposes, 4GB RAM and 10 GB HDD should be available for 
   
 
 #### Prerequisites
-- For this guide we will assume that setup with Apache reverse proxy already exists with SSL enabled. Application resources which need to be protected using authentication are accessed via reverse proxy.
--  For the simplicity of the instruction set, we will use one of the webpage hosted by Apache server itself as application resource and configure authentication for the same.
+- Existing Apache reverse proxy setup that is SSL enabled. Application resources which need to be protected using authentication are accessed via reverse proxy.
+- For simplicity, we will use one of the webpage hosted directly on Apache server as application resource and configure authentication for the same.
 
 ## Setup Janssen server 
 
-Janssen Server provides OpenID Connect Provider.
-
-Commands below can be used to install Janssen Authorization Server on an Ubuntu 20.04 system. More installation options are available [here](https://github.com/JanssenProject/jans/wiki#janssen-installation). For this guide, we would assume that Janssen installation host is accessible FQDN `https://janssen.op.io/`.
+Commands below can be used to install Janssen Authorization Server on an Ubuntu 20.04 system. More installation options are available [here](https://github.com/JanssenProject/jans/wiki#janssen-installation). For this guide, we would assume that Janssen server host is accessible via FQDN `https://janssen.op.io/`.
 
 ```
 wget https://repo.gluu.org/jans/jans_1.0.0~ubuntu20.04_amd64.deb
@@ -45,34 +43,36 @@ https://janssen.op.io/.well-known/openid-configuration
 
 #### Configure Janssen server
 
-Janssen server provides `jans-cli` tool which enables Janssen Configuration via Command Line Interface(CLI). It has menu-driven interface that makes it easier to configure Janssen server.
+Janssen server provides `jans-cli` CLI tool to configure Janssen server. `jans-cli` has menu-driven interface that makes it easy to configure Janssen server.
+
 Use steps below to configure Janssen server.
+
 - Add RP as OpenID Connect client
   - Run command below to enter interactive mode
     ```
     /opt/jans/jans-cli/config-cli.py`
     ```
-  - Once after entering interactive mode navigate through options to start registering new OpenID Connect client
-  - Provide inputs for following properties. Number in parathesis indicates menu option(may change):
+  - Navigate through options to start registering new OpenID Connect client
+  - Provide inputs for following properties. Number in parathesis indicates menu option(may change) and are not part of input:
     ```
     displayName: test.local.rp.io
     applicationType: web
     includeClaimsInIdToken  [false]: _true
     Populate optional fields? y
-    clientSecret: my-client-secret (1)
-    subjectType: public (21)
-    tokenEndpointAuthMethod: client_secret_basic (31)
-    redirectUris: https://test.local.rp.io/redirect (7)
-    scopes: email openid profile (39)
-    responseTypes: code (9)
-    grantTypes: authorization_code (10)
+    clientSecret: my-client-secret
+    subjectType: public
+    tokenEndpointAuthMethod: client_secret_basic
+    redirectUris: https://test.local.rp.io/redirect
+    scopes: email openid profile
+    responseTypes: code
+    grantTypes: authorization_code
     ```
-   - Copy the resulting JSON data and save it to a file, `register-apache-rp.json`.
+   - Copy the resulting JSON data and save it to a file, say `register-apache-rp.json`.
    - Now register client usign following command
    ```
-   /opt/jans/jans-cli/config-cli.py --operation-id post-oauth-openid-clients --data /root/register-apache-rp.json
+   /opt/jans/jans-cli/config-cli.py --operation-id post-oauth-openid-clients --data <path>/register-apache-rp.json
    ```
-   - Output of this command would be a JSON response. Save this response for reference as some of these value will be required when configuring *mod-auth-openidc*.
+   - Output of this command would be a JSON response. Save this response to a file as some of the values in it will be required when configuring *mod-auth-openidc*.
  
 - create test users and scopes 
 > TODO: add steps
@@ -82,19 +82,19 @@ Use steps below to configure Janssen server.
 
 #### Install *mod-auth-openidc* 
 
-Add mod-auth-openidc using steps below
+Add mod-auth-openidc using commands below
 ```
 sudo apt-get install libapache2-mod-auth-openidc
 sudo a2enmod auth_openidc
 service apache2 restart
 ```
 #### Configure *mod-auth-openidc* 
-- Open `/etc/apache2/sites-available/default-ssl.conf`. Find more configuration options for mod-auth-openidc [here](https://github.com/zmartzone/mod_auth_openidc/blob/master/auth_openidc.conf). 
-- Add configuration parameters given below for virtual host `_default_:443`.
-- This will enable authentication for any resource under `/` context root.
+- Open `/etc/apache2/sites-available/default-ssl.conf`. 
+- Add *mod-auth-openidc* configuration parameters given below for virtual host `_default_:443`. Find more configuration options for mod-auth-openidc [here](https://github.com/zmartzone/mod_auth_openidc/blob/master/auth_openidc.conf). 
+- This configuration will enable authentication for any resource under `/` context root.
 
 ```
-OIDCProviderMetadataURL https://jans-install-mysql.lxc.jans.io/jans-auth/.well-known/openid-configuration
+OIDCProviderMetadataURL https://janssen.op.io/jans-auth/.well-known/openid-configuration
 OIDCClientID 73257b63-f3c2-484c-b228-ffeb33290cec
 OIDCClientSecret my-client-secret
 OIDCResponseType code
