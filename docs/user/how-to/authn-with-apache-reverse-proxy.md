@@ -1,5 +1,3 @@
-
-
 ## Contents:
 
 - [Overview](#overview)
@@ -9,21 +7,18 @@
 
 ## Overview
 
-This guide will walk through the steps used to enable authentication for web applications using Janssen server.
+This guide describes steps to enable authentication for web applications using Janssen server which is an OpenID Connect Provider (OP). 
 
-Janssen server acts as OpenID Connect authentication provider. It is also referred to as OpenID Connection Provider (OP). 
-Application which needs to be protected with authentication is called Resource Server(RS). 
-
-Majority of the web applications use a reverse proxy, like Apache, to avail functionalities like load-balancing etc. We will configure Apache reverse proxy, and use [mod_auth_openidc](https://github.com/zmartzone/mod_auth_openidc) Apache server module to add Relying Party(RP) functionality. RP is implementation authentication flows of OpenID Connect specification. For each incoming request, RP ensures that the request is authenticated. If request is not pre-authenticated, then RP will coordinate with Janssen server to integrate authentication.
+Majority of the web applications use a reverse proxy, like Apache, to avail functionalities like load-balancing etc. We will configure  [mod_auth_openidc](https://github.com/zmartzone/mod_auth_openidc) Apache server module to add Relying Party(RP) functionality to existing Apache reverse proxy. RP is implements authentication flows of OpenID Connect specification. For each incoming request, RP ensures that the request is authenticated. If request is not pre-authenticated, then RP will coordinate with Janssen server to integrate authentication.
 
 #### Hardware configuration
 
-For development and POC purposes, 4GB RAM and 10 GB HDD should be available for Janssen Server. For PROD deployments, please refer installation guide documents.
+For development and POC purposes, 4GB RAM and 10 GB HDD should be available for Janssen Server. For PROD deployments, please refer [installation guide](https://github.com/JanssenProject/jans/wiki#janssen-installation).
   
 
 #### Prerequisites
-- Existing Apache reverse proxy setup that is SSL enabled. Application resources which need to be protected using authentication are accessed via reverse proxy.
-- For simplicity, we will use one of the webpage hosted directly on Apache server as application resource and configure authentication for the same.
+- Existing Apache reverse proxy that is SSL enabled. Application resources which need to be protected using authentication are accessed via this reverse proxy.
+- For simplicity, we will use one of the web page hosted directly on Apache server as application resource and configure authentication for the same.
 
 ## Setup Janssen server 
 
@@ -48,27 +43,27 @@ Janssen server provides `jans-cli` CLI tool to configure Janssen server. `jans-c
 Use steps below to configure Janssen server.
 
 - Add RP as OpenID Connect client
-  - Run command below to enter interactive mode
+  - Run command below on host running Janssen Server
     ```
     /opt/jans/jans-cli/config-cli.py`
     ```
   - Navigate through options to start registering new OpenID Connect client
   - Provide inputs for following properties. Number in parathesis indicates menu option(may change) and are not part of input:
     ```
-    displayName: test.local.rp.io
+    displayName: <name-of-choice>
     applicationType: web
     includeClaimsInIdToken  [false]: _true
     Populate optional fields? y
-    clientSecret: my-client-secret
+    clientSecret: <secret-of-your-choice>
     subjectType: public
     tokenEndpointAuthMethod: client_secret_basic
-    redirectUris: https://test.local.rp.io/redirect
+    redirectUris: <app-url-post-authn>
     scopes: email openid profile
     responseTypes: code
     grantTypes: authorization_code
     ```
    - Copy the resulting JSON data and save it to a file, say `register-apache-rp.json`.
-   - Now register client usign following command
+   - Register client usign following command
    ```
    /opt/jans/jans-cli/config-cli.py --operation-id post-oauth-openid-clients --data <path>/register-apache-rp.json
    ```
@@ -82,14 +77,14 @@ Use steps below to configure Janssen server.
 
 #### Install *mod-auth-openidc* 
 
-Add mod-auth-openidc using commands below
+On Apache reverse proxy host, add mod-auth-openidc using commands below
 ```
 sudo apt-get install libapache2-mod-auth-openidc
 sudo a2enmod auth_openidc
 service apache2 restart
 ```
 #### Configure *mod-auth-openidc* 
-- Open `/etc/apache2/sites-available/default-ssl.conf`. 
+- Open `/etc/apache2/sites-available/default-ssl.conf`
 - Add *mod-auth-openidc* configuration parameters given below for virtual host `_default_:443`. Find more configuration options for mod-auth-openidc [here](https://github.com/zmartzone/mod_auth_openidc/blob/master/auth_openidc.conf). 
 - This configuration will enable authentication for any resource under `/` context root.
 
@@ -115,4 +110,4 @@ Restart Apache service
 
 ## Test Complete Flow
 
-- Accessing `https://test.local.rp.io/` should redirect to Janssen authentication screen. Upon successful authentication, browser should be redirected to `https://test.local.rp.io/redirect`. 
+- Accessing `https://test.apache.rp.io/` should redirect to Janssen authentication screen. Upon successful authentication, browser should be redirected to redirect URI.
