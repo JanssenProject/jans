@@ -3,12 +3,15 @@ package io.jans.configapi.model.configuration;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.jans.as.model.configuration.Configuration;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ApiAppConfiguration implements Configuration {
+public class ApiAppConfiguration implements Configuration, Serializable {
 
+    private static final long serialVersionUID = 1L;
+    
     private boolean configOauthEnabled;
     private List<String> apiApprovedIssuer;
     private String apiProtectionType;

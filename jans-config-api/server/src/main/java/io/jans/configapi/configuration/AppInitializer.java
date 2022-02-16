@@ -87,7 +87,7 @@ public class AppInitializer {
     private PythonService pythonService;
 
     public void onStart(@Observes @Initialized(ApplicationScoped.class) Object init) {
-        log.info("=============  STARTING API APPLICATION  ========================");
+        log.error("=============  STARTING API APPLICATION  ========================");
         log.info("init:{}", init);
 
         // Resteasy config - Turn off the default patch filter
@@ -115,10 +115,10 @@ public class AppInitializer {
         statusCheckerTimer.initTimer();
 
         // Schedule timer tasks
-        //loggerService.initTimer();
+        loggerService.initTimer();
 
         // Schedule timer tasks
-        // configurationFactory.initTimer();
+        configurationFactory.initTimer();
 
         log.info("==============  APPLICATION IS UP AND RUNNING ===================");
     }

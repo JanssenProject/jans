@@ -217,6 +217,7 @@
 		<finalName>jans-config-api</finalName>
 
 		<filters>
+			<filter>../profiles/${cfg}/config-build.properties</filter>
 			<filter>../profiles/${cfg}/config-api-test.properties</filter>
 		</filters>
 

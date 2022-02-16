@@ -35,7 +35,7 @@ public class ConfigurationService {
     private StatsData statsData;
 
     public Conf findConf() {
-        final String dn = configurationFactory.getConfigurationDn();
+        final String dn = configurationFactory.getAuthConfigurationDn();
         return persistenceManager.find(dn, Conf.class, null);
     }
 
