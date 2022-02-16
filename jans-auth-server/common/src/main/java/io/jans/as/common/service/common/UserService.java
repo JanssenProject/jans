@@ -391,8 +391,8 @@ public abstract class UserService {
         return true;
     }
 
-    public User removeUserAttribute(String userId, String attributeName, String attributeValue) {
-        log.debug("Remove user attribute from LDAP: attributeName = '{}', attributeValue = '{}'", attributeName, attributeValue);
+    public User removeUserAttributeValue(String userId, String attributeName, String attributeValue) {
+        log.debug("Remove user attribute value from LDAP: attributeName = '{}', attributeValue = '{}'", attributeName, attributeValue);
 
         User user = getUser(userId);
         if (user == null) {

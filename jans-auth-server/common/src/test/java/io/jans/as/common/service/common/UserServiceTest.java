@@ -464,7 +464,7 @@ public class UserServiceTest {
         when(dataSourceTypeService.isSpanner(anyString())).thenReturn(true);
         when(persistenceEntryManager.findEntries(anyString(), any(), any(), any())).thenReturn(getListBasicOneUser(userId, baseDn));
 
-        User resultUser = userService.removeUserAttribute(userId, "attribute2", "value2");
+        User resultUser = userService.removeUserAttributeValue(userId, "attribute2", "value2");
         assertNull(resultUser);
     }
 
@@ -485,7 +485,7 @@ public class UserServiceTest {
         when(persistenceEntryManager.find(anyString(), any(), any())).thenReturn(user);
         doNothing().when(persistenceEntryManager).merge(any());
 
-        User resultUser = userService.removeUserAttribute(userId, "attribute1", "value1");
+        User resultUser = userService.removeUserAttributeValue(userId, "attribute1", "value1");
         assertNotNull(resultUser);
         assertTrue(resultUser.getCustomAttributes().get(0).getValues().isEmpty());
 //        assertTrue(resultUser.getCustomAttributes().size() == 1);
