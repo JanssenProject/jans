@@ -72,7 +72,7 @@ class ConfigApiAuthorization(ConfigApiType):
 
         #Example to validate method
         if ("GET" == StringHelper.toUpperCase(method) ):
-          print "Validate ethod: %s" % method
+          print "Validate method: %s" % method
         
         if ("attributes" == StringHelper.toLowerCase(path) ):
           print "ConfigApiType.path: %s" % path
