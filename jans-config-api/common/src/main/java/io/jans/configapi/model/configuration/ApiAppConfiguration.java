@@ -9,7 +9,6 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ApiAppConfiguration implements Configuration {
 
-    
     private boolean configOauthEnabled;
     private List<String> apiApprovedIssuer;
     private String apiProtectionType;
