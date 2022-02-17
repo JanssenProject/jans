@@ -24,6 +24,8 @@ RUN pip3 install -U pip wheel \
 ARG JANS_LINUX_SETUP_VERSION=493337f94045be705386b8f2b59dda29f85762e6
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
+RUN mkdir -p /app/static/rdbm /app/static/couchbase /app/schema /app/openbanking/static /app/templates
+
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the jans-linux-setup code
 RUN git clone --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
@@ -32,18 +34,23 @@ RUN git clone --filter blob:none --no-checkout https://github.com/janssenproject
     && git checkout ${JANS_LINUX_SETUP_VERSION} \
     && git sparse-checkout set ${JANS_SETUP_DIR}
 
-# sync files from linux-setup
-RUN mkdir -p /app/static /app/schema /app/openbanking/static \
-    && cd /tmp/jans \
+# sync static files from linux-setup
+RUN cd /tmp/jans \
     && cp -R ${JANS_SETUP_DIR}/static/extension /app/static/extension \
     && cp -R ${JANS_SETUP_DIR}/openbanking/static/extension /app/openbanking/static/extension \
-    && mkdir -p /app/static/couchbase \
     && cp ${JANS_SETUP_DIR}/static/couchbase/index.json /app/static/couchbase/index.json \
     && cp ${JANS_SETUP_DIR}/schema/opendj_types.json /app/schema/opendj_types.json \
     && cp -R ${JANS_SETUP_DIR}/static/rdbm /app/static/rdbm \
-    && mkdir -p /app/schema \
     && cp ${JANS_SETUP_DIR}/schema/jans_schema.json /app/schema/jans_schema.json \
     && cp ${JANS_SETUP_DIR}/schema/custom_schema.json /app/schema/custom_schema.json
+
+# partially sync templates from linux-setup
+RUN cd /tmp/jans \
+    && cp ${JANS_SETUP_DIR}/templates/base.ldif /app/templates/base.ldif \
+    && cp ${JANS_SETUP_DIR}/templates/attributes.ldif /app/templates/attributes.ldif \
+    && cp ${JANS_SETUP_DIR}/openbanking/templates/attributes.ldif /app/templates/attributes.ob.ldif \
+    && cp ${JANS_SETUP_DIR}/templates/scopes.ldif /app/templates/scopes.ldif \
+    && cp ${JANS_SETUP_DIR}/openbanking/templates/scopes.ldif /app/templates/scopes.ob.ldif
 
 # TODO: casa should be moved from this image
 ARG GLUU_CASA_VERSION=e703c4b62e60d3cd299ea84f471417290987bdef

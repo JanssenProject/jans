@@ -30,8 +30,8 @@ class BaseBackend:
     """
 
     def __init__(self):
-        self.jans_admin_ui_role_id = "inum=43F1,ou=scopes,o=jans"
-        self.jans_admin_ui_claim = "inum=0A01,ou=attributes,o=jans"
+        # self.jans_admin_ui_role_id = "inum=43F1,ou=scopes,o=jans"
+        # self.jans_admin_ui_claim = "inum=0A01,ou=attributes,o=jans"
         self.jans_attrs = '{"spontaneousClientId":null,"spontaneousClientScopes":null,"showInConfigurationEndpoint":true}'
         # SCIM users.read, SCIM users.write scopes that get added to config-api client
         self.jans_scim_scopes = [
@@ -52,6 +52,9 @@ JANS_MANAGER_GROUP = "inum=60B7,ou=groups,o=jans"
 
 #: ID of jans-auth config
 JANS_AUTH_CONFIG_ID = "ou=jans-auth,ou=configuration,o=jans"
+
+#: View profile scope
+JANS_PROFILE_SCOPE_DN = "inum=43F1,ou=scopes,o=jans"
 
 
 def _transform_auth_dynamic_config(conf):
@@ -103,6 +106,47 @@ def _transform_token_server_client(attrs):
 
     # returns the modified attributes and flag to determine whether it needs update or not
     return attrs, should_update
+
+
+def _transform_profile_scope(attrs):
+    def modify_claims(claims):
+        should_update = False
+
+        # remove deprecated claim
+        old_attr = "inum=0A01,ou=attributes,o=jans"
+        if old_attr in claims:
+            claims.remove(old_attr)
+            should_update = True
+
+        # new AdminUI role attribute
+        new_attr = "inum=4CF1,ou=attributes,o=jans"
+        if new_attr not in claims:
+            claims.append(new_attr)
+            should_update = True
+
+        # returns modified claims and the flag
+        return claims, should_update
+
+    # special case for SQL-based attrs
+    if isinstance(attrs["jansClaim"], dict):
+        attrs["jansClaim"]["v"], should_update = modify_claims(attrs["jansClaim"]["v"])
+    else:
+        attrs["jansClaim"], should_update = modify_claims(attrs["jansClaim"])
+
+    # returns the modified attributes and flag to determine whether it needs update or not
+    return attrs, should_update
+
+
+def collect_claim_names(ldif_file="/app/templates/attributes.ldif"):
+    from ldif import LDIFParser
+
+    rows = {}
+    with open("/app/templates/attributes.ldif", "rb") as fd:
+        parser = LDIFParser(fd)
+
+        for dn, entry in parser.parse():
+            rows[dn] = entry["jansClaimName"][0]
+    return rows
 
 
 class LDAPBackend(BaseBackend):
@@ -160,14 +204,13 @@ class LDAPBackend(BaseBackend):
     def update_scopes_entries(self):
         # add jansAdminUIRole claim to profile scope
         kwargs = {}
-
-        entry = self.get_entry(self.jans_admin_ui_role_id, **kwargs)
+        entry = self.get_entry(JANS_PROFILE_SCOPE_DN, **kwargs)
         if not entry:
             return
 
-        if self.jans_admin_ui_claim not in entry.attrs["jansClaim"]:
-            entry.attrs["jansClaim"].append(self.jans_admin_ui_claim)
-            self.modify_entry(self.jans_admin_ui_role_id, entry.attrs, **kwargs)
+        attrs, should_update = _transform_profile_scope(entry.attrs)
+        if should_update:
+            self.modify_entry(entry.id, attrs, **kwargs)
 
     def update_clients_entries(self):
         # modify redirect UI of config-api client
@@ -246,6 +289,20 @@ class LDAPBackend(BaseBackend):
             entry.attrs["jansRevision"] += 1
             self.modify_entry(entry.id, entry.attrs)
 
+    def update_attributes_entries(self):
+        kwargs = {}
+        rows = collect_claim_names()
+
+        for dn, claim_name in rows.items():
+            entry = self.get_entry(dn, **kwargs)
+
+            # jansClaimName already set
+            if "jansClaimName" in entry.attrs and entry.attrs["jansClaimName"]:
+                continue
+
+            entry.attrs["jansClaimName"] = claim_name
+            self.modify_entry(entry.id, entry.attrs, **kwargs)
+
 
 class SQLBackend(BaseBackend):
     def __init__(self, manager):
@@ -284,17 +341,15 @@ class SQLBackend(BaseBackend):
 
     def update_scopes_entries(self):
         # add jansAdminUIRole claim to profile scope
-        id_ = doc_id_from_dn(self.jans_admin_ui_role_id)
         kwargs = {"table_name": "jansScope"}
-
-        entry = self.get_entry(id_, **kwargs)
+        entry = self.get_entry(doc_id_from_dn(JANS_PROFILE_SCOPE_DN), **kwargs)
 
         if not entry:
             return
 
-        if self.jans_admin_ui_claim not in entry.attrs["jansClaim"]["v"]:
-            entry.attrs["jansClaim"]["v"].append(self.jans_admin_ui_claim)
-            self.modify_entry(id_, entry.attrs, **kwargs)
+        attrs, should_update = _transform_profile_scope(entry.attrs)
+        if should_update:
+            self.modify_entry(entry.id, attrs, **kwargs)
 
     def update_clients_entries(self):
         # modify redirect UI of config-api client
@@ -387,6 +442,20 @@ class SQLBackend(BaseBackend):
             entry.attrs["jansRevision"] += 1
             self.modify_entry(entry.id, entry.attrs, **kwargs)
 
+    def update_attributes_entries(self):
+        kwargs = {"table_name": "jansAttr"}
+        rows = collect_claim_names()
+
+        for dn, claim_name in rows.items():
+            entry = self.get_entry(doc_id_from_dn(dn), **kwargs)
+
+            # jansClaimName already set
+            if "jansClaimName" in entry.attrs and entry.attrs["jansClaimName"]:
+                continue
+
+            entry.attrs["jansClaimName"] = claim_name
+            self.modify_entry(entry.id, entry.attrs, **kwargs)
+
 
 class CouchbaseBackend(BaseBackend):
     def __init__(self, manager):
@@ -463,17 +532,15 @@ class CouchbaseBackend(BaseBackend):
 
     def update_scopes_entries(self):
         # add jansAdminUIRole claim to profile scope
-        id_ = id_from_dn(self.jans_admin_ui_role_id)
-        bucket = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
-        kwargs = {"bucket": bucket}
+        kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
+        entry = self.get_entry(id_from_dn(JANS_PROFILE_SCOPE_DN), **kwargs)
 
-        entry = self.get_entry(id_, **kwargs)
         if not entry:
             return
 
-        if self.jans_admin_ui_claim not in entry.attrs["jansClaim"]:
-            entry.attrs["jansClaim"].append(self.jans_admin_ui_claim)
-            self.modify_entry(id_, entry.attrs, **kwargs)
+        attrs, should_update = _transform_profile_scope(entry.attrs)
+        if should_update:
+            self.modify_entry(entry.id, attrs, **kwargs)
 
     def update_clients_entries(self):
         # modify redirect UI of config-api client
@@ -589,6 +656,20 @@ class CouchbaseBackend(BaseBackend):
             entry.attrs["jansRevision"] += 1
             self.modify_entry(entry.id, entry.attrs, **kwargs)
 
+    def update_attributes_entries(self):
+        kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
+        rows = collect_claim_names()
+
+        for dn, claim_name in rows.items():
+            entry = self.get_entry(id_from_dn(dn), **kwargs)
+
+            # jansClaimName already set
+            if "jansClaimName" in entry.attrs and entry.attrs["jansClaimName"]:
+                continue
+
+            entry.attrs["jansClaimName"] = claim_name
+            self.modify_entry(entry.id, entry.attrs, **kwargs)
+
 
 class SpannerBackend(BaseBackend):
     def __init__(self, manager):
@@ -627,17 +708,15 @@ class SpannerBackend(BaseBackend):
 
     def update_scopes_entries(self):
         # add jansAdminUIRole claim to profile scope
-        id_ = doc_id_from_dn(self.jans_admin_ui_role_id)
         kwargs = {"table_name": "jansScope"}
-
-        entry = self.get_entry(id_, **kwargs)
+        entry = self.get_entry(doc_id_from_dn(JANS_PROFILE_SCOPE_DN), **kwargs)
 
         if not entry:
             return
 
-        if self.jans_admin_ui_claim not in entry.attrs["jansClaim"]:
-            entry.attrs["jansClaim"].append(self.jans_admin_ui_claim)
-            self.modify_entry(id_, entry.attrs, **kwargs)
+        attrs, should_update = _transform_profile_scope(entry.attrs)
+        if should_update:
+            self.modify_entry(entry.id, attrs, **kwargs)
 
     def update_clients_entries(self):
         # modify redirect UI of config-api client
@@ -730,6 +809,20 @@ class SpannerBackend(BaseBackend):
             entry.attrs["jansRevision"] += 1
             self.modify_entry(entry.id, entry.attrs, **kwargs)
 
+    def update_attributes_entries(self):
+        kwargs = {"table_name": "jansAttr"}
+        rows = collect_claim_names()
+
+        for dn, claim_name in rows.items():
+            entry = self.get_entry(doc_id_from_dn(dn), **kwargs)
+
+            # jansClaimName already set
+            if "jansClaimName" in entry.attrs and entry.attrs["jansClaimName"]:
+                continue
+
+            entry.attrs["jansClaimName"] = claim_name
+            self.modify_entry(entry.id, entry.attrs, **kwargs)
+
 
 class Upgrade:
     def __init__(self, manager):
@@ -758,3 +851,4 @@ class Upgrade:
             self.backend.update_misc()
 
         self.backend.update_auth_dynamic_config()
+        self.backend.update_attributes_entries()

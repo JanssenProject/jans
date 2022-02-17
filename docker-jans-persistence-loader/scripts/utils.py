@@ -442,7 +442,6 @@ def get_ldif_mappings(optional_scopes=None):
 
         files += [
             "jans-config-api/configuration.ldif",
-            "jans-config-api/admin-ui-attributes.ldif",
             "jans-config-api/admin-ui-clients.ldif",
             "jans-auth/configuration.ldif",
             "jans-auth/role-scope-mappings.ldif",

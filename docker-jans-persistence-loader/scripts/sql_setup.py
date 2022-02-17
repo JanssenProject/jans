@@ -436,7 +436,7 @@ class SQLBackend:
 
             # pre-populate the modified column
             for doc_id, value in values.items():
-                if all([value, "v" in value, len(value["v"])]):
+                if value and "v" in value and value["v"]:
                     new_value = value["v"][0]
                 else:
                     new_value = ""
