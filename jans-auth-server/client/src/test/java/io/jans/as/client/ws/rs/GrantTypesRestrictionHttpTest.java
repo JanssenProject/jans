@@ -22,6 +22,7 @@ import io.jans.as.client.TokenRequest;
 import io.jans.as.client.TokenResponse;
 import io.jans.as.client.UserInfoClient;
 import io.jans.as.client.UserInfoResponse;
+
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
@@ -43,6 +44,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import static io.jans.as.client.client.Asserter.assertOk;
 import static io.jans.as.model.register.RegisterRequestParam.APPLICATION_TYPE;
 import static io.jans.as.model.register.RegisterRequestParam.SCOPE;
 import static org.testng.Assert.assertEquals;
@@ -83,12 +85,7 @@ public class GrantTypesRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201);
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        assertOk(registerResponse);
         assertNotNull(registerResponse.getResponseTypes());
         assertTrue(registerResponse.getResponseTypes().containsAll(expectedResponseTypes));
         assertNotNull(registerResponse.getGrantTypes());

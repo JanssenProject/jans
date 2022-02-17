@@ -12,6 +12,7 @@ import io.jans.as.client.BaseTest;
 import io.jans.as.client.RegisterClient;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
+
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.register.ApplicationType;
@@ -23,6 +24,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import static io.jans.as.client.client.Asserter.assertOk;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
@@ -55,13 +57,7 @@ public class ProvidingAcrValues extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(response.getStatus(), 201, "Unexpected response code: " + response.getEntity());
-        assertNotNull(response.getClientId());
-        assertNotNull(response.getClientSecret());
-        assertNotNull(response.getRegistrationAccessToken());
-        assertNotNull(response.getRegistrationClientUri());
-        assertNotNull(response.getClientIdIssuedAt());
-        assertNotNull(response.getClientSecretExpiresAt());
+        assertOk(response);
         assertNotNull(response.getResponseTypes());
         assertTrue(response.getResponseTypes().containsAll(responseTypes));
         assertNotNull(response.getGrantTypes());

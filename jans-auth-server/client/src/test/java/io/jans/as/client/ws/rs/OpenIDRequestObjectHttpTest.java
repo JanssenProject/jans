@@ -17,6 +17,7 @@ import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
 import io.jans.as.client.UserInfoClient;
 import io.jans.as.client.UserInfoResponse;
+
 import io.jans.as.client.model.authorize.Claim;
 import io.jans.as.client.model.authorize.ClaimValue;
 import io.jans.as.client.model.authorize.JwtAuthorizationRequest;
@@ -49,6 +50,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import static io.jans.as.client.client.Asserter.assertOk;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.fail;
@@ -85,12 +87,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        assertOk(registerResponse);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -167,12 +164,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        assertOk(registerResponse);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -246,12 +238,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        assertOk(registerResponse);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -299,12 +286,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        assertOk(registerResponse);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -354,12 +336,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        assertOk(registerResponse);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -410,12 +387,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        assertOk(registerResponse);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -481,11 +453,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(response.getStatus(), 201, "Unexpected response code: " + response.getEntity());
-        assertNotNull(response.getClientId());
-        assertNotNull(response.getClientSecret());
-        assertNotNull(response.getRegistrationAccessToken());
-        assertNotNull(response.getClientSecretExpiresAt());
+        assertOk(response);
 
         String clientId = response.getClientId();
 
@@ -569,11 +537,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(response.getStatus(), 201, "Unexpected response code: " + response.getEntity());
-        assertNotNull(response.getClientId());
-        assertNotNull(response.getClientSecret());
-        assertNotNull(response.getRegistrationAccessToken());
-        assertNotNull(response.getClientSecretExpiresAt());
+        assertOk(response);
 
         String clientId = response.getClientId();
 
@@ -658,11 +622,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(response.getStatus(), 201, "Unexpected response code: " + response.getEntity());
-        assertNotNull(response.getClientId());
-        assertNotNull(response.getClientSecret());
-        assertNotNull(response.getRegistrationAccessToken());
-        assertNotNull(response.getClientSecretExpiresAt());
+        assertOk(response);
 
         String clientId = response.getClientId();
 
@@ -745,11 +705,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(response.getStatus(), 201, "Unexpected response code: " + response.getEntity());
-        assertNotNull(response.getClientId());
-        assertNotNull(response.getClientSecret());
-        assertNotNull(response.getRegistrationAccessToken());
-        assertNotNull(response.getClientSecretExpiresAt());
+        assertOk(response);
 
         String clientId = response.getClientId();
 
@@ -835,11 +791,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(response.getStatus(), 201, "Unexpected response code: " + response.getEntity());
-        assertNotNull(response.getClientId());
-        assertNotNull(response.getClientSecret());
-        assertNotNull(response.getRegistrationAccessToken());
-        assertNotNull(response.getClientSecretExpiresAt());
+        assertOk(response);
 
         String clientId = response.getClientId();
         String clientSecret = response.getClientSecret();
@@ -927,11 +879,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(response.getStatus(), 201, "Unexpected response code: " + response.getEntity());
-        assertNotNull(response.getClientId());
-        assertNotNull(response.getClientSecret());
-        assertNotNull(response.getRegistrationAccessToken());
-        assertNotNull(response.getClientSecretExpiresAt());
+        assertOk(response);
 
         String clientId = response.getClientId();
 
@@ -1015,11 +963,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(response.getStatus(), 201, "Unexpected response code: " + response.getEntity());
-        assertNotNull(response.getClientId());
-        assertNotNull(response.getClientSecret());
-        assertNotNull(response.getRegistrationAccessToken());
-        assertNotNull(response.getClientSecretExpiresAt());
+        assertOk(response);
 
         String clientId = response.getClientId();
 
@@ -1103,11 +1047,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(response.getStatus(), 201, "Unexpected response code: " + response.getEntity());
-        assertNotNull(response.getClientId());
-        assertNotNull(response.getClientSecret());
-        assertNotNull(response.getRegistrationAccessToken());
-        assertNotNull(response.getClientSecretExpiresAt());
+        assertOk(response);
 
         String clientId = response.getClientId();
 
@@ -1191,11 +1131,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(response.getStatus(), 201, "Unexpected response code: " + response.getEntity());
-        assertNotNull(response.getClientId());
-        assertNotNull(response.getClientSecret());
-        assertNotNull(response.getRegistrationAccessToken());
-        assertNotNull(response.getClientSecretExpiresAt());
+        assertOk(response);
 
         String clientId = response.getClientId();
 
@@ -1279,11 +1215,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(response.getStatus(), 201, "Unexpected response code: " + response.getEntity());
-        assertNotNull(response.getClientId());
-        assertNotNull(response.getClientSecret());
-        assertNotNull(response.getRegistrationAccessToken());
-        assertNotNull(response.getClientSecretExpiresAt());
+        assertOk(response);
 
         String clientId = response.getClientId();
 
@@ -1367,11 +1299,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(response.getStatus(), 201, "Unexpected response code: " + response.getEntity());
-        assertNotNull(response.getClientId());
-        assertNotNull(response.getClientSecret());
-        assertNotNull(response.getRegistrationAccessToken());
-        assertNotNull(response.getClientSecretExpiresAt());
+        assertOk(response);
 
         String clientId = response.getClientId();
 
@@ -1455,11 +1383,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(response.getStatus(), 201, "Unexpected response code: " + response.getEntity());
-        assertNotNull(response.getClientId());
-        assertNotNull(response.getClientSecret());
-        assertNotNull(response.getRegistrationAccessToken());
-        assertNotNull(response.getClientSecretExpiresAt());
+        assertOk(response);
 
         String clientId = response.getClientId();
 
@@ -1543,11 +1467,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(response.getStatus(), 201, "Unexpected response code: " + response.getEntity());
-        assertNotNull(response.getClientId());
-        assertNotNull(response.getClientSecret());
-        assertNotNull(response.getRegistrationAccessToken());
-        assertNotNull(response.getClientSecretExpiresAt());
+        assertOk(response);
 
         String clientId = response.getClientId();
 
@@ -1632,11 +1552,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(response.getStatus(), 201, "Unexpected response code: " + response.getEntity());
-        assertNotNull(response.getClientId());
-        assertNotNull(response.getClientSecret());
-        assertNotNull(response.getRegistrationAccessToken());
-        assertNotNull(response.getClientSecretExpiresAt());
+        assertOk(response);
 
         String clientId = response.getClientId();
 
@@ -1721,11 +1637,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(response.getStatus(), 201, "Unexpected response code: " + response.getEntity());
-        assertNotNull(response.getClientId());
-        assertNotNull(response.getClientSecret());
-        assertNotNull(response.getRegistrationAccessToken());
-        assertNotNull(response.getClientSecretExpiresAt());
+        assertOk(response);
 
         String clientId = response.getClientId();
 
@@ -1806,11 +1718,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             RegisterResponse registerResponse = registerClient.exec();
 
             showClient(registerClient);
-            assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-            assertNotNull(registerResponse.getClientId());
-            assertNotNull(registerResponse.getClientSecret());
-            assertNotNull(registerResponse.getRegistrationAccessToken());
-            assertNotNull(registerResponse.getClientSecretExpiresAt());
+            assertOk(registerResponse);
 
             String clientId = registerResponse.getClientId();
 
@@ -1862,11 +1770,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             RegisterResponse registerResponse = registerClient.exec();
 
             showClient(registerClient);
-            assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-            assertNotNull(registerResponse.getClientId());
-            assertNotNull(registerResponse.getClientSecret());
-            assertNotNull(registerResponse.getRegistrationAccessToken());
-            assertNotNull(registerResponse.getClientSecretExpiresAt());
+            assertOk(registerResponse);
 
             String clientId = registerResponse.getClientId();
             String clientSecret = registerResponse.getClientSecret();
@@ -1932,11 +1836,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             RegisterResponse registerResponse = registerClient.exec();
 
             showClient(registerClient);
-            assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-            assertNotNull(registerResponse.getClientId());
-            assertNotNull(registerResponse.getClientSecret());
-            assertNotNull(registerResponse.getRegistrationAccessToken());
-            assertNotNull(registerResponse.getClientSecretExpiresAt());
+            assertOk(registerResponse);
 
             String clientId = registerResponse.getClientId();
             String clientSecret = registerResponse.getClientSecret();
@@ -2003,11 +1903,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             RegisterResponse registerResponse = registerClient.exec();
 
             showClient(registerClient);
-            assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-            assertNotNull(registerResponse.getClientId());
-            assertNotNull(registerResponse.getClientSecret());
-            assertNotNull(registerResponse.getRegistrationAccessToken());
-            assertNotNull(registerResponse.getClientSecretExpiresAt());
+            assertOk(registerResponse);
 
             String clientId = registerResponse.getClientId();
             String clientSecret = registerResponse.getClientSecret();
@@ -2070,12 +1966,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        assertOk(registerResponse);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -2160,12 +2051,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             RegisterResponse registerResponse = registerClient.exec();
 
             showClient(registerClient);
-            assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-            assertNotNull(registerResponse.getClientId());
-            assertNotNull(registerResponse.getClientSecret());
-            assertNotNull(registerResponse.getRegistrationAccessToken());
-            assertNotNull(registerResponse.getClientIdIssuedAt());
-            assertNotNull(registerResponse.getClientSecretExpiresAt());
+            assertOk(registerResponse);
 
             String clientId = registerResponse.getClientId();
 
@@ -2219,12 +2105,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             RegisterResponse registerResponse = registerClient.exec();
 
             showClient(registerClient);
-            assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-            assertNotNull(registerResponse.getClientId());
-            assertNotNull(registerResponse.getClientSecret());
-            assertNotNull(registerResponse.getRegistrationAccessToken());
-            assertNotNull(registerResponse.getClientIdIssuedAt());
-            assertNotNull(registerResponse.getClientSecretExpiresAt());
+            assertOk(registerResponse);
 
             String clientId = registerResponse.getClientId();
 
@@ -2280,12 +2161,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        assertOk(registerResponse);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -2367,11 +2243,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             RegisterResponse response = registerClient.exec();
 
             showClient(registerClient);
-            assertEquals(response.getStatus(), 201, "Unexpected response code: " + response.getEntity());
-            assertNotNull(response.getClientId());
-            assertNotNull(response.getClientSecret());
-            assertNotNull(response.getRegistrationAccessToken());
-            assertNotNull(response.getClientSecretExpiresAt());
+            assertOk(response);
 
             String clientId = response.getClientId();
 
@@ -2455,11 +2327,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             RegisterResponse response = registerClient.exec();
 
             showClient(registerClient);
-            assertEquals(response.getStatus(), 201, "Unexpected response code: " + response.getEntity());
-            assertNotNull(response.getClientId());
-            assertNotNull(response.getClientSecret());
-            assertNotNull(response.getRegistrationAccessToken());
-            assertNotNull(response.getClientSecretExpiresAt());
+            assertOk(response);
 
             String clientId = response.getClientId();
 
@@ -2552,11 +2420,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             RegisterResponse response = registerClient.exec();
 
             showClient(registerClient);
-            assertEquals(response.getStatus(), 201, "Unexpected response code: " + response.getEntity());
-            assertNotNull(response.getClientId());
-            assertNotNull(response.getClientSecret());
-            assertNotNull(response.getRegistrationAccessToken());
-            assertNotNull(response.getClientSecretExpiresAt());
+            assertOk(response);
 
             String clientId = response.getClientId();
 
@@ -2649,11 +2513,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             RegisterResponse response = registerClient.exec();
 
             showClient(registerClient);
-            assertEquals(response.getStatus(), 201, "Unexpected response code: " + response.getEntity());
-            assertNotNull(response.getClientId());
-            assertNotNull(response.getClientSecret());
-            assertNotNull(response.getRegistrationAccessToken());
-            assertNotNull(response.getClientSecretExpiresAt());
+            assertOk(response);
 
             String clientId = response.getClientId();
 
@@ -2746,11 +2606,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             RegisterResponse response = registerClient.exec();
 
             showClient(registerClient);
-            assertEquals(response.getStatus(), 201, "Unexpected response code: " + response.getEntity());
-            assertNotNull(response.getClientId());
-            assertNotNull(response.getClientSecret());
-            assertNotNull(response.getRegistrationAccessToken());
-            assertNotNull(response.getClientSecretExpiresAt());
+            assertOk(response);
 
             String clientId = response.getClientId();
             String clientSecret = response.getClientSecret();
@@ -2834,11 +2690,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             RegisterResponse response = registerClient.exec();
 
             showClient(registerClient);
-            assertEquals(response.getStatus(), 201, "Unexpected response code: " + response.getEntity());
-            assertNotNull(response.getClientId());
-            assertNotNull(response.getClientSecret());
-            assertNotNull(response.getRegistrationAccessToken());
-            assertNotNull(response.getClientSecretExpiresAt());
+            assertOk(response);
 
             String clientId = response.getClientId();
             String clientSecret = response.getClientSecret();

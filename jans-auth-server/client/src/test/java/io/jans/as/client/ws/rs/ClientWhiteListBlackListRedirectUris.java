@@ -20,6 +20,8 @@ import javax.ws.rs.HttpMethod;
 import java.util.Arrays;
 import java.util.List;
 
+import static io.jans.as.client.client.Asserter.assertBadRequest;
+import static io.jans.as.client.client.Asserter.assertOk;
 import static io.jans.as.model.register.RegisterRequestParam.SCOPE;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -70,10 +72,7 @@ public class ClientWhiteListBlackListRedirectUris extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
 
         showClient(registerClient);
-        assertEquals(response.getStatus(), 400, "Unexpected response code: " + response.getEntity());
-        assertNotNull(response.getEntity(), "The entity is null");
-        assertNotNull(response.getErrorType(), "The error type is null");
-        assertNotNull(response.getErrorDescription(), "The error description is null");
+        assertBadRequest(response);
     }
 
     @Parameters({"redirectUris", "sectorIdentifierUri"})
@@ -91,11 +90,7 @@ public class ClientWhiteListBlackListRedirectUris extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(response.getStatus(), 201, "Unexpected response code: " + response.getEntity());
-        assertNotNull(response.getClientId());
-        assertNotNull(response.getClientSecret());
-        assertNotNull(response.getRegistrationAccessToken());
-        assertNotNull(response.getClientSecretExpiresAt());
+        assertOk(response);
         assertNotNull(response.getClaims().get(SCOPE.toString()));
 
         registrationAccessToken1 = response.getRegistrationAccessToken();
@@ -118,9 +113,6 @@ public class ClientWhiteListBlackListRedirectUris extends BaseTest {
         final RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(response.getStatus(), 400, "Unexpected response code: " + response.getEntity());
-        assertNotNull(response.getEntity(), "The entity is null");
-        assertNotNull(response.getErrorType(), "The error type is null");
-        assertNotNull(response.getErrorDescription(), "The error description is null");
+        assertBadRequest(response);
     }
 }

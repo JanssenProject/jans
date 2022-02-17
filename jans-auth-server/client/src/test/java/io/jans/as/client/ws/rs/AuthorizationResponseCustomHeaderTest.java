@@ -7,6 +7,7 @@
 package io.jans.as.client.ws.rs;
 
 import io.jans.as.client.*;
+
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.register.ApplicationType;
@@ -17,6 +18,7 @@ import org.testng.annotations.Test;
 
 import java.util.*;
 
+import static io.jans.as.client.client.Asserter.assertOk;
 import static org.testng.Assert.*;
 
 /**
@@ -43,12 +45,7 @@ public class AuthorizationResponseCustomHeaderTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        assertOk(registerResponse);
 
         String clientId = registerResponse.getClientId();
 
