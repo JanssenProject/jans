@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.1.0 (2022-02-17)
+
+
+### Features
+
+* jans-cli logout (ref: [#706](https://github.com/JanssenProject/jans/issues/706)) ([#723](https://github.com/JanssenProject/jans/issues/723)) ([0cc51bc](https://github.com/JanssenProject/jans/commit/0cc51bc18a40476ed6bc638225b6897a11c21c16))
+
+
+### Bug Fixes
+
+* jans-cli sync swagger file from jans-config-api ([#759](https://github.com/JanssenProject/jans/issues/759)) ([315c699](https://github.com/JanssenProject/jans/commit/315c699a84593e7d621a1a3740b053e361133ed4))
+* vm setup suse fixes ([#705](https://github.com/JanssenProject/jans/issues/705)) ([2f69a8a](https://github.com/JanssenProject/jans/commit/2f69a8a90747e6c0b67eb76f66edbf3166019264))
+
+
+### Documentation
+
+* remove sonar badges table from readme ([#694](https://github.com/JanssenProject/jans/issues/694)) ([08f4f1f](https://github.com/JanssenProject/jans/commit/08f4f1fa6d2a35517d15daca613fe47eaf1c682e))
+
 ## [0.3.0](https://www.github.com/JanssenProject/jans-cli/compare/v0.2.0...v0.3.0) (2021-09-10)
 
 
