@@ -8,6 +8,7 @@ package io.jans.as.model.fido.u2f.protocol;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.jans.as.model.fido.u2f.exception.BadInputException;
 import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
@@ -43,13 +44,25 @@ public class AuthenticateResponse implements Serializable {
     /* keyHandle originally passed */
     @JsonProperty
     private final String keyHandle;
+    
+	/**
+	 * base64(UTF8(device data))
+	 */
+	@JsonProperty
+	@JsonInclude(JsonInclude.Include.NON_EMPTY)
+	private final String deviceData;
+
+	public String getDeviceData() {
+		return deviceData;
+	}
 
     public AuthenticateResponse(@JsonProperty("clientData") String clientData, @JsonProperty("signatureData") String signatureData,
-                                @JsonProperty("keyHandle") String keyHandle) throws BadInputException {
+                                @JsonProperty("keyHandle") String keyHandle, @JsonProperty("deviceData") String deviceData) throws BadInputException {
         this.clientData = clientData;
         this.signatureData = signatureData;
         this.keyHandle = keyHandle;
         this.clientDataRef = new ClientData(clientData);
+        this.deviceData = deviceData;
     }
 
     public ClientData getClientData() {
@@ -76,7 +89,7 @@ public class AuthenticateResponse implements Serializable {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("AuthenticateResponse [clientData=").append(clientData).append(", signatureData=").append(signatureData).append(", keyHandle=")
+        builder.append("AuthenticateResponse [clientData=").append(clientData).append(", signatureData=").append(signatureData).append(" , deviceData=").append(deviceData).append(", keyHandle=")
                 .append(keyHandle).append("]");
         return builder.toString();
     }
