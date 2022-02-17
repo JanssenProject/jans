@@ -50,8 +50,7 @@ RUN mkdir -p /app/templates/jans-config-api
 # partially sync templates from linux-setup
 RUN cd /tmp/jans \
     && cp ${JANS_SETUP_DIR}/templates/*.ldif /app/templates \
-    && cp ${JANS_SETUP_DIR}/templates/jans-auth/people.ldif /app/templates/people.ldif \
-    && cp ${JANS_SETUP_DIR}/templates/jans-auth/groups.ldif /app/templates/groups.ldif \
+    && cp -R ${JANS_SETUP_DIR}/templates/jans-auth /app/templates/jans-auth \
     && cp ${JANS_SETUP_DIR}/openbanking/templates/scopes.ldif /app/templates/scopes.ob.ldif \
     && cp ${JANS_SETUP_DIR}/openbanking/templates/attributes.ldif /app/templates/attributes.ob.ldif \
     && cp ${JANS_SETUP_DIR}/static/metric/o_metric.ldif /app/templates/o_metric.ldif \

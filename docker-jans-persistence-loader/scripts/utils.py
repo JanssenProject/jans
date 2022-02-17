@@ -212,14 +212,15 @@ def merge_extension_ctx(ctx):
 def merge_auth_ctx(ctx):
     basedir = '/app/templates/jans-auth'
     file_mappings = {
-        'auth_static_conf_base64': 'static-conf.json',
-        'auth_error_base64': 'errors.json',
+        'auth_static_conf_base64': 'jans-auth-static-conf.json',
+        'auth_error_base64': 'jans-auth-errors.json',
+        "auth_config_base64": "jans-auth-config.json",
     }
 
     if os.environ.get("CN_DISTRIBUTION", "default") == "openbanking":
-        file_mappings["auth_config_base64"] = "dynamic-conf.ob.json"
-    else:
-        file_mappings["auth_config_base64"] = "dynamic-conf.json"
+        file_mappings["auth_config_base64"] = "jans-auth-config.ob.json"
+    # else:
+    #     file_mappings["auth_config_base64"] = "jans-auth-config.json"
 
     for key, file_ in file_mappings.items():
         file_path = os.path.join(basedir, file_)
@@ -410,8 +411,8 @@ def get_ldif_mappings(optional_scopes=None):
 
         if dist != "openbanking":
             files += [
-                "people.ldif",
-                "groups.ldif",
+                "jans-auth/people.ldif",
+                "jans-auth/groups.ldif",
             ]
         return files
 
