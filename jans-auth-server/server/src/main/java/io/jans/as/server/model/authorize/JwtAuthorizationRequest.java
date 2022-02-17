@@ -58,8 +58,8 @@ import java.util.List;
  */
 public class JwtAuthorizationRequest {
 
-    private final static Logger log = LoggerFactory.getLogger(JwtAuthorizationRequest.class);
-    private final static int SIXTY_MINUTES_AS_SECONDS = 3600;
+    private static final Logger log = LoggerFactory.getLogger(JwtAuthorizationRequest.class);
+    private static final int SIXTY_MINUTES_AS_SECONDS = 3600;
 
     // Header
     private String type;
@@ -544,17 +544,11 @@ public class JwtAuthorizationRequest {
             throw new InvalidJwtException("None algorithm is not allowed for FAPI");
         }
 
-        if (nbf == null || nbf <= 0) { // https://github.com/JanssenProject/jans-auth-server/issues/164 fapi1-advanced-final-ensure-request-object-without-nbf-fails
-            log.error("nbf claim is not set, nbf: {}", nbf);
-            throw new InvalidJwtException("nbf claim is not set");
-        }
-        final long nowSeconds = System.currentTimeMillis() / 1000;
-        final long nbfDiff = nowSeconds - nbf;
-        if (nbfDiff > SIXTY_MINUTES_AS_SECONDS) { // https://github.com/JanssenProject/jans-auth-server/issues/166
-            log.error("nbf claim is more then 60 Minutes in the past, nbf: {}, nowSeconds: {}", nbf, nowSeconds);
-            throw new InvalidJwtException("nbf claim is more then 60 in the past");
-        }
+        validateNbf(nbf);
+        validateExp(exp);
+    }
 
+    public static void validateExp(Integer exp) throws InvalidJwtException {
         if (exp == null) {
             log.error("The exp claim is not set");
             throw new InvalidJwtException("exp claim is not set");
@@ -566,6 +560,18 @@ public class JwtAuthorizationRequest {
             log.error("exp claim is more then 60 minutes in the future, exp: {}, nowSecondsExp: {}", exp, nowSecondsExp);
             throw new InvalidJwtException("exp claim is more then 60 in the future");
         }
+    }
 
+    public static void validateNbf(Integer nbf) throws InvalidJwtException {
+        if (nbf == null || nbf <= 0) { // https://github.com/JanssenProject/jans-auth-server/issues/164 fapi1-advanced-final-ensure-request-object-without-nbf-fails
+            log.error("nbf claim is not set, nbf: {}", nbf);
+            throw new InvalidJwtException("nbf claim is not set");
+        }
+        final long nowSeconds = System.currentTimeMillis() / 1000;
+        final long nbfDiff = nowSeconds - nbf;
+        if (nbfDiff > SIXTY_MINUTES_AS_SECONDS) { // https://github.com/JanssenProject/jans-auth-server/issues/166
+            log.error("nbf claim is more then 60 Minutes in the past, nbf: {}, nowSeconds: {}", nbf, nowSeconds);
+            throw new InvalidJwtException("nbf claim is more then 60 in the past");
+        }
     }
 }
