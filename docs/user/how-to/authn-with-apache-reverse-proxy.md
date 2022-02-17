@@ -42,7 +42,7 @@ Janssen server provides `jans-cli` CLI tool to configure Janssen server. `jans-c
 
 Use steps below to configure Janssen server.
 
-- Add RP as OpenID Connect client
+- Manually register client(RP) as OpenID Connect client
   - Run command below on host running Janssen Server
     ```
     /opt/jans/jans-cli/config-cli.py`
@@ -90,19 +90,18 @@ service apache2 restart
 
 ```
 OIDCProviderMetadataURL https://janssen.op.io/jans-auth/.well-known/openid-configuration
-OIDCClientID 73257b63-f3c2-484c-b228-ffeb33290cec
-OIDCClientSecret my-client-secret
+OIDCClientID <inum-as-received-in-client-registration-response>
+OIDCClientSecret <as-provided-in-client-registration-request>
 OIDCResponseType code
 OIDCProviderTokenEndpointAuth client_secret_basic
 OIDCSSLValidateServer Off
 OIDCProviderIssuer https://janssen.op.io
 OIDCRedirectURI https://test.apache.rp.io/redirect
-OIDCCryptoPassphrase my-crypto-passphrase
+OIDCCryptoPassphrase <crypto-passphrase-of-choice>
 <Location "/">
     Require valid-user
     AuthType openid-connect
 </Location>
-
 ```
 
 Restart Apache service
