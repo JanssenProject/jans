@@ -5,15 +5,14 @@ on:
     tags:
     - '*'
 
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - run: git clone -b jans_1.0.0 https://github.com/GluuFederation/packaging
-    - run: mkdir -p jans/jans-1.0.0/opt/
+    - run: git clone -b jans https://github.com/GluuFederation/packaging
+    - run: mkdir -p jans/jans-src/opt/
     - run: cp -rp packaging/deb/focal/* jans/
     - run: wget https://raw.githubusercontent.com/JanssenProject/jans/main/jans-linux-setup/jans_setup/install.py -O jans/install.py
     - run: sudo apt install -y python3-distutils python3-ldap3 build-essential devscripts debhelper
@@ -21,32 +20,17 @@ jobs:
       run: |
          cd jans/
          sudo python3.8 install.py --no-setup
-         cp -r /opt/dist jans-1.0.0/opt/
-         cp -r /opt/jans jans-1.0.0/opt/
-         touch jans-1.0.0/opt/jans/jans-setup/package
+         cp -r /opt/dist jans-src/opt/
+         cp -r /opt/jans jans-src/opt/
+         touch jans-src/opt/jans/jans-setup/package
          rm -rf install.py install jans-cli
          sed -i "s/%VERSION%/${GITHUB_REF##*/}/g" debian/changelog
          sed -i "s/%VERSION%/${GITHUB_REF##*/}/g" run-build.sh
-         cat debian/changelog
          sudo ./run-build.sh
-         ls -la       
-    # Publish build
-    - name: Create Release
-      if: github.run_number == 1
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
-      with:
-        tag_name: ${{ github.ref }}
-        release_name: ${{ github.ref }}
-        draft: false
-        prerelease: false          
     - name: Upload binaries to release
       uses: svenstaro/upload-release-action@v2
       with:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        repo_token: ${{ secrets.MOWORKFLOWTOKEN }}
         file: ${{github.workspace}}/jans/jans_${{ github.ref_name }}~ubuntu20.04_amd64.deb
         asset_name: jans_${{ github.ref_name }}~ubuntu20.04_amd64.deb
         tag: ${{ github.ref }}        
-
