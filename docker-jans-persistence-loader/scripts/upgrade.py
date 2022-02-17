@@ -13,6 +13,7 @@ from jans.pycloudlib.persistence.couchbase import CouchbaseClient
 from jans.pycloudlib.persistence.ldap import LdapClient
 from jans.pycloudlib.persistence.spanner import SpannerClient
 from jans.pycloudlib.persistence.sql import SQLClient
+from jans.pycloudlib.utils import as_boolean
 
 from settings import LOGGING_CONFIG
 from utils import doc_id_from_dn
@@ -55,6 +56,9 @@ JANS_AUTH_CONFIG_ID = "ou=jans-auth,ou=configuration,o=jans"
 
 #: View profile scope
 JANS_PROFILE_SCOPE_DN = "inum=43F1,ou=scopes,o=jans"
+
+#: SCIM script DN
+JANS_SCIM_SCRIPT_DN = "inum=2DAF-F9A5,ou=scripts,o=jans"
 
 
 def _transform_auth_dynamic_config(conf):
@@ -303,6 +307,22 @@ class LDAPBackend(BaseBackend):
             entry.attrs["jansClaimName"] = claim_name
             self.modify_entry(entry.id, entry.attrs, **kwargs)
 
+    def feature_flags(self):
+        kwargs = {}
+        entry = self.get_entry(JANS_SCIM_SCRIPT_DN, **kwargs)
+
+        if not entry:
+            return
+
+        env_enabled = as_boolean(os.environ.get("CN_SCIM_ENABLED", False))
+        script_enabled = as_boolean(entry.attrs["jansEnabled"])
+
+        if script_enabled == env_enabled:
+            return
+
+        entry.attrs["jansEnabled"] = env_enabled
+        self.modify_entry(entry.id, entry.attrs, **kwargs)
+
 
 class SQLBackend(BaseBackend):
     def __init__(self, manager):
@@ -455,6 +475,22 @@ class SQLBackend(BaseBackend):
 
             entry.attrs["jansClaimName"] = claim_name
             self.modify_entry(entry.id, entry.attrs, **kwargs)
+
+    def feature_flags(self):
+        kwargs = {"table_name": "jansCustomScr"}
+        entry = self.get_entry(doc_id_from_dn(JANS_SCIM_SCRIPT_DN), **kwargs)
+
+        if not entry:
+            return
+
+        env_enabled = as_boolean(os.environ.get("CN_SCIM_ENABLED", False))
+        script_enabled = as_boolean(entry.attrs["jansEnabled"])
+
+        if script_enabled == env_enabled:
+            return
+
+        entry.attrs["jansEnabled"] = env_enabled
+        self.modify_entry(entry.id, entry.attrs, **kwargs)
 
 
 class CouchbaseBackend(BaseBackend):
@@ -670,6 +706,22 @@ class CouchbaseBackend(BaseBackend):
             entry.attrs["jansClaimName"] = claim_name
             self.modify_entry(entry.id, entry.attrs, **kwargs)
 
+    def feature_flags(self):
+        kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
+        entry = self.get_entry(id_from_dn(JANS_SCIM_SCRIPT_DN), **kwargs)
+
+        if not entry:
+            return
+
+        env_enabled = as_boolean(os.environ.get("CN_SCIM_ENABLED", False))
+        script_enabled = as_boolean(entry.attrs["jansEnabled"])
+
+        if script_enabled == env_enabled:
+            return
+
+        entry.attrs["jansEnabled"] = env_enabled
+        self.modify_entry(entry.id, entry.attrs, **kwargs)
+
 
 class SpannerBackend(BaseBackend):
     def __init__(self, manager):
@@ -823,6 +875,22 @@ class SpannerBackend(BaseBackend):
             entry.attrs["jansClaimName"] = claim_name
             self.modify_entry(entry.id, entry.attrs, **kwargs)
 
+    def feature_flags(self):
+        kwargs = {"table_name": "jansCustomScr"}
+        entry = self.get_entry(doc_id_from_dn(JANS_SCIM_SCRIPT_DN), **kwargs)
+
+        if not entry:
+            return
+
+        env_enabled = as_boolean(os.environ.get("CN_SCIM_ENABLED", False))
+        script_enabled = as_boolean(entry.attrs["jansEnabled"])
+
+        if script_enabled == env_enabled:
+            return
+
+        entry.attrs["jansEnabled"] = env_enabled
+        self.modify_entry(entry.id, entry.attrs, **kwargs)
+
 
 class Upgrade:
     def __init__(self, manager):
@@ -852,3 +920,4 @@ class Upgrade:
 
         self.backend.update_auth_dynamic_config()
         self.backend.update_attributes_entries()
+        self.backend.feature_flags()

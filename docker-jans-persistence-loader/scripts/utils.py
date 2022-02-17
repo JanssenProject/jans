@@ -156,7 +156,7 @@ def get_base_ctx(manager):
         "fido2ConfigFolder": manager.config.get("fido2ConfigFolder"),
 
         "admin_inum": manager.config.get("admin_inum"),
-        "enable_scim_access_policy": str(as_boolean(scim_enabled) or as_boolean(passport_enabled)).lower(),
+        # "enable_scim_access_policy": str(as_boolean(scim_enabled) or as_boolean(passport_enabled)).lower(),
         "scim_client_id": manager.config.get("scim_client_id"),
         "scim_client_encoded_pw": manager.secret.get("scim_client_encoded_pw"),
         "casa_enable_script": str(as_boolean(casa_enabled)).lower(),
@@ -463,6 +463,7 @@ def get_ldif_mappings(optional_scopes=None):
             files += [
                 "gluu-casa/configuration.ldif",
                 "gluu-casa/clients.ldif",
+                "gluu-casa/scripts.ldif",
             ]
         return files
 

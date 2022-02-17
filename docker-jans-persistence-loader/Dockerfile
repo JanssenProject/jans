@@ -24,7 +24,7 @@ RUN pip3 install -U pip wheel \
 ARG JANS_LINUX_SETUP_VERSION=493337f94045be705386b8f2b59dda29f85762e6
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
-RUN mkdir -p /app/static/rdbm /app/static/couchbase /app/schema /app/openbanking/static /app/templates
+RUN mkdir -p /app/static /app/static/couchbase /app/schema /app/openbanking/static /app/templates
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the jans-linux-setup code
@@ -46,16 +46,13 @@ RUN cd /tmp/jans \
 
 # partially sync templates from linux-setup
 RUN cd /tmp/jans \
-    && cp ${JANS_SETUP_DIR}/templates/base.ldif /app/templates/base.ldif \
-    && cp ${JANS_SETUP_DIR}/templates/attributes.ldif /app/templates/attributes.ldif \
-    && cp ${JANS_SETUP_DIR}/openbanking/templates/attributes.ldif /app/templates/attributes.ob.ldif \
-    && cp ${JANS_SETUP_DIR}/templates/scopes.ldif /app/templates/scopes.ldif \
-    && cp ${JANS_SETUP_DIR}/openbanking/templates/scopes.ldif /app/templates/scopes.ob.ldif \
-    && cp ${JANS_SETUP_DIR}/static/metric/o_metric.ldif /app/templates/o_metric.ldif \
-    && cp ${JANS_SETUP_DIR}/static/cache-refresh/o_site.ldif /app/templates/o_site.ldif \
+    && cp ${JANS_SETUP_DIR}/templates/*.ldif /app/templates \
     && cp ${JANS_SETUP_DIR}/templates/jans-auth/people.ldif /app/templates/people.ldif \
-    && cp ${JANS_SETUP_DIR}/templates/jans-auth/groups.ldif /app/templates/groups.ldif
-
+    && cp ${JANS_SETUP_DIR}/templates/jans-auth/groups.ldif /app/templates/groups.ldif \
+    && cp ${JANS_SETUP_DIR}/openbanking/templates/scopes.ldif /app/templates/scopes.ob.ldif \
+    && cp ${JANS_SETUP_DIR}/openbanking/templates/attributes.ldif /app/templates/attributes.ob.ldif \
+    && cp ${JANS_SETUP_DIR}/static/metric/o_metric.ldif /app/templates/o_metric.ldif \
+    && cp ${JANS_SETUP_DIR}/static/cache-refresh/o_site.ldif /app/templates/o_site.ldif
 
 # TODO: casa should be moved from this image
 ARG GLUU_CASA_VERSION=e703c4b62e60d3cd299ea84f471417290987bdef
@@ -180,6 +177,7 @@ LABEL name="Persistence" \
 RUN mkdir -p /app/tmp /etc/certs /etc/jans/conf
 
 COPY scripts /app/scripts
+# this overrides existing templates
 COPY templates /app/templates
 RUN chmod +x /app/scripts/entrypoint.sh
 
