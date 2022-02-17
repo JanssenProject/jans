@@ -53,7 +53,8 @@ RUN cd /tmp/jans \
     && cp ${JANS_SETUP_DIR}/openbanking/templates/attributes.ldif /app/templates/attributes.ob.ldif \
     && cp ${JANS_SETUP_DIR}/static/metric/o_metric.ldif /app/templates/o_metric.ldif \
     && cp ${JANS_SETUP_DIR}/static/cache-refresh/o_site.ldif /app/templates/o_site.ldif \
-    && cp -R ${JANS_SETUP_DIR}/templates/jans-fido2 /app/templates/jans-fido2
+    && cp -R ${JANS_SETUP_DIR}/templates/jans-fido2 /app/templates/jans-fido2 \
+    && cp -R ${JANS_SETUP_DIR}/templates/jans-scim /app/templates/jans-scim
 
 # TODO: casa should be moved from this image
 ARG GLUU_CASA_VERSION=e703c4b62e60d3cd299ea84f471417290987bdef
