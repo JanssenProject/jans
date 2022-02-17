@@ -114,7 +114,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
         acccessToken = validateScope(acccessToken, tokenScopes, resourceInfo, issuer);
 
         boolean isAuthorized = externalAuthorization(token, issuer, method, path);
-        logger.error("Custom authorization - isAuthorized:{}", isAuthorized);
+        logger.debug("Custom authorization - isAuthorized:{}", isAuthorized);
 
         return acccessToken;
     }
@@ -190,7 +190,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
     }
 
     private boolean externalAuthorization(String token, String issuer, String method, String path) {
-        logger.error(
+        logger.debug(
                 "External Authorization script params -  request:{}, response:{}, token:{}, issuer:{}, method:{}, path:{} ",
                 request, response, token, issuer, method, path);
         Map<String, Object> requestParameters = new HashMap<>();

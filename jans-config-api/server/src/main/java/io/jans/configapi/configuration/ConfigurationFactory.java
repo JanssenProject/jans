@@ -329,8 +329,7 @@ public class ConfigurationFactory {
         try {
             final Conf c = loadConfigurationFromDb(getConfigurationDn(Constants.SERVER_KEY_OF_CONFIGURATION_ENTRY),
                     new Conf());
-
-            log.error("\n\n\n Auth configuration '{}' DB...", c + "\n\n\n");
+            log.trace("Auth configuration '{}' DB...", c);
 
             if (c != null) {
                 initAuthConf(c);
@@ -356,7 +355,7 @@ public class ConfigurationFactory {
         try {
             final ApiConf apiConf = loadConfigurationFromDb(getConfigurationDn(CONFIGAPI_CONFIGURATION_ENTRY),
                     new ApiConf());
-            log.error("\n\n\n ApiConf configuration '{}' DB...", apiConf + "\n\n\n");
+            log.trace("ApiConf configuration '{}' DB...", apiConf);
 
             if (apiConf != null) {
                 initApiAuthConf(apiConf);
