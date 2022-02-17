@@ -345,9 +345,9 @@ public class ConfigurationFactory {
                 return true;
             }
         } catch (Exception ex) {
-            log.error(ex.getMessage(), ex);
+            log.error("Unable to find auth configuration in DB " + ex.getMessage(), ex);
         }
-        throw new ConfigurationException("Unable to find auth configuration in DB... ");
+        return false;
     }
 
     private boolean loadApiConfigFromDb() {
@@ -371,9 +371,9 @@ public class ConfigurationFactory {
                 return true;
             }
         } catch (Exception ex) {
-            log.error(ex.getMessage(), ex);
+            log.error("Unable to find api configuration in DB..." + ex.getMessage(), ex);
         }
-        throw new ConfigurationException("Unable to find api configuration in DB... ");
+        return false;
     }
 
     private void initApiAuthConf(ApiConf apiConf) {
