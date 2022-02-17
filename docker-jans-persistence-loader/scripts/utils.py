@@ -394,7 +394,7 @@ def get_ldif_mappings(optional_scopes=None):
 
         if "fido2" in optional_scopes:
             files += [
-                "jans-fido2/configuration.ldif",
+                "jans-fido2/fido2.ldif",
             ]
 
         if "casa" in optional_scopes:
