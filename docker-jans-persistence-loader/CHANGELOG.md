@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.0.0 (2022-02-17)
+
+
+### Features
+
+* add Gluu Casa support ([608a9b8](https://github.com/JanssenProject/jans/commit/608a9b857872d7ccc65931a4dd9307a064e55492))
+* add Gluu Casa support ([608a9b8](https://github.com/JanssenProject/jans/commit/608a9b857872d7ccc65931a4dd9307a064e55492))
+* add Gluu Casa support ([089a872](https://github.com/JanssenProject/jans/commit/089a87214a9349916b537ef6755a10ef468f6221))
+* add Gluu Casa support ([089a872](https://github.com/JanssenProject/jans/commit/089a87214a9349916b537ef6755a10ef468f6221))
+* **image:** implement role-based scope script ([#813](https://github.com/JanssenProject/jans/issues/813)) ([bd68898](https://github.com/JanssenProject/jans/commit/bd6889861847fcba2f18cbc63a8b7f63ebbea341))
+* update base images [#672](https://github.com/JanssenProject/jans/issues/672) ([#673](https://github.com/JanssenProject/jans/issues/673)) ([0a23d08](https://github.com/JanssenProject/jans/commit/0a23d085ea8fe16d0b4cd21cd3ec8cde59df9f9a))
+
+
+### Bug Fixes
+
+* gprcio bug in build error ([0ee6386](https://github.com/JanssenProject/jans/commit/0ee638635ea2dcbe14f0f3b1d2e538a9496afc9a))
+* **image:** update images ([#775](https://github.com/JanssenProject/jans/issues/775)) ([b31059c](https://github.com/JanssenProject/jans/commit/b31059c8ed1d895c023126bb39b1e5d390521c2c))
+* **pycloudlib:** missing tar option to not restore file timestamp [#613](https://github.com/JanssenProject/jans/issues/613) ([#627](https://github.com/JanssenProject/jans/issues/627)) ([d19fbfd](https://github.com/JanssenProject/jans/commit/d19fbfd6891d03fb0c76073dfa8ba2ffc44a3b9b))
+
 ## 1.0.0-beta.14 (2021-12-27)
 
 
