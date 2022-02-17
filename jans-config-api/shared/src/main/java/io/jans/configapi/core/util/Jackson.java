@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationConfig;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.github.fge.jackson.JacksonUtils;
 import com.github.fge.jsonpatch.JsonPatch;
@@ -21,6 +22,10 @@ import com.google.common.base.Preconditions;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -91,6 +96,29 @@ public class Jackson {
     public <T> String getJsonString(T obj) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         return mapper.writeValueAsString(obj);
+    }
+
+    public static String asJson(Object obj) throws IOException {
+        final ObjectMapper mapper = createJsonMapper().configure(SerializationFeature.WRAP_ROOT_VALUE, false);
+        return mapper.writeValueAsString(obj);
+    }
+
+    public static String asPrettyJson(Object obj) throws IOException {
+        final ObjectMapper mapper = createJsonMapper().configure(SerializationFeature.WRAP_ROOT_VALUE, false);
+        return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
+    }
+
+    public static JSONObject createJSONObject(Map<String, Object> map) throws JSONException {
+        if (map == null || map.size() == 0) {
+            return null;
+        }
+
+        JSONObject jsonObject = new JSONObject();
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            jsonObject.put(entry.getKey(), entry.getValue());
+        }
+
+        return jsonObject;
     }
 
 }
