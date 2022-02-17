@@ -24,8 +24,6 @@ RUN pip3 install -U pip wheel \
 ARG JANS_LINUX_SETUP_VERSION=493337f94045be705386b8f2b59dda29f85762e6
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
-RUN mkdir -p /app/static /app/static/couchbase /app/schema /app/openbanking/static /app/templates
-
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the jans-linux-setup code
 RUN git clone --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
@@ -33,6 +31,8 @@ RUN git clone --filter blob:none --no-checkout https://github.com/janssenproject
     && git sparse-checkout init --cone \
     && git checkout ${JANS_LINUX_SETUP_VERSION} \
     && git sparse-checkout set ${JANS_SETUP_DIR}
+
+RUN mkdir -p /app/static /app/static/couchbase /app/schema /app/openbanking/static
 
 # sync static files from linux-setup
 RUN cd /tmp/jans \
@@ -44,6 +44,9 @@ RUN cd /tmp/jans \
     && cp ${JANS_SETUP_DIR}/schema/jans_schema.json /app/schema/jans_schema.json \
     && cp ${JANS_SETUP_DIR}/schema/custom_schema.json /app/schema/custom_schema.json
 
+
+RUN mkdir -p /app/templates/jans-config-api
+
 # partially sync templates from linux-setup
 RUN cd /tmp/jans \
     && cp ${JANS_SETUP_DIR}/templates/*.ldif /app/templates \
@@ -54,7 +57,8 @@ RUN cd /tmp/jans \
     && cp ${JANS_SETUP_DIR}/static/metric/o_metric.ldif /app/templates/o_metric.ldif \
     && cp ${JANS_SETUP_DIR}/static/cache-refresh/o_site.ldif /app/templates/o_site.ldif \
     && cp -R ${JANS_SETUP_DIR}/templates/jans-fido2 /app/templates/jans-fido2 \
-    && cp -R ${JANS_SETUP_DIR}/templates/jans-scim /app/templates/jans-scim
+    && cp -R ${JANS_SETUP_DIR}/templates/jans-scim /app/templates/jans-scim \
+    && cp ${JANS_SETUP_DIR}/templates/jans-config-api/config.ldif /app/templates/jans-config-api/config.ldif
 
 # TODO: casa should be moved from this image
 ARG GLUU_CASA_VERSION=e703c4b62e60d3cd299ea84f471417290987bdef
