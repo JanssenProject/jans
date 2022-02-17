@@ -15,6 +15,7 @@ import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.exception.InvalidJwtException;
+import org.junit.Assert;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 

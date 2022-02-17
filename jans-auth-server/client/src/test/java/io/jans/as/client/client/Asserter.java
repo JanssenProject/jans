@@ -51,15 +51,17 @@ public class Asserter {
         assertEquals(response.getStatus(), 201, "Unexpected response code: " + response.getEntity());
         assertNotNull(response.getClientId());
         assertNotNull(response.getClientSecret());
-        assertNotNull(response.getClientIdIssuedAt());
         assertNotNull(response.getClientSecretExpiresAt());
+        assertNotNull(response.getRegistrationAccessToken());
+        assertNotNull(response.getClientIdIssuedAt());
+        assertNotNull(response.getRegistrationClientUri());
     }
 
     public static void assertBadRequest(RegisterResponse registerResponse) {
-        assertEquals(registerResponse.getStatus(), 400, "Unexpected response code");
-        assertNotNull(registerResponse.getEntity());
-        assertNotNull(registerResponse.getErrorType());
-        assertNotNull(registerResponse.getErrorDescription());
+        assertEquals(registerResponse.getStatus(), 400, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getEntity(), "The entity is null");
+        assertNotNull(registerResponse.getErrorType(), "The error type is null");
+        assertNotNull(registerResponse.getErrorDescription(), "The error description is null");
     }
 
     public static void assertTokenResponse(TokenResponse response) {
