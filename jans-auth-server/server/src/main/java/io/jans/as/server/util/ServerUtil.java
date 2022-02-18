@@ -75,6 +75,17 @@ public class ServerUtil {
         return new GregorianCalendar(TimeZone.getTimeZone("UTC"));
     }
 
+    public static int nowAsSeconds() {
+        return (int) (new Date().getTime() / 1000L);
+    }
+
+    public static int calculateTtl(Integer expirationDateAsSeconds) {
+        if (expirationDateAsSeconds == null) {
+            return 0;
+        }
+        return expirationDateAsSeconds - nowAsSeconds();
+    }
+
     public static int calculateTtl(Date creationDate, Date expirationDate) {
         if (creationDate != null && expirationDate != null) {
             return (int) ((expirationDate.getTime() - creationDate.getTime()) / 1000L);

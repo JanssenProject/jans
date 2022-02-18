@@ -176,7 +176,7 @@ public class ParRestWebService {
 
             ParResponse parResponse = new ParResponse();
             parResponse.setRequestUri(ParService.toOutsideId(par.getId()));
-            parResponse.setExpiresIn(par.getTtl());
+            parResponse.setExpiresIn(par.getTtl()); // set it to TTL instead of lifetime because TTL can be updated during request object validation
 
             final String responseAsString = ServerUtil.asJson(parResponse);
 
