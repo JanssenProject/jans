@@ -197,16 +197,17 @@ class ConfigApiInstaller(JettyInstaller):
 
         self.dbUtils.import_ldif(self.load_ldif_files)
 
+    def write_test_properties(self):
+        self.prepare_scope_list()
+        test_properties_dir = os.path.join(Config.templateFolder, 'test/jans-config-api/client')
+        test_properties_fn = os.path.join('config-api-test.properties')
+        self.renderTemplateInOut(test_properties_fn, test_properties_dir, '/tmp')
 
-    def load_test_data(self):
-        if not self.installed():
-            return
+    def prepare_scope_list(self):
 
-        check_result = self.check_clients([('jca_test_client_id', '1802.')])
-
-        result = self.dbUtils.search('ou=scopes,o=jans', search_filter='(&(inum=1800.*)(objectClass=jansScope))', fetchmany=True)
         scopes = []
         scopes_id_list = []
+        result = self.dbUtils.search('ou=scopes,o=jans', search_filter='(&(inum=1800.*)(objectClass=jansScope))', fetchmany=True)
 
         for scope in result:
             if isinstance(scope, dict):
@@ -225,6 +226,15 @@ class ConfigApiInstaller(JettyInstaller):
 
         Config.templateRenderingDict['config_api_scopes'] = '\n'.join(scopes)
         Config.templateRenderingDict['config_api_scopes_list'] = ' '.join(scopes_id_list)
+
+
+    def load_test_data(self):
+        if not self.installed():
+            return
+
+        check_result = self.check_clients([('jca_test_client_id', '1802.')])
+
+        self.prepare_scope_list()
 
         if check_result.get('1802.') == 1:
             warning = "Test data for Config Api was allready loaded."

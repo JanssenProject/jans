@@ -57,15 +57,6 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
         base.extract_from_zip(self.source_files[1][0], 'jca', os.path.join(self.jans_cli_install_dir, 'jca'))
         base.extract_from_zip(self.source_files[2][0], 'scim', os.path.join(self.jans_cli_install_dir, 'scim'))
 
-        """
-        for i, app_mod in enumerate(('jca', 'scim')):
-            swagger_cli_dir = os.path.join(self.jans_cli_install_dir, app_mod)
-            self.createDirs(swagger_cli_dir)
-            init_fn = os.path.join(swagger_cli_dir, '__init__.py')
-            self.writeFile(init_fn, '')
-            shutil.unpack_archive(self.source_files[i+1][0], swagger_cli_dir)
-        """
-        
         #extract pyjwt from archieve
         base.extract_from_zip(self.source_files[3][0], 'jwt', os.path.join(self.jans_cli_install_dir, 'pylib/jwt'))
 
