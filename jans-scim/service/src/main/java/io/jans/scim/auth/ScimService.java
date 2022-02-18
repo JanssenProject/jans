@@ -23,7 +23,7 @@ public class ScimService implements JansRestService {
     @Inject
     private ConfigurationService configurationService;
 
-	@Inject
+    @Inject
     private AppConfiguration appConfiguration;
     
     @Inject
