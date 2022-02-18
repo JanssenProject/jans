@@ -8,6 +8,7 @@ import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.error.IErrorType;
 import io.jans.as.model.jwt.JwtClaimName;
+import io.jans.as.model.util.Util;
 import io.jans.as.persistence.model.Par;
 import io.jans.as.server.authorize.ws.rs.AuthorizeRestWebServiceValidator;
 import io.jans.as.server.model.authorize.Claim;
@@ -96,7 +97,8 @@ public class ParValidator {
                 par.getAttributes().setNbf(jwtRequest.getNbf());
             }
             if (jwtRequest.getExp() != null) {
-                par.setExpirationDate(new Date(jwtRequest.getExp() * 1000L));
+                par.setTtl(jwtRequest.getExp());
+                par.setExpirationDate(Util.createExpirationDate(jwtRequest.getExp()));
             }
             if (!jwtRequest.getScopes().isEmpty()) { // JWT wins
                 Set<String> scopes = scopeChecker.checkScopesPolicy(client, Lists.newArrayList(jwtRequest.getScopes()));
