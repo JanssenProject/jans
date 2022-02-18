@@ -69,7 +69,7 @@ def encode_decode(s, decode=False):
     cmd = '/opt/jans/bin/encode.py '
     if decode:
         cmd += '-D '
-    result = os.popen(cmd + s).read()
+    result = os.popen(cmd + s + ' 2>/dev/null').read()
     return result.strip()
 
 
