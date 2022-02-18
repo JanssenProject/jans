@@ -91,7 +91,9 @@ public class ParValidator {
             if (StringUtils.isNotBlank(jwtRequest.getClientId())) {
                 par.getAttributes().setClientId(jwtRequest.getClientId());
             }
-
+            if (jwtRequest.getNbf() != null) {
+                par.getAttributes().setNbf(jwtRequest.getNbf());
+            }
             if (!jwtRequest.getScopes().isEmpty()) { // JWT wins
                 Set<String> scopes = scopeChecker.checkScopesPolicy(client, Lists.newArrayList(jwtRequest.getScopes()));
                 par.getAttributes().setScope(implode(scopes, " "));
