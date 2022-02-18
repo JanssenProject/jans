@@ -7,7 +7,7 @@ FROM alpine:3.14.3
 RUN apk update \
     && apk add --no-cache py3-pip curl tini py3-cryptography py3-psycopg2 \
     && apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/v3.15/community py3-grpcio \
-    && apk add --no-cache --virtual build-deps git
+    && apk add --no-cache --virtual build-deps git wget
 
 # ======
 # Python
@@ -16,6 +16,55 @@ RUN apk update \
 COPY requirements.txt /app/requirements.txt
 RUN pip3 install -U pip wheel \
     && pip3 install --no-cache-dir --default-timeout=300 -r /app/requirements.txt
+
+# =====================
+# jans-linux-setup sync
+# =====================
+
+ARG JANS_LINUX_SETUP_VERSION=493337f94045be705386b8f2b59dda29f85762e6
+ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
+
+# note that as we're pulling from a monorepo (with multiple project in it)
+# we are using partial-clone and sparse-checkout to get the jans-linux-setup code
+RUN git clone --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
+    && cd /tmp/jans \
+    && git sparse-checkout init --cone \
+    && git checkout ${JANS_LINUX_SETUP_VERSION} \
+    && git sparse-checkout set ${JANS_SETUP_DIR}
+
+RUN mkdir -p /app/static /app/static/couchbase /app/schema /app/openbanking/static
+
+# sync static files from linux-setup
+RUN cd /tmp/jans \
+    && cp -R ${JANS_SETUP_DIR}/static/extension /app/static/extension \
+    && cp -R ${JANS_SETUP_DIR}/openbanking/static/extension /app/openbanking/static/extension \
+    && cp ${JANS_SETUP_DIR}/static/couchbase/index.json /app/static/couchbase/index.json \
+    && cp ${JANS_SETUP_DIR}/schema/opendj_types.json /app/schema/opendj_types.json \
+    && cp -R ${JANS_SETUP_DIR}/static/rdbm /app/static/rdbm \
+    && cp ${JANS_SETUP_DIR}/schema/jans_schema.json /app/schema/jans_schema.json \
+    && cp ${JANS_SETUP_DIR}/schema/custom_schema.json /app/schema/custom_schema.json
+
+
+RUN mkdir -p /app/templates/jans-config-api
+
+# partially sync templates from linux-setup
+RUN cd /tmp/jans \
+    && cp ${JANS_SETUP_DIR}/templates/*.ldif /app/templates \
+    && cp -R ${JANS_SETUP_DIR}/templates/jans-auth /app/templates/jans-auth \
+    && cp ${JANS_SETUP_DIR}/openbanking/templates/scopes.ldif /app/templates/scopes.ob.ldif \
+    && cp ${JANS_SETUP_DIR}/openbanking/templates/attributes.ldif /app/templates/attributes.ob.ldif \
+    && cp ${JANS_SETUP_DIR}/static/metric/o_metric.ldif /app/templates/o_metric.ldif \
+    && cp ${JANS_SETUP_DIR}/static/cache-refresh/o_site.ldif /app/templates/o_site.ldif \
+    && cp -R ${JANS_SETUP_DIR}/templates/jans-fido2 /app/templates/jans-fido2 \
+    && cp -R ${JANS_SETUP_DIR}/templates/jans-scim /app/templates/jans-scim \
+    && cp ${JANS_SETUP_DIR}/templates/jans-config-api/config.ldif /app/templates/jans-config-api/config.ldif
+
+# TODO: casa should be moved from this image
+ARG GLUU_CASA_VERSION=e703c4b62e60d3cd299ea84f471417290987bdef
+RUN wget -q https://github.com/GluuFederation/flex/raw/${GLUU_CASA_VERSION}/casa/extras/Casa.py -O /app/static/extension/person_authentication/Casa.py
+
+# cleanup
+RUN rm -rf /tmp/jans
 
 # =======
 # Cleanup
@@ -103,9 +152,6 @@ ENV CN_CACHE_TYPE=NATIVE_PERSISTENCE \
     CN_MEMCACHED_URL=localhost:11211 \
     CN_WAIT_SLEEP_DURATION=10 \
     CN_CASA_ENABLED=false \
-    CN_PASSPORT_ENABLED=false \
-    CN_RADIUS_ENABLED=false \
-    CN_SAML_ENABLED=false \
     CN_SCIM_ENABLED=false \
     CN_PERSISTENCE_SKIP_INITIALIZED=false \
     CN_DOCUMENT_STORE_TYPE=LOCAL \
@@ -126,14 +172,14 @@ LABEL name="Persistence" \
     maintainer="Janssen <support@jans.io>" \
     vendor="Janssen Project" \
     version="1.0.0" \
-    release="b12" \
+    release="beta.15" \
     summary="Janssen Authorization Server Persistence loader" \
     description="Generate initial data for persistence layer"
 
 RUN mkdir -p /app/tmp /etc/certs /etc/jans/conf
 
 COPY scripts /app/scripts
-COPY static /app/static
+# this overrides existing templates
 COPY templates /app/templates
 RUN chmod +x /app/scripts/entrypoint.sh
 
