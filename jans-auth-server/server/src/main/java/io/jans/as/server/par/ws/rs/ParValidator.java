@@ -17,6 +17,7 @@ import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.server.model.authorize.ScopeChecker;
 import io.jans.as.server.service.RedirectUriResponse;
 import io.jans.as.server.service.RequestParameterService;
+import io.jans.as.server.util.ServerUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -99,6 +100,10 @@ public class ParValidator {
             if (jwtRequest.getExp() != null) {
                 par.setTtl(jwtRequest.getExp());
                 par.setExpirationDate(Util.createExpirationDate(jwtRequest.getExp()));
+            }
+            if (jwtRequest.getExp() != null) {
+                par.setTtl(ServerUtil.calculateTtl(jwtRequest.getExp()));
+                par.setExpirationDate(new Date(jwtRequest.getExp() * 1000L));
             }
             if (!jwtRequest.getScopes().isEmpty()) { // JWT wins
                 Set<String> scopes = scopeChecker.checkScopesPolicy(client, Lists.newArrayList(jwtRequest.getScopes()));
