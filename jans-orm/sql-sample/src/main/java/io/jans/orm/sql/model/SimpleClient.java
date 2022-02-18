@@ -10,6 +10,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.AttributesList;
 import io.jans.orm.annotation.CustomObjectClass;
 import io.jans.orm.annotation.DN;
@@ -30,6 +31,12 @@ public class SimpleClient implements Serializable {
     @DN
     private String dn;
 
+    @AttributeName(name = "displayName")
+    private String clientName;
+
+    @AttributeName(name = "jansDefAcrValues")
+    private String[] defaultAcrValues;
+
     @AttributesList(name = "name", value = "values", sortByName = true)
     private List<CustomAttribute> customAttributes = new ArrayList<CustomAttribute>();
 
@@ -44,7 +51,23 @@ public class SimpleClient implements Serializable {
         this.dn = dn;
     }
 
-    public List<CustomAttribute> getCustomAttributes() {
+    public String getClientName() {
+		return clientName;
+	}
+
+	public void setClientName(String clientName) {
+		this.clientName = clientName;
+	}
+
+	public String[] getDefaultAcrValues() {
+		return defaultAcrValues;
+	}
+
+	public void setDefaultAcrValues(String[] defaultAcrValues) {
+		this.defaultAcrValues = defaultAcrValues;
+	}
+
+	public List<CustomAttribute> getCustomAttributes() {
         return customAttributes;
     }
 
