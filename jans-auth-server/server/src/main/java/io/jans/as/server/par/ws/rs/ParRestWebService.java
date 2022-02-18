@@ -176,7 +176,7 @@ public class ParRestWebService {
 
             ParResponse parResponse = new ParResponse();
             parResponse.setRequestUri(ParService.toOutsideId(par.getId()));
-            parResponse.setExpiresIn(parLifetime);
+            parResponse.setExpiresIn(par.getTtl());
 
             final String responseAsString = ServerUtil.asJson(parResponse);
 
