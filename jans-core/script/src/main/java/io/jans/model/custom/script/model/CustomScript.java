@@ -114,7 +114,7 @@ public class CustomScript extends BaseEntry {
         this.internal = customScript.internal;
         
         if (customScript.aliases != null) {
-        	this.aliases = new ArrayList<String>(customScript.aliases);
+        	this.aliases = new ArrayList<>(customScript.aliases);
         }
     }
 
@@ -268,8 +268,8 @@ public class CustomScript extends BaseEntry {
     protected SimpleCustomProperty getModuleProperty(final String modulePropertyName) {
         SimpleCustomProperty result = null;
 
-        List<SimpleCustomProperty> moduleProperties = getModuleProperties();
-        if (moduleProperties == null) {
+        List<SimpleCustomProperty> modulePropertiesList = getModuleProperties();
+        if (modulePropertiesList == null) {
             return result;
         }
 
@@ -299,12 +299,12 @@ public class CustomScript extends BaseEntry {
     }
 
     public void removeModuleProperty(final String modulePropertyName) {
-        List<SimpleCustomProperty> moduleProperties = getModuleProperties();
-        if (moduleProperties == null) {
+        List<SimpleCustomProperty> modulePropertiesList = getModuleProperties();
+        if (modulePropertiesList == null) {
             return;
         }
 
-        for (Iterator<SimpleCustomProperty> it = moduleProperties.iterator(); it.hasNext();) {
+        for (Iterator<SimpleCustomProperty> it = modulePropertiesList.iterator(); it.hasNext();) {
             SimpleCustomProperty moduleProperty = (SimpleCustomProperty) it.next();
             if (StringHelper.equalsIgnoreCase(moduleProperty.getValue1(), modulePropertyName)) {
                 it.remove();
@@ -321,4 +321,17 @@ public class CustomScript extends BaseEntry {
         this.scriptError = scriptError;
     }
 
+    
+    @Override
+    public String toString() {
+        return "CustomScript [inum=" + inum
+                + ", name=" + name 
+                + ", description=" + description
+                + ", programmingLanguage=" + programmingLanguage
+                + ", scriptType=" + scriptType
+                + ", level=" + level
+                + ", revision=" + revision
+                + ", enabled=" + enabled
+                + "]";
+    }
 }
