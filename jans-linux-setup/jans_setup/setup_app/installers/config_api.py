@@ -197,11 +197,6 @@ class ConfigApiInstaller(JettyInstaller):
 
         self.dbUtils.import_ldif(self.load_ldif_files)
 
-    def write_test_properties(self):
-        self.prepare_scope_list()
-        test_properties_dir = os.path.join(Config.templateFolder, 'test/jans-config-api/client')
-        test_properties_fn = os.path.join('config-api-test.properties')
-        self.renderTemplateInOut(test_properties_fn, test_properties_dir, '/tmp')
 
     def prepare_scope_list(self):
 
