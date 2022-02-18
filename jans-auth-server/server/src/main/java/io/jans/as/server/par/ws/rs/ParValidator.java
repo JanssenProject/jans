@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
+import java.util.Date;
 import java.util.Set;
 
 import static io.jans.as.model.util.StringUtils.implode;
@@ -93,6 +94,9 @@ public class ParValidator {
             }
             if (jwtRequest.getNbf() != null) {
                 par.getAttributes().setNbf(jwtRequest.getNbf());
+            }
+            if (jwtRequest.getExp() != null) {
+                par.setExpirationDate(new Date(jwtRequest.getExp() * 1000L));
             }
             if (!jwtRequest.getScopes().isEmpty()) { // JWT wins
                 Set<String> scopes = scopeChecker.checkScopesPolicy(client, Lists.newArrayList(jwtRequest.getScopes()));
