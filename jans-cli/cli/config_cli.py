@@ -34,7 +34,7 @@ sys.path.append(cur_dir)
 from pylib.tabulate.tabulate import tabulate
 try:
     import jwt
-except:
+except ModuleNotFoundError:
     from pylib import jwt
 
 tabulate_endpoints = {
