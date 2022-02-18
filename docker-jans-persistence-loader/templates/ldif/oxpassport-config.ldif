@@ -1,5 +1,0 @@
-dn: ou=oxpassport,ou=configuration,o=gluu
-objectClass: top
-objectClass: oxPassportConfiguration
-ou: oxpassport
-gluuPassportConfiguration:: %(passport_central_config_base64)s
