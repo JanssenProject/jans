@@ -291,11 +291,11 @@ public class SpannerEntryManager extends BaseEntryManager implements Serializabl
 		// Remove entry
         try {
             for (DeleteNotifier subscriber : subscribers) {
-                subscriber.onBeforeRemove(dn);
+                subscriber.onBeforeRemove(dn, objectClasses);
             }
             getOperationService().delete(toSQLKey(dn).getKey(), objectClasses[0]);
             for (DeleteNotifier subscriber : subscribers) {
-                subscriber.onAfterRemove(dn);
+                subscriber.onAfterRemove(dn, objectClasses);
             }
         } catch (Exception ex) {
             throw new EntryDeleteException(String.format("Failed to remove entry: '%s'", dn), ex);
@@ -308,15 +308,13 @@ public class SpannerEntryManager extends BaseEntryManager implements Serializabl
     		throw new UnsupportedOperationException("Entry class is manadatory for recursive remove operation!");
     	}
 		
-    	removeByDn(dn, objectClasses);
-
 		try {
             for (DeleteNotifier subscriber : subscribers) {
-                subscriber.onBeforeRemove(dn);
+                subscriber.onBeforeRemove(dn, objectClasses);
             }
             getOperationService().deleteRecursively(toSQLKey(dn).getKey(), objectClasses[0]);
             for (DeleteNotifier subscriber : subscribers) {
-                subscriber.onAfterRemove(dn);
+                subscriber.onAfterRemove(dn, objectClasses);
             }
         } catch (Exception ex) {
             throw new EntryDeleteException(String.format("Failed to remove entry: '%s'", dn), ex);
@@ -772,10 +770,19 @@ public class SpannerEntryManager extends BaseEntryManager implements Serializabl
 
     @Override
     public List<AttributeData> exportEntry(String dn) {
-        try {
+        throw new EntryPersistenceException("This is deprectated method. Use exportEntry(String dn, Class<T> entryClass) instead of it!");
+    }
+
+	@Override
+	public List<AttributeData> exportEntry(String dn, String objectClass) {
+		if (StringHelper.isEmpty(objectClass)) {
+			throw new MappingException("Object class isn't defined!");
+		}
+
+		try {
             // Load entry
             ParsedKey keyWithInum = toSQLKey(dn);
-            List<AttributeData> entry = getOperationService().lookup(keyWithInum.getKey(), null);
+            List<AttributeData> entry = getOperationService().lookup(keyWithInum.getKey(), objectClass);
 
             if (entry != null) {
                 return entry;
@@ -786,7 +793,6 @@ public class SpannerEntryManager extends BaseEntryManager implements Serializabl
             throw new EntryPersistenceException(String.format("Failed to find entry: '%s'", dn), ex);
         }
     }
-
     
     private ConvertedExpression toSqlFilter(String key, String objectClass, Filter genericFilter, Map<String, PropertyAnnotation> propertiesAnnotationsMap) throws SearchException {
     	TableMapping tableMapping = getOperationService().getTabeMapping(key, objectClass);
