@@ -60,6 +60,12 @@ class ConfigApiInstaller(JettyInstaller):
         self.copyFile(self.source_files[1][0], self.libDir)
         scim_plugin_path = os.path.join(self.libDir, os.path.basename(self.source_files[1][0]))
         self.add_extra_class(scim_plugin_path)
+        base.extract_file(
+                os.path.join(Config.distJansFolder, 'jans.zip'),
+                'jans-config-api/server/src/main/resources/log4j2.xml',
+                self.custom_config_dir
+                 )
+
         self.enable()
 
     def installed(self):
@@ -192,15 +198,11 @@ class ConfigApiInstaller(JettyInstaller):
         self.dbUtils.import_ldif(self.load_ldif_files)
 
 
-    def load_test_data(self):
-        if not self.installed():
-            return
+    def prepare_scope_list(self):
 
-        check_result = self.check_clients([('jca_test_client_id', '1802.')])
-
-        result = self.dbUtils.search('ou=scopes,o=jans', search_filter='(&(inum=1800.*)(objectClass=jansScope))', fetchmany=True)
         scopes = []
         scopes_id_list = []
+        result = self.dbUtils.search('ou=scopes,o=jans', search_filter='(&(inum=1800.*)(objectClass=jansScope))', fetchmany=True)
 
         for scope in result:
             if isinstance(scope, dict):
@@ -219,6 +221,15 @@ class ConfigApiInstaller(JettyInstaller):
 
         Config.templateRenderingDict['config_api_scopes'] = '\n'.join(scopes)
         Config.templateRenderingDict['config_api_scopes_list'] = ' '.join(scopes_id_list)
+
+
+    def load_test_data(self):
+        if not self.installed():
+            return
+
+        check_result = self.check_clients([('jca_test_client_id', '1802.')])
+
+        self.prepare_scope_list()
 
         if check_result.get('1802.') == 1:
             warning = "Test data for Config Api was allready loaded."
