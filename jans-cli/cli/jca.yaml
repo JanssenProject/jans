@@ -33,8 +33,10 @@ tags:
   - name: OAuth - Scopes
   - name: Statistics - User
   - name: Health - Check
+  - name: Server Stats
   - name: SCIM - User Management
   - name: SCIM - Config Management
+  - name: Organization Configuration
   - name: Auth Server Health - Check
   - name: Admin UI - Role
   - name: Admin UI - Permission
@@ -2377,6 +2379,23 @@ paths:
                 $ref: '#/components/schemas/HealthStatusItem'
         '500':
           description: Internal Server Error
+  
+  /jans-config-api/api/v1/health/server-stat:
+    get:
+      summary: Returns application server status.
+      description: Returns application server status.
+      operationId: get-server-stat
+      tags:
+        - Server Stats
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatsData'
+        '500':
+          description: Internal Server Error
 
   /jans-config-api/scim/user:
     get:
@@ -2806,7 +2825,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
       security:
         - oauth2: [https://jans.io/oauth/config/scim/users.read https://jans.io/scim/users.read]
-		
+
   /jans-config-api/scim/config:
     get:
       summary: Retrieves SCIM App configuration.
@@ -2859,7 +2878,60 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '500':
           $ref: '#/components/responses/InternalServerError'
-		  
+  
+  /jans-config-api/api/v1/org:
+    get:
+      summary: Retrieves organization configuration.
+      description: Retrieves organization configuration.
+      operationId: get-organization-config
+      security:
+        - oauth2: [https://jans.io/oauth/config/organization.readonly]
+      tags:
+        - Organization Configuration
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: Organization
+                description:  Organization configuration.
+                $ref: '#/components/schemas/Organization'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    patch:
+      summary: Partially modifies organization configuration.
+      description: Partially modifies organization configuration.
+      operationId: patch-organization-config
+      security:
+        - oauth2: [https://jans.io/oauth/config/organization.write]
+      tags:
+        - Organization Configuration
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/PatchRequest'
+                description: String representing patch-document.
+                example: '[{"op": "add", "path": "/jsFaviconPath", "value": "/opt/jans/jetty/jans-auth/custom/static/"}]'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: Organization
+                description: Organization configuration.
+                $ref: '#/components/schemas/Organization'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  
   /jans-config-api/api/v1/jans-auth-server/health:
     get:
       summary: Returns auth server health status.
@@ -3336,6 +3408,8 @@ components:
             https://jans.io/oauth/config/scim/users.write: Manage scim user related information
             https://jans.io/scim/config.readonly: Vew SCIM App configuration
             https://jans.io/scim/config.write: Manage SCIM App configuration
+            https://jans.io/oauth/config/organization.readonly: View organization configuration information
+            https://jans.io/oauth/config/organization.write: Manage organization configuration information
 
   responses:
     Found:
@@ -6542,5 +6616,88 @@ components:
         useLocalCache:
           type: boolean
           description: Boolean value specifying whether to enable local in-memory cache.
-		  
-		  
+  
+    Organization:
+      type: object
+      properties:
+        displayName:
+          type: string
+          description: Organization name
+        description:
+          type: string
+          description: Organization description 
+        member:
+          type: string
+          description: String describing memberOf
+        countryName:
+          type: string
+          description: Organization country name
+        organization:
+          type: string
+        status:
+          type: string
+        managerGroup:
+          type: string
+          description: qualified id of the group
+          example: inum=60B7,ou=groups,o=jans
+        themeColor:
+          type: string
+          description: color of the theme
+          example: 166309
+        shortName:
+          type: string
+        customMessages:
+          type: array
+          items:
+            type: string
+        title:
+          type: string
+        jsLogoPath:
+          type: string
+          description: Path to organization logo image
+        jsFaviconPath:
+          type: string
+          description: Path to organization favicon image
+  
+  
+    FacterData:
+      type: object
+      properties:
+        memoryfree:
+          type: string
+          description: Server free memory
+        swapfree:
+          type: string
+          description: Server swap free
+        hostname:
+          type: string
+          description: Server hostname
+        ipaddress:
+          type: string
+          description: Server ipaddress
+        uptime:
+          type: string
+          description: Server uptime
+        free_disk_space:
+          type: string
+          description: Server free disk space
+        load_average:
+          type: string
+          description: Server average load time
+
+
+    StatsData:
+      type: object
+      properties:
+        dbType:
+          type: string
+          description: Jans Server DB type
+        lastUpdate:
+          type: string
+          description: Stats update time
+        facterData:
+          type: object
+          $ref: '#/components/schemas/FacterData'
+          description: Underlying Server stats
+
+  

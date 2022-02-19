@@ -32,7 +32,10 @@ cur_dir = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(cur_dir)
 
 from pylib.tabulate.tabulate import tabulate
-from pylib import jwt
+try:
+    import jwt
+except ModuleNotFoundError:
+    from pylib import jwt
 
 tabulate_endpoints = {
     'jca.get-config-scripts': ['scriptType', 'name', 'enabled', 'inum'],
@@ -66,7 +69,7 @@ def encode_decode(s, decode=False):
     cmd = '/opt/jans/bin/encode.py '
     if decode:
         cmd += '-D '
-    result = os.popen(cmd + s).read()
+    result = os.popen(cmd + s + ' 2>/dev/null').read()
     return result.strip()
 
 
