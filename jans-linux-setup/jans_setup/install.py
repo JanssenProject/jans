@@ -231,7 +231,7 @@ def download_files():
     download(urljoin(maven_base_url, 'jans-auth-client/{0}{1}/jans-auth-client-{0}{1}-jar-with-dependencies.jar'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD'])), os.path.join(jans_app_dir, 'jans-auth-client-jar-with-dependencies.jar'))
     download(urljoin(maven_base_url, 'jans-config-api-server/{0}{1}/jans-config-api-server-{0}{1}.war'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD'])), os.path.join(jans_app_dir, 'jans-config-api.war'))
     download('https://github.com/sqlalchemy/sqlalchemy/archive/rel_1_3_23.zip', sqlalchemy_zip_file)
-    download(urljoin(maven_base_url, 'scim-plugin/{0}{1}/scim-plugin-{0}{1}-distribution.jar'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD'])), os.path.join(jans_app_dir, 'scim-plugin.jar'))
+    download(urljoin(maven_base_url, 'jans-config-api/plugins/scim-plugin/{0}{1}/scim-plugin-{0}{1}-distribution.jar'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD'])), os.path.join(jans_app_dir, 'scim-plugin.jar'))
     download('https://ox.gluu.org/icrby8xcvbcv/cli-swagger/jca_swagger_client.zip', os.path.join(jans_app_dir, 'jca-swagger-client.zip'))
     download('https://ox.gluu.org/icrby8xcvbcv/cli-swagger/scim_swagger_client.zip', os.path.join(jans_app_dir, 'scim-swagger-client.zip'))
     download('https://raw.githubusercontent.com/GluuFederation/gluu-snap/master/facter/facter', os.path.join(jans_app_dir, 'facter'))
