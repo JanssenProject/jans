@@ -15,10 +15,10 @@
 	<dependencies>
 
 		<!-- jans -->
-		<dependency>
+		<!-- <dependency>
 			<groupId>io.jans</groupId>
 			<artifactId>jans-core-util</artifactId>
-		</dependency>
+		</dependency> -->
 		<dependency>
 			<groupId>io.jans</groupId>
 			<artifactId>jans-core-model</artifactId>
@@ -35,11 +35,6 @@
 			<groupId>io.jans</groupId>
 			<artifactId>jans-core-service</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>io.jans</groupId>
-			<artifactId>jans-client-api</artifactId>
-		</dependency>
-
 
 		<!-- Weld -->
 		<dependency>
