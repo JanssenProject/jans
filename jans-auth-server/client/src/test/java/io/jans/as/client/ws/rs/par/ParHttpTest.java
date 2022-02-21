@@ -55,7 +55,7 @@ public class ParHttpTest extends BaseTest {
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, registerResponse.getClientId(), scopes, redirectUri, nonce);
         ParRequest parRequest = new ParRequest(authorizationRequest);
-        parRequest.setNbf(1);
+        parRequest.setNbf((int) (System.currentTimeMillis() / 1000L));
         parRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
         parRequest.setAuthUsername(registerResponse.getClientId());
         parRequest.setAuthPassword(registerResponse.getClientSecret());
