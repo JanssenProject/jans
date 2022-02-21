@@ -86,10 +86,11 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
             config['DEFAULT']['jca_client_secret_enc'] = Config.role_based_client_encoded_pw
 
         if Config.get('installScimServer'):
-            config['DEFAULT']['scim_client_id'] = Config.role_based_client_id
-            config['DEFAULT']['scim_client_secret_enc'] = Config.role_based_client_encoded_pw
+            config['DEFAULT']['scim_client_id'] = Config.scim_client_id
+            config['DEFAULT']['scim_client_secret_enc'] = Config.scim_client_encoded_pw
 
         config.write(self.config_ini_fn.open('w'))
+        self.config_ini_fn.chmod(0o600)
 
 
     def render_import_templates(self):
