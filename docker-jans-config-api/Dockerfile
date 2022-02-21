@@ -32,7 +32,7 @@ RUN wget -q https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/${JETTY_
 # ==========
 
 ENV CN_VERSION=1.0.0-SNAPSHOT
-ENV CN_BUILD_DATE='2022-01-25 07:53'
+ENV CN_BUILD_DATE='2022-02-22 05:22'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api-server/${CN_VERSION}/jans-config-api-server-${CN_VERSION}.war
 
 # Install Jans Config API
@@ -46,18 +46,26 @@ RUN wget -q ${CN_SOURCE_URL} -O /tmp/jans-config-api.war \
 # Ports exposed by config-api
 EXPOSE 8074
 
+# ======
+# Facter
+# ======
+
+ARG PYFACTER_VERSION=9d8478ee47dc5498a766e010e8d3a3451b46e541
+RUN wget -q https://github.com/GluuFederation/gluu-snap/raw/${PYFACTER_VERSION}/facter/facter -O /usr/bin/facter \
+    && chmod +x /usr/bin/facter
+
 # =======
 # Plugins
 # =======
 
 RUN mkdir -p /usr/share/java
 
-ENV SCIM_PLUGIN_BUILD_DATE='2022-01-25 07:54'
-ENV SCIM_PLUGIN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/scim-plugin/${CN_VERSION}/scim-plugin-${CN_VERSION}-distribution.jar
+ENV SCIM_PLUGIN_BUILD_DATE='2022-02-21 16:26'
+ENV SCIM_PLUGIN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/scim-plugin/${CN_VERSION}/scim-plugin-${CN_VERSION}-distribution.jar
 RUN wget -q ${SCIM_PLUGIN_SOURCE_URL} -O /usr/share/java/scim-plugin.jar
 
-ENV ADMIN_UI_PLUGIN_BUILD_DATE='2022-01-25 07:53'
-ENV ADMIN_UI_SOURCE_URL=https://maven.jans.io/maven/io/jans/admin-ui-plugin/${CN_VERSION}/admin-ui-plugin-${CN_VERSION}-distribution.jar
+ENV ADMIN_UI_PLUGIN_BUILD_DATE='2022-02-21 16:26'
+ENV ADMIN_UI_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/admin-ui-plugin/${CN_VERSION}/admin-ui-plugin-${CN_VERSION}-distribution.jar
 RUN wget -q ${ADMIN_UI_SOURCE_URL} -O /usr/share/java/admin-ui-plugin.jar
 
 # ======
