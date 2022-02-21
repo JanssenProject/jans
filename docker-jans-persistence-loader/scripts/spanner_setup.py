@@ -402,17 +402,7 @@ class SpannerBackend:
     def update_schema(self):
         """Updates schema (may include data migration)"""
 
-        table_mapping = {}
-
-        # TODO: this should be replacing the one in jans-pycloudlib
-        for table in self.client.database.list_tables():
-            with self.client.database.snapshot() as snapshot:
-                result = snapshot.execute_sql(
-                    f"select column_name, spanner_type "
-                    "from information_schema.columns "
-                    f"where table_name = '{table.table_id}'"
-                )
-                table_mapping[table.table_id] = dict(result)
+        table_mapping = self.client.get_table_mapping()
 
         def column_to_array(table_name, col_name):
             old_data_type = table_mapping[table_name][col_name]
