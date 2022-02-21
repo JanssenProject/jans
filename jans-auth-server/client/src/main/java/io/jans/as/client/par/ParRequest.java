@@ -11,6 +11,7 @@ import io.jans.as.model.util.QueryBuilder;
 public class ParRequest extends ClientAuthnRequest {
 
     private AuthorizationRequest authorizationRequest;
+    private Integer nbf;
 
     public ParRequest(AuthorizationRequest authorizationRequest) {
         this.authorizationRequest = authorizationRequest;
@@ -35,5 +36,13 @@ public class ParRequest extends ClientAuthnRequest {
         }
 
         return builder.toString();
+    }
+
+    public Integer getNbf() {
+        return nbf;
+    }
+
+    public void setNbf(Integer nbf) {
+        this.nbf = nbf;
     }
 }

@@ -295,6 +295,14 @@ public class Util {
         }
     }
 
+    public static Integer parseIntegerSilently(String intString) {
+        try {
+            return Integer.parseInt(intString);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     // SHA-1 (160 bits)
     public static String toSHA1HexString(String input) {
         MessageDigest md = null;
