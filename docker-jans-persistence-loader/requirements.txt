@@ -2,4 +2,4 @@
 grpcio==1.41.0
 ldif==4.1.1
 libcst<0.4
-git+https://github.com/JanssenProject/jans@f88095b1f52f0639221e4109ed7262099e06d0e9#egg=jans-pycloudlib&subdirectory=jans-pycloudlib
+git+https://github.com/JanssenProject/jans@03eba074dfcf9969e47d050a5d4a0b754185fed9#egg=jans-pycloudlib&subdirectory=jans-pycloudlib
