@@ -98,6 +98,7 @@ public class ParRestWebService {
             @FormParam("origin_headers") String originHeaders,
             @FormParam("code_challenge") String codeChallenge,
             @FormParam("code_challenge_method") String codeChallengeMethod,
+            @FormParam("nbf") String nbf,
             @FormParam(AuthorizeRequestParam.CUSTOM_RESPONSE_HEADERS) String customResponseHeaders,
             @FormParam("claims") String claims,
             @Context HttpServletRequest httpRequest,
@@ -145,6 +146,7 @@ public class ParRestWebService {
             par.setTtl(parLifetime);
             par.setExpirationDate(Util.createExpirationDate(parLifetime));
             par.getAttributes().setScope(scope);
+            par.getAttributes().setNbf(Util.parseIntegerSilently(nbf));
             par.getAttributes().setResponseType(responseType);
             par.getAttributes().setClientId(clientId);
             par.getAttributes().setRedirectUri(redirectUri);
