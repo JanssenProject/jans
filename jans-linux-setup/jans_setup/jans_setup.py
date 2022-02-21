@@ -11,7 +11,6 @@ import shutil
 import traceback
 import code
 import site
-import socket
 
 from pathlib import Path
 
