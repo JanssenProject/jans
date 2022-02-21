@@ -59,8 +59,8 @@ urllib3.disable_warnings()
 config = configparser.ConfigParser()
 
 host = os.environ.get('jans_host')
-client_id = os.environ.get(my_op_mode + '_client_id')
-client_secret = os.environ.get(my_op_mode + '_client_secret')
+client_id = os.environ.get(my_op_mode + 'jca_client_id')
+client_secret = os.environ.get(my_op_mode + 'jca_client_secret')
 debug = os.environ.get('jans_client_debug')
 debug_log_file = os.environ.get('jans_debug_log_file')
 error_log_file = os.path.join(cur_dir, 'error.log')
@@ -137,11 +137,11 @@ if not (host and client_id and client_secret):
     if config_ini_fn.exists():
         config.read_string(config_ini_fn.read_text())
         host = config['DEFAULT']['jans_host']
-        client_id = config['DEFAULT'][my_op_mode + '_client_id']
-        if config['DEFAULT'].get(my_op_mode + '_client_secret'):
-            client_secret = config['DEFAULT'][my_op_mode + '_client_secret']
-        elif config['DEFAULT'].get(my_op_mode + '_client_secret_enc'):
-            client_secret_enc = config['DEFAULT'][my_op_mode + '_client_secret_enc']
+        client_id = config['DEFAULT']['jca_client_id']
+        if config['DEFAULT'].get('jca_client_secret'):
+            client_secret = config['DEFAULT']['jca_client_secret']
+        elif config['DEFAULT'].get('jca_client_secret_enc'):
+            client_secret_enc = config['DEFAULT']['jca_client_secret_enc']
             client_secret = encode_decode(client_secret_enc, decode=True)
         debug = config['DEFAULT'].get('debug')
         debug_log_file = config['DEFAULT'].get('debug_log_file')
