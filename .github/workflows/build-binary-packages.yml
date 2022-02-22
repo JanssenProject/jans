@@ -34,18 +34,23 @@ jobs:
 
     steps:
     - name: Getting build dependencies
+      id: get_dependencies
       run: |      
          git clone -b jans https://github.com/GluuFederation/packaging
          mkdir -p jans/jans-src/opt/
          cp -rp packaging/${{ matrix.build_files }}/* jans/
          wget https://raw.githubusercontent.com/JanssenProject/jans/main/jans-linux-setup/jans_setup/install.py -O jans/install.py
          sudo apt install -y python3-distutils python3-ldap3 build-essential devscripts debhelper rpm dpkg-sig
-    - name: Configure GPG Key
-      run: |
-        echo -n "$GPG_SIGNING_KEY" | base64 --decode | gpg --import
-      env:
-        GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}         
+    - name: Import GPG key
+      id: import_gpg
+      uses: crazy-max/ghaction-import-gpg@v4
+      with:
+        gpg_private_key: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY }}
+        passphrase: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY_PASSPHRASE }}
+        git_user_signingkey: true
+        git_commit_gpgsign: true         
     - name: Running install and build
+      id: run_build
       run: |
          cd jans/
          sudo python3.8 install.py --no-setup
@@ -57,6 +62,7 @@ jobs:
          cat run-build.sh
          sudo ./run-build.sh
     - name: Upload binaries to release
+      id: upload_binaries
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.MOWORKFLOWTOKEN }}
@@ -64,6 +70,7 @@ jobs:
         asset_name: jans${{ matrix.asset_prefix }}${{ github.ref_name }}${{ matrix.asset_suffix }}
         tag: ${{ github.ref }} 
     - name: Upload checksum to release
+      id: upload_binaries
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.MOWORKFLOWTOKEN }}
