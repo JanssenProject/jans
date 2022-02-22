@@ -80,6 +80,7 @@ The following environment variables are supported by the container:
 - `CN_LICENSE_ADMIN_UI_PRODUCT_CODE`: Path to admin-ui license product code (default to `/etc/jans/conf/admin_ui_product_code`).
 - `CN_LICENSE_ADMIN_UI_SHARED_KEY`: Path to admin-ui license shared key (default to `/etc/jans/conf/admin_ui_shared_key`).
 - `CN_LICENSE_ADMIN_UI_MANAGEMENT_KEY`: Path to admin-ui license management key (default to `/etc/jans/conf/admin_ui_management_key`).
+- `CN_ADMIN_UI_PLUGIN_LOGGERS`: Custom logging configuration for AdminUI plugin in JSON-string format with hash type (see [Configure plugin loggers](#configure-plugin-loggers) section for details).
 
 ### Configure app loggers
 
@@ -113,5 +114,34 @@ The following key-value pairs are the defaults:
     "ldap_stats_log_level": "INFO",
     "script_log_target": "FILE",
     "script_log_level": "INFO"
+}
+```
+
+### Configure plugin loggers
+
+Plugin loggers can be configured to define where the logs will be redirected and what is the level the logs should be displayed.
+
+Supported redirect target:
+
+- `STDOUT`
+- `FILE`
+
+Supported level:
+
+- `FATAL`
+- `ERROR`
+- `WARN`
+- `INFO`
+- `DEBUG`
+- `TRACE`
+
+The following key-value pairs are the defaults:
+
+```json
+{
+    "admin_ui_log_target": "FILE",
+    "admin_ui_log_level": "INFO",
+    "admin_ui_audit_log_target": "FILE",
+    "admin_ui_audit_log_level": "INFO"
 }
 ```
