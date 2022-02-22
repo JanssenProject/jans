@@ -643,7 +643,7 @@
 			<dependency>
 			    <groupId>org.postgresql</groupId>
 			    <artifactId>postgresql</artifactId>
-			    <version>42.2.23.jre7</version>
+			    <version>42.3.2</version>
 			</dependency>
 
 			<!-- SQL Query -->

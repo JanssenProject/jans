@@ -351,11 +351,11 @@ public class ConfigurationFactory {
     }
 
     private boolean loadApiConfigFromDb() {
-        log.debug("Loading Api configuration from '{}' DB...", baseConfiguration.getString("persistence.type"));
+        log.error("Loading Api configuration from '{}' DB...", baseConfiguration.getString("persistence.type"));
         try {
             final ApiConf apiConf = loadConfigurationFromDb(getConfigurationDn(CONFIGAPI_CONFIGURATION_ENTRY),
                     new ApiConf());
-            log.trace("ApiConf configuration '{}' DB...", apiConf);
+            log.error("ApiConf configuration '{}' DB...", apiConf);
 
             if (apiConf != null) {
                 initApiAuthConf(apiConf);
@@ -516,7 +516,7 @@ public class ConfigurationFactory {
     }
 
     public boolean reloadAuthConfFromLdap() {
-        log.debug("Reload auth configuration TimerEvent");
+        log.error("Reload auth configuration TimerEvent");
         if (!isAuthRevisionIncreased()) {
             return false;
         }
@@ -524,7 +524,7 @@ public class ConfigurationFactory {
     }
 
     public boolean reloadApiConfFromLdap() {
-        log.debug("Reload api configuration TimerEvent");
+        log.error("Reload api configuration TimerEvent");
         if (!isApiRevisionIncreased()) {
             return false;
         }
@@ -537,7 +537,7 @@ public class ConfigurationFactory {
     }
 
     public void initTimer() {
-        log.debug("Initializing Configuration Timer");
+        log.error("Initializing Configuration Timer");
 
         final int delay = 30;
 
@@ -547,7 +547,7 @@ public class ConfigurationFactory {
 
     @Asynchronous
     public void reloadConfigurationTimerEvent(@Observes @Scheduled ConfigurationEvent configurationEvent) {
-        log.debug("Config reload configuration TimerEvent - baseConfigurationFileLastModifiedTime:{}",
+        log.error("Config reload configuration TimerEvent - baseConfigurationFileLastModifiedTime:{}",
                 baseConfigurationFileLastModifiedTime);
 
         // Reload Base configuration if needed

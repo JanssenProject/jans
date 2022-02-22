@@ -61,6 +61,7 @@ public abstract class LoggerService {
 
     @Asynchronous
     public void updateLoggerTimerEvent(@Observes @Scheduled LoggerUpdateEvent loggerUpdateEvent) {
+        log.error("\n\n Core LoggerService LoggerUpdateEvent \n\n");
         if (this.isActive.get()) {
             return;
         }
@@ -80,13 +81,17 @@ public abstract class LoggerService {
 
     private void updateLoggerConfiguration() {
     	// Do periodic update to apply changes to new loggers as well
+        log.error("\n\n Core LoggerService::updateLoggerConfiguration() \n\n");
         String loggingLevel = getLoggingLevel();
+        log.error("\n\n Core LoggerService::updateLoggerConfiguration() - loggingLevel = "+loggingLevel+", this.getLoggingLayout() = "+this.getLoggingLayout()+"\n\n");
 		if (StringHelper.isEmpty(loggingLevel) || StringUtils.isEmpty(this.getLoggingLayout())
 				|| StringHelper.equalsIgnoreCase("DEFAULT", loggingLevel)) {
+		    log.error("\n\n Core LoggerService::updateLoggerConfiguration() - loggingLevel Empty check return n\n");
 			return;
 		}
 
         Level level = Level.toLevel(loggingLevel, Level.INFO);
+        log.error("\n\n Core LoggerService::updateLoggerConfiguration() - level = "+level.name()+"\n\n");
         LoggingLayoutType loggingLayout = LoggingLayoutType.getByValue(this.getLoggingLayout().toUpperCase());
 
         updateAppendersAndLogLevel(loggingLayout, level);
@@ -179,6 +184,7 @@ public abstract class LoggerService {
     }
 
     private void updateAppendersAndLogLevel(LoggingLayoutType loggingLayout, Level level) {
+        log.error("\n\n Core LoggerService::updateAppendersAndLogLevel() - loggingLayout:{}, level:{}", loggingLayout,level.toString()+"\n\n");
         if (loggingLayout == LoggingLayoutType.TEXT) {
             final LoggerContext ctx = LoggerContext.getContext(false);
             ctx.reconfigure();
@@ -196,7 +202,7 @@ public abstract class LoggerService {
             }
 
             if (count > 0) {
-                log.info("Updated log level of '{}' loggers to {}", count, level.toString());
+                log.error("Updated log level of '{}' loggers to {}", count, level.toString());
             }
         }
 //    	boolean runLoggersUpdate = false;
