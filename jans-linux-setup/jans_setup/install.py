@@ -310,6 +310,9 @@ def extract_yaml_files():
     extract_file(jans_zip_file, 'jans-scim/server/src/main/resources/jans-scim-openapi.yaml', os.path.join(setup_dir, 'setup_app/data'))
     extract_file(jans_zip_file, 'jans-config-api/server/src/main/resources/log4j2.xml', jans_app_dir)
 
+def prepare_jans_cli_package():
+    print("Preparing jans-cli package")
+    extract_subdir(jans_zip_file, 'jans-cli', 'jans-cli', os.path.join(jans_app_dir, 'jans-cli.zip'))
 
 def uninstall_jans():
     check_installation()

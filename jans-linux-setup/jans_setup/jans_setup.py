@@ -187,6 +187,12 @@ elif os.path.isfile(Config.setup_properties_fn + '.enc'):
     base.logIt('%s Properties found!\n' % Config.setup_properties_fn + '.enc')
     setup_loaded = propertiesUtils.load_properties(Config.setup_properties_fn + '.enc')
 
+if argsp.import_ldif:
+    if os.path.isdir(argsp.import_ldif):
+        base.logIt("Found setup LDIF import directory {}".format(argsp.import_ldif))
+    else:
+        base.logIt("The custom LDIF import directory {} does not exist. Exiting...".format(argsp.import_ldif, True, True))
+
 collectProperties = CollectProperties()
 if os.path.exists(Config.jans_properties_fn):
     collectProperties.collect()
