@@ -140,6 +140,14 @@ def configure_logging():
     config = {
         "config_api_log_target": "STDOUT",
         "config_api_log_level": "INFO",
+        "persistence_log_target": "FILE",
+        "persistence_log_level": "INFO",
+        "persistence_duration_log_target": "FILE",
+        "persistence_duration_log_level": "INFO",
+        "ldap_stats_log_target": "FILE",
+        "ldap_stats_log_level": "INFO",
+        "script_log_target": "FILE",
+        "script_log_level": "INFO",
     }
 
     # pre-populate custom config; format is JSON string of ``dict``
@@ -178,10 +186,20 @@ def configure_logging():
     # mapping between the ``log_target`` value and their appenders
     file_aliases = {
         "config_api_log_target": "FILE",
+        "persistence_log_target": "JANS_CONFIGAPI_PERSISTENCE_FILE",
+        "persistence_duration_log_target": "JANS_CONFIGAPI_PERSISTENCE_DURATION_FILE",
+        "ldap_stats_log_target": "JANS_CONFIGAPI_PERSISTENCE_LDAP_STATISTICS_FILE",
+        "script_log_target": "JANS_CONFIGAPI_SCRIPT_LOG_FILE",
     }
-    for key, value in file_aliases.items():
-        if config[key] == "FILE":
-            config[key] = value
+
+    for key, value in config.items():
+        if not key.endswith("_target"):
+            continue
+
+        if value == "STDOUT":
+            config[key] = "Console"
+        else:
+            config[key] = file_aliases[key]
 
     logfile = "/opt/jans/jetty/jans-config-api/resources/log4j2.xml"
     with open(logfile) as f:
