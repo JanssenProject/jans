@@ -60,6 +60,7 @@ public class ParClient extends BaseClient<ParRequest, ParResponse> {
         addReqParam(AuthorizeRequestParam.SCOPE, scopesAsString);
         addReqParam(AuthorizeRequestParam.REDIRECT_URI, getRequest().getAuthorizationRequest().getRedirectUri());
         addReqParam(AuthorizeRequestParam.STATE, getRequest().getAuthorizationRequest().getState());
+        addReqParam(AuthorizeRequestParam.NBF, getRequest().getNbf() != null ? getRequest().getNbf().toString() : null);
 
         addReqParam(AuthorizeRequestParam.NONCE, getRequest().getAuthorizationRequest().getNonce());
         addReqParam(AuthorizeRequestParam.DISPLAY, getRequest().getAuthorizationRequest().getDisplay());
