@@ -39,7 +39,12 @@ jobs:
          mkdir -p jans/jans-src/opt/
          cp -rp packaging/${{ matrix.build_files }}/* jans/
          wget https://raw.githubusercontent.com/JanssenProject/jans/main/jans-linux-setup/jans_setup/install.py -O jans/install.py
-         sudo apt install -y python3-distutils python3-ldap3 build-essential devscripts debhelper rpm
+         sudo apt install -y python3-distutils python3-ldap3 build-essential devscripts debhelper rpm dpkg-sig
+    - name: Configure GPG Key
+      run: |
+        echo -n "$GPG_SIGNING_KEY" | base64 --decode | gpg --import
+      env:
+        GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}         
     - name: Running install and build
       run: |
          cd jans/
@@ -58,3 +63,10 @@ jobs:
         file: ${{github.workspace}}/${{ matrix.asset_path }}/jans${{ matrix.asset_prefix }}${{ github.ref_name }}${{ matrix.asset_suffix }}
         asset_name: jans${{ matrix.asset_prefix }}${{ github.ref_name }}${{ matrix.asset_suffix }}
         tag: ${{ github.ref }} 
+    - name: Upload checksum to release
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.MOWORKFLOWTOKEN }}
+        file: ${{github.workspace}}/${{ matrix.asset_path }}/jans${{ matrix.asset_prefix }}${{ github.ref_name }}${{ matrix.asset_suffix }}.sha256sum
+        asset_name: jans${{ matrix.asset_prefix }}${{ github.ref_name }}${{ matrix.asset_suffix }}.sha256sum
+        tag: ${{ github.ref }}        
