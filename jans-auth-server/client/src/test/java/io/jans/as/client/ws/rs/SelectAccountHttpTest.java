@@ -33,6 +33,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import static io.jans.as.client.client.Asserter.assertAuthorizationResponse;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNotNull;
@@ -152,10 +153,7 @@ public class SelectAccountHttpTest extends BaseTest {
 
         AuthorizationResponse authorizationResponse = buildAuthorizationResponse(authorizationRequest, driver, authorizationResponseStr);
 
-        assertNotNull(authorizationResponse.getLocation(), "The location is null");
-        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
-        assertNotNull(authorizationResponse.getState(), "The state is null");
-        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertAuthorizationResponse(authorizationResponse, true);
         return authorizationResponse;
     }
 
@@ -181,10 +179,7 @@ public class SelectAccountHttpTest extends BaseTest {
 
         AuthorizationResponse authorizationResponse = authorize(authorizationRequest, userId, userSecret, 1);
 
-        assertNotNull(authorizationResponse.getLocation(), "The location is null");
-        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
-        assertNotNull(authorizationResponse.getState(), "The state is null");
-        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertAuthorizationResponse(authorizationResponse, true);
         return authorizationResponse;
     }
 }

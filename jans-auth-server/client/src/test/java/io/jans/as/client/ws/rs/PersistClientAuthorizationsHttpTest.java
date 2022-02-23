@@ -30,7 +30,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static io.jans.as.client.client.Asserter.assertOk;
+import static io.jans.as.client.client.Asserter.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
@@ -60,7 +60,7 @@ public class PersistClientAuthorizationsHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -80,10 +80,7 @@ public class PersistClientAuthorizationsHttpTest extends BaseTest {
             AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                     authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-            assertNotNull(authorizationResponse.getLocation());
-            assertNotNull(authorizationResponse.getCode());
-            assertNotNull(authorizationResponse.getIdToken());
-            assertNotNull(authorizationResponse.getState());
+            assertAuthorizationResponse(authorizationResponse, responseTypes, true);
 
             String authorizationCode = authorizationResponse.getCode();
             sessionId = authorizationResponse.getSessionId();
@@ -101,12 +98,7 @@ public class PersistClientAuthorizationsHttpTest extends BaseTest {
             TokenResponse tokenResponse = tokenClient.exec();
 
             showClient(tokenClient);
-            assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-            assertNotNull(tokenResponse.getEntity());
-            assertNotNull(tokenResponse.getAccessToken());
-            assertNotNull(tokenResponse.getExpiresIn());
-            assertNotNull(tokenResponse.getTokenType());
-            assertNotNull(tokenResponse.getRefreshToken());
+            assertTokenResponseOk(tokenResponse, true);
         }
 
         {
@@ -123,10 +115,7 @@ public class PersistClientAuthorizationsHttpTest extends BaseTest {
             AuthorizationResponse authorizationResponse = authenticateResourceOwner(
                     authorizationEndpoint, authorizationRequest, userId, userSecret, false);
 
-            assertNotNull(authorizationResponse.getLocation());
-            assertNotNull(authorizationResponse.getCode());
-            assertNotNull(authorizationResponse.getIdToken());
-            assertNotNull(authorizationResponse.getState());
+            assertAuthorizationResponse(authorizationResponse, responseTypes, true);
 
             String authorizationCode = authorizationResponse.getCode();
 
@@ -143,12 +132,7 @@ public class PersistClientAuthorizationsHttpTest extends BaseTest {
             TokenResponse tokenResponse = tokenClient.exec();
 
             showClient(tokenClient);
-            assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-            assertNotNull(tokenResponse.getEntity());
-            assertNotNull(tokenResponse.getAccessToken());
-            assertNotNull(tokenResponse.getExpiresIn());
-            assertNotNull(tokenResponse.getTokenType());
-            assertNotNull(tokenResponse.getRefreshToken());
+            assertTokenResponseOk(tokenResponse, true);
         }
 
         {
@@ -166,10 +150,7 @@ public class PersistClientAuthorizationsHttpTest extends BaseTest {
             AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                     authorizationEndpoint, authorizationRequest, userId, userSecret, false);
 
-            assertNotNull(authorizationResponse.getLocation());
-            assertNotNull(authorizationResponse.getCode());
-            assertNotNull(authorizationResponse.getIdToken());
-            assertNotNull(authorizationResponse.getState());
+            assertAuthorizationResponse(authorizationResponse, responseTypes, true);
 
             String authorizationCode = authorizationResponse.getCode();
 
@@ -186,12 +167,7 @@ public class PersistClientAuthorizationsHttpTest extends BaseTest {
             TokenResponse tokenResponse = tokenClient.exec();
 
             showClient(tokenClient);
-            assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-            assertNotNull(tokenResponse.getEntity());
-            assertNotNull(tokenResponse.getAccessToken());
-            assertNotNull(tokenResponse.getExpiresIn());
-            assertNotNull(tokenResponse.getTokenType());
-            assertNotNull(tokenResponse.getRefreshToken());
+            assertTokenResponseOk(tokenResponse, true);
         }
 
         {
@@ -208,10 +184,7 @@ public class PersistClientAuthorizationsHttpTest extends BaseTest {
             AuthorizationResponse authorizationResponse = authenticateResourceOwner(
                     authorizationEndpoint, authorizationRequest, userId, userSecret, false);
 
-            assertNotNull(authorizationResponse.getLocation());
-            assertNotNull(authorizationResponse.getCode());
-            assertNotNull(authorizationResponse.getIdToken());
-            assertNotNull(authorizationResponse.getState());
+            assertAuthorizationResponse(authorizationResponse, responseTypes, true);
 
             String authorizationCode = authorizationResponse.getCode();
 
@@ -228,12 +201,7 @@ public class PersistClientAuthorizationsHttpTest extends BaseTest {
             TokenResponse tokenResponse = tokenClient.exec();
 
             showClient(tokenClient);
-            assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-            assertNotNull(tokenResponse.getEntity());
-            assertNotNull(tokenResponse.getAccessToken());
-            assertNotNull(tokenResponse.getExpiresIn());
-            assertNotNull(tokenResponse.getTokenType());
-            assertNotNull(tokenResponse.getRefreshToken());
+            assertTokenResponseOk(tokenResponse, true);
         }
 
         {
@@ -255,10 +223,7 @@ public class PersistClientAuthorizationsHttpTest extends BaseTest {
 
             AuthorizationResponse authorizationResponse = authorizeClient.exec();
 
-            assertNotNull(authorizationResponse.getLocation());
-            assertNotNull(authorizationResponse.getCode());
-            assertNotNull(authorizationResponse.getState());
-            assertNotNull(authorizationResponse.getScope());
+            assertAuthorizationResponse(authorizationResponse, responseTypes, true);
 
             String authorizationCode = authorizationResponse.getCode();
 
@@ -275,12 +240,7 @@ public class PersistClientAuthorizationsHttpTest extends BaseTest {
             TokenResponse tokenResponse = tokenClient.exec();
 
             showClient(tokenClient);
-            assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-            assertNotNull(tokenResponse.getEntity(), "The entity is null");
-            assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
-            assertNotNull(tokenResponse.getExpiresIn(), "The expires in value is null");
-            assertNotNull(tokenResponse.getTokenType(), "The token type is null");
-            assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
+            assertTokenResponseOk(tokenResponse, true);
         }
     }
 
@@ -304,7 +264,7 @@ public class PersistClientAuthorizationsHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -324,10 +284,7 @@ public class PersistClientAuthorizationsHttpTest extends BaseTest {
             AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                     authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-            assertNotNull(authorizationResponse.getLocation());
-            assertNotNull(authorizationResponse.getCode());
-            assertNotNull(authorizationResponse.getIdToken());
-            assertNotNull(authorizationResponse.getState());
+            assertAuthorizationResponse(authorizationResponse, responseTypes, true);
 
             String authorizationCode = authorizationResponse.getCode();
             sessionId = authorizationResponse.getSessionId();
@@ -345,12 +302,7 @@ public class PersistClientAuthorizationsHttpTest extends BaseTest {
             TokenResponse tokenResponse = tokenClient.exec();
 
             showClient(tokenClient);
-            assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-            assertNotNull(tokenResponse.getEntity());
-            assertNotNull(tokenResponse.getAccessToken());
-            assertNotNull(tokenResponse.getExpiresIn());
-            assertNotNull(tokenResponse.getTokenType());
-            assertNotNull(tokenResponse.getRefreshToken());
+            assertTokenResponseOk(tokenResponse, true);
         }
 
         {
@@ -368,10 +320,7 @@ public class PersistClientAuthorizationsHttpTest extends BaseTest {
             AuthorizationResponse authorizationResponse = authenticateResourceOwner(
                     authorizationEndpoint, authorizationRequest, null, null, false);
 
-            assertNotNull(authorizationResponse.getLocation());
-            assertNotNull(authorizationResponse.getCode());
-            assertNotNull(authorizationResponse.getIdToken());
-            assertNotNull(authorizationResponse.getState());
+            assertAuthorizationResponse(authorizationResponse, responseTypes, true);
 
             String authorizationCode = authorizationResponse.getCode();
 
@@ -388,12 +337,7 @@ public class PersistClientAuthorizationsHttpTest extends BaseTest {
             TokenResponse tokenResponse = tokenClient.exec();
 
             showClient(tokenClient);
-            assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-            assertNotNull(tokenResponse.getEntity());
-            assertNotNull(tokenResponse.getAccessToken());
-            assertNotNull(tokenResponse.getExpiresIn());
-            assertNotNull(tokenResponse.getTokenType());
-            assertNotNull(tokenResponse.getRefreshToken());
+            assertTokenResponseOk(tokenResponse, true);
         }
 
         {
@@ -411,10 +355,7 @@ public class PersistClientAuthorizationsHttpTest extends BaseTest {
             AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                     authorizationEndpoint, authorizationRequest, null, null, false);
 
-            assertNotNull(authorizationResponse.getLocation());
-            assertNotNull(authorizationResponse.getCode());
-            assertNotNull(authorizationResponse.getIdToken());
-            assertNotNull(authorizationResponse.getState());
+            assertAuthorizationResponse(authorizationResponse, responseTypes, true);
 
             String authorizationCode = authorizationResponse.getCode();
 
@@ -431,12 +372,7 @@ public class PersistClientAuthorizationsHttpTest extends BaseTest {
             TokenResponse tokenResponse = tokenClient.exec();
 
             showClient(tokenClient);
-            assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-            assertNotNull(tokenResponse.getEntity());
-            assertNotNull(tokenResponse.getAccessToken());
-            assertNotNull(tokenResponse.getExpiresIn());
-            assertNotNull(tokenResponse.getTokenType());
-            assertNotNull(tokenResponse.getRefreshToken());
+            assertTokenResponseOk(tokenResponse, true);
         }
 
         {
@@ -454,10 +390,7 @@ public class PersistClientAuthorizationsHttpTest extends BaseTest {
             AuthorizationResponse authorizationResponse = authenticateResourceOwner(
                     authorizationEndpoint, authorizationRequest, null, null, false);
 
-            assertNotNull(authorizationResponse.getLocation());
-            assertNotNull(authorizationResponse.getCode());
-            assertNotNull(authorizationResponse.getIdToken());
-            assertNotNull(authorizationResponse.getState());
+            assertAuthorizationResponse(authorizationResponse, responseTypes, true);
 
             String authorizationCode = authorizationResponse.getCode();
 
@@ -474,12 +407,7 @@ public class PersistClientAuthorizationsHttpTest extends BaseTest {
             TokenResponse tokenResponse = tokenClient.exec();
 
             showClient(tokenClient);
-            assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-            assertNotNull(tokenResponse.getEntity());
-            assertNotNull(tokenResponse.getAccessToken());
-            assertNotNull(tokenResponse.getExpiresIn());
-            assertNotNull(tokenResponse.getTokenType());
-            assertNotNull(tokenResponse.getRefreshToken());
+            assertTokenResponseOk(tokenResponse, true);
         }
     }
 
@@ -504,7 +432,7 @@ public class PersistClientAuthorizationsHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -522,10 +450,7 @@ public class PersistClientAuthorizationsHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwner(
                 authorizationEndpoint, authorizationRequest, userId, userSecret, false);
 
-        assertNotNull(authorizationResponse.getLocation());
-        assertNotNull(authorizationResponse.getCode());
-        assertNotNull(authorizationResponse.getIdToken());
-        assertNotNull(authorizationResponse.getState());
+        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
 
         String authorizationCode = authorizationResponse.getCode();
 
@@ -542,11 +467,6 @@ public class PersistClientAuthorizationsHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity());
-        assertNotNull(tokenResponse.getAccessToken());
-        assertNotNull(tokenResponse.getExpiresIn());
-        assertNotNull(tokenResponse.getTokenType());
-        assertNotNull(tokenResponse.getRefreshToken());
+        assertTokenResponseOk(tokenResponse, true);
     }
 }

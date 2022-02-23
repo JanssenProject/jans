@@ -33,7 +33,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static io.jans.as.client.client.Asserter.assertOk;
+import static io.jans.as.client.client.Asserter.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
@@ -75,7 +75,7 @@ public class OPRegistrationJwks extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
         assertNotNull(registerResponse.getResponseTypes());
         assertTrue(registerResponse.getResponseTypes().containsAll(responseTypes));
         assertNotNull(registerResponse.getGrantTypes());
@@ -124,12 +124,7 @@ public class OPRegistrationJwks extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity(), "The entity is null");
-        assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
-        assertNotNull(tokenResponse.getTokenType(), "The token type is null");
-        assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
-        assertNotNull(tokenResponse.getIdToken(), "The id token is null");
+        assertTokenResponseOk(tokenResponse, true);
     }
 
     @Parameters({"redirectUri", "postLogoutRedirectUri", "clientJwksUri", "userId", "userSecret", "RS256_keyId",
@@ -160,7 +155,7 @@ public class OPRegistrationJwks extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
         assertNotNull(registerResponse.getResponseTypes());
         assertTrue(registerResponse.getResponseTypes().containsAll(responseTypes));
         assertNotNull(registerResponse.getGrantTypes());
@@ -183,9 +178,7 @@ public class OPRegistrationJwks extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertNotNull(authorizationResponse.getLocation());
-        assertNotNull(authorizationResponse.getState());
-        assertNotNull(authorizationResponse.getScope());
+        assertAuthorizationResponse(authorizationResponse);
 
         String authorizationCode = authorizationResponse.getCode();
 
@@ -209,11 +202,6 @@ public class OPRegistrationJwks extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity(), "The entity is null");
-        assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
-        assertNotNull(tokenResponse.getTokenType(), "The token type is null");
-        assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
-        assertNotNull(tokenResponse.getIdToken(), "The id token is null");
+        assertTokenResponseOk(tokenResponse, true);
     }
 }
