@@ -52,16 +52,6 @@ public class Asserter {
         assertNotNull(response.getExpiresIn());
     }
 
-    public static void assertOk(RegisterResponse response) {
-        assertEquals(response.getStatus(), 201, "Unexpected response code: " + response.getEntity());
-        assertNotNull(response.getClientId());
-        assertNotNull(response.getClientSecret());
-        assertNotNull(response.getClientSecretExpiresAt());
-        assertNotNull(response.getRegistrationAccessToken());
-        assertNotNull(response.getClientIdIssuedAt());
-        assertNotNull(response.getRegistrationClientUri());
-    }
-
     public static void assertRegisterResponseOk(RegisterResponse response, int status, boolean checkClientUri) {
         assertEquals(response.getStatus(), status, "Unexpected response code: " + response.getEntity());
         assertNotNull(response.getClientId());

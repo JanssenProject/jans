@@ -69,7 +69,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
         String registrationClientUri = registerResponse.getRegistrationClientUri();
@@ -114,7 +114,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -193,7 +193,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -274,7 +274,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -357,7 +357,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -448,7 +448,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -527,7 +527,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -608,7 +608,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -691,7 +691,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -783,7 +783,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -868,7 +868,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -954,7 +954,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1040,7 +1040,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1127,7 +1127,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1217,7 +1217,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1307,7 +1307,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1397,7 +1397,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1487,7 +1487,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1577,7 +1577,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1667,7 +1667,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1757,7 +1757,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1847,7 +1847,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1933,7 +1933,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -2019,7 +2019,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -2107,7 +2107,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -2195,7 +2195,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -2281,7 +2281,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -2369,7 +2369,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -2457,7 +2457,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -2543,7 +2543,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -2631,7 +2631,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -2720,7 +2720,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -2801,7 +2801,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -2883,7 +2883,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -2977,7 +2977,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -3061,7 +3061,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -3143,7 +3143,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -3225,7 +3225,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -3307,7 +3307,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -3390,7 +3390,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -3473,7 +3473,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -3556,7 +3556,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -3639,7 +3639,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -3722,7 +3722,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -3805,7 +3805,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -3888,7 +3888,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -3971,7 +3971,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -4055,7 +4055,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -4142,7 +4142,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -4231,7 +4231,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -4320,7 +4320,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -4409,7 +4409,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -4498,7 +4498,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -4587,7 +4587,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -4674,7 +4674,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -4763,7 +4763,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -4852,7 +4852,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -4941,7 +4941,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -5030,7 +5030,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -5119,7 +5119,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -5206,7 +5206,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -5295,7 +5295,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -5384,7 +5384,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -5473,7 +5473,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -5562,7 +5562,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -5651,7 +5651,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -5738,7 +5738,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -5827,7 +5827,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -5916,7 +5916,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -6005,7 +6005,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -6094,7 +6094,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -6183,7 +6183,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -6270,7 +6270,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -6359,7 +6359,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -6448,7 +6448,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -6537,7 +6537,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -6626,7 +6626,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -6715,7 +6715,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -6802,7 +6802,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -6891,7 +6891,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -6980,7 +6980,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -7069,7 +7069,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -7158,7 +7158,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -7247,7 +7247,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -7334,7 +7334,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -7423,7 +7423,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -7512,7 +7512,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -7601,7 +7601,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -7690,7 +7690,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -7779,7 +7779,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -7865,7 +7865,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -7954,7 +7954,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -8043,7 +8043,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -8132,7 +8132,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -8221,7 +8221,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -8310,7 +8310,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -8397,7 +8397,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -8486,7 +8486,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -8575,7 +8575,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -8664,7 +8664,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -8753,7 +8753,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();

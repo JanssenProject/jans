@@ -62,7 +62,7 @@ public class SupportRegistrationRead extends BaseTest {
         RegisterResponse registerResponse1 = registerClient1.exec();
 
         showClient(registerClient1);
-        assertOk(registerResponse1);
+        assertRegisterResponseOk(registerResponse1, 201, true);
 
         assertRegisterResponseClaimsNotNull(registerResponse1, SCOPE);
 

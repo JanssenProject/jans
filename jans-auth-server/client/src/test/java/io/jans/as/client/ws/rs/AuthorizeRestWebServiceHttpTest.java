@@ -76,7 +76,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -127,7 +127,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -178,7 +178,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -254,7 +254,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -339,7 +339,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -395,7 +395,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -447,7 +447,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -524,7 +524,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -587,7 +587,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -656,7 +656,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -725,7 +725,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -797,7 +797,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -869,7 +869,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -927,7 +927,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -986,7 +986,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -1063,7 +1063,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -1137,7 +1137,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -1191,7 +1191,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -1247,7 +1247,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -1303,7 +1303,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -1361,7 +1361,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -1419,7 +1419,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -1471,7 +1471,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -1524,7 +1524,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -1576,7 +1576,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -1630,7 +1630,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -1683,7 +1683,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -1739,7 +1739,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
 
@@ -1772,7 +1772,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
 
@@ -1811,7 +1811,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
 
@@ -1858,7 +1858,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1972,7 +1972,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -2083,7 +2083,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -2142,7 +2142,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String sessionId = null;
@@ -2231,7 +2231,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -2285,7 +2285,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -2345,7 +2345,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -2415,7 +2415,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();

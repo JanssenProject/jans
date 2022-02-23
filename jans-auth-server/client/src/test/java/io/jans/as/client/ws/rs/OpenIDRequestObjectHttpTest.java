@@ -87,7 +87,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -154,7 +154,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -219,7 +219,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -267,7 +267,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -314,7 +314,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -362,7 +362,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -425,7 +425,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(response);
+        assertRegisterResponseOk(response, 201, true);
 
         String clientId = response.getClientId();
 
@@ -503,7 +503,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(response);
+        assertRegisterResponseOk(response, 201, true);
 
         String clientId = response.getClientId();
 
@@ -582,7 +582,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(response);
+        assertRegisterResponseOk(response, 201, true);
 
         String clientId = response.getClientId();
 
@@ -659,7 +659,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(response);
+        assertRegisterResponseOk(response, 201, true);
 
         String clientId = response.getClientId();
 
@@ -739,7 +739,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(response);
+        assertRegisterResponseOk(response, 201, true);
 
         String clientId = response.getClientId();
         String clientSecret = response.getClientSecret();
@@ -821,7 +821,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(response);
+        assertRegisterResponseOk(response, 201, true);
 
         String clientId = response.getClientId();
 
@@ -899,7 +899,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(response);
+        assertRegisterResponseOk(response, 201, true);
 
         String clientId = response.getClientId();
 
@@ -977,7 +977,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(response);
+        assertRegisterResponseOk(response, 201, true);
 
         String clientId = response.getClientId();
 
@@ -1055,7 +1055,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(response);
+        assertRegisterResponseOk(response, 201, true);
 
         String clientId = response.getClientId();
 
@@ -1133,7 +1133,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(response);
+        assertRegisterResponseOk(response, 201, true);
 
         String clientId = response.getClientId();
 
@@ -1211,7 +1211,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(response);
+        assertRegisterResponseOk(response, 201, true);
 
         String clientId = response.getClientId();
 
@@ -1289,7 +1289,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(response);
+        assertRegisterResponseOk(response, 201, true);
 
         String clientId = response.getClientId();
 
@@ -1367,7 +1367,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(response);
+        assertRegisterResponseOk(response, 201, true);
 
         String clientId = response.getClientId();
 
@@ -1446,7 +1446,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(response);
+        assertRegisterResponseOk(response, 201, true);
 
         String clientId = response.getClientId();
 
@@ -1525,7 +1525,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(response);
+        assertRegisterResponseOk(response, 201, true);
 
         String clientId = response.getClientId();
 
@@ -1600,7 +1600,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             RegisterResponse registerResponse = registerClient.exec();
 
             showClient(registerClient);
-            assertOk(registerResponse);
+            assertRegisterResponseOk(registerResponse, 201, true);
 
             String clientId = registerResponse.getClientId();
 
@@ -1652,7 +1652,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             RegisterResponse registerResponse = registerClient.exec();
 
             showClient(registerClient);
-            assertOk(registerResponse);
+            assertRegisterResponseOk(registerResponse, 201, true);
 
             String clientId = registerResponse.getClientId();
             String clientSecret = registerResponse.getClientSecret();
@@ -1718,7 +1718,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             RegisterResponse registerResponse = registerClient.exec();
 
             showClient(registerClient);
-            assertOk(registerResponse);
+            assertRegisterResponseOk(registerResponse, 201, true);
 
             String clientId = registerResponse.getClientId();
             String clientSecret = registerResponse.getClientSecret();
@@ -1785,7 +1785,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             RegisterResponse registerResponse = registerClient.exec();
 
             showClient(registerClient);
-            assertOk(registerResponse);
+            assertRegisterResponseOk(registerResponse, 201, true);
 
             String clientId = registerResponse.getClientId();
             String clientSecret = registerResponse.getClientSecret();
@@ -1848,7 +1848,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1930,7 +1930,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             RegisterResponse registerResponse = registerClient.exec();
 
             showClient(registerClient);
-            assertOk(registerResponse);
+            assertRegisterResponseOk(registerResponse, 201, true);
 
             String clientId = registerResponse.getClientId();
 
@@ -1984,7 +1984,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             RegisterResponse registerResponse = registerClient.exec();
 
             showClient(registerClient);
-            assertOk(registerResponse);
+            assertRegisterResponseOk(registerResponse, 201, true);
 
             String clientId = registerResponse.getClientId();
 
@@ -2040,7 +2040,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -2122,7 +2122,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             RegisterResponse response = registerClient.exec();
 
             showClient(registerClient);
-            assertOk(response);
+            assertRegisterResponseOk(response, 201, true);
 
             String clientId = response.getClientId();
 
@@ -2200,7 +2200,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             RegisterResponse response = registerClient.exec();
 
             showClient(registerClient);
-            assertOk(response);
+            assertRegisterResponseOk(response, 201, true);
 
             String clientId = response.getClientId();
 
@@ -2287,7 +2287,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             RegisterResponse response = registerClient.exec();
 
             showClient(registerClient);
-            assertOk(response);
+            assertRegisterResponseOk(response, 201, true);
 
             String clientId = response.getClientId();
 
@@ -2374,7 +2374,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             RegisterResponse response = registerClient.exec();
 
             showClient(registerClient);
-            assertOk(response);
+            assertRegisterResponseOk(response, 201, true);
 
             String clientId = response.getClientId();
 
@@ -2461,7 +2461,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             RegisterResponse response = registerClient.exec();
 
             showClient(registerClient);
-            assertOk(response);
+            assertRegisterResponseOk(response, 201, true);
 
             String clientId = response.getClientId();
             String clientSecret = response.getClientSecret();
@@ -2539,7 +2539,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             RegisterResponse response = registerClient.exec();
 
             showClient(registerClient);
-            assertOk(response);
+            assertRegisterResponseOk(response, 201, true);
 
             String clientId = response.getClientId();
             String clientSecret = response.getClientSecret();

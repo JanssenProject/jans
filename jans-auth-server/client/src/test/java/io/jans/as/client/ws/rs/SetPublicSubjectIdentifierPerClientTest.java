@@ -117,7 +117,7 @@ public class SetPublicSubjectIdentifierPerClientTest extends BaseTest {
         if (checkError) {
             assertRegisterResponseFail(registerResponse);
         } else {
-            assertOk(registerResponse);
+            assertRegisterResponseOk(registerResponse, 201, true);
         }
 
         return registerResponse;

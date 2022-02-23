@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static io.jans.as.client.client.Asserter.assertAuthorizationResponse;
-import static io.jans.as.client.client.Asserter.assertOk;
+import static io.jans.as.client.client.Asserter.assertRegisterResponseOk;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
@@ -89,7 +89,7 @@ public class AccessTokenAsJwtHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
         return registerResponse;
     }
 

@@ -70,7 +70,7 @@ public class PkceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         // 3. Request authorization
         List<String> scopes = Arrays.asList(
@@ -145,7 +145,7 @@ public class PkceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);

@@ -113,7 +113,7 @@ public class ClientAuthenticationByAccessTokenHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(response);
+        assertRegisterResponseOk(response, 201, true);
 
         clientId = response.getClientId();
         clientSecret = response.getClientSecret();

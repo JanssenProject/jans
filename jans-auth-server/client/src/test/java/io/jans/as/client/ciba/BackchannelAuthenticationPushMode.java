@@ -107,7 +107,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256, BackchannelTokenDeliveryMode.PUSH, true);
 
@@ -157,7 +157,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256, BackchannelTokenDeliveryMode.PUSH, true);
 
@@ -204,7 +204,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256, BackchannelTokenDeliveryMode.PUSH, true);
 
@@ -251,7 +251,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256, BackchannelTokenDeliveryMode.PUSH, false);
 
@@ -296,7 +296,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256, BackchannelTokenDeliveryMode.PUSH, null);
 
@@ -347,7 +347,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256, BackchannelTokenDeliveryMode.PUSH, true);
 
@@ -403,7 +403,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS384, BackchannelTokenDeliveryMode.PUSH, true);
 
@@ -459,7 +459,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS512, BackchannelTokenDeliveryMode.PUSH, true);
 
@@ -515,7 +515,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.ES256, BackchannelTokenDeliveryMode.PUSH, true);
 
@@ -571,7 +571,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.ES384, BackchannelTokenDeliveryMode.PUSH, true);
 
@@ -627,7 +627,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.ES512, BackchannelTokenDeliveryMode.PUSH, true);
 
@@ -683,7 +683,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.PS256, BackchannelTokenDeliveryMode.PUSH, true);
 
@@ -739,7 +739,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.PS384, BackchannelTokenDeliveryMode.PUSH, true);
 
@@ -795,7 +795,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.PS512, BackchannelTokenDeliveryMode.PUSH, true);
 
@@ -847,7 +847,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256, BackchannelTokenDeliveryMode.PUSH, true);
 
@@ -895,7 +895,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256, BackchannelTokenDeliveryMode.PUSH, true);
 
@@ -943,7 +943,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256, BackchannelTokenDeliveryMode.PUSH, true);
 
@@ -991,7 +991,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256, BackchannelTokenDeliveryMode.PUSH, true);
 
@@ -1039,7 +1039,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256, BackchannelTokenDeliveryMode.PUSH, true);
 
@@ -1087,7 +1087,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256, BackchannelTokenDeliveryMode.PUSH, true);
 
@@ -1135,7 +1135,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS384, BackchannelTokenDeliveryMode.PUSH, true);
 
@@ -1183,7 +1183,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS512, BackchannelTokenDeliveryMode.PUSH, true);
 
@@ -1231,7 +1231,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.ES256, BackchannelTokenDeliveryMode.PUSH, true);
 
@@ -1279,7 +1279,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.ES384, BackchannelTokenDeliveryMode.PUSH, true);
 
@@ -1327,7 +1327,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.ES512, BackchannelTokenDeliveryMode.PUSH, true);
 
@@ -1375,7 +1375,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.PS256, BackchannelTokenDeliveryMode.PUSH, true);
 
@@ -1423,7 +1423,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.PS384, BackchannelTokenDeliveryMode.PUSH, true);
 
@@ -1471,7 +1471,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.PS512, BackchannelTokenDeliveryMode.PUSH, true);
 
@@ -1517,7 +1517,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256, BackchannelTokenDeliveryMode.PUSH, true);
 
@@ -1551,7 +1551,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256, BackchannelTokenDeliveryMode.PUSH, true);
 
@@ -1589,7 +1589,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256, BackchannelTokenDeliveryMode.PUSH, true);
 
@@ -1629,7 +1629,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256, BackchannelTokenDeliveryMode.PUSH, true);
 
@@ -1672,7 +1672,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256, BackchannelTokenDeliveryMode.PUSH, true);
 
@@ -1714,7 +1714,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256, BackchannelTokenDeliveryMode.PUSH, true);
 
@@ -1759,7 +1759,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256, BackchannelTokenDeliveryMode.PUSH, true);
 
@@ -1805,7 +1805,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256, BackchannelTokenDeliveryMode.PUSH, true);
 
@@ -1855,7 +1855,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
 
@@ -1913,7 +1913,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
 
@@ -1971,7 +1971,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
 
@@ -2029,7 +2029,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
 
@@ -2087,7 +2087,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
 
@@ -2145,7 +2145,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
 
@@ -2203,7 +2203,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
 
@@ -2261,7 +2261,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
 
@@ -2319,7 +2319,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
 
@@ -2378,7 +2378,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -2430,7 +2430,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -2485,7 +2485,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
 
@@ -2542,7 +2542,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
 
@@ -2599,7 +2599,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
 

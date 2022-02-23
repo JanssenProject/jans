@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static io.jans.as.client.client.Asserter.assertAuthorizationResponse;
-import static io.jans.as.client.client.Asserter.assertOk;
+import static io.jans.as.client.client.Asserter.assertRegisterResponseOk;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
@@ -58,7 +58,7 @@ public class ProvidingAcrValues extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(response);
+        assertRegisterResponseOk(response, 201, true);
         assertNotNull(response.getResponseTypes());
         assertTrue(response.getResponseTypes().containsAll(responseTypes));
         assertNotNull(response.getGrantTypes());

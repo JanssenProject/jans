@@ -66,7 +66,7 @@ public class BackchannelAuthenticationExpiredRequestsTests extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256, BackchannelTokenDeliveryMode.POLL, true);
 
         String clientId = registerResponse.getClientId();
@@ -143,7 +143,7 @@ public class BackchannelAuthenticationExpiredRequestsTests extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256, BackchannelTokenDeliveryMode.PING, true);
 
         String clientId = registerResponse.getClientId();
@@ -220,7 +220,7 @@ public class BackchannelAuthenticationExpiredRequestsTests extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256, BackchannelTokenDeliveryMode.PING, true);
 
         String clientId = registerResponse.getClientId();

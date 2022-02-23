@@ -241,7 +241,7 @@ public class CibaPollModeJwtAuthRequestTests extends BaseTest {
 
         showClient(registerClient);
 
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
         assertRegisterResponseClaimsBackChannel(registerResponse, algorithm, mode, false);
     }
 
@@ -343,7 +343,7 @@ public class CibaPollModeJwtAuthRequestTests extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
 

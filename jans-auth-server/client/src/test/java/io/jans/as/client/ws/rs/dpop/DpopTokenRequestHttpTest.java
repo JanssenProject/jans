@@ -625,7 +625,7 @@ public class DpopTokenRequestHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         return registerResponse.getClientId();
     }

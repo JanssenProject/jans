@@ -36,7 +36,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import static io.jans.as.client.client.Asserter.assertOk;
+import static io.jans.as.client.client.Asserter.assertRegisterResponseOk;
 import static io.jans.as.client.client.Asserter.assertRegisterResponseOk;
 import static io.jans.as.model.register.RegisterRequestParam.APPLICATION_TYPE;
 import static io.jans.as.model.register.RegisterRequestParam.CLIENT_NAME;
@@ -137,7 +137,7 @@ public class RegistrationWithSoftwareStatementTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(response);
+        assertRegisterResponseOk(response, 201, true);
         assertNotNull(response.getFirstClaim(SCOPE.toString()));
         assertNotNull(response.getFirstClaim(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString()));
         assertTrue(Boolean.parseBoolean(response.getFirstClaim(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString())));
@@ -241,7 +241,7 @@ public class RegistrationWithSoftwareStatementTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(response);
+        assertRegisterResponseOk(response, 201, true);
         assertNotNull(response.getFirstClaim(SCOPE.toString()));
         assertNotNull(response.getFirstClaim(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString()));
         assertTrue(Boolean.parseBoolean(response.getFirstClaim(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString())));

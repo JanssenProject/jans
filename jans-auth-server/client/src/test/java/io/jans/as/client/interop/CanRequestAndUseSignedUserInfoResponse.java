@@ -61,7 +61,7 @@ public class CanRequestAndUseSignedUserInfoResponse extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();

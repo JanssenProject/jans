@@ -21,7 +21,7 @@ import org.testng.annotations.Test;
 
 import java.util.Arrays;
 
-import static io.jans.as.client.client.Asserter.assertOk;
+import static io.jans.as.client.client.Asserter.assertRegisterResponseOk;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
@@ -54,6 +54,6 @@ public class UsesDynamicRegistration extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(response);
+        assertRegisterResponseOk(response, 201, true);
     }
 }

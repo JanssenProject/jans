@@ -268,7 +268,7 @@ public class CibaPingModeJwtAuthRequestTests extends BaseTest {
 
         showClient(registerClient);
 
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
         assertRegisterResponseClaimsBackChannel(registerResponse, algorithm, mode, false);
     }
 
@@ -370,7 +370,7 @@ public class CibaPingModeJwtAuthRequestTests extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
 

@@ -111,7 +111,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256,BackchannelTokenDeliveryMode.POLL, true);
 
@@ -213,7 +213,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256,BackchannelTokenDeliveryMode.POLL, true);
 
@@ -260,7 +260,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256,BackchannelTokenDeliveryMode.POLL, true);
 
@@ -324,7 +324,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256,BackchannelTokenDeliveryMode.POLL, true);
 
@@ -441,7 +441,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256,BackchannelTokenDeliveryMode.POLL, true);
 
@@ -496,7 +496,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS384,BackchannelTokenDeliveryMode.POLL, true);
 
@@ -551,7 +551,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS512,BackchannelTokenDeliveryMode.POLL, true);
 
@@ -606,7 +606,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.ES256,BackchannelTokenDeliveryMode.POLL, true);
 
@@ -661,7 +661,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.ES384,BackchannelTokenDeliveryMode.POLL, true);
 
@@ -716,7 +716,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.ES512,BackchannelTokenDeliveryMode.POLL, true);
 
@@ -771,7 +771,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.PS256,BackchannelTokenDeliveryMode.POLL, true);
 
@@ -826,7 +826,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.PS384,BackchannelTokenDeliveryMode.POLL, true);
 
@@ -881,7 +881,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.PS512,BackchannelTokenDeliveryMode.POLL, true);
 
@@ -932,7 +932,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256,BackchannelTokenDeliveryMode.POLL, true);
 
@@ -979,7 +979,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256,BackchannelTokenDeliveryMode.POLL, true);
 
@@ -1026,7 +1026,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256,BackchannelTokenDeliveryMode.POLL, true);
 
@@ -1073,7 +1073,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256,BackchannelTokenDeliveryMode.POLL, true);
 
@@ -1120,7 +1120,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256,BackchannelTokenDeliveryMode.POLL, true);
 
@@ -1167,7 +1167,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256,BackchannelTokenDeliveryMode.POLL, true);
 
@@ -1214,7 +1214,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS384,BackchannelTokenDeliveryMode.POLL, true);
 
@@ -1261,7 +1261,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS512,BackchannelTokenDeliveryMode.POLL, true);
 
@@ -1308,7 +1308,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.ES256,BackchannelTokenDeliveryMode.POLL, true);
 
@@ -1355,7 +1355,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.ES384,BackchannelTokenDeliveryMode.POLL, true);
 
@@ -1402,7 +1402,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.ES512,BackchannelTokenDeliveryMode.POLL, true);
 
@@ -1449,7 +1449,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.PS256,BackchannelTokenDeliveryMode.POLL, true);
 
@@ -1496,7 +1496,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.PS384,BackchannelTokenDeliveryMode.POLL, true);
 
@@ -1543,7 +1543,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.PS512,BackchannelTokenDeliveryMode.POLL, true);
 
@@ -1589,7 +1589,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256,BackchannelTokenDeliveryMode.POLL, true);
 
@@ -1623,7 +1623,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256,BackchannelTokenDeliveryMode.POLL, true);
 
@@ -1661,7 +1661,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256,BackchannelTokenDeliveryMode.POLL, true);
 
@@ -1701,7 +1701,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256,BackchannelTokenDeliveryMode.POLL, true);
 
@@ -1744,7 +1744,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256,BackchannelTokenDeliveryMode.POLL, true);
 
@@ -1786,7 +1786,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256,BackchannelTokenDeliveryMode.POLL, true);
 
@@ -1832,7 +1832,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256,BackchannelTokenDeliveryMode.POLL, true);
 
@@ -1882,7 +1882,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
 
@@ -1940,7 +1940,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
 
@@ -1998,7 +1998,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
 
@@ -2056,7 +2056,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
 
@@ -2114,7 +2114,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
 
@@ -2172,7 +2172,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
 
@@ -2230,7 +2230,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
 
@@ -2288,7 +2288,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
 
@@ -2346,7 +2346,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
 
@@ -2405,7 +2405,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -2457,7 +2457,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -2512,7 +2512,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
 
@@ -2569,7 +2569,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
 
@@ -2626,7 +2626,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
 

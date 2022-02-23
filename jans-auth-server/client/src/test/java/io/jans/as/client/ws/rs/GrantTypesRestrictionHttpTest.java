@@ -85,7 +85,7 @@ public class GrantTypesRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
         assertNotNull(registerResponse.getResponseTypes());
         assertTrue(registerResponse.getResponseTypes().containsAll(expectedResponseTypes));
         assertNotNull(registerResponse.getGrantTypes());

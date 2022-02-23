@@ -82,7 +82,7 @@ public class EnableClientToRestrictJavascriptOrigin extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
         assertTrue(registerResponse.getClaims().containsKey(RegisterRequestParam.AUTHORIZED_ORIGINS.toString()));
 
         String clientId = registerResponse.getClientId();

@@ -67,7 +67,7 @@ public class RegistrationTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256, BackchannelTokenDeliveryMode.POLL, true);
 
@@ -107,7 +107,7 @@ public class RegistrationTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertTrue(registerResponse.getClaims().containsKey(JWKS_URI.toString()));
         assertTrue(registerResponse.getClaims().containsKey(SECTOR_IDENTIFIER_URI.toString()));
@@ -148,7 +148,7 @@ public class RegistrationTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256, BackchannelTokenDeliveryMode.POLL, true);
 
@@ -181,7 +181,7 @@ public class RegistrationTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
         String registrationClientUri = registerResponse.getRegistrationClientUri();
@@ -245,7 +245,7 @@ public class RegistrationTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
         assertRegisterResponseClaimsNotNull(registerResponse, APPLICATION_TYPE, SUBJECT_TYPE, ID_TOKEN_SIGNED_RESPONSE_ALG, JWKS, CLIENT_NAME, SCOPE);
         assertRegisterResponseClaimsAreContained(registerResponse, ID_TOKEN_SIGNED_RESPONSE_ALG, TOKEN_ENDPOINT_AUTH_SIGNING_ALG, TOKEN_ENDPOINT_AUTH_METHOD);
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.PS256, BackchannelTokenDeliveryMode.POLL, false);
@@ -296,7 +296,7 @@ public class RegistrationTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256, BackchannelTokenDeliveryMode.PING, true);
 
@@ -338,7 +338,7 @@ public class RegistrationTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
         assertRegisterResponseClaimsAreContained(registerResponse, JWKS_URI, SECTOR_IDENTIFIER_URI);
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256, BackchannelTokenDeliveryMode.PING, true);
 
@@ -379,7 +379,7 @@ public class RegistrationTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256, BackchannelTokenDeliveryMode.PING, true);
 
@@ -413,7 +413,7 @@ public class RegistrationTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
         String registrationClientUri = registerResponse.getRegistrationClientUri();
@@ -480,7 +480,7 @@ public class RegistrationTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
         assertRegisterResponseClaimsNotNull(registerResponse, APPLICATION_TYPE, SUBJECT_TYPE, ID_TOKEN_SIGNED_RESPONSE_ALG, JWKS, CLIENT_NAME, SCOPE);
         assertRegisterResponseClaimsAreContained(registerResponse, ID_TOKEN_SIGNED_RESPONSE_ALG, TOKEN_ENDPOINT_AUTH_SIGNING_ALG, TOKEN_ENDPOINT_AUTH_METHOD);
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.PS256, BackchannelTokenDeliveryMode.PING, false);
@@ -529,7 +529,7 @@ public class RegistrationTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256, BackchannelTokenDeliveryMode.PUSH, true);
 
@@ -569,7 +569,7 @@ public class RegistrationTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertTrue(registerResponse.getClaims().containsKey(SECTOR_IDENTIFIER_URI.toString()));
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256, BackchannelTokenDeliveryMode.PUSH, true);
@@ -611,7 +611,7 @@ public class RegistrationTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256, BackchannelTokenDeliveryMode.PUSH, true);
 
@@ -644,7 +644,7 @@ public class RegistrationTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
         String registrationClientUri = registerResponse.getRegistrationClientUri();

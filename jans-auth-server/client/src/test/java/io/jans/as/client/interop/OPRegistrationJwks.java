@@ -75,7 +75,7 @@ public class OPRegistrationJwks extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
         assertNotNull(registerResponse.getResponseTypes());
         assertTrue(registerResponse.getResponseTypes().containsAll(responseTypes));
         assertNotNull(registerResponse.getGrantTypes());
@@ -155,7 +155,7 @@ public class OPRegistrationJwks extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
         assertNotNull(registerResponse.getResponseTypes());
         assertTrue(registerResponse.getResponseTypes().containsAll(responseTypes));
         assertNotNull(registerResponse.getGrantTypes());

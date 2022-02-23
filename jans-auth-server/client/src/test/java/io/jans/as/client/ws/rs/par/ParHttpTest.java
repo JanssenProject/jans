@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static io.jans.as.client.client.Asserter.assertAuthorizationResponse;
-import static io.jans.as.client.client.Asserter.assertOk;
+import static io.jans.as.client.client.Asserter.assertRegisterResponseOk;
 import static io.jans.as.client.client.Asserter.assertParResponse;
 import static io.jans.as.client.client.Asserter.assertTokenResponseOk;
 import static io.jans.as.client.client.Asserter.validateIdToken;
@@ -50,7 +50,7 @@ public class ParHttpTest extends BaseTest {
         String nonce = UUID.randomUUID().toString();
 
         registerResponse = registerClient(redirectUris, responseTypes, scopes, sectorIdentifierUri);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, registerResponse.getClientId(), scopes, redirectUri, nonce);
         ParRequest parRequest = new ParRequest(authorizationRequest);
