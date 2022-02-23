@@ -50,7 +50,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static io.jans.as.client.client.Asserter.assertOk;
+import static io.jans.as.client.client.Asserter.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.fail;
@@ -87,7 +87,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -118,11 +118,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertNotNull(authorizationResponse.getLocation(), "The location is null");
-        assertNotNull(authorizationResponse.getAccessToken(), "The accessToken is null");
-        assertNotNull(authorizationResponse.getTokenType(), "The tokenType is null");
-        assertNotNull(authorizationResponse.getIdToken(), "The idToken is null");
-        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
 
         String accessToken = authorizationResponse.getAccessToken();
 
@@ -131,14 +127,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertEquals(userInfoResponse.getStatus(), 200, "Unexpected response code: " + userInfoResponse.getStatus());
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NAME));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.GIVEN_NAME));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.FAMILY_NAME));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ZONEINFO));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.LOCALE));
+        assertUserInfoBasicResponseOk(userInfoResponse, 200);
+        assertUserInfoPersonalDataNotNull(userInfoResponse);
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS));
     }
 
@@ -164,7 +154,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -195,10 +185,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertNotNull(authorizationResponse.getLocation(), "The location is null");
-        assertNotNull(authorizationResponse.getAccessToken(), "The accessToken is null");
-        assertNotNull(authorizationResponse.getTokenType(), "The tokenType is null");
-        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertAuthorizationResponse(authorizationResponse, responseTypes, true); 
 
         String accessToken = authorizationResponse.getAccessToken();
 
@@ -207,14 +194,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         UserInfoResponse response2 = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertEquals(response2.getStatus(), 200, "Unexpected response code: " + response2.getStatus());
-        assertNotNull(response2.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(response2.getClaim(JwtClaimName.NAME));
-        assertNotNull(response2.getClaim(JwtClaimName.GIVEN_NAME));
-        assertNotNull(response2.getClaim(JwtClaimName.FAMILY_NAME));
-        assertNotNull(response2.getClaim(JwtClaimName.EMAIL));
-        assertNotNull(response2.getClaim(JwtClaimName.ZONEINFO));
-        assertNotNull(response2.getClaim(JwtClaimName.LOCALE));
+        assertUserInfoBasicResponseOk(response2, 200);
+        assertUserInfoPersonalDataNotNull(response2);        
         assertNotNull(response2.getClaim(JwtClaimName.ADDRESS));
     }
 
@@ -238,7 +219,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -286,7 +267,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -310,10 +291,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertNotNull(authorizationResponse.getLocation(), "The location is null");
-        assertNotNull(authorizationResponse.getAccessToken(), "The accessToken is null");
-        assertNotNull(authorizationResponse.getTokenType(), "The tokenType is null");
-        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertAuthorizationResponse(authorizationResponse, responseTypes, true); 
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
@@ -336,7 +314,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -360,10 +338,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertNotNull(authorizationResponse.getLocation(), "The location is null");
-        assertNotNull(authorizationResponse.getAccessToken(), "The accessToken is null");
-        assertNotNull(authorizationResponse.getTokenType(), "The tokenType is null");
-        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertAuthorizationResponse(authorizationResponse, responseTypes, true); 
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
@@ -387,7 +362,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -411,10 +386,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertNotNull(authorizationResponse.getLocation(), "The location is null");
-        assertNotNull(authorizationResponse.getAccessToken(), "The accessToken is null");
-        assertNotNull(authorizationResponse.getTokenType(), "The tokenType is null");
-        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertAuthorizationResponse(authorizationResponse, responseTypes, true); 
 
         String accessToken = authorizationResponse.getAccessToken();
 
@@ -453,7 +425,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(response);
+        assertRegisterResponseOk(response, 201, true);
 
         String clientId = response.getClientId();
 
@@ -502,14 +474,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         UserInfoResponse response3 = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertEquals(response3.getStatus(), 200, "Unexpected response code: " + response3.getStatus());
-        assertNotNull(response3.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(response3.getClaim(JwtClaimName.NAME));
-        assertNotNull(response3.getClaim(JwtClaimName.GIVEN_NAME));
-        assertNotNull(response3.getClaim(JwtClaimName.FAMILY_NAME));
-        assertNotNull(response3.getClaim(JwtClaimName.EMAIL));
-        assertNotNull(response3.getClaim(JwtClaimName.ZONEINFO));
-        assertNotNull(response3.getClaim(JwtClaimName.LOCALE));
+        assertUserInfoBasicResponseOk(response3, 200); 
+        assertUserInfoPersonalDataNotNull(response3);
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
@@ -537,7 +503,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(response);
+        assertRegisterResponseOk(response, 201, true);
 
         String clientId = response.getClientId();
 
@@ -587,14 +553,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         UserInfoResponse response3 = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertEquals(response3.getStatus(), 200, "Unexpected response code: " + response3.getStatus());
-        assertNotNull(response3.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(response3.getClaim(JwtClaimName.NAME));
-        assertNotNull(response3.getClaim(JwtClaimName.GIVEN_NAME));
-        assertNotNull(response3.getClaim(JwtClaimName.FAMILY_NAME));
-        assertNotNull(response3.getClaim(JwtClaimName.EMAIL));
-        assertNotNull(response3.getClaim(JwtClaimName.ZONEINFO));
-        assertNotNull(response3.getClaim(JwtClaimName.LOCALE));
+        assertUserInfoBasicResponseOk(response3, 200); 
+        assertUserInfoPersonalDataNotNull(response3);
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
@@ -622,7 +582,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(response);
+        assertRegisterResponseOk(response, 201, true);
 
         String clientId = response.getClientId();
 
@@ -670,14 +630,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         UserInfoResponse response3 = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertEquals(response3.getStatus(), 200, "Unexpected response code: " + response3.getStatus());
-        assertNotNull(response3.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(response3.getClaim(JwtClaimName.NAME));
-        assertNotNull(response3.getClaim(JwtClaimName.GIVEN_NAME));
-        assertNotNull(response3.getClaim(JwtClaimName.FAMILY_NAME));
-        assertNotNull(response3.getClaim(JwtClaimName.EMAIL));
-        assertNotNull(response3.getClaim(JwtClaimName.ZONEINFO));
-        assertNotNull(response3.getClaim(JwtClaimName.LOCALE));
+        assertUserInfoBasicResponseOk(response3, 200); 
+        assertUserInfoPersonalDataNotNull(response3);
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
@@ -705,7 +659,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(response);
+        assertRegisterResponseOk(response, 201, true);
 
         String clientId = response.getClientId();
 
@@ -754,14 +708,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         UserInfoResponse response3 = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertEquals(response3.getStatus(), 200, "Unexpected response code: " + response3.getStatus());
-        assertNotNull(response3.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(response3.getClaim(JwtClaimName.NAME));
-        assertNotNull(response3.getClaim(JwtClaimName.GIVEN_NAME));
-        assertNotNull(response3.getClaim(JwtClaimName.FAMILY_NAME));
-        assertNotNull(response3.getClaim(JwtClaimName.EMAIL));
-        assertNotNull(response3.getClaim(JwtClaimName.ZONEINFO));
-        assertNotNull(response3.getClaim(JwtClaimName.LOCALE));
+        assertUserInfoBasicResponseOk(response3, 200); 
+        assertUserInfoPersonalDataNotNull(response3);
         assertNotNull(response3.getClaim(JwtClaimName.ADDRESS));
     }
 
@@ -791,7 +739,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(response);
+        assertRegisterResponseOk(response, 201, true);
 
         String clientId = response.getClientId();
         String clientSecret = response.getClientSecret();
@@ -843,14 +791,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         UserInfoResponse response3 = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertEquals(response3.getStatus(), 200, "Unexpected response code: " + response3.getStatus());
-        assertNotNull(response3.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(response3.getClaim(JwtClaimName.NAME));
-        assertNotNull(response3.getClaim(JwtClaimName.GIVEN_NAME));
-        assertNotNull(response3.getClaim(JwtClaimName.FAMILY_NAME));
-        assertNotNull(response3.getClaim(JwtClaimName.EMAIL));
-        assertNotNull(response3.getClaim(JwtClaimName.ZONEINFO));
-        assertNotNull(response3.getClaim(JwtClaimName.LOCALE));
+        assertUserInfoBasicResponseOk(response3, 200); 
+        assertUserInfoPersonalDataNotNull(response3);
         assertNotNull(response3.getClaim(JwtClaimName.ADDRESS));
     }
 
@@ -879,7 +821,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(response);
+        assertRegisterResponseOk(response, 201, true);
 
         String clientId = response.getClientId();
 
@@ -928,14 +870,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         UserInfoResponse response3 = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertEquals(response3.getStatus(), 200, "Unexpected response code: " + response3.getStatus());
-        assertNotNull(response3.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(response3.getClaim(JwtClaimName.NAME));
-        assertNotNull(response3.getClaim(JwtClaimName.GIVEN_NAME));
-        assertNotNull(response3.getClaim(JwtClaimName.FAMILY_NAME));
-        assertNotNull(response3.getClaim(JwtClaimName.EMAIL));
-        assertNotNull(response3.getClaim(JwtClaimName.ZONEINFO));
-        assertNotNull(response3.getClaim(JwtClaimName.LOCALE));
+        assertUserInfoBasicResponseOk(response3, 200); 
+        assertUserInfoPersonalDataNotNull(response3);
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
@@ -963,7 +899,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(response);
+        assertRegisterResponseOk(response, 201, true);
 
         String clientId = response.getClientId();
 
@@ -1012,14 +948,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         UserInfoResponse response3 = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertEquals(response3.getStatus(), 200, "Unexpected response code: " + response3.getStatus());
-        assertNotNull(response3.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(response3.getClaim(JwtClaimName.NAME));
-        assertNotNull(response3.getClaim(JwtClaimName.GIVEN_NAME));
-        assertNotNull(response3.getClaim(JwtClaimName.FAMILY_NAME));
-        assertNotNull(response3.getClaim(JwtClaimName.EMAIL));
-        assertNotNull(response3.getClaim(JwtClaimName.ZONEINFO));
-        assertNotNull(response3.getClaim(JwtClaimName.LOCALE));
+        assertUserInfoBasicResponseOk(response3, 200); 
+        assertUserInfoPersonalDataNotNull(response3);
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
@@ -1047,7 +977,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(response);
+        assertRegisterResponseOk(response, 201, true);
 
         String clientId = response.getClientId();
 
@@ -1096,14 +1026,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         UserInfoResponse response3 = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertEquals(response3.getStatus(), 200, "Unexpected response code: " + response3.getStatus());
-        assertNotNull(response3.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(response3.getClaim(JwtClaimName.NAME));
-        assertNotNull(response3.getClaim(JwtClaimName.GIVEN_NAME));
-        assertNotNull(response3.getClaim(JwtClaimName.FAMILY_NAME));
-        assertNotNull(response3.getClaim(JwtClaimName.EMAIL));
-        assertNotNull(response3.getClaim(JwtClaimName.ZONEINFO));
-        assertNotNull(response3.getClaim(JwtClaimName.LOCALE));
+        assertUserInfoBasicResponseOk(response3, 200); 
+        assertUserInfoPersonalDataNotNull(response3);
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
@@ -1131,7 +1055,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(response);
+        assertRegisterResponseOk(response, 201, true);
 
         String clientId = response.getClientId();
 
@@ -1180,14 +1104,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         UserInfoResponse response3 = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertEquals(response3.getStatus(), 200, "Unexpected response code: " + response3.getStatus());
-        assertNotNull(response3.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(response3.getClaim(JwtClaimName.NAME));
-        assertNotNull(response3.getClaim(JwtClaimName.GIVEN_NAME));
-        assertNotNull(response3.getClaim(JwtClaimName.FAMILY_NAME));
-        assertNotNull(response3.getClaim(JwtClaimName.EMAIL));
-        assertNotNull(response3.getClaim(JwtClaimName.ZONEINFO));
-        assertNotNull(response3.getClaim(JwtClaimName.LOCALE));
+        assertUserInfoBasicResponseOk(response3, 200); 
+        assertUserInfoPersonalDataNotNull(response3);
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
@@ -1215,7 +1133,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(response);
+        assertRegisterResponseOk(response, 201, true);
 
         String clientId = response.getClientId();
 
@@ -1264,14 +1182,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         UserInfoResponse response3 = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertEquals(response3.getStatus(), 200, "Unexpected response code: " + response3.getStatus());
-        assertNotNull(response3.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(response3.getClaim(JwtClaimName.NAME));
-        assertNotNull(response3.getClaim(JwtClaimName.GIVEN_NAME));
-        assertNotNull(response3.getClaim(JwtClaimName.FAMILY_NAME));
-        assertNotNull(response3.getClaim(JwtClaimName.EMAIL));
-        assertNotNull(response3.getClaim(JwtClaimName.ZONEINFO));
-        assertNotNull(response3.getClaim(JwtClaimName.LOCALE));
+        assertUserInfoBasicResponseOk(response3, 200); 
+        assertUserInfoPersonalDataNotNull(response3);
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
@@ -1299,7 +1211,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(response);
+        assertRegisterResponseOk(response, 201, true);
 
         String clientId = response.getClientId();
 
@@ -1348,14 +1260,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         UserInfoResponse response3 = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertEquals(response3.getStatus(), 200, "Unexpected response code: " + response3.getStatus());
-        assertNotNull(response3.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(response3.getClaim(JwtClaimName.NAME));
-        assertNotNull(response3.getClaim(JwtClaimName.GIVEN_NAME));
-        assertNotNull(response3.getClaim(JwtClaimName.FAMILY_NAME));
-        assertNotNull(response3.getClaim(JwtClaimName.EMAIL));
-        assertNotNull(response3.getClaim(JwtClaimName.ZONEINFO));
-        assertNotNull(response3.getClaim(JwtClaimName.LOCALE));
+        assertUserInfoBasicResponseOk(response3, 200); 
+        assertUserInfoPersonalDataNotNull(response3);
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
@@ -1383,7 +1289,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(response);
+        assertRegisterResponseOk(response, 201, true);
 
         String clientId = response.getClientId();
 
@@ -1432,14 +1338,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         UserInfoResponse response3 = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertEquals(response3.getStatus(), 200, "Unexpected response code: " + response3.getStatus());
-        assertNotNull(response3.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(response3.getClaim(JwtClaimName.NAME));
-        assertNotNull(response3.getClaim(JwtClaimName.GIVEN_NAME));
-        assertNotNull(response3.getClaim(JwtClaimName.FAMILY_NAME));
-        assertNotNull(response3.getClaim(JwtClaimName.EMAIL));
-        assertNotNull(response3.getClaim(JwtClaimName.ZONEINFO));
-        assertNotNull(response3.getClaim(JwtClaimName.LOCALE));
+        assertUserInfoBasicResponseOk(response3, 200); 
+        assertUserInfoPersonalDataNotNull(response3);
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
@@ -1467,7 +1367,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(response);
+        assertRegisterResponseOk(response, 201, true);
 
         String clientId = response.getClientId();
 
@@ -1516,14 +1416,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         UserInfoResponse response3 = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertEquals(response3.getStatus(), 200, "Unexpected response code: " + response3.getStatus());
-        assertNotNull(response3.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(response3.getClaim(JwtClaimName.NAME));
-        assertNotNull(response3.getClaim(JwtClaimName.GIVEN_NAME));
-        assertNotNull(response3.getClaim(JwtClaimName.FAMILY_NAME));
-        assertNotNull(response3.getClaim(JwtClaimName.EMAIL));
-        assertNotNull(response3.getClaim(JwtClaimName.ZONEINFO));
-        assertNotNull(response3.getClaim(JwtClaimName.LOCALE));
+        assertUserInfoBasicResponseOk(response3, 200); 
+        assertUserInfoPersonalDataNotNull(response3);
         assertNotNull(response3.getClaim(JwtClaimName.ADDRESS));
     }
 
@@ -1552,7 +1446,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(response);
+        assertRegisterResponseOk(response, 201, true);
 
         String clientId = response.getClientId();
 
@@ -1601,14 +1495,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         UserInfoResponse response3 = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertEquals(response3.getStatus(), 200, "Unexpected response code: " + response3.getStatus());
-        assertNotNull(response3.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(response3.getClaim(JwtClaimName.NAME));
-        assertNotNull(response3.getClaim(JwtClaimName.GIVEN_NAME));
-        assertNotNull(response3.getClaim(JwtClaimName.FAMILY_NAME));
-        assertNotNull(response3.getClaim(JwtClaimName.EMAIL));
-        assertNotNull(response3.getClaim(JwtClaimName.ZONEINFO));
-        assertNotNull(response3.getClaim(JwtClaimName.LOCALE));
+        assertUserInfoBasicResponseOk(response3, 200); 
+        assertUserInfoPersonalDataNotNull(response3);
         assertNotNull(response3.getClaim(JwtClaimName.ADDRESS));
     }
 
@@ -1637,7 +1525,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(response);
+        assertRegisterResponseOk(response, 201, true);
 
         String clientId = response.getClientId();
 
@@ -1686,14 +1574,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         UserInfoResponse response3 = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertEquals(response3.getStatus(), 200, "Unexpected response code: " + response3.getStatus());
-        assertNotNull(response3.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(response3.getClaim(JwtClaimName.NAME));
-        assertNotNull(response3.getClaim(JwtClaimName.GIVEN_NAME));
-        assertNotNull(response3.getClaim(JwtClaimName.FAMILY_NAME));
-        assertNotNull(response3.getClaim(JwtClaimName.EMAIL));
-        assertNotNull(response3.getClaim(JwtClaimName.ZONEINFO));
-        assertNotNull(response3.getClaim(JwtClaimName.LOCALE));
+        assertUserInfoBasicResponseOk(response3, 200); 
+        assertUserInfoPersonalDataNotNull(response3);
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
@@ -1718,7 +1600,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             RegisterResponse registerResponse = registerClient.exec();
 
             showClient(registerClient);
-            assertOk(registerResponse);
+            assertRegisterResponseOk(registerResponse, 201, true);
 
             String clientId = registerResponse.getClientId();
 
@@ -1770,7 +1652,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             RegisterResponse registerResponse = registerClient.exec();
 
             showClient(registerClient);
-            assertOk(registerResponse);
+            assertRegisterResponseOk(registerResponse, 201, true);
 
             String clientId = registerResponse.getClientId();
             String clientSecret = registerResponse.getClientSecret();
@@ -1836,7 +1718,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             RegisterResponse registerResponse = registerClient.exec();
 
             showClient(registerClient);
-            assertOk(registerResponse);
+            assertRegisterResponseOk(registerResponse, 201, true);
 
             String clientId = registerResponse.getClientId();
             String clientSecret = registerResponse.getClientSecret();
@@ -1903,7 +1785,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             RegisterResponse registerResponse = registerClient.exec();
 
             showClient(registerClient);
-            assertOk(registerResponse);
+            assertRegisterResponseOk(registerResponse, 201, true);
 
             String clientId = registerResponse.getClientId();
             String clientSecret = registerResponse.getClientSecret();
@@ -1966,7 +1848,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -2022,10 +1904,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertNotNull(authorizationResponse.getLocation(), "The location is null");
-        assertNotNull(authorizationResponse.getAccessToken(), "The accessToken is null");
-        assertNotNull(authorizationResponse.getTokenType(), "The tokenType is null");
-        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertAuthorizationResponse(authorizationResponse, responseTypes, true); 
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
@@ -2051,7 +1930,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             RegisterResponse registerResponse = registerClient.exec();
 
             showClient(registerClient);
-            assertOk(registerResponse);
+            assertRegisterResponseOk(registerResponse, 201, true);
 
             String clientId = registerResponse.getClientId();
 
@@ -2105,7 +1984,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             RegisterResponse registerResponse = registerClient.exec();
 
             showClient(registerClient);
-            assertOk(registerResponse);
+            assertRegisterResponseOk(registerResponse, 201, true);
 
             String clientId = registerResponse.getClientId();
 
@@ -2161,7 +2040,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -2243,7 +2122,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             RegisterResponse response = registerClient.exec();
 
             showClient(registerClient);
-            assertOk(response);
+            assertRegisterResponseOk(response, 201, true);
 
             String clientId = response.getClientId();
 
@@ -2291,14 +2170,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             UserInfoResponse response3 = userInfoClient.execUserInfo(accessToken);
 
             showClient(userInfoClient);
-            assertEquals(response3.getStatus(), 200, "Unexpected response code: " + response3.getStatus());
-            assertNotNull(response3.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
-            assertNotNull(response3.getClaim(JwtClaimName.NAME));
-            assertNotNull(response3.getClaim(JwtClaimName.GIVEN_NAME));
-            assertNotNull(response3.getClaim(JwtClaimName.FAMILY_NAME));
-            assertNotNull(response3.getClaim(JwtClaimName.EMAIL));
-            assertNotNull(response3.getClaim(JwtClaimName.ZONEINFO));
-            assertNotNull(response3.getClaim(JwtClaimName.LOCALE));
+            assertUserInfoBasicResponseOk(response3, 200);
+        assertUserInfoPersonalDataNotNull(response3);
             assertNotNull(response3.getClaim(JwtClaimName.ADDRESS));
         } catch (Exception e) {
             fail(e.getMessage(), e);
@@ -2327,7 +2200,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             RegisterResponse response = registerClient.exec();
 
             showClient(registerClient);
-            assertOk(response);
+            assertRegisterResponseOk(response, 201, true);
 
             String clientId = response.getClientId();
 
@@ -2384,14 +2257,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             UserInfoResponse response3 = userInfoClient.execUserInfo(accessToken);
 
             showClient(userInfoClient);
-            assertEquals(response3.getStatus(), 200, "Unexpected response code: " + response3.getStatus());
-            assertNotNull(response3.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
-            assertNotNull(response3.getClaim(JwtClaimName.NAME));
-            assertNotNull(response3.getClaim(JwtClaimName.GIVEN_NAME));
-            assertNotNull(response3.getClaim(JwtClaimName.FAMILY_NAME));
-            assertNotNull(response3.getClaim(JwtClaimName.EMAIL));
-            assertNotNull(response3.getClaim(JwtClaimName.ZONEINFO));
-            assertNotNull(response3.getClaim(JwtClaimName.LOCALE));
+            assertUserInfoBasicResponseOk(response3, 200); 
+        assertUserInfoPersonalDataNotNull(response3);
             assertNotNull(response3.getClaim(JwtClaimName.ADDRESS));
         } catch (Exception e) {
             fail(e.getMessage(), e);
@@ -2420,7 +2287,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             RegisterResponse response = registerClient.exec();
 
             showClient(registerClient);
-            assertOk(response);
+            assertRegisterResponseOk(response, 201, true);
 
             String clientId = response.getClientId();
 
@@ -2477,14 +2344,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             UserInfoResponse response3 = userInfoClient.execUserInfo(accessToken);
 
             showClient(userInfoClient);
-            assertEquals(response3.getStatus(), 200, "Unexpected response code: " + response3.getStatus());
-            assertNotNull(response3.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
-            assertNotNull(response3.getClaim(JwtClaimName.NAME));
-            assertNotNull(response3.getClaim(JwtClaimName.GIVEN_NAME));
-            assertNotNull(response3.getClaim(JwtClaimName.FAMILY_NAME));
-            assertNotNull(response3.getClaim(JwtClaimName.EMAIL));
-            assertNotNull(response3.getClaim(JwtClaimName.ZONEINFO));
-            assertNotNull(response3.getClaim(JwtClaimName.LOCALE));
+            assertUserInfoBasicResponseOk(response3, 200); 
+        assertUserInfoPersonalDataNotNull(response3);
             assertNotNull(response3.getClaim(JwtClaimName.ADDRESS));
         } catch (Exception e) {
             fail(e.getMessage(), e);
@@ -2513,7 +2374,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             RegisterResponse response = registerClient.exec();
 
             showClient(registerClient);
-            assertOk(response);
+            assertRegisterResponseOk(response, 201, true);
 
             String clientId = response.getClientId();
 
@@ -2570,14 +2431,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             UserInfoResponse response3 = userInfoClient.execUserInfo(accessToken);
 
             showClient(userInfoClient);
-            assertEquals(response3.getStatus(), 200, "Unexpected response code: " + response3.getStatus());
-            assertNotNull(response3.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
-            assertNotNull(response3.getClaim(JwtClaimName.NAME));
-            assertNotNull(response3.getClaim(JwtClaimName.GIVEN_NAME));
-            assertNotNull(response3.getClaim(JwtClaimName.FAMILY_NAME));
-            assertNotNull(response3.getClaim(JwtClaimName.EMAIL));
-            assertNotNull(response3.getClaim(JwtClaimName.ZONEINFO));
-            assertNotNull(response3.getClaim(JwtClaimName.LOCALE));
+            assertUserInfoBasicResponseOk(response3, 200); 
+        assertUserInfoPersonalDataNotNull(response3);
             assertNotNull(response3.getClaim(JwtClaimName.ADDRESS));
         } catch (Exception e) {
             fail(e.getMessage(), e);
@@ -2606,7 +2461,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             RegisterResponse response = registerClient.exec();
 
             showClient(registerClient);
-            assertOk(response);
+            assertRegisterResponseOk(response, 201, true);
 
             String clientId = response.getClientId();
             String clientSecret = response.getClientSecret();
@@ -2654,14 +2509,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             UserInfoResponse response3 = userInfoClient.execUserInfo(accessToken);
 
             showClient(userInfoClient);
-            assertEquals(response3.getStatus(), 200, "Unexpected response code: " + response3.getStatus());
-            assertNotNull(response3.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
-            assertNotNull(response3.getClaim(JwtClaimName.NAME));
-            assertNotNull(response3.getClaim(JwtClaimName.GIVEN_NAME));
-            assertNotNull(response3.getClaim(JwtClaimName.FAMILY_NAME));
-            assertNotNull(response3.getClaim(JwtClaimName.EMAIL));
-            assertNotNull(response3.getClaim(JwtClaimName.ZONEINFO));
-            assertNotNull(response3.getClaim(JwtClaimName.LOCALE));
+            assertUserInfoBasicResponseOk(response3, 200); 
+        assertUserInfoPersonalDataNotNull(response3);
             assertNotNull(response3.getClaim(JwtClaimName.ADDRESS));
         } catch (Exception e) {
             fail(e.getMessage(), e);
@@ -2690,7 +2539,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             RegisterResponse response = registerClient.exec();
 
             showClient(registerClient);
-            assertOk(response);
+            assertRegisterResponseOk(response, 201, true);
 
             String clientId = response.getClientId();
             String clientSecret = response.getClientSecret();
@@ -2738,14 +2587,8 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             UserInfoResponse response3 = userInfoClient.execUserInfo(accessToken);
 
             showClient(userInfoClient);
-            assertEquals(response3.getStatus(), 200, "Unexpected response code: " + response3.getStatus());
-            assertNotNull(response3.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
-            assertNotNull(response3.getClaim(JwtClaimName.NAME));
-            assertNotNull(response3.getClaim(JwtClaimName.GIVEN_NAME));
-            assertNotNull(response3.getClaim(JwtClaimName.FAMILY_NAME));
-            assertNotNull(response3.getClaim(JwtClaimName.EMAIL));
-            assertNotNull(response3.getClaim(JwtClaimName.ZONEINFO));
-            assertNotNull(response3.getClaim(JwtClaimName.LOCALE));
+            assertUserInfoBasicResponseOk(response3, 200); 
+        assertUserInfoPersonalDataNotNull(response3);
             assertNotNull(response3.getClaim(JwtClaimName.ADDRESS));
         } catch (Exception e) {
             fail(e.getMessage(), e);

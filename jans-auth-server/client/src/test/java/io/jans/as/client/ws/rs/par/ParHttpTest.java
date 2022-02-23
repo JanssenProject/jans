@@ -15,7 +15,6 @@ import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.exception.InvalidJwtException;
-import org.junit.Assert;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
@@ -28,9 +27,9 @@ import java.util.List;
 import java.util.UUID;
 
 import static io.jans.as.client.client.Asserter.assertAuthorizationResponse;
-import static io.jans.as.client.client.Asserter.assertOk;
+import static io.jans.as.client.client.Asserter.assertRegisterResponseOk;
 import static io.jans.as.client.client.Asserter.assertParResponse;
-import static io.jans.as.client.client.Asserter.assertTokenResponse;
+import static io.jans.as.client.client.Asserter.assertTokenResponseOk;
 import static io.jans.as.client.client.Asserter.validateIdToken;
 
 /**
@@ -51,7 +50,7 @@ public class ParHttpTest extends BaseTest {
         String nonce = UUID.randomUUID().toString();
 
         registerResponse = registerClient(redirectUris, responseTypes, scopes, sectorIdentifierUri);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, registerResponse.getClientId(), scopes, redirectUri, nonce);
         ParRequest parRequest = new ParRequest(authorizationRequest);
@@ -86,7 +85,7 @@ public class ParHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponse(tokenResponse);
+        assertTokenResponseOk(tokenResponse, true);
         validateIdToken(idToken, jwksUri, SignatureAlgorithm.RS256);
     }
 

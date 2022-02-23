@@ -18,7 +18,7 @@ import org.testng.annotations.Test;
 
 import java.util.*;
 
-import static io.jans.as.client.client.Asserter.assertOk;
+import static io.jans.as.client.client.Asserter.assertRegisterResponseOk;
 import static org.testng.Assert.*;
 
 /**
@@ -45,7 +45,7 @@ public class AuthorizationResponseCustomHeaderTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
 

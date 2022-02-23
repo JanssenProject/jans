@@ -38,7 +38,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static io.jans.as.client.client.Asserter.assertOk;
+import static io.jans.as.client.client.Asserter.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
@@ -77,7 +77,7 @@ public class ProvidingIdTokenWithMaxAgeRestriction extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -93,11 +93,7 @@ public class ProvidingIdTokenWithMaxAgeRestriction extends BaseTest {
 
             AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                     authorizationEndpoint, authorizationRequest, userId, userSecret);
-
-            assertNotNull(authorizationResponse.getLocation());
-            assertNotNull(authorizationResponse.getCode());
-            assertNotNull(authorizationResponse.getState());
-            assertNotNull(authorizationResponse.getScope());
+            assertAuthorizationResponse(authorizationResponse);
             assertEquals(authorizationResponse.getState(), state);
 
             String authorizationCode = authorizationResponse.getCode();
@@ -118,25 +114,12 @@ public class ProvidingIdTokenWithMaxAgeRestriction extends BaseTest {
             String idToken = tokenResponse.getIdToken();
 
             showClient(tokenClient);
-            assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-            assertNotNull(tokenResponse.getEntity(), "The entity is null");
-            assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
-            assertNotNull(tokenResponse.getIdToken(), "The ID Token is null");
-            assertNotNull(tokenResponse.getExpiresIn(), "The expires in value is null");
-            assertNotNull(tokenResponse.getTokenType(), "The token type is null");
-            assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
+
+            assertTokenResponseOk(tokenResponse, true);
 
             // 4. Validate id_token
             Jwt jwt = Jwt.parse(idToken);
-            assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
-            assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
-            assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
-            assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
-            assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
-            assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
-            assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
-            assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
-            assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ACCESS_TOKEN_HASH));
+            assertJwtStandarClaimsNotNull(jwt, true);
 
             RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
                     jwksUri,
@@ -160,11 +143,7 @@ public class ProvidingIdTokenWithMaxAgeRestriction extends BaseTest {
 
             AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                     authorizationEndpoint, authorizationRequest, userId, userSecret);
-
-            assertNotNull(authorizationResponse.getLocation());
-            assertNotNull(authorizationResponse.getCode());
-            assertNotNull(authorizationResponse.getState());
-            assertNotNull(authorizationResponse.getScope());
+            assertAuthorizationResponse(authorizationResponse, responseTypes, true);
             assertEquals(authorizationResponse.getState(), state);
 
             String authorizationCode = authorizationResponse.getCode();
@@ -184,25 +163,11 @@ public class ProvidingIdTokenWithMaxAgeRestriction extends BaseTest {
             String idToken = tokenResponse.getIdToken();
 
             showClient(tokenClient);
-            assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-            assertNotNull(tokenResponse.getEntity(), "The entity is null");
-            assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
-            assertNotNull(tokenResponse.getIdToken(), "The ID Token is null");
-            assertNotNull(tokenResponse.getExpiresIn(), "The expires in value is null");
-            assertNotNull(tokenResponse.getTokenType(), "The token type is null");
-            assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
+            assertTokenResponseOk(tokenResponse, true);
 
             // 7. Validate id_token
             Jwt jwt = Jwt.parse(idToken);
-            assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
-            assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
-            assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
-            assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
-            assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
-            assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
-            assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
-            assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
-            assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ACCESS_TOKEN_HASH));
+            assertJwtStandarClaimsNotNull(jwt, true);
 
             RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
                     jwksUri,
@@ -235,7 +200,7 @@ public class ProvidingIdTokenWithMaxAgeRestriction extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -252,12 +217,7 @@ public class ProvidingIdTokenWithMaxAgeRestriction extends BaseTest {
 
             AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                     authorizationEndpoint, authorizationRequest, userId, userSecret);
-
-            assertNotNull(authorizationResponse.getLocation());
-            assertNotNull(authorizationResponse.getCode());
-            assertNotNull(authorizationResponse.getIdToken());
-            assertNotNull(authorizationResponse.getState());
-            assertNotNull(authorizationResponse.getScope());
+            assertAuthorizationResponse(authorizationResponse, responseTypes, true);
 
             String authorizationCode = authorizationResponse.getCode();
             sessionId = authorizationResponse.getSessionId();
@@ -275,12 +235,7 @@ public class ProvidingIdTokenWithMaxAgeRestriction extends BaseTest {
             TokenResponse tokenResponse = tokenClient.exec();
 
             showClient(tokenClient);
-            assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-            assertNotNull(tokenResponse.getEntity(), "The entity is null");
-            assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
-            assertNotNull(tokenResponse.getExpiresIn(), "The expires in value is null");
-            assertNotNull(tokenResponse.getTokenType(), "The token type is null");
-            assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
+            assertTokenResponseOk(tokenResponse, true);
         }
 
         Thread.sleep(60000);
@@ -304,12 +259,7 @@ public class ProvidingIdTokenWithMaxAgeRestriction extends BaseTest {
 
             AuthorizationResponse authorizationResponse = authenticateResourceOwner(
                     authorizationEndpoint, authorizationRequest, userId, userSecret, false);
-
-            assertNotNull(authorizationResponse.getLocation());
-            assertNotNull(authorizationResponse.getCode());
-            assertNotNull(authorizationResponse.getIdToken());
-            assertNotNull(authorizationResponse.getState());
-            assertNotNull(authorizationResponse.getScope());
+            assertAuthorizationResponse(authorizationResponse, responseTypes, true);
 
             String authorizationCode = authorizationResponse.getCode();
 
@@ -326,12 +276,7 @@ public class ProvidingIdTokenWithMaxAgeRestriction extends BaseTest {
             TokenResponse tokenResponse = tokenClient.exec();
 
             showClient(tokenClient);
-            assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-            assertNotNull(tokenResponse.getEntity(), "The entity is null");
-            assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
-            assertNotNull(tokenResponse.getExpiresIn(), "The expires in value is null");
-            assertNotNull(tokenResponse.getTokenType(), "The token type is null");
-            assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
+            assertTokenResponseOk(tokenResponse, true);
         }
     }
 }
