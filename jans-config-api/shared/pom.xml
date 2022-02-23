@@ -15,10 +15,6 @@
 	<dependencies>
 
 		<!-- jans -->
-		<!-- <dependency>
-			<groupId>io.jans</groupId>
-			<artifactId>jans-core-util</artifactId>
-		</dependency> -->
 		<dependency>
 			<groupId>io.jans</groupId>
 			<artifactId>jans-core-model</artifactId>
