@@ -5,10 +5,10 @@ import pprint
 import inspect
 from collections import OrderedDict
 
-from jans_setup.paths import INSTALL_DIR
-from jans_setup.static import InstallTypes
-from jans_setup.utils.printVersion import get_war_info
-from jans_setup.utils import base
+from setup_app.paths import INSTALL_DIR
+from setup_app.static import InstallTypes
+from setup_app.utils.printVersion import get_war_info
+from setup_app.utils import base
 
 class Config:
 
