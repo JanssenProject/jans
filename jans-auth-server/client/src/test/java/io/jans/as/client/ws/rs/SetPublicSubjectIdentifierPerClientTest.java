@@ -115,7 +115,7 @@ public class SetPublicSubjectIdentifierPerClientTest extends BaseTest {
         showClient(registerClient);
 
         if (checkError) {
-            assertBadRequest(registerResponse);
+            assertRegisterResponseFail(registerResponse);
         } else {
             assertOk(registerResponse);
         }

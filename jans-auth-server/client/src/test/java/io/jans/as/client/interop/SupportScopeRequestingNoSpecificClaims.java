@@ -37,7 +37,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static io.jans.as.client.client.Asserter.assertOk;
+import static io.jans.as.client.client.Asserter.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
@@ -86,9 +86,7 @@ public class SupportScopeRequestingNoSpecificClaims extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertNotNull(authorizationResponse.getLocation());
-        assertNotNull(authorizationResponse.getCode());
-        assertNotNull(authorizationResponse.getState());
+        assertAuthorizationResponse(authorizationResponse, true);
 
         String authorizationCode = authorizationResponse.getCode();
 
@@ -105,12 +103,7 @@ public class SupportScopeRequestingNoSpecificClaims extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity(), "The entity is null");
-        assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
-        assertNotNull(tokenResponse.getExpiresIn(), "The expires in value is null");
-        assertNotNull(tokenResponse.getTokenType(), "The token type is null");
-        assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
+        assertTokenResponseOk(tokenResponse, true);
 
         String accessToken = tokenResponse.getAccessToken();
         String idToken = tokenResponse.getIdToken();

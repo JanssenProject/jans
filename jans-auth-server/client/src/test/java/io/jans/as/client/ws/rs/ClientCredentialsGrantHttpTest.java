@@ -33,6 +33,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static io.jans.as.client.client.Asserter.assertOk;
+import static io.jans.as.client.client.Asserter.assertTokenResponseOk;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
@@ -81,12 +82,8 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity());
-        assertNotNull(tokenResponse.getAccessToken());
-        assertNotNull(tokenResponse.getTokenType());
+        assertTokenResponseOk(tokenResponse, true);
         assertNotNull(tokenResponse.getScope());
-        assertNull(tokenResponse.getRefreshToken());
 
         String accessToken = tokenResponse.getAccessToken();
 
@@ -179,12 +176,8 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity());
-        assertNotNull(tokenResponse.getAccessToken());
-        assertNotNull(tokenResponse.getTokenType());
+        assertTokenResponseOk(tokenResponse, true);
         assertNotNull(tokenResponse.getScope());
-        assertNull(tokenResponse.getRefreshToken());
 
         String accessToken = tokenResponse.getAccessToken();
 
@@ -288,12 +281,8 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity());
-        assertNotNull(tokenResponse.getAccessToken());
-        assertNotNull(tokenResponse.getTokenType());
+        assertTokenResponseOk(tokenResponse, true);
         assertNotNull(tokenResponse.getScope());
-        assertNull(tokenResponse.getRefreshToken());
 
         String accessToken = tokenResponse.getAccessToken();
 
@@ -475,12 +464,8 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity());
-        assertNotNull(tokenResponse.getAccessToken());
-        assertNotNull(tokenResponse.getTokenType());
+        assertTokenResponseOk(tokenResponse, true);
         assertNotNull(tokenResponse.getScope());
-        assertNull(tokenResponse.getRefreshToken());
 
         String accessToken = tokenResponse.getAccessToken();
 
@@ -585,12 +570,8 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity());
-        assertNotNull(tokenResponse.getAccessToken());
-        assertNotNull(tokenResponse.getTokenType());
+        assertTokenResponseOk(tokenResponse, true);
         assertNotNull(tokenResponse.getScope());
-        assertNull(tokenResponse.getRefreshToken());
 
         String accessToken = tokenResponse.getAccessToken();
 
@@ -695,12 +676,8 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity());
-        assertNotNull(tokenResponse.getAccessToken());
-        assertNotNull(tokenResponse.getTokenType());
+        assertTokenResponseOk(tokenResponse, true);
         assertNotNull(tokenResponse.getScope());
-        assertNull(tokenResponse.getRefreshToken());
 
         String accessToken = tokenResponse.getAccessToken();
 
@@ -808,12 +785,8 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity());
-        assertNotNull(tokenResponse.getAccessToken());
-        assertNotNull(tokenResponse.getTokenType());
+        assertTokenResponseOk(tokenResponse, true);
         assertNotNull(tokenResponse.getScope());
-        assertNull(tokenResponse.getRefreshToken());
 
         String accessToken = tokenResponse.getAccessToken();
 
@@ -923,12 +896,8 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity());
-        assertNotNull(tokenResponse.getAccessToken());
-        assertNotNull(tokenResponse.getTokenType());
+        assertTokenResponseOk(tokenResponse, true);
         assertNotNull(tokenResponse.getScope());
-        assertNull(tokenResponse.getRefreshToken());
 
         String accessToken = tokenResponse.getAccessToken();
 
@@ -1038,12 +1007,8 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity());
-        assertNotNull(tokenResponse.getAccessToken());
-        assertNotNull(tokenResponse.getTokenType());
+        assertTokenResponseOk(tokenResponse, true);
         assertNotNull(tokenResponse.getScope());
-        assertNull(tokenResponse.getRefreshToken());
 
         String accessToken = tokenResponse.getAccessToken();
 
@@ -1153,12 +1118,8 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity());
-        assertNotNull(tokenResponse.getAccessToken());
-        assertNotNull(tokenResponse.getTokenType());
+        assertTokenResponseOk(tokenResponse, true);
         assertNotNull(tokenResponse.getScope());
-        assertNull(tokenResponse.getRefreshToken());
 
         String accessToken = tokenResponse.getAccessToken();
 
@@ -1268,12 +1229,8 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity());
-        assertNotNull(tokenResponse.getAccessToken());
-        assertNotNull(tokenResponse.getTokenType());
+        assertTokenResponseOk(tokenResponse, true);
         assertNotNull(tokenResponse.getScope());
-        assertNull(tokenResponse.getRefreshToken());
 
         String accessToken = tokenResponse.getAccessToken();
 
@@ -1383,12 +1340,8 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity());
-        assertNotNull(tokenResponse.getAccessToken());
-        assertNotNull(tokenResponse.getTokenType());
+        assertTokenResponseOk(tokenResponse, true);
         assertNotNull(tokenResponse.getScope());
-        assertNull(tokenResponse.getRefreshToken());
 
         String accessToken = tokenResponse.getAccessToken();
 
@@ -1498,12 +1451,8 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity());
-        assertNotNull(tokenResponse.getAccessToken());
-        assertNotNull(tokenResponse.getTokenType());
+        assertTokenResponseOk(tokenResponse, true);
         assertNotNull(tokenResponse.getScope());
-        assertNull(tokenResponse.getRefreshToken());
 
         String accessToken = tokenResponse.getAccessToken();
 
@@ -1613,12 +1562,8 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity());
-        assertNotNull(tokenResponse.getAccessToken());
-        assertNotNull(tokenResponse.getTokenType());
+        assertTokenResponseOk(tokenResponse, true);
         assertNotNull(tokenResponse.getScope());
-        assertNull(tokenResponse.getRefreshToken());
 
         String accessToken = tokenResponse.getAccessToken();
 
@@ -1728,12 +1673,8 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity());
-        assertNotNull(tokenResponse.getAccessToken());
-        assertNotNull(tokenResponse.getTokenType());
+        assertTokenResponseOk(tokenResponse, true);
         assertNotNull(tokenResponse.getScope());
-        assertNull(tokenResponse.getRefreshToken());
 
         String accessToken = tokenResponse.getAccessToken();
 

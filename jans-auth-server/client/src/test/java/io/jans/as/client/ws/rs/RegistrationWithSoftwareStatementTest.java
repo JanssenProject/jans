@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static io.jans.as.client.client.Asserter.assertOk;
+import static io.jans.as.client.client.Asserter.assertRegisterResponseOk;
 import static io.jans.as.model.register.RegisterRequestParam.APPLICATION_TYPE;
 import static io.jans.as.model.register.RegisterRequestParam.CLIENT_NAME;
 import static io.jans.as.model.register.RegisterRequestParam.CONTACTS;
@@ -300,11 +301,7 @@ public class RegistrationWithSoftwareStatementTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(response.getStatus(), 200, "Unexpected response code: " + response.getEntity());
-        assertNotNull(response.getClientId());
-        assertNotNull(response.getClientSecret());
-        assertNotNull(response.getRegistrationAccessToken());
-        assertNotNull(response.getClientSecretExpiresAt());
+        assertRegisterResponseOk(response, 200, false);
         assertNotNull(response.getFirstClaim(SCOPE.toString()));
         assertNotNull(response.getFirstClaim(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString()));
         assertTrue(Boolean.parseBoolean(response.getFirstClaim(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString())));
@@ -358,11 +355,7 @@ public class RegistrationWithSoftwareStatementTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(response.getStatus(), 200, "Unexpected response code: " + response.getEntity());
-        assertNotNull(response.getClientId());
-        assertNotNull(response.getClientSecret());
-        assertNotNull(response.getRegistrationAccessToken());
-        assertNotNull(response.getClientSecretExpiresAt());
+        assertRegisterResponseOk(response, 200, false);
         assertNotNull(response.getFirstClaim(SCOPE.toString()));
         assertNotNull(response.getFirstClaim(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString()));
         assertTrue(Boolean.parseBoolean(response.getFirstClaim(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString())));
@@ -508,11 +501,7 @@ public class RegistrationWithSoftwareStatementTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(response.getStatus(), 200, "Unexpected response code: " + response.getEntity());
-        assertNotNull(response.getClientId());
-        assertNotNull(response.getClientSecret());
-        assertNotNull(response.getRegistrationAccessToken());
-        assertNotNull(response.getClientSecretExpiresAt());
+        assertRegisterResponseOk(response, 200, false);
         assertNotNull(response.getFirstClaim(SCOPE.toString()));
         assertNotNull(response.getFirstClaim(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString()));
         assertTrue(Boolean.parseBoolean(response.getFirstClaim(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString())));
@@ -628,11 +617,7 @@ public class RegistrationWithSoftwareStatementTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(response.getStatus(), 200, "Unexpected response code: " + response.getEntity());
-        assertNotNull(response.getClientId());
-        assertNotNull(response.getClientSecret());
-        assertNotNull(response.getRegistrationAccessToken());
-        assertNotNull(response.getClientSecretExpiresAt());
+        assertRegisterResponseOk(response, 200, false);
         assertNotNull(response.getFirstClaim(SCOPE.toString()));
         assertNotNull(response.getFirstClaim(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString()));
         assertTrue(Boolean.parseBoolean(response.getFirstClaim(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString())));

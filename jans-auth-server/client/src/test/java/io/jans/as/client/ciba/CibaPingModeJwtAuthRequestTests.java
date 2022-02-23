@@ -43,10 +43,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import static io.jans.as.client.client.Asserter.assertOk;
-import static io.jans.as.model.register.RegisterRequestParam.BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG;
-import static io.jans.as.model.register.RegisterRequestParam.BACKCHANNEL_TOKEN_DELIVERY_MODE;
-import static io.jans.as.model.register.RegisterRequestParam.BACKCHANNEL_USER_CODE_PARAMETER;
+import static io.jans.as.client.client.Asserter.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
@@ -179,35 +176,35 @@ public class CibaPingModeJwtAuthRequestTests extends BaseTest {
         jwtAuthorizationRequest.setAud(null);
 
         processCibaAuthorizationEndpointFailCall(jwtAuthorizationRequest.getEncodedJwt(), clientId,
-                registerResponse.getClientSecret(), 400, BackchannelAuthenticationErrorResponseType.INVALID_REQUEST.getParameter());
+                registerResponse.getClientSecret(), 400, BackchannelAuthenticationErrorResponseType.INVALID_REQUEST);
 
         // 2. Request doesn't include any hint
         jwtAuthorizationRequest = createJwtRequest(keyStoreFile, keyStoreSecret, dnName, userId, keyId, SignatureAlgorithm.PS256);
         jwtAuthorizationRequest.setLoginHint(null);
 
         processCibaAuthorizationEndpointFailCall(jwtAuthorizationRequest.getEncodedJwt(), clientId,
-                registerResponse.getClientSecret(), 400, BackchannelAuthenticationErrorResponseType.UNKNOWN_USER_ID.getParameter());
+                registerResponse.getClientSecret(), 400, BackchannelAuthenticationErrorResponseType.UNKNOWN_USER_ID);
 
         // 3. Request has a wrong Binding Message
         jwtAuthorizationRequest = createJwtRequest(keyStoreFile, keyStoreSecret, dnName, userId, keyId, SignatureAlgorithm.PS256);
         jwtAuthorizationRequest.setBindingMessage("(/)=&/(%&/(%$/&($%/&)");
 
         processCibaAuthorizationEndpointFailCall(jwtAuthorizationRequest.getEncodedJwt(), clientId,
-                registerResponse.getClientSecret(), 400, BackchannelAuthenticationErrorResponseType.INVALID_BINDING_MESSAGE.getParameter());
+                registerResponse.getClientSecret(), 400, BackchannelAuthenticationErrorResponseType.INVALID_BINDING_MESSAGE);
 
         // 4. Request has wrong Client Id
         jwtAuthorizationRequest = createJwtRequest(keyStoreFile, keyStoreSecret, dnName, userId, keyId, SignatureAlgorithm.PS256);
         jwtAuthorizationRequest.setClientId("abcabcabcabcabcabcabcabcabcabc");
 
         processCibaAuthorizationEndpointFailCall(jwtAuthorizationRequest.getEncodedJwt(), "abcabcabcabcabcabcabcabcabcabc",
-                registerResponse.getClientSecret(), 401, BackchannelAuthenticationErrorResponseType.INVALID_CLIENT.getParameter());
+                registerResponse.getClientSecret(), 401, BackchannelAuthenticationErrorResponseType.INVALID_CLIENT);
 
         // 5. Request has wrong Client Id
         jwtAuthorizationRequest = createJwtRequest(keyStoreFile, keyStoreSecret, dnName, userId, keyId, SignatureAlgorithm.PS256);
         jwtAuthorizationRequest.setClientNotificationToken(null);
 
         processCibaAuthorizationEndpointFailCall(jwtAuthorizationRequest.getEncodedJwt(), clientId,
-                registerResponse.getClientSecret(), 400, BackchannelAuthenticationErrorResponseType.INVALID_REQUEST.getParameter());
+                registerResponse.getClientSecret(), 400, BackchannelAuthenticationErrorResponseType.INVALID_REQUEST);
     }
 
     @Parameters({"PS256_keyId", "userId", "dnName", "keyStoreFile", "keyStoreSecret", "clientJwksUri",
@@ -246,7 +243,7 @@ public class CibaPingModeJwtAuthRequestTests extends BaseTest {
         String jwtWithWrongSigning = jwtParts[0] + "." + jwtParts[1] + ".WRONG-SIGNING";
 
         processCibaAuthorizationEndpointFailCall(jwtWithWrongSigning, registerResponse.getClientId(),
-                registerResponse.getClientSecret(), 400, BackchannelAuthenticationErrorResponseType.INVALID_REQUEST.getParameter());
+                registerResponse.getClientSecret(), 400, BackchannelAuthenticationErrorResponseType.INVALID_REQUEST);
     }
 
     /**
@@ -272,12 +269,7 @@ public class CibaPingModeJwtAuthRequestTests extends BaseTest {
         showClient(registerClient);
 
         assertOk(registerResponse);
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_USER_CODE_PARAMETER.toString()));
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()), mode.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()), algorithm.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_USER_CODE_PARAMETER.toString()), "false");
+        assertRegisterResponseClaimsBackChannel(registerResponse, algorithm, mode, false);
     }
 
     /**
@@ -299,11 +291,7 @@ public class CibaPingModeJwtAuthRequestTests extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-
-        assertEquals(backchannelAuthenticationResponse.getStatus(), 200, "Unexpected response code: " + backchannelAuthenticationResponse.getEntity());
-        assertNotNull(backchannelAuthenticationResponse.getAuthReqId());
-        assertNotNull(backchannelAuthenticationResponse.getExpiresIn());
-        assertNotNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Ping or Ping modes.
+        assertBackchannelAuthentication(backchannelAuthenticationResponse, true);
     }
 
     /**
@@ -313,9 +301,9 @@ public class CibaPingModeJwtAuthRequestTests extends BaseTest {
      * @param clientId     Client identifier.
      * @param clientSecret Client secret.
      * @param httpStatus   Param used to validate response from the server.
-     * @param error        Error used to validate error response from the server.
+     * @param errorType    Error used to validate error response from the server.
      */
-    private void processCibaAuthorizationEndpointFailCall(String jwtRequest, String clientId, String clientSecret, int httpStatus, String error) {
+    private void processCibaAuthorizationEndpointFailCall(String jwtRequest, String clientId, String clientSecret, int httpStatus, BackchannelAuthenticationErrorResponseType errorType) {
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
         backchannelAuthenticationRequest.setRequest(jwtRequest);
         backchannelAuthenticationRequest.setClientId(clientId);
@@ -327,11 +315,8 @@ public class CibaPingModeJwtAuthRequestTests extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
+        assertBackchannelAuthenticationFail(backchannelAuthenticationResponse, httpStatus, errorType);
 
-        assertEquals(backchannelAuthenticationResponse.getStatus(), httpStatus, "Unexpected response code: " + backchannelAuthenticationResponse.getEntity());
-        assertNotNull(backchannelAuthenticationResponse.getErrorType());
-        assertNotNull(backchannelAuthenticationResponse.getErrorDescription());
-        assertEquals(error, backchannelAuthenticationResponse.getErrorType().getParameter());
         assertNull(backchannelAuthenticationResponse.getAuthReqId());
         assertNull(backchannelAuthenticationResponse.getExpiresIn());
         assertNull(backchannelAuthenticationResponse.getInterval());
@@ -403,26 +388,14 @@ public class CibaPingModeJwtAuthRequestTests extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertNotNull(authorizationResponse.getLocation(), "The location is null");
-        assertNotNull(authorizationResponse.getAccessToken(), "The accessToken is null");
-        assertNotNull(authorizationResponse.getTokenType(), "The tokenType is null");
-        assertNotNull(authorizationResponse.getIdToken(), "The idToken is null");
-        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
 
         String idToken = authorizationResponse.getIdToken();
 
         // 3. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
         assertNotNull(jwt);
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ACCESS_TOKEN_HASH));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
+        assertJwtStandarClaimsNotNull(jwt, true);
 
         RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
                 jwksUri,

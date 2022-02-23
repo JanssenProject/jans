@@ -38,8 +38,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static io.jans.as.client.client.Asserter.assertBadRequest;
-import static io.jans.as.client.client.Asserter.assertOk;
+import static io.jans.as.client.client.Asserter.*;
 import static io.jans.as.model.register.RegisterRequestParam.APPLICATION_TYPE;
 import static io.jans.as.model.register.RegisterRequestParam.CLIENT_NAME;
 import static io.jans.as.model.register.RegisterRequestParam.ID_TOKEN_SIGNED_RESPONSE_ALG;
@@ -88,20 +87,10 @@ public class ApplicationTypeRestrictionHttpTest extends BaseTest {
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);
-        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
-        assertNotNull(readClientResponse.getClientId());
-        assertNotNull(readClientResponse.getClientSecret());
-        assertNotNull(readClientResponse.getClientIdIssuedAt());
-        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+        assertRegisterResponseOk(readClientResponse, 200, false);
 
-        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
         assertEquals(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()), ApplicationType.WEB.toString());
-        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
-        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
-        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
-        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
-        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
     }
 
     /**
@@ -136,20 +125,10 @@ public class ApplicationTypeRestrictionHttpTest extends BaseTest {
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);
-        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
-        assertNotNull(readClientResponse.getClientId());
-        assertNotNull(readClientResponse.getClientSecret());
-        assertNotNull(readClientResponse.getClientIdIssuedAt());
-        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+        assertRegisterResponseOk(readClientResponse, 200, false);
 
-        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
         assertEquals(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()), ApplicationType.WEB.toString());
-        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
-        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
-        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
-        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
-        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
     }
 
     /**
@@ -166,7 +145,7 @@ public class ApplicationTypeRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
 
         showClient(registerClient);
-        assertBadRequest(registerResponse);
+        assertRegisterResponseFail(registerResponse);
     }
 
     /**
@@ -217,14 +196,8 @@ public class ApplicationTypeRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClientIdIssuedAt());
         assertNotNull(readClientResponse.getClientSecretExpiresAt());
 
-        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
         assertEquals(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()), ApplicationType.NATIVE.toString());
-        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
-        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
-        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
-        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
-        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization and receive the authorization code.
         String nonce = UUID.randomUUID().toString();
@@ -269,15 +242,8 @@ public class ApplicationTypeRestrictionHttpTest extends BaseTest {
 
         // 5. Validate id_token 
         Jwt jwt = Jwt.parse(idToken);
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
+        assertJwtStandarClaimsNotNull(jwt, false);
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.CODE_HASH));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.OX_OPENID_CONNECT_VERSION));
 
         RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
@@ -357,14 +323,8 @@ public class ApplicationTypeRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClientIdIssuedAt());
         assertNotNull(readClientResponse.getClientSecretExpiresAt());
 
-        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
         assertEquals(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()), ApplicationType.NATIVE.toString());
-        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
-        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
-        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
-        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
-        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization and receive the authorization code.
         String nonce = UUID.randomUUID().toString();
@@ -409,15 +369,8 @@ public class ApplicationTypeRestrictionHttpTest extends BaseTest {
 
         // 5. Validate id_token 
         Jwt jwt = Jwt.parse(idToken);
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
+        assertJwtStandarClaimsNotNull(jwt, false);
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.CODE_HASH));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.OX_OPENID_CONNECT_VERSION));
 
         RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
@@ -466,7 +419,7 @@ public class ApplicationTypeRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
 
         showClient(registerClient);
-        assertBadRequest(registerResponse);
+        assertRegisterResponseFail(registerResponse);
     }
 
     /**
@@ -483,6 +436,6 @@ public class ApplicationTypeRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
 
         showClient(registerClient);
-        assertBadRequest(registerResponse);
+        assertRegisterResponseFail(registerResponse);
     }
 }

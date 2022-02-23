@@ -30,6 +30,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import static io.jans.as.client.client.Asserter.assertAuthorizationResponse;
 import static io.jans.as.client.client.Asserter.assertOk;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -83,11 +84,7 @@ public class CanRequestAndUseEncryptedIdTokenResponse extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertNotNull(authorizationResponse.getLocation(), "The location is null");
-        assertNotNull(authorizationResponse.getAccessToken(), "The accessToken is null");
-        assertNotNull(authorizationResponse.getTokenType(), "The tokenType is null");
-        assertNotNull(authorizationResponse.getIdToken(), "The idToken is null");
-        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
 
         String idToken = authorizationResponse.getIdToken();
 

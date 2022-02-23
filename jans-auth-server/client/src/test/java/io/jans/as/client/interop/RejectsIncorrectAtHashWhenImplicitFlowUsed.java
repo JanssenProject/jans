@@ -30,6 +30,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import static io.jans.as.client.client.Asserter.assertJwtStandarClaimsNotNull;
 import static io.jans.as.client.client.Asserter.assertOk;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -92,15 +93,7 @@ public class RejectsIncorrectAtHashWhenImplicitFlowUsed extends BaseTest {
 
         // 3. Validate access_token and id_token
         Jwt jwt = Jwt.parse(idToken);
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ACCESS_TOKEN_HASH));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
+        assertJwtStandarClaimsNotNull(jwt, true);
 
         jwt.getClaims().setClaim(JwtClaimName.ACCESS_TOKEN_HASH, "INCORRECT_AT_HASH");
 

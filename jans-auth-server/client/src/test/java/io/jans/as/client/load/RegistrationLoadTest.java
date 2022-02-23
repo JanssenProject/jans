@@ -17,6 +17,7 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
 import static io.jans.as.client.client.Asserter.assertOk;
+import static io.jans.as.client.client.Asserter.assertRegisterResponseOk;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
@@ -48,10 +49,6 @@ public class RegistrationLoadTest extends BaseTest {
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);
-        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
-        assertNotNull(readClientResponse.getClientId());
-        assertNotNull(readClientResponse.getClientSecret());
-        assertNotNull(readClientResponse.getClientIdIssuedAt());
-        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+        assertRegisterResponseOk(readClientResponse, 200, false);
     }
 }

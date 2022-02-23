@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import static io.jans.as.client.client.Asserter.assertAuthorizationResponse;
 import static io.jans.as.client.client.Asserter.assertOk;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -71,8 +72,6 @@ public class SupportCodeResponseType extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertNotNull(authorizationResponse.getLocation());
-        assertNotNull(authorizationResponse.getCode());
-        assertNotNull(authorizationResponse.getState());
+        assertAuthorizationResponse(authorizationResponse, true);
     }
 }
