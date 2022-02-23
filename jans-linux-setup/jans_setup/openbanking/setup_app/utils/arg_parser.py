@@ -32,6 +32,7 @@ def arg_parser():
     parser.add_argument('-country', help="Two letters country coude used for generating X.509 certificates")
     parser.add_argument('-jans-max-mem', help="Total memory (in KB) to be used by Jannses Server")
     parser.add_argument('--disable-config-api-security', help="Turn off oauth2 security validation for jans-config-api", action='store_true')
+    parser.add_argument('--import-ldif', help="Render ldif templates from directory and import them in Database")
 
     parser.add_argument('--shell', help="Drop into interactive shell before starting installation", action='store_true')
     parser.add_argument('--no-progress', help="Use simple progress", action='store_true')
