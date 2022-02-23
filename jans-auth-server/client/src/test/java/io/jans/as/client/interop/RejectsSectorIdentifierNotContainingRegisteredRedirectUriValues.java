@@ -20,7 +20,7 @@ import org.testng.annotations.Test;
 import java.util.Arrays;
 import java.util.List;
 
-import static io.jans.as.client.client.Asserter.assertBadRequest;
+import static io.jans.as.client.client.Asserter.assertRegisterResponseFail;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
@@ -48,6 +48,6 @@ public class RejectsSectorIdentifierNotContainingRegisteredRedirectUriValues ext
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertBadRequest(registerResponse);
+        assertRegisterResponseFail(registerResponse);
     }
 }

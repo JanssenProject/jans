@@ -32,7 +32,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static io.jans.as.client.client.Asserter.assertOk;
+import static io.jans.as.client.client.Asserter.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.fail;
@@ -68,7 +68,7 @@ public class CanProvideEncryptedIdTokenResponse extends BaseTest {
             RegisterResponse registerResponse = registerClient.exec();
 
             showClient(registerClient);
-            assertOk(registerResponse);
+            assertRegisterResponseOk(registerResponse, 201, true);
 
             String clientId = registerResponse.getClientId();
             String clientSecret = registerResponse.getClientSecret();
@@ -86,24 +86,13 @@ public class CanProvideEncryptedIdTokenResponse extends BaseTest {
 
             AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                     authorizationEndpoint, authorizationRequest, userId, userSecret);
-
-            assertNotNull(authorizationResponse.getLocation(), "The location is null");
-            assertNotNull(authorizationResponse.getAccessToken(), "The accessToken is null");
-            assertNotNull(authorizationResponse.getTokenType(), "The tokenType is null");
-            assertNotNull(authorizationResponse.getIdToken(), "The idToken is null");
-            assertNotNull(authorizationResponse.getState(), "The state is null");
+            assertAuthorizationResponse(authorizationResponse, responseTypes, true);
 
             String idToken = authorizationResponse.getIdToken();
 
             // 3. Read Encrypted ID Token
             Jwe jwe = Jwe.parse(idToken, null, clientSecret.getBytes(StandardCharsets.UTF_8));
-            assertNotNull(jwe.getHeader().getClaimAsString(JwtHeaderName.TYPE));
-            assertNotNull(jwe.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
-            assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ISSUER));
-            assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
-            assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
-            assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
-            assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
+            assertJweStandarClaimsNotNull(jwe, true);
         } catch (Exception ex) {
             fail(ex.getMessage(), ex);
         }
@@ -132,7 +121,7 @@ public class CanProvideEncryptedIdTokenResponse extends BaseTest {
             RegisterResponse registerResponse = registerClient.exec();
 
             showClient(registerClient);
-            assertOk(registerResponse);
+            assertRegisterResponseOk(registerResponse, 201, true);
 
             String clientId = registerResponse.getClientId();
             String clientSecret = registerResponse.getClientSecret();
@@ -150,24 +139,13 @@ public class CanProvideEncryptedIdTokenResponse extends BaseTest {
 
             AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                     authorizationEndpoint, authorizationRequest, userId, userSecret);
-
-            assertNotNull(authorizationResponse.getLocation(), "The location is null");
-            assertNotNull(authorizationResponse.getAccessToken(), "The accessToken is null");
-            assertNotNull(authorizationResponse.getTokenType(), "The tokenType is null");
-            assertNotNull(authorizationResponse.getIdToken(), "The idToken is null");
-            assertNotNull(authorizationResponse.getState(), "The state is null");
+            assertAuthorizationResponse(authorizationResponse, responseTypes, true);
 
             String idToken = authorizationResponse.getIdToken();
 
             // 3. Read Encrypted ID Token
             Jwe jwe = Jwe.parse(idToken, null, clientSecret.getBytes(StandardCharsets.UTF_8));
-            assertNotNull(jwe.getHeader().getClaimAsString(JwtHeaderName.TYPE));
-            assertNotNull(jwe.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
-            assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ISSUER));
-            assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
-            assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
-            assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
-            assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
+            assertJweStandarClaimsNotNull(jwe, true);
         } catch (Exception ex) {
             fail(ex.getMessage(), ex);
         }
@@ -200,7 +178,7 @@ public class CanProvideEncryptedIdTokenResponse extends BaseTest {
             RegisterResponse registerResponse = registerClient.exec();
 
             showClient(registerClient);
-            assertOk(registerResponse);
+            assertRegisterResponseOk(registerResponse, 201, true);
 
             String clientId = registerResponse.getClientId();
 
@@ -217,12 +195,7 @@ public class CanProvideEncryptedIdTokenResponse extends BaseTest {
 
             AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                     authorizationEndpoint, authorizationRequest, userId, userSecret);
-
-            assertNotNull(authorizationResponse.getLocation(), "The location is null");
-            assertNotNull(authorizationResponse.getAccessToken(), "The accessToken is null");
-            assertNotNull(authorizationResponse.getTokenType(), "The tokenType is null");
-            assertNotNull(authorizationResponse.getIdToken(), "The idToken is null");
-            assertNotNull(authorizationResponse.getState(), "The state is null");
+            assertAuthorizationResponse(authorizationResponse, responseTypes, true);
 
             String idToken = authorizationResponse.getIdToken();
 
@@ -231,13 +204,7 @@ public class CanProvideEncryptedIdTokenResponse extends BaseTest {
             PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
 
             Jwe jwe = Jwe.parse(idToken, privateKey, null);
-            assertNotNull(jwe.getHeader().getClaimAsString(JwtHeaderName.TYPE));
-            assertNotNull(jwe.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
-            assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ISSUER));
-            assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
-            assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
-            assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
-            assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
+            assertJweStandarClaimsNotNull(jwe, false);
         } catch (Exception ex) {
             fail(ex.getMessage(), ex);
         }
@@ -270,7 +237,7 @@ public class CanProvideEncryptedIdTokenResponse extends BaseTest {
             RegisterResponse registerResponse = registerClient.exec();
 
             showClient(registerClient);
-            assertOk(registerResponse);
+            assertRegisterResponseOk(registerResponse, 201, true);
 
             String clientId = registerResponse.getClientId();
 
@@ -301,13 +268,7 @@ public class CanProvideEncryptedIdTokenResponse extends BaseTest {
             PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
 
             Jwe jwe = Jwe.parse(idToken, privateKey, null);
-            assertNotNull(jwe.getHeader().getClaimAsString(JwtHeaderName.TYPE));
-            assertNotNull(jwe.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
-            assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ISSUER));
-            assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
-            assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
-            assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
-            assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
+            assertJweStandarClaimsNotNull(jwe, false);
         } catch (Exception ex) {
             fail(ex.getMessage(), ex);
         }
@@ -340,7 +301,7 @@ public class CanProvideEncryptedIdTokenResponse extends BaseTest {
             RegisterResponse registerResponse = registerClient.exec();
 
             showClient(registerClient);
-            assertOk(registerResponse);
+            assertRegisterResponseOk(registerResponse, 201, true);
 
             String clientId = registerResponse.getClientId();
 
@@ -357,12 +318,7 @@ public class CanProvideEncryptedIdTokenResponse extends BaseTest {
 
             AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                     authorizationEndpoint, authorizationRequest, userId, userSecret);
-
-            assertNotNull(authorizationResponse.getLocation(), "The location is null");
-            assertNotNull(authorizationResponse.getAccessToken(), "The accessToken is null");
-            assertNotNull(authorizationResponse.getTokenType(), "The tokenType is null");
-            assertNotNull(authorizationResponse.getIdToken(), "The idToken is null");
-            assertNotNull(authorizationResponse.getState(), "The state is null");
+            assertAuthorizationResponse(authorizationResponse, responseTypes, true);
 
             String idToken = authorizationResponse.getIdToken();
 
@@ -371,13 +327,7 @@ public class CanProvideEncryptedIdTokenResponse extends BaseTest {
             PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
 
             Jwe jwe = Jwe.parse(idToken, privateKey, null);
-            assertNotNull(jwe.getHeader().getClaimAsString(JwtHeaderName.TYPE));
-            assertNotNull(jwe.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
-            assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ISSUER));
-            assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
-            assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
-            assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
-            assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
+            assertJweStandarClaimsNotNull(jwe, false);
         } catch (Exception ex) {
             fail(ex.getMessage(), ex);
         }

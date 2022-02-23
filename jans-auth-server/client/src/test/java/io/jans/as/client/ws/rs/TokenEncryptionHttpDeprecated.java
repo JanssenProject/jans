@@ -29,6 +29,7 @@ import java.security.PrivateKey;
 import java.util.Arrays;
 import java.util.List;
 
+import static io.jans.as.client.client.Asserter.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.fail;
@@ -69,11 +70,7 @@ public class TokenEncryptionHttpDeprecated extends BaseTest {
             RegisterResponse response = registerClient.exec();
 
             showClient(registerClient);
-            assertEquals(response.getStatus(), 200, "Unexpected response code: " + response.getEntity());
-            assertNotNull(response.getClientId());
-            assertNotNull(response.getClientSecret());
-            assertNotNull(response.getRegistrationAccessToken());
-            assertNotNull(response.getClientSecretExpiresAt());
+            assertRegisterResponseOk(response, 200, false);
 
             String clientId = response.getClientId();
             String clientSecret = response.getClientSecret();
@@ -91,11 +88,7 @@ public class TokenEncryptionHttpDeprecated extends BaseTest {
             TokenResponse tokenResponse = tokenClient.exec();
 
             showClient(tokenClient);
-            assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-            assertNotNull(tokenResponse.getEntity(), "The entity is null");
-            assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
-            assertNotNull(tokenResponse.getTokenType(), "The token type is null");
-            assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
+            assertTokenResponseOk(tokenResponse, true);
             assertNotNull(tokenResponse.getScope(), "The scope is null");
             assertNotNull(tokenResponse.getIdToken(), "The id token is null");
 
@@ -106,13 +99,7 @@ public class TokenEncryptionHttpDeprecated extends BaseTest {
             PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
 
             Jwe jwe = Jwe.parse(idToken, privateKey, null);
-            assertNotNull(jwe.getHeader().getClaimAsString(JwtHeaderName.TYPE));
-            assertNotNull(jwe.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
-            assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ISSUER));
-            assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
-            assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
-            assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
-            assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
+            assertJweStandarClaimsNotNull(jwe, false);
             assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.OX_OPENID_CONNECT_VERSION));
         } catch (Exception ex) {
             fail(ex.getMessage(), ex);
@@ -148,11 +135,7 @@ public class TokenEncryptionHttpDeprecated extends BaseTest {
             RegisterResponse response = registerClient.exec();
 
             showClient(registerClient);
-            assertEquals(response.getStatus(), 200, "Unexpected response code: " + response.getEntity());
-            assertNotNull(response.getClientId());
-            assertNotNull(response.getClientSecret());
-            assertNotNull(response.getRegistrationAccessToken());
-            assertNotNull(response.getClientSecretExpiresAt());
+            assertRegisterResponseOk(response, 200, false);
 
             String clientId = response.getClientId();
             String clientSecret = response.getClientSecret();
@@ -170,11 +153,7 @@ public class TokenEncryptionHttpDeprecated extends BaseTest {
             TokenResponse tokenResponse = tokenClient.exec();
 
             showClient(tokenClient);
-            assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-            assertNotNull(tokenResponse.getEntity(), "The entity is null");
-            assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
-            assertNotNull(tokenResponse.getTokenType(), "The token type is null");
-            assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
+            assertTokenResponseOk(tokenResponse, true);
             assertNotNull(tokenResponse.getScope(), "The scope is null");
             assertNotNull(tokenResponse.getIdToken(), "The id token is null");
 
@@ -185,13 +164,7 @@ public class TokenEncryptionHttpDeprecated extends BaseTest {
             PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
 
             Jwe jwe = Jwe.parse(idToken, privateKey, null);
-            assertNotNull(jwe.getHeader().getClaimAsString(JwtHeaderName.TYPE));
-            assertNotNull(jwe.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
-            assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ISSUER));
-            assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
-            assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
-            assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
-            assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
+            assertJweStandarClaimsNotNull(jwe, false);
             assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.OX_OPENID_CONNECT_VERSION));
         } catch (Exception ex) {
             fail(ex.getMessage(), ex);
@@ -227,11 +200,7 @@ public class TokenEncryptionHttpDeprecated extends BaseTest {
             RegisterResponse response = registerClient.exec();
 
             showClient(registerClient);
-            assertEquals(response.getStatus(), 200, "Unexpected response code: " + response.getEntity());
-            assertNotNull(response.getClientId());
-            assertNotNull(response.getClientSecret());
-            assertNotNull(response.getRegistrationAccessToken());
-            assertNotNull(response.getClientSecretExpiresAt());
+            assertRegisterResponseOk(response, 200, false);
 
             String clientId = response.getClientId();
             String clientSecret = response.getClientSecret();
@@ -249,11 +218,7 @@ public class TokenEncryptionHttpDeprecated extends BaseTest {
             TokenResponse tokenResponse = tokenClient.exec();
 
             showClient(tokenClient);
-            assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-            assertNotNull(tokenResponse.getEntity(), "The entity is null");
-            assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
-            assertNotNull(tokenResponse.getTokenType(), "The token type is null");
-            assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
+            assertTokenResponseOk(tokenResponse, true);
             assertNotNull(tokenResponse.getScope(), "The scope is null");
             assertNotNull(tokenResponse.getIdToken(), "The id token is null");
 
@@ -264,13 +229,7 @@ public class TokenEncryptionHttpDeprecated extends BaseTest {
             PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
 
             Jwe jwe = Jwe.parse(idToken, privateKey, null);
-            assertNotNull(jwe.getHeader().getClaimAsString(JwtHeaderName.TYPE));
-            assertNotNull(jwe.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
-            assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ISSUER));
-            assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
-            assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
-            assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
-            assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
+            assertJweStandarClaimsNotNull(jwe, false);
             assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.OX_OPENID_CONNECT_VERSION));
         } catch (Exception ex) {
             fail(ex.getMessage(), ex);
@@ -303,11 +262,7 @@ public class TokenEncryptionHttpDeprecated extends BaseTest {
             RegisterResponse response = registerClient.exec();
 
             showClient(registerClient);
-            assertEquals(response.getStatus(), 200, "Unexpected response code: " + response.getEntity());
-            assertNotNull(response.getClientId());
-            assertNotNull(response.getClientSecret());
-            assertNotNull(response.getRegistrationAccessToken());
-            assertNotNull(response.getClientSecretExpiresAt());
+            assertRegisterResponseOk(response, 200, false);
 
             String clientId = response.getClientId();
             String clientSecret = response.getClientSecret();
@@ -325,11 +280,7 @@ public class TokenEncryptionHttpDeprecated extends BaseTest {
             TokenResponse tokenResponse = tokenClient.exec();
 
             showClient(tokenClient);
-            assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-            assertNotNull(tokenResponse.getEntity(), "The entity is null");
-            assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
-            assertNotNull(tokenResponse.getTokenType(), "The token type is null");
-            assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
+            assertTokenResponseOk(tokenResponse, true);
             assertNotNull(tokenResponse.getScope(), "The scope is null");
             assertNotNull(tokenResponse.getIdToken(), "The id token is null");
 
@@ -337,13 +288,7 @@ public class TokenEncryptionHttpDeprecated extends BaseTest {
 
             // 3. Read Encrypted ID Token
             Jwe jwe = Jwe.parse(idToken, null, clientSecret.getBytes(StandardCharsets.UTF_8));
-            assertNotNull(jwe.getHeader().getClaimAsString(JwtHeaderName.TYPE));
-            assertNotNull(jwe.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
-            assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ISSUER));
-            assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
-            assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
-            assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
-            assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
+            assertJweStandarClaimsNotNull(jwe, false);
             assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.OX_OPENID_CONNECT_VERSION));
         } catch (Exception ex) {
             fail(ex.getMessage(), ex);
@@ -376,11 +321,7 @@ public class TokenEncryptionHttpDeprecated extends BaseTest {
             RegisterResponse response = registerClient.exec();
 
             showClient(registerClient);
-            assertEquals(response.getStatus(), 200, "Unexpected response code: " + response.getEntity());
-            assertNotNull(response.getClientId());
-            assertNotNull(response.getClientSecret());
-            assertNotNull(response.getRegistrationAccessToken());
-            assertNotNull(response.getClientSecretExpiresAt());
+            assertRegisterResponseOk(response, 200, false);
 
             String clientId = response.getClientId();
             String clientSecret = response.getClientSecret();
@@ -398,11 +339,7 @@ public class TokenEncryptionHttpDeprecated extends BaseTest {
             TokenResponse tokenResponse = tokenClient.exec();
 
             showClient(tokenClient);
-            assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-            assertNotNull(tokenResponse.getEntity(), "The entity is null");
-            assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
-            assertNotNull(tokenResponse.getTokenType(), "The token type is null");
-            assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
+            assertTokenResponseOk(tokenResponse, true);
             assertNotNull(tokenResponse.getScope(), "The scope is null");
             assertNotNull(tokenResponse.getIdToken(), "The id token is null");
 
@@ -410,13 +347,7 @@ public class TokenEncryptionHttpDeprecated extends BaseTest {
 
             // 3. Read Encrypted ID Token
             Jwe jwe = Jwe.parse(idToken, null, clientSecret.getBytes(StandardCharsets.UTF_8));
-            assertNotNull(jwe.getHeader().getClaimAsString(JwtHeaderName.TYPE));
-            assertNotNull(jwe.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
-            assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ISSUER));
-            assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
-            assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
-            assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
-            assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
+            assertJweStandarClaimsNotNull(jwe, false);
             assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.OX_OPENID_CONNECT_VERSION));
         } catch (Exception ex) {
             fail(ex.getMessage(), ex);

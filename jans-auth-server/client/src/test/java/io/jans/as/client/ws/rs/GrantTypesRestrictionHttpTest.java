@@ -44,7 +44,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static io.jans.as.client.client.Asserter.assertOk;
+import static io.jans.as.client.client.Asserter.*;
 import static io.jans.as.model.register.RegisterRequestParam.APPLICATION_TYPE;
 import static io.jans.as.model.register.RegisterRequestParam.SCOPE;
 import static org.testng.Assert.assertEquals;
@@ -85,7 +85,7 @@ public class GrantTypesRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
         assertNotNull(registerResponse.getResponseTypes());
         assertTrue(registerResponse.getResponseTypes().containsAll(expectedResponseTypes));
         assertNotNull(registerResponse.getGrantTypes());
@@ -105,14 +105,8 @@ public class GrantTypesRestrictionHttpTest extends BaseTest {
         RegisterResponse readResponse = readClient.exec();
 
         showClient(readClient);
-        assertEquals(readResponse.getStatus(), 200);
-        assertNotNull(readResponse.getClientId());
-        assertNotNull(readResponse.getClientSecret());
-        assertNotNull(readResponse.getRegistrationAccessToken());
-        assertNotNull(readResponse.getRegistrationClientUri());
-        assertNotNull(readResponse.getClientSecretExpiresAt());
-        assertNotNull(readResponse.getClaims().get(APPLICATION_TYPE.toString()));
-        assertNotNull(readResponse.getClaims().get(SCOPE.toString()));
+        assertRegisterResponseOk(readResponse, 200, true);
+        assertRegisterResponseClaimsNotNull(readResponse, APPLICATION_TYPE, SCOPE);
         assertNotNull(readResponse.getResponseTypes());
         assertTrue(readResponse.getResponseTypes().containsAll(expectedResponseTypes));
         assertNotNull(readResponse.getGrantTypes());
@@ -169,14 +163,7 @@ public class GrantTypesRestrictionHttpTest extends BaseTest {
 
             // 4. Validate id_token
             Jwt jwt = Jwt.parse(idToken);
-            assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
-            assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
-            assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
-            assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
-            assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
-            assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
-            assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
-            assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
+            assertJwtStandarClaimsNotNull(jwt, false);
 
             RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
                     jwksUri,
@@ -209,11 +196,7 @@ public class GrantTypesRestrictionHttpTest extends BaseTest {
             TokenResponse tokenResponse = tokenClient.exec();
 
             showClient(tokenClient);
-            assertEquals(tokenResponse.getStatus(), 200);
-            assertNotNull(tokenResponse.getEntity());
-            assertNotNull(tokenResponse.getAccessToken());
-            assertNotNull(tokenResponse.getExpiresIn());
-            assertNotNull(tokenResponse.getTokenType());
+            assertTokenResponseOk(tokenResponse, false);
 
             if (expectedGrantTypes.contains(GrantType.REFRESH_TOKEN)) {
                 assertNotNull(tokenResponse.getRefreshToken());
@@ -225,12 +208,7 @@ public class GrantTypesRestrictionHttpTest extends BaseTest {
                 TokenResponse refreshTokenResponse = refreshTokenClient.execRefreshToken(scope, refreshToken, clientId, clientSecret);
 
                 showClient(refreshTokenClient);
-                assertEquals(refreshTokenResponse.getStatus(), 200);
-                assertNotNull(refreshTokenResponse.getEntity());
-                assertNotNull(refreshTokenResponse.getAccessToken());
-                assertNotNull(refreshTokenResponse.getTokenType());
-                assertNotNull(refreshTokenResponse.getRefreshToken());
-                assertNotNull(refreshTokenResponse.getScope());
+                assertTokenResponseOk(refreshTokenResponse, true);
 
                 accessToken = refreshTokenResponse.getAccessToken();
             } else {
