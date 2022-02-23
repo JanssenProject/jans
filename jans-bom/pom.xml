@@ -662,7 +662,7 @@
 			<dependency>
 			    <groupId>com.google.cloud</groupId>
 			    <artifactId>google-cloud-spanner</artifactId>
-			    <version>6.17.3</version>
+			    <version>6.17.4</version>
 			</dependency>
 			<!-- Force to use latest grpc libs. We need to remove this once google-cloud-spanner will depend on grpc >= 1.43.0  -->
 			<dependency>
