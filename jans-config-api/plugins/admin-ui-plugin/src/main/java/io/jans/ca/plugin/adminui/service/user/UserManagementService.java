@@ -40,7 +40,7 @@ public class UserManagementService {
     private AdminRole getRoleObjByName(String role) throws ApplicationException {
         try {
             AdminConf adminConf = entryManager.find(AdminConf.class, CONFIG_DN);
-            List roles = adminConf.getDynamic().getRoles().stream().filter(ele -> ele.getRole().equals(role)).collect(Collectors.toList());
+            List<AdminRole> roles = adminConf.getDynamic().getRoles().stream().filter(ele -> ele.getRole().equals(role)).collect(Collectors.toList());
             if (roles.isEmpty()) {
                 log.error(ErrorResponse.ROLE_NOT_FOUND.getDescription());
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.ROLE_NOT_FOUND.getDescription());
