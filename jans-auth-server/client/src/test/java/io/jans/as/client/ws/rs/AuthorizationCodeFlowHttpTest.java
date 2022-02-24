@@ -98,7 +98,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         TokenResponse tokenResponse1 = tokenClient1.exec();
 
         showClient(tokenClient1);
-        assertTokenResponseOk(tokenResponse1, true);
+        assertTokenResponseOk(tokenResponse1, true, false);
 
         String refreshToken = tokenResponse1.getRefreshToken();
 
@@ -119,7 +119,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         TokenResponse tokenResponse2 = tokenClient2.execRefreshToken(scope, refreshToken, clientId, clientSecret);
 
         showClient(tokenClient2);
-        assertTokenResponseOk(tokenResponse2, true);
+        assertTokenResponseOk(tokenResponse2, true, false);
         assertNotNull(tokenResponse2.getScope(), "The scope is null");
 
         String accessToken = tokenResponse2.getAccessToken();
@@ -200,7 +200,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         TokenResponse tokenResponse1 = tokenClient1.exec();
 
         showClient(tokenClient1);
-        assertTokenResponseOk(tokenResponse1, true);
+        assertTokenResponseOk(tokenResponse1, true, false);
 
         String refreshToken = tokenResponse1.getRefreshToken();
 
@@ -222,7 +222,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         TokenResponse tokenResponse2 = tokenClient2.execRefreshToken(scope, refreshToken, clientId, clientSecret);
 
         showClient(tokenClient2);
-        assertTokenResponseOk(tokenResponse2, true);
+        assertTokenResponseOk(tokenResponse2, true, false);
         assertNotNull(tokenResponse2.getScope(), "The scope is null");
         assertEquals(tokenResponse2.getScope(), "openid");
 
@@ -294,7 +294,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        assertTokenResponseOk(tokenResponse, true, false);
 
         String accessToken = tokenResponse.getAccessToken();
 
@@ -354,7 +354,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        assertTokenResponseOk(tokenResponse, true, false);
 
         String accessToken = tokenResponse.getAccessToken();
 
@@ -428,7 +428,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         TokenResponse tokenResponse1 = tokenClient1.exec();
 
         showClient(tokenClient1);
-        assertTokenResponseOk(tokenResponse1, true);
+        assertTokenResponseOk(tokenResponse1, true, false);
 
         String refreshToken = tokenResponse1.getRefreshToken();
 
@@ -452,7 +452,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         TokenResponse tokenResponse2 = tokenClient2.execRefreshToken(scope, refreshToken, clientId, clientSecret);
 
         showClient(tokenClient2);
-        assertTokenResponseOk(tokenResponse2, true);
+        assertTokenResponseOk(tokenResponse2, true, false);
         assertNotNull(tokenResponse2.getScope(), "The scope is null");
     }
 
@@ -619,7 +619,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         TokenResponse tokenResponse1 = tokenClient1.exec();
 
         showClient(tokenClient1);
-        assertTokenResponseOk(tokenResponse1, true);
+        assertTokenResponseOk(tokenResponse1, true, false);
 
         String refreshToken = tokenResponse1.getRefreshToken();
 
@@ -641,7 +641,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         TokenResponse tokenResponse2 = tokenClient2.execRefreshToken(scope, refreshToken, clientId, clientSecret);
 
         showClient(tokenClient2);
-        assertTokenResponseOk(tokenResponse2, true);
+        assertTokenResponseOk(tokenResponse2, true, false);
         assertNotNull(tokenResponse2.getScope(), "The scope is null");
 
         String accessToken = tokenResponse2.getAccessToken();
@@ -708,7 +708,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         TokenResponse tokenResponse1 = tokenClient1.exec();
 
         showClient(tokenClient1);
-        assertTokenResponseOk(tokenResponse1, true);
+        assertTokenResponseOk(tokenResponse1, true, false);
 
         String refreshToken = tokenResponse1.getRefreshToken();
 
@@ -722,7 +722,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         TokenResponse tokenResponse2 = tokenClient2.execRefreshToken(scope, refreshToken, clientId, clientSecret);
 
         showClient(tokenClient2);
-        assertTokenResponseOk(tokenResponse2, true);
+        assertTokenResponseOk(tokenResponse2, true, false);
         assertNotNull(tokenResponse2.getScope(), "The scope is null");
 
         String accessToken = tokenResponse2.getAccessToken();

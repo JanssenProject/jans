@@ -117,7 +117,7 @@ public class EnableClientToRestrictJavascriptOrigin extends BaseTest {
         TokenResponse tokenResponse1 = tokenClient1.exec();
 
         showClient(tokenClient1);
-        assertTokenResponseOk(tokenResponse1, true);
+        assertTokenResponseOk(tokenResponse1, true, false);
 
         String refreshToken = tokenResponse1.getRefreshToken();
 
@@ -139,7 +139,7 @@ public class EnableClientToRestrictJavascriptOrigin extends BaseTest {
         TokenResponse tokenResponse2 = tokenClient2.execRefreshToken(scope, refreshToken, clientId, clientSecret);
 
         showClient(tokenClient2);
-        assertTokenResponseOk(tokenResponse2, true);
+        assertTokenResponseOk(tokenResponse2, true, false);
         assertNotNull(tokenResponse2.getScope(), "The scope is null");
 
         String accessToken = tokenResponse2.getAccessToken();

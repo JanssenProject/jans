@@ -430,7 +430,7 @@ public class DeviceAuthzFlowHttpTest extends BaseTest {
     private void verifyIdToken(String idToken) throws InvalidJwtException, UnrecoverableKeyException,
             NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
         Jwt jwt = Jwt.parse(idToken);
-        Asserter.assertJwtStandarClaimsNotNull(jwt, false);
+        assertJwtStandarClaimsNotNull(jwt, false, false);
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.OX_OPENID_CONNECT_VERSION));
 
         RSAPublicKey publicKey = JwkClient.getRSAPublicKey(

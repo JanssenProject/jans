@@ -82,7 +82,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        assertTokenResponseOk(tokenResponse, true, false);
         assertNotNull(tokenResponse.getScope());
 
         String accessToken = tokenResponse.getAccessToken();
@@ -176,7 +176,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        assertTokenResponseOk(tokenResponse, true, false);
         assertNotNull(tokenResponse.getScope());
 
         String accessToken = tokenResponse.getAccessToken();
@@ -281,7 +281,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        assertTokenResponseOk(tokenResponse, true, false);
         assertNotNull(tokenResponse.getScope());
 
         String accessToken = tokenResponse.getAccessToken();
@@ -464,7 +464,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        assertTokenResponseOk(tokenResponse, true, false);
         assertNotNull(tokenResponse.getScope());
 
         String accessToken = tokenResponse.getAccessToken();
@@ -570,7 +570,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        assertTokenResponseOk(tokenResponse, true, false);
         assertNotNull(tokenResponse.getScope());
 
         String accessToken = tokenResponse.getAccessToken();
@@ -676,7 +676,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        assertTokenResponseOk(tokenResponse, true, false);
         assertNotNull(tokenResponse.getScope());
 
         String accessToken = tokenResponse.getAccessToken();
@@ -785,7 +785,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        assertTokenResponseOk(tokenResponse, true, false);
         assertNotNull(tokenResponse.getScope());
 
         String accessToken = tokenResponse.getAccessToken();
@@ -896,7 +896,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        assertTokenResponseOk(tokenResponse, true, false);
         assertNotNull(tokenResponse.getScope());
 
         String accessToken = tokenResponse.getAccessToken();
@@ -1007,7 +1007,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        assertTokenResponseOk(tokenResponse, true, false);
         assertNotNull(tokenResponse.getScope());
 
         String accessToken = tokenResponse.getAccessToken();
@@ -1118,7 +1118,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        assertTokenResponseOk(tokenResponse, true, false);
         assertNotNull(tokenResponse.getScope());
 
         String accessToken = tokenResponse.getAccessToken();
@@ -1229,7 +1229,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        assertTokenResponseOk(tokenResponse, true, false);
         assertNotNull(tokenResponse.getScope());
 
         String accessToken = tokenResponse.getAccessToken();
@@ -1340,7 +1340,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        assertTokenResponseOk(tokenResponse, true, false);
         assertNotNull(tokenResponse.getScope());
 
         String accessToken = tokenResponse.getAccessToken();
@@ -1451,7 +1451,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        assertTokenResponseOk(tokenResponse, true, false);
         assertNotNull(tokenResponse.getScope());
 
         String accessToken = tokenResponse.getAccessToken();
@@ -1562,7 +1562,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        assertTokenResponseOk(tokenResponse, true, false);
         assertNotNull(tokenResponse.getScope());
 
         String accessToken = tokenResponse.getAccessToken();
@@ -1673,7 +1673,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        assertTokenResponseOk(tokenResponse, true, false);
         assertNotNull(tokenResponse.getScope());
 
         String accessToken = tokenResponse.getAccessToken();

@@ -127,7 +127,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
+        assertUserInfoBasicMinimumResponseOk(userInfoResponse, 200);
         assertUserInfoPersonalDataNotNull(userInfoResponse);
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS));
     }
@@ -194,7 +194,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         UserInfoResponse response2 = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(response2, 200);
+        assertUserInfoBasicMinimumResponseOk(response2, 200);
         assertUserInfoPersonalDataNotNull(response2);        
         assertNotNull(response2.getClaim(JwtClaimName.ADDRESS));
     }
@@ -474,7 +474,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         UserInfoResponse response3 = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(response3, 200); 
+        assertUserInfoBasicMinimumResponseOk(response3, 200); 
         assertUserInfoPersonalDataNotNull(response3);
     }
 
@@ -553,7 +553,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         UserInfoResponse response3 = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(response3, 200); 
+        assertUserInfoBasicMinimumResponseOk(response3, 200); 
         assertUserInfoPersonalDataNotNull(response3);
     }
 
@@ -630,7 +630,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         UserInfoResponse response3 = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(response3, 200); 
+        assertUserInfoBasicMinimumResponseOk(response3, 200); 
         assertUserInfoPersonalDataNotNull(response3);
     }
 
@@ -708,7 +708,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         UserInfoResponse response3 = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(response3, 200); 
+        assertUserInfoBasicMinimumResponseOk(response3, 200); 
         assertUserInfoPersonalDataNotNull(response3);
         assertNotNull(response3.getClaim(JwtClaimName.ADDRESS));
     }
@@ -791,7 +791,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         UserInfoResponse response3 = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(response3, 200); 
+        assertUserInfoBasicMinimumResponseOk(response3, 200); 
         assertUserInfoPersonalDataNotNull(response3);
         assertNotNull(response3.getClaim(JwtClaimName.ADDRESS));
     }
@@ -870,7 +870,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         UserInfoResponse response3 = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(response3, 200); 
+        assertUserInfoBasicMinimumResponseOk(response3, 200); 
         assertUserInfoPersonalDataNotNull(response3);
     }
 
@@ -948,7 +948,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         UserInfoResponse response3 = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(response3, 200); 
+        assertUserInfoBasicMinimumResponseOk(response3, 200); 
         assertUserInfoPersonalDataNotNull(response3);
     }
 
@@ -1026,7 +1026,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         UserInfoResponse response3 = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(response3, 200); 
+        assertUserInfoBasicMinimumResponseOk(response3, 200); 
         assertUserInfoPersonalDataNotNull(response3);
     }
 
@@ -1104,7 +1104,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         UserInfoResponse response3 = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(response3, 200); 
+        assertUserInfoBasicMinimumResponseOk(response3, 200); 
         assertUserInfoPersonalDataNotNull(response3);
     }
 
@@ -1182,7 +1182,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         UserInfoResponse response3 = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(response3, 200); 
+        assertUserInfoBasicMinimumResponseOk(response3, 200); 
         assertUserInfoPersonalDataNotNull(response3);
     }
 
@@ -1260,7 +1260,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         UserInfoResponse response3 = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(response3, 200); 
+        assertUserInfoBasicMinimumResponseOk(response3, 200); 
         assertUserInfoPersonalDataNotNull(response3);
     }
 
@@ -1338,7 +1338,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         UserInfoResponse response3 = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(response3, 200); 
+        assertUserInfoBasicMinimumResponseOk(response3, 200); 
         assertUserInfoPersonalDataNotNull(response3);
     }
 
@@ -1416,7 +1416,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         UserInfoResponse response3 = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(response3, 200); 
+        assertUserInfoBasicMinimumResponseOk(response3, 200); 
         assertUserInfoPersonalDataNotNull(response3);
         assertNotNull(response3.getClaim(JwtClaimName.ADDRESS));
     }
@@ -1495,7 +1495,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         UserInfoResponse response3 = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(response3, 200); 
+        assertUserInfoBasicMinimumResponseOk(response3, 200); 
         assertUserInfoPersonalDataNotNull(response3);
         assertNotNull(response3.getClaim(JwtClaimName.ADDRESS));
     }
@@ -1574,7 +1574,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         UserInfoResponse response3 = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(response3, 200); 
+        assertUserInfoBasicMinimumResponseOk(response3, 200); 
         assertUserInfoPersonalDataNotNull(response3);
     }
 
@@ -2170,7 +2170,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             UserInfoResponse response3 = userInfoClient.execUserInfo(accessToken);
 
             showClient(userInfoClient);
-            assertUserInfoBasicResponseOk(response3, 200);
+            assertUserInfoBasicMinimumResponseOk(response3, 200);
         assertUserInfoPersonalDataNotNull(response3);
             assertNotNull(response3.getClaim(JwtClaimName.ADDRESS));
         } catch (Exception e) {
@@ -2257,7 +2257,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             UserInfoResponse response3 = userInfoClient.execUserInfo(accessToken);
 
             showClient(userInfoClient);
-            assertUserInfoBasicResponseOk(response3, 200); 
+            assertUserInfoBasicMinimumResponseOk(response3, 200); 
         assertUserInfoPersonalDataNotNull(response3);
             assertNotNull(response3.getClaim(JwtClaimName.ADDRESS));
         } catch (Exception e) {
@@ -2344,7 +2344,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             UserInfoResponse response3 = userInfoClient.execUserInfo(accessToken);
 
             showClient(userInfoClient);
-            assertUserInfoBasicResponseOk(response3, 200); 
+            assertUserInfoBasicMinimumResponseOk(response3, 200); 
         assertUserInfoPersonalDataNotNull(response3);
             assertNotNull(response3.getClaim(JwtClaimName.ADDRESS));
         } catch (Exception e) {
@@ -2431,7 +2431,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             UserInfoResponse response3 = userInfoClient.execUserInfo(accessToken);
 
             showClient(userInfoClient);
-            assertUserInfoBasicResponseOk(response3, 200); 
+            assertUserInfoBasicMinimumResponseOk(response3, 200); 
         assertUserInfoPersonalDataNotNull(response3);
             assertNotNull(response3.getClaim(JwtClaimName.ADDRESS));
         } catch (Exception e) {
@@ -2509,7 +2509,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             UserInfoResponse response3 = userInfoClient.execUserInfo(accessToken);
 
             showClient(userInfoClient);
-            assertUserInfoBasicResponseOk(response3, 200); 
+            assertUserInfoBasicMinimumResponseOk(response3, 200); 
         assertUserInfoPersonalDataNotNull(response3);
             assertNotNull(response3.getClaim(JwtClaimName.ADDRESS));
         } catch (Exception e) {
@@ -2587,7 +2587,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             UserInfoResponse response3 = userInfoClient.execUserInfo(accessToken);
 
             showClient(userInfoClient);
-            assertUserInfoBasicResponseOk(response3, 200); 
+            assertUserInfoBasicMinimumResponseOk(response3, 200); 
         assertUserInfoPersonalDataNotNull(response3);
             assertNotNull(response3.getClaim(JwtClaimName.ADDRESS));
         } catch (Exception e) {

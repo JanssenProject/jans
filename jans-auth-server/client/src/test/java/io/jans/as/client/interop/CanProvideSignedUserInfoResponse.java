@@ -92,7 +92,7 @@ public class CanProvideSignedUserInfoResponse extends BaseTest {
         showClient(userInfoClient);
         assertUserInfoBasicResponseOk(userInfoResponse, 200);
         assertUserInfoPersonalDataNotNull(userInfoResponse);
-        assertUserInfoAddressNotNull(userInfoResponse);
+        assertUserInfoAddressMinimumNotNull(userInfoResponse);
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
@@ -147,7 +147,7 @@ public class CanProvideSignedUserInfoResponse extends BaseTest {
         showClient(userInfoClient);
         assertUserInfoBasicResponseOk(userInfoResponse, 200);
         assertUserInfoPersonalDataNotNull(userInfoResponse);
-        assertUserInfoAddressNotNull(userInfoResponse);
+        assertUserInfoAddressMinimumNotNull(userInfoResponse);
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
@@ -202,7 +202,7 @@ public class CanProvideSignedUserInfoResponse extends BaseTest {
         showClient(userInfoClient);
         assertUserInfoBasicResponseOk(userInfoResponse, 200);
         assertUserInfoPersonalDataNotNull(userInfoResponse);
-        assertUserInfoAddressNotNull(userInfoResponse);
+        assertUserInfoAddressMinimumNotNull(userInfoResponse);
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
@@ -256,7 +256,7 @@ public class CanProvideSignedUserInfoResponse extends BaseTest {
         showClient(userInfoClient);
         assertUserInfoBasicResponseOk(userInfoResponse, 200);
         assertUserInfoPersonalDataNotNull(userInfoResponse);
-        assertUserInfoAddressNotNull(userInfoResponse);
+        assertUserInfoAddressMinimumNotNull(userInfoResponse);
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
@@ -310,7 +310,7 @@ public class CanProvideSignedUserInfoResponse extends BaseTest {
         showClient(userInfoClient);
         assertUserInfoBasicResponseOk(userInfoResponse, 200);
         assertUserInfoPersonalDataNotNull(userInfoResponse);
-        assertUserInfoAddressNotNull(userInfoResponse);
+        assertUserInfoAddressMinimumNotNull(userInfoResponse);
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
@@ -364,7 +364,7 @@ public class CanProvideSignedUserInfoResponse extends BaseTest {
         showClient(userInfoClient);
         assertUserInfoBasicResponseOk(userInfoResponse, 200);
         assertUserInfoPersonalDataNotNull(userInfoResponse);
-        assertUserInfoAddressNotNull(userInfoResponse);
+        assertUserInfoAddressMinimumNotNull(userInfoResponse);
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
@@ -418,7 +418,7 @@ public class CanProvideSignedUserInfoResponse extends BaseTest {
         showClient(userInfoClient);
         assertUserInfoBasicResponseOk(userInfoResponse, 200);
         assertUserInfoPersonalDataNotNull(userInfoResponse);
-        assertUserInfoAddressNotNull(userInfoResponse);
+        assertUserInfoAddressMinimumNotNull(userInfoResponse);
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
@@ -472,7 +472,7 @@ public class CanProvideSignedUserInfoResponse extends BaseTest {
         showClient(userInfoClient);
         assertUserInfoBasicResponseOk(userInfoResponse, 200);
         assertUserInfoPersonalDataNotNull(userInfoResponse);
-        assertUserInfoAddressNotNull(userInfoResponse);
+        assertUserInfoAddressMinimumNotNull(userInfoResponse);
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
@@ -526,6 +526,6 @@ public class CanProvideSignedUserInfoResponse extends BaseTest {
         showClient(userInfoClient);
         assertUserInfoBasicResponseOk(userInfoResponse, 200);
         assertUserInfoPersonalDataNotNull(userInfoResponse);
-        assertUserInfoAddressNotNull(userInfoResponse);
+        assertUserInfoAddressMinimumNotNull(userInfoResponse);
     }
 }

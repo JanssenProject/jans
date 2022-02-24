@@ -92,7 +92,7 @@ public class UserInfoEndpointAccessWithFormEncodedBodyMethod extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.exec();
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
+        assertUserInfoBasicMinimumResponseOk(userInfoResponse, 200);
         assertUserInfoPersonalDataNotNull(userInfoResponse);
     }
 }

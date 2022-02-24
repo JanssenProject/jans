@@ -88,7 +88,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         UserInfoResponse response2 = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(response2, 200);
+        assertUserInfoBasicMinimumResponseOk(response2, 200);
         assertUserInfoPersonalDataNotNull(response2);        
         assertNotNull(response2.getClaim(JwtClaimName.ADDRESS));
         assertNull(response2.getClaim("org_name"));
@@ -125,7 +125,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         UserInfoResponse response2 = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(response2, 200);
+        assertUserInfoBasicMinimumResponseOk(response2, 200);
         assertUserInfoPersonalDataNotNull(response2);        
         assertNotNull(response2.getClaim(JwtClaimName.ADDRESS));
         assertNull(response2.getClaim("phone_mobile_number"));
@@ -161,7 +161,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         UserInfoResponse response2 = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(response2, 200);
+        assertUserInfoBasicMinimumResponseOk(response2, 200);
         assertUserInfoPersonalDataNotNull(response2);        
         assertNotNull(response2.getClaim(JwtClaimName.ADDRESS));
         assertNotNull(response2.getClaim("org_name"));
@@ -193,7 +193,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 clientId, clientSecret);
 
         showClient(tokenClient);
-        assertTokenResponseOk(response1, false);
+        assertTokenResponseOk(response1, false, false);
         assertNotNull(response1.getScope(), "The scope is null");
 
         String accessToken = response1.getAccessToken();
@@ -203,7 +203,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         UserInfoResponse response2 = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(response2, 200);
+        assertUserInfoBasicMinimumResponseOk(response2, 200);
         assertUserInfoPersonalDataNotNull(response2);        
         assertNull(response2.getClaim("org_name"));
         assertNull(response2.getClaim("work_phone"));
@@ -234,7 +234,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 clientId, clientSecret);
 
         showClient(tokenClient);
-        assertTokenResponseOk(response1, false);
+        assertTokenResponseOk(response1, false, false);
         assertNotNull(response1.getScope(), "The scope is null");
 
         String accessToken = response1.getAccessToken();
@@ -244,7 +244,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         UserInfoResponse response2 = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(response2, 200);
+        assertUserInfoBasicMinimumResponseOk(response2, 200);
         assertUserInfoPersonalDataNotNull(response2);        
         assertNull(response2.getClaim("phone_mobile_number"));
     }
@@ -284,7 +284,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         UserInfoResponse response2 = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(response2, 200);
+        assertUserInfoBasicMinimumResponseOk(response2, 200);
         assertUserInfoPersonalDataNotNull(response2);        
         assertNotNull(response2.getClaim("org_name"));
         assertNotNull(response2.getClaim("work_phone"));
@@ -344,7 +344,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        assertAuthorizationResponse(authorizationResponse, responseTypes, true, false);
 
         String accessToken = authorizationResponse.getAccessToken();
 
@@ -484,7 +484,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.exec();
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
+        assertUserInfoBasicMinimumResponseOk(userInfoResponse, 200);
         assertUserInfoPersonalDataNotNull(userInfoResponse);
 
         // Custom Claims
@@ -585,7 +585,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        assertTokenResponseOk(tokenResponse, true, false);
 
         String accessToken = tokenResponse.getAccessToken();
 
@@ -1159,7 +1159,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
 
             showClient(userInfoClient);
             assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);
+            assertUserInfoPersonalDataNotNull(userInfoResponse);
         } catch (Exception ex) {
             fail(ex.getMessage(), ex);
         }

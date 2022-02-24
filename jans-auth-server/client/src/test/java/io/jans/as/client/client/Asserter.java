@@ -118,6 +118,21 @@ public class Asserter {
         }
     }
 
+    public static void assertTokenResponseOk(TokenResponse response, boolean checkRefreshToken, boolean checkIdToken) {
+        assertNotNull(response);
+        assertEquals(response.getStatus(), 200, "Unexpected response code: " + response.getStatus());
+        assertNotNull(response.getEntity(), "The entity is null");
+        assertNotNull(response.getAccessToken(), "The access token is null");
+        assertNotNull(response.getExpiresIn(), "The expires in value is null");
+        assertNotNull(response.getTokenType(), "The token type is null");
+        if (checkIdToken) {
+            assertNotNull(response.getIdToken(), "The id token is null");
+        }
+        if (checkRefreshToken) {
+            assertNotNull(response.getRefreshToken(), "The refresh token is null");
+        }
+    }
+
     public static void assertTokenResponseFail(TokenResponse tokenResponse, int status, TokenErrorResponseType errorResponseType) {
         assertEquals(tokenResponse.getStatus(), status, "Unexpected HTTP status resposne: " + tokenResponse.getEntity());
         assertNotNull(tokenResponse.getEntity(), "The entity is null");
@@ -136,6 +151,29 @@ public class Asserter {
         assertNotNull(response.getScope(), "The scope is null");
         if (checkState) {
             assertNotNull(response.getState(), "The state is null");
+        }
+    }
+
+    public static void assertAuthorizationResponse(AuthorizationResponse authorizationResponse, List<ResponseType> responseTypes, boolean checkState, boolean checkScope) {
+        assertNotNull(authorizationResponse);
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        if (checkScope) {
+            assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        }
+
+        if (checkState) {
+            assertNotNull(authorizationResponse.getState(), "The state is null");
+        }
+        if (responseTypes.contains(ResponseType.CODE)) {
+            assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        }
+        if (responseTypes.contains(ResponseType.TOKEN)) {
+            assertNotNull(authorizationResponse.getAccessToken(), "The access_token is null");
+            assertNotNull(authorizationResponse.getTokenType());
+            assertNotNull(authorizationResponse.getExpiresIn());
+        }
+        if (responseTypes.contains(ResponseType.ID_TOKEN)) {
+            assertNotNull(authorizationResponse.getIdToken(), "The id_token is null");
         }
     }
 
@@ -218,9 +256,23 @@ public class Asserter {
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.AUDIENCE));
     }
 
+    public static void assertUserInfoBasicMinimumResponseOk(UserInfoResponse userInfoResponse, int status) {
+        assertEquals(userInfoResponse.getStatus(), status, "Unexpected response code: " + userInfoResponse.getEntity());
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
+    }
+
     public static void assertUserInfoAddressNotNull(UserInfoResponse userInfoResponse) {
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_STREET_ADDRESS));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_COUNTRY));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS).containsAll(Arrays.asList(
+                JwtClaimName.ADDRESS_STREET_ADDRESS,
+                JwtClaimName.ADDRESS_COUNTRY,
+                JwtClaimName.ADDRESS_LOCALITY,
+                JwtClaimName.ADDRESS_REGION)));
+    }
+
+    public static void assertUserInfoAddressMinimumNotNull(UserInfoResponse userInfoResponse) {
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS).containsAll(Arrays.asList(
                 JwtClaimName.ADDRESS_STREET_ADDRESS,
@@ -235,6 +287,18 @@ public class Asserter {
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.FAMILY_NAME));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.PICTURE));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ZONEINFO));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.LOCALE));
+    }
+
+    public static void assertUserInfoPersonalDataNotNull(UserInfoResponse userInfoResponse, boolean checkEmail) {
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NAME));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.GIVEN_NAME));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.FAMILY_NAME));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.PICTURE));
+        if (checkEmail) {
+            assertNotNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
+        }
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.ZONEINFO));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.LOCALE));
     }
@@ -266,6 +330,24 @@ public class Asserter {
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
 
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
+        if (checkAccessTokenHash) {
+            assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ACCESS_TOKEN_HASH));
+        }
+    }
+
+    public static void assertJwtStandarClaimsNotNull(Jwt jwt, boolean checkAccessTokenHash, boolean checkAuthenticationTime) {
+        assertNotNull(jwt);
+        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
+        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
+        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
+        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
+        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
+        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
+        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
+        if(checkAuthenticationTime){
+            assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
+        }
+
         if (checkAccessTokenHash) {
             assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ACCESS_TOKEN_HASH));
         }

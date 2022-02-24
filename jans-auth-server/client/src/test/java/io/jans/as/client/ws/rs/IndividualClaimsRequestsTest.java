@@ -170,7 +170,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
 
         showClient(userInfoClient);
         assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);
+        assertUserInfoPersonalDataNotNull(userInfoResponse, false);
         assertUserInfoAddressNotNull(userInfoResponse);
     }
 
@@ -281,7 +281,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
 
         showClient(userInfoClient);
         assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);
+        assertUserInfoPersonalDataNotNull(userInfoResponse, false);
         assertUserInfoAddressNotNull(userInfoResponse);
     }
 
@@ -394,7 +394,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
 
         showClient(userInfoClient);
         assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);
+        assertUserInfoPersonalDataNotNull(userInfoResponse, false);
         assertUserInfoAddressNotNull(userInfoResponse);
     }
 
@@ -507,7 +507,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
 
         showClient(userInfoClient);
         assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);
+        assertUserInfoPersonalDataNotNull(userInfoResponse, false);
         assertUserInfoAddressNotNull(userInfoResponse);
     }
 
@@ -620,7 +620,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
 
         showClient(userInfoClient);
         assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);
+        assertUserInfoPersonalDataNotNull(userInfoResponse, false);
         assertUserInfoAddressNotNull(userInfoResponse);
     }
 
@@ -740,7 +740,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
 
         showClient(userInfoClient);
         assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);
+        assertUserInfoPersonalDataNotNull(userInfoResponse, false);
         assertUserInfoAddressNotNull(userInfoResponse);
     }
 
@@ -860,7 +860,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
 
         showClient(userInfoClient);
         assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);
+        assertUserInfoPersonalDataNotNull(userInfoResponse, false);
         assertUserInfoAddressNotNull(userInfoResponse);
     }
 
@@ -980,7 +980,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
 
         showClient(userInfoClient);
         assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);
+        assertUserInfoPersonalDataNotNull(userInfoResponse, false);
         assertUserInfoAddressNotNull(userInfoResponse);
     }
 
@@ -1100,7 +1100,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
 
         showClient(userInfoClient);
         assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);
+        assertUserInfoPersonalDataNotNull(userInfoResponse, false);
         assertUserInfoAddressNotNull(userInfoResponse);
     }
 
@@ -1220,7 +1220,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
 
         showClient(userInfoClient);
         assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);
+        assertUserInfoPersonalDataNotNull(userInfoResponse, false);
         assertUserInfoAddressNotNull(userInfoResponse);
     }
 
@@ -1340,7 +1340,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
 
         showClient(userInfoClient);
         assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);
+        assertUserInfoPersonalDataNotNull(userInfoResponse, false);
         assertUserInfoAddressNotNull(userInfoResponse);
     }
 
@@ -1454,7 +1454,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
 
         showClient(userInfoClient);
         assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);
+        assertUserInfoPersonalDataNotNull(userInfoResponse, false);
         assertUserInfoAddressNotNull(userInfoResponse);
     }
 
@@ -1568,7 +1568,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
 
         showClient(userInfoClient);
         assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);
+        assertUserInfoPersonalDataNotNull(userInfoResponse, false);
         assertUserInfoAddressNotNull(userInfoResponse);
     }
 
@@ -1694,7 +1694,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
 
         showClient(userInfoClient);
         assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);
+        assertUserInfoPersonalDataNotNull(userInfoResponse, false);
         assertUserInfoAddressNotNull(userInfoResponse);
     }
 
@@ -1820,7 +1820,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
 
         showClient(userInfoClient);
         assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);
+        assertUserInfoPersonalDataNotNull(userInfoResponse, false);
         assertUserInfoAddressNotNull(userInfoResponse);
     }
 
@@ -1946,7 +1946,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
 
         showClient(userInfoClient);
         assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);
+        assertUserInfoPersonalDataNotNull(userInfoResponse, false);
         assertUserInfoAddressNotNull(userInfoResponse);
     }
 }
