@@ -88,32 +88,15 @@ class SpannerClient:
         """Get mapping of column name and type from all tables.
         """
 
-        type_names = (
-            "TYPE_CODE_UNSPECIFIED",
-            "BOOL",
-            "INT64",
-            "FLOAT64",
-            "TIMESTAMP",
-            "DATE",
-            "STRING",
-            "BYTES",
-            "ARRAY",
-            "STRUCT",
-            "NUMERIC",
-        )
-
-        def parse_field_type(type_):
-            name = type_names[type_.code]
-            # if name == "ARRAY":
-            #     name = f"{name}<{type_names[type_.array_element_type.code]}>"
-            return name
-
         table_mapping = {}
         for table in self.database.list_tables():
-            table_mapping[table.table_id] = {
-                field.name: parse_field_type(field.type_)
-                for field in table.schema
-            }
+            with self.database.snapshot() as snapshot:
+                result = snapshot.execute_sql(
+                    f"select column_name, spanner_type "
+                    "from information_schema.columns "
+                    f"where table_name = '{table.table_id}'"
+                )
+                table_mapping[table.table_id] = dict(result)
         return table_mapping
 
     def insert_into(self, table_name, column_mapping):
