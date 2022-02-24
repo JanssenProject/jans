@@ -28,7 +28,7 @@ We are really glad you are reading this, because we need volunteer developers to
 - [Community](#community)
 - [Issues](#issues)
 - [Triaging](#triaging)
-- [Commit convention](#commit-convention)
+- [Coding Conventions](#code-conventions)
 - [Developer Certificate Of Origin](#developer-certificate-of-origin)
 
 ## Code of Conduct
@@ -80,10 +80,17 @@ When you triage an issue, you:
 Here is how we [continously triage](triage.md) new issues and PRs so that contributors can contribute faster and better.
 
 
-## Commit convention
+## Code conventions
 
+### Commits
 As commit convention, we adopt [Conventional Commits v1.0.0](https://www.conventionalcommits.org/en/v1.0.0/), we have an history
 of commits that do not adopt the convention but any new commit must follow it to be eligible for merge.
+
+### Branch names
+Branch name should have component name as prefix, eg `jans-core-mybranch`
+
+### PR titles
+PR titles should also follow [Conventional Commits v1.0.0](https://www.conventionalcommits.org/en/v1.0.0/). This will help in keeping merge commit messages inline with commit message standards
 
 ## Developer Certificate Of Origin
 
