@@ -3,7 +3,7 @@ entries:
   janssen:
   - annotations:
       artifacthub.io/changes: |
-        - Fix opendj image ref
+        - Update always
       artifacthub.io/containsSecurityUpdates: "true"
       artifacthub.io/images: |
         - name: auth-server
@@ -31,7 +31,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.0
-    created: "2022-02-14T16:44:40.741562497Z"
+    created: "2022-02-24T09:24:50.666165377Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -74,7 +74,7 @@ entries:
       repository: ""
       version: 1.0.0-beta.14
     description: Janssen Access and Identity Management
-    digest: 9a6c598d982d66ad257683cdb683c917798184a0b58f61f3f1af8312421efd39
+    digest: 18dd78add2b7e695b0525f58a0e4421e414d9a0e396aaf3abafd54a6fb73be8f
     home: https://jans.io
     icon: https://github.com/JanssenProject/jans/raw/main/docs/logo/janssen_project_favicon_transparent_50px_50px.png
     kubeVersion: '>=v1.21.0-0'
@@ -88,4 +88,4 @@ entries:
     urls:
     - janssen-1.0.0-beta.14.tgz
     version: 1.0.0-beta.14
-generated: "2022-02-14T16:44:40.728559091Z"
+generated: "2022-02-24T09:24:50.655048653Z"

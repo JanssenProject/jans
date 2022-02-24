@@ -521,35 +521,6 @@
           "type": "string",
           "pattern": ".*google-credentials.json\\b.*"
         },
-        "config-api": {
-          "type": "object",
-          "properties": {
-            "configApiServerServiceName": {
-              "description": "Name of the config-api service. Please keep it as default.",
-              "type": "string",
-              "pattern": "^[a-z0-9-]+$"
-            },
-            "enabled": {
-              "description": "Boolean flag to enable/disable the config-api chart.",
-              "type": "boolean"
-            },
-            "appLoggers": {
-              "type": "object",
-              "properties": {
-                "configApiLogTarget": {
-                  "description": "configapi.log target",
-                  "type": "string",
-                  "pattern": "^(STDOUT|FILE)$"
-                },
-                "configApiLogLevel": {
-                  "description": "configapi.log level",
-                  "type": "string",
-                  "pattern": "^(FATAL|ERROR|WARN|INFO|DEBUG|TRACE)$"
-                }
-              }
-            }
-          }
-        },
         "fqdn": {
           "description": "Fully qualified domain name to be used for Janssen installation. This address will be used to reach Janssen services.",
           "$ref": "#/definitions/fqdn-pattern"
