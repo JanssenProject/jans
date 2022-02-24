@@ -355,12 +355,7 @@ class SQLBackend:
     def update_schema(self):
         """Updates schema (may include data migration)"""
 
-        table_mapping = {}
-        for name, table in self.client.adapter.metadata.tables.items():
-            table_mapping[name] = {
-                column.name: str(column.type)
-                for column in table.c
-            }
+        table_mapping = self.client.get_table_mapping()
 
         def column_to_json(table_name, col_name):
             old_data_type = table_mapping[table_name][col_name]
@@ -393,7 +388,7 @@ class SQLBackend:
                 self.client.update(table_name, doc_id, {col_name: {"v": value_list}})
 
         def add_column(table_name, col_name):
-            if col_name in self.client.get_table_mapping()[table_name]:
+            if col_name in table_mapping[table_name]:
                 return
 
             data_type = self.get_data_type(col_name, table_name)
