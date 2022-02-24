@@ -12,6 +12,15 @@ copy_builtin_plugins() {
     fi
 }
 
+get_logging_files() {
+    logs="resources/log4j2.xml"
+
+    if [ -f /opt/jans/jetty/jans-config-api/custom/config/log4j2-adminui.xml ]; then
+        logs="$logs,custom/config/log4j2-adminui.xml"
+    fi
+    echo $logs
+}
+
 python3 /app/scripts/wait.py
 
 copy_builtin_plugins
@@ -33,6 +42,6 @@ exec java \
     -Dserver.base=/opt/jans/jetty/jans-config-api \
     -Dlog.base=/opt/jans/jetty/jans-config-api \
     -Djava.io.tmpdir=/opt/jetty/temp \
-    -Dlog4j2.configurationFile=resources/log4j2.xml \
+    -Dlog4j2.configurationFile=$(get_logging_files) \
     ${CN_JAVA_OPTIONS} \
     -jar /opt/jetty/start.jar jetty.http.port=8074
