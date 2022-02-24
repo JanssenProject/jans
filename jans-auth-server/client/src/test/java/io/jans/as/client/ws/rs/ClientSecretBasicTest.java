@@ -161,7 +161,7 @@ public class ClientSecretBasicTest extends BaseTest {
         TokenResponse tokenResponse1 = tokenClient1.exec();
 
         showClient(tokenClient1);
-        assertTokenResponseOk(tokenResponse1, true);
+        assertTokenResponseOk(tokenResponse1, true, false);
 
         String refreshToken = tokenResponse1.getRefreshToken();
 
@@ -183,7 +183,7 @@ public class ClientSecretBasicTest extends BaseTest {
         TokenResponse tokenResponse2 = tokenClient2.execRefreshToken(scope, refreshToken, clientId, clientSecret);
 
         showClient(tokenClient2);
-        assertTokenResponseOk(tokenResponse2, true);
+        assertTokenResponseOk(tokenResponse2, true, false);
         assertNotNull(tokenResponse2.getScope(), "The scope is null");
 
         String accessToken = tokenResponse2.getAccessToken();
@@ -193,18 +193,12 @@ public class ClientSecretBasicTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertEquals(userInfoResponse.getStatus(), 200, "Unexpected response code: " + userInfoResponse.getStatus());
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NAME));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.FAMILY_NAME));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.GIVEN_NAME));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.PICTURE));
+        assertUserInfoBasicMinimumResponseOk(userInfoResponse, 200);
+        assertUserInfoPersonalDataNotNull(userInfoResponse);
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.EMAIL_VERIFIED));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.PHONE_NUMBER_VERIFIED));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.LOCALE));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ZONEINFO));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.USER_NAME));
         assertNull(userInfoResponse.getClaim("org_name"));
         assertNull(userInfoResponse.getClaim("work_phone"));

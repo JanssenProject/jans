@@ -1307,7 +1307,7 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         TokenResponse response = tokenClient.execClientCredentialsGrant(scope, clientId, clientSecret);
 
         showClient(tokenClient);
-        assertTokenResponseOk(response, false);
+        assertTokenResponseOk(response, false, false);
     }
 
     @Parameters({"redirectUris", "sectorIdentifierUri"})

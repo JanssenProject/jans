@@ -395,7 +395,7 @@ public class DeviceAuthzFlowHttpTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
+        assertUserInfoBasicMinimumResponseOk(userInfoResponse, 200);
         assertUserInfoPersonalDataNotNull(userInfoResponse);
 
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.BIRTHDATE));
@@ -422,7 +422,7 @@ public class DeviceAuthzFlowHttpTest extends BaseTest {
         TokenResponse tokenResponse2 = tokenClient2.execRefreshToken(scopes, refreshToken, clientId, clientSecret);
 
         showClient(tokenClient2);
-        assertTokenResponseOk(tokenResponse2, true);
+        assertTokenResponseOk(tokenResponse2, true, false);
         assertNotNull(tokenResponse2.getScope(), "The scope is null");
         return tokenResponse2;
     }
@@ -430,7 +430,7 @@ public class DeviceAuthzFlowHttpTest extends BaseTest {
     private void verifyIdToken(String idToken) throws InvalidJwtException, UnrecoverableKeyException,
             NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
         Jwt jwt = Jwt.parse(idToken);
-        Asserter.assertJwtStandarClaimsNotNull(jwt, false);
+        assertJwtStandarClaimsNotNull(jwt, false, false);
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.OX_OPENID_CONNECT_VERSION));
 
         RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
@@ -457,7 +457,7 @@ public class DeviceAuthzFlowHttpTest extends BaseTest {
     }
 
     private void validateTokenSuccessfulResponse(TokenResponse tokenResponse) {
-        assertTokenResponseOk(tokenResponse, true);
+        assertTokenResponseOk(tokenResponse, true, false);
     }
 
     private void assertSuccessAuthzResponse(final AuthorizationResponse authorizationResponse) {

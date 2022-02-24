@@ -2386,7 +2386,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
+        assertUserInfoBasicMinimumResponseOk(userInfoResponse, 200);
         assertUserInfoPersonalDataNotNull(userInfoResponse);
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS));
     }

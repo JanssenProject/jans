@@ -142,7 +142,7 @@ public class AddressClaimsTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.exec();
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
+        assertUserInfoBasicMinimumResponseOk(userInfoResponse, 200);
         assertUserInfoAddressNotNull(userInfoResponse);
     }
 

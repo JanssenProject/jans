@@ -133,7 +133,7 @@ public class ClientInfoRestWebServiceHttpTest extends BaseTest {
                 clientId, clientSecret);
 
         showClient(tokenClient);
-        assertTokenResponseOk(response1, false);
+        assertTokenResponseOk(response1, false, false);
         assertNotNull(response1.getScope(), "The scope is null");
 
         String accessToken = response1.getAccessToken();
