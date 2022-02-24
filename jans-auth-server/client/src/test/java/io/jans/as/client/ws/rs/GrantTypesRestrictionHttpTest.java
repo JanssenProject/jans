@@ -196,7 +196,7 @@ public class GrantTypesRestrictionHttpTest extends BaseTest {
             TokenResponse tokenResponse = tokenClient.exec();
 
             showClient(tokenClient);
-            assertTokenResponseOk(tokenResponse, false);
+            assertTokenResponseOk(tokenResponse, false, false);
 
             if (expectedGrantTypes.contains(GrantType.REFRESH_TOKEN)) {
                 assertNotNull(tokenResponse.getRefreshToken());
@@ -208,7 +208,7 @@ public class GrantTypesRestrictionHttpTest extends BaseTest {
                 TokenResponse refreshTokenResponse = refreshTokenClient.execRefreshToken(scope, refreshToken, clientId, clientSecret);
 
                 showClient(refreshTokenClient);
-                assertTokenResponseOk(refreshTokenResponse, true);
+                assertTokenResponseOk(refreshTokenResponse, true, false);
 
                 accessToken = refreshTokenResponse.getAccessToken();
             } else {

@@ -152,7 +152,7 @@ public class TokenRevocationTest extends BaseTest {
         TokenResponse tokenResponse1 = tokenClient1.exec();
 
         showClient(tokenClient1);
-        assertTokenResponseOk(tokenResponse1, true);
+        assertTokenResponseOk(tokenResponse1, true, false);
 
         String refreshToken = tokenResponse1.getRefreshToken();
 
@@ -174,7 +174,7 @@ public class TokenRevocationTest extends BaseTest {
         TokenResponse tokenResponse2 = tokenClient2.execRefreshToken(scope, refreshToken, clientId, clientSecret);
 
         showClient(tokenClient2);
-        assertTokenResponseOk(tokenResponse2, true);
+        assertTokenResponseOk(tokenResponse2, true, false);
         assertNotNull(tokenResponse2.getScope(), "The scope is null");
 
         String accessToken2 = tokenResponse2.getAccessToken();
@@ -185,7 +185,7 @@ public class TokenRevocationTest extends BaseTest {
         UserInfoResponse userInfoResponse1 = userInfoClient1.execUserInfo(accessToken2);
 
         showClient(userInfoClient1);
-        assertUserInfoBasicResponseOk(userInfoResponse1, 200);
+        assertUserInfoBasicMinimumResponseOk(userInfoResponse1, 200);
         assertUserInfoPersonalDataNotNull(userInfoResponse1);        
         assertNotNull(userInfoResponse1.getClaim(JwtClaimName.BIRTHDATE));        
         assertNotNull(userInfoResponse1.getClaim(JwtClaimName.GENDER));        
@@ -291,7 +291,7 @@ public class TokenRevocationTest extends BaseTest {
         TokenResponse tokenResponse1 = tokenClient1.exec();
 
         showClient(tokenClient1);
-        assertTokenResponseOk(tokenResponse1, true);
+        assertTokenResponseOk(tokenResponse1, true, false);
 
         String accessToken = tokenResponse1.getAccessToken();
         String refreshToken = tokenResponse1.getRefreshToken();
@@ -314,7 +314,7 @@ public class TokenRevocationTest extends BaseTest {
         UserInfoResponse userInfoResponse1 = userInfoClient1.execUserInfo(accessToken);
 
         showClient(userInfoClient1);
-        assertUserInfoBasicResponseOk(userInfoResponse1, 200);
+        assertUserInfoBasicMinimumResponseOk(userInfoResponse1, 200);
         assertUserInfoPersonalDataNotNull(userInfoResponse1);        
         assertNotNull(userInfoResponse1.getClaim(JwtClaimName.BIRTHDATE));        
         assertNotNull(userInfoResponse1.getClaim(JwtClaimName.GENDER));        
@@ -405,7 +405,7 @@ public class TokenRevocationTest extends BaseTest {
         TokenResponse tokenResponse1 = tokenClient1.exec();
 
         showClient(tokenClient1);
-        assertTokenResponseOk(tokenResponse1, true);
+        assertTokenResponseOk(tokenResponse1, true, false);
 
         String accessToken = tokenResponse1.getAccessToken();
         String refreshToken = tokenResponse1.getRefreshToken();
@@ -521,7 +521,7 @@ public class TokenRevocationTest extends BaseTest {
         TokenResponse tokenResponse1 = tokenClient1.exec();
 
         showClient(tokenClient1);
-        assertTokenResponseOk(tokenResponse1, true);
+        assertTokenResponseOk(tokenResponse1, true, false);
 
         String refreshToken = tokenResponse1.getRefreshToken();
 
@@ -543,7 +543,7 @@ public class TokenRevocationTest extends BaseTest {
         TokenResponse tokenResponse2 = tokenClient2.execRefreshToken(scope, refreshToken, clientId, clientSecret);
 
         showClient(tokenClient2);
-        assertTokenResponseOk(tokenResponse2, true);
+        assertTokenResponseOk(tokenResponse2, true, false);
         assertNotNull(tokenResponse2.getScope(), "The scope is null");
 
         String accessToken = tokenResponse2.getAccessToken();
@@ -554,7 +554,7 @@ public class TokenRevocationTest extends BaseTest {
         UserInfoResponse userInfoResponse1 = userInfoClient1.execUserInfo(accessToken);
 
         showClient(userInfoClient1);
-        assertUserInfoBasicResponseOk(userInfoResponse1, 200);
+        assertUserInfoBasicMinimumResponseOk(userInfoResponse1, 200);
         assertUserInfoPersonalDataNotNull(userInfoResponse1);        
         assertNotNull(userInfoResponse1.getClaim(JwtClaimName.BIRTHDATE));        
         assertNotNull(userInfoResponse1.getClaim(JwtClaimName.GENDER));        
@@ -656,7 +656,7 @@ public class TokenRevocationTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        assertTokenResponseOk(tokenResponse, true, false);
 
         String refreshToken = tokenResponse.getRefreshToken();
 
@@ -716,7 +716,7 @@ public class TokenRevocationTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        assertTokenResponseOk(tokenResponse, true, false);
 
         String accessToken = tokenResponse.getAccessToken();
 
@@ -740,7 +740,7 @@ public class TokenRevocationTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
+        assertUserInfoBasicMinimumResponseOk(userInfoResponse, 200);
         assertUserInfoPersonalDataNotNull(userInfoResponse);        
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.BIRTHDATE));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.GENDER));
@@ -795,7 +795,7 @@ public class TokenRevocationTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        assertTokenResponseOk(tokenResponse, true, false);
 
         String refreshToken = tokenResponse.getRefreshToken();
 

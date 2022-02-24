@@ -92,6 +92,6 @@ public class CanRequestAndUseSignedUserInfoResponse extends BaseTest {
         showClient(userInfoClient);
         assertUserInfoBasicResponseOk(userInfoResponse, 200);
         assertUserInfoPersonalDataNotNull(userInfoResponse);
-        assertUserInfoAddressNotNull(userInfoResponse);
+        assertUserInfoAddressMinimumNotNull(userInfoResponse);
     }
 }

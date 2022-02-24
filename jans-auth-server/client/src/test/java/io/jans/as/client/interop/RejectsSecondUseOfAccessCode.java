@@ -105,8 +105,8 @@ public class RejectsSecondUseOfAccessCode extends BaseTest {
             UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
             showClient(userInfoClient);
-            assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);
+            assertUserInfoBasicMinimumResponseOk(userInfoResponse, 200);
+            assertUserInfoPersonalDataNotNull(userInfoResponse);
         }
 
         // 5. Request access token using the same authorization code one more time. This call must fail.

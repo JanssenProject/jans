@@ -586,7 +586,7 @@ public class RegistrationTest extends BaseTest {
 
         showClient(clientReadClient);
         assertRegisterResponseOk(clientReadResponse, 200, true);
-        assertRegisterResponseClaimsNotNull(clientReadResponse, APPLICATION_TYPE, SECTOR_IDENTIFIER_URI, SUBJECT_TYPE, ID_TOKEN_SIGNED_RESPONSE_ALG, JWKS, CLIENT_NAME, SCOPE);
+        assertRegisterResponseClaimsNotNull(clientReadResponse, APPLICATION_TYPE, SECTOR_IDENTIFIER_URI, SUBJECT_TYPE, ID_TOKEN_SIGNED_RESPONSE_ALG, CLIENT_NAME, SCOPE);
         assertRegisterResponseClaimsAreContained(clientReadResponse, SECTOR_IDENTIFIER_URI);
         assertRegisterResponseClaimsBackChannel(clientReadResponse, AsymmetricSignatureAlgorithm.RS256, BackchannelTokenDeliveryMode.PUSH, true);
     }

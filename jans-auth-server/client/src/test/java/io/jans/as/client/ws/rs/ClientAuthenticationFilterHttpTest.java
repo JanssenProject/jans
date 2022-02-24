@@ -144,7 +144,7 @@ public class ClientAuthenticationFilterHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        assertTokenResponseOk(tokenResponse, true, false);
     }
 
     @Parameters({"userId", "userSecret"})
@@ -166,6 +166,6 @@ public class ClientAuthenticationFilterHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        assertTokenResponseOk(tokenResponse, true, false);
     }
 }

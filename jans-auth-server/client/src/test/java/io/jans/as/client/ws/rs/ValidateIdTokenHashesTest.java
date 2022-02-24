@@ -90,11 +90,7 @@ public class ValidateIdTokenHashesTest extends BaseTest {
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
-
-        assertNotNull(authorizationResponse.getLocation(), "The location is null");
-        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
-        assertNotNull(authorizationResponse.getScope(), "The scope is null");
-        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertAuthorizationResponse(authorizationResponse, true);
         assertEquals(authorizationResponse.getState(), stateParam);
 
         String scope = authorizationResponse.getScope();
@@ -136,7 +132,7 @@ public class ValidateIdTokenHashesTest extends BaseTest {
         TokenResponse tokenResponse1 = tokenClient1.exec();
 
         showClient(tokenClient1);
-        assertTokenResponseOk(tokenResponse1, true);
+        assertTokenResponseOk(tokenResponse1, true, false);
 
         String refreshToken = tokenResponse1.getRefreshToken();
         String idToken2 = tokenResponse1.getIdToken();
@@ -163,7 +159,7 @@ public class ValidateIdTokenHashesTest extends BaseTest {
         TokenResponse tokenResponse2 = tokenClient2.execRefreshToken(scope, refreshToken, clientId, clientSecret);
 
         showClient(tokenClient2);
-        assertTokenResponseOk(tokenResponse2, true);
+        assertTokenResponseOk(tokenResponse2, true, false);
         assertNotNull(tokenResponse2.getScope(), "The scope is null");
 
         String accessToken3 = tokenResponse2.getAccessToken();
@@ -173,7 +169,7 @@ public class ValidateIdTokenHashesTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken3);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
+        assertUserInfoBasicMinimumResponseOk(userInfoResponse, 200);
         assertUserInfoPersonalDataNotNull(userInfoResponse);        
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.BIRTHDATE));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.GENDER));

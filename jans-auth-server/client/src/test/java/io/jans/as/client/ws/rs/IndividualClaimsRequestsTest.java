@@ -169,9 +169,15 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);
-        assertUserInfoAddressNotNull(userInfoResponse);
+        assertUserInfoBasicMinimumResponseOk(userInfoResponse, 200);
+        assertUserInfoPersonalDataNotNull(userInfoResponse, false);
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NICKNAME));
+        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
+        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL_VERIFIED));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_STREET_ADDRESS));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_LOCALITY));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_REGION));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_COUNTRY));
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
@@ -281,8 +287,14 @@ public class IndividualClaimsRequestsTest extends BaseTest {
 
         showClient(userInfoClient);
         assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);
-        assertUserInfoAddressNotNull(userInfoResponse);
+        assertUserInfoPersonalDataNotNull(userInfoResponse, false);
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NICKNAME));
+        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
+        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL_VERIFIED));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_STREET_ADDRESS));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_LOCALITY));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_REGION));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_COUNTRY));
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
@@ -394,8 +406,14 @@ public class IndividualClaimsRequestsTest extends BaseTest {
 
         showClient(userInfoClient);
         assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);
-        assertUserInfoAddressNotNull(userInfoResponse);
+        assertUserInfoPersonalDataNotNull(userInfoResponse, false);
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NICKNAME));
+        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
+        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL_VERIFIED));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_STREET_ADDRESS));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_LOCALITY));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_REGION));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_COUNTRY));
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
@@ -507,8 +525,14 @@ public class IndividualClaimsRequestsTest extends BaseTest {
 
         showClient(userInfoClient);
         assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);
-        assertUserInfoAddressNotNull(userInfoResponse);
+        assertUserInfoPersonalDataNotNull(userInfoResponse, false);
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NICKNAME));
+        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
+        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL_VERIFIED));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_STREET_ADDRESS));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_LOCALITY));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_REGION));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_COUNTRY));
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
@@ -620,8 +644,14 @@ public class IndividualClaimsRequestsTest extends BaseTest {
 
         showClient(userInfoClient);
         assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);
-        assertUserInfoAddressNotNull(userInfoResponse);
+        assertUserInfoPersonalDataNotNull(userInfoResponse, false);
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NICKNAME));
+        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
+        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL_VERIFIED));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_STREET_ADDRESS));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_LOCALITY));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_REGION));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_COUNTRY));
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri", "RS256_keyId",
@@ -740,8 +770,14 @@ public class IndividualClaimsRequestsTest extends BaseTest {
 
         showClient(userInfoClient);
         assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);
-        assertUserInfoAddressNotNull(userInfoResponse);
+        assertUserInfoPersonalDataNotNull(userInfoResponse, false);
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NICKNAME));
+        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
+        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL_VERIFIED));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_STREET_ADDRESS));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_LOCALITY));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_REGION));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_COUNTRY));
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri", "RS384_keyId",
@@ -860,8 +896,14 @@ public class IndividualClaimsRequestsTest extends BaseTest {
 
         showClient(userInfoClient);
         assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);
-        assertUserInfoAddressNotNull(userInfoResponse);
+        assertUserInfoPersonalDataNotNull(userInfoResponse, false);
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NICKNAME));
+        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
+        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL_VERIFIED));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_STREET_ADDRESS));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_LOCALITY));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_REGION));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_COUNTRY));
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri", "RS512_keyId",
@@ -980,8 +1022,14 @@ public class IndividualClaimsRequestsTest extends BaseTest {
 
         showClient(userInfoClient);
         assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);
-        assertUserInfoAddressNotNull(userInfoResponse);
+        assertUserInfoPersonalDataNotNull(userInfoResponse, false);
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NICKNAME));
+        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
+        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL_VERIFIED));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_STREET_ADDRESS));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_LOCALITY));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_REGION));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_COUNTRY));
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri", "ES256_keyId",
@@ -1100,8 +1148,14 @@ public class IndividualClaimsRequestsTest extends BaseTest {
 
         showClient(userInfoClient);
         assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);
-        assertUserInfoAddressNotNull(userInfoResponse);
+        assertUserInfoPersonalDataNotNull(userInfoResponse, false);
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NICKNAME));
+        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
+        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL_VERIFIED));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_STREET_ADDRESS));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_LOCALITY));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_REGION));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_COUNTRY));
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri", "ES384_keyId",
@@ -1220,8 +1274,14 @@ public class IndividualClaimsRequestsTest extends BaseTest {
 
         showClient(userInfoClient);
         assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);
-        assertUserInfoAddressNotNull(userInfoResponse);
+        assertUserInfoPersonalDataNotNull(userInfoResponse, false);
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NICKNAME));
+        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
+        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL_VERIFIED));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_STREET_ADDRESS));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_LOCALITY));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_REGION));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_COUNTRY));
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri", "ES512_keyId",
@@ -1340,8 +1400,14 @@ public class IndividualClaimsRequestsTest extends BaseTest {
 
         showClient(userInfoClient);
         assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);
-        assertUserInfoAddressNotNull(userInfoResponse);
+        assertUserInfoPersonalDataNotNull(userInfoResponse, false);
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NICKNAME));
+        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
+        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL_VERIFIED));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_STREET_ADDRESS));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_LOCALITY));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_REGION));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_COUNTRY));
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
@@ -1454,8 +1520,14 @@ public class IndividualClaimsRequestsTest extends BaseTest {
 
         showClient(userInfoClient);
         assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);
-        assertUserInfoAddressNotNull(userInfoResponse);
+        assertUserInfoPersonalDataNotNull(userInfoResponse, false);
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NICKNAME));
+        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
+        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL_VERIFIED));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_STREET_ADDRESS));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_LOCALITY));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_REGION));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_COUNTRY));
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
@@ -1568,8 +1640,14 @@ public class IndividualClaimsRequestsTest extends BaseTest {
 
         showClient(userInfoClient);
         assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);
-        assertUserInfoAddressNotNull(userInfoResponse);
+        assertUserInfoPersonalDataNotNull(userInfoResponse, false);
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NICKNAME));
+        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
+        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL_VERIFIED));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_STREET_ADDRESS));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_LOCALITY));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_REGION));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_COUNTRY));
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri", "dnName", "keyStoreFile",
@@ -1694,8 +1772,14 @@ public class IndividualClaimsRequestsTest extends BaseTest {
 
         showClient(userInfoClient);
         assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);
-        assertUserInfoAddressNotNull(userInfoResponse);
+        assertUserInfoPersonalDataNotNull(userInfoResponse, false);
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NICKNAME));
+        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
+        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL_VERIFIED));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_STREET_ADDRESS));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_LOCALITY));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_REGION));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_COUNTRY));
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri", "dnName", "keyStoreFile",
@@ -1820,8 +1904,14 @@ public class IndividualClaimsRequestsTest extends BaseTest {
 
         showClient(userInfoClient);
         assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);
-        assertUserInfoAddressNotNull(userInfoResponse);
+        assertUserInfoPersonalDataNotNull(userInfoResponse, false);
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NICKNAME));
+        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
+        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL_VERIFIED));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_STREET_ADDRESS));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_LOCALITY));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_REGION));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_COUNTRY));
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri", "dnName", "keyStoreFile",
@@ -1946,7 +2036,13 @@ public class IndividualClaimsRequestsTest extends BaseTest {
 
         showClient(userInfoClient);
         assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);
-        assertUserInfoAddressNotNull(userInfoResponse);
+        assertUserInfoPersonalDataNotNull(userInfoResponse, false);
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NICKNAME));
+        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
+        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL_VERIFIED));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_STREET_ADDRESS));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_LOCALITY));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_REGION));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_COUNTRY));
     }
 }
