@@ -595,7 +595,22 @@ global:
       configApiLogTarget: "STDOUT"
       # -- configapi.log level
       configApiLogLevel: "INFO"
-  # -- Fully qualified domain name to be used for Janssen installation. This address will be used to reach Janssen services.
+      # -- config-api_persistence.log target
+      persistenceLogTarget: "FILE"
+      # -- jans-auth_persistence.log level
+      persistenceLogLevel: "INFO"
+      # -- config-api_persistence_duration.log target
+      persistenceDurationLogTarget: "FILE"
+      # -- config-api_persistence_duration.log level
+      persistenceDurationLogLevel: "INFO"
+      # -- config-api_persistence_ldap_statistics.log target
+      ldapStatsLogTarget: "FILE"
+      # -- config-api_persistence_ldap_statistics.log level
+      ldapStatsLogLevel: "INFO"
+      # -- config-api_script.log target
+      scriptLogTarget: "FILE"
+      # -- config-api_script.log level
+      scriptLogLevel: "INFO"
   fqdn: demoexample.jans.io
   fido2:
     # -- Name of the fido2 service. Please keep it as default.
