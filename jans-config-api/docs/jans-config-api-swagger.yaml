@@ -6471,6 +6471,9 @@ components:
         description:
           type: string
           description: role description
+        deletable:
+          type: boolean
+          description: can we delete the role?
     AdminPermission:
       type: object
       description: Admin permission
