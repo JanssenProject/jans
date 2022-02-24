@@ -351,4 +351,11 @@ public class UserManagementService {
             throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.PERMISSION_NOT_FOUND.getDescription());
         }
     }
+
+    private static boolean isFalse(Boolean bool) {
+        if (bool == null) {
+            return true;
+        }
+        return bool.booleanValue() ? false : true;
+    }
 }
