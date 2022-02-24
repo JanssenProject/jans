@@ -234,18 +234,24 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
 
         showClient(userInfoClient);
         assertUserInfoBasicMinimumResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);
+        assertNull(userInfoResponse.getClaim(JwtClaimName.NAME));
         assertNull(userInfoResponse.getClaim(JwtClaimName.BIRTHDATE));
+        assertNull(userInfoResponse.getClaim(JwtClaimName.FAMILY_NAME));
         assertNull(userInfoResponse.getClaim(JwtClaimName.GENDER));
+        assertNull(userInfoResponse.getClaim(JwtClaimName.GIVEN_NAME));
         assertNull(userInfoResponse.getClaim(JwtClaimName.MIDDLE_NAME));
         assertNull(userInfoResponse.getClaim(JwtClaimName.NICKNAME));
+        assertNull(userInfoResponse.getClaim(JwtClaimName.PICTURE));
         assertNull(userInfoResponse.getClaim(JwtClaimName.PREFERRED_USERNAME));
         assertNull(userInfoResponse.getClaim(JwtClaimName.PROFILE));
         assertNull(userInfoResponse.getClaim(JwtClaimName.WEBSITE));
+        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
         assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL_VERIFIED));
         assertNull(userInfoResponse.getClaim(JwtClaimName.PHONE_NUMBER));
         assertNull(userInfoResponse.getClaim(JwtClaimName.PHONE_NUMBER_VERIFIED));
         assertNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS));
+        assertNull(userInfoResponse.getClaim(JwtClaimName.LOCALE));
+        assertNull(userInfoResponse.getClaim(JwtClaimName.ZONEINFO));
         assertNull(userInfoResponse.getClaim(JwtClaimName.USER_NAME));
         assertNull(userInfoResponse.getClaim("org_name"));
         assertNull(userInfoResponse.getClaim("work_phone"));

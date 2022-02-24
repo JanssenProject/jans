@@ -457,7 +457,7 @@ public class DeviceAuthzFlowHttpTest extends BaseTest {
     }
 
     private void validateTokenSuccessfulResponse(TokenResponse tokenResponse) {
-        assertTokenResponseOk(tokenResponse, true);
+        assertTokenResponseOk(tokenResponse, true, false);
     }
 
     private void assertSuccessAuthzResponse(final AuthorizationResponse authorizationResponse) {
