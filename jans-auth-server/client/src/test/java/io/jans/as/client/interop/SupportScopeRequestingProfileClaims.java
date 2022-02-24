@@ -100,7 +100,7 @@ public class SupportScopeRequestingProfileClaims extends BaseTest {
         // 4. Request user info
         UserInfoResponse userInfoResponse = requestUserInfo(accessToken);
         assertUserInfoBasicMinimumResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);
+        assertUserInfoPersonalDataNotNull(userInfoResponse, false);
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.WEBSITE));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.BIRTHDATE));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.GENDER));

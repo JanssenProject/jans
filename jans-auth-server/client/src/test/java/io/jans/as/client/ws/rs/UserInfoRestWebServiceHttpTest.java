@@ -274,7 +274,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 clientId, clientSecret);
 
         showClient(tokenClient);
-        assertTokenResponseOk(response1, false);
+        assertTokenResponseOk(response1, false, false);
         assertNotNull(response1.getScope(), "The scope is null");
 
         String accessToken = response1.getAccessToken();
@@ -500,7 +500,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         UserInfoResponse response3 = userInfoClient2.exec();
 
         showClient(userInfoClient2);
-        assertUserInfoBasicResponseOk(response3, 200); 
+        assertUserInfoBasicMinimumResponseOk(response3, 200);
         assertUserInfoPersonalDataNotNull(response3);
 
         // 5. Request user info (URL_QUERY_PARAMETER)
@@ -511,7 +511,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         UserInfoResponse response4 = userInfoClient3.exec();
 
         showClient(userInfoClient3);
-        assertUserInfoBasicResponseOk(response4, 200);
+        assertUserInfoBasicMinimumResponseOk(response4, 200);
         assertUserInfoPersonalDataNotNull(response4);
     }
 
