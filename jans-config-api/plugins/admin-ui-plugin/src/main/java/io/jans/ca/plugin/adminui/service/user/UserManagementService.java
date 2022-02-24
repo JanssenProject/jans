@@ -45,7 +45,7 @@ public class UserManagementService {
                 log.error(ErrorResponse.ROLE_NOT_FOUND.getDescription());
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.ROLE_NOT_FOUND.getDescription());
             }
-            return roles.get(0);
+            return roles.stream().findFirst().get();
         } catch (ApplicationException e) {
             log.error(ErrorResponse.GET_ADMIUI_ROLES_ERROR.getDescription());
             throw e;
@@ -310,7 +310,7 @@ public class UserManagementService {
     public List<RolePermissionMapping> removePermissionsFromRole(RolePermissionMapping rolePermissionMappingArg) throws ApplicationException {
         try {
             AdminConf adminConf = entryManager.find(AdminConf.class, CONFIG_DN);
-            if (isFalse(getRoleObjByName(role).getDeletable())) {
+            if (isFalse(getRoleObjByName(rolePermissionMappingArg.getRole()).getDeletable())) {
                 log.error(ErrorResponse.ROLE_MARKED_UNDELETABLE.getDescription());
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.ROLE_MARKED_UNDELETABLE.getDescription());
             }
