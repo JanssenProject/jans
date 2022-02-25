@@ -32,7 +32,8 @@ import org.testng.annotations.Test;
 import java.util.Arrays;
 import java.util.List;
 
-import static io.jans.as.client.client.Asserter.assertOk;
+import static io.jans.as.client.client.Asserter.assertRegisterResponseOk;
+import static io.jans.as.client.client.Asserter.assertTokenResponseOk;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
@@ -65,7 +66,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -81,10 +82,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity());
-        assertNotNull(tokenResponse.getAccessToken());
-        assertNotNull(tokenResponse.getTokenType());
+        assertTokenResponseOk(tokenResponse, false, false);
         assertNotNull(tokenResponse.getScope());
         assertNull(tokenResponse.getRefreshToken());
 
@@ -118,7 +116,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
 
@@ -162,7 +160,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -179,10 +177,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity());
-        assertNotNull(tokenResponse.getAccessToken());
-        assertNotNull(tokenResponse.getTokenType());
+        assertTokenResponseOk(tokenResponse, false, false);
         assertNotNull(tokenResponse.getScope());
         assertNull(tokenResponse.getRefreshToken());
 
@@ -226,7 +221,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
 
@@ -271,7 +266,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -288,10 +283,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity());
-        assertNotNull(tokenResponse.getAccessToken());
-        assertNotNull(tokenResponse.getTokenType());
+        assertTokenResponseOk(tokenResponse, false, false);
         assertNotNull(tokenResponse.getScope());
         assertNull(tokenResponse.getRefreshToken());
 
@@ -326,7 +318,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
 
@@ -367,7 +359,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
 
@@ -408,7 +400,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
 
@@ -453,7 +445,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -475,10 +467,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity());
-        assertNotNull(tokenResponse.getAccessToken());
-        assertNotNull(tokenResponse.getTokenType());
+        assertTokenResponseOk(tokenResponse, false, false);
         assertNotNull(tokenResponse.getScope());
         assertNull(tokenResponse.getRefreshToken());
 
@@ -513,7 +502,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
 
@@ -563,7 +552,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -585,10 +574,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity());
-        assertNotNull(tokenResponse.getAccessToken());
-        assertNotNull(tokenResponse.getTokenType());
+        assertTokenResponseOk(tokenResponse, false, false);
         assertNotNull(tokenResponse.getScope());
         assertNull(tokenResponse.getRefreshToken());
 
@@ -623,7 +609,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
 
@@ -673,7 +659,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -695,10 +681,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity());
-        assertNotNull(tokenResponse.getAccessToken());
-        assertNotNull(tokenResponse.getTokenType());
+        assertTokenResponseOk(tokenResponse, false, false);
         assertNotNull(tokenResponse.getScope());
         assertNull(tokenResponse.getRefreshToken());
 
@@ -733,7 +716,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -787,7 +770,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
 
@@ -808,10 +791,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity());
-        assertNotNull(tokenResponse.getAccessToken());
-        assertNotNull(tokenResponse.getTokenType());
+        assertTokenResponseOk(tokenResponse, false, false);
         assertNotNull(tokenResponse.getScope());
         assertNull(tokenResponse.getRefreshToken());
 
@@ -849,7 +829,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
 
@@ -902,7 +882,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
 
@@ -923,10 +903,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity());
-        assertNotNull(tokenResponse.getAccessToken());
-        assertNotNull(tokenResponse.getTokenType());
+        assertTokenResponseOk(tokenResponse, false, false);
         assertNotNull(tokenResponse.getScope());
         assertNull(tokenResponse.getRefreshToken());
 
@@ -964,7 +941,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
 
@@ -1017,7 +994,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
 
@@ -1038,10 +1015,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity());
-        assertNotNull(tokenResponse.getAccessToken());
-        assertNotNull(tokenResponse.getTokenType());
+        assertTokenResponseOk(tokenResponse, false, false);
         assertNotNull(tokenResponse.getScope());
         assertNull(tokenResponse.getRefreshToken());
 
@@ -1079,7 +1053,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
 
@@ -1132,7 +1106,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
 
@@ -1153,10 +1127,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity());
-        assertNotNull(tokenResponse.getAccessToken());
-        assertNotNull(tokenResponse.getTokenType());
+        assertTokenResponseOk(tokenResponse, false, false);
         assertNotNull(tokenResponse.getScope());
         assertNull(tokenResponse.getRefreshToken());
 
@@ -1194,7 +1165,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
 
@@ -1247,7 +1218,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
 
@@ -1268,10 +1239,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity());
-        assertNotNull(tokenResponse.getAccessToken());
-        assertNotNull(tokenResponse.getTokenType());
+        assertTokenResponseOk(tokenResponse, false, false);
         assertNotNull(tokenResponse.getScope());
         assertNull(tokenResponse.getRefreshToken());
 
@@ -1309,7 +1277,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
 
@@ -1362,7 +1330,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
 
@@ -1383,10 +1351,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity());
-        assertNotNull(tokenResponse.getAccessToken());
-        assertNotNull(tokenResponse.getTokenType());
+        assertTokenResponseOk(tokenResponse, false, false);
         assertNotNull(tokenResponse.getScope());
         assertNull(tokenResponse.getRefreshToken());
 
@@ -1424,7 +1389,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
 
@@ -1477,7 +1442,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
 
@@ -1498,10 +1463,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity());
-        assertNotNull(tokenResponse.getAccessToken());
-        assertNotNull(tokenResponse.getTokenType());
+        assertTokenResponseOk(tokenResponse, false, false);
         assertNotNull(tokenResponse.getScope());
         assertNull(tokenResponse.getRefreshToken());
 
@@ -1539,7 +1501,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
 
@@ -1592,7 +1554,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
 
@@ -1613,10 +1575,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity());
-        assertNotNull(tokenResponse.getAccessToken());
-        assertNotNull(tokenResponse.getTokenType());
+        assertTokenResponseOk(tokenResponse, false, false);
         assertNotNull(tokenResponse.getScope());
         assertNull(tokenResponse.getRefreshToken());
 
@@ -1654,7 +1613,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
 
@@ -1707,7 +1666,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
 
@@ -1728,10 +1687,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity());
-        assertNotNull(tokenResponse.getAccessToken());
-        assertNotNull(tokenResponse.getTokenType());
+        assertTokenResponseOk(tokenResponse, false, false);
         assertNotNull(tokenResponse.getScope());
         assertNull(tokenResponse.getRefreshToken());
 
@@ -1769,7 +1725,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
 

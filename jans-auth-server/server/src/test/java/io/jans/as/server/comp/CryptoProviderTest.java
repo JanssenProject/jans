@@ -413,7 +413,7 @@ public class CryptoProviderTest extends ConfigurableTest {
                 JSONObject response = cryptoProvider.generateKey(algorithm, expirationTime);
                 String keyId = response.optString(JWKParameter.KEY_ID);
                 ECPrivateKey ecPrivateKey = (ECPrivateKey)cryptoProvider.getPrivateKey(keyId);
-                cryptoProvider.deleteKey(response.optString(keyId));
+                cryptoProvider.deleteKey(keyId);
 
                 byte[] s = Base64Util.bigIntegerToUnsignedByteArray(ecPrivateKey.getS());
 

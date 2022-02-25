@@ -41,6 +41,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import static io.jans.as.client.client.Asserter.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
@@ -151,26 +152,14 @@ public class TokenRevocationTest extends BaseTest {
         TokenResponse tokenResponse1 = tokenClient1.exec();
 
         showClient(tokenClient1);
-        assertEquals(tokenResponse1.getStatus(), 200, "Unexpected response code: " + tokenResponse1.getStatus());
-        assertNotNull(tokenResponse1.getEntity(), "The entity is null");
-        assertNotNull(tokenResponse1.getAccessToken(), "The access token is null");
-        assertNotNull(tokenResponse1.getExpiresIn(), "The expires in value is null");
-        assertNotNull(tokenResponse1.getTokenType(), "The token type is null");
-        assertNotNull(tokenResponse1.getRefreshToken(), "The refresh token is null");
+        assertTokenResponseOk(tokenResponse1, true, false);
 
         String refreshToken = tokenResponse1.getRefreshToken();
 
         // 4. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
+        assertJwtStandarClaimsNotNull(jwt, false);
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.CODE_HASH));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.OX_OPENID_CONNECT_VERSION));
 
         RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
@@ -185,11 +174,7 @@ public class TokenRevocationTest extends BaseTest {
         TokenResponse tokenResponse2 = tokenClient2.execRefreshToken(scope, refreshToken, clientId, clientSecret);
 
         showClient(tokenClient2);
-        assertEquals(tokenResponse2.getStatus(), 200, "Unexpected response code: " + tokenResponse2.getStatus());
-        assertNotNull(tokenResponse2.getEntity(), "The entity is null");
-        assertNotNull(tokenResponse2.getAccessToken(), "The access token is null");
-        assertNotNull(tokenResponse2.getTokenType(), "The token type is null");
-        assertNotNull(tokenResponse2.getRefreshToken(), "The refresh token is null");
+        assertTokenResponseOk(tokenResponse2, true, false);
         assertNotNull(tokenResponse2.getScope(), "The scope is null");
 
         String accessToken2 = tokenResponse2.getAccessToken();
@@ -200,26 +185,19 @@ public class TokenRevocationTest extends BaseTest {
         UserInfoResponse userInfoResponse1 = userInfoClient1.execUserInfo(accessToken2);
 
         showClient(userInfoClient1);
-        assertEquals(userInfoResponse1.getStatus(), 200, "Unexpected response code: " + userInfoResponse1.getStatus());
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.NAME));
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.BIRTHDATE));
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.FAMILY_NAME));
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.GENDER));
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.GIVEN_NAME));
+        assertUserInfoBasicMinimumResponseOk(userInfoResponse1, 200);
+        assertUserInfoPersonalDataNotNull(userInfoResponse1);        
+        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.BIRTHDATE));        
+        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.GENDER));        
         assertNotNull(userInfoResponse1.getClaim(JwtClaimName.MIDDLE_NAME));
         assertNotNull(userInfoResponse1.getClaim(JwtClaimName.NICKNAME));
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.PICTURE));
         assertNotNull(userInfoResponse1.getClaim(JwtClaimName.PREFERRED_USERNAME));
         assertNotNull(userInfoResponse1.getClaim(JwtClaimName.PROFILE));
         assertNotNull(userInfoResponse1.getClaim(JwtClaimName.WEBSITE));
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.EMAIL));
         assertNotNull(userInfoResponse1.getClaim(JwtClaimName.EMAIL_VERIFIED));
         assertNotNull(userInfoResponse1.getClaim(JwtClaimName.PHONE_NUMBER));
         assertNotNull(userInfoResponse1.getClaim(JwtClaimName.PHONE_NUMBER_VERIFIED));
         assertNotNull(userInfoResponse1.getClaim(JwtClaimName.ADDRESS));
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.LOCALE));
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.ZONEINFO));
         assertNotNull(userInfoResponse1.getClaim(JwtClaimName.USER_NAME));
         assertNull(userInfoResponse1.getClaim("org_name"));
         assertNull(userInfoResponse1.getClaim("work_phone"));
@@ -313,27 +291,15 @@ public class TokenRevocationTest extends BaseTest {
         TokenResponse tokenResponse1 = tokenClient1.exec();
 
         showClient(tokenClient1);
-        assertEquals(tokenResponse1.getStatus(), 200, "Unexpected response code: " + tokenResponse1.getStatus());
-        assertNotNull(tokenResponse1.getEntity(), "The entity is null");
-        assertNotNull(tokenResponse1.getAccessToken(), "The access token is null");
-        assertNotNull(tokenResponse1.getExpiresIn(), "The expires in value is null");
-        assertNotNull(tokenResponse1.getTokenType(), "The token type is null");
-        assertNotNull(tokenResponse1.getRefreshToken(), "The refresh token is null");
+        assertTokenResponseOk(tokenResponse1, true, false);
 
         String accessToken = tokenResponse1.getAccessToken();
         String refreshToken = tokenResponse1.getRefreshToken();
 
         // 4. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
+        assertJwtStandarClaimsNotNull(jwt, false);
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.CODE_HASH));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.OX_OPENID_CONNECT_VERSION));
 
         RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
@@ -348,26 +314,19 @@ public class TokenRevocationTest extends BaseTest {
         UserInfoResponse userInfoResponse1 = userInfoClient1.execUserInfo(accessToken);
 
         showClient(userInfoClient1);
-        assertEquals(userInfoResponse1.getStatus(), 200, "Unexpected response code: " + userInfoResponse1.getStatus());
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.NAME));
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.BIRTHDATE));
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.FAMILY_NAME));
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.GENDER));
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.GIVEN_NAME));
+        assertUserInfoBasicMinimumResponseOk(userInfoResponse1, 200);
+        assertUserInfoPersonalDataNotNull(userInfoResponse1);        
+        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.BIRTHDATE));        
+        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.GENDER));        
         assertNotNull(userInfoResponse1.getClaim(JwtClaimName.MIDDLE_NAME));
         assertNotNull(userInfoResponse1.getClaim(JwtClaimName.NICKNAME));
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.PICTURE));
         assertNotNull(userInfoResponse1.getClaim(JwtClaimName.PREFERRED_USERNAME));
         assertNotNull(userInfoResponse1.getClaim(JwtClaimName.PROFILE));
         assertNotNull(userInfoResponse1.getClaim(JwtClaimName.WEBSITE));
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.EMAIL));
         assertNotNull(userInfoResponse1.getClaim(JwtClaimName.EMAIL_VERIFIED));
         assertNotNull(userInfoResponse1.getClaim(JwtClaimName.PHONE_NUMBER));
         assertNotNull(userInfoResponse1.getClaim(JwtClaimName.PHONE_NUMBER_VERIFIED));
         assertNotNull(userInfoResponse1.getClaim(JwtClaimName.ADDRESS));
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.LOCALE));
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.ZONEINFO));
         assertNotNull(userInfoResponse1.getClaim(JwtClaimName.USER_NAME));
         assertNull(userInfoResponse1.getClaim("org_name"));
         assertNull(userInfoResponse1.getClaim("work_phone"));
@@ -446,27 +405,15 @@ public class TokenRevocationTest extends BaseTest {
         TokenResponse tokenResponse1 = tokenClient1.exec();
 
         showClient(tokenClient1);
-        assertEquals(tokenResponse1.getStatus(), 200, "Unexpected response code: " + tokenResponse1.getStatus());
-        assertNotNull(tokenResponse1.getEntity(), "The entity is null");
-        assertNotNull(tokenResponse1.getAccessToken(), "The access token is null");
-        assertNotNull(tokenResponse1.getExpiresIn(), "The expires in value is null");
-        assertNotNull(tokenResponse1.getTokenType(), "The token type is null");
-        assertNotNull(tokenResponse1.getRefreshToken(), "The refresh token is null");
+        assertTokenResponseOk(tokenResponse1, true, false);
 
         String accessToken = tokenResponse1.getAccessToken();
         String refreshToken = tokenResponse1.getRefreshToken();
 
         // 4. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
+        assertJwtStandarClaimsNotNull(jwt, false);
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.CODE_HASH));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.OX_OPENID_CONNECT_VERSION));
 
         RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
@@ -574,26 +521,14 @@ public class TokenRevocationTest extends BaseTest {
         TokenResponse tokenResponse1 = tokenClient1.exec();
 
         showClient(tokenClient1);
-        assertEquals(tokenResponse1.getStatus(), 200, "Unexpected response code: " + tokenResponse1.getStatus());
-        assertNotNull(tokenResponse1.getEntity(), "The entity is null");
-        assertNotNull(tokenResponse1.getAccessToken(), "The access token is null");
-        assertNotNull(tokenResponse1.getExpiresIn(), "The expires in value is null");
-        assertNotNull(tokenResponse1.getTokenType(), "The token type is null");
-        assertNotNull(tokenResponse1.getRefreshToken(), "The refresh token is null");
+        assertTokenResponseOk(tokenResponse1, true, false);
 
         String refreshToken = tokenResponse1.getRefreshToken();
 
         // 4. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
+        assertJwtStandarClaimsNotNull(jwt, false);
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.CODE_HASH));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.OX_OPENID_CONNECT_VERSION));
 
         RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
@@ -608,11 +543,7 @@ public class TokenRevocationTest extends BaseTest {
         TokenResponse tokenResponse2 = tokenClient2.execRefreshToken(scope, refreshToken, clientId, clientSecret);
 
         showClient(tokenClient2);
-        assertEquals(tokenResponse2.getStatus(), 200, "Unexpected response code: " + tokenResponse2.getStatus());
-        assertNotNull(tokenResponse2.getEntity(), "The entity is null");
-        assertNotNull(tokenResponse2.getAccessToken(), "The access token is null");
-        assertNotNull(tokenResponse2.getTokenType(), "The token type is null");
-        assertNotNull(tokenResponse2.getRefreshToken(), "The refresh token is null");
+        assertTokenResponseOk(tokenResponse2, true, false);
         assertNotNull(tokenResponse2.getScope(), "The scope is null");
 
         String accessToken = tokenResponse2.getAccessToken();
@@ -623,26 +554,19 @@ public class TokenRevocationTest extends BaseTest {
         UserInfoResponse userInfoResponse1 = userInfoClient1.execUserInfo(accessToken);
 
         showClient(userInfoClient1);
-        assertEquals(userInfoResponse1.getStatus(), 200, "Unexpected response code: " + userInfoResponse1.getStatus());
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.NAME));
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.BIRTHDATE));
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.FAMILY_NAME));
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.GENDER));
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.GIVEN_NAME));
+        assertUserInfoBasicMinimumResponseOk(userInfoResponse1, 200);
+        assertUserInfoPersonalDataNotNull(userInfoResponse1);        
+        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.BIRTHDATE));        
+        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.GENDER));        
         assertNotNull(userInfoResponse1.getClaim(JwtClaimName.MIDDLE_NAME));
         assertNotNull(userInfoResponse1.getClaim(JwtClaimName.NICKNAME));
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.PICTURE));
         assertNotNull(userInfoResponse1.getClaim(JwtClaimName.PREFERRED_USERNAME));
         assertNotNull(userInfoResponse1.getClaim(JwtClaimName.PROFILE));
         assertNotNull(userInfoResponse1.getClaim(JwtClaimName.WEBSITE));
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.EMAIL));
         assertNotNull(userInfoResponse1.getClaim(JwtClaimName.EMAIL_VERIFIED));
         assertNotNull(userInfoResponse1.getClaim(JwtClaimName.PHONE_NUMBER));
         assertNotNull(userInfoResponse1.getClaim(JwtClaimName.PHONE_NUMBER_VERIFIED));
         assertNotNull(userInfoResponse1.getClaim(JwtClaimName.ADDRESS));
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.LOCALE));
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.ZONEINFO));
         assertNotNull(userInfoResponse1.getClaim(JwtClaimName.USER_NAME));
         assertNull(userInfoResponse1.getClaim("org_name"));
         assertNull(userInfoResponse1.getClaim("work_phone"));
@@ -732,12 +656,7 @@ public class TokenRevocationTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity(), "The entity is null");
-        assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
-        assertNotNull(tokenResponse.getExpiresIn(), "The expires in value is null");
-        assertNotNull(tokenResponse.getTokenType(), "The token type is null");
-        assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
+        assertTokenResponseOk(tokenResponse, true, false);
 
         String refreshToken = tokenResponse.getRefreshToken();
 
@@ -797,12 +716,7 @@ public class TokenRevocationTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity(), "The entity is null");
-        assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
-        assertNotNull(tokenResponse.getExpiresIn(), "The expires in value is null");
-        assertNotNull(tokenResponse.getTokenType(), "The token type is null");
-        assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
+        assertTokenResponseOk(tokenResponse, true, false);
 
         String accessToken = tokenResponse.getAccessToken();
 
@@ -826,26 +740,19 @@ public class TokenRevocationTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertEquals(userInfoResponse.getStatus(), 200, "Unexpected response code: " + userInfoResponse.getStatus());
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NAME));
+        assertUserInfoBasicMinimumResponseOk(userInfoResponse, 200);
+        assertUserInfoPersonalDataNotNull(userInfoResponse);        
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.BIRTHDATE));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.FAMILY_NAME));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.GENDER));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.GIVEN_NAME));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.MIDDLE_NAME));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.NICKNAME));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.PICTURE));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.PREFERRED_USERNAME));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.PROFILE));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.WEBSITE));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.EMAIL_VERIFIED));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.PHONE_NUMBER));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.PHONE_NUMBER_VERIFIED));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.LOCALE));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ZONEINFO));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.USER_NAME));
         assertNull(userInfoResponse.getClaim("org_name"));
         assertNull(userInfoResponse.getClaim("work_phone"));
@@ -888,12 +795,7 @@ public class TokenRevocationTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity(), "The entity is null");
-        assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
-        assertNotNull(tokenResponse.getExpiresIn(), "The expires in value is null");
-        assertNotNull(tokenResponse.getTokenType(), "The token type is null");
-        assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
+        assertTokenResponseOk(tokenResponse, true, false);
 
         String refreshToken = tokenResponse.getRefreshToken();
 
@@ -925,10 +827,7 @@ public class TokenRevocationTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertNotNull(authorizationResponse.getLocation(), "The location is null");
-        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
-        assertNotNull(authorizationResponse.getState(), "The state is null");
-        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertAuthorizationResponse(authorizationResponse, true);
         return authorizationResponse;
     }
 

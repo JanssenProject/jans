@@ -274,12 +274,12 @@ class PropertiesUtils(SetupUtils):
         
         if not prop_fn:
             prop_fn = Config.savedProperties
-            
+
         if not obj:
             obj = self
 
         self.logIt('Saving properties to %s' % prop_fn)
-        
+
         def getString(value):
             if isinstance(value, str):
                 return str(value).strip()
@@ -298,7 +298,6 @@ class PropertiesUtils(SetupUtils):
                 if obj_name.startswith('cmd_'):
                     continue
 
-
                 if not obj_name.startswith('__') and (not callable(obj)):
 
                     if obj_name == 'mappingLocations':
@@ -310,6 +309,8 @@ class PropertiesUtils(SetupUtils):
 
             with open(prop_fn, 'wb') as f:
                 p.store(f, encoding="utf-8")
+
+            self.run([paths.cmd_chmod, '600', prop_fn])
 
             # TODO: uncomment later
             return

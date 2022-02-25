@@ -8,6 +8,7 @@ import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.error.IErrorType;
 import io.jans.as.model.jwt.JwtClaimName;
+import io.jans.as.model.util.Util;
 import io.jans.as.persistence.model.Par;
 import io.jans.as.server.authorize.ws.rs.AuthorizeRestWebServiceValidator;
 import io.jans.as.server.model.authorize.Claim;
@@ -16,6 +17,7 @@ import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.server.model.authorize.ScopeChecker;
 import io.jans.as.server.service.RedirectUriResponse;
 import io.jans.as.server.service.RequestParameterService;
+import io.jans.as.server.util.ServerUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -24,6 +26,7 @@ import org.slf4j.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
+import java.util.Date;
 import java.util.Set;
 
 import static io.jans.as.model.util.StringUtils.implode;
@@ -91,7 +94,17 @@ public class ParValidator {
             if (StringUtils.isNotBlank(jwtRequest.getClientId())) {
                 par.getAttributes().setClientId(jwtRequest.getClientId());
             }
-
+            if (jwtRequest.getNbf() != null) {
+                par.getAttributes().setNbf(jwtRequest.getNbf());
+            }
+            if (jwtRequest.getExp() != null) {
+                par.setTtl(jwtRequest.getExp());
+                par.setExpirationDate(Util.createExpirationDate(jwtRequest.getExp()));
+            }
+            if (jwtRequest.getExp() != null) {
+                par.setTtl(ServerUtil.calculateTtl(jwtRequest.getExp()));
+                par.setExpirationDate(new Date(jwtRequest.getExp() * 1000L));
+            }
             if (!jwtRequest.getScopes().isEmpty()) { // JWT wins
                 Set<String> scopes = scopeChecker.checkScopesPolicy(client, Lists.newArrayList(jwtRequest.getScopes()));
                 par.getAttributes().setScope(implode(scopes, " "));

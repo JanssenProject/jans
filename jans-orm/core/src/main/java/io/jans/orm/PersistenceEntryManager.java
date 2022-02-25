@@ -115,7 +115,10 @@ public interface PersistenceEntryManager extends EntityManager {
 
     <T> void sortListByProperties(Class<T> entryClass, List<T> entries, boolean caseSensetive, String... sortByProperties);
 
+    @Deprecated
     List<AttributeData> exportEntry(String dn);
+
+    List<AttributeData> exportEntry(String dn, String objectClass);
 
     <T> void importEntry(String dn, Class<T> entryClass, List<AttributeData> data);
 

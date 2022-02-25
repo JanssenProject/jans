@@ -76,7 +76,7 @@ jobs:
          package-name: ${{ matrix.simple }}
          monorepo-tags: true
   release-python-pr:
-    needs: release-docker-pr
+    needs: release-simple-pr
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 1

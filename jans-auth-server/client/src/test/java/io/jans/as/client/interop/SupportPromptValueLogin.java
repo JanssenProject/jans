@@ -29,7 +29,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static io.jans.as.client.client.Asserter.assertOk;
+import static io.jans.as.client.client.Asserter.assertAuthorizationResponse;
+import static io.jans.as.client.client.Asserter.assertRegisterResponseOk;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
@@ -60,7 +61,7 @@ public class SupportPromptValueLogin extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -78,10 +79,7 @@ public class SupportPromptValueLogin extends BaseTest {
             AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                     authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-            assertNotNull(authorizationResponse.getLocation());
-            assertNotNull(authorizationResponse.getCode());
-            assertNotNull(authorizationResponse.getState());
-            assertNotNull(authorizationResponse.getScope());
+            assertAuthorizationResponse(authorizationResponse, responseTypes, true);
 
             String authorizationCode = authorizationResponse.getCode();
             sessionId = authorizationResponse.getSessionId();
@@ -120,10 +118,7 @@ public class SupportPromptValueLogin extends BaseTest {
             AuthorizationResponse authorizationResponse = authenticateResourceOwner(
                     authorizationEndpoint, authorizationRequest, userId, userSecret, false);
 
-            assertNotNull(authorizationResponse.getLocation());
-            assertNotNull(authorizationResponse.getCode());
-            assertNotNull(authorizationResponse.getState());
-            assertNotNull(authorizationResponse.getScope());
+            assertAuthorizationResponse(authorizationResponse, responseTypes, true);
 
             String authorizationCode = authorizationResponse.getCode();
 

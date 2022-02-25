@@ -29,13 +29,13 @@ class SQLBackend:
 
         self.db_dialect = os.environ.get("CN_SQL_DB_DIALECT", "mysql")
         self.schema_files = [
-            "/app/static/jans_schema.json",
-            "/app/static/custom_schema.json",
+            "/app/schema/jans_schema.json",
+            "/app/schema/custom_schema.json",
         ]
 
         self.client = SQLClient()
 
-        with open("/app/static/sql/sql_data_types.json") as f:
+        with open("/app/static/rdbm/sql_data_types.json") as f:
             self.sql_data_types = json.loads(f.read())
 
         self.attr_types = []
@@ -44,18 +44,18 @@ class SQLBackend:
                 schema = json.loads(f.read())
             self.attr_types += schema["attributeTypes"]
 
-        with open("/app/static/sql/opendj_attributes_syntax.json") as f:
+        with open("/app/static/rdbm/opendj_attributes_syntax.json") as f:
             self.opendj_attr_types = json.loads(f.read())
 
-        with open("/app/static/sql/ldap_sql_data_type_mapping.json") as f:
+        with open("/app/static/rdbm/ldap_sql_data_type_mapping.json") as f:
             self.sql_data_types_mapping = json.loads(f.read())
 
         if self.db_dialect == "mysql":
             index_fn = "mysql_index.json"
         else:
-            index_fn = "postgresql_index.json"
+            index_fn = "pgsql_index.json"
 
-        with open(f"/app/static/sql/{index_fn}") as f:
+        with open(f"/app/static/rdbm/{index_fn}") as f:
             self.sql_indexes = json.loads(f.read())
 
     def get_attr_syntax(self, attr):
@@ -355,12 +355,7 @@ class SQLBackend:
     def update_schema(self):
         """Updates schema (may include data migration)"""
 
-        table_mapping = {}
-        for name, table in self.client.adapter.metadata.tables.items():
-            table_mapping[name] = {
-                column.name: str(column.type)
-                for column in table.c
-            }
+        table_mapping = self.client.get_table_mapping()
 
         def column_to_json(table_name, col_name):
             old_data_type = table_mapping[table_name][col_name]
@@ -393,7 +388,7 @@ class SQLBackend:
                 self.client.update(table_name, doc_id, {col_name: {"v": value_list}})
 
         def add_column(table_name, col_name):
-            if col_name in self.client.get_table_mapping()[table_name]:
+            if col_name in table_mapping[table_name]:
                 return
 
             data_type = self.get_data_type(col_name, table_name)
@@ -436,7 +431,7 @@ class SQLBackend:
 
             # pre-populate the modified column
             for doc_id, value in values.items():
-                if all([value, "v" in value, len(value["v"])]):
+                if value and "v" in value and value["v"]:
                     new_value = value["v"][0]
                 else:
                     new_value = ""

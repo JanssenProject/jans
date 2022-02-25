@@ -20,8 +20,8 @@ import javax.ws.rs.HttpMethod;
 import java.util.Arrays;
 import java.util.List;
 
-import static io.jans.as.client.client.Asserter.assertBadRequest;
-import static io.jans.as.client.client.Asserter.assertOk;
+import static io.jans.as.client.client.Asserter.assertRegisterResponseFail;
+import static io.jans.as.client.client.Asserter.assertRegisterResponseOk;
 import static io.jans.as.model.register.RegisterRequestParam.SCOPE;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -72,7 +72,7 @@ public class ClientWhiteListBlackListRedirectUris extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
 
         showClient(registerClient);
-        assertBadRequest(response);
+        assertRegisterResponseFail(response);
     }
 
     @Parameters({"redirectUris", "sectorIdentifierUri"})
@@ -90,7 +90,7 @@ public class ClientWhiteListBlackListRedirectUris extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(response);
+        assertRegisterResponseOk(response, 201, true);
         assertNotNull(response.getClaims().get(SCOPE.toString()));
 
         registrationAccessToken1 = response.getRegistrationAccessToken();
@@ -113,6 +113,6 @@ public class ClientWhiteListBlackListRedirectUris extends BaseTest {
         final RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertBadRequest(response);
+        assertRegisterResponseFail(response);
     }
 }
