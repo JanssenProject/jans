@@ -105,7 +105,7 @@ def check_install_dependencies():
     except:
         app_globals.package_dependencies.append('python3-ldap3')
 
-    if app_globals.package_dependencies and not app_globals.argsp.n:
+    if app_globals.package_dependencies and not app_globals.argsp.yes:
         install_dist = input('Required package(s): {}. Install now? [Y/n] '.format(', '.join(app_globals.package_dependencies)))
         if install_dist.lower().startswith('n'):
             print("Can't continue...")
