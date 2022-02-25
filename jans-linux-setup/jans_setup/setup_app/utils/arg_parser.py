@@ -1,5 +1,4 @@
 import argparse
-import __main__
 
 parser_description='''Use this script to configure your Jans Server and to add initial data required for
 oxAuth and oxTrust to start. If setup.properties is found in this folder, these
@@ -82,12 +81,12 @@ spanner_cred_group.add_argument('-google-application-credentials', help="Path to
 
 parser.add_argument('-approved-issuer', help="Api Approved Issuer")
 
+def add_to_me(you):
 
-if hasattr(__main__, 'parser') and hasattr(__main__.parser, 'add_to_setup_parser') and __main__.parser.add_to_setup_parser:
-    print("Adding to main parser elements")
-    group = parser.add_argument_group(__main__.parser.description)
+    print("Adding actions from parser", you.description)
+    group = parser.add_argument_group(you.description)
 
-    for action in __main__.parser._actions:
+    for action in you._actions:
         if isinstance(action, argparse._HelpAction):
             continue
         if isinstance(action, argparse._StoreTrueAction):
