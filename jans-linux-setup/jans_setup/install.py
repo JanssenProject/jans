@@ -249,7 +249,7 @@ def download_files():
 
 
 def check_installation():
-    if not (os.path.exists(jetty_home) and os.path.join('/opt/jans/jans-setup/setup_app') and ('/etc/jans/conf/jans.properties')):
+    if not (os.path.exists(jetty_home) and os.path.exists('/etc/jans/conf/jans.properties')):
         print("Jans server seems not installed")
         sys.exit()
 
@@ -408,7 +408,7 @@ def main():
     init_installer()
     check_install_dependencies()
 
-    if not (app_globals.argsp.u or app_globals.argsp.uninstall):
+    if not (app_globals.argsp.use_downloaded or app_globals.argsp.uninstall):
         download_files()
 
     if app_globals.argsp.upgrade:
