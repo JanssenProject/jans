@@ -52,7 +52,7 @@ RUN wget -q https://github.com/fabioz/PyDev.Debugger/archive/refs/tags/pydev_deb
 # ===========
 
 ENV CN_VERSION=1.0.0-SNAPSHOT
-ENV CN_BUILD_DATE='2022-01-25 09:49'
+ENV CN_BUILD_DATE='2022-02-25 10:38'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-server/${CN_VERSION}/jans-auth-server-${CN_VERSION}.war
 
 # Install Jans Auth
@@ -76,9 +76,26 @@ ARG JSMPP_VERSION=2.3.7
 RUN wget -q https://repo1.maven.org/maven2/org/jsmpp/jsmpp/${JSMPP_VERSION}/jsmpp-${JSMPP_VERSION}.jar -O /usr/share/java/jsmpp.jar
 
 # This will later be refactored and moved to be pulled from persitence or a central bucket
-ARG CASA_VERSION=5.0.0-SNAPSHOT
-ARG CASA_BUILD_DATE="2022-01-05 12:52"
-RUN wget -q https://jenkins.gluu.org/maven/org/gluu/casa-config/${CASA_VERSION}/casa-config-${CASA_VERSION}.jar -O /usr/share/java/casa-config.jar
+ARG CASA_CONFIG_VERSION=5.0.0-SNAPSHOT
+ARG CASA_CONFIG_BUILD_DATE="2022-01-05 12:52"
+RUN wget -q https://jenkins.gluu.org/maven/org/gluu/casa-config/${CASA_CONFIG_VERSION}/casa-config-${CASA_CONFIG_VERSION}.jar -O /usr/share/java/casa-config.jar
+
+# =====================
+# Casa external scripts
+# =====================
+
+ARG CASA_EXTRAS_VERSION=ed78914de05ec918493bab9dae631a34d4850e1f
+ARG CASA_EXTRAS_DIR=casa/extras
+
+RUN mkdir -p /opt/jans/python/libs
+RUN git clone --filter blob:none --no-checkout https://github.com/GluuFederation/flex.git /tmp/flex \
+    && cd /tmp/flex \
+    && git sparse-checkout init --cone \
+    && git checkout ${CASA_EXTRAS_VERSION} \
+    && git sparse-checkout set ${CASA_EXTRAS_DIR} \
+    && cd /opt/jans/python/libs \
+    && cp /tmp/flex/${CASA_EXTRAS_DIR}/casa-external_* . \
+    && rm -rf /tmp/flex
 
 # ======
 # Python
@@ -204,7 +221,6 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/custom/pages \
     /etc/jans/conf \
     /app/templates
 
-COPY libs /opt/jans/python/libs
 COPY certs /etc/certs
 COPY jetty/jans-auth_web_resources.xml ${JETTY_BASE}/jans-auth/webapps/
 COPY jetty/jans-auth.xml ${JETTY_BASE}/jans-auth/webapps/
