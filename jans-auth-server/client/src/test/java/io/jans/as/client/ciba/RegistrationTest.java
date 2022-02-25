@@ -13,6 +13,7 @@ import io.jans.as.client.RegisterClient;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
 
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.BackchannelTokenDeliveryMode;
 import io.jans.as.model.common.GrantType;
@@ -702,7 +703,7 @@ public class RegistrationTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseFail(response);
+        AssertBuilder.registerResponseBuilder(response).status(400).checkAsserts();
     }
 
     @Parameters({"clientJwksUri"})
@@ -724,7 +725,7 @@ public class RegistrationTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseFail(response);
+        AssertBuilder.registerResponseBuilder(response).status(400).checkAsserts();
     }
 
     @Parameters({"clientJwksUri"})
@@ -746,7 +747,7 @@ public class RegistrationTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseFail(response);
+        AssertBuilder.registerResponseBuilder(response).status(400).checkAsserts();
     }
 
     @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint"})
@@ -768,7 +769,7 @@ public class RegistrationTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseFail(response);
+        AssertBuilder.registerResponseBuilder(response).status(400).checkAsserts();
     }
 
     @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint"})
@@ -790,7 +791,7 @@ public class RegistrationTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseFail(response);
+        AssertBuilder.registerResponseBuilder(response).status(400).checkAsserts();
     }
 
     @Parameters({"backchannelClientNotificationEndpoint"})
@@ -812,7 +813,7 @@ public class RegistrationTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseFail(response);
+        AssertBuilder.registerResponseBuilder(response).status(400).checkAsserts();
     }
 
     @Parameters({"backchannelClientNotificationEndpoint"})
@@ -834,6 +835,6 @@ public class RegistrationTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseFail(response);
+        AssertBuilder.registerResponseBuilder(response).status(400).checkAsserts();
     }
 }

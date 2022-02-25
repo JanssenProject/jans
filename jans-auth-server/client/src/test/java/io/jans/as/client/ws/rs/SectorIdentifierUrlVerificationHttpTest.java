@@ -20,6 +20,7 @@ import io.jans.as.client.TokenResponse;
 import io.jans.as.client.UserInfoClient;
 import io.jans.as.client.UserInfoResponse;
 
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.Prompt;
@@ -352,7 +353,7 @@ public class SectorIdentifierUrlVerificationHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseFail(response);
+        AssertBuilder.registerResponseBuilder(response).status(400).checkAsserts();
     }
 
     @Parameters({"sectorIdentifierUri"})
@@ -372,7 +373,7 @@ public class SectorIdentifierUrlVerificationHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseFail(response);
+        AssertBuilder.registerResponseBuilder(response).status(400).checkAsserts();
     }
 
     /**
@@ -394,6 +395,6 @@ public class SectorIdentifierUrlVerificationHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseFail(response);
+        AssertBuilder.registerResponseBuilder(response).status(400).checkAsserts();
     }
 }

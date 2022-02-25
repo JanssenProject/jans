@@ -44,6 +44,7 @@ import static org.testng.Assert.*;
 public class Asserter {
 
     private Asserter() {
+
     }
 
     public static void assertParResponse(ParResponse response) {
@@ -215,6 +216,7 @@ public class Asserter {
         assertNotNull(idToken.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
         assertNotNull(idToken.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
         assertNotNull(idToken.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
+
         assertNotNull(idToken.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
         assertNotNull(idToken.getClaims().getClaimAsString(JwtClaimName.OX_OPENID_CONNECT_VERSION));
         assertNotNull(idToken.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE));

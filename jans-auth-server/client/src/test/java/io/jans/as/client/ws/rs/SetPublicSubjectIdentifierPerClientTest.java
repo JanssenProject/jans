@@ -7,6 +7,7 @@
 package io.jans.as.client.ws.rs;
 
 import io.jans.as.client.*;
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.crypto.signature.RSAPublicKey;
@@ -115,7 +116,7 @@ public class SetPublicSubjectIdentifierPerClientTest extends BaseTest {
         showClient(registerClient);
 
         if (checkError) {
-            assertRegisterResponseFail(registerResponse);
+            AssertBuilder.registerResponseBuilder(registerResponse).status(400).checkAsserts();
         } else {
             assertRegisterResponseOk(registerResponse, 201, true);
         }

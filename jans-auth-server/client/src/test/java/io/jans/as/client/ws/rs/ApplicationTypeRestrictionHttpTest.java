@@ -19,6 +19,7 @@ import io.jans.as.client.TokenResponse;
 import io.jans.as.client.UserInfoClient;
 import io.jans.as.client.UserInfoResponse;
 
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
@@ -145,7 +146,7 @@ public class ApplicationTypeRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
 
         showClient(registerClient);
-        assertRegisterResponseFail(registerResponse);
+        AssertBuilder.registerResponseBuilder(registerResponse).status(400).checkAsserts();
     }
 
     /**
@@ -419,7 +420,7 @@ public class ApplicationTypeRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
 
         showClient(registerClient);
-        assertRegisterResponseFail(registerResponse);
+        AssertBuilder.registerResponseBuilder(registerResponse).status(400).checkAsserts();
     }
 
     /**
@@ -436,6 +437,6 @@ public class ApplicationTypeRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
 
         showClient(registerClient);
-        assertRegisterResponseFail(registerResponse);
+        AssertBuilder.registerResponseBuilder(registerResponse).status(400).checkAsserts();
     }
 }

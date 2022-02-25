@@ -1,12 +1,7 @@
 package io.jans.as.client.ws.rs.par;
 
-import io.jans.as.client.AuthorizationRequest;
-import io.jans.as.client.AuthorizationResponse;
-import io.jans.as.client.BaseTest;
-import io.jans.as.client.RegisterResponse;
-import io.jans.as.client.TokenClient;
-import io.jans.as.client.TokenRequest;
-import io.jans.as.client.TokenResponse;
+import io.jans.as.client.*;
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.client.par.ParClient;
 import io.jans.as.client.par.ParRequest;
 import io.jans.as.client.par.ParResponse;
@@ -26,11 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static io.jans.as.client.client.Asserter.assertAuthorizationResponse;
-import static io.jans.as.client.client.Asserter.assertRegisterResponseOk;
-import static io.jans.as.client.client.Asserter.assertParResponse;
-import static io.jans.as.client.client.Asserter.assertTokenResponseOk;
-import static io.jans.as.client.client.Asserter.validateIdToken;
+import static io.jans.as.client.client.Asserter.*;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -62,7 +53,7 @@ public class ParHttpTest extends BaseTest {
         ParClient parClient = newParClient(parRequest);
         parResponse = parClient.exec();
         showClient(parClient);
-        assertParResponse(parResponse);
+        AssertBuilder.parResponseBuilder(parResponse).checkAsserts();
     }
 
     @Parameters({"userId", "userSecret", "redirectUri"})

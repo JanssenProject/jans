@@ -10,6 +10,7 @@ import io.jans.as.client.BaseTest;
 import io.jans.as.client.RegisterClient;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.StringUtils;
 import io.jans.as.model.util.URLPatternList;
@@ -72,7 +73,7 @@ public class ClientWhiteListBlackListRedirectUris extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
 
         showClient(registerClient);
-        assertRegisterResponseFail(response);
+        AssertBuilder.registerResponseBuilder(response).status(400).checkAsserts();
     }
 
     @Parameters({"redirectUris", "sectorIdentifierUri"})
@@ -113,6 +114,6 @@ public class ClientWhiteListBlackListRedirectUris extends BaseTest {
         final RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseFail(response);
+        AssertBuilder.registerResponseBuilder(response).status(400).checkAsserts();
     }
 }
