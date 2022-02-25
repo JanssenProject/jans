@@ -47,7 +47,7 @@ for action in install.parser._actions:
 
 argsp = arg_parser.parser.parse_known_args()[0]
 
-if not (os.path.exists('/opt/dist/jans/jans.zip') or os.path.exists('jans-auth.war')) or '-uninstall' in sys.argv or argsp.force_download:
+if not (os.path.exists('/opt/dist/jans/jans.zip') or os.path.exists('/opt/dist/jans/jans-auth.war')) or '-uninstall' in sys.argv or argsp.force_download:
 
     install.app_globals.argsp = argsp
     install.setup_dir = dir_path
@@ -148,7 +148,7 @@ def main():
     if '-uninstall' in sys.argv:
         install.uninstall_jans()
         sys.exit()
-    else:
+    elif not os.path.exists('/opt/dist/jans/jans-auth.war'):
         print("Downloading Files")
         install.download_files()
         install.extract_yaml_files()
