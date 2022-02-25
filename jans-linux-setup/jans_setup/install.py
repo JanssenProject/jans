@@ -10,11 +10,12 @@ import ssl
 import json
 import re
 
+from types import SimpleNamespace
 from urllib import request
 from urllib.parse import urljoin
 from pathlib import Path
 
-maven_base_url = 'https://maven.jans.io/maven/io/jans/'
+ssl._create_default_https_context = ssl._create_unverified_context
 
 app_versions = {
   "JANS_APP_VERSION": "1.0.0",
@@ -26,10 +27,21 @@ app_versions = {
   "SETUP_BRANCH": "main",
 }
 
+app_globals = SimpleNamespace()
+app_globals.jetty_dist_string = 'jetty-distribution'
+app_globals.jetty_services = ['jans-auth', 'jans-config-api']
+app_globals.package_dependencies = []
+
 jans_dir = '/opt/jans'
 app_dir = '/opt/dist/app'
 jans_app_dir = '/opt/dist/jans'
 scripts_dir = '/opt/dist/scripts'
+jetty_home = '/opt/jans/jetty'
+maven_base_url = 'https://maven.jans.io/maven/io/jans/'
+jans_zip_file = os.path.join(jans_app_dir, 'jans.zip')
+sqlalchemy_zip_file = os.path.join(jans_app_dir, 'sqlalchemy.zip')
+
+package_installer = shutil.which('apt') or shutil.which('dnf') or shutil.which('yum') or shutil.which('zypper')
 
 
 for d in (jans_dir, app_dir, jans_app_dir, scripts_dir):
@@ -38,11 +50,11 @@ for d in (jans_dir, app_dir, jans_app_dir, scripts_dir):
 
 parser = argparse.ArgumentParser(description="This script downloads Janssen Server components and fires setup")
 parser.add_argument('-a', help=argparse.SUPPRESS, action='store_true')
-parser.add_argument('-u', help="Use already downloaded components", action='store_true')
+parser.add_argument('-use-downloaded', help="Use already downloaded components", action='store_true')
 parser.add_argument('-upgrade', help="Upgrade Janssen war and jar files", action='store_true')
 parser.add_argument('-uninstall', help="Uninstall Jans server and removes all files", action='store_true')
 parser.add_argument('--args', help="Arguments to be passed to setup.py")
-parser.add_argument('-n', help="No prompt", action='store_true')
+parser.add_argument('-yes', help="No prompt", action='store_true')
 parser.add_argument('--keep-downloads', help="Keep downloaded files (applicable for uninstallation only)", action='store_true')
 parser.add_argument('--profile', help="Setup profile", choices=['jans', 'openbanking'], default='jans')
 parser.add_argument('--jans-app-version', help="Version for Jannses applications")
@@ -52,59 +64,54 @@ parser.add_argument('--no-setup', help="Do not launch setup", action='store_true
 parser.add_argument('--no-jans-setup', help="Do not extract jans-setup", action='store_true')
 parser.add_argument('--no-gcs', help="Do not download gcs", action='store_true')
 parser.add_argument('-setup-dir', help="Setup directory", default=os.path.join(jans_dir, 'jans-setup'))
-
+parser.add_argument('--force-download', help="Force downloading files", action='store_true')
 
 if '-a' in sys.argv:
     parser.add_argument('--jetty-version', help="Jetty verison. For example 11.0.6")
 
-argsp = parser.parse_args()
 
-setup_dir = argsp.setup_dir
-ssl._create_default_https_context = ssl._create_unverified_context
+def init_installer():
 
-if argsp.jans_app_version:
-    app_versions['JANS_APP_VERSION'] = argsp.jans_app_version
+    if app_globals.argsp.jans_app_version:
+        app_versions['JANS_APP_VERSION'] = app_globals.argsp.jans_app_version
 
-if argsp.jans_build:
-    app_versions['JANS_BUILD'] = argsp.jans_build
+    if app_globals.argsp.jans_build:
+        app_versions['JANS_BUILD'] = app_globals.argsp.jans_build
 
-if argsp.setup_branch:
-    app_versions['SETUP_BRANCH'] = argsp.setup_branch
+    if app_globals.argsp.setup_branch:
+        app_versions['SETUP_BRANCH'] = app_globals.argsp.setup_branch
 
-jetty_dist_string = 'jetty-distribution'
-if getattr(argsp, 'jetty_version', None):
-    result = re.findall('(\d*).', argsp.jetty_version)
-    if result and result[0] and result[0].isdigit():
-        if int(result[0]) > 9:
-            jetty_dist_string = 'jetty-home'
-            app_versions['JETTY_VERSION'] = argsp.jetty_version
-    else:
-        print("Can't determine Jetty Version. Continuing with version {}".format(app_versions['JETTY_VERSION']))
+    if getattr(app_globals.argsp, 'jetty_version', None):
+        result = re.findall('(\d*).', app_globals.argsp.jetty_version)
+        if result and result[0] and result[0].isdigit():
+            if int(result[0]) > 9:
+                app_globals.jetty_dist_string = 'jetty-home'
+                app_versions['JETTY_VERSION'] = app_globals.argsp.jetty_version
+        else:
+            print("Can't determine Jetty Version. Continuing with version {}".format(app_versions['JETTY_VERSION']))
 
-
-package_installer = shutil.which('apt') or shutil.which('dnf') or shutil.which('yum') or shutil.which('zypper')
-
-package_dependencies = []
+    if app_globals.argsp.profile == 'jans':
+        app_globals.jetty_services += ['jans-fido2', 'jans-scim', 'jans-eleven']
 
 def check_install_dependencies():
 
     try:
         from distutils import dist
     except:
-        package_dependencies.append('python3-distutils')
+        app_globals.package_dependencies.append('python3-distutils')
 
     try:
         import ldap3
     except:
-        package_dependencies.append('python3-ldap3')
+        app_globals.package_dependencies.append('python3-ldap3')
 
-    if package_dependencies and not argsp.n:
-        install_dist = input('Required package(s): {}. Install now? [Y/n] '.format(', '.join(package_dependencies)))
+    if app_globals.package_dependencies and not app_globals.argsp.n:
+        install_dist = input('Required package(s): {}. Install now? [Y/n] '.format(', '.join(app_globals.package_dependencies)))
         if install_dist.lower().startswith('n'):
             print("Can't continue...")
             sys.exit()
 
-        os.system('{} install -y {}'.format(package_installer, ' '.join(package_dependencies)))
+        os.system('{} install -y {}'.format(package_installer, ' '.join(app_globals.package_dependencies)))
 
 
 def extract_subdir(zip_fn, sub_dir, target_dir, zipf=None):
@@ -215,17 +222,13 @@ def download_gcs():
         shutil.rmtree(tmp_dir)
 
 
-jans_zip_file = os.path.join(jans_app_dir, 'jans.zip')
-sqlalchemy_zip_file = os.path.join(jans_app_dir, 'sqlalchemy.zip')
-
-
 def download_files():
 
     setup_url = 'https://github.com/JanssenProject/jans/archive/refs/heads/{}.zip'.format(app_versions['SETUP_BRANCH'])
     download(setup_url, jans_zip_file)
 
     download('https://corretto.aws/downloads/resources/{0}/amazon-corretto-{0}-linux-x64.tar.gz'.format(app_versions['AMAZON_CORRETTO_VERSION']), os.path.join(app_dir, 'amazon-corretto-{0}-linux-x64.tar.gz'.format(app_versions['AMAZON_CORRETTO_VERSION'])))
-    download('https://repo1.maven.org/maven2/org/eclipse/jetty/{1}/{0}/{1}-{0}.tar.gz'.format(app_versions['JETTY_VERSION'], jetty_dist_string), os.path.join(app_dir,'{1}-{0}.tar.gz'.format(app_versions['JETTY_VERSION'], jetty_dist_string)))
+    download('https://repo1.maven.org/maven2/org/eclipse/jetty/{1}/{0}/{1}-{0}.tar.gz'.format(app_versions['JETTY_VERSION'], app_globals.jetty_dist_string), os.path.join(app_dir,'{1}-{0}.tar.gz'.format(app_versions['JETTY_VERSION'], app_globals.jetty_dist_string)))
     download('https://maven.gluu.org/maven/org/gluufederation/jython-installer/{0}/jython-installer-{0}.jar'.format(app_versions['JYTHON_VERSION']), os.path.join(app_dir, 'jython-installer-{0}.jar'.format(app_versions['JYTHON_VERSION'])))
     download(urljoin(maven_base_url, 'jans-auth-server/{0}{1}/jans-auth-server-{0}{1}.war'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD'])), os.path.join(jans_app_dir, 'jans-auth.war'))
     download(urljoin(maven_base_url, 'jans-auth-client/{0}{1}/jans-auth-client-{0}{1}-jar-with-dependencies.jar'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD'])), os.path.join(jans_app_dir, 'jans-auth-client-jar-with-dependencies.jar'))
@@ -237,17 +240,13 @@ def download_files():
     download('https://raw.githubusercontent.com/GluuFederation/gluu-snap/master/facter/facter', os.path.join(jans_app_dir, 'facter'))
     download('https://github.com/jpadilla/pyjwt/archive/refs/tags/2.3.0.zip', os.path.join(app_dir, 'pyjwt.zip'))
 
-    if argsp.profile == 'jans':
+    if app_globals.argsp.profile == 'jans':
         download('https://maven.gluu.org/maven/org/gluufederation/opendj/opendj-server-legacy/{0}/opendj-server-legacy-{0}.zip'.format(app_versions['OPENDJ_VERSION']), os.path.join(app_dir, 'opendj-server-legacy-{0}.zip'.format(app_versions['OPENDJ_VERSION'])))
         download(urljoin(maven_base_url, 'jans-fido2-server/{0}{1}/jans-fido2-server-{0}{1}.war'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD'])), os.path.join(jans_app_dir, 'jans-fido2.war'))
         download(urljoin(maven_base_url, 'jans-scim-server/{0}{1}/jans-scim-server-{0}{1}.war'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD'])), os.path.join(jans_app_dir, 'jans-scim.war'))
         download('https://jenkins.jans.io/maven/io/jans/jans-eleven-server/{0}{1}/jans-eleven-server-{0}{1}.war'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD']), os.path.join(jans_app_dir, 'jans-eleven.war'))
         download('https://www.apple.com/certificateauthority/Apple_WebAuthn_Root_CA.pem', os.path.join(app_dir, 'Apple_WebAuthn_Root_CA.pem'))
 
-jetty_home = '/opt/jans/jetty'
-jetty_services = ['jans-auth', 'jans-config-api']
-if argsp.profile == 'jans':
-    jetty_services += ['jans-fido2', 'jans-scim', 'jans-eleven']
 
 def check_installation():
     if not (os.path.exists(jetty_home) and os.path.join('/opt/jans/jans-setup/setup_app') and ('/etc/jans/conf/jans.properties')):
@@ -256,8 +255,8 @@ def check_installation():
 
 
 def profile_setup():
-    print("Preparing Setup for profile {}".format(argsp.profile))
-    profile_dir = os.path.join(setup_dir, argsp.profile)
+    print("Preparing Setup for profile {}".format(app_globals.argsp.profile))
+    profile_dir = os.path.join(app_globals.argsp.setup_dir, app_globals.argsp.profile)
     replace_dirs = []
     if not os.path.exists(profile_dir):
         print("Profile directory {} does not exist. Exiting ...".format(profile_dir))
@@ -274,11 +273,11 @@ def profile_setup():
     replaced_dirs = []
     for pdir in replace_dirs:
         source_dir = os.path.join(profile_dir, pdir)
-        target_dir = os.path.join(setup_dir, pdir)
+        target_dir = os.path.join(app_globals.argsp.setup_dir, pdir)
         replaced_dirs.append(source_dir)
         if os.path.exists(source_dir) and os.path.exists(target_dir):
             shutil.rmtree(target_dir)
-            copy_target = os.path.join(setup_dir, os.path.sep.join(os.path.split(pdir)[:-1]))
+            copy_target = os.path.join(app_globals.argsp.setup_dir, os.path.sep.join(os.path.split(pdir)[:-1]))
             print(target_dir)
             shutil.copytree(source_dir, target_dir)
 
@@ -286,7 +285,7 @@ def profile_setup():
         if root.startswith(tuple(replaced_dirs)):
             continue
         if files:
-            target_dir = Path(setup_dir).joinpath(Path(root).relative_to(Path(profile_dir)))
+            target_dir = Path(app_globals.argsp.setup_dir).joinpath(Path(root).relative_to(Path(profile_dir)))
             for f in files:
                 if f in ['.profiledirs']:
                     continue
@@ -295,19 +294,19 @@ def profile_setup():
                 shutil.copy(source_file, target_dir)
 
 def extract_setup():
-    if os.path.exists(setup_dir):
-        shutil.move(setup_dir, setup_dir + '-back.' + time.ctime())
+    if os.path.exists(app_globals.argsp.setup_dir):
+        shutil.move(app_globals.argsp.setup_dir, app_globals.argsp.setup_dir + '-back.' + time.ctime())
     print("Extracting jans-setup package")
-    extract_subdir(jans_zip_file, 'jans-linux-setup/jans_setup', setup_dir)
-    extract_subdir(sqlalchemy_zip_file, 'lib/sqlalchemy', os.path.join(setup_dir, 'setup_app/pylib/sqlalchemy'))
+    extract_subdir(jans_zip_file, 'jans-linux-setup/jans_setup', app_globals.argsp.setup_dir)
+    extract_subdir(sqlalchemy_zip_file, 'lib/sqlalchemy', os.path.join(app_globals.argsp.setup_dir, 'setup_app/pylib/sqlalchemy'))
 
-    target_setup = os.path.join(setup_dir, 'setup.py')
+    target_setup = os.path.join(app_globals.argsp.setup_dir, 'setup.py')
     if not os.path.exists(target_setup):
-        os.symlink(os.path.join(setup_dir, 'jans_setup.py'), target_setup)
+        os.symlink(os.path.join(app_globals.argsp.setup_dir, 'jans_setup.py'), target_setup)
 
 def extract_yaml_files():
-    extract_file(jans_zip_file, 'jans-config-api/docs/jans-config-api-swagger.yaml', os.path.join(setup_dir, 'setup_app/data'))
-    extract_file(jans_zip_file, 'jans-scim/server/src/main/resources/jans-scim-openapi.yaml', os.path.join(setup_dir, 'setup_app/data'))
+    extract_file(jans_zip_file, 'jans-config-api/docs/jans-config-api-swagger.yaml', os.path.join(app_globals.argsp.setup_dir, 'setup_app/data'))
+    extract_file(jans_zip_file, 'jans-scim/server/src/main/resources/jans-scim-openapi.yaml', os.path.join(app_globals.argsp.setup_dir, 'setup_app/data'))
     extract_file(jans_zip_file, 'jans-config-api/server/src/main/resources/log4j2.xml', jans_app_dir)
 
 def prepare_jans_cli_package():
@@ -316,7 +315,7 @@ def prepare_jans_cli_package():
 
 def uninstall_jans():
     check_installation()
-    if not argsp.n:
+    if not app_globals.argsp.yes:
         print('\033[31m')
         print("This process is irreversible.")
         print("You will lose all data related to Janssen Server.")
@@ -335,7 +334,7 @@ def uninstall_jans():
                 print("Please type \033[1m yes \033[0m to uninstall")
 
     print("Uninstalling Jannsen Server...")
-    for service in jetty_services:
+    for service in app_globals.jetty_services:
         if os.path.exists(os.path.join(jetty_home, service)):
             default_fn = os.path.join('/etc/default/', service)
             if os.path.exists(default_fn):
@@ -344,14 +343,14 @@ def uninstall_jans():
             print("Stopping", service)
             os.system('systemctl stop ' + service)
 
-    if argsp.profile == 'jans':
+    if app_globals.argsp.profile == 'jans':
         print("Stopping OpenDj Server")
         os.system('/opt/opendj/bin/stop-ds')
 
     remove_list = ['/etc/certs', '/etc/jans', '/opt/jans', '/opt/amazon-corretto*', '/opt/jre', '/opt/node*', '/opt/jetty*', '/opt/jython*']
-    if argsp.profile == 'jans':
+    if app_globals.argsp.profile == 'jans':
         remove_list.append('/opt/opendj')
-    if not argsp.keep_downloads:
+    if not app_globals.argsp.keep_downloads:
         remove_list.append('/opt/dist')
 
     for p in remove_list:
@@ -360,63 +359,64 @@ def uninstall_jans():
         os.system('rm -r -f ' + p)
 
 
-def main():
+def upgrade():
+    check_installation()
 
+    for service in app_globals.jetty_services:
+        source_fn = os.path.join('/opt/dist/jans', service +'.war')
+        target_fn = os.path.join(jetty_home, service, 'webapps', service +'.war' )
+        if os.path.exists(target_fn):
+            print("Copying", source_fn, "as", target_fn)
+            shutil.move(target_fn, target_fn+'-back.' + time.ctime())
+            shutil.copy(source_fn, target_fn)
+            print("Restarting", service)
+            os.system('systemctl restart ' + service)
+
+    jans_config_api_fn = '/opt/jans/config-api/jans-config-api-runner.jar'
+    if os.path.exists(jans_config_api_fn):
+        shutil.move(jans_config_api_fn, jans_config_api_fn + '-back.' + time.ctime())
+        source_fn = '/opt/dist/jans/jans-config-api-runner.jar'
+        print("Copying", source_fn, "as", jans_config_api_fn)
+        shutil.copy(source_fn, jans_config_api_fn)
+        print("Restarting jans-config-api")
+        os.system('systemctl restart jans-config-api')
+
+def do_install():
+    if not app_globals.argsp.no_jans_setup:
+        extract_setup()
+
+    extract_yaml_files()
+
+    if app_globals.argsp.profile == 'jans':
+        if not app_globals.argsp.no_gcs:
+            download_gcs()
+    else:
+        profile_setup()
+
+    if not app_globals.argsp.no_setup:
+        print("Launching Janssen Setup")
+
+        setup_cmd = 'python3 {}/setup.py'.format(app_globals.argsp.setup_dir)
+
+        if app_globals.argsp.args:
+            setup_cmd += ' ' + app_globals.argsp.args
+
+        os.system(setup_cmd)
+
+def main():
+    app_globals.argsp = parser.parse_known_args()[0]
+    init_installer()
     check_install_dependencies()
 
-    if not (argsp.u or argsp.uninstall):
+    if not (app_globals.argsp.u or app_globals.argsp.uninstall):
         download_files()
 
-    if argsp.upgrade:
-
-        check_installation()
-
-        for service in jetty_services:
-            source_fn = os.path.join('/opt/dist/jans', service +'.war')
-            target_fn = os.path.join(jetty_home, service, 'webapps', service +'.war' )
-            if os.path.exists(target_fn):
-                print("Copying", source_fn, "as", target_fn)
-                shutil.move(target_fn, target_fn+'-back.' + time.ctime())
-                shutil.copy(source_fn, target_fn)
-                print("Restarting", service)
-                os.system('systemctl restart ' + service)
-
-        jans_config_api_fn = '/opt/jans/config-api/jans-config-api-runner.jar'
-        if os.path.exists(jans_config_api_fn):
-            shutil.move(jans_config_api_fn, jans_config_api_fn + '-back.' + time.ctime())
-            source_fn = '/opt/dist/jans/jans-config-api-runner.jar'
-            print("Copying", source_fn, "as", jans_config_api_fn)
-            shutil.copy(source_fn, jans_config_api_fn)
-            print("Restarting jans-config-api")
-            os.system('systemctl restart jans-config-api')
-
-    elif argsp.uninstall:
-
+    if app_globals.argsp.upgrade:
+        upgrade()
+    elif app_globals.argsp.uninstall:
         uninstall_jans()
-
     else:
-
-        if not argsp.no_jans_setup:
-            extract_setup()
-
-        extract_yaml_files()
-
-        if argsp.profile == 'jans':
-            if not argsp.no_gcs:
-                download_gcs()
-        else:
-            profile_setup()
-
-
-        if not argsp.no_setup:
-            print("Launching Janssen Setup")
-
-            setup_cmd = 'python3 {}/setup.py'.format(setup_dir)
-
-            if argsp.args:
-                setup_cmd += ' ' + argsp.args
-
-            os.system(setup_cmd)
+        do_install()
 
 
 if __name__ == "__main__":

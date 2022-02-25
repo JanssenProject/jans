@@ -11,20 +11,48 @@ import shutil
 import traceback
 import code
 import site
+import argparse
 
 from pathlib import Path
 
 from queue import Queue
 
 __STATIC_SETUP_DIR__ = '/opt/jans/jans-setup/'
-queue = Queue()
+os.environ['LC_ALL'] = 'C'
 
+queue = Queue()
 dir_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(dir_path)
 
-if not (os.path.exists('/opt/dist/jans/jans.zip') or os.path.exists('jans-auth.war')) or '-uninstall' in sys.argv:
-    import install
+from setup_app.utils import arg_parser
+
+import install
+
+group = arg_parser.parser.add_argument_group(install.parser.description)
+
+for action in install.parser._actions:
+    if isinstance(action, argparse._HelpAction):
+        continue
+    if isinstance(action, argparse._StoreTrueAction):
+        arg = group.add_argument(*action.option_strings, action='store_true')
+    else:
+        arg = group.add_argument(*action.option_strings)
+
+    arg.option_strings = action.option_strings
+    arg.default = action.default
+    arg.help = action.help
+    arg.choices = action.choices
+    arg.required = False
+    arg.type = action.type
+
+argsp = arg_parser.parser.parse_known_args()[0]
+
+if not (os.path.exists('/opt/dist/jans/jans.zip') or os.path.exists('jans-auth.war')) or '-uninstall' in sys.argv or argsp.force_download:
+
+    install.app_globals.argsp = argsp
     install.setup_dir = dir_path
+    install.init_installer()
+
     if '-uninstall' in sys.argv:
         install.uninstall_jans()
         sys.exit()
@@ -33,11 +61,10 @@ if not (os.path.exists('/opt/dist/jans/jans.zip') or os.path.exists('jans-auth.w
         install.download_files()
         install.extract_yaml_files()
         install.prepare_jans_cli_package()
-
-os.environ['LC_ALL'] = 'C'
-from setup_app.utils.arg_parser import arg_parser
-
-argsp = arg_parser()
+        if argsp.profile != 'jans':
+            install.profile_setup()
+        elif not argsp.no_gcs:
+            install.download_gcs()
 
 # first import paths and make changes if necassary
 from setup_app import paths
