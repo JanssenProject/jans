@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static io.jans.as.client.client.Asserter.assertUserInfoBasicResponseOk;
+import static io.jans.as.client.client.Asserter.assertUserInfoPersonalDataNotNull;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
@@ -79,13 +81,7 @@ public class UserInfoLoadTest extends BaseTest {
         UserInfoResponse response2 = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertEquals(response2.getStatus(), 200, "Unexpected response code: " + response2.getStatus());
-        assertNotNull(response2.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(response2.getClaim(JwtClaimName.NAME));
-        assertNotNull(response2.getClaim(JwtClaimName.GIVEN_NAME));
-        assertNotNull(response2.getClaim(JwtClaimName.FAMILY_NAME));
-        assertNotNull(response2.getClaim(JwtClaimName.EMAIL));
-        assertNotNull(response2.getClaim(JwtClaimName.ZONEINFO));
-        assertNotNull(response2.getClaim(JwtClaimName.LOCALE));
+        assertUserInfoBasicResponseOk(response2, 200);
+        assertUserInfoPersonalDataNotNull(response2);
     }
 }

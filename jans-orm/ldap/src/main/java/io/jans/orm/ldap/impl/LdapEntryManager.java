@@ -297,11 +297,11 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
         // Remove entry
         try {
             for (DeleteNotifier subscriber : subscribers) {
-                subscriber.onBeforeRemove(dn);
+                subscriber.onBeforeRemove(dn, objectClasses);
             }
             getOperationService().delete(dn);
             for (DeleteNotifier subscriber : subscribers) {
-                subscriber.onAfterRemove(dn);
+                subscriber.onAfterRemove(dn, objectClasses);
             }
         } catch (Exception ex) {
             throw new EntryDeleteException(String.format("Failed to remove entry: %s", dn), ex);
@@ -351,11 +351,11 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
         try {
             if (getOperationService().getConnectionProvider().isSupportsSubtreeDeleteRequestControl()) {
                 for (DeleteNotifier subscriber : subscribers) {
-                    subscriber.onBeforeRemove(dn);
+                    subscriber.onBeforeRemove(dn, objectClasses);
                 }
                 getOperationService().deleteRecursively(dn);
                 for (DeleteNotifier subscriber : subscribers) {
-                    subscriber.onAfterRemove(dn);
+                    subscriber.onAfterRemove(dn, objectClasses);
                 }
             } else {
                 removeSubtreeThroughIteration(dn);
@@ -880,6 +880,11 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
             throw new EntryPersistenceException(String.format("Failed to find entry: %s", dn), ex);
         }
     }
+
+	@Override
+	public List<AttributeData> exportEntry(String dn, String objectClass) {
+		return exportEntry(dn);
+	}
 
     public int getSupportedLDAPVersion() {
         return getOperationService().getSupportedLDAPVersion();

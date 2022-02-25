@@ -7,6 +7,7 @@ This module contains various helpers related to SQL persistence.
 
 import logging
 import os
+from collections import defaultdict
 
 from sqlalchemy import create_engine
 from sqlalchemy import MetaData
@@ -64,7 +65,8 @@ class BaseClient:
         """Lazy init of metadata."""
 
         if not self._metadata:
-            self._metadata = MetaData(bind=self.engine, reflect=True)
+            self._metadata = MetaData(bind=self.engine)
+            self._metadata.reflect()
         return self._metadata
 
     @property
@@ -99,13 +101,14 @@ class BaseClient:
         """Get mapping of column name and type from all tables.
         """
 
-        table_mapping = {}
+        table_mapping = defaultdict(dict)
         for table_name, table in self.metadata.tables.items():
-            table_mapping[table_name] = {
-                column.name: column.type.__class__.__name__
-                for column in table.c
-            }
-        return table_mapping
+            for column in table.c:
+                # truncate COLLATION string
+                if getattr(column.type, "collation", None):
+                    column.type.collation = None
+                table_mapping[table_name][column.name] = str(column.type)
+        return dict(table_mapping)
 
     def row_exists(self, table_name, id_):
         """Check whether a row is exist."""

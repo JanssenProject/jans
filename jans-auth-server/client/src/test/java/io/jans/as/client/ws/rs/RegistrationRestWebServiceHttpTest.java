@@ -33,8 +33,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import static io.jans.as.client.client.Asserter.assertBadRequest;
-import static io.jans.as.client.client.Asserter.assertOk;
+import static io.jans.as.client.client.Asserter.*;
 import static io.jans.as.model.common.GrantType.AUTHORIZATION_CODE;
 import static io.jans.as.model.common.GrantType.CLIENT_CREDENTIALS;
 import static io.jans.as.model.common.GrantType.IMPLICIT;
@@ -44,39 +43,7 @@ import static io.jans.as.model.common.GrantType.RESOURCE_OWNER_PASSWORD_CREDENTI
 import static io.jans.as.model.common.ResponseType.CODE;
 import static io.jans.as.model.common.ResponseType.ID_TOKEN;
 import static io.jans.as.model.common.ResponseType.TOKEN;
-import static io.jans.as.model.register.RegisterRequestParam.ACCESS_TOKEN_AS_JWT;
-import static io.jans.as.model.register.RegisterRequestParam.ACCESS_TOKEN_SIGNING_ALG;
-import static io.jans.as.model.register.RegisterRequestParam.APPLICATION_TYPE;
-import static io.jans.as.model.register.RegisterRequestParam.BACKCHANNEL_LOGOUT_SESSION_REQUIRED;
-import static io.jans.as.model.register.RegisterRequestParam.BACKCHANNEL_LOGOUT_URI;
-import static io.jans.as.model.register.RegisterRequestParam.CLIENT_NAME;
-import static io.jans.as.model.register.RegisterRequestParam.CONTACTS;
-import static io.jans.as.model.register.RegisterRequestParam.FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED;
-import static io.jans.as.model.register.RegisterRequestParam.FRONT_CHANNEL_LOGOUT_URI;
-import static io.jans.as.model.register.RegisterRequestParam.ID_TOKEN_ENCRYPTED_RESPONSE_ALG;
-import static io.jans.as.model.register.RegisterRequestParam.ID_TOKEN_ENCRYPTED_RESPONSE_ENC;
-import static io.jans.as.model.register.RegisterRequestParam.ID_TOKEN_SIGNED_RESPONSE_ALG;
-import static io.jans.as.model.register.RegisterRequestParam.JWKS_URI;
-import static io.jans.as.model.register.RegisterRequestParam.LOGO_URI;
-import static io.jans.as.model.register.RegisterRequestParam.PAR_LIFETIME;
-import static io.jans.as.model.register.RegisterRequestParam.POLICY_URI;
-import static io.jans.as.model.register.RegisterRequestParam.REDIRECT_URIS;
-import static io.jans.as.model.register.RegisterRequestParam.REQUEST_OBJECT_ENCRYPTION_ALG;
-import static io.jans.as.model.register.RegisterRequestParam.REQUEST_OBJECT_ENCRYPTION_ENC;
-import static io.jans.as.model.register.RegisterRequestParam.REQUEST_OBJECT_SIGNING_ALG;
-import static io.jans.as.model.register.RegisterRequestParam.REQUEST_URIS;
-import static io.jans.as.model.register.RegisterRequestParam.REQUIRE_AUTH_TIME;
-import static io.jans.as.model.register.RegisterRequestParam.RPT_AS_JWT;
-import static io.jans.as.model.register.RegisterRequestParam.SCOPE;
-import static io.jans.as.model.register.RegisterRequestParam.SECTOR_IDENTIFIER_URI;
-import static io.jans.as.model.register.RegisterRequestParam.SOFTWARE_ID;
-import static io.jans.as.model.register.RegisterRequestParam.SOFTWARE_VERSION;
-import static io.jans.as.model.register.RegisterRequestParam.SUBJECT_TYPE;
-import static io.jans.as.model.register.RegisterRequestParam.TOKEN_ENDPOINT_AUTH_METHOD;
-import static io.jans.as.model.register.RegisterRequestParam.TOKEN_ENDPOINT_AUTH_SIGNING_ALG;
-import static io.jans.as.model.register.RegisterRequestParam.USERINFO_ENCRYPTED_RESPONSE_ALG;
-import static io.jans.as.model.register.RegisterRequestParam.USERINFO_ENCRYPTED_RESPONSE_ENC;
-import static io.jans.as.model.register.RegisterRequestParam.USERINFO_SIGNED_RESPONSE_ALG;
+import static io.jans.as.model.register.RegisterRequestParam.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
@@ -122,7 +89,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
         String registrationClientUri = registerResponse.getRegistrationClientUri();
@@ -211,7 +178,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(response);
+        assertRegisterResponseOk(response, 201, true);
         assertNotNull(response.getClaims().get(SCOPE.toString()));
         assertTrue(Boolean.parseBoolean(response.getClaims().get(BACKCHANNEL_LOGOUT_SESSION_REQUIRED.toString())));
         assertEquals(logoutUri, new JSONArray(response.getClaims().get(BACKCHANNEL_LOGOUT_URI.toString())).getString(0));
@@ -284,7 +251,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         registerClient.setRequest(registerRequest);
         RegisterResponse response = registerClient.exec();
         showClient(registerClient);
-        assertOk(response);
+        assertRegisterResponseOk(response, 201, true);
         assertTrue(response.getClaims().containsKey(SOFTWARE_ID.toString()));
         assertEquals(response.getClaims().get(SOFTWARE_ID.toString()), softwareId);
         assertTrue(response.getClaims().containsKey(SOFTWARE_VERSION.toString()));
@@ -334,24 +301,9 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(response.getStatus(), 200, "Unexpected response code: " + response.getEntity());
-        assertNotNull(response.getClientId());
-        assertNotNull(response.getClientSecret());
-        assertNotNull(response.getRegistrationAccessToken());
-        assertNotNull(response.getRegistrationClientUri());
-        assertNotNull(response.getClientSecretExpiresAt());
-        assertNotNull(response.getClaims().get(APPLICATION_TYPE.toString()));
-        assertNotNull(response.getClaims().get(POLICY_URI.toString()));
-        assertNotNull(response.getClaims().get(REQUEST_OBJECT_SIGNING_ALG.toString()));
-        assertNotNull(response.getClaims().get(CONTACTS.toString()));
-        assertNotNull(response.getClaims().get(SECTOR_IDENTIFIER_URI.toString()));
-        assertNotNull(response.getClaims().get(SUBJECT_TYPE.toString()));
-        assertNotNull(response.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(response.getClaims().get(JWKS_URI.toString()));
-        assertNotNull(response.getClaims().get(CLIENT_NAME.toString()));
-        assertNotNull(response.getClaims().get(LOGO_URI.toString()));
-        assertNotNull(response.getClaims().get(REQUEST_URIS.toString()));
-        assertNotNull(response.getClaims().get(SCOPE.toString()));
+        assertRegisterResponseOk(response, 200, true);
+        assertRegisterResponseClaimsNotNull(response, APPLICATION_TYPE, POLICY_URI, REQUEST_OBJECT_SIGNING_ALG, CONTACTS, SECTOR_IDENTIFIER_URI);
+        assertRegisterResponseClaimsNotNull(response, SUBJECT_TYPE, ID_TOKEN_SIGNED_RESPONSE_ALG, JWKS_URI, CLIENT_NAME, LOGO_URI, REQUEST_URIS, SCOPE);
     }
 
     @Parameters({"redirectUris", "sectorIdentifierUri", "logoutUri"})
@@ -378,7 +330,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(response);
+        assertRegisterResponseOk(response, 201, true);
         assertNotNull(response.getClaims().get(SCOPE.toString()));
         assertNotNull(response.getClaims().get(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString()));
         assertTrue(Boolean.parseBoolean(response.getClaims().get(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString())));
@@ -466,7 +418,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         final RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(response);
+        assertRegisterResponseOk(response, 201, true);
     }
 
     @Test
@@ -482,7 +434,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertBadRequest(response);
+        assertRegisterResponseFail(response);
     }
 
     @Test
@@ -494,7 +446,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
                 Arrays.asList("https://client.example.com/cb#fail_fragment"));
 
         showClient(registerClient);
-        assertBadRequest(response);
+        assertRegisterResponseFail(response);
     }
 
     @Parameters({"redirectUris"})
@@ -536,7 +488,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(response);
+        assertRegisterResponseOk(response, 201, true);
     }
 
     @Parameters({"redirectUris", "sectorIdentifierUri"})
@@ -558,7 +510,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(response);
+        assertRegisterResponseOk(response, 201, true);
     }
 
     @Parameters({"redirectUris"})
@@ -579,7 +531,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(response);
+        assertRegisterResponseOk(response, 201, true);
     }
 
     @Parameters({"redirectUris"})
@@ -600,7 +552,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(response);
+        assertRegisterResponseOk(response, 201, true);
     }
 
     @Parameters({"redirectUris"})
@@ -643,7 +595,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(response);
+        assertRegisterResponseOk(response, 201, true);
 
         registerRequest = new RegisterRequest(response.getRegistrationAccessToken());
         registerRequest.setHttpMethod(HttpMethod.DELETE);

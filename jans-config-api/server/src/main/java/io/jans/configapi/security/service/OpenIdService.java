@@ -22,6 +22,8 @@ import javax.inject.Inject;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 @ApplicationScoped
 @Named("openIdService")
 public class OpenIdService implements Serializable {
@@ -37,7 +39,7 @@ public class OpenIdService implements Serializable {
     @Inject
     ConfigurationService configurationService;
 
-    private IntrospectionService introspectionService;
+    private transient IntrospectionService introspectionService;
 
     public IntrospectionService getIntrospectionService() {
         return introspectionService;
@@ -51,24 +53,24 @@ public class OpenIdService implements Serializable {
         return configurationService.find().getTokenEndpoint();
     }
 
-    public IntrospectionResponse getIntrospectionResponse(String header, String token, String issuer) throws Exception {
+    public IntrospectionResponse getIntrospectionResponse(String header, String token, String issuer) throws JsonProcessingException {
         log.debug("oAuth Introspection request , header:{}, token:{}, issuer:{}", header, token, issuer);
 
         String introspectionUrl = getIntrospectionEndpoint();
         if (StringUtils.isNotBlank(issuer)) {
             introspectionUrl = AuthClientFactory.getIntrospectionEndpoint(issuer);
-            log.trace("\n\n oAuth Issuer's introspectionUrl = " + introspectionUrl);
+            log.trace("oAuth Issuer's introspectionUrl:{}", introspectionUrl);
         }
 
-        log.info("\n\n oAuth Final introspectionUrl = " + introspectionUrl);
+        log.info("oAuth Final introspectionUrl:{} ", introspectionUrl);
         return AuthClientFactory.getIntrospectionResponse(introspectionUrl, header, token, false);
     }
 
-    public String requestAccessToken(final String clientId, final List<String> scope) throws Exception {
+    public String requestAccessToken(final String clientId, final List<String> scope) {
         log.info("oAuth request AccessToken - clientId:{}, scope:{} ", clientId, scope);
         String tokenUrl = getTokenEndpoint();
         Token token = authUtil.requestAccessToken(tokenUrl, clientId, scope);
-        log.info("oAuth AccessToken response - token = " + token);
+        log.info("oAuth AccessToken response - token:{}", token);
         if (token != null) {
             return token.getAccessToken();
         }

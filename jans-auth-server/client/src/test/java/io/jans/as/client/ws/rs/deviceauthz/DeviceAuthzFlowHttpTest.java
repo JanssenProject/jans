@@ -18,6 +18,7 @@ import io.jans.as.client.TokenRequest;
 import io.jans.as.client.TokenResponse;
 import io.jans.as.client.UserInfoClient;
 import io.jans.as.client.UserInfoResponse;
+import io.jans.as.client.client.Asserter;
 import io.jans.as.client.page.DeviceAuthzPage;
 import io.jans.as.client.page.LoginPage;
 import io.jans.as.client.page.PageConfig;
@@ -51,6 +52,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import static io.jans.as.client.client.Asserter.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
@@ -393,26 +395,20 @@ public class DeviceAuthzFlowHttpTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertEquals(userInfoResponse.getStatus(), 200, "Unexpected response code: " + userInfoResponse.getStatus());
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NAME));
+        assertUserInfoBasicMinimumResponseOk(userInfoResponse, 200);
+        assertUserInfoPersonalDataNotNull(userInfoResponse);
+
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.BIRTHDATE));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.FAMILY_NAME));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.GENDER));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.GIVEN_NAME));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.MIDDLE_NAME));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.NICKNAME));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.PICTURE));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.PREFERRED_USERNAME));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.PROFILE));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.WEBSITE));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.EMAIL_VERIFIED));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.PHONE_NUMBER));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.PHONE_NUMBER_VERIFIED));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.LOCALE));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ZONEINFO));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.USER_NAME));
         assertNull(userInfoResponse.getClaim("org_name"));
         assertNull(userInfoResponse.getClaim("work_phone"));
@@ -426,26 +422,15 @@ public class DeviceAuthzFlowHttpTest extends BaseTest {
         TokenResponse tokenResponse2 = tokenClient2.execRefreshToken(scopes, refreshToken, clientId, clientSecret);
 
         showClient(tokenClient2);
-        assertEquals(tokenResponse2.getStatus(), 200, "Unexpected response code: " + tokenResponse2.getStatus());
-        assertNotNull(tokenResponse2.getEntity(), "The entity is null");
-        assertNotNull(tokenResponse2.getAccessToken(), "The access token is null");
-        assertNotNull(tokenResponse2.getTokenType(), "The token type is null");
-        assertNotNull(tokenResponse2.getRefreshToken(), "The refresh token is null");
+        assertTokenResponseOk(tokenResponse2, true, false);
         assertNotNull(tokenResponse2.getScope(), "The scope is null");
-
         return tokenResponse2;
     }
 
     private void verifyIdToken(String idToken) throws InvalidJwtException, UnrecoverableKeyException,
             NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
         Jwt jwt = Jwt.parse(idToken);
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
+        assertJwtStandarClaimsNotNull(jwt, false, false);
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.OX_OPENID_CONNECT_VERSION));
 
         RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
@@ -472,12 +457,7 @@ public class DeviceAuthzFlowHttpTest extends BaseTest {
     }
 
     private void validateTokenSuccessfulResponse(TokenResponse tokenResponse) {
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity(), "The entity is null");
-        assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
-        assertNotNull(tokenResponse.getExpiresIn(), "The expires in value is null");
-        assertNotNull(tokenResponse.getTokenType(), "The token type is null");
-        assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
+        assertTokenResponseOk(tokenResponse, true, false);
     }
 
     private void assertSuccessAuthzResponse(final AuthorizationResponse authorizationResponse) {

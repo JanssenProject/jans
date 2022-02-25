@@ -14,15 +14,21 @@ import io.jans.configapi.service.status.StatusCheckerTimer;
 import io.jans.configapi.service.logger.LoggerService;
 import io.jans.exception.ConfigurationException;
 import io.jans.exception.OxIntializationException;
+import io.jans.model.custom.script.CustomScriptType;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.PersistenceEntryManagerFactory;
 import io.jans.orm.service.PersistanceFactoryService;
+import io.jans.service.PythonService;
 import io.jans.service.cdi.event.LdapConfigurationReload;
 import io.jans.service.cdi.util.CdiUtil;
+import io.jans.service.custom.script.CustomScriptManager;
 import io.jans.service.timer.QuartzSchedulerManager;
 import io.jans.util.StringHelper;
 import org.jboss.resteasy.plugins.server.servlet.ResteasyContextParameters;
 import org.slf4j.Logger;
+import java.util.ArrayList;
+
+import java.util.List;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.BeforeDestroyed;
@@ -64,46 +70,63 @@ public class AppInitializer {
 
     @Inject
     private Instance<AuthorizationService> authorizationServiceInstance;
-    
+
     @Inject
     StatusCheckerTimer statusCheckerTimer;
-    
+
     @Inject
     private LoggerService loggerService;
-    
+
     @Inject
     private QuartzSchedulerManager quartzSchedulerManager;
 
+    @Inject
+    private CustomScriptManager customScriptManager;
+
+    @Inject
+    private PythonService pythonService;
+
     public void onStart(@Observes @Initialized(ApplicationScoped.class) Object init) {
-        log.info("========================== Initializing - App =======================================");
         log.info("=============  STARTING API APPLICATION  ========================");
-        log.info("init:{}",init);
+        log.info("init:{}", init);
+
+        // Resteasy config - Turn off the default patch filter
         System.setProperty(ResteasyContextParameters.RESTEASY_PATCH_FILTER_DISABLED, "true");
+        ResteasyProviderFactory instance = ResteasyProviderFactory.getInstance();
+        RegisterBuiltin.register(instance);
+        instance.registerProvider(ResteasyJackson2Provider.class);
+
+        // configuration
         this.configurationFactory.create();
         persistenceEntryManagerInstance.get();
         this.createAuthorizationService();
 
+        // Initialize python interpreter
+        pythonService
+                .initPythonInterpreter(configurationFactory.getBaseConfiguration().getString("pythonModulesDir", null));
+
         // Start timer
         initSchedulerService();
-        
+
+        // Initialize custom Script
+        initCustomScripts();
+
         // Stats timer
         statusCheckerTimer.initTimer();
 
         // Schedule timer tasks
         loggerService.initTimer();
-                
-        ResteasyProviderFactory instance = ResteasyProviderFactory.getInstance();
-        RegisterBuiltin.register(instance);
-        instance.registerProvider(ResteasyJackson2Provider.class);
+
+        // Schedule timer tasks
+        configurationFactory.initTimer();
 
         log.info("==============  APPLICATION IS UP AND RUNNING ===================");
-        log.info("========================== App - Initialized =======================================");
     }
 
     public void destroy(@Observes @BeforeDestroyed(ApplicationScoped.class) ServletContext init) {
         log.info("================================================================");
         log.info("===========  API APPLICATION STOPPED  ==========================");
-        log.info("init:{}",init);
+        log.info("init:{}", init);
         log.info("================================================================");
     }
 
@@ -143,8 +166,12 @@ public class AppInitializer {
                     configurationFactory.getApiClientId());
             return authorizationServiceInstance.select(OpenIdAuthorizationService.class).get();
         } catch (Exception ex) {
-            log.error("Failed to create AuthorizationService instance", ex);
-            throw new ConfigurationException("Failed to create AuthorizationService instance", ex);
+            if (log.isErrorEnabled()) {
+                log.error("Failed to create AuthorizationService instance - apiProtectionType:{}, exception:{} ",
+                        configurationFactory.getApiProtectionType(), ex);
+            }
+            throw new ConfigurationException("Failed to create AuthorizationService instance  - apiProtectionType = "
+                    + configurationFactory.getApiProtectionType(), ex);
         }
     }
 
@@ -169,7 +196,7 @@ public class AppInitializer {
     }
 
     protected void initSchedulerService() {
-        log.debug(" \n\n initSchedulerService - Entry \n\n");
+        log.debug("Initializing Scheduler Service");
         quartzSchedulerManager.start();
 
         String disableScheduler = System.getProperties().getProperty("gluu.disable.scheduler");
@@ -177,5 +204,12 @@ public class AppInitializer {
             this.log.warn("Suspending Quartz Scheduler Service...");
             quartzSchedulerManager.standby();
         }
+    }
+
+    private void initCustomScripts() {
+        List<CustomScriptType> supportedCustomScriptTypes = new ArrayList<>();
+        supportedCustomScriptTypes.add(CustomScriptType.CONFIG_API);
+        customScriptManager.initTimer(supportedCustomScriptTypes);
+        log.info("Initialized Custom Scripts!");
     }
 }

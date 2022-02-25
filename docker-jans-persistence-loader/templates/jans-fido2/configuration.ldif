@@ -1,7 +1,0 @@
-dn: ou=jans-fido2,ou=configuration,o=jans
-jansConfDyn::%(fido2_dynamic_conf_base64)s
-jansConfStatic::%(fido2_static_conf_base64)s
-jansRevision: 1
-objectClass: top
-objectClass: jansAppConf
-ou: fido2

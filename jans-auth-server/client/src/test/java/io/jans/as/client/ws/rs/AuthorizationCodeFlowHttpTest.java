@@ -37,9 +37,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static io.jans.as.client.client.Asserter.assertIdToken;
-import static io.jans.as.client.client.Asserter.assertOk;
-import static io.jans.as.model.register.RegisterRequestParam.APPLICATION_TYPE;
+import static io.jans.as.client.client.Asserter.*;
 import static io.jans.as.model.register.RegisterRequestParam.CLIENT_NAME;
 import static io.jans.as.model.register.RegisterRequestParam.ID_TOKEN_SIGNED_RESPONSE_ALG;
 import static io.jans.as.model.register.RegisterRequestParam.REDIRECT_URIS;
@@ -100,12 +98,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         TokenResponse tokenResponse1 = tokenClient1.exec();
 
         showClient(tokenClient1);
-        assertEquals(tokenResponse1.getStatus(), 200, "Unexpected response code: " + tokenResponse1.getStatus());
-        assertNotNull(tokenResponse1.getEntity(), "The entity is null");
-        assertNotNull(tokenResponse1.getAccessToken(), "The access token is null");
-        assertNotNull(tokenResponse1.getExpiresIn(), "The expires in value is null");
-        assertNotNull(tokenResponse1.getTokenType(), "The token type is null");
-        assertNotNull(tokenResponse1.getRefreshToken(), "The refresh token is null");
+        assertTokenResponseOk(tokenResponse1, true, false);
 
         String refreshToken = tokenResponse1.getRefreshToken();
 
@@ -126,11 +119,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         TokenResponse tokenResponse2 = tokenClient2.execRefreshToken(scope, refreshToken, clientId, clientSecret);
 
         showClient(tokenClient2);
-        assertEquals(tokenResponse2.getStatus(), 200, "Unexpected response code: " + tokenResponse2.getStatus());
-        assertNotNull(tokenResponse2.getEntity(), "The entity is null");
-        assertNotNull(tokenResponse2.getAccessToken(), "The access token is null");
-        assertNotNull(tokenResponse2.getTokenType(), "The token type is null");
-        assertNotNull(tokenResponse2.getRefreshToken(), "The refresh token is null");
+        assertTokenResponseOk(tokenResponse2, true, false);
         assertNotNull(tokenResponse2.getScope(), "The scope is null");
 
         String accessToken = tokenResponse2.getAccessToken();
@@ -141,26 +130,19 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertEquals(userInfoResponse.getStatus(), 200, "Unexpected response code: " + userInfoResponse.getStatus());
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NAME));
+        assertUserInfoBasicMinimumResponseOk(userInfoResponse, 200);
+        assertUserInfoPersonalDataNotNull(userInfoResponse);
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.BIRTHDATE));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.FAMILY_NAME));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.GENDER));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.GIVEN_NAME));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.MIDDLE_NAME));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.NICKNAME));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.PICTURE));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.PREFERRED_USERNAME));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.PROFILE));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.WEBSITE));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.EMAIL_VERIFIED));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.PHONE_NUMBER));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.PHONE_NUMBER_VERIFIED));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.LOCALE));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ZONEINFO));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.USER_NAME));
         assertNull(userInfoResponse.getClaim("org_name"));
         assertNull(userInfoResponse.getClaim("work_phone"));
@@ -218,26 +200,14 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         TokenResponse tokenResponse1 = tokenClient1.exec();
 
         showClient(tokenClient1);
-        assertEquals(tokenResponse1.getStatus(), 200, "Unexpected response code: " + tokenResponse1.getStatus());
-        assertNotNull(tokenResponse1.getEntity(), "The entity is null");
-        assertNotNull(tokenResponse1.getAccessToken(), "The access token is null");
-        assertNotNull(tokenResponse1.getExpiresIn(), "The expires in value is null");
-        assertNotNull(tokenResponse1.getTokenType(), "The token type is null");
-        assertNotNull(tokenResponse1.getRefreshToken(), "The refresh token is null");
+        assertTokenResponseOk(tokenResponse1, true, false);
 
         String refreshToken = tokenResponse1.getRefreshToken();
 
         // 4. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
+        assertJwtStandarClaimsNotNull(jwt, false);
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.CODE_HASH));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.OX_OPENID_CONNECT_VERSION));
 
         RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
@@ -252,11 +222,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         TokenResponse tokenResponse2 = tokenClient2.execRefreshToken(scope, refreshToken, clientId, clientSecret);
 
         showClient(tokenClient2);
-        assertEquals(tokenResponse2.getStatus(), 200, "Unexpected response code: " + tokenResponse2.getStatus());
-        assertNotNull(tokenResponse2.getEntity(), "The entity is null");
-        assertNotNull(tokenResponse2.getAccessToken(), "The access token is null");
-        assertNotNull(tokenResponse2.getTokenType(), "The token type is null");
-        assertNotNull(tokenResponse2.getRefreshToken(), "The refresh token is null");
+        assertTokenResponseOk(tokenResponse2, true, false);
         assertNotNull(tokenResponse2.getScope(), "The scope is null");
         assertEquals(tokenResponse2.getScope(), "openid");
 
@@ -267,8 +233,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertEquals(userInfoResponse.getStatus(), 200, "Unexpected response code: " + userInfoResponse.getStatus());
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
+        assertUserInfoBasicMinimumResponseOk(userInfoResponse, 200);
         assertNull(userInfoResponse.getClaim(JwtClaimName.NAME));
         assertNull(userInfoResponse.getClaim(JwtClaimName.BIRTHDATE));
         assertNull(userInfoResponse.getClaim(JwtClaimName.FAMILY_NAME));
@@ -335,11 +300,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity(), "The entity is null");
-        assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
-        assertNotNull(tokenResponse.getTokenType(), "The token type is null");
-        assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
+        assertTokenResponseOk(tokenResponse, true, false);
 
         String accessToken = tokenResponse.getAccessToken();
 
@@ -382,15 +343,8 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
 
         // 3. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
+        assertJwtStandarClaimsNotNull(jwt, false);
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.CODE_HASH));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.OX_OPENID_CONNECT_VERSION));
 
         // 4. Request access token
@@ -406,11 +360,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity(), "The entity is null");
-        assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
-        assertNotNull(tokenResponse.getTokenType(), "The token type is null");
-        assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
+        assertTokenResponseOk(tokenResponse, true, false);
 
         String accessToken = tokenResponse.getAccessToken();
 
@@ -449,7 +399,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -465,10 +415,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertNotNull(authorizationResponse.getLocation(), "The location is null");
-        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
-        assertNotNull(authorizationResponse.getState(), "The state is null");
-        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertAuthorizationResponse(authorizationResponse, true);
 
         String scope = authorizationResponse.getScope();
         String authorizationCode = authorizationResponse.getCode();
@@ -487,29 +434,16 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         TokenResponse tokenResponse1 = tokenClient1.exec();
 
         showClient(tokenClient1);
-        assertEquals(tokenResponse1.getStatus(), 200, "Unexpected response code: " + tokenResponse1.getStatus());
-        assertNotNull(tokenResponse1.getEntity(), "The entity is null");
-        assertNotNull(tokenResponse1.getAccessToken(), "The access token is null");
-        assertNotNull(tokenResponse1.getExpiresIn(), "The expires in value is null");
-        assertNotNull(tokenResponse1.getTokenType(), "The token type is null");
-        assertNotNull(tokenResponse1.getRefreshToken(), "The refresh token is null");
+        assertTokenResponseOk(tokenResponse1, true, false);
 
         String refreshToken = tokenResponse1.getRefreshToken();
 
         // 4. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
-
+        assertJwtStandarClaimsNotNull(jwt, false);
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.NONCE));
         assertEquals(jwt.getClaims().getClaimAsString(JwtClaimName.NONCE), nonce);
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.CODE_HASH));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.OX_OPENID_CONNECT_VERSION));
 
         RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
@@ -524,11 +458,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         TokenResponse tokenResponse2 = tokenClient2.execRefreshToken(scope, refreshToken, clientId, clientSecret);
 
         showClient(tokenClient2);
-        assertEquals(tokenResponse2.getStatus(), 200, "Unexpected response code: " + tokenResponse2.getStatus());
-        assertNotNull(tokenResponse2.getEntity(), "The entity is null");
-        assertNotNull(tokenResponse2.getAccessToken(), "The access token is null");
-        assertNotNull(tokenResponse2.getTokenType(), "The token type is null");
-        assertNotNull(tokenResponse2.getRefreshToken(), "The refresh token is null");
+        assertTokenResponseOk(tokenResponse2, true, false);
         assertNotNull(tokenResponse2.getScope(), "The scope is null");
     }
 
@@ -557,7 +487,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertOk(registerResponse);
+        assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -572,18 +502,8 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);
-        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
-        assertNotNull(readClientResponse.getClientId());
-        assertNotNull(readClientResponse.getClientSecret());
-        assertNotNull(readClientResponse.getClientIdIssuedAt());
-        assertNotNull(readClientResponse.getClientSecretExpiresAt());
-
-        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
-        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
-        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
-        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
-        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
+        assertRegisterResponseOk(readClientResponse, 200, false);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization and receive the authorization code.
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
@@ -596,10 +516,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertNotNull(authorizationResponse.getLocation(), "The location is null");
-        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
-        assertNotNull(authorizationResponse.getState(), "The state is null");
-        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertAuthorizationResponse(authorizationResponse, true);
         assertNotNull(authorizationResponse.getIdToken(), "The id token is null");
 
         String scope = authorizationResponse.getScope();
@@ -608,15 +525,8 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
 
         // 4. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
+        assertJwtStandarClaimsNotNull(jwt, false);
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.CODE_HASH));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
 
         RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
                 jwksUri,
@@ -631,11 +541,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
                 clientId, clientSecret);
 
         showClient(tokenClient1);
-        assertEquals(response2.getStatus(), 200, "Unexpected response code: " + response2.getStatus());
-        assertNotNull(response2.getEntity(), "The entity is null");
-        assertNotNull(response2.getAccessToken(), "The access token is null");
-        assertNotNull(response2.getTokenType(), "The token type is null");
-        assertNotNull(response2.getRefreshToken(), "The refresh token is null");
+        assertTokenResponseOk(response2, true);
 
         String accessToken = response2.getAccessToken();
         String refreshToken = response2.getRefreshToken();
@@ -700,10 +606,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret); // put userId explicitly, window.onload function result is not same as in browser (tested with chrome and FF)
 
-        assertNotNull(authorizationResponse.getLocation(), "The location is null");
-        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
-        assertNotNull(authorizationResponse.getState(), "The state is null");
-        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertAuthorizationResponse(authorizationResponse, true);
 
         String scope = authorizationResponse.getScope();
         String authorizationCode = authorizationResponse.getCode();
@@ -722,26 +625,14 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         TokenResponse tokenResponse1 = tokenClient1.exec();
 
         showClient(tokenClient1);
-        assertEquals(tokenResponse1.getStatus(), 200, "Unexpected response code: " + tokenResponse1.getStatus());
-        assertNotNull(tokenResponse1.getEntity(), "The entity is null");
-        assertNotNull(tokenResponse1.getAccessToken(), "The access token is null");
-        assertNotNull(tokenResponse1.getExpiresIn(), "The expires in value is null");
-        assertNotNull(tokenResponse1.getTokenType(), "The token type is null");
-        assertNotNull(tokenResponse1.getRefreshToken(), "The refresh token is null");
+        assertTokenResponseOk(tokenResponse1, true, false);
 
         String refreshToken = tokenResponse1.getRefreshToken();
 
         // 4. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
+        assertJwtStandarClaimsNotNull(jwt, false);
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.CODE_HASH));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.OX_OPENID_CONNECT_VERSION));
 
         RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
@@ -756,11 +647,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         TokenResponse tokenResponse2 = tokenClient2.execRefreshToken(scope, refreshToken, clientId, clientSecret);
 
         showClient(tokenClient2);
-        assertEquals(tokenResponse2.getStatus(), 200, "Unexpected response code: " + tokenResponse2.getStatus());
-        assertNotNull(tokenResponse2.getEntity(), "The entity is null");
-        assertNotNull(tokenResponse2.getAccessToken(), "The access token is null");
-        assertNotNull(tokenResponse2.getTokenType(), "The token type is null");
-        assertNotNull(tokenResponse2.getRefreshToken(), "The refresh token is null");
+        assertTokenResponseOk(tokenResponse2, true, false);
         assertNotNull(tokenResponse2.getScope(), "The scope is null");
 
         String accessToken = tokenResponse2.getAccessToken();
@@ -788,10 +675,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertNotNull(authorizationResponse.getLocation(), "The location is null");
-        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
-        assertNotNull(authorizationResponse.getState(), "The state is null");
-        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertAuthorizationResponse(authorizationResponse, true);
         return authorizationResponse;
     }
 
@@ -830,12 +714,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         TokenResponse tokenResponse1 = tokenClient1.exec();
 
         showClient(tokenClient1);
-        assertEquals(tokenResponse1.getStatus(), 200, "Unexpected response code: " + tokenResponse1.getStatus());
-        assertNotNull(tokenResponse1.getEntity(), "The entity is null");
-        assertNotNull(tokenResponse1.getAccessToken(), "The access token is null");
-        assertNotNull(tokenResponse1.getExpiresIn(), "The expires in value is null");
-        assertNotNull(tokenResponse1.getTokenType(), "The token type is null");
-        assertNotNull(tokenResponse1.getRefreshToken(), "The refresh token is null");
+        assertTokenResponseOk(tokenResponse1, true, false);
 
         String refreshToken = tokenResponse1.getRefreshToken();
 
@@ -849,11 +728,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         TokenResponse tokenResponse2 = tokenClient2.execRefreshToken(scope, refreshToken, clientId, clientSecret);
 
         showClient(tokenClient2);
-        assertEquals(tokenResponse2.getStatus(), 200, "Unexpected response code: " + tokenResponse2.getStatus());
-        assertNotNull(tokenResponse2.getEntity(), "The entity is null");
-        assertNotNull(tokenResponse2.getAccessToken(), "The access token is null");
-        assertNotNull(tokenResponse2.getTokenType(), "The token type is null");
-        assertNotNull(tokenResponse2.getRefreshToken(), "The refresh token is null");
+        assertTokenResponseOk(tokenResponse2, true, false);
         assertNotNull(tokenResponse2.getScope(), "The scope is null");
 
         String accessToken = tokenResponse2.getAccessToken();

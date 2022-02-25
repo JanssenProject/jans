@@ -89,13 +89,13 @@ class AttrProcessor(object):
     def process(self):
         attrs = {}
 
-        with open("/app/static/opendj/opendj_types.json") as f:
+        with open("/app/schema/opendj_types.json") as f:
             attr_maps = json.loads(f.read())
             for type_, names in attr_maps.items():
                 for name in names:
                     attrs[name] = {"type": type_, "multivalued": False}
 
-        with open("/app/static/jans_schema.json") as f:
+        with open("/app/schema/jans_schema.json") as f:
             schemas = json.loads(f.read()).get("attributeTypes", {})
             for schema in schemas:
                 if schema.get("json"):

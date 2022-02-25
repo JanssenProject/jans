@@ -2,6 +2,7 @@ import contextlib
 import base64
 import json
 import os
+from pathlib import Path
 from urllib.parse import urlparse
 from uuid import uuid4
 
@@ -73,11 +74,7 @@ def get_base_ctx(manager):
     redis_ssl_truststore = os.environ.get("CN_REDIS_SSL_TRUSTSTORE", "")
     redis_sentinel_group = os.environ.get("CN_REDIS_SENTINEL_GROUP", "")
     memcached_url = os.environ.get('CN_MEMCACHED_URL', 'localhost:11211')
-    oxtrust_config_generation = os.environ.get("CN_OXTRUST_CONFIG_GENERATION", True)
-    passport_enabled = os.environ.get("CN_PASSPORT_ENABLED", False)
-    radius_enabled = os.environ.get("CN_RADIUS_ENABLED", False)
     casa_enabled = os.environ.get("CN_CASA_ENABLED", False)
-    saml_enabled = os.environ.get("CN_SAML_ENABLED", False)
     scim_enabled = os.environ.get("CN_SCIM_ENABLED", False)
 
     ctx = {
@@ -108,40 +105,17 @@ def get_base_ctx(manager):
         'idp_client_id': manager.config.get('idp_client_id'),
         'idpClient_encoded_pw': manager.secret.get('idpClient_encoded_pw'),
         'auth_openid_key_base64': manager.secret.get('auth_openid_key_base64'),
-        # 'passport_rs_client_id': manager.config.get('passport_rs_client_id'),
-        # 'passport_rs_client_base64_jwks': manager.secret.get('passport_rs_client_base64_jwks'),
-        # 'passport_rs_client_cert_alias': manager.config.get('passport_rs_client_cert_alias'),
-        # 'passport_rp_client_id': manager.config.get('passport_rp_client_id'),
-        # 'passport_rp_client_base64_jwks': manager.secret.get('passport_rp_client_base64_jwks'),
-        # "passport_rp_client_jks_fn": manager.config.get("passport_rp_client_jks_fn"),
-        # "passport_rp_client_jks_pass": manager.secret.get("passport_rp_client_jks_pass"),
         # "encoded_ldap_pw": manager.secret.get('encoded_ldap_pw'),
         "encoded_admin_password": manager.secret.get('encoded_admin_password'),
-        # 'passport_rp_ii_client_id': manager.config.get("passport_rp_ii_client_id"),
 
         'admin_email': manager.config.get('admin_email'),
         'shibJksFn': manager.config.get('shibJksFn'),
         'shibJksPass': manager.secret.get('shibJksPass'),
-        'oxTrustConfigGeneration': str(as_boolean(oxtrust_config_generation)).lower(),
         'encoded_shib_jks_pw': manager.secret.get('encoded_shib_jks_pw'),
-        'passport_rs_client_jks_fn': manager.config.get('passport_rs_client_jks_fn'),
-        'passport_rs_client_jks_pass_encoded': manager.secret.get('passport_rs_client_jks_pass_encoded'),
         'shibboleth_version': manager.config.get('shibboleth_version'),
         'idp3Folder': manager.config.get('idp3Folder'),
         'ldap_site_binddn': manager.config.get('ldap_site_binddn'),
 
-        "passport_resource_id": manager.config.get("passport_resource_id"),
-
-        "gluu_radius_client_id": manager.config.get("gluu_radius_client_id"),
-        "gluu_ro_encoded_pw": manager.secret.get("gluu_ro_encoded_pw"),
-        # "super_gluu_ro_session_script": manager.config.get("super_gluu_ro_session_script"),
-        # "super_gluu_ro_script": manager.config.get("super_gluu_ro_script"),
-        # "enableRadiusScripts": "false",  # @TODO: enable it?
-        # "gluu_ro_client_base64_jwks": manager.secret.get("gluu_ro_client_base64_jwks"),
-
-        "jansPassportEnabled": str(as_boolean(passport_enabled)).lower(),
-        "jansRadiusEnabled": str(as_boolean(radius_enabled)).lower(),
-        "jansSamlEnabled": str(as_boolean(saml_enabled)).lower(),
         "jansScimEnabled": str(as_boolean(scim_enabled)).lower(),
 
         "pairwiseCalculationKey": manager.secret.get("pairwiseCalculationKey"),
@@ -149,18 +123,13 @@ def get_base_ctx(manager):
         "default_openid_jks_dn_name": manager.config.get("default_openid_jks_dn_name"),
         "auth_openid_jks_pass": manager.secret.get("auth_openid_jks_pass"),
         "auth_legacyIdTokenClaims": manager.config.get("auth_legacyIdTokenClaims"),
-        "passportSpTLSCert": manager.config.get("passportSpTLSCert"),
-        "passportSpTLSKey": manager.config.get("passportSpTLSKey"),
         "auth_openidScopeBackwardCompatibility": manager.config.get("auth_openidScopeBackwardCompatibility"),
         "fido2ConfigFolder": manager.config.get("fido2ConfigFolder"),
 
         "admin_inum": manager.config.get("admin_inum"),
-        "enable_scim_access_policy": str(as_boolean(scim_enabled) or as_boolean(passport_enabled)).lower(),
         "scim_client_id": manager.config.get("scim_client_id"),
         "scim_client_encoded_pw": manager.secret.get("scim_client_encoded_pw"),
         "casa_enable_script": str(as_boolean(casa_enabled)).lower(),
-        # "oxd_hostname": "localhost",
-        # "oxd_port": "8443",
         "jca_client_id": manager.config.get("jca_client_id"),
         "jca_client_encoded_pw": manager.secret.get("jca_client_encoded_pw"),
     }
@@ -228,33 +197,30 @@ def merge_extension_ctx(ctx):
     basedir = "/app/static/extension"
 
     if os.environ.get("CN_DISTRIBUTION", "default") == "openbanking":
-        basedir = "/app/static/ob_extension"
+        basedir = "/app/openbanking/static/extension"
 
-    for ext_type in os.listdir(basedir):
-        ext_type_dir = os.path.join(basedir, ext_type)
+    filepath = Path(basedir)
+    for ext_path in filepath.glob("**/*.py"):
+        if not ext_path.is_file():
+            continue
 
-        for fname in os.listdir(ext_type_dir):
-            filepath = os.path.join(ext_type_dir, fname)
-            ext_name = "{}_{}".format(
-                ext_type, os.path.splitext(fname)[0].lower()
-            )
-
-            with open(filepath) as fd:
-                ctx[ext_name] = generate_base64_contents(fd.read())
+        ext_name = f"{ext_path.parent.name.lower()}_{ext_path.stem.lower()}"
+        ctx[ext_name] = generate_base64_contents(ext_path.read_text())
     return ctx
 
 
 def merge_auth_ctx(ctx):
     basedir = '/app/templates/jans-auth'
     file_mappings = {
-        'auth_static_conf_base64': 'static-conf.json',
-        'auth_error_base64': 'errors.json',
+        'auth_static_conf_base64': 'jans-auth-static-conf.json',
+        'auth_error_base64': 'jans-auth-errors.json',
+        "auth_config_base64": "jans-auth-config.json",
     }
 
     if os.environ.get("CN_DISTRIBUTION", "default") == "openbanking":
-        file_mappings["auth_config_base64"] = "dynamic-conf.ob.json"
-    else:
-        file_mappings["auth_config_base64"] = "dynamic-conf.json"
+        file_mappings["auth_config_base64"] = "jans-auth-config.ob.json"
+    # else:
+    #     file_mappings["auth_config_base64"] = "jans-auth-config.json"
 
     for key, file_ in file_mappings.items():
         file_path = os.path.join(basedir, file_)
@@ -289,32 +255,6 @@ def merge_scim_ctx(ctx):
         with open(file_path) as fp:
             ctx[key] = generate_base64_contents(fp.read() % ctx)
     return ctx
-
-
-# def merge_oxidp_ctx(ctx):
-#     basedir = '/app/templates/oxidp'
-#     file_mappings = {
-#         'oxidp_config_base64': 'oxidp-config.json',
-#     }
-#
-#     for key, file_ in file_mappings.items():
-#         file_path = os.path.join(basedir, file_)
-#         with open(file_path) as fp:
-#             ctx[key] = generate_base64_contents(fp.read() % ctx)
-#     return ctx
-
-
-# def merge_passport_ctx(ctx):
-#     basedir = '/app/templates/passport'
-#     file_mappings = {
-#         'passport_central_config_base64': 'passport-central-config.json',
-#     }
-#
-#     for key, file_ in file_mappings.items():
-#         file_path = os.path.join(basedir, file_)
-#         with open(file_path) as fp:
-#             ctx[key] = generate_base64_contents(fp.read() % ctx)
-#     return ctx
 
 
 def merge_config_api_ctx(ctx):
@@ -401,12 +341,8 @@ def prepare_template_ctx(manager):
 
     ctx = get_base_ctx(manager)
     ctx = merge_extension_ctx(ctx)
-    # ctx = merge_radius_ctx(ctx)
     ctx = merge_auth_ctx(ctx)
     ctx = merge_config_api_ctx(ctx)
-    # ctx = merge_oxtrust_ctx(ctx)
-    # ctx = merge_oxidp_ctx(ctx)
-    # ctx = merge_passport_ctx(ctx)
     ctx = merge_fido2_ctx(ctx)
     ctx = merge_scim_ctx(ctx)
 
@@ -444,8 +380,7 @@ def get_ldif_mappings(optional_scopes=None):
             ]
 
         files += [
-            "jans-config-api/configuration.ldif",
-            "jans-config-api/admin-ui-attributes.ldif",
+            "jans-config-api/config.ldif",
             "jans-config-api/admin-ui-clients.ldif",
             "jans-auth/configuration.ldif",
             "jans-auth/role-scope-mappings.ldif",
@@ -460,13 +395,14 @@ def get_ldif_mappings(optional_scopes=None):
 
         if "fido2" in optional_scopes:
             files += [
-                "jans-fido2/configuration.ldif",
+                "jans-fido2/fido2.ldif",
             ]
 
         if "casa" in optional_scopes:
             files += [
                 "gluu-casa/configuration.ldif",
                 "gluu-casa/clients.ldif",
+                "gluu-casa/scripts.ldif",
             ]
         return files
 
@@ -475,8 +411,8 @@ def get_ldif_mappings(optional_scopes=None):
 
         if dist != "openbanking":
             files += [
-                "people.ldif",
-                "groups.ldif",
+                "jans-auth/people.ldif",
+                "jans-auth/groups.ldif",
             ]
         return files
 

@@ -317,6 +317,22 @@ def download(url, dst):
         else:
             break
 
+def extract_file(zip_file, source, target, ren=False):
+    zip_obj = zipfile.ZipFile(zip_file, "r")
+    for member in zip_obj.infolist():
+        if not member.is_dir() and member.filename.endswith(source):
+            if ren:
+                target_p = Path(target)
+            else:
+                p = Path(member.filename)
+                target_p = Path(target).joinpath(p.name)
+                if not target_p.parent.exists():
+                    target_p.parent.mkdir(parents=True)
+            target_p.write_bytes(zip_obj.read(member))
+            break
+    zip_obj.close()
+
+
 def extract_from_zip(zip_file, sub_dir, target_dir, remove_target_dir=False):
     zipobj = zipfile.ZipFile(zip_file, "r")
     parent_dir = zipobj.namelist()[0]

@@ -231,9 +231,9 @@ def download_files():
     download(urljoin(maven_base_url, 'jans-auth-client/{0}{1}/jans-auth-client-{0}{1}-jar-with-dependencies.jar'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD'])), os.path.join(jans_app_dir, 'jans-auth-client-jar-with-dependencies.jar'))
     download(urljoin(maven_base_url, 'jans-config-api-server/{0}{1}/jans-config-api-server-{0}{1}.war'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD'])), os.path.join(jans_app_dir, 'jans-config-api.war'))
     download('https://github.com/sqlalchemy/sqlalchemy/archive/rel_1_3_23.zip', sqlalchemy_zip_file)
-    download(urljoin(maven_base_url, 'scim-plugin/{0}{1}/scim-plugin-{0}{1}-distribution.jar'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD'])), os.path.join(jans_app_dir, 'scim-plugin.jar'))
-    download('https://ox.gluu.org/icrby8xcvbcv/cli-swagger/jca.tgz', os.path.join(jans_app_dir, 'jca-swagger-client.tgz'))
-    download('https://ox.gluu.org/icrby8xcvbcv/cli-swagger/scim.tgz', os.path.join(jans_app_dir, 'scim-swagger-client.tgz'))
+    download(urljoin(maven_base_url, 'jans-config-api/plugins/scim-plugin/{0}{1}/scim-plugin-{0}{1}-distribution.jar'.format(app_versions['JANS_APP_VERSION'], app_versions['JANS_BUILD'])), os.path.join(jans_app_dir, 'scim-plugin.jar'))
+    download('https://ox.gluu.org/icrby8xcvbcv/cli-swagger/jca_swagger_client.zip', os.path.join(jans_app_dir, 'jca-swagger-client.zip'))
+    download('https://ox.gluu.org/icrby8xcvbcv/cli-swagger/scim_swagger_client.zip', os.path.join(jans_app_dir, 'scim-swagger-client.zip'))
     download('https://raw.githubusercontent.com/GluuFederation/gluu-snap/master/facter/facter', os.path.join(jans_app_dir, 'facter'))
     download('https://github.com/jpadilla/pyjwt/archive/refs/tags/2.3.0.zip', os.path.join(app_dir, 'pyjwt.zip'))
 
@@ -310,30 +310,29 @@ def extract_yaml_files():
     extract_file(jans_zip_file, 'jans-scim/server/src/main/resources/jans-scim-openapi.yaml', os.path.join(setup_dir, 'setup_app/data'))
     extract_file(jans_zip_file, 'jans-config-api/server/src/main/resources/log4j2.xml', jans_app_dir)
 
-
 def prepare_jans_cli_package():
     print("Preparing jans-cli package")
     extract_subdir(jans_zip_file, 'jans-cli', 'jans-cli', os.path.join(jans_app_dir, 'jans-cli.zip'))
 
-
 def uninstall_jans():
     check_installation()
-    print('\033[31m')
-    print("This process is irreversible.")
-    print("You will lose all data related to Janssen Server.")
-    print('\033[0m')
-    print()
-    while True:
-        print('\033[31m \033[1m')
-        response = input("Are you sure to uninstall Janssen Server? [yes/N] ")
+    if not argsp.n:
+        print('\033[31m')
+        print("This process is irreversible.")
+        print("You will lose all data related to Janssen Server.")
         print('\033[0m')
-        if response.lower() in ('yes', 'n', 'no'):
-            if not response.lower() == 'yes':
-                sys.exit()
+        print()
+        while True:
+            print('\033[31m \033[1m')
+            response = input("Are you sure to uninstall Janssen Server? [yes/N] ")
+            print('\033[0m')
+            if response.lower() in ('yes', 'n', 'no'):
+                if not response.lower() == 'yes':
+                    sys.exit()
+                else:
+                    break
             else:
-                break
-        else:
-            print("Please type \033[1m yes \033[0m to uninstall")
+                print("Please type \033[1m yes \033[0m to uninstall")
 
     print("Uninstalling Jannsen Server...")
     for service in jetty_services:
@@ -408,7 +407,6 @@ def main():
         else:
             profile_setup()
 
-        prepare_jans_cli_package()
 
         if not argsp.no_setup:
             print("Launching Janssen Setup")

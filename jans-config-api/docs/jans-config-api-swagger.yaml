@@ -1816,13 +1816,13 @@ paths:
           description: The 1-based index of the first query result.
         - schema:
             type: string
-            default: 1
+            default: inum
           in: query
           name: sortBy
           description: Attribute whose value will be used to order the returned response.
         - schema:
             type: string
-            default: 1
+            default: ascending
             enum:
               - ascending
               - descending
@@ -6471,6 +6471,9 @@ components:
         description:
           type: string
           description: role description
+        deletable:
+          type: boolean
+          description: can we delete the role?
     AdminPermission:
       type: object
       description: Admin permission

@@ -597,3 +597,18 @@ jansRevision: 1
 jansScr::%(introspection_introspection_role_based_scope)s
 jansScrTyp: introspection
 
+dn: inum=A110-88AB,ou=scripts,o=jans
+objectClass: top
+objectClass: jansCustomScr
+description: Jans Config Api authorization script
+displayName: config_api_authorization
+inum: A110-88AB
+jansEnabled: false
+jansConfProperty: {"value1":"testProp1","value2":"Test value 1","hide":false,"description":""}
+jansConfProperty: {"value1":"testProp2","value2":"Test value 2","hide":false,"description":""}
+jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+jansLevel: 100
+jansRevision: 1
+jansProgLng: python
+jansScrTyp: config_api_auth
+jansScr::%(config_api_config_api_interception)s

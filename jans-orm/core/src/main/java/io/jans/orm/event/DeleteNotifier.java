@@ -8,8 +8,8 @@ package io.jans.orm.event;
 
 public interface DeleteNotifier {
 
-    void onBeforeRemove(String dn);
+    void onBeforeRemove(String dn, String[] objectClasses);
 
-    void onAfterRemove(String dn);
+    void onAfterRemove(String dn, String[] objectClasses);
 
 }
