@@ -1,5 +1,7 @@
 import argparse
 
+from setup_app.utils import base
+
 parser_description='''Use this script to configure your Jans Server and to add initial data required for
 oxAuth and oxTrust to start. If setup.properties is found in this folder, these
 properties will automatically be used instead of the interactive setup.
@@ -83,10 +85,11 @@ parser.add_argument('-approved-issuer', help="Api Approved Issuer")
 
 def add_to_me(you):
 
-    print("Adding actions from parser", you.description)
+    base.logIt("Adding actions from parser: '{}'".format(you.description))
     group = parser.add_argument_group(you.description)
 
     for action in you._actions:
+        base.logIt("Adding action '{}'".format(' '.join(action.option_strings)))
         if isinstance(action, argparse._HelpAction):
             continue
         if isinstance(action, argparse._StoreTrueAction):
