@@ -10,7 +10,8 @@ This script migrates data from ldap to MySQL.
 2. Install MySQL Server, create a database (namely **jansdb**), add a user (namely **jans**) and
 give grant previlages to user **jans** on **jansdb**
 
-3. Copy this script to `/opt/jans/jans-setup`
+3. Download script to `/opt/jans/jans-setup`
+  `wget https://raw.githubusercontent.com/JanssenProject/jans/jans-linux-setup-ldap2mysql/jans-linux-setup/tools/ldap2mysql/ldap2mysql.py -O /opt/jans/jans-setup/ldap2mysql.py`
 
 4. Execute
 
