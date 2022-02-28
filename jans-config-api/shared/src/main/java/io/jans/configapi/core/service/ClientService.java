@@ -12,11 +12,13 @@ import io.jans.util.StringHelper;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.inject.Named;
 import java.io.Serializable;
 
 import org.slf4j.Logger;
 
 @ApplicationScoped
+@Named("cltSrv")
 public class ClientService implements Serializable {
 
     private static final long serialVersionUID = 7912416439116338984L;
