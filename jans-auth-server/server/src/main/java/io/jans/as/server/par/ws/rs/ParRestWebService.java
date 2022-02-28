@@ -123,6 +123,8 @@ public class ParRestWebService {
                             + "customRespHeaders = {}, claims = {}, tokenBindingHeader = {}",
                     acrValuesStr, amrValuesStr, originHeaders, codeChallenge, codeChallengeMethod, customResponseHeaders, claims, tokenBindingHeader);
 
+            parValidator.validatePkce(codeChallenge, state);
+
             List<ResponseType> responseTypes = ResponseType.fromString(responseType, " ");
             ResponseMode responseModeObj = ResponseMode.getByValue(responseMode);
 
