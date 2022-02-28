@@ -22,7 +22,7 @@
   "suse 15": {
     "optional": "",
     "mondatory": "apache2 curl wget tar xz unzip rsyslog bzip2",
-    "python": {"ldap3":"python3-ldap3", "requests":"python3-requests", "ruamel.yaml":"python3-ruamel-yaml", "certifi":"python3-certifi", "pymysql":"python3-PyMySQL", "Crypto": "python3-cryptography"}
+    "python": {"ldap3":"python3-ldap3", "requests":"python3-requests", "ruamel.yaml":"python3-ruamel.yaml", "certifi":"python3-certifi", "pymysql":"python3-PyMySQL", "Crypto": "python3-cryptography"}
   },
   "debian 10": {
     "optional": "",
