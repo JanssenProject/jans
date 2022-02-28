@@ -53,9 +53,6 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
     JwtUtil jwtUtil;
 
     @Inject
-    Jackson jackson;
-
-    @Inject
     OpenIdService openIdService;
 
     @Inject

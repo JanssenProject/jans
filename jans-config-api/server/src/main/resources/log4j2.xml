@@ -106,7 +106,7 @@
 
         <Root level="INFO">
 			<AppenderRef ref="FILE" />
-			<AppenderRef ref="STDOUT" />
+			<AppenderRef ref="Console" />
         </Root>
 		
     </Loggers>
