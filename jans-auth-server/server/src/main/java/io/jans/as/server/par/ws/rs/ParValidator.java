@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 import java.util.Date;
 import java.util.Set;
 
@@ -165,6 +166,18 @@ public class ParValidator {
         if (appConfiguration.isFapi() && StringUtils.isBlank(jwtRequest.getState())) {
             par.getAttributes().setState(""); // #1250 - FAPI : discard state if in JWT we don't have state
             redirectUriResponse.setState("");
+        }
+    }
+
+    public void validatePkce(String codeChallenge, String state) {
+        if (!appConfiguration.isFapi()) {
+            return;
+        }
+        if (StringUtils.isBlank(codeChallenge)) {
+            throw new WebApplicationException(Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST, state, ""))
+                    .build());
         }
     }
 }
