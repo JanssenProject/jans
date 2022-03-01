@@ -5,7 +5,7 @@ jobs:
   release-chart-pr:
     runs-on: ubuntu-latest
     strategy:
-      max-parallel: 1
+      #max-parallel: 1
       fail-fast: false
       matrix:
         charts: [ "charts/janssen" ]
@@ -42,7 +42,7 @@ jobs:
     needs: release-chart-pr
     runs-on: ubuntu-latest
     strategy:
-      max-parallel: 1
+      #max-parallel: 1
       fail-fast: false
       matrix:
         simple: [ "jans-scim", "jans-orm", "jans-notify", "jans-fido2", "jans-eleven", "jans-core", "jans-config-api", "jans-client-api", "jans-bom", "jans-auth-server" ]
@@ -79,7 +79,7 @@ jobs:
     needs: release-simple-pr
     runs-on: ubuntu-latest
     strategy:
-      max-parallel: 1
+      #max-parallel: 1
       fail-fast: false
       matrix:
         simple: [ "docker-jans-auth-server", "docker-jans-certmanager", "docker-jans-config-api", "docker-jans-client-api", "docker-jans-configurator", "docker-jans-fido2", "docker-jans-persistence-loader", "docker-jans-scim" ]
@@ -112,12 +112,11 @@ jobs:
          release-type: simple
          package-name: ${{ matrix.simple }}
          monorepo-tags: true
-
   release-python-pr:
     needs: release-docker-pr
     runs-on: ubuntu-latest
     strategy:
-      max-parallel: 1
+      #max-parallel: 1
       fail-fast: false
       matrix:
         python-projects: ["jans-pycloudlib", "jans-cli", "jans-linux-setup"]
