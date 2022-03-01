@@ -38,6 +38,7 @@ setup(
     install_requires=[
         "ruamel.yaml>=0.16.5",
         "PyJWT==2.3.0",
+        "certifi",
         "jca-swagger-client @ https://ox.gluu.org/icrby8xcvbcv/cli-swagger/jca_swagger_client.zip",
         "scim_swagger_client @ https://ox.gluu.org/icrby8xcvbcv/cli-swagger/scim_swagger_client.zip",
 

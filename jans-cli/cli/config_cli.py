@@ -126,6 +126,11 @@ args = parser.parse_args()
 
 ################## end of arguments #################
 
+
+def write_config():
+    with open(config_ini_fn, 'w') as w:
+        config.write(w)
+
 if not (host and client_id and client_secret):
     host = args.host
     client_id = args.client_id
@@ -152,7 +157,7 @@ if not (host and client_id and client_secret):
                              'scim_client_id': 'your jans scim client id',
                              'scim_client_secret': 'client secret for your jans scim client'}
 
-        self.write_config()
+        write_config()
 
         print(
             "Pelase fill {} or set environmental variables jans_host, jans_client_id ,and jans_client_secret and re-run".format(config_ini_fn)
@@ -288,10 +293,6 @@ class JCA_CLI:
                 with open(debug_json, 'w') as w:
                     json.dump(self.cfg_yml, w, indent=2)
         return self.cfg_yml
-
-    def write_config(self):
-        with open(config_ini_fn, 'w') as w:
-            config.write(w)
 
     def get_rest_client(self):
         rest = swagger_client.rest.RESTClientObject(self.swagger_configuration)
@@ -490,7 +491,7 @@ class JCA_CLI:
         self.access_token = result['access_token']
         access_token_enc = encode_decode(self.access_token)
         config['DEFAULT']['access_token_enc'] = access_token_enc
-        self.write_config()
+        write_config()
 
 
     def get_access_token(self, scope):
@@ -637,7 +638,7 @@ class JCA_CLI:
                 print("Logging out...")
                 if 'access_token_enc' in config['DEFAULT']:
                     config['DEFAULT'].pop('access_token_enc')
-                    self.write_config()
+                    write_config()
                 print("Quiting...")
                 sys.exit()
                 break
