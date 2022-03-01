@@ -23,7 +23,7 @@ def find_version(*file_paths):
 
 setup(
     name="jans-setup",
-    version=find_version("jans_setup/setup_app/__init__.py"),
+    version=find_version("jans_setup/setup_app/version.py"),
     url="",
     license="Apache 2.0 <https://www.apache.org/licenses/LICENSE-2.0>",
     author="Janssen",
