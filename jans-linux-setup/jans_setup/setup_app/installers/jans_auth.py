@@ -157,6 +157,3 @@ class JansAuthInstaller(JettyInstaller):
         if os.path.isfile(Config.ob_key_fn) and os.path.isfile(Config.ob_cert_fn):
             self.gen_keystore('obsigning', self.oxauth_openid_jks_fn, Config.oxauth_openid_jks_pass, Config.ob_key_fn, Config.ob_cert_fn, Config.ob_alias)
 
-
-    def installed(self):
-        return os.path.exists(os.path.join(Config.jetty_base, self.service_name, 'start.ini'))
