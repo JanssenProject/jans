@@ -220,7 +220,7 @@ class BaseInstaller:
 
     def installed(self):
         return None
-    
+
     def check_need_for_download(self):
         pass
 

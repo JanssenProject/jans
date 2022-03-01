@@ -382,3 +382,6 @@ class JettyInstaller(BaseInstaller, SetupUtils):
                 f.write(b'<?xml version="1.0"  encoding="ISO-8859-1"?>\n')
                 f.write(b'<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "http://www.eclipse.org/jetty/configure_9_0.dtd">\n')
                 f.write(ET.tostring(root, method='xml'))
+
+    def installed(self):
+        return os.path.exists(os.path.join(Config.jetty_base, self.service_name, 'start.ini')) or os.path.exists(os.path.join(Config.jetty_base, self.service_name, 'start.d/server.ini'))
