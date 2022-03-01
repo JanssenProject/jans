@@ -46,9 +46,6 @@ class ScimInstaller(JettyInstaller):
         self.war_for_jetty10(os.path.join(jettyServiceWebapps, os.path.basename(self.source_files[0][0])))
         self.enable()
 
-    def installed(self):
-        return os.path.exists(os.path.join(Config.jetty_base, self.service_name, 'start.ini'))
-
 
     def create_scope(self, scope, inum_base='0001.'):
         result = self.check_scope(scope['jansId'][0])
