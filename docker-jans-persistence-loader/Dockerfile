@@ -21,7 +21,7 @@ RUN pip3 install -U pip wheel \
 # jans-linux-setup sync
 # =====================
 
-ARG JANS_LINUX_SETUP_VERSION=493337f94045be705386b8f2b59dda29f85762e6
+ARG JANS_LINUX_SETUP_VERSION=76854c78af1fd0820f12587f40093e5663012a50
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -60,7 +60,7 @@ RUN cd /tmp/jans \
     && cp ${JANS_SETUP_DIR}/templates/jans-config-api/config.ldif /app/templates/jans-config-api/config.ldif
 
 # TODO: casa should be moved from this image
-ARG GLUU_CASA_VERSION=e703c4b62e60d3cd299ea84f471417290987bdef
+ARG GLUU_CASA_VERSION=6aa59af5f7001d8587ca4a9b6c688c861faec5eb
 RUN wget -q https://github.com/GluuFederation/flex/raw/${GLUU_CASA_VERSION}/casa/extras/Casa.py -O /app/static/extension/person_authentication/Casa.py
 
 # cleanup
