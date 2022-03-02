@@ -88,7 +88,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     - uses: addnab/docker-run-action@v3
       name: Build with Suse
       continue-on-error: true
@@ -186,7 +186,7 @@ jobs:
         name: [centos, ubuntu, suse]
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     - uses: actions/cache@v2.1.7
       id: cache-installers
       with:
