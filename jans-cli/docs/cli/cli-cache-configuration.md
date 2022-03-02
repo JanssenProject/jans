@@ -4,7 +4,7 @@ Cache Configuration supports two types of operation through the Single Line comm
 Let's get the information for Cache Configuration.
 
 ```
-/opt/jans/jans-cli/config-cli.py –info CacheConfiguration
+/opt/jans/jans-cli/config-cli.py --info CacheConfiguration
 ```
 
 It prints below two operations:
