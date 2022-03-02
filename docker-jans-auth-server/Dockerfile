@@ -52,7 +52,7 @@ RUN wget -q https://github.com/fabioz/PyDev.Debugger/archive/refs/tags/pydev_deb
 # ===========
 
 ENV CN_VERSION=1.0.0-SNAPSHOT
-ENV CN_BUILD_DATE='2022-02-25 10:38'
+ENV CN_BUILD_DATE='2022-03-02 12:55'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-server/${CN_VERSION}/jans-auth-server-${CN_VERSION}.war
 
 # Install Jans Auth
@@ -77,14 +77,14 @@ RUN wget -q https://repo1.maven.org/maven2/org/jsmpp/jsmpp/${JSMPP_VERSION}/jsmp
 
 # This will later be refactored and moved to be pulled from persitence or a central bucket
 ARG CASA_CONFIG_VERSION=5.0.0-SNAPSHOT
-ARG CASA_CONFIG_BUILD_DATE="2022-01-05 12:52"
+ARG CASA_CONFIG_BUILD_DATE="2022-03-02 11:52"
 RUN wget -q https://jenkins.gluu.org/maven/org/gluu/casa-config/${CASA_CONFIG_VERSION}/casa-config-${CASA_CONFIG_VERSION}.jar -O /usr/share/java/casa-config.jar
 
 # =====================
 # Casa external scripts
 # =====================
 
-ARG CASA_EXTRAS_VERSION=ed78914de05ec918493bab9dae631a34d4850e1f
+ARG CASA_EXTRAS_VERSION=6aa59af5f7001d8587ca4a9b6c688c861faec5eb
 ARG CASA_EXTRAS_DIR=casa/extras
 
 RUN mkdir -p /opt/jans/python/libs
