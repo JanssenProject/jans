@@ -576,6 +576,8 @@ class JCA_CLI:
                     default = False
             else:
                 type_text = "Type: " + itype
+                if values:
+                    type_text += ', Valid values: {}'.format(self.colored_text(', '.join(values), bold_color))
 
         if help_text:
             help_text = help_text.strip('.') + '. ' + type_text
