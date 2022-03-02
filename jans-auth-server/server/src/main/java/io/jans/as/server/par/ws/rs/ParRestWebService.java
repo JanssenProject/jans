@@ -42,7 +42,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import java.net.URI;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -123,7 +122,7 @@ public class ParRestWebService {
                             + "customRespHeaders = {}, claims = {}, tokenBindingHeader = {}",
                     acrValuesStr, amrValuesStr, originHeaders, codeChallenge, codeChallengeMethod, customResponseHeaders, claims, tokenBindingHeader);
 
-            parValidator.validatePkce(codeChallenge, state);
+            parValidator.validatePkce(codeChallenge, codeChallengeMethod, state);
 
             List<ResponseType> responseTypes = ResponseType.fromString(responseType, " ");
             ResponseMode responseModeObj = ResponseMode.getByValue(responseMode);
