@@ -1,5 +1,32 @@
 # Changelog
 
+## 1.0.0-beta.15 (2022-03-02)
+
+
+### Features
+
+* jans-cli logout (ref: [#706](https://github.com/JanssenProject/jans/issues/706)) ([#723](https://github.com/JanssenProject/jans/issues/723)) ([0cc51bc](https://github.com/JanssenProject/jans/commit/0cc51bc18a40476ed6bc638225b6897a11c21c16))
+
+
+### Bug Fixes
+
+* jans-cli sync swagger file from jans-config-api ([#759](https://github.com/JanssenProject/jans/issues/759)) ([315c699](https://github.com/JanssenProject/jans/commit/315c699a84593e7d621a1a3740b053e361133ed4))
+* **jans-cli:** jans cli pkg fixes ([#854](https://github.com/JanssenProject/jans/issues/854)) ([9e96e4c](https://github.com/JanssenProject/jans/commit/9e96e4c6b13bc44f4bb2d74222da1669d5b5ed22))
+* **jans-cli:** retain scim client in config.ini ([#872](https://github.com/JanssenProject/jans/issues/872)) ([8346517](https://github.com/JanssenProject/jans/commit/83465172bf11ea0a787ee3de34c8dd8968bcdcf0))
+* vm setup suse fixes ([#705](https://github.com/JanssenProject/jans/issues/705)) ([2f69a8a](https://github.com/JanssenProject/jans/commit/2f69a8a90747e6c0b67eb76f66edbf3166019264))
+
+
+### Documentation
+
+* remove sonar badges table from readme ([#694](https://github.com/JanssenProject/jans/issues/694)) ([08f4f1f](https://github.com/JanssenProject/jans/commit/08f4f1fa6d2a35517d15daca613fe47eaf1c682e))
+
+
+### Miscellaneous Chores
+
+* release 1.0.0-beta.15 ([ee5b719](https://github.com/JanssenProject/jans/commit/ee5b719bee5cc4bdaebf81a5103e6a7ab0695dbb))
+* release 1.0.0-beta.15 ([ca6d1c9](https://github.com/JanssenProject/jans/commit/ca6d1c9e2acb5e6422e1cd26ac277dd3eba4e56e))
+* release 1.0.0-beta.15 ([b65bab2](https://github.com/JanssenProject/jans/commit/b65bab20530b7d6736dd404e26649abf47c0fb60))
+
 ## [0.3.0](https://www.github.com/JanssenProject/jans-cli/compare/v0.2.0...v0.3.0) (2021-09-10)
 
 
