@@ -1,10 +1,9 @@
 name: release
 on:
   workflow_dispatch:
-  push:
 jobs:
   release-chart-pr:
-    if: contains(github.event.head_commit.message, 'Release-As:')
+    if: contains(github.event.head_commit.message, 'Release-As:') || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     strategy:
       #max-parallel: 1
