@@ -304,7 +304,7 @@ public class JcaDocumentStoreProvider extends DocumentStoreProvider<JcaDocumentS
             	jcaDocumentStoreConfiguration.setDecryptedPassword(stringEncrypter.decrypt(encryptedPassword));
                 log.trace("Decrypted JCA password successfully.");
             }
-        } catch (StringEncrypter.EncryptionException ex) {
+        } catch (Exception ex) {
             log.error("Error during JCA password decryption", ex);
         }
     }
