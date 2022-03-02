@@ -29,23 +29,45 @@ wget https://github.com/JanssenProject/jans-cli/releases/latest/download/jans-cl
 If you would like to build `jans-cli` manually, you can go through the following steps noted here:
 
 ## Prerequisites
-1. git
+1. wget
+1. unzip
 1. Python 3.6+.
 1. Python `pip3` package.
 
-### Downloading `jans-cli` files
+### Building 
 
-1. Clone the repository:
+1. Install dependencies
 
-    ```
-    git clone https://github.com/JanssenProject/jans-cli/
+    ```sh
+    apt install -y wget unzip python3-pip python3-dev
+    pip3 install shiv
     ```
 
-2. open directory
+2. Download the repository:
 
+    ```sh
+    wget https://github.com/JanssenProject/jans/archive/refs/heads/main.zip
     ```
-    cd jans-cli
+
+3. Unzip package, and change to directory
+
+    ```sh
+    unzip main.zip
+    cd jans-main/jans-cli
     ```
+
+4. Build
+
+    ```sh
+    make zipapp
+    ```
+
+You can verify with the following command line if everything is done successfully.
+
+```
+python3 jans-cli.pyz -h
+```
+
 
 ### Standard Python package
 
@@ -64,28 +86,6 @@ If you would like to build `jans-cli` manually, you can go through the following
 
     This command will install executable called `jans-cli` available in virtual environment `PATH`.
 
-### Python zipapp
-
-1.  Install [shiv](https://shiv.readthedocs.io/) using `pip3`:
-
-    ```sh
-    pip3 install shiv
-    ```
-
-1.  Install the package:
-
-    ```sh
-    make zipapp
-    ```
-
-    This command will generate executable called `jans-cli.pyz` under the same directory.
-
-
-You can verify with the following command line if everything is done successfully.
-
-```
-python3 jans-cli.pyz -h
-```
 
 ![](docs/img/build-jans-cli-pyz-manually.png)
 
