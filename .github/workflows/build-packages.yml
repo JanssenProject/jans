@@ -96,9 +96,12 @@ jobs:
         image: opensuse/leap:15.4
         options: -v ${{ github.workspace }}:/suse
         run: |
-          zypper addrepo https://download.opensuse.org/repositories/openSUSE:Leap:15.4/standard/openSUSE:Leap:15.4.repo
+          zypper addrepo https://download.opensuse.org/repositories/openSUSE:Leap:15.1/standard/openSUSE:Leap:15.1.repo
           zypper --gpg-auto-import-keys refresh
-          zypper --non-interactive install -y gcc-c++ make gcc automake autoconf libtool python3-pip python3-setuptools python3-wheel
+          zypper --non-interactive install -y gcc-c++ make gcc automake autoconf libtool python3-pip python3-setuptools python3-wheel          
+          zypper addrepo https://download.opensuse.org/repositories/home:smarty12:Python/RaspberryPi_Leap_15.2/home:smarty12:Python.repo
+          zypper --gpg-auto-import-keys refresh
+          zypper --non-interactive install -y python3-dev
           echo "Building jans-linux-setup package"
           cd /suse/jans-linux-setup
           pip install shiv
@@ -137,10 +140,10 @@ jobs:
           make zipapp 
           mv jans-cli.pyz jans-cli-linux-centos-X86-64.pyz
           sha256sum jans-cli-linux-centos-X86-64.pyz > jans-cli-linux-centos-X86-64.pyz.sha256sum
-    - name: Set up Python 3.7
-      uses: actions/setup-python@v2.3.2
+    - name: Set up Python 3.6
+      uses: actions/setup-python@v3
       with:
-        python-version: 3.7
+        python-version: 3.6
     - name: Build with Ubuntu
       continue-on-error: true
       run: |
