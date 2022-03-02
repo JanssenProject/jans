@@ -42,6 +42,7 @@ jobs:
          sudo apt install -y python3-distutils python3-ldap3 build-essential devscripts debhelper rpm dpkg-sig
     - name: Import GPG key
       id: import_gpg
+      continue-on-error: true
       uses: crazy-max/ghaction-import-gpg@v4
       with:
         gpg_private_key: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY }}
