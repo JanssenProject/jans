@@ -84,7 +84,7 @@ class HttpdInstaller(BaseInstaller, SetupUtils):
             self.copyFile(tmp_fn, self.server_root)
 
         # we only need these modules
-        mods_enabled = ['env', 'log_config', 'proxy', 'proxy_http', 'access_compat', 'alias', 'authn_core', 'authz_core', 'authz_host', 'headers', 'mime', 'mpm_event', 'proxy_ajp', 'security2', 'reqtimeout', 'setenvif', 'socache_shmcb', 'ssl', 'unique_id', 'rewrite', 'mod_dir']
+        mods_enabled = ['env', 'log_config', 'proxy', 'proxy_http', 'access_compat', 'alias', 'authn_core', 'authz_core', 'authz_host', 'headers', 'mime', 'mpm_event', 'proxy_ajp', 'security2', 'reqtimeout', 'setenvif', 'socache_shmcb', 'ssl', 'unique_id', 'rewrite', 'mod_dir', 'auth_openidc']
 
         cmd_a2enmod = shutil.which('a2enmod')
         cmd_a2dismod = shutil.which('a2dismod')
