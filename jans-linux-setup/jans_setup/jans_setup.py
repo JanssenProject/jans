@@ -203,13 +203,6 @@ if os.path.exists(Config.jans_properties_fn):
         print("Saving collected properties")
         collectProperties.save()
         sys.exit()
-else:
-    # check if ony of opendj port is used by another process
-    for port in (Config.ldaps_port, Config.ldap_admin_port):
-        port_used = SetupUtils.port_used(port)
-        if port_used:
-            print("{}Opendj port {} is used bu another process. Please kill the process uses this port.{}".format(static.colors.DANGER, port, static.colors.ENDC))
-            sys.exit(1)
 
 
 if not Config.noPrompt and not Config.installed_instance and not setup_loaded:

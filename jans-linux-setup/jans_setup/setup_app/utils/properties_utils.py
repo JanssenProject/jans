@@ -12,6 +12,7 @@ import inspect
 import ldap3
 
 from setup_app import paths
+from setup_app.messages import msg
 from setup_app.utils import base
 from setup_app.utils.cbm import CBM
 from setup_app.static import InstallTypes, colors
@@ -120,6 +121,12 @@ class PropertiesUtils(SetupUtils):
 
                 if Config.rdbm_install:
                     Config.mappingLocations = { group: 'rdbm' for group in Config.couchbaseBucketDict }
+
+            if Config.opendj_install == InstallTypes.LOCAL:
+                used_ports = self.opendj_used_ports()
+                if used_ports:
+                    print(msg.used_ports.format(','.join(used_ports)))
+                    sys.exit(1)
 
             self.set_persistence_type()
 
@@ -653,6 +660,12 @@ class PropertiesUtils(SetupUtils):
                 print("Please enter one of {}".format(', '.join(nlist)))
             else:
                 choice = n
+
+            if choice == 1:
+                used_ports = self.opendj_used_ports()
+                if used_ports:
+                    print(colors.DANGER, msg.used_ports.format(','.join(used_ports)), colors.ENDC)
+                    choice = None
 
             if choice:
                 break

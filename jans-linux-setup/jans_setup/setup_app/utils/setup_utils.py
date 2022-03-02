@@ -566,10 +566,17 @@ class SetupUtils(Crypto64):
         yml_str = ruamel.yaml.dump(yacron_yaml, Dumper=ruamel.yaml.RoundTripDumper)
         self.writeFile(yacron_yaml_fn, yml_str)
 
-    @classmethod
+
     def port_used(self, port):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         result = sock.connect_ex(('127.0.0.1', int(port)))
         ret_val = result == 0
         sock.close()
         return ret_val
+
+    def opendj_used_ports(self):
+        ports = []
+        for port in (Config.ldaps_port, Config.ldap_admin_port):
+            if self.port_used(port):
+                ports.append(port)
+        return ports
