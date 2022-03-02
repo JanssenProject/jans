@@ -3,7 +3,7 @@
 To get info about Jans Authorization Server operations:
 
 ```text
-/opt/jans/jans-cli/config-cli.py –info ConfigurationProperties
+/opt/jans/jans-cli/config-cli.py --info ConfigurationProperties
 
 
 Operation ID: get-properties
