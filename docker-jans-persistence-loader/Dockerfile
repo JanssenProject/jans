@@ -57,7 +57,8 @@ RUN cd /tmp/jans \
     && cp ${JANS_SETUP_DIR}/static/cache-refresh/o_site.ldif /app/templates/o_site.ldif \
     && cp -R ${JANS_SETUP_DIR}/templates/jans-fido2 /app/templates/jans-fido2 \
     && cp -R ${JANS_SETUP_DIR}/templates/jans-scim /app/templates/jans-scim \
-    && cp ${JANS_SETUP_DIR}/templates/jans-config-api/config.ldif /app/templates/jans-config-api/config.ldif
+    && cp ${JANS_SETUP_DIR}/templates/jans-config-api/config.ldif /app/templates/jans-config-api/config.ldif \
+    && cp -R ${JANS_SETUP_DIR}/templates/jans-cli /app/templates/jans-cli
 
 # TODO: casa should be moved from this image
 ARG GLUU_CASA_VERSION=6aa59af5f7001d8587ca4a9b6c688c861faec5eb
