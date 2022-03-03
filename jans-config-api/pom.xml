@@ -22,7 +22,7 @@
 		<surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
 
 		<jans.version>1.0.0-SNAPSHOT</jans.version>
-		<weld.version>3.1.2.Final</weld.version>
+		<weld.version>4.0.3.Final</weld.version>
 		<jetty.version>11.0.2</jetty.version>
 		<resteasy.version>4.5.10.Final</resteasy.version>
 		<jackson.version>2.10.1</jackson.version>

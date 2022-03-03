@@ -18,7 +18,7 @@
 		<httpcore.version>4.4.14</httpcore.version>
 		<httpclient.version>4.5.13</httpclient.version>
 
-		<weld.version>3.1.8.Final</weld.version>
+		<weld.version>4.0.3.Final</weld.version>
 		<servlet.version>5.0.0</servlet.version>
 		<richfaces.version>4.5.19-gluu.Final</richfaces.version>
 
@@ -265,13 +265,13 @@
 				<scope>import</scope>
 				<type>pom</type>
 			</dependency>
-<!--
+
 			<dependency>
 				<groupId>jakarta.servlet</groupId>
 				<artifactId>jakarta.servlet-api</artifactId>
 				<version>${servlet.version}</version>
 			</dependency>
--->
+
 			<dependency>
 				<groupId>javax.enterprise</groupId>
 				<artifactId>cdi-api</artifactId>

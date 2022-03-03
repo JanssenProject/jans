@@ -16,7 +16,7 @@
 		<plugin.version>0.1</plugin.version>
 
 		<jans.version>1.0.0-SNAPSHOT</jans.version>
-		<weld.version>3.1.2.Final</weld.version>
+		<weld.version>4.0.3.Final</weld.version>
 		<resteasy.version>4.5.7.Final</resteasy.version>
 		<log4j.version>2.17.1</log4j.version>
 		<slf4j.version>1.7.25</slf4j.version>
@@ -145,9 +145,9 @@
 			<version>1.9</version>
 		</dependency>
 		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
-			<version>3.1.0</version>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
+			<scope>provided</scope>
 		</dependency>
 
 	</dependencies>
