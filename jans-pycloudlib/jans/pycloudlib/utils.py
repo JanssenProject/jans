@@ -38,6 +38,7 @@ from jans.pycloudlib.pki import sign_csr
 # Default charset
 _DEFAULT_CHARS = "".join([string.ascii_letters, string.digits])
 
+# logger
 logger = logging.getLogger(__name__)
 
 
