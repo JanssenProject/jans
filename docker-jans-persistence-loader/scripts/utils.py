@@ -336,6 +336,27 @@ def merge_casa_ctx(manager, ctx):
     return ctx
 
 
+def merge_jans_cli_ctx(manager, ctx):
+    # jans-cli client
+    ctx["role_based_client_id"] = manager.config.get("role_based_client_id")
+    if not ctx["role_based_client_id"]:
+        ctx["role_based_client_id"] = f"2000.{uuid4()}"
+        manager.config.set("role_based_client_id", ctx["role_based_client_id"])
+
+    ctx["role_based_client_pw"] = manager.secret.get("role_based_client_pw")
+    if not ctx["role_based_client_pw"]:
+        ctx["role_based_client_pw"] = get_random_chars()
+        manager.secret.set("role_based_client_pw", ctx["role_based_client_pw"])
+
+    ctx["role_based_client_encoded_pw"] = manager.secret.get("role_based_client_encoded_pw")
+    if not ctx["role_based_client_encoded_pw"]:
+        ctx["role_based_client_encoded_pw"] = encode_text(
+            ctx["role_based_client_pw"], manager.secret.get("encoded_salt"),
+        ).decode()
+        manager.secret.set("role_based_client_encoded_pw", ctx["role_based_client_encoded_pw"])
+    return ctx
+
+
 def prepare_template_ctx(manager):
     opt_scopes = json.loads(manager.config.get("optional_scopes", "[]"))
 
@@ -345,6 +366,7 @@ def prepare_template_ctx(manager):
     ctx = merge_config_api_ctx(ctx)
     ctx = merge_fido2_ctx(ctx)
     ctx = merge_scim_ctx(ctx)
+    ctx = merge_jans_cli_ctx(manager, ctx)
 
     if "casa" in opt_scopes:
         ctx = merge_casa_ctx(manager, ctx)
@@ -384,6 +406,7 @@ def get_ldif_mappings(optional_scopes=None):
             "jans-config-api/admin-ui-clients.ldif",
             "jans-auth/configuration.ldif",
             "jans-auth/role-scope-mappings.ldif",
+            "jans-cli/client.ldif",
         ]
 
         if "scim" in optional_scopes:
