@@ -10,4 +10,4 @@ uninstall:
 	pip3 uninstall jans-cli -y
 
 zipapp:
-	shiv --compressed -o jans-cli.pyz -p '/usr/bin/env python3' -e cli.config_cli:main . --no-cache
+	shiv --compressed -o config-cli.pyz -p '/usr/bin/env python3' -e cli.config_cli:main . --no-cache
