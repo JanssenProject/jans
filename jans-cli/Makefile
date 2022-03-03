@@ -1,7 +1,7 @@
 .DEFAULT_GOAL := develop
 
 develop:
-	/usr/bin/env python3 setup.py develop
+	pip3 install -e .
 
 install:
 	pip3 install .
