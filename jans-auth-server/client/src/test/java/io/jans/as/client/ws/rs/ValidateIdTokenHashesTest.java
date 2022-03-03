@@ -135,7 +135,7 @@ public class ValidateIdTokenHashesTest extends BaseTest {
         AssertBuilder.jwtBuilder(null)
                 .validateIdToken(idToken2, jwksUri, SignatureAlgorithm.RS256)
                 .accessToken(accessToken2)
-                .claimsPresence(JwtClaimName.STATE_HASH)
+                .claimsNoPresence(JwtClaimName.STATE_HASH)
                 .notNullAuthenticationTime()
                 .notNullOxOpenIDConnectVersion()
                 .notNullAuthenticationContextClassReference()

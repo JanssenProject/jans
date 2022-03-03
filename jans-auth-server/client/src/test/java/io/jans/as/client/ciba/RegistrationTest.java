@@ -205,6 +205,7 @@ public class RegistrationTest extends BaseTest {
 
         // 3. Client Update
         RegisterResponse clientUpdateResponse = TestCaseBuilder.registrationTestCaseBuilder("backchannelTokenDeliveryModePoll4 update")
+                .withRegistrationAccessToken(registrationAccessToken)
                 .withRegistrationEndpoint(registrationClientUri)
                 .withSectorIdentifierUri(sectorIdentifierUri)
                 .withJwksUri(clientJwksUri)
@@ -455,6 +456,7 @@ public class RegistrationTest extends BaseTest {
 
         // 3. Client Update
         RegisterResponse clientUpdateResponse = TestCaseBuilder.registrationTestCaseBuilder("backchannelTokenDeliveryModePing4 update")
+                .withRegistrationAccessToken(registrationAccessToken)
                 .withRegistrationEndpoint(registrationClientUri)
                 .withSectorIdentifierUri(sectorIdentifierUri)
                 .withJwksUri(clientJwksUri)
@@ -700,6 +702,7 @@ public class RegistrationTest extends BaseTest {
 
         // 3. Client Update
         RegisterResponse clientUpdateResponse = TestCaseBuilder.registrationTestCaseBuilder("backchannelTokenDeliveryModePush4 update")
+                .withRegistrationAccessToken(registrationAccessToken)
                 .withRegistrationEndpoint(registrationClientUri)
                 .withSectorIdentifierUri(sectorIdentifierUri)
                 .withGrantTypes(Collections.singletonList(GrantType.CIBA))

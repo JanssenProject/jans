@@ -28,6 +28,7 @@ public class JwtAssertBuilder extends BaseAssertBuilder {
     private boolean notNullAuthenticationMethodReferences;
     private boolean notNullClaimsAddressdata;
     private String[] claimsPresence;
+    private String[] claimsNoPresence;
 
     private RSAPublicKey publicKey;
     private SignatureAlgorithm signatureAlgorithm;
@@ -80,6 +81,11 @@ public class JwtAssertBuilder extends BaseAssertBuilder {
 
     public JwtAssertBuilder claimsPresence(String... claimsPresence) {
         this.claimsPresence = claimsPresence;
+        return this;
+    }
+
+    public JwtAssertBuilder claimsNoPresence(String... claimsNoPresence) {
+        this.claimsNoPresence = claimsNoPresence;
         return this;
     }
 
@@ -149,6 +155,13 @@ public class JwtAssertBuilder extends BaseAssertBuilder {
             for (String claim : claimsPresence) {
                 assertNotNull(claim, "Claim name is null");
                 assertNotNull(jwt.getClaims().getClaimAsString(claim), "Jwt Claim " + claim + " is not found");
+            }
+        }
+
+        if (claimsNoPresence != null) {
+            for (String claim : claimsNoPresence) {
+                assertNotNull(claim, "Claim name is null");
+                assertNull(jwt.getClaims().getClaimAsString(claim), "Jwt Claim " + claim + " is found");
             }
         }
 

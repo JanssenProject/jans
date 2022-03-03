@@ -151,9 +151,10 @@ public class RegistrationTestCase extends BaseTestCase {
         RegisterRequest registerRequest;
         registerRequest = new RegisterRequest(applicationType, clientName, redirectUris);
 
-        if (isReadMode) {
+        if (isReadMode || isUpdateMode) {
             registerRequest = new RegisterRequest(registrationAccessToken);
-        } else if (isUpdateMode) {
+        }
+        if (isUpdateMode) {
             registerRequest.setHttpMethod(HttpMethod.PUT);
         }
 
