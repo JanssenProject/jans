@@ -53,10 +53,10 @@ jobs:
       id: previoustag
       run: |
         echo "::set-output name=tag::$(curl https://api.github.com/repos/${{ github.repository }}/releases -s | grep "tag_name" | cut -d '"' -f 4 | grep -o '^\v.*' | head -n 1)"
-        echo "::set-output name=version::$(curl https://api.github.com/repos/${{ github.repository }}/${{ steps.project.outputs.gitproject }}/releases -s | grep "tag_name" | cut -d '"' -f 4 | grep -o '^\v.*' | head -n 1 | cut -d 'v' -f 2)"
+        echo "::set-output name=version::$(curl https://api.github.com/repos/${{ github.repository }}/releases -s | grep "tag_name" | cut -d '"' -f 4 | grep -o '^\v.*' | head -n 1 | cut -d 'v' -f 2)"
     - name: Print Version
       run: |
-        echo "${{ steps.previoustag.outputs.tag }}"
+        echo "${{ steps.previoustag.outputs.version }}"
     - name: Running install and build
       id: run_build
       run: |
