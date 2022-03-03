@@ -39,7 +39,7 @@ import static io.jans.as.model.util.StringUtils.toJSONArray;
  *
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
- * @version February 10, 2022
+ * @version March 2, 2022
  */
 public class RegisterRequest extends BaseRequest {
 
@@ -113,6 +113,7 @@ public class RegisterRequest extends BaseRequest {
     private String softwareId;
     private String softwareVersion;
     private String softwareStatement;
+    private Boolean defaultPromptLogin;
     private BackchannelTokenDeliveryMode backchannelTokenDeliveryMode;
     private String backchannelClientNotificationEndpoint;
     private AsymmetricSignatureAlgorithm backchannelAuthenticationRequestSigningAlg;
@@ -1161,6 +1162,14 @@ public class RegisterRequest extends BaseRequest {
         this.backchannelUserCodeParameter = backchannelUserCodeParameter;
     }
 
+    public Boolean getDefaultPromptLogin() {
+        return defaultPromptLogin;
+    }
+
+    public void setDefaultPromptLogin(Boolean defaultPromptLogin) {
+        this.defaultPromptLogin = defaultPromptLogin;
+    }
+
     public String getHttpMethod() {
         return httpMethod;
     }
@@ -1383,6 +1392,9 @@ public class RegisterRequest extends BaseRequest {
         if (backchannelUserCodeParameter != null && backchannelUserCodeParameter) {
             parameters.put(BACKCHANNEL_USER_CODE_PARAMETER.toString(), backchannelUserCodeParameter.toString());
         }
+        if (defaultPromptLogin != null) {
+            parameters.put(DEFAULT_PROMPT_LOGIN.getName(), defaultPromptLogin.toString());
+        }
 
         // Custom params
         if (customAttributes != null && !customAttributes.isEmpty()) {
@@ -1469,6 +1481,7 @@ public class RegisterRequest extends BaseRequest {
         result.setBackchannelClientNotificationEndpoint(requestObject.optString(BACKCHANNEL_CLIENT_NOTIFICATION_ENDPOINT.toString()));
         result.setBackchannelAuthenticationRequestSigningAlg(AsymmetricSignatureAlgorithm.fromString(requestObject.optString(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString())));
         result.setBackchannelUserCodeParameter(booleanOrNull(requestObject, BACKCHANNEL_USER_CODE_PARAMETER.toString()));
+        result.setDefaultPromptLogin(requestObject.optBoolean(DEFAULT_PROMPT_LOGIN.getName()));
 
         return result;
     }
@@ -1679,6 +1692,9 @@ public class RegisterRequest extends BaseRequest {
         }
         if (backchannelUserCodeParameter != null) {
             parameters.put(BACKCHANNEL_USER_CODE_PARAMETER.toString(), backchannelUserCodeParameter);
+        }
+        if (defaultPromptLogin != null) {
+            parameters.put(DEFAULT_PROMPT_LOGIN.getName(), defaultPromptLogin);
         }
         // Custom params
         if (customAttributes != null && !customAttributes.isEmpty()) {
