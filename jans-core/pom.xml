@@ -20,6 +20,18 @@
 		<janssen.version>1.0.0-SNAPSHOT</janssen.version>
 
 		<jacoco.version>0.8.7</jacoco.version>
+		
+		<!-- Jakarta -->
+		<!-- <jakarta.activation.api.version>2.0.1</jakarta.activation.api.version> -->
+    	<!-- <jakarta.annotation.api.version>2.0.0</jakarta.annotation.api.version> -->
+		<!-- <jakarta.el.api.version>4.0.0</jakarta.el.api.version> -->
+    	<!-- <jakarta.enterprise.cdi.api.version>3.0.0</jakarta.enterprise.cdi.api.version>
+    	<jakarta.inject.api.version>2.0.1</jakarta.inject.api.version>
+		<jakarta.mail.api.version>2.0.1</jakarta.mail.api.version> -->
+		<!-- <jakarta.mail.api.version>2.0.1</jakarta.mail.api.version>
+    	<jakarta.servlet.api.version>5.0.0</jakarta.servlet.api.version>
+    	<jakarta.ws.rs.api.version>3.0.0</jakarta.ws.rs.api.version>
+		<jakarta.xml.bind.api.version>3.0.1</jakarta.xml.bind.api.version> -->
 
 		<sonar.projectKey>JanssenProject_jans-core</sonar.projectKey>
 		<sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
@@ -62,11 +74,11 @@
 				<scope>import</scope>
 				<type>pom</type>
 			</dependency>
-			<dependency>
+			<!-- <dependency>
 				<groupId>jakarta.xml.bind</groupId>
 				<artifactId>jakarta.xml.bind-api</artifactId>
 				<version>2.3.3</version>
-			</dependency>
+			</dependency> -->
 		</dependencies>
 	</dependencyManagement>
 

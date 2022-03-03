@@ -11,7 +11,7 @@ import io.jans.service.cache.CacheProvider;
 import io.jans.service.cache.CacheProviderType;
 import org.slf4j.Logger;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.util.Date;
 import java.util.function.Supplier;
 

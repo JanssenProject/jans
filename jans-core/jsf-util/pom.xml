@@ -32,11 +32,11 @@
 			<groupId>io.jans</groupId>
 			<artifactId>jans-core-service</artifactId>
 		</dependency>
-		<dependency>
+	<!-- 	<dependency>
 			<groupId>javax.enterprise</groupId>
 			<artifactId>cdi-api</artifactId>
 			<scope>provided</scope>
-		</dependency>
+		</dependency> -->
 		<dependency>
 			<groupId>com.sun.faces</groupId>
 			<artifactId>jsf-api</artifactId>
@@ -51,16 +51,27 @@
 			<artifactId>jakarta.servlet-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
+		<!-- <dependency>
 			<groupId>javax.el</groupId>
 			<artifactId>el-api</artifactId>
 			<scope>provided</scope>
-		</dependency>
+		</dependency> -->
 		<dependency>
 			<groupId>org.glassfish.web</groupId>
 			<artifactId>el-impl</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		
+        <dependency>
+		    <groupId>jakarta.enterprise</groupId>
+		    <artifactId>jakarta.enterprise.cdi-api</artifactId>
+		    <scope>provided</scope>
+   		</dependency>
+      	<dependency>
+        	<groupId>jakarta.el</groupId>
+        	<artifactId>jakarta.el-api</artifactId>
+		    <scope>provided</scope>
+      	</dependency>
 	</dependencies>
 
 </project>

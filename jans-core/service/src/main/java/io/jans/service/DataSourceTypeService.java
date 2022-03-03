@@ -11,9 +11,9 @@ import io.jans.orm.cloud.spanner.impl.SpannerEntryManagerFactory;
 import io.jans.orm.ldap.impl.LdapEntryManagerFactory;
 
 import java.io.Serializable;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 @ApplicationScoped
 @Named

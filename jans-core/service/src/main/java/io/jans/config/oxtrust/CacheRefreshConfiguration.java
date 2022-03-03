@@ -9,7 +9,7 @@ package io.jans.config.oxtrust;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.jans.model.ldap.GluuLdapConfiguration;
 
-import javax.enterprise.inject.Vetoed;
+import jakarta.enterprise.inject.Vetoed;
 import java.util.List;
 
 /**

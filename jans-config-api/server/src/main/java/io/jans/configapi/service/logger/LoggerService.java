@@ -1,7 +1,7 @@
 package io.jans.configapi.service.logger;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import io.jans.configapi.model.configuration.ApiAppConfiguration;
 

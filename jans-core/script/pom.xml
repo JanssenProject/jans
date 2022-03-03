@@ -64,22 +64,45 @@
 		</dependency>
 
 		<!-- CDI -->
-		<dependency>
+	<!-- 	<dependency>
 			<groupId>javax.enterprise</groupId>
 			<artifactId>cdi-api</artifactId>
 			<scope>provided</scope>
-		</dependency>
+		</dependency> -->
 		<dependency>
 			<groupId>javax.validation</groupId>
 			<artifactId>validation-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
+		<!-- <dependency>
 			<groupId>jakarta.servlet</groupId>
 			<artifactId>jakarta.servlet-api</artifactId>
 			<scope>provided</scope>
+		</dependency> -->
+		<dependency>
+        	<groupId>jakarta.annotation</groupId>
+            <artifactId>jakarta.annotation-api</artifactId>
+        </dependency>
+        <dependency>
+		    <groupId>jakarta.enterprise</groupId>
+		    <artifactId>jakarta.enterprise.cdi-api</artifactId>
+		    <scope>provided</scope>
+   		</dependency>
+      	<dependency>
+            <groupId>jakarta.servlet</groupId>
+        	<artifactId>jakarta.servlet-api</artifactId>
+			<scope>provided</scope>
+   		</dependency>
+		<dependency>
+			<groupId>jakarta.xml.bind</groupId>
+			<artifactId>jakarta.xml.bind-api</artifactId>
 		</dependency>
-
+		<dependency>
+        	<groupId>jakarta.ws.rs</groupId>
+        	<artifactId>jakarta.ws.rs-api</artifactId>
+        	<scope>provided</scope>
+        </dependency>
+		
 		<!-- Google -->
 		<dependency>
 			<groupId>com.google.guava</groupId>
@@ -93,20 +116,17 @@
 			<scope>provided</scope>
 		</dependency>
 
-		<dependency>
-			<groupId>jakarta.xml.bind</groupId>
-			<artifactId>jakarta.xml.bind-api</artifactId>
-		</dependency>
-		<dependency>
+
+<!-- 		<dependency>
 			<groupId>javax.annotation</groupId>
 			<artifactId>javax.annotation-api</artifactId>
-		</dependency>
-
+		</dependency> 
 		<dependency>
 		    <groupId>javax.ws.rs</groupId>
 		    <artifactId>javax.ws.rs-api</artifactId>
 		    <scope>provided</scope>
-		</dependency>
+		</dependency>-->
+
 		
 		<!-- Test -->
 		<dependency>

@@ -82,11 +82,20 @@
 		</dependency>
 
 		<!-- CDI -->
-		<dependency>
+<!-- 		<dependency>
 			<groupId>javax.enterprise</groupId>
 			<artifactId>cdi-api</artifactId>
 			<scope>provided</scope>
-		</dependency>
+		</dependency> -->
+        <dependency>
+		    <groupId>jakarta.enterprise</groupId>
+		    <artifactId>jakarta.enterprise.cdi-api</artifactId>
+		    <scope>provided</scope>
+   		</dependency>
+		<dependency>
+		    <groupId>jakarta.inject</groupId>
+        	<artifactId>jakarta.inject-api</artifactId>
+   		</dependency>	
 		<dependency>
 			<groupId>jakarta.servlet</groupId>
 			<artifactId>jakarta.servlet-api</artifactId>
@@ -97,10 +106,10 @@
 			<artifactId>jboss-annotations-api_1.2_spec</artifactId>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
+<!-- 		<dependency>
 			<groupId>javax.inject</groupId>
 			<artifactId>javax.inject</artifactId>
-		</dependency>
+		</dependency> -->
 		<dependency>
 			<groupId>javax.validation</groupId>
 			<artifactId>validation-api</artifactId>
@@ -154,12 +163,12 @@
 		<dependency>
 			<groupId>com.sun.mail</groupId>
 			<artifactId>jakarta.mail</artifactId>
-			<exclusions>
+		<!-- 	<exclusions>
 				<exclusion>
 					<groupId>com.sun.activation</groupId>
 					<artifactId>jakarta.activation</artifactId>
 				</exclusion>
-			</exclusions>
+			</exclusions> -->
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml</groupId>
