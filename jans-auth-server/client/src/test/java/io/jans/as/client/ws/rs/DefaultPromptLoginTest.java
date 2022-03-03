@@ -7,6 +7,7 @@
 package io.jans.as.client.ws.rs;
 
 import io.jans.as.client.*;
+import io.jans.as.client.client.Asserter;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.StringUtils;
@@ -23,7 +24,7 @@ import static org.testng.Assert.assertNotNull;
 
 /**
  * @author Javier Rojas Blum
- * @version March 2, 2022
+ * @version March 3, 2022
  */
 public class DefaultPromptLoginTest extends BaseTest {
 
@@ -48,12 +49,7 @@ public class DefaultPromptLoginTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        Asserter.assertRegisterResponseOk(registerResponse, 201, true);
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -68,10 +64,7 @@ public class DefaultPromptLoginTest extends BaseTest {
 
         showClient(readClient);
         assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
-        assertNotNull(readClientResponse.getClientId());
-        assertNotNull(readClientResponse.getClientSecret());
-        assertNotNull(readClientResponse.getClientIdIssuedAt());
-        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+        Asserter.assertRegisterResponseOk(readClientResponse, 200, false);
 
         assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
         assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
@@ -94,11 +87,7 @@ public class DefaultPromptLoginTest extends BaseTest {
             AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                     authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-            assertNotNull(authorizationResponse.getLocation());
-            assertNotNull(authorizationResponse.getCode());
-            assertNotNull(authorizationResponse.getIdToken());
-            assertNotNull(authorizationResponse.getState());
-            assertNotNull(authorizationResponse.getScope());
+            Asserter.assertAuthorizationResponse(authorizationResponse, responseTypes, true);
 
             sessionId = authorizationResponse.getSessionId();
         }
@@ -112,11 +101,7 @@ public class DefaultPromptLoginTest extends BaseTest {
             AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                     authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-            assertNotNull(authorizationResponse.getLocation());
-            assertNotNull(authorizationResponse.getCode());
-            assertNotNull(authorizationResponse.getIdToken());
-            assertNotNull(authorizationResponse.getState());
-            assertNotNull(authorizationResponse.getScope());
+            Asserter.assertAuthorizationResponse(authorizationResponse, responseTypes, true);
         }
     }
 }
