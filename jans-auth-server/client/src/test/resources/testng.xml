@@ -159,6 +159,12 @@
         </classes>
     </test>
 
+    <test name="Default Prompt Login True Test" enabled="true">
+        <classes>
+            <class name="io.jans.as.client.ws.rs.DefaultPromptLoginTest"></class>
+        </classes>
+    </test>
+
     <test name="Enable Client to restrict JavaScript Origins" enabled="true">
         <classes>
             <class name="io.jans.as.client.ws.rs.EnableClientToRestrictJavascriptOrigin"/>
