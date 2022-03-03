@@ -22,7 +22,8 @@ import pprint
 from pathlib import Path
 from urllib.parse import urlencode
 from collections import OrderedDict
-
+from prompt_toolkit import prompt, HTML
+from prompt_toolkit.completion import WordCompleter
 
 home_dir = Path.home()
 config_dir = home_dir.joinpath('.config')
@@ -612,7 +613,7 @@ class JCA_CLI:
 
         if not default is None:
             default_text = str(default).lower() if itype == 'boolean' else str(default)
-            text += self.colored_text('  [' + default_text + ']', 11)
+            text += '  [<b>' + default_text + '</b>]'
             if itype == 'integer':
                 default = int(default)
 
@@ -623,7 +624,9 @@ class JCA_CLI:
             values = ['_true', '_false']
 
         while True:
-            selection = input(' ' * spacing + self.colored_text(text, 20) + ' ')
+            #selection = input(' ' * spacing + self.colored_text(text, 20) + ' ')
+            html_completer = WordCompleter(values)
+            selection = prompt(HTML(' ' * spacing + text + ' '), completer=html_completer)
             selection = selection.strip()
             if selection.startswith('_file '):
                 fname = selection.split()[1]
