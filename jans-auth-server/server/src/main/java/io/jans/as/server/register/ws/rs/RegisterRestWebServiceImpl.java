@@ -84,7 +84,7 @@ import static org.apache.commons.lang3.BooleanUtils.isTrue;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version February 11, 2022
+ * @version March 2, 2022
  */
 @Path("/")
 public class RegisterRestWebServiceImpl implements RegisterRestWebService {
@@ -834,6 +834,10 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
 
         if (StringUtils.isNotBlank(requestObject.getSubjectIdentifierAttribute())) {
             client.getAttributes().setPublicSubjectIdentifierAttribute(requestObject.getSubjectIdentifierAttribute());
+        }
+
+        if (requestObject.getDefaultPromptLogin() != null) {
+            client.getAttributes().setDefaultPromptLogin(requestObject.getDefaultPromptLogin());
         }
 
         cibaRegisterClientMetadataService.updateClient(client, requestObject.getBackchannelTokenDeliveryMode(),
