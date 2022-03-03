@@ -188,6 +188,7 @@
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
+		<!-- selenium -->
 		<dependency>
 			<groupId>org.seleniumhq.selenium</groupId>
 			<artifactId>htmlunit-driver</artifactId>
