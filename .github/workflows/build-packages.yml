@@ -52,7 +52,7 @@ jobs:
     - name: Get latest tag
       id: previoustag
       run: |
-        echo "::set-output name=tag::$(curl https://api.github.com/repos/${{ github.repository }}/releases -s | grep "tag_name" | cut -d '"' -f 4 | grep -o '^\v.*' | head -n 1)"
+        echo "::set-output name=tag::$(curl https://api.github.com/repos/${{ github.repository }}/releases -s | grep "tag_name" | cut -d '"' -f 4 | grep -o '^\v.*' | head -n 1 | sed 's/^v//')"
         echo "::set-output name=version::$(curl https://api.github.com/repos/${{ github.repository }}/${{ steps.project.outputs.gitproject }}/releases -s | grep "tag_name" | cut -d '"' -f 4 | grep -o '^\v.*' | head -n 1 | cut -d 'v' -f 2)"
     - name: Print Version
       run: |
@@ -66,7 +66,7 @@ jobs:
          cp -r /opt/jans jans-src/opt/
          touch jans-src/opt/jans/jans-setup/package
          rm -rf install.py install jans-cli
-         sed -i "s/%VERSION%/${{ steps.previoustag.outputs.version }}/g" run-build.sh
+         sed -i "s/%VERSION%/${{ steps.previoustag.outputs.tag }}/g" run-build.sh
          cat run-build.sh
          sudo ./run-build.sh
     - name: Upload binaries to release
