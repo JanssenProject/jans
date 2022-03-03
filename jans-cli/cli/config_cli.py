@@ -47,6 +47,7 @@ swagger_client = importlib.import_module(my_op_mode + '.swagger_client')
 swagger_client.models = importlib.import_module(my_op_mode + '.swagger_client.models')
 swagger_client.api = importlib.import_module(my_op_mode + '.swagger_client.api')
 swagger_client.rest = importlib.import_module(my_op_mode + '.swagger_client.rest')
+plugins = []
 
 warning_color = 214
 error_color = 196
@@ -100,6 +101,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--host", help="Hostname of server")
 parser.add_argument("--client-id", help="Jans Config Api Client ID")
 parser.add_argument("--client_secret", help="Jans Config Api Client ID secret")
+parser.add_argument("--plugins", help="Available plugins separated by comma")
 parser.add_argument("-debug", help="Run in debug mode", action='store_true')
 parser.add_argument("--debug-log-file", default='swagger.log', help="Log file name when run in debug mode")
 parser.add_argument("--operation-id", help="Operation ID to be done")
@@ -126,6 +128,9 @@ args = parser.parse_args()
 
 ################## end of arguments #################
 
+if args.plugins:
+    for plugin in args.plugins.split(','):
+        plugins.append(plugin.strip())
 
 def write_config():
     with open(config_ini_fn, 'w') as w:
@@ -247,6 +252,12 @@ class JCA_CLI:
         self.swagger_configuration = swagger_client.Configuration()
         self.swagger_configuration.host = 'https://{}'.format(self.host)
         self.access_token = config['DEFAULT'].get('access_token')
+
+        for plugin_s in config['DEFAULT'].get(my_op_mode + '_plugins', '').split(','):
+            plugin = plugin_s.strip()
+            if plugin:
+                plugins.append(plugin)
+
         if not self.access_token and config['DEFAULT'].get('access_token_enc'):
             self.access_token = encode_decode(config['DEFAULT']['access_token_enc'], decode=True)
 
@@ -352,11 +363,16 @@ class JCA_CLI:
                 menu.add_child(m)
                 for path in self.cfg_yml['paths']:
                     for method in self.cfg_yml['paths'][path]:
+
                         if 'tags' in self.cfg_yml['paths'][path][method] and m.name in \
                                 self.cfg_yml['paths'][path][method]['tags'] and 'operationId' in \
                                 self.cfg_yml['paths'][path][method]:
-                            # if isinstance(self.cfg_yml['paths'][path][method], dict) and self.cfg_yml['paths'][path][method].get('x-cli-ignore'):
-                            #    continue
+
+                            if isinstance(self.cfg_yml['paths'][path][method], dict) and self.cfg_yml['paths'][path][method].get('x-cli-plugin') and not self.cfg_yml['paths'][path][method]['x-cli-plugin'] in plugins:
+                                if m in menu.children:
+                                    menu.children.remove(m)
+                                continue
+
                             menu_name = self.cfg_yml['paths'][path][method].get('summary') or \
                                         self.cfg_yml['paths'][path][method].get('description')
 
