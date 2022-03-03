@@ -27,7 +27,7 @@ import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 
 import io.jans.service.custom.inject.ReloadScript;
 import org.apache.commons.io.FileUtils;
