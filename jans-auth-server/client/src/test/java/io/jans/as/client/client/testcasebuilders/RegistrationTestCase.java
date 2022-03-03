@@ -78,7 +78,7 @@ public class RegistrationTestCase extends BaseTestCase {
         return this;
     }
 
-    public RegistrationTestCase withSectorIdentifierUri(String sectorIdentifieruri) {
+    public RegistrationTestCase withSectorIdentifierUri(String sectorIdentifierUri) {
         this.sectorIdentifierUri = sectorIdentifierUri;
         return this;
     }
