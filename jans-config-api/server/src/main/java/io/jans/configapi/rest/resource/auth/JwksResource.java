@@ -43,6 +43,7 @@ public class JwksResource extends BaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.JWKS_READ_ACCESS })
     public Response get() {
         final String json = configurationService.findConf().getWebKeys().toString();
+		log.debug("JWKS json = " + json);
         return Response.ok(json).build();
     }
 
