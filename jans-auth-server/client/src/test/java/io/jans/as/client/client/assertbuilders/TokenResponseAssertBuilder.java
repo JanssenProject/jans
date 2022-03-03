@@ -7,7 +7,7 @@ import io.jans.as.model.token.TokenErrorResponseType;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
-public class TokenResponseAssertBuilder extends AssertBuilder {
+public class TokenResponseAssertBuilder extends BaseAssertBuilder {
 
     private TokenResponse response;
     private int status = 200;
@@ -37,7 +37,7 @@ public class TokenResponseAssertBuilder extends AssertBuilder {
         return this;
     }
 
-    public TokenResponseAssertBuilder checkErrorResponseType(TokenErrorResponseType errorResponseType) {
+    public TokenResponseAssertBuilder errorResponseType(TokenErrorResponseType errorResponseType) {
         this.errorResponseType = errorResponseType;
         return this;
     }

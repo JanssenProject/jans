@@ -19,6 +19,7 @@ import io.jans.as.client.TokenResponse;
 import io.jans.as.client.UserInfoClient;
 import io.jans.as.client.UserInfoResponse;
 
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
@@ -90,7 +91,7 @@ public class ValidateIdTokenHashesTest extends BaseTest {
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertEquals(authorizationResponse.getState(), stateParam);
 
         String scope = authorizationResponse.getScope();
@@ -100,24 +101,16 @@ public class ValidateIdTokenHashesTest extends BaseTest {
         String state = authorizationResponse.getState();
 
         // 3. Validate id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertIdToken(jwt);
-
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS256, publicKey);
-
-        assertTrue(rsaSigner.validate(jwt));
-
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.CODE_HASH));
-        assertTrue(rsaSigner.validateAuthorizationCode(authorizationCode, jwt));
-
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ACCESS_TOKEN_HASH));
-        assertTrue(rsaSigner.validateAccessToken(accessToken, jwt));
-
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.STATE_HASH));
-        assertTrue(rsaSigner.validateState(state, jwt));
+        AssertBuilder.jwtBuilder(null)
+                .validateIdToken(idToken, jwksUri, SignatureAlgorithm.RS256)
+                .authorizationCode(authorizationCode)
+                .accessToken(accessToken)
+                .state(state)
+                .notNullAuthenticationTime()
+                .notNullOxOpenIDConnectVersion()
+                .notNullAuthenticationContextClassReference()
+                .notNullAuthenticationMethodReferences()
+                .checkAsserts();
 
         // 4. Request access token using the authorization code.
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
@@ -139,20 +132,15 @@ public class ValidateIdTokenHashesTest extends BaseTest {
         String accessToken2 = tokenResponse1.getAccessToken();
 
         // 5. Validate id_token
-        Jwt jwt2 = Jwt.parse(idToken2);
-        assertIdToken(jwt2);
-
-        RSAPublicKey publicKey2 = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt2.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner2 = new RSASigner(SignatureAlgorithm.RS256, publicKey2);
-
-        assertTrue(rsaSigner2.validate(jwt2));
-
-        assertNotNull(jwt2.getClaims().getClaimAsString(JwtClaimName.ACCESS_TOKEN_HASH));
-        assertTrue(rsaSigner2.validateAccessToken(accessToken2, jwt2));
-
-        assertNull(jwt2.getClaims().getClaimAsString(JwtClaimName.STATE_HASH));
+        AssertBuilder.jwtBuilder(null)
+                .validateIdToken(idToken2, jwksUri, SignatureAlgorithm.RS256)
+                .accessToken(accessToken2)
+                .claimsPresence(JwtClaimName.STATE_HASH)
+                .notNullAuthenticationTime()
+                .notNullOxOpenIDConnectVersion()
+                .notNullAuthenticationContextClassReference()
+                .notNullAuthenticationMethodReferences()
+                .checkAsserts();
 
         // 6. Request new access token using the refresh token.
         TokenClient tokenClient2 = new TokenClient(tokenEndpoint);

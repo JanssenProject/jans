@@ -13,6 +13,7 @@ import io.jans.as.client.RegisterResponse;
 import io.jans.as.client.TokenClient;
 import io.jans.as.client.TokenRequest;
 import io.jans.as.client.TokenResponse;
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
@@ -23,7 +24,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static io.jans.as.client.client.Asserter.assertAuthorizationResponse;
+
 import static io.jans.as.client.client.Asserter.assertTokenResponseOk;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -80,7 +81,9 @@ public class MultiStepAuthorizationCodeFlowHttpTest extends BaseTest {
         TokenResponse tokenResponse1 = tokenClient1.exec();
 
         showClient(tokenClient1);
-        assertTokenResponseOk(tokenResponse1, true);
+        AssertBuilder.tokenResponseBuilder(tokenResponse1)
+                .notNullRefreshToken()
+                .checkAsserts();
     }
 
     private AuthorizationResponse requestAuthorization(final String userId, final String userSecret, final String redirectUri,
@@ -94,7 +97,7 @@ public class MultiStepAuthorizationCodeFlowHttpTest extends BaseTest {
                 authorizationEndpoint, authorizationRequest, userId, userSecret,
                 true, false, countAuthzSteps);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         return authorizationResponse;
     }
 }

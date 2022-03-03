@@ -11,6 +11,7 @@ import io.jans.as.client.RegisterResponse;
 import io.jans.as.client.TokenClient;
 import io.jans.as.client.TokenResponse;
 
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.client.load.benchmark.suite.BenchmarkTestListener;
 import io.jans.as.client.load.benchmark.suite.BenchmarkTestSuiteListener;
 import io.jans.as.model.common.ResponseType;
@@ -79,6 +80,8 @@ public class BenchmarkRequestAccessToken extends BaseTest {
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
         TokenResponse response1 = tokenClient.execResourceOwnerPasswordCredentialsGrant(userId, userSecret, scope, clientId, clientSecret);
-        assertTokenResponseOk(response1, true);
+        AssertBuilder.tokenResponseBuilder(response1)
+                .notNullRefreshToken()
+                .checkAsserts();
     }
 }

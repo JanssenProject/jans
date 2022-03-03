@@ -6,9 +6,7 @@ import io.jans.as.client.par.ParResponse;
 import io.jans.as.model.jwe.Jwe;
 import io.jans.as.model.jwt.Jwt;
 
-public abstract class AssertBuilder {
-
-    public abstract void checkAsserts();
+public class AssertBuilder {
 
     public static ParResponseAssertBuilder parResponseBuilder(ParResponse response) {
         return new ParResponseAssertBuilder(response);

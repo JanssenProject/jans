@@ -10,6 +10,7 @@ import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.exception.InvalidJwtException;
+import io.jans.as.model.jwt.JwtClaimName;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
@@ -76,8 +77,19 @@ public class ParHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
-        validateIdToken(idToken, jwksUri, SignatureAlgorithm.RS256);
+        AssertBuilder.tokenResponseBuilder(tokenResponse)
+                .status(200)
+                .notNullRefreshToken()
+                .checkAsserts();
+
+        AssertBuilder.jwtBuilder(null)
+                .validateIdToken(idToken, jwksUri, SignatureAlgorithm.RS256)
+                .claimsPresence(JwtClaimName.CODE_HASH)
+                .notNullAuthenticationTime()
+                .notNullOxOpenIDConnectVersion()
+                .notNullAuthenticationContextClassReference()
+                .notNullAuthenticationMethodReferences()
+                .checkAsserts();
     }
 
     private AuthorizationResponse requestAuthorization(final String userId, final String userSecret, String redirectUri) {
@@ -88,7 +100,7 @@ public class ParHttpTest extends BaseTest {
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, false);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().checkAsserts();
         return authorizationResponse;
     }
 }

@@ -16,6 +16,7 @@ import io.jans.as.client.TokenClient;
 import io.jans.as.client.TokenRequest;
 import io.jans.as.client.TokenResponse;
 
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
@@ -151,7 +152,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -169,7 +170,9 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        AssertBuilder.tokenResponseBuilder(tokenResponse)
+                .notNullRefreshToken()
+                .checkAsserts();
     }
 
     /**
@@ -230,7 +233,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -311,7 +314,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -394,7 +397,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -485,7 +488,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -503,7 +506,9 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        AssertBuilder.tokenResponseBuilder(tokenResponse)
+                .notNullRefreshToken()
+                .checkAsserts();
     }
 
     /**
@@ -564,7 +569,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -645,7 +650,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -728,7 +733,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -820,7 +825,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -842,7 +847,9 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        AssertBuilder.tokenResponseBuilder(tokenResponse)
+                .notNullRefreshToken()
+                .checkAsserts();
     }
 
     /**
@@ -905,7 +912,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -928,7 +935,9 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        AssertBuilder.tokenResponseBuilder(tokenResponse)
+                .notNullRefreshToken()
+                .checkAsserts();
     }
 
     /**
@@ -991,7 +1000,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -1014,7 +1023,9 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        AssertBuilder.tokenResponseBuilder(tokenResponse)
+                .notNullRefreshToken()
+                .checkAsserts();
     }
 
     /**
@@ -1077,7 +1088,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -1100,7 +1111,9 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        AssertBuilder.tokenResponseBuilder(tokenResponse)
+                .notNullRefreshToken()
+                .checkAsserts();
     }
 
     /**
@@ -1164,7 +1177,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -1254,7 +1267,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -1344,7 +1357,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -1434,7 +1447,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -1524,7 +1537,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -1614,7 +1627,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -1704,7 +1717,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -1794,7 +1807,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -1884,7 +1897,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -1973,7 +1986,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -1996,7 +2009,9 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        AssertBuilder.tokenResponseBuilder(tokenResponse)
+                .notNullRefreshToken()
+                .checkAsserts();
     }
 
     @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "dnName", "keyStoreFile", "keyStoreSecret",
@@ -2059,7 +2074,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -2147,7 +2162,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -2235,7 +2250,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -2258,7 +2273,9 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        AssertBuilder.tokenResponseBuilder(tokenResponse)
+                .notNullRefreshToken()
+                .checkAsserts();
     }
 
     @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "dnName", "keyStoreFile", "keyStoreSecret",
@@ -2321,7 +2338,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -2409,7 +2426,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -2497,7 +2514,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -2520,7 +2537,9 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        AssertBuilder.tokenResponseBuilder(tokenResponse)
+                .notNullRefreshToken()
+                .checkAsserts();
     }
 
     @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "dnName", "keyStoreFile", "keyStoreSecret",
@@ -2583,7 +2602,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -2671,7 +2690,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -2757,7 +2776,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -2838,7 +2857,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -2920,7 +2939,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -3013,7 +3032,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -3036,7 +3055,9 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        AssertBuilder.tokenResponseBuilder(tokenResponse)
+                .notNullRefreshToken()
+                .checkAsserts();
     }
 
     /**
@@ -3098,7 +3119,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -3180,7 +3201,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -3262,7 +3283,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -3343,7 +3364,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -3366,7 +3387,9 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        AssertBuilder.tokenResponseBuilder(tokenResponse)
+                .notNullRefreshToken()
+                .checkAsserts();
     }
 
     @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "RS384_keyId", "dnName",
@@ -3426,7 +3449,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -3449,7 +3472,9 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        AssertBuilder.tokenResponseBuilder(tokenResponse)
+                .notNullRefreshToken()
+                .checkAsserts();
     }
 
     @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "RS512_keyId", "dnName",
@@ -3509,7 +3534,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -3532,7 +3557,9 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        AssertBuilder.tokenResponseBuilder(tokenResponse)
+                .notNullRefreshToken()
+                .checkAsserts();
     }
 
     @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "ES256_keyId", "dnName",
@@ -3592,7 +3619,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -3615,7 +3642,9 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        AssertBuilder.tokenResponseBuilder(tokenResponse)
+                .notNullRefreshToken()
+                .checkAsserts();
     }
 
     @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "ES384_keyId", "dnName",
@@ -3675,7 +3704,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -3698,7 +3727,9 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        AssertBuilder.tokenResponseBuilder(tokenResponse)
+                .notNullRefreshToken()
+                .checkAsserts();
     }
 
     @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "ES512_keyId", "dnName",
@@ -3758,7 +3789,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -3781,7 +3812,9 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        AssertBuilder.tokenResponseBuilder(tokenResponse)
+                .notNullRefreshToken()
+                .checkAsserts();
     }
 
     @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "PS256_keyId", "dnName",
@@ -3841,7 +3874,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -3864,7 +3897,9 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        AssertBuilder.tokenResponseBuilder(tokenResponse)
+                .notNullRefreshToken()
+                .checkAsserts();
     }
 
     @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "PS384_keyId", "dnName",
@@ -3924,7 +3959,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -3947,7 +3982,9 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        AssertBuilder.tokenResponseBuilder(tokenResponse)
+                .notNullRefreshToken()
+                .checkAsserts();
     }
 
     @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "PS512_keyId", "dnName",
@@ -4007,7 +4044,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -4030,7 +4067,9 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        AssertBuilder.tokenResponseBuilder(tokenResponse)
+                .notNullRefreshToken()
+                .checkAsserts();
     }
 
     @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "RS256_keyId", "dnName",
@@ -4094,7 +4133,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -4117,7 +4156,9 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        AssertBuilder.tokenResponseBuilder(tokenResponse)
+                .notNullRefreshToken()
+                .checkAsserts();
     }
 
     @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "RS384_keyId", "dnName",
@@ -4181,7 +4222,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -4270,7 +4311,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -4359,7 +4400,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -4448,7 +4489,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -4537,7 +4578,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -4626,7 +4667,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -4649,7 +4690,9 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        AssertBuilder.tokenResponseBuilder(tokenResponse)
+                .notNullRefreshToken()
+                .checkAsserts();
     }
 
     @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "RS256_keyId", "dnName",
@@ -4713,7 +4756,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -4802,7 +4845,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -4891,7 +4934,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -4980,7 +5023,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -5069,7 +5112,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -5158,7 +5201,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -5181,7 +5224,9 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        AssertBuilder.tokenResponseBuilder(tokenResponse)
+                .notNullRefreshToken()
+                .checkAsserts();
     }
 
     @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "RS256_keyId", "dnName",
@@ -5245,7 +5290,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -5334,7 +5379,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -5423,7 +5468,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -5512,7 +5557,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -5601,7 +5646,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -5690,7 +5735,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -5713,7 +5758,9 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        AssertBuilder.tokenResponseBuilder(tokenResponse)
+                .notNullRefreshToken()
+                .checkAsserts();
     }
 
     @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "RS256_keyId", "dnName",
@@ -5777,7 +5824,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -5866,7 +5913,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -5955,7 +6002,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -6044,7 +6091,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -6133,7 +6180,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -6222,7 +6269,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -6245,7 +6292,9 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        AssertBuilder.tokenResponseBuilder(tokenResponse)
+                .notNullRefreshToken()
+                .checkAsserts();
     }
 
     @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "RS256_keyId", "dnName",
@@ -6309,7 +6358,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -6398,7 +6447,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -6487,7 +6536,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -6576,7 +6625,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -6665,7 +6714,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -6754,7 +6803,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -6777,7 +6826,9 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        AssertBuilder.tokenResponseBuilder(tokenResponse)
+                .notNullRefreshToken()
+                .checkAsserts();
     }
 
     @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "RS256_keyId", "dnName",
@@ -6841,7 +6892,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -6930,7 +6981,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -7019,7 +7070,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -7108,7 +7159,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -7197,7 +7248,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -7286,7 +7337,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -7309,7 +7360,9 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        AssertBuilder.tokenResponseBuilder(tokenResponse)
+                .notNullRefreshToken()
+                .checkAsserts();
     }
 
     @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "PS384_keyId", "dnName",
@@ -7373,7 +7426,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -7462,7 +7515,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -7551,7 +7604,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -7640,7 +7693,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -7729,7 +7782,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -7818,7 +7871,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -7841,7 +7894,9 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        AssertBuilder.tokenResponseBuilder(tokenResponse)
+                .notNullRefreshToken()
+                .checkAsserts();
     }
 
     @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "RS256_keyId", "dnName",
@@ -7905,7 +7960,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -7993,7 +8048,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -8082,7 +8137,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -8171,7 +8226,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -8260,7 +8315,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -8349,7 +8404,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -8372,7 +8427,9 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        AssertBuilder.tokenResponseBuilder(tokenResponse)
+                .notNullRefreshToken()
+                .checkAsserts();
     }
 
     @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "PS256_keyId", "dnName",
@@ -8436,7 +8493,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -8525,7 +8582,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -8614,7 +8671,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -8703,7 +8760,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
@@ -8792,7 +8849,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();

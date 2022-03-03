@@ -1,13 +1,12 @@
 package io.jans.as.client.client.assertbuilders;
 
-import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.client.par.ParResponse;
 import org.apache.commons.lang3.StringUtils;
 
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
-public class ParResponseAssertBuilder extends AssertBuilder {
+public class ParResponseAssertBuilder extends BaseAssertBuilder {
 
     ParResponse response;
 

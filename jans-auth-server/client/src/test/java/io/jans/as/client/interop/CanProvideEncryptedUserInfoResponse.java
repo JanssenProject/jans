@@ -16,6 +16,7 @@ import io.jans.as.client.RegisterResponse;
 import io.jans.as.client.UserInfoClient;
 import io.jans.as.client.UserInfoResponse;
 
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
@@ -85,7 +86,7 @@ public class CanProvideEncryptedUserInfoResponse extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String accessToken = authorizationResponse.getAccessToken();
 
@@ -141,7 +142,7 @@ public class CanProvideEncryptedUserInfoResponse extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String accessToken = authorizationResponse.getAccessToken();
 

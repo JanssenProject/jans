@@ -11,6 +11,7 @@ import io.jans.as.client.AuthorizationResponse;
 import io.jans.as.client.BaseTest;
 import io.jans.as.client.RegisterResponse;
 
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.client.load.benchmark.suite.BenchmarkTestListener;
 import io.jans.as.client.load.benchmark.suite.BenchmarkTestSuiteListener;
 import io.jans.as.model.common.ResponseType;
@@ -24,7 +25,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static io.jans.as.client.client.Asserter.assertAuthorizationResponse;
+
 import static io.jans.as.client.client.Asserter.assertRegisterResponseOk;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -81,7 +82,11 @@ public class BenchmarkRequestAuthorization extends BaseTest {
         String nonce = UUID.randomUUID().toString();
 
         AuthorizationResponse response = requestAuthorization(userId, userSecret, redirectUri, responseTypes, scopes, clientId, nonce, useNewDriver);
-        assertAuthorizationResponse(response, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(response)
+                .notNullState()
+                .notNullScope()
+                .responseTypes(responseTypes)
+                .checkAsserts();
     }
 
     private AuthorizationResponse requestAuthorization(final String userId, final String userSecret, final String redirectUri,

@@ -1,7 +1,6 @@
 package io.jans.as.client.client.assertbuilders;
 
 import io.jans.as.client.UserInfoResponse;
-import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.jwt.JwtClaimName;
 
 import java.util.Arrays;
@@ -9,7 +8,7 @@ import java.util.Arrays;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
-public class UserInfoResponseAssertBuilder extends AssertBuilder {
+public class UserInfoResponseAssertBuilder extends BaseAssertBuilder {
 
     private UserInfoResponse response;
     private int status = 200;

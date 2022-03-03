@@ -16,10 +16,9 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 
 import static io.jans.as.client.BaseTest.clientEngine;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
-public class JwtAssertBuilder extends AssertBuilder {
+public class JwtAssertBuilder extends BaseAssertBuilder {
 
     private Jwt jwt;
     private boolean notNullAccesTokenHash;
@@ -32,6 +31,9 @@ public class JwtAssertBuilder extends AssertBuilder {
 
     private RSAPublicKey publicKey;
     private SignatureAlgorithm signatureAlgorithm;
+    private String authorizationCode;
+    private String accessToken;
+    private String state;
 
     public JwtAssertBuilder(Jwt jwt) {
         this.jwt = jwt;
@@ -88,6 +90,21 @@ public class JwtAssertBuilder extends AssertBuilder {
         return this;
     }
 
+    public JwtAssertBuilder authorizationCode(String authorizationCode) {
+        this.authorizationCode = authorizationCode;
+        return this;
+    }
+
+    public JwtAssertBuilder state(String state) {
+        this.state = state;
+        return this;
+    }
+
+    public JwtAssertBuilder accessToken(String accessToken) {
+        this.accessToken = accessToken;
+        return this;
+    }
+
     private void assertNotNullHeaderClaim(String headerClaim) {
         assertNotNull(jwt.getHeader().getClaimAsString(headerClaim), "Jwt Claim Header " + headerClaim + " is null");
     }
@@ -107,16 +124,17 @@ public class JwtAssertBuilder extends AssertBuilder {
         assertNotNullClaim(JwtClaimName.ISSUED_AT);
         assertNotNullClaim(JwtClaimName.SUBJECT_IDENTIFIER);
 
+        if (notNullAuthenticationTime)
+            assertNotNullClaim(JwtClaimName.AUTHENTICATION_TIME);
         if (notNullAccesTokenHash)
             assertNotNullClaim(JwtClaimName.ACCESS_TOKEN_HASH);
+        if (notNullOxOpenIDConnectVersion)
+            assertNotNullClaim(JwtClaimName.OX_OPENID_CONNECT_VERSION);
         if (notNullAuthenticationContextClassReference)
             assertNotNullClaim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE);
         if (notNullAuthenticationMethodReferences)
             assertNotNullClaim(JwtClaimName.AUTHENTICATION_METHOD_REFERENCES);
-        if (notNullAuthenticationTime)
-            assertNotNullClaim(JwtClaimName.AUTHENTICATION_TIME);
-        if (notNullOxOpenIDConnectVersion)
-            assertNotNullClaim(JwtClaimName.OX_OPENID_CONNECT_VERSION);
+
         if (notNullClaimsAddressdata) {
             assertNotNullClaim(JwtClaimName.ADDRESS_STREET_ADDRESS);
             assertNotNullClaim(JwtClaimName.ADDRESS_COUNTRY);
@@ -129,13 +147,27 @@ public class JwtAssertBuilder extends AssertBuilder {
 
         if (claimsPresence != null) {
             for (String claim : claimsPresence) {
-                assertNotNull(claim, "Jwt Claim " + claim + " is not found");
+                assertNotNull(claim, "Claim name is null");
+                assertNull(jwt.getClaims().getClaimAsString(claim), "Jwt Claim " + claim + " is not found");
             }
         }
 
         if (signatureAlgorithm != null && publicKey != null) {
             RSASigner rsaSigner = new RSASigner(signatureAlgorithm, publicKey);
             assertTrue(rsaSigner.validate(jwt));
+
+            if (authorizationCode != null) {
+                assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.CODE_HASH));
+                assertTrue(rsaSigner.validateAuthorizationCode(authorizationCode, jwt));
+            }
+            if (accessToken != null) {
+                assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ACCESS_TOKEN_HASH));
+                assertTrue(rsaSigner.validateAccessToken(accessToken, jwt));
+            }
+            if (state != null) {
+                assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.STATE_HASH));
+                assertTrue(rsaSigner.validateState(state, jwt));
+            }
         }
     }
 }

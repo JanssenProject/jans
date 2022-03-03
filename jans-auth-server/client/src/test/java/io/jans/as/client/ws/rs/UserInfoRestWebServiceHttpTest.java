@@ -19,6 +19,7 @@ import io.jans.as.client.UserInfoClient;
 import io.jans.as.client.UserInfoRequest;
 import io.jans.as.client.UserInfoResponse;
 
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.client.model.authorize.Claim;
 import io.jans.as.client.model.authorize.ClaimValue;
 import io.jans.as.client.model.authorize.JwtAuthorizationRequest;
@@ -344,7 +345,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true, false);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullState().responseTypes(responseTypes).checkAsserts();
 
         String accessToken = authorizationResponse.getAccessToken();
 
@@ -472,7 +473,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String accessToken = authorizationResponse.getAccessToken();
 
@@ -568,7 +569,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String authorizationCode = authorizationResponse.getCode();
 
@@ -1411,7 +1412,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
         assertNotNull(authorizationResponse.getIdToken(), "The id token must be null");
         return authorizationResponse;
     }
@@ -1457,7 +1458,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
         assertNotNull(authorizationResponse.getIdToken(), "The id token must be null");
 
         String accessToken = authorizationResponse.getAccessToken();

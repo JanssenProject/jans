@@ -177,7 +177,7 @@ public class SectorIdentifierUrlVerificationHttpTest extends BaseTest {
 
         showClient(authorizeClient);
         assertEquals(authorizationResponse.getStatus(), 302, "Unexpected response code: " + authorizationResponse.getStatus());
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertEquals(authorizationResponse.getState(), state);
 
         String authorizationCode = authorizationResponse.getCode();
@@ -218,7 +218,9 @@ public class SectorIdentifierUrlVerificationHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        AssertBuilder.tokenResponseBuilder(tokenResponse)
+                .notNullRefreshToken()
+                .checkAsserts();
 
         String accessToken = tokenResponse.getAccessToken();
 
@@ -290,7 +292,7 @@ public class SectorIdentifierUrlVerificationHttpTest extends BaseTest {
 
         showClient(authorizeClient);
         assertEquals(authorizationResponse.getStatus(), 302, "Unexpected response code: " + authorizationResponse.getStatus());
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertEquals(authorizationResponse.getState(), state);
 
         String authorizationCode = authorizationResponse.getCode();
@@ -323,7 +325,9 @@ public class SectorIdentifierUrlVerificationHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        AssertBuilder.tokenResponseBuilder(tokenResponse)
+                .notNullRefreshToken()
+                .checkAsserts();
 
         String accessToken = tokenResponse.getAccessToken();
 

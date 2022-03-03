@@ -19,6 +19,7 @@ import io.jans.as.client.UserInfoClient;
 import io.jans.as.client.UserInfoRequest;
 import io.jans.as.client.UserInfoResponse;
 
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.client.model.authorize.Claim;
 import io.jans.as.client.model.authorize.ClaimValue;
 import io.jans.as.client.model.authorize.JwtAuthorizationRequest;
@@ -106,7 +107,7 @@ public class MultivaluedClaims extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
@@ -177,7 +178,7 @@ public class MultivaluedClaims extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
@@ -247,7 +248,7 @@ public class MultivaluedClaims extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
@@ -317,7 +318,7 @@ public class MultivaluedClaims extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
@@ -385,7 +386,7 @@ public class MultivaluedClaims extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
@@ -458,7 +459,7 @@ public class MultivaluedClaims extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
@@ -531,7 +532,7 @@ public class MultivaluedClaims extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
@@ -604,7 +605,7 @@ public class MultivaluedClaims extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
@@ -677,7 +678,7 @@ public class MultivaluedClaims extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
@@ -750,7 +751,7 @@ public class MultivaluedClaims extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
@@ -823,7 +824,7 @@ public class MultivaluedClaims extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
@@ -897,7 +898,7 @@ public class MultivaluedClaims extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
@@ -971,7 +972,7 @@ public class MultivaluedClaims extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
@@ -1048,14 +1049,16 @@ public class MultivaluedClaims extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
 
         // 3. Validate id_token
         Jwe jwe = Jwe.parse(idToken, null, clientSecret.getBytes(StandardCharsets.UTF_8));
-        assertJweStandarClaimsNotNull(jwe, true);
+        AssertBuilder.jweBuilder(jwe)
+                .notNullAccesTokenHash()
+                .checkAsserts();
         assertNotNull(jwe.getClaims().getClaimAsStringList("member_of"));
         assertTrue(jwe.getClaims().getClaimAsStringList("member_of").size() > 1);
 
@@ -1117,14 +1120,16 @@ public class MultivaluedClaims extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
 
         // 3. Validate id_token
         Jwe jwe = Jwe.parse(idToken, null, clientSecret.getBytes(StandardCharsets.UTF_8));
-        assertJweStandarClaimsNotNull(jwe, true);
+        AssertBuilder.jweBuilder(jwe)
+                .notNullAccesTokenHash()
+                .checkAsserts();
         assertNotNull(jwe.getClaims().getClaimAsStringList("member_of"));
         assertTrue(jwe.getClaims().getClaimAsStringList("member_of").size() > 1);
 
@@ -1189,7 +1194,7 @@ public class MultivaluedClaims extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
@@ -1199,7 +1204,9 @@ public class MultivaluedClaims extends BaseTest {
         PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
 
         Jwe jwe = Jwe.parse(idToken, privateKey, null);
-        assertJweStandarClaimsNotNull(jwe, true);
+        AssertBuilder.jweBuilder(jwe)
+                .notNullAccesTokenHash()
+                .checkAsserts();
         assertNotNull(jwe.getClaims().getClaimAsStringList("member_of"));
         assertTrue(jwe.getClaims().getClaimAsStringList("member_of").size() > 1);
 
@@ -1264,7 +1271,7 @@ public class MultivaluedClaims extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
@@ -1274,7 +1281,9 @@ public class MultivaluedClaims extends BaseTest {
         PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
 
         Jwe jwe = Jwe.parse(idToken, privateKey, null);
-        assertJweStandarClaimsNotNull(jwe, true);
+        AssertBuilder.jweBuilder(jwe)
+                .notNullAccesTokenHash()
+                .checkAsserts();
         assertNotNull(jwe.getClaims().getClaimAsStringList("member_of"));
         assertTrue(jwe.getClaims().getClaimAsStringList("member_of").size() > 1);
 
@@ -1339,7 +1348,7 @@ public class MultivaluedClaims extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
@@ -1349,7 +1358,9 @@ public class MultivaluedClaims extends BaseTest {
         PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
 
         Jwe jwe = Jwe.parse(idToken, privateKey, null);
-        assertJweStandarClaimsNotNull(jwe, true);
+        AssertBuilder.jweBuilder(jwe)
+                .notNullAccesTokenHash()
+                .checkAsserts();
         assertNotNull(jwe.getClaims().getClaimAsStringList("member_of"));
         assertTrue(jwe.getClaims().getClaimAsStringList("member_of").size() > 1);
 
@@ -1418,7 +1429,7 @@ public class MultivaluedClaims extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
@@ -1498,7 +1509,7 @@ public class MultivaluedClaims extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
@@ -1579,7 +1590,7 @@ public class MultivaluedClaims extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
@@ -1660,7 +1671,7 @@ public class MultivaluedClaims extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
@@ -1743,7 +1754,7 @@ public class MultivaluedClaims extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
@@ -1830,7 +1841,7 @@ public class MultivaluedClaims extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
@@ -1917,7 +1928,7 @@ public class MultivaluedClaims extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
@@ -2004,7 +2015,7 @@ public class MultivaluedClaims extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
@@ -2091,7 +2102,7 @@ public class MultivaluedClaims extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
@@ -2178,7 +2189,7 @@ public class MultivaluedClaims extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
@@ -2265,7 +2276,7 @@ public class MultivaluedClaims extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
@@ -2352,7 +2363,7 @@ public class MultivaluedClaims extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
@@ -2439,7 +2450,7 @@ public class MultivaluedClaims extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
@@ -2528,14 +2539,16 @@ public class MultivaluedClaims extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
 
         // 3. Validate id_token
         Jwe jwe = Jwe.parse(idToken, null, clientSecret.getBytes(StandardCharsets.UTF_8));
-        assertJweStandarClaimsNotNull(jwe, true);
+        AssertBuilder.jweBuilder(jwe)
+                .notNullAccesTokenHash()
+                .checkAsserts();
         assertNotNull(jwe.getClaims().getClaimAsStringList("member_of"));
         assertTrue(jwe.getClaims().getClaimAsStringList("member_of").size() > 1);
 
@@ -2610,14 +2623,16 @@ public class MultivaluedClaims extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
 
         // 3. Validate id_token
         Jwe jwe = Jwe.parse(idToken, null, clientSecret.getBytes(StandardCharsets.UTF_8));
-        assertJweStandarClaimsNotNull(jwe, true);
+        AssertBuilder.jweBuilder(jwe)
+                .notNullAccesTokenHash()
+                .checkAsserts();
         assertNotNull(jwe.getClaims().getClaimAsStringList("member_of"));
         assertTrue(jwe.getClaims().getClaimAsStringList("member_of").size() > 1);
 
@@ -2702,7 +2717,7 @@ public class MultivaluedClaims extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
@@ -2711,7 +2726,9 @@ public class MultivaluedClaims extends BaseTest {
         PrivateKey privateKey = cryptoProvider.getPrivateKey(clientKeyId);
 
         Jwe jwe = Jwe.parse(idToken, privateKey, null);
-        assertJweStandarClaimsNotNull(jwe, true);
+        AssertBuilder.jweBuilder(jwe)
+                .notNullAccesTokenHash()
+                .checkAsserts();
         assertNotNull(jwe.getClaims().getClaimAsStringList("member_of"));
         assertTrue(jwe.getClaims().getClaimAsStringList("member_of").size() > 1);
 
@@ -2796,7 +2813,7 @@ public class MultivaluedClaims extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
@@ -2805,7 +2822,9 @@ public class MultivaluedClaims extends BaseTest {
         PrivateKey privateKey = cryptoProvider.getPrivateKey(clientKeyId);
 
         Jwe jwe = Jwe.parse(idToken, privateKey, null);
-        assertJweStandarClaimsNotNull(jwe, true);
+        AssertBuilder.jweBuilder(jwe)
+                .notNullAccesTokenHash()
+                .checkAsserts();
         assertNotNull(jwe.getClaims().getClaimAsStringList("member_of"));
         assertTrue(jwe.getClaims().getClaimAsStringList("member_of").size() > 1);
 
@@ -2890,7 +2909,7 @@ public class MultivaluedClaims extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
@@ -2899,7 +2918,9 @@ public class MultivaluedClaims extends BaseTest {
         PrivateKey privateKey = cryptoProvider.getPrivateKey(clientKeyId);
 
         Jwe jwe = Jwe.parse(idToken, privateKey, null);
-        assertJweStandarClaimsNotNull(jwe, true);
+        AssertBuilder.jweBuilder(jwe)
+                .notNullAccesTokenHash()
+                .checkAsserts();
         assertNotNull(jwe.getClaims().getClaimAsStringList("member_of"));
         assertTrue(jwe.getClaims().getClaimAsStringList("member_of").size() > 1);
 

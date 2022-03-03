@@ -8,7 +8,7 @@ import java.util.List;
 
 import static org.testng.Assert.assertNotNull;
 
-public class AuthorizationResponseAssertBuilder extends AssertBuilder {
+public class AuthorizationResponseAssertBuilder extends BaseAssertBuilder {
 
     private AuthorizationResponse response;
     private int status;

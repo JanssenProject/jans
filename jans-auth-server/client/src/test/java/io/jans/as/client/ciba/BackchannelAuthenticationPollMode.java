@@ -23,6 +23,7 @@ import io.jans.as.client.TokenResponse;
 import io.jans.as.client.UserInfoClient;
 import io.jans.as.client.UserInfoResponse;
 
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.BackchannelTokenDeliveryMode;
@@ -138,7 +139,12 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, true);
+        AssertBuilder.backchannelAuthenticationResponseBuilder(backchannelAuthenticationResponse)
+                        .status(200)
+                        .notNullInterval()
+                        .notNullAuthReqId()
+                        .notNullExpiresIn()
+                        .checkAsserts();
 
         //String authReqId = backchannelAuthenticationResponse.getAuthReqId();
 
@@ -237,7 +243,12 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, true);
+        AssertBuilder.backchannelAuthenticationResponseBuilder(backchannelAuthenticationResponse)
+                        .status(200)
+                        .notNullInterval()
+                        .notNullAuthReqId()
+                        .notNullExpiresIn()
+                        .checkAsserts();
     }
 
     @Parameters({"clientJwksUri", "userInum", "backchannelUserCode"})
@@ -284,7 +295,12 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, true);
+        AssertBuilder.backchannelAuthenticationResponseBuilder(backchannelAuthenticationResponse)
+                        .status(200)
+                        .notNullInterval()
+                        .notNullAuthReqId()
+                        .notNullExpiresIn()
+                        .checkAsserts();
     }
 
     @Parameters({"clientJwksUri", "userId", "backchannelUserCode"})
@@ -353,7 +369,12 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, true);
+        AssertBuilder.backchannelAuthenticationResponseBuilder(backchannelAuthenticationResponse)
+                        .status(200)
+                        .notNullInterval()
+                        .notNullAuthReqId()
+                        .notNullExpiresIn()
+                        .checkAsserts();
 
         String authReqId = backchannelAuthenticationResponse.getAuthReqId();
 
@@ -375,7 +396,8 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
             showClient(tokenClient);
             pollCount++;
         } while (tokenResponse.getStatus() == 400 && pollCount < 5);
-        assertTokenResponseOk(tokenResponse, false);
+        AssertBuilder.tokenResponseBuilder(tokenResponse)
+                .checkAsserts();
 
         String accessToken = tokenResponse.getAccessToken();
         String idToken = tokenResponse.getIdToken();
@@ -469,7 +491,12 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, true);
+        AssertBuilder.backchannelAuthenticationResponseBuilder(backchannelAuthenticationResponse)
+                        .status(200)
+                        .notNullInterval()
+                        .notNullAuthReqId()
+                        .notNullExpiresIn()
+                        .checkAsserts();
     }
 
     @Parameters({"clientJwksUri", "backchannelUserCode",
@@ -524,7 +551,12 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, true);
+        AssertBuilder.backchannelAuthenticationResponseBuilder(backchannelAuthenticationResponse)
+                        .status(200)
+                        .notNullInterval()
+                        .notNullAuthReqId()
+                        .notNullExpiresIn()
+                        .checkAsserts();
     }
 
     @Parameters({"clientJwksUri", "backchannelUserCode",
@@ -579,7 +611,12 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, true);
+        AssertBuilder.backchannelAuthenticationResponseBuilder(backchannelAuthenticationResponse)
+                        .status(200)
+                        .notNullInterval()
+                        .notNullAuthReqId()
+                        .notNullExpiresIn()
+                        .checkAsserts();
     }
 
     @Parameters({"clientJwksUri", "backchannelUserCode",
@@ -634,7 +671,12 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, true);
+        AssertBuilder.backchannelAuthenticationResponseBuilder(backchannelAuthenticationResponse)
+                        .status(200)
+                        .notNullInterval()
+                        .notNullAuthReqId()
+                        .notNullExpiresIn()
+                        .checkAsserts();
     }
 
     @Parameters({"clientJwksUri", "backchannelUserCode",
@@ -689,7 +731,12 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, true);
+        AssertBuilder.backchannelAuthenticationResponseBuilder(backchannelAuthenticationResponse)
+                        .status(200)
+                        .notNullInterval()
+                        .notNullAuthReqId()
+                        .notNullExpiresIn()
+                        .checkAsserts();
     }
 
     @Parameters({"clientJwksUri", "backchannelUserCode",
@@ -744,7 +791,12 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, true);
+        AssertBuilder.backchannelAuthenticationResponseBuilder(backchannelAuthenticationResponse)
+                        .status(200)
+                        .notNullInterval()
+                        .notNullAuthReqId()
+                        .notNullExpiresIn()
+                        .checkAsserts();
     }
 
     @Parameters({"clientJwksUri", "backchannelUserCode",
@@ -799,7 +851,12 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, true);
+        AssertBuilder.backchannelAuthenticationResponseBuilder(backchannelAuthenticationResponse)
+                        .status(200)
+                        .notNullInterval()
+                        .notNullAuthReqId()
+                        .notNullExpiresIn()
+                        .checkAsserts();
     }
 
     @Parameters({"clientJwksUri", "backchannelUserCode",
@@ -854,7 +911,12 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, true);
+        AssertBuilder.backchannelAuthenticationResponseBuilder(backchannelAuthenticationResponse)
+                        .status(200)
+                        .notNullInterval()
+                        .notNullAuthReqId()
+                        .notNullExpiresIn()
+                        .checkAsserts();
     }
 
     @Parameters({"clientJwksUri", "backchannelUserCode",
@@ -909,7 +971,12 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, true);
+        AssertBuilder.backchannelAuthenticationResponseBuilder(backchannelAuthenticationResponse)
+                        .status(200)
+                        .notNullInterval()
+                        .notNullAuthReqId()
+                        .notNullExpiresIn()
+                        .checkAsserts();
     }
 
     @Parameters({"clientJwksUri", "backchannelUserCode"})
@@ -956,7 +1023,12 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, true);
+        AssertBuilder.backchannelAuthenticationResponseBuilder(backchannelAuthenticationResponse)
+                        .status(200)
+                        .notNullInterval()
+                        .notNullAuthReqId()
+                        .notNullExpiresIn()
+                        .checkAsserts();
     }
 
     @Parameters({"clientJwksUri", "backchannelUserCode"})
@@ -1003,7 +1075,12 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, true);
+        AssertBuilder.backchannelAuthenticationResponseBuilder(backchannelAuthenticationResponse)
+                        .status(200)
+                        .notNullInterval()
+                        .notNullAuthReqId()
+                        .notNullExpiresIn()
+                        .checkAsserts();
     }
 
     @Parameters({"clientJwksUri", "backchannelUserCode"})
@@ -1050,7 +1127,12 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, true);
+        AssertBuilder.backchannelAuthenticationResponseBuilder(backchannelAuthenticationResponse)
+                        .status(200)
+                        .notNullInterval()
+                        .notNullAuthReqId()
+                        .notNullExpiresIn()
+                        .checkAsserts();
     }
 
     @Parameters({"clientJwksUri", "backchannelUserCode"})
@@ -1097,7 +1179,12 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, true);
+        AssertBuilder.backchannelAuthenticationResponseBuilder(backchannelAuthenticationResponse)
+                        .status(200)
+                        .notNullInterval()
+                        .notNullAuthReqId()
+                        .notNullExpiresIn()
+                        .checkAsserts();
     }
 
     @Parameters({"clientJwksUri", "backchannelUserCode"})
@@ -1144,7 +1231,12 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, true);
+        AssertBuilder.backchannelAuthenticationResponseBuilder(backchannelAuthenticationResponse)
+                        .status(200)
+                        .notNullInterval()
+                        .notNullAuthReqId()
+                        .notNullExpiresIn()
+                        .checkAsserts();
     }
 
     @Parameters({"clientJwksUri", "backchannelUserCode"})
@@ -1191,7 +1283,12 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, true);
+        AssertBuilder.backchannelAuthenticationResponseBuilder(backchannelAuthenticationResponse)
+                        .status(200)
+                        .notNullInterval()
+                        .notNullAuthReqId()
+                        .notNullExpiresIn()
+                        .checkAsserts();
     }
 
     @Parameters({"clientJwksUri", "backchannelUserCode"})
@@ -1238,7 +1335,12 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, true);
+        AssertBuilder.backchannelAuthenticationResponseBuilder(backchannelAuthenticationResponse)
+                        .status(200)
+                        .notNullInterval()
+                        .notNullAuthReqId()
+                        .notNullExpiresIn()
+                        .checkAsserts();
     }
 
     @Parameters({"clientJwksUri", "backchannelUserCode"})
@@ -1285,7 +1387,12 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, true);
+        AssertBuilder.backchannelAuthenticationResponseBuilder(backchannelAuthenticationResponse)
+                        .status(200)
+                        .notNullInterval()
+                        .notNullAuthReqId()
+                        .notNullExpiresIn()
+                        .checkAsserts();
     }
 
     @Parameters({"clientJwksUri", "backchannelUserCode"})
@@ -1332,7 +1439,12 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, true);
+        AssertBuilder.backchannelAuthenticationResponseBuilder(backchannelAuthenticationResponse)
+                        .status(200)
+                        .notNullInterval()
+                        .notNullAuthReqId()
+                        .notNullExpiresIn()
+                        .checkAsserts();
     }
 
     @Parameters({"clientJwksUri", "backchannelUserCode"})
@@ -1379,7 +1491,12 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, true);
+        AssertBuilder.backchannelAuthenticationResponseBuilder(backchannelAuthenticationResponse)
+                        .status(200)
+                        .notNullInterval()
+                        .notNullAuthReqId()
+                        .notNullExpiresIn()
+                        .checkAsserts();
     }
 
     @Parameters({"clientJwksUri", "backchannelUserCode"})
@@ -1426,7 +1543,12 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, true);
+        AssertBuilder.backchannelAuthenticationResponseBuilder(backchannelAuthenticationResponse)
+                        .status(200)
+                        .notNullInterval()
+                        .notNullAuthReqId()
+                        .notNullExpiresIn()
+                        .checkAsserts();
     }
 
     @Parameters({"clientJwksUri", "backchannelUserCode"})
@@ -1473,7 +1595,12 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, true);
+        AssertBuilder.backchannelAuthenticationResponseBuilder(backchannelAuthenticationResponse)
+                        .status(200)
+                        .notNullInterval()
+                        .notNullAuthReqId()
+                        .notNullExpiresIn()
+                        .checkAsserts();
     }
 
     @Parameters({"clientJwksUri", "backchannelUserCode"})
@@ -1520,7 +1647,12 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, true);
+        AssertBuilder.backchannelAuthenticationResponseBuilder(backchannelAuthenticationResponse)
+                        .status(200)
+                        .notNullInterval()
+                        .notNullAuthReqId()
+                        .notNullExpiresIn()
+                        .checkAsserts();
     }
 
     @Parameters({"clientJwksUri", "backchannelUserCode"})
@@ -1567,7 +1699,12 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, true);
+        AssertBuilder.backchannelAuthenticationResponseBuilder(backchannelAuthenticationResponse)
+                        .status(200)
+                        .notNullInterval()
+                        .notNullAuthReqId()
+                        .notNullExpiresIn()
+                        .checkAsserts();
     }
 
     @Parameters({"clientJwksUri"})
@@ -1601,7 +1738,10 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthenticationFail(backchannelAuthenticationResponse, 400, BackchannelAuthenticationErrorResponseType.INVALID_REQUEST);
+        AssertBuilder.backchannelAuthenticationResponseBuilder(backchannelAuthenticationResponse)
+                .status(400)
+                .errorResponseType(BackchannelAuthenticationErrorResponseType.INVALID_REQUEST)
+                .checkAsserts();
     }
 
     @Parameters({"clientJwksUri"})
@@ -1639,7 +1779,10 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthenticationFail(backchannelAuthenticationResponse, 401, BackchannelAuthenticationErrorResponseType.INVALID_CLIENT);
+        AssertBuilder.backchannelAuthenticationResponseBuilder(backchannelAuthenticationResponse)
+                .status(401)
+                .errorResponseType(BackchannelAuthenticationErrorResponseType.INVALID_CLIENT)
+                .checkAsserts();
     }
 
     @Parameters({"clientJwksUri"})
@@ -1679,7 +1822,10 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthenticationFail(backchannelAuthenticationResponse, 400, BackchannelAuthenticationErrorResponseType.UNKNOWN_USER_ID);
+        AssertBuilder.backchannelAuthenticationResponseBuilder(backchannelAuthenticationResponse)
+                .status(400)
+                .errorResponseType(BackchannelAuthenticationErrorResponseType.UNKNOWN_USER_ID)
+                .checkAsserts();
     }
 
     @Parameters({"clientJwksUri"})
@@ -1722,7 +1868,10 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthenticationFail(backchannelAuthenticationResponse, 400, BackchannelAuthenticationErrorResponseType.UNKNOWN_USER_ID);
+        AssertBuilder.backchannelAuthenticationResponseBuilder(backchannelAuthenticationResponse)
+                .status(400)
+                .errorResponseType(BackchannelAuthenticationErrorResponseType.UNKNOWN_USER_ID)
+                .checkAsserts();
     }
 
     @Parameters({"clientJwksUri", "userId"})
@@ -1764,7 +1913,10 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthenticationFail(backchannelAuthenticationResponse, 400, BackchannelAuthenticationErrorResponseType.INVALID_USER_CODE);
+        AssertBuilder.backchannelAuthenticationResponseBuilder(backchannelAuthenticationResponse)
+                .status(400)
+                .errorResponseType(BackchannelAuthenticationErrorResponseType.INVALID_USER_CODE)
+                .checkAsserts();
     }
 
     @Parameters({"clientJwksUri", "userId"})
@@ -1809,7 +1961,10 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthenticationFail(backchannelAuthenticationResponse, 400, BackchannelAuthenticationErrorResponseType.INVALID_USER_CODE);
+        AssertBuilder.backchannelAuthenticationResponseBuilder(backchannelAuthenticationResponse)
+                .status(400)
+                .errorResponseType(BackchannelAuthenticationErrorResponseType.INVALID_USER_CODE)
+                .checkAsserts();
     }
 
     @Parameters({"clientJwksUri", "userId", "backchannelUserCode"})
@@ -1858,7 +2013,11 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthenticationFail(backchannelAuthenticationResponse, 400, BackchannelAuthenticationErrorResponseType.INVALID_BINDING_MESSAGE);
+        AssertBuilder.backchannelAuthenticationResponseBuilder(backchannelAuthenticationResponse)
+                .status(400)
+                .errorResponseType(BackchannelAuthenticationErrorResponseType.INVALID_BINDING_MESSAGE)
+                .checkAsserts();
+
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
@@ -1900,7 +2059,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
 
@@ -1958,7 +2117,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
 
@@ -2016,7 +2175,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
 
@@ -2074,7 +2233,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
 
@@ -2132,7 +2291,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
 
@@ -2190,7 +2349,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
 
@@ -2248,7 +2407,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
 
@@ -2306,7 +2465,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
 
@@ -2364,7 +2523,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
 
@@ -2424,13 +2583,15 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
 
         // 3. Validate id_token
         Jwe jwe = Jwe.parse(idToken, null, clientSecret.getBytes(StandardCharsets.UTF_8));
-        assertJweStandarClaimsNotNull(jwe, true);
+        AssertBuilder.jweBuilder(jwe)
+                .notNullAccesTokenHash()
+                .checkAsserts();
 
         idTokenHintAlgA128KWEncA128GCM = idToken;
     }
@@ -2476,13 +2637,15 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
 
         // 3. Validate id_token
         Jwe jwe = Jwe.parse(idToken, null, clientSecret.getBytes(StandardCharsets.UTF_8));
-        assertJweStandarClaimsNotNull(jwe, true);
+        AssertBuilder.jweBuilder(jwe)
+                .notNullAccesTokenHash()
+                .checkAsserts();
 
         idTokenHintAlgA256KWEncA256GCM = idToken;
     }
@@ -2530,7 +2693,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
 
@@ -2539,7 +2702,9 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
 
         Jwe jwe = Jwe.parse(idToken, privateKey, null);
-        assertJweStandarClaimsNotNull(jwe, true);
+        AssertBuilder.jweBuilder(jwe)
+                .notNullAccesTokenHash()
+                .checkAsserts();
 
         idTokenHintAlgRSA15EncA128CBCPLUSHS256 = idToken;
     }
@@ -2587,7 +2752,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
 
@@ -2596,7 +2761,9 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
 
         Jwe jwe = Jwe.parse(idToken, privateKey, null);
-        assertJweStandarClaimsNotNull(jwe, true);
+        AssertBuilder.jweBuilder(jwe)
+                .notNullAccesTokenHash()
+                .checkAsserts();
 
         idTokenHintAlgRSA15EncA256CBCPLUSHS512 = idToken;
     }
@@ -2644,7 +2811,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
 
@@ -2653,7 +2820,9 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
 
         Jwe jwe = Jwe.parse(idToken, privateKey, null);
-        assertJweStandarClaimsNotNull(jwe, true);
+        AssertBuilder.jweBuilder(jwe)
+                .notNullAccesTokenHash()
+                .checkAsserts();
 
         idTokenHintAlgRSAOAEPEncA256GCM = idToken;
     }

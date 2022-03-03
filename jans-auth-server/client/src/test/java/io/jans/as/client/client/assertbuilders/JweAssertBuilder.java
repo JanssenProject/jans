@@ -10,7 +10,7 @@ import static io.jans.as.client.BaseTest.clientEngine;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
-public class JweAssertBuilder extends AssertBuilder {
+public class JweAssertBuilder extends BaseAssertBuilder {
 
     private Jwe jwe;
     private boolean notNullAccesTokenHash;

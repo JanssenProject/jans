@@ -19,6 +19,7 @@ import io.jans.as.client.TokenResponse;
 import io.jans.as.client.UserInfoClient;
 import io.jans.as.client.UserInfoResponse;
 
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.AuthorizationMethod;
 import io.jans.as.model.common.GrantType;
@@ -82,7 +83,7 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
 
         AuthorizationResponse authorizationResponse1 = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest1, userId, userSecret);
-        assertAuthorizationResponse(authorizationResponse1);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse1).notNullState().notNullScope().checkAsserts();
         assertNotNull(authorizationResponse1.getSessionId(), "The session id is null");
         assertEquals(authorizationResponse1.getState(), state1);
 
@@ -101,7 +102,9 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
         TokenResponse tokenResponse1 = tokenClient1.execAuthorizationCode(code1, redirectUri, clientId, clientSecret);
 
         showClient(tokenClient1);
-        assertTokenResponseOk(tokenResponse1, true);
+        AssertBuilder.tokenResponseBuilder(tokenResponse1)
+                .notNullRefreshToken()
+                .checkAsserts();
 
         String accessToken1 = tokenResponse1.getAccessToken();
 
@@ -227,7 +230,7 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse1 = authorizationRequestAndGrantAccess(
                 authorizationEndpoint, authorizationRequest1);
 
-        assertAuthorizationResponse(authorizationResponse1);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse1).notNullState().notNullScope().checkAsserts();
         assertNotNull(authorizationResponse1.getSessionId(), "The session id is null");
         assertEquals(authorizationRequest1.getState(), state1);
 
@@ -246,7 +249,9 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
         TokenResponse tokenResponse1 = tokenClient1.exec();
 
         showClient(tokenClient1);
-        assertTokenResponseOk(tokenResponse1, true);
+        AssertBuilder.tokenResponseBuilder(tokenResponse1)
+                .notNullRefreshToken()
+                .checkAsserts();
 
         // User wants to authenticate on B2 (without sending its credentials)
 
@@ -337,6 +342,8 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
         TokenResponse tokenResponse3 = tokenClient3.exec();
 
         showClient(tokenClient3);
-        assertTokenResponseOk(tokenResponse3, true);
+        AssertBuilder.tokenResponseBuilder(tokenResponse3)
+                .notNullRefreshToken()
+                .checkAsserts();
     }
 }

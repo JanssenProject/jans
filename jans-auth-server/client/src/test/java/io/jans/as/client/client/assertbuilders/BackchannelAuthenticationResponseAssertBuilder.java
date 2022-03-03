@@ -6,10 +6,14 @@ import io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType;
 
 import static org.testng.Assert.*;
 
-public class BackchannelAuthenticationResponseAssertBuilder extends AssertBuilder {
+public class BackchannelAuthenticationResponseAssertBuilder extends BaseAssertBuilder {
 
     private BackchannelAuthenticationResponse response;
     private int status;
+    private boolean notNullAuthReqId;
+    private boolean notNullExpiresIn;
+    private boolean nullAuthReqId;
+    private boolean nullExpiresIn;
     private boolean notNullInterval;
     private boolean nullInterval;
     private BackchannelAuthenticationErrorResponseType errorResponseType;
@@ -17,6 +21,10 @@ public class BackchannelAuthenticationResponseAssertBuilder extends AssertBuilde
     public BackchannelAuthenticationResponseAssertBuilder(BackchannelAuthenticationResponse response) {
         this.response = response;
         this.status = 200;
+        this.notNullAuthReqId = false;
+        this.notNullExpiresIn = false;
+        this.nullAuthReqId = false;
+        this.nullExpiresIn = false;
         this.notNullInterval = false;
         this.nullInterval = false;
         this.errorResponseType = null;
@@ -24,6 +32,30 @@ public class BackchannelAuthenticationResponseAssertBuilder extends AssertBuilde
 
     public BackchannelAuthenticationResponseAssertBuilder status(int status) {
         this.status = status;
+        return this;
+    }
+
+    public BackchannelAuthenticationResponseAssertBuilder nullAuthReqId() {
+        this.notNullAuthReqId = false;
+        this.nullAuthReqId = true;
+        return this;
+    }
+
+    public BackchannelAuthenticationResponseAssertBuilder nullExpiresIn() {
+        this.notNullExpiresIn = false;
+        this.nullExpiresIn = true;
+        return this;
+    }
+
+    public BackchannelAuthenticationResponseAssertBuilder notNullAuthReqId() {
+        this.notNullAuthReqId = true;
+        this.nullAuthReqId = false;
+        return this;
+    }
+
+    public BackchannelAuthenticationResponseAssertBuilder notNullExpiresIn() {
+        this.notNullExpiresIn = true;
+        this.nullExpiresIn = false;
         return this;
     }
 
@@ -46,17 +78,23 @@ public class BackchannelAuthenticationResponseAssertBuilder extends AssertBuilde
 
     @Override
     public void checkAsserts() {
-        if (status == 200) {
-            assertEquals(response.getStatus(), status, "Unexpected response code: " + response.getEntity());
+        assertEquals(response.getStatus(), status, "Unexpected response code: " + response.getEntity());
+        if (notNullInterval) {
+            assertNotNull(response.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
+        } else if (nullInterval) {
+            assertNull(response.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
+        }
+        if (notNullAuthReqId) {
             assertNotNull(response.getAuthReqId());
+        } else if (nullInterval) {
+            assertNull(response.getAuthReqId());
+        }
+        if (notNullExpiresIn) {
             assertNotNull(response.getExpiresIn());
-            if (notNullInterval) {
-                assertNotNull(response.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
-            } else if (nullInterval) {
-                assertNull(response.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
-            }
-        } else {
-            assertEquals(response.getStatus(), status, "Unexpected response code: " + response.getEntity());
+        } else if (nullExpiresIn) {
+            assertNull(response.getExpiresIn());
+        }
+        if (status != 200) {
             assertNotNull(response.getEntity(), "The entity is null");
             assertNotNull(response.getErrorType(), "The error type is null");
             if (errorResponseType != null) {

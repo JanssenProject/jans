@@ -7,6 +7,7 @@
 package io.jans.as.client.interop;
 
 import io.jans.as.client.*;
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.StringUtils;
@@ -17,7 +18,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static io.jans.as.client.client.Asserter.assertAuthorizationResponse;
+
 import static io.jans.as.client.client.Asserter.assertRegisterResponseOk;
 
 /**
@@ -59,6 +60,6 @@ public class AcceptRequestWithoutRedirectUriWhenOneRegistered extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
     }
 }

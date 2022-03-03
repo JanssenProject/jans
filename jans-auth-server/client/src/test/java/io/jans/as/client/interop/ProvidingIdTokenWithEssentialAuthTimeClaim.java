@@ -15,6 +15,7 @@ import io.jans.as.client.RegisterClient;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
 
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.client.model.authorize.Claim;
 import io.jans.as.client.model.authorize.ClaimValue;
 import io.jans.as.client.model.authorize.JwtAuthorizationRequest;
@@ -95,7 +96,11 @@ public class ProvidingIdTokenWithEssentialAuthTimeClaim extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse)
+                .notNullScope()
+                .notNullState()
+                .responseTypes(responseTypes)
+                .checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();

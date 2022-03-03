@@ -19,6 +19,7 @@ import io.jans.as.client.TokenResponse;
 import io.jans.as.client.UserInfoClient;
 import io.jans.as.client.UserInfoResponse;
 
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
@@ -86,7 +87,7 @@ public class SupportScopeRequestingNoSpecificClaims extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
 
         String authorizationCode = authorizationResponse.getCode();
 
@@ -103,7 +104,9 @@ public class SupportScopeRequestingNoSpecificClaims extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        AssertBuilder.tokenResponseBuilder(tokenResponse)
+                .notNullRefreshToken()
+                .checkAsserts();
 
         String accessToken = tokenResponse.getAccessToken();
         String idToken = tokenResponse.getIdToken();

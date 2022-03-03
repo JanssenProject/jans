@@ -16,6 +16,7 @@ import io.jans.as.client.TokenClient;
 import io.jans.as.client.TokenRequest;
 import io.jans.as.client.TokenResponse;
 
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
@@ -75,7 +76,7 @@ public class CanMakeAccessTokenRequestWithClientSecretJwtAuthentication extends 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String authorizationCode = authorizationResponse.getCode();
 
@@ -96,6 +97,8 @@ public class CanMakeAccessTokenRequestWithClientSecretJwtAuthentication extends 
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        AssertBuilder.tokenResponseBuilder(tokenResponse)
+                .notNullRefreshToken()
+                .checkAsserts();
     }
 }

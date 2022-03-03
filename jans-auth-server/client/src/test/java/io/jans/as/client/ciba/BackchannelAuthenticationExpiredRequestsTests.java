@@ -17,6 +17,7 @@ import io.jans.as.client.TokenClient;
 import io.jans.as.client.TokenRequest;
 import io.jans.as.client.TokenResponse;
 
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType;
 import io.jans.as.model.common.BackchannelTokenDeliveryMode;
 import io.jans.as.model.common.GrantType;
@@ -92,7 +93,12 @@ public class BackchannelAuthenticationExpiredRequestsTests extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, true);
+        AssertBuilder.backchannelAuthenticationResponseBuilder(backchannelAuthenticationResponse)
+                        .status(200)
+                        .notNullInterval()
+                        .notNullAuthReqId()
+                        .notNullExpiresIn()
+                        .checkAsserts();
 
         // 3. Request token - expected expiration error
 
@@ -115,7 +121,10 @@ public class BackchannelAuthenticationExpiredRequestsTests extends BaseTest {
         } while (pollCount < 5 && tokenResponse.getStatus() == 400
                 && tokenResponse.getErrorType() == TokenErrorResponseType.AUTHORIZATION_PENDING);
 
-        assertTokenResponseFail(tokenResponse, 400, TokenErrorResponseType.EXPIRED_TOKEN);
+        AssertBuilder.tokenResponseBuilder(tokenResponse)
+                .status(400)
+                .errorResponseType(TokenErrorResponseType.EXPIRED_TOKEN)
+                .checkAsserts();
     }
 
     /**
@@ -169,7 +178,12 @@ public class BackchannelAuthenticationExpiredRequestsTests extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, true);
+        AssertBuilder.backchannelAuthenticationResponseBuilder(backchannelAuthenticationResponse)
+                        .status(200)
+                        .notNullInterval()
+                        .notNullAuthReqId()
+                        .notNullExpiresIn()
+                        .checkAsserts();
 
         // 3. Request token - expected expiration error
 
@@ -192,7 +206,10 @@ public class BackchannelAuthenticationExpiredRequestsTests extends BaseTest {
         } while (pollCount < 5 && tokenResponse.getStatus() == 400
                 && tokenResponse.getErrorType() == TokenErrorResponseType.AUTHORIZATION_PENDING);
 
-        assertTokenResponseFail(tokenResponse, 400, TokenErrorResponseType.EXPIRED_TOKEN);
+        AssertBuilder.tokenResponseBuilder(tokenResponse)
+                .status(400)
+                .errorResponseType(TokenErrorResponseType.EXPIRED_TOKEN)
+                .checkAsserts();
     }
 
     /**
@@ -246,9 +263,12 @@ public class BackchannelAuthenticationExpiredRequestsTests extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthenticationFail(backchannelAuthenticationResponse, 400, BackchannelAuthenticationErrorResponseType.INVALID_REQUEST);
-        assertNull(backchannelAuthenticationResponse.getAuthReqId());
-        assertNull(backchannelAuthenticationResponse.getExpiresIn());
+        AssertBuilder.backchannelAuthenticationResponseBuilder(backchannelAuthenticationResponse)
+                .status(400)
+                .errorResponseType(BackchannelAuthenticationErrorResponseType.INVALID_REQUEST)
+                .nullAuthReqId()
+                .nullExpiresIn()
+                .checkAsserts();
     }
 
 }

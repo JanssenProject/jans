@@ -13,6 +13,7 @@ import io.jans.as.client.RegisterResponse;
 import io.jans.as.client.TokenClient;
 import io.jans.as.client.TokenRequest;
 import io.jans.as.client.TokenResponse;
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
@@ -88,7 +89,9 @@ public class TokenEncryptionHttpDeprecated extends BaseTest {
             TokenResponse tokenResponse = tokenClient.exec();
 
             showClient(tokenClient);
-            assertTokenResponseOk(tokenResponse, true);
+            AssertBuilder.tokenResponseBuilder(tokenResponse)
+                .notNullRefreshToken()
+                .checkAsserts();
             assertNotNull(tokenResponse.getScope(), "The scope is null");
             assertNotNull(tokenResponse.getIdToken(), "The id token is null");
 
@@ -99,7 +102,7 @@ public class TokenEncryptionHttpDeprecated extends BaseTest {
             PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
 
             Jwe jwe = Jwe.parse(idToken, privateKey, null);
-            assertJweStandarClaimsNotNull(jwe, false);
+            AssertBuilder.jweBuilder(jwe).checkAsserts();
             assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.OX_OPENID_CONNECT_VERSION));
         } catch (Exception ex) {
             fail(ex.getMessage(), ex);
@@ -153,7 +156,9 @@ public class TokenEncryptionHttpDeprecated extends BaseTest {
             TokenResponse tokenResponse = tokenClient.exec();
 
             showClient(tokenClient);
-            assertTokenResponseOk(tokenResponse, true);
+            AssertBuilder.tokenResponseBuilder(tokenResponse)
+                .notNullRefreshToken()
+                .checkAsserts();
             assertNotNull(tokenResponse.getScope(), "The scope is null");
             assertNotNull(tokenResponse.getIdToken(), "The id token is null");
 
@@ -164,7 +169,7 @@ public class TokenEncryptionHttpDeprecated extends BaseTest {
             PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
 
             Jwe jwe = Jwe.parse(idToken, privateKey, null);
-            assertJweStandarClaimsNotNull(jwe, false);
+            AssertBuilder.jweBuilder(jwe).checkAsserts();
             assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.OX_OPENID_CONNECT_VERSION));
         } catch (Exception ex) {
             fail(ex.getMessage(), ex);
@@ -218,7 +223,9 @@ public class TokenEncryptionHttpDeprecated extends BaseTest {
             TokenResponse tokenResponse = tokenClient.exec();
 
             showClient(tokenClient);
-            assertTokenResponseOk(tokenResponse, true);
+            AssertBuilder.tokenResponseBuilder(tokenResponse)
+                .notNullRefreshToken()
+                .checkAsserts();
             assertNotNull(tokenResponse.getScope(), "The scope is null");
             assertNotNull(tokenResponse.getIdToken(), "The id token is null");
 
@@ -229,7 +236,7 @@ public class TokenEncryptionHttpDeprecated extends BaseTest {
             PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
 
             Jwe jwe = Jwe.parse(idToken, privateKey, null);
-            assertJweStandarClaimsNotNull(jwe, false);
+            AssertBuilder.jweBuilder(jwe).checkAsserts();
             assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.OX_OPENID_CONNECT_VERSION));
         } catch (Exception ex) {
             fail(ex.getMessage(), ex);
@@ -280,7 +287,9 @@ public class TokenEncryptionHttpDeprecated extends BaseTest {
             TokenResponse tokenResponse = tokenClient.exec();
 
             showClient(tokenClient);
-            assertTokenResponseOk(tokenResponse, true);
+            AssertBuilder.tokenResponseBuilder(tokenResponse)
+                .notNullRefreshToken()
+                .checkAsserts();
             assertNotNull(tokenResponse.getScope(), "The scope is null");
             assertNotNull(tokenResponse.getIdToken(), "The id token is null");
 
@@ -288,7 +297,7 @@ public class TokenEncryptionHttpDeprecated extends BaseTest {
 
             // 3. Read Encrypted ID Token
             Jwe jwe = Jwe.parse(idToken, null, clientSecret.getBytes(StandardCharsets.UTF_8));
-            assertJweStandarClaimsNotNull(jwe, false);
+            AssertBuilder.jweBuilder(jwe).checkAsserts();
             assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.OX_OPENID_CONNECT_VERSION));
         } catch (Exception ex) {
             fail(ex.getMessage(), ex);
@@ -339,7 +348,9 @@ public class TokenEncryptionHttpDeprecated extends BaseTest {
             TokenResponse tokenResponse = tokenClient.exec();
 
             showClient(tokenClient);
-            assertTokenResponseOk(tokenResponse, true);
+            AssertBuilder.tokenResponseBuilder(tokenResponse)
+                .notNullRefreshToken()
+                .checkAsserts();
             assertNotNull(tokenResponse.getScope(), "The scope is null");
             assertNotNull(tokenResponse.getIdToken(), "The id token is null");
 
@@ -347,7 +358,7 @@ public class TokenEncryptionHttpDeprecated extends BaseTest {
 
             // 3. Read Encrypted ID Token
             Jwe jwe = Jwe.parse(idToken, null, clientSecret.getBytes(StandardCharsets.UTF_8));
-            assertJweStandarClaimsNotNull(jwe, false);
+            AssertBuilder.jweBuilder(jwe).checkAsserts();
             assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.OX_OPENID_CONNECT_VERSION));
         } catch (Exception ex) {
             fail(ex.getMessage(), ex);

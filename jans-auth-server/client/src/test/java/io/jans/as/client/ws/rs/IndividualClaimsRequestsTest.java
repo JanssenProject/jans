@@ -17,6 +17,7 @@ import io.jans.as.client.RegisterResponse;
 import io.jans.as.client.UserInfoClient;
 import io.jans.as.client.UserInfoResponse;
 
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.client.model.authorize.Claim;
 import io.jans.as.client.model.authorize.ClaimValue;
 import io.jans.as.client.model.authorize.JwtAuthorizationRequest;
@@ -146,7 +147,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
@@ -263,7 +264,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
@@ -381,7 +382,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
@@ -500,7 +501,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
@@ -619,7 +620,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
@@ -741,7 +742,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
@@ -867,7 +868,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
@@ -993,7 +994,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
@@ -1119,7 +1120,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
@@ -1245,7 +1246,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
@@ -1371,7 +1372,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
@@ -1498,14 +1499,16 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
 
         // 3. Validate id_token
         Jwe jwe = Jwe.parse(idToken, null, clientSecret.getBytes(StandardCharsets.UTF_8));
-        assertJweStandarClaimsNotNull(jwe, true);
+        AssertBuilder.jweBuilder(jwe)
+                .notNullAccesTokenHash()
+                .checkAsserts();
         assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.NAME));
         assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.NICKNAME));
         assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.GIVEN_NAME));
@@ -1618,14 +1621,16 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
 
         // 3. Validate id_token
         Jwe jwe = Jwe.parse(idToken, null, clientSecret.getBytes(StandardCharsets.UTF_8));
-        assertJweStandarClaimsNotNull(jwe, true);
+        AssertBuilder.jweBuilder(jwe)
+                .notNullAccesTokenHash()
+                .checkAsserts();
         assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.NAME));
         assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.NICKNAME));
         assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.GIVEN_NAME));
@@ -1748,7 +1753,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
@@ -1757,7 +1762,9 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         PrivateKey privateKey = cryptoProvider.getPrivateKey(clientKeyId);
 
         Jwe jwe = Jwe.parse(idToken, privateKey, null);
-        assertJweStandarClaimsNotNull(jwe, true);
+        AssertBuilder.jweBuilder(jwe)
+                .notNullAccesTokenHash()
+                .checkAsserts();
         assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.NAME));
         assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.NICKNAME));
         assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.GIVEN_NAME));
@@ -1880,7 +1887,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
@@ -1889,7 +1896,9 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         PrivateKey privateKey = cryptoProvider.getPrivateKey(clientKeyId);
 
         Jwe jwe = Jwe.parse(idToken, privateKey, null);
-        assertJweStandarClaimsNotNull(jwe, true);
+        AssertBuilder.jweBuilder(jwe)
+                .notNullAccesTokenHash()
+                .checkAsserts();
         assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.NAME));
         assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.NICKNAME));
         assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.GIVEN_NAME));
@@ -2012,7 +2021,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
@@ -2021,7 +2030,9 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         PrivateKey privateKey = cryptoProvider.getPrivateKey(clientKeyId);
 
         Jwe jwe = Jwe.parse(idToken, privateKey, null);
-        assertJweStandarClaimsNotNull(jwe, true);
+        AssertBuilder.jweBuilder(jwe)
+                .notNullAccesTokenHash()
+                .checkAsserts();
         assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.NAME));
         assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.NICKNAME));
         assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.GIVEN_NAME));

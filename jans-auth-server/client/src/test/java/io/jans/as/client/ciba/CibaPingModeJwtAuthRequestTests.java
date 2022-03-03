@@ -18,6 +18,7 @@ import io.jans.as.client.RegisterClient;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
 
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.client.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType;
 import io.jans.as.model.common.BackchannelTokenDeliveryMode;
@@ -291,7 +292,12 @@ public class CibaPingModeJwtAuthRequestTests extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthentication(backchannelAuthenticationResponse, true);
+        AssertBuilder.backchannelAuthenticationResponseBuilder(backchannelAuthenticationResponse)
+                        .status(200)
+                        .notNullInterval()
+                        .notNullAuthReqId()
+                        .notNullExpiresIn()
+                        .checkAsserts();
     }
 
     /**
@@ -315,11 +321,13 @@ public class CibaPingModeJwtAuthRequestTests extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertBackchannelAuthenticationFail(backchannelAuthenticationResponse, httpStatus, errorType);
-
-        assertNull(backchannelAuthenticationResponse.getAuthReqId());
-        assertNull(backchannelAuthenticationResponse.getExpiresIn());
-        assertNull(backchannelAuthenticationResponse.getInterval());
+        AssertBuilder.backchannelAuthenticationResponseBuilder(backchannelAuthenticationResponse)
+                .status(httpStatus)
+                .errorResponseType(errorType)
+                .nullAuthReqId()
+                .nullExpiresIn()
+                .nullInterval()
+                .checkAsserts();
     }
 
     /**
@@ -388,7 +396,7 @@ public class CibaPingModeJwtAuthRequestTests extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String idToken = authorizationResponse.getIdToken();
 

@@ -16,6 +16,7 @@ import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
 import io.jans.as.client.UserInfoClient;
 import io.jans.as.client.UserInfoResponse;
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.client.model.authorize.Claim;
 import io.jans.as.client.model.authorize.ClaimValue;
 import io.jans.as.client.model.authorize.JwtAuthorizationRequest;
@@ -104,7 +105,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
@@ -155,7 +156,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
@@ -211,7 +212,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
         showClient(authorizeClient);
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
     }
 
     @Parameters({"userId", "userSecret"})
@@ -424,7 +425,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
@@ -476,7 +477,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
     }
 
     @Parameters({"userId", "userSecret", "redirectUri"})
@@ -616,22 +617,22 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String accessToken = authorizationResponse.getAccessToken();
         String idToken = authorizationResponse.getIdToken();
 
         // 2. Validate access_token and id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertIdToken(jwt, JwtClaimName.ACCESS_TOKEN_HASH);
+        AssertBuilder.jwtBuilder(null)
+                .validateIdToken(idToken, jwksUri, SignatureAlgorithm.RS256)
+                .accessToken(accessToken)
+                .claimsPresence(JwtClaimName.ACCESS_TOKEN_HASH)
+                .notNullAuthenticationTime()
+                .notNullOxOpenIDConnectVersion()
+                .notNullAuthenticationContextClassReference()
+                .notNullAuthenticationMethodReferences()
+                .checkAsserts();
 
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS256, publicKey);
-
-        assertTrue(rsaSigner.validate(jwt));
-        assertTrue(rsaSigner.validateAccessToken(accessToken, jwt));
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
@@ -685,22 +686,22 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String accessToken = authorizationResponse.getAccessToken();
         String idToken = authorizationResponse.getIdToken();
 
         // 2. Validate access_token and id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertIdToken(jwt, JwtClaimName.ACCESS_TOKEN_HASH);
+        AssertBuilder.jwtBuilder(null)
+                .validateIdToken(idToken, jwksUri, SignatureAlgorithm.RS256)
+                .accessToken(accessToken)
+                .claimsPresence(JwtClaimName.ACCESS_TOKEN_HASH)
+                .notNullAuthenticationTime()
+                .notNullOxOpenIDConnectVersion()
+                .notNullAuthenticationContextClassReference()
+                .notNullAuthenticationMethodReferences()
+                .checkAsserts();
 
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS256, publicKey);
-
-        assertTrue(rsaSigner.validate(jwt));
-        assertTrue(rsaSigner.validateAccessToken(accessToken, jwt));
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
@@ -763,16 +764,16 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         String idToken = authorizationResponse.getIdToken();
 
         // 4. Validate code and id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertIdToken(jwt, JwtClaimName.CODE_HASH);
+        AssertBuilder.jwtBuilder(null)
+                .validateIdToken(idToken, jwksUri, SignatureAlgorithm.RS256)
+                .authorizationCode(code)
+                .claimsPresence(JwtClaimName.CODE_HASH)
+                .notNullAuthenticationTime()
+                .notNullOxOpenIDConnectVersion()
+                .notNullAuthenticationContextClassReference()
+                .notNullAuthenticationMethodReferences()
+                .checkAsserts();
 
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS256, publicKey);
-
-        assertTrue(rsaSigner.validate(jwt));
-        assertTrue(rsaSigner.validateAuthorizationCode(code, jwt));
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
@@ -835,16 +836,15 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         String idToken = authorizationResponse.getIdToken();
 
         // 4. Validate code and id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertIdToken(jwt, JwtClaimName.CODE_HASH);
-
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS256, publicKey);
-
-        assertTrue(rsaSigner.validate(jwt));
-        assertTrue(rsaSigner.validateAuthorizationCode(code, jwt));
+        AssertBuilder.jwtBuilder(null)
+                .validateIdToken(idToken, jwksUri, SignatureAlgorithm.RS256)
+                .authorizationCode(code)
+                .claimsPresence(JwtClaimName.CODE_HASH)
+                .notNullAuthenticationTime()
+                .notNullOxOpenIDConnectVersion()
+                .notNullAuthenticationContextClassReference()
+                .notNullAuthenticationMethodReferences()
+                .checkAsserts();
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
@@ -1027,17 +1027,17 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         String idToken = authorizationResponse.getIdToken();
 
         // 4. Validate access_token and id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertIdToken(jwt, JwtClaimName.CODE_HASH, JwtClaimName.ACCESS_TOKEN_HASH);
+        AssertBuilder.jwtBuilder(null)
+                .validateIdToken(idToken, jwksUri, SignatureAlgorithm.RS256)
+                .authorizationCode(code)
+                .accessToken(accessToken)
+                .claimsPresence(JwtClaimName.CODE_HASH, JwtClaimName.ACCESS_TOKEN_HASH)
+                .notNullAuthenticationTime()
+                .notNullOxOpenIDConnectVersion()
+                .notNullAuthenticationContextClassReference()
+                .notNullAuthenticationMethodReferences()
+                .checkAsserts();
 
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS256, publicKey);
-
-        assertTrue(rsaSigner.validate(jwt));
-        assertTrue(rsaSigner.validateAuthorizationCode(code, jwt));
-        assertTrue(rsaSigner.validateAccessToken(accessToken, jwt));
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
@@ -1104,17 +1104,16 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         String idToken = authorizationResponse.getIdToken();
 
         // 4. Validate access_token and id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertIdToken(jwt, JwtClaimName.CODE_HASH, JwtClaimName.ACCESS_TOKEN_HASH);
-
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS256, publicKey);
-
-        assertTrue(rsaSigner.validate(jwt));
-        assertTrue(rsaSigner.validateAuthorizationCode(code, jwt));
-        assertTrue(rsaSigner.validateAccessToken(accessToken, jwt));
+        AssertBuilder.jwtBuilder(null)
+                .validateIdToken(idToken, jwksUri, SignatureAlgorithm.RS256)
+                .authorizationCode(code)
+                .accessToken(accessToken)
+                .claimsPresence(JwtClaimName.CODE_HASH, JwtClaimName.ACCESS_TOKEN_HASH)
+                .notNullAuthenticationTime()
+                .notNullOxOpenIDConnectVersion()
+                .notNullAuthenticationContextClassReference()
+                .notNullAuthenticationMethodReferences()
+                .checkAsserts();
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
@@ -1448,7 +1447,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
@@ -1500,7 +1499,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
@@ -1553,7 +1552,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
@@ -1606,7 +1605,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
@@ -1660,7 +1659,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
@@ -1753,7 +1752,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
     }
 
     @Parameters({"redirectUri", "userId", "userSecret"})
@@ -1792,7 +1791,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
 
         showClient(authorizeClient);
         assertEquals(authorizationResponse.getStatus(), 302, "Unexpected response code: " + authorizationResponse.getStatus());
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
     }
 
     @Parameters({"redirectUris", "userId", "userSecret", "sectorIdentifierUri"})
@@ -2259,7 +2258,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwner(
                 authorizationEndpoint, authorizationRequest, userId, userSecret, false);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
@@ -2321,7 +2320,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
@@ -2377,7 +2376,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String accessToken = authorizationResponse.getAccessToken();
 
@@ -2460,7 +2459,13 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         String idToken = authorizationResponse1.getIdToken();
 
         // 2. Validate access_token and id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertIdToken(jwt, JwtClaimName.ACCESS_TOKEN_HASH);
+        AssertBuilder.jwtBuilder(null)
+                .validateIdToken(idToken, jwksUri, SignatureAlgorithm.RS256)
+                .claimsPresence(JwtClaimName.ACCESS_TOKEN_HASH)
+                .notNullAuthenticationTime()
+                .notNullOxOpenIDConnectVersion()
+                .notNullAuthenticationContextClassReference()
+                .notNullAuthenticationMethodReferences()
+                .checkAsserts();
     }
 }

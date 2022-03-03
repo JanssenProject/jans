@@ -17,6 +17,7 @@ import io.jans.as.client.TokenClient;
 import io.jans.as.client.TokenRequest;
 import io.jans.as.client.TokenResponse;
 
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.client.uma.UmaClientFactory;
 import io.jans.as.client.uma.UmaRptIntrospectionService;
 import io.jans.as.client.uma.UmaTokenService;
@@ -173,7 +174,9 @@ public class ClientAuthenticationByAccessTokenHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        AssertBuilder.tokenResponseBuilder(tokenResponse)
+                .notNullRefreshToken()
+                .checkAsserts();
 
         userAccessToken = tokenResponse.getAccessToken();
     }

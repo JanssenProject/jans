@@ -15,6 +15,7 @@ import io.jans.as.client.TokenClient;
 import io.jans.as.client.TokenRequest;
 import io.jans.as.client.TokenResponse;
 
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.client.service.ClientFactory;
 import io.jans.as.client.service.IntrospectionService;
 import io.jans.as.model.common.AuthenticationMethod;
@@ -544,7 +545,9 @@ public class DpopTokenRequestHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        AssertBuilder.tokenResponseBuilder(tokenResponse)
+                .notNullRefreshToken()
+                .checkAsserts();
         assertEquals(tokenResponse.getTokenType(), TokenType.DPOP);
     }
 
@@ -589,7 +592,9 @@ public class DpopTokenRequestHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        AssertBuilder.tokenResponseBuilder(tokenResponse)
+                .notNullRefreshToken()
+                .checkAsserts();
         assertEquals(tokenResponse.getTokenType(), TokenType.DPOP);
         return tokenResponse;
     }
@@ -605,7 +610,7 @@ public class DpopTokenRequestHttpTest extends BaseTest {
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
-        assertAuthorizationResponse(authorizationResponse);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullState().notNullScope().checkAsserts();
 
         return authorizationResponse.getCode();
     }

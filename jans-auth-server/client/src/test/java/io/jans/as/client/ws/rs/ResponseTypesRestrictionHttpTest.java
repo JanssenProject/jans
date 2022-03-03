@@ -18,6 +18,7 @@ import io.jans.as.client.TokenClient;
 import io.jans.as.client.TokenRequest;
 import io.jans.as.client.TokenResponse;
 
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.Prompt;
@@ -112,7 +113,7 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
 
         String authorizationCode = authorizationResponse.getCode();
 
@@ -129,7 +130,9 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true);
+        AssertBuilder.tokenResponseBuilder(tokenResponse)
+                .notNullRefreshToken()
+                .checkAsserts();
     }
 
     @DataProvider(name = "omittedResponseTypesFailDataProvider")
@@ -272,7 +275,7 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String authorizationCode = authorizationResponse.getCode();
         String idToken = authorizationResponse.getIdToken();
@@ -303,7 +306,9 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
         TokenResponse tokenResponse1 = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse1, true);
+        AssertBuilder.tokenResponseBuilder(tokenResponse1)
+                .notNullRefreshToken()
+                .checkAsserts();
     }
 
     @DataProvider(name = "responseTypesCodeIdTokenFailDataProvider")
@@ -443,7 +448,7 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
         String accessToken = authorizationResponse.getAccessToken();
         String idToken = authorizationResponse.getIdToken();

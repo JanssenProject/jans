@@ -8,7 +8,7 @@ import io.jans.as.model.crypto.signature.AsymmetricSignatureAlgorithm;
 import static io.jans.as.model.register.RegisterRequestParam.*;
 import static org.testng.Assert.*;
 
-public class RegisterResponseAssertBuilder extends AssertBuilder {
+public class RegisterResponseAssertBuilder extends BaseAssertBuilder {
 
     private RegisterResponse response;
     private int status;
@@ -21,6 +21,9 @@ public class RegisterResponseAssertBuilder extends AssertBuilder {
         this.response = response;
         this.notNullRegistrationClientUri = false;
         this.status = 200;
+        this.backchannelRequestSigningAlgorithm = null;
+        this.backchannelTokenDeliveryMode = null;
+        this.backchannelUserCodeParameter = null;
     }
 
     public RegisterResponseAssertBuilder status(int status) {
@@ -52,11 +55,13 @@ public class RegisterResponseAssertBuilder extends AssertBuilder {
     public void checkAsserts() {
         if (status == 200 || status == 201) {
             assertEquals(response.getStatus(), status, "Unexpected response code: " + response.getEntity());
+
             assertNotNull(response.getClientId());
             assertNotNull(response.getClientSecret());
             assertNotNull(response.getClientSecretExpiresAt());
             assertNotNull(response.getRegistrationAccessToken());
             assertNotNull(response.getClientIdIssuedAt());
+
             if (notNullRegistrationClientUri) {
                 assertNotNull(response.getRegistrationClientUri());//Review usage
             }

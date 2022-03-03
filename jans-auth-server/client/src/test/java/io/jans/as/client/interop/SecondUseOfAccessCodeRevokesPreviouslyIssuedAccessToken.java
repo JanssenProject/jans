@@ -17,6 +17,7 @@ import io.jans.as.client.TokenResponse;
 import io.jans.as.client.UserInfoClient;
 import io.jans.as.client.UserInfoResponse;
 
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.register.ApplicationType;
@@ -78,7 +79,7 @@ public class SecondUseOfAccessCodeRevokesPreviouslyIssuedAccessToken extends Bas
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNotNull(authorizationResponse.getIdToken(), "The id token is null");
 
         String scope = authorizationResponse.getScope();
@@ -93,7 +94,9 @@ public class SecondUseOfAccessCodeRevokesPreviouslyIssuedAccessToken extends Bas
                     clientId, clientSecret);
 
             showClient(tokenClient);
-            assertTokenResponseOk(tokenResponse, true);
+            AssertBuilder.tokenResponseBuilder(tokenResponse)
+                .notNullRefreshToken()
+                .checkAsserts();
 
             accessToken = tokenResponse.getAccessToken();
             refreshToken = tokenResponse.getRefreshToken();

@@ -19,6 +19,7 @@ import io.jans.as.client.TokenResponse;
 import io.jans.as.client.UserInfoClient;
 import io.jans.as.client.UserInfoResponse;
 
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
@@ -103,15 +104,14 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         String refreshToken = tokenResponse1.getRefreshToken();
 
         // 4. Validate id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertIdToken(jwt, JwtClaimName.CODE_HASH);
-
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID), clientEngine(true));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS256, publicKey);
-
-        assertTrue(rsaSigner.validate(jwt));
+        AssertBuilder.jwtBuilder(null)
+                .validateIdToken(idToken, jwksUri, SignatureAlgorithm.RS256)
+                .claimsPresence(JwtClaimName.CODE_HASH)
+                .notNullAuthenticationTime()
+                .notNullOxOpenIDConnectVersion()
+                .notNullAuthenticationContextClassReference()
+                .notNullAuthenticationMethodReferences()
+                .checkAsserts();
 
         // 5. Request new access token using the refresh token.
         TokenClient tokenClient2 = new TokenClient(tokenEndpoint);
@@ -285,7 +285,13 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
 
         // 3. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
-        assertIdToken(jwt, JwtClaimName.CODE_HASH);
+        AssertBuilder.jwtBuilder(jwt)
+                .claimsPresence(JwtClaimName.CODE_HASH)
+                .notNullAuthenticationTime()
+                .notNullOxOpenIDConnectVersion()
+                .notNullAuthenticationContextClassReference()
+                .notNullAuthenticationMethodReferences()
+                .checkAsserts();
 
         // 4. Request access token
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
@@ -415,7 +421,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
 
         String scope = authorizationResponse.getScope();
         String authorizationCode = authorizationResponse.getCode();
@@ -516,7 +522,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         assertNotNull(authorizationResponse.getIdToken(), "The id token is null");
 
         String scope = authorizationResponse.getScope();
@@ -541,7 +547,9 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
                 clientId, clientSecret);
 
         showClient(tokenClient1);
-        assertTokenResponseOk(response2, true);
+        AssertBuilder.tokenResponseBuilder(response2)
+                .notNullRefreshToken()
+                .checkAsserts();
 
         String accessToken = response2.getAccessToken();
         String refreshToken = response2.getRefreshToken();
@@ -606,7 +614,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret); // put userId explicitly, window.onload function result is not same as in browser (tested with chrome and FF)
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
 
         String scope = authorizationResponse.getScope();
         String authorizationCode = authorizationResponse.getCode();
@@ -675,7 +683,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
         return authorizationResponse;
     }
 
@@ -720,7 +728,13 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
 
         // 4. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
-        assertIdToken(jwt, JwtClaimName.CODE_HASH);
+        AssertBuilder.jwtBuilder(jwt)
+                .claimsPresence(JwtClaimName.CODE_HASH)
+                .notNullAuthenticationTime()
+                .notNullOxOpenIDConnectVersion()
+                .notNullAuthenticationContextClassReference()
+                .notNullAuthenticationMethodReferences()
+                .checkAsserts();
 
         // 5. Request new access token using the refresh token.
         TokenClient tokenClient2 = new TokenClient(tokenEndpoint);

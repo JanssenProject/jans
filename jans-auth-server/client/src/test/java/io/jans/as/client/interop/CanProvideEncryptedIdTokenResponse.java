@@ -14,6 +14,7 @@ import io.jans.as.client.RegisterClient;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
 
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
@@ -86,13 +87,15 @@ public class CanProvideEncryptedIdTokenResponse extends BaseTest {
 
             AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                     authorizationEndpoint, authorizationRequest, userId, userSecret);
-            assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+            AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
             String idToken = authorizationResponse.getIdToken();
 
             // 3. Read Encrypted ID Token
             Jwe jwe = Jwe.parse(idToken, null, clientSecret.getBytes(StandardCharsets.UTF_8));
-            assertJweStandarClaimsNotNull(jwe, true);
+            AssertBuilder.jweBuilder(jwe)
+                .notNullAccesTokenHash()
+                .checkAsserts();
         } catch (Exception ex) {
             fail(ex.getMessage(), ex);
         }
@@ -139,13 +142,15 @@ public class CanProvideEncryptedIdTokenResponse extends BaseTest {
 
             AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                     authorizationEndpoint, authorizationRequest, userId, userSecret);
-            assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+            AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
             String idToken = authorizationResponse.getIdToken();
 
             // 3. Read Encrypted ID Token
             Jwe jwe = Jwe.parse(idToken, null, clientSecret.getBytes(StandardCharsets.UTF_8));
-            assertJweStandarClaimsNotNull(jwe, true);
+            AssertBuilder.jweBuilder(jwe)
+                .notNullAccesTokenHash()
+                .checkAsserts();
         } catch (Exception ex) {
             fail(ex.getMessage(), ex);
         }
@@ -195,7 +200,7 @@ public class CanProvideEncryptedIdTokenResponse extends BaseTest {
 
             AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                     authorizationEndpoint, authorizationRequest, userId, userSecret);
-            assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+            AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
             String idToken = authorizationResponse.getIdToken();
 
@@ -204,7 +209,7 @@ public class CanProvideEncryptedIdTokenResponse extends BaseTest {
             PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
 
             Jwe jwe = Jwe.parse(idToken, privateKey, null);
-            assertJweStandarClaimsNotNull(jwe, false);
+            AssertBuilder.jweBuilder(jwe).checkAsserts();
         } catch (Exception ex) {
             fail(ex.getMessage(), ex);
         }
@@ -268,7 +273,7 @@ public class CanProvideEncryptedIdTokenResponse extends BaseTest {
             PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
 
             Jwe jwe = Jwe.parse(idToken, privateKey, null);
-            assertJweStandarClaimsNotNull(jwe, false);
+            AssertBuilder.jweBuilder(jwe).checkAsserts();
         } catch (Exception ex) {
             fail(ex.getMessage(), ex);
         }
@@ -318,7 +323,7 @@ public class CanProvideEncryptedIdTokenResponse extends BaseTest {
 
             AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                     authorizationEndpoint, authorizationRequest, userId, userSecret);
-            assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+            AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
 
             String idToken = authorizationResponse.getIdToken();
 
@@ -327,7 +332,7 @@ public class CanProvideEncryptedIdTokenResponse extends BaseTest {
             PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
 
             Jwe jwe = Jwe.parse(idToken, privateKey, null);
-            assertJweStandarClaimsNotNull(jwe, false);
+            AssertBuilder.jweBuilder(jwe).checkAsserts();
         } catch (Exception ex) {
             fail(ex.getMessage(), ex);
         }
