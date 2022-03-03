@@ -21,7 +21,6 @@ import org.testng.annotations.Test;
 import java.util.Arrays;
 import java.util.List;
 
-import static io.jans.as.client.client.Asserter.assertRegisterResponseFail;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
@@ -49,6 +48,6 @@ public class RejectRegistrationOfRedirectUriWithFragment extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        AssertBuilder.registerResponseBuilder(registerResponse).status(400).checkAsserts();
+        AssertBuilder.registerResponse(registerResponse).status(400).checkAsserts();
     }
 }

@@ -10,55 +10,55 @@ import io.jans.as.client.BaseTest;
 import io.jans.as.client.JwkClient;
 import io.jans.as.client.JwkResponse;
 import io.jans.as.client.RegisterClient;
-import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
-
 import io.jans.as.client.client.AssertBuilder;
-import io.jans.as.client.client.TestCaseBuilder;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.BackchannelTokenDeliveryMode;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.crypto.signature.AsymmetricSignatureAlgorithm;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
-import io.jans.as.model.register.ApplicationType;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import javax.ws.rs.HttpMethod;
 import java.util.Arrays;
 import java.util.Collections;
 
-import static io.jans.as.client.client.Asserter.*;
-import static io.jans.as.model.register.RegisterRequestParam.*;
+import static io.jans.as.client.client.Asserter.assertRegisterResponseClaimsAreContained;
+import static io.jans.as.client.client.Asserter.assertRegisterResponseClaimsNotNull;
+import static io.jans.as.model.register.RegisterRequestParam.APPLICATION_TYPE;
+import static io.jans.as.model.register.RegisterRequestParam.CLIENT_NAME;
+import static io.jans.as.model.register.RegisterRequestParam.ID_TOKEN_SIGNED_RESPONSE_ALG;
+import static io.jans.as.model.register.RegisterRequestParam.JWKS;
+import static io.jans.as.model.register.RegisterRequestParam.JWKS_URI;
+import static io.jans.as.model.register.RegisterRequestParam.SCOPE;
+import static io.jans.as.model.register.RegisterRequestParam.SECTOR_IDENTIFIER_URI;
+import static io.jans.as.model.register.RegisterRequestParam.SUBJECT_TYPE;
+import static io.jans.as.model.register.RegisterRequestParam.TOKEN_ENDPOINT_AUTH_METHOD;
+import static io.jans.as.model.register.RegisterRequestParam.TOKEN_ENDPOINT_AUTH_SIGNING_ALG;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
-/**
- * @author Javier Rojas Blum
- * @version May 20, 2020
- */
 public class RegistrationTest extends BaseTest {
 
     @Parameters({"clientJwksUri"})
     @Test
-    public void backchannelTokenDeliveryModePoll1(final String clientJwksUri) {
-        showTitle("backchannelTokenDeliveryModePoll1");
+
+    // todo all our names should be names as X_Y_Z, where X is what we call, Y under what condition, Z what do we expect.
+    public void backchannelTokenDeliveryModePoll_whenCallWithValidData_shouldRegisterSuccessfully(final String clientJwksUri) {
+        showTitle("backchannelTokenDeliveryModePoll_whenCallWithValidData_shouldRegisterSuccessfully");
 
         // 1. Dynamic Client Registration
-        RegisterResponse registerResponse = TestCaseBuilder.registrationTestCaseBuilder("backchannelTokenDeliveryModePoll1 register")
+        RegisterResponse registerResponse = RegisterClient.builder()
                 .withRegistrationEndpoint(registrationEndpoint)
                 .withJwksUri(clientJwksUri)
                 .withGrantTypes(Collections.singletonList(GrantType.CIBA))
                 .withBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
                 .withBackchannelAuthRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
                 .withBackchannelUserCodeParameter(true)
-                .excuteTestCase();
+                .execute();
 
-        AssertBuilder.registerResponseBuilder(registerResponse)
-                .status(201)
-                .notNullRegistrationClientUri()
+        AssertBuilder.registerResponseCreated(registerResponse)
                 .backchannelUserCodeParameter(true)
                 .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
                 .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
@@ -68,12 +68,12 @@ public class RegistrationTest extends BaseTest {
         String registrationClientUri = registerResponse.getRegistrationClientUri();
 
         // 2. Client Read
-        RegisterResponse clientReadResponse = TestCaseBuilder.registrationTestCaseBuilder("backchannelTokenDeliveryModePoll1 read")
+        RegisterResponse clientReadResponse = RegisterClient.builder()
                 .withRegistrationEndpoint(registrationClientUri)
                 .withRegistrationAccessToken(registrationAccessToken)
                 .isReadMode()
-                .excuteTestCase();
-        AssertBuilder.registerResponseBuilder(clientReadResponse)
+                .execute();
+        AssertBuilder.registerResponse(clientReadResponse)
                 .status(200)
                 .notNullRegistrationClientUri()
                 .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
@@ -90,7 +90,7 @@ public class RegistrationTest extends BaseTest {
         showTitle("backchannelTokenDeliveryModePoll2");
 
         // 1. Dynamic Client Registration
-        RegisterResponse registerResponse = TestCaseBuilder.registrationTestCaseBuilder("backchannelTokenDeliveryModePoll2 register")
+        RegisterResponse registerResponse = RegisterClient.builder()
                 .withRegistrationEndpoint(registrationEndpoint)
                 .withSectorIdentifierUri(sectorIdentifierUri)
                 .withJwksUri(clientJwksUri)
@@ -98,11 +98,9 @@ public class RegistrationTest extends BaseTest {
                 .withBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
                 .withBackchannelAuthRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
                 .withBackchannelUserCodeParameter(true)
-                .excuteTestCase();
+                .execute();
 
-        AssertBuilder.registerResponseBuilder(registerResponse)
-                .status(201)
-                .notNullRegistrationClientUri()
+        AssertBuilder.registerResponseCreated(registerResponse)
                 .backchannelUserCodeParameter(true)
                 .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
                 .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
@@ -114,12 +112,12 @@ public class RegistrationTest extends BaseTest {
         String registrationClientUri = registerResponse.getRegistrationClientUri();
 
         // 2. Client Read
-        RegisterResponse clientReadResponse = TestCaseBuilder.registrationTestCaseBuilder("backchannelTokenDeliveryModePoll2 read")
+        RegisterResponse clientReadResponse = RegisterClient.builder()
                 .withRegistrationEndpoint(registrationClientUri)
                 .withRegistrationAccessToken(registrationAccessToken)
                 .isReadMode()
-                .excuteTestCase();
-        AssertBuilder.registerResponseBuilder(clientReadResponse)
+                .execute();
+        AssertBuilder.registerResponse(clientReadResponse)
                 .status(200)
                 .notNullRegistrationClientUri()
                 .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
@@ -136,18 +134,16 @@ public class RegistrationTest extends BaseTest {
         showTitle("backchannelTokenDeliveryModePoll3");
 
         // 1. Dynamic Client Registration
-        RegisterResponse registerResponse = TestCaseBuilder.registrationTestCaseBuilder("backchannelTokenDeliveryModePoll3 register")
+        RegisterResponse registerResponse = RegisterClient.builder()
                 .withRegistrationEndpoint(registrationEndpoint)
                 .withSubjectType(SubjectType.PUBLIC)
                 .withGrantTypes(Collections.singletonList(GrantType.CIBA))
                 .withBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
                 .withBackchannelAuthRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
                 .withBackchannelUserCodeParameter(true)
-                .excuteTestCase();
+                .execute();
 
-        AssertBuilder.registerResponseBuilder(registerResponse)
-                .status(201)
-                .notNullRegistrationClientUri()
+        AssertBuilder.registerResponseCreated(registerResponse)
                 .backchannelUserCodeParameter(true)
                 .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
                 .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
@@ -157,12 +153,12 @@ public class RegistrationTest extends BaseTest {
         String registrationClientUri = registerResponse.getRegistrationClientUri();
 
         // 2. Client Read
-        RegisterResponse clientReadResponse = TestCaseBuilder.registrationTestCaseBuilder("backchannelTokenDeliveryModePoll3 read")
+        RegisterResponse clientReadResponse = RegisterClient.builder()
                 .withRegistrationEndpoint(registrationClientUri)
                 .withRegistrationAccessToken(registrationAccessToken)
                 .isReadMode()
-                .excuteTestCase();
-        AssertBuilder.registerResponseBuilder(clientReadResponse)
+                .execute();
+        AssertBuilder.registerResponse(clientReadResponse)
                 .status(200)
                 .notNullRegistrationClientUri()
                 .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
@@ -179,32 +175,29 @@ public class RegistrationTest extends BaseTest {
         showTitle("backchannelTokenDeliveryModePoll4");
 
         // 1. Dynamic Client Registration
-        RegisterResponse registerResponse = TestCaseBuilder.registrationTestCaseBuilder("backchannelTokenDeliveryModePoll4 register")
+        RegisterResponse registerResponse = RegisterClient.builder()
                 .withRegistrationEndpoint(registrationEndpoint)
-                .excuteTestCase();
+                .execute();
 
-        AssertBuilder.registerResponseBuilder(registerResponse)
-                .status(201)
-                .notNullRegistrationClientUri()
-                .checkAsserts();
+        AssertBuilder.registerResponseCreated(registerResponse).checkAsserts();
 
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
         String registrationClientUri = registerResponse.getRegistrationClientUri();
 
         // 2. Client Read
-        RegisterResponse clientReadResponse = TestCaseBuilder.registrationTestCaseBuilder("backchannelTokenDeliveryModePoll4 read")
+        RegisterResponse clientReadResponse = RegisterClient.builder()
                 .withRegistrationEndpoint(registrationClientUri)
                 .withRegistrationAccessToken(registrationAccessToken)
                 .isReadMode()
-                .excuteTestCase();
-        AssertBuilder.registerResponseBuilder(clientReadResponse)
+                .execute();
+        AssertBuilder.registerResponse(clientReadResponse)
                 .status(200)
                 .notNullRegistrationClientUri()
                 .checkAsserts();
         assertRegisterResponseClaimsNotNull(clientReadResponse, APPLICATION_TYPE, SUBJECT_TYPE, ID_TOKEN_SIGNED_RESPONSE_ALG, CLIENT_NAME, SCOPE);
 
         // 3. Client Update
-        RegisterResponse clientUpdateResponse = TestCaseBuilder.registrationTestCaseBuilder("backchannelTokenDeliveryModePoll4 update")
+        RegisterResponse clientUpdateResponse = RegisterClient.builder()
                 .withRegistrationAccessToken(registrationAccessToken)
                 .withRegistrationEndpoint(registrationClientUri)
                 .withSectorIdentifierUri(sectorIdentifierUri)
@@ -214,8 +207,8 @@ public class RegistrationTest extends BaseTest {
                 .withBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
                 .withBackchannelAuthRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
                 .isUpdateMode()
-                .excuteTestCase();
-        AssertBuilder.registerResponseBuilder(clientUpdateResponse)
+                .execute();
+        AssertBuilder.registerResponse(clientUpdateResponse)
                 .status(200)
                 .notNullRegistrationClientUri()
                 .backchannelUserCodeParameter(true)
@@ -235,7 +228,7 @@ public class RegistrationTest extends BaseTest {
         JwkClient jwkClient = new JwkClient(clientJwksUri);
         JwkResponse jwkResponse = jwkClient.exec();
 
-        RegisterResponse registerResponse = TestCaseBuilder.registrationTestCaseBuilder("backchannelTokenDeliveryModePoll5 register")
+        RegisterResponse registerResponse = RegisterClient.builder()
                 .withRegistrationEndpoint(registrationEndpoint)
                 .withJwks(jwkResponse.getJwks().toString())
                 .withGrantTypes(Collections.singletonList(GrantType.CIBA))
@@ -245,11 +238,9 @@ public class RegistrationTest extends BaseTest {
                 .withTokenSignedResponseAlgorithm(SignatureAlgorithm.PS256)
                 .withTokenEndPointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT)
                 .withTokenEndPointAuthSigningAlgorithm(SignatureAlgorithm.PS256)
-                .excuteTestCase();
+                .execute();
 
-        AssertBuilder.registerResponseBuilder(registerResponse)
-                .status(201)
-                .notNullRegistrationClientUri()
+        AssertBuilder.registerResponseCreated(registerResponse)
                 .backchannelUserCodeParameter(false)
                 .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
                 .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.PS256)
@@ -266,12 +257,12 @@ public class RegistrationTest extends BaseTest {
         String registrationClientUri = registerResponse.getRegistrationClientUri();
 
         // 2. Client Read
-        RegisterResponse clientReadResponse = TestCaseBuilder.registrationTestCaseBuilder("backchannelTokenDeliveryModePoll5 read")
+        RegisterResponse clientReadResponse = RegisterClient.builder()
                 .withRegistrationEndpoint(registrationClientUri)
                 .withRegistrationAccessToken(registrationAccessToken)
                 .isReadMode()
-                .excuteTestCase();
-        AssertBuilder.registerResponseBuilder(clientReadResponse)
+                .execute();
+        AssertBuilder.registerResponse(clientReadResponse)
                 .status(200)
                 .notNullRegistrationClientUri()
                 .backchannelUserCodeParameter(false)
@@ -294,7 +285,7 @@ public class RegistrationTest extends BaseTest {
         showTitle("backchannelTokenDeliveryModePing1");
 
         // 1. Dynamic Client Registration
-        RegisterResponse registerResponse = TestCaseBuilder.registrationTestCaseBuilder("backchannelTokenDeliveryModePing1 register")
+        RegisterResponse registerResponse = RegisterClient.builder()
                 .withRegistrationEndpoint(registrationEndpoint)
                 .withJwksUri(clientJwksUri)
                 .withGrantTypes(Collections.singletonList(GrantType.CIBA))
@@ -302,11 +293,9 @@ public class RegistrationTest extends BaseTest {
                 .withBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING)
                 .withBackchannelAuthRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
                 .withBackchannelClientNotificationEndPoint(backchannelClientNotificationEndpoint)
-                .excuteTestCase();
+                .execute();
 
-        AssertBuilder.registerResponseBuilder(registerResponse)
-                .status(201)
-                .notNullRegistrationClientUri()
+        AssertBuilder.registerResponseCreated(registerResponse)
                 .backchannelUserCodeParameter(true)
                 .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING)
                 .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
@@ -316,12 +305,12 @@ public class RegistrationTest extends BaseTest {
         String registrationClientUri = registerResponse.getRegistrationClientUri();
 
         // 2. Client Read
-        RegisterResponse clientReadResponse = TestCaseBuilder.registrationTestCaseBuilder("backchannelTokenDeliveryModePing1 read")
+        RegisterResponse clientReadResponse = RegisterClient.builder()
                 .withRegistrationEndpoint(registrationClientUri)
                 .withRegistrationAccessToken(registrationAccessToken)
                 .isReadMode()
-                .excuteTestCase();
-        AssertBuilder.registerResponseBuilder(clientReadResponse)
+                .execute();
+        AssertBuilder.registerResponse(clientReadResponse)
                 .status(200)
                 .notNullRegistrationClientUri()
                 .backchannelUserCodeParameter(true)
@@ -338,7 +327,7 @@ public class RegistrationTest extends BaseTest {
         showTitle("backchannelTokenDeliveryModePing2");
 
         // 1. Dynamic Client Registration
-        RegisterResponse registerResponse = TestCaseBuilder.registrationTestCaseBuilder("backchannelTokenDeliveryModePing2 register")
+        RegisterResponse registerResponse = RegisterClient.builder()
                 .withRegistrationEndpoint(registrationEndpoint)
                 .withJwksUri(clientJwksUri)
                 .withSectorIdentifierUri(sectorIdentifierUri)
@@ -347,11 +336,9 @@ public class RegistrationTest extends BaseTest {
                 .withBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING)
                 .withBackchannelAuthRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
                 .withBackchannelClientNotificationEndPoint(backchannelClientNotificationEndpoint)
-                .excuteTestCase();
+                .execute();
 
-        AssertBuilder.registerResponseBuilder(registerResponse)
-                .status(201)
-                .notNullRegistrationClientUri()
+        AssertBuilder.registerResponseCreated(registerResponse)
                 .backchannelUserCodeParameter(true)
                 .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING)
                 .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
@@ -362,12 +349,12 @@ public class RegistrationTest extends BaseTest {
         String registrationClientUri = registerResponse.getRegistrationClientUri();
 
         // 2. Client Read
-        RegisterResponse clientReadResponse = TestCaseBuilder.registrationTestCaseBuilder("backchannelTokenDeliveryModePing2 read")
+        RegisterResponse clientReadResponse = RegisterClient.builder()
                 .withRegistrationEndpoint(registrationClientUri)
                 .withRegistrationAccessToken(registrationAccessToken)
                 .isReadMode()
-                .excuteTestCase();
-        AssertBuilder.registerResponseBuilder(clientReadResponse)
+                .execute();
+        AssertBuilder.registerResponse(clientReadResponse)
                 .status(200)
                 .notNullRegistrationClientUri()
                 .backchannelUserCodeParameter(true)
@@ -385,7 +372,7 @@ public class RegistrationTest extends BaseTest {
         showTitle("backchannelTokenDeliveryModePing3");
 
         // 1. Dynamic Client Registration
-        RegisterResponse registerResponse = TestCaseBuilder.registrationTestCaseBuilder("backchannelTokenDeliveryModePing3 register")
+        RegisterResponse registerResponse = RegisterClient.builder()
                 .withRegistrationEndpoint(registrationEndpoint)
                 .withSubjectType(SubjectType.PUBLIC)
                 .withGrantTypes(Collections.singletonList(GrantType.CIBA))
@@ -393,11 +380,9 @@ public class RegistrationTest extends BaseTest {
                 .withBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING)
                 .withBackchannelAuthRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
                 .withBackchannelClientNotificationEndPoint(backchannelClientNotificationEndpoint)
-                .excuteTestCase();
+                .execute();
 
-        AssertBuilder.registerResponseBuilder(registerResponse)
-                .status(201)
-                .notNullRegistrationClientUri()
+        AssertBuilder.registerResponseCreated(registerResponse)
                 .backchannelUserCodeParameter(true)
                 .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING)
                 .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
@@ -407,12 +392,12 @@ public class RegistrationTest extends BaseTest {
         String registrationClientUri = registerResponse.getRegistrationClientUri();
 
         // 2. Client Read
-        RegisterResponse clientReadResponse = TestCaseBuilder.registrationTestCaseBuilder("backchannelTokenDeliveryModePing3 read")
+        RegisterResponse clientReadResponse = RegisterClient.builder()
                 .withRegistrationEndpoint(registrationClientUri)
                 .withRegistrationAccessToken(registrationAccessToken)
                 .isReadMode()
-                .excuteTestCase();
-        AssertBuilder.registerResponseBuilder(clientReadResponse)
+                .execute();
+        AssertBuilder.registerResponse(clientReadResponse)
                 .status(200)
                 .notNullRegistrationClientUri()
                 .backchannelUserCodeParameter(true)
@@ -430,32 +415,29 @@ public class RegistrationTest extends BaseTest {
         showTitle("backchannelTokenDeliveryModePing4");
 
         // 1. Dynamic Client Registration
-        RegisterResponse registerResponse = TestCaseBuilder.registrationTestCaseBuilder("backchannelTokenDeliveryModePing4 register")
+        RegisterResponse registerResponse = RegisterClient.builder()
                 .withRegistrationEndpoint(registrationEndpoint)
-                .excuteTestCase();
+                .execute();
 
-        AssertBuilder.registerResponseBuilder(registerResponse)
-                .status(201)
-                .notNullRegistrationClientUri()
-                .checkAsserts();
+        AssertBuilder.registerResponseCreated(registerResponse).checkAsserts();
 
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
         String registrationClientUri = registerResponse.getRegistrationClientUri();
 
         // 2. Client Read
-        RegisterResponse clientReadResponse = TestCaseBuilder.registrationTestCaseBuilder("backchannelTokenDeliveryModePing4 read")
+        RegisterResponse clientReadResponse = RegisterClient.builder()
                 .withRegistrationEndpoint(registrationClientUri)
                 .withRegistrationAccessToken(registrationAccessToken)
                 .isReadMode()
-                .excuteTestCase();
-        AssertBuilder.registerResponseBuilder(clientReadResponse)
+                .execute();
+        AssertBuilder.registerResponse(clientReadResponse)
                 .status(200)
                 .notNullRegistrationClientUri()
                 .checkAsserts();
         assertRegisterResponseClaimsNotNull(clientReadResponse, APPLICATION_TYPE, SUBJECT_TYPE, ID_TOKEN_SIGNED_RESPONSE_ALG, CLIENT_NAME, SCOPE);
 
         // 3. Client Update
-        RegisterResponse clientUpdateResponse = TestCaseBuilder.registrationTestCaseBuilder("backchannelTokenDeliveryModePing4 update")
+        RegisterResponse clientUpdateResponse = RegisterClient.builder()
                 .withRegistrationAccessToken(registrationAccessToken)
                 .withRegistrationEndpoint(registrationClientUri)
                 .withSectorIdentifierUri(sectorIdentifierUri)
@@ -466,10 +448,9 @@ public class RegistrationTest extends BaseTest {
                 .withBackchannelClientNotificationEndPoint(backchannelClientNotificationEndpoint)
                 .withBackchannelAuthRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
                 .isUpdateMode()
-                .excuteTestCase();
-        AssertBuilder.registerResponseBuilder(clientUpdateResponse)
+                .execute();
+        AssertBuilder.registerResponse(clientUpdateResponse)
                 .status(200)
-                .notNullRegistrationClientUri()
                 .backchannelUserCodeParameter(true)
                 .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING)
                 .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
@@ -488,7 +469,7 @@ public class RegistrationTest extends BaseTest {
         JwkClient jwkClient = new JwkClient(clientJwksUri);
         JwkResponse jwkResponse = jwkClient.exec();
 
-        RegisterResponse registerResponse = TestCaseBuilder.registrationTestCaseBuilder("backchannelTokenDeliveryModePing5 register")
+        RegisterResponse registerResponse = RegisterClient.builder()
                 .withRegistrationEndpoint(registrationEndpoint)
                 .withJwks(jwkResponse.getJwks().toString())
                 .withGrantTypes(Collections.singletonList(GrantType.CIBA))
@@ -499,11 +480,9 @@ public class RegistrationTest extends BaseTest {
                 .withTokenSignedResponseAlgorithm(SignatureAlgorithm.PS256)
                 .withTokenEndPointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT)
                 .withTokenEndPointAuthSigningAlgorithm(SignatureAlgorithm.PS256)
-                .excuteTestCase();
+                .execute();
 
-        AssertBuilder.registerResponseBuilder(registerResponse)
-                .status(201)
-                .notNullRegistrationClientUri()
+        AssertBuilder.registerResponseCreated(registerResponse)
                 .backchannelUserCodeParameter(false)
                 .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING)
                 .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.PS256)
@@ -520,14 +499,13 @@ public class RegistrationTest extends BaseTest {
         String registrationClientUri = registerResponse.getRegistrationClientUri();
 
         // 2. Client Read
-        RegisterResponse clientReadResponse = TestCaseBuilder.registrationTestCaseBuilder("backchannelTokenDeliveryModePing5 read")
+        RegisterResponse clientReadResponse = RegisterClient.builder()
                 .withRegistrationEndpoint(registrationClientUri)
                 .withRegistrationAccessToken(registrationAccessToken)
                 .isReadMode()
-                .excuteTestCase();
-        AssertBuilder.registerResponseBuilder(clientReadResponse)
+                .execute();
+        AssertBuilder.registerResponse(clientReadResponse)
                 .status(200)
-                .notNullRegistrationClientUri()
                 .backchannelUserCodeParameter(false)
                 .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING)
                 .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.PS256)
@@ -547,17 +525,15 @@ public class RegistrationTest extends BaseTest {
         showTitle("backchannelTokenDeliveryModePush1");
 
         // 1. Dynamic Client Registration
-        RegisterResponse registerResponse = TestCaseBuilder.registrationTestCaseBuilder("backchannelTokenDeliveryModePush1 register")
+        RegisterResponse registerResponse = RegisterClient.builder()
                 .withRegistrationEndpoint(registrationEndpoint)
                 .withGrantTypes(Collections.singletonList(GrantType.CIBA))
                 .withBackchannelUserCodeParameter(true)
                 .withBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH)
                 .withBackchannelClientNotificationEndPoint(backchannelClientNotificationEndpoint)
                 .withBackchannelAuthRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
-                .excuteTestCase();
-        AssertBuilder.registerResponseBuilder(registerResponse)
-                .status(201)
-                .notNullRegistrationClientUri()
+                .execute();
+        AssertBuilder.registerResponseCreated(registerResponse)
                 .backchannelUserCodeParameter(true)
                 .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH)
                 .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
@@ -567,14 +543,13 @@ public class RegistrationTest extends BaseTest {
         String registrationClientUri = registerResponse.getRegistrationClientUri();
 
         // 2. Client Read
-        RegisterResponse clientReadResponse = TestCaseBuilder.registrationTestCaseBuilder("backchannelTokenDeliveryModePush1 read")
+        RegisterResponse clientReadResponse = RegisterClient.builder()
                 .withRegistrationEndpoint(registrationClientUri)
                 .withRegistrationAccessToken(registrationAccessToken)
                 .isReadMode()
-                .excuteTestCase();
-        AssertBuilder.registerResponseBuilder(clientReadResponse)
+                .execute();
+        AssertBuilder.registerResponse(clientReadResponse)
                 .status(200)
-                .notNullRegistrationClientUri()
                 .backchannelUserCodeParameter(true)
                 .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH)
                 .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
@@ -588,7 +563,7 @@ public class RegistrationTest extends BaseTest {
         showTitle("backchannelTokenDeliveryModePush2");
 
         // 1. Dynamic Client Registration
-        RegisterResponse registerResponse = TestCaseBuilder.registrationTestCaseBuilder("backchannelTokenDeliveryModePush2 register")
+        RegisterResponse registerResponse = RegisterClient.builder()
                 .withRegistrationEndpoint(registrationEndpoint)
                 .withSectorIdentifierUri(sectorIdentifierUri)
                 .withGrantTypes(Collections.singletonList(GrantType.CIBA))
@@ -596,10 +571,8 @@ public class RegistrationTest extends BaseTest {
                 .withBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH)
                 .withBackchannelClientNotificationEndPoint(backchannelClientNotificationEndpoint)
                 .withBackchannelAuthRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
-                .excuteTestCase();
-        AssertBuilder.registerResponseBuilder(registerResponse)
-                .status(201)
-                .notNullRegistrationClientUri()
+                .execute();
+        AssertBuilder.registerResponseCreated(registerResponse)
                 .backchannelUserCodeParameter(true)
                 .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH)
                 .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
@@ -610,14 +583,13 @@ public class RegistrationTest extends BaseTest {
         String registrationClientUri = registerResponse.getRegistrationClientUri();
 
         // 2. Client Read
-        RegisterResponse clientReadResponse = TestCaseBuilder.registrationTestCaseBuilder("backchannelTokenDeliveryModePush2 read")
+        RegisterResponse clientReadResponse = RegisterClient.builder()
                 .withRegistrationEndpoint(registrationClientUri)
                 .withRegistrationAccessToken(registrationAccessToken)
                 .isReadMode()
-                .excuteTestCase();
-        AssertBuilder.registerResponseBuilder(clientReadResponse)
+                .execute();
+        AssertBuilder.registerResponse(clientReadResponse)
                 .status(200)
-                .notNullRegistrationClientUri()
                 .backchannelUserCodeParameter(true)
                 .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH)
                 .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
@@ -633,7 +605,7 @@ public class RegistrationTest extends BaseTest {
         showTitle("backchannelTokenDeliveryModePush3");
 
         // 1. Dynamic Client Registration
-        RegisterResponse registerResponse = TestCaseBuilder.registrationTestCaseBuilder("backchannelTokenDeliveryModePush3 register")
+        RegisterResponse registerResponse = RegisterClient.builder()
                 .withRegistrationEndpoint(registrationEndpoint)
                 .withSubjectType(SubjectType.PUBLIC)
                 .withGrantTypes(Collections.singletonList(GrantType.CIBA))
@@ -641,10 +613,8 @@ public class RegistrationTest extends BaseTest {
                 .withBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH)
                 .withBackchannelClientNotificationEndPoint(backchannelClientNotificationEndpoint)
                 .withBackchannelAuthRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
-                .excuteTestCase();
-        AssertBuilder.registerResponseBuilder(registerResponse)
-                .status(201)
-                .notNullRegistrationClientUri()
+                .execute();
+        AssertBuilder.registerResponseCreated(registerResponse)
                 .backchannelUserCodeParameter(true)
                 .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH)
                 .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
@@ -654,14 +624,13 @@ public class RegistrationTest extends BaseTest {
         String registrationClientUri = registerResponse.getRegistrationClientUri();
 
         // 2. Client Read
-        RegisterResponse clientReadResponse = TestCaseBuilder.registrationTestCaseBuilder("backchannelTokenDeliveryModePush3 read")
+        RegisterResponse clientReadResponse = RegisterClient.builder()
                 .withRegistrationEndpoint(registrationClientUri)
                 .withRegistrationAccessToken(registrationAccessToken)
                 .isReadMode()
-                .excuteTestCase();
-        AssertBuilder.registerResponseBuilder(clientReadResponse)
+                .execute();
+        AssertBuilder.registerResponse(clientReadResponse)
                 .status(200)
-                .notNullRegistrationClientUri()
                 .backchannelUserCodeParameter(true)
                 .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH)
                 .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
@@ -675,33 +644,29 @@ public class RegistrationTest extends BaseTest {
         showTitle("backchannelTokenDeliveryModePush4");
 
         // 1. Dynamic Client Registration
-        RegisterResponse registerResponse = TestCaseBuilder.registrationTestCaseBuilder("backchannelTokenDeliveryModePush4 register")
+        RegisterResponse registerResponse = RegisterClient.builder()
                 .withRegistrationEndpoint(registrationEndpoint)
-                .excuteTestCase();
+                .execute();
 
-        AssertBuilder.registerResponseBuilder(registerResponse)
-                .status(201)
-                .notNullRegistrationClientUri()
-                .checkAsserts();
+        AssertBuilder.registerResponseCreated(registerResponse).checkAsserts();
 
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
         String registrationClientUri = registerResponse.getRegistrationClientUri();
 
         // 2. Client Read
-        RegisterResponse clientReadResponse = TestCaseBuilder.registrationTestCaseBuilder("backchannelTokenDeliveryModePush4 read")
+        RegisterResponse clientReadResponse = RegisterClient.builder()
                 .withRegistrationEndpoint(registrationClientUri)
                 .withRegistrationAccessToken(registrationAccessToken)
                 .isReadMode()
-                .excuteTestCase();
-        AssertBuilder.registerResponseBuilder(clientReadResponse)
+                .execute();
+        AssertBuilder.registerResponse(clientReadResponse)
                 .status(200)
-                .notNullRegistrationClientUri()
                 .checkAsserts();
 
         assertRegisterResponseClaimsNotNull(clientReadResponse, APPLICATION_TYPE, SUBJECT_TYPE, ID_TOKEN_SIGNED_RESPONSE_ALG, CLIENT_NAME, SCOPE);
 
         // 3. Client Update
-        RegisterResponse clientUpdateResponse = TestCaseBuilder.registrationTestCaseBuilder("backchannelTokenDeliveryModePush4 update")
+        RegisterResponse clientUpdateResponse = RegisterClient.builder()
                 .withRegistrationAccessToken(registrationAccessToken)
                 .withRegistrationEndpoint(registrationClientUri)
                 .withSectorIdentifierUri(sectorIdentifierUri)
@@ -711,11 +676,10 @@ public class RegistrationTest extends BaseTest {
                 .withBackchannelClientNotificationEndPoint(backchannelClientNotificationEndpoint)
                 .withBackchannelAuthRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
                 .isUpdateMode()
-                .excuteTestCase();
+                .execute();
 
-        AssertBuilder.registerResponseBuilder(clientUpdateResponse)
+        AssertBuilder.registerResponse(clientUpdateResponse)
                 .status(200)
-                .notNullRegistrationClientUri()
                 .backchannelUserCodeParameter(true)
                 .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH)
                 .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
@@ -727,19 +691,19 @@ public class RegistrationTest extends BaseTest {
 
     @Parameters({"clientJwksUri"})
     @Test
-    public void registrationFail1(final String clientJwksUri) {
+    public void registrationFail1(final String clientJwksUri) { // todo not clear why it should fail, we need X_Y_Z pattern here and in all names
         showTitle("registrationFail1");
 
-        RegisterResponse response = TestCaseBuilder.registrationTestCaseBuilder("registratioonFail1")
+        RegisterResponse response = RegisterClient.builder()
                 .withRegistrationEndpoint(registrationEndpoint)
                 .withJwksUri(clientJwksUri)
                 .withGrantTypes(Collections.singletonList(GrantType.CIBA))
                 .withBackchannelUserCodeParameter(true)
                 .withBackchannelTokenDeliveryMode(null)
                 .withBackchannelAuthRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
-                .excuteTestCase();
+                .execute();
 
-        AssertBuilder.registerResponseBuilder(response)
+        AssertBuilder.registerResponse(response)
                 .status(400).
                 checkAsserts();
     }
@@ -748,7 +712,7 @@ public class RegistrationTest extends BaseTest {
     @Test
     public void registrationFail2(final String clientJwksUri) {
         showTitle("registrationFail2");
-        RegisterResponse response = TestCaseBuilder.registrationTestCaseBuilder("registratioonFail2")
+        RegisterResponse response = RegisterClient.builder()
                 .withRegistrationEndpoint(registrationEndpoint)
                 .withJwksUri(clientJwksUri)
                 .withGrantTypes(Collections.singletonList(GrantType.CIBA))
@@ -756,9 +720,9 @@ public class RegistrationTest extends BaseTest {
                 .withBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING)
                 .withBackchannelClientNotificationEndPoint(null) // Missing backchannel_client_notification_endpoint
                 .withBackchannelAuthRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
-                .excuteTestCase();
+                .execute();
 
-        AssertBuilder.registerResponseBuilder(response)
+        AssertBuilder.registerResponse(response)
                 .status(400)
                 .checkAsserts();
     }
@@ -767,7 +731,7 @@ public class RegistrationTest extends BaseTest {
     @Test
     public void registrationFail3(final String clientJwksUri) {
         showTitle("registration3");
-        RegisterResponse response = TestCaseBuilder.registrationTestCaseBuilder("registration3")
+        RegisterResponse response = RegisterClient.builder()
                 .withRegistrationEndpoint(registrationEndpoint)
                 .withJwksUri(clientJwksUri)
                 .withGrantTypes(Collections.singletonList(GrantType.CIBA))
@@ -775,16 +739,16 @@ public class RegistrationTest extends BaseTest {
                 .withBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH)
                 .withBackchannelClientNotificationEndPoint(null) // Missing backchannel_client_notification_endpoint
                 .withBackchannelAuthRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
-                .excuteTestCase();
+                .execute();
 
-        AssertBuilder.registerResponseBuilder(response).status(400).checkAsserts();
+        AssertBuilder.registerResponse(response).status(400).checkAsserts();
     }
 
     @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint"})
     @Test
     public void registrationFail4(final String clientJwksUri, final String backchannelClientNotificationEndpoint) {
         showTitle("registrationFail4");
-        RegisterResponse response = TestCaseBuilder.registrationTestCaseBuilder("registrationFail4")
+        RegisterResponse response = RegisterClient.builder()
                 .withRegistrationEndpoint(registrationEndpoint)
                 .withJwksUri(clientJwksUri)
                 .withGrantTypes(Arrays.asList())// Missing  grant type urn:openid:params:grant-type:ciba
@@ -792,9 +756,9 @@ public class RegistrationTest extends BaseTest {
                 .withBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING)
                 .withBackchannelClientNotificationEndPoint(backchannelClientNotificationEndpoint)
                 .withBackchannelAuthRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
-                .excuteTestCase();
+                .execute();
 
-        AssertBuilder.registerResponseBuilder(response)
+        AssertBuilder.registerResponse(response)
                 .status(400)
                 .checkAsserts();
     }
@@ -803,7 +767,7 @@ public class RegistrationTest extends BaseTest {
     @Test
     public void registrationFail5(final String clientJwksUri, final String backchannelClientNotificationEndpoint) {
         showTitle("registrationFail5");
-        RegisterResponse response = TestCaseBuilder.registrationTestCaseBuilder("registrationFail5")
+        RegisterResponse response = RegisterClient.builder()
                 .withRegistrationEndpoint(registrationEndpoint)
                 .withJwksUri(clientJwksUri)
                 .withGrantTypes(Arrays.asList())// Missing  grant type urn:openid:params:grant-type:ciba
@@ -811,9 +775,9 @@ public class RegistrationTest extends BaseTest {
                 .withBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
                 .withBackchannelClientNotificationEndPoint(backchannelClientNotificationEndpoint)
                 .withBackchannelAuthRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
-                .excuteTestCase();
+                .execute();
 
-        AssertBuilder.registerResponseBuilder(response)
+        AssertBuilder.registerResponse(response) // todo we should think how to make it shorter, maybe just  AssertBuilder.registerResponseIsBadRequest(response) ?
                 .status(400)
                 .checkAsserts();
     }
@@ -822,17 +786,17 @@ public class RegistrationTest extends BaseTest {
     @Test
     public void registrationFail6(final String backchannelClientNotificationEndpoint) {
         showTitle("registrationFail6");
-        RegisterResponse response = TestCaseBuilder.registrationTestCaseBuilder("registrationFail6")
+        RegisterResponse response = RegisterClient.builder()
                 .withRegistrationEndpoint(registrationEndpoint)
-                .withJwksUri(null) // Missing jwks_uri
+                .withJwksUri(null) // Missing jwks_uri // todo it is missed by default, no ?
                 .withGrantTypes(Collections.singletonList(GrantType.CIBA))
                 .withBackchannelUserCodeParameter(true)
                 .withBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING)
                 .withBackchannelClientNotificationEndPoint(backchannelClientNotificationEndpoint)
                 .withBackchannelAuthRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
-                .excuteTestCase();
+                .execute();
 
-        AssertBuilder.registerResponseBuilder(response)
+        AssertBuilder.registerResponse(response)
                 .status(400)
                 .checkAsserts();
     }
@@ -842,16 +806,16 @@ public class RegistrationTest extends BaseTest {
     public void registrationFail7(final String backchannelClientNotificationEndpoint) {
         showTitle("registrationFail7");
 
-        RegisterResponse response = TestCaseBuilder.registrationTestCaseBuilder("registrationFail6")
+        RegisterResponse response = RegisterClient.builder()
                 .withRegistrationEndpoint(registrationEndpoint)
-                .withJwksUri(null) // Missing jwks_uri
+                .withJwksUri(null) // Missing jwks_uri // todo it is missed by default, no ?
                 .withGrantTypes(Collections.singletonList(GrantType.CIBA))
                 .withBackchannelUserCodeParameter(true)
                 .withBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
                 .withBackchannelClientNotificationEndPoint(backchannelClientNotificationEndpoint)
                 .withBackchannelAuthRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
-                .excuteTestCase();
+                .execute();
 
-        AssertBuilder.registerResponseBuilder(response).status(400).checkAsserts();
+        AssertBuilder.registerResponse(response).status(400).checkAsserts();
     }
 }

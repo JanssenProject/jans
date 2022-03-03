@@ -12,9 +12,14 @@ public class AssertBuilder {
         return new ParResponseAssertBuilder(response);
     }
 
-    public static RegisterResponseAssertBuilder registerResponseBuilder(RegisterResponse response) {
+    public static RegisterResponseAssertBuilder registerResponse(RegisterResponse response) {
         return new RegisterResponseAssertBuilder(response);
     }
+
+    public static RegisterResponseAssertBuilder registerResponseCreated(RegisterResponse response) {
+        return new RegisterResponseAssertBuilder(response).status(201);
+    }
+
 
     public static TokenResponseAssertBuilder tokenResponseBuilder(TokenResponse response) {
         return new TokenResponseAssertBuilder(response);

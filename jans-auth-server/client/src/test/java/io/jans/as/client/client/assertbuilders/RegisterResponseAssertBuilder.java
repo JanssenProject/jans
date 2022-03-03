@@ -1,7 +1,6 @@
 package io.jans.as.client.client.assertbuilders;
 
 import io.jans.as.client.RegisterResponse;
-import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.common.BackchannelTokenDeliveryMode;
 import io.jans.as.model.crypto.signature.AsymmetricSignatureAlgorithm;
 
@@ -62,7 +61,7 @@ public class RegisterResponseAssertBuilder extends BaseAssertBuilder {
             assertNotNull(response.getRegistrationAccessToken());
             assertNotNull(response.getClientIdIssuedAt());
 
-            if (notNullRegistrationClientUri) {
+            if (notNullRegistrationClientUri || status == 201) { // when created status it must be always present
                 assertNotNull(response.getRegistrationClientUri());//Review usage
             }
             //Backchannel claims

@@ -1,4 +1,4 @@
-package io.jans.as.client.client.testcasebuilders;
+package io.jans.as.client.builder;
 
 import io.jans.as.client.ClientUtils;
 import io.jans.as.client.RegisterClient;
@@ -15,9 +15,8 @@ import io.jans.as.model.register.ApplicationType;
 import javax.ws.rs.HttpMethod;
 import java.util.List;
 
-public class RegistrationTestCase extends BaseTestCase {
+public class RegistrationBuilder implements Builder {
 
-    private RegisterResponse response;
     private ApplicationType applicationType;
     private SubjectType subjectType;
     private String clientName;
@@ -36,120 +35,115 @@ public class RegistrationTestCase extends BaseTestCase {
     private SignatureAlgorithm tokenEndpointAuthSigningAlgorithm;
     private String registrationAccessToken;
 
-    private boolean isUpdateMode = false;
-    private boolean isReadMode = false;
+    private boolean isUpdateMode;
+    private boolean isReadMode;
 
-    public RegistrationTestCase(String title) {
-        super(title);
+    private String title;
+
+    public RegistrationBuilder() {
         this.applicationType = ApplicationType.WEB;
-        this.clientName = "jans test app";
-        this.redirectUris = null;
-        this.isUpdateMode = false;
-        this.isReadMode = false;
     }
 
-    public RegistrationTestCase withRegistrationAccessToken(String registrationAccessToken) {
+    public RegistrationBuilder withRegistrationAccessToken(String registrationAccessToken) {
         this.registrationAccessToken = registrationAccessToken;
         return this;
     }
 
-    public RegistrationTestCase withApplicationType(ApplicationType applicationType) {
+    public RegistrationBuilder withApplicationType(ApplicationType applicationType) {
         this.applicationType = applicationType;
         return this;
     }
 
-    public RegistrationTestCase withClientName(String clientName) {
+    public RegistrationBuilder withClientName(String clientName) {
         this.clientName = clientName;
         return this;
     }
 
-    public RegistrationTestCase withRedirectUris(List<String> redirectUris) {
+    public RegistrationBuilder withRedirectUris(List<String> redirectUris) {
         this.redirectUris = redirectUris;
         return this;
     }
 
-    public RegistrationTestCase withJwks(String jwks) {
+    public RegistrationBuilder withJwks(String jwks) {
         this.jwks = jwks;
         return this;
     }
 
-    public RegistrationTestCase withJwksUri(String jwksUri) {
+    public RegistrationBuilder withJwksUri(String jwksUri) {
         this.jwksUri = jwksUri;
         return this;
     }
 
-    public RegistrationTestCase withSectorIdentifierUri(String sectorIdentifierUri) {
+    public RegistrationBuilder withSectorIdentifierUri(String sectorIdentifierUri) {
         this.sectorIdentifierUri = sectorIdentifierUri;
         return this;
     }
 
-    public RegistrationTestCase withGrantTypes(List<GrantType> grantTypeList) {
+    public RegistrationBuilder withGrantTypes(List<GrantType> grantTypeList) {
         this.grantTypeList = grantTypeList;
         return this;
     }
 
-    public RegistrationTestCase withSubjectType(SubjectType subjectType) {
+    public RegistrationBuilder withSubjectType(SubjectType subjectType) {
         this.subjectType = subjectType;
         return this;
     }
 
-    public RegistrationTestCase withRegistrationEndpoint(String registrationEndpoint) {
+    public RegistrationBuilder withRegistrationEndpoint(String registrationEndpoint) {
         this.registrationEndpoint = registrationEndpoint;
         return this;
     }
 
-    public RegistrationTestCase withBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode backchannelTokenDeliveryMode) {
+    public RegistrationBuilder withBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode backchannelTokenDeliveryMode) {
         this.backchannelTokenDeliveryMode = backchannelTokenDeliveryMode;
         return this;
     }
 
-    public RegistrationTestCase withBackchannelClientNotificationEndPoint(String backchannelClientNotificationEndPoint) {
+    public RegistrationBuilder withBackchannelClientNotificationEndPoint(String backchannelClientNotificationEndPoint) {
         this.backchannelClientNotificationEndPoint = backchannelClientNotificationEndPoint;
         return this;
     }
 
-    public RegistrationTestCase withBackchannelAuthRequestSigningAlgorithm(AsymmetricSignatureAlgorithm backchannekAuthRequestSigningAlgorithm) {
+    public RegistrationBuilder withBackchannelAuthRequestSigningAlgorithm(AsymmetricSignatureAlgorithm backchannekAuthRequestSigningAlgorithm) {
         this.backchannekAuthRequestSigningAlgorithm = backchannekAuthRequestSigningAlgorithm;
         return this;
     }
 
-    public RegistrationTestCase withBackchannelUserCodeParameter(Boolean backchannelUserCodeParameter) {
+    public RegistrationBuilder withBackchannelUserCodeParameter(Boolean backchannelUserCodeParameter) {
         this.backchannelUserCodeParameter = backchannelUserCodeParameter;
         return this;
     }
 
-    public RegistrationTestCase withTokenEndPointAuthMethod(AuthenticationMethod tokenEndPointAuthenticationMethod) {
+    public RegistrationBuilder withTokenEndPointAuthMethod(AuthenticationMethod tokenEndPointAuthenticationMethod) {
         this.tokenEndpointAuthMethod = tokenEndPointAuthenticationMethod;
         return this;
     }
 
-    public RegistrationTestCase withTokenEndPointAuthSigningAlgorithm(SignatureAlgorithm tokenEndpointAuthSigningAlgorithm) {
+    public RegistrationBuilder withTokenEndPointAuthSigningAlgorithm(SignatureAlgorithm tokenEndpointAuthSigningAlgorithm) {
         this.tokenEndpointAuthSigningAlgorithm = tokenEndpointAuthSigningAlgorithm;
         return this;
     }
 
-    public RegistrationTestCase withTokenSignedResponseAlgorithm(SignatureAlgorithm tokenSignedResponseAlgorithm) {
+    public RegistrationBuilder withTokenSignedResponseAlgorithm(SignatureAlgorithm tokenSignedResponseAlgorithm) {
         this.tokenSignedResponseAlgorithm = tokenSignedResponseAlgorithm;
         return this;
     }
 
-    public RegistrationTestCase isUpdateMode() {
+    public RegistrationBuilder isUpdateMode() {
         this.isUpdateMode = true;
         this.isReadMode = false;
         return this;
     }
 
-    public RegistrationTestCase isReadMode() {
+    public RegistrationBuilder isReadMode() {
         this.isReadMode = true;
         this.isUpdateMode = false;
         return this;
     }
 
-
     @Override
-    public RegisterResponse excuteTestCase() {
-        RegisterRequest registerRequest;
-        registerRequest = new RegisterRequest(applicationType, clientName, redirectUris);
+    public RegisterResponse execute() {
+        RegisterRequest registerRequest = new RegisterRequest(applicationType, clientName, redirectUris);
 
         if (isReadMode || isUpdateMode) {
             registerRequest = new RegisterRequest(registrationAccessToken);
@@ -193,10 +187,13 @@ public class RegistrationTestCase extends BaseTestCase {
         if (tokenEndpointAuthSigningAlgorithm != null) {
             registerRequest.setTokenEndpointAuthSigningAlg(tokenEndpointAuthSigningAlgorithm);
         }
+        if (jwks != null) {
+            registerRequest.setJwks(jwks);
+        }
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
-        response = registerClient.exec();
+        RegisterResponse response = registerClient.exec();
         ClientUtils.showClient(registerClient);
         return response;
     }

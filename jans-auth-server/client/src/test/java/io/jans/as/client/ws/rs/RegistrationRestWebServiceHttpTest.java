@@ -435,7 +435,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        AssertBuilder.registerResponseBuilder(response).status(400).checkAsserts();
+        AssertBuilder.registerResponse(response).status(400).checkAsserts();
     }
 
     @Test
@@ -447,7 +447,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
                 Arrays.asList("https://client.example.com/cb#fail_fragment"));
 
         showClient(registerClient);
-        AssertBuilder.registerResponseBuilder(response).status(400).checkAsserts();
+        AssertBuilder.registerResponse(response).status(400).checkAsserts();
     }
 
     @Parameters({"redirectUris"})

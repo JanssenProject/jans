@@ -116,7 +116,7 @@ public class SetPublicSubjectIdentifierPerClientTest extends BaseTest {
         showClient(registerClient);
 
         if (checkError) {
-            AssertBuilder.registerResponseBuilder(registerResponse).status(400).checkAsserts();
+            AssertBuilder.registerResponse(registerResponse).status(400).checkAsserts();
         } else {
             assertRegisterResponseOk(registerResponse, 201, true);
         }

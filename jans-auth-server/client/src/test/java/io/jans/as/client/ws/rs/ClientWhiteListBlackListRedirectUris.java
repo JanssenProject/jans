@@ -21,7 +21,6 @@ import javax.ws.rs.HttpMethod;
 import java.util.Arrays;
 import java.util.List;
 
-import static io.jans.as.client.client.Asserter.assertRegisterResponseFail;
 import static io.jans.as.client.client.Asserter.assertRegisterResponseOk;
 import static io.jans.as.model.register.RegisterRequestParam.SCOPE;
 import static org.testng.Assert.assertEquals;
@@ -73,7 +72,7 @@ public class ClientWhiteListBlackListRedirectUris extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
 
         showClient(registerClient);
-        AssertBuilder.registerResponseBuilder(response).status(400).checkAsserts();
+        AssertBuilder.registerResponse(response).status(400).checkAsserts();
     }
 
     @Parameters({"redirectUris", "sectorIdentifierUri"})
@@ -114,6 +113,6 @@ public class ClientWhiteListBlackListRedirectUris extends BaseTest {
         final RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        AssertBuilder.registerResponseBuilder(response).status(400).checkAsserts();
+        AssertBuilder.registerResponse(response).status(400).checkAsserts();
     }
 }

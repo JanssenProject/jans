@@ -357,7 +357,7 @@ public class SectorIdentifierUrlVerificationHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        AssertBuilder.registerResponseBuilder(response).status(400).checkAsserts();
+        AssertBuilder.registerResponse(response).status(400).checkAsserts();
     }
 
     @Parameters({"sectorIdentifierUri"})
@@ -377,7 +377,7 @@ public class SectorIdentifierUrlVerificationHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        AssertBuilder.registerResponseBuilder(response).status(400).checkAsserts();
+        AssertBuilder.registerResponse(response).status(400).checkAsserts();
     }
 
     /**
@@ -399,6 +399,6 @@ public class SectorIdentifierUrlVerificationHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        AssertBuilder.registerResponseBuilder(response).status(400).checkAsserts();
+        AssertBuilder.registerResponse(response).status(400).checkAsserts();
     }
 }
