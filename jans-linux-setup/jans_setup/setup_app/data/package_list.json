@@ -26,22 +26,22 @@
   },
   "debian 10": {
     "optional": "",
-    "mondatory": "apache2 libapache2-mod-auth-openidc curl wget tar xz-utils unzip rsyslog bzip2",
-    "python": {"ldap3":"python3-ldap3", "requests":"python3-requests", "ruamel.yaml":"python3-ruamel.yaml", "certifi":"python3-certifi", "pymysql":"python3-pymysql", "Crypto": "python3-crypto"}
+    "mondatory": "apache2 curl wget tar xz-utils unzip rsyslog bzip2",
+    "python": {"ldap3":"python3-ldap3", "requests":"python3-requests", "ruamel.yaml":"python3-ruamel.yaml", "certifi":"python3-certifi", "pymysql":"python3-pymysql", "Crypto": "python3-crypto", "distutils.util": "python3-distutils"}
   },
   "debian 9": {
     "optional": "",
-    "mondatory": "apache2 libapache2-mod-auth-openidc curl wget tar xz-utils unzip rsyslog bzip2",
-    "python": {"ldap3":"python3-ldap3", "requests":"python3-requests", "ruamel.yaml":"python3-ruamel.yaml", "certifi":"python3-certifi", "pymysql":"python3-pymysql", "Crypto": "python3-crypto"}
+    "mondatory": "apache2 curl wget tar xz-utils unzip rsyslog bzip2",
+    "python": {"ldap3":"python3-ldap3", "requests":"python3-requests", "ruamel.yaml":"python3-ruamel.yaml", "certifi":"python3-certifi", "pymysql":"python3-pymysql", "Crypto": "python3-crypto", "distutils.util": "python3-distutils"}
   },
   "ubuntu 18": {
     "optional": "",
-    "mondatory": "apache2 libapache2-mod-auth-openidc curl wget xz-utils unzip rsyslog net-tools bzip2",
-    "python": {"ldap3":"python3-ldap3", "requests":"python3-requests", "ruamel.yaml":"python3-ruamel.yaml", "certifi":"python3-certifi", "pymysql":"python3-pymysql", "Crypto": "python3-crypto"}
+    "mondatory": "apache2 curl wget xz-utils unzip rsyslog net-tools bzip2",
+    "python": {"ldap3":"python3-ldap3", "requests":"python3-requests", "ruamel.yaml":"python3-ruamel.yaml", "certifi":"python3-certifi", "pymysql":"python3-pymysql", "Crypto": "python3-crypto", "distutils.util": "python3-distutils"}
   },
   "ubuntu 20": {
     "optional": "",
-    "mondatory": "apache2 libapache2-mod-auth-openidc curl wget xz-utils unzip rsyslog bzip2",
-    "python": {"ldap3":"python3-ldap3", "requests":"python3-requests", "ruamel.yaml":"python3-ruamel.yaml", "certifi":"python3-certifi", "pymysql":"python3-pymysql", "Crypto": "python3-crypto"}
+    "mondatory": "apache2 curl wget xz-utils unzip rsyslog bzip2",
+    "python": {"ldap3":"python3-ldap3", "requests":"python3-requests", "ruamel.yaml":"python3-ruamel.yaml", "certifi":"python3-certifi", "pymysql":"python3-pymysql", "Crypto": "python3-crypto", "distutils.util": "python3-distutils"}
   }
 }

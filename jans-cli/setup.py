@@ -40,6 +40,7 @@ setup(
         "PyJWT==2.3.0",
         "certifi",
         "six",
+        "prompt_toolkit",
         "jca-swagger-client @ https://ox.gluu.org/icrby8xcvbcv/cli-swagger/jca_swagger_client.zip",
         "scim_swagger_client @ https://ox.gluu.org/icrby8xcvbcv/cli-swagger/scim_swagger_client.zip",
 
