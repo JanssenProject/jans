@@ -2401,6 +2401,7 @@ paths:
     get:
       tags:
         - SCIM - User Management
+      x-cli-plugin: scim
       summary: Gets list of SCIM users
       description: Gets list of SCIM users
       operationId: get-scim-users
@@ -2480,6 +2481,7 @@ paths:
     post:
       tags:
         - SCIM - User Management
+      x-cli-plugin: scim
       operationId: post-create-user
       summary: Create a SCIM user.
       description: Allows creating a User resource via POST (see section 3.3 of RFC 7644)
@@ -2549,6 +2551,7 @@ paths:
     get:
       tags:
         - SCIM - User Management
+      x-cli-plugin: scim
       operationId: get-user-by-id
       summary: Retrieves SCIM user by Id.
       description: Retrieves a User resource by Id (see section 3.4.1 of RFC 7644)
@@ -2601,6 +2604,7 @@ paths:
     put:
       tags:
         - SCIM - User Management
+      x-cli-plugin: scim
       operationId: put-update-user-by-id
       summary: Updates an SCIM user.
       description: "Updates a User resource (see section 3.5.1 of RFC 7644). Update\
@@ -2687,6 +2691,7 @@ paths:
     delete:
       tags:
         - SCIM - User Management
+      x-cli-plugin: scim
       operationId: delete-user-by-id
       summary: Deletes a SCIM user.
       description: Deletes a user resource
@@ -2724,6 +2729,7 @@ paths:
     patch:
       tags:
         - SCIM - User Management
+      x-cli-plugin: scim
       operationId: patch-user-by-id
       summary: Patches SCIM User attributes.
       description: "Updates one or more attributes of a User resource using a sequence\
@@ -2796,6 +2802,7 @@ paths:
     post:
       tags:
         - SCIM - User Management
+      x-cli-plugin: scim
       summary: Search SCIM user.
       description: Gets list of users
       operationId: post-search-scim-users
@@ -2835,6 +2842,7 @@ paths:
         - oauth2: [https://jans.io/scim/config.readonly]
       tags:
         - SCIM - Config Management
+      x-cli-plugin: scim
       responses:
         '200':
           description: OK
@@ -2856,6 +2864,7 @@ paths:
         - oauth2: [https://jans.io/scim/config.write]
       tags:
         - SCIM - Config Management
+      x-cli-plugin: scim
       requestBody:
         content:
           application/json-patch+json:
@@ -2953,6 +2962,7 @@ paths:
     get:
       tags:
         - Admin UI - Role
+      x-cli-plugin: admin-ui
       summary: Get all admin ui roles.
       description: Get all admin ui roles.
       operationId: get-adminui-roles
@@ -2978,6 +2988,7 @@ paths:
     post:
       tags:
         - Admin UI - Role
+      x-cli-plugin: admin-ui
       summary: Add admin ui role.
       description: Add admin ui role.
       operationId: add-adminui-role
@@ -3010,6 +3021,7 @@ paths:
     put:
       tags:
         - Admin UI - Role
+      x-cli-plugin: admin-ui
       summary: Edit admin ui role.
       description: Edit admin ui role.
       operationId: edit-adminui-role
@@ -3040,6 +3052,7 @@ paths:
     delete:
       tags:
         - Admin UI - Role
+      x-cli-plugin: admin-ui
       summary: Delete admin ui role.
       description: Delete admin ui role.
       operationId: delete-adminui-role
@@ -3071,6 +3084,7 @@ paths:
     get:
       tags:
         - Admin UI - Permission
+      x-cli-plugin: admin-ui
       summary: Get admin ui permissions.
       description: Get admin ui permissions.
       operationId: get-adminui-permissions
@@ -3096,6 +3110,7 @@ paths:
     post:
       tags:
         - Admin UI - Permission
+      x-cli-plugin: admin-ui
       summary: Add admin ui permission.
       description: Add admin ui permission.
       operationId: add-adminui-permission
@@ -3128,6 +3143,7 @@ paths:
     put:
       tags:
         - Admin UI - Permission
+      x-cli-plugin: admin-ui
       summary: Edit admin ui permission.
       description: Edit admin ui permission.
       operationId: edit-adminui-permission
@@ -3158,6 +3174,7 @@ paths:
     delete:
       tags:
         - Admin UI - Permission
+      x-cli-plugin: admin-ui
       summary: Delete admin ui permission.
       description: Delete admin ui permission.
       operationId: delete-adminui-permission
@@ -3189,6 +3206,7 @@ paths:
     get:
       tags:
         - Admin UI - Role-Permissions Mapping
+      x-cli-plugin: admin-ui
       summary: Get admin ui role-permissions mapping.
       description: Get admin ui role-permissions mapping.
       operationId: get-adminui-role-permissions
@@ -3214,6 +3232,7 @@ paths:
     post:
       tags:
         - Admin UI - Role-Permissions Mapping
+      x-cli-plugin: admin-ui
       summary: Add role-permissions mapping.
       description: Add role-permissions mapping.
       operationId: Add role-permissions mapping.
@@ -3244,6 +3263,7 @@ paths:
     put:
       tags:
         - Admin UI - Role-Permissions Mapping
+      x-cli-plugin: admin-ui
       summary: Map permissions to role.
       description: Map permissions to role.
       operationId: map-permissions-to-role
@@ -3274,6 +3294,7 @@ paths:
     delete:
       tags:
         - Admin UI - Role-Permissions Mapping
+      x-cli-plugin: admin-ui
       summary: Remove role-permissions mapping.
       description: Remove role-permissions mapping.
       operationId: remove-role-permissions-permission
@@ -3305,6 +3326,7 @@ paths:
     get:
       tags:
         - Admin UI - License
+      x-cli-plugin: admin-ui
       summary: Get admin ui license details.
       description: Get admin ui license details.
       operationId: get-adminui-license
@@ -3328,6 +3350,7 @@ paths:
     put:
       tags:
         - Admin UI - License
+      x-cli-plugin: admin-ui
       summary: Edit admin ui license details.
       description: Edit admin ui license details.
       operationId: edit-adminui-license
@@ -3797,6 +3820,12 @@ components:
         - alg
         - exp
       properties:
+        name:
+          type: string
+          description: Name of the key.
+        descr:
+          type: string
+          description: key description.
         kid:
           type: string
           description: The unique identifier for the key.

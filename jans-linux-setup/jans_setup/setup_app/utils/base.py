@@ -297,21 +297,27 @@ def find_script_names(ldif_file):
                 
     return name_list
 
-def download(url, dst):
+def download(url, dst, verbose=False):
     pardir, fn = os.path.split(dst)
     if not os.path.exists(pardir):
         logIt("Creating driectory", pardir)
         os.makedirs(pardir)
-    logIt("Downloading {} to {}".format(url, dst))
+
+    def mylog(logs):
+        logIt(logs)
+        if verbose:
+            print(logs)
+
+    mylog("Downloading {} to {}".format(url, dst))
     download_tries = 1
     while download_tries < 4:
         try:
             result = urlretrieve(url, dst)
             f_size = result[1].get('Content-Length','0')
-            logIt("Download size: {} bytes".format(f_size))
+            mylog("Download size: {} bytes".format(f_size))
             time.sleep(0.1)
         except:
-             logIt("Error downloading {}. Download will be re-tried once more".format(url))
+             mylog("Error downloading {}. Download will be re-tried once more".format(url))
              download_tries += 1
              time.sleep(1)
         else:

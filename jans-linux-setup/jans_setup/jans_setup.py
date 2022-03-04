@@ -204,7 +204,6 @@ if os.path.exists(Config.jans_properties_fn):
         collectProperties.save()
         sys.exit()
 
-
 if not Config.noPrompt and not Config.installed_instance and not setup_loaded:
     propertiesUtils.promptForProperties()
 

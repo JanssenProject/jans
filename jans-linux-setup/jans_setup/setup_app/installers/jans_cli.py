@@ -89,6 +89,8 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
             config['DEFAULT']['scim_client_id'] = Config.scim_client_id
             config['DEFAULT']['scim_client_secret_enc'] = Config.scim_client_encoded_pw
 
+        config['DEFAULT']['jca_plugins'] = ','.join(base.current_app.ConfigApiInstaller.get_plugins())
+
         config.write(self.config_ini_fn.open('w'))
         self.config_ini_fn.chmod(0o600)
 

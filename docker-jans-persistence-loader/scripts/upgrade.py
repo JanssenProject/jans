@@ -64,12 +64,27 @@ JANS_SCIM_SCRIPT_DN = "inum=2DAF-F9A5,ou=scripts,o=jans"
 def _transform_auth_dynamic_config(conf):
     should_update = False
 
-    if all([
-        os.environ.get("CN_DISTRIBUTION", "default") == "openbanking",
-        "dcrAuthorizationWithMTLS" not in conf,
-    ]):
-        conf["dcrAuthorizationWithMTLS"] = False
-        should_update = True
+    if os.environ.get("CN_DISTRIBUTION", "default") == "openbanking":
+        if "dcrAuthorizationWithMTLS" not in conf:
+            conf["dcrAuthorizationWithMTLS"] = False
+            should_update = True
+
+        if "scopesSupported" not in conf:
+            conf["scopesSupported"] = [
+                "openid",
+                "consents",
+                "accounts",
+                "resources",
+            ]
+            should_update = True
+
+        if "jwt" not in conf["responseModesSupported"]:
+            conf["responseModesSupported"].append("jwt")
+            should_update = True
+
+        if "private_key_jwt" not in conf["tokenEndpointAuthMethodsSupported"]:
+            conf["tokenEndpointAuthMethodsSupported"].append("private_key_jwt")
+            should_update = True
 
     if "grantTypesAndResponseTypesAutofixEnabled" not in conf:
         conf["grantTypesAndResponseTypesAutofixEnabled"] = False

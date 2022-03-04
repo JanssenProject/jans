@@ -12,7 +12,7 @@ jobs:
         charts: [ "charts/janssen" ]
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         fetch-depth: 0
 
@@ -49,7 +49,7 @@ jobs:
         simple: [ "docs", "jans-scim", "jans-orm", "jans-notify", "jans-fido2", "jans-eleven", "jans-core", "jans-config-api", "jans-client-api", "jans-bom", "jans-auth-server" ]
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         fetch-depth: 0
 
@@ -86,7 +86,7 @@ jobs:
         simple: [ "docker-jans-auth-server", "docker-jans-certmanager", "docker-jans-config-api", "docker-jans-client-api", "docker-jans-configurator", "docker-jans-fido2", "docker-jans-persistence-loader", "docker-jans-scim" ]
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         fetch-depth: 0
 
@@ -123,7 +123,7 @@ jobs:
         python-projects: ["jans-pycloudlib", "jans-cli", "jans-linux-setup"]
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         fetch-depth: 0
 
@@ -155,7 +155,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         fetch-depth: 0
 
