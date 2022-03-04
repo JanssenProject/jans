@@ -11,33 +11,47 @@ import shutil
 import traceback
 import code
 import site
+import argparse
 
 from pathlib import Path
 
 from queue import Queue
 
 __STATIC_SETUP_DIR__ = '/opt/jans/jans-setup/'
-queue = Queue()
+os.environ['LC_ALL'] = 'C'
 
+queue = Queue()
 dir_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(dir_path)
 
-if not (os.path.exists('/opt/dist/jans/jans.zip') or os.path.exists('jans-auth.war')) or '-uninstall' in sys.argv:
-    import install
-    install.setup_dir = dir_path
-    if '-uninstall' in sys.argv:
-        install.uninstall_jans()
-        sys.exit()
+from setup_app.utils import arg_parser
+
+import install
+
+group = arg_parser.parser.add_argument_group(install.parser.description)
+
+for action in install.parser._actions:
+    if isinstance(action, argparse._HelpAction):
+        continue
+    if isinstance(action, argparse._StoreTrueAction):
+        arg = group.add_argument(*action.option_strings, action='store_true')
     else:
-        print("Downloading Files")
-        install.download_files()
-        install.extract_yaml_files()
-        install.prepare_jans_cli_package()
+        arg = group.add_argument(*action.option_strings)
 
-os.environ['LC_ALL'] = 'C'
-from setup_app.utils.arg_parser import arg_parser
+    arg.option_strings = action.option_strings
+    arg.default = action.default
+    arg.help = action.help
+    arg.choices = action.choices
+    arg.required = False
+    arg.type = action.type
 
-argsp = arg_parser()
+argsp = arg_parser.parser.parse_known_args()[0]
+
+if not (os.path.exists('/opt/dist/jans/jans.zip') or os.path.exists('/opt/dist/jans/jans-auth.war')) or '-uninstall' in sys.argv or argsp.force_download:
+
+    install.app_globals.argsp = argsp
+    install.setup_dir = dir_path
+    install.init_installer()
 
 # first import paths and make changes if necassary
 from setup_app import paths
@@ -128,166 +142,180 @@ if paths.IAMPACKAGED:
     if not os.path.exists(Config.outputFolder):
         os.makedirs(Config.outputFolder)
 
-# initialize config object
-Config.init(paths.INSTALL_DIR)
-Config.determine_version()
-
-base.profile = Config.profile
-if Config.profile != 'jans':
-    argsp.t = False
-
-# we must initilize SetupUtils after initilizing Config
-SetupUtils.init()
-
-# get setup options from args
-setupOptions = get_setup_options()
-
-terminal_size = shutil.get_terminal_size()
-tty_rows = terminal_size.lines
-tty_columns = terminal_size.columns
-
-# check if we are running in terminal
-try:
-    os.get_terminal_size()
-except:
-    argsp.no_progress = True
-
-if not argsp.n:
-    base.check_resources()
-
-# pass progress indicator to Config object
-Config.pbar = jansProgress
-
-for key in setupOptions:
-    setattr(Config, key, setupOptions[key])
-
-jansInstaller = JansInstaller()
-jansInstaller.initialize()
-
-print()
-detected_os = '{} {}'.format(base.os_type, base.os_version)
-if base.snap:
-    detected_os = 'snap ' + detected_os
-print("Installing Janssen Server...\n\nFor more info see:\n  {}  \n  {}\n".format(paths.LOG_FILE, paths.LOG_ERROR_FILE))
-print("Profile         :  {}".format(Config.profile))
-print("Detected OS     :  {}".format(detected_os))
-print("Janssen Version :  {}".format(Config.oxVersion))
-print("Detected init   :  {}".format(base.os_initdaemon))
-print("Detected Apache :  {}".format(base.determineApacheVersion()))
-print()
-
-setup_loaded = {}
-if setupOptions['setup_properties']:
-    base.logIt('%s Properties found!\n' % setupOptions['setup_properties'])
-    setup_loaded = propertiesUtils.load_properties(setupOptions['setup_properties'])
-elif os.path.isfile(Config.setup_properties_fn):
-    base.logIt('%s Properties found!\n' % Config.setup_properties_fn)
-    setup_loaded = propertiesUtils.load_properties(Config.setup_properties_fn)
-elif os.path.isfile(Config.setup_properties_fn + '.enc'):
-    base.logIt('%s Properties found!\n' % Config.setup_properties_fn + '.enc')
-    setup_loaded = propertiesUtils.load_properties(Config.setup_properties_fn + '.enc')
-
-if argsp.import_ldif:
-    if os.path.isdir(argsp.import_ldif):
-        base.logIt("Found setup LDIF import directory {}".format(argsp.import_ldif))
-    else:
-        base.logIt("The custom LDIF import directory {} does not exist. Exiting...".format(argsp.import_ldif, True, True))
-
-collectProperties = CollectProperties()
-if os.path.exists(Config.jans_properties_fn):
-    collectProperties.collect()
-    collectProperties.save()
-    Config.installed_instance = True
-
-    if argsp.csx:
-        print("Saving collected properties")
-        collectProperties.save()
-        sys.exit()
-
-if not Config.noPrompt and not Config.installed_instance and not setup_loaded:
-    propertiesUtils.promptForProperties()
-
-propertiesUtils.check_properties()
-# initialize installers, order is important!
-jreInstaller = JreInstaller()
-jettyInstaller = JettyInstaller()
-jythonInstaller = JythonInstaller()
-
-if Config.profile == 'jans':
-    openDjInstaller = OpenDjInstaller()
-    couchbaseInstaller = CouchbaseInstaller()
-
-rdbmInstaller = RDBMInstaller()
-httpdinstaller = HttpdInstaller()
-jansAuthInstaller = JansAuthInstaller()
-configApiInstaller = ConfigApiInstaller()
-
-if Config.profile == 'jans':
-    fidoInstaller = FidoInstaller()
-    scimInstaller = ScimInstaller()
-    elevenInstaller = ElevenInstaller()
-
-jansCliInstaller = JansCliInstaller()
-
-# oxdInstaller = OxdInstaller()
-
-rdbmInstaller.packageUtils = packageUtils
-
-if Config.installed_instance:
-    for service in jansProgress.services:
-        setattr(Config, service['object'].install_var, service['object'].installed())
-
-    if not argsp.shell:
-        propertiesUtils.promptForProperties()
-
-        if not (argsp.t or argsp.x) and not Config.addPostSetupService:
-            print("No service was selected to install. Exiting ...")
-            sys.exit()
-
-def print_or_log(msg):
-    print(msg) if argsp.x else base.logIt(msg)
-
-
-if Config.profile == 'jans':
-    if argsp.t:
-        testDataLoader = TestDataLoader()
-
-    if argsp.t and argsp.x:
-        print_or_log("Loading test data")
-        testDataLoader.dbUtils.bind()
-        testDataLoader.createLdapPw()
-        configApiInstaller.load_test_data()
-        testDataLoader.load_test_data()
-        testDataLoader.deleteLdapPw()
-        print_or_log("Test data loaded.")
-
-    if not argsp.t and argsp.x and argsp.load_config_api_test:
-        print_or_log("Loading Config Api Test data")
-        configApiInstaller.load_test_data()
-        print_or_log("Test data loaded. Exiting ...")
-
-    if argsp.x:
-        print("Exiting ...")
-        sys.exit()
-
-Config.installJansCli = Config.installConfigApi or Config.installScimServer
-
-app_vars = locals().copy()
-
-if argsp.shell:
-    code.interact(local=locals())
-    sys.exit()
-
-if Config.profile == 'jans':
-    # re-calculate memory usage
-    Config.calculate_mem()
-
-print()
-print(jansInstaller)
-
-base.current_app.proceed_installation = True
 
 def main():
+
+    if '-uninstall' in sys.argv:
+        install.uninstall_jans()
+        sys.exit()
+    elif not os.path.exists('/opt/dist/jans/jans-auth.war'):
+        print("Downloading Files")
+        install.download_files()
+        install.extract_yaml_files()
+        install.prepare_jans_cli_package()
+        if argsp.profile != 'jans':
+            install.profile_setup()
+        elif not argsp.no_gcs:
+            install.download_gcs()
+
+    # initialize config object
+    Config.init(paths.INSTALL_DIR)
+    Config.determine_version()
+
+    base.profile = Config.profile
+    if Config.profile != 'jans':
+        argsp.t = False
+
+    # we must initilize SetupUtils after initilizing Config
+    SetupUtils.init()
+
+    # get setup options from args
+    setupOptions = get_setup_options()
+
+    terminal_size = shutil.get_terminal_size()
+    tty_rows = terminal_size.lines
+    tty_columns = terminal_size.columns
+
+    # check if we are running in terminal
+    try:
+        os.get_terminal_size()
+    except:
+        argsp.no_progress = True
+
+    if not argsp.n:
+        base.check_resources()
+
+    # pass progress indicator to Config object
+    Config.pbar = jansProgress
+
+    for key in setupOptions:
+        setattr(Config, key, setupOptions[key])
+
+    jansInstaller = JansInstaller()
+    jansInstaller.initialize()
+
+    print()
+    detected_os = '{} {}'.format(base.os_type, base.os_version)
+    if base.snap:
+        detected_os = 'snap ' + detected_os
+    print("Installing Janssen Server...\n\nFor more info see:\n  {}  \n  {}\n".format(paths.LOG_FILE, paths.LOG_ERROR_FILE))
+    print("Profile         :  {}".format(Config.profile))
+    print("Detected OS     :  {}".format(detected_os))
+    print("Janssen Version :  {}".format(Config.oxVersion))
+    print("Detected init   :  {}".format(base.os_initdaemon))
+    print("Detected Apache :  {}".format(base.determineApacheVersion()))
+    print()
+
+    setup_loaded = {}
+    if setupOptions['setup_properties']:
+        base.logIt('%s Properties found!\n' % setupOptions['setup_properties'])
+        setup_loaded = propertiesUtils.load_properties(setupOptions['setup_properties'])
+    elif os.path.isfile(Config.setup_properties_fn):
+        base.logIt('%s Properties found!\n' % Config.setup_properties_fn)
+        setup_loaded = propertiesUtils.load_properties(Config.setup_properties_fn)
+    elif os.path.isfile(Config.setup_properties_fn + '.enc'):
+        base.logIt('%s Properties found!\n' % Config.setup_properties_fn + '.enc')
+        setup_loaded = propertiesUtils.load_properties(Config.setup_properties_fn + '.enc')
+
+    if argsp.import_ldif:
+        if os.path.isdir(argsp.import_ldif):
+            base.logIt("Found setup LDIF import directory {}".format(argsp.import_ldif))
+        else:
+            base.logIt("The custom LDIF import directory {} does not exist. Exiting...".format(argsp.import_ldif, True, True))
+
+    collectProperties = CollectProperties()
+    if os.path.exists(Config.jans_properties_fn):
+        collectProperties.collect()
+        collectProperties.save()
+        Config.installed_instance = True
+
+        if argsp.csx:
+            print("Saving collected properties")
+            collectProperties.save()
+            sys.exit()
+
+    if not Config.noPrompt and not Config.installed_instance and not setup_loaded:
+        propertiesUtils.promptForProperties()
+
+    propertiesUtils.check_properties()
+    # initialize installers, order is important!
+    jreInstaller = JreInstaller()
+    jettyInstaller = JettyInstaller()
+    jythonInstaller = JythonInstaller()
+
+    if Config.profile == 'jans':
+        openDjInstaller = OpenDjInstaller()
+        couchbaseInstaller = CouchbaseInstaller()
+
+    rdbmInstaller = RDBMInstaller()
+    httpdinstaller = HttpdInstaller()
+    jansAuthInstaller = JansAuthInstaller()
+    configApiInstaller = ConfigApiInstaller()
+
+    if Config.profile == 'jans':
+        fidoInstaller = FidoInstaller()
+        scimInstaller = ScimInstaller()
+        elevenInstaller = ElevenInstaller()
+
+    jansCliInstaller = JansCliInstaller()
+
+    # oxdInstaller = OxdInstaller()
+
+    rdbmInstaller.packageUtils = packageUtils
+
+    if Config.installed_instance:
+        for service in jansProgress.services:
+            setattr(Config, service['object'].install_var, service['object'].installed())
+
+        if not argsp.shell:
+            propertiesUtils.promptForProperties()
+
+            if not (argsp.t or argsp.x) and not Config.addPostSetupService:
+                print("No service was selected to install. Exiting ...")
+                sys.exit()
+
+    def print_or_log(msg):
+        print(msg) if argsp.x else base.logIt(msg)
+
+
+    if Config.profile == 'jans':
+        if argsp.t:
+            testDataLoader = TestDataLoader()
+
+        if argsp.t and argsp.x:
+            print_or_log("Loading test data")
+            testDataLoader.dbUtils.bind()
+            testDataLoader.createLdapPw()
+            configApiInstaller.load_test_data()
+            testDataLoader.load_test_data()
+            testDataLoader.deleteLdapPw()
+            print_or_log("Test data loaded.")
+
+        if not argsp.t and argsp.x and argsp.load_config_api_test:
+            print_or_log("Loading Config Api Test data")
+            configApiInstaller.load_test_data()
+            print_or_log("Test data loaded. Exiting ...")
+
+        if argsp.x:
+            print("Exiting ...")
+            sys.exit()
+
+    Config.installJansCli = Config.installConfigApi or Config.installScimServer
+
+    app_vars = locals().copy()
+
+    if argsp.shell:
+        code.interact(local=locals())
+        sys.exit()
+
+    if Config.profile == 'jans':
+        # re-calculate memory usage
+        Config.calculate_mem()
+
+    print()
+    print(jansInstaller)
+
+    base.current_app.proceed_installation = True
 
     if not Config.noPrompt:
         proceed_prompt = input('Proceed with these values [Y|n] ').lower().strip()
