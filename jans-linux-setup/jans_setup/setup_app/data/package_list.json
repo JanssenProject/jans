@@ -1,27 +1,27 @@
 {
   "red 7": {
     "optional": "",
-    "mondatory": "httpd httpd-mod_ssl curl wget tar xz unzip rsyslog bzip2",
+    "mondatory": "httpd httpd-mod_ssl mod_auth_openidc curl wget tar xz unzip rsyslog bzip2",
     "python": {"ldap3":"python3-ldap3", "requests":"python3-requests", "ruamel.yaml":"python3-ruamel-yaml", "certifi":"python3-certifi", "pymysql":"python3-PyMySQL", "Crypto": "python3-cryptography"}
   },
   "red 8": {
     "optional": "",
-    "mondatory": "httpd mod_ssl curl wget tar xz unzip rsyslog bzip2",
+    "mondatory": "httpd mod_ssl mod_auth_openidc curl wget tar xz unzip rsyslog bzip2",
     "python": {"ldap3":"python3-ldap3", "requests":"python3-requests", "ruamel.yaml":"python3-ruamel-yaml", "certifi":"python3-certifi", "pymysql":"python3-PyMySQL", "Crypto": "python3-cryptography"}
   },
   "centos 7": {
     "optional": "",
-    "mondatory": "httpd mod_ssl curl wget tar xz unzip bzip2 rsyslog ",
+    "mondatory": "httpd mod_ssl curl mod_auth_openidc wget tar xz unzip bzip2 rsyslog ",
     "python": {"ldap3":"python3-ldap3", "requests":"python3-requests", "ruamel.yaml":"python3-ruamel-yaml", "certifi":"python3-certifi", "pymysql":"python3-PyMySQL", "Crypto": "python3-cryptography"}
   },
   "centos 8": {
     "optional": "",
-    "mondatory": "httpd mod_ssl curl wget tar xz unzip  rsyslog bzip2",
+    "mondatory": "httpd mod_ssl mod_auth_openidc curl wget tar xz unzip  rsyslog bzip2",
     "python": {"ldap3":"python3-ldap3", "requests":"python3-requests", "ruamel.yaml":"python3-ruamel-yaml", "certifi":"python3-certifi", "pymysql":"python3-PyMySQL", "Crypto": "python3-cryptography"}
   },
   "suse 15": {
     "optional": "",
-    "mondatory": "apache2 curl wget tar xz unzip rsyslog bzip2",
+    "mondatory": "apache2 apache2-mod_auth_openidc curl wget tar xz unzip rsyslog bzip2",
     "python": {"ldap3":"python3-ldap3", "requests":"python3-requests", "ruamel.yaml":"python3-ruamel-yaml", "certifi":"python3-certifi", "pymysql":"python3-PyMySQL", "Crypto": "python3-cryptography"}
   },
   "debian 10": {

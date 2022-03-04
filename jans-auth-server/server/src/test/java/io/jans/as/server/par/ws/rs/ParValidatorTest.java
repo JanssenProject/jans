@@ -32,21 +32,21 @@ public class ParValidatorTest {
     public void validatePkce_whenFapiIsFalse_shouldNotThrowError() {
         when(appConfiguration.isFapi()).thenReturn(false);
 
-        parValidator.validatePkce(null, null);
+        parValidator.validatePkce(null, null, null);
     }
 
     @Test(expectedExceptions = WebApplicationException.class)
     public void validatePkce_whenFapiIsTrueAndNoCodeChallenage_shouldThrowError() {
         when(appConfiguration.isFapi()).thenReturn(true);
 
-        parValidator.validatePkce(null, null);
+        parValidator.validatePkce(null, "s256", null);
     }
 
     @Test
     public void validatePkce_whenFapiIsTrueAndCodeChallenageIsSet_shouldNotThrowError() {
         when(appConfiguration.isFapi()).thenReturn(true);
 
-        parValidator.validatePkce("codechallangehere", null);
+        parValidator.validatePkce("codechallangehere", "s256",null);
     }
 
 }

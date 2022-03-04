@@ -3,6 +3,7 @@ package io.jans.as.server.par.ws.rs;
 import com.google.common.collect.Lists;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
+import io.jans.as.model.authorize.CodeVerifier;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.error.ErrorResponseFactory;
@@ -169,11 +170,20 @@ public class ParValidator {
         }
     }
 
-    public void validatePkce(String codeChallenge, String state) {
+    public void validatePkce(String codeChallenge, String codeChallengeMethod, String state) {
         if (!appConfiguration.isFapi()) {
             return;
         }
+        if (StringUtils.isBlank(codeChallengeMethod) ||
+                CodeVerifier.CodeChallengeMethod.fromString(codeChallengeMethod) == CodeVerifier.CodeChallengeMethod.PLAIN) {
+            log.error("code_challenge_method is invalid: {} (plain or blank method is not allowed)", codeChallengeMethod);
+            throw new WebApplicationException(Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST, state, ""))
+                    .build());
+        }
         if (StringUtils.isBlank(codeChallenge)) {
+            log.error("code_challenge is blank");
             throw new WebApplicationException(Response
                     .status(Response.Status.BAD_REQUEST)
                     .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST, state, ""))
