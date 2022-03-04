@@ -35,9 +35,9 @@ if not (os.path.exists('/opt/dist/jans/jans.zip') or os.path.exists('jans-auth.w
         install.prepare_jans_cli_package()
 
 os.environ['LC_ALL'] = 'C'
-from setup_app.utils.arg_parser import arg_parser
+from setup_app.utils import arg_parser
 
-argsp = arg_parser()
+argsp = arg_parser.get_parser()
 
 # first import paths and make changes if necassary
 from setup_app import paths
