@@ -22,7 +22,7 @@ public class AuthUtil {
     ConfService confService;
 
     @Inject
-    ClientService clientService;
+    ClientService cltSrv;
 
     public String getOpenIdConfigurationEndpoint() {
         return this.confService.find().getOpenIdConfigurationEndpoint();
@@ -33,7 +33,7 @@ public class AuthUtil {
     }
 
     public Client getClient(String clientId) {
-        return clientService.getClientByInum(clientId);
+        return cltSrv.getClientByInum(clientId);
     }
 
     public List<String> findMissingElements(List<String> list1, List<String> list2) {

@@ -27,9 +27,9 @@ jobs:
     steps:
       - name: Checkout
         if: github.actor != 'mo-auto'
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         if: github.event_name == 'pull_request' && github.actor != 'mo-auto'
         with:
           ref: ${{ github.head_ref }}
@@ -69,7 +69,7 @@ jobs:
         uses: peter-evans/create-pull-request@v3
         if: github.event_name == 'pull_request' && github.actor != 'mo-auto'
         with:
-          token: ${{ secrets.MOWORKFLOWTOKEN }}
+          token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
           committer: mo-auto <54212639+mo-auto@users.noreply.github.com>
           author: mo-auto <54212639+mo-auto@users.noreply.github.com>
           branch: 'update-pycloud-in-${{ github.head_ref }}'
@@ -89,7 +89,7 @@ jobs:
         if: steps.cpr.outputs.pull-request-operation == 'created' && github.actor != 'mo-auto'
         uses: peter-evans/enable-pull-request-automerge@v1
         with:
-          token: ${{ secrets.MOWORKFLOWTOKEN }}
+          token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
           pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
           merge-method: squash
 
@@ -99,7 +99,7 @@ jobs:
         uses: peter-evans/create-pull-request@v3
         if: github.event_name != 'pull_request' && github.actor != 'mo-auto'
         with:
-          token: ${{ secrets.MOWORKFLOWTOKEN }}
+          token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
           committer: mo-auto <54212639+mo-auto@users.noreply.github.com>
           author: mo-auto <54212639+mo-auto@users.noreply.github.com>
           branch: ${{ env.PR_DOCKER_BRANCH_NAME }}

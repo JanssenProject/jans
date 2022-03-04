@@ -60,7 +60,3 @@ class ElevenInstaller(JettyInstaller):
 
     def create_folders(self):
         pass
-
-
-    def installed(self):
-        return os.path.exists(os.path.join(Config.jetty_base, self.service_name, 'start.ini'))

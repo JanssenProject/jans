@@ -3,6 +3,7 @@ package io.jans.as.server.par.ws.rs;
 import com.google.common.collect.Lists;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
+import io.jans.as.model.authorize.CodeVerifier;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.error.ErrorResponseFactory;
@@ -26,6 +27,7 @@ import org.slf4j.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 import java.util.Date;
 import java.util.Set;
 
@@ -165,6 +167,27 @@ public class ParValidator {
         if (appConfiguration.isFapi() && StringUtils.isBlank(jwtRequest.getState())) {
             par.getAttributes().setState(""); // #1250 - FAPI : discard state if in JWT we don't have state
             redirectUriResponse.setState("");
+        }
+    }
+
+    public void validatePkce(String codeChallenge, String codeChallengeMethod, String state) {
+        if (!appConfiguration.isFapi()) {
+            return;
+        }
+        if (StringUtils.isBlank(codeChallengeMethod) ||
+                CodeVerifier.CodeChallengeMethod.fromString(codeChallengeMethod) == CodeVerifier.CodeChallengeMethod.PLAIN) {
+            log.error("code_challenge_method is invalid: {} (plain or blank method is not allowed)", codeChallengeMethod);
+            throw new WebApplicationException(Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST, state, ""))
+                    .build());
+        }
+        if (StringUtils.isBlank(codeChallenge)) {
+            log.error("code_challenge is blank");
+            throw new WebApplicationException(Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST, state, ""))
+                    .build());
         }
     }
 }

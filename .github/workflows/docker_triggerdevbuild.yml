@@ -6,11 +6,11 @@ jobs:
   checkBuildAndUpdate:
     runs-on: ubuntu-latest
     env:
-      GITHUB_TOKEN: ${{ secrets.MOWORKFLOWTOKEN }}
+      GITHUB_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
       PR_DOCKER_DEV_BRANCH_NAME: update-dev-images
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Import GPG key
         id: import_gpg
@@ -50,7 +50,7 @@ jobs:
       - name: Open PR
         uses: peter-evans/create-pull-request@v3
         with:
-          token: ${{ secrets.MOWORKFLOWTOKEN }}
+          token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
           committer: mo-auto <54212639+mo-auto@users.noreply.github.com>
           author: mo-auto <54212639+mo-auto@users.noreply.github.com>
           branch: ${{ env.PR_DOCKER_DEV_BRANCH_NAME }}

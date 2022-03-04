@@ -28,7 +28,7 @@ jobs:
       matrix:
         docker-images: ["auth-server", "certmanager", "config-api", "client-api", "configurator", "fido2", "persistence-loader", "scim"]
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Build the Container image
       run: docker build ./docker-jans-${{ matrix.docker-images }} --file ./docker-jans-${{ matrix.docker-images }}/Dockerfile --tag localbuild/scanimage:latest
     - uses: anchore/scan-action@v3

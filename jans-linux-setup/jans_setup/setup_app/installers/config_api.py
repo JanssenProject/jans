@@ -68,9 +68,6 @@ class ConfigApiInstaller(JettyInstaller):
 
         self.enable()
 
-    def installed(self):
-        return os.path.exists(os.path.join(Config.jetty_base, self.service_name, 'start.ini'))
-
 
     def create_folders(self):
         for d in (self.output_folder, self.custom_config_dir):
