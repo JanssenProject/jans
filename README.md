@@ -1,10 +1,16 @@
-[![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/4353/badge)](https://bestpractices.coreinfrastructure.org/projects/4353)
-
-![Janssen Logo](https://github.com/JanssenProject/jans/blob/main/docs/logo/janssen_project_transparent_630px_182px.png)
+<h1 align="center"><img src="https://github.com/JanssenProject/jans/blob/eea33ea5c7740244b45f7bb1893167cd3fb93903/docs/logo/janssen_project_transparent_630px_182px.png" alt="Janssen Project - cloud native identity and access management platform"></h1>
 
 ## Welcome to the Janssen Project
 
 Janssen enables organizations to build a scalable centralized authentication and authorization service using free open source software. The components of the project include client and server implementations of the OAuth, OpenID Connect, SCIM and FIDO standards. New digital identity components may be added as the technology evolves.
+
+**Get Help**: [Chat](https://gitter.im/JanssenProject/Lobby) | [Discussions](https://github.com/JanssenProject/jans/discussions)
+
+**Get Started**: [Quick Start](https://github.com/JanssenProject/jans/edit/docs-readme-updates/README.md#quick-start) | [User Guides](https://github.com/JanssenProject/jans/tree/main/docs/user)
+
+**Contribute**: [Contribution Guide](https://github.com/JanssenProject/jans/blob/main/docs/CONTRIBUTING.md) | [Community Docs](https://github.com/JanssenProject/jans/tree/main/docs/community) | [Developer Guides](https://github.com/JanssenProject/jans/tree/main/docs/developer)
+
+[![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/4353/badge)](https://bestpractices.coreinfrastructure.org/projects/4353)
 
 ## Quick Start
 
