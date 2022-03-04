@@ -82,11 +82,6 @@
 		</dependency>
 
 		<!-- CDI -->
-<!-- 		<dependency>
-			<groupId>javax.enterprise</groupId>
-			<artifactId>cdi-api</artifactId>
-			<scope>provided</scope>
-		</dependency> -->
         <dependency>
 		    <groupId>jakarta.enterprise</groupId>
 		    <artifactId>jakarta.enterprise.cdi-api</artifactId>
@@ -102,17 +97,13 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
+            <groupId>jakarta.validation</groupId>
+            <artifactId>jakarta.validation-api</artifactId>
+        </dependency>
+		<dependency>
 			<groupId>org.jboss.spec.javax.annotation</groupId>
 			<artifactId>jboss-annotations-api_1.2_spec</artifactId>
 			<scope>provided</scope>
-		</dependency>
-<!-- 		<dependency>
-			<groupId>javax.inject</groupId>
-			<artifactId>javax.inject</artifactId>
-		</dependency> -->
-		<dependency>
-			<groupId>javax.validation</groupId>
-			<artifactId>validation-api</artifactId>
 		</dependency>
 
 		<!-- JSF, EL -->

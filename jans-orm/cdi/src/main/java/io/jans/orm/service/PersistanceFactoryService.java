@@ -10,9 +10,9 @@ import java.io.File;
 import java.util.Iterator;
 import java.util.Map;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Instance;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
 
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.slf4j.Logger;

@@ -29,10 +29,11 @@
     	<jakarta.inject.api.version>2.0.1</jakarta.inject.api.version>
 		<jakarta.interceptor.api.version>2.0.0</jakarta.interceptor.api.version>
 		<jakarta.mail.api.version>2.0.1</jakarta.mail.api.version>
-		<jakarta.persistence.api.version>2.2.3</jakarta.persistence.api.version>
+		<!-- <jakarta.persistence.api.version>3.0.0</jakarta.persistence.api.version> -->
     	<jakarta.security.enterprise.api.version>2.0.0</jakarta.security.enterprise.api.version>
     	<jakarta.servlet.api.version>5.0.0</jakarta.servlet.api.version>
     	<jakarta.validation.api.version>2.0.2</jakarta.validation.api.version>
+    	<jakarta.websocket.api.version>2.0.0</jakarta.websocket.api.version>
     	<jakarta.ws.rs.api.version>3.0.0</jakarta.ws.rs.api.version>
 		<jakarta.xml.bind.api.version>3.0.1</jakarta.xml.bind.api.version>
 		<jakarta.xml.soap.api.version>2.0.1</jakarta.xml.soap.api.version>
@@ -317,11 +318,11 @@
         		<artifactId>jakarta.mail-api</artifactId>
         		<version>${jakarta.mail.api.version}</version>
       		</dependency>
-            <dependency>
+   <!--          <dependency>
                <groupId>jakarta.persistence</groupId>
                <artifactId>jakarta.persistence-api</artifactId>
                <version>${jakarta.persistence.api.version}</version>
-            </dependency>
+            </dependency> -->
 			<dependency>
                 <groupId>jakarta.security.enterprise</groupId>
                 <artifactId>jakarta.security.enterprise-api</artifactId>
@@ -337,6 +338,13 @@
                 <artifactId>jakarta.validation-api</artifactId>
         		<version>${jakarta.validation.api.version}</version>
             </dependency>
+            <dependency>
+                <groupId>jakarta.websocket</groupId>
+                <artifactId>jakarta.websocket-api</artifactId>
+                <version>${jakarta.websocket.api.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            
 			<dependency>
         	    <groupId>jakarta.ws.rs</groupId>
         		<artifactId>jakarta.ws.rs-api</artifactId>
@@ -364,17 +372,17 @@
 				<artifactId>javax.inject</artifactId>
 				<version>1</version>
 			</dependency>-->
-			<dependency>
+			<!-- <dependency>
 				<groupId>javax.validation</groupId>
 				<artifactId>validation-api</artifactId>
 				<version>2.0.1.Final</version>
-			</dependency>
-			<dependency>
+			</dependency> -->
+			<!-- <dependency>
 				<groupId>javax.el</groupId>
 				<artifactId>el-api</artifactId>
 				<version>${uel-api.version}</version>
 				<scope>provided</scope>
-			</dependency> 
+			</dependency>  -->
 			<dependency>
 				<groupId>org.glassfish.web</groupId>
 				<artifactId>el-impl</artifactId>
@@ -397,11 +405,11 @@
 				<scope>provided</scope>
 			</dependency>
 
-			<dependency>
+		<!-- 	<dependency>
 				<groupId>javax.websocket</groupId>
 				<artifactId>javax.websocket-api</artifactId>
 				<version>1.1</version>
-			</dependency>
+			</dependency> -->
 
 			<dependency>
 				<groupId>javax.persistence</groupId>
