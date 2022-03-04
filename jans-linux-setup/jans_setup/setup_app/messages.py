@@ -24,7 +24,7 @@ class msg:
     password_label = "Password"
     hosts_label = "Hosts"
     username_label = "Username"
-    
+
     installOxAuth_label = "Install OxAuth"
     installOxTrust_label = "Install OxTrust"
     backend_types_label = "Backend Types"
@@ -40,13 +40,13 @@ class msg:
     installCasa_label = "Install Casa"
     installScimServer_label = "Install Scim"
     installFido2_label = "Install Fido2"
-    
+
     insufficient_free_disk_space = "Available free disk space was determined to be {1:0.1f} GB. This is less than the required disk space of {} GB."
     insufficient_mem_size = "RAM size was determined to be {:0.1f} GB. This is less than the suggested RAM size of {} GB"
     insufficient_number_of_cpu = "Available CPU Units found was {}. This is less than the required amount of {} CPU Units"
     insufficient_file_max = "Maximum number of files that can be opened on this computer is {}. Please increase number of file-max to {} on the host system and re-run setup.py"
     insufficient_free_disk_space = "Available free disk space was determined to be {} GB. This is less than the required disk space of {}"
-    
+
     suggested_free_disk_space = 40 #in GB
     suggested_number_of_cpu = 2
     suggested_file_max = 64000
@@ -82,7 +82,6 @@ class msg:
     ask_opendj_install = "Install OpenDJ"
     ask_installScimServer = "Install Scim Server"
     ask_installFido2 = "Install Fido2"
-
 
     opendj_install_options = ["Don't Install","Install Locally","Use Remote OpenDJ"]
     oxd_url_label = "oxd Server URL"
@@ -125,9 +124,10 @@ class msg:
     installation_description_casa = "Janssen Casa is a self-service web portal for end-users to manage authentication and authorization preferences for their account in a Janssen Server."
     installation_description_scim = "The Janssen Server implements SCIM to offer standard REST APIs for performing CRUD operations (create, read, update and delete) against user data."
     installation_description_fido2 = "FIDO 2.0 (FIDO2) is an open authentication standard that enables people to leverage common devices to authenticate to online services in both mobile and desktop environments"
-    
+
     installation_description_scripts = "Interception scripts can be used to implement custom business logic for authentication, authorization and more in a way that is upgrade-proof and doesn't require forking the Janssen Server code."
-    
-    
+
     installation_error = "The following error occurred while installing Janssen Server:"
     exit_post_setup = "No service was selected to install. Exit now?"
+
+    used_ports = "Port(s) {} should be free to continue. Please check."
