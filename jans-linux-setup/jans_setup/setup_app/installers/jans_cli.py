@@ -3,7 +3,8 @@ import glob
 import re
 import configparser
 import tarfile
-import shutil 
+import shutil
+import time
 
 from setup_app import paths
 from setup_app.utils import base
@@ -46,6 +47,10 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
     def install(self):
 
         self.logIt("Installing Jans Cli", pbar=self.service_name)
+
+        # backup if exists
+        if os.path.exists(self.jans_cli_install_dir):
+            self.run(['mv', '-f', self.jans_cli_install_dir, self.jans_cli_install_dir+'_backup-{}'.format(time.ctime())])
 
         #extract jans-cli tgz archieve
         base.extract_from_zip(self.source_files[0][0], 'jans-cli/cli', self.jans_cli_install_dir)
