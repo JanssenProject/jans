@@ -383,5 +383,23 @@ class JettyInstaller(BaseInstaller, SetupUtils):
                 f.write(b'<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "http://www.eclipse.org/jetty/configure_9_0.dtd">\n')
                 f.write(ET.tostring(root, method='xml'))
 
+    def get_plugins(self):
+        plugins = []
+        webapps_xml_fn = os.path.join(self.jetty_base, self.service_name, 'webapps', self.service_name+'.xml')
+
+        if os.path.exists(webapps_xml_fn):
+
+            tree = ET.parse(webapps_xml_fn)
+            root = tree.getroot()
+
+            for app_set in root.findall("Set"):
+                if app_set.get('name') == 'extraClasspath':
+                    for plugin_path in app_set.text.split(','):
+                        base_name = os.path.basename(plugin_path)
+                        n = base_name.rfind('plugin')
+                        plugins.append(base_name[:n].rstrip('-'))
+
+        return plugins
+
     def installed(self):
         return os.path.exists(os.path.join(Config.jetty_base, self.service_name, 'start.ini')) or os.path.exists(os.path.join(Config.jetty_base, self.service_name, 'start.d/server.ini'))
