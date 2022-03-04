@@ -9,10 +9,10 @@ package io.jans.service.timer;
 import java.util.Date;
 import java.util.UUID;
 
-import javax.annotation.PreDestroy;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
+import jakarta.annotation.PreDestroy;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
+import jakarta.inject.Inject;
 
 import io.jans.service.timer.event.TimerEvent;
 import io.jans.service.timer.schedule.JobShedule;

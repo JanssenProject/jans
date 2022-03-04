@@ -6,9 +6,9 @@
 
 package io.jans.service.el;
 
-import javax.el.ExpressionFactory;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Produces;
+import jakarta.el.ExpressionFactory;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Produces;
 
 /**
  * @author Yuriy Movchan Date: 05/22/2017

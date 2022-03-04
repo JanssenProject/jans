@@ -10,14 +10,14 @@ import java.beans.FeatureDescriptor;
 import java.util.Iterator;
 import java.util.Locale;
 
-import javax.el.ELContext;
-import javax.el.ELException;
-import javax.el.ELResolver;
-import javax.el.FunctionMapper;
-import javax.el.ValueExpression;
-import javax.el.ValueReference;
-import javax.el.VariableMapper;
-import javax.faces.el.CompositeComponentExpressionHolder;
+import jakarta.el.ELContext;
+import jakarta.el.ELException;
+import jakarta.el.ELResolver;
+import jakarta.el.FunctionMapper;
+import jakarta.el.ValueExpression;
+import jakarta.el.ValueReference;
+import jakarta.el.VariableMapper;
+import jakarta.faces.el.CompositeComponentExpressionHolder;
 
 class ValueExpressionAnalyzer {
     private ValueExpression expression;

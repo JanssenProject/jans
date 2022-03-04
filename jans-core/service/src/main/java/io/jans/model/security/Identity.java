@@ -19,8 +19,8 @@ import jakarta.enterprise.inject.Alternative;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.interceptor.Interceptor;
-import jakarta.security.auth.Subject;
-import jakarta.security.auth.login.LoginException;
+import javax.security.auth.Subject;
+import javax.security.auth.login.LoginException;
 
 import org.slf4j.Logger;
 

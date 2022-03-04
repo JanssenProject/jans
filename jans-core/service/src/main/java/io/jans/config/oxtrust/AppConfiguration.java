@@ -9,7 +9,7 @@ package io.jans.config.oxtrust;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import javax.enterprise.inject.Vetoed;
+import jakarta.enterprise.inject.Vetoed;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;

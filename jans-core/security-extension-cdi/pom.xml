@@ -45,11 +45,11 @@
 		</dependency>
 
 		<!-- CDI -->
-<!-- 		<dependency>
-			<groupId>javax.enterprise</groupId>
-			<artifactId>cdi-api</artifactId>
+      	<dependency>
+		    <groupId>jakarta.enterprise</groupId>
+		    <artifactId>jakarta.enterprise.cdi-api</artifactId>
 			<scope>provided</scope>
-		</dependency> -->
+      	</dependency>
 		<dependency>
 			<groupId>org.jboss.weld</groupId>
 			<artifactId>weld-core-impl</artifactId>
@@ -57,19 +57,6 @@
 		</dependency>
 
 		<!-- Other -->
-<!-- 		<dependency>
-			<groupId>jakarta.servlet</groupId>
-			<artifactId>jakarta.servlet-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-		    <groupId>javax.ws.rs</groupId>
-		    <artifactId>javax.ws.rs-api</artifactId>
-		</dependency> -->
-      	<dependency>
-		    <groupId>jakarta.enterprise</groupId>
-		    <artifactId>jakarta.enterprise.cdi-api</artifactId>
-      	</dependency>
       	<dependency>
             <groupId>jakarta.servlet</groupId>
         	<artifactId>jakarta.servlet-api</artifactId>

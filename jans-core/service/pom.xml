@@ -90,7 +90,15 @@
 		<dependency>
 		    <groupId>jakarta.inject</groupId>
         	<artifactId>jakarta.inject-api</artifactId>
-   		</dependency>	
+   		</dependency>
+        <dependency>
+            <groupId>jakarta.mail</groupId>
+        	<artifactId>jakarta.mail-api</artifactId>
+      	</dependency>
+		<dependency>
+			<groupId>jakarta.security.auth.message</groupId>
+		    <artifactId>jakarta.security.auth.message-api</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>jakarta.servlet</groupId>
 			<artifactId>jakarta.servlet-api</artifactId>
@@ -107,11 +115,11 @@
 		</dependency>
 
 		<!-- JSF, EL -->
-		<dependency>
-			<groupId>com.sun.faces</groupId>
-			<artifactId>jsf-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
+        <dependency>
+            <groupId>jakarta.faces</groupId>
+            <artifactId>jakarta.faces-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
 		<dependency>
 			<groupId>org.glassfish.web</groupId>
 			<artifactId>el-impl</artifactId>

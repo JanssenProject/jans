@@ -26,6 +26,7 @@
     	<jakarta.annotation.api.version>2.0.0</jakarta.annotation.api.version>
 		<jakarta.el.api.version>4.0.0</jakarta.el.api.version>
     	<jakarta.enterprise.cdi.api.version>3.0.0</jakarta.enterprise.cdi.api.version>
+    	<jakarta.faces.api.version>3.0.0</jakarta.faces.api.version>    	
     	<jakarta.inject.api.version>2.0.1</jakarta.inject.api.version>
 		<jakarta.interceptor.api.version>2.0.0</jakarta.interceptor.api.version>
 		<jakarta.mail.api.version>2.0.1</jakarta.mail.api.version>
@@ -37,10 +38,11 @@
     	<jakarta.ws.rs.api.version>3.0.0</jakarta.ws.rs.api.version>
 		<jakarta.xml.bind.api.version>3.0.1</jakarta.xml.bind.api.version>
 		<jakarta.xml.soap.api.version>2.0.1</jakarta.xml.soap.api.version>
+		<org.glassfish.jakarta.el.version>4.0.0</org.glassfish.jakarta.el.version>
 
-		<jsf-api.version>2.2.20</jsf-api.version>
-		<jsf-impl.version>2.3.14</jsf-impl.version>
-		<uel-api.version>2.2.1-b04</uel-api.version>
+		<!-- <jsf-api.version>2.2.20</jsf-api.version> -->
+		<jsf-impl.version>3.0.0</jsf-impl.version>
+		<!-- <uel-api.version>2.2.1-b04</uel-api.version> -->
 		<uel-impl.version>2.2.1-b05</uel-impl.version>
 
 		<jackson.version>2.13.0</jackson.version>
@@ -303,6 +305,12 @@
         		<artifactId>jakarta.el-api</artifactId>
         		<version>${jakarta.el.api.version}</version>
       		</dependency>
+            <dependency>
+                <groupId>jakarta.faces</groupId>
+                 <artifactId>jakarta.faces-api</artifactId>
+                 <version>${jakarta.faces.api.version}</version>
+                  <scope>provided</scope>
+            </dependency>
 			<dependency>
         		<groupId>jakarta.inject</groupId>
         		<artifactId>jakarta.inject-api</artifactId>
@@ -324,6 +332,11 @@
                <version>${jakarta.persistence.api.version}</version>
             </dependency> -->
 			<dependency>
+			    <groupId>jakarta.security.auth.message</groupId>
+			    <artifactId>jakarta.security.auth.message-api</artifactId>
+			    <version>${jakarta.security.auth.message.api.version}</version>
+			</dependency>
+			<dependency>
                 <groupId>jakarta.security.enterprise</groupId>
                 <artifactId>jakarta.security.enterprise-api</artifactId>
                 <version>${jakarta.security.enterprise.api.version}</version>
@@ -343,8 +356,7 @@
                 <artifactId>jakarta.websocket-api</artifactId>
                 <version>${jakarta.websocket.api.version}</version>
                 <scope>provided</scope>
-            </dependency>
-            
+            </dependency>            
 			<dependency>
         	    <groupId>jakarta.ws.rs</groupId>
         		<artifactId>jakarta.ws.rs-api</artifactId>
@@ -383,15 +395,21 @@
 				<version>${uel-api.version}</version>
 				<scope>provided</scope>
 			</dependency>  -->
-			<dependency>
+			<!-- <dependency>
 				<groupId>org.glassfish.web</groupId>
 				<artifactId>el-impl</artifactId>
 				<version>${uel-impl.version}</version>
-			</dependency>
-			<dependency>
+			</dependency> -->
+<!-- 			<dependency>
 				<groupId>com.sun.faces</groupId>
 				<artifactId>jsf-api</artifactId>
 				<version>${jsf-api.version}</version>
+			</dependency> -->
+	
+			<dependency>
+    			<groupId>org.glassfish</groupId>
+			    <artifactId>jakarta.el</artifactId>
+			    <version>${org.glassfish.jakarta.el.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.glassfish</groupId>
@@ -561,11 +579,11 @@
 				<artifactId>jackson-dataformat-cbor</artifactId>
 				<version>${jackson.version}</version>
 			</dependency>
-			<dependency>
+		<!-- 	<dependency>
 				<groupId>jakarta.xml.bind</groupId>
 				<artifactId>jakarta.xml.bind-api</artifactId>
 				<version>2.3.3</version>
-			</dependency>
+			</dependency> -->
 
 			<!-- Jython -->
 			<dependency>
@@ -822,11 +840,11 @@
 			</dependency>
 
 			<!-- Deprecated XML libraries -->
-			<dependency>
+			<!-- <dependency>
 				<groupId>jakarta.xml.bind</groupId>
 				<artifactId>jakarta.xml.bind-api</artifactId>
 				<version>3.0.1</version>
-			</dependency>
+			</dependency> -->
 			<!-- <dependency>
 				<groupId>javax.annotation</groupId>
 				<artifactId>javax.annotation-api</artifactId>

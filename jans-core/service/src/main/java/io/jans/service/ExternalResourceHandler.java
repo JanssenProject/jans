@@ -13,8 +13,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.faces.FacesException;
-import javax.faces.view.facelets.ResourceResolver;
+import jakarta.faces.FacesException;
+import jakarta.faces.view.facelets.ResourceResolver;
 
 import io.jans.util.StringHelper;
 import org.slf4j.Logger;

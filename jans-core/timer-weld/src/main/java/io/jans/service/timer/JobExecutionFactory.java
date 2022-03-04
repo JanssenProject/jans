@@ -6,8 +6,8 @@
 
 package io.jans.service.timer;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import org.quartz.Job;
 import org.quartz.Scheduler;
