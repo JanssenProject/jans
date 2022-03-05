@@ -21,16 +21,15 @@ import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.crypto.binding.TokenBindingMessage;
 import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
 import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
-import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.crypto.signature.AlgorithmFamily;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.exception.InvalidJwtException;
+import io.jans.as.model.jwe.Jwe;
 import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.jwk.JSONWebKeySet;
 import io.jans.as.model.jwk.Use;
 import io.jans.as.model.jwt.Jwt;
-import io.jans.as.model.jwe.Jwe;
-import io.jans.as.model.jwt.JwtClaims;
 import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.jwt.JwtHeader;
 import io.jans.as.model.jwt.JwtHeaderName;
@@ -100,7 +99,7 @@ import static org.apache.commons.lang3.BooleanUtils.isTrue;
  * Implementation for request authorization through REST web services.
  *
  * @author Javier Rojas Blum
- * @version February 2, 2022
+ * @version March 2, 2022
  */
 @Path("/")
 public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
@@ -413,7 +412,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                             AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT, "",
                                             "The None algorithm in nested JWT is not allowed for FAPI"))
                                     .type(MediaType.APPLICATION_JSON_TYPE).build());
-                        }                        
+                        }
                         responseMode = ResponseMode.getByValue(jwr.getClaims().getClaimAsString("response_mode"));
                         if (responseMode == ResponseMode.JWT) {
                             redirectUriResponse.getRedirectUri().setResponseMode(ResponseMode.JWT);
@@ -600,6 +599,12 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                         }
                     }
                 }
+            }
+
+            if (identity.getSessionId().getState() == SessionIdState.AUTHENTICATED
+                    && client != null && Boolean.TRUE.equals(client.getAttributes().getDefaultPromptLogin())
+                    && new Date().getTime() - identity.getSessionId().getAuthenticationTime().getTime() > 200) {
+                prompts.add(Prompt.LOGIN);
             }
 
             if (prompts.contains(Prompt.LOGIN)) {
