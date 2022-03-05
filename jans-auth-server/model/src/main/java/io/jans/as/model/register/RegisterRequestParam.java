@@ -13,7 +13,7 @@ import org.apache.commons.lang.StringUtils;
  *
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version February 10, 2022
+ * @version March 2, 2022
  */
 
 public enum RegisterRequestParam {
@@ -346,6 +346,8 @@ public enum RegisterRequestParam {
     BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG("backchannel_authentication_request_signing_alg"),
 
     BACKCHANNEL_USER_CODE_PARAMETER("backchannel_user_code_parameter"),
+
+    DEFAULT_PROMPT_LOGIN("default_prompt_login"),
 
     PUBLIC_SUBJECT_IDENTIFIER_ATTRIBUTE("public_subject_identifier_attribute");
 

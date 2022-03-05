@@ -17,7 +17,7 @@ import java.util.List;
 /**
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version February 10, 2022
+ * @version March 2, 2022
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ClientAttributes implements Serializable {
@@ -91,6 +91,9 @@ public class ClientAttributes implements Serializable {
 
     @JsonProperty("jansSubAttr")
     private String publicSubjectIdentifierAttribute;
+
+    @JsonProperty("jansDefaultPromptLogin")
+    private Boolean defaultPromptLogin = false;
 
     public List<String> getRopcScripts() {
         if (ropcScripts == null) ropcScripts = new ArrayList<>();
@@ -293,6 +296,18 @@ public class ClientAttributes implements Serializable {
         this.publicSubjectIdentifierAttribute = publicSubjectIdentifierAttribute;
     }
 
+    public Boolean getDefaultPromptLogin() {
+        if (defaultPromptLogin == null) {
+            defaultPromptLogin = false;
+        }
+
+        return defaultPromptLogin;
+    }
+
+    public void setDefaultPromptLogin(Boolean defaultPromptLogin) {
+        this.defaultPromptLogin = defaultPromptLogin;
+    }
+
     @Override
     public String toString() {
         return "ClientAttributes{" +
@@ -314,6 +329,7 @@ public class ClientAttributes implements Serializable {
                 ", authorizationEncryptedResponseAlg=" + authorizationEncryptedResponseAlg +
                 ", authorizationEncryptedResponseEnc=" + authorizationEncryptedResponseEnc +
                 ", publicSubjectIdentifierAttribute=" + publicSubjectIdentifierAttribute +
+                ", defaultPromptLogin=" + defaultPromptLogin +
                 '}';
     }
 }
