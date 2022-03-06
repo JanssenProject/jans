@@ -14,7 +14,15 @@ class LdapHandler(BaseHandler):
         alt_name = self.opts.get("subj-alt-name", "localhost")
         suffix = "opendj"
 
-        self._patch_cert_key(suffix, extra_dns=[alt_name])
+        try:
+            valid_to = int(self.opts.get("valid-to", 365))
+        except ValueError:
+            valid_to = 365
+        finally:
+            if valid_to < 1:
+                valid_to = 365
+
+        self._patch_cert_key(suffix, extra_dns=[alt_name], valid_to=valid_to)
 
         with open("/etc/certs/{}.pem".format(suffix), "w") as fw:
             with open("/etc/certs/{}.crt".format(suffix)) as fr:
