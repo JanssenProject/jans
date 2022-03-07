@@ -9,7 +9,7 @@ It will print all information about how to configure Janssen Server using CLI mo
 
 ```
 usage: config-cli.py [-h] [--host HOST] [--client-id CLIENT_ID]
-                     [--client_secret CLIENT_SECRET] [-debug]
+                     [--client_secret CLIENT_SECRET] [--plugins PLUGINS] [-debug]
                      [--debug-log-file DEBUG_LOG_FILE]
                      [--operation-id OPERATION_ID] [--url-suffix URL_SUFFIX]
                      [--info {Attribute,CacheConfiguration,CacheConfigurationInMemory,CacheConfigurationMemcached,CacheConfigurationNativePersistence,CacheConfigurationRedis,ConfigurationFido2,ConfigurationJWKJSONWebKeyJWK,ConfigurationLogging,ConfigurationProperties,ConfigurationSMTP,CustomScripts,DatabaseCouchbaseConfiguration,DatabaseLDAPConfiguration,DefaultAuthenticationMethod,OAuthOpenIDConnectClients,OAuthScopes,OAuthUMAResources}]
@@ -27,6 +27,7 @@ optional arguments:
                         Jans Config Api Client ID
   --client_secret CLIENT_SECRET
                         Jans Config Api Client ID secret
+  --plugins PLUGINS     Available plugins separated by comma
   -debug                Run in debug mode
   --debug-log-file DEBUG_LOG_FILE
                         Log file name when run in debug mode

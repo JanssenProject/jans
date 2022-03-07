@@ -121,6 +121,10 @@ class JettyInstaller(BaseInstaller, SetupUtils):
 
         return jettyArchive, jetty_dist
 
+    @property
+    def web_app_xml_fn(self):
+        return os.path.join(self.jetty_base, self.service_name, 'webapps', self.service_name+'.xml')
+
 
     def installJettyService(self, serviceConfiguration, supportCustomizations=False, supportOnlyPageCustomizations=False):
         serviceName = serviceConfiguration['name']
@@ -130,7 +134,6 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         jettyServiceBase = '%s/%s' % (self.jetty_base, serviceName)
         jettyModules = serviceConfiguration['jetty']['modules']
         jettyModulesList = jettyModules.split(',')
-        self.web_app_xml_fn = os.path.join(self.jetty_base, serviceName, 'webapps', serviceName+'.xml')
 
         jettyModulesList = [m.strip() for m in jettyModules.split(',')]
         if self.jetty_dist_string == 'jetty-home':
@@ -368,20 +371,47 @@ class JettyInstaller(BaseInstaller, SetupUtils):
             xml_fn = self.web_app_xml_fn
         tree = ET.parse(xml_fn)
         root = tree.getroot()
+        path_list = []
 
         for app_set in root.findall("Set"):
-            if app_set.get('name') == 'extraClasspath' and app_set.text.endswith(os.path.basename(class_path)):
+            if app_set.get('name') == 'extraClasspath':
+                path_list = [cp.strip() for cp in app_set.text.split(',')]
                 break
         else:
-            child = ET.Element("Set")
-            child.set('name', 'extraClasspath')
-            child.text = class_path
-            root.append(child)
+            app_set = ET.Element("Set")
+            app_set.set('name', 'extraClasspath')
+            
+            root.append(app_set)
 
-            with open(xml_fn, 'wb') as f:
-                f.write(b'<?xml version="1.0"  encoding="ISO-8859-1"?>\n')
-                f.write(b'<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "http://www.eclipse.org/jetty/configure_9_0.dtd">\n')
-                f.write(ET.tostring(root, method='xml'))
+        for cp in class_path.split(','):
+            if os.path.basename(cp) not in ','.join(path_list):
+                path_list.append(cp.strip())
+
+        app_set.text = ','.join(path_list)
+        
+        with open(xml_fn, 'wb') as f:
+            f.write(b'<?xml version="1.0"  encoding="ISO-8859-1"?>\n')
+            f.write(b'<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "http://www.eclipse.org/jetty/configure_9_0.dtd">\n')
+            f.write(ET.tostring(root, method='xml'))
+
+
+    def get_plugins(self):
+        plugins = []
+        webapps_xml_fn = os.path.join(self.jetty_base, self.service_name, 'webapps', self.service_name+'.xml')
+
+        if os.path.exists(webapps_xml_fn):
+
+            tree = ET.parse(webapps_xml_fn)
+            root = tree.getroot()
+
+            for app_set in root.findall("Set"):
+                if app_set.get('name') == 'extraClasspath':
+                    for plugin_path in app_set.text.split(','):
+                        base_name = os.path.basename(plugin_path)
+                        n = base_name.rfind('plugin')
+                        plugins.append(base_name[:n].rstrip('-'))
+
+        return plugins
 
     def installed(self):
         return os.path.exists(os.path.join(Config.jetty_base, self.service_name, 'start.ini')) or os.path.exists(os.path.join(Config.jetty_base, self.service_name, 'start.d/server.ini'))

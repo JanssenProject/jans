@@ -65,7 +65,7 @@ If you would like to build `jans-cli` manually, you can go through the following
 You can verify with the following command line if everything is done successfully.
 
 ```
-python3 jans-cli.pyz -h
+python3 config-cli.pyz -h
 ```
 
 

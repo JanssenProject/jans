@@ -3,7 +3,8 @@ import glob
 import re
 import configparser
 import tarfile
-import shutil 
+import shutil
+import time
 
 from setup_app import paths
 from setup_app.utils import base
@@ -47,6 +48,10 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
 
         self.logIt("Installing Jans Cli", pbar=self.service_name)
 
+        # backup if exists
+        if os.path.exists(self.jans_cli_install_dir):
+            self.run(['mv', '-f', self.jans_cli_install_dir, self.jans_cli_install_dir+'_backup-{}'.format(time.ctime())])
+
         #extract jans-cli tgz archieve
         base.extract_from_zip(self.source_files[0][0], 'jans-cli/cli', self.jans_cli_install_dir)
 
@@ -88,6 +93,8 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
         if Config.get('installScimServer'):
             config['DEFAULT']['scim_client_id'] = Config.scim_client_id
             config['DEFAULT']['scim_client_secret_enc'] = Config.scim_client_encoded_pw
+
+        config['DEFAULT']['jca_plugins'] = ','.join(base.current_app.ConfigApiInstaller.get_plugins())
 
         config.write(self.config_ini_fn.open('w'))
         self.config_ini_fn.chmod(0o600)

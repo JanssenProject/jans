@@ -124,11 +124,6 @@ class JansAuthInstaller(JettyInstaller):
             Config.pairwiseCalculationSalt = self.genRandomString(random.randint(20,30))
 
     def copy_static(self):
-        self.copyFile(
-                os.path.join(Config.install_dir, 'static/auth/lib/duo_web.py'),
-                os.path.join(Config.jansOptPythonFolder, 'libs' )
-            )
-
         for conf_fn in ('duo_creds.json', 'gplus_client_secrets.json', 'super_gluu_creds.json',
                         'vericloud_jans_creds.json', 'cert_creds.json', 'otp_configuration.json'):
 
