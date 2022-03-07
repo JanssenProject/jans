@@ -38,9 +38,9 @@ Janssen enables organizations to build a scalable centralized authentication and
 - [Support](#support)
 
 
-## What is Janssen Project
+## What is the Janssen Project
 
-Janssen Project is a cloud native digital identity platform. Using Janssen, applications can quickly integrate basic to advance authentication and authorization flows. Janssen supports
+The Janssen Project is a cloud native digital identity platform. Using Janssen, applications can quickly integrate basic to advance authentication and authorization flows. Janssen supports
 
 - **Social login**: Janssen implements OAuth2 and enables applications to quickly integrate social logins
 - **Two factor authentication**: Janssen implements FIDO2 standards to enable applications to use two factor authentication
@@ -52,7 +52,7 @@ Janssen [user documentation](https://github.com/JanssenProject/jans/tree/main/do
 
 ### Quick start
 
-> TODO: create a docker based installation which has all the components needed in the ecosystem, like Apache with mod-auth-oidc, Janssen server, an app that needs to be protected.
+> TODO: create a docker based installation which has all components needed in the ecosystem, like Apache with mod-auth-oidc, Janssen server, an app that needs to be protected.
 Try first, ask questions later? Quick start shows how easy and simple it is to install Janssen Auth server and integrate it with a sample application. 
 
 ### Installation
