@@ -6,8 +6,25 @@
 
 package io.jans.as.server.service;
 
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import javax.ejb.DependsOn;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.slf4j.Logger;
+
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Maps;
+
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
@@ -19,7 +36,6 @@ import io.jans.as.server.model.fido.u2f.DeviceRegistration;
 import io.jans.as.server.model.fido.u2f.RegisterRequestMessageLdap;
 import io.jans.as.server.model.ldap.ClientAuthorization;
 import io.jans.as.server.model.ldap.TokenEntity;
-import io.jans.as.server.service.fido.u2f.RequestService;
 import io.jans.as.server.uma.authorization.UmaPCT;
 import io.jans.as.server.uma.service.UmaPctService;
 import io.jans.as.server.uma.service.UmaResourceService;
@@ -33,20 +49,6 @@ import io.jans.service.cdi.event.CleanerEvent;
 import io.jans.service.cdi.event.Scheduled;
 import io.jans.service.timer.event.TimerEvent;
 import io.jans.service.timer.schedule.TimerSchedule;
-import org.slf4j.Logger;
-
-import javax.ejb.DependsOn;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -75,10 +77,6 @@ public class CleanerTimer {
 
     @Inject
     private CacheProvider cacheProvider;
-
-    @Inject
-    @Named("u2fRequestService")
-    private RequestService u2fRequestService;
 
     @Inject
     private AppConfiguration appConfiguration;
