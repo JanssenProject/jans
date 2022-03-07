@@ -293,9 +293,35 @@ def decode_text(text: AnyStr, key: AnyStr) -> bytes:
     return unpadder.update(padded_data) + unpadder.finalize()
 
 
-def generate_ssl_certkey(suffix, email, hostname, org_name, country_code,
-                         state, city, base_dir="/etc/certs",
-                         extra_dns=None, extra_ips=None):
+def generate_ssl_certkey(
+    suffix,
+    email,
+    hostname,
+    org_name,
+    country_code,
+    state,
+    city,
+    base_dir="/etc/certs",
+    extra_dns=None,
+    extra_ips=None,
+    valid_to=365,
+):
+    """Generate SSL public and private keys.
+
+    :param suffix: Suffix as basename (i.e. ``auth-server``)
+    :param email: Email address for subject/issuer.
+    :param hostname: Hostname (common name) for subject/issuer.
+    :param org_name: Organization name for subject/issuer.
+    :param country_code: Country name in ISO format for subject/issuer.
+    :param state: State/province name for subject/issuer.
+    :param city: City/locality name for subject/issuer.
+    :param base_dir: Directory to store generated public and private keys.
+    :param extra_dns: Additional DNS names.
+    :param extra_ips: Additional IP addresses.
+    :param valid_to: Validity length in days.
+    :returns: A pair of path to generated public and private keys.
+    """
+
     key_fn = f"{base_dir}/{suffix}.key"
     priv_key = generate_private_key(key_fn)
 
@@ -313,6 +339,7 @@ def generate_ssl_certkey(suffix, email, hostname, org_name, country_code,
         org_name=org_name,
         extra_dns=extra_dns,
         extra_ips=extra_ips,
+        valid_to=valid_to,
     )
     return cert_fn, key_fn
 
@@ -380,8 +407,30 @@ def generate_keystore(suffix, hostname, keypasswd, jks_fn="", in_key="", in_cert
         raise RuntimeError(f"Failed to generate JKS keystore {jks_fn}; reason={err.decode()}")
 
 
-def generate_ssl_ca_certkey(suffix, email, hostname, org_name, country_code,
-                            state, city, base_dir="/etc/certs"):
+def generate_ssl_ca_certkey(
+    suffix,
+    email,
+    hostname,
+    org_name,
+    country_code,
+    state,
+    city,
+    base_dir="/etc/certs",
+    valid_to=365,
+):
+    """Generate SSL public and private keys for CA.
+
+    :param suffix: Suffix as basename (i.e. ``auth-server``)
+    :param email: Email address for subject/issuer.
+    :param hostname: Hostname (common name) for subject/issuer.
+    :param org_name: Organization name for subject/issuer.
+    :param country_code: Country name in ISO format for subject/issuer.
+    :param state: State/province name for subject/issuer.
+    :param city: City/locality name for subject/issuer.
+    :param base_dir: Directory to store generated public and private keys.
+    :param valid_to: Validity length in days.
+    :returns: A pair of path to generated public and private keys.
+    """
 
     key_fn = f"{base_dir}/{suffix}.key"
     priv_key = generate_private_key(key_fn)
@@ -397,13 +446,44 @@ def generate_ssl_ca_certkey(suffix, email, hostname, org_name, country_code,
         city=city,
         email=email,
         org_name=org_name,
+        valid_to=valid_to,
     )
     return cert_fn, key_fn
 
 
-def generate_signed_ssl_certkey(suffix, ca_key_fn, ca_cert_fn, email, hostname, org_name,
-                                country_code, state, city, base_dir="/etc/certs",
-                                extra_dns=None, extra_ips=None):
+def generate_signed_ssl_certkey(
+    suffix,
+    ca_key_fn,
+    ca_cert_fn,
+    email,
+    hostname,
+    org_name,
+    country_code,
+    state,
+    city,
+    base_dir="/etc/certs",
+    extra_dns=None,
+    extra_ips=None,
+    valid_to=365,
+):
+    """Generate SSL public and private keys signed by CA.
+
+    :param suffix: Suffix as basename (i.e. ``auth-server``)
+    :param ca_key_fn: Path to CA private key.
+    :param ca_cert_fn: Path to CA public key.
+    :param email: Email address for subject/issuer.
+    :param hostname: Hostname (common name) for subject/issuer.
+    :param org_name: Organization name for subject/issuer.
+    :param country_code: Country name in ISO format for subject/issuer.
+    :param state: State/province name for subject/issuer.
+    :param city: City/locality name for subject/issuer.
+    :param base_dir: Directory to store generated public and private keys.
+    :param extra_dns: Additional DNS names.
+    :param extra_ips: Additional IP addresses.
+    :param valid_to: Validity length in days.
+    :returns: A pair of path to generated public and private keys.
+    """
+
     key_fn = f"{base_dir}/{suffix}.key"
     priv_key = generate_private_key(key_fn)
 
@@ -435,5 +515,5 @@ def generate_signed_ssl_certkey(suffix, ca_key_fn, ca_cert_fn, email, hostname, 
     with open(ca_cert_fn, "rb") as f:
         ca_cert = x509.load_pem_x509_certificate(f.read())
 
-    sign_csr(cert_fn, csr, ca_key, ca_cert)
+    sign_csr(cert_fn, csr, ca_key, ca_cert, valid_to=valid_to)
     return cert_fn, key_fn
