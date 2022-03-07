@@ -25,6 +25,8 @@ sys.path.append(dir_path)
 if not (os.path.exists('/opt/dist/jans/jans.zip') or os.path.exists('jans-auth.war')) or '-uninstall' in sys.argv:
     import install
     install.setup_dir = dir_path
+    install.app_globals.argsp = install.parser.parse_known_args()[0]
+
     if '-uninstall' in sys.argv:
         install.uninstall_jans()
         sys.exit()
