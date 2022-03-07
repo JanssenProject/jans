@@ -44,7 +44,7 @@ The Janssen Project is a cloud native digital identity platform. Using Janssen, 
 
 - **Social login**: Janssen implements OAuth2 and enables applications to quickly integrate social logins
 - **Two factor authentication**: Janssen implements FIDO2 standards to enable applications to use two factor authentication
-- **User registration and management**
+> TODO: add more use cases
 
 Janssen [user documentation](https://github.com/JanssenProject/jans/tree/main/docs/user) has full list of usecases and how to implement them using Janssen.
 
@@ -62,6 +62,7 @@ Janssen can be installed as cloud-native in a Kubernetes cluster or as a server 
 ### Use cases
 
 Complete list of Janssen usecases can be found under our [user documentation](docs/user).
+> TODO: add more content here
 
 ## Users and Community
 
@@ -173,6 +174,7 @@ In 2020, Gluu decided to democratize the governance of the oxAuth project by mov
 
 Pigeons (or doves if you like...) are universally regarded as a symbol of peace. But they are also fast. Powered by a handful of seeds, a well trained racing pigeon can fly 1000 kilometers in a day. The Janssen brothers of Arendonk in Belgium bred the world's fastest family of racing pigeons. Complex open source infrastructure, like competitive animal husbandry, requires incremental improvement. Janssen racing pigeons revolutionized the sport. The Janssen Project seeks to revolutionize identity and access management.
 
+> TODO: refactor support section
 ## Support
 
 Documentation currently is a work in progress. Draft pages are currently available on [Janssen Project Wiki](https://github.com/JanssenProject/jans/wiki/). You may want to also check Gluu Server [docs](https://gluu.org/docs), which have a lot in common with Janssen.
