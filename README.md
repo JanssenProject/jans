@@ -12,6 +12,30 @@ Janssen enables organizations to build a scalable centralized authentication and
 
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/4353/badge)](https://bestpractices.coreinfrastructure.org/projects/4353)
 
+**Table of Contents**
+
+- [What is Janssen Project](#what-is-janssen-project)
+- [Users and Community](#users-and-community)
+- [Getting Started](#getting-started)
+  - [Quick Start](#quick-start)
+  - [Installation](#installation)
+  - [Use Cases](#use-cases)
+- [Contributing](#contributing)
+  - [Code of Conduct](#code-of-conduct)
+  - [Contribution Guidelines](#contribution-guidelines)
+- [Security](#security)
+- [Documentation](#documentation)
+  - [Community Documentation](#community-documentation)
+  - [Technical Documentation](#technical-documentation)
+  - [Developer Guides](#developer-guides)
+  - [Code Documentation](#code-documentation)
+- [Design](#design)
+  - [Design Goals](#design-goals)
+  - [Janssen Modules](#janssen-modules)
+- [Goal and Governance](#goal-and-governance)
+- [Support](#support)
+
+
 ## What is Janssen Project
 
 Janssen Project is a cloud native digital identity platform. Using Janssen, applications can quickly integrate basic to advance authentication and authorization flows. Janssen supports
@@ -53,29 +77,38 @@ Complete list of Janssen usecases can be found under our user documentation.
 
 Janssen code of conduct ensures that Janssen community is a welcoming place for everyone. 
 
-### Guidelines
+### Contribution Guidelines
 
 Contribution guide will give you all necessary information and `howto` to get started. Janssen community welcomes all types of contributions. Be it an interesting comment on an open issue or implementing a feature.  Welcome aboard! ✈️ 
 
-### Documentation
+## Security
+
+### Disclosing vulnerabilities
+If you think you found a security vulnerability, please refrain from posting it publicly on the forums, the chat, or GitHub. Instead, send us an email on security@jans.io and include the word "SECURITY" in the subject line
+
+Refer to [Janssen Security Policy](.github/SECURITY.md)
+
+## Documentation
 
 Janssen provides documentation that will help contributors at every step.
 
-#### Community documentation 
+### Community Documentation 
 
 Provides details on community charter, processes and structure.
 
-#### Technical documentation
+### Technical Documentation
 
 Technical documentation helps understanding architecture and design of various Janssen modules. 
 
-#### Developer Guides
+### Developer Guides
 
 Developer guides help contributors setup their workspace, setup local test environments, coding convensions and styles.
 
-#### Code documentation
+### Code Documentation
 
 This is source code documentation that helps understanding Janssen code in finer details.
+
+## Design
 
 ### Design Goals
 
@@ -109,7 +142,7 @@ Janssen is not a big monolith--it's a lot of services working together. Whether 
 
 1. **[orm](jans-orm)**: This is the library for persistence and caching implemenations in Janssen. Currently LDAP and Couchbase are supported. RDBMS is coming soon.
 
-### Goal and Governance
+## Goal and Governance
 
 ### Project Goal
 
@@ -126,7 +159,7 @@ Through the Janssen project, we can coalesce a community. Open source developmen
 
 Janssen is a Linux Foundation project, governed according to the [charter](./docs/community/charter.md). Technical oversight of the project is the responsibility of the Technical Steering Committee ("TSC"). Day to day decision making is in the hands of the Contributors. The TSC helps to guide the direction of the project and to improve the quality and security of the development process.
 
-## History
+### History
 
 The initial code was ported by [Gluu](https://gluu.org), based on version 4.2 of it's identity and access management (IAM) platform. Gluu launched in 2009 with the goal of creating an enterprise-grade open source distribution of IAM components. In 2012, Gluu started work on an OAuth Authorization Server to implement OpenID Connect, which they saw as a promising next-generation replacement for SAML. This project was called [oxAuth](https://github.com/GluuFederation/oxauth), and over time, became the core component of the Gluu Server.  Gluu has submitted many [self-certifications](https://openid.net/certification/) at the OpenID Foundation. Today, it is  one of the most comprehensive OpenID Connect Providers.
 
