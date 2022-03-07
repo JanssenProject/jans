@@ -26,10 +26,44 @@ Janssen [user documentation](https://github.com/JanssenProject/jans/tree/main/do
 
 Janssen is used by many internet facing applications and enterprise applications as their core digital identity platform. Janssen community actively helps in resolving issues. Community also makes sure that Janssen is upto date with new developments and standards in authentication and authorization domain.
 
+A BIG thanks to all amazing contributors!! 👏 👏
 
-## Quick Start
+<a href="https://github.com/JanssenProject/jans/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=JanssenProject/jans" />
+</a>
 
-Try first, ask questions later? Go to the [Janssen Project Wiki](https://github.com/JanssenProject/jans/wiki/) right now!
+## Getting Started
+
+### Quick start
+
+> TODO: create a docker based installation which has all the components needed in the ecosystem, like Apache with mod-auth-oidc, Janssen server, an app that needs to be protected.
+Try first, ask questions later? Quick start shows how easy and simple it is to install Janssen Auth server and integrate it with a sample application. 
+
+### Installation
+
+Janssen can be installed as cloud-native in a Kubernetes cluster or as a server on a single VM. Go to the [Janssen Project Wiki](https://github.com/JanssenProject/jans/wiki/) to know all the installation options
+
+### Janssen Modules
+
+Janssen is not a big monolith--it's a lot of services working together. Whether you deploy Janssen to a Kubernetes cluster, or you are a developer running everything on one server, it's important to understand the different parts. 
+
+1. **[auth-server](jans-auth-server)**: This component is the OAuth Authorization Server, the OpenID Connect Provider, the UMA Authorization Server--this is the main Internet facing component of Janssen. It's the service that returns tokens, JWT's and identity assertions. This service must be Internet facing.
+
+1. **[fido](jans-fido2)**:  This component provides the server side endpoints to enroll and validate devices that use FIDO. It provides both FIDO U2F (register, authenticate) and FIDO 2 (attestation, assertion) endpoints. This service must be internet facing.
+
+1. **[config-api](jans-config-api)**: The API to configure the auth-server and other components is consolidated in this component. This service should not be Internet-facing.
+
+1. **[scim](jans-scim)**: [SCIM](http://www.simplecloud.info/) is JSON/REST API to manage user data. Use it to add, edit and update user information. This service should not be Internet facing.
+
+1. **[jans-cli](jans-cli)**: This module is a command line interface for configuring the Janssen software, providing both interactive and simple single line
+   options for configuration.
+
+1. **[client-api](jans-client-api)**: Middleware API to help application developers call an OAuth, OpenID or UMA server. You may wonder why this is necessary. It makes it easier for client developers to use OpenID signing and encryption features, without becoming crypto experts. This API provides some high level endpoints to do some of the heavy lifting.
+
+1. **[core](jans-core)**: This library has code that is shared across several janssen projects. You will most likely need this project when you build other Janssen components.
+
+1. **[orm](jans-orm)**: This is the library for persistence and caching implemenations in Janssen. Currently LDAP and Couchbase are supported. RDBMS is coming soon.
+
 
 ## Project Goal
 
