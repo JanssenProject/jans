@@ -43,6 +43,51 @@ Try first, ask questions later? Quick start shows how easy and simple it is to i
 
 Janssen can be installed as cloud-native in a Kubernetes cluster or as a server on a single VM. Go to the [Janssen Project Wiki](https://github.com/JanssenProject/jans/wiki/) to know all the installation options
 
+### Use cases
+
+Complete list of Janssen usecases can be found under our user documentation.
+
+## Contributing
+
+### Code of Conduct
+
+Janssen code of conduct ensures that Janssen community is a welcoming place for everyone. 
+
+### Guidelines
+
+Contribution guide will give you all necessary information and `howto` to get started. Janssen community welcomes all types of contributions. Be it an interesting comment on an open issue or implementing a feature.  Welcome aboard! ✈️ 
+
+### Documentation
+
+Janssen provides documentation that will help contributors at every step.
+
+#### Community documentation 
+
+Provides details on community charter, processes and structure.
+
+#### Technical documentation
+
+Technical documentation helps understanding architecture and design of various Janssen modules. 
+
+#### Developer Guides
+
+Developer guides help contributors setup their workspace, setup local test environments, coding convensions and styles.
+
+#### Code documentation
+
+This is source code documentation that helps understanding Janssen code in finer details.
+
+### Design Goals
+
+The Janssen Project is aligned with the goals of cloud native infrastructure to enable:
+
+1. High Concurrency: For digital identity infrastructure, the number of users is not necessarily related to performance. If you have a billion users who never login, you can do this with a monolithic platform. Concurrency is hard. Janssen is designed to scale horizontally--enabling hypothetically any concurrency by adding more compute and memory.
+
+2. Highly Available: Digital identity infrastructure is mission critical. For many applications, if you can't login, you're dead in the water. Robustness is a fundamental consideration.
+
+3. Flexible while Upgradable: Open source gives you the freedom to modify the code. But having your own fork of the code might make it hard to upgrade--you'll have to merge changes. Janssen provides standard interfaces that make it possible to implement custom business logic in an upgrade-friendly manner.
+
+
 ### Janssen Modules
 
 Janssen is not a big monolith--it's a lot of services working together. Whether you deploy Janssen to a Kubernetes cluster, or you are a developer running everything on one server, it's important to understand the different parts. 
@@ -64,8 +109,9 @@ Janssen is not a big monolith--it's a lot of services working together. Whether 
 
 1. **[orm](jans-orm)**: This is the library for persistence and caching implemenations in Janssen. Currently LDAP and Couchbase are supported. RDBMS is coming soon.
 
+### Goal and Governance
 
-## Project Goal
+### Project Goal
 
 Using the Janssen Project components, you can build a world class cloud native identity and access management ("IAM") platform. But why should you?
 1. You have economies of scale, and outsourcing this critical infrastructure to a third party does not make sense
@@ -76,19 +122,9 @@ Using the Janssen Project components, you can build a world class cloud native i
 
 Through the Janssen project, we can coalesce a community. Open source development results in more innovation and better code. And ultimately, more trust in the code--*trust* is foundational to digital identity infrastructure.
 
-## Project Structure
+### Governance
 
 Janssen is a Linux Foundation project, governed according to the [charter](./docs/community/charter.md). Technical oversight of the project is the responsibility of the Technical Steering Committee ("TSC"). Day to day decision making is in the hands of the Contributors. The TSC helps to guide the direction of the project and to improve the quality and security of the development process.
-
-## Design Goals
-
-The Janssen Project is aligned with the goals of cloud native infrastructure to enable:
-
-1. High Concurrency: For digital identity infrastructure, the number of users is not necessarily related to performance. If you have a billion users who never login, you can do this with a monolithic platform. Concurrency is hard. Janssen is designed to scale horizontally--enabling hypothetically any concurrency by adding more compute and memory.
-
-2. Highly Available: Digital identity infrastructure is mission critical. For many applications, if you can't login, you're dead in the water. Robustness is a fundamental consideration.
-
-3. Flexible while Upgradable: Open source gives you the freedom to modify the code. But having your own fork of the code might make it hard to upgrade--you'll have to merge changes. Janssen provides standard interfaces that make it possible to implement custom business logic in an upgrade-friendly manner.
 
 ## History
 
@@ -96,7 +132,7 @@ The initial code was ported by [Gluu](https://gluu.org), based on version 4.2 of
 
 In 2020, Gluu decided to democratize the governance of the oxAuth project by moving it to the Linux Foundation. The name of the project was changed from oxAuth to Janssen, to avoid any potential trademark issues. Gluu felt that a collaboration with the Linux Foundation would help to build a larger ecosystem.
 
-## Why the name Janssen?
+### Why the name Janssen?
 
 Pigeons (or doves if you like...) are universally regarded as a symbol of peace. But they are also fast. Powered by a handful of seeds, a well trained racing pigeon can fly 1000 kilometers in a day. The Janssen brothers of Arendonk in Belgium bred the world's fastest family of racing pigeons. Complex open source infrastructure, like competitive animal husbandry, requires incremental improvement. Janssen racing pigeons revolutionized the sport. The Janssen Project seeks to revolutionize identity and access management.
 
