@@ -12,6 +12,21 @@ Janssen enables organizations to build a scalable centralized authentication and
 
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/4353/badge)](https://bestpractices.coreinfrastructure.org/projects/4353)
 
+## What is Janssen Project
+
+Janssen Project is a cloud native digital identity platform. Using Janssen, applications can quickly integrate basic to advance authentication and authorization flows. Janssen supports
+
+- **Social login**: Janssen implements OAuth2 and enables applications to quickly integrate social logins
+- **Two factor authentication**: Janssen implements FIDO2 standards to enable applications to use two factor authentication
+- **User registration and management**
+
+Janssen [user documentation](https://github.com/JanssenProject/jans/tree/main/docs/user) has full list of usecases and how to implement them using Janssen.
+
+## Users and Community
+
+Janssen is used by many internet facing applications and enterprise applications as their core digital identity platform. Janssen community actively helps in resolving issues. Community also makes sure that Janssen is upto date with new developments and standards in authentication and authorization domain.
+
+
 ## Quick Start
 
 Try first, ask questions later? Go to the [Janssen Project Wiki](https://github.com/JanssenProject/jans/wiki/) right now!
@@ -23,6 +38,7 @@ Using the Janssen Project components, you can build a world class cloud native i
 1. You need to embed this component in your product or solution
 1. The privacy or security profile of a hosted solution is not acceptable
 1. You need more freedom to customize
+
 
 Through the Janssen project, we can coalesce a community. Open source development results in more innovation and better code. And ultimately, more trust in the code--*trust* is foundational to digital identity infrastructure.
 
