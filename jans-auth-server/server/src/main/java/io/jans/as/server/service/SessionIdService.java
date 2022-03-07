@@ -801,7 +801,7 @@ public class SessionIdService {
             return sessionId;
         } catch (Exception e) {
             if (!silently) {
-                log.error("Failed to get session by dn: " + dn + ". " + e.getMessage());
+                log.error("Failed to get session by dn: {}. {}", dn, e.getMessage());
             }
         }
         return null;
