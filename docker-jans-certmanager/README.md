@@ -108,6 +108,7 @@ Supported services:
     Options:
 
     - `source`: `from-files` or empty string
+    - `valid-to`: Validity length in days (default to `365`)
 
 1.  `auth`
 
@@ -138,6 +139,7 @@ Supported services:
     Options:
 
     - `subj-alt-name`: Subject Alternative Name (SAN) for certificate (default to `localhost`)
+    - `valid-to`: Validity length in days (default to `365`)
 
 1.  `client-api`
 
@@ -154,6 +156,7 @@ Supported services:
 
     - `application-cn`: Subject alternative name for application certificate (default to `localhost`)
     - `admin-cn`: Subject alternative name for admin certificate (default to `localhost`)
+    - `valid-to`: Validity length in days (default to `365`)
 
 #### prune
 
@@ -240,4 +243,3 @@ spec:
               args: ["patch", "auth", "--opts", "interval:48"]
           restartPolicy: Never
 ```
-

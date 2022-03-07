@@ -51,18 +51,19 @@ def generate_public_key(filename, private_key, is_ca=False, add_san=False, add_k
 
     Keyword arguments:
 
-        - ``email``: Email address for subject/issuer.
-        - ``hostname``: Hostname (common name) for subject/issuer.
-        - ``org_name``: Organization name for subject/issuer.
-        - ``country_code``: Country name in ISO format for subject/issuer.
-        - ``state``: State/province name for subject/issuer.
-        - ``city``: City/locality name for subject/issuer.
-        - ``extra_dns``: Additional DNS names (added if ``add_san`` argument is set to ``True``).
-        - ``extra_ips``: Additional IP addresses (added if ``add_san`` argument is set to ``True``).
+    - ``email``: Email address for subject/issuer.
+    - ``hostname``: Hostname (common name) for subject/issuer.
+    - ``org_name``: Organization name for subject/issuer.
+    - ``country_code``: Country name in ISO format for subject/issuer.
+    - ``state``: State/province name for subject/issuer.
+    - ``city``: City/locality name for subject/issuer.
+    - ``extra_dns``: Additional DNS names (added if ``add_san`` argument is set to ``True``).
+    - ``extra_ips``: Additional IP addresses (added if ``add_san`` argument is set to ``True``).
+    - ``valid_to``: Validity length in days.
     """
 
     valid_from = datetime.utcnow()
-    valid_to = valid_from + timedelta(days=365)
+    valid_to = valid_from + timedelta(days=kwargs.get("valid_to", 365))
 
     # issuer equals subject because we use self-signed
     subject = issuer = x509.Name([
@@ -229,7 +230,7 @@ def generate_csr(filename, private_key, add_san=False, add_key_usage=False, **kw
     return csr
 
 
-def sign_csr(filename, csr, ca_private_key, ca_public_key):
+def sign_csr(filename, csr, ca_private_key, ca_public_key, **kwargs):
     """Sign a certificate signing request (CSR).
 
     :param filename: Path to signed certificate.
@@ -239,7 +240,7 @@ def sign_csr(filename, csr, ca_private_key, ca_public_key):
     """
 
     valid_from = datetime.utcnow()
-    valid_to = valid_from + timedelta(days=365)
+    valid_to = valid_from + timedelta(days=kwargs.get("valid_to", 365))
 
     builder = (
         x509.CertificateBuilder()
