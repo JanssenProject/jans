@@ -689,7 +689,7 @@ public class RegistrationTest extends BaseTest {
 
     @Parameters({"clientJwksUri"})
     @Test
-    public void backchannelRegistration_whenCallMissingTokenDeliveryMode_shouldFail(final String clientJwksUri) { // todo not clear why it should fail, we need X_Y_Z pattern here and in all names
+    public void backchannelRegistration_whenCallMissingTokenDeliveryMode_shouldFail(final String clientJwksUri) {
         showTitle("backchannelRegistration_whenCallWithoutTokenDeliveryMode_shouldFail");
 
         RegisterResponse response = RegisterClient.builder()
@@ -697,13 +697,11 @@ public class RegistrationTest extends BaseTest {
                 .withJwksUri(clientJwksUri)
                 .withGrantTypes(Collections.singletonList(GrantType.CIBA))
                 .withBackchannelUserCodeParameter(true)
-                .missingBackchannelTokenDeliveryMode()
                 .withBackchannelAuthRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
+                .missingBackchannelTokenDeliveryMode()
                 .execute();
 
-        AssertBuilder.registerResponse(response)
-                .status(400).
-                checkAsserts();
+        AssertBuilder.registerResponseBadRequest(response).checkAsserts();
     }
 
     @Parameters({"clientJwksUri"})
@@ -716,13 +714,11 @@ public class RegistrationTest extends BaseTest {
                 .withGrantTypes(Collections.singletonList(GrantType.CIBA))
                 .withBackchannelUserCodeParameter(true)
                 .withBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING)
-                .missingBackchannelClientNotificationEndPoint() // Missing backchannel_client_notification_endpoint
                 .withBackchannelAuthRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
+                .missingBackchannelClientNotificationEndPoint() // Missing backchannel_client_notification_endpoint
                 .execute();
 
-        AssertBuilder.registerResponse(response)
-                .status(400)
-                .checkAsserts();
+        AssertBuilder.registerResponseBadRequest(response).checkAsserts();
     }
 
     @Parameters({"clientJwksUri"})
@@ -735,8 +731,8 @@ public class RegistrationTest extends BaseTest {
                 .withGrantTypes(Collections.singletonList(GrantType.CIBA))
                 .withBackchannelUserCodeParameter(true)
                 .withBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH)
-                .missingBackchannelClientNotificationEndPoint() // Missing backchannel_client_notification_endpoint
                 .withBackchannelAuthRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
+                .missingBackchannelClientNotificationEndPoint() // Missing backchannel_client_notification_endpoint
                 .execute();
 
         AssertBuilder.registerResponse(response).status(400).checkAsserts();
@@ -756,9 +752,7 @@ public class RegistrationTest extends BaseTest {
                 .withBackchannelAuthRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
                 .execute();
 
-        AssertBuilder.registerResponse(response)
-                .status(400)
-                .checkAsserts();
+        AssertBuilder.registerResponseBadRequest(response).checkAsserts();
     }
 
     @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint"})
@@ -776,10 +770,6 @@ public class RegistrationTest extends BaseTest {
                 .execute();
 
         AssertBuilder.registerResponseBadRequest(response).checkAsserts();
-
-        AssertBuilder.registerResponse(response) // todo we should think how to make it shorter, maybe just  AssertBuilder.registerResponseIsBadRequest(response) ?
-                .status(400)
-                .checkAsserts();
     }
 
     @Parameters({"backchannelClientNotificationEndpoint"})
@@ -788,17 +778,15 @@ public class RegistrationTest extends BaseTest {
         showTitle("backchannelTokenDeliveryModePing_whenCallWithoutJwksUri_shouldFail");
         RegisterResponse response = RegisterClient.builder()
                 .withRegistrationEndpoint(registrationEndpoint)
-                .missingJwksUri() // Missing jwks_uri
                 .withGrantTypes(Collections.singletonList(GrantType.CIBA))
                 .withBackchannelUserCodeParameter(true)
                 .withBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING)
                 .withBackchannelClientNotificationEndPoint(backchannelClientNotificationEndpoint)
                 .withBackchannelAuthRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
+                .missingJwksUri() // Missing jwks_uri
                 .execute();
 
-        AssertBuilder.registerResponse(response)
-                .status(400)
-                .checkAsserts();
+        AssertBuilder.registerResponseBadRequest(response).checkAsserts();
     }
 
     @Parameters({"backchannelClientNotificationEndpoint"})
@@ -808,16 +796,14 @@ public class RegistrationTest extends BaseTest {
 
         RegisterResponse response = RegisterClient.builder()
                 .withRegistrationEndpoint(registrationEndpoint)
-                .missingJwksUri() // Missing jwks_uri // todo it is missed by default, no ?
                 .withGrantTypes(Collections.singletonList(GrantType.CIBA))
                 .withBackchannelUserCodeParameter(true)
                 .withBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
                 .withBackchannelClientNotificationEndPoint(backchannelClientNotificationEndpoint)
                 .withBackchannelAuthRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
+                .missingJwksUri() // Missing jwks_uri
                 .execute();
 
-        AssertBuilder.registerResponse(response)
-                .status(400)
-                .checkAsserts();
+        AssertBuilder.registerResponseBadRequest(response).checkAsserts();
     }
 }
