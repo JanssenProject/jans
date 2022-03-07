@@ -16,6 +16,10 @@ public class AssertBuilder {
         return new RegisterResponseAssertBuilder(response);
     }
 
+    public static RegisterResponseAssertBuilder registerResponseBadRequest(RegisterResponse response) {
+        return new RegisterResponseAssertBuilder(response).status(400);
+    }
+
     public static RegisterResponseAssertBuilder registerResponseCreated(RegisterResponse response) {
         return new RegisterResponseAssertBuilder(response).status(201);
     }

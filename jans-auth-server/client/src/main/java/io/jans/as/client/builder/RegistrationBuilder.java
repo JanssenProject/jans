@@ -38,8 +38,6 @@ public class RegistrationBuilder implements Builder {
     private boolean isUpdateMode;
     private boolean isReadMode;
 
-    private String title;
-
     public RegistrationBuilder() {
         this.applicationType = ApplicationType.WEB;
     }
@@ -74,6 +72,11 @@ public class RegistrationBuilder implements Builder {
         return this;
     }
 
+    public RegistrationBuilder missingJwksUri() {
+        this.jwksUri = null;
+        return this;
+    }
+
     public RegistrationBuilder withSectorIdentifierUri(String sectorIdentifierUri) {
         this.sectorIdentifierUri = sectorIdentifierUri;
         return this;
@@ -99,8 +102,18 @@ public class RegistrationBuilder implements Builder {
         return this;
     }
 
+    public RegistrationBuilder missingBackchannelTokenDeliveryMode() {
+        this.backchannelTokenDeliveryMode = null;
+        return this;
+    }
+
     public RegistrationBuilder withBackchannelClientNotificationEndPoint(String backchannelClientNotificationEndPoint) {
         this.backchannelClientNotificationEndPoint = backchannelClientNotificationEndPoint;
+        return this;
+    }
+
+    public RegistrationBuilder missingBackchannelClientNotificationEndPoint() {
+        this.backchannelClientNotificationEndPoint = null;
         return this;
     }
 
@@ -116,6 +129,11 @@ public class RegistrationBuilder implements Builder {
 
     public RegistrationBuilder withTokenEndPointAuthMethod(AuthenticationMethod tokenEndPointAuthenticationMethod) {
         this.tokenEndpointAuthMethod = tokenEndPointAuthenticationMethod;
+        return this;
+    }
+
+    public RegistrationBuilder missingTokenEndPointAuthMethod() {
+        this.tokenEndpointAuthMethod = null;
         return this;
     }
 

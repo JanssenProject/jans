@@ -43,8 +43,6 @@ public class RegistrationTest extends BaseTest {
 
     @Parameters({"clientJwksUri"})
     @Test
-
-    // todo all our names should be names as X_Y_Z, where X is what we call, Y under what condition, Z what do we expect.
     public void backchannelTokenDeliveryModePoll_whenCallWithValidData_shouldRegisterSuccessfully(final String clientJwksUri) {
         showTitle("backchannelTokenDeliveryModePoll_whenCallWithValidData_shouldRegisterSuccessfully");
 
@@ -86,8 +84,8 @@ public class RegistrationTest extends BaseTest {
 
     @Parameters({"sectorIdentifierUri", "clientJwksUri"})
     @Test
-    public void backchannelTokenDeliveryModePoll2(final String sectorIdentifierUri, final String clientJwksUri) {
-        showTitle("backchannelTokenDeliveryModePoll2");
+    public void backchannelTokenDeliveryModePoll_whenCallWithValidDataAndSectorIdentifier_shouldRegisterSuccessfully(final String sectorIdentifierUri, final String clientJwksUri) {
+        showTitle("backchannelTokenDeliveryModePoll_whenCallWithValidDataAndSectorIdentifier_shouldRegisterSuccessfully");
 
         // 1. Dynamic Client Registration
         RegisterResponse registerResponse = RegisterClient.builder()
@@ -130,8 +128,8 @@ public class RegistrationTest extends BaseTest {
     }
 
     @Test
-    public void backchannelTokenDeliveryModePoll3() {
-        showTitle("backchannelTokenDeliveryModePoll3");
+    public void backchannelTokenDeliveryModePoll_whenCallWithValidDataAndSubjectTypePublic_shouldRegisterSuccessfully() {
+        showTitle("backchannelTokenDeliveryModePoll_whenCallWithValidDataAndSubjectTypePublic_shouldRegisterSuccessfully");
 
         // 1. Dynamic Client Registration
         RegisterResponse registerResponse = RegisterClient.builder()
@@ -171,8 +169,8 @@ public class RegistrationTest extends BaseTest {
 
     @Parameters({"sectorIdentifierUri", "clientJwksUri"})
     @Test
-    public void backchannelTokenDeliveryModePoll4(final String sectorIdentifierUri, final String clientJwksUri) {
-        showTitle("backchannelTokenDeliveryModePoll4");
+    public void backchannelTokenDeliveryModePoll_whenCallWithValidDataAndFindAndUpdate_shouldRegisterAndUpdateSuccessfully(final String sectorIdentifierUri, final String clientJwksUri) {
+        showTitle("backchannelTokenDeliveryModePoll_whenCallWithValidDataAndFindAndUpdate_shouldRegisterAndUpdateSuccessfully");
 
         // 1. Dynamic Client Registration
         RegisterResponse registerResponse = RegisterClient.builder()
@@ -221,8 +219,8 @@ public class RegistrationTest extends BaseTest {
     }
 
     @Parameters({"clientJwksUri"})
-    public void backchannelTokenDeliveryModePoll5(final String clientJwksUri) {
-        showTitle("backchannelTokenDeliveryModePoll5");
+    public void backchannelTokenDeliveryModePoll_whenCallWithValidDataAndJwksAndTokenParams_shouldRegisterSuccessfully(final String clientJwksUri) {
+        showTitle("backchannelTokenDeliveryModePoll_whenCallWithValidDataAndJwksAndTokenParams_shouldRegisterSuccessfully");
 
         // 1. Dynamic Client Registration
         JwkClient jwkClient = new JwkClient(clientJwksUri);
@@ -280,9 +278,9 @@ public class RegistrationTest extends BaseTest {
 
     @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint"})
     @Test
-    public void backchannelTokenDeliveryModePing1(final String clientJwksUri,
+    public void backchannelTokenDeliveryModePing_whenCallWithValidData_shouldRegisterSuccessfully(final String clientJwksUri,
                                                   final String backchannelClientNotificationEndpoint) {
-        showTitle("backchannelTokenDeliveryModePing1");
+        showTitle("backchannelTokenDeliveryModePing_whenCallWithValidData_shouldRegisterSuccessfully");
 
         // 1. Dynamic Client Registration
         RegisterResponse registerResponse = RegisterClient.builder()
@@ -322,9 +320,9 @@ public class RegistrationTest extends BaseTest {
 
     @Parameters({"sectorIdentifierUri", "clientJwksUri", "backchannelClientNotificationEndpoint"})
     @Test
-    public void backchannelTokenDeliveryModePing2(final String sectorIdentifierUri, final String clientJwksUri,
+    public void backchannelTokenDeliveryModePing_whenCallWithValidDataAndSectorIdentifier_shouldRegisterSuccessfully(final String sectorIdentifierUri, final String clientJwksUri,
                                                   final String backchannelClientNotificationEndpoint) {
-        showTitle("backchannelTokenDeliveryModePing2");
+        showTitle("backchannelTokenDeliveryModePing_whenCallWithValidDataAndSectorIdentifier_shouldRegisterSuccessfully");
 
         // 1. Dynamic Client Registration
         RegisterResponse registerResponse = RegisterClient.builder()
@@ -368,8 +366,8 @@ public class RegistrationTest extends BaseTest {
 
     @Parameters({"backchannelClientNotificationEndpoint"})
     @Test
-    public void backchannelTokenDeliveryModePing3(final String backchannelClientNotificationEndpoint) {
-        showTitle("backchannelTokenDeliveryModePing3");
+    public void backchannelTokenDeliveryModePing_whenCallWithValidDataAndSubjectTypePublic_shouldRegisterSuccessfully(final String backchannelClientNotificationEndpoint) {
+        showTitle("backchannelTokenDeliveryModePing_whenCallWithValidDataAndSubjectTypePublic_shouldRegisterSuccessfully");
 
         // 1. Dynamic Client Registration
         RegisterResponse registerResponse = RegisterClient.builder()
@@ -410,9 +408,9 @@ public class RegistrationTest extends BaseTest {
 
     @Parameters({"sectorIdentifierUri", "clientJwksUri", "backchannelClientNotificationEndpoint"})
     @Test
-    public void backchannelTokenDeliveryModePing4(final String sectorIdentifierUri, final String clientJwksUri,
+    public void backchannelTokenDeliveryModePing_whenCallWithValidDataAndFindAndUpdate_shouldRegisterAndUpdateSuccessfully(final String sectorIdentifierUri, final String clientJwksUri,
                                                   final String backchannelClientNotificationEndpoint) {
-        showTitle("backchannelTokenDeliveryModePing4");
+        showTitle("backchannelTokenDeliveryModePing_whenCallWithValidDataAndFindAndUpdate_shouldRegisterAndUpdateSuccessfully");
 
         // 1. Dynamic Client Registration
         RegisterResponse registerResponse = RegisterClient.builder()
@@ -461,9 +459,9 @@ public class RegistrationTest extends BaseTest {
     }
 
     @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint"})
-    public void backchannelTokenDeliveryModePing5(final String clientJwksUri,
+    public void backchannelTokenDeliveryModePing_whenCallWithValidDataAndTokenParamsAndJwks_shouldRegisterSuccessfully(final String clientJwksUri,
                                                   final String backchannelClientNotificationEndpoint) {
-        showTitle("backchannelTokenDeliveryModePing5");
+        showTitle("backchannelTokenDeliveryModePing_whenCallWithValidDataAndTokenParamsAndJwks_shouldRegisterSuccessfully");
 
         // 1. Dynamic Client Registration
         JwkClient jwkClient = new JwkClient(clientJwksUri);
@@ -521,8 +519,8 @@ public class RegistrationTest extends BaseTest {
 
     @Parameters({"backchannelClientNotificationEndpoint"})
     @Test
-    public void backchannelTokenDeliveryModePush1(final String backchannelClientNotificationEndpoint) {
-        showTitle("backchannelTokenDeliveryModePush1");
+    public void backchannelTokenDeliveryModePush_whenCallWithValidData_shouldRegisterSuccessfully(final String backchannelClientNotificationEndpoint) {
+        showTitle("backchannelTokenDeliveryModePush_whenCallWithValidData_shouldRegisterSuccessfully");
 
         // 1. Dynamic Client Registration
         RegisterResponse registerResponse = RegisterClient.builder()
@@ -559,8 +557,8 @@ public class RegistrationTest extends BaseTest {
 
     @Parameters({"sectorIdentifierUri", "backchannelClientNotificationEndpoint"})
     @Test
-    public void backchannelTokenDeliveryModePush2(final String sectorIdentifierUri, final String backchannelClientNotificationEndpoint) {
-        showTitle("backchannelTokenDeliveryModePush2");
+    public void backchannelTokenDeliveryModePush_whenCallWithValidDataAndSectorIdentifier_shouldRegisterSuccessfully(final String sectorIdentifierUri, final String backchannelClientNotificationEndpoint) {
+        showTitle("backchannelTokenDeliveryModePush_whenCallWithValidDataAndSectorIdentifier_shouldRegisterSuccessfully");
 
         // 1. Dynamic Client Registration
         RegisterResponse registerResponse = RegisterClient.builder()
@@ -601,8 +599,8 @@ public class RegistrationTest extends BaseTest {
 
     @Parameters({"backchannelClientNotificationEndpoint"})
     @Test
-    public void backchannelTokenDeliveryModePush3(final String backchannelClientNotificationEndpoint) {
-        showTitle("backchannelTokenDeliveryModePush3");
+    public void backchannelTokenDeliveryModePush_whenCallWithValidDataAndSubjectTypePublic_shouldRegisterSuccessfully(final String backchannelClientNotificationEndpoint) {
+        showTitle("backchannelTokenDeliveryModePush_whenCallWithValidDataAndSubjectTypePublic_shouldRegisterSuccessfully");
 
         // 1. Dynamic Client Registration
         RegisterResponse registerResponse = RegisterClient.builder()
@@ -640,8 +638,8 @@ public class RegistrationTest extends BaseTest {
 
     @Parameters({"sectorIdentifierUri", "backchannelClientNotificationEndpoint"})
     @Test
-    public void backchannelTokenDeliveryModePush4(final String sectorIdentifierUri, final String backchannelClientNotificationEndpoint) {
-        showTitle("backchannelTokenDeliveryModePush4");
+    public void backchannelTokenDeliveryModePush_whenCallWithValidDataAndFindAndUpdate_shouldRegisterAndUpdateSuccessfully(final String sectorIdentifierUri, final String backchannelClientNotificationEndpoint) {
+        showTitle("backchannelTokenDeliveryModePush_whenCallWithValidDataAndFindAndUpdate_shouldRegisterAndUpdateSuccessfully");
 
         // 1. Dynamic Client Registration
         RegisterResponse registerResponse = RegisterClient.builder()
@@ -691,15 +689,15 @@ public class RegistrationTest extends BaseTest {
 
     @Parameters({"clientJwksUri"})
     @Test
-    public void registrationFail1(final String clientJwksUri) { // todo not clear why it should fail, we need X_Y_Z pattern here and in all names
-        showTitle("registrationFail1");
+    public void backchannelRegistration_whenCallMissingTokenDeliveryMode_shouldFail(final String clientJwksUri) { // todo not clear why it should fail, we need X_Y_Z pattern here and in all names
+        showTitle("backchannelRegistration_whenCallWithoutTokenDeliveryMode_shouldFail");
 
         RegisterResponse response = RegisterClient.builder()
                 .withRegistrationEndpoint(registrationEndpoint)
                 .withJwksUri(clientJwksUri)
                 .withGrantTypes(Collections.singletonList(GrantType.CIBA))
                 .withBackchannelUserCodeParameter(true)
-                .withBackchannelTokenDeliveryMode(null)
+                .missingBackchannelTokenDeliveryMode()
                 .withBackchannelAuthRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
                 .execute();
 
@@ -710,15 +708,15 @@ public class RegistrationTest extends BaseTest {
 
     @Parameters({"clientJwksUri"})
     @Test
-    public void registrationFail2(final String clientJwksUri) {
-        showTitle("registrationFail2");
+    public void backchannelTokenDeliveryModePing_whenCallMissingClientNotificationEndPoint_shouldFail(final String clientJwksUri) {
+        showTitle("backchannelTokenDeliveryModePing_whenCallWithoutClientNotificationEndPoint_shouldFail");
         RegisterResponse response = RegisterClient.builder()
                 .withRegistrationEndpoint(registrationEndpoint)
                 .withJwksUri(clientJwksUri)
                 .withGrantTypes(Collections.singletonList(GrantType.CIBA))
                 .withBackchannelUserCodeParameter(true)
                 .withBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING)
-                .withBackchannelClientNotificationEndPoint(null) // Missing backchannel_client_notification_endpoint
+                .missingBackchannelClientNotificationEndPoint() // Missing backchannel_client_notification_endpoint
                 .withBackchannelAuthRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
                 .execute();
 
@@ -729,15 +727,15 @@ public class RegistrationTest extends BaseTest {
 
     @Parameters({"clientJwksUri"})
     @Test
-    public void registrationFail3(final String clientJwksUri) {
-        showTitle("registration3");
+    public void backchannelTokenDeliveryModePush_whenCallMissingClientNotificationEndPoint_shouldFail(final String clientJwksUri) {
+        showTitle("backchannelTokenDeliveryModePing_whenCallWithoutClientNotificationEndPoint_shouldFail");
         RegisterResponse response = RegisterClient.builder()
                 .withRegistrationEndpoint(registrationEndpoint)
                 .withJwksUri(clientJwksUri)
                 .withGrantTypes(Collections.singletonList(GrantType.CIBA))
                 .withBackchannelUserCodeParameter(true)
                 .withBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH)
-                .withBackchannelClientNotificationEndPoint(null) // Missing backchannel_client_notification_endpoint
+                .missingBackchannelClientNotificationEndPoint() // Missing backchannel_client_notification_endpoint
                 .withBackchannelAuthRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
                 .execute();
 
@@ -746,8 +744,8 @@ public class RegistrationTest extends BaseTest {
 
     @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint"})
     @Test
-    public void registrationFail4(final String clientJwksUri, final String backchannelClientNotificationEndpoint) {
-        showTitle("registrationFail4");
+    public void backchannelTokenDeliveryModePing_whenCallMissingGrantTypes_shouldFail(final String clientJwksUri, final String backchannelClientNotificationEndpoint) {
+        showTitle("backchannelTokenDeliveryModePing_whenCallWithoutGrantTypes_shouldFail");
         RegisterResponse response = RegisterClient.builder()
                 .withRegistrationEndpoint(registrationEndpoint)
                 .withJwksUri(clientJwksUri)
@@ -765,8 +763,8 @@ public class RegistrationTest extends BaseTest {
 
     @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint"})
     @Test
-    public void registrationFail5(final String clientJwksUri, final String backchannelClientNotificationEndpoint) {
-        showTitle("registrationFail5");
+    public void backchannelTokenDeliveryModePoll_whenCallMissingGrantTypes_shouldFail(final String clientJwksUri, final String backchannelClientNotificationEndpoint) {
+        showTitle("backchannelTokenDeliveryModePoll_whenCallWithoutGrantTypes_shouldFail");
         RegisterResponse response = RegisterClient.builder()
                 .withRegistrationEndpoint(registrationEndpoint)
                 .withJwksUri(clientJwksUri)
@@ -776,6 +774,8 @@ public class RegistrationTest extends BaseTest {
                 .withBackchannelClientNotificationEndPoint(backchannelClientNotificationEndpoint)
                 .withBackchannelAuthRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
                 .execute();
+
+        AssertBuilder.registerResponseBadRequest(response).checkAsserts();
 
         AssertBuilder.registerResponse(response) // todo we should think how to make it shorter, maybe just  AssertBuilder.registerResponseIsBadRequest(response) ?
                 .status(400)
@@ -784,11 +784,11 @@ public class RegistrationTest extends BaseTest {
 
     @Parameters({"backchannelClientNotificationEndpoint"})
     @Test
-    public void registrationFail6(final String backchannelClientNotificationEndpoint) {
-        showTitle("registrationFail6");
+    public void backchannelTokenDeliveryModePing_whenCallMissingJwksUri_shouldFail(final String backchannelClientNotificationEndpoint) {
+        showTitle("backchannelTokenDeliveryModePing_whenCallWithoutJwksUri_shouldFail");
         RegisterResponse response = RegisterClient.builder()
                 .withRegistrationEndpoint(registrationEndpoint)
-                .withJwksUri(null) // Missing jwks_uri // todo it is missed by default, no ?
+                .missingJwksUri() // Missing jwks_uri
                 .withGrantTypes(Collections.singletonList(GrantType.CIBA))
                 .withBackchannelUserCodeParameter(true)
                 .withBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING)
@@ -803,12 +803,12 @@ public class RegistrationTest extends BaseTest {
 
     @Parameters({"backchannelClientNotificationEndpoint"})
     @Test
-    public void registrationFail7(final String backchannelClientNotificationEndpoint) {
-        showTitle("registrationFail7");
+    public void backchannelTokenDeliveryModePoll_whenCallMissingJwksUri_shouldFail(final String backchannelClientNotificationEndpoint) {
+        showTitle("backchannelTokenDeliveryModePoll_whenCallWithoutJwksUri_shouldFail");
 
         RegisterResponse response = RegisterClient.builder()
                 .withRegistrationEndpoint(registrationEndpoint)
-                .withJwksUri(null) // Missing jwks_uri // todo it is missed by default, no ?
+                .missingJwksUri() // Missing jwks_uri // todo it is missed by default, no ?
                 .withGrantTypes(Collections.singletonList(GrantType.CIBA))
                 .withBackchannelUserCodeParameter(true)
                 .withBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
@@ -816,6 +816,8 @@ public class RegistrationTest extends BaseTest {
                 .withBackchannelAuthRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
                 .execute();
 
-        AssertBuilder.registerResponse(response).status(400).checkAsserts();
+        AssertBuilder.registerResponse(response)
+                .status(400)
+                .checkAsserts();
     }
 }
