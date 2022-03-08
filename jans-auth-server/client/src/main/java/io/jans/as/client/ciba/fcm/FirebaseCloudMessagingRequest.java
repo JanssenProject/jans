@@ -11,7 +11,7 @@ import org.apache.commons.lang.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import javax.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.MediaType;
 
 import static io.jans.as.model.ciba.FirebaseCloudMessagingRequestParam.BODY;
 import static io.jans.as.model.ciba.FirebaseCloudMessagingRequestParam.CLICK_ACTION;

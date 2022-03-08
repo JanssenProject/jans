@@ -9,7 +9,7 @@ package io.jans.as.client;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.util.QueryBuilder;
 
-import javax.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.MediaType;
 
 /**
  * @author Yuriy Zabrovarnyy

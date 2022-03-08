@@ -26,8 +26,8 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.StringReader;
 import java.math.BigInteger;
@@ -192,7 +192,7 @@ public class JwtUtil {
         JSONObject jsonKey = null;
         try {
             if (StringHelper.isEmpty(jwks)) {
-                javax.ws.rs.client.Client clientRequest = ClientBuilder.newClient();
+                jakarta.ws.rs.client.Client clientRequest = ClientBuilder.newClient();
                 try {
                     Response clientResponse = clientRequest.target(jwksUri).request().buildGet().invoke();
 
@@ -248,7 +248,7 @@ public class JwtUtil {
                     ((ResteasyClientBuilder) clientBuilder).httpEngine(engine);
                 }
 
-                javax.ws.rs.client.Client clientRequest = clientBuilder.build();
+                jakarta.ws.rs.client.Client clientRequest = clientBuilder.build();
                 try {
                     Response clientResponse = clientRequest.target(jwksUri).request().buildGet().invoke();
 
