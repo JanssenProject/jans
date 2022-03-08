@@ -13,10 +13,12 @@ Janssen enables organizations to build a scalable centralized authentication and
 **Contribute**: [Contribution Guide](docs/CONTRIBUTING.md) | [Community Docs](docs/community) | [Developer Guides](docs/developer)
 
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/4353/badge)](https://bestpractices.coreinfrastructure.org/projects/4353)
+![Hex.pm](https://img.shields.io/hexpm/l/plug)
+![GitHub contributors](https://img.shields.io/github/contributors/janssenproject/jans)
 
 **Table of Contents**
 
-- [What is Janssen Project](#what-is-janssen-project)
+- [What is the Janssen Project](#what-is-the-janssen-project)
 - [Getting Started](#getting-started)
   - [Quick Start](#quick-start)
   - [Installation](#installation)
@@ -34,15 +36,18 @@ Janssen enables organizations to build a scalable centralized authentication and
 - [Design](#design)
   - [Design Goals](#design-goals)
   - [Janssen Modules](#janssen-modules)
-- [Goal and Governance](#goal-and-governance)
+- [Governance](#governance)
 - [Support](#support)
+- [More about Janssen Project](#more-about-janssen-project)
+  - [History](#history)
+  - [why the name Janssen](#why-the-name-janssen)
 
 
 ## What is the Janssen Project
 
 The Janssen Project is a cloud native digital identity platform. Using Janssen, applications can quickly integrate basic to advance authentication and authorization flows. Janssen supports
 
-- **Social login**: Janssen implements OAuth2 and enables applications to quickly integrate social logins
+- **Single sign-on**: Janssen implements OAuth2 and enables applications to quickly implement single sign-on
 - **Two factor authentication**: Janssen implements FIDO2 standards to enable applications to use two factor authentication
 > TODO: add more use cases
 
@@ -147,32 +152,9 @@ Janssen is not a big monolith--it's a lot of services working together. Whether 
 
 More details can be found under [Janssen technical documentation](docs/technical).
 
-## Goal and Governance
-
-### Project Goal
-
-Using the Janssen Project components, you can build a world class cloud native identity and access management ("IAM") platform. But why should you?
-1. You have economies of scale, and outsourcing this critical infrastructure to a third party does not make sense
-1. You need to embed this component in your product or solution
-1. The privacy or security profile of a hosted solution is not acceptable
-1. You need more freedom to customize
-
-
-Through the Janssen project, we can coalesce a community. Open source development results in more innovation and better code. And ultimately, more trust in the code--*trust* is foundational to digital identity infrastructure.
-
-### Governance
+## Governance
 
 Janssen is a Linux Foundation project, governed according to the [charter](./docs/community/charter.md). Technical oversight of the project is the responsibility of the Technical Steering Committee ("TSC"). Day to day decision making is in the hands of the Contributors. The TSC helps to guide the direction of the project and to improve the quality and security of the development process.
-
-### History
-
-The initial code was ported by [Gluu](https://gluu.org), based on version 4.2 of it's identity and access management (IAM) platform. Gluu launched in 2009 with the goal of creating an enterprise-grade open source distribution of IAM components. In 2012, Gluu started work on an OAuth Authorization Server to implement OpenID Connect, which they saw as a promising next-generation replacement for SAML. This project was called [oxAuth](https://github.com/GluuFederation/oxauth), and over time, became the core component of the Gluu Server.  Gluu has submitted many [self-certifications](https://openid.net/certification/) at the OpenID Foundation. Today, it is  one of the most comprehensive OpenID Connect Providers.
-
-In 2020, Gluu decided to democratize the governance of the oxAuth project by moving it to the Linux Foundation. The name of the project was changed from oxAuth to Janssen, to avoid any potential trademark issues. Gluu felt that a collaboration with the Linux Foundation would help to build a larger ecosystem.
-
-### Why the name Janssen?
-
-Pigeons (or doves if you like...) are universally regarded as a symbol of peace. But they are also fast. Powered by a handful of seeds, a well trained racing pigeon can fly 1000 kilometers in a day. The Janssen brothers of Arendonk in Belgium bred the world's fastest family of racing pigeons. Complex open source infrastructure, like competitive animal husbandry, requires incremental improvement. Janssen racing pigeons revolutionized the sport. The Janssen Project seeks to revolutionize identity and access management.
 
 > TODO: refactor support section
 ## Support
@@ -185,4 +167,16 @@ You can also subscribe to the [Janssen Google Group](https://groups.google.com/u
 and post messages there.
 
 If you find a bug in a Janssen project, or you would like to suggest a new feature, try the [GitHub Discussions](https://github.com/JanssenProject/jans/discussion) first. If you have a "howto" or "usage" question, [raise the question or usage](https://github.com/JanssenProject/jans/discussion)! 
+
+## More about Janssen Project
+
+### History
+
+The initial code was ported by [Gluu](https://gluu.org), based on version 4.2 of it's identity and access management (IAM) platform. Gluu launched in 2009 with the goal of creating an enterprise-grade open source distribution of IAM components. In 2012, Gluu started work on an OAuth Authorization Server to implement OpenID Connect, which they saw as a promising next-generation replacement for SAML. This project was called [oxAuth](https://github.com/GluuFederation/oxauth), and over time, became the core component of the Gluu Server.  Gluu has submitted many [self-certifications](https://openid.net/certification/) at the OpenID Foundation. Today, it is  one of the most comprehensive OpenID Connect Providers.
+
+In 2020, Gluu decided to democratize the governance of the oxAuth project by moving it to the Linux Foundation. The name of the project was changed from oxAuth to Janssen, to avoid any potential trademark issues. Gluu felt that a collaboration with the Linux Foundation would help to build a larger ecosystem.
+
+### Why the name Janssen?
+
+Pigeons (or doves if you like...) are universally regarded as a symbol of peace. But they are also fast. Powered by a handful of seeds, a well trained racing pigeon can fly 1000 kilometers in a day. The Janssen brothers of Arendonk in Belgium bred the world's fastest family of racing pigeons. Complex open source infrastructure, like competitive animal husbandry, requires incremental improvement. Janssen racing pigeons revolutionized the sport. The Janssen Project seeks to revolutionize identity and access management.
 
