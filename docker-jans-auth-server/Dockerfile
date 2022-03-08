@@ -1,4 +1,4 @@
-FROM bellsoft/liberica-openjre-alpine:11
+FROM bellsoft/liberica-openjre-alpine:11.0.13-8
 
 # ===============
 # Alpine packages
@@ -52,7 +52,7 @@ RUN wget -q https://github.com/fabioz/PyDev.Debugger/archive/refs/tags/pydev_deb
 # ===========
 
 ENV CN_VERSION=1.0.0-SNAPSHOT
-ENV CN_BUILD_DATE='2022-03-02 12:55'
+ENV CN_BUILD_DATE='2022-03-07 16:26'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-server/${CN_VERSION}/jans-auth-server-${CN_VERSION}.war
 
 # Install Jans Auth
@@ -84,7 +84,7 @@ RUN wget -q https://jenkins.gluu.org/maven/org/gluu/casa-config/${CASA_CONFIG_VE
 # Casa external scripts
 # =====================
 
-ARG CASA_EXTRAS_VERSION=6aa59af5f7001d8587ca4a9b6c688c861faec5eb
+ARG CASA_EXTRAS_VERSION=303e707061773ba33bec74ecb3a78f5de0539e24
 ARG CASA_EXTRAS_DIR=casa/extras
 
 RUN mkdir -p /opt/jans/python/libs
