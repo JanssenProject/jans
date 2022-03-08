@@ -8,7 +8,6 @@ from ldap3.core.exceptions import LDAPSocketOpenError
 
 from ldif import LDIFParser
 
-from jans.pycloudlib.utils import as_boolean
 from jans.pycloudlib.persistence.ldap import LdapClient
 
 from settings import LOGGING_CONFIG
@@ -106,34 +105,4 @@ class LDAPBackend:
             time.sleep(sleep_duration)
 
     def initialize(self):
-        def is_initialized():
-            persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "ldap")
-            ldap_mapping = os.environ.get("CN_PERSISTENCE_LDAP_MAPPING", "default")
-
-            # a minimum service stack is having oxTrust, hence check whether entry
-            # for oxTrust exists in LDAP
-            default_search = ("ou=jans-auth,ou=configuration,o=jans",
-                              "(objectClass=jansAppConf)")
-
-            if persistence_type == "hybrid":
-                # `cache` and `token` mapping only have base entries
-                search_mapping = {
-                    "default": default_search,
-                    "user": ("inum=60B7,ou=groups,o=jans", "(objectClass=jansGrp)"),
-                    "site": ("ou=cache-refresh,o=site", "(ou=people)"),
-                    "cache": ("o=jans", "(ou=cache)"),
-                    "token": ("ou=tokens,o=jans", "(ou=tokens)"),
-                    "session": ("ou=sessions,o=jans", "(ou=sessions)"),
-                }
-                search = search_mapping[ldap_mapping]
-            else:
-                search = default_search
-            return self.client.search(search[0], search[1], attributes=["objectClass"], limit=1)
-
-        should_skip = as_boolean(
-            os.environ.get("CN_PERSISTENCE_SKIP_INITIALIZED", False),
-        )
-        if should_skip and is_initialized():
-            logger.info("LDAP backend already initialized")
-            return
         self.import_ldif()
