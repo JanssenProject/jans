@@ -339,16 +339,16 @@
                <artifactId>jakarta.persistence-api</artifactId>
                <version>${jakarta.persistence.api.version}</version>
             </dependency>
-			<dependency>
+			<!-- <dependency>
 			    <groupId>jakarta.security.auth.message</groupId>
 			    <artifactId>jakarta.security.auth.message-api</artifactId>
 			    <version>${jakarta.security.auth.message.api.version}</version>
-			</dependency>
-			<dependency>
+			</dependency> -->
+			<!-- <dependency>
                 <groupId>jakarta.security.enterprise</groupId>
                 <artifactId>jakarta.security.enterprise-api</artifactId>
                 <version>${jakarta.security.enterprise.api.version}</version>
-            </dependency>
+            </dependency> -->
       		<dependency>
         		<groupId>jakarta.servlet</groupId>
         		<artifactId>jakarta.servlet-api</artifactId>
