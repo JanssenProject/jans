@@ -2,6 +2,7 @@ import json
 import logging.config
 import os
 import time
+from pathlib import Path
 
 from ldap3.core.exceptions import LDAPSessionTerminatedByServerError
 from ldap3.core.exceptions import LDAPSocketOpenError
@@ -53,7 +54,7 @@ class LDAPBackend:
                            "retrying in {} seconds".format(reason, sleep_duration))
             time.sleep(sleep_duration)
 
-    def import_ldif(self):
+    def import_builtin_ldif(self, ctx):
         optional_scopes = json.loads(self.manager.config.get("optional_scopes", "[]"))
         ldif_mappings = get_ldif_mappings(optional_scopes)
 
@@ -64,31 +65,19 @@ class LDAPBackend:
             mapping = ldap_mapping
             ldif_mappings = {mapping: ldif_mappings[mapping]}
 
-            # # these mappings require `base.ldif`
+            # these mappings require `base.ldif`
             # opt_mappings = ("user", "token",)
 
-            # `user` mapping requires `o=gluu` which available in `base.ldif`
+            # `user` mapping requires `o=jans` which available in `base.ldif`
             # if mapping in opt_mappings and "base.ldif" not in ldif_mappings[mapping]:
             if "base.ldif" not in ldif_mappings[mapping]:
                 ldif_mappings[mapping].insert(0, "base.ldif")
-
-        ctx = prepare_template_ctx(self.manager)
 
         for mapping, files in ldif_mappings.items():
             self.check_indexes(mapping)
 
             for file_ in files:
-                logger.info(f"Importing {file_} file")
-                src = f"/app/templates/{file_}"
-                dst = f"/app/tmp/{file_}"
-                os.makedirs(os.path.dirname(dst), exist_ok=True)
-
-                render_ldif(src, dst, ctx)
-
-                with open(dst, "rb") as fd:
-                    parser = LDIFParser(fd)
-                    for dn, entry in parser.parse():
-                        self.add_entry(dn, entry)
+                self._import_ldif(f"/app/templates/{file_}", ctx)
 
     def add_entry(self, dn, attrs):
         max_wait_time = 300
@@ -105,4 +94,28 @@ class LDAPBackend:
             time.sleep(sleep_duration)
 
     def initialize(self):
-        self.import_ldif()
+        ctx = prepare_template_ctx(self.manager)
+
+        logger.info("Importing builtin LDIF files")
+        self.import_builtin_ldif(ctx)
+
+        logger.info("Importing custom LDIF files (if any)")
+        self.import_custom_ldif(ctx)
+
+    def import_custom_ldif(self, ctx):
+        custom_dir = Path("/app/custom_ldif")
+
+        for file_ in custom_dir.rglob("*.ldif"):
+            self._import_ldif(file_, ctx)
+
+    def _import_ldif(self, path, ctx):
+        src = Path(path).resolve()
+        dst = Path(f"{path}.out").resolve()
+
+        logger.info(f"Importing {src} file")
+        render_ldif(src, dst, ctx)
+
+        with open(dst, "rb") as fd:
+            parser = LDIFParser(fd)
+            for dn, entry in parser.parse():
+                self.add_entry(dn, entry)

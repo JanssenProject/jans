@@ -177,7 +177,7 @@ LABEL name="Persistence" \
     summary="Janssen Authorization Server Persistence loader" \
     description="Generate initial data for persistence layer"
 
-RUN mkdir -p /app/tmp /etc/certs /etc/jans/conf
+RUN mkdir -p /app/custom_ldif /etc/certs /etc/jans/conf
 
 COPY scripts /app/scripts
 # this overrides existing templates
@@ -189,9 +189,11 @@ RUN adduser -s /bin/sh -D -G root -u 1000 1000
 
  # adjust ownership
 RUN chown -R 1000:1000 /tmp \
-    && chown -R 1000:1000 /app/tmp/ \
+    && chown -R 1000:1000 /app/custom_ldif/ \
+    && chown -R 1000:1000 /app/templates/ \
     && chgrp -R 0 /tmp && chmod -R g=u /tmp \
-    && chgrp -R 0 /app/tmp && chmod -R g=u /app/tmp \
+    && chgrp -R 0 /app/custom_ldif && chmod -R g=u /app/custom_ldif \
+    && chgrp -R 0 /app/templates && chmod -R g=u /app/templates \
     && chgrp -R 0 /etc/certs && chmod -R g=u /etc/certs \
     && chgrp -R 0 /etc/jans && chmod -R g=u /etc/jans
 USER 1000
