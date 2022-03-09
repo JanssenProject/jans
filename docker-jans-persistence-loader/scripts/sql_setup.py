@@ -505,7 +505,15 @@ class SQLBackend:
 
     def _import_ldif(self, path, ctx):
         src = Path(path).resolve()
-        dst = Path(f"{path}.out").resolve()
+
+        # generated template will be saved under ``/app/tmp`` directory
+        # examples:
+        # - ``/app/templates/groups.ldif`` will be saved as ``/app/tmp/templates/groups.ldif``
+        # - ``/app/custom_ldif/groups.ldif`` will be saved as ``/app/tmp/custom_ldif/groups.ldif``
+        dst = Path("/app/tmp").joinpath(str(src).removeprefix("/app/")).resolve()
+
+        # ensure directory for generated template is exist
+        dst.parent.mkdir(parents=True, exist_ok=True)
 
         logger.info(f"Importing {src} file")
         render_ldif(src, dst, ctx)
