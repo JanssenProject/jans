@@ -10,6 +10,7 @@ import com.github.fge.jsonpatch.JsonPatchException;
 import static io.jans.as.model.util.Util.escapeLog;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.common.EncryptionService;
+import io.jans.as.common.service.common.InumService;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.rest.model.SearchRequest;
 import io.jans.configapi.service.auth.ClientService;
@@ -33,6 +34,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.slf4j.Logger;
 
@@ -54,6 +56,9 @@ public class ClientsResource extends BaseResource {
 
     @Inject
     ClientService clientService;
+    
+    @Inject
+    private InumService inumService;
 
     @Inject
     EncryptionService encryptionService;
@@ -100,7 +105,7 @@ public class ClientsResource extends BaseResource {
         }
         String inum = client.getClientId();
         if (inum == null || inum.isEmpty() || inum.isBlank()) {
-            inum = clientService.generateInumForNewClient();
+            inum = inumService.generateClientInum();
             client.setClientId(inum);
         }
         checkNotNull(client.getClientName(), AttributeNames.DISPLAY_NAME);
@@ -185,11 +190,7 @@ public class ClientsResource extends BaseResource {
     }
 
     private String generatePassword() throws NoSuchAlgorithmException {
-        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz";
-        SecureRandom secureRandom = SecureRandom.getInstanceStrong();
-        return secureRandom.ints(12, 0, characters.length()).mapToObj(characters::charAt)
-                .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append).toString();
-
+        return UUID.randomUUID().toString();
     }
 
     private List<Client> doSearch(SearchRequest searchReq) {
