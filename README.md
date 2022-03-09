@@ -49,7 +49,6 @@ The Janssen Project is a cloud native digital identity platform. Using Janssen, 
 
 - **Single sign-on**: Janssen implements OAuth2 and enables applications to quickly implement single sign-on
 - **Two factor authentication**: Janssen implements FIDO2 standards to enable applications to use two factor authentication
-> TODO: add more use cases
 
 Janssen [user documentation](https://github.com/JanssenProject/jans/tree/main/docs/user) has full list of usecases and how to implement them using Janssen.
 
