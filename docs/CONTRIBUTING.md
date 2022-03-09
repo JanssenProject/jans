@@ -11,6 +11,7 @@
     - [Branch Names](#branch-names)
     - [PR Titles](#pr-titles)
   - [Developer Certificate Of Origin](#developer-certificate-of-origin)
+- [Contribution Workflow](#contribution-workflow)
 
 # Join the Community
 
@@ -111,3 +112,47 @@ Git even has a `-s` command line option to append this automatically to your com
 ```
 $ git commit -s -m 'This is my commit message'
 ```
+
+# Contribution Workflow
+
+## Find something to work on
+Best place to find something to work on is to look at [currently open issues](https://github.com/JanssenProject/jans/issues). If you are a first time contributor then starting with [list of good first issues](https://github.com/JanssenProject/jans/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22) is best.
+
+## Start a discussion
+Start a [Github Discussion](https://github.com/JanssenProject/jans/discussions) about what you are planning to contribute. Explain the feature or issue that you are planning to contribute and what your solution or implementation approach. Janssen is a community driven project and it'll be helpful to get community's view about it.
+
+## Create an issue
+Take your time to write a proper issue including a good summary and description. Outcome of Github discussion about your contribution can help you create good content for the issue. As a first step when creating a new issue, an issue template has to be selected. Select appropriate `issue template` and it'll help you create an issue with right content.
+
+Remember that issue may be the first thing a reviewer of your PR will look at to get an idea of what you are proposing. It will also be used by the community in the future to find about what new features and enhancements are included in new releases.
+
+## Implement the change
+All contributions to Janssen Project should be made via Github pull requests(PR). 
+> New to PR workflow?? Learn and practice it at [first-contributions](https://github.com/firstcontributions/first-contributions)
+
+### Create a fork
+Fork [Janssen repository](https://github.com/JanssenProject/jans). And create a clone.
+
+### Implement the change
+
+To setup code, build and run locally, refer to [DEVELOPING]() guide.
+Also, [commit](#commits) guidelines should be followed while committing your code.
+
+## Test 
+
+To run tests locally before pushing your code, refer to [TESTING] guide.
+
+## Document
+
+Include changes in relevent documentation along with code changes.
+
+## Raise a PR
+- Make sure that PR title follows the [convension](#pr-titles)
+- Janssen uses Github PR template. Template provides helpful instructions to ensure new PRs are complete in details and easy to review. Github will populate new PR's description with these instructions. You can edit PR description as per your requirements.
+- When PR is raised, Github will automatically assign reviewer to the PR based changed files and [CODEOWNERS](https://github.com/JanssenProject/jans/blob/main/.github%2FCODEOWNERS) list.
+- Once PR is raised, ensure that PR passes all the mandatory Github actions checks available on Github PR page. Github will not allow PR to be merged if any of the mandatory check is failing.
+
+## Follow through
+Once PR is raised, wait for reviewers to start review. Reviewers will start review at the first opportunity available. If you want to draw attention, give a gentle reminder in PR comments. But please be patient. 
+
+Follow activities on your PR closely till the time PR is merged. PR reviewer may suggest a change or may need more clarity around PR by asking question in PR comments. Make sure you are actively collaborating.
