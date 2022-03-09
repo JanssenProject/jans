@@ -12,6 +12,12 @@
     - [PR Titles](#pr-titles)
   - [Developer Certificate Of Origin](#developer-certificate-of-origin)
 - [Contribution Workflow](#contribution-workflow)
+  - [Find Something To Work On](#find-something-to-work-on)
+  - [Start a Discussion](#start-a-discussion)
+  - [Implement the Change](#implement-the-change)
+  - [Test](#test)
+  - [Document](#document)
+  - [Follow Through](#follow-through)
 
 # Join the Community
 
@@ -128,14 +134,16 @@ Remember that issue may be the first thing a reviewer of your PR will look at to
 
 ## Implement the change
 All contributions to Janssen Project should be made via Github pull requests(PR). 
+
 > New to PR workflow?? Learn and practice it at [first-contributions](https://github.com/firstcontributions/first-contributions)
 
-### Create a fork
+### Create a Fork
 Fork [Janssen repository](https://github.com/JanssenProject/jans). And create a clone.
 
-### Implement the change
+### Implement the Change
 
 To setup code, build and run locally, refer to [DEVELOPING]() guide.
+
 Also, [commit](#commits) guidelines should be followed while committing your code.
 
 ## Test 
@@ -152,7 +160,9 @@ Include changes in relevent documentation along with code changes.
 - When PR is raised, Github will automatically assign reviewer to the PR based changed files and [CODEOWNERS](https://github.com/JanssenProject/jans/blob/main/.github%2FCODEOWNERS) list.
 - Once PR is raised, ensure that PR passes all the mandatory Github actions checks available on Github PR page. Github will not allow PR to be merged if any of the mandatory check is failing.
 
-## Follow through
-Once PR is raised, wait for reviewers to start review. Reviewers will start review at the first opportunity available. If you want to draw attention, give a gentle reminder in PR comments. But please be patient. 
+## Follow Through
+Once the PR is raised, wait for reviewers to start review. Reviewers will start review at the first opportunity available. If you want to draw attention, give a gentle reminder in PR comments. But please be patient. 
 
-Follow activities on your PR closely till the time PR is merged. PR reviewer may suggest a change or may need more clarity around PR by asking question in PR comments. Make sure you are actively collaborating.
+Follow activities on your PR closely till the time PR is merged. PR reviewer may want to suggest a change or may need to ask a question to get more clarity. Make sure you are actively collaborating. Once Reviewer has completed the review and approved the changes, the PR will be merged.
+
+Thats it!! Congratulations on successful contribution. 🥳 🤟
