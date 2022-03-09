@@ -57,17 +57,13 @@ Janssen [user documentation](https://github.com/JanssenProject/jans/tree/main/do
 
 ### Quick start
 
-> TODO: create a docker based installation which has all components needed in the ecosystem, like Apache with mod-auth-oidc, Janssen server, an app that needs to be protected.
-Try first, ask questions later? Quick start shows how easy and simple it is to install Janssen Auth server and integrate it with a sample application. 
-
-### Installation
+#### Installation
 
 Janssen can be installed as cloud-native in a Kubernetes cluster or as a server on a single VM. Go to the [Janssen Project Wiki](https://github.com/JanssenProject/jans/wiki/) to know all the installation options
 
-### Use cases
+#### Use cases
 
 Complete list of Janssen usecases can be found under our [user documentation](docs/user).
-> TODO: add more content here
 
 ## Users and Community
 
@@ -156,15 +152,11 @@ More details can be found under [Janssen technical documentation](docs/technical
 
 Janssen is a Linux Foundation project, governed according to the [charter](./docs/community/charter.md). Technical oversight of the project is the responsibility of the Technical Steering Committee ("TSC"). Day to day decision making is in the hands of the Contributors. The TSC helps to guide the direction of the project and to improve the quality and security of the development process.
 
-> TODO: refactor support section
 ## Support
 
 Documentation currently is a work in progress. Draft pages are currently available on [Janssen Project Wiki](https://github.com/JanssenProject/jans/wiki/). You may want to also check Gluu Server [docs](https://gluu.org/docs), which have a lot in common with Janssen.
 
 We prefer to have all our discussions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussion) to better facilitate faster responses. However, other means are available such as the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). You can register for free there with your Github identity.
-
-You can also subscribe to the [Janssen Google Group](https://groups.google.com/u/2/g/janssen_project)
-and post messages there.
 
 If you find a bug in a Janssen project, or you would like to suggest a new feature, try the [GitHub Discussions](https://github.com/JanssenProject/jans/discussion) first. If you have a "howto" or "usage" question, [raise the question or usage](https://github.com/JanssenProject/jans/discussion)! 
 
