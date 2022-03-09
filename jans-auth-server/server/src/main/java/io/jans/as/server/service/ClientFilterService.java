@@ -12,11 +12,11 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.operation.SearchException;
 import org.apache.commons.lang.StringUtils;
 
-import javax.annotation.PostConstruct;
-import javax.ejb.DependsOn;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.annotation.PostConstruct;
+import jakarta.ejb.DependsOn;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import java.util.Map;
 
 /**

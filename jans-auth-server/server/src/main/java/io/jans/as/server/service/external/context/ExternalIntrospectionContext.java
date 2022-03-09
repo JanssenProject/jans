@@ -13,8 +13,8 @@ import io.jans.as.model.jwt.Jwt;
 import io.jans.as.server.model.common.AuthorizationGrant;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * @author Yuriy Zabrovarnyy

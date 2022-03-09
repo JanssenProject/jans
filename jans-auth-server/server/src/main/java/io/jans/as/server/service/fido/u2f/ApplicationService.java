@@ -8,8 +8,8 @@ package io.jans.as.server.service.fido.u2f;
 
 import io.jans.as.server.exception.fido.u2f.BadConfigurationException;
 
-import javax.ejb.Stateless;
-import javax.inject.Named;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Named;
 import java.net.URI;
 import java.net.URISyntaxException;
 

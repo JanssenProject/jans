@@ -13,9 +13,9 @@ import io.jans.model.custom.script.type.logout.EndSessionType;
 import io.jans.service.custom.script.ExternalScriptService;
 import org.apache.commons.lang.StringUtils;
 
-import javax.ejb.DependsOn;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Named;
+import jakarta.ejb.DependsOn;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Named;
 
 /**
  * @author Yuriy Zabrovarnyy

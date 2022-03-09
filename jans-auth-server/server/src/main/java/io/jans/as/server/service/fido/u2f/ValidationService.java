@@ -15,9 +15,9 @@ import io.jans.as.server.service.SessionIdService;
 import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 /**
  * Utility to validate U2F input data

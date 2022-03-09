@@ -22,9 +22,9 @@ import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.orm.PersistenceEntryManager;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;

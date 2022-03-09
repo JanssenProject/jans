@@ -34,8 +34,8 @@ import io.jans.as.server.ws.rs.fido.u2f.U2fConfigurationWS;
 import io.jans.as.server.ws.rs.fido.u2f.U2fRegistrationWS;
 import io.jans.as.server.ws.rs.stat.StatWS;
 
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
+import jakarta.ws.rs.ApplicationPath;
+import jakarta.ws.rs.core.Application;
 import java.util.HashSet;
 import java.util.Set;
 

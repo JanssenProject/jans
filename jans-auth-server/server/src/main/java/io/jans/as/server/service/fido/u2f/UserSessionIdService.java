@@ -14,9 +14,9 @@ import io.jans.as.server.ws.rs.fido.u2f.U2fAuthenticationWS;
 import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import java.util.Map;
 
 /**

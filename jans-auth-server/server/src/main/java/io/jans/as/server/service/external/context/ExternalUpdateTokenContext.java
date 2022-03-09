@@ -15,7 +15,7 @@ import io.jans.as.server.model.common.ExecutionContext;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import org.jetbrains.annotations.Nullable;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * @author Yuriy Movchan

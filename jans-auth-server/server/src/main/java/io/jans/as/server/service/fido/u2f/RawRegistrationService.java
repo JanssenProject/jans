@@ -20,9 +20,9 @@ import io.jans.util.io.ByteDataInputStream;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import java.io.IOException;
 import java.security.cert.CertificateException;
 

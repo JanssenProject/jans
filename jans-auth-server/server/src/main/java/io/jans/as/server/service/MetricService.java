@@ -16,11 +16,11 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.service.metric.inject.ReportMetric;
 import io.jans.service.net.NetworkService;
 
-import javax.ejb.DependsOn;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Instance;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.ejb.DependsOn;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 /**
  * Store and retrieve metric

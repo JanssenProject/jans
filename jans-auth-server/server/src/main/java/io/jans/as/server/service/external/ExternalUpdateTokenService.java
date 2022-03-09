@@ -17,7 +17,7 @@ import io.jans.model.custom.script.type.token.UpdateTokenType;
 import io.jans.service.custom.script.ExternalScriptService;
 import org.jetbrains.annotations.NotNull;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 import java.util.List;
 import java.util.function.Function;
 

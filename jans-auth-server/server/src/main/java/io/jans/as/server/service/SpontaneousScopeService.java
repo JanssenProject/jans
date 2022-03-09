@@ -16,9 +16,9 @@ import io.jans.as.persistence.model.Scope;
 import org.python.google.common.collect.Sets;
 import org.slf4j.Logger;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;

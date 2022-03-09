@@ -10,10 +10,10 @@ import io.jans.orm.search.filter.Filter;
 import net.agkn.hll.HLL;
 import org.slf4j.Logger;
 
-import javax.ejb.DependsOn;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.ejb.DependsOn;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;

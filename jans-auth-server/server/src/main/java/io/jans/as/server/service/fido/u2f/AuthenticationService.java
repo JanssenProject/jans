@@ -29,11 +29,11 @@ import io.jans.util.StringHelper;
 import org.apache.commons.codec.binary.Hex;
 import org.slf4j.Logger;
 
-import javax.ejb.Stateless;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Produces;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.ejb.Stateless;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Produces;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
