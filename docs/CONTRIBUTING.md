@@ -1,11 +1,25 @@
-# Join the community
+# Contributing to Janssen Project
+
+- [Join the Community](#join-the-community)
+- [Get Started](#get-started)
+- [Contribution Guidelines](#contribution-guidelines)
+  - [Code of Conduct](#code-of-conduct)
+  - [Issues](#issues)
+  - [Triaging](#triaging)
+  - [Code conventions](#code-conventions)
+    - [Commits](#commits)
+    - [Branch Names](#branch-names)
+    - [PR Titles](#pr-titles)
+  - [Developer Certificate Of Origin](#developer-certificate-of-origin)
+
+# Join the Community
 
 * **Repo**: Watch and Star [Janssen repository](https://github.com/JanssenProject/jans) on Github
 * **Chat**: We have an active [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). You can register for free their with your Github identity.
 * **Discussions**: Join interesting discussions at [Github Discussions](https://github.com/JanssenProject/jans/discussions)
 * **Tweet**: Janssen is on [Twitter](https://twitter.com/janssen_project) too. Follow us there to stay up to date on release announcements and news around Janssen.
 
-# Contribute
+# Get Started
 
 There are many ways of contributing to Janssen. And it is not just limited to fixing issues and raising pull requests. Janssen welcomes you to [raise issues](#issues), respond to queries, suggest new features, tell us your experience with Janssen, be it good or bad. All these are contributions towards making Janssen better.
 
@@ -16,7 +30,7 @@ In case you are _**first-time**_ contributor, then you can start with our [good 
 If you need Janssen installation to test out your fix, here are the [steps](https://github.com/JanssenProject/jans/wiki#janssen-installation).
 
 
-# Contribution guidelines
+# Contribution Guidelines
 
 We are really glad you are reading this, because we need volunteer developers to help this project come to fruition.
 
