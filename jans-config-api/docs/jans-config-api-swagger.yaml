@@ -4828,6 +4828,9 @@ components:
         staticKid:
           type: string
           description: Specifies static Kid
+        redirectUrisRegexEnabled:
+          type: boolean
+          description: Enable/Disable redirect uris validation using regular expression.
 
     GluuAttribute:
       title: GluuAttribute

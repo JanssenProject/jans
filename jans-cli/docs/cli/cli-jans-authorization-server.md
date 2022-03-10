@@ -486,7 +486,8 @@ Getting access token for scope https://jans.io/oauth/jans-auth-server/config/pro
   "discoveryCacheLifetimeInMinutes": 60,
   "httpLoggingEnabled": false,
   "httpLoggingExludePaths": null,
-  "externalLoggerConfiguration": null
+  "externalLoggerConfiguration": null,
+  "redirectUrisRegexEnabled": false
 }
 ```
 

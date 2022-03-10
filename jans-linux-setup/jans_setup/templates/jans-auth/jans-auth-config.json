@@ -445,5 +445,6 @@
     },
     "deviceAuthzRequestExpiresIn": 1800,
     "deviceAuthzTokenPollInterval": 5,
-    "deviceAuthzResponseTypeToProcessAuthz": "code"
+    "deviceAuthzResponseTypeToProcessAuthz": "code",
+    "redirectUrisRegexEnabled": false
 }
