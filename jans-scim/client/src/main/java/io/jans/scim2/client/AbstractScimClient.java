@@ -22,9 +22,9 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.stream.Stream;
 
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.client.ClientBuilder;
 
 /**
  * The base class for specific SCIM clients.
@@ -47,7 +47,7 @@ public abstract class AbstractScimClient<T> implements CloseableClient, Invocati
 
     private Logger logger = LogManager.getLogger(getClass());
 
-    //All method calls using scimService (with exception of close) will return a javax.ws.rs.core.Response object.
+    //All method calls using scimService (with exception of close) will return a jakarta.ws.rs.core.Response object.
     //The underlying data can be read using the readEntity method
     private T scimService;
 
@@ -106,7 +106,7 @@ public abstract class AbstractScimClient<T> implements CloseableClient, Invocati
      * triggered when the objects returned by factory methods of {@link io.jans.scim2.client.factory.ScimClientFactory ScimClientFactory}
      * are manipulated.</p>
      *
-     * @return The response associated to the invocation (normally a javax.ws.rs.core.Response instance)
+     * @return The response associated to the invocation (normally a jakarta.ws.rs.core.Response instance)
      */
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {

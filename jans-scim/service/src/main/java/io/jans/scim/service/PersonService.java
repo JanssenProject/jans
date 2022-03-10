@@ -16,8 +16,8 @@ import java.util.Map;
 import java.time.Instant;
 import java.util.UUID;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import io.jans.model.GluuAttribute;
 import io.jans.orm.PersistenceEntryManager;

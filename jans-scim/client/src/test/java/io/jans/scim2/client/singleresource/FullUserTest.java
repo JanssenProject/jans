@@ -17,11 +17,11 @@ import io.jans.scim2.listener.SkipTest;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 import java.util.*;
 
 import static io.jans.scim.model.scim2.Constants.USER_EXT_SCHEMA_ID;
-import static javax.ws.rs.core.Response.Status.*;
+import static jakarta.ws.rs.core.Response.Status.*;
 
 import static org.testng.Assert.*;
 

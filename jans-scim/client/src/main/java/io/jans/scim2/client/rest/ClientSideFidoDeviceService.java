@@ -10,9 +10,9 @@ import io.jans.scim.ws.rs.scim2.IFidoDeviceWebService;
 
 import static io.jans.scim.model.scim2.Constants.*;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 /**
  * An interface that exhibits operations to manipulate FidoDevice SCIM resources.

@@ -6,8 +6,8 @@
 
 package io.jans.scim.service.logger;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import io.jans.scim.model.conf.AppConfiguration;
 

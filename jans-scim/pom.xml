@@ -20,7 +20,7 @@
 		
 		<janssen.version>1.0.0-SNAPSHOT</janssen.version>
 		<gluu.version>1.0.0-SNAPSHOT</gluu.version>
-        <weld.version>3.1.2.Final</weld.version>
+        <weld.version>4.0.3.Final</weld.version>
 
 		<jacoco.version>0.8.7</jacoco.version>
 
