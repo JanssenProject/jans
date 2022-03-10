@@ -32,6 +32,7 @@
 		<jetty.version>11.0.8</jetty.version>
 		<jakarta.jms.api.version>3.0.0</jakarta.jms.api.version>
 		<jakarta.websocket.api.version>2.0.0</jakarta.websocket.api.version>
+		<jakarta.interceptor.api.version>2.0.0</jakarta.interceptor.api.version>
 
         <arquillian.version>1.4.0.Final</arquillian.version>
         <arquillian.rest.version>1.0.0.Alpha4</arquillian.rest.version>
@@ -117,6 +118,7 @@
             <dependency>
                 <groupId>jakarta.interceptor</groupId>
                 <artifactId>jakarta.interceptor-api</artifactId>
+                <version>${jakarta.interceptor.api.version}</version>
             </dependency>
 			<!-- https://github.com/wywygmbh/log4j-plugin-fluency -->
 			<dependency>

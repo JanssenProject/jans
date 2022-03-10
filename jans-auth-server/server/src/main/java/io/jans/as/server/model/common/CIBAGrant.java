@@ -9,7 +9,7 @@ package io.jans.as.server.model.common;
 import io.jans.as.model.common.GrantType;
 import io.jans.service.CacheService;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 /**
  * An extension grant with the grant type value: urn:openid:params:grant-type:ciba

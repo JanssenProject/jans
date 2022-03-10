@@ -21,7 +21,7 @@ import io.jans.as.server.uma.service.UmaPermissionService;
 import io.jans.as.server.uma.service.UmaSessionService;
 import io.jans.model.SimpleCustomProperty;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;

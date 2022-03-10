@@ -18,9 +18,9 @@ import io.jans.util.INumGenerator;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;

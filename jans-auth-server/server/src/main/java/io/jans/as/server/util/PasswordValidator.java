@@ -11,20 +11,20 @@ import io.jans.model.attribute.AttributeValidation;
 import io.jans.service.AttributeService;
 import io.jans.service.cdi.util.CdiUtil;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.faces.application.FacesMessage;
-import javax.faces.component.UIComponent;
-import javax.faces.component.UIInput;
-import javax.faces.context.FacesContext;
-import javax.faces.validator.FacesValidator;
-import javax.faces.validator.ValidatorException;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.faces.application.FacesMessage;
+import jakarta.faces.component.UIComponent;
+import jakarta.faces.component.UIInput;
+import jakarta.faces.context.FacesContext;
+import jakarta.faces.validator.FacesValidator;
+import jakarta.faces.validator.ValidatorException;
+import jakarta.inject.Inject;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @ApplicationScoped
 @FacesValidator(value = "gluuPasswordValidator", managed = true)
-public class PasswordValidator implements javax.faces.validator.Validator {
+public class PasswordValidator implements jakarta.faces.validator.Validator {
 
     private static final String USER_PASSWORD = "userPassword";
     private String newPassword;

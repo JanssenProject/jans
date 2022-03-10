@@ -9,9 +9,9 @@ package io.jans.as.server.ciba;
 import io.jans.as.model.error.DefaultErrorResponse;
 import org.apache.logging.log4j.util.Strings;
 
-import javax.ejb.Stateless;
-import javax.inject.Named;
-import javax.ws.rs.core.Response;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Named;
+import jakarta.ws.rs.core.Response;
 
 import static io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType.INVALID_REQUEST;
 import static io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType.UNKNOWN_USER_ID;

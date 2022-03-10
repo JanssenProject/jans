@@ -11,7 +11,7 @@ import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.configuration.AppConfiguration;
 import org.apache.commons.lang.StringUtils;
 
-import javax.enterprise.inject.Instance;
+import jakarta.enterprise.inject.Instance;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Set;

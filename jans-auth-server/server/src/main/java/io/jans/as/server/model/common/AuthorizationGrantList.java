@@ -24,9 +24,9 @@ import io.jans.service.CacheService;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
-import javax.enterprise.context.Dependent;
-import javax.enterprise.inject.Instance;
-import javax.inject.Inject;
+import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
