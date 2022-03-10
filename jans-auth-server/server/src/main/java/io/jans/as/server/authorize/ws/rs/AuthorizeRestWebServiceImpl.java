@@ -99,7 +99,7 @@ import static org.apache.commons.lang3.BooleanUtils.isTrue;
  * Implementation for request authorization through REST web services.
  *
  * @author Javier Rojas Blum
- * @version March 2, 2022
+ * @version March 7, 2022
  */
 @Path("/")
 public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
@@ -601,8 +601,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 }
             }
 
-            if (identity.getSessionId().getState() == SessionIdState.AUTHENTICATED
+            if (identity != null && identity.getSessionId() != null && identity.getSessionId().getState() == SessionIdState.AUTHENTICATED
                     && client != null && Boolean.TRUE.equals(client.getAttributes().getDefaultPromptLogin())
+                    && identity.getSessionId().getAuthenticationTime() != null
                     && new Date().getTime() - identity.getSessionId().getAuthenticationTime().getTime() > 200) {
                 prompts.add(Prompt.LOGIN);
             }
