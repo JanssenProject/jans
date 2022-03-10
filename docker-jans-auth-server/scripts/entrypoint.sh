@@ -58,4 +58,4 @@ exec java \
     -Dlog4j2.configurationFile=resources/log4j2.xml \
     $(get_debug_opt) \
     ${CN_JAVA_OPTIONS} \
-    -jar /opt/jetty/start.jar
+    -jar /opt/jetty/start.jar jetty.deploy.scanInterval=0

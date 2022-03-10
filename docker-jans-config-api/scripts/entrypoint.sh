@@ -40,4 +40,4 @@ exec java \
     -Djava.io.tmpdir=/opt/jetty/temp \
     -Dlog4j2.configurationFile=$(get_logging_files) \
     ${CN_JAVA_OPTIONS} \
-    -jar /opt/jetty/start.jar jetty.http.port=8074
+    -jar /opt/jetty/start.jar jetty.http.port=8074 jetty.deploy.scanInterval=0
