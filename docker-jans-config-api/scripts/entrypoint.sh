@@ -25,13 +25,9 @@ python3 /app/scripts/wait.py
 
 copy_builtin_plugins
 
-if [ ! -f /deploy/touched  ]; then
-    python3 /app/scripts/bootstrap.py
-    touch /deploy/touched
-fi
+python3 /app/scripts/bootstrap.py
 
 # run config-api
-mkdir -p /opt/jetty/temp
 cd /opt/jans/jetty/jans-config-api
 exec java \
     -server \
