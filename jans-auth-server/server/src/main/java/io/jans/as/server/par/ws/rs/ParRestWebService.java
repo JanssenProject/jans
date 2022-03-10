@@ -122,8 +122,6 @@ public class ParRestWebService {
                             + "customRespHeaders = {}, claims = {}, tokenBindingHeader = {}",
                     acrValuesStr, amrValuesStr, originHeaders, codeChallenge, codeChallengeMethod, customResponseHeaders, claims, tokenBindingHeader);
 
-            parValidator.validatePkce(codeChallenge, codeChallengeMethod, state);
-
             List<ResponseType> responseTypes = ResponseType.fromString(responseType, " ");
             ResponseMode responseModeObj = ResponseMode.getByValue(responseMode);
 
@@ -173,6 +171,8 @@ public class ParRestWebService {
             par.getAttributes().setCustomParameters(requestParameterService.getCustomParameters(QueryStringDecoder.decode(httpRequest.getQueryString())));
 
             parValidator.validateRequestObject(redirectUriResponse, par, client);
+
+            parValidator.validatePkce(par.getAttributes().getCodeChallenge(), par.getAttributes().getCodeChallengeMethod(), state);
             authorizeRestWebServiceValidator.validatePkce(par.getAttributes().getCodeChallenge(), redirectUriResponse);
 
             parService.persist(par);
