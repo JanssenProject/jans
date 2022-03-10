@@ -10,9 +10,9 @@ import io.jans.configapi.util.AuthUtil;
 import io.jans.configapi.configuration.ConfigurationFactory;
 import org.slf4j.Logger;
 
-import javax.inject.Inject;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.container.ResourceInfo;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.container.ResourceInfo;
 import java.io.Serializable;
 import java.util.List;
 

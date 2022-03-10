@@ -18,10 +18,10 @@ import static io.jans.scim.model.scim2.Constants.QUERY_PARAM_SORT_ORDER;
 import static io.jans.scim.model.scim2.Constants.QUERY_PARAM_START_INDEX;
 import static io.jans.scim.model.scim2.Constants.UTF8_CHARSET_FRAGMENT;
 
-import javax.inject.Inject;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 @Path("/user")
 public class ScimResource {

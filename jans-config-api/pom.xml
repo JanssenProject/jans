@@ -22,9 +22,11 @@
 		<surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
 
 		<jans.version>1.0.0-SNAPSHOT</jans.version>
+
+		<jetty.version>11.0.8</jetty.version>
 		<weld.version>4.0.3.Final</weld.version>
-		<jetty.version>11.0.2</jetty.version>
-		<resteasy.version>4.5.10.Final</resteasy.version>
+		<resteasy.version>6.0.0.Final</resteasy.version>
+
 		<jackson.version>2.10.1</jackson.version>
 		<microprofile.version>3.0</microprofile.version>
 		<smallrye.version>2.2.0</smallrye.version>
@@ -207,6 +209,11 @@
 				<artifactId>jans-orm-annotation</artifactId>
 				<version>${jans.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>io.jans</groupId>
+				<artifactId>uma-rs-core</artifactId>
+				<version>${jans.version}</version>
+			</dependency>
 
 			<!-- Security -->
 			<dependency>
@@ -238,6 +245,12 @@
 				<version>${microprofile.version}</version>
 			</dependency>
 			<dependency>
+			    <groupId>org.eclipse.microprofile.rest.client</groupId>
+			    <artifactId>microprofile-rest-client-api</artifactId>
+			    <version>${microprofile.version}</version>
+			</dependency>
+
+			<dependency>
 				<groupId>io.smallrye</groupId>
 				<artifactId>smallrye-metrics</artifactId>
 				<version>3.0.3</version>
@@ -247,22 +260,22 @@
 				<artifactId>smallrye-health</artifactId>
 				<version>3.0.1</version>
 			</dependency>
-			<dependency>
+			<!-- <dependency>
 				<groupId>io.smallrye</groupId>
 				<artifactId>smallrye-rest-client</artifactId>
 				<version>1.2.2</version>
-			</dependency>
+			</dependency> -->
 
 			<!-- Validation -->
 			<dependency>
 				<groupId>org.hibernate</groupId>
 				<artifactId>hibernate-validator-cdi</artifactId>
-				<version>7.0.1.Final</version>
+				<version>7.0.3.Final</version>
 			</dependency>
 			<dependency>
 				<groupId>org.hibernate.validator</groupId>
 				<artifactId>hibernate-validator</artifactId>
-				<version>7.0.1.Final</version>
+				<version>7.0.3.Final</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>

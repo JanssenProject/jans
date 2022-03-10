@@ -15,9 +15,9 @@ import io.jans.configapi.util.AuthUtil;
 
 import java.io.Serializable;
 import java.util.List;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Named;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Named;
+import jakarta.inject.Inject;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;

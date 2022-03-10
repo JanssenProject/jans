@@ -6,7 +6,7 @@
 
 package io.jans.configapi.core.rest;
 
-import javax.ws.rs.NameBinding;
+import jakarta.ws.rs.NameBinding;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

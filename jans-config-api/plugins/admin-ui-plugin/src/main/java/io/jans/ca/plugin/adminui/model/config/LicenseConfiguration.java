@@ -5,7 +5,7 @@ import com.licensespring.LicenseSpringConfiguration;
 import com.licensespring.model.exceptions.LicenseSpringException;
 import org.slf4j.Logger;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 public class LicenseConfiguration {
 

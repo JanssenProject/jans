@@ -23,14 +23,14 @@ import io.jans.configapi.core.util.Jackson;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
 
-import javax.inject.Inject;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilder;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.Invocation.Builder;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.MultivaluedHashMap;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriBuilder;
 
 import org.eclipse.microprofile.rest.client.annotation.RegisterProvider;
 import org.eclipse.microprofile.rest.client.RestClientBuilder;
@@ -64,7 +64,7 @@ public class AuthClientFactory {
         log.debug("Introspect Token - url:{}, header:{}, token:{} ,followRedirects:{} ", url, header, token,
                 followRedirects);
         RestClientBuilder client = getRestClientBuilder(url);
-        ResteasyWebTarget target = (ResteasyWebTarget) ClientBuilder.newClient(client.getConfiguration())
+        ResteasyWebTarget target = (ResteasyWebTarget) ClientBuilder.newClient()
                 .property(CONTENT_TYPE, MediaType.APPLICATION_JSON).target(url);
         IntrospectionService proxy = target.proxy(IntrospectionService.class);
         return proxy.introspectToken(header, token);
@@ -76,7 +76,7 @@ public class AuthClientFactory {
                     escapeLog(month), escapeLog(format));
         }
         RestClientBuilder restClientBuilder = getRestClientBuilder(url);
-        ResteasyWebTarget webTarget = (ResteasyWebTarget) ClientBuilder.newClient(restClientBuilder.getConfiguration())
+        ResteasyWebTarget webTarget = (ResteasyWebTarget) ClientBuilder.newClient()
                 .target(url);
         StatService statService = webTarget.proxy(StatService.class);
         return statService.stat(token, month, format);
@@ -149,7 +149,7 @@ public class AuthClientFactory {
             engine = ClientFactoryUtil.createEngine(followRedirects);
             RestClientBuilder restClient = getRestClientBuilder(url).register(engine);
             ResteasyWebTarget resteasyWebTarget = (ResteasyWebTarget) ClientBuilder
-                    .newClient(restClient.getConfiguration()).target(url);
+                    .newClient().target(url);
             return resteasyWebTarget.proxy(IntrospectionService.class);
         } finally {
             if (engine != null) {

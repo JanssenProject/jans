@@ -15,8 +15,8 @@ import io.jans.orm.search.filter.Filter;
 import io.jans.util.StringHelper;
 import org.apache.commons.lang.StringUtils;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import java.util.List;
 
 /**

@@ -12,8 +12,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
 import java.text.SimpleDateFormat;
-import javax.inject.Singleton;
-import javax.ws.rs.ext.ContextResolver;
+import jakarta.inject.Singleton;
+import jakarta.ws.rs.ext.ContextResolver;
 
 @Singleton
 public class ObjectMapperContextResolver implements ContextResolver<ObjectMapper> {

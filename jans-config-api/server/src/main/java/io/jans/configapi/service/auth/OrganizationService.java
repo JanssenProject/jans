@@ -1,6 +1,6 @@
 package io.jans.configapi.service.auth;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 import io.jans.model.ApplicationType;
 
 /**

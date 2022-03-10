@@ -17,9 +17,9 @@ import io.jans.ca.plugin.adminui.model.auth.LicenseResponse;
 import io.jans.ca.plugin.adminui.service.config.AUIConfigurationService;
 import org.slf4j.Logger;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.ws.rs.core.Response;
 
 @Singleton
 public class LicenseDetailsService {
