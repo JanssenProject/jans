@@ -45,7 +45,6 @@ python3 /app/scripts/auth_conf.py
 
 # run auth-server
 cd /opt/jans/jetty/jans-auth
-mkdir -p /opt/jetty/temp
 exec java \
     -server \
     -XX:+DisableExplicitGC \

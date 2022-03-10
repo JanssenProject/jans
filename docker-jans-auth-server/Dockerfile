@@ -7,7 +7,7 @@ FROM bellsoft/liberica-openjre-alpine:11.0.13-8
 RUN apk update \
     && apk add --no-cache openssl py3-pip tini curl bash py3-cryptography py3-psycopg2 \
     && apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/v3.15/community py3-grpcio \
-    && apk add --no-cache --virtual build-deps wget git \
+    && apk add --no-cache --virtual build-deps wget git zip \
     && mkdir -p /usr/java/latest \
     && ln -sf /usr/lib/jvm/jre /usr/java/latest/jre
 
@@ -52,16 +52,19 @@ RUN wget -q https://github.com/fabioz/PyDev.Debugger/archive/refs/tags/pydev_deb
 # ===========
 
 ENV CN_VERSION=1.0.0-SNAPSHOT
-ENV CN_BUILD_DATE='2022-03-07 16:26'
+ENV CN_BUILD_DATE='2022-03-10 11:31'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-server/${CN_VERSION}/jans-auth-server-${CN_VERSION}.war
 
 # Install Jans Auth
-RUN wget -q ${CN_SOURCE_URL} -O /tmp/jans-auth.war \
-    && mkdir -p ${JETTY_BASE}/jans-auth/webapps/jans-auth \
-    && unzip -qq /tmp/jans-auth.war -d ${JETTY_BASE}/jans-auth/webapps/jans-auth \
-    && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-auth --add-to-start=server,deploy,annotations,resources,http,http-forwarded,threadpool,jsp,websocket,cdi-decorate \
-    && rm -f /tmp/jans-auth.war \
-    && rm -f ${JETTY_BASE}/jans-auth/webapps/jans-auth/WEB-INF/jetty-web.xml
+COPY jetty/jetty-env.xml /tmp/WEB-INF/jetty-env.xml
+RUN mkdir -p ${JETTY_BASE}/jans-auth/webapps \
+    && wget -q ${CN_SOURCE_URL} -O /tmp/jans-auth.war \
+    && cd /tmp \
+    && zip -d jans-auth.war WEB-INF/jetty-web.xml \
+    && zip -r jans-auth.war WEB-INF/jetty-env.xml \
+    && cp jans-auth.war ${JETTY_BASE}/jans-auth/webapps/jans-auth.war \
+    && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-auth --add-module=server,deploy,annotations,resources,http,http-forwarded,threadpool,jsp,websocket,cdi-decorate \
+    && rm -rf /tmp/jans-auth.war /tmp/WEB-INF
 
 # ===========
 # Custom libs
@@ -219,18 +222,18 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/custom/pages \
     ${JETTY_BASE}/jans-auth/custom/libs \
     ${JETTY_BASE}/jans-auth/custom/i18n \
     /etc/jans/conf \
-    /app/templates
+    /app/templates \
+    /opt/jetty/temp
 
 COPY certs /etc/certs
 COPY jetty/jans-auth_web_resources.xml ${JETTY_BASE}/jans-auth/webapps/
 COPY jetty/jans-auth.xml ${JETTY_BASE}/jans-auth/webapps/
-COPY jetty/jetty-env.xml ${JETTY_BASE}/jans-auth/webapps/jans-auth/WEB-INF/
 COPY jetty/log4j2.xml ${JETTY_BASE}/jans-auth/resources/
 COPY conf/*.tmpl /app/templates/
 COPY scripts /app/scripts
 RUN chmod +x /app/scripts/entrypoint.sh
 
-# # create non-root user
+# create non-root user
 RUN adduser -s /bin/sh -D -G root -u 1000 jetty
 
  # adjust ownership
