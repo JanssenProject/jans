@@ -106,18 +106,19 @@ public class RedirectionUriService {
                 redirectUris = getSectorRedirectUris(sectorIdentifierUri).toArray(new String[0]);
             }
 
-            if (StringUtils.isNotBlank(redirectionUri) && redirectUris != null) {
+            if (StringUtils.isBlank(sectorIdentifierUri) && redirectUris != null && redirectUris.length == 1) {
+                return redirectUris[0];
+            }
+
+            if (StringUtils.isNotBlank(redirectionUri)) {
                 log.debug("Validating redirection URI: clientIdentifier = {}, redirectionUri = {}, found = {}",
                         client.getClientId(), redirectionUri, redirectUris.length);
-
                 if (isUriEqual(redirectionUri, redirectUris)) {
                     return redirectionUri;
                 }
-            } else {
-                // Accept Request Without redirect_uri when One Registered
-                if (redirectUris != null && redirectUris.length == 1) {
-                    return redirectUris[0];
-                }
+
+                //if not found a match, should it print a log ?
+                return redirectionUri.matches(client.getAttributes().getRedirectUrisRegex()) ? redirectionUri : null;
             }
         } catch (Exception e) {
             return null;
