@@ -241,26 +241,6 @@ objectClass: jansCustomScr
 jansEnabled: false
 jansProgLng: python
 
-dn: inum=5018-AF9C,ou=scripts,o=jans
-description: UAF authentication module
-displayName: uaf
-inum: 5018-AF9C
-jansConfProperty: {"value1":"uaf_server_uri","value2":"https://%(hostname)s","description":""}
-jansConfProperty: {"value1":"uaf_policy_name","value2":"default","description":""}
-jansConfProperty: {"value1":"qr_options","value2":"{ width: 400, height: 400 }","description":""}
-jansConfProperty: {"value1":"registration_uri","value2":"https://%(hostname)s/identity/register","description":""}
-jansConfProperty: {"value1":"send_push_notifaction","value2":"false","description":""}
-jansLevel: 70
-jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
-jansModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
-jansRevision: 1
-jansScr::%(person_authentication_uafexternalauthenticator)s
-jansScrTyp: person_authentication
-objectClass: top
-objectClass: jansCustomScr
-jansEnabled: false
-jansProgLng: python
-
 dn: inum=5018-D4BF,ou=scripts,o=jans
 description: HOTP/TOPT authentication module
 displayName: otp
@@ -337,23 +317,6 @@ jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
 jansRevision: 1
 jansScr::%(user_registration_confirmregistrationsamplescript)s
 jansScrTyp: user_registration
-objectClass: top
-objectClass: jansCustomScr
-jansEnabled: false
-jansProgLng: python
-
-dn: inum=8BAF-80D6,ou=scripts,o=jans
-description: Fido U2F authentication module
-displayName: u2f
-inum: 8BAF-80D6
-jansConfProperty: {"value1":"u2f_application_id","value2":"https://%(hostname)s","description":""}
-jansConfProperty: {"value1":"u2f_server_uri","value2":"https://%(hostname)s","description":""}
-jansLevel: 50
-jansModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
-jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
-jansRevision: 1
-jansScr::%(person_authentication_u2fexternalauthenticator)s
-jansScrTyp: person_authentication
 objectClass: top
 objectClass: jansCustomScr
 jansEnabled: false

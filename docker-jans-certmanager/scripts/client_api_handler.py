@@ -11,9 +11,18 @@ logger = logging.getLogger("certmanager")
 
 class ClientApiHandler(BaseHandler):
     def generate_x509(self, suffix, cert_cn):
+        try:
+            valid_to = int(self.opts.get("valid-to", 365))
+        except ValueError:
+            valid_to = 365
+        finally:
+            if valid_to < 1:
+                valid_to = 365
+
         cert_file, key_file = self._patch_cert_key(
             suffix,
             extra_dns=[cert_cn],
+            valid_to=valid_to,
         )
         return cert_file, key_file
 
