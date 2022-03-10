@@ -17,7 +17,7 @@ import io.jans.orm.exception.PropertyNotFoundException;
 import io.jans.orm.exception.operation.ConfigurationException;
 import io.jans.orm.model.PersistenceConfiguration;
 import io.jans.orm.reflect.util.ReflectHelper;
-
+import static org.reflections.scanners.Scanners.SubTypes;
 /**
  * Factory which creates Persistence Entry Manager
  *
@@ -62,7 +62,7 @@ public class StandalonePersistanceFactoryService extends PersistanceFactoryServi
 
 		org.reflections.Reflections reflections = new org.reflections.Reflections(new org.reflections.util.ConfigurationBuilder()
 			     .setUrls(org.reflections.util.ClasspathHelper.forPackage("io.jans.orm"))
-			     .setScanners(new org.reflections.scanners.SubTypesScanner()));
+				 .setScanners(SubTypes));
 		Set<Class<? extends PersistenceEntryManagerFactory>> classes = reflections.getSubTypesOf(PersistenceEntryManagerFactory.class);
 
 		getLog().info("Found '{}' PersistenceEntryManagerFactory", classes.size());
