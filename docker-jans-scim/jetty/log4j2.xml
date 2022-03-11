@@ -56,7 +56,7 @@
     </Appenders>
 
     <Loggers>
-        <Logger name="io.jans.scim" level="$scim_log_level">
+        <Logger name="io.jans.scim" level="$scim_log_level" additivity="false">
             <AppenderRef ref="$scim_log_target" />
         </Logger>
 
