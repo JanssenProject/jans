@@ -109,7 +109,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         AssertBuilder.registerResponse(registerResponse).created()
                 .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH)
                 .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
-                .backchannelUserCodeParameter(false)
+                .backchannelUserCodeParameter(true)
                 .check();
 
         String clientId = registerResponse.getClientId();

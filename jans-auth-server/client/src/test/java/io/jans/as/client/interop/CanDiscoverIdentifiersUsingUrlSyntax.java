@@ -9,6 +9,8 @@ package io.jans.as.client.interop;
 import io.jans.as.client.OpenIdConnectDiscoveryRequest;
 import org.testng.annotations.Test;
 
+import java.net.URISyntaxException;
+
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -22,12 +24,7 @@ public class CanDiscoverIdentifiersUsingUrlSyntax {
     public void urlNormalization1() throws Exception {
         String resource = "https://example.com";
         String expectedHost = "example.com";
-        String expectedPath = null;
-
-        OpenIdConnectDiscoveryRequest openIdConnectDiscoveryRequest = new OpenIdConnectDiscoveryRequest(resource);
-        assertEquals(openIdConnectDiscoveryRequest.getResource(), resource);
-        assertEquals(openIdConnectDiscoveryRequest.getHost(), expectedHost);
-        assertEquals(openIdConnectDiscoveryRequest.getPath(), expectedPath);
+        assertRequest(resource, expectedHost, null);
     }
 
     @Test
@@ -35,23 +32,14 @@ public class CanDiscoverIdentifiersUsingUrlSyntax {
         String resource = "https://example.com/joe";
         String expectedHost = "example.com";
         String expectedPath = "/joe";
-
-        OpenIdConnectDiscoveryRequest openIdConnectDiscoveryRequest = new OpenIdConnectDiscoveryRequest(resource);
-        assertEquals(openIdConnectDiscoveryRequest.getResource(), resource);
-        assertEquals(openIdConnectDiscoveryRequest.getHost(), expectedHost);
-        assertEquals(openIdConnectDiscoveryRequest.getPath(), expectedPath);
+        assertRequest(resource, expectedHost, expectedPath);
     }
 
     @Test
     public void urlNormalization3() throws Exception {
         String resource = "https://example.com:8080/";
         String expectedHost = "example.com:8080";
-        String expectedPath = null;
-
-        OpenIdConnectDiscoveryRequest openIdConnectDiscoveryRequest = new OpenIdConnectDiscoveryRequest(resource);
-        assertEquals(openIdConnectDiscoveryRequest.getResource(), resource);
-        assertEquals(openIdConnectDiscoveryRequest.getHost(), expectedHost);
-        assertEquals(openIdConnectDiscoveryRequest.getPath(), expectedPath);
+        assertRequest(resource, expectedHost, null);
     }
 
     @Test
@@ -59,11 +47,7 @@ public class CanDiscoverIdentifiersUsingUrlSyntax {
         String resource = "https://example.com:8080/joe";
         String expectedHost = "example.com:8080";
         String expectedPath = "/joe";
-
-        OpenIdConnectDiscoveryRequest openIdConnectDiscoveryRequest = new OpenIdConnectDiscoveryRequest(resource);
-        assertEquals(openIdConnectDiscoveryRequest.getResource(), resource);
-        assertEquals(openIdConnectDiscoveryRequest.getHost(), expectedHost);
-        assertEquals(openIdConnectDiscoveryRequest.getPath(), expectedPath);
+        assertRequest(resource, expectedHost, expectedPath);
     }
 
     @Test
@@ -71,11 +55,7 @@ public class CanDiscoverIdentifiersUsingUrlSyntax {
         String resource = "https://example.com:8080/joe#fragment";
         String expectedHost = "example.com:8080";
         String expectedPath = "/joe";
-
-        OpenIdConnectDiscoveryRequest openIdConnectDiscoveryRequest = new OpenIdConnectDiscoveryRequest(resource);
-        assertEquals(openIdConnectDiscoveryRequest.getResource(), resource);
-        assertEquals(openIdConnectDiscoveryRequest.getHost(), expectedHost);
-        assertEquals(openIdConnectDiscoveryRequest.getPath(), expectedPath);
+        assertRequest(resource, expectedHost, expectedPath);
     }
 
     @Test
@@ -83,11 +63,7 @@ public class CanDiscoverIdentifiersUsingUrlSyntax {
         String resource = "https://example.com:8080/joe?param=value";
         String expectedHost = "example.com:8080";
         String expectedPath = "/joe";
-
-        OpenIdConnectDiscoveryRequest openIdConnectDiscoveryRequest = new OpenIdConnectDiscoveryRequest(resource);
-        assertEquals(openIdConnectDiscoveryRequest.getResource(), resource);
-        assertEquals(openIdConnectDiscoveryRequest.getHost(), expectedHost);
-        assertEquals(openIdConnectDiscoveryRequest.getPath(), expectedPath);
+        assertRequest(resource, expectedHost, expectedPath);
     }
 
     @Test
@@ -95,11 +71,7 @@ public class CanDiscoverIdentifiersUsingUrlSyntax {
         String resource = "https://example.com:8080/joe?param1=foo&param2=bar#fragment";
         String expectedHost = "example.com:8080";
         String expectedPath = "/joe";
-
-        OpenIdConnectDiscoveryRequest openIdConnectDiscoveryRequest = new OpenIdConnectDiscoveryRequest(resource);
-        assertEquals(openIdConnectDiscoveryRequest.getResource(), resource);
-        assertEquals(openIdConnectDiscoveryRequest.getHost(), expectedHost);
-        assertEquals(openIdConnectDiscoveryRequest.getPath(), expectedPath);
+        assertRequest(resource, expectedHost, expectedPath);
     }
 
     @Test
@@ -107,11 +79,7 @@ public class CanDiscoverIdentifiersUsingUrlSyntax {
         String resource = "example.com";
         String expectedHost = "example.com";
         String expectedPath = null;
-
-        OpenIdConnectDiscoveryRequest openIdConnectDiscoveryRequest = new OpenIdConnectDiscoveryRequest(resource);
-        assertEquals(openIdConnectDiscoveryRequest.getResource(), resource);
-        assertEquals(openIdConnectDiscoveryRequest.getHost(), expectedHost);
-        assertEquals(openIdConnectDiscoveryRequest.getPath(), expectedPath);
+        assertRequest(resource, expectedHost, expectedPath);
     }
 
     @Test
@@ -119,11 +87,7 @@ public class CanDiscoverIdentifiersUsingUrlSyntax {
         String resource = "example.com:8080";
         String expectedHost = "example.com:8080";
         String expectedPath = null;
-
-        OpenIdConnectDiscoveryRequest openIdConnectDiscoveryRequest = new OpenIdConnectDiscoveryRequest(resource);
-        assertEquals(openIdConnectDiscoveryRequest.getResource(), resource);
-        assertEquals(openIdConnectDiscoveryRequest.getHost(), expectedHost);
-        assertEquals(openIdConnectDiscoveryRequest.getPath(), expectedPath);
+        assertRequest(resource, expectedHost, expectedPath);
     }
 
     @Test
@@ -131,11 +95,7 @@ public class CanDiscoverIdentifiersUsingUrlSyntax {
         String resource = "example.com/path";
         String expectedHost = "example.com";
         String expectedPath = "/path";
-
-        OpenIdConnectDiscoveryRequest openIdConnectDiscoveryRequest = new OpenIdConnectDiscoveryRequest(resource);
-        assertEquals(openIdConnectDiscoveryRequest.getResource(), resource);
-        assertEquals(openIdConnectDiscoveryRequest.getHost(), expectedHost);
-        assertEquals(openIdConnectDiscoveryRequest.getPath(), expectedPath);
+        assertRequest(resource, expectedHost, expectedPath);
     }
 
     @Test
@@ -143,7 +103,10 @@ public class CanDiscoverIdentifiersUsingUrlSyntax {
         String resource = "example.com:8080/path";
         String expectedHost = "example.com:8080";
         String expectedPath = "/path";
+        assertRequest(resource, expectedHost, expectedPath);
+    }
 
+    private void assertRequest(String resource, String expectedHost, String expectedPath) throws URISyntaxException {
         OpenIdConnectDiscoveryRequest openIdConnectDiscoveryRequest = new OpenIdConnectDiscoveryRequest(resource);
         assertEquals(openIdConnectDiscoveryRequest.getResource(), resource);
         assertEquals(openIdConnectDiscoveryRequest.getHost(), expectedHost);

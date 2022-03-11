@@ -83,7 +83,7 @@ public class JwtAssertBuilder extends BaseAssertBuilder {
             List<String> listClaims = new ArrayList<>();
             listClaims.addAll(Arrays.asList(this.claimsPresence));
             listClaims.addAll(Arrays.asList(claimsPresence));
-            this.claimsPresence = (String[]) listClaims.toArray();
+            this.claimsPresence = listClaims.toArray(new String[0]);
         } else {
             this.claimsPresence = claimsPresence;
         }
@@ -95,7 +95,7 @@ public class JwtAssertBuilder extends BaseAssertBuilder {
             List<String> listClaims = new ArrayList<>();
             listClaims.addAll(Arrays.asList(this.claimsNoPresence));
             listClaims.addAll(Arrays.asList(claimsNoPresence));
-            this.claimsNoPresence = (String[]) listClaims.toArray();
+            this.claimsNoPresence = listClaims.toArray(new String[0]);
         } else {
             this.claimsNoPresence = claimsNoPresence;
         }

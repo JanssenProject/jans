@@ -99,7 +99,7 @@ public class ParHttpTest extends BaseTest {
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponse(authorizationResponse).check();
+        AssertBuilder.authorizationResponse(authorizationResponse).nullState().check();
         return authorizationResponse;
     }
 }

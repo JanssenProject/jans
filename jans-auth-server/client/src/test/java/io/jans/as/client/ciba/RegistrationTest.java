@@ -6,11 +6,7 @@
 
 package io.jans.as.client.ciba;
 
-import io.jans.as.client.BaseTest;
-import io.jans.as.client.JwkClient;
-import io.jans.as.client.JwkResponse;
-import io.jans.as.client.RegisterClient;
-import io.jans.as.client.RegisterResponse;
+import io.jans.as.client.*;
 import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.BackchannelTokenDeliveryMode;
@@ -347,9 +343,6 @@ public class RegistrationTest extends BaseTest {
                 .execute();
         AssertBuilder.registerResponse(clientReadResponse).ok()
                 .notNullRegistrationClientUri()
-                .backchannelUserCodeParameter(true)
-                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING)
-                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
                 .check();
 
         assertRegisterResponseClaimsNotNull(clientReadResponse, APPLICATION_TYPE, SECTOR_IDENTIFIER_URI, SUBJECT_TYPE, ID_TOKEN_SIGNED_RESPONSE_ALG, JWKS_URI, CLIENT_NAME, SCOPE);

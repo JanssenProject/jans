@@ -715,7 +715,8 @@ public class IndividualClaimsRequestsTest extends BaseTest {
                 .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS256)
                 .notNullAuthenticationTime()
                 .notNullAccesTokenHash()
-                .claimsPresence(JwtClaimName.NAME, JwtClaimName.NICKNAME, JwtClaimName.GIVEN_NAME, JwtClaimName.FAMILY_NAME, JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
+                .claimsPresence(JwtClaimName.NAME, JwtClaimName.NICKNAME, JwtClaimName.GIVEN_NAME, JwtClaimName.FAMILY_NAME)
+                .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
                 .check();
 
         // 4. Request user info
@@ -829,7 +830,8 @@ public class IndividualClaimsRequestsTest extends BaseTest {
                 .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS384)
                 .notNullAuthenticationTime()
                 .notNullAccesTokenHash()
-                .claimsPresence(JwtClaimName.NAME, JwtClaimName.NICKNAME, JwtClaimName.GIVEN_NAME, JwtClaimName.FAMILY_NAME, JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
+                .claimsPresence(JwtClaimName.NAME, JwtClaimName.NICKNAME, JwtClaimName.GIVEN_NAME, JwtClaimName.FAMILY_NAME)
+                .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
                 .check();
 
         // 4. Request user info
@@ -943,7 +945,8 @@ public class IndividualClaimsRequestsTest extends BaseTest {
                 .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS512)
                 .notNullAuthenticationTime()
                 .notNullAccesTokenHash()
-                .claimsPresence(JwtClaimName.NAME, JwtClaimName.NICKNAME, JwtClaimName.GIVEN_NAME, JwtClaimName.FAMILY_NAME, JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
+                .claimsPresence(JwtClaimName.NAME, JwtClaimName.NICKNAME, JwtClaimName.GIVEN_NAME, JwtClaimName.FAMILY_NAME)
+                .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
                 .check();
 
         // 4. Request user info

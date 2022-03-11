@@ -730,6 +730,6 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         Jwt at2Jwt = Jwt.parse(accessToken);
         assertNotNull(at2Jwt, "AT2 is null");
         System.out.println("AT2 claims: " + at2Jwt.getClaims().toJsonString());
-        assertEquals("value1", at2Jwt.getClaims().getClaimAsString("claim1"));
+        assertEquals(at2Jwt.getClaims().getClaimAsString("claim1"), "value1");
     }
 }

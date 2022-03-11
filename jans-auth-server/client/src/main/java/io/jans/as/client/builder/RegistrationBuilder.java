@@ -40,6 +40,7 @@ public class RegistrationBuilder implements Builder {
 
     public RegistrationBuilder() {
         this.applicationType = ApplicationType.WEB;
+        this.clientName = "jans test app";
     }
 
     public RegistrationBuilder withRegistrationAccessToken(String registrationAccessToken) {
@@ -161,10 +162,11 @@ public class RegistrationBuilder implements Builder {
 
     @Override
     public RegisterResponse execute() {
-        RegisterRequest registerRequest = new RegisterRequest(applicationType, clientName, redirectUris);
-
+        RegisterRequest registerRequest;
         if (isReadMode || isUpdateMode) {
             registerRequest = new RegisterRequest(registrationAccessToken);
+        } else {
+            registerRequest = new RegisterRequest(applicationType, clientName, redirectUris);
         }
         if (isUpdateMode) {
             registerRequest.setHttpMethod(HttpMethod.PUT);

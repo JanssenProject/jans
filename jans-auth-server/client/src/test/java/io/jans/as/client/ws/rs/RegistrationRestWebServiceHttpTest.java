@@ -188,38 +188,27 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response.getClaims().get(FRONT_CHANNEL_LOGOUT_URI.toString()));
         assertEquals(logoutUri, response.getClaims().get(FRONT_CHANNEL_LOGOUT_URI.toString()));
         assertNotNull(response.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertEquals(SignatureAlgorithm.RS512,
-                SignatureAlgorithm.fromString(response.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString())));
+        assertEquals(SignatureAlgorithm.fromString(response.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString())), SignatureAlgorithm.RS512);
         assertNotNull(response.getClaims().get(ID_TOKEN_ENCRYPTED_RESPONSE_ALG.toString()));
-        assertEquals(KeyEncryptionAlgorithm.RSA1_5,
-                KeyEncryptionAlgorithm.fromName(response.getClaims().get(ID_TOKEN_ENCRYPTED_RESPONSE_ALG.toString())));
+        assertEquals(KeyEncryptionAlgorithm.fromName(response.getClaims().get(ID_TOKEN_ENCRYPTED_RESPONSE_ALG.toString())), KeyEncryptionAlgorithm.RSA1_5);
         assertNotNull(response.getClaims().get(ID_TOKEN_ENCRYPTED_RESPONSE_ENC.toString()));
-        assertEquals(BlockEncryptionAlgorithm.A128CBC_PLUS_HS256,
-                BlockEncryptionAlgorithm.fromName(response.getClaims().get(ID_TOKEN_ENCRYPTED_RESPONSE_ENC.toString())));
+        assertEquals(BlockEncryptionAlgorithm.fromName(response.getClaims().get(ID_TOKEN_ENCRYPTED_RESPONSE_ENC.toString())), BlockEncryptionAlgorithm.A128CBC_PLUS_HS256);
         assertNotNull(response.getClaims().get(USERINFO_SIGNED_RESPONSE_ALG.toString()));
-        assertEquals(SignatureAlgorithm.RS384,
-                SignatureAlgorithm.fromString(response.getClaims().get(USERINFO_SIGNED_RESPONSE_ALG.toString())));
+        assertEquals(SignatureAlgorithm.fromString(response.getClaims().get(USERINFO_SIGNED_RESPONSE_ALG.toString())),SignatureAlgorithm.RS384);
         assertNotNull(response.getClaims().get(USERINFO_ENCRYPTED_RESPONSE_ALG.toString()));
-        assertEquals(KeyEncryptionAlgorithm.A128KW,
-                KeyEncryptionAlgorithm.fromName(response.getClaims().get(USERINFO_ENCRYPTED_RESPONSE_ALG.toString())));
+        assertEquals(KeyEncryptionAlgorithm.fromName(response.getClaims().get(USERINFO_ENCRYPTED_RESPONSE_ALG.toString())), KeyEncryptionAlgorithm.A128KW);
         assertNotNull(response.getClaims().get(USERINFO_ENCRYPTED_RESPONSE_ENC.toString()));
-        assertEquals(BlockEncryptionAlgorithm.A128GCM,
-                BlockEncryptionAlgorithm.fromName(response.getClaims().get(USERINFO_ENCRYPTED_RESPONSE_ENC.toString())));
+        assertEquals(BlockEncryptionAlgorithm.fromName(response.getClaims().get(USERINFO_ENCRYPTED_RESPONSE_ENC.toString())),BlockEncryptionAlgorithm.A128GCM);
         assertNotNull(response.getClaims().get(REQUEST_OBJECT_SIGNING_ALG.toString()));
-        assertEquals(SignatureAlgorithm.RS256,
-                SignatureAlgorithm.fromString(response.getClaims().get(REQUEST_OBJECT_SIGNING_ALG.toString())));
+        assertEquals(SignatureAlgorithm.fromString(response.getClaims().get(REQUEST_OBJECT_SIGNING_ALG.toString())), SignatureAlgorithm.RS256);
         assertNotNull(response.getClaims().get(REQUEST_OBJECT_ENCRYPTION_ALG.toString()));
-        assertEquals(KeyEncryptionAlgorithm.A256KW,
-                KeyEncryptionAlgorithm.fromName(response.getClaims().get(REQUEST_OBJECT_ENCRYPTION_ALG.toString())));
+        assertEquals(KeyEncryptionAlgorithm.fromName(response.getClaims().get(REQUEST_OBJECT_ENCRYPTION_ALG.toString())), KeyEncryptionAlgorithm.A256KW);
         assertNotNull(response.getClaims().get(REQUEST_OBJECT_ENCRYPTION_ENC.toString()));
-        assertEquals(BlockEncryptionAlgorithm.A256CBC_PLUS_HS512,
-                BlockEncryptionAlgorithm.fromName(response.getClaims().get(REQUEST_OBJECT_ENCRYPTION_ENC.toString())));
+        assertEquals(BlockEncryptionAlgorithm.fromName(response.getClaims().get(REQUEST_OBJECT_ENCRYPTION_ENC.toString())), BlockEncryptionAlgorithm.A256CBC_PLUS_HS512);
         assertNotNull(response.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
-        assertEquals(AuthenticationMethod.CLIENT_SECRET_JWT,
-                AuthenticationMethod.fromString(response.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString())));
+        assertEquals(AuthenticationMethod.fromString(response.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString())), AuthenticationMethod.CLIENT_SECRET_JWT);
         assertNotNull(response.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
-        assertEquals(SignatureAlgorithm.ES256,
-                SignatureAlgorithm.fromString(response.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString())));
+        assertEquals(SignatureAlgorithm.fromString(response.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString())), SignatureAlgorithm.ES256);
         assertEquals(38, Integer.parseInt(response.getClaims().get(PAR_LIFETIME.toString())));
         JSONArray scopesJsonArray = new JSONArray(StringUtils.spaceSeparatedToList(response.getClaims().get(SCOPE.toString())));
         List<String> scopes = new ArrayList<String>();

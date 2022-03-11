@@ -353,7 +353,10 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
-        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
+        AssertBuilder.authorizationResponse(authorizationResponse)
+                .nullScope()
+                .responseTypes(responseTypes)
+                .check();
 
         String accessToken = authorizationResponse.getAccessToken();
 
@@ -408,7 +411,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
 
             showClient(userInfoClient);
             AssertBuilder.userInfoResponse(userInfoResponse)
-                .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                    .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
                     .notNullClaimsPersonalData()
                     .claimsPresence(JwtClaimName.EMAIL)
                     .check();
@@ -1215,7 +1218,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
 
             showClient(userInfoClient);
             AssertBuilder.userInfoResponse(userInfoResponse)
-                .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                    .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
                     .notNullClaimsPersonalData()
                     .claimsPresence(JwtClaimName.EMAIL)
                     .check();
@@ -1275,7 +1278,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
 
             showClient(userInfoClient);
             AssertBuilder.userInfoResponse(userInfoResponse)
-                .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                    .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
                     .notNullClaimsPersonalData()
                     .claimsPresence(JwtClaimName.EMAIL)
                     .check();
@@ -1335,7 +1338,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
 
             showClient(userInfoClient);
             AssertBuilder.userInfoResponse(userInfoResponse)
-                .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                    .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
                     .notNullClaimsPersonalData()
                     .claimsPresence(JwtClaimName.EMAIL)
                     .check();

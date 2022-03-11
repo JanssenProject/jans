@@ -138,8 +138,8 @@ public class AddressClaimsTest extends BaseTest {
 
         showClient(userInfoClient);
         AssertBuilder.userInfoResponse(userInfoResponse)
-                .notNullClaimsPersonalData()
-                .claimsPresence(JwtClaimName.EMAIL)
+                .notNullClaimsAddressData()
+                .claimsPresence(JwtClaimName.ADDRESS_STREET_ADDRESS, JwtClaimName.ADDRESS_COUNTRY)
                 .check();
     }
 
@@ -997,7 +997,7 @@ public class AddressClaimsTest extends BaseTest {
 
         // 3. Validate id_token
         AssertBuilder.jwtParse(idToken)
-                .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS256)
+                .validateSignatureRSA(jwksUri, SignatureAlgorithm.PS256)
                 .notNullClaimsAddressdata()
                 .notNullAuthenticationTime()
                 .notNullAccesTokenHash()
