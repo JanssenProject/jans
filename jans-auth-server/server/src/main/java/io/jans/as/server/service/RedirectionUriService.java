@@ -111,12 +111,14 @@ public class RedirectionUriService {
             }
 
             if (StringUtils.isNotBlank(redirectionUri)) {
-                log.debug("Validating redirection URI: clientIdentifier = {}, redirectionUri = {}, found = {}",
-                        client.getClientId(), redirectionUri, redirectUris.length);
-                if (isUriEqual(redirectionUri, redirectUris)) {
-                    return redirectionUri;
-                } else {
-                    log.debug("RedirectionUri didn't match with any of the client redirect uris, clientId = {}, redirectionUri = {}", client.getClientId(), redirectionUri);
+                if (redirectUris != null) {
+                    log.debug("Validating redirection URI: clientIdentifier = {}, redirectionUri = {}, found = {}",
+                            client.getClientId(), redirectionUri, redirectUris.length);
+                    if (isUriEqual(redirectionUri, redirectUris)) {
+                        return redirectionUri;
+                    } else {
+                        log.debug("RedirectionUri didn't match with any of the client redirect uris, clientId = {}, redirectionUri = {}", client.getClientId(), redirectionUri);
+                    }
                 }
 
                 if (appConfiguration.getRedirectUrisRegexEnabled()) {
