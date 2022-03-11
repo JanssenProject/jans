@@ -203,7 +203,8 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_SYNC_JKS_INTERVAL=30 \
     GOOGLE_PROJECT_ID="" \
     GOOGLE_APPLICATION_CREDENTIALS=/etc/jans/conf/google-credentials.json \
-    ADMIN_UI_JWKS=http://0.0.0.0:8080/jans-auth/restv1/jwks
+    ADMIN_UI_JWKS=http://0.0.0.0:8080/jans-auth/restv1/jwks \
+    CN_JETTY_REQUEST_HEADER_SIZE=8192
 
 # ==========
 # misc stuff
