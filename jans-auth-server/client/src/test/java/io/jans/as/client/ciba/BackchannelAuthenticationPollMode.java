@@ -2331,7 +2331,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
 
         // 3. Validate id_token
         AssertBuilder.jwtParse(idToken)
-                .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS256)
+                .validateSignatureRSA(jwksUri, SignatureAlgorithm.PS256)
                 .notNullAccesTokenHash()
                 .notNullAuthenticationTime()
                 .check();
@@ -2384,7 +2384,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
 
         // 3. Validate id_token
         AssertBuilder.jwtParse(idToken)
-                .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS384)
+                .validateSignatureRSA(jwksUri, SignatureAlgorithm.PS384)
                 .notNullAccesTokenHash()
                 .notNullAuthenticationTime()
                 .check();
@@ -2437,7 +2437,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
 
         // 3. Validate id_token
         AssertBuilder.jwtParse(idToken)
-                .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS512)
+                .validateSignatureRSA(jwksUri, SignatureAlgorithm.PS512)
                 .notNullAccesTokenHash()
                 .notNullAuthenticationTime()
                 .check();

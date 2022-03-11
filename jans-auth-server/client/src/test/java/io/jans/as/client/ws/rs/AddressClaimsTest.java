@@ -1082,7 +1082,7 @@ public class AddressClaimsTest extends BaseTest {
 
         // 3. Validate id_token
         AssertBuilder.jwtParse(idToken)
-                .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS384)
+                .validateSignatureRSA(jwksUri, SignatureAlgorithm.PS384)
                 .notNullClaimsAddressdata()
                 .notNullAuthenticationTime()
                 .notNullAccesTokenHash()
@@ -1167,7 +1167,7 @@ public class AddressClaimsTest extends BaseTest {
 
         // 3. Validate id_token
         AssertBuilder.jwtParse(idToken)
-                .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS512)
+                .validateSignatureRSA(jwksUri, SignatureAlgorithm.PS512)
                 .notNullClaimsAddressdata()
                 .notNullAuthenticationTime()
                 .notNullAccesTokenHash()

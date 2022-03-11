@@ -7,7 +7,7 @@ import io.jans.as.model.common.ResponseType;
 import java.util.List;
 
 import static org.testng.Assert.assertNotNull;
-import static org.testng.AssertJUnit.assertNull;
+import static org.testng.Assert.assertNull;
 
 public class AuthorizationResponseAssertBuilder extends BaseAssertBuilder {
 
@@ -36,7 +36,7 @@ public class AuthorizationResponseAssertBuilder extends BaseAssertBuilder {
     }
 
     public AuthorizationResponseAssertBuilder nullScope() {
-        this.nullState = true;
+        this.nullScope = true;
         return this;
     }
 

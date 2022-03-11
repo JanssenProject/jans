@@ -209,7 +209,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         assertEquals(AuthenticationMethod.fromString(response.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString())), AuthenticationMethod.CLIENT_SECRET_JWT);
         assertNotNull(response.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(SignatureAlgorithm.fromString(response.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString())), SignatureAlgorithm.ES256);
-        assertEquals(38, Integer.parseInt(response.getClaims().get(PAR_LIFETIME.toString())));
+        assertEquals(Integer.parseInt(response.getClaims().get(PAR_LIFETIME.toString())), 38);
         JSONArray scopesJsonArray = new JSONArray(StringUtils.spaceSeparatedToList(response.getClaims().get(SCOPE.toString())));
         List<String> scopes = new ArrayList<String>();
         for (int i = 0; i < scopesJsonArray.length(); i++) {
@@ -277,7 +277,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
 
         assertTrue(responseContacts.contains(contact1NewValue) && responseContacts.contains(contact2NewValue));
         assertEquals(responseLogoUri, logoUriNewValue);
-        assertEquals(32, Integer.parseInt(response.getClaims().get(PAR_LIFETIME.toString())));
+        assertEquals(Integer.parseInt(response.getClaims().get(PAR_LIFETIME.toString())), 32);
     }
 
     @Test(dependsOnMethods = "requestClientAssociate2")
@@ -327,10 +327,8 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response.getClaims().get(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString()));
         assertTrue(Boolean.parseBoolean(response.getClaims().get(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString())));
         assertNotNull(response.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertEquals(SignatureAlgorithm.RS256,
-                SignatureAlgorithm.fromString(response.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString())));
-        assertEquals(AuthenticationMethod.CLIENT_SECRET_POST,
-                AuthenticationMethod.fromString(response.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString())));
+        assertEquals(SignatureAlgorithm.fromString(response.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString())), SignatureAlgorithm.RS256);
+        assertEquals(AuthenticationMethod.fromString(response.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString())), AuthenticationMethod.CLIENT_SECRET_POST);
         JSONArray scopesJsonArray = new JSONArray(StringUtils.spaceSeparatedToList(response.getClaims().get(SCOPE.toString())));
         List<String> scopes = new ArrayList<String>();
         for (int i = 0; i < scopesJsonArray.length(); i++) {
