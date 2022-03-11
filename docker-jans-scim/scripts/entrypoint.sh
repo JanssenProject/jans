@@ -3,11 +3,7 @@
 set -e
 
 python3 /app/scripts/wait.py
-
-if [ ! -f /deploy/touched ]; then
-    python3 /app/scripts/bootstrap.py
-    touch /deploy/touched
-fi
+python3 /app/scripts/bootstrap.py
 
 cd /opt/jans/jetty/jans-scim
 exec java \
@@ -18,8 +14,8 @@ exec java \
     -Djans.base=/etc/jans \
     -Dserver.base=/opt/jans/jetty/jans-scim \
     -Dlog.base=/opt/jans/jetty/jans-scim \
-    -Djava.io.tmpdir=/tmp \
+    -Djava.io.tmpdir=/opt/jetty/temp \
     -Dpython.home=/opt/jython \
     -Dlog4j2.configurationFile=resources/log4j2.xml \
     ${CN_JAVA_OPTIONS} \
-    -jar /opt/jetty/start.jar
+    -jar /opt/jetty/start.jar jetty.deploy.scanInterval=0 jetty.httpConfig.sendServerVersion=false

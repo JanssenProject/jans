@@ -7,7 +7,7 @@ FROM bellsoft/liberica-openjre-alpine:11.0.13-8
 RUN apk update \
     && apk add --no-cache openssl py3-pip tini curl py3-cryptography py3-psycopg2 \
     && apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/v3.15/community py3-grpcio \
-    && apk add --no-cache --virtual build-deps wget git \
+    && apk add --no-cache --virtual build-deps wget git zip \
     && mkdir -p /usr/java/latest \
     && ln -sf /usr/lib/jvm/jre /usr/java/latest/jre
 
@@ -32,16 +32,19 @@ RUN wget -q https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/${JETTY_
 # ==========
 
 ENV CN_VERSION=1.0.0-SNAPSHOT
-ENV CN_BUILD_DATE='2022-03-07 10:51'
+ENV CN_BUILD_DATE='2022-03-10 11:34'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api-server/${CN_VERSION}/jans-config-api-server-${CN_VERSION}.war
 
 # Install Jans Config API
-RUN wget -q ${CN_SOURCE_URL} -O /tmp/jans-config-api.war \
-    && mkdir -p ${JETTY_BASE}/jans-config-api/webapps/jans-config-api \
-    && unzip -qq /tmp/jans-config-api.war -d ${JETTY_BASE}/jans-config-api/webapps/jans-config-api \
-    && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-config-api --add-to-start=server,deploy,annotations,resources,http,http-forwarded,threadpool,jsp,websocket,cdi-decorate \
-    && rm -f /tmp/jans-config-api.war \
-    && rm -f ${JETTY_BASE}/jans-config-api/webapps/jans-config-api/WEB-INF/jetty-web.xml
+COPY jetty/jetty-env.xml /tmp/WEB-INF/jetty-env.xml
+RUN mkdir -p ${JETTY_BASE}/jans-config-api/webapps \
+    && wget -q ${CN_SOURCE_URL} -O /tmp/jans-config-api.war \
+    && cd /tmp \
+    && zip -d jans-config-api.war WEB-INF/jetty-web.xml \
+    && zip -r jans-config-api.war WEB-INF/jetty-env.xml \
+    && cp jans-config-api.war ${JETTY_BASE}/jans-config-api/webapps/jans-config-api.war \
+    && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-config-api --add-module=server,deploy,annotations,resources,http,http-forwarded,threadpool,jsp,websocket,cdi-decorate \
+    && rm -rf /tmp/jans-config-api.war /tmp/WEB-INF
 
 # Ports exposed by config-api
 EXPOSE 8074
@@ -176,14 +179,19 @@ LABEL name="Config API" \
     maintainer="Janssen Project <support@jans.io>" \
     vendor="Janssen" \
     version="1.0.0" \
-    release="b11" \
+    release="beta.15" \
     summary="Janssen Config API" \
     description=""
 
-RUN mkdir -p /etc/certs /app/templates/ /deploy /etc/jans/conf ${JETTY_BASE}/jans-config-api/custom/libs ${JETTY_BASE}/jans-config-api/custom/config
+RUN mkdir -p /etc/certs \
+    /app/templates/ \
+    /etc/jans/conf \
+    ${JETTY_BASE}/jans-config-api/custom/libs \
+    ${JETTY_BASE}/jans-config-api/custom/config \
+    /opt/jetty/temp
+
 RUN touch /etc/hosts.back
 COPY jetty/jans-config-api.xml ${JETTY_BASE}/jans-config-api/webapps/
-COPY jetty/jetty-env.xml ${JETTY_BASE}/jans-config-api/webapps/jans-config-api/WEB-INF/
 COPY jetty/log4j2.xml ${JETTY_BASE}/jans-config-api/resources/
 COPY conf/*.tmpl /app/templates/
 COPY plugins /app/plugins
@@ -196,14 +204,12 @@ RUN adduser -s /bin/sh -D -G root -u 1000 jetty
 # adjust ownership
 RUN chown -R 1000:1000 /opt/jans/jetty \
     && chown -R 1000:1000 /opt/jetty \
-    && chown -R 1000:1000 /deploy \
     && chown -R 1000:1000 /tmp \
     && chown -R 1000:1000 /etc/hosts.back \
     && chgrp -R 0 /etc/hosts.back && chmod -R g=u /etc/hosts.back \
     && chgrp -R 0 /opt/jans/jetty && chmod -R g=u /opt/jans/jetty \
     && chgrp -R 0 /opt/jetty && chmod -R g=u /opt/jetty \
     && chgrp -R 0 /tmp && chmod -R g=u /tmp \
-    && chgrp -R 0 /deploy && chmod -R g=u /deploy \
     && chgrp -R 0 /etc/certs && chmod -R g=u /etc/certs \
     && chgrp -R 0 /etc/jans && chmod -R g=u /etc/jans \
     && chmod -R +w /usr/java/latest/jre/lib/security/cacerts && chgrp -R 0 /usr/java/latest/jre/lib/security/cacerts && chmod -R g=u /usr/java/latest/jre/lib/security/cacerts \
