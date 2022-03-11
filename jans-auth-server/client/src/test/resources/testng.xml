@@ -100,6 +100,7 @@
     <test name="Authorize test (HTTP)" enabled="true">
         <classes>
             <class name="io.jans.as.client.ws.rs.AuthorizeRestWebServiceHttpTest"/>
+            <class name="io.jans.as.client.ws.rs.AuthorizationRedirectUrisRegexTest"/>
         </classes>
     </test>
 
