@@ -22,10 +22,10 @@ public class AuthorizationRedirectUrisRegexTest extends BaseTest {
     
     @Parameters({"userId", "userSecret", "redirectUris", "sectorIdentifierUri", "redirectUrisRegex", "redirectUri"})
     @Test
-    public void requestClientRedirectUrisRegex( final String userId, final String userSecret,
+    public void requestClientValidateUsingRedirectUrisRegex( final String userId, final String userSecret,
                                                 final String redirectUris, final String sectorIdentifierUri,
-                                                final String redirectUrisRegex, final String redirectUri) throws Exception {
-        showTitle("requestClientRedirectUrisRegex");
+                                                final String redirectUrisRegex, final String redirectUri) {
+        showTitle("requestClientValidateUsingRedirectUrisRegex");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
 

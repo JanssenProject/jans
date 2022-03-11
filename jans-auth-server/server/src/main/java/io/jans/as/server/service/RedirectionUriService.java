@@ -115,12 +115,22 @@ public class RedirectionUriService {
                         client.getClientId(), redirectionUri, redirectUris.length);
                 if (isUriEqual(redirectionUri, redirectUris)) {
                     return redirectionUri;
+                } else {
+                    log.debug("RedirectionUri didn't match with any of the client redirect uris, clientId = {}, redirectionUri = {}", client.getClientId(), redirectionUri);
                 }
 
-                //if not found a match, should it print a log ?
-                return redirectionUri.matches(client.getAttributes().getRedirectUrisRegex()) ? redirectionUri : null;
+                if (appConfiguration.getRedirectUrisRegexEnabled()) {
+                    if (redirectionUri.matches(client.getAttributes().getRedirectUrisRegex())) {
+                        return redirectionUri;
+                    } else {
+                        log.debug("RedirectionUri didn't match with client regular expression, clientId = {}, redirectionUri = {}", client.getClientId(), redirectionUri);
+                    }
+                }
+            } else {
+                log.warn("RedirectionUri is blank, clientId = {}", client.getClientId());
             }
         } catch (Exception e) {
+            log.error("Problems validating redirection uri, clientId = {}, redirectionUri = {}", client.getClientId(), redirectionUri);
             return null;
         }
         return null;

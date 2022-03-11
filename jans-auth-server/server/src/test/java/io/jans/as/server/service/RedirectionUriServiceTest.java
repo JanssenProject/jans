@@ -43,7 +43,7 @@ public class RedirectionUriServiceTest {
     private LocalResponseCache localResponseCache;
 
     @Test
-    public void validateRedirectionUri() throws Exception {
+    public void validateRedirectionUri_withValidRedirectUri_returnNotNullValue() throws Exception {
         final String redirectURl = "https://test.gluu.org/jans-auth-rp/home.htm" ;
 
         when(redirectionUriService.getSectorRedirectUris(anyString())).thenReturn(getSectorIdentifiers());
@@ -55,7 +55,7 @@ public class RedirectionUriServiceTest {
     }
 
     @Test
-    public void validateRedirectionUri_differentRedirectUrl() throws Exception {
+    public void validateRedirectionUri_differentRedirectUrl_returnNull() throws Exception {
         final String redirectURl = "https://test.gluu.org/jans-auth-rp/home.html" ;
 
         when(redirectionUriService.getSectorRedirectUris(anyString())).thenReturn(getSectorIdentifiers());
@@ -67,35 +67,30 @@ public class RedirectionUriServiceTest {
     }
 
     @Test
-    public void validateRedirectionUri_sectorIdentifierBlank() throws Exception {
-        final String redirectURl = "https://test.gluu.org/jans-auth-rp/home.htm" ;
+    public void validateRedirectionUri_sectorIdentifierBlank_returnSameRedirectUri() throws Exception {
+        final String redirectUrl = "https://test.gluu.org/jans-auth-rp/home.htm" ;
 
         final String returnValue = redirectionUriService.validateRedirectionUri(getClientForValidateRedirectionUri_sectorIdentifierBlank(),
-                redirectURl) ;
+                redirectUrl) ;
 
         assertNotNull(returnValue);
-        assertEquals(redirectURl, returnValue);
+        assertEquals(redirectUrl, returnValue);
     }
 
     @Test
-    public void validateRedirectionUri_redirectUrlNull() throws Exception {
-        final String redirectURl = null ;
-
+    public void validateRedirectionUri_redirectUrlNull_returnNull() throws Exception {
         when(redirectionUriService.getSectorRedirectUris(anyString())).thenReturn(getSectorIdentifiers());
 
-        final String returnValue = redirectionUriService.validateRedirectionUri(getClientForValidateRedirectionUri_full()
-                , redirectURl) ;
+        final String returnValue = redirectionUriService.validateRedirectionUri(
+                getClientForValidateRedirectionUri_full(), null);
 
         assertNull(returnValue);
     }
 
     @Test
-    public void validateRedirectionUri_redirectUrlNull_redirectUrisNull() throws Exception {
-        final String redirectURl = null ;
-
-        final String returnValue = redirectionUriService
-                .validateRedirectionUri(getClientForValidateRedirectionUri_sectorIdentifierBlank_redirectURisNull(),
-                        redirectURl) ;
+    public void validateRedirectionUri_sectorIdentifierBlankAndRredirectUrlNull_returnNull() throws Exception {
+        final String returnValue = redirectionUriService.validateRedirectionUri(
+                getClientForValidateRedirectionUri_sectorIdentifierBlank_redirectURisNull(), null);
 
         assertNull(returnValue);
     }
