@@ -160,6 +160,9 @@ public class AppConfiguration implements Configuration {
     private int expirationNotificatorMapSizeLimit = 100000;
     private int expirationNotificatorIntervalInSeconds = 600;
 
+    //feature flags
+    private Boolean redirectUrisRegexEnabled = false;
+
     private Boolean authenticationFiltersEnabled;
     private Boolean clientAuthenticationFiltersEnabled;
     private Boolean clientRegDefaultToCodeFlowWithRefresh;
@@ -2458,5 +2461,13 @@ public class AppConfiguration implements Configuration {
 
     public void setDpopJtiCacheTime(int dpopJtiCacheTime) {
         this.dpopJtiCacheTime = dpopJtiCacheTime;
+    }
+
+    public Boolean getRedirectUrisRegexEnabled() {
+        return redirectUrisRegexEnabled != null && redirectUrisRegexEnabled;
+    }
+
+    public void setRedirectUrisRegexEnabled(Boolean redirectUrisRegexEnabled) {
+        this.redirectUrisRegexEnabled = redirectUrisRegexEnabled;
     }
 }

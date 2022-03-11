@@ -4388,6 +4388,9 @@ components:
           type: integer
           description: The expiration notificator interval in seconds.
           example: 600
+        redirectUrisRegexEnabled:
+          type: boolean
+          description: Enable/Disable redirect uris validation using regular expression.
         authenticationFiltersEnabled:
           type: boolean
           description: Boolean value specifying whether to enable user authentication filters.
