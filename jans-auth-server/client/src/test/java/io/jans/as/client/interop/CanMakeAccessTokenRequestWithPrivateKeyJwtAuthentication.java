@@ -64,7 +64,7 @@ public class CanMakeAccessTokenRequestWithPrivateKeyJwtAuthentication extends Ba
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -78,7 +78,7 @@ public class CanMakeAccessTokenRequestWithPrivateKeyJwtAuthentication extends Ba
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String authorizationCode = authorizationResponse.getCode();
 
@@ -100,8 +100,8 @@ public class CanMakeAccessTokenRequestWithPrivateKeyJwtAuthentication extends Ba
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        AssertBuilder.tokenResponseBuilder(tokenResponse)
+        AssertBuilder.tokenResponse(tokenResponse).ok()
                 .notNullRefreshToken()
-                .checkAsserts();
+                .check();
     }
 }

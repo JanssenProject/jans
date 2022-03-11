@@ -26,9 +26,7 @@ import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseType;
-import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
-import io.jans.as.model.jwt.JwtHeaderName;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.uma.UmaMetadata;
 import io.jans.as.model.uma.UmaNeedInfoResponse;
@@ -114,7 +112,7 @@ public class ClientAuthenticationByAccessTokenHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(response, 201, true);
+        AssertBuilder.registerResponse(response).created().check();
 
         clientId = response.getClientId();
         clientSecret = response.getClientSecret();
@@ -156,9 +154,10 @@ public class ClientAuthenticationByAccessTokenHttpTest extends BaseTest {
         String idToken = authorizationResponse.getIdToken();
 
         // 2. Validate code and id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertJwtStandarClaimsNotNull(jwt, false);
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.CODE_HASH));
+        AssertBuilder.jwtParse(idToken)
+                .notNullAuthenticationTime()
+                .claimsPresence(JwtClaimName.CODE_HASH)
+                .check();
 
         // 3. Request access token using the authorization code.
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
@@ -174,9 +173,9 @@ public class ClientAuthenticationByAccessTokenHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        AssertBuilder.tokenResponseBuilder(tokenResponse)
+        AssertBuilder.tokenResponse(tokenResponse)
                 .notNullRefreshToken()
-                .checkAsserts();
+                .check();
 
         userAccessToken = tokenResponse.getAccessToken();
     }

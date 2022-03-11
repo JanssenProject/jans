@@ -62,7 +62,7 @@ public class SupportScopeRequestingProfileClaims extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -78,7 +78,7 @@ public class SupportScopeRequestingProfileClaims extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).check();
 
         String authorizationCode = authorizationResponse.getCode();
 
@@ -94,23 +94,19 @@ public class SupportScopeRequestingProfileClaims extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        AssertBuilder.tokenResponseBuilder(tokenResponse)
+        AssertBuilder.tokenResponse(tokenResponse)
                 .notNullRefreshToken()
-                .checkAsserts();
+                .check();
 
         String accessToken = tokenResponse.getAccessToken();
 
         // 4. Request user info
         UserInfoResponse userInfoResponse = requestUserInfo(accessToken);
-        assertUserInfoBasicMinimumResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse, false);
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.WEBSITE));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.BIRTHDATE));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.GENDER));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.PROFILE));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.PREFERRED_USERNAME));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.MIDDLE_NAME));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.UPDATED_AT));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NICKNAME));
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .notNullClaimsPersonalData()
+                .claimsPresence(JwtClaimName.WEBSITE, JwtClaimName.BIRTHDATE, JwtClaimName.GENDER)
+                .claimsPresence(JwtClaimName.PROFILE, JwtClaimName.PREFERRED_USERNAME, JwtClaimName.MIDDLE_NAME)
+                .claimsPresence(JwtClaimName.UPDATED_AT, JwtClaimName.NICKNAME)
+                .check();
     }
 }

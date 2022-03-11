@@ -28,13 +28,11 @@ import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
 import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
 import io.jans.as.model.crypto.signature.ECDSAPublicKey;
-import io.jans.as.model.crypto.signature.RSAPublicKey;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.jwe.Jwe;
 import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.jws.ECDSASigner;
 import io.jans.as.model.jws.HMACSigner;
-import io.jans.as.model.jws.RSASigner;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.jwt.JwtHeaderName;
@@ -88,7 +86,7 @@ public class AddressClaimsTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -118,22 +116,18 @@ public class AddressClaimsTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
 
         // 3. Validate id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertJwtStandarClaimsNotNull(jwt, true);
-        assertJwtAddressClaimsNotNull(jwt);
-
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS256, publicKey);
-
-        assertTrue(rsaSigner.validate(jwt));
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS256)
+                .notNullClaimsAddressdata()
+                .notNullAuthenticationTime()
+                .notNullAccesTokenHash()
+                .check();
 
         // 4. Request user info
         UserInfoRequest userInfoRequest = new UserInfoRequest(accessToken);
@@ -143,8 +137,10 @@ public class AddressClaimsTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.exec();
 
         showClient(userInfoClient);
-        assertUserInfoBasicMinimumResponseOk(userInfoResponse, 200);
-        assertUserInfoAddressNotNull(userInfoResponse);
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .notNullClaimsPersonalData()
+                .claimsPresence(JwtClaimName.EMAIL)
+                .check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "dnName", "keyStoreFile", "keyStoreSecret",
@@ -172,7 +168,7 @@ public class AddressClaimsTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -202,15 +198,18 @@ public class AddressClaimsTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
 
         // 3. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
-        assertJwtStandarClaimsNotNull(jwt, true);
-        assertJwtAddressClaimsNotNull(jwt);
+        AssertBuilder.jwt(jwt)
+                .notNullAccesTokenHash()
+                .notNullAuthenticationTime()
+                .notNullClaimsAddressdata()
+                .check();
 
         HMACSigner hmacSigner = new HMACSigner(SignatureAlgorithm.HS256, clientSecret);
         assertTrue(hmacSigner.validate(jwt));
@@ -223,8 +222,12 @@ public class AddressClaimsTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.exec();
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoAddressNotNull(userInfoResponse);
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                .notNullClaimsAddressData()
+                .claimsPresence(JwtClaimName.ADDRESS_STREET_ADDRESS, JwtClaimName.ADDRESS_COUNTRY)
+                .check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "dnName", "keyStoreFile", "keyStoreSecret",
@@ -252,7 +255,7 @@ public class AddressClaimsTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -282,15 +285,18 @@ public class AddressClaimsTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
 
         // 3. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
-        assertJwtStandarClaimsNotNull(jwt, true);
-        assertJwtAddressClaimsNotNull(jwt);
+        AssertBuilder.jwt(jwt)
+                .notNullAccesTokenHash()
+                .notNullAuthenticationTime()
+                .notNullClaimsAddressdata()
+                .check();
 
         HMACSigner hmacSigner = new HMACSigner(SignatureAlgorithm.HS384, clientSecret);
         assertTrue(hmacSigner.validate(jwt));
@@ -303,8 +309,11 @@ public class AddressClaimsTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.exec();
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoAddressNotNull(userInfoResponse);
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                .notNullClaimsAddressData()
+                .claimsPresence(JwtClaimName.ADDRESS_STREET_ADDRESS, JwtClaimName.ADDRESS_COUNTRY)
+                .check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "dnName", "keyStoreFile", "keyStoreSecret",
@@ -332,7 +341,7 @@ public class AddressClaimsTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -362,15 +371,18 @@ public class AddressClaimsTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
 
         // 3. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
-        assertJwtStandarClaimsNotNull(jwt, true);
-        assertJwtAddressClaimsNotNull(jwt);
+        AssertBuilder.jwt(jwt)
+                .notNullAccesTokenHash()
+                .notNullAuthenticationTime()
+                .notNullClaimsAddressdata()
+                .check();
 
         HMACSigner hmacSigner = new HMACSigner(SignatureAlgorithm.HS512, clientSecret);
         assertTrue(hmacSigner.validate(jwt));
@@ -383,8 +395,11 @@ public class AddressClaimsTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.exec();
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoAddressNotNull(userInfoResponse);
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                .notNullClaimsAddressData()
+                .claimsPresence(JwtClaimName.ADDRESS_STREET_ADDRESS, JwtClaimName.ADDRESS_COUNTRY)
+                .check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "dnName", "keyStoreFile", "keyStoreSecret",
@@ -414,7 +429,7 @@ public class AddressClaimsTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -444,22 +459,18 @@ public class AddressClaimsTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
 
         // 3. Validate id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertJwtStandarClaimsNotNull(jwt, true);
-        assertJwtAddressClaimsNotNull(jwt);
-
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS256, publicKey);
-
-        assertTrue(rsaSigner.validate(jwt));
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS256)
+                .notNullClaimsAddressdata()
+                .notNullAuthenticationTime()
+                .notNullAccesTokenHash()
+                .check();
 
         // 4. Request user info
         UserInfoRequest userInfoRequest = new UserInfoRequest(accessToken);
@@ -469,8 +480,11 @@ public class AddressClaimsTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.exec();
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoAddressNotNull(userInfoResponse);
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                .notNullClaimsAddressData()
+                .claimsPresence(JwtClaimName.ADDRESS_STREET_ADDRESS, JwtClaimName.ADDRESS_COUNTRY)
+                .check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "dnName", "keyStoreFile", "keyStoreSecret",
@@ -500,7 +514,7 @@ public class AddressClaimsTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -530,22 +544,18 @@ public class AddressClaimsTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
 
         // 3. Validate id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertJwtStandarClaimsNotNull(jwt, true);
-        assertJwtAddressClaimsNotNull(jwt);
-
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS384, publicKey);
-
-        assertTrue(rsaSigner.validate(jwt));
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS384)
+                .notNullClaimsAddressdata()
+                .notNullAuthenticationTime()
+                .notNullAccesTokenHash()
+                .check();
 
         // 4. Request user info
         UserInfoRequest userInfoRequest = new UserInfoRequest(accessToken);
@@ -555,8 +565,11 @@ public class AddressClaimsTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.exec();
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoAddressNotNull(userInfoResponse);
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                .notNullClaimsAddressData()
+                .claimsPresence(JwtClaimName.ADDRESS_STREET_ADDRESS, JwtClaimName.ADDRESS_COUNTRY)
+                .check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "dnName", "keyStoreFile", "keyStoreSecret",
@@ -586,7 +599,7 @@ public class AddressClaimsTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -616,22 +629,18 @@ public class AddressClaimsTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
 
         // 3. Validate id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertJwtStandarClaimsNotNull(jwt, true);
-        assertJwtAddressClaimsNotNull(jwt);
-
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS512, publicKey);
-
-        assertTrue(rsaSigner.validate(jwt));
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS512)
+                .notNullClaimsAddressdata()
+                .notNullAuthenticationTime()
+                .notNullAccesTokenHash()
+                .check();
 
         // 4. Request user info
         UserInfoRequest userInfoRequest = new UserInfoRequest(accessToken);
@@ -641,8 +650,11 @@ public class AddressClaimsTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.exec();
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoAddressNotNull(userInfoResponse);
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                .notNullClaimsAddressData()
+                .claimsPresence(JwtClaimName.ADDRESS_STREET_ADDRESS, JwtClaimName.ADDRESS_COUNTRY)
+                .check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "dnName", "keyStoreFile", "keyStoreSecret",
@@ -672,7 +684,7 @@ public class AddressClaimsTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -702,15 +714,18 @@ public class AddressClaimsTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
 
         // 3. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
-        assertJwtStandarClaimsNotNull(jwt, true);
-        assertJwtAddressClaimsNotNull(jwt);
+        AssertBuilder.jwt(jwt)
+                .notNullAccesTokenHash()
+                .notNullAuthenticationTime()
+                .notNullClaimsAddressdata()
+                .check();
 
         ECDSAPublicKey publicKey = JwkClient.getECDSAPublicKey(
                 jwksUri,
@@ -727,8 +742,11 @@ public class AddressClaimsTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.exec();
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoAddressNotNull(userInfoResponse);
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                .notNullClaimsAddressData()
+                .claimsPresence(JwtClaimName.ADDRESS_STREET_ADDRESS, JwtClaimName.ADDRESS_COUNTRY)
+                .check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "dnName", "keyStoreFile", "keyStoreSecret",
@@ -758,7 +776,7 @@ public class AddressClaimsTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -788,15 +806,18 @@ public class AddressClaimsTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
 
         // 3. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
-        assertJwtStandarClaimsNotNull(jwt, true);
-        assertJwtAddressClaimsNotNull(jwt);
+        AssertBuilder.jwt(jwt)
+                .notNullAccesTokenHash()
+                .notNullAuthenticationTime()
+                .notNullClaimsAddressdata()
+                .check();
 
         ECDSAPublicKey publicKey = JwkClient.getECDSAPublicKey(
                 jwksUri,
@@ -813,8 +834,11 @@ public class AddressClaimsTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.exec();
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoAddressNotNull(userInfoResponse);
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                .notNullClaimsAddressData()
+                .claimsPresence(JwtClaimName.ADDRESS_STREET_ADDRESS, JwtClaimName.ADDRESS_COUNTRY)
+                .check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "dnName", "keyStoreFile", "keyStoreSecret",
@@ -844,7 +868,7 @@ public class AddressClaimsTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -874,15 +898,18 @@ public class AddressClaimsTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
 
         // 3. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
-        assertJwtStandarClaimsNotNull(jwt, true);
-        assertJwtAddressClaimsNotNull(jwt);
+        AssertBuilder.jwt(jwt)
+                .notNullAccesTokenHash()
+                .notNullAuthenticationTime()
+                .notNullClaimsAddressdata()
+                .check();
 
         ECDSAPublicKey publicKey = JwkClient.getECDSAPublicKey(
                 jwksUri,
@@ -899,8 +926,11 @@ public class AddressClaimsTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.exec();
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoAddressNotNull(userInfoResponse);
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                .notNullClaimsAddressData()
+                .claimsPresence(JwtClaimName.ADDRESS_STREET_ADDRESS, JwtClaimName.ADDRESS_COUNTRY)
+                .check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "dnName", "keyStoreFile", "keyStoreSecret",
@@ -930,7 +960,7 @@ public class AddressClaimsTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -960,22 +990,18 @@ public class AddressClaimsTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
 
         // 3. Validate id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertJwtStandarClaimsNotNull(jwt, true);
-        assertJwtAddressClaimsNotNull(jwt);
-
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.PS256, publicKey);
-
-        assertTrue(rsaSigner.validate(jwt));
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS256)
+                .notNullClaimsAddressdata()
+                .notNullAuthenticationTime()
+                .notNullAccesTokenHash()
+                .check();
 
         // 4. Request user info
         UserInfoRequest userInfoRequest = new UserInfoRequest(accessToken);
@@ -985,8 +1011,11 @@ public class AddressClaimsTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.exec();
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoAddressNotNull(userInfoResponse);
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                .notNullClaimsAddressData()
+                .claimsPresence(JwtClaimName.ADDRESS_STREET_ADDRESS, JwtClaimName.ADDRESS_COUNTRY)
+                .check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "dnName", "keyStoreFile", "keyStoreSecret",
@@ -1016,7 +1045,7 @@ public class AddressClaimsTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -1046,22 +1075,18 @@ public class AddressClaimsTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
 
         // 3. Validate id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertJwtStandarClaimsNotNull(jwt, true);
-        assertJwtAddressClaimsNotNull(jwt);
-
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.PS384, publicKey);
-
-        assertTrue(rsaSigner.validate(jwt));
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS384)
+                .notNullClaimsAddressdata()
+                .notNullAuthenticationTime()
+                .notNullAccesTokenHash()
+                .check();
 
         // 4. Request user info
         UserInfoRequest userInfoRequest = new UserInfoRequest(accessToken);
@@ -1071,8 +1096,11 @@ public class AddressClaimsTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.exec();
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoAddressNotNull(userInfoResponse);
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                .notNullClaimsAddressData()
+                .claimsPresence(JwtClaimName.ADDRESS_STREET_ADDRESS, JwtClaimName.ADDRESS_COUNTRY)
+                .check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "dnName", "keyStoreFile", "keyStoreSecret",
@@ -1102,7 +1130,7 @@ public class AddressClaimsTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -1132,22 +1160,18 @@ public class AddressClaimsTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
 
         // 3. Validate id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertJwtStandarClaimsNotNull(jwt, true);
-        assertJwtAddressClaimsNotNull(jwt);
-
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.PS512, publicKey);
-
-        assertTrue(rsaSigner.validate(jwt));
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS512)
+                .notNullClaimsAddressdata()
+                .notNullAuthenticationTime()
+                .notNullAccesTokenHash()
+                .check();
 
         // 4. Request user info
         UserInfoRequest userInfoRequest = new UserInfoRequest(accessToken);
@@ -1157,8 +1181,11 @@ public class AddressClaimsTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.exec();
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoAddressNotNull(userInfoResponse);
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                .notNullClaimsAddressData()
+                .claimsPresence(JwtClaimName.ADDRESS_STREET_ADDRESS, JwtClaimName.ADDRESS_COUNTRY)
+                .check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
@@ -1188,7 +1215,7 @@ public class AddressClaimsTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1220,23 +1247,17 @@ public class AddressClaimsTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
 
         // 3. Validate id_token
         Jwe jwe = Jwe.parse(idToken, null, clientSecret.getBytes(StandardCharsets.UTF_8));
-        AssertBuilder.jweBuilder(jwe)
+        AssertBuilder.jwe(jwe)
                 .notNullAccesTokenHash()
-                .checkAsserts();
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ADDRESS_STREET_ADDRESS));
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ADDRESS_COUNTRY));
-        assertNotNull(jwe.getClaims().getClaim(JwtClaimName.ADDRESS));
-        assertNotNull(jwe.getClaims().getClaimAsJSON(JwtClaimName.ADDRESS).has(JwtClaimName.ADDRESS_STREET_ADDRESS));
-        assertNotNull(jwe.getClaims().getClaimAsJSON(JwtClaimName.ADDRESS).has(JwtClaimName.ADDRESS_COUNTRY));
-        assertNotNull(jwe.getClaims().getClaimAsJSON(JwtClaimName.ADDRESS).has(JwtClaimName.ADDRESS_LOCALITY));
-        assertNotNull(jwe.getClaims().getClaimAsJSON(JwtClaimName.ADDRESS).has(JwtClaimName.ADDRESS_REGION));
+                .notNullClaimsAddressdata()
+                .check();
 
         // 4. Request user info
         UserInfoRequest userInfoRequest = new UserInfoRequest(accessToken);
@@ -1246,8 +1267,11 @@ public class AddressClaimsTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.exec();
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoAddressNotNull(userInfoResponse);
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                .notNullClaimsAddressData()
+                .claimsPresence(JwtClaimName.ADDRESS_STREET_ADDRESS, JwtClaimName.ADDRESS_COUNTRY)
+                .check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
@@ -1277,7 +1301,7 @@ public class AddressClaimsTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1309,23 +1333,17 @@ public class AddressClaimsTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
 
         // 3. Validate id_token
         Jwe jwe = Jwe.parse(idToken, null, clientSecret.getBytes(StandardCharsets.UTF_8));
-        AssertBuilder.jweBuilder(jwe)
+        AssertBuilder.jwe(jwe)
                 .notNullAccesTokenHash()
-                .checkAsserts();
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ADDRESS_STREET_ADDRESS));
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ADDRESS_COUNTRY));
-        assertNotNull(jwe.getClaims().getClaim(JwtClaimName.ADDRESS));
-        assertNotNull(jwe.getClaims().getClaimAsJSON(JwtClaimName.ADDRESS).has(JwtClaimName.ADDRESS_STREET_ADDRESS));
-        assertNotNull(jwe.getClaims().getClaimAsJSON(JwtClaimName.ADDRESS).has(JwtClaimName.ADDRESS_COUNTRY));
-        assertNotNull(jwe.getClaims().getClaimAsJSON(JwtClaimName.ADDRESS).has(JwtClaimName.ADDRESS_LOCALITY));
-        assertNotNull(jwe.getClaims().getClaimAsJSON(JwtClaimName.ADDRESS).has(JwtClaimName.ADDRESS_REGION));
+                .notNullClaimsAddressdata()
+                .check();
 
         // 4. Request user info
         UserInfoRequest userInfoRequest = new UserInfoRequest(accessToken);
@@ -1335,8 +1353,11 @@ public class AddressClaimsTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.exec();
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoAddressNotNull(userInfoResponse);
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                .notNullClaimsAddressData()
+                .claimsPresence(JwtClaimName.ADDRESS_STREET_ADDRESS, JwtClaimName.ADDRESS_COUNTRY)
+                .check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris",
@@ -1370,7 +1391,7 @@ public class AddressClaimsTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -1408,7 +1429,7 @@ public class AddressClaimsTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
@@ -1417,16 +1438,10 @@ public class AddressClaimsTest extends BaseTest {
         PrivateKey privateKey = cryptoProvider.getPrivateKey(clientKeyId);
 
         Jwe jwe = Jwe.parse(idToken, privateKey, null);
-        AssertBuilder.jweBuilder(jwe)
+        AssertBuilder.jwe(jwe)
                 .notNullAccesTokenHash()
-                .checkAsserts();
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ADDRESS_STREET_ADDRESS));
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ADDRESS_COUNTRY));
-        assertNotNull(jwe.getClaims().getClaim(JwtClaimName.ADDRESS));
-        assertNotNull(jwe.getClaims().getClaimAsJSON(JwtClaimName.ADDRESS).has(JwtClaimName.ADDRESS_STREET_ADDRESS));
-        assertNotNull(jwe.getClaims().getClaimAsJSON(JwtClaimName.ADDRESS).has(JwtClaimName.ADDRESS_COUNTRY));
-        assertNotNull(jwe.getClaims().getClaimAsJSON(JwtClaimName.ADDRESS).has(JwtClaimName.ADDRESS_LOCALITY));
-        assertNotNull(jwe.getClaims().getClaimAsJSON(JwtClaimName.ADDRESS).has(JwtClaimName.ADDRESS_REGION));
+                .notNullClaimsAddressdata()
+                .check();
 
         // 5. Request user info
         UserInfoRequest userInfoRequest = new UserInfoRequest(accessToken);
@@ -1436,8 +1451,11 @@ public class AddressClaimsTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.exec();
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoAddressNotNull(userInfoResponse);
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                .notNullClaimsAddressData()
+                .claimsPresence(JwtClaimName.ADDRESS_STREET_ADDRESS, JwtClaimName.ADDRESS_COUNTRY)
+                .check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris",
@@ -1471,7 +1489,7 @@ public class AddressClaimsTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -1509,7 +1527,7 @@ public class AddressClaimsTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
@@ -1518,16 +1536,10 @@ public class AddressClaimsTest extends BaseTest {
         PrivateKey privateKey = cryptoProvider.getPrivateKey(clientKeyId);
 
         Jwe jwe = Jwe.parse(idToken, privateKey, null);
-        AssertBuilder.jweBuilder(jwe)
+        AssertBuilder.jwe(jwe)
                 .notNullAccesTokenHash()
-                .checkAsserts();
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ADDRESS_STREET_ADDRESS));
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ADDRESS_COUNTRY));
-        assertNotNull(jwe.getClaims().getClaim(JwtClaimName.ADDRESS));
-        assertNotNull(jwe.getClaims().getClaimAsJSON(JwtClaimName.ADDRESS).has(JwtClaimName.ADDRESS_STREET_ADDRESS));
-        assertNotNull(jwe.getClaims().getClaimAsJSON(JwtClaimName.ADDRESS).has(JwtClaimName.ADDRESS_COUNTRY));
-        assertNotNull(jwe.getClaims().getClaimAsJSON(JwtClaimName.ADDRESS).has(JwtClaimName.ADDRESS_LOCALITY));
-        assertNotNull(jwe.getClaims().getClaimAsJSON(JwtClaimName.ADDRESS).has(JwtClaimName.ADDRESS_REGION));
+                .notNullClaimsAddressdata()
+                .check();
 
         // 5. Request user info
         UserInfoRequest userInfoRequest = new UserInfoRequest(accessToken);
@@ -1537,8 +1549,11 @@ public class AddressClaimsTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.exec();
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoAddressNotNull(userInfoResponse);
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                .notNullClaimsAddressData()
+                .claimsPresence(JwtClaimName.ADDRESS_STREET_ADDRESS, JwtClaimName.ADDRESS_COUNTRY)
+                .check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris",
@@ -1572,7 +1587,7 @@ public class AddressClaimsTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -1610,7 +1625,7 @@ public class AddressClaimsTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
@@ -1619,16 +1634,10 @@ public class AddressClaimsTest extends BaseTest {
         PrivateKey privateKey = cryptoProvider.getPrivateKey(clientKeyId);
 
         Jwe jwe = Jwe.parse(idToken, privateKey, null);
-        AssertBuilder.jweBuilder(jwe)
+        AssertBuilder.jwe(jwe)
                 .notNullAccesTokenHash()
-                .checkAsserts();
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ADDRESS_STREET_ADDRESS));
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ADDRESS_COUNTRY));
-        assertNotNull(jwe.getClaims().getClaim(JwtClaimName.ADDRESS));
-        assertNotNull(jwe.getClaims().getClaimAsJSON(JwtClaimName.ADDRESS).has(JwtClaimName.ADDRESS_STREET_ADDRESS));
-        assertNotNull(jwe.getClaims().getClaimAsJSON(JwtClaimName.ADDRESS).has(JwtClaimName.ADDRESS_COUNTRY));
-        assertNotNull(jwe.getClaims().getClaimAsJSON(JwtClaimName.ADDRESS).has(JwtClaimName.ADDRESS_LOCALITY));
-        assertNotNull(jwe.getClaims().getClaimAsJSON(JwtClaimName.ADDRESS).has(JwtClaimName.ADDRESS_REGION));
+                .notNullClaimsAddressdata()
+                .check();
 
         // 5. Request user info
         UserInfoRequest userInfoRequest = new UserInfoRequest(accessToken);
@@ -1638,7 +1647,10 @@ public class AddressClaimsTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.exec();
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoAddressNotNull(userInfoResponse);
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                .notNullClaimsAddressData()
+                .claimsPresence(JwtClaimName.ADDRESS_STREET_ADDRESS, JwtClaimName.ADDRESS_COUNTRY)
+                .check();
     }
 }

@@ -61,7 +61,7 @@ public class SupportAuthenticationToTokenEndpointWithSymmetricallySignedJWTs ext
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -77,7 +77,7 @@ public class SupportAuthenticationToTokenEndpointWithSymmetricallySignedJWTs ext
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).check();
 
         String authorizationCode = authorizationResponse.getCode();
 
@@ -98,9 +98,9 @@ public class SupportAuthenticationToTokenEndpointWithSymmetricallySignedJWTs ext
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        AssertBuilder.tokenResponseBuilder(tokenResponse)
+        AssertBuilder.tokenResponse(tokenResponse)
                 .notNullRefreshToken()
-                .checkAsserts();
+                .check();
     }
 
     @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "sectorIdentifierUri"})
@@ -121,7 +121,7 @@ public class SupportAuthenticationToTokenEndpointWithSymmetricallySignedJWTs ext
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -137,7 +137,7 @@ public class SupportAuthenticationToTokenEndpointWithSymmetricallySignedJWTs ext
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).check();
 
         String authorizationCode = authorizationResponse.getCode();
 
@@ -159,9 +159,9 @@ public class SupportAuthenticationToTokenEndpointWithSymmetricallySignedJWTs ext
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        AssertBuilder.tokenResponseBuilder(tokenResponse)
+        AssertBuilder.tokenResponse(tokenResponse)
                 .notNullRefreshToken()
-                .checkAsserts();
+                .check();
     }
 
     @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "sectorIdentifierUri"})
@@ -182,7 +182,7 @@ public class SupportAuthenticationToTokenEndpointWithSymmetricallySignedJWTs ext
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -198,7 +198,7 @@ public class SupportAuthenticationToTokenEndpointWithSymmetricallySignedJWTs ext
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).check();
 
         String authorizationCode = authorizationResponse.getCode();
 
@@ -220,8 +220,8 @@ public class SupportAuthenticationToTokenEndpointWithSymmetricallySignedJWTs ext
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        AssertBuilder.tokenResponseBuilder(tokenResponse)
+        AssertBuilder.tokenResponse(tokenResponse)
                 .notNullRefreshToken()
-                .checkAsserts();
+                .check();
     }
 }

@@ -42,7 +42,7 @@ public class ParHttpTest extends BaseTest {
         String nonce = UUID.randomUUID().toString();
 
         registerResponse = registerClient(redirectUris, responseTypes, scopes, sectorIdentifierUri);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, registerResponse.getClientId(), scopes, redirectUri, nonce);
         ParRequest parRequest = new ParRequest(authorizationRequest);
@@ -54,7 +54,7 @@ public class ParHttpTest extends BaseTest {
         ParClient parClient = newParClient(parRequest);
         parResponse = parClient.exec();
         showClient(parClient);
-        AssertBuilder.parResponseBuilder(parResponse).checkAsserts();
+        AssertBuilder.parResponse(parResponse).check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUri"})
@@ -77,19 +77,18 @@ public class ParHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        AssertBuilder.tokenResponseBuilder(tokenResponse)
-                .status(200)
+        AssertBuilder.tokenResponse(tokenResponse).ok()
                 .notNullRefreshToken()
-                .checkAsserts();
+                .check();
 
-        AssertBuilder.jwtBuilder(null)
-                .validateIdToken(idToken, jwksUri, SignatureAlgorithm.RS256)
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureRSAClientEngine(jwksUri, SignatureAlgorithm.RS256)
                 .claimsPresence(JwtClaimName.CODE_HASH)
                 .notNullAuthenticationTime()
                 .notNullOxOpenIDConnectVersion()
                 .notNullAuthenticationContextClassReference()
                 .notNullAuthenticationMethodReferences()
-                .checkAsserts();
+                .check();
     }
 
     private AuthorizationResponse requestAuthorization(final String userId, final String userSecret, String redirectUri) {
@@ -100,7 +99,7 @@ public class ParHttpTest extends BaseTest {
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).check();
         return authorizationResponse;
     }
 }

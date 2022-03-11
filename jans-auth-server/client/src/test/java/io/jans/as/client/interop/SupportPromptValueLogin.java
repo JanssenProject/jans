@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.UUID;
 
 
-import static io.jans.as.client.client.Asserter.assertRegisterResponseOk;
+
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
@@ -62,7 +62,7 @@ public class SupportPromptValueLogin extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -80,7 +80,7 @@ public class SupportPromptValueLogin extends BaseTest {
             AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                     authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-            AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
+            AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
             String authorizationCode = authorizationResponse.getCode();
             sessionId = authorizationResponse.getSessionId();
@@ -119,7 +119,7 @@ public class SupportPromptValueLogin extends BaseTest {
             AuthorizationResponse authorizationResponse = authenticateResourceOwner(
                     authorizationEndpoint, authorizationRequest, userId, userSecret, false);
 
-            AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
+            AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
             String authorizationCode = authorizationResponse.getCode();
 

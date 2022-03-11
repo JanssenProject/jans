@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.UUID;
 
 
-import static io.jans.as.client.client.Asserter.assertRegisterResponseOk;
+
 import static org.testng.Assert.assertNotNull;
 
 /**
@@ -56,7 +56,7 @@ public class SupportDisplayValuePopup extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -72,6 +72,6 @@ public class SupportDisplayValuePopup extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).check();
     }
 }

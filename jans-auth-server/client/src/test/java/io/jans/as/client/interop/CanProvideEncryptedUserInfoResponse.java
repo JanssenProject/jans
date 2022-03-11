@@ -67,7 +67,7 @@ public class CanProvideEncryptedUserInfoResponse extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -86,7 +86,7 @@ public class CanProvideEncryptedUserInfoResponse extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String accessToken = authorizationResponse.getAccessToken();
 
@@ -96,9 +96,12 @@ public class CanProvideEncryptedUserInfoResponse extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);
-        assertUserInfoAddressMinimumNotNull(userInfoResponse);
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                .notNullClaimsPersonalData()
+                .notNullClaimsAddressData()
+                .claimsPresence(JwtClaimName.EMAIL)
+                .check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
@@ -123,7 +126,7 @@ public class CanProvideEncryptedUserInfoResponse extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -142,7 +145,7 @@ public class CanProvideEncryptedUserInfoResponse extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String accessToken = authorizationResponse.getAccessToken();
 
@@ -152,9 +155,12 @@ public class CanProvideEncryptedUserInfoResponse extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);
-        assertUserInfoAddressMinimumNotNull(userInfoResponse);
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                .notNullClaimsPersonalData()
+                .notNullClaimsAddressData()
+                .claimsPresence(JwtClaimName.EMAIL)
+                .check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris",
@@ -184,7 +190,7 @@ public class CanProvideEncryptedUserInfoResponse extends BaseTest {
             RegisterResponse registerResponse = registerClient.exec();
 
             showClient(registerClient);
-            assertRegisterResponseOk(registerResponse, 201, true);
+            AssertBuilder.registerResponse(registerResponse).created().check();
 
             String clientId = registerResponse.getClientId();
 
@@ -266,7 +272,7 @@ public class CanProvideEncryptedUserInfoResponse extends BaseTest {
             RegisterResponse registerResponse = registerClient.exec();
 
             showClient(registerClient);
-            assertRegisterResponseOk(registerResponse, 201, true);
+            AssertBuilder.registerResponse(registerResponse).created().check();
 
             String clientId = registerResponse.getClientId();
 
@@ -348,7 +354,7 @@ public class CanProvideEncryptedUserInfoResponse extends BaseTest {
             RegisterResponse registerResponse = registerClient.exec();
 
             showClient(registerClient);
-            assertRegisterResponseOk(registerResponse, 201, true);
+            AssertBuilder.registerResponse(registerResponse).created().check();
 
             String clientId = registerResponse.getClientId();
 

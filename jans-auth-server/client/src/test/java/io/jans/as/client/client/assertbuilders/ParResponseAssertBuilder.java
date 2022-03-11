@@ -15,7 +15,7 @@ public class ParResponseAssertBuilder extends BaseAssertBuilder {
     }
 
     @Override
-    public void checkAsserts() {
+    public void check() {
         assertNotNull(response);
         assertTrue(StringUtils.isNotBlank(response.getRequestUri()));
         assertNotNull(response.getExpiresIn());

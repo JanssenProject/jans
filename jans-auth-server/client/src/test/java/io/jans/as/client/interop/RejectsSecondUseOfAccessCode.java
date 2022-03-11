@@ -63,7 +63,7 @@ public class RejectsSecondUseOfAccessCode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -79,7 +79,7 @@ public class RejectsSecondUseOfAccessCode extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).check();
         assertNotNull(authorizationResponse.getIdToken(), "The id token is null");
 
         String scope = authorizationResponse.getScope();
@@ -94,9 +94,9 @@ public class RejectsSecondUseOfAccessCode extends BaseTest {
                     clientId, clientSecret);
 
             showClient(tokenClient);
-            AssertBuilder.tokenResponseBuilder(tokenResponse)
+            AssertBuilder.tokenResponse(tokenResponse)
                 .notNullRefreshToken()
-                .checkAsserts();
+                .check();
 
             accessToken = tokenResponse.getAccessToken();
             refreshToken = tokenResponse.getRefreshToken();
@@ -108,8 +108,10 @@ public class RejectsSecondUseOfAccessCode extends BaseTest {
             UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
             showClient(userInfoClient);
-            assertUserInfoBasicMinimumResponseOk(userInfoResponse, 200);
-            assertUserInfoPersonalDataNotNull(userInfoResponse);
+            AssertBuilder.userInfoResponse(userInfoResponse)
+                    .notNullClaimsPersonalData()
+                    .claimsPresence(JwtClaimName.EMAIL)
+                    .check();
         }
 
         // 5. Request access token using the same authorization code one more time. This call must fail.

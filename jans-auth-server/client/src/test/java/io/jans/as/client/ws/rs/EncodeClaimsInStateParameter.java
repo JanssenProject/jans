@@ -36,7 +36,7 @@ import java.util.List;
 import java.util.UUID;
 
 
-import static io.jans.as.client.client.Asserter.assertRegisterResponseOk;
+
 import static io.jans.as.model.jwt.JwtStateClaimName.ADDITIONAL_CLAIMS;
 import static io.jans.as.model.jwt.JwtStateClaimName.JTI;
 import static io.jans.as.model.jwt.JwtStateClaimName.KID;
@@ -75,7 +75,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -100,7 +100,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String state = authorizationResponse.getState();
 
@@ -133,7 +133,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -158,7 +158,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String state = authorizationResponse.getState();
 
@@ -191,7 +191,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -216,7 +216,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String state = authorizationResponse.getState();
 
@@ -251,7 +251,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -276,7 +276,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String state = authorizationResponse.getState();
 
@@ -311,7 +311,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -336,7 +336,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String state = authorizationResponse.getState();
 
@@ -371,7 +371,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -396,7 +396,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String state = authorizationResponse.getState();
 
@@ -431,7 +431,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -456,7 +456,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String state = authorizationResponse.getState();
 
@@ -491,7 +491,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -516,7 +516,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String state = authorizationResponse.getState();
 
@@ -551,7 +551,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -576,7 +576,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String state = authorizationResponse.getState();
 
@@ -611,7 +611,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -636,7 +636,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String state = authorizationResponse.getState();
 
@@ -671,7 +671,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -696,7 +696,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String state = authorizationResponse.getState();
 
@@ -731,7 +731,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -756,7 +756,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String state = authorizationResponse.getState();
 
@@ -791,7 +791,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -817,7 +817,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String state = authorizationResponse.getState();
 
@@ -861,7 +861,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -887,7 +887,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String state = authorizationResponse.getState();
 
@@ -931,7 +931,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -957,7 +957,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String state = authorizationResponse.getState();
 
@@ -999,7 +999,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1022,7 +1022,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String state = authorizationResponse.getState();
 
@@ -1062,7 +1062,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1085,7 +1085,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String state = authorizationResponse.getState();
 

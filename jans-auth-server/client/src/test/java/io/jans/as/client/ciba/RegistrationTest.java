@@ -56,11 +56,11 @@ public class RegistrationTest extends BaseTest {
                 .withBackchannelUserCodeParameter(true)
                 .execute();
 
-        AssertBuilder.registerResponseCreated(registerResponse)
+        AssertBuilder.registerResponse(registerResponse).created()
                 .backchannelUserCodeParameter(true)
                 .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
                 .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
-                .checkAsserts();
+                .check();
 
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
         String registrationClientUri = registerResponse.getRegistrationClientUri();
@@ -71,13 +71,12 @@ public class RegistrationTest extends BaseTest {
                 .withRegistrationAccessToken(registrationAccessToken)
                 .isReadMode()
                 .execute();
-        AssertBuilder.registerResponse(clientReadResponse)
-                .status(200)
+        AssertBuilder.registerResponse(clientReadResponse).ok()
                 .notNullRegistrationClientUri()
                 .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
                 .backchannelUserCodeParameter(true)
                 .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
-                .checkAsserts();
+                .check();
 
         assertRegisterResponseClaimsNotNull(clientReadResponse, APPLICATION_TYPE, SUBJECT_TYPE, ID_TOKEN_SIGNED_RESPONSE_ALG, JWKS_URI, CLIENT_NAME, SCOPE);
     }
@@ -98,11 +97,11 @@ public class RegistrationTest extends BaseTest {
                 .withBackchannelUserCodeParameter(true)
                 .execute();
 
-        AssertBuilder.registerResponseCreated(registerResponse)
+        AssertBuilder.registerResponse(registerResponse).created()
                 .backchannelUserCodeParameter(true)
                 .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
                 .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
-                .checkAsserts();
+                .check();
 
         assertRegisterResponseClaimsAreContained(registerResponse, JWKS_URI, SECTOR_IDENTIFIER_URI);
 
@@ -115,13 +114,12 @@ public class RegistrationTest extends BaseTest {
                 .withRegistrationAccessToken(registrationAccessToken)
                 .isReadMode()
                 .execute();
-        AssertBuilder.registerResponse(clientReadResponse)
-                .status(200)
+        AssertBuilder.registerResponse(clientReadResponse).ok()
                 .notNullRegistrationClientUri()
                 .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
                 .backchannelUserCodeParameter(true)
                 .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
-                .checkAsserts();
+                .check();
 
         assertRegisterResponseClaimsNotNull(clientReadResponse, APPLICATION_TYPE, SECTOR_IDENTIFIER_URI, SUBJECT_TYPE, ID_TOKEN_SIGNED_RESPONSE_ALG, JWKS_URI, CLIENT_NAME, SCOPE);
         assertRegisterResponseClaimsAreContained(clientReadResponse, JWKS_URI, SECTOR_IDENTIFIER_URI);
@@ -141,11 +139,11 @@ public class RegistrationTest extends BaseTest {
                 .withBackchannelUserCodeParameter(true)
                 .execute();
 
-        AssertBuilder.registerResponseCreated(registerResponse)
+        AssertBuilder.registerResponse(registerResponse).created()
                 .backchannelUserCodeParameter(true)
                 .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
                 .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
-                .checkAsserts();
+                .check();
 
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
         String registrationClientUri = registerResponse.getRegistrationClientUri();
@@ -156,13 +154,12 @@ public class RegistrationTest extends BaseTest {
                 .withRegistrationAccessToken(registrationAccessToken)
                 .isReadMode()
                 .execute();
-        AssertBuilder.registerResponse(clientReadResponse)
-                .status(200)
+        AssertBuilder.registerResponse(clientReadResponse).ok()
                 .notNullRegistrationClientUri()
                 .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
                 .backchannelUserCodeParameter(true)
                 .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
-                .checkAsserts();
+                .check();
 
         assertRegisterResponseClaimsNotNull(clientReadResponse, APPLICATION_TYPE, SUBJECT_TYPE, ID_TOKEN_SIGNED_RESPONSE_ALG, CLIENT_NAME, SCOPE);
     }
@@ -177,7 +174,7 @@ public class RegistrationTest extends BaseTest {
                 .withRegistrationEndpoint(registrationEndpoint)
                 .execute();
 
-        AssertBuilder.registerResponseCreated(registerResponse).checkAsserts();
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
         String registrationClientUri = registerResponse.getRegistrationClientUri();
@@ -188,10 +185,9 @@ public class RegistrationTest extends BaseTest {
                 .withRegistrationAccessToken(registrationAccessToken)
                 .isReadMode()
                 .execute();
-        AssertBuilder.registerResponse(clientReadResponse)
-                .status(200)
+        AssertBuilder.registerResponse(clientReadResponse).ok()
                 .notNullRegistrationClientUri()
-                .checkAsserts();
+                .check();
         assertRegisterResponseClaimsNotNull(clientReadResponse, APPLICATION_TYPE, SUBJECT_TYPE, ID_TOKEN_SIGNED_RESPONSE_ALG, CLIENT_NAME, SCOPE);
 
         // 3. Client Update
@@ -206,13 +202,12 @@ public class RegistrationTest extends BaseTest {
                 .withBackchannelAuthRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
                 .isUpdateMode()
                 .execute();
-        AssertBuilder.registerResponse(clientUpdateResponse)
-                .status(200)
+        AssertBuilder.registerResponse(clientUpdateResponse).ok()
                 .notNullRegistrationClientUri()
                 .backchannelUserCodeParameter(true)
                 .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
                 .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
-                .checkAsserts();
+                .check();
 
         assertRegisterResponseClaimsNotNull(clientUpdateResponse, APPLICATION_TYPE, SECTOR_IDENTIFIER_URI, SUBJECT_TYPE, ID_TOKEN_SIGNED_RESPONSE_ALG, JWKS_URI, CLIENT_NAME, SCOPE);
         assertRegisterResponseClaimsAreContained(clientUpdateResponse, JWKS_URI, SECTOR_IDENTIFIER_URI);
@@ -238,11 +233,11 @@ public class RegistrationTest extends BaseTest {
                 .withTokenEndPointAuthSigningAlgorithm(SignatureAlgorithm.PS256)
                 .execute();
 
-        AssertBuilder.registerResponseCreated(registerResponse)
+        AssertBuilder.registerResponse(registerResponse).created()
                 .backchannelUserCodeParameter(false)
                 .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
                 .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.PS256)
-                .checkAsserts();
+                .check();
 
         assertRegisterResponseClaimsNotNull(registerResponse, APPLICATION_TYPE, SUBJECT_TYPE, ID_TOKEN_SIGNED_RESPONSE_ALG, JWKS, CLIENT_NAME, SCOPE);
         assertRegisterResponseClaimsAreContained(registerResponse, ID_TOKEN_SIGNED_RESPONSE_ALG, TOKEN_ENDPOINT_AUTH_SIGNING_ALG, TOKEN_ENDPOINT_AUTH_METHOD);
@@ -260,13 +255,12 @@ public class RegistrationTest extends BaseTest {
                 .withRegistrationAccessToken(registrationAccessToken)
                 .isReadMode()
                 .execute();
-        AssertBuilder.registerResponse(clientReadResponse)
-                .status(200)
+        AssertBuilder.registerResponse(clientReadResponse).ok()
                 .notNullRegistrationClientUri()
                 .backchannelUserCodeParameter(false)
                 .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
                 .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.PS256)
-                .checkAsserts();
+                .check();
 
         assertRegisterResponseClaimsNotNull(clientReadResponse, APPLICATION_TYPE, SUBJECT_TYPE, ID_TOKEN_SIGNED_RESPONSE_ALG, JWKS, CLIENT_NAME, SCOPE);
         assertRegisterResponseClaimsAreContained(clientReadResponse, ID_TOKEN_SIGNED_RESPONSE_ALG, TOKEN_ENDPOINT_AUTH_SIGNING_ALG, TOKEN_ENDPOINT_AUTH_METHOD);
@@ -293,11 +287,11 @@ public class RegistrationTest extends BaseTest {
                 .withBackchannelClientNotificationEndPoint(backchannelClientNotificationEndpoint)
                 .execute();
 
-        AssertBuilder.registerResponseCreated(registerResponse)
+        AssertBuilder.registerResponse(registerResponse).created()
                 .backchannelUserCodeParameter(true)
                 .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING)
                 .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
-                .checkAsserts();
+                .check();
 
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
         String registrationClientUri = registerResponse.getRegistrationClientUri();
@@ -308,13 +302,12 @@ public class RegistrationTest extends BaseTest {
                 .withRegistrationAccessToken(registrationAccessToken)
                 .isReadMode()
                 .execute();
-        AssertBuilder.registerResponse(clientReadResponse)
-                .status(200)
+        AssertBuilder.registerResponse(clientReadResponse).ok()
                 .notNullRegistrationClientUri()
                 .backchannelUserCodeParameter(true)
                 .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING)
                 .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
-                .checkAsserts();
+                .check();
         assertRegisterResponseClaimsNotNull(clientReadResponse, APPLICATION_TYPE, SUBJECT_TYPE, ID_TOKEN_SIGNED_RESPONSE_ALG, JWKS_URI, CLIENT_NAME, SCOPE);
     }
 
@@ -336,11 +329,11 @@ public class RegistrationTest extends BaseTest {
                 .withBackchannelClientNotificationEndPoint(backchannelClientNotificationEndpoint)
                 .execute();
 
-        AssertBuilder.registerResponseCreated(registerResponse)
+        AssertBuilder.registerResponse(registerResponse).created()
                 .backchannelUserCodeParameter(true)
                 .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING)
                 .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
-                .checkAsserts();
+                .check();
         assertRegisterResponseClaimsAreContained(registerResponse, JWKS_URI, SECTOR_IDENTIFIER_URI);
 
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -352,13 +345,12 @@ public class RegistrationTest extends BaseTest {
                 .withRegistrationAccessToken(registrationAccessToken)
                 .isReadMode()
                 .execute();
-        AssertBuilder.registerResponse(clientReadResponse)
-                .status(200)
+        AssertBuilder.registerResponse(clientReadResponse).ok()
                 .notNullRegistrationClientUri()
                 .backchannelUserCodeParameter(true)
                 .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING)
                 .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
-                .checkAsserts();
+                .check();
 
         assertRegisterResponseClaimsNotNull(clientReadResponse, APPLICATION_TYPE, SECTOR_IDENTIFIER_URI, SUBJECT_TYPE, ID_TOKEN_SIGNED_RESPONSE_ALG, JWKS_URI, CLIENT_NAME, SCOPE);
         assertRegisterResponseClaimsAreContained(clientReadResponse, JWKS_URI, SECTOR_IDENTIFIER_URI);
@@ -380,11 +372,11 @@ public class RegistrationTest extends BaseTest {
                 .withBackchannelClientNotificationEndPoint(backchannelClientNotificationEndpoint)
                 .execute();
 
-        AssertBuilder.registerResponseCreated(registerResponse)
+        AssertBuilder.registerResponse(registerResponse).created()
                 .backchannelUserCodeParameter(true)
                 .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING)
                 .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
-                .checkAsserts();
+                .check();
 
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
         String registrationClientUri = registerResponse.getRegistrationClientUri();
@@ -395,13 +387,12 @@ public class RegistrationTest extends BaseTest {
                 .withRegistrationAccessToken(registrationAccessToken)
                 .isReadMode()
                 .execute();
-        AssertBuilder.registerResponse(clientReadResponse)
-                .status(200)
+        AssertBuilder.registerResponse(clientReadResponse).ok()
                 .notNullRegistrationClientUri()
                 .backchannelUserCodeParameter(true)
                 .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING)
                 .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
-                .checkAsserts();
+                .check();
 
         assertRegisterResponseClaimsNotNull(clientReadResponse, APPLICATION_TYPE, SUBJECT_TYPE, ID_TOKEN_SIGNED_RESPONSE_ALG, CLIENT_NAME, SCOPE);
     }
@@ -417,7 +408,7 @@ public class RegistrationTest extends BaseTest {
                 .withRegistrationEndpoint(registrationEndpoint)
                 .execute();
 
-        AssertBuilder.registerResponseCreated(registerResponse).checkAsserts();
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
         String registrationClientUri = registerResponse.getRegistrationClientUri();
@@ -428,10 +419,9 @@ public class RegistrationTest extends BaseTest {
                 .withRegistrationAccessToken(registrationAccessToken)
                 .isReadMode()
                 .execute();
-        AssertBuilder.registerResponse(clientReadResponse)
-                .status(200)
+        AssertBuilder.registerResponse(clientReadResponse).ok()
                 .notNullRegistrationClientUri()
-                .checkAsserts();
+                .check();
         assertRegisterResponseClaimsNotNull(clientReadResponse, APPLICATION_TYPE, SUBJECT_TYPE, ID_TOKEN_SIGNED_RESPONSE_ALG, CLIENT_NAME, SCOPE);
 
         // 3. Client Update
@@ -447,12 +437,11 @@ public class RegistrationTest extends BaseTest {
                 .withBackchannelAuthRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
                 .isUpdateMode()
                 .execute();
-        AssertBuilder.registerResponse(clientUpdateResponse)
-                .status(200)
+        AssertBuilder.registerResponse(clientUpdateResponse).ok()
                 .backchannelUserCodeParameter(true)
                 .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING)
                 .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
-                .checkAsserts();
+                .check();
 
         assertRegisterResponseClaimsNotNull(clientUpdateResponse, APPLICATION_TYPE, SECTOR_IDENTIFIER_URI, SUBJECT_TYPE, ID_TOKEN_SIGNED_RESPONSE_ALG, JWKS_URI, CLIENT_NAME, SCOPE);
         assertRegisterResponseClaimsAreContained(clientUpdateResponse, JWKS_URI, SECTOR_IDENTIFIER_URI);
@@ -480,11 +469,11 @@ public class RegistrationTest extends BaseTest {
                 .withTokenEndPointAuthSigningAlgorithm(SignatureAlgorithm.PS256)
                 .execute();
 
-        AssertBuilder.registerResponseCreated(registerResponse)
+        AssertBuilder.registerResponse(registerResponse).created()
                 .backchannelUserCodeParameter(false)
                 .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING)
                 .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.PS256)
-                .checkAsserts();
+                .check();
 
         assertRegisterResponseClaimsNotNull(registerResponse, APPLICATION_TYPE, SUBJECT_TYPE, ID_TOKEN_SIGNED_RESPONSE_ALG, JWKS, CLIENT_NAME, SCOPE);
         assertRegisterResponseClaimsAreContained(registerResponse, ID_TOKEN_SIGNED_RESPONSE_ALG, TOKEN_ENDPOINT_AUTH_SIGNING_ALG, TOKEN_ENDPOINT_AUTH_METHOD);
@@ -502,12 +491,11 @@ public class RegistrationTest extends BaseTest {
                 .withRegistrationAccessToken(registrationAccessToken)
                 .isReadMode()
                 .execute();
-        AssertBuilder.registerResponse(clientReadResponse)
-                .status(200)
+        AssertBuilder.registerResponse(clientReadResponse).ok()
                 .backchannelUserCodeParameter(false)
                 .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING)
                 .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.PS256)
-                .checkAsserts();
+                .check();
 
         assertRegisterResponseClaimsNotNull(clientReadResponse, APPLICATION_TYPE, SUBJECT_TYPE, ID_TOKEN_SIGNED_RESPONSE_ALG, JWKS, CLIENT_NAME, SCOPE);
         assertRegisterResponseClaimsAreContained(clientReadResponse, ID_TOKEN_SIGNED_RESPONSE_ALG, TOKEN_ENDPOINT_AUTH_SIGNING_ALG, TOKEN_ENDPOINT_AUTH_METHOD);
@@ -531,11 +519,11 @@ public class RegistrationTest extends BaseTest {
                 .withBackchannelClientNotificationEndPoint(backchannelClientNotificationEndpoint)
                 .withBackchannelAuthRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
                 .execute();
-        AssertBuilder.registerResponseCreated(registerResponse)
+        AssertBuilder.registerResponse(registerResponse).created()
                 .backchannelUserCodeParameter(true)
                 .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH)
                 .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
-                .checkAsserts();
+                .check();
 
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
         String registrationClientUri = registerResponse.getRegistrationClientUri();
@@ -546,12 +534,11 @@ public class RegistrationTest extends BaseTest {
                 .withRegistrationAccessToken(registrationAccessToken)
                 .isReadMode()
                 .execute();
-        AssertBuilder.registerResponse(clientReadResponse)
-                .status(200)
+        AssertBuilder.registerResponse(clientReadResponse).ok()
                 .backchannelUserCodeParameter(true)
                 .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH)
                 .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
-                .checkAsserts();
+                .check();
         assertRegisterResponseClaimsNotNull(clientReadResponse, APPLICATION_TYPE, SUBJECT_TYPE, ID_TOKEN_SIGNED_RESPONSE_ALG, CLIENT_NAME, SCOPE);
     }
 
@@ -570,11 +557,11 @@ public class RegistrationTest extends BaseTest {
                 .withBackchannelClientNotificationEndPoint(backchannelClientNotificationEndpoint)
                 .withBackchannelAuthRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
                 .execute();
-        AssertBuilder.registerResponseCreated(registerResponse)
+        AssertBuilder.registerResponse(registerResponse).created()
                 .backchannelUserCodeParameter(true)
                 .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH)
                 .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
-                .checkAsserts();
+                .check();
         assertTrue(registerResponse.getClaims().containsKey(SECTOR_IDENTIFIER_URI.toString()));
 
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -586,12 +573,11 @@ public class RegistrationTest extends BaseTest {
                 .withRegistrationAccessToken(registrationAccessToken)
                 .isReadMode()
                 .execute();
-        AssertBuilder.registerResponse(clientReadResponse)
-                .status(200)
+        AssertBuilder.registerResponse(clientReadResponse).ok()
                 .backchannelUserCodeParameter(true)
                 .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH)
                 .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
-                .checkAsserts();
+                .check();
 
         assertRegisterResponseClaimsNotNull(clientReadResponse, APPLICATION_TYPE, SECTOR_IDENTIFIER_URI, SUBJECT_TYPE, ID_TOKEN_SIGNED_RESPONSE_ALG, CLIENT_NAME, SCOPE);
         assertRegisterResponseClaimsAreContained(clientReadResponse, SECTOR_IDENTIFIER_URI);
@@ -612,11 +598,11 @@ public class RegistrationTest extends BaseTest {
                 .withBackchannelClientNotificationEndPoint(backchannelClientNotificationEndpoint)
                 .withBackchannelAuthRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
                 .execute();
-        AssertBuilder.registerResponseCreated(registerResponse)
+        AssertBuilder.registerResponse(registerResponse).created()
                 .backchannelUserCodeParameter(true)
                 .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH)
                 .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
-                .checkAsserts();
+                .check();
 
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
         String registrationClientUri = registerResponse.getRegistrationClientUri();
@@ -627,12 +613,11 @@ public class RegistrationTest extends BaseTest {
                 .withRegistrationAccessToken(registrationAccessToken)
                 .isReadMode()
                 .execute();
-        AssertBuilder.registerResponse(clientReadResponse)
-                .status(200)
+        AssertBuilder.registerResponse(clientReadResponse).ok()
                 .backchannelUserCodeParameter(true)
                 .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH)
                 .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
-                .checkAsserts();
+                .check();
         assertRegisterResponseClaimsNotNull(clientReadResponse, APPLICATION_TYPE, SUBJECT_TYPE, ID_TOKEN_SIGNED_RESPONSE_ALG, CLIENT_NAME, SCOPE);
     }
 
@@ -646,7 +631,7 @@ public class RegistrationTest extends BaseTest {
                 .withRegistrationEndpoint(registrationEndpoint)
                 .execute();
 
-        AssertBuilder.registerResponseCreated(registerResponse).checkAsserts();
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
         String registrationClientUri = registerResponse.getRegistrationClientUri();
@@ -657,9 +642,7 @@ public class RegistrationTest extends BaseTest {
                 .withRegistrationAccessToken(registrationAccessToken)
                 .isReadMode()
                 .execute();
-        AssertBuilder.registerResponse(clientReadResponse)
-                .status(200)
-                .checkAsserts();
+        AssertBuilder.registerResponse(clientReadResponse).ok().check();
 
         assertRegisterResponseClaimsNotNull(clientReadResponse, APPLICATION_TYPE, SUBJECT_TYPE, ID_TOKEN_SIGNED_RESPONSE_ALG, CLIENT_NAME, SCOPE);
 
@@ -676,12 +659,11 @@ public class RegistrationTest extends BaseTest {
                 .isUpdateMode()
                 .execute();
 
-        AssertBuilder.registerResponse(clientUpdateResponse)
-                .status(200)
+        AssertBuilder.registerResponse(clientUpdateResponse).ok()
                 .backchannelUserCodeParameter(true)
                 .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH)
                 .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
-                .checkAsserts();
+                .check();
 
         assertRegisterResponseClaimsNotNull(clientUpdateResponse, APPLICATION_TYPE, SECTOR_IDENTIFIER_URI, SUBJECT_TYPE, ID_TOKEN_SIGNED_RESPONSE_ALG, CLIENT_NAME, SCOPE);
         assertRegisterResponseClaimsAreContained(clientUpdateResponse, SECTOR_IDENTIFIER_URI);
@@ -701,7 +683,7 @@ public class RegistrationTest extends BaseTest {
                 .missingBackchannelTokenDeliveryMode()
                 .execute();
 
-        AssertBuilder.registerResponseBadRequest(response).checkAsserts();
+        AssertBuilder.registerResponse(response).bad().check();
     }
 
     @Parameters({"clientJwksUri"})
@@ -718,7 +700,7 @@ public class RegistrationTest extends BaseTest {
                 .missingBackchannelClientNotificationEndPoint() // Missing backchannel_client_notification_endpoint
                 .execute();
 
-        AssertBuilder.registerResponseBadRequest(response).checkAsserts();
+        AssertBuilder.registerResponse(response).bad().check();
     }
 
     @Parameters({"clientJwksUri"})
@@ -735,7 +717,7 @@ public class RegistrationTest extends BaseTest {
                 .missingBackchannelClientNotificationEndPoint() // Missing backchannel_client_notification_endpoint
                 .execute();
 
-        AssertBuilder.registerResponse(response).status(400).checkAsserts();
+        AssertBuilder.registerResponse(response).bad().check();
     }
 
     @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint"})
@@ -752,7 +734,7 @@ public class RegistrationTest extends BaseTest {
                 .withBackchannelAuthRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
                 .execute();
 
-        AssertBuilder.registerResponseBadRequest(response).checkAsserts();
+        AssertBuilder.registerResponse(response).bad().check();
     }
 
     @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint"})
@@ -769,7 +751,7 @@ public class RegistrationTest extends BaseTest {
                 .withBackchannelAuthRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
                 .execute();
 
-        AssertBuilder.registerResponseBadRequest(response).checkAsserts();
+        AssertBuilder.registerResponse(response).bad().check();
     }
 
     @Parameters({"backchannelClientNotificationEndpoint"})
@@ -786,7 +768,7 @@ public class RegistrationTest extends BaseTest {
                 .missingJwksUri() // Missing jwks_uri
                 .execute();
 
-        AssertBuilder.registerResponseBadRequest(response).checkAsserts();
+        AssertBuilder.registerResponse(response).bad().check();
     }
 
     @Parameters({"backchannelClientNotificationEndpoint"})
@@ -804,6 +786,6 @@ public class RegistrationTest extends BaseTest {
                 .missingJwksUri() // Missing jwks_uri
                 .execute();
 
-        AssertBuilder.registerResponseBadRequest(response).checkAsserts();
+        AssertBuilder.registerResponse(response).bad().check();
     }
 }

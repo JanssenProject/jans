@@ -154,7 +154,7 @@ public class SelectAccountHttpTest extends BaseTest {
 
         AuthorizationResponse authorizationResponse = buildAuthorizationResponse(authorizationRequest, driver, authorizationResponseStr);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).check();
         return authorizationResponse;
     }
 
@@ -180,7 +180,7 @@ public class SelectAccountHttpTest extends BaseTest {
 
         AuthorizationResponse authorizationResponse = authorize(authorizationRequest, userId, userSecret, 1);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).check();
         return authorizationResponse;
     }
 }

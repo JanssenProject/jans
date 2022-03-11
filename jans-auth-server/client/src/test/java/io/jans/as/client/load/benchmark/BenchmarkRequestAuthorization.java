@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.UUID;
 
 
-import static io.jans.as.client.client.Asserter.assertRegisterResponseOk;
+
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
@@ -52,7 +52,7 @@ public class BenchmarkRequestAuthorization extends BaseTest {
 
         RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, scopes, sectorIdentifierUri);
 
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         this.clientId = registerResponse.getClientId();
         this.clientSecret = registerResponse.getClientSecret();
@@ -81,12 +81,10 @@ public class BenchmarkRequestAuthorization extends BaseTest {
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email", "user_name");
         String nonce = UUID.randomUUID().toString();
 
-        AuthorizationResponse response = requestAuthorization(userId, userSecret, redirectUri, responseTypes, scopes, clientId, nonce, useNewDriver);
-        AssertBuilder.authorizationResponseBuilder(response)
-                .notNullState()
-                .notNullScope()
+        AuthorizationResponse authorizationResponse = requestAuthorization(userId, userSecret, redirectUri, responseTypes, scopes, clientId, nonce, useNewDriver);
+        AssertBuilder.authorizationResponse(authorizationResponse)
                 .responseTypes(responseTypes)
-                .checkAsserts();
+                .check();
     }
 
     private AuthorizationResponse requestAuthorization(final String userId, final String userSecret, final String redirectUri,

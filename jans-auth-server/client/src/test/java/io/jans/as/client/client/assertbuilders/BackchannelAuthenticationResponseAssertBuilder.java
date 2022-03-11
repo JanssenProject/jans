@@ -30,6 +30,19 @@ public class BackchannelAuthenticationResponseAssertBuilder extends BaseAssertBu
         this.errorResponseType = null;
     }
 
+    public BackchannelAuthenticationResponseAssertBuilder ok() {
+        this.status = 200;
+        this.notNullAuthReqId = true;
+        this.notNullExpiresIn = true;
+        this.notNullInterval = true;
+        return this;
+    }
+
+    public BackchannelAuthenticationResponseAssertBuilder bad() {
+        this.status = 400;
+        return this;
+    }
+
     public BackchannelAuthenticationResponseAssertBuilder status(int status) {
         this.status = status;
         return this;
@@ -77,7 +90,7 @@ public class BackchannelAuthenticationResponseAssertBuilder extends BaseAssertBu
     }
 
     @Override
-    public void checkAsserts() {
+    public void check() {
         assertEquals(response.getStatus(), status, "Unexpected response code: " + response.getEntity());
         if (notNullInterval) {
             assertNotNull(response.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
@@ -86,7 +99,7 @@ public class BackchannelAuthenticationResponseAssertBuilder extends BaseAssertBu
         }
         if (notNullAuthReqId) {
             assertNotNull(response.getAuthReqId());
-        } else if (nullInterval) {
+        } else if (nullAuthReqId) {
             assertNull(response.getAuthReqId());
         }
         if (notNullExpiresIn) {
@@ -94,6 +107,7 @@ public class BackchannelAuthenticationResponseAssertBuilder extends BaseAssertBu
         } else if (nullExpiresIn) {
             assertNull(response.getExpiresIn());
         }
+
         if (status != 200) {
             assertNotNull(response.getEntity(), "The entity is null");
             assertNotNull(response.getErrorType(), "The error type is null");

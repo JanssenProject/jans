@@ -3,62 +3,30 @@ package io.jans.as.client.client.assertbuilders;
 import io.jans.as.client.UserInfoResponse;
 import io.jans.as.model.jwt.JwtClaimName;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.*;
 
 public class UserInfoResponseAssertBuilder extends BaseAssertBuilder {
 
     private UserInfoResponse response;
     private int status = 200;
-    private boolean notNullClaimIssuer;
-    private boolean notNullClaimAudience;
-    private boolean notNullClaimEmail;
     private boolean notNullClaimsPersonalData;
     private boolean notNullClaimsAddressData;
-    private boolean notNullClaimAddressCountry;
-    private boolean notNullClaimAddressStreet;
+    private String[] claimsPresence;
+    private String[] claimsNoPresence;
 
     public UserInfoResponseAssertBuilder(UserInfoResponse response) {
         this.response = response;
         this.status = 200;
-        this.notNullClaimIssuer = false;
-        this.notNullClaimAudience = false;
-        this.notNullClaimEmail = false;
         this.notNullClaimsPersonalData = false;
         this.notNullClaimsAddressData = false;
-        this.notNullClaimAddressCountry = false;
-        this.notNullClaimAddressStreet = false;
     }
 
     public UserInfoResponseAssertBuilder status(int status) {
         this.status = status;
-        return this;
-    }
-
-    public UserInfoResponseAssertBuilder notNullClaimIssuer() {
-        this.notNullClaimIssuer = true;
-        return this;
-    }
-
-    public UserInfoResponseAssertBuilder notNullClaimAudience() {
-        this.notNullClaimAudience = true;
-        return this;
-    }
-
-    public UserInfoResponseAssertBuilder notNullClaimEmail() {
-        this.notNullClaimEmail = true;
-        return this;
-    }
-
-    public UserInfoResponseAssertBuilder notNullClaimAddressCountry() {
-        this.notNullClaimAddressCountry = true;
-        return this;
-    }
-
-    public UserInfoResponseAssertBuilder notNullClaimAddressStreet() {
-        this.notNullClaimAddressStreet = true;
         return this;
     }
 
@@ -72,19 +40,36 @@ public class UserInfoResponseAssertBuilder extends BaseAssertBuilder {
         return this;
     }
 
+    public UserInfoResponseAssertBuilder claimsPresence(String... claimsPresence) {
+        if (this.claimsPresence != null) {
+            List<String> listClaims = new ArrayList<>();
+            listClaims.addAll(Arrays.asList(this.claimsPresence));
+            listClaims.addAll(Arrays.asList(claimsPresence));
+            this.claimsPresence = (String[]) listClaims.toArray();
+        } else {
+            this.claimsPresence = claimsPresence;
+        }
+        return this;
+    }
+
+    public UserInfoResponseAssertBuilder claimsNoPresence(String... claimsNoPresence) {
+        if (this.claimsNoPresence != null) {
+            List<String> listClaims = new ArrayList<>();
+            listClaims.addAll(Arrays.asList(this.claimsNoPresence));
+            listClaims.addAll(Arrays.asList(claimsNoPresence));
+            this.claimsNoPresence = (String[]) listClaims.toArray();
+        } else {
+            this.claimsNoPresence = claimsNoPresence;
+        }
+        return this;
+    }
 
     @Override
-    public void checkAsserts() {
+    public void check() {
         assertNotNull(response, "TokenResponse is null");
         if (status == 200) {
             assertEquals(response.getStatus(), status, "Unexpected response code: " + response.getEntity());
             assertNotNull(response.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
-            if (notNullClaimIssuer) {
-                assertNotNull(response.getClaim(JwtClaimName.ISSUER));
-            }
-            if (notNullClaimAudience) {
-                assertNotNull(response.getClaim(JwtClaimName.AUDIENCE));
-            }
 
             //Check Basic Personal Data Claims
             if (notNullClaimsPersonalData) {
@@ -92,20 +77,11 @@ public class UserInfoResponseAssertBuilder extends BaseAssertBuilder {
                 assertNotNull(response.getClaim(JwtClaimName.GIVEN_NAME));
                 assertNotNull(response.getClaim(JwtClaimName.FAMILY_NAME));
                 assertNotNull(response.getClaim(JwtClaimName.PICTURE));
-                if (notNullClaimEmail) {
-                    assertNotNull(response.getClaim(JwtClaimName.EMAIL));
-                }
                 assertNotNull(response.getClaim(JwtClaimName.ZONEINFO));
                 assertNotNull(response.getClaim(JwtClaimName.LOCALE));
             }
 
             //Check Address Data Claims
-            if (notNullClaimAddressStreet) {
-                assertNotNull(response.getClaim(JwtClaimName.ADDRESS_STREET_ADDRESS));
-            }
-            if (notNullClaimAddressCountry) {
-                assertNotNull(response.getClaim(JwtClaimName.ADDRESS_COUNTRY));
-            }
             if (notNullClaimsAddressData) {
                 assertNotNull(response.getClaim(JwtClaimName.ADDRESS));
                 assertNotNull(response.getClaim(JwtClaimName.ADDRESS).containsAll(Arrays.asList(
@@ -116,6 +92,19 @@ public class UserInfoResponseAssertBuilder extends BaseAssertBuilder {
             }
         } else {
 
+        }
+        if (claimsPresence != null) {
+            for (String claim : claimsPresence) {
+                assertNotNull(claim, "Claim name is null");
+                assertNotNull(response.getClaim(claim), "UserInfo Claim " + claim + " is not found");
+            }
+        }
+
+        if (claimsNoPresence != null) {
+            for (String claim : claimsNoPresence) {
+                assertNotNull(claim, "Claim name is null");
+                assertNull(response.getClaim(claim), "UserInfo Claim " + claim + " is found");
+            }
         }
     }
 }

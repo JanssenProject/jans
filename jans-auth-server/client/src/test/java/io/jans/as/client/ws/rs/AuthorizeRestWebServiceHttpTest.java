@@ -10,7 +10,6 @@ import io.jans.as.client.AuthorizationRequest;
 import io.jans.as.client.AuthorizationResponse;
 import io.jans.as.client.AuthorizeClient;
 import io.jans.as.client.BaseTest;
-import io.jans.as.client.JwkClient;
 import io.jans.as.client.RegisterClient;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
@@ -25,12 +24,8 @@ import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.crypto.AuthCryptoProvider;
-import io.jans.as.model.crypto.signature.RSAPublicKey;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
-import io.jans.as.model.jws.RSASigner;
-import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
-import io.jans.as.model.jwt.JwtHeaderName;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.StringUtils;
 import org.testng.annotations.Parameters;
@@ -77,7 +72,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -91,7 +86,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);
-        assertRegisterResponseOk(readClientResponse, 200, false);
+        AssertBuilder.registerResponse(readClientResponse).ok().check();
 
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
@@ -105,7 +100,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
@@ -128,7 +123,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -142,7 +137,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);
-        assertRegisterResponseOk(readClientResponse, 200, false);
+        AssertBuilder.registerResponse(readClientResponse).ok().check();
 
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
@@ -156,7 +151,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
@@ -179,7 +174,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -193,7 +188,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);
-        assertRegisterResponseOk(readClientResponse, 200, false);
+        AssertBuilder.registerResponse(readClientResponse).ok().check();
 
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
@@ -212,7 +207,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
         showClient(authorizeClient);
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).check();
     }
 
     @Parameters({"userId", "userSecret"})
@@ -255,7 +250,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -269,7 +264,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);
-        assertRegisterResponseOk(readClientResponse, 200, false);
+        AssertBuilder.registerResponse(readClientResponse).ok().check();
 
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
@@ -340,7 +335,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -354,7 +349,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);
-        assertRegisterResponseOk(readClientResponse, 200, false);
+        AssertBuilder.registerResponse(readClientResponse).ok().check();
 
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
@@ -396,7 +391,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -410,7 +405,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);
-        assertRegisterResponseOk(readClientResponse, 200, false);
+        AssertBuilder.registerResponse(readClientResponse).ok().check();
 
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
@@ -425,7 +420,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
@@ -448,7 +443,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -462,7 +457,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);
-        assertRegisterResponseOk(readClientResponse, 200, false);
+        AssertBuilder.registerResponse(readClientResponse).ok().check();
 
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
@@ -477,7 +472,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUri"})
@@ -525,7 +520,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -539,7 +534,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);
-        assertRegisterResponseOk(readClientResponse, 200, false);
+        AssertBuilder.registerResponse(readClientResponse).ok().check();
 
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
@@ -588,7 +583,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -602,7 +597,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);
-        assertRegisterResponseOk(readClientResponse, 200, false);
+        AssertBuilder.registerResponse(readClientResponse).ok().check();
 
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
@@ -617,21 +612,21 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String accessToken = authorizationResponse.getAccessToken();
         String idToken = authorizationResponse.getIdToken();
 
         // 2. Validate access_token and id_token
-        AssertBuilder.jwtBuilder(null)
-                .validateIdToken(idToken, jwksUri, SignatureAlgorithm.RS256)
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS256)
                 .accessToken(accessToken)
                 .claimsPresence(JwtClaimName.ACCESS_TOKEN_HASH)
                 .notNullAuthenticationTime()
                 .notNullOxOpenIDConnectVersion()
                 .notNullAuthenticationContextClassReference()
                 .notNullAuthenticationMethodReferences()
-                .checkAsserts();
+                .check();
 
     }
 
@@ -657,7 +652,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -671,7 +666,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);
-        assertRegisterResponseOk(readClientResponse, 200, false);
+        AssertBuilder.registerResponse(readClientResponse).ok().check();
 
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
@@ -686,21 +681,21 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String accessToken = authorizationResponse.getAccessToken();
         String idToken = authorizationResponse.getIdToken();
 
         // 2. Validate access_token and id_token
-        AssertBuilder.jwtBuilder(null)
-                .validateIdToken(idToken, jwksUri, SignatureAlgorithm.RS256)
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS256)
                 .accessToken(accessToken)
                 .claimsPresence(JwtClaimName.ACCESS_TOKEN_HASH)
                 .notNullAuthenticationTime()
                 .notNullOxOpenIDConnectVersion()
                 .notNullAuthenticationContextClassReference()
                 .notNullAuthenticationMethodReferences()
-                .checkAsserts();
+                .check();
 
     }
 
@@ -726,7 +721,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -740,7 +735,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);
-        assertRegisterResponseOk(readClientResponse, 200, false);
+        AssertBuilder.registerResponse(readClientResponse).ok().check();
 
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
@@ -764,15 +759,15 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         String idToken = authorizationResponse.getIdToken();
 
         // 4. Validate code and id_token
-        AssertBuilder.jwtBuilder(null)
-                .validateIdToken(idToken, jwksUri, SignatureAlgorithm.RS256)
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS256)
                 .authorizationCode(code)
                 .claimsPresence(JwtClaimName.CODE_HASH)
                 .notNullAuthenticationTime()
                 .notNullOxOpenIDConnectVersion()
                 .notNullAuthenticationContextClassReference()
                 .notNullAuthenticationMethodReferences()
-                .checkAsserts();
+                .check();
 
     }
 
@@ -798,7 +793,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -812,7 +807,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);
-        assertRegisterResponseOk(readClientResponse, 200, false);
+        AssertBuilder.registerResponse(readClientResponse).ok().check();
 
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
@@ -836,15 +831,15 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         String idToken = authorizationResponse.getIdToken();
 
         // 4. Validate code and id_token
-        AssertBuilder.jwtBuilder(null)
-                .validateIdToken(idToken, jwksUri, SignatureAlgorithm.RS256)
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS256)
                 .authorizationCode(code)
                 .claimsPresence(JwtClaimName.CODE_HASH)
                 .notNullAuthenticationTime()
                 .notNullOxOpenIDConnectVersion()
                 .notNullAuthenticationContextClassReference()
                 .notNullAuthenticationMethodReferences()
-                .checkAsserts();
+                .check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
@@ -869,7 +864,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -883,7 +878,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);
-        assertRegisterResponseOk(readClientResponse, 200, false);
+        AssertBuilder.registerResponse(readClientResponse).ok().check();
 
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
@@ -927,7 +922,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -941,7 +936,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);
-        assertRegisterResponseOk(readClientResponse, 200, false);
+        AssertBuilder.registerResponse(readClientResponse).ok().check();
 
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
@@ -986,7 +981,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -1000,7 +995,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);
-        assertRegisterResponseOk(readClientResponse, 200, false);
+        AssertBuilder.registerResponse(readClientResponse).ok().check();
 
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
@@ -1027,8 +1022,8 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         String idToken = authorizationResponse.getIdToken();
 
         // 4. Validate access_token and id_token
-        AssertBuilder.jwtBuilder(null)
-                .validateIdToken(idToken, jwksUri, SignatureAlgorithm.RS256)
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS256)
                 .authorizationCode(code)
                 .accessToken(accessToken)
                 .claimsPresence(JwtClaimName.CODE_HASH, JwtClaimName.ACCESS_TOKEN_HASH)
@@ -1036,7 +1031,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
                 .notNullOxOpenIDConnectVersion()
                 .notNullAuthenticationContextClassReference()
                 .notNullAuthenticationMethodReferences()
-                .checkAsserts();
+                .check();
 
     }
 
@@ -1063,7 +1058,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -1077,7 +1072,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);
-        assertRegisterResponseOk(readClientResponse, 200, false);
+        AssertBuilder.registerResponse(readClientResponse).ok().check();
 
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
@@ -1104,8 +1099,8 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         String idToken = authorizationResponse.getIdToken();
 
         // 4. Validate access_token and id_token
-        AssertBuilder.jwtBuilder(null)
-                .validateIdToken(idToken, jwksUri, SignatureAlgorithm.RS256)
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS256)
                 .authorizationCode(code)
                 .accessToken(accessToken)
                 .claimsPresence(JwtClaimName.CODE_HASH, JwtClaimName.ACCESS_TOKEN_HASH)
@@ -1113,7 +1108,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
                 .notNullOxOpenIDConnectVersion()
                 .notNullAuthenticationContextClassReference()
                 .notNullAuthenticationMethodReferences()
-                .checkAsserts();
+                .check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
@@ -1136,7 +1131,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -1150,7 +1145,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);
-        assertRegisterResponseOk(readClientResponse, 200, false);
+        AssertBuilder.registerResponse(readClientResponse).ok().check();
 
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
@@ -1190,7 +1185,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -1204,7 +1199,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);
-        assertRegisterResponseOk(readClientResponse, 200, false);
+        AssertBuilder.registerResponse(readClientResponse).ok().check();
 
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
@@ -1246,7 +1241,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -1260,7 +1255,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);
-        assertRegisterResponseOk(readClientResponse, 200, false);
+        AssertBuilder.registerResponse(readClientResponse).ok().check();
 
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
@@ -1302,7 +1297,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -1316,7 +1311,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);
-        assertRegisterResponseOk(readClientResponse, 200, false);
+        AssertBuilder.registerResponse(readClientResponse).ok().check();
 
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
@@ -1360,7 +1355,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -1374,7 +1369,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);
-        assertRegisterResponseOk(readClientResponse, 200, false);
+        AssertBuilder.registerResponse(readClientResponse).ok().check();
 
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
@@ -1418,7 +1413,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -1432,7 +1427,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);
-        assertRegisterResponseOk(readClientResponse, 200, false);
+        AssertBuilder.registerResponse(readClientResponse).ok().check();
 
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
@@ -1447,7 +1442,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
@@ -1470,7 +1465,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -1484,7 +1479,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);
-        assertRegisterResponseOk(readClientResponse, 200, false);
+        AssertBuilder.registerResponse(readClientResponse).ok().check();
 
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
@@ -1499,7 +1494,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
@@ -1523,7 +1518,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -1537,7 +1532,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);
-        assertRegisterResponseOk(readClientResponse, 200, false);
+        AssertBuilder.registerResponse(readClientResponse).ok().check();
 
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
@@ -1552,7 +1547,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
@@ -1575,7 +1570,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -1589,7 +1584,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);
-        assertRegisterResponseOk(readClientResponse, 200, false);
+        AssertBuilder.registerResponse(readClientResponse).ok().check();
 
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
@@ -1605,7 +1600,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
@@ -1629,7 +1624,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -1643,7 +1638,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);
-        assertRegisterResponseOk(readClientResponse, 200, false);
+        AssertBuilder.registerResponse(readClientResponse).ok().check();
 
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
@@ -1659,7 +1654,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
@@ -1682,7 +1677,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -1696,7 +1691,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);
-        assertRegisterResponseOk(readClientResponse, 200, false);
+        AssertBuilder.registerResponse(readClientResponse).ok().check();
 
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
@@ -1738,7 +1733,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -1752,7 +1747,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).check();
     }
 
     @Parameters({"redirectUri", "userId", "userSecret"})
@@ -1771,7 +1766,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -1791,7 +1786,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
 
         showClient(authorizeClient);
         assertEquals(authorizationResponse.getStatus(), 302, "Unexpected response code: " + authorizationResponse.getStatus());
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).check();
     }
 
     @Parameters({"redirectUris", "userId", "userSecret", "sectorIdentifierUri"})
@@ -1810,7 +1805,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -1857,7 +1852,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1872,7 +1867,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);
-        assertRegisterResponseOk(readClientResponse, 200, false);
+        AssertBuilder.registerResponse(readClientResponse).ok().check();
 
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
@@ -1971,7 +1966,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1986,7 +1981,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);
-        assertRegisterResponseOk(readClientResponse, 200, false);
+        AssertBuilder.registerResponse(readClientResponse).ok().check();
 
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
@@ -2082,7 +2077,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -2096,7 +2091,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);
-        assertRegisterResponseOk(readClientResponse, 200, false);
+        AssertBuilder.registerResponse(readClientResponse).ok().check();
 
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
@@ -2141,7 +2136,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String sessionId = null;
@@ -2230,7 +2225,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -2244,7 +2239,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);
-        assertRegisterResponseOk(readClientResponse, 200, false);
+        AssertBuilder.registerResponse(readClientResponse).ok().check();
 
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
@@ -2258,7 +2253,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwner(
                 authorizationEndpoint, authorizationRequest, userId, userSecret, false);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
@@ -2284,7 +2279,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -2299,7 +2294,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);
-        assertRegisterResponseOk(readClientResponse, 200, false);
+        AssertBuilder.registerResponse(readClientResponse).ok().check();
 
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
@@ -2320,7 +2315,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
@@ -2344,7 +2339,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -2376,7 +2371,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String accessToken = authorizationResponse.getAccessToken();
 
@@ -2385,9 +2380,10 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicMinimumResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS));
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .notNullClaimsPersonalData()
+                .claimsPresence(JwtClaimName.EMAIL, JwtClaimName.ADDRESS)
+                .check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
@@ -2414,7 +2410,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -2429,7 +2425,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);
-        assertRegisterResponseOk(readClientResponse, 200, false);
+        AssertBuilder.registerResponse(readClientResponse).ok().check();
 
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
@@ -2459,13 +2455,13 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         String idToken = authorizationResponse1.getIdToken();
 
         // 2. Validate access_token and id_token
-        AssertBuilder.jwtBuilder(null)
-                .validateIdToken(idToken, jwksUri, SignatureAlgorithm.RS256)
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS256)
                 .claimsPresence(JwtClaimName.ACCESS_TOKEN_HASH)
                 .notNullAuthenticationTime()
                 .notNullOxOpenIDConnectVersion()
                 .notNullAuthenticationContextClassReference()
                 .notNullAuthenticationMethodReferences()
-                .checkAsserts();
+                .check();
     }
 }

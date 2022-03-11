@@ -64,7 +64,7 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -83,7 +83,7 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
 
         AuthorizationResponse authorizationResponse1 = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest1, userId, userSecret);
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse1).notNullState().notNullScope().checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse1).check();
         assertNotNull(authorizationResponse1.getSessionId(), "The session id is null");
         assertEquals(authorizationResponse1.getState(), state1);
 
@@ -102,9 +102,9 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
         TokenResponse tokenResponse1 = tokenClient1.execAuthorizationCode(code1, redirectUri, clientId, clientSecret);
 
         showClient(tokenClient1);
-        AssertBuilder.tokenResponseBuilder(tokenResponse1)
+        AssertBuilder.tokenResponse(tokenResponse1)
                 .notNullRefreshToken()
-                .checkAsserts();
+                .check();
 
         String accessToken1 = tokenResponse1.getAccessToken();
 
@@ -204,7 +204,7 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -230,7 +230,7 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse1 = authorizationRequestAndGrantAccess(
                 authorizationEndpoint, authorizationRequest1);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse1).notNullState().notNullScope().checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse1).check();
         assertNotNull(authorizationResponse1.getSessionId(), "The session id is null");
         assertEquals(authorizationRequest1.getState(), state1);
 
@@ -249,9 +249,9 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
         TokenResponse tokenResponse1 = tokenClient1.exec();
 
         showClient(tokenClient1);
-        AssertBuilder.tokenResponseBuilder(tokenResponse1)
+        AssertBuilder.tokenResponse(tokenResponse1)
                 .notNullRefreshToken()
-                .checkAsserts();
+                .check();
 
         // User wants to authenticate on B2 (without sending its credentials)
 
@@ -342,8 +342,8 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
         TokenResponse tokenResponse3 = tokenClient3.exec();
 
         showClient(tokenClient3);
-        AssertBuilder.tokenResponseBuilder(tokenResponse3)
+        AssertBuilder.tokenResponse(tokenResponse3)
                 .notNullRefreshToken()
-                .checkAsserts();
+                .check();
     }
 }

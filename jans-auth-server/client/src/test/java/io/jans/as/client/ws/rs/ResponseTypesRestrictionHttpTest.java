@@ -10,7 +10,6 @@ import io.jans.as.client.AuthorizationRequest;
 import io.jans.as.client.AuthorizationResponse;
 import io.jans.as.client.AuthorizeClient;
 import io.jans.as.client.BaseTest;
-import io.jans.as.client.JwkClient;
 import io.jans.as.client.RegisterClient;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
@@ -23,12 +22,8 @@ import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseType;
-import io.jans.as.model.crypto.signature.RSAPublicKey;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
-import io.jans.as.model.jws.RSASigner;
-import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
-import io.jans.as.model.jwt.JwtHeaderName;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.StringUtils;
 import org.testng.ITestContext;
@@ -79,7 +74,7 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -94,7 +89,7 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);
-        assertRegisterResponseOk(readClientResponse, 200, false);
+        AssertBuilder.registerResponse(readClientResponse).ok().check();
 
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
@@ -113,7 +108,7 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).check();
 
         String authorizationCode = authorizationResponse.getCode();
 
@@ -130,9 +125,9 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        AssertBuilder.tokenResponseBuilder(tokenResponse)
+        AssertBuilder.tokenResponse(tokenResponse)
                 .notNullRefreshToken()
-                .checkAsserts();
+                .check();
     }
 
     @DataProvider(name = "omittedResponseTypesFailDataProvider")
@@ -172,7 +167,7 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -186,7 +181,7 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);
-        assertRegisterResponseOk(readClientResponse, 200, false);
+        AssertBuilder.registerResponse(readClientResponse).ok().check();
 
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
@@ -241,7 +236,7 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -256,7 +251,7 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);
-        assertRegisterResponseOk(readClientResponse, 200, false);
+        AssertBuilder.registerResponse(readClientResponse).ok().check();
 
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
@@ -275,23 +270,18 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String authorizationCode = authorizationResponse.getCode();
         String idToken = authorizationResponse.getIdToken();
 
         // 4. Validate code and id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertJwtStandarClaimsNotNull(jwt, false);
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.CODE_HASH));
-
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS256, publicKey);
-
-        assertTrue(rsaSigner.validate(jwt));
-        assertTrue(rsaSigner.validateAuthorizationCode(authorizationCode, jwt));
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS256)
+                .authorizationCode(authorizationCode)
+                .notNullAuthenticationTime()
+                .claimsPresence(JwtClaimName.CODE_HASH)
+                .check();
 
         // 5. Get Access Token
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
@@ -306,9 +296,9 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
         TokenResponse tokenResponse1 = tokenClient.exec();
 
         showClient(tokenClient);
-        AssertBuilder.tokenResponseBuilder(tokenResponse1)
+        AssertBuilder.tokenResponse(tokenResponse1)
                 .notNullRefreshToken()
-                .checkAsserts();
+                .check();
     }
 
     @DataProvider(name = "responseTypesCodeIdTokenFailDataProvider")
@@ -349,7 +339,7 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -363,7 +353,7 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);
-        assertRegisterResponseOk(readClientResponse, 200, false);
+        AssertBuilder.registerResponse(readClientResponse).ok().check();
 
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
@@ -414,7 +404,7 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -428,7 +418,7 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);
-        assertRegisterResponseOk(readClientResponse, 200, false);
+        AssertBuilder.registerResponse(readClientResponse).ok().check();
 
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
@@ -448,22 +438,18 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String accessToken = authorizationResponse.getAccessToken();
         String idToken = authorizationResponse.getIdToken();
 
         // 4. Validate code and id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertJwtStandarClaimsNotNull(jwt, true);
-
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS256, publicKey);
-
-        assertTrue(rsaSigner.validate(jwt));
-        assertTrue(rsaSigner.validateAccessToken(accessToken, jwt));
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS256)
+                .accessToken(accessToken)
+                .notNullAuthenticationTime()
+                .notNullAccesTokenHash()
+                .check();
     }
 
     @DataProvider(name = "responseTypesTokenIdTokenFailDataProvider")
@@ -501,7 +487,7 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -515,7 +501,7 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);
-        assertRegisterResponseOk(readClientResponse, 200, false);
+        AssertBuilder.registerResponse(readClientResponse).ok().check();
 
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 

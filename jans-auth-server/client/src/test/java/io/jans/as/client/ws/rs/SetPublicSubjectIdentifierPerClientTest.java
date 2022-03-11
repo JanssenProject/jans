@@ -61,7 +61,7 @@ public class SetPublicSubjectIdentifierPerClientTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
 
@@ -116,9 +116,9 @@ public class SetPublicSubjectIdentifierPerClientTest extends BaseTest {
         showClient(registerClient);
 
         if (checkError) {
-            AssertBuilder.registerResponse(registerResponse).status(400).checkAsserts();
+            AssertBuilder.registerResponse(registerResponse).status(400).check();
         } else {
-            assertRegisterResponseOk(registerResponse, 201, true);
+            AssertBuilder.registerResponse(registerResponse).created().check();
         }
 
         return registerResponse;

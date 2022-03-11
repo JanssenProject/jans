@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.UUID;
 
 import static io.jans.as.client.client.Asserter.*;
-import static io.jans.as.model.register.RegisterRequestParam.APPLICATION_TYPE;
 import static io.jans.as.model.register.RegisterRequestParam.CLIENT_NAME;
 import static io.jans.as.model.register.RegisterRequestParam.ID_TOKEN_SIGNED_RESPONSE_ALG;
 import static io.jans.as.model.register.RegisterRequestParam.REDIRECT_URIS;
@@ -82,7 +81,7 @@ public class AuthorizeSessionIdRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -96,7 +95,7 @@ public class AuthorizeSessionIdRestWebServiceHttpTest extends BaseTest {
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);
-        assertRegisterResponseOk(readClientResponse, 200, false);
+        AssertBuilder.registerResponse(readClientResponse).ok().check();
 
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
@@ -121,7 +120,7 @@ public class AuthorizeSessionIdRestWebServiceHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint2, authorizationRequest2, userId, userSecret, false);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).check();
         assertNotEquals(sessionId, authorizationResponse.getSessionId(), "The session_id is the same for 2 different authorization requests");
     }
 

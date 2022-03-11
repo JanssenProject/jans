@@ -9,7 +9,6 @@ package io.jans.as.client.ws.rs;
 import io.jans.as.client.AuthorizationRequest;
 import io.jans.as.client.AuthorizationResponse;
 import io.jans.as.client.BaseTest;
-import io.jans.as.client.JwkClient;
 import io.jans.as.client.RegisterClient;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
@@ -24,12 +23,8 @@ import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.common.SubjectType;
-import io.jans.as.model.crypto.signature.RSAPublicKey;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
-import io.jans.as.model.jws.RSASigner;
-import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
-import io.jans.as.model.jwt.JwtHeaderName;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.StringUtils;
 import org.testng.annotations.Parameters;
@@ -75,7 +70,7 @@ public class ApplicationTypeRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
         String registrationClientUri = registerResponse.getRegistrationClientUri();
@@ -88,7 +83,7 @@ public class ApplicationTypeRestrictionHttpTest extends BaseTest {
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);
-        assertRegisterResponseOk(readClientResponse, 200, false);
+        AssertBuilder.registerResponse(readClientResponse).ok().check();
 
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
         assertEquals(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()), ApplicationType.WEB.toString());
@@ -113,7 +108,7 @@ public class ApplicationTypeRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
         String registrationClientUri = registerResponse.getRegistrationClientUri();
@@ -126,7 +121,7 @@ public class ApplicationTypeRestrictionHttpTest extends BaseTest {
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);
-        assertRegisterResponseOk(readClientResponse, 200, false);
+        AssertBuilder.registerResponse(readClientResponse).ok().check();
 
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
         assertEquals(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()), ApplicationType.WEB.toString());
@@ -146,7 +141,7 @@ public class ApplicationTypeRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
 
         showClient(registerClient);
-        AssertBuilder.registerResponse(registerResponse).status(400).checkAsserts();
+        AssertBuilder.registerResponse(registerResponse).status(400).check();
     }
 
     /**
@@ -176,7 +171,7 @@ public class ApplicationTypeRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -242,17 +237,12 @@ public class ApplicationTypeRestrictionHttpTest extends BaseTest {
         String refreshToken = tokenResponse1.getRefreshToken();
 
         // 5. Validate id_token 
-        Jwt jwt = Jwt.parse(idToken);
-        assertJwtStandarClaimsNotNull(jwt, false);
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.CODE_HASH));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.OX_OPENID_CONNECT_VERSION));
-
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS256, publicKey);
-
-        assertTrue(rsaSigner.validate(jwt));
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS256)
+                .notNullOxOpenIDConnectVersion()
+                .notNullAuthenticationTime()
+                .claimsPresence(JwtClaimName.CODE_HASH)
+                .check();
 
         // 6. Request new access token using the refresh token.
         TokenClient tokenClient2 = new TokenClient(tokenEndpoint);
@@ -303,7 +293,7 @@ public class ApplicationTypeRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -369,17 +359,12 @@ public class ApplicationTypeRestrictionHttpTest extends BaseTest {
         String refreshToken = tokenResponse1.getRefreshToken();
 
         // 5. Validate id_token 
-        Jwt jwt = Jwt.parse(idToken);
-        assertJwtStandarClaimsNotNull(jwt, false);
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.CODE_HASH));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.OX_OPENID_CONNECT_VERSION));
-
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS256, publicKey);
-
-        assertTrue(rsaSigner.validate(jwt));
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS256)
+                .notNullOxOpenIDConnectVersion()
+                .notNullAuthenticationTime()
+                .claimsPresence(JwtClaimName.CODE_HASH)
+                .check();
 
         // 6. Request new access token using the refresh token.
         TokenClient tokenClient2 = new TokenClient(tokenEndpoint);
@@ -420,7 +405,7 @@ public class ApplicationTypeRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
 
         showClient(registerClient);
-        AssertBuilder.registerResponse(registerResponse).status(400).checkAsserts();
+        AssertBuilder.registerResponse(registerResponse).status(400).check();
     }
 
     /**
@@ -437,6 +422,6 @@ public class ApplicationTypeRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
 
         showClient(registerClient);
-        AssertBuilder.registerResponse(registerResponse).status(400).checkAsserts();
+        AssertBuilder.registerResponse(registerResponse).status(400).check();
     }
 }

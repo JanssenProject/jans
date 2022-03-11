@@ -1,11 +1,8 @@
 package io.jans.as.client.client.assertbuilders;
 
 import io.jans.as.client.JwkClient;
-import io.jans.as.client.client.AssertBuilder;
-import io.jans.as.model.crypto.signature.RSAPublicKey;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
-import io.jans.as.model.exception.InvalidJwtException;
-import io.jans.as.model.jws.RSASigner;
+import io.jans.as.model.jws.*;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.jwt.JwtHeaderName;
@@ -14,6 +11,9 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import static io.jans.as.client.BaseTest.clientEngine;
 import static org.testng.Assert.*;
@@ -27,11 +27,11 @@ public class JwtAssertBuilder extends BaseAssertBuilder {
     private boolean notNullAuthenticationContextClassReference;
     private boolean notNullAuthenticationMethodReferences;
     private boolean notNullClaimsAddressdata;
+    private boolean checkMemberOfClaimNoEmpty;
     private String[] claimsPresence;
     private String[] claimsNoPresence;
 
-    private RSAPublicKey publicKey;
-    private SignatureAlgorithm signatureAlgorithm;
+    private AbstractJwsSigner jwtSigner;
     private String authorizationCode;
     private String accessToken;
     private String state;
@@ -45,8 +45,7 @@ public class JwtAssertBuilder extends BaseAssertBuilder {
         this.notNullAuthenticationMethodReferences = false;
         this.claimsPresence = null;
 
-        this.publicKey = null;
-        this.signatureAlgorithm = null;
+        this.jwtSigner = null;
     }
 
     public JwtAssertBuilder notNullAccesTokenHash() {
@@ -80,19 +79,26 @@ public class JwtAssertBuilder extends BaseAssertBuilder {
     }
 
     public JwtAssertBuilder claimsPresence(String... claimsPresence) {
-        this.claimsPresence = claimsPresence;
+        if (this.claimsPresence != null) {
+            List<String> listClaims = new ArrayList<>();
+            listClaims.addAll(Arrays.asList(this.claimsPresence));
+            listClaims.addAll(Arrays.asList(claimsPresence));
+            this.claimsPresence = (String[]) listClaims.toArray();
+        } else {
+            this.claimsPresence = claimsPresence;
+        }
         return this;
     }
 
     public JwtAssertBuilder claimsNoPresence(String... claimsNoPresence) {
-        this.claimsNoPresence = claimsNoPresence;
-        return this;
-    }
-
-    public JwtAssertBuilder validateIdToken(String idToken, String jwksUri, SignatureAlgorithm signatureAlgorithm) throws InvalidJwtException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
-        this.jwt = Jwt.parse(idToken);
-        this.publicKey = JwkClient.getRSAPublicKey(jwksUri, jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID), clientEngine(true));
-        this.signatureAlgorithm = signatureAlgorithm;
+        if (this.claimsNoPresence != null) {
+            List<String> listClaims = new ArrayList<>();
+            listClaims.addAll(Arrays.asList(this.claimsNoPresence));
+            listClaims.addAll(Arrays.asList(claimsNoPresence));
+            this.claimsNoPresence = (String[]) listClaims.toArray();
+        } else {
+            this.claimsNoPresence = claimsNoPresence;
+        }
         return this;
     }
 
@@ -119,8 +125,38 @@ public class JwtAssertBuilder extends BaseAssertBuilder {
         assertNotNull(jwt.getClaims().getClaimAsString(claim), "Jwt Claim " + claim + " is null");
     }
 
+    public JwtAssertBuilder claimMemberOfNoEmpty() {
+        this.checkMemberOfClaimNoEmpty = true;
+        return this;
+    }
+
+    public JwtAssertBuilder validateSignatureRSA(String jwksUri, SignatureAlgorithm signatureAlgorithm) {
+        this.jwtSigner = new RSASigner(signatureAlgorithm, JwkClient.getRSAPublicKey(jwksUri, jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID)));
+        return this;
+    }
+
+    public JwtAssertBuilder validateSignatureRSAClientEngine(String jwksUri, SignatureAlgorithm signatureAlgorithm) throws UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+        this.jwtSigner = new RSASigner(signatureAlgorithm, JwkClient.getRSAPublicKey(jwksUri, jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID), clientEngine(true)));
+        return this;
+    }
+
+    public JwtAssertBuilder validateSignatureECDSA(String jwksUri, SignatureAlgorithm signatureAlgorithm) {
+        this.jwtSigner = new ECDSASigner(signatureAlgorithm, JwkClient.getECDSAPublicKey(jwksUri, jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID)));
+        return this;
+    }
+
+    public JwtAssertBuilder validateSignatureHMAC(SignatureAlgorithm signatureAlgorithm, String clientSecret) {
+        this.jwtSigner = new HMACSigner(signatureAlgorithm, clientSecret);
+        return this;
+    }
+
+    public JwtAssertBuilder validateSignaturePlainText() {
+        this.jwtSigner = new PlainTextSignature();
+        return this;
+    }
+
     @Override
-    public void checkAsserts() {
+    public void check() {
         assertNotNull(jwt, "Jwt is null");
         assertNotNullHeaderClaim(JwtHeaderName.TYPE);
         assertNotNullHeaderClaim(JwtHeaderName.ALGORITHM);
@@ -140,6 +176,10 @@ public class JwtAssertBuilder extends BaseAssertBuilder {
             assertNotNullClaim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE);
         if (notNullAuthenticationMethodReferences)
             assertNotNullClaim(JwtClaimName.AUTHENTICATION_METHOD_REFERENCES);
+        if (checkMemberOfClaimNoEmpty) {
+            assertNotNull(jwt.getClaims().getClaimAsStringList("member_of"));
+            assertTrue(jwt.getClaims().getClaimAsStringList("member_of").size() > 1);
+        }
 
         if (notNullClaimsAddressdata) {
             assertNotNullClaim(JwtClaimName.ADDRESS_STREET_ADDRESS);
@@ -165,21 +205,20 @@ public class JwtAssertBuilder extends BaseAssertBuilder {
             }
         }
 
-        if (signatureAlgorithm != null && publicKey != null) {
-            RSASigner rsaSigner = new RSASigner(signatureAlgorithm, publicKey);
-            assertTrue(rsaSigner.validate(jwt));
+        if (jwtSigner != null) {
+            assertTrue(jwtSigner.validate(jwt));
 
             if (authorizationCode != null) {
-                assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.CODE_HASH));
-                assertTrue(rsaSigner.validateAuthorizationCode(authorizationCode, jwt));
+//                assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.CODE_HASH));
+                assertTrue(jwtSigner.validateAuthorizationCode(authorizationCode, jwt));
             }
             if (accessToken != null) {
                 assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ACCESS_TOKEN_HASH));
-                assertTrue(rsaSigner.validateAccessToken(accessToken, jwt));
+                assertTrue(jwtSigner.validateAccessToken(accessToken, jwt));
             }
             if (state != null) {
                 assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.STATE_HASH));
-                assertTrue(rsaSigner.validateState(state, jwt));
+                assertTrue(jwtSigner.validateState(state, jwt));
             }
         }
     }

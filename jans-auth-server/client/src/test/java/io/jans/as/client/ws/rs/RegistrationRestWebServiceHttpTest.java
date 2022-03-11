@@ -90,7 +90,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
         String registrationClientUri = registerResponse.getRegistrationClientUri();
@@ -179,7 +179,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(response, 201, true);
+        AssertBuilder.registerResponse(response).created().check();
         assertNotNull(response.getClaims().get(SCOPE.toString()));
         assertTrue(Boolean.parseBoolean(response.getClaims().get(BACKCHANNEL_LOGOUT_SESSION_REQUIRED.toString())));
         assertEquals(logoutUri, new JSONArray(response.getClaims().get(BACKCHANNEL_LOGOUT_URI.toString())).getString(0));
@@ -252,7 +252,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         registerClient.setRequest(registerRequest);
         RegisterResponse response = registerClient.exec();
         showClient(registerClient);
-        assertRegisterResponseOk(response, 201, true);
+        AssertBuilder.registerResponse(response).created().check();
         assertTrue(response.getClaims().containsKey(SOFTWARE_ID.toString()));
         assertEquals(response.getClaims().get(SOFTWARE_ID.toString()), softwareId);
         assertTrue(response.getClaims().containsKey(SOFTWARE_VERSION.toString()));
@@ -302,7 +302,9 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(response, 200, true);
+        AssertBuilder.registerResponse(response).ok()
+                .notNullRegistrationClientUri()
+                .check();
         assertRegisterResponseClaimsNotNull(response, APPLICATION_TYPE, POLICY_URI, REQUEST_OBJECT_SIGNING_ALG, CONTACTS, SECTOR_IDENTIFIER_URI);
         assertRegisterResponseClaimsNotNull(response, SUBJECT_TYPE, ID_TOKEN_SIGNED_RESPONSE_ALG, JWKS_URI, CLIENT_NAME, LOGO_URI, REQUEST_URIS, SCOPE);
     }
@@ -331,7 +333,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(response, 201, true);
+        AssertBuilder.registerResponse(response).created().check();
         assertNotNull(response.getClaims().get(SCOPE.toString()));
         assertNotNull(response.getClaims().get(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString()));
         assertTrue(Boolean.parseBoolean(response.getClaims().get(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString())));
@@ -419,7 +421,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         final RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(response, 201, true);
+        AssertBuilder.registerResponse(response).created().check();
     }
 
     @Test
@@ -435,7 +437,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        AssertBuilder.registerResponse(response).status(400).checkAsserts();
+        AssertBuilder.registerResponse(response).status(400).check();
     }
 
     @Test
@@ -447,7 +449,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
                 Arrays.asList("https://client.example.com/cb#fail_fragment"));
 
         showClient(registerClient);
-        AssertBuilder.registerResponse(response).status(400).checkAsserts();
+        AssertBuilder.registerResponse(response).status(400).check();
     }
 
     @Parameters({"redirectUris"})
@@ -489,7 +491,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(response, 201, true);
+        AssertBuilder.registerResponse(response).created().check();
     }
 
     @Parameters({"redirectUris", "sectorIdentifierUri"})
@@ -511,7 +513,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(response, 201, true);
+        AssertBuilder.registerResponse(response).created().check();
     }
 
     @Parameters({"redirectUris"})
@@ -532,7 +534,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(response, 201, true);
+        AssertBuilder.registerResponse(response).created().check();
     }
 
     @Parameters({"redirectUris"})
@@ -553,7 +555,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(response, 201, true);
+        AssertBuilder.registerResponse(response).created().check();
     }
 
     @Parameters({"redirectUris"})
@@ -596,7 +598,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(response, 201, true);
+        AssertBuilder.registerResponse(response).created().check();
 
         registerRequest = new RegisterRequest(response.getRegistrationAccessToken());
         registerRequest.setHttpMethod(HttpMethod.DELETE);

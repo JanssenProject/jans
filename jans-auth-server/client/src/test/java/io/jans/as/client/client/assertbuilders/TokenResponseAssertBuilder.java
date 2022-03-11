@@ -13,6 +13,8 @@ public class TokenResponseAssertBuilder extends BaseAssertBuilder {
     private int status = 200;
     private boolean notNullRefreshToken;
     private boolean notNullIdToken;
+    private boolean notNullScope;
+    private boolean nullRefreshToken;
     private TokenErrorResponseType errorResponseType;
 
     public TokenResponseAssertBuilder(TokenResponse response) {
@@ -20,6 +22,23 @@ public class TokenResponseAssertBuilder extends BaseAssertBuilder {
         this.status = 200;
         this.notNullIdToken = false;
         this.notNullRefreshToken = false;
+        this.notNullScope = false;
+        this.nullRefreshToken = false;
+    }
+
+    public TokenResponseAssertBuilder ok() {
+        this.status = 200;
+        return this;
+    }
+
+    public TokenResponseAssertBuilder created() {
+        this.status = 201;
+        return this;
+    }
+
+    public TokenResponseAssertBuilder bad() {
+        this.status = 400;
+        return this;
     }
 
     public TokenResponseAssertBuilder status(int status) {
@@ -29,11 +48,23 @@ public class TokenResponseAssertBuilder extends BaseAssertBuilder {
 
     public TokenResponseAssertBuilder notNullRefreshToken() {
         this.notNullRefreshToken = true;
+        this.nullRefreshToken = false;
         return this;
     }
 
     public TokenResponseAssertBuilder notNullIdToken() {
         this.notNullIdToken = true;
+        return this;
+    }
+
+    public TokenResponseAssertBuilder notNullScope() {
+        this.notNullScope = true;
+        return this;
+    }
+
+    public TokenResponseAssertBuilder nullRefreshToken() {
+        this.nullRefreshToken = true;
+        this.notNullRefreshToken = false;
         return this;
     }
 
@@ -43,7 +74,7 @@ public class TokenResponseAssertBuilder extends BaseAssertBuilder {
     }
 
     @Override
-    public void checkAsserts() {
+    public void check() {
         assertNotNull(response, "TokenResponse is null");
         if (status == 200 || status == 201) {
             assertEquals(response.getStatus(), status, "Unexpected response code: " + response.getStatus());

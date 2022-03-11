@@ -24,9 +24,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-
-import static io.jans.as.client.client.Asserter.assertTokenResponseOk;
-import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
 /**
@@ -81,9 +78,9 @@ public class MultiStepAuthorizationCodeFlowHttpTest extends BaseTest {
         TokenResponse tokenResponse1 = tokenClient1.exec();
 
         showClient(tokenClient1);
-        AssertBuilder.tokenResponseBuilder(tokenResponse1)
+        AssertBuilder.tokenResponse(tokenResponse1)
                 .notNullRefreshToken()
-                .checkAsserts();
+                .check();
     }
 
     private AuthorizationResponse requestAuthorization(final String userId, final String userSecret, final String redirectUri,
@@ -97,7 +94,7 @@ public class MultiStepAuthorizationCodeFlowHttpTest extends BaseTest {
                 authorizationEndpoint, authorizationRequest, userId, userSecret,
                 true, false, countAuthzSteps);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).check();
         return authorizationResponse;
     }
 }

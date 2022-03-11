@@ -36,7 +36,7 @@ import java.util.List;
 import java.util.UUID;
 
 
-import static io.jans.as.client.client.Asserter.assertRegisterResponseOk;
+
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
@@ -103,7 +103,7 @@ public class TokenBindingHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authorizeClient.exec();
         showClient(authorizeClient);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullScope().notNullState().responseTypes(responseTypes).checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
         assertNotNull(authorizationResponse.getIdToken(), "The id token must be null");
         return authorizationResponse;
     }
@@ -123,7 +123,7 @@ public class TokenBindingHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         return registerResponse;
     }

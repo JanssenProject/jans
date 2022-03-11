@@ -76,7 +76,7 @@ public class OPRegistrationJwks extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
         assertNotNull(registerResponse.getResponseTypes());
         assertTrue(registerResponse.getResponseTypes().containsAll(responseTypes));
         assertNotNull(registerResponse.getGrantTypes());
@@ -125,9 +125,9 @@ public class OPRegistrationJwks extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        AssertBuilder.tokenResponseBuilder(tokenResponse)
+        AssertBuilder.tokenResponse(tokenResponse)
                 .notNullRefreshToken()
-                .checkAsserts();
+                .check();
     }
 
     @Parameters({"redirectUri", "postLogoutRedirectUri", "clientJwksUri", "userId", "userSecret", "RS256_keyId",
@@ -158,7 +158,7 @@ public class OPRegistrationJwks extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
         assertNotNull(registerResponse.getResponseTypes());
         assertTrue(registerResponse.getResponseTypes().containsAll(responseTypes));
         assertNotNull(registerResponse.getGrantTypes());
@@ -181,7 +181,7 @@ public class OPRegistrationJwks extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullState().notNullScope().checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).check();
 
         String authorizationCode = authorizationResponse.getCode();
 
@@ -205,8 +205,8 @@ public class OPRegistrationJwks extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        AssertBuilder.tokenResponseBuilder(tokenResponse)
+        AssertBuilder.tokenResponse(tokenResponse)
                 .notNullRefreshToken()
-                .checkAsserts();
+                .check();
     }
 }

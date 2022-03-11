@@ -67,8 +67,12 @@ public class BackchannelAuthenticationExpiredRequestsTests extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
-        assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256, BackchannelTokenDeliveryMode.POLL, true);
+        AssertBuilder.registerResponse(registerResponse).created()
+                .notNullRegistrationClientUri()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -93,12 +97,8 @@ public class BackchannelAuthenticationExpiredRequestsTests extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        AssertBuilder.backchannelAuthenticationResponseBuilder(backchannelAuthenticationResponse)
-                        .status(200)
-                        .notNullInterval()
-                        .notNullAuthReqId()
-                        .notNullExpiresIn()
-                        .checkAsserts();
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .check();
 
         // 3. Request token - expected expiration error
 
@@ -121,10 +121,10 @@ public class BackchannelAuthenticationExpiredRequestsTests extends BaseTest {
         } while (pollCount < 5 && tokenResponse.getStatus() == 400
                 && tokenResponse.getErrorType() == TokenErrorResponseType.AUTHORIZATION_PENDING);
 
-        AssertBuilder.tokenResponseBuilder(tokenResponse)
+        AssertBuilder.tokenResponse(tokenResponse)
                 .status(400)
                 .errorResponseType(TokenErrorResponseType.EXPIRED_TOKEN)
-                .checkAsserts();
+                .check();
     }
 
     /**
@@ -152,8 +152,12 @@ public class BackchannelAuthenticationExpiredRequestsTests extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
-        assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256, BackchannelTokenDeliveryMode.PING, true);
+        AssertBuilder.registerResponse(registerResponse).created()
+                .notNullRegistrationClientUri()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -178,12 +182,8 @@ public class BackchannelAuthenticationExpiredRequestsTests extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        AssertBuilder.backchannelAuthenticationResponseBuilder(backchannelAuthenticationResponse)
-                        .status(200)
-                        .notNullInterval()
-                        .notNullAuthReqId()
-                        .notNullExpiresIn()
-                        .checkAsserts();
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .check();
 
         // 3. Request token - expected expiration error
 
@@ -206,10 +206,10 @@ public class BackchannelAuthenticationExpiredRequestsTests extends BaseTest {
         } while (pollCount < 5 && tokenResponse.getStatus() == 400
                 && tokenResponse.getErrorType() == TokenErrorResponseType.AUTHORIZATION_PENDING);
 
-        AssertBuilder.tokenResponseBuilder(tokenResponse)
+        AssertBuilder.tokenResponse(tokenResponse)
                 .status(400)
                 .errorResponseType(TokenErrorResponseType.EXPIRED_TOKEN)
-                .checkAsserts();
+                .check();
     }
 
     /**
@@ -237,8 +237,12 @@ public class BackchannelAuthenticationExpiredRequestsTests extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
-        assertRegisterResponseClaimsBackChannel(registerResponse, AsymmetricSignatureAlgorithm.RS256, BackchannelTokenDeliveryMode.PING, true);
+        AssertBuilder.registerResponse(registerResponse).created()
+                .notNullRegistrationClientUri()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -263,12 +267,12 @@ public class BackchannelAuthenticationExpiredRequestsTests extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        AssertBuilder.backchannelAuthenticationResponseBuilder(backchannelAuthenticationResponse)
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse)
                 .status(400)
                 .errorResponseType(BackchannelAuthenticationErrorResponseType.INVALID_REQUEST)
                 .nullAuthReqId()
                 .nullExpiresIn()
-                .checkAsserts();
+                .check();
     }
 
 }

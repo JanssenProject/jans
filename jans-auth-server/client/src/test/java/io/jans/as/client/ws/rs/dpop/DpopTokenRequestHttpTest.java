@@ -545,9 +545,9 @@ public class DpopTokenRequestHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        AssertBuilder.tokenResponseBuilder(tokenResponse)
+        AssertBuilder.tokenResponse(tokenResponse)
                 .notNullRefreshToken()
-                .checkAsserts();
+                .check();
         assertEquals(tokenResponse.getTokenType(), TokenType.DPOP);
     }
 
@@ -592,9 +592,9 @@ public class DpopTokenRequestHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        AssertBuilder.tokenResponseBuilder(tokenResponse)
+        AssertBuilder.tokenResponse(tokenResponse)
                 .notNullRefreshToken()
-                .checkAsserts();
+                .check();
         assertEquals(tokenResponse.getTokenType(), TokenType.DPOP);
         return tokenResponse;
     }
@@ -610,7 +610,7 @@ public class DpopTokenRequestHttpTest extends BaseTest {
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
-        AssertBuilder.authorizationResponseBuilder(authorizationResponse).notNullState().notNullScope().checkAsserts();
+        AssertBuilder.authorizationResponse(authorizationResponse).check();
 
         return authorizationResponse.getCode();
     }
@@ -630,7 +630,7 @@ public class DpopTokenRequestHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         return registerResponse.getClientId();
     }

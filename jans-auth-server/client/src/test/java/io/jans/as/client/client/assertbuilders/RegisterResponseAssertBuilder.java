@@ -25,6 +25,21 @@ public class RegisterResponseAssertBuilder extends BaseAssertBuilder {
         this.backchannelUserCodeParameter = null;
     }
 
+    public RegisterResponseAssertBuilder ok() {
+        this.status = 200;
+        return this;
+    }
+
+    public RegisterResponseAssertBuilder created() {
+        this.status = 201;
+        return this;
+    }
+
+    public RegisterResponseAssertBuilder bad() {
+        this.status = 400;
+        return this;
+    }
+
     public RegisterResponseAssertBuilder status(int status) {
         this.status = status;
         return this;
@@ -51,7 +66,7 @@ public class RegisterResponseAssertBuilder extends BaseAssertBuilder {
     }
 
     @Override
-    public void checkAsserts() {
+    public void check() {
         if (status == 200 || status == 201) {
             assertEquals(response.getStatus(), status, "Unexpected response code: " + response.getEntity());
 

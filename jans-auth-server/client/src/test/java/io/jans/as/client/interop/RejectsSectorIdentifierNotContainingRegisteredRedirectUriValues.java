@@ -48,6 +48,6 @@ public class RejectsSectorIdentifierNotContainingRegisteredRedirectUriValues ext
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        AssertBuilder.registerResponse(registerResponse).status(400).checkAsserts();
+        AssertBuilder.registerResponse(registerResponse).status(400).check();
     }
 }
