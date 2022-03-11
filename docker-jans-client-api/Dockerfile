@@ -1,4 +1,4 @@
-FROM bellsoft/liberica-openjre-alpine:11
+FROM bellsoft/liberica-openjre-alpine:11.0.13-8
 
 # ===============
 # Alpine packages
@@ -16,7 +16,7 @@ RUN apk update \
 # ==========
 
 ENV CN_VERSION=1.0.0-SNAPSHOT
-ENV CN_BUILD_DATE='2021-12-21 10:52'
+ENV CN_BUILD_DATE='2022-03-10 17:03'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-client-api-server/${CN_VERSION}/jans-client-api-server-${CN_VERSION}-distribution.zip
 
 RUN wget -q ${CN_SOURCE_URL} -O /tmp/client-api.zip \
