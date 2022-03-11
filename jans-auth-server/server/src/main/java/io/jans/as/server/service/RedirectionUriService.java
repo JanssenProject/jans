@@ -106,20 +106,33 @@ public class RedirectionUriService {
                 redirectUris = getSectorRedirectUris(sectorIdentifierUri).toArray(new String[0]);
             }
 
-            if (StringUtils.isNotBlank(redirectionUri) && redirectUris != null) {
-                log.debug("Validating redirection URI: clientIdentifier = {}, redirectionUri = {}, found = {}",
-                        client.getClientId(), redirectionUri, redirectUris.length);
+            if (StringUtils.isBlank(sectorIdentifierUri) && redirectUris != null && redirectUris.length == 1) {
+                return redirectUris[0];
+            }
 
-                if (isUriEqual(redirectionUri, redirectUris)) {
-                    return redirectionUri;
+            if (StringUtils.isNotBlank(redirectionUri)) {
+                if (redirectUris != null) {
+                    log.debug("Validating redirection URI: clientIdentifier = {}, redirectionUri = {}, found = {}",
+                            client.getClientId(), redirectionUri, redirectUris.length);
+                    if (isUriEqual(redirectionUri, redirectUris)) {
+                        return redirectionUri;
+                    } else {
+                        log.debug("RedirectionUri didn't match with any of the client redirect uris, clientId = {}, redirectionUri = {}", client.getClientId(), redirectionUri);
+                    }
+                }
+
+                if (appConfiguration.getRedirectUrisRegexEnabled()) {
+                    if (redirectionUri.matches(client.getAttributes().getRedirectUrisRegex())) {
+                        return redirectionUri;
+                    } else {
+                        log.debug("RedirectionUri didn't match with client regular expression, clientId = {}, redirectionUri = {}", client.getClientId(), redirectionUri);
+                    }
                 }
             } else {
-                // Accept Request Without redirect_uri when One Registered
-                if (redirectUris != null && redirectUris.length == 1) {
-                    return redirectUris[0];
-                }
+                log.warn("RedirectionUri is blank, clientId = {}", client.getClientId());
             }
         } catch (Exception e) {
+            log.error("Problems validating redirection uri, clientId = {}, redirectionUri = {}", client.getClientId(), redirectionUri);
             return null;
         }
         return null;
