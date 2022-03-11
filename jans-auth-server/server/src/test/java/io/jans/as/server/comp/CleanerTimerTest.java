@@ -37,8 +37,8 @@ import io.jans.util.security.StringEncrypter;
 import org.testng.annotations.Test;
 import org.testng.collections.Lists;
 
-import javax.inject.Inject;
-import javax.ws.rs.WebApplicationException;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;

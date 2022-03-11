@@ -11,7 +11,7 @@ import io.jans.as.server.BaseTest;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 /**
  * @author Javier Rojas Blum Date: 05.30.2012

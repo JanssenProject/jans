@@ -23,7 +23,7 @@ import io.jans.as.model.register.ApplicationType;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import javax.ws.rs.HttpMethod;
+import jakarta.ws.rs.HttpMethod;
 import java.util.Arrays;
 import java.util.Collections;
 

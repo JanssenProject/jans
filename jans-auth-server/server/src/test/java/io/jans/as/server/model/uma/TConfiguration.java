@@ -13,8 +13,8 @@ import io.jans.as.server.BaseTest;
 import io.jans.as.server.util.ServerUtil;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.client.Invocation.Builder;
+import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.net.URI;
 

@@ -13,7 +13,7 @@ import org.apache.commons.lang.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 /**
  * @author Yuriy Zabrovarnyy

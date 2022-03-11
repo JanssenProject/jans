@@ -18,7 +18,7 @@ import org.json.JSONObject;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import java.security.interfaces.ECPrivateKey;
 import java.util.GregorianCalendar;

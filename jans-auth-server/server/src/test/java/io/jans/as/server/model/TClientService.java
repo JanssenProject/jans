@@ -14,9 +14,9 @@ import io.jans.as.server.BaseTest;
 import io.jans.as.server.register.ws.rs.RegisterRestWebService;
 import io.jans.as.server.util.ServerUtil;
 
-import javax.ejb.Stateless;
-import javax.inject.Named;
-import javax.ws.rs.core.Response;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Named;
+import jakarta.ws.rs.core.Response;
 import java.net.URI;
 
 import static org.testng.Assert.assertEquals;
