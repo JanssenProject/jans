@@ -81,7 +81,6 @@ def main():
 
     modify_jetty_xml()
     modify_webdefault_xml()
-    modify_server_ini()
     configure_logging()
 
     plugins = discover_plugins()
@@ -124,15 +123,6 @@ def modify_webdefault_xml():
     )
 
     with open(fn, "w") as f:
-        f.write(updates)
-
-
-def modify_server_ini():
-    with open("/opt/jans/jetty/jans-config-api/start.d/server.ini", "a") as f:
-        updates = "\n".join([
-            # disable server version info
-            "jetty.httpConfig.sendServerVersion=false",
-        ])
         f.write(updates)
 
 

@@ -123,7 +123,6 @@ def main():
     #                        decode=True, binary_mode=True)
 
     modify_jetty_xml()
-    modify_server_ini()
     modify_webdefault_xml()
     configure_logging()
 
@@ -227,18 +226,6 @@ def main():
 
     # ensure we're using correct JKS file and JWKS uri
     modify_keystore_path(manager, keystore_path, jwks_uri)
-
-
-def modify_server_ini():
-    with open("/opt/jans/jetty/jans-auth/start.d/server.ini", "a") as f:
-        req_header_size = os.environ.get("CN_JETTY_REQUEST_HEADER_SIZE", "8192")
-        updates = "\n".join([
-            # disable server version info
-            "jetty.httpConfig.sendServerVersion=false",
-            # customize request header size
-            f"jetty.httpConfig.requestHeaderSize={req_header_size}",
-        ])
-        f.write(updates)
 
 
 def configure_logging():
