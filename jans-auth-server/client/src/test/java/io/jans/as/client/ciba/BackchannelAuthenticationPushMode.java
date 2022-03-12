@@ -1642,9 +1642,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse)
-                .status(400)
-                .errorResponseType(BackchannelAuthenticationErrorResponseType.INVALID_REQUEST)
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).bad(BackchannelAuthenticationErrorResponseType.INVALID_REQUEST)
                 .check();
     }
 
@@ -1685,9 +1683,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse)
-                .status(401)
-                .errorResponseType(BackchannelAuthenticationErrorResponseType.INVALID_CLIENT)
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).unauthorized(BackchannelAuthenticationErrorResponseType.INVALID_CLIENT)
                 .check();
     }
 
@@ -1730,10 +1726,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse)
-                .status(400)
-                .errorResponseType(BackchannelAuthenticationErrorResponseType.UNKNOWN_USER_ID)
-                .check();
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).bad(BackchannelAuthenticationErrorResponseType.UNKNOWN_USER_ID).check();
     }
 
     @Parameters({"backchannelClientNotificationEndpoint"})
@@ -1778,9 +1771,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse)
-                .status(400)
-                .errorResponseType(BackchannelAuthenticationErrorResponseType.UNKNOWN_USER_ID)
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).bad(BackchannelAuthenticationErrorResponseType.UNKNOWN_USER_ID)
                 .check();
     }
 
@@ -1825,10 +1816,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse)
-                .status(400)
-                .errorResponseType(BackchannelAuthenticationErrorResponseType.INVALID_REQUEST)
-                .check();
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).bad(BackchannelAuthenticationErrorResponseType.INVALID_REQUEST).check();
     }
 
     @Parameters({"backchannelClientNotificationEndpoint", "userId"})
@@ -1875,10 +1863,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse)
-                .status(400)
-                .errorResponseType(BackchannelAuthenticationErrorResponseType.INVALID_USER_CODE)
-                .check();
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).bad(BackchannelAuthenticationErrorResponseType.INVALID_USER_CODE).check();
     }
 
     @Parameters({"backchannelClientNotificationEndpoint", "userId"})
@@ -1925,10 +1910,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse)
-                .status(400)
-                .errorResponseType(BackchannelAuthenticationErrorResponseType.INVALID_USER_CODE)
-                .check();
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).bad(BackchannelAuthenticationErrorResponseType.INVALID_USER_CODE).check();
     }
 
     @Parameters({"backchannelClientNotificationEndpoint", "backchannelUserCode", "userId"})
@@ -1979,10 +1961,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse)
-                .status(400)
-                .errorResponseType(BackchannelAuthenticationErrorResponseType.INVALID_BINDING_MESSAGE)
-                .check();
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).bad(BackchannelAuthenticationErrorResponseType.INVALID_BINDING_MESSAGE).check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})

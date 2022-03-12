@@ -141,7 +141,7 @@ public class ApplicationTypeRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
 
         showClient(registerClient);
-        AssertBuilder.registerResponse(registerResponse).status(400).check();
+        AssertBuilder.registerResponse(registerResponse).bad().check();
     }
 
     /**
@@ -405,7 +405,7 @@ public class ApplicationTypeRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
 
         showClient(registerClient);
-        AssertBuilder.registerResponse(registerResponse).status(400).check();
+        AssertBuilder.registerResponse(registerResponse).bad().check();
     }
 
     /**
@@ -422,6 +422,6 @@ public class ApplicationTypeRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
 
         showClient(registerClient);
-        AssertBuilder.registerResponse(registerResponse).status(400).check();
+        AssertBuilder.registerResponse(registerResponse).bad().check();
     }
 }

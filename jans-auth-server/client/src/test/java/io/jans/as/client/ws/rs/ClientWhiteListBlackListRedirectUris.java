@@ -72,7 +72,7 @@ public class ClientWhiteListBlackListRedirectUris extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
 
         showClient(registerClient);
-        AssertBuilder.registerResponse(response).status(400).check();
+        AssertBuilder.registerResponse(response).bad().check();
     }
 
     @Parameters({"redirectUris", "sectorIdentifierUri"})
@@ -113,6 +113,6 @@ public class ClientWhiteListBlackListRedirectUris extends BaseTest {
         final RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        AssertBuilder.registerResponse(response).status(400).check();
+        AssertBuilder.registerResponse(response).bad().check();
     }
 }

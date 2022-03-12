@@ -38,8 +38,15 @@ public class BackchannelAuthenticationResponseAssertBuilder extends BaseAssertBu
         return this;
     }
 
-    public BackchannelAuthenticationResponseAssertBuilder bad() {
+    public BackchannelAuthenticationResponseAssertBuilder bad(BackchannelAuthenticationErrorResponseType responseType) {
         this.status = 400;
+        this.errorResponseType = responseType;
+        return this;
+    }
+
+    public BackchannelAuthenticationResponseAssertBuilder unauthorized(BackchannelAuthenticationErrorResponseType responseType) {
+        this.status = 401;
+        this.errorResponseType = responseType;
         return this;
     }
 

@@ -121,10 +121,7 @@ public class BackchannelAuthenticationExpiredRequestsTests extends BaseTest {
         } while (pollCount < 5 && tokenResponse.getStatus() == 400
                 && tokenResponse.getErrorType() == TokenErrorResponseType.AUTHORIZATION_PENDING);
 
-        AssertBuilder.tokenResponse(tokenResponse)
-                .status(400)
-                .errorResponseType(TokenErrorResponseType.EXPIRED_TOKEN)
-                .check();
+        AssertBuilder.tokenResponse(tokenResponse).bad(TokenErrorResponseType.EXPIRED_TOKEN).check();
     }
 
     /**
@@ -206,10 +203,7 @@ public class BackchannelAuthenticationExpiredRequestsTests extends BaseTest {
         } while (pollCount < 5 && tokenResponse.getStatus() == 400
                 && tokenResponse.getErrorType() == TokenErrorResponseType.AUTHORIZATION_PENDING);
 
-        AssertBuilder.tokenResponse(tokenResponse)
-                .status(400)
-                .errorResponseType(TokenErrorResponseType.EXPIRED_TOKEN)
-                .check();
+        AssertBuilder.tokenResponse(tokenResponse).bad(TokenErrorResponseType.EXPIRED_TOKEN).check();
     }
 
     /**
@@ -267,9 +261,7 @@ public class BackchannelAuthenticationExpiredRequestsTests extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse)
-                .status(400)
-                .errorResponseType(BackchannelAuthenticationErrorResponseType.INVALID_REQUEST)
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).bad(BackchannelAuthenticationErrorResponseType.INVALID_REQUEST)
                 .nullAuthReqId()
                 .nullExpiresIn()
                 .check();

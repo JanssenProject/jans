@@ -36,8 +36,9 @@ public class TokenResponseAssertBuilder extends BaseAssertBuilder {
         return this;
     }
 
-    public TokenResponseAssertBuilder bad() {
+    public TokenResponseAssertBuilder bad(TokenErrorResponseType responseType) {
         this.status = 400;
+        this.errorResponseType = responseType;
         return this;
     }
 

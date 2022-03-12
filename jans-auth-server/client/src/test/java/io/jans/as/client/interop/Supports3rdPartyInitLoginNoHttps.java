@@ -54,6 +54,6 @@ public class Supports3rdPartyInitLoginNoHttps extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        AssertBuilder.registerResponse(registerResponse).status(400).check();
+        AssertBuilder.registerResponse(registerResponse).bad().check();
     }
 }
