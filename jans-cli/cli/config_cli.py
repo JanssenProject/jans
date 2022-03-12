@@ -1993,22 +1993,22 @@ class JCA_CLI:
 
 def main():
 
-    cliObject = JCA_CLI(host, client_id, client_secret, access_token)
+    cli_object = JCA_CLI(host, client_id, client_secret, access_token)
 
     try:
-        cliObject.check_connection()
+        cli_object.check_connection()
         if not (args.operation_id or args.info or args.schema):
             # reset previous color
             print('\033[0m', end='')
-            cliObject.runApp()
+            cli_object.runApp()
         else:
             print()
             if args.info:
-                cliObject.help_for(args.info)
+                cli_object.help_for(args.info)
             elif args.schema:
-                cliObject.get_sample_schema(args.schema)
+                cli_object.get_sample_schema(args.schema)
             elif args.operation_id:
-                cliObject.process_command_by_id(args.operation_id, args.url_suffix, args.endpoint_args, args.data)
+                cli_object.process_command_by_id(args.operation_id, args.url_suffix, args.endpoint_args, args.data)
             print()
     except Exception as e:
         if os.environ.get('errstdout'):
