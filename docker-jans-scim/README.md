@@ -99,4 +99,3 @@ The following key-value pairs are the defaults:
     "script_log_level": "INFO",
 }
 ```
-
