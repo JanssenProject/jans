@@ -31,7 +31,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.0
-    created: "2022-03-14T11:31:01.16446907Z"
+    created: "2022-03-14T12:27:26.855773569Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -74,7 +74,7 @@ entries:
       repository: ""
       version: 1.0.0-beta.16
     description: Janssen Access and Identity Management
-    digest: a78e34cb0ffc779ac5108632acec52d8adb708dc0d14ce210b39814236920673
+    digest: 37155fc2bd8c6b4ba584bf46754c74c6ce23ed49113fa74da4ee563db7355ed7
     home: https://jans.io
     icon: https://github.com/JanssenProject/jans/raw/main/docs/logo/janssen_project_favicon_transparent_50px_50px.png
     kubeVersion: '>=v1.21.0-0'
@@ -88,4 +88,4 @@ entries:
     urls:
     - janssen-1.0.0-beta.16.tgz
     version: 1.0.0-beta.16
-generated: "2022-03-14T11:31:01.153801232Z"
+generated: "2022-03-14T12:27:26.840460439Z"
