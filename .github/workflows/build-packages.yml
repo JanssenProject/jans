@@ -21,18 +21,21 @@ jobs:
             asset_prefix: '_'
             asset_path: jans
             sign_cmd: dpkg-sig -s builder -k DE92BEF14A1A4E542F678B64DC3C790386C73900
+            python_version: 3.8
           - name: el8
             asset_suffix: .el8.x86_64.rpm
             build_files: rpm/el8
             asset_prefix: '-'
             asset_path: jans/rpmbuild/RPMS/x86_64
             sign_cmd: rpm --addsign
+            python_version: 3.6
           - name: suse15
             asset_suffix: .suse15.x86_64.rpm
             build_files: rpm/suse15
             asset_prefix: '-'
             asset_path: jans/rpmbuild/RPMS/x86_64
             sign_cmd: rpm --addsign
+            python_version: 3.6
 
     steps:
     - name: Getting build dependencies
@@ -42,6 +45,9 @@ jobs:
          mkdir -p jans/jans-src/opt/
          cp -rp packaging/${{ matrix.build_files }}/* jans/
          wget https://raw.githubusercontent.com/JanssenProject/jans/main/jans-linux-setup/jans_setup/install.py -O jans/install.py
+         sudo add-apt-repository ppa:deadsnakes/ppa
+         sudo apt-get update
+         sudo apt-get install -y python${{ matrix.python_version }}
          sudo apt install -y python3-distutils python3-ldap3 build-essential devscripts debhelper rpm dpkg-sig
     - name: Import GPG key
       id: import_gpg
@@ -67,7 +73,7 @@ jobs:
       id: run_build
       run: |
          cd jans/
-         sudo python3.8 install.py --no-setup
+         sudo python${{ matrix.python_version }} install.py --no-setup
          cp -r /opt/dist jans-src/opt/
          cp -r /opt/jans jans-src/opt/
          touch jans-src/opt/jans/jans-setup/package
