@@ -105,7 +105,7 @@ Here, `test.local.jans.io` can be any name of your choice. We will refer to `tes
 To configure Jetty to work with HTTPS, we have to setup a certificate. We will use Java keytool to generate key pair. Use command given below after replacing value for `{password-of-choice}`:
     
 ```
-keytool -genkeypair -alias jetty -keyalg EC -groupname secp256r1 -keypass secret -validity 3700 -storetype JKS -keystore keystore.test.local.jans.io.jks -storepass {password-of-choice}
+keytool -genkeypair -alias jetty -keyalg EC -groupname secp256r1 -keypass secret -validity 3700 -storetype PKCS12 -keystore keystore.test.local.jans.io.p12 -storepass {password-of-choice}
 ```
 > TODO: instead of jks, generate p12 file
 
