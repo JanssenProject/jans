@@ -7,6 +7,7 @@
 package io.jans.as.client.ws.rs;
 
 import io.jans.as.client.*;
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.client.client.Asserter;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.register.ApplicationType;
@@ -49,7 +50,9 @@ public class DefaultPromptLoginTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        Asserter.assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created()
+                .notNullRegistrationClientUri()
+                .check();
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -63,8 +66,7 @@ public class DefaultPromptLoginTest extends BaseTest {
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);
-        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
-        Asserter.assertRegisterResponseOk(readClientResponse, 200, false);
+        AssertBuilder.registerResponse(readClientResponse).ok().check();
 
         assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
         assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
@@ -86,8 +88,7 @@ public class DefaultPromptLoginTest extends BaseTest {
 
             AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                     authorizationEndpoint, authorizationRequest, userId, userSecret);
-
-            Asserter.assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+            AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
             sessionId = authorizationResponse.getSessionId();
         }
@@ -101,7 +102,7 @@ public class DefaultPromptLoginTest extends BaseTest {
             AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                     authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-            Asserter.assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+            AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
         }
     }
 }
