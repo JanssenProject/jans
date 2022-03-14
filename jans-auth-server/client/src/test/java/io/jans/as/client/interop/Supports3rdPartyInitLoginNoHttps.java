@@ -10,7 +10,8 @@ import io.jans.as.client.BaseTest;
 import io.jans.as.client.RegisterClient;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
-import static io.jans.as.client.client.Asserter.assertRegisterResponseFail;
+
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.StringUtils;
@@ -53,6 +54,6 @@ public class Supports3rdPartyInitLoginNoHttps extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseFail(registerResponse);
+        AssertBuilder.registerResponse(registerResponse).bad().check();
     }
 }
