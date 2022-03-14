@@ -18,6 +18,7 @@ import io.jans.as.client.TokenResponse;
 import io.jans.as.client.UserInfoClient;
 import io.jans.as.client.UserInfoResponse;
 
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.crypto.AuthCryptoProvider;
@@ -32,8 +33,7 @@ import org.testng.annotations.Test;
 import java.util.Arrays;
 import java.util.List;
 
-import static io.jans.as.client.client.Asserter.assertRegisterResponseOk;
-import static io.jans.as.client.client.Asserter.assertTokenResponseOk;
+
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
@@ -66,7 +66,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().notNullRegistrationClientUri().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -82,9 +82,10 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, false, false);
-        assertNotNull(tokenResponse.getScope());
-        assertNull(tokenResponse.getRefreshToken());
+        AssertBuilder.tokenResponse(tokenResponse).ok()
+                .notNullScope()
+                .nullRefreshToken()
+                .check();
 
         String accessToken = tokenResponse.getAccessToken();
 
@@ -116,7 +117,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -160,7 +161,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -177,9 +178,10 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, false, false);
-        assertNotNull(tokenResponse.getScope());
-        assertNull(tokenResponse.getRefreshToken());
+        AssertBuilder.tokenResponse(tokenResponse).ok()
+                .notNullScope()
+                .nullRefreshToken()
+                .check();
 
         String accessToken = tokenResponse.getAccessToken();
 
@@ -221,7 +223,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -266,7 +268,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -283,9 +285,10 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, false, false);
-        assertNotNull(tokenResponse.getScope());
-        assertNull(tokenResponse.getRefreshToken());
+        AssertBuilder.tokenResponse(tokenResponse).ok()
+                .notNullScope()
+                .nullRefreshToken()
+                .check();
 
         String accessToken = tokenResponse.getAccessToken();
 
@@ -318,7 +321,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -359,7 +362,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -400,7 +403,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -445,7 +448,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -467,9 +470,10 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, false, false);
-        assertNotNull(tokenResponse.getScope());
-        assertNull(tokenResponse.getRefreshToken());
+        AssertBuilder.tokenResponse(tokenResponse).ok()
+                .notNullScope()
+                .nullRefreshToken()
+                .check();
 
         String accessToken = tokenResponse.getAccessToken();
 
@@ -502,7 +506,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -552,7 +556,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -574,9 +578,11 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, false, false);
-        assertNotNull(tokenResponse.getScope());
-        assertNull(tokenResponse.getRefreshToken());
+        AssertBuilder.tokenResponse(tokenResponse).ok()
+                .notNullScope()
+                .nullRefreshToken()
+                .check();
+
 
         String accessToken = tokenResponse.getAccessToken();
 
@@ -609,7 +615,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -659,7 +665,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -681,9 +687,10 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, false, false);
-        assertNotNull(tokenResponse.getScope());
-        assertNull(tokenResponse.getRefreshToken());
+        AssertBuilder.tokenResponse(tokenResponse).ok()
+                .notNullScope()
+                .nullRefreshToken()
+                .check();
 
         String accessToken = tokenResponse.getAccessToken();
 
@@ -716,7 +723,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -770,7 +777,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -791,9 +798,10 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, false, false);
-        assertNotNull(tokenResponse.getScope());
-        assertNull(tokenResponse.getRefreshToken());
+        AssertBuilder.tokenResponse(tokenResponse).ok()
+                .notNullScope()
+                .nullRefreshToken()
+                .check();
 
         String accessToken = tokenResponse.getAccessToken();
 
@@ -829,7 +837,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -882,7 +890,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -903,9 +911,10 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, false, false);
-        assertNotNull(tokenResponse.getScope());
-        assertNull(tokenResponse.getRefreshToken());
+        AssertBuilder.tokenResponse(tokenResponse).ok()
+                .notNullScope()
+                .nullRefreshToken()
+                .check();
 
         String accessToken = tokenResponse.getAccessToken();
 
@@ -941,7 +950,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -994,7 +1003,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -1015,9 +1024,10 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, false, false);
-        assertNotNull(tokenResponse.getScope());
-        assertNull(tokenResponse.getRefreshToken());
+        AssertBuilder.tokenResponse(tokenResponse).ok()
+                .notNullScope()
+                .nullRefreshToken()
+                .check();
 
         String accessToken = tokenResponse.getAccessToken();
 
@@ -1053,7 +1063,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -1106,7 +1116,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -1127,9 +1137,10 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, false, false);
-        assertNotNull(tokenResponse.getScope());
-        assertNull(tokenResponse.getRefreshToken());
+        AssertBuilder.tokenResponse(tokenResponse).ok()
+                .notNullScope()
+                .nullRefreshToken()
+                .check();
 
         String accessToken = tokenResponse.getAccessToken();
 
@@ -1165,7 +1176,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -1218,7 +1229,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -1239,9 +1250,11 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, false, false);
-        assertNotNull(tokenResponse.getScope());
-        assertNull(tokenResponse.getRefreshToken());
+        AssertBuilder.tokenResponse(tokenResponse).ok()
+                .notNullScope()
+                .nullRefreshToken()
+                .check();
+
 
         String accessToken = tokenResponse.getAccessToken();
 
@@ -1277,7 +1290,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -1330,7 +1343,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -1351,9 +1364,10 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, false, false);
-        assertNotNull(tokenResponse.getScope());
-        assertNull(tokenResponse.getRefreshToken());
+        AssertBuilder.tokenResponse(tokenResponse).ok()
+                .notNullScope()
+                .nullRefreshToken()
+                .check();
 
         String accessToken = tokenResponse.getAccessToken();
 
@@ -1389,7 +1403,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -1442,7 +1456,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -1463,9 +1477,10 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, false, false);
-        assertNotNull(tokenResponse.getScope());
-        assertNull(tokenResponse.getRefreshToken());
+        AssertBuilder.tokenResponse(tokenResponse).ok()
+                .notNullScope()
+                .nullRefreshToken()
+                .check();
 
         String accessToken = tokenResponse.getAccessToken();
 
@@ -1501,7 +1516,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -1554,7 +1569,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -1575,9 +1590,10 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, false, false);
-        assertNotNull(tokenResponse.getScope());
-        assertNull(tokenResponse.getRefreshToken());
+        AssertBuilder.tokenResponse(tokenResponse).ok()
+                .notNullScope()
+                .nullRefreshToken()
+                .check();
 
         String accessToken = tokenResponse.getAccessToken();
 
@@ -1613,7 +1629,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -1666,7 +1682,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -1687,9 +1703,10 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, false, false);
-        assertNotNull(tokenResponse.getScope());
-        assertNull(tokenResponse.getRefreshToken());
+        AssertBuilder.tokenResponse(tokenResponse).ok()
+                .notNullScope()
+                .nullRefreshToken()
+                .check();
 
         String accessToken = tokenResponse.getAccessToken();
 
@@ -1725,7 +1742,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 

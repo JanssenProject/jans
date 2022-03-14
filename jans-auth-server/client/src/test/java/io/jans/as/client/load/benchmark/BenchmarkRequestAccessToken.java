@@ -11,6 +11,7 @@ import io.jans.as.client.RegisterResponse;
 import io.jans.as.client.TokenClient;
 import io.jans.as.client.TokenResponse;
 
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.client.load.benchmark.suite.BenchmarkTestListener;
 import io.jans.as.client.load.benchmark.suite.BenchmarkTestSuiteListener;
 import io.jans.as.model.common.ResponseType;
@@ -23,10 +24,7 @@ import org.testng.annotations.Test;
 import java.util.Arrays;
 import java.util.List;
 
-import static io.jans.as.client.client.Asserter.assertRegisterResponseOk;
-import static io.jans.as.client.client.Asserter.assertTokenResponseOk;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
+
 
 /**
  * @author Yuriy Movchan
@@ -49,7 +47,7 @@ public class BenchmarkRequestAccessToken extends BaseTest {
 
         RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, scopes, sectorIdentifierUri);
 
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         this.clientId = registerResponse.getClientId();
         this.clientSecret = registerResponse.getClientSecret();
@@ -79,6 +77,8 @@ public class BenchmarkRequestAccessToken extends BaseTest {
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
         TokenResponse response1 = tokenClient.execResourceOwnerPasswordCredentialsGrant(userId, userSecret, scope, clientId, clientSecret);
-        assertTokenResponseOk(response1, true);
+        AssertBuilder.tokenResponse(response1)
+                .notNullRefreshToken()
+                .check();
     }
 }

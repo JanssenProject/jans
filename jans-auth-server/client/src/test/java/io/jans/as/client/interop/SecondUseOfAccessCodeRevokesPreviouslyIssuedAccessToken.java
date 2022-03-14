@@ -17,6 +17,7 @@ import io.jans.as.client.TokenResponse;
 import io.jans.as.client.UserInfoClient;
 import io.jans.as.client.UserInfoResponse;
 
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.register.ApplicationType;
@@ -62,7 +63,7 @@ public class SecondUseOfAccessCodeRevokesPreviouslyIssuedAccessToken extends Bas
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -78,7 +79,7 @@ public class SecondUseOfAccessCodeRevokesPreviouslyIssuedAccessToken extends Bas
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponse(authorizationResponse).check();
         assertNotNull(authorizationResponse.getIdToken(), "The id token is null");
 
         String scope = authorizationResponse.getScope();
@@ -93,7 +94,9 @@ public class SecondUseOfAccessCodeRevokesPreviouslyIssuedAccessToken extends Bas
                     clientId, clientSecret);
 
             showClient(tokenClient);
-            assertTokenResponseOk(tokenResponse, true);
+            AssertBuilder.tokenResponse(tokenResponse)
+                .notNullRefreshToken()
+                .check();
 
             accessToken = tokenResponse.getAccessToken();
             refreshToken = tokenResponse.getRefreshToken();
@@ -105,8 +108,10 @@ public class SecondUseOfAccessCodeRevokesPreviouslyIssuedAccessToken extends Bas
             UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
             showClient(userInfoClient);
-            assertUserInfoBasicMinimumResponseOk(userInfoResponse, 200);
-            assertUserInfoPersonalDataNotNull(userInfoResponse);
+            AssertBuilder.userInfoResponse(userInfoResponse)
+                    .notNullClaimsPersonalData()
+                    .claimsPresence(JwtClaimName.EMAIL)
+                    .check();
         }
 
         // 5. Request access token using the same authorization code one more time. This call must fail.
