@@ -28,12 +28,15 @@ sudo apt-get install mysql-server
 
 ## Get Code and Build
 
-- Open IntellijIdea and create a new project from version control using [Github repo](https://github.com/JanssenProject/jans-auth-server) for `jans-auth-server`
+- Open IntellijIdea and create a new project from version control using [Github repo](https://github.com/JanssenProject/jans) for `jans-auth-server`
 
-- To build `jans-auth-server`, create a new run configuration using Idea's `run/debug configurations` dialogue as below:
+- To build `jans-auth-server` in IntellijIdea
+  - Setup SDK for `jans` using `module settings > project > SDK`
+  - create a new run configuration using Idea's `run/debug configurations` dialogue as below:
   - Create a new `maven` configuration named `jans-auth-server-parent` 
   - Give command line as `clean install` 
-  - Under `Java options` make sure that JDK-11 is selected 
+  - Select working directory path so that it points to `jans-auth-server` in your workspace
+  - Under `Java options > JRE` make sure that JDK-11 is selected 
   - Add `skip tests` option by clicking `modify` on `java options`
   - `Save` configuration
 
@@ -48,11 +51,17 @@ Janssen uses Jetty to run application service. For the purpose of development, J
 ### Download Jetty configuration xml files 
 
 Download files listed below. Files will be required by Jetty to enable ssl and other configuration:
-- [jetty.xml](https://github.com/eclipse/jetty.project/blob/jetty-9.4.x/jetty-server/src/main/config/etc/jetty.xml)
-- [jetty-http.xml](https://github.com/eclipse/jetty.project/blob/jetty-9.4.x/jetty-server/src/main/config/etc/jetty-http.xml)
-- [jetty-ssl.xml](https://github.com/eclipse/jetty.project/blob/jetty-9.4.x/jetty-server/src/main/config/etc/jetty-ssl.xml)
-- [jetty-ssl-context.xml](https://github.com/eclipse/jetty.project/blob/jetty-9.4.x/jetty-server/src/main/config/etc/jetty-ssl-context.xml)
-- [jetty-https.xml](https://github.com/eclipse/jetty.project/blob/jetty-9.4.x/jetty-server/src/main/config/etc/jetty-https.xml)
+- jetty.xml
+- jetty-http.xml
+- jetty-ssl.xml
+- jetty-ssl-context.xml
+- jetty-https.xml
+
+Use the command below to download these files:
+
+```
+wget https://raw.githubusercontent.com/eclipse/jetty.project/jetty-9.4.x/jetty-server/src/main/config/etc/jetty.xml https://raw.githubusercontent.com/eclipse/jetty.project/jetty-9.4.x/jetty-server/src/main/config/etc/jetty-http.xml https://raw.githubusercontent.com/eclipse/jetty.project/jetty-9.4.x/jetty-server/src/main/config/etc/jetty-ssl.xml https://raw.githubusercontent.com/eclipse/jetty.project/jetty-9.4.x/jetty-server/src/main/config/etc/jetty-ssl-context.xml https://raw.githubusercontent.com/eclipse/jetty.project/jetty-9.4.x/jetty-server/src/main/config/etc/jetty-https.xml
+```
 
 (or you can get same files from a downloaded Jetty distribution from `<jetty-home>/etc`)
 
@@ -98,6 +107,7 @@ To configure Jetty to work with HTTPS, we have to setup a certificate. We will u
 ```
 keytool -genkeypair -alias jetty -keyalg EC -groupname secp256r1 -keypass secret -validity 3700 -storetype JKS -keystore keystore.test.local.jans.io.jks -storepass {password-of-choice}
 ```
+> TODO: instead of jks, generate p12 file
 
 Above command will create a `.jks` file in the same directory from where you have executed the command. Copy this keystore file to path:
 
@@ -120,7 +130,7 @@ Update following properties in `jans-auth-server/server/src/main/webapp-jetty/WE
 - Janssen source comes with keys that are required for running tests. Add these keys to keystore.
 
    ```
-   keytool -importkeystore -srckeystore <auth-server-code-dir>/server/profiles/default/client_keystore.jks -destkeystore keystore.test.local.jans.io.jks
+   keytool -importkeystore -srckeystore <auth-server-code-dir>/server/profiles/default/client_keystore.p12 -destkeystore keystore.test.local.jans.io.jks
    ```
 
 - Generate JWT
@@ -130,7 +140,7 @@ Update following properties in `jans-auth-server/server/src/main/webapp-jetty/WE
      ```
 	   java -Dlog4j.defaultInitOverride=true -cp /tmp/jans-auth-client-1.0.0-SNAPSHOT-jar-with-dependencies.jar io.jans.as.client.util.KeyGenerator -keystore './keystore.test.local.jans.io.jks' -keypasswd secret -sig_keys RS256 RS384 RS512 ES256 ES384 ES512 -enc_keys RS256 RS384 RS512 ES256 ES384 ES512 -dnname 'CN=Jans Auth CA Certificates' -expiration 365 > /tmp/keys/keys_client_keystore.json
      ```
-- Move `keystore.test.local.jans.io.jks` file created above to `/etc/certs` and rename it to `jans-auth-keys.jks`. This file will be used at a later in this guide when we point Janssen server to look for certificates under `/etc/certs`.
+- Move `keystore.test.local.jans.io.jks` file created above to `/etc/certs` and rename it to `jans-auth-keys.p12`. This file will be used at a later in this guide when we point Janssen server to look for certificates under `/etc/certs`.
 
 ## Setup Persistance Store
 
