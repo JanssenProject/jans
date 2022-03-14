@@ -135,12 +135,12 @@ Update following properties in `jans-auth-server/server/src/main/webapp-jetty/WE
 
 - Generate JWT
 
-   - To generate JWT, we will use a utility Jar file. Download this file from [here](https://maven.jans.io/maven/io/jans/jans-auth-client/1.0.0-SNAPSHOT/)
+   - To generate JWT, we will use a utility Jar file `jans-auth-client-1.0.0-SNAPSHOT-jar-with-dependencies.jar` which got generated when `jans-auth-server` project was built in step `Get code and build` section. This file should be available in maven local repository (.m2) at path `.m2/repository/io/jans/jans-auth-client/1.0.0-SNAPSHOT/`. Copy it to `/tmp` location. 
    - now run command as given below. This command adds additional keys in `keystore.test.local.jans.io.jks` and creates a JSON file with web keys. We will use web keys files later to update in our persistence store.
      ```
-	   java -Dlog4j.defaultInitOverride=true -cp /tmp/jans-auth-client-1.0.0-SNAPSHOT-jar-with-dependencies.jar io.jans.as.client.util.KeyGenerator -keystore './keystore.test.local.jans.io.jks' -keypasswd secret -sig_keys RS256 RS384 RS512 ES256 ES384 ES512 -enc_keys RS256 RS384 RS512 ES256 ES384 ES512 -dnname 'CN=Jans Auth CA Certificates' -expiration 365 > /tmp/keys/keys_client_keystore.json
+	   java -Dlog4j.defaultInitOverride=true -cp /tmp/jans-auth-client-1.0.0-SNAPSHOT-jar-with-dependencies.jar io.jans.as.client.util.KeyGenerator -keystore './keystore.test.local.jans.io.p12' -keypasswd secret -sig_keys RS256 RS384 RS512 ES256 ES384 ES512 -enc_keys RS256 RS384 RS512 ES256 ES384 ES512 -dnname 'CN=Jans Auth CA Certificates' -expiration 365 > /tmp/keys/keys_client_keystore.json
      ```
-- Move `keystore.test.local.jans.io.jks` file created above to `/etc/certs` and rename it to `jans-auth-keys.p12`. This file will be used at a later in this guide when we point Janssen server to look for certificates under `/etc/certs`.
+- Move `keystore.test.local.jans.io.p12` file created above to `/etc/certs` and rename it to `jans-auth-keys.p12`. This file will be used at a later in this guide when we point Janssen server to look for certificates under `/etc/certs`.
 
 ## Setup Persistance Store
 

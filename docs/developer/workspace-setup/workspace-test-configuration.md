@@ -38,7 +38,7 @@ In this step we will give all the essential information about target Janssen ser
     ```
     test.server.name=test.local.jans.io:8443
     swd.resource=acct:test_user@test.local.jans.io:8443
-    clientKeyStoreFile=profiles/test.local.jans.io/client_keystore.jks
+    clientKeyStoreFile=profiles/test.local.jans.io/client_keystore.p12
     clientKeyStoreSecret=secret
     ```
 
@@ -61,9 +61,7 @@ In this step we will give all the essential information about target Janssen ser
     config.jans-auth.issuer=https://test.local.jans.io:8443
     config.jans-auth.contextPath=https://test.local.jans.io:8443/jans-auth
     ```
-    
-    > TODO: values of these properties should not be just server name in a dev setup, it should contain port number as well. Also for property config.jans-auth.contextPath, it should have /jans-auth after server and port as context
-    
+        
   - If you are using MySql as Janssen server backend, then comment out the properties for LDAP
  
 - Edit `config-oxauth-test.properties`
