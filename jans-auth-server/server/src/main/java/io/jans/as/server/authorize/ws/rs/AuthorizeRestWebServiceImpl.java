@@ -99,7 +99,7 @@ import static org.apache.commons.lang3.BooleanUtils.isTrue;
  * Implementation for request authorization through REST web services.
  *
  * @author Javier Rojas Blum
- * @version March 7, 2022
+ * @version March 14, 2022
  */
 @Path("/")
 public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
@@ -320,6 +320,10 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
             Set<String> scopes = scopeChecker.checkScopesPolicy(client, scope);
 
+            if (appConfiguration.getForceSignedRequestObject() && StringUtils.isBlank(request) && StringUtils.isBlank(requestUri)) {
+                throw authorizeRestWebServiceValidator.createInvalidJwtRequestException(redirectUriResponse, "A signed request object is required");
+            }
+
             JwtAuthorizationRequest jwtRequest = null;
             if (StringUtils.isNotBlank(request) || StringUtils.isNotBlank(requestUri)) {
                 try {
@@ -339,6 +343,11 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
                     if (jwtRequest.getRedirectUri() != null) {
                         redirectUriResponse.getRedirectUri().setBaseRedirectUri(jwtRequest.getRedirectUri());
+                    }
+
+                    SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(jwtRequest.getAlgorithm());
+                    if (appConfiguration.getForceSignedRequestObject() && signatureAlgorithm == SignatureAlgorithm.NONE) {
+                        throw authorizeRestWebServiceValidator.createInvalidJwtRequestException(redirectUriResponse, "A signed request object is required");
                     }
 
                     // JWT wins

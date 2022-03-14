@@ -184,6 +184,12 @@
             <class name="io.jans.as.client.ws.rs.EndSessionRestWebServiceHttpTest"/>
         </classes>
     </test>
+    
+    <test name="Force Signed Request Object Test" enabled="true">
+        <classes>
+            <class name="io.jans.as.client.ws.rs.ForceSignedRequestObjectTest"/>
+        </classes>
+    </test>
 
     <test name="Grant Types Restriction (HTTP)" enabled="true">
         <classes>
