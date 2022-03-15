@@ -23,7 +23,7 @@ import java.util.Set;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version February 10, 2022
+ * @version March 15, 2022
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AppConfiguration implements Configuration {
@@ -105,6 +105,7 @@ public class AppConfiguration implements Configuration {
     private List<String> idTokenSigningAlgValuesSupported;
     private List<String> idTokenEncryptionAlgValuesSupported;
     private List<String> idTokenEncryptionEncValuesSupported;
+    private Boolean forceSignedRequestObject = false;
     private List<String> requestObjectSigningAlgValuesSupported;
     private List<String> requestObjectEncryptionAlgValuesSupported;
     private List<String> requestObjectEncryptionEncValuesSupported;
@@ -1230,6 +1231,18 @@ public class AppConfiguration implements Configuration {
 
     public void setIdTokenEncryptionEncValuesSupported(List<String> idTokenEncryptionEncValuesSupported) {
         this.idTokenEncryptionEncValuesSupported = idTokenEncryptionEncValuesSupported;
+    }
+
+    public Boolean getForceSignedRequestObject() {
+        if (forceSignedRequestObject == null) {
+            return false;
+        }
+
+        return forceSignedRequestObject;
+    }
+
+    public void setForceSignedRequestObject(Boolean forceSignedRequestObject) {
+        this.forceSignedRequestObject = forceSignedRequestObject;
     }
 
     public List<String> getRequestObjectSigningAlgValuesSupported() {
