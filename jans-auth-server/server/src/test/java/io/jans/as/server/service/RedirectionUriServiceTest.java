@@ -95,6 +95,16 @@ public class RedirectionUriServiceTest {
         assertNull(returnValue);
     }
 
+    @Test
+    public void validateRedirectionUri_redirectionUriBlankAndOneClientRedirectUri_returnSingleItem() {
+        final String singleRedirectUri = "https://client.example.com/cb2";
+        final Client client = getClientForValidateRedirectionUri_sectorIdentifierBlank_redirectURisNull();
+        client.setRedirectUris(new String[]{ singleRedirectUri });
+
+        final String returnValue = redirectionUriService.validateRedirectionUri(client, singleRedirectUri);
+        assertEquals(singleRedirectUri, returnValue);
+    }
+
     private Client getClientForValidateRedirectionUri_full() {
         final Client client = new Client();
         client.setSectorIdentifierUri("https://test.gluu.org/jans-auth/sectoridentifier/a55ede29-8f5a-461d-b06e-76caee8d40b5");

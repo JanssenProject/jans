@@ -106,7 +106,7 @@ public class RedirectionUriService {
                 redirectUris = getSectorRedirectUris(sectorIdentifierUri).toArray(new String[0]);
             }
 
-            if (StringUtils.isBlank(sectorIdentifierUri) && redirectUris != null && redirectUris.length == 1) {
+            if (StringUtils.isBlank(redirectionUri) && redirectUris != null && redirectUris.length == 1) {
                 return redirectUris[0];
             }
 
