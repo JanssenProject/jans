@@ -32,7 +32,7 @@ RUN wget -q https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/${JETTY_
 # ==========
 
 ENV CN_VERSION=1.0.0-SNAPSHOT
-ENV CN_BUILD_DATE='2022-03-10 11:34'
+ENV CN_BUILD_DATE='2022-03-15 20:31'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api-server/${CN_VERSION}/jans-config-api-server-${CN_VERSION}.war
 
 # Install Jans Config API
@@ -175,11 +175,11 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
 # misc
 # ====
 
-LABEL name="Config API" \
+LABEL name="janssenproject/config-api" \
     maintainer="Janssen Project <support@jans.io>" \
-    vendor="Janssen" \
+    vendor="Janssen Project" \
     version="1.0.0" \
-    release="beta.15" \
+    release="beta.16" \
     summary="Janssen Config API" \
     description=""
 
