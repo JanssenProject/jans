@@ -39,6 +39,8 @@ class PackageUtils(SetupUtils):
 
 
     def installNetPackage(self, packages):
+        if base.clone_type == 'rpm' and base.os_type != 'suse':
+            self.run(['yum', '-y', 'module', 'enable', 'mod_auth_openidc'])
         install_command, update_command, query_command, check_text = self.get_install_commands()
         self.run(install_command.format(packages), shell=True)
 
