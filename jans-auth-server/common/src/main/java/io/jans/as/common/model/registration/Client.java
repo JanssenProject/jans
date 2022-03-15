@@ -196,7 +196,7 @@ public class Client extends DeletableEntity implements Serializable {
     private Integer accessTokenLifetime;
 
     @AttributesList(name = "name", value = "values", sortByName = true)
-    private List<CustomAttribute> customAttributes = new ArrayList<CustomAttribute>();
+    private List<CustomAttribute> customAttributes = new ArrayList<>();
 
     @CustomObjectClass
     private String[] customObjectClasses;
@@ -240,6 +240,9 @@ public class Client extends DeletableEntity implements Serializable {
 
     @AttributeName(name = "jansBackchannelUsrCodeParameter")
     private Boolean backchannelUserCodeParameter;
+    
+    @AttributeName(name = "description")
+    private String description;
 
     @Expiration
     private Integer ttl;
@@ -291,10 +294,12 @@ public class Client extends DeletableEntity implements Serializable {
         return AuthenticationMethod.fromString(tokenEndpointAuthMethod);
     }
 
+    @Override
     public String getDn() {
         return dn;
     }
 
+    @Override
     public void setDn(String dn) {
         this.dn = dn;
     }
@@ -1167,8 +1172,8 @@ public class Client extends DeletableEntity implements Serializable {
         return customObjectClasses;
     }
 
-    public void setCustomObjectClasses(String[] p_customObjectClasses) {
-        customObjectClasses = p_customObjectClasses;
+    public void setCustomObjectClasses(String[] customObjectClasses) {
+        this.customObjectClasses = customObjectClasses;
     }
 
     public boolean isDisabled() {
@@ -1244,11 +1249,19 @@ public class Client extends DeletableEntity implements Serializable {
     }
 
     public String getDisplayName() {
-        return clientName;
+        return getClientName();
     }
 
     public void setDisplayName(String displayName) {
         this.clientName = displayName;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+    
 }
