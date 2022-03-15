@@ -31,7 +31,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -99,7 +98,7 @@ public class ClientsResource extends BaseResource {
 
     @POST
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS })
-    public Response createOpenIdConnect(@Valid Client client) throws NoSuchAlgorithmException, EncryptionException {
+    public Response createOpenIdConnect(@Valid Client client) EncryptionException {
         if (logger.isDebugEnabled()) {
             logger.debug("Client details to be added - client:{}", escapeLog(client));
         }
@@ -189,7 +188,7 @@ public class ClientsResource extends BaseResource {
         return clients;
     }
 
-    private String generatePassword() throws NoSuchAlgorithmException {
+    private String generatePassword() {
         return UUID.randomUUID().toString();
     }
 
