@@ -320,7 +320,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
             Set<String> scopes = scopeChecker.checkScopesPolicy(client, scope);
 
-            if (appConfiguration.getForceSignedRequestObject() && StringUtils.isBlank(request) && StringUtils.isBlank(requestUri)) {
+            if (Boolean.TRUE.equals(appConfiguration.getForceSignedRequestObject()) && StringUtils.isBlank(request) && StringUtils.isBlank(requestUri)) {
                 throw authorizeRestWebServiceValidator.createInvalidJwtRequestException(redirectUriResponse, "A signed request object is required");
             }
 
@@ -346,7 +346,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     }
 
                     SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(jwtRequest.getAlgorithm());
-                    if (appConfiguration.getForceSignedRequestObject() && signatureAlgorithm == SignatureAlgorithm.NONE) {
+                    if (Boolean.TRUE.equals(appConfiguration.getForceSignedRequestObject()) && signatureAlgorithm == SignatureAlgorithm.NONE) {
                         throw authorizeRestWebServiceValidator.createInvalidJwtRequestException(redirectUriResponse, "A signed request object is required");
                     }
 
