@@ -33,16 +33,14 @@ sudo apt-get install mysql-server
 - To build `jans-auth-server` in IntellijIdea
   - Setup SDK for `jans` using `module settings > project > SDK`
   - create a new run configuration using Idea's `run/debug configurations` dialogue as below:
-  - Create a new `maven` configuration named `jans-auth-server-parent` 
+  - Create a new `maven` configuration and name it as `jans-auth-server-parent` 
   - Give command line as `clean install` 
   - Select working directory path so that it points to `jans-auth-server` in your workspace
   - Under `Java options > JRE` make sure that JDK-11 is selected 
   - Add `skip tests` option by clicking `modify` on `java options`
   - `Save` configuration
 
-> TODO: add image of run config dialogue
-
-Running this configuration will build and install `jans-auth-server` project. Build will produce `jans-auth-server-1.0.0-SNAPSHOT.war` artifact as it'll be visible from build logs.
+Running this configuration will build and install `jans-auth-server` project. Build will produce a `.war` artifact as it'll be visible from build logs.
 
 ## Configure Jetty
 
@@ -62,8 +60,6 @@ Use the command below to download these files:
 ```
 wget https://raw.githubusercontent.com/eclipse/jetty.project/jetty-9.4.x/jetty-server/src/main/config/etc/jetty.xml https://raw.githubusercontent.com/eclipse/jetty.project/jetty-9.4.x/jetty-server/src/main/config/etc/jetty-http.xml https://raw.githubusercontent.com/eclipse/jetty.project/jetty-9.4.x/jetty-server/src/main/config/etc/jetty-ssl.xml https://raw.githubusercontent.com/eclipse/jetty.project/jetty-9.4.x/jetty-server/src/main/config/etc/jetty-ssl-context.xml https://raw.githubusercontent.com/eclipse/jetty.project/jetty-9.4.x/jetty-server/src/main/config/etc/jetty-https.xml
 ```
-
-(or you can get same files from a downloaded Jetty distribution from `<jetty-home>/etc`)
 
 and put these files under
 
@@ -107,9 +103,8 @@ To configure Jetty to work with HTTPS, we have to setup a certificate. We will u
 ```
 keytool -genkeypair -alias jetty -keyalg EC -groupname secp256r1 -keypass secret -validity 3700 -storetype PKCS12 -keystore keystore.test.local.jans.io.p12 -storepass {password-of-choice}
 ```
-> TODO: instead of jks, generate p12 file
 
-Above command will create a `.p12` file in the same directory from where you have executed the command. Copy this keystore file to path:
+Above command will create a `.p12` file in the same directory from where you have executed the command. Copy this keystore file to path below:
 
 ```
 jans-auth-server/server/src/main/webapp-jetty/WEB-INF
@@ -130,7 +125,7 @@ Update following properties in `jans-auth-server/server/src/main/webapp-jetty/WE
 - Janssen source comes with keys that are required for running tests. Add these keys to keystore.
 
    ```
-   keytool -importkeystore -srckeystore <auth-server-code-dir>/server/profiles/default/client_keystore.p12 -destkeystore keystore.test.local.jans.io.jks
+   keytool -importkeystore -srckeystore <auth-server-code-dir>/server/profiles/default/client_keystore.p12 -destkeystore keystore.test.local.jans.io.p12
    ```
 
 - Generate JWT
@@ -183,6 +178,7 @@ We will load basic configuration and test data into MySQL using a data import sc
 
 ```
 TODO:
+Need to make data load sql script available to community so that members can create test schema with test data populated. 
 Add link to script below. This script is essentially export of entire Janssen schema including test data.
 Generation of this script needs to be automated. One way to do this is to have Jenkins build create 
 this data dumpscript after every successful installtion on integration servers. Once this script is 
@@ -281,12 +277,12 @@ Now we are ready to run Janssen server. You can run Janssen auth server via mave
 Run below maven command from root of `server` module
 
 ```
-mvn -DskipTests -Djans.base=./target -Dlog.base=/home/dhaval/temp/logs/jans-logs jetty:run-war
+mvn -DskipTests -Djans.base=./target -Dlog.base=<path of choice> jetty:run-war
 ```
 
 ### Using Idea run configuration
 
-- Open IntellijIdea's `run/debug configurations` dialogue and create a copy of previously created run configuration `jans-auth-server-parent`. And update following: 
+- Open IntellijIdea's `run/debug configurations` dialogue and create a copy of previously created run configuration `build-jans-auth-server`. And update following: 
   - change working directory to `jans-auth-server` by selecting `jans-auth-server/server`
   - change the `command line` arguments to `jetty:run-war`
   - Add following `VM arguments` to `java options`
@@ -301,8 +297,3 @@ You can varify if the server is up by accessing:
 https://test.local.jans.io:8443/jans-auth/.well-known/openid-configuration
 ```
 
-
-## Next Steps:
-  - [Run unit and integration tests](https://gist.github.com/ossdhaval/f2ca2590cdbe0c11db5d58f87e13479f)
-  - [Setup Debugging](https://gist.github.com/ossdhaval/11df8be8ebf9063b2ba18097efb040f9)
-  - [Setup IntellijIdea](https://gist.github.com/ossdhaval/36e219c350e1120b31f803695a22e30d)

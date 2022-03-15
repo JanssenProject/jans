@@ -102,9 +102,3 @@ In this step we will give all the essential information about target Janssen ser
    mvn -Dcfg=test.dd.jans.io -fae -Dcvss-score=9 -Dfindbugs.skip=true -Dlog4j.default.log.level=TRACE -Ddependency.check=false clean test
    ```
 
-
-## Steps:
-  - [Setup workspace](https://gist.github.com/ossdhaval/c0c82e437dcb5d5403f241e81908ec4c)	
-  - [Run unit and integration tests](https://gist.github.com/ossdhaval/f2ca2590cdbe0c11db5d58f87e13479f)
-  - [Setup Debugging](https://gist.github.com/ossdhaval/11df8be8ebf9063b2ba18097efb040f9)
-  - [Setup IntellijIdea](https://gist.github.com/ossdhaval/36e219c350e1120b31f803695a22e30d)
