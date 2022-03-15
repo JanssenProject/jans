@@ -60,6 +60,9 @@ JANS_PROFILE_SCOPE_DN = "inum=43F1,ou=scopes,o=jans"
 #: SCIM script DN
 JANS_SCIM_SCRIPT_DN = "inum=2DAF-F9A5,ou=scripts,o=jans"
 
+#: Basic script DN
+JANS_BASIC_SCRIPT_DN = "inum=A51E-76DA,ou=scripts,o=jans"
+
 
 def _transform_auth_dynamic_config(conf):
     should_update = False
@@ -109,6 +112,10 @@ def _transform_auth_dynamic_config(conf):
                 ("customParam5", True),
             ]
         ))
+        should_update = True
+
+    if "redirectUrisRegexEnabled" not in conf:
+        conf["redirectUrisRegexEnabled"] = False
         should_update = True
 
     # return the conf and flag to determine whether it needs update or not
@@ -322,22 +329,6 @@ class LDAPBackend(BaseBackend):
             entry.attrs["jansClaimName"] = claim_name
             self.modify_entry(entry.id, entry.attrs, **kwargs)
 
-    def feature_flags(self):
-        kwargs = {}
-        entry = self.get_entry(JANS_SCIM_SCRIPT_DN, **kwargs)
-
-        if not entry:
-            return
-
-        env_enabled = as_boolean(os.environ.get("CN_SCIM_ENABLED", False))
-        script_enabled = as_boolean(entry.attrs["jansEnabled"])
-
-        if script_enabled == env_enabled:
-            return
-
-        entry.attrs["jansEnabled"] = env_enabled
-        self.modify_entry(entry.id, entry.attrs, **kwargs)
-
 
 class SQLBackend(BaseBackend):
     def __init__(self, manager):
@@ -490,22 +481,6 @@ class SQLBackend(BaseBackend):
 
             entry.attrs["jansClaimName"] = claim_name
             self.modify_entry(entry.id, entry.attrs, **kwargs)
-
-    def feature_flags(self):
-        kwargs = {"table_name": "jansCustomScr"}
-        entry = self.get_entry(doc_id_from_dn(JANS_SCIM_SCRIPT_DN), **kwargs)
-
-        if not entry:
-            return
-
-        env_enabled = as_boolean(os.environ.get("CN_SCIM_ENABLED", False))
-        script_enabled = as_boolean(entry.attrs["jansEnabled"])
-
-        if script_enabled == env_enabled:
-            return
-
-        entry.attrs["jansEnabled"] = env_enabled
-        self.modify_entry(entry.id, entry.attrs, **kwargs)
 
 
 class CouchbaseBackend(BaseBackend):
@@ -721,22 +696,6 @@ class CouchbaseBackend(BaseBackend):
             entry.attrs["jansClaimName"] = claim_name
             self.modify_entry(entry.id, entry.attrs, **kwargs)
 
-    def feature_flags(self):
-        kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
-        entry = self.get_entry(id_from_dn(JANS_SCIM_SCRIPT_DN), **kwargs)
-
-        if not entry:
-            return
-
-        env_enabled = as_boolean(os.environ.get("CN_SCIM_ENABLED", False))
-        script_enabled = as_boolean(entry.attrs["jansEnabled"])
-
-        if script_enabled == env_enabled:
-            return
-
-        entry.attrs["jansEnabled"] = env_enabled
-        self.modify_entry(entry.id, entry.attrs, **kwargs)
-
 
 class SpannerBackend(BaseBackend):
     def __init__(self, manager):
@@ -890,22 +849,6 @@ class SpannerBackend(BaseBackend):
             entry.attrs["jansClaimName"] = claim_name
             self.modify_entry(entry.id, entry.attrs, **kwargs)
 
-    def feature_flags(self):
-        kwargs = {"table_name": "jansCustomScr"}
-        entry = self.get_entry(doc_id_from_dn(JANS_SCIM_SCRIPT_DN), **kwargs)
-
-        if not entry:
-            return
-
-        env_enabled = as_boolean(os.environ.get("CN_SCIM_ENABLED", False))
-        script_enabled = as_boolean(entry.attrs["jansEnabled"])
-
-        if script_enabled == env_enabled:
-            return
-
-        entry.attrs["jansEnabled"] = env_enabled
-        self.modify_entry(entry.id, entry.attrs, **kwargs)
-
 
 class Upgrade:
     def __init__(self, manager):
@@ -935,4 +878,35 @@ class Upgrade:
 
         self.backend.update_auth_dynamic_config()
         self.backend.update_attributes_entries()
-        self.backend.feature_flags()
+        self.update_scripts_entries()
+
+    def update_scripts_entries(self):
+        # default to ldap persistence
+        kwargs = {}
+        scim_id = JANS_SCIM_SCRIPT_DN
+        basic_id = JANS_BASIC_SCRIPT_DN
+
+        if self.backend.type in ("sql", "spanner"):
+            kwargs = {"table_name": "jansCustomScr"}
+            scim_id = doc_id_from_dn(scim_id)
+            basic_id = doc_id_from_dn(basic_id)
+
+        if self.backend.type == "couchbase":
+            kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
+            scim_id = id_from_dn(scim_id)
+            basic_id = id_from_dn(basic_id)
+
+        # toggle scim script
+        scim_entry = self.backend.get_entry(scim_id, **kwargs)
+        scim_enabled = as_boolean(os.environ.get("CN_SCIM_ENABLED", False))
+
+        if scim_entry and scim_entry.attrs["jansEnabled"] != scim_enabled:
+            scim_entry.attrs["jansEnabled"] = scim_enabled
+            self.backend.modify_entry(scim_entry.id, scim_entry.attrs, **kwargs)
+
+        # always enable basic script
+        basic_entry = self.backend.get_entry(basic_id, **kwargs)
+
+        if basic_entry and not as_boolean(basic_entry.attrs["jansEnabled"]):
+            basic_entry.attrs["jansEnabled"] = True
+            self.backend.modify_entry(basic_entry.id, basic_entry.attrs, **kwargs)

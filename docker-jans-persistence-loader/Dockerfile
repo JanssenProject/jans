@@ -169,11 +169,11 @@ ENV CN_CACHE_TYPE=NATIVE_PERSISTENCE \
 # misc
 # ====
 
-LABEL name="Persistence" \
-    maintainer="Janssen <support@jans.io>" \
+LABEL name="janssenproject/persistence-loader" \
+    maintainer="Janssen Project <support@jans.io>" \
     vendor="Janssen Project" \
     version="1.0.0" \
-    release="beta.15" \
+    release="beta.16" \
     summary="Janssen Authorization Server Persistence loader" \
     description="Generate initial data for persistence layer"
 
