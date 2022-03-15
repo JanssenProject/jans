@@ -6,6 +6,7 @@
 
 package io.jans.configapi.rest.resource.auth;
 
+import static io.jans.as.model.util.Util.escapeLog;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
@@ -66,7 +67,9 @@ public class CustomScriptResource extends BaseResource {
     @Path(PATH_SEPARATOR + ApiConstants.INUM + PATH_SEPARATOR + ApiConstants.INUM_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.SCRIPTS_READ_ACCESS })
     public Response getCustomScriptByInum(@PathParam(ApiConstants.INUM) @NotNull String inum) {
-        log.debug("Custom Script to be fetched - inum:{} ",inum);
+        if (log.isDebugEnabled()) {
+            log.debug("Custom Script to be fetched - inum:{} ", escapeLog(inum));
+        }
         CustomScript script = null;
         try {
             script = this.customScriptService.getScriptByInum(inum);
@@ -113,7 +116,9 @@ public class CustomScriptResource extends BaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.SCRIPTS_DELETE_ACCESS })
     public Response deleteScript(@PathParam(ApiConstants.INUM) @NotNull String inum) {
         try {
-            log.debug("Custom Script Resource to delete - inum:{}",inum);
+            if (log.isDebugEnabled()) {
+                log.debug("Custom Script Resource to delete - inum:{}",escapeLog(inum));
+            }
             CustomScript existingScript = customScriptService.getScriptByInum(inum);
             customScriptService.remove(existingScript);
             return Response.noContent().build();
