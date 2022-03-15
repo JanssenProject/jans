@@ -585,7 +585,7 @@ class JCA_CLI:
                   example=None, spacing=0
                   ):
         if 'b' in values and 'q' in values and 'x' in values:
-            print(self.colored_text("b: back, q: quit x: lougout and quit", grey_color))
+            print(self.colored_text("b: back, q: quit x: logout and quit", grey_color))
         print()
         type_text = ''
         if itype:
