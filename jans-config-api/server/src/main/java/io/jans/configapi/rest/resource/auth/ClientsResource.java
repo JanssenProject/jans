@@ -98,7 +98,7 @@ public class ClientsResource extends BaseResource {
 
     @POST
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS })
-    public Response createOpenIdConnect(@Valid Client client) EncryptionException {
+    public Response createOpenIdConnect(@Valid Client client) throws EncryptionException {
         if (logger.isDebugEnabled()) {
             logger.debug("Client details to be added - client:{}", escapeLog(client));
         }
