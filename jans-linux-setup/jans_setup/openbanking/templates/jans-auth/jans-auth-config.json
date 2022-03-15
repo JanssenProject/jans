@@ -116,6 +116,7 @@
     ],
     "idTokenEncryptionEncValuesSupported":[
     ],
+    "forceSignedRequestObject": false,
     "requestObjectSigningAlgValuesSupported":[
         "HS256",
         "RS256",

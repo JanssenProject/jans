@@ -167,6 +167,7 @@
         "A128GCM",
         "A256GCM"
     ],
+    "forceSignedRequestObject": false,
     "requestObjectSigningAlgValuesSupported":[
         "none",
         "HS256",

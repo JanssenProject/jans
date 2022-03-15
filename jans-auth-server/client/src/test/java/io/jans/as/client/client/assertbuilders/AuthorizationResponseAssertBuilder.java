@@ -1,13 +1,17 @@
+/*
+ * Janssen Project software is available under the Apache License (2004). See http://www.apache.org/licenses/ for full text.
+ *
+ * Copyright (c) 2020, Janssen Project
+ */
+
 package io.jans.as.client.client.assertbuilders;
 
 import io.jans.as.client.AuthorizationResponse;
-import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.common.ResponseType;
 
 import java.util.List;
 
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
+import static org.testng.Assert.*;
 
 public class AuthorizationResponseAssertBuilder extends BaseAssertBuilder {
 
@@ -76,8 +80,17 @@ public class AuthorizationResponseAssertBuilder extends BaseAssertBuilder {
                     assertNotNull(response.getIdToken(), "The id_token is null");
                 }
             }
-        } else {
-
+        } else if (status == 302) {
+            assertEquals(response.getStatus(), status, "Unexpected response code: " + response.getEntity());
+            assertNotNull(response.getLocation(), "The location is null");
+            assertNotNull(response.getEntity(), "The entity is null");
+            assertNotNull(response.getErrorType(), "The error type is null");
+            assertNotNull(response.getErrorDescription(), "The error description is null");
+            if (nullState) {
+                assertNull(response.getState(), "The state is not null");
+            } else {
+                assertNotNull(response.getState(), "The state is null");
+            }
         }
     }
 }

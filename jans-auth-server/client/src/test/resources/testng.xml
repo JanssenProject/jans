@@ -185,6 +185,12 @@
         </classes>
     </test>
 
+    <test name="Force Signed Request Object Test" enabled="true">
+        <classes>
+            <class name="io.jans.as.client.ws.rs.ForceSignedRequestObjectTest"></class>
+        </classes>
+    </test>
+
     <test name="Grant Types Restriction (HTTP)" enabled="true">
         <classes>
             <class name="io.jans.as.client.ws.rs.GrantTypesRestrictionHttpTest"/>
