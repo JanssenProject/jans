@@ -10,22 +10,18 @@ import io.jans.as.client.AuthorizationRequest;
 import io.jans.as.client.AuthorizationResponse;
 import io.jans.as.client.AuthorizeClient;
 import io.jans.as.client.BaseTest;
-import io.jans.as.client.JwkClient;
 import io.jans.as.client.RegisterClient;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
 import io.jans.as.client.UserInfoClient;
 import io.jans.as.client.UserInfoResponse;
 
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.client.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.crypto.AuthCryptoProvider;
-import io.jans.as.model.crypto.signature.RSAPublicKey;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
-import io.jans.as.model.jws.RSASigner;
-import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
-import io.jans.as.model.jwt.JwtHeaderName;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.StringUtils;
 import org.testng.annotations.Parameters;
@@ -68,7 +64,7 @@ public class RequestingUserInfoClaimsWithOpenIdRequestObject extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -93,30 +89,26 @@ public class RequestingUserInfoClaimsWithOpenIdRequestObject extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
 
         // 3. Validate id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertJwtStandarClaimsNotNull(jwt, true);
-
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS256, publicKey);
-
-        assertTrue(rsaSigner.validate(jwt));
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS256)
+                .notNullAuthenticationTime()
+                .notNullAccesTokenHash()
+                .check();
 
         // 4. Request user info
         UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicMinimumResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.PICTURE));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS));
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .notNullClaimsPersonalData()
+                .claimsPresence(JwtClaimName.EMAIL, JwtClaimName.PICTURE, JwtClaimName.ADDRESS)
+                .check();
     }
 }

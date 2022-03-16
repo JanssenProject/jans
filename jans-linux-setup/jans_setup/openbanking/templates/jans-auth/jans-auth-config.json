@@ -116,6 +116,7 @@
     ],
     "idTokenEncryptionEncValuesSupported":[
     ],
+    "forceSignedRequestObject": false,
     "requestObjectSigningAlgValuesSupported":[
         "HS256",
         "RS256",
@@ -359,5 +360,6 @@
     "deviceAuthzTokenPollInterval": 5,
     "deviceAuthzResponseTypeToProcessAuthz": "code",
     "staticKid": "%(staticKid)s",
-    "forceOfflineAccessScopeToEnableRefreshToken" : false
+    "forceOfflineAccessScopeToEnableRefreshToken" : false,
+    "redirectUrisRegexEnabled": false
 }

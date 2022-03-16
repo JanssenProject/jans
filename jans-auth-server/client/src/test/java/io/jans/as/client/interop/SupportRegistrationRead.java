@@ -10,6 +10,7 @@ import io.jans.as.client.BaseTest;
 import io.jans.as.client.RegisterClient;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.common.SubjectType;
@@ -62,8 +63,7 @@ public class SupportRegistrationRead extends BaseTest {
         RegisterResponse registerResponse1 = registerClient1.exec();
 
         showClient(registerClient1);
-        assertRegisterResponseOk(registerResponse1, 201, true);
-
+        AssertBuilder.registerResponse(registerResponse1).created().check();
         assertRegisterResponseClaimsNotNull(registerResponse1, SCOPE);
 
         String clientId = registerResponse1.getClientId();
@@ -78,7 +78,9 @@ public class SupportRegistrationRead extends BaseTest {
         RegisterResponse registerResponse2 = registerClient2.exec();
 
         showClient(registerClient2);
-        assertRegisterResponseOk(registerResponse2, 200, true);
+        AssertBuilder.registerResponse(registerResponse2).ok()
+                .notNullRegistrationClientUri()
+                .check();
         assertRegisterResponseClaimsNotNull(registerResponse2, APPLICATION_TYPE, POLICY_URI, REQUEST_OBJECT_SIGNING_ALG, CONTACTS, SECTOR_IDENTIFIER_URI);
         assertRegisterResponseClaimsNotNull(registerResponse2, SUBJECT_TYPE, ID_TOKEN_SIGNED_RESPONSE_ALG, JWKS_URI, CLIENT_NAME, LOGO_URI, REQUEST_URIS, SCOPE);
     }

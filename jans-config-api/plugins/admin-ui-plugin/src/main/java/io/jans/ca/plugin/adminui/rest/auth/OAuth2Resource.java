@@ -52,7 +52,7 @@ public class OAuth2Resource {
         oauth2Config.setResponseType("code");
         oauth2Config.setScope(auiConfiguration.getAuthServerScope());
         oauth2Config.setRedirectUrl(auiConfiguration.getAuthServerRedirectUrl());
-        oauth2Config.setAcrValues("simple_password_auth");
+        oauth2Config.setAcrValues(auiConfiguration.getAuthServerAcrValues());
         oauth2Config.setFrontChannelLogoutUrl(auiConfiguration.getAuthServerFrontChannelLogoutUrl());
         oauth2Config.setPostLogoutRedirectUri(auiConfiguration.getAuthServerPostLogoutRedirectUri());
         oauth2Config.setEndSessionEndpoint(auiConfiguration.getAuthServerEndSessionEndpoint());

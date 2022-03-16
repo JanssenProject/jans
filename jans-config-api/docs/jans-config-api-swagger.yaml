@@ -3543,9 +3543,12 @@ components:
             - POST_AUTHN
             - SCIM
             - CIBA_END_USER_NOTIFICATION
+            - REVOKE_TOKEN
             - PERSISTENCE_EXTENSION
             - IDP
+            - DISCOVERY
             - UPDATE_TOKEN
+            - CONFIG_API
         programmingLanguage:
           type: string
           enum:
@@ -4828,6 +4831,9 @@ components:
         staticKid:
           type: string
           description: Specifies static Kid
+        redirectUrisRegexEnabled:
+          type: boolean
+          description: Enable/Disable redirect uris validation using regular expression.
 
     GluuAttribute:
       title: GluuAttribute
@@ -5510,6 +5516,9 @@ components:
           default: false
         jansId:
           description: Attribute Scope Id.
+          type: string
+        description:
+          description: Description of the client.
           type: string
 
     UmaResource:

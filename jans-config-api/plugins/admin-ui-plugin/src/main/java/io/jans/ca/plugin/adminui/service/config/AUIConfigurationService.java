@@ -51,6 +51,7 @@ public class AUIConfigurationService {
         auiConfig.setAuthServerIntrospectionEndpoint(props.getProperty("authserver.introspectionEndpoint"));
         auiConfig.setAuthServerUserInfoEndpoint(props.getProperty("authserver.userInfoEndpoint"));
         auiConfig.setAuthServerEndSessionEndpoint(props.getProperty("authserver.endSessionEndpoint"));
+        auiConfig.setAuthServerAcrValues(props.getProperty("authserver.acrValues"));
 
         auiConfig.setTokenServerClientId(props.getProperty("tokenServer.clientId"));
         auiConfig.setTokenServerClientSecret(props.getProperty("tokenServer.clientSecret"));
@@ -63,6 +64,7 @@ public class AUIConfigurationService {
         auiConfig.setTokenServerIntrospectionEndpoint(props.getProperty("tokenServer.introspectionEndpoint"));
         auiConfig.setTokenServerUserInfoEndpoint(props.getProperty("tokenServer.userInfoEndpoint"));
         auiConfig.setTokenServerEndSessionEndpoint(props.getProperty("tokenServer.endSessionEndpoint"));
+        auiConfig.setTokenServerAcrValues(props.getProperty("tokenServer.acrValues"));
 
         LicenseConfiguration licenseConfiguration = new LicenseConfiguration();
         licenseConfiguration.setApiKey(props.getProperty("licenseSpring.apiKey"));

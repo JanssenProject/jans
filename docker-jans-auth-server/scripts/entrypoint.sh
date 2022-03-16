@@ -45,7 +45,6 @@ python3 /app/scripts/auth_conf.py
 
 # run auth-server
 cd /opt/jans/jetty/jans-auth
-mkdir -p /opt/jetty/temp
 exec java \
     -server \
     -XX:+DisableExplicitGC \
@@ -59,4 +58,7 @@ exec java \
     -Dlog4j2.configurationFile=resources/log4j2.xml \
     $(get_debug_opt) \
     ${CN_JAVA_OPTIONS} \
-    -jar /opt/jetty/start.jar
+    -jar /opt/jetty/start.jar \
+        jetty.deploy.scanInterval=0 \
+        jetty.httpConfig.sendServerVersion=false \
+        jetty.httpConfig.requestHeaderSize=$CN_JETTY_REQUEST_HEADER_SIZE

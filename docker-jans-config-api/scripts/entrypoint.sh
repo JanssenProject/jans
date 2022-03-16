@@ -25,13 +25,9 @@ python3 /app/scripts/wait.py
 
 copy_builtin_plugins
 
-if [ ! -f /deploy/touched  ]; then
-    python3 /app/scripts/bootstrap.py
-    touch /deploy/touched
-fi
+python3 /app/scripts/bootstrap.py
 
 # run config-api
-mkdir -p /opt/jetty/temp
 cd /opt/jans/jetty/jans-config-api
 exec java \
     -server \
@@ -44,4 +40,7 @@ exec java \
     -Djava.io.tmpdir=/opt/jetty/temp \
     -Dlog4j2.configurationFile=$(get_logging_files) \
     ${CN_JAVA_OPTIONS} \
-    -jar /opt/jetty/start.jar jetty.http.port=8074
+    -jar /opt/jetty/start.jar \
+        jetty.http.port=8074 \
+        jetty.deploy.scanInterval=0 \
+        jetty.httpConfig.sendServerVersion=false

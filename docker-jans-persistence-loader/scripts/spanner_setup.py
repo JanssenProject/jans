@@ -2,10 +2,10 @@
 import hashlib
 import json
 import logging.config
-import os
 import re
 from collections import OrderedDict
 from collections import defaultdict
+from pathlib import Path
 
 from ldif import LDIFParser
 
@@ -232,25 +232,13 @@ class SpannerBackend:
             # run the callback
             self.create_spanner_indexes(table_name, column_mapping)
 
-    def import_ldif(self):
+    def import_builtin_ldif(self, ctx):
         optional_scopes = json.loads(self.manager.config.get("optional_scopes", "[]"))
         ldif_mappings = get_ldif_mappings(optional_scopes)
 
-        ctx = prepare_template_ctx(self.manager)
-
         for _, files in ldif_mappings.items():
             for file_ in files:
-                logger.info(f"Importing {file_} file")
-                src = f"/app/templates/{file_}"
-                dst = f"/app/tmp/{file_}"
-                os.makedirs(os.path.dirname(dst), exist_ok=True)
-
-                render_ldif(src, dst, ctx)
-
-                for table_name, column_mapping in self.data_from_ldif(dst):
-                    self.client.insert_into(table_name, column_mapping)
-                    # inject rows into subtable (if any)
-                    self.insert_into_subtable(table_name, column_mapping)
+                self._import_ldif(f"/app/templates/{file_}", ctx)
 
     def initialize(self):
         logger.info("Creating tables (if not exist)")
@@ -263,7 +251,13 @@ class SpannerBackend:
         logger.info("Creating indexes (if not exist)")
         self.create_indexes()
 
-        self.import_ldif()
+        ctx = prepare_template_ctx(self.manager)
+
+        logger.info("Importing builtin LDIF files")
+        self.import_builtin_ldif(ctx)
+
+        logger.info("Importing custom LDIF files (if any)")
+        self.import_custom_ldif(ctx)
 
     def transform_value(self, key, values):
         type_ = self.sql_data_types.get(key)
@@ -555,3 +549,29 @@ class SpannerBackend:
             ("jansPerson", "jansOTPDevices"),
         ]:
             column_from_array(mod[0], mod[1])
+
+    def import_custom_ldif(self, ctx):
+        custom_dir = Path("/app/custom_ldif")
+
+        for file_ in custom_dir.rglob("*.ldif"):
+            self._import_ldif(file_, ctx)
+
+    def _import_ldif(self, path, ctx):
+        src = Path(path).resolve()
+
+        # generated template will be saved under ``/app/tmp`` directory
+        # examples:
+        # - ``/app/templates/groups.ldif`` will be saved as ``/app/tmp/templates/groups.ldif``
+        # - ``/app/custom_ldif/groups.ldif`` will be saved as ``/app/tmp/custom_ldif/groups.ldif``
+        dst = Path("/app/tmp").joinpath(str(src).removeprefix("/app/")).resolve()
+
+        # ensure directory for generated template is exist
+        dst.parent.mkdir(parents=True, exist_ok=True)
+
+        logger.info(f"Importing {src} file")
+        render_ldif(src, dst, ctx)
+
+        for table_name, column_mapping in self.data_from_ldif(dst):
+            self.client.insert_into(table_name, column_mapping)
+            # inject rows into subtable (if any)
+            self.insert_into_subtable(table_name, column_mapping)

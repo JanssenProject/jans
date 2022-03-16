@@ -119,6 +119,7 @@ public class RegisterRequest extends BaseRequest {
     private AsymmetricSignatureAlgorithm backchannelAuthenticationRequestSigningAlg;
     private Boolean backchannelUserCodeParameter;
     private List<String> additionalAudience;
+    private String redirectUrisRegex;
 
     /**
      * String containing a space-separated list of scope values. (correct name is 'scope' not 'scopes', see (rfc7591).)
@@ -1396,6 +1397,10 @@ public class RegisterRequest extends BaseRequest {
             parameters.put(DEFAULT_PROMPT_LOGIN.getName(), defaultPromptLogin.toString());
         }
 
+        if (redirectUrisRegex != null) {
+            parameters.put(REDIRECT_URIS_REGEX.toString(), redirectUrisRegex.toString()) ;
+        }
+
         // Custom params
         if (customAttributes != null && !customAttributes.isEmpty()) {
             for (Map.Entry<String, String> entry : customAttributes.entrySet()) {
@@ -1481,6 +1486,7 @@ public class RegisterRequest extends BaseRequest {
         result.setBackchannelClientNotificationEndpoint(requestObject.optString(BACKCHANNEL_CLIENT_NOTIFICATION_ENDPOINT.toString()));
         result.setBackchannelAuthenticationRequestSigningAlg(AsymmetricSignatureAlgorithm.fromString(requestObject.optString(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString())));
         result.setBackchannelUserCodeParameter(booleanOrNull(requestObject, BACKCHANNEL_USER_CODE_PARAMETER.toString()));
+        result.setRedirectUrisRegex(requestObject.optString(REDIRECT_URIS_REGEX.toString()));
         result.setDefaultPromptLogin(requestObject.optBoolean(DEFAULT_PROMPT_LOGIN.getName()));
 
         return result;
@@ -1693,9 +1699,15 @@ public class RegisterRequest extends BaseRequest {
         if (backchannelUserCodeParameter != null) {
             parameters.put(BACKCHANNEL_USER_CODE_PARAMETER.toString(), backchannelUserCodeParameter);
         }
+
+        if (redirectUrisRegex != null) {
+            parameters.put(REDIRECT_URIS_REGEX.toString(), redirectUrisRegex) ;
+        }
+
         if (defaultPromptLogin != null) {
             parameters.put(DEFAULT_PROMPT_LOGIN.getName(), defaultPromptLogin);
         }
+
         // Custom params
         if (customAttributes != null && !customAttributes.isEmpty()) {
             for (Map.Entry<String, String> entry : customAttributes.entrySet()) {
@@ -1753,5 +1765,13 @@ public class RegisterRequest extends BaseRequest {
 
     public boolean hasJwtRequestAsString() {
         return StringUtils.isNotBlank(jwtRequestAsString);
+    }
+
+    public String getRedirectUrisRegex() {
+        return redirectUrisRegex;
+    }
+
+    public void setRedirectUrisRegex(String redirectUrisRegex) {
+        this.redirectUrisRegex = redirectUrisRegex;
     }
 }
