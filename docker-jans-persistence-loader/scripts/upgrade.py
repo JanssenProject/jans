@@ -27,31 +27,11 @@ logger = logging.getLogger("entrypoint")
 Entry = namedtuple("Entry", ["id", "attrs"])
 
 
-class BaseBackend:
-    """Base class for backend adapters. Must be sub-classed per
-    implementation details.
-    """
-
-    def __init__(self):
-        # self.jans_admin_ui_role_id = "inum=43F1,ou=scopes,o=jans"
-        # self.jans_admin_ui_claim = "inum=0A01,ou=attributes,o=jans"
-        self.jans_attrs = '{"spontaneousClientId":null,"spontaneousClientScopes":null,"showInConfigurationEndpoint":true}'
-        # SCIM users.read, SCIM users.write scopes that get added to config-api client
-        self.jans_scim_scopes = [
-            "inum=1200.2B7428,ou=scopes,o=jans",  # users.read scope
-            "inum=1200.0A0198,ou=scopes,o=jans",  # users.write scope
-        ]
-        # jans_stat
-        self.jans_stat_scopes = [
-            "inum=C4F7,ou=scopes,o=jans",  # jans_stat
-        ]
-
-
 #: ID of base entry
 JANS_BASE_DN = "o=jans"
 
 #: ID of manager group
-JANS_MANAGER_GROUP = "inum=60B7,ou=groups,o=jans"
+JANS_MANAGER_GROUP_DN = "inum=60B7,ou=groups,o=jans"
 
 #: ID of jans-auth config
 JANS_AUTH_CONFIG_DN = "ou=jans-auth,ou=configuration,o=jans"
@@ -72,6 +52,9 @@ JANS_SCIM_USERS_READ_SCOPE_DN = "inum=1200.2B7428,ou=scopes,o=jans"
 JANS_SCIM_USERS_WRITE_SCOPE_DN = "inum=1200.0A0198,ou=scopes,o=jans"
 
 DEFAULT_JANS_ATTRS = '{"spontaneousClientId":null,"spontaneousClientScopes":null,"showInConfigurationEndpoint":true}'
+
+#: jans_stat scope
+JANS_STAT_SCOPE_DN = "inum=C4F7,ou=scopes,o=jans"
 
 
 def _transform_auth_dynamic_config(conf):
@@ -183,9 +166,8 @@ def collect_claim_names(ldif_file="/app/templates/attributes.ldif"):
     return rows
 
 
-class LDAPBackend(BaseBackend):
+class LDAPBackend:
     def __init__(self, manager):
-        super().__init__()
         self.manager = manager
         self.client = LdapClient(manager)
         self.type = "ldap"
@@ -221,51 +203,9 @@ class LDAPBackend(BaseBackend):
             attrs[k] = [(mod, v)]
         return self.client.modify(key, attrs)
 
-    def update_clients_entries(self):
-        # modify redirect UI of config-api client
-        def _update_jca_client():
-            jca_client_id = self.manager.config.get("jca_client_id")
-            entry = self.get_entry(f"inum={jca_client_id},ou=clients,o=jans")
 
-            if not entry:
-                return
-
-            should_update = False
-
-            hostname = self.manager.config.get("hostname")
-            if f"https://{hostname}/admin" not in entry.attrs["jansRedirectURI"]:
-                entry.attrs["jansRedirectURI"].append(f"https://{hostname}/admin")
-                should_update = True
-
-            # add jans_stat, SCIM users.read, SCIM users.write scopes to config-api client
-            for scope in (self.jans_scim_scopes + self.jans_stat_scopes):
-                if scope not in entry.attrs["jansScope"]:
-                    entry.attrs["jansScope"].append(scope)
-                    should_update = True
-
-            if should_update:
-                self.modify_entry(entry.id, entry.attrs)
-
-        # modify introspection script for token server client
-        def _update_token_server_client():
-            token_server_admin_ui_client_id = self.manager.config.get("token_server_admin_ui_client_id")
-            entry = self.get_entry(f"inum={token_server_admin_ui_client_id},ou=clients,o=jans")
-
-            if not entry:
-                return
-
-            attrs, should_update = _transform_token_server_client(json.loads(entry.attrs["jansAttrs"]))
-            if should_update:
-                entry.attrs["jansAttrs"] = json.dumps(attrs)
-                self.modify_entry(entry.id, entry.attrs)
-
-        _update_jca_client()
-        _update_token_server_client()
-
-
-class SQLBackend(BaseBackend):
+class SQLBackend:
     def __init__(self, manager):
-        super().__init__()
         self.manager = manager
         self.client = SQLClient()
         self.type = "sql"
@@ -283,61 +223,9 @@ class SQLBackend(BaseBackend):
         table_name = kwargs.get("table_name")
         return self.client.update(table_name, key, attrs), ""
 
-    def update_clients_entries(self):
-        # modify redirect UI of config-api client
-        def _update_jca_client():
-            jca_client_id = self.manager.config.get("jca_client_id")
-            kwargs = {"table_name": "jansClnt"}
 
-            entry = self.get_entry(
-                doc_id_from_dn(f"inum={jca_client_id},ou=clients,o=jans"),
-                **kwargs
-            )
-
-            if not entry:
-                return
-
-            should_update = False
-
-            hostname = self.manager.config.get("hostname")
-
-            if f"https://{hostname}/admin" not in entry.attrs["jansRedirectURI"]["v"]:
-                entry.attrs["jansRedirectURI"]["v"].append(f"https://{hostname}/admin")
-                should_update = True
-
-            # add jans_stat, SCIM users.read, SCIM users.write scopes to config-api client
-            for scope in (self.jans_scim_scopes + self.jans_stat_scopes):
-                if scope not in entry.attrs["jansScope"]["v"]:
-                    entry.attrs["jansScope"]["v"].append(scope)
-                    should_update = True
-
-            if should_update:
-                self.modify_entry(entry.id, entry.attrs, **kwargs)
-
-        # modify introspection script for token server client
-        def _update_token_server_client():
-            token_server_admin_ui_client_id = self.manager.config.get("token_server_admin_ui_client_id")
-            kwargs = {"table_name": "jansClnt"}
-            entry = self.get_entry(
-                doc_id_from_dn(f"inum={token_server_admin_ui_client_id},ou=clients,o=jans"),
-                **kwargs,
-            )
-
-            if not entry:
-                return
-
-            attrs, should_update = _transform_token_server_client(json.loads(entry.attrs["jansAttrs"]))
-            if should_update:
-                entry.attrs["jansAttrs"] = json.dumps(attrs)
-                self.modify_entry(entry.id, entry.attrs, **kwargs)
-
-        _update_jca_client()
-        _update_token_server_client()
-
-
-class CouchbaseBackend(BaseBackend):
+class CouchbaseBackend:
     def __init__(self, manager):
-        super().__init__()
         self.manager = manager
         hostname = os.environ.get("CN_COUCHBASE_URL", "localhost")
         user = get_couchbase_superuser(manager) or get_couchbase_user(manager)
@@ -393,57 +281,6 @@ class CouchbaseBackend(BaseBackend):
             message = req.text or req.reason
         return status, message
 
-    def update_clients_entries(self):
-        # modify redirect UI of config-api client
-        def _update_jca_client():
-            jca_client_id = self.manager.config.get("jca_client_id")
-            kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
-
-            entry = self.get_entry(
-                id_from_dn(f"inum={jca_client_id},ou=clients,o=jans"),
-                **kwargs,
-            )
-            if not entry:
-                return
-
-            should_update = False
-
-            hostname = self.manager.config.get("hostname")
-
-            if f"https://{hostname}/admin" not in entry.attrs["jansRedirectURI"]:
-                entry.attrs["jansRedirectURI"].append(f"https://{hostname}/admin")
-                should_update = True
-
-            # add jans_stat, SCIM users.read, SCIM users.write scopes to config-api client
-            for scope in (self.jans_scim_scopes + self.jans_stat_scopes):
-                if scope not in entry.attrs["jansScope"]:
-                    entry.attrs["jansScope"].append(scope)
-                    should_update = True
-
-            if should_update:
-                self.modify_entry(entry.id, entry.attrs, **kwargs)
-
-        # modify introspection script for token server client
-        def _update_token_server_client():
-            token_server_admin_ui_client_id = self.manager.config.get("token_server_admin_ui_client_id")
-            kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
-
-            entry = self.get_entry(
-                id_from_dn(f"inum={token_server_admin_ui_client_id},ou=clients,o=jans"),
-                **kwargs,
-            )
-
-            if not entry:
-                return
-
-            attrs, should_update = _transform_token_server_client(json.loads(entry.attrs["jansAttrs"]))
-            if should_update:
-                entry.attrs["jansAttrs"] = json.dumps(attrs)
-                self.modify_entry(entry.id, entry.attrs, **kwargs)
-
-        _update_jca_client()
-        _update_token_server_client()
-
     def update_misc(self):
         # 1 - fix objectclass for scim and config-api where it has lowecased objectclass instead of objectClass
         bucket = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
@@ -466,9 +303,8 @@ class CouchbaseBackend(BaseBackend):
         self.client.exec_query(f'DROP INDEX `{bucket}`.`def_jans_fix_oc`')
 
 
-class SpannerBackend(BaseBackend):
+class SpannerBackend:
     def __init__(self, manager):
-        super().__init__()
         self.manager = manager
         self.client = SpannerClient()
         self.type = "spanner"
@@ -485,57 +321,6 @@ class SpannerBackend(BaseBackend):
         attrs = attrs or {}
         table_name = kwargs.get("table_name")
         return self.client.update(table_name, key, attrs), ""
-
-    def update_clients_entries(self):
-        # modify redirect UI of config-api client
-        def _update_jca_client():
-            jca_client_id = self.manager.config.get("jca_client_id")
-            kwargs = {"table_name": "jansClnt"}
-
-            entry = self.get_entry(
-                doc_id_from_dn(f"inum={jca_client_id},ou=clients,o=jans"),
-                **kwargs,
-            )
-
-            if not entry:
-                return
-
-            should_update = False
-
-            hostname = self.manager.config.get("hostname")
-
-            if f"https://{hostname}/admin" not in entry.attrs["jansRedirectURI"]:
-                entry.attrs["jansRedirectURI"].append(f"https://{hostname}/admin")
-                should_update = True
-
-            # add jans_stat, SCIM users.read, SCIM users.write scopes to config-api client
-            for scope in (self.jans_scim_scopes + self.jans_stat_scopes):
-                if scope not in entry.attrs["jansScope"]:
-                    entry.attrs["jansScope"].append(scope)
-                    should_update = True
-
-            if should_update:
-                self.modify_entry(entry.id, entry.attrs, **kwargs)
-
-        # modify introspection script for token server client
-        def _update_token_server_client():
-            token_server_admin_ui_client_id = self.manager.config.get("token_server_admin_ui_client_id")
-            kwargs = {"table_name": "jansClnt"}
-            entry = self.get_entry(
-                doc_id_from_dn(f"inum={token_server_admin_ui_client_id},ou=clients,o=jans"),
-                **kwargs,
-            )
-
-            if not entry:
-                return
-
-            attrs, should_update = _transform_token_server_client(json.loads(entry.attrs["jansAttrs"]))
-            if should_update:
-                entry.attrs["jansAttrs"] = json.dumps(attrs)
-                self.modify_entry(entry.id, entry.attrs, **kwargs)
-
-        _update_jca_client()
-        _update_token_server_client()
 
 
 class Upgrade:
@@ -556,11 +341,10 @@ class Upgrade:
     def invoke(self):
         # TODO: refactor all self.backend.update_ to this class method
         logger.info("Running upgrade process (if required)")
+
         self.update_people_entries()
         self.update_scopes_entries()
-
-        self.backend.update_clients_entries()
-
+        self.update_clients_entries()
         self.update_scim_scopes_entries()
         self.update_base_entries()
 
@@ -698,7 +482,7 @@ class Upgrade:
             return
 
         if not entry.attrs.get("jansManagerGrp"):
-            entry.attrs["jansManagerGrp"] = JANS_MANAGER_GROUP
+            entry.attrs["jansManagerGrp"] = JANS_MANAGER_GROUP_DN
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
 
     def update_scim_scopes_entries(self):
@@ -780,3 +564,78 @@ class Upgrade:
 
         if should_update:
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
+
+    def update_clients_entries(self):
+        # modify redirect UI of config-api client
+        def _update_jca_client():
+            kwargs = {}
+            jca_client_id = self.manager.config.get("jca_client_id")
+            id_ = f"inum={jca_client_id},ou=clients,o=jans"
+
+            if self.backend.type in ("sql", "spanner"):
+                kwargs = {"table_name": "jansClnt"}
+                id_ = doc_id_from_dn(id_)
+            elif self.backend.type == "couchbase":
+                kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
+                id_ = id_from_dn(id_)
+
+            entry = self.backend.get_entry(id_, **kwargs)
+
+            if not entry:
+                return
+
+            should_update = False
+
+            hostname = self.manager.config.get("hostname")
+            scopes = [JANS_SCIM_USERS_READ_SCOPE_DN, JANS_SCIM_USERS_WRITE_SCOPE_DN, JANS_STAT_SCOPE_DN]
+
+            if self.backend.type == "sql":
+                if f"https://{hostname}/admin" not in entry.attrs["jansRedirectURI"]["v"]:
+                    entry.attrs["jansRedirectURI"]["v"].append(f"https://{hostname}/admin")
+                    should_update = True
+
+                # add jans_stat, SCIM users.read, SCIM users.write scopes to config-api client
+                for scope in scopes:
+                    if scope not in entry.attrs["jansScope"]["v"]:
+                        entry.attrs["jansScope"]["v"].append(scope)
+                        should_update = True
+
+            else:  # ldap, couchbase, and spanner
+                if f"https://{hostname}/admin" not in entry.attrs["jansRedirectURI"]:
+                    entry.attrs["jansRedirectURI"].append(f"https://{hostname}/admin")
+                    should_update = True
+
+                # add jans_stat, SCIM users.read, SCIM users.write scopes to config-api client
+                for scope in scopes:
+                    if scope not in entry.attrs["jansScope"]:
+                        entry.attrs["jansScope"].append(scope)
+                        should_update = True
+
+            if should_update:
+                self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
+
+        # modify introspection script for token server client
+        def _update_token_server_client():
+            kwargs = {}
+            token_server_admin_ui_client_id = self.manager.config.get("token_server_admin_ui_client_id")
+            id_ = f"inum={token_server_admin_ui_client_id},ou=clients,o=jans"
+
+            if self.backend.type in ("sql", "spanner"):
+                kwargs = {"table_name": "jansClnt"}
+                id_ = doc_id_from_dn(id_)
+            elif self.backend.type == "couchbase":
+                kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
+                id_ = id_from_dn(id_)
+
+            entry = self.backend.get_entry(id_, **kwargs)
+
+            if not entry:
+                return
+
+            attrs, should_update = _transform_token_server_client(json.loads(entry.attrs["jansAttrs"]))
+            if should_update:
+                entry.attrs["jansAttrs"] = json.dumps(attrs)
+                self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
+
+        _update_jca_client()
+        _update_token_server_client()
