@@ -19,6 +19,7 @@ Janssen enables organizations to build a scalable centralized authentication and
 **Table of Contents**
 
 - [What is the Janssen Project](#what-is-the-janssen-project)
+  - [Janssen Modules](#janssen-modules)
 - [Getting Started](#getting-started)
   - [Quick Start](#quick-start)
   - [Installation](#installation)
@@ -35,7 +36,6 @@ Janssen enables organizations to build a scalable centralized authentication and
   - [Code Documentation](#code-documentation)
 - [Design](#design)
   - [Design Goals](#design-goals)
-  - [Janssen Modules](#janssen-modules)
 - [Governance](#governance)
 - [Support](#support)
 - [More about Janssen Project](#more-about-janssen-project)
@@ -51,6 +51,29 @@ The Janssen Project is a cloud native digital identity platform. Using Janssen, 
 - **Two factor authentication**: Janssen implements FIDO2 standards to enable applications to use two factor authentication
 
 Janssen [user documentation](https://github.com/JanssenProject/jans/tree/main/docs/user) has full list of usecases and how to implement them using Janssen.
+
+### Janssen Modules
+
+Janssen is not a big monolith--it's a lot of services working together. Whether you deploy Janssen to a Kubernetes cluster, or you are a developer running everything on one server, it's important to understand the different parts. 
+
+1. **[auth-server](jans-auth-server)**: This component is the OAuth Authorization Server, the OpenID Connect Provider, the UMA Authorization Server--this is the main Internet facing component of Janssen. It's the service that returns tokens, JWT's and identity assertions. This service must be Internet facing.
+
+1. **[fido](jans-fido2)**:  This component provides the server side endpoints to enroll and validate devices that use FIDO. It provides both FIDO U2F (register, authenticate) and FIDO 2 (attestation, assertion) endpoints. This service must be internet facing.
+
+1. **[config-api](jans-config-api)**: The API to configure the auth-server and other components is consolidated in this component. This service should not be Internet-facing.
+
+1. **[scim](jans-scim)**: [SCIM](http://www.simplecloud.info/) is JSON/REST API to manage user data. Use it to add, edit and update user information. This service should not be Internet facing.
+
+1. **[jans-cli](jans-cli)**: This module is a command line interface for configuring the Janssen software, providing both interactive and simple single line
+   options for configuration.
+
+1. **[client-api](jans-client-api)**: Middleware API to help application developers call an OAuth, OpenID or UMA server. You may wonder why this is necessary. It makes it easier for client developers to use OpenID signing and encryption features, without becoming crypto experts. This API provides some high level endpoints to do some of the heavy lifting.
+
+1. **[core](jans-core)**: This library has code that is shared across several janssen projects. You will most likely need this project when you build other Janssen components.
+
+1. **[orm](jans-orm)**: This is the library for persistence and caching implemenations in Janssen. Currently LDAP and Couchbase are supported. RDBMS is coming soon.
+
+More details can be found under [Janssen technical documentation](docs/technical).
 
 ## Getting Started
 
@@ -87,7 +110,7 @@ A BIG thanks to all amazing contributors!! 👏 👏
 ## Security
 
 ### Disclosing vulnerabilities
-If you think you found a security vulnerability, please refrain from posting it publicly on the forums, the chat, or GitHub. Instead, send us an email on security@jans.io and include the word "SECURITY" in the subject line
+If you think you found a security vulnerability, please refrain from posting it publicly on the forums, the chat, or GitHub. Instead, send us an email on security@jans.io.
 
 Refer to [Janssen Security Policy](.github/SECURITY.md)
 
@@ -122,30 +145,6 @@ The Janssen Project is aligned with the goals of cloud native infrastructure to 
 2. Highly Available: Digital identity infrastructure is mission critical. For many applications, if you can't login, you're dead in the water. Robustness is a fundamental consideration.
 
 3. Flexible while Upgradable: Open source gives you the freedom to modify the code. But having your own fork of the code might make it hard to upgrade--you'll have to merge changes. Janssen provides standard interfaces that make it possible to implement custom business logic in an upgrade-friendly manner.
-
-
-### Janssen Modules
-
-Janssen is not a big monolith--it's a lot of services working together. Whether you deploy Janssen to a Kubernetes cluster, or you are a developer running everything on one server, it's important to understand the different parts. 
-
-1. **[auth-server](jans-auth-server)**: This component is the OAuth Authorization Server, the OpenID Connect Provider, the UMA Authorization Server--this is the main Internet facing component of Janssen. It's the service that returns tokens, JWT's and identity assertions. This service must be Internet facing.
-
-1. **[fido](jans-fido2)**:  This component provides the server side endpoints to enroll and validate devices that use FIDO. It provides both FIDO U2F (register, authenticate) and FIDO 2 (attestation, assertion) endpoints. This service must be internet facing.
-
-1. **[config-api](jans-config-api)**: The API to configure the auth-server and other components is consolidated in this component. This service should not be Internet-facing.
-
-1. **[scim](jans-scim)**: [SCIM](http://www.simplecloud.info/) is JSON/REST API to manage user data. Use it to add, edit and update user information. This service should not be Internet facing.
-
-1. **[jans-cli](jans-cli)**: This module is a command line interface for configuring the Janssen software, providing both interactive and simple single line
-   options for configuration.
-
-1. **[client-api](jans-client-api)**: Middleware API to help application developers call an OAuth, OpenID or UMA server. You may wonder why this is necessary. It makes it easier for client developers to use OpenID signing and encryption features, without becoming crypto experts. This API provides some high level endpoints to do some of the heavy lifting.
-
-1. **[core](jans-core)**: This library has code that is shared across several janssen projects. You will most likely need this project when you build other Janssen components.
-
-1. **[orm](jans-orm)**: This is the library for persistence and caching implemenations in Janssen. Currently LDAP and Couchbase are supported. RDBMS is coming soon.
-
-More details can be found under [Janssen technical documentation](docs/technical).
 
 ## Governance
 
