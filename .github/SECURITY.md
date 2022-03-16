@@ -14,8 +14,7 @@ Security updates will typically only be applied to the latest release (at least 
 
 ## Reporting a vulnerability
 
-To report a security issue, email [security@jans.io](mailto:security@jans.io?subject=SECURITY)
-and include the word "SECURITY" in the subject line.
+To report a security issue, send an email to [security@jans.io](mailto:security@jans.io?subject=SECURITY)
 
 The **Janssen** team will send a response indicating the next steps in handling your report.
 After the initial reply to your report, the team will keep you informed of the progress towards a fix and full announcement,
