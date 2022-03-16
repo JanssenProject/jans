@@ -5,6 +5,8 @@ import logging.config
 import os
 from collections import namedtuple
 
+from ldif import LDIFParser
+
 from jans.pycloudlib.persistence.couchbase import get_couchbase_user
 from jans.pycloudlib.persistence.couchbase import get_couchbase_superuser
 from jans.pycloudlib.persistence.couchbase import get_couchbase_password
@@ -172,8 +174,6 @@ def _transform_profile_scope(attrs):
 
 
 def collect_claim_names(ldif_file="/app/templates/attributes.ldif"):
-    from ldif import LDIFParser
-
     rows = {}
     with open("/app/templates/attributes.ldif", "rb") as fd:
         parser = LDIFParser(fd)
@@ -631,11 +631,35 @@ class Upgrade:
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
 
     def update_attributes_entries(self):
-        # default to ldap persistence
-        kwargs = {}
-        rows = collect_claim_names()
+        def _update_claim_names():
+            # default to ldap persistence
+            kwargs = {}
+            rows = collect_claim_names()
 
-        for id_, claim_name in rows.items():
+            for id_, claim_name in rows.items():
+                if self.backend.type in ("sql", "spanner"):
+                    id_ = doc_id_from_dn(id_)
+                    kwargs = {"table_name": "jansAttr"}
+                elif self.backend.type == "couchbase":
+                    id_ = id_from_dn(id_)
+                    kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
+
+                entry = self.backend.get_entry(id_, **kwargs)
+
+                if not entry:
+                    return
+
+                # jansClaimName already set
+                if "jansClaimName" in entry.attrs and entry.attrs["jansClaimName"]:
+                    continue
+
+                entry.attrs["jansClaimName"] = claim_name
+                self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
+
+        def _update_mobile_attr():
+            kwargs = {}
+            id_ = "inum=6DA6,ou=attributes,o=jans"
+
             if self.backend.type in ("sql", "spanner"):
                 id_ = doc_id_from_dn(id_)
                 kwargs = {"table_name": "jansAttr"}
@@ -648,12 +672,12 @@ class Upgrade:
             if not entry:
                 return
 
-            # jansClaimName already set
-            if "jansClaimName" in entry.attrs and entry.attrs["jansClaimName"]:
-                continue
+            if not entry.attrs.get("jansMultivaluedAttr"):
+                entry.attrs["jansMultivaluedAttr"] = True
+                self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
 
-            entry.attrs["jansClaimName"] = claim_name
-            self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
+        _update_claim_names()
+        _update_mobile_attr()
 
     def update_base_entries(self):
         # default to ldap persistence
