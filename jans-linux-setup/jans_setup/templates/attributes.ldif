@@ -663,6 +663,7 @@ jansAttrTyp: string
 jansAttrViewTyp: user
 jansAttrViewTyp: admin
 jansClaimName: phone_mobile_number
+jansMultivaluedAttr: true
 jansSAML1URI: urn:mace:dir:attribute-def:mobile
 jansSAML2URI: urn:oid:0.9.2342.19200300.100.1.41
 jansStatus: inactive

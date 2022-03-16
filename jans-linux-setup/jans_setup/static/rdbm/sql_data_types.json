@@ -1033,5 +1033,13 @@
     "spanner": {
       "type": "STRING(MAX)"
     }
+  },
+  "mobile": {
+    "mysql": {
+      "type": "JSON"
+    },
+    "spanner": {
+      "type": "ARRAY<STRING(MAX)>"
+    }
   }
 }
