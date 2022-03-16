@@ -46,7 +46,7 @@ class BaseBackend:
 
 
 #: ID of base entry
-JANS_BASE_ID = "o=jans"
+JANS_BASE_DN = "o=jans"
 
 #: ID of manager group
 JANS_MANAGER_GROUP = "inum=60B7,ou=groups,o=jans"
@@ -62,6 +62,14 @@ JANS_SCIM_SCRIPT_DN = "inum=2DAF-F9A5,ou=scripts,o=jans"
 
 #: Basic script DN
 JANS_BASIC_SCRIPT_DN = "inum=A51E-76DA,ou=scripts,o=jans"
+
+#: SCIM users.read scope
+JANS_SCIM_USERS_READ_SCOPE_DN = "inum=1200.2B7428,ou=scopes,o=jans"
+
+#: SCIM users.write scope
+JANS_SCIM_USERS_WRITE_SCOPE_DN = "inum=1200.0A0198,ou=scopes,o=jans"
+
+DEFAULT_JANS_ATTRS = '{"spontaneousClientId":null,"spontaneousClientScopes":null,"showInConfigurationEndpoint":true}'
 
 
 def _transform_auth_dynamic_config(conf):
@@ -213,31 +221,6 @@ class LDAPBackend(BaseBackend):
             attrs[k] = [(mod, v)]
         return self.client.modify(key, attrs)
 
-    def update_people_entries(self):
-        # add jansAdminUIRole to default admin user
-        admin_inum = self.manager.config.get("admin_inum")
-        id_ = f"inum={admin_inum},ou=people,o=jans"
-        kwargs = {}
-
-        entry = self.get_entry(id_, **kwargs)
-        if not entry:
-            return
-
-        if "jansAdminUIRole" not in entry.attrs:
-            entry.attrs["jansAdminUIRole"] = ["api-admin"]
-            self.modify_entry(id_, entry.attrs, **kwargs)
-
-    def update_scopes_entries(self):
-        # add jansAdminUIRole claim to profile scope
-        kwargs = {}
-        entry = self.get_entry(JANS_PROFILE_SCOPE_DN, **kwargs)
-        if not entry:
-            return
-
-        attrs, should_update = _transform_profile_scope(entry.attrs)
-        if should_update:
-            self.modify_entry(entry.id, attrs, **kwargs)
-
     def update_clients_entries(self):
         # modify redirect UI of config-api client
         def _update_jca_client():
@@ -279,45 +262,6 @@ class LDAPBackend(BaseBackend):
         _update_jca_client()
         _update_token_server_client()
 
-    def update_scim_scopes_entries(self):
-        # add jansAttrs to SCIM users.read and users.write scopes
-        ids = self.jans_scim_scopes
-        kwargs = {}
-
-        for id_ in ids:
-            entry = self.get_entry(id_, **kwargs)
-            if not entry:
-                continue
-
-            if "jansAttrs" not in entry.attrs:
-                entry.attrs[
-                    "jansAttrs"] = self.jans_attrs
-                self.modify_entry(id_, entry.attrs, **kwargs)
-
-    def update_base_entries(self):
-        # add jansManagerGrp to base entry
-        entry = self.get_entry(JANS_BASE_ID)
-        if not entry:
-            return
-
-        if not entry.attrs.get("jansManagerGrp"):
-            entry.attrs["jansManagerGrp"] = JANS_MANAGER_GROUP
-            self.modify_entry(JANS_BASE_ID, entry.attrs)
-
-    def update_attributes_entries(self):
-        kwargs = {}
-        rows = collect_claim_names()
-
-        for dn, claim_name in rows.items():
-            entry = self.get_entry(dn, **kwargs)
-
-            # jansClaimName already set
-            if "jansClaimName" in entry.attrs and entry.attrs["jansClaimName"]:
-                continue
-
-            entry.attrs["jansClaimName"] = claim_name
-            self.modify_entry(entry.id, entry.attrs, **kwargs)
-
 
 class SQLBackend(BaseBackend):
     def __init__(self, manager):
@@ -338,33 +282,6 @@ class SQLBackend(BaseBackend):
         attrs = attrs or {}
         table_name = kwargs.get("table_name")
         return self.client.update(table_name, key, attrs), ""
-
-    def update_people_entries(self):
-        # add jansAdminUIRole to default admin user
-        admin_inum = self.manager.config.get("admin_inum")
-        id_ = doc_id_from_dn(f"inum={admin_inum},ou=people,o=jans")
-        kwargs = {"table_name": "jansPerson"}
-
-        entry = self.get_entry(id_, **kwargs)
-        if not entry:
-            return
-
-        # sql entry may have empty jansAdminUIRole hash ({"v": []})
-        if not entry.attrs["jansAdminUIRole"]["v"]:
-            entry.attrs["jansAdminUIRole"] = {"v": ["api-admin"]}
-            self.modify_entry(id_, entry.attrs, **kwargs)
-
-    def update_scopes_entries(self):
-        # add jansAdminUIRole claim to profile scope
-        kwargs = {"table_name": "jansScope"}
-        entry = self.get_entry(doc_id_from_dn(JANS_PROFILE_SCOPE_DN), **kwargs)
-
-        if not entry:
-            return
-
-        attrs, should_update = _transform_profile_scope(entry.attrs)
-        if should_update:
-            self.modify_entry(entry.id, attrs, **kwargs)
 
     def update_clients_entries(self):
         # modify redirect UI of config-api client
@@ -416,48 +333,6 @@ class SQLBackend(BaseBackend):
 
         _update_jca_client()
         _update_token_server_client()
-
-    def update_scim_scopes_entries(self):
-        # add jansAttrs to SCIM users.read and users.write scopes
-        ids = [doc_id_from_dn(scope) for scope in self.jans_scim_scopes]
-        kwargs = {"table_name": "jansScope"}
-
-        for id_ in ids:
-            entry = self.get_entry(id_, **kwargs)
-            if not entry:
-                continue
-
-            if "jansAttrs" not in entry.attrs:
-                entry.attrs[
-                    "jansAttrs"] = self.jans_attrs
-                self.modify_entry(id_, entry.attrs, **kwargs)
-
-    def update_base_entries(self):
-        # add jansManagerGrp to base entry
-        id_ = doc_id_from_dn(JANS_BASE_ID)
-        kwargs = {"table_name": "jansOrganization"}
-
-        entry = self.get_entry(id_, **kwargs)
-        if not entry:
-            return
-
-        if not entry.attrs.get("jansManagerGrp"):
-            entry.attrs["jansManagerGrp"] = JANS_MANAGER_GROUP
-            self.modify_entry(id_, entry.attrs, **kwargs)
-
-    def update_attributes_entries(self):
-        kwargs = {"table_name": "jansAttr"}
-        rows = collect_claim_names()
-
-        for dn, claim_name in rows.items():
-            entry = self.get_entry(doc_id_from_dn(dn), **kwargs)
-
-            # jansClaimName already set
-            if "jansClaimName" in entry.attrs and entry.attrs["jansClaimName"]:
-                continue
-
-            entry.attrs["jansClaimName"] = claim_name
-            self.modify_entry(entry.id, entry.attrs, **kwargs)
 
 
 class CouchbaseBackend(BaseBackend):
@@ -518,33 +393,6 @@ class CouchbaseBackend(BaseBackend):
             message = req.text or req.reason
         return status, message
 
-    def update_people_entries(self):
-        # add jansAdminUIRole to default admin user
-        admin_inum = self.manager.config.get("admin_inum")
-        id_ = id_from_dn(f"inum={admin_inum},ou=people,o=jans")
-        bucket = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
-        kwargs = {"bucket": f"{bucket}_user"}
-
-        entry = self.get_entry(id_, **kwargs)
-        if not entry:
-            return
-
-        if "jansAdminUIRole" not in entry.attrs:
-            entry.attrs["jansAdminUIRole"] = ["api-admin"]
-            self.modify_entry(id_, entry.attrs, **kwargs)
-
-    def update_scopes_entries(self):
-        # add jansAdminUIRole claim to profile scope
-        kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
-        entry = self.get_entry(id_from_dn(JANS_PROFILE_SCOPE_DN), **kwargs)
-
-        if not entry:
-            return
-
-        attrs, should_update = _transform_profile_scope(entry.attrs)
-        if should_update:
-            self.modify_entry(entry.id, attrs, **kwargs)
-
     def update_clients_entries(self):
         # modify redirect UI of config-api client
         def _update_jca_client():
@@ -596,22 +444,6 @@ class CouchbaseBackend(BaseBackend):
         _update_jca_client()
         _update_token_server_client()
 
-    def update_scim_scopes_entries(self):
-        # add jansAttrs to SCIM users.read and users.write scopes
-        ids = map(id_from_dn, self.jans_scim_scopes)
-        bucket = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
-        kwargs = {"bucket": bucket}
-
-        for id_ in ids:
-            entry = self.get_entry(id_, **kwargs)
-            if not entry:
-                continue
-
-            if "jansAttrs" not in entry.attrs:
-                entry.attrs[
-                    "jansAttrs"] = self.jans_attrs
-                self.modify_entry(id_, entry.attrs, **kwargs)
-
     def update_misc(self):
         # 1 - fix objectclass for scim and config-api where it has lowecased objectclass instead of objectClass
         bucket = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
@@ -633,34 +465,6 @@ class CouchbaseBackend(BaseBackend):
         # drop the index
         self.client.exec_query(f'DROP INDEX `{bucket}`.`def_jans_fix_oc`')
 
-    def update_base_entries(self):
-        # add jansManagerGrp to base entry
-        id_ = id_from_dn(JANS_BASE_ID)
-        bucket = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
-        kwargs = {"bucket": bucket}
-
-        entry = self.get_entry(id_, **kwargs)
-        if not entry:
-            return
-
-        if not entry.attrs.get("jansManagerGrp"):
-            entry.attrs["jansManagerGrp"] = JANS_MANAGER_GROUP
-            self.modify_entry(id_, entry.attrs, **kwargs)
-
-    def update_attributes_entries(self):
-        kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
-        rows = collect_claim_names()
-
-        for dn, claim_name in rows.items():
-            entry = self.get_entry(id_from_dn(dn), **kwargs)
-
-            # jansClaimName already set
-            if "jansClaimName" in entry.attrs and entry.attrs["jansClaimName"]:
-                continue
-
-            entry.attrs["jansClaimName"] = claim_name
-            self.modify_entry(entry.id, entry.attrs, **kwargs)
-
 
 class SpannerBackend(BaseBackend):
     def __init__(self, manager):
@@ -681,33 +485,6 @@ class SpannerBackend(BaseBackend):
         attrs = attrs or {}
         table_name = kwargs.get("table_name")
         return self.client.update(table_name, key, attrs), ""
-
-    def update_people_entries(self):
-        # add jansAdminUIRole to default admin user
-        admin_inum = self.manager.config.get("admin_inum")
-        id_ = doc_id_from_dn(f"inum={admin_inum},ou=people,o=jans")
-        kwargs = {"table_name": "jansPerson"}
-
-        entry = self.get_entry(id_, **kwargs)
-        if not entry:
-            return
-
-        # sql entry may have empty jansAdminUIRole hash ({"v": []})
-        if not entry.attrs["jansAdminUIRole"]:
-            entry.attrs["jansAdminUIRole"] = ["api-admin"]
-            self.modify_entry(id_, entry.attrs, **kwargs)
-
-    def update_scopes_entries(self):
-        # add jansAdminUIRole claim to profile scope
-        kwargs = {"table_name": "jansScope"}
-        entry = self.get_entry(doc_id_from_dn(JANS_PROFILE_SCOPE_DN), **kwargs)
-
-        if not entry:
-            return
-
-        attrs, should_update = _transform_profile_scope(entry.attrs)
-        if should_update:
-            self.modify_entry(entry.id, attrs, **kwargs)
 
     def update_clients_entries(self):
         # modify redirect UI of config-api client
@@ -760,48 +537,6 @@ class SpannerBackend(BaseBackend):
         _update_jca_client()
         _update_token_server_client()
 
-    def update_scim_scopes_entries(self):
-        # add jansAttrs to SCIM users.read and users.write scopes
-        ids = [doc_id_from_dn(scope) for scope in self.jans_scim_scopes]
-        kwargs = {"table_name": "jansScope"}
-
-        for id_ in ids:
-            entry = self.get_entry(id_, **kwargs)
-            if not entry:
-                continue
-
-            if "jansAttrs" not in entry.attrs:
-                entry.attrs[
-                    "jansAttrs"] = self.jans_attrs
-                self.modify_entry(id_, entry.attrs, **kwargs)
-
-    def update_base_entries(self):
-        # add jansManagerGrp to base entry
-        id_ = doc_id_from_dn(JANS_BASE_ID)
-        kwargs = {"table_name": "jansOrganization"}
-
-        entry = self.get_entry(id_, **kwargs)
-        if not entry:
-            return
-
-        if not entry.attrs.get("jansManagerGrp"):
-            entry.attrs["jansManagerGrp"] = JANS_MANAGER_GROUP
-            self.modify_entry(id_, entry.attrs, **kwargs)
-
-    def update_attributes_entries(self):
-        kwargs = {"table_name": "jansAttr"}
-        rows = collect_claim_names()
-
-        for dn, claim_name in rows.items():
-            entry = self.get_entry(doc_id_from_dn(dn), **kwargs)
-
-            # jansClaimName already set
-            if "jansClaimName" in entry.attrs and entry.attrs["jansClaimName"]:
-                continue
-
-            entry.attrs["jansClaimName"] = claim_name
-            self.modify_entry(entry.id, entry.attrs, **kwargs)
-
 
 class Upgrade:
     def __init__(self, manager):
@@ -821,17 +556,19 @@ class Upgrade:
     def invoke(self):
         # TODO: refactor all self.backend.update_ to this class method
         logger.info("Running upgrade process (if required)")
-        self.backend.update_people_entries()
-        self.backend.update_scopes_entries()
+        self.update_people_entries()
+        self.update_scopes_entries()
+
         self.backend.update_clients_entries()
-        self.backend.update_scim_scopes_entries()
-        self.backend.update_base_entries()
+
+        self.update_scim_scopes_entries()
+        self.update_base_entries()
 
         if hasattr(self.backend, "update_misc"):
             self.backend.update_misc()
 
         self.update_auth_dynamic_config()
-        self.backend.update_attributes_entries()
+        self.update_attributes_entries()
         self.update_scripts_entries()
 
     def update_scripts_entries(self):
@@ -844,8 +581,7 @@ class Upgrade:
             kwargs = {"table_name": "jansCustomScr"}
             scim_id = doc_id_from_dn(scim_id)
             basic_id = doc_id_from_dn(basic_id)
-
-        if self.backend.type == "couchbase":
+        elif self.backend.type == "couchbase":
             kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
             scim_id = id_from_dn(scim_id)
             basic_id = id_from_dn(basic_id)
@@ -873,8 +609,7 @@ class Upgrade:
         if self.backend.type in ("sql", "spanner"):
             kwargs = {"table_name": "jansAppConf"}
             id_ = doc_id_from_dn(id_)
-
-        if self.backend.type == "couchbase":
+        elif self.backend.type == "couchbase":
             kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
             id_ = id_from_dn(id_)
 
@@ -893,4 +628,131 @@ class Upgrade:
                 entry.attrs["jansConfDyn"] = json.dumps(conf)
 
             entry.attrs["jansRevision"] += 1
+            self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
+
+    def update_attributes_entries(self):
+        # default to ldap persistence
+        kwargs = {}
+        rows = collect_claim_names()
+
+        for id_, claim_name in rows.items():
+            if self.backend.type in ("sql", "spanner"):
+                id_ = doc_id_from_dn(id_)
+                kwargs = {"table_name": "jansAttr"}
+            elif self.backend.type == "couchbase":
+                id_ = id_from_dn(id_)
+                kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
+
+            entry = self.backend.get_entry(id_, **kwargs)
+
+            if not entry:
+                return
+
+            # jansClaimName already set
+            if "jansClaimName" in entry.attrs and entry.attrs["jansClaimName"]:
+                continue
+
+            entry.attrs["jansClaimName"] = claim_name
+            self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
+
+    def update_base_entries(self):
+        # default to ldap persistence
+        kwargs = {}
+        id_ = JANS_BASE_DN
+
+        if self.backend.type in ("sql", "spanner"):
+            kwargs = {"table_name": "jansOrganization"}
+            id_ = doc_id_from_dn(id_)
+        elif self.backend.type == "couchbase":
+            kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
+            id_ = id_from_dn(id_)
+
+        # add jansManagerGrp to base entry
+        entry = self.backend.get_entry(id_, **kwargs)
+
+        if not entry:
+            return
+
+        if not entry.attrs.get("jansManagerGrp"):
+            entry.attrs["jansManagerGrp"] = JANS_MANAGER_GROUP
+            self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
+
+    def update_scim_scopes_entries(self):
+        # default to ldap persistence
+        kwargs = {}
+
+        # add jansAttrs to SCIM users.read and users.write scopes
+        for id_ in [JANS_SCIM_USERS_READ_SCOPE_DN, JANS_SCIM_USERS_WRITE_SCOPE_DN]:
+            if self.backend.type in ("sql", "spanner"):
+                kwargs = {"table_name": "jansScope"}
+                id_ = doc_id_from_dn(id_)
+            elif self.backend.type == "couchbase":
+                kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
+                id_ = id_from_dn(id_)
+
+            entry = self.backend.get_entry(id_, **kwargs)
+
+            if not entry:
+                continue
+
+            if "jansAttrs" not in entry.attrs:
+                entry.attrs["jansAttrs"] = DEFAULT_JANS_ATTRS
+                self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
+
+    def update_scopes_entries(self):
+        # default to ldap persistence
+        kwargs = {}
+        id_ = JANS_PROFILE_SCOPE_DN
+
+        if self.backend.type in ("sql", "spanner"):
+            kwargs = {"table_name": "jansScope"}
+            id_ = doc_id_from_dn(id_)
+        elif self.backend.type == "couchbase":
+            kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
+            id_ = id_from_dn(id_)
+
+        entry = self.backend.get_entry(id_, **kwargs)
+
+        if not entry:
+            return
+
+        attrs, should_update = _transform_profile_scope(entry.attrs)
+        if should_update:
+            self.backend.modify_entry(entry.id, attrs, **kwargs)
+
+    def update_people_entries(self):
+        # default to ldap persistence
+        admin_inum = self.manager.config.get("admin_inum")
+
+        id_ = f"inum={admin_inum},ou=people,o=jans"
+        kwargs = {}
+
+        if self.backend.type in ("sql", "spanner"):
+            id_ = doc_id_from_dn(id_)
+            kwargs = {"table_name": "jansPerson"}
+        elif self.backend.type == "couchbase":
+            id_ = id_from_dn(id_)
+            bucket = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
+            kwargs = {"bucket": f"{bucket}_user"}
+
+        entry = self.backend.get_entry(id_, **kwargs)
+
+        if not entry:
+            return
+
+        # add jansAdminUIRole to default admin user
+        should_update = False
+
+        if self.backend.type == "sql" and not entry.attrs["jansAdminUIRole"]["v"]:
+            entry.attrs["jansAdminUIRole"] = {"v": ["api-admin"]}
+            should_update = True
+        elif self.backend.type == "spanner" and not entry.attrs["jansAdminUIRole"]:
+            entry.attrs["jansAdminUIRole"] = ["api-admin"]
+            should_update = True
+        else:  # ldap and couchbase
+            if "jansAdminUIRole" not in entry.attrs:
+                entry.attrs["jansAdminUIRole"] = ["api-admin"]
+                should_update = True
+
+        if should_update:
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
