@@ -19,7 +19,6 @@ import io.jans.as.persistence.model.ClientAttributes;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.AttributesList;
 import io.jans.orm.annotation.CustomObjectClass;
-import io.jans.orm.annotation.DN;
 import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.Expiration;
 import io.jans.orm.annotation.JsonObject;
@@ -42,10 +41,7 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Client extends DeletableEntity implements Serializable {
 
-    private static final long serialVersionUID = -6832496019942067970L;
-
-    @DN
-    private String dn;
+    private static final long serialVersionUID = -6832496019942067971L;
 
     @JsonProperty("inum")
     @AttributeName(name = "inum", ignoreDuringUpdate = true)
@@ -196,7 +192,7 @@ public class Client extends DeletableEntity implements Serializable {
     private Integer accessTokenLifetime;
 
     @AttributesList(name = "name", value = "values", sortByName = true)
-    private List<CustomAttribute> customAttributes = new ArrayList<CustomAttribute>();
+    private List<CustomAttribute> customAttributes = new ArrayList<>();
 
     @CustomObjectClass
     private String[] customObjectClasses;
@@ -289,14 +285,6 @@ public class Client extends DeletableEntity implements Serializable {
 
     public AuthenticationMethod getAuthenticationMethod() {
         return AuthenticationMethod.fromString(tokenEndpointAuthMethod);
-    }
-
-    public String getDn() {
-        return dn;
-    }
-
-    public void setDn(String dn) {
-        this.dn = dn;
     }
 
     /**
