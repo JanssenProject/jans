@@ -8,6 +8,7 @@ import shutil
 import re
 import requests
 import zipfile
+import site
 
 from pathlib import Path
 
@@ -468,3 +469,18 @@ class JansInstaller(BaseInstaller, SetupUtils):
                 cron_service = 'crond' if base.os_type in ['centos', 'red', 'fedora'] else 'cron'
                 self.restart(cron_service)
 
+
+            # if we are running inside shiv package, copy site pacakages to /opt/dist/jans-setup-packages and add to sys path
+
+            gluu_site_dir = '/opt/dist/jans-setup-packages'
+
+            for p in sys.path:
+                ps = str(p)
+                if '/.shiv/' in ps and ps.endswith('site-packages'):
+                    if not gluu_site_dir in sys.path:
+                        if not os.path.exists(site.USER_SITE):
+                            os.makedirs(site.USER_SITE)
+                        with open(os.path.join(site.USER_SITE, 'jans_setup_site.pth'), 'w') as site_file:
+                            site_file.write(gluu_site_dir)
+                        self.logIt("Copying site packages to {}".format(gluu_site_dir))
+                        shutil.copytree(p, gluu_site_dir, dirs_exist_ok=True)
