@@ -359,5 +359,6 @@
     "deviceAuthzTokenPollInterval": 5,
     "deviceAuthzResponseTypeToProcessAuthz": "code",
     "staticKid": "%(staticKid)s",
-    "forceOfflineAccessScopeToEnableRefreshToken" : false
+    "forceOfflineAccessScopeToEnableRefreshToken" : false,
+    "redirectUrisRegexEnabled": true
 }

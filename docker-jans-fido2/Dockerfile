@@ -7,7 +7,7 @@ FROM bellsoft/liberica-openjre-alpine:11.0.13-8
 RUN apk update \
     && apk add --no-cache openssl py3-pip tini curl py3-cryptography py3-psycopg2 \
     && apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/v3.15/community py3-grpcio \
-    && apk add --no-cache --virtual build-deps wget git \
+    && apk add --no-cache --virtual build-deps wget git zip \
     && mkdir -p /usr/java/latest \
     && ln -sf /usr/lib/jvm/jre /usr/java/latest/jre
 
@@ -35,16 +35,20 @@ EXPOSE 8080
 # =====
 
 ENV CN_VERSION=1.0.0-SNAPSHOT
-ENV CN_BUILD_DATE='2022-03-07 08:41'
+ENV CN_BUILD_DATE='2022-03-15 17:18'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-fido2-server/${CN_VERSION}/jans-fido2-server-${CN_VERSION}.war
 
 # Install FIDO2
-RUN wget -q ${CN_SOURCE_URL} -O /tmp/fido2.war \
-    && mkdir -p ${JETTY_BASE}/jans-fido2/webapps/jans-fido2 \
-    && unzip -qq /tmp/fido2.war -d ${JETTY_BASE}/jans-fido2/webapps/jans-fido2 \
-    && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-fido2 --add-to-start=server,deploy,resources,http,http-forwarded,threadpool,jsp,cdi-decorate \
-    && rm -f /tmp/fido2.war \
-    && rm -f ${JETTY_BASE}/jans-fido2/webapps/jans-fido2/WEB-INF/jetty-web.xml
+
+COPY jetty/jetty-env.xml /tmp/WEB-INF/jetty-env.xml
+RUN mkdir -p ${JETTY_BASE}/jans-fido2/webapps \
+    && wget -q ${CN_SOURCE_URL} -O /tmp/jans-fido2.war \
+    && cd /tmp \
+    && zip -d jans-fido2.war WEB-INF/jetty-web.xml \
+    && zip -r jans-fido2.war WEB-INF/jetty-env.xml \
+    && cp jans-fido2.war ${JETTY_BASE}/jans-fido2/webapps/jans-fido2.war \
+    && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-fido2 --add-module=server,deploy,resources,http,http-forwarded,threadpool,jsp,cdi-decorate \
+    && rm -rf /tmp/jans-fido2.war /tmp/WEB-INF
 
 # ======
 # Python
@@ -145,43 +149,41 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
 # misc stuff
 # ==========
 
-LABEL name="FIDO2" \
-    maintainer="Janssen io <support@jans.io>" \
+LABEL name="janssenproject/fido2" \
+    maintainer="Janssen Project <support@jans.io>" \
     vendor="Janssen Project" \
     version="1.0.0" \
-    release="b12" \
+    release="beta.16" \
     summary="Janssen FIDO2" \
     description="FIDO2 server"
 
-RUN mkdir -p /etc/certs /deploy \
+RUN mkdir -p /etc/certs \
     /etc/jans/conf \
-    /app/templates
+    /etc/jans/conf/fido2/mds/cert \
+    /etc/jans/conf/fido2/mds/toc \
+    /etc/jans/conf/fido2/server_metadata \
+    /app/templates \
+    /opt/jetty/temp
 
 COPY jetty/jans-fido2.xml ${JETTY_BASE}/jans-fido2/webapps/
-COPY jetty/jetty-env.xml ${JETTY_BASE}/jans-fido2/webapps/jans-fido2/WEB-INF/
 COPY jetty/log4j2.xml ${JETTY_BASE}/jans-fido2/resources/
 COPY conf/*.tmpl /app/templates/
 COPY conf/fido2 /etc/jans/conf/fido2
-RUN mkdir -p /etc/jans/conf/fido2/mds/cert \
-    /etc/jans/conf/fido2/mds/toc \
-    /etc/jans/conf/fido2/server_metadata
 
 COPY scripts /app/scripts
 RUN chmod +x /app/scripts/entrypoint.sh
 
-# # create non-root user
+# create non-root user
 RUN adduser -s /bin/sh -D -G root -u 1000 jetty
 
  # adjust ownership
 RUN chown -R 1000:1000 /opt/jans/jetty \
     && chown -R 1000:1000 /etc/jans \
     && chown -R 1000:1000 /opt/jetty \
-    && chown -R 1000:1000 /deploy \
     && chown -R 1000:1000 /tmp \
     && chgrp -R 0 /opt/jans/jetty && chmod -R g=u /opt/jans/jetty \
     && chgrp -R 0 /opt/jetty && chmod -R g=u /opt/jetty \
     && chgrp -R 0 /tmp && chmod -R g=u /tmp \
-    && chgrp -R 0 /deploy && chmod -R g=u /deploy \
     && chgrp -R 0 /etc/certs && chmod -R g=u /etc/certs \
     && chgrp -R 0 /etc/jans && chmod -R g=u /etc/jans \
     && chmod -R +w /usr/java/latest/jre/lib/security/cacerts && chgrp -R 0 /usr/java/latest/jre/lib/security/cacerts && chmod -R g=u /usr/java/latest/jre/lib/security/cacerts \

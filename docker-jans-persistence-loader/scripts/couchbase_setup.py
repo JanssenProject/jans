@@ -4,6 +4,7 @@ import json
 import logging.config
 import os
 import time
+from pathlib import Path
 
 from ldif import LDIFParser
 
@@ -29,32 +30,32 @@ def get_bucket_mappings(manager):
         "default": {
             "bucket": prefix,
             "mem_alloc": 100,
-            "document_key_prefix": [],
+            # "document_key_prefix": [],
         },
         "user": {
             "bucket": f"{prefix}_user",
             "mem_alloc": 300,
-            "document_key_prefix": ["groups_", "people_", "authorizations_"],
+            # "document_key_prefix": ["groups_", "people_", "authorizations_"],
         },
         "site": {
             "bucket": f"{prefix}_site",
             "mem_alloc": 100,
-            "document_key_prefix": ["site_", "cache-refresh_"],
+            # "document_key_prefix": ["site_", "cache-refresh_"],
         },
         "token": {
             "bucket": f"{prefix}_token",
             "mem_alloc": 300,
-            "document_key_prefix": ["tokens_"],
+            # "document_key_prefix": ["tokens_"],
         },
         "cache": {
             "bucket": f"{prefix}_cache",
             "mem_alloc": 100,
-            "document_key_prefix": ["cache_"],
+            # "document_key_prefix": ["cache_"],
         },
         "session": {
             "bucket": f"{prefix}_session",
             "mem_alloc": 200,
-            "document_key_prefix": [],
+            # "document_key_prefix": [],
         },
     }
 
@@ -205,6 +206,7 @@ class CouchbaseBackend:
         self.client = CouchbaseClient(hostname, user, password)
         self.manager = manager
         self.index_num_replica = 0
+        self.attr_processor = AttrProcessor()
 
     def create_buckets(self, bucket_mappings, bucket_type="couchbase"):
         sys_info = self.client.get_system_info()
@@ -326,37 +328,10 @@ class CouchbaseBackend:
                             continue
                         logger.warning("Failed to execute query, reason={}".format(error["msg"]))
 
-    def import_ldif(self, bucket_mappings):
-        ctx = prepare_template_ctx(self.manager)
-        attr_processor = AttrProcessor()
-
+    def import_builtin_ldif(self, bucket_mappings, ctx):
         for _, mapping in bucket_mappings.items():
             for file_ in mapping["files"]:
-                logger.info(f"Importing {file_} file")
-                src = f"/app/templates/{file_}"
-                dst = f"/app/tmp/{file_}"
-                os.makedirs(os.path.dirname(dst), exist_ok=True)
-
-                render_ldif(src, dst, ctx)
-
-                with open(dst, "rb") as fd:
-                    parser = LDIFParser(fd)
-
-                    for dn, entry in parser.parse():
-                        if len(entry) <= 2:
-                            continue
-
-                        key = id_from_dn(dn)
-                        entry["dn"] = [dn]
-                        entry = transform_entry(entry, attr_processor)
-                        data = json.dumps(entry)
-
-                        # using INSERT will cause duplication error, but the data is left intact
-                        query = 'INSERT INTO `%s` (KEY, VALUE) VALUES ("%s", %s)' % (mapping["bucket"], key, data)
-                        req = self.client.exec_query(query)
-
-                        if not req.ok:
-                            logger.warning("Failed to execute query, reason={}".format(req.json()))
+                self._import_ldif(f"/app/templates/{file_}", ctx)
 
     def initialize(self):
         num_replica = int(os.environ.get("CN_COUCHBASE_INDEX_NUM_REPLICA", 0))
@@ -376,7 +351,9 @@ class CouchbaseBackend:
         self.create_indexes(bucket_mappings)
 
         time.sleep(5)
-        self.import_ldif(bucket_mappings)
+        ctx = prepare_template_ctx(self.manager)
+        self.import_builtin_ldif(bucket_mappings, ctx)
+        self.import_custom_ldif(ctx)
 
         time.sleep(5)
         self.create_couchbase_shib_user()
@@ -388,3 +365,64 @@ class CouchbaseBackend:
             'Shibboleth IDP',
             'query_select[*]',
         )
+
+    def import_custom_ldif(self, ctx):
+        custom_dir = Path("/app/custom_ldif")
+
+        for file_ in custom_dir.rglob("*.ldif"):
+            self._import_ldif(file_, ctx)
+
+    def _import_ldif(self, path, ctx):
+        src = Path(path).resolve()
+
+        # generated template will be saved under ``/app/tmp`` directory
+        # examples:
+        # - ``/app/templates/groups.ldif`` will be saved as ``/app/tmp/templates/groups.ldif``
+        # - ``/app/custom_ldif/groups.ldif`` will be saved as ``/app/tmp/custom_ldif/groups.ldif``
+        dst = Path("/app/tmp").joinpath(str(src).removeprefix("/app/")).resolve()
+
+        # ensure directory for generated template is exist
+        dst.parent.mkdir(parents=True, exist_ok=True)
+
+        logger.info(f"Importing {src} file")
+        render_ldif(src, dst, ctx)
+
+        with open(dst, "rb") as fd:
+            parser = LDIFParser(fd)
+
+            for dn, entry in parser.parse():
+                if len(entry) <= 2:
+                    continue
+
+                key = id_from_dn(dn)
+                bucket = get_bucket_for_key(key)
+                entry["dn"] = [dn]
+                entry = transform_entry(entry, self.attr_processor)
+                data = json.dumps(entry)
+
+                # TODO: get the bucket based on key prefix
+                # using INSERT will cause duplication error, but the data is left intact
+                query = 'INSERT INTO `%s` (KEY, VALUE) VALUES ("%s", %s)' % (bucket, key, data)
+                req = self.client.exec_query(query)
+
+                if not req.ok:
+                    logger.warning("Failed to execute query, reason={}".format(req.json()))
+
+
+def get_bucket_for_key(key):
+    bucket_prefix = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
+
+    cursor = key.find("_")
+    key_prefix = key[:cursor + 1]
+
+    if key_prefix in ("groups_", "people_", "authorizations_"):
+        bucket = f"{bucket_prefix}_user"
+    elif key_prefix in ("site_", "cache-refresh_"):
+        bucket = f"{bucket_prefix}_site"
+    elif key_prefix in ("tokens_"):
+        bucket = f"{bucket_prefix}_token"
+    elif key_prefix in ("cache_"):
+        bucket = f"{bucket_prefix}_cache"
+    else:
+        bucket = bucket_prefix
+    return bucket

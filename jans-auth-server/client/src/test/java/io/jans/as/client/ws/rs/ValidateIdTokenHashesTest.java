@@ -9,7 +9,6 @@ package io.jans.as.client.ws.rs;
 import io.jans.as.client.AuthorizationRequest;
 import io.jans.as.client.AuthorizationResponse;
 import io.jans.as.client.BaseTest;
-import io.jans.as.client.JwkClient;
 import io.jans.as.client.RegisterClient;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
@@ -19,16 +18,13 @@ import io.jans.as.client.TokenResponse;
 import io.jans.as.client.UserInfoClient;
 import io.jans.as.client.UserInfoResponse;
 
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.common.SubjectType;
-import io.jans.as.model.crypto.signature.RSAPublicKey;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
-import io.jans.as.model.jws.RSASigner;
-import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
-import io.jans.as.model.jwt.JwtHeaderName;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.StringUtils;
 import org.testng.annotations.Parameters;
@@ -76,7 +72,7 @@ public class ValidateIdTokenHashesTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -90,7 +86,7 @@ public class ValidateIdTokenHashesTest extends BaseTest {
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponse(authorizationResponse).check();
         assertEquals(authorizationResponse.getState(), stateParam);
 
         String scope = authorizationResponse.getScope();
@@ -100,24 +96,16 @@ public class ValidateIdTokenHashesTest extends BaseTest {
         String state = authorizationResponse.getState();
 
         // 3. Validate id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertIdToken(jwt);
-
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS256, publicKey);
-
-        assertTrue(rsaSigner.validate(jwt));
-
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.CODE_HASH));
-        assertTrue(rsaSigner.validateAuthorizationCode(authorizationCode, jwt));
-
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ACCESS_TOKEN_HASH));
-        assertTrue(rsaSigner.validateAccessToken(accessToken, jwt));
-
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.STATE_HASH));
-        assertTrue(rsaSigner.validateState(state, jwt));
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS256)
+                .authorizationCode(authorizationCode)
+                .accessToken(accessToken)
+                .state(state)
+                .notNullAuthenticationTime()
+                .notNullOxOpenIDConnectVersion()
+                .notNullAuthenticationContextClassReference()
+                .notNullAuthenticationMethodReferences()
+                .check();
 
         // 4. Request access token using the authorization code.
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
@@ -132,35 +120,34 @@ public class ValidateIdTokenHashesTest extends BaseTest {
         TokenResponse tokenResponse1 = tokenClient1.exec();
 
         showClient(tokenClient1);
-        assertTokenResponseOk(tokenResponse1, true, false);
+        AssertBuilder.tokenResponse(tokenResponse1)
+                .notNullRefreshToken()
+                .check();
 
         String refreshToken = tokenResponse1.getRefreshToken();
         String idToken2 = tokenResponse1.getIdToken();
         String accessToken2 = tokenResponse1.getAccessToken();
 
         // 5. Validate id_token
-        Jwt jwt2 = Jwt.parse(idToken2);
-        assertIdToken(jwt2);
-
-        RSAPublicKey publicKey2 = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt2.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner2 = new RSASigner(SignatureAlgorithm.RS256, publicKey2);
-
-        assertTrue(rsaSigner2.validate(jwt2));
-
-        assertNotNull(jwt2.getClaims().getClaimAsString(JwtClaimName.ACCESS_TOKEN_HASH));
-        assertTrue(rsaSigner2.validateAccessToken(accessToken2, jwt2));
-
-        assertNull(jwt2.getClaims().getClaimAsString(JwtClaimName.STATE_HASH));
+        AssertBuilder.jwtParse(idToken2)
+                .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS256)
+                .accessToken(accessToken2)
+                .claimsNoPresence(JwtClaimName.STATE_HASH)
+                .notNullAuthenticationTime()
+                .notNullOxOpenIDConnectVersion()
+                .notNullAuthenticationContextClassReference()
+                .notNullAuthenticationMethodReferences()
+                .check();
 
         // 6. Request new access token using the refresh token.
         TokenClient tokenClient2 = new TokenClient(tokenEndpoint);
         TokenResponse tokenResponse2 = tokenClient2.execRefreshToken(scope, refreshToken, clientId, clientSecret);
 
         showClient(tokenClient2);
-        assertTokenResponseOk(tokenResponse2, true, false);
-        assertNotNull(tokenResponse2.getScope(), "The scope is null");
+        AssertBuilder.tokenResponse(tokenResponse2)
+                .notNullRefreshToken()
+                .notNullScope()
+                .check();
 
         String accessToken3 = tokenResponse2.getAccessToken();
 
@@ -169,21 +156,13 @@ public class ValidateIdTokenHashesTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken3);
 
         showClient(userInfoClient);
-        assertUserInfoBasicMinimumResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);        
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.BIRTHDATE));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.GENDER));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.MIDDLE_NAME));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NICKNAME));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.PREFERRED_USERNAME));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.PROFILE));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.WEBSITE));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.EMAIL_VERIFIED));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.PHONE_NUMBER));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.PHONE_NUMBER_VERIFIED));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.USER_NAME));
-        assertNull(userInfoResponse.getClaim("org_name"));
-        assertNull(userInfoResponse.getClaim("work_phone"));
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .notNullClaimsPersonalData()
+                .claimsPresence(JwtClaimName.EMAIL, JwtClaimName.BIRTHDATE, JwtClaimName.GENDER, JwtClaimName.MIDDLE_NAME)
+                .claimsPresence(JwtClaimName.NICKNAME, JwtClaimName.PREFERRED_USERNAME, JwtClaimName.PROFILE)
+                .claimsPresence(JwtClaimName.WEBSITE, JwtClaimName.EMAIL_VERIFIED, JwtClaimName.PHONE_NUMBER)
+                .claimsPresence(JwtClaimName.PHONE_NUMBER_VERIFIED, JwtClaimName.ADDRESS, JwtClaimName.USER_NAME)
+                .claimsNoPresence("org_name", "work_phone")
+                .check();
     }
 }

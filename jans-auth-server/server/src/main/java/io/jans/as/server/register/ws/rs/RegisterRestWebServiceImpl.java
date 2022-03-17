@@ -310,8 +310,8 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
 
             builder.entity(jsonObjectToString(jsonObject));
 
-            log.info("Client registered: clientId = {}, applicationType = {}, clientName = {}, redirectUris = {}, sectorIdentifierUri = {}",
-                    client.getClientId(), client.getApplicationType(), client.getClientName(), client.getRedirectUris(), client.getSectorIdentifierUri());
+            log.info("Client registered: clientId = {}, applicationType = {}, clientName = {}, redirectUris = {}, sectorIdentifierUri = {}, redirectUrisRegex = {}" ,
+                    client.getClientId(), client.getApplicationType(), client.getClientName(), client.getRedirectUris(), client.getSectorIdentifierUri(), client.getAttributes().getRedirectUrisRegex());
 
             oAuth2AuditLog.setClientId(client.getClientId());
             oAuth2AuditLog.setScope(clientScopesToString(client));
@@ -364,6 +364,16 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                 );
             }
         }
+
+        if (StringUtils.isNotBlank(registerRequest.getRedirectUrisRegex())) {
+            if (Boolean.FALSE.equals(appConfiguration.getRedirectUrisRegexEnabled())) {
+                throw errorResponseFactory.createBadRequestException(
+                        RegisterErrorResponseType.INVALID_REDIRECT_URIS_REGEX,
+                        "The redirect URI's Regex is disabled."
+                );
+            }
+        }
+
     }
 
     private void setClientName(RegisterRequest r, Client client) {
@@ -675,6 +685,9 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         }
         if (requestObject.getTlsClientAuthSubjectDn() != null) {
             client.getAttributes().setTlsClientAuthSubjectDn(requestObject.getTlsClientAuthSubjectDn());
+        }
+        if (requestObject.getRedirectUrisRegex() != null) {
+            client.getAttributes().setRedirectUrisRegex(requestObject.getRedirectUrisRegex());
         }
         if (requestObject.getAllowSpontaneousScopes() != null) {
             client.getAttributes().setAllowSpontaneousScopes(requestObject.getAllowSpontaneousScopes());
@@ -1136,6 +1149,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         Util.addToJSONObjectIfNotNull(responseJsonObject, FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString(), client.getFrontChannelLogoutSessionRequired());
         Util.addToJSONObjectIfNotNull(responseJsonObject, BACKCHANNEL_LOGOUT_URI.toString(), client.getAttributes().getBackchannelLogoutUri());
         Util.addToJSONObjectIfNotNull(responseJsonObject, BACKCHANNEL_LOGOUT_SESSION_REQUIRED.toString(), client.getAttributes().getBackchannelLogoutSessionRequired());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, REDIRECT_URIS_REGEX.toString(), client.getAttributes().getRedirectUrisRegex());
 
         // Custom Params
         String[] scopeNames = null;

@@ -101,7 +101,8 @@ for api_name in dir(swagger_client.api):
 parser = argparse.ArgumentParser()
 parser.add_argument("--host", help="Hostname of server")
 parser.add_argument("--client-id", help="Jans Config Api Client ID")
-parser.add_argument("--client_secret", help="Jans Config Api Client ID secret")
+parser.add_argument("--client-secret", "--client_secret", help="Jans Config Api Client ID secret")
+parser.add_argument("--access-token", help="JWT access token or path to file containing JWT access token")
 parser.add_argument("--plugins", help="Available plugins separated by comma")
 parser.add_argument("-debug", help="Run in debug mode", action='store_true')
 parser.add_argument("--debug-log-file", default='swagger.log', help="Log file name when run in debug mode")
@@ -128,6 +129,11 @@ parser.add_argument("--data", help="Path to json data file")
 args = parser.parse_args()
 
 ################## end of arguments #################
+access_token = args.access_token
+if access_token and os.path.isfile(access_token):
+    with open(access_token) as f:
+        access_token = f.read()
+
 
 if args.plugins:
     for plugin in args.plugins.split(','):
@@ -246,13 +252,13 @@ class Menu(object):
 
 class JCA_CLI:
 
-    def __init__(self, host, client_id, client_secret):
+    def __init__(self, host, client_id, client_secret, access_token):
         self.host = host
         self.client_id = client_id
         self.client_secret = client_secret
         self.swagger_configuration = swagger_client.Configuration()
         self.swagger_configuration.host = 'https://{}'.format(self.host)
-        self.access_token = config['DEFAULT'].get('access_token')
+        self.access_token = access_token or config['DEFAULT'].get('access_token')
 
         for plugin_s in config['DEFAULT'].get(my_op_mode + '_plugins', '').split(','):
             plugin = plugin_s.strip()
@@ -579,7 +585,7 @@ class JCA_CLI:
                   example=None, spacing=0
                   ):
         if 'b' in values and 'q' in values and 'x' in values:
-            print(self.colored_text("b: back, q: quit x: lougout and quit", grey_color))
+            print(self.colored_text("b: back, q: quit x: logout and quit", grey_color))
         print()
         type_text = ''
         if itype:
@@ -1987,22 +1993,22 @@ class JCA_CLI:
 
 def main():
 
-    cliObject = JCA_CLI(host, client_id, client_secret)
+    cli_object = JCA_CLI(host, client_id, client_secret, access_token)
 
     try:
-        cliObject.check_connection()
+        cli_object.check_connection()
         if not (args.operation_id or args.info or args.schema):
             # reset previous color
             print('\033[0m', end='')
-            cliObject.runApp()
+            cli_object.runApp()
         else:
             print()
             if args.info:
-                cliObject.help_for(args.info)
+                cli_object.help_for(args.info)
             elif args.schema:
-                cliObject.get_sample_schema(args.schema)
+                cli_object.get_sample_schema(args.schema)
             elif args.operation_id:
-                cliObject.process_command_by_id(args.operation_id, args.url_suffix, args.endpoint_args, args.data)
+                cli_object.process_command_by_id(args.operation_id, args.url_suffix, args.endpoint_args, args.data)
             print()
     except Exception as e:
         if os.environ.get('errstdout'):

@@ -17,6 +17,7 @@ import io.jans.as.client.RegisterResponse;
 import io.jans.as.client.UserInfoClient;
 import io.jans.as.client.UserInfoResponse;
 
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.client.model.authorize.Claim;
 import io.jans.as.client.model.authorize.ClaimValue;
 import io.jans.as.client.model.authorize.JwtAuthorizationRequest;
@@ -26,14 +27,12 @@ import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
 import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
 import io.jans.as.model.crypto.signature.ECDSAPublicKey;
-import io.jans.as.model.crypto.signature.RSAPublicKey;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.jwe.Jwe;
 import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.jws.ECDSASigner;
 import io.jans.as.model.jws.HMACSigner;
 import io.jans.as.model.jws.PlainTextSignature;
-import io.jans.as.model.jws.RSASigner;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.jwt.JwtHeaderName;
@@ -100,7 +99,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -146,38 +145,31 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
 
         // 3. Validate id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertJwtStandarClaimsNotNull(jwt, true);
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.NAME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.NICKNAME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.GIVEN_NAME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.FAMILY_NAME));
-        assertNull(jwt.getClaims().getClaimAsString(JwtClaimName.EMAIL));
-        assertNull(jwt.getClaims().getClaimAsString(JwtClaimName.EMAIL_VERIFIED));
-
-        PlainTextSignature signer = new PlainTextSignature();
-        assertTrue(signer.validate(jwt));
+        AssertBuilder.jwtParse(idToken)
+                .validateSignaturePlainText()
+                .notNullAccesTokenHash()
+                .notNullAuthenticationTime()
+                .claimsPresence(JwtClaimName.NAME, JwtClaimName.NICKNAME, JwtClaimName.GIVEN_NAME, JwtClaimName.FAMILY_NAME)
+                .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
+                .check();
 
         // 4. Request user info
         UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicMinimumResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse, false);
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NICKNAME));
-        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
-        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL_VERIFIED));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_STREET_ADDRESS));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_LOCALITY));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_REGION));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_COUNTRY));
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .notNullClaimsPersonalData()
+                .claimsPresence(JwtClaimName.NICKNAME, JwtClaimName.ADDRESS_STREET_ADDRESS, JwtClaimName.ADDRESS_LOCALITY)
+                .claimsPresence(JwtClaimName.ADDRESS_REGION, JwtClaimName.ADDRESS_COUNTRY)
+                .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
+                .check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
@@ -217,7 +209,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -263,38 +255,31 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
 
         // 3. Validate id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertJwtStandarClaimsNotNull(jwt, true);
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.NAME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.NICKNAME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.GIVEN_NAME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.FAMILY_NAME));
-        assertNull(jwt.getClaims().getClaimAsString(JwtClaimName.EMAIL));
-        assertNull(jwt.getClaims().getClaimAsString(JwtClaimName.EMAIL_VERIFIED));
-
-        PlainTextSignature signer = new PlainTextSignature();
-        assertTrue(signer.validate(jwt));
+        AssertBuilder.jwtParse(idToken)
+                .validateSignaturePlainText()
+                .notNullAccesTokenHash()
+                .notNullAuthenticationTime()
+                .claimsPresence(JwtClaimName.NAME, JwtClaimName.NICKNAME, JwtClaimName.GIVEN_NAME, JwtClaimName.FAMILY_NAME)
+                .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
+                .check();
 
         // 4. Request user info
         UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse, false);
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NICKNAME));
-        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
-        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL_VERIFIED));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_STREET_ADDRESS));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_LOCALITY));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_REGION));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_COUNTRY));
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                .notNullClaimsPersonalData()
+                .claimsPresence(JwtClaimName.NICKNAME,JwtClaimName.ADDRESS_STREET_ADDRESS,JwtClaimName.ADDRESS_LOCALITY, JwtClaimName.ADDRESS_REGION,JwtClaimName.ADDRESS_COUNTRY)
+                .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
+                .check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
@@ -335,7 +320,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -381,23 +366,19 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
 
         // 3. Validate id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertJwtStandarClaimsNotNull(jwt, true);
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.NAME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.NICKNAME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.GIVEN_NAME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.FAMILY_NAME));
-        assertNull(jwt.getClaims().getClaimAsString(JwtClaimName.EMAIL));
-        assertNull(jwt.getClaims().getClaimAsString(JwtClaimName.EMAIL_VERIFIED));
-
-        HMACSigner hmacSigner = new HMACSigner(SignatureAlgorithm.HS256, clientSecret);
-        assertTrue(hmacSigner.validate(jwt));
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureHMAC(SignatureAlgorithm.HS256, clientSecret)
+                .notNullAccesTokenHash()
+                .notNullAuthenticationTime()
+                .claimsPresence(JwtClaimName.NAME, JwtClaimName.NICKNAME, JwtClaimName.GIVEN_NAME, JwtClaimName.FAMILY_NAME)
+                .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
+                .check();
 
         // 4. Request user info
         UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
@@ -405,15 +386,12 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse, false);
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NICKNAME));
-        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
-        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL_VERIFIED));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_STREET_ADDRESS));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_LOCALITY));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_REGION));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_COUNTRY));
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                .notNullClaimsPersonalData()
+                .claimsPresence(JwtClaimName.NICKNAME,JwtClaimName.ADDRESS_STREET_ADDRESS,JwtClaimName.ADDRESS_LOCALITY, JwtClaimName.ADDRESS_REGION,JwtClaimName.ADDRESS_COUNTRY)
+                .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
+                .check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
@@ -454,7 +432,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -500,23 +478,19 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
 
         // 3. Validate id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertJwtStandarClaimsNotNull(jwt, true);
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.NAME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.NICKNAME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.GIVEN_NAME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.FAMILY_NAME));
-        assertNull(jwt.getClaims().getClaimAsString(JwtClaimName.EMAIL));
-        assertNull(jwt.getClaims().getClaimAsString(JwtClaimName.EMAIL_VERIFIED));
-
-        HMACSigner hmacSigner = new HMACSigner(SignatureAlgorithm.HS384, clientSecret);
-        assertTrue(hmacSigner.validate(jwt));
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureHMAC(SignatureAlgorithm.HS384, clientSecret)
+                .notNullAccesTokenHash()
+                .notNullAuthenticationTime()
+                .claimsPresence(JwtClaimName.NAME, JwtClaimName.NICKNAME, JwtClaimName.GIVEN_NAME, JwtClaimName.FAMILY_NAME)
+                .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
+                .check();
 
         // 4. Request user info
         UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
@@ -524,15 +498,12 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse, false);
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NICKNAME));
-        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
-        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL_VERIFIED));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_STREET_ADDRESS));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_LOCALITY));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_REGION));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_COUNTRY));
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                .notNullClaimsPersonalData()
+                .claimsPresence(JwtClaimName.NICKNAME,JwtClaimName.ADDRESS_STREET_ADDRESS,JwtClaimName.ADDRESS_LOCALITY, JwtClaimName.ADDRESS_REGION,JwtClaimName.ADDRESS_COUNTRY)
+                .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
+                .check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
@@ -573,7 +544,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -619,23 +590,19 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
 
         // 3. Validate id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertJwtStandarClaimsNotNull(jwt, true);
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.NAME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.NICKNAME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.GIVEN_NAME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.FAMILY_NAME));
-        assertNull(jwt.getClaims().getClaimAsString(JwtClaimName.EMAIL));
-        assertNull(jwt.getClaims().getClaimAsString(JwtClaimName.EMAIL_VERIFIED));
-
-        HMACSigner hmacSigner = new HMACSigner(SignatureAlgorithm.HS512, clientSecret);
-        assertTrue(hmacSigner.validate(jwt));
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureHMAC(SignatureAlgorithm.HS512, clientSecret)
+                .notNullAccesTokenHash()
+                .notNullAuthenticationTime()
+                .claimsPresence(JwtClaimName.NAME, JwtClaimName.NICKNAME, JwtClaimName.GIVEN_NAME, JwtClaimName.FAMILY_NAME)
+                .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
+                .check();
 
         // 4. Request user info
         UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
@@ -643,15 +610,12 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse, false);
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NICKNAME));
-        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
-        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL_VERIFIED));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_STREET_ADDRESS));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_LOCALITY));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_REGION));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_COUNTRY));
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                .notNullClaimsPersonalData()
+                .claimsPresence(JwtClaimName.NICKNAME,JwtClaimName.ADDRESS_STREET_ADDRESS,JwtClaimName.ADDRESS_LOCALITY, JwtClaimName.ADDRESS_REGION,JwtClaimName.ADDRESS_COUNTRY)
+                .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
+                .check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri", "RS256_keyId",
@@ -695,7 +659,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -741,27 +705,19 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
 
         // 3. Validate id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertJwtStandarClaimsNotNull(jwt, true);
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.NAME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.NICKNAME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.GIVEN_NAME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.FAMILY_NAME));
-        assertNull(jwt.getClaims().getClaimAsString(JwtClaimName.EMAIL));
-        assertNull(jwt.getClaims().getClaimAsString(JwtClaimName.EMAIL_VERIFIED));
-
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS256, publicKey);
-
-        assertTrue(rsaSigner.validate(jwt));
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS256)
+                .notNullAuthenticationTime()
+                .notNullAccesTokenHash()
+                .claimsPresence(JwtClaimName.NAME, JwtClaimName.NICKNAME, JwtClaimName.GIVEN_NAME, JwtClaimName.FAMILY_NAME)
+                .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
+                .check();
 
         // 4. Request user info
         UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
@@ -769,15 +725,12 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse, false);
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NICKNAME));
-        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
-        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL_VERIFIED));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_STREET_ADDRESS));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_LOCALITY));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_REGION));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_COUNTRY));
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                .notNullClaimsPersonalData()
+                .claimsPresence(JwtClaimName.NICKNAME,JwtClaimName.ADDRESS_STREET_ADDRESS,JwtClaimName.ADDRESS_LOCALITY, JwtClaimName.ADDRESS_REGION,JwtClaimName.ADDRESS_COUNTRY)
+                .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
+                .check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri", "RS384_keyId",
@@ -821,7 +774,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -867,27 +820,19 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
 
         // 3. Validate id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertJwtStandarClaimsNotNull(jwt, true);
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.NAME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.NICKNAME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.GIVEN_NAME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.FAMILY_NAME));
-        assertNull(jwt.getClaims().getClaimAsString(JwtClaimName.EMAIL));
-        assertNull(jwt.getClaims().getClaimAsString(JwtClaimName.EMAIL_VERIFIED));
-
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS384, publicKey);
-
-        assertTrue(rsaSigner.validate(jwt));
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS384)
+                .notNullAuthenticationTime()
+                .notNullAccesTokenHash()
+                .claimsPresence(JwtClaimName.NAME, JwtClaimName.NICKNAME, JwtClaimName.GIVEN_NAME, JwtClaimName.FAMILY_NAME)
+                .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
+                .check();
 
         // 4. Request user info
         UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
@@ -895,15 +840,12 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse, false);
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NICKNAME));
-        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
-        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL_VERIFIED));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_STREET_ADDRESS));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_LOCALITY));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_REGION));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_COUNTRY));
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                .notNullClaimsPersonalData()
+                .claimsPresence(JwtClaimName.NICKNAME,JwtClaimName.ADDRESS_STREET_ADDRESS,JwtClaimName.ADDRESS_LOCALITY, JwtClaimName.ADDRESS_REGION,JwtClaimName.ADDRESS_COUNTRY)
+                .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
+                .check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri", "RS512_keyId",
@@ -947,7 +889,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -993,27 +935,19 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
 
         // 3. Validate id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertJwtStandarClaimsNotNull(jwt, true);
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.NAME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.NICKNAME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.GIVEN_NAME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.FAMILY_NAME));
-        assertNull(jwt.getClaims().getClaimAsString(JwtClaimName.EMAIL));
-        assertNull(jwt.getClaims().getClaimAsString(JwtClaimName.EMAIL_VERIFIED));
-
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS512, publicKey);
-
-        assertTrue(rsaSigner.validate(jwt));
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS512)
+                .notNullAuthenticationTime()
+                .notNullAccesTokenHash()
+                .claimsPresence(JwtClaimName.NAME, JwtClaimName.NICKNAME, JwtClaimName.GIVEN_NAME, JwtClaimName.FAMILY_NAME)
+                .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
+                .check();
 
         // 4. Request user info
         UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
@@ -1021,15 +955,12 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse, false);
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NICKNAME));
-        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
-        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL_VERIFIED));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_STREET_ADDRESS));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_LOCALITY));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_REGION));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_COUNTRY));
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                .notNullClaimsPersonalData()
+                .claimsPresence(JwtClaimName.NICKNAME,JwtClaimName.ADDRESS_STREET_ADDRESS,JwtClaimName.ADDRESS_LOCALITY, JwtClaimName.ADDRESS_REGION,JwtClaimName.ADDRESS_COUNTRY)
+                .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
+                .check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri", "ES256_keyId",
@@ -1073,7 +1004,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -1119,27 +1050,19 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
 
         // 3. Validate id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertJwtStandarClaimsNotNull(jwt, true);
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.NAME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.NICKNAME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.GIVEN_NAME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.FAMILY_NAME));
-        assertNull(jwt.getClaims().getClaimAsString(JwtClaimName.EMAIL));
-        assertNull(jwt.getClaims().getClaimAsString(JwtClaimName.EMAIL_VERIFIED));
-
-        ECDSAPublicKey publicKey = JwkClient.getECDSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        ECDSASigner ecdsaSigner = new ECDSASigner(SignatureAlgorithm.ES256, publicKey);
-
-        assertTrue(ecdsaSigner.validate(jwt));
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureECDSA(jwksUri, SignatureAlgorithm.ES256)
+                .notNullAccesTokenHash()
+                .notNullAuthenticationTime()
+                .claimsPresence(JwtClaimName.NAME, JwtClaimName.NICKNAME, JwtClaimName.GIVEN_NAME, JwtClaimName.FAMILY_NAME)
+                .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
+                .check();
 
         // 4. Request user info
         UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
@@ -1147,15 +1070,12 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse, false);
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NICKNAME));
-        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
-        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL_VERIFIED));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_STREET_ADDRESS));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_LOCALITY));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_REGION));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_COUNTRY));
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                .notNullClaimsPersonalData()
+                .claimsPresence(JwtClaimName.NICKNAME,JwtClaimName.ADDRESS_STREET_ADDRESS,JwtClaimName.ADDRESS_LOCALITY, JwtClaimName.ADDRESS_REGION,JwtClaimName.ADDRESS_COUNTRY)
+                .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
+                .check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri", "ES384_keyId",
@@ -1199,7 +1119,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -1245,27 +1165,19 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
 
         // 3. Validate id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertJwtStandarClaimsNotNull(jwt, true);
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.NAME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.NICKNAME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.GIVEN_NAME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.FAMILY_NAME));
-        assertNull(jwt.getClaims().getClaimAsString(JwtClaimName.EMAIL));
-        assertNull(jwt.getClaims().getClaimAsString(JwtClaimName.EMAIL_VERIFIED));
-
-        ECDSAPublicKey publicKey = JwkClient.getECDSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        ECDSASigner ecdsaSigner = new ECDSASigner(SignatureAlgorithm.ES384, publicKey);
-
-        assertTrue(ecdsaSigner.validate(jwt));
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureECDSA(jwksUri, SignatureAlgorithm.ES384)
+                .notNullAccesTokenHash()
+                .notNullAuthenticationTime()
+                .claimsPresence(JwtClaimName.NAME, JwtClaimName.NICKNAME, JwtClaimName.GIVEN_NAME, JwtClaimName.FAMILY_NAME)
+                .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
+                .check();
 
         // 4. Request user info
         UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
@@ -1273,15 +1185,12 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse, false);
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NICKNAME));
-        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
-        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL_VERIFIED));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_STREET_ADDRESS));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_LOCALITY));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_REGION));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_COUNTRY));
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                .notNullClaimsPersonalData()
+                .claimsPresence(JwtClaimName.NICKNAME,JwtClaimName.ADDRESS_STREET_ADDRESS,JwtClaimName.ADDRESS_LOCALITY, JwtClaimName.ADDRESS_REGION,JwtClaimName.ADDRESS_COUNTRY)
+                .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
+                .check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri", "ES512_keyId",
@@ -1325,7 +1234,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -1371,27 +1280,19 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
 
         // 3. Validate id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertJwtStandarClaimsNotNull(jwt, true);
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.NAME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.NICKNAME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.GIVEN_NAME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.FAMILY_NAME));
-        assertNull(jwt.getClaims().getClaimAsString(JwtClaimName.EMAIL));
-        assertNull(jwt.getClaims().getClaimAsString(JwtClaimName.EMAIL_VERIFIED));
-
-        ECDSAPublicKey publicKey = JwkClient.getECDSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        ECDSASigner ecdsaSigner = new ECDSASigner(SignatureAlgorithm.ES512, publicKey);
-
-        assertTrue(ecdsaSigner.validate(jwt));
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureECDSA(jwksUri, SignatureAlgorithm.ES512)
+                .notNullAccesTokenHash()
+                .notNullAuthenticationTime()
+                .claimsPresence(JwtClaimName.NAME, JwtClaimName.NICKNAME, JwtClaimName.GIVEN_NAME, JwtClaimName.FAMILY_NAME)
+                .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
+                .check();
 
         // 4. Request user info
         UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
@@ -1399,15 +1300,12 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse, false);
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NICKNAME));
-        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
-        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL_VERIFIED));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_STREET_ADDRESS));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_LOCALITY));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_REGION));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_COUNTRY));
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                .notNullClaimsPersonalData()
+                .claimsPresence(JwtClaimName.NICKNAME,JwtClaimName.ADDRESS_STREET_ADDRESS,JwtClaimName.ADDRESS_LOCALITY, JwtClaimName.ADDRESS_REGION,JwtClaimName.ADDRESS_COUNTRY)
+                .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
+                .check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
@@ -1451,7 +1349,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1498,20 +1396,18 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
 
         // 3. Validate id_token
         Jwe jwe = Jwe.parse(idToken, null, clientSecret.getBytes(StandardCharsets.UTF_8));
-        assertJweStandarClaimsNotNull(jwe, true);
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.NAME));
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.NICKNAME));
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.GIVEN_NAME));
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.FAMILY_NAME));
-        assertNull(jwe.getClaims().getClaimAsString(JwtClaimName.EMAIL));
-        assertNull(jwe.getClaims().getClaimAsString(JwtClaimName.EMAIL_VERIFIED));
+        AssertBuilder.jwe(jwe)
+                .notNullAccesTokenHash()
+                .claimsPresence(JwtClaimName.NAME, JwtClaimName.NICKNAME, JwtClaimName.GIVEN_NAME, JwtClaimName.FAMILY_NAME)
+                .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
+                .check();
 
         // 4. Request user info
         UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
@@ -1519,15 +1415,12 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse, false);
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NICKNAME));
-        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
-        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL_VERIFIED));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_STREET_ADDRESS));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_LOCALITY));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_REGION));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_COUNTRY));
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                .notNullClaimsPersonalData()
+                .claimsPresence(JwtClaimName.NICKNAME,JwtClaimName.ADDRESS_STREET_ADDRESS,JwtClaimName.ADDRESS_LOCALITY, JwtClaimName.ADDRESS_REGION,JwtClaimName.ADDRESS_COUNTRY)
+                .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
+                .check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
@@ -1571,7 +1464,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1618,20 +1511,18 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
 
         // 3. Validate id_token
         Jwe jwe = Jwe.parse(idToken, null, clientSecret.getBytes(StandardCharsets.UTF_8));
-        assertJweStandarClaimsNotNull(jwe, true);
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.NAME));
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.NICKNAME));
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.GIVEN_NAME));
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.FAMILY_NAME));
-        assertNull(jwe.getClaims().getClaimAsString(JwtClaimName.EMAIL));
-        assertNull(jwe.getClaims().getClaimAsString(JwtClaimName.EMAIL_VERIFIED));
+        AssertBuilder.jwe(jwe)
+                .notNullAccesTokenHash()
+                .claimsPresence(JwtClaimName.NAME, JwtClaimName.NICKNAME, JwtClaimName.GIVEN_NAME, JwtClaimName.FAMILY_NAME)
+                .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
+                .check();
 
         // 4. Request user info
         UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
@@ -1639,15 +1530,12 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse, false);
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NICKNAME));
-        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
-        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL_VERIFIED));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_STREET_ADDRESS));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_LOCALITY));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_REGION));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_COUNTRY));
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                .notNullClaimsPersonalData()
+                .claimsPresence(JwtClaimName.NICKNAME,JwtClaimName.ADDRESS_STREET_ADDRESS,JwtClaimName.ADDRESS_LOCALITY, JwtClaimName.ADDRESS_REGION,JwtClaimName.ADDRESS_COUNTRY)
+                .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
+                .check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri", "dnName", "keyStoreFile",
@@ -1694,7 +1582,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1748,7 +1636,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
@@ -1757,13 +1645,11 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         PrivateKey privateKey = cryptoProvider.getPrivateKey(clientKeyId);
 
         Jwe jwe = Jwe.parse(idToken, privateKey, null);
-        assertJweStandarClaimsNotNull(jwe, true);
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.NAME));
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.NICKNAME));
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.GIVEN_NAME));
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.FAMILY_NAME));
-        assertNull(jwe.getClaims().getClaimAsString(JwtClaimName.EMAIL));
-        assertNull(jwe.getClaims().getClaimAsString(JwtClaimName.EMAIL_VERIFIED));
+        AssertBuilder.jwe(jwe)
+                .notNullAccesTokenHash()
+                .claimsPresence(JwtClaimName.NAME, JwtClaimName.NICKNAME, JwtClaimName.GIVEN_NAME, JwtClaimName.FAMILY_NAME)
+                .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
+                .check();
 
         // 5. Request user info
         UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
@@ -1771,15 +1657,12 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse, false);
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NICKNAME));
-        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
-        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL_VERIFIED));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_STREET_ADDRESS));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_LOCALITY));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_REGION));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_COUNTRY));
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                .notNullClaimsPersonalData()
+                .claimsPresence(JwtClaimName.NICKNAME,JwtClaimName.ADDRESS_STREET_ADDRESS,JwtClaimName.ADDRESS_LOCALITY, JwtClaimName.ADDRESS_REGION,JwtClaimName.ADDRESS_COUNTRY)
+                .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
+                .check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri", "dnName", "keyStoreFile",
@@ -1826,7 +1709,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1880,7 +1763,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
@@ -1889,13 +1772,11 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         PrivateKey privateKey = cryptoProvider.getPrivateKey(clientKeyId);
 
         Jwe jwe = Jwe.parse(idToken, privateKey, null);
-        assertJweStandarClaimsNotNull(jwe, true);
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.NAME));
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.NICKNAME));
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.GIVEN_NAME));
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.FAMILY_NAME));
-        assertNull(jwe.getClaims().getClaimAsString(JwtClaimName.EMAIL));
-        assertNull(jwe.getClaims().getClaimAsString(JwtClaimName.EMAIL_VERIFIED));
+        AssertBuilder.jwe(jwe)
+                .notNullAccesTokenHash()
+                .claimsPresence(JwtClaimName.NAME, JwtClaimName.NICKNAME, JwtClaimName.GIVEN_NAME, JwtClaimName.FAMILY_NAME)
+                .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
+                .check();
 
         // 5. Request user info
         UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
@@ -1903,15 +1784,12 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse, false);
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NICKNAME));
-        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
-        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL_VERIFIED));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_STREET_ADDRESS));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_LOCALITY));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_REGION));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_COUNTRY));
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                .notNullClaimsPersonalData()
+                .claimsPresence(JwtClaimName.NICKNAME,JwtClaimName.ADDRESS_STREET_ADDRESS,JwtClaimName.ADDRESS_LOCALITY, JwtClaimName.ADDRESS_REGION,JwtClaimName.ADDRESS_COUNTRY)
+                .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
+                .check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri", "dnName", "keyStoreFile",
@@ -1958,7 +1836,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -2012,7 +1890,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
         String accessToken = authorizationResponse.getAccessToken();
@@ -2021,13 +1899,11 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         PrivateKey privateKey = cryptoProvider.getPrivateKey(clientKeyId);
 
         Jwe jwe = Jwe.parse(idToken, privateKey, null);
-        assertJweStandarClaimsNotNull(jwe, true);
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.NAME));
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.NICKNAME));
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.GIVEN_NAME));
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.FAMILY_NAME));
-        assertNull(jwe.getClaims().getClaimAsString(JwtClaimName.EMAIL));
-        assertNull(jwe.getClaims().getClaimAsString(JwtClaimName.EMAIL_VERIFIED));
+        AssertBuilder.jwe(jwe)
+                .notNullAccesTokenHash()
+                .claimsPresence(JwtClaimName.NAME, JwtClaimName.NICKNAME, JwtClaimName.GIVEN_NAME, JwtClaimName.FAMILY_NAME)
+                .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
+                .check();
 
         // 5. Request user info
         UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
@@ -2035,14 +1911,12 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse, false);
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NICKNAME));
-        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
-        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL_VERIFIED));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_STREET_ADDRESS));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_LOCALITY));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_REGION));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_COUNTRY));
+
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                .notNullClaimsPersonalData()
+                .claimsPresence(JwtClaimName.NICKNAME,JwtClaimName.ADDRESS_STREET_ADDRESS,JwtClaimName.ADDRESS_LOCALITY, JwtClaimName.ADDRESS_REGION,JwtClaimName.ADDRESS_COUNTRY)
+                .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED)
+                .check();
     }
 }

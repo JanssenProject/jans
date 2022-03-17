@@ -347,9 +347,11 @@ public enum RegisterRequestParam {
 
     BACKCHANNEL_USER_CODE_PARAMETER("backchannel_user_code_parameter"),
 
-    DEFAULT_PROMPT_LOGIN("default_prompt_login"),
+    PUBLIC_SUBJECT_IDENTIFIER_ATTRIBUTE("public_subject_identifier_attribute"),
 
-    PUBLIC_SUBJECT_IDENTIFIER_ATTRIBUTE("public_subject_identifier_attribute");
+    REDIRECT_URIS_REGEX("redirect_uris_regex"),
+
+    DEFAULT_PROMPT_LOGIN("default_prompt_login");
 
     /**
      * Parameter name

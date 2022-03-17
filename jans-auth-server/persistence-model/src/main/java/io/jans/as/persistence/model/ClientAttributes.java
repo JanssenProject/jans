@@ -92,6 +92,9 @@ public class ClientAttributes implements Serializable {
     @JsonProperty("jansSubAttr")
     private String publicSubjectIdentifierAttribute;
 
+    @JsonProperty("redirectUrisRegex")
+    private String redirectUrisRegex ;
+    
     @JsonProperty("jansDefaultPromptLogin")
     private Boolean defaultPromptLogin = false;
 
@@ -296,6 +299,14 @@ public class ClientAttributes implements Serializable {
         this.publicSubjectIdentifierAttribute = publicSubjectIdentifierAttribute;
     }
 
+    public String getRedirectUrisRegex() {
+        return redirectUrisRegex;
+    }
+
+    public void setRedirectUrisRegex(String redirectUrisRegex) {
+        this.redirectUrisRegex = redirectUrisRegex;
+    }		
+
     public Boolean getDefaultPromptLogin() {
         if (defaultPromptLogin == null) {
             defaultPromptLogin = false;
@@ -329,6 +340,7 @@ public class ClientAttributes implements Serializable {
                 ", authorizationEncryptedResponseAlg=" + authorizationEncryptedResponseAlg +
                 ", authorizationEncryptedResponseEnc=" + authorizationEncryptedResponseEnc +
                 ", publicSubjectIdentifierAttribute=" + publicSubjectIdentifierAttribute +
+                ", redirectUrisRegex=" + redirectUrisRegex +
                 ", defaultPromptLogin=" + defaultPromptLogin +
                 '}';
     }

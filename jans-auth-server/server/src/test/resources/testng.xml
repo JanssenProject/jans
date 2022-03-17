@@ -12,6 +12,7 @@
             <class name="io.jans.as.server.model.authorize.JwtAuthorizationRequestTest" />
 			<class name="io.jans.as.server.service.ScopeServiceTest" />
 			<class name="io.jans.as.server.model.CIBAGrantTest" />
+			<class name="io.jans.as.server.service.RedirectionUriServiceTest" />
         </classes>
     </test>
 

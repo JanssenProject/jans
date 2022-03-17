@@ -9,7 +9,6 @@ package io.jans.as.client.ws.rs;
 import io.jans.as.client.AuthorizationRequest;
 import io.jans.as.client.AuthorizationResponse;
 import io.jans.as.client.BaseTest;
-import io.jans.as.client.JwkClient;
 import io.jans.as.client.RegisterClient;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
@@ -19,15 +18,13 @@ import io.jans.as.client.TokenResponse;
 import io.jans.as.client.UserInfoClient;
 import io.jans.as.client.UserInfoResponse;
 
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
-import io.jans.as.model.crypto.signature.RSAPublicKey;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
-import io.jans.as.model.jws.RSASigner;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
-import io.jans.as.model.jwt.JwtHeaderName;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.StringUtils;
 import org.testng.annotations.Parameters;
@@ -98,20 +95,21 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         TokenResponse tokenResponse1 = tokenClient1.exec();
 
         showClient(tokenClient1);
-        assertTokenResponseOk(tokenResponse1, true, false);
+        AssertBuilder.tokenResponse(tokenResponse1)
+                .notNullRefreshToken()
+                .check();
 
         String refreshToken = tokenResponse1.getRefreshToken();
 
         // 4. Validate id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertIdToken(jwt, JwtClaimName.CODE_HASH);
-
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID), clientEngine(true));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS256, publicKey);
-
-        assertTrue(rsaSigner.validate(jwt));
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureRSAClientEngine(jwksUri, SignatureAlgorithm.RS256)
+                .claimsPresence(JwtClaimName.CODE_HASH)
+                .notNullAuthenticationTime()
+                .notNullOxOpenIDConnectVersion()
+                .notNullAuthenticationContextClassReference()
+                .notNullAuthenticationMethodReferences()
+                .check();
 
         // 5. Request new access token using the refresh token.
         TokenClient tokenClient2 = new TokenClient(tokenEndpoint);
@@ -119,9 +117,10 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         TokenResponse tokenResponse2 = tokenClient2.execRefreshToken(scope, refreshToken, clientId, clientSecret);
 
         showClient(tokenClient2);
-        assertTokenResponseOk(tokenResponse2, true, false);
-        assertNotNull(tokenResponse2.getScope(), "The scope is null");
-
+        AssertBuilder.tokenResponse(tokenResponse2)
+                .notNullRefreshToken()
+                .notNullScope()
+                .check();
         String accessToken = tokenResponse2.getAccessToken();
 
         // 6. Request user info
@@ -130,22 +129,14 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicMinimumResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.BIRTHDATE));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.GENDER));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.MIDDLE_NAME));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NICKNAME));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.PREFERRED_USERNAME));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.PROFILE));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.WEBSITE));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.EMAIL_VERIFIED));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.PHONE_NUMBER));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.PHONE_NUMBER_VERIFIED));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.USER_NAME));
-        assertNull(userInfoResponse.getClaim("org_name"));
-        assertNull(userInfoResponse.getClaim("work_phone"));
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .notNullClaimsPersonalData()
+                .claimsPresence(JwtClaimName.EMAIL, JwtClaimName.BIRTHDATE, JwtClaimName.GENDER, JwtClaimName.MIDDLE_NAME)
+                .claimsPresence(JwtClaimName.NICKNAME, JwtClaimName.PREFERRED_USERNAME, JwtClaimName.PROFILE)
+                .claimsPresence(JwtClaimName.WEBSITE, JwtClaimName.EMAIL_VERIFIED, JwtClaimName.PHONE_NUMBER)
+                .claimsPresence(JwtClaimName.PHONE_NUMBER_VERIFIED, JwtClaimName.ADDRESS, JwtClaimName.USER_NAME)
+                .claimsNoPresence("org_name", "work_phone")
+                .check();
     }
 
     /**
@@ -180,7 +171,6 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         String nonce = UUID.randomUUID().toString();
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email", "phone", "user_name");
         AuthorizationResponse authorizationResponse = requestAuthorization(userId, userSecret, redirectUri, responseTypes, scopes, clientId, nonce);
-
         assertEquals(authorizationResponse.getScope(), "openid");
 
         String scope = authorizationResponse.getScope();
@@ -200,30 +190,29 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         TokenResponse tokenResponse1 = tokenClient1.exec();
 
         showClient(tokenClient1);
-        assertTokenResponseOk(tokenResponse1, true, false);
+        AssertBuilder.tokenResponse(tokenResponse1)
+                .notNullRefreshToken()
+                .check();
 
         String refreshToken = tokenResponse1.getRefreshToken();
 
         // 4. Validate id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertJwtStandarClaimsNotNull(jwt, false);
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.CODE_HASH));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.OX_OPENID_CONNECT_VERSION));
-
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS256, publicKey);
-
-        assertTrue(rsaSigner.validate(jwt));
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureRSAClientEngine(jwksUri, SignatureAlgorithm.RS256)
+                .notNullAuthenticationTime()
+                .notNullOxOpenIDConnectVersion()
+                .claimsPresence(JwtClaimName.CODE_HASH)
+                .check();
 
         // 5. Request new access token using the refresh token.
         TokenClient tokenClient2 = new TokenClient(tokenEndpoint);
         TokenResponse tokenResponse2 = tokenClient2.execRefreshToken(scope, refreshToken, clientId, clientSecret);
 
         showClient(tokenClient2);
-        assertTokenResponseOk(tokenResponse2, true, false);
-        assertNotNull(tokenResponse2.getScope(), "The scope is null");
+        AssertBuilder.tokenResponse(tokenResponse2)
+                .notNullRefreshToken()
+                .notNullScope()
+                .check();
         assertEquals(tokenResponse2.getScope(), "openid");
 
         String accessToken = tokenResponse2.getAccessToken();
@@ -233,28 +222,16 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicMinimumResponseOk(userInfoResponse, 200);
-        assertNull(userInfoResponse.getClaim(JwtClaimName.NAME));
-        assertNull(userInfoResponse.getClaim(JwtClaimName.BIRTHDATE));
-        assertNull(userInfoResponse.getClaim(JwtClaimName.FAMILY_NAME));
-        assertNull(userInfoResponse.getClaim(JwtClaimName.GENDER));
-        assertNull(userInfoResponse.getClaim(JwtClaimName.GIVEN_NAME));
-        assertNull(userInfoResponse.getClaim(JwtClaimName.MIDDLE_NAME));
-        assertNull(userInfoResponse.getClaim(JwtClaimName.NICKNAME));
-        assertNull(userInfoResponse.getClaim(JwtClaimName.PICTURE));
-        assertNull(userInfoResponse.getClaim(JwtClaimName.PREFERRED_USERNAME));
-        assertNull(userInfoResponse.getClaim(JwtClaimName.PROFILE));
-        assertNull(userInfoResponse.getClaim(JwtClaimName.WEBSITE));
-        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
-        assertNull(userInfoResponse.getClaim(JwtClaimName.EMAIL_VERIFIED));
-        assertNull(userInfoResponse.getClaim(JwtClaimName.PHONE_NUMBER));
-        assertNull(userInfoResponse.getClaim(JwtClaimName.PHONE_NUMBER_VERIFIED));
-        assertNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS));
-        assertNull(userInfoResponse.getClaim(JwtClaimName.LOCALE));
-        assertNull(userInfoResponse.getClaim(JwtClaimName.ZONEINFO));
-        assertNull(userInfoResponse.getClaim(JwtClaimName.USER_NAME));
-        assertNull(userInfoResponse.getClaim("org_name"));
-        assertNull(userInfoResponse.getClaim("work_phone"));
+        AssertBuilder.userInfoResponse(userInfoResponse)
+
+                .claimsNoPresence(JwtClaimName.NAME, JwtClaimName.BIRTHDATE, JwtClaimName.FAMILY_NAME, JwtClaimName.GENDER)
+                .claimsNoPresence(JwtClaimName.GIVEN_NAME, JwtClaimName.MIDDLE_NAME, JwtClaimName.NICKNAME, JwtClaimName.PICTURE)
+                .claimsNoPresence(JwtClaimName.PREFERRED_USERNAME, JwtClaimName.PROFILE, JwtClaimName.WEBSITE)
+                .claimsNoPresence(JwtClaimName.EMAIL, JwtClaimName.EMAIL_VERIFIED, JwtClaimName.PHONE_NUMBER)
+                .claimsNoPresence(JwtClaimName.PHONE_NUMBER_VERIFIED, JwtClaimName.ADDRESS, JwtClaimName.LOCALE)
+                .claimsNoPresence(JwtClaimName.ZONEINFO, JwtClaimName.USER_NAME)
+                .claimsNoPresence("org_name", "work_phone")
+                .check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
@@ -285,7 +262,13 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
 
         // 3. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
-        assertIdToken(jwt, JwtClaimName.CODE_HASH);
+        AssertBuilder.jwt(jwt)
+                .claimsPresence(JwtClaimName.CODE_HASH)
+                .notNullAuthenticationTime()
+                .notNullOxOpenIDConnectVersion()
+                .notNullAuthenticationContextClassReference()
+                .notNullAuthenticationMethodReferences()
+                .check();
 
         // 4. Request access token
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
@@ -300,7 +283,9 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true, false);
+        AssertBuilder.tokenResponse(tokenResponse)
+                .notNullRefreshToken()
+                .check();
 
         String accessToken = tokenResponse.getAccessToken();
 
@@ -342,10 +327,11 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 3. Validate id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertJwtStandarClaimsNotNull(jwt, false);
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.CODE_HASH));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.OX_OPENID_CONNECT_VERSION));
+        AssertBuilder.jwtParse(idToken)
+                .notNullAuthenticationTime()
+                .notNullOxOpenIDConnectVersion()
+                .claimsPresence(JwtClaimName.CODE_HASH)
+                .check();
 
         // 4. Request access token
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
@@ -360,7 +346,9 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true, false);
+        AssertBuilder.tokenResponse(tokenResponse)
+                .notNullRefreshToken()
+                .check();
 
         String accessToken = tokenResponse.getAccessToken();
 
@@ -399,7 +387,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -415,7 +403,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponse(authorizationResponse).check();
 
         String scope = authorizationResponse.getScope();
         String authorizationCode = authorizationResponse.getCode();
@@ -434,32 +422,31 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         TokenResponse tokenResponse1 = tokenClient1.exec();
 
         showClient(tokenClient1);
-        assertTokenResponseOk(tokenResponse1, true, false);
+        AssertBuilder.tokenResponse(tokenResponse1)
+                .notNullRefreshToken()
+                .check();
 
         String refreshToken = tokenResponse1.getRefreshToken();
 
         // 4. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
-        assertJwtStandarClaimsNotNull(jwt, false);
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.NONCE));
+        AssertBuilder.jwt(jwt)
+                .validateSignatureRSAClientEngine(jwksUri, SignatureAlgorithm.RS256)
+                .notNullAuthenticationTime()
+                .notNullOxOpenIDConnectVersion()
+                .claimsPresence(JwtClaimName.NONCE, JwtClaimName.CODE_HASH)
+                .check();
         assertEquals(jwt.getClaims().getClaimAsString(JwtClaimName.NONCE), nonce);
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.CODE_HASH));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.OX_OPENID_CONNECT_VERSION));
-
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS256, publicKey);
-
-        assertTrue(rsaSigner.validate(jwt));
 
         // 5. Request new access token using the refresh token.
         TokenClient tokenClient2 = new TokenClient(tokenEndpoint);
         TokenResponse tokenResponse2 = tokenClient2.execRefreshToken(scope, refreshToken, clientId, clientSecret);
 
         showClient(tokenClient2);
-        assertTokenResponseOk(tokenResponse2, true, false);
-        assertNotNull(tokenResponse2.getScope(), "The scope is null");
+        AssertBuilder.tokenResponse(tokenResponse2)
+                .notNullRefreshToken()
+                .notNullScope()
+                .check();
     }
 
     /**
@@ -487,7 +474,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -502,8 +489,8 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);
-        assertRegisterResponseOk(readClientResponse, 200, false);
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        AssertBuilder.registerResponse(readClientResponse).ok().check();
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization and receive the authorization code.
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
@@ -516,7 +503,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponse(authorizationResponse).check();
         assertNotNull(authorizationResponse.getIdToken(), "The id token is null");
 
         String scope = authorizationResponse.getScope();
@@ -524,16 +511,11 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         String idToken = authorizationResponse.getIdToken();
 
         // 4. Validate id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertJwtStandarClaimsNotNull(jwt, false);
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.CODE_HASH));
-
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS256, publicKey);
-
-        assertTrue(rsaSigner.validate(jwt));
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureRSAClientEngine(jwksUri, SignatureAlgorithm.RS256)
+                .notNullAuthenticationTime()
+                .claimsPresence(JwtClaimName.CODE_HASH)
+                .check();
 
         // 5. Request access token using the authorization code.
         TokenClient tokenClient1 = new TokenClient(tokenEndpoint);
@@ -541,7 +523,9 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
                 clientId, clientSecret);
 
         showClient(tokenClient1);
-        assertTokenResponseOk(response2, true);
+        AssertBuilder.tokenResponse(response2)
+                .notNullRefreshToken()
+                .check();
 
         String accessToken = response2.getAccessToken();
         String refreshToken = response2.getRefreshToken();
@@ -606,7 +590,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret); // put userId explicitly, window.onload function result is not same as in browser (tested with chrome and FF)
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponse(authorizationResponse).check();
 
         String scope = authorizationResponse.getScope();
         String authorizationCode = authorizationResponse.getCode();
@@ -625,30 +609,29 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         TokenResponse tokenResponse1 = tokenClient1.exec();
 
         showClient(tokenClient1);
-        assertTokenResponseOk(tokenResponse1, true, false);
+        AssertBuilder.tokenResponse(tokenResponse1)
+                .notNullRefreshToken()
+                .check();
 
         String refreshToken = tokenResponse1.getRefreshToken();
 
         // 4. Validate id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertJwtStandarClaimsNotNull(jwt, false);
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.CODE_HASH));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.OX_OPENID_CONNECT_VERSION));
-
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS256, publicKey);
-
-        assertTrue(rsaSigner.validate(jwt));
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureRSAClientEngine(jwksUri, SignatureAlgorithm.RS256)
+                .notNullAuthenticationTime()
+                .notNullOxOpenIDConnectVersion()
+                .claimsPresence(JwtClaimName.CODE_HASH)
+                .check();
 
         // 5. Request new access token using the refresh token.
         TokenClient tokenClient2 = new TokenClient(tokenEndpoint);
         TokenResponse tokenResponse2 = tokenClient2.execRefreshToken(scope, refreshToken, clientId, clientSecret);
 
         showClient(tokenClient2);
-        assertTokenResponseOk(tokenResponse2, true, false);
-        assertNotNull(tokenResponse2.getScope(), "The scope is null");
+        AssertBuilder.tokenResponse(tokenResponse2)
+                .notNullRefreshToken()
+                .notNullScope()
+                .check();
 
         String accessToken = tokenResponse2.getAccessToken();
 
@@ -675,7 +658,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponse(authorizationResponse).check();
         return authorizationResponse;
     }
 
@@ -714,13 +697,21 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         TokenResponse tokenResponse1 = tokenClient1.exec();
 
         showClient(tokenClient1);
-        assertTokenResponseOk(tokenResponse1, true, false);
+        AssertBuilder.tokenResponse(tokenResponse1)
+                .notNullRefreshToken()
+                .check();
 
         String refreshToken = tokenResponse1.getRefreshToken();
 
         // 4. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
-        assertIdToken(jwt, JwtClaimName.CODE_HASH);
+        AssertBuilder.jwt(jwt)
+                .claimsPresence(JwtClaimName.CODE_HASH)
+                .notNullAuthenticationTime()
+                .notNullOxOpenIDConnectVersion()
+                .notNullAuthenticationContextClassReference()
+                .notNullAuthenticationMethodReferences()
+                .check();
 
         // 5. Request new access token using the refresh token.
         TokenClient tokenClient2 = new TokenClient(tokenEndpoint);
@@ -728,8 +719,10 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         TokenResponse tokenResponse2 = tokenClient2.execRefreshToken(scope, refreshToken, clientId, clientSecret);
 
         showClient(tokenClient2);
-        assertTokenResponseOk(tokenResponse2, true, false);
-        assertNotNull(tokenResponse2.getScope(), "The scope is null");
+        AssertBuilder.tokenResponse(tokenResponse2)
+                .notNullRefreshToken()
+                .notNullScope()
+                .check();
 
         String accessToken = tokenResponse2.getAccessToken();
         System.out.println("AT2: " + accessToken);
@@ -737,6 +730,6 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         Jwt at2Jwt = Jwt.parse(accessToken);
         assertNotNull(at2Jwt, "AT2 is null");
         System.out.println("AT2 claims: " + at2Jwt.getClaims().toJsonString());
-        assertEquals("value1", at2Jwt.getClaims().getClaimAsString("claim1"));
+        assertEquals(at2Jwt.getClaims().getClaimAsString("claim1"), "value1");
     }
 }

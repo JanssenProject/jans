@@ -3,7 +3,7 @@
 To get info about Jans Authorization Server operations:
 
 ```text
-/opt/jans/jans-cli/config-cli.py --info Configuration
+/opt/jans/jans-cli/config-cli.py --info ConfigurationProperties
 
 
 Operation ID: get-properties
@@ -486,7 +486,8 @@ Getting access token for scope https://jans.io/oauth/jans-auth-server/config/pro
   "discoveryCacheLifetimeInMinutes": 60,
   "httpLoggingEnabled": false,
   "httpLoggingExludePaths": null,
-  "externalLoggerConfiguration": null
+  "externalLoggerConfiguration": null,
+  "redirectUrisRegexEnabled": false
 }
 ```
 

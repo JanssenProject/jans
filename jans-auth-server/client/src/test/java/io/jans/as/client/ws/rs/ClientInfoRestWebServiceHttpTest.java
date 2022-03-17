@@ -17,6 +17,7 @@ import io.jans.as.client.RegisterResponse;
 import io.jans.as.client.TokenClient;
 import io.jans.as.client.TokenResponse;
 
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.register.ApplicationType;
@@ -64,7 +65,7 @@ public class ClientInfoRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -80,7 +81,7 @@ public class ClientInfoRestWebServiceHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, responseTypes, true);
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
         assertNotNull(authorizationResponse.getIdToken(), "The id token must be null");
 
         String accessToken = authorizationResponse.getAccessToken();
@@ -120,7 +121,7 @@ public class ClientInfoRestWebServiceHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertRegisterResponseOk(registerResponse, 201, true);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -133,8 +134,9 @@ public class ClientInfoRestWebServiceHttpTest extends BaseTest {
                 clientId, clientSecret);
 
         showClient(tokenClient);
-        assertTokenResponseOk(response1, false, false);
-        assertNotNull(response1.getScope(), "The scope is null");
+        AssertBuilder.tokenResponse(response1)
+                .notNullScope()
+                .check();
 
         String accessToken = response1.getAccessToken();
 
