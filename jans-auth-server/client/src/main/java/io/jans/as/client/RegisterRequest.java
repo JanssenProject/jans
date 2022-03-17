@@ -39,7 +39,7 @@ import static io.jans.as.model.util.StringUtils.toJSONArray;
  *
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
- * @version March 2, 2022
+ * @version March 17, 2022
  */
 public class RegisterRequest extends BaseRequest {
 
@@ -114,6 +114,7 @@ public class RegisterRequest extends BaseRequest {
     private String softwareVersion;
     private String softwareStatement;
     private Boolean defaultPromptLogin;
+    private List<String> authorizedAcrValues;
     private BackchannelTokenDeliveryMode backchannelTokenDeliveryMode;
     private String backchannelClientNotificationEndpoint;
     private AsymmetricSignatureAlgorithm backchannelAuthenticationRequestSigningAlg;
@@ -157,6 +158,7 @@ public class RegisterRequest extends BaseRequest {
         this.scope = new ArrayList<>();
         this.claims = new ArrayList<>();
         this.customAttributes = new HashMap<>();
+        this.authorizedAcrValues = new ArrayList<>();
     }
 
     /**
@@ -1171,6 +1173,14 @@ public class RegisterRequest extends BaseRequest {
         this.defaultPromptLogin = defaultPromptLogin;
     }
 
+    public List<String> getAuthorizedAcrValues() {
+        return authorizedAcrValues;
+    }
+
+    public void setAuthorizedAcrValues(List<String> authorizedAcrValues) {
+        this.authorizedAcrValues = authorizedAcrValues;
+    }
+
     public String getHttpMethod() {
         return httpMethod;
     }
@@ -1396,9 +1406,11 @@ public class RegisterRequest extends BaseRequest {
         if (defaultPromptLogin != null) {
             parameters.put(DEFAULT_PROMPT_LOGIN.getName(), defaultPromptLogin.toString());
         }
-
+        if (authorizedAcrValues != null && !authorizedAcrValues.isEmpty()) {
+            parameters.put(AUTHORIZED_ACR_VALUES.getName(), toJSONArray(authorizedAcrValues).toString());
+        }
         if (redirectUrisRegex != null) {
-            parameters.put(REDIRECT_URIS_REGEX.toString(), redirectUrisRegex.toString()) ;
+            parameters.put(REDIRECT_URIS_REGEX.toString(), redirectUrisRegex.toString());
         }
 
         // Custom params
@@ -1488,6 +1500,7 @@ public class RegisterRequest extends BaseRequest {
         result.setBackchannelUserCodeParameter(booleanOrNull(requestObject, BACKCHANNEL_USER_CODE_PARAMETER.toString()));
         result.setRedirectUrisRegex(requestObject.optString(REDIRECT_URIS_REGEX.toString()));
         result.setDefaultPromptLogin(requestObject.optBoolean(DEFAULT_PROMPT_LOGIN.getName()));
+        result.setAuthorizedAcrValues(extractListByKey(requestObject, AUTHORIZED_ACR_VALUES.getName()));
 
         return result;
     }
@@ -1701,11 +1714,14 @@ public class RegisterRequest extends BaseRequest {
         }
 
         if (redirectUrisRegex != null) {
-            parameters.put(REDIRECT_URIS_REGEX.toString(), redirectUrisRegex) ;
+            parameters.put(REDIRECT_URIS_REGEX.toString(), redirectUrisRegex);
         }
 
         if (defaultPromptLogin != null) {
             parameters.put(DEFAULT_PROMPT_LOGIN.getName(), defaultPromptLogin);
+        }
+        if (authorizedAcrValues != null && !authorizedAcrValues.isEmpty()) {
+            parameters.put(AUTHORIZED_ACR_VALUES.toString(), toJSONArray(authorizedAcrValues));
         }
 
         // Custom params
