@@ -25,7 +25,7 @@
 
 		<slf4j.version>1.7.25</slf4j.version>
 
-		<omnifaces.version>2.6.9</omnifaces.version>
+		<!-- <omnifaces.version>2.6.9</omnifaces.version> -->
 
 		<swagger.version>1.3.13</swagger.version>
 
@@ -202,11 +202,11 @@
 			</dependency>
 
 			<!-- Omnifaces -->
-			<dependency>
+		<!-- 	<dependency>
 				<groupId>org.omnifaces</groupId>
 				<artifactId>omnifaces</artifactId>
 				<version>${omnifaces.version}</version>
-			</dependency>
+			</dependency> -->
 
 			<!-- Microsoft -->
 			<dependency>

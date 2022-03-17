@@ -22,6 +22,7 @@
 		<richfaces.version>4.5.19-gluu.Final</richfaces.version>
 		
 		<!-- Jakarta -->
+		<jakarta.jakartaee.api.version>9.0.0</jakarta.jakartaee.api.version>
 		<jakarta.activation.api.version>2.1.0</jakarta.activation.api.version>
     	<jakarta.annotation.api.version>2.0.0</jakarta.annotation.api.version>
     	<jakarta.ejb.api.version>4.0.0</jakarta.ejb.api.version>
@@ -37,6 +38,7 @@
     	<jakarta.security.enterprise.api.version>2.0.0</jakarta.security.enterprise.api.version>
     	<jakarta.servlet.api.version>5.0.0</jakarta.servlet.api.version>
     	<jakarta.validation.api.version>3.0.0</jakarta.validation.api.version>
+    	<jakarta.jakartaee.web.api.version>9.1.0</jakarta.jakartaee.web.api.version>
     	<jakarta.websocket.api.version>2.0.0</jakarta.websocket.api.version>
     	<jakarta.ws.rs.api.version>3.0.0</jakarta.ws.rs.api.version>
 		<jakarta.xml.bind.api.version>3.0.1</jakarta.xml.bind.api.version>
@@ -289,11 +291,20 @@
 			</dependency>
 			
 			<!-- Jakarta -->
-	        <dependency>
+			<!-- https://mvnrepository.com/artifact/jakarta.platform/jakarta.jakartaee-api -->
+			<dependency>
+			    <groupId>jakarta.platform</groupId>
+			    <artifactId>jakarta.jakartaee-api</artifactId>
+			    <version>9.0.0</version>
+			    <scope>provided</scope>
+			</dependency>
+			
+			
+	      <!--   <dependency>
 	            <groupId>jakarta.activation</groupId>
 	            <artifactId>jakarta.activation-api</artifactId>
 	            <version>${jakarta.activation.api.version}</version>
-	        </dependency>
+	        </dependency> -->
             <dependency>
                 <groupId>jakarta.annotation</groupId>
                 <artifactId>jakarta.annotation-api</artifactId>
@@ -365,6 +376,13 @@
                 <artifactId>jakarta.validation-api</artifactId>
         		<version>${jakarta.validation.api.version}</version>
             </dependency>
+            <dependency>
+			    <groupId>jakarta.platform</groupId>
+			    <artifactId>jakarta.jakartaee-web-api</artifactId>
+			    <version>${jakarta.jakartaee.web.api.version}</version>
+			    <scope>provided</scope>
+			</dependency>
+            
             <dependency>
                 <groupId>jakarta.websocket</groupId>
                 <artifactId>jakarta.websocket-api</artifactId>
