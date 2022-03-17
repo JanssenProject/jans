@@ -494,6 +494,7 @@ class SpannerBackend:
             ("jansClnt", "jansDefAcrValues"),
             ("jansClnt", "jansLogoutURI"),
             ("jansPerson", "role"),
+            ("jansPerson", "mobile"),
         ]:
             column_to_array(mod[0], mod[1])
 

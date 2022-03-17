@@ -360,5 +360,5 @@
     "deviceAuthzResponseTypeToProcessAuthz": "code",
     "staticKid": "%(staticKid)s",
     "forceOfflineAccessScopeToEnableRefreshToken" : false,
-    "redirectUrisRegexEnabled": false
+    "redirectUrisRegexEnabled": true
 }
