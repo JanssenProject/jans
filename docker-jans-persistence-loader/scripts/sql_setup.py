@@ -441,6 +441,7 @@ class SQLBackend:
             ("jansClnt", "jansDefAcrValues"),
             ("jansClnt", "jansLogoutURI"),
             ("jansPerson", "role"),
+            ("jansPerson", "mobile"),
         ]:
             column_to_json(mod[0], mod[1])
 
