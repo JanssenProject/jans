@@ -488,6 +488,7 @@ class SQLBackend:
             ("jansDeviceRegistration", "jansDeviceKeyHandle"),
             ("jansUmaResource", "jansUmaScope"),
             ("jansU2fReq", "jansReq"),
+            ("jansFido2AuthnEntry", "jansAuthData"),
         ]:
             change_column_type(mod[0], mod[1])
 
