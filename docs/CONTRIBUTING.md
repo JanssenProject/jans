@@ -26,6 +26,7 @@ There are many ways in which contributions can be made to the Janssen Project. A
 # Join the Community
 
 * **Repo**: Watch and Star [Janssen repository](https://github.com/JanssenProject/jans) on Github
+* **Discussions**: Join interesting discussions at [Github Discussions](https://github.com/JanssenProject/jans/discussions)
 * **Chat**: We have an active [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). You can register for free their with your Github identity.
 * **Discussions**: Join interesting discussions at [Github Discussions](https://github.com/JanssenProject/jans/discussions)
 * **Tweet**: Janssen is on [Twitter](https://twitter.com/janssen_project) too. Follow us there to stay up to date on release announcements and news around Janssen.
@@ -141,9 +142,15 @@ Fork [Janssen repository](https://github.com/JanssenProject/jans). And create a 
 
 ### Implement the Change
 
-To setup code, build and run locally, refer to [DEVELOPING]() guide.
+Start working on changes as required. 
 
-Also, [commit](#commits) guidelines should be followed while committing your code.
+- Make sure the [code conventions](#code-conventions) are being followed.
+- Use static code analysis and linting tools to make sure the code is high-quality.
+- Write tests first and then code. Ensure that integration tests that cover your code are appropriately updated and reviewed.
+- Create PR early and push often. 
+- Janssen uses Github actions to run automated checks on PR changes. Ensure that these checks are passing with every push.
+- Engage PR reviewers at the start so that they can continue to reivew code as it is developed and in small chunks.
+- For a change that is non-trivial(an enhancement or a new feature), design should be reviewed. This should be done via PR by adding appropriate code owners.
 
 ## Test 
 
@@ -151,7 +158,7 @@ To run tests locally before pushing your code, refer to [TESTING] guide.
 
 ## Document
 
-Include changes in relevent documentation along with code changes.
+PR should include changes in relevent documentation along with code changes.
 
 ## Raise a PR
 - Make sure that PR title follows the [convension](#pr-titles)
