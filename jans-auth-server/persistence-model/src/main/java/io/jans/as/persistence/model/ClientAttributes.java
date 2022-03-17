@@ -17,7 +17,7 @@ import java.util.List;
 /**
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version March 2, 2022
+ * @version March 17, 2022
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ClientAttributes implements Serializable {
@@ -93,8 +93,11 @@ public class ClientAttributes implements Serializable {
     private String publicSubjectIdentifierAttribute;
 
     @JsonProperty("redirectUrisRegex")
-    private String redirectUrisRegex ;
-    
+    private String redirectUrisRegex;
+
+    @JsonProperty("jansAuthorizedAcr")
+    private List<String> authorizedAcrValues;
+
     @JsonProperty("jansDefaultPromptLogin")
     private Boolean defaultPromptLogin = false;
 
@@ -305,7 +308,18 @@ public class ClientAttributes implements Serializable {
 
     public void setRedirectUrisRegex(String redirectUrisRegex) {
         this.redirectUrisRegex = redirectUrisRegex;
-    }		
+    }
+
+    public List<String> getAuthorizedAcrValues() {
+        if (authorizedAcrValues == null) {
+            return Lists.newArrayList();
+        }
+        return authorizedAcrValues;
+    }
+
+    public void setAuthorizedAcrValues(List<String> authorizedAcrValues) {
+        this.authorizedAcrValues = authorizedAcrValues;
+    }
 
     public Boolean getDefaultPromptLogin() {
         if (defaultPromptLogin == null) {

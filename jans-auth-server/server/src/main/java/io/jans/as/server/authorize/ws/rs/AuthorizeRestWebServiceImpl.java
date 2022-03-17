@@ -99,7 +99,7 @@ import static org.apache.commons.lang3.BooleanUtils.isTrue;
  * Implementation for request authorization through REST web services.
  *
  * @author Javier Rojas Blum
- * @version March 15, 2022
+ * @version March 17, 2022
  */
 @Path("/")
 public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
@@ -313,10 +313,15 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             Client client = authorizeRestWebServiceValidator.validateClient(clientId, state, isPar);
             String deviceAuthzUserCode = deviceAuthorizationService.getUserCodeFromSession(httpRequest);
             redirectUri = authorizeRestWebServiceValidator.validateRedirectUri(client, redirectUri, state, deviceAuthzUserCode, httpRequest);
-            checkAcrChanged(acrValuesStr, prompts, sessionUser); // check after redirect uri is validated
-
             RedirectUriResponse redirectUriResponse = new RedirectUriResponse(new RedirectUri(redirectUri, responseTypes, responseMode), state, httpRequest, errorResponseFactory);
             redirectUriResponse.setFapiCompatible(appConfiguration.isFapi());
+
+            if (!client.getAttributes().getAuthorizedAcrValues().isEmpty() &&
+                    !client.getAttributes().getAuthorizedAcrValues().containsAll(acrValues)) {
+                throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST,
+                        "Restricted acr value request, please review the list of authorized acr values for this client");
+            }
+            checkAcrChanged(acrValuesStr, prompts, sessionUser); // check after redirect uri is validated
 
             Set<String> scopes = scopeChecker.checkScopesPolicy(client, scope);
 

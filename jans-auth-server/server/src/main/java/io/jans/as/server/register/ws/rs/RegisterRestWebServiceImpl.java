@@ -84,7 +84,7 @@ import static org.apache.commons.lang3.BooleanUtils.isTrue;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version March 2, 2022
+ * @version March 17, 2022
  */
 @Path("/")
 public class RegisterRestWebServiceImpl implements RegisterRestWebService {
@@ -310,7 +310,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
 
             builder.entity(jsonObjectToString(jsonObject));
 
-            log.info("Client registered: clientId = {}, applicationType = {}, clientName = {}, redirectUris = {}, sectorIdentifierUri = {}, redirectUrisRegex = {}" ,
+            log.info("Client registered: clientId = {}, applicationType = {}, clientName = {}, redirectUris = {}, sectorIdentifierUri = {}, redirectUrisRegex = {}",
                     client.getClientId(), client.getApplicationType(), client.getClientName(), client.getRedirectUris(), client.getSectorIdentifierUri(), client.getAttributes().getRedirectUrisRegex());
 
             oAuth2AuditLog.setClientId(client.getClientId());
@@ -851,6 +851,12 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
 
         if (requestObject.getDefaultPromptLogin() != null) {
             client.getAttributes().setDefaultPromptLogin(requestObject.getDefaultPromptLogin());
+        }
+
+        List<String> authorizedAcrValues = requestObject.getAuthorizedAcrValues();
+        if (authorizedAcrValues != null && !authorizedAcrValues.isEmpty()) {
+            authorizedAcrValues = new ArrayList<>(new HashSet<>(authorizedAcrValues)); // Remove repeated elements
+            client.getAttributes().setAuthorizedAcrValues(authorizedAcrValues);
         }
 
         cibaRegisterClientMetadataService.updateClient(client, requestObject.getBackchannelTokenDeliveryMode(),
