@@ -91,7 +91,8 @@ nginx-ingress:
 EOF
 sudo helm repo add janssen https://janssenproject.github.io/jans/charts
 sudo helm repo update
-sudo helm install janssen janssen/janssen -n jans -f override.yaml --kubeconfig="$KUBECONFIG"
+# remove --devel once we issue the first prod chart
+sudo helm install janssen janssen/janssen --devel -n jans -f override.yaml --kubeconfig="$KUBECONFIG"
 echo "Waiting for auth-server to come up. This may take 5-10 mins....Please do not cancel out...This will wait for the auth-server to be ready.."
 sleep 120
 cat << EOF > testendpoints.sh
@@ -106,6 +107,6 @@ echo -e "Testing fido2-configuration endpoint.. \n"
 curl -k https://$JANS_FQDN/.well-known/fido2-configuration
 cd ..
 EOF
-sudo microk8s.kubectl -n jans wait --for=condition=available --timeout=600s deploy/jans-auth-server --kubeconfig="$KUBECONFIG"
+sudo microk8s.kubectl -n jans wait --for=condition=available --timeout=600s deploy/janssen-auth-server --kubeconfig="$KUBECONFIG" || echo "Couldn't find deployment running tests anyways..."
 sudo bash testendpoints.sh
 echo -e "You may re-execute bash testendpoints.sh to do a quick test to check the openid-configuration endpoint."
