@@ -6,7 +6,7 @@ Janssen enables organizations to build a scalable centralized authentication and
 
 **Releases**: [Latest](https://github.com/JanssenProject/jans/releases/latest) | [All](https://github.com/JanssenProject/jans/releases)
 
-**Get Help**: [Chat](https://gitter.im/JanssenProject/Lobby) | [Discussions](https://github.com/JanssenProject/jans/discussions)
+**Get Help**: [Discussions](https://github.com/JanssenProject/jans/discussions) | [Chat](https://gitter.im/JanssenProject/Lobby)
 
 **Get Started**: [Quick Start](#quick-start) | [User Guides](docs/user)
 
