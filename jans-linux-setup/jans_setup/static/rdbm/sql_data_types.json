@@ -194,6 +194,16 @@
       "type": "STRING"
     }
   },
+  "jansAuthData": {
+    "mysql": {
+      "size": 512,
+      "type": "VARCHAR"
+    },
+    "spanner": {
+      "size": 512,
+      "type": "STRING"
+    }
+  },
   "jansCacheConf": {
     "mysql": {
       "type": "TEXT"
@@ -1032,6 +1042,14 @@
     },
     "spanner": {
       "type": "STRING(MAX)"
+    }
+  },
+  "mobile": {
+    "mysql": {
+      "type": "JSON"
+    },
+    "spanner": {
+      "type": "ARRAY<STRING(MAX)>"
     }
   }
 }

@@ -114,4 +114,3 @@ The following key-value pairs are the defaults:
     "audit_log_level": "INFO"
 }
 ```
-

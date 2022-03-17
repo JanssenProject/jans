@@ -26,7 +26,7 @@ spec:
     - uri:
         prefix: /.well-known/scim-configuration
     rewrite:
-      uri: /scim/restv1/scim-configuration
+      uri: /jans-scim/restv1/scim-configuration
     route:
       - destination:
           host: {{ .Values.global.scim.scimServiceName }}.{{.Release.Namespace}}.svc.cluster.local
@@ -36,7 +36,7 @@ spec:
   - name: {{ .Release.Name }}-istio-scim
     match:
     - uri:
-        prefix: "/scim"
+        prefix: "/jans-scim"
     route:
     - destination:
         host: {{ .Values.global.scim.scimServiceName }}.{{.Release.Namespace}}.svc.cluster.local

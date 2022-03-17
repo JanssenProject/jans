@@ -1,5 +1,6 @@
 {
     "accessTokenAsJwt": false,
+	"description":"Description for test client",
     "attributes": {
         "additionalAudience": [],
         "allowSpontaneousScopes": false,

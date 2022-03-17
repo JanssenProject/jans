@@ -6,6 +6,7 @@
 
 package io.jans.as.client;
 
+import io.jans.as.client.builder.RegistrationBuilder;
 import io.jans.as.client.util.ClientUtil;
 import io.jans.as.model.register.ApplicationType;
 import org.apache.commons.lang.StringUtils;
@@ -39,6 +40,10 @@ public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse
      */
     public RegisterClient(String url) {
         super(url);
+    }
+
+    public static RegistrationBuilder builder() {
+        return new RegistrationBuilder();
     }
 
     @Override

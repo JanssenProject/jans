@@ -93,4 +93,3 @@ The following key-value pairs are the defaults:
     "persistence_log_level": "INFO"
 }
 ```
-

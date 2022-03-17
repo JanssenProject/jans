@@ -16,15 +16,15 @@ tags:
   - name: Attribute
   - name: Default Authentication Method
   - name: Cache Configuration
-  - name: Cache Configuration - Memcached
-  - name: Cache Configuration - Redis
-  - name: Cache Configuration - in-Memory
-  - name: Cache Configuration - Native-Persistence
-  - name: Configuration - Properties
-  - name: Configuration - Fido2
-  - name: Configuration - SMTP
-  - name: Configuration - Logging
-  - name: Configuration - JWK - JSON Web Key (JWK)
+  - name: Cache Configuration – Memcached
+  - name: Cache Configuration – Redis
+  - name: Cache Configuration – in-Memory
+  - name: Cache Configuration – Native-Persistence
+  - name: Configuration – Properties
+  - name: Configuration – Fido2
+  - name: Configuration – SMTP
+  - name: Configuration – Logging
+  - name: Configuration – JWK - JSON Web Key (JWK)
   - name: Custom Scripts
   - name: Database - LDAP configuration
   - name: Database - Couchbase configuration
@@ -51,7 +51,7 @@ paths:
       security:
         - oauth2: [https://jans.io/oauth/jans-auth-server/config/properties.readonly]
       tags:
-        - Configuration - Properties
+        - Configuration – Properties
       responses:
         '200':
           description: OK
@@ -72,7 +72,7 @@ paths:
       security:
         - oauth2: [https://jans.io/oauth/jans-auth-server/config/properties.write]
       tags:
-        - Configuration - Properties
+        - Configuration – Properties
       requestBody:
         content:
           application/json-patch+json:
@@ -103,7 +103,7 @@ paths:
       security:
         - oauth2: [https://jans.io/oauth/jans-auth-server/config/properties.readonly]
       tags:
-        - Configuration - Properties
+        - Configuration – Properties
       responses:
         '200':
           description: OK
@@ -123,7 +123,7 @@ paths:
       description: Gets Jans Authorization Server Fido2 configuration properties.
       operationId: get-properties-fido2
       tags:
-        - Configuration - Fido2
+        - Configuration – Fido2
       responses:
         '200':
           description: OK
@@ -142,7 +142,7 @@ paths:
       description: Updates Fido2 configuration properties.
       operationId: put-properties-fido2
       tags:
-        - Configuration - Fido2
+        - Configuration – Fido2
       requestBody:
         content:
           application/json:
@@ -1158,7 +1158,7 @@ paths:
       description: Returns Memcached cache configuration.
       operationId: get-config-cache-memcached
       tags:
-        - Cache Configuration - Memcached
+        - Cache Configuration – Memcached
       responses:
         '200':
           description: OK
@@ -1177,7 +1177,7 @@ paths:
       description: Updates Memcached cache configuration.
       operationId: put-config-cache-memcached
       tags:
-        - Cache Configuration - Memcached
+        - Cache Configuration – Memcached
       requestBody:
         content:
           application/json:
@@ -1204,7 +1204,7 @@ paths:
       description: Partially modifies Memcached cache configuration.
       operationId: patch-config-cache-memcached
       tags:
-        - Cache Configuration - Memcached
+        - Cache Configuration – Memcached
       requestBody:
         content:
           application/json-patch+json:
@@ -1233,7 +1233,7 @@ paths:
       description: Returns Redis cache configuration.
       operationId: get-config-cache-redis
       tags:
-        - Cache Configuration - Redis
+        - Cache Configuration – Redis
       responses:
         '200':
           description: OK
@@ -1252,7 +1252,7 @@ paths:
       description: Updates Redis cache configuration.
       operationId: put-config-cache-redis
       tags:
-        - Cache Configuration - Redis
+        - Cache Configuration – Redis
       requestBody:
         content:
           application/json:
@@ -1277,7 +1277,7 @@ paths:
       description: Partially modifies Redis cache configuration.
       operationId: patch-config-cache-redis
       tags:
-        - Cache Configuration - Redis
+        - Cache Configuration – Redis
       requestBody:
         content:
           application/json-patch+json:
@@ -1306,7 +1306,7 @@ paths:
       description: Returns in-Memory cache configuration.
       operationId: get-config-cache-in-memory
       tags:
-        - Cache Configuration - in-Memory
+        - Cache Configuration – in-Memory
       responses:
         '200':
           description: OK
@@ -1325,7 +1325,7 @@ paths:
       description: Updates in-Memory cache configuration.
       operationId: put-config-cache-in-memory
       tags:
-        - Cache Configuration - in-Memory
+        - Cache Configuration – in-Memory
       requestBody:
         content:
           application/json:
@@ -1350,7 +1350,7 @@ paths:
       description: Partially modifies In-Memory cache configuration.
       operationId: patch-config-cache-in-memory
       tags:
-        - Cache Configuration - in-Memory
+        - Cache Configuration – in-Memory
       requestBody:
         content:
           application/json-patch+json:
@@ -1379,7 +1379,7 @@ paths:
       description: Returns native persistence cache configuration.
       operationId: get-config-cache-native-persistence
       tags:
-        - Cache Configuration - Native-Persistence
+        - Cache Configuration – Native-Persistence
       responses:
         '200':
           description: OK
@@ -1398,7 +1398,7 @@ paths:
       description: Updates native persistence cache configuration.
       operationId: put-config-cache-native-persistence
       tags:
-        - Cache Configuration - Native-Persistence
+        - Cache Configuration – Native-Persistence
       requestBody:
         content:
           application/json:
@@ -1423,7 +1423,7 @@ paths:
       description: Partially modifies Native Persistence cache configuration.
       operationId: patch-config-cache-native-persistence
       tags:
-        - Cache Configuration - Native-Persistence
+        - Cache Configuration – Native-Persistence
       requestBody:
         content:
           application/json-patch+json:
@@ -1452,7 +1452,7 @@ paths:
       description: Returns SMTP server configuration.
       operationId: get-config-smtp
       tags:
-        - Configuration - SMTP
+        - Configuration – SMTP
       responses:
         '200':
           description: OK
@@ -1471,7 +1471,7 @@ paths:
       description: Adds SMTP server configuration.
       operationId: post-config-smtp
       tags:
-        - Configuration - SMTP
+        - Configuration – SMTP
       requestBody:
         content:
           application/json:
@@ -1495,7 +1495,7 @@ paths:
       description: Updates SMTP server configuration.
       operationId: put-config-smtp
       tags:
-        - Configuration - SMTP
+        - Configuration – SMTP
       requestBody:
         content:
           application/json:
@@ -1521,7 +1521,7 @@ paths:
       description: Deletes SMTP server configuration.
       operationId: delete-config-smtp
       tags:
-        - Configuration - SMTP
+        - Configuration – SMTP
       responses:
         '204':
           description: No Content
@@ -1540,7 +1540,7 @@ paths:
       description: Test SMTP server configuration.
       operationId: test-config-smtp
       tags:
-        - Configuration - SMTP
+        - Configuration – SMTP
       responses:
         '200':
           description: OK
@@ -1558,7 +1558,7 @@ paths:
   /jans-config-api/api/v1/logging:
     get:
       tags:
-        - Configuration - Logging
+        - Configuration – Logging
       summary: Returns Jans Authorization Server logging settings.
       description: Returns Jans Authorization Server logging settings.
       operationId: get-config-logging
@@ -1577,7 +1577,7 @@ paths:
         - oauth2: [https://jans.io/oauth/config/logging.readonly]
     put:
       tags:
-        - Configuration - Logging
+        - Configuration – Logging
       summary: Updates Jans Authorization Server logging settings.
       description: Updates Jans Authorization Server logging settings.
       operationId: put-config-logging
@@ -1605,7 +1605,7 @@ paths:
   /jans-config-api/api/v1/config/jwks:
     get:
       tags:
-        - Configuration - JWK - JSON Web Key (JWK)
+        - Configuration – JWK - JSON Web Key (JWK)
       summary: Gets list of JSON Web Key (JWK) used by server.
       description: 'Gets list of JSON Web Key (JWK) used by server. JWK is a JSON data structure that represents a set of public keys as a JSON object [RFC4627].'
       operationId: get-config-jwks
@@ -1624,7 +1624,7 @@ paths:
         - oauth2: [https://jans.io/oauth/config/jwks.readonly]
     put:
       tags:
-        - Configuration - JWK - JSON Web Key (JWK)
+        - Configuration – JWK - JSON Web Key (JWK)
       summary: Puts/replaces JWKS
       description: Puts/replaces JSON Web Keys (JWKS).
       operationId: put-config-jwks
@@ -1648,7 +1648,7 @@ paths:
         - oauth2: [https://jans.io/oauth/config/jwks.write]
     patch:
       tags:
-        - Configuration - JWK - JSON Web Key (JWK)
+        - Configuration – JWK - JSON Web Key (JWK)
       summary: Patch JWKS
       description: Patch JSON Web Keys (JWKS).
       operationId: patch-config-jwks
@@ -1677,7 +1677,7 @@ paths:
   /jans-config-api/api/v1/config/jwks/key:
     post:
       tags:
-        - Configuration - JWK - JSON Web Key (JWK)
+        - Configuration – JWK - JSON Web Key (JWK)
       summary: Adds a new key to JSON Web Keys (JWKS)
       description: Adds a new key to JSON Web Keys (JWKS).
       operationId: post-config-jwks-key
@@ -1709,7 +1709,7 @@ paths:
         required: true
     get:
       tags:
-        - Configuration - JWK - JSON Web Key (JWK)
+        - Configuration – JWK - JSON Web Key (JWK)
       summary: Get a JSON Web Key based on kid
       description: Get a JSON Web Key based on kid
       operationId: put-config-jwk-kid
@@ -1728,7 +1728,7 @@ paths:
         - oauth2: [https://jans.io/oauth/config/jwks.readonly]
     patch:
       tags:
-        - Configuration - JWK - JSON Web Key (JWK)
+        - Configuration – JWK - JSON Web Key (JWK)
       summary: Patch a specific JSON Web Key based on kid
       description: Patch a specific JSON Web Key based on kid
       operationId: patch-config-jwk-kid
@@ -1758,7 +1758,7 @@ paths:
         - oauth2: [https://jans.io/oauth/config/jwks.write]
     delete:
       tags:
-        - Configuration - JWK - JSON Web Key (JWK)
+        - Configuration – JWK - JSON Web Key (JWK)
       summary: Delete a JSON Web Key based on kid
       description: Delete a JSON Web Key based on kid
       operationId: delete-config-jwk-kid
@@ -3543,9 +3543,12 @@ components:
             - POST_AUTHN
             - SCIM
             - CIBA_END_USER_NOTIFICATION
+            - REVOKE_TOKEN
             - PERSISTENCE_EXTENSION
             - IDP
+            - DISCOVERY
             - UPDATE_TOKEN
+            - CONFIG_API
         programmingLanguage:
           type: string
           enum:
@@ -4828,6 +4831,9 @@ components:
         staticKid:
           type: string
           description: Specifies static Kid
+        redirectUrisRegexEnabled:
+          type: boolean
+          description: Enable/Disable redirect uris validation using regular expression.
 
     GluuAttribute:
       title: GluuAttribute
@@ -5510,6 +5516,9 @@ components:
           default: false
         jansId:
           description: Attribute Scope Id.
+          type: string
+        description:
+          description: Description of the client.
           type: string
 
     UmaResource:

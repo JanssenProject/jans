@@ -1,4 +1,4 @@
-FROM bellsoft/liberica-openjre-alpine:11
+FROM bellsoft/liberica-openjre-alpine:11.0.13-8
 
 # ===============
 # Alpine packages
@@ -16,7 +16,7 @@ RUN apk update \
 # ==========
 
 ENV CN_VERSION=1.0.0-SNAPSHOT
-ENV CN_BUILD_DATE='2021-12-21 10:52'
+ENV CN_BUILD_DATE='2022-03-15 08:49'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-client-api-server/${CN_VERSION}/jans-client-api-server-${CN_VERSION}-distribution.zip
 
 RUN wget -q ${CN_SOURCE_URL} -O /tmp/client-api.zip \
@@ -134,15 +134,15 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
 # misc
 # ====
 
-LABEL name="Client API" \
+LABEL name="janssenproject/client-api" \
     maintainer="Janssen Project <support@jans.io>" \
-    vendor="Janssen" \
+    vendor="Janssen Project" \
     version="1.0.0" \
-    release="b12" \
+    release="beta.16" \
     summary="Janssen Client API" \
     description="Client software to secure apps with OAuth 2.0, OpenID Connect, and UMA"
 
-RUN mkdir -p /etc/certs /app/templates/ /deploy /etc/jans/conf /opt/client-api/logs
+RUN mkdir -p /etc/certs /app/templates/ /etc/jans/conf /opt/client-api/logs
 COPY scripts /app/scripts
 COPY templates/*.tmpl /app/templates/
 RUN chmod +x /app/scripts/entrypoint.sh
@@ -153,11 +153,9 @@ RUN adduser -s /bin/sh -D -G root -u 1000 1000
  # adjust ownership
 RUN chown -R 1000:1000 /app/templates \
     && chown -R 1000:1000 /etc/jans \
-    && chown -R 1000:1000 /deploy \
     && chown -R 1000:1000 /tmp \
     && chown -R 1000:1000 /opt/client-api \
     && chgrp -R 0 /tmp && chmod -R g=u /tmp \
-    && chgrp -R 0 /deploy && chmod -R g=u /deploy \
     && chgrp -R 0 /etc/certs && chmod -R g=u /etc/certs \
     && chgrp -R 0 /etc/jans && chmod -R g=u /etc/jans \
     && chgrp -R 0 /opt/client-api && chmod -R g=u /opt/client-api \

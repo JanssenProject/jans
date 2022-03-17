@@ -460,7 +460,8 @@ Select 1 to get all the details about Jans authorization server configuration. I
   "discoveryCacheLifetimeInMinutes": 60,
   "httpLoggingEnabled": false,
   "httpLoggingExludePaths": null,
-  "externalLoggerConfiguration": null
+  "externalLoggerConfiguration": null,
+  "redirectUrisRegexEnabled": false
 }
 ```
 By selecting the 2nd option, you can modify its properties partially. 

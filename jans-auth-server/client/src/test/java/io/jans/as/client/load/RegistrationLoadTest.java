@@ -11,13 +11,14 @@ import io.jans.as.client.RegisterClient;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
 
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.StringUtils;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import static io.jans.as.client.client.Asserter.assertRegisterResponseOk;
-import static io.jans.as.client.client.Asserter.assertRegisterResponseOk;
+
+
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
@@ -40,7 +41,7 @@ public class RegistrationLoadTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
 
         showClient(registerClient);
-        assertRegisterResponseOk(response, 201, true);
+        AssertBuilder.registerResponse(response).created().check();
 
         RegisterRequest readClientRequest = new RegisterRequest(response.getRegistrationAccessToken());
 
@@ -49,6 +50,6 @@ public class RegistrationLoadTest extends BaseTest {
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);
-        assertRegisterResponseOk(readClientResponse, 200, false);
+        AssertBuilder.registerResponse(readClientResponse).ok().check();
     }
 }

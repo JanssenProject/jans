@@ -21,7 +21,7 @@ RUN pip3 install -U pip wheel \
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_LINUX_SETUP_VERSION=452ce0fc0132f6ac7fd3be4a20bab560b1586dea
+ENV JANS_LINUX_SETUP_VERSION=2add3e9ef4d29847f77d5d7389e22ded76cc3764
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -61,7 +61,7 @@ RUN cd /tmp/jans \
     && cp -R ${JANS_SETUP_DIR}/templates/jans-cli /app/templates/jans-cli
 
 # TODO: casa should be moved from this image
-ENV GLUU_CASA_VERSION=303e707061773ba33bec74ecb3a78f5de0539e24
+ENV GLUU_CASA_VERSION=2a4a7fcb16554d23ea0ff599d46f86b9de292e30
 RUN wget -q https://github.com/GluuFederation/flex/raw/${GLUU_CASA_VERSION}/casa/extras/Casa.py -O /app/static/extension/person_authentication/Casa.py
 
 # cleanup
@@ -169,31 +169,35 @@ ENV CN_CACHE_TYPE=NATIVE_PERSISTENCE \
 # misc
 # ====
 
-LABEL name="Persistence" \
-    maintainer="Janssen <support@jans.io>" \
+LABEL name="janssenproject/persistence-loader" \
+    maintainer="Janssen Project <support@jans.io>" \
     vendor="Janssen Project" \
     version="1.0.0" \
-    release="beta.15" \
+    release="beta.16" \
     summary="Janssen Authorization Server Persistence loader" \
     description="Generate initial data for persistence layer"
 
-RUN mkdir -p /app/tmp /etc/certs /etc/jans/conf
+RUN mkdir -p /app/tmp /app/custom_ldif /etc/certs /etc/jans/conf
 
 COPY scripts /app/scripts
 # this overrides existing templates
 COPY templates /app/templates
 RUN chmod +x /app/scripts/entrypoint.sh
 
-# # create non-root user
+# create non-root user
 RUN adduser -s /bin/sh -D -G root -u 1000 1000
 
  # adjust ownership
 RUN chown -R 1000:1000 /tmp \
     && chown -R 1000:1000 /app/tmp/ \
+    && chown -R 1000:1000 /app/custom_ldif/ \
     && chgrp -R 0 /tmp && chmod -R g=u /tmp \
     && chgrp -R 0 /app/tmp && chmod -R g=u /app/tmp \
+    && chgrp -R 0 /app/custom_ldif && chmod -R g=u /app/custom_ldif \
     && chgrp -R 0 /etc/certs && chmod -R g=u /etc/certs \
     && chgrp -R 0 /etc/jans && chmod -R g=u /etc/jans
+
 USER 1000
+
 ENTRYPOINT ["tini", "-g", "--"]
 CMD ["sh", "/app/scripts/entrypoint.sh"]

@@ -1,5 +1,6 @@
 import argparse
 
+from setup_app.version import __version__
 from setup_app.utils import base
 
 parser_description='''Use setup.py to configure your Jans Server and to add initial data required for
@@ -8,6 +9,7 @@ properties will automatically be used instead of the interactive setup.
 '''
 
 parser = argparse.ArgumentParser(description=parser_description)
+parser.add_argument('--version', action='version', version='%(prog)s ' + __version__)
 parser.add_argument('-c', help="Use command line instead of tui", action='store_true')
 parser.add_argument('-d', help="Installation directory")
 parser.add_argument('-n', help="No interactive prompt before install starts", action='store_true')

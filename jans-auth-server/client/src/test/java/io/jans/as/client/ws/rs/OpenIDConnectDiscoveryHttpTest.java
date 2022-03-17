@@ -13,6 +13,8 @@ import io.jans.as.client.OpenIdConnectDiscoveryResponse;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
+import java.net.URISyntaxException;
+
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
@@ -28,84 +30,49 @@ public class OpenIDConnectDiscoveryHttpTest extends BaseTest {
     public void emailNormalization1() throws Exception {
         String resource = "acct:joe@example.com";
         String expectedHost = "example.com";
-        String expectedPath = null;
-
-        OpenIdConnectDiscoveryRequest openIdConnectDiscoveryRequest = new OpenIdConnectDiscoveryRequest(resource);
-        assertEquals(openIdConnectDiscoveryRequest.getResource(), resource);
-        assertEquals(openIdConnectDiscoveryRequest.getHost(), expectedHost);
-        assertEquals(openIdConnectDiscoveryRequest.getPath(), expectedPath);
+        assertRequest(resource, expectedHost, null);
     }
 
     @Test
     public void emailNormalization2() throws Exception {
         String resource = "joe@example.com";
         String expectedHost = "example.com";
-        String expectedPath = null;
-
-        OpenIdConnectDiscoveryRequest openIdConnectDiscoveryRequest = new OpenIdConnectDiscoveryRequest(resource);
-        assertEquals(openIdConnectDiscoveryRequest.getResource(), resource);
-        assertEquals(openIdConnectDiscoveryRequest.getHost(), expectedHost);
-        assertEquals(openIdConnectDiscoveryRequest.getPath(), expectedPath);
+        assertRequest(resource, expectedHost, null);
     }
 
     @Test
     public void emailNormalization3() throws Exception {
         String resource = "acct:joe@example.com:8080";
         String expectedHost = "example.com:8080";
-        String expectedPath = null;
-
-        OpenIdConnectDiscoveryRequest openIdConnectDiscoveryRequest = new OpenIdConnectDiscoveryRequest(resource);
-        assertEquals(openIdConnectDiscoveryRequest.getResource(), resource);
-        assertEquals(openIdConnectDiscoveryRequest.getHost(), expectedHost);
-        assertEquals(openIdConnectDiscoveryRequest.getPath(), expectedPath);
+        assertRequest(resource, expectedHost, null);
     }
 
     @Test
     public void emailNormalization4() throws Exception {
         String resource = "joe@example.com:8080";
         String expectedHost = "example.com:8080";
-        String expectedPath = null;
-
-        OpenIdConnectDiscoveryRequest openIdConnectDiscoveryRequest = new OpenIdConnectDiscoveryRequest(resource);
-        assertEquals(openIdConnectDiscoveryRequest.getResource(), resource);
-        assertEquals(openIdConnectDiscoveryRequest.getHost(), expectedHost);
-        assertEquals(openIdConnectDiscoveryRequest.getPath(), expectedPath);
+        assertRequest(resource, expectedHost, null);
     }
 
     @Test
     public void emailNormalization5() throws Exception {
         String resource = "joe@localhost";
         String expectedHost = "localhost";
-        String expectedPath = null;
-
-        OpenIdConnectDiscoveryRequest openIdConnectDiscoveryRequest = new OpenIdConnectDiscoveryRequest(resource);
-        assertEquals(openIdConnectDiscoveryRequest.getResource(), resource);
-        assertEquals(openIdConnectDiscoveryRequest.getHost(), expectedHost);
-        assertEquals(openIdConnectDiscoveryRequest.getPath(), expectedPath);
+        assertRequest(resource, expectedHost, null);
     }
 
     @Test
     public void emailNormalization6() throws Exception {
         String resource = "joe@localhost:8080";
         String expectedHost = "localhost:8080";
-        String expectedPath = null;
-
-        OpenIdConnectDiscoveryRequest openIdConnectDiscoveryRequest = new OpenIdConnectDiscoveryRequest(resource);
-        assertEquals(openIdConnectDiscoveryRequest.getResource(), resource);
-        assertEquals(openIdConnectDiscoveryRequest.getHost(), expectedHost);
-        assertEquals(openIdConnectDiscoveryRequest.getPath(), expectedPath);
+        assertRequest(resource, expectedHost, null);
     }
 
     @Test
     public void urlNormalization1() throws Exception {
         String resource = "https://example.com";
         String expectedHost = "example.com";
-        String expectedPath = null;
-
-        OpenIdConnectDiscoveryRequest openIdConnectDiscoveryRequest = new OpenIdConnectDiscoveryRequest(resource);
-        assertEquals(openIdConnectDiscoveryRequest.getResource(), resource);
-        assertEquals(openIdConnectDiscoveryRequest.getHost(), expectedHost);
-        assertEquals(openIdConnectDiscoveryRequest.getPath(), expectedPath);
+        assertRequest(resource, expectedHost, null);
     }
 
     @Test
@@ -113,23 +80,14 @@ public class OpenIDConnectDiscoveryHttpTest extends BaseTest {
         String resource = "https://example.com/joe";
         String expectedHost = "example.com";
         String expectedPath = "/joe";
-
-        OpenIdConnectDiscoveryRequest openIdConnectDiscoveryRequest = new OpenIdConnectDiscoveryRequest(resource);
-        assertEquals(openIdConnectDiscoveryRequest.getResource(), resource);
-        assertEquals(openIdConnectDiscoveryRequest.getHost(), expectedHost);
-        assertEquals(openIdConnectDiscoveryRequest.getPath(), expectedPath);
+        assertRequest(resource, expectedHost, expectedPath);
     }
 
     @Test
     public void urlNormalization3() throws Exception {
         String resource = "https://example.com:8080/";
         String expectedHost = "example.com:8080";
-        String expectedPath = null;
-
-        OpenIdConnectDiscoveryRequest openIdConnectDiscoveryRequest = new OpenIdConnectDiscoveryRequest(resource);
-        assertEquals(openIdConnectDiscoveryRequest.getResource(), resource);
-        assertEquals(openIdConnectDiscoveryRequest.getHost(), expectedHost);
-        assertEquals(openIdConnectDiscoveryRequest.getPath(), expectedPath);
+        assertRequest(resource, expectedHost, null);
     }
 
     @Test
@@ -137,11 +95,7 @@ public class OpenIDConnectDiscoveryHttpTest extends BaseTest {
         String resource = "https://example.com:8080/joe";
         String expectedHost = "example.com:8080";
         String expectedPath = "/joe";
-
-        OpenIdConnectDiscoveryRequest openIdConnectDiscoveryRequest = new OpenIdConnectDiscoveryRequest(resource);
-        assertEquals(openIdConnectDiscoveryRequest.getResource(), resource);
-        assertEquals(openIdConnectDiscoveryRequest.getHost(), expectedHost);
-        assertEquals(openIdConnectDiscoveryRequest.getPath(), expectedPath);
+        assertRequest(resource, expectedHost, expectedPath);
     }
 
     @Test
@@ -149,11 +103,7 @@ public class OpenIDConnectDiscoveryHttpTest extends BaseTest {
         String resource = "https://example.com:8080/joe#fragment";
         String expectedHost = "example.com:8080";
         String expectedPath = "/joe";
-
-        OpenIdConnectDiscoveryRequest openIdConnectDiscoveryRequest = new OpenIdConnectDiscoveryRequest(resource);
-        assertEquals(openIdConnectDiscoveryRequest.getResource(), resource);
-        assertEquals(openIdConnectDiscoveryRequest.getHost(), expectedHost);
-        assertEquals(openIdConnectDiscoveryRequest.getPath(), expectedPath);
+        assertRequest(resource, expectedHost, expectedPath);
     }
 
     @Test
@@ -161,11 +111,7 @@ public class OpenIDConnectDiscoveryHttpTest extends BaseTest {
         String resource = "https://example.com:8080/joe?param=value";
         String expectedHost = "example.com:8080";
         String expectedPath = "/joe";
-
-        OpenIdConnectDiscoveryRequest openIdConnectDiscoveryRequest = new OpenIdConnectDiscoveryRequest(resource);
-        assertEquals(openIdConnectDiscoveryRequest.getResource(), resource);
-        assertEquals(openIdConnectDiscoveryRequest.getHost(), expectedHost);
-        assertEquals(openIdConnectDiscoveryRequest.getPath(), expectedPath);
+        assertRequest(resource, expectedHost, expectedPath);
     }
 
     @Test
@@ -173,35 +119,21 @@ public class OpenIDConnectDiscoveryHttpTest extends BaseTest {
         String resource = "https://example.com:8080/joe?param1=foo&param2=bar#fragment";
         String expectedHost = "example.com:8080";
         String expectedPath = "/joe";
-
-        OpenIdConnectDiscoveryRequest openIdConnectDiscoveryRequest = new OpenIdConnectDiscoveryRequest(resource);
-        assertEquals(openIdConnectDiscoveryRequest.getResource(), resource);
-        assertEquals(openIdConnectDiscoveryRequest.getHost(), expectedHost);
-        assertEquals(openIdConnectDiscoveryRequest.getPath(), expectedPath);
+        assertRequest(resource, expectedHost, expectedPath);
     }
 
     @Test
     public void hostNormalization1() throws Exception {
         String resource = "example.com";
         String expectedHost = "example.com";
-        String expectedPath = null;
-
-        OpenIdConnectDiscoveryRequest openIdConnectDiscoveryRequest = new OpenIdConnectDiscoveryRequest(resource);
-        assertEquals(openIdConnectDiscoveryRequest.getResource(), resource);
-        assertEquals(openIdConnectDiscoveryRequest.getHost(), expectedHost);
-        assertEquals(openIdConnectDiscoveryRequest.getPath(), expectedPath);
+        assertRequest(resource, expectedHost, null);
     }
 
     @Test
     public void hostNormalization2() throws Exception {
         String resource = "example.com:8080";
         String expectedHost = "example.com:8080";
-        String expectedPath = null;
-
-        OpenIdConnectDiscoveryRequest openIdConnectDiscoveryRequest = new OpenIdConnectDiscoveryRequest(resource);
-        assertEquals(openIdConnectDiscoveryRequest.getResource(), resource);
-        assertEquals(openIdConnectDiscoveryRequest.getHost(), expectedHost);
-        assertEquals(openIdConnectDiscoveryRequest.getPath(), expectedPath);
+        assertRequest(resource, expectedHost, null);
     }
 
     @Test
@@ -209,11 +141,7 @@ public class OpenIDConnectDiscoveryHttpTest extends BaseTest {
         String resource = "example.com/path";
         String expectedHost = "example.com";
         String expectedPath = "/path";
-
-        OpenIdConnectDiscoveryRequest openIdConnectDiscoveryRequest = new OpenIdConnectDiscoveryRequest(resource);
-        assertEquals(openIdConnectDiscoveryRequest.getResource(), resource);
-        assertEquals(openIdConnectDiscoveryRequest.getHost(), expectedHost);
-        assertEquals(openIdConnectDiscoveryRequest.getPath(), expectedPath);
+        assertRequest(resource, expectedHost, expectedPath);
     }
 
     @Test
@@ -221,7 +149,10 @@ public class OpenIDConnectDiscoveryHttpTest extends BaseTest {
         String resource = "example.com:8080/path";
         String expectedHost = "example.com:8080";
         String expectedPath = "/path";
+        assertRequest(resource, expectedHost, expectedPath);
+    }
 
+    private void assertRequest(String resource, String expectedHost, String expectedPath) throws URISyntaxException {
         OpenIdConnectDiscoveryRequest openIdConnectDiscoveryRequest = new OpenIdConnectDiscoveryRequest(resource);
         assertEquals(openIdConnectDiscoveryRequest.getResource(), resource);
         assertEquals(openIdConnectDiscoveryRequest.getHost(), expectedHost);

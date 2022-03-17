@@ -9,7 +9,6 @@ package io.jans.as.client.ws.rs;
 import io.jans.as.client.AuthorizationRequest;
 import io.jans.as.client.AuthorizationResponse;
 import io.jans.as.client.BaseTest;
-import io.jans.as.client.JwkClient;
 import io.jans.as.client.RegisterClient;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
@@ -21,17 +20,14 @@ import io.jans.as.client.TokenRevocationRequest;
 import io.jans.as.client.TokenRevocationResponse;
 import io.jans.as.client.UserInfoClient;
 import io.jans.as.client.UserInfoResponse;
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.common.TokenTypeHint;
-import io.jans.as.model.crypto.signature.RSAPublicKey;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
-import io.jans.as.model.jws.RSASigner;
-import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
-import io.jans.as.model.jwt.JwtHeaderName;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.StringUtils;
 import org.testng.annotations.Parameters;
@@ -152,30 +148,29 @@ public class TokenRevocationTest extends BaseTest {
         TokenResponse tokenResponse1 = tokenClient1.exec();
 
         showClient(tokenClient1);
-        assertTokenResponseOk(tokenResponse1, true, false);
+        AssertBuilder.tokenResponse(tokenResponse1)
+                .notNullRefreshToken()
+                .check();
 
         String refreshToken = tokenResponse1.getRefreshToken();
 
         // 4. Validate id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertJwtStandarClaimsNotNull(jwt, false);
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.CODE_HASH));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.OX_OPENID_CONNECT_VERSION));
-
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS256, publicKey);
-
-        assertTrue(rsaSigner.validate(jwt));
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS256)
+                .notNullAuthenticationTime()
+                .notNullOxOpenIDConnectVersion()
+                .claimsPresence(JwtClaimName.CODE_HASH)
+                .check();
 
         // 5. Request new access token using the refresh token.
         TokenClient tokenClient2 = new TokenClient(tokenEndpoint);
         TokenResponse tokenResponse2 = tokenClient2.execRefreshToken(scope, refreshToken, clientId, clientSecret);
 
         showClient(tokenClient2);
-        assertTokenResponseOk(tokenResponse2, true, false);
-        assertNotNull(tokenResponse2.getScope(), "The scope is null");
+        AssertBuilder.tokenResponse(tokenResponse2)
+                .notNullRefreshToken()
+                .notNullScope()
+                .check();
 
         String accessToken2 = tokenResponse2.getAccessToken();
         String refreshToken2 = tokenResponse2.getRefreshToken();
@@ -185,22 +180,14 @@ public class TokenRevocationTest extends BaseTest {
         UserInfoResponse userInfoResponse1 = userInfoClient1.execUserInfo(accessToken2);
 
         showClient(userInfoClient1);
-        assertUserInfoBasicMinimumResponseOk(userInfoResponse1, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse1);        
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.BIRTHDATE));        
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.GENDER));        
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.MIDDLE_NAME));
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.NICKNAME));
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.PREFERRED_USERNAME));
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.PROFILE));
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.WEBSITE));
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.EMAIL_VERIFIED));
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.PHONE_NUMBER));
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.PHONE_NUMBER_VERIFIED));
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.ADDRESS));
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.USER_NAME));
-        assertNull(userInfoResponse1.getClaim("org_name"));
-        assertNull(userInfoResponse1.getClaim("work_phone"));
+        AssertBuilder.userInfoResponse(userInfoResponse1)
+                .notNullClaimsPersonalData()
+                .claimsPresence(JwtClaimName.EMAIL, JwtClaimName.BIRTHDATE, JwtClaimName.GENDER, JwtClaimName.MIDDLE_NAME)
+                .claimsPresence(JwtClaimName.NICKNAME, JwtClaimName.PREFERRED_USERNAME, JwtClaimName.PROFILE)
+                .claimsPresence(JwtClaimName.WEBSITE, JwtClaimName.EMAIL_VERIFIED, JwtClaimName.PHONE_NUMBER)
+                .claimsPresence(JwtClaimName.PHONE_NUMBER_VERIFIED, JwtClaimName.ADDRESS, JwtClaimName.USER_NAME)
+                .claimsNoPresence("org_name", "work_phone")
+                .check();
 
         // 7. Request refresh token revocation
         TokenRevocationRequest tokenRevocationRequest1 = new TokenRevocationRequest();
@@ -291,45 +278,34 @@ public class TokenRevocationTest extends BaseTest {
         TokenResponse tokenResponse1 = tokenClient1.exec();
 
         showClient(tokenClient1);
-        assertTokenResponseOk(tokenResponse1, true, false);
+        AssertBuilder.tokenResponse(tokenResponse1)
+                .notNullRefreshToken()
+                .check();
 
         String accessToken = tokenResponse1.getAccessToken();
         String refreshToken = tokenResponse1.getRefreshToken();
 
         // 4. Validate id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertJwtStandarClaimsNotNull(jwt, false);
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.CODE_HASH));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.OX_OPENID_CONNECT_VERSION));
-
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS256, publicKey);
-
-        assertTrue(rsaSigner.validate(jwt));
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS256)
+                .notNullAuthenticationTime()
+                .notNullOxOpenIDConnectVersion()
+                .claimsPresence(JwtClaimName.CODE_HASH)
+                .check();
 
         // 6. Request user info
         UserInfoClient userInfoClient1 = new UserInfoClient(userInfoEndpoint);
         UserInfoResponse userInfoResponse1 = userInfoClient1.execUserInfo(accessToken);
 
         showClient(userInfoClient1);
-        assertUserInfoBasicMinimumResponseOk(userInfoResponse1, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse1);        
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.BIRTHDATE));        
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.GENDER));        
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.MIDDLE_NAME));
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.NICKNAME));
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.PREFERRED_USERNAME));
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.PROFILE));
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.WEBSITE));
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.EMAIL_VERIFIED));
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.PHONE_NUMBER));
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.PHONE_NUMBER_VERIFIED));
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.ADDRESS));
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.USER_NAME));
-        assertNull(userInfoResponse1.getClaim("org_name"));
-        assertNull(userInfoResponse1.getClaim("work_phone"));
+        AssertBuilder.userInfoResponse(userInfoResponse1)
+                .notNullClaimsPersonalData()
+                .claimsPresence(JwtClaimName.EMAIL, JwtClaimName.BIRTHDATE, JwtClaimName.GENDER, JwtClaimName.MIDDLE_NAME)
+                .claimsPresence(JwtClaimName.NICKNAME, JwtClaimName.PREFERRED_USERNAME, JwtClaimName.PROFILE)
+                .claimsPresence(JwtClaimName.WEBSITE, JwtClaimName.EMAIL_VERIFIED, JwtClaimName.PHONE_NUMBER)
+                .claimsPresence(JwtClaimName.PHONE_NUMBER_VERIFIED, JwtClaimName.ADDRESS, JwtClaimName.USER_NAME)
+                .claimsNoPresence("org_name", "work_phone")
+                .check();
 
         // 7. Request access token revocation
         TokenRevocationRequest tokenRevocationRequest2 = new TokenRevocationRequest();
@@ -405,23 +381,20 @@ public class TokenRevocationTest extends BaseTest {
         TokenResponse tokenResponse1 = tokenClient1.exec();
 
         showClient(tokenClient1);
-        assertTokenResponseOk(tokenResponse1, true, false);
+        AssertBuilder.tokenResponse(tokenResponse1)
+                .notNullRefreshToken()
+                .check();
 
         String accessToken = tokenResponse1.getAccessToken();
         String refreshToken = tokenResponse1.getRefreshToken();
 
         // 4. Validate id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertJwtStandarClaimsNotNull(jwt, false);
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.CODE_HASH));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.OX_OPENID_CONNECT_VERSION));
-
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS256, publicKey);
-
-        assertTrue(rsaSigner.validate(jwt));
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS256)
+                .notNullAuthenticationTime()
+                .notNullOxOpenIDConnectVersion()
+                .claimsPresence(JwtClaimName.CODE_HASH)
+                .check();
 
         // 5. Request refresh token revocation
         TokenRevocationRequest tokenRevocationRequest1 = new TokenRevocationRequest();
@@ -521,30 +494,29 @@ public class TokenRevocationTest extends BaseTest {
         TokenResponse tokenResponse1 = tokenClient1.exec();
 
         showClient(tokenClient1);
-        assertTokenResponseOk(tokenResponse1, true, false);
+        AssertBuilder.tokenResponse(tokenResponse1)
+                .notNullRefreshToken()
+                .check();
 
         String refreshToken = tokenResponse1.getRefreshToken();
 
         // 4. Validate id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertJwtStandarClaimsNotNull(jwt, false);
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.CODE_HASH));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.OX_OPENID_CONNECT_VERSION));
-
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS256, publicKey);
-
-        assertTrue(rsaSigner.validate(jwt));
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS256)
+                .notNullAuthenticationTime()
+                .notNullOxOpenIDConnectVersion()
+                .claimsPresence(JwtClaimName.CODE_HASH)
+                .check();
 
         // 5. Request new access token using the refresh token.
         TokenClient tokenClient2 = new TokenClient(tokenEndpoint);
         TokenResponse tokenResponse2 = tokenClient2.execRefreshToken(scope, refreshToken, clientId, clientSecret);
 
         showClient(tokenClient2);
-        assertTokenResponseOk(tokenResponse2, true, false);
-        assertNotNull(tokenResponse2.getScope(), "The scope is null");
+        AssertBuilder.tokenResponse(tokenResponse2)
+                .notNullRefreshToken()
+                .notNullScope()
+                .check();
 
         String accessToken = tokenResponse2.getAccessToken();
         String refreshToken2 = tokenResponse2.getRefreshToken();
@@ -554,22 +526,14 @@ public class TokenRevocationTest extends BaseTest {
         UserInfoResponse userInfoResponse1 = userInfoClient1.execUserInfo(accessToken);
 
         showClient(userInfoClient1);
-        assertUserInfoBasicMinimumResponseOk(userInfoResponse1, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse1);        
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.BIRTHDATE));        
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.GENDER));        
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.MIDDLE_NAME));
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.NICKNAME));
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.PREFERRED_USERNAME));
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.PROFILE));
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.WEBSITE));
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.EMAIL_VERIFIED));
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.PHONE_NUMBER));
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.PHONE_NUMBER_VERIFIED));
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.ADDRESS));
-        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.USER_NAME));
-        assertNull(userInfoResponse1.getClaim("org_name"));
-        assertNull(userInfoResponse1.getClaim("work_phone"));
+        AssertBuilder.userInfoResponse(userInfoResponse1)
+                .notNullClaimsPersonalData()
+                .claimsPresence(JwtClaimName.EMAIL, JwtClaimName.BIRTHDATE, JwtClaimName.GENDER, JwtClaimName.MIDDLE_NAME)
+                .claimsPresence(JwtClaimName.NICKNAME, JwtClaimName.PREFERRED_USERNAME, JwtClaimName.PROFILE)
+                .claimsPresence(JwtClaimName.WEBSITE, JwtClaimName.EMAIL_VERIFIED, JwtClaimName.PHONE_NUMBER)
+                .claimsPresence(JwtClaimName.PHONE_NUMBER_VERIFIED, JwtClaimName.ADDRESS, JwtClaimName.USER_NAME)
+                .claimsNoPresence("org_name", "work_phone")
+                .check();
 
         // 7. Request refresh token revocation
         TokenRevocationRequest tokenRevocationRequest1 = new TokenRevocationRequest();
@@ -656,7 +620,9 @@ public class TokenRevocationTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true, false);
+        AssertBuilder.tokenResponse(tokenResponse)
+                .notNullRefreshToken()
+                .check();
 
         String refreshToken = tokenResponse.getRefreshToken();
 
@@ -716,7 +682,9 @@ public class TokenRevocationTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true, false);
+        AssertBuilder.tokenResponse(tokenResponse)
+                .notNullRefreshToken()
+                .check();
 
         String accessToken = tokenResponse.getAccessToken();
 
@@ -740,22 +708,14 @@ public class TokenRevocationTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertUserInfoBasicMinimumResponseOk(userInfoResponse, 200);
-        assertUserInfoPersonalDataNotNull(userInfoResponse);        
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.BIRTHDATE));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.GENDER));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.MIDDLE_NAME));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NICKNAME));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.PREFERRED_USERNAME));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.PROFILE));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.WEBSITE));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.EMAIL_VERIFIED));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.PHONE_NUMBER));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.PHONE_NUMBER_VERIFIED));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.USER_NAME));
-        assertNull(userInfoResponse.getClaim("org_name"));
-        assertNull(userInfoResponse.getClaim("work_phone"));
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .notNullClaimsPersonalData()
+                .claimsPresence(JwtClaimName.EMAIL, JwtClaimName.BIRTHDATE, JwtClaimName.GENDER, JwtClaimName.MIDDLE_NAME)
+                .claimsPresence(JwtClaimName.NICKNAME, JwtClaimName.PREFERRED_USERNAME, JwtClaimName.PROFILE)
+                .claimsPresence(JwtClaimName.WEBSITE, JwtClaimName.EMAIL_VERIFIED, JwtClaimName.PHONE_NUMBER)
+                .claimsPresence(JwtClaimName.PHONE_NUMBER_VERIFIED, JwtClaimName.ADDRESS, JwtClaimName.USER_NAME)
+                .claimsNoPresence("org_name", "work_phone")
+                .check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
@@ -795,7 +755,9 @@ public class TokenRevocationTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponseOk(tokenResponse, true, false);
+        AssertBuilder.tokenResponse(tokenResponse)
+                .notNullRefreshToken()
+                .check();
 
         String refreshToken = tokenResponse.getRefreshToken();
 
@@ -827,7 +789,7 @@ public class TokenRevocationTest extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, true);
+        AssertBuilder.authorizationResponse(authorizationResponse).check();
         return authorizationResponse;
     }
 

@@ -237,6 +237,9 @@ public class Client extends DeletableEntity implements Serializable {
     @AttributeName(name = "jansBackchannelUsrCodeParameter")
     private Boolean backchannelUserCodeParameter;
 
+    @AttributeName(name = "description")
+    private String description;
+
     @Expiration
     private Integer ttl;
 
@@ -1155,8 +1158,8 @@ public class Client extends DeletableEntity implements Serializable {
         return customObjectClasses;
     }
 
-    public void setCustomObjectClasses(String[] p_customObjectClasses) {
-        customObjectClasses = p_customObjectClasses;
+    public void setCustomObjectClasses(String[] customObjectClasses) {
+        this.customObjectClasses = customObjectClasses;
     }
 
     public boolean isDisabled() {
@@ -1232,11 +1235,19 @@ public class Client extends DeletableEntity implements Serializable {
     }
 
     public String getDisplayName() {
-        return clientName;
+        return getClientName();
     }
 
     public void setDisplayName(String displayName) {
         this.clientName = displayName;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
 }
