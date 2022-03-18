@@ -1,5 +1,7 @@
 {
   "applicationType": "web",
+  "description":"Description for test client",
+  "customObjectClasses":["top"],
   "accessTokenAsJwt": false,
   "claimRedirectUris": [
   ],
