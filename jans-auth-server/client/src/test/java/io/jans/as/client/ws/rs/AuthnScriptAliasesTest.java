@@ -22,14 +22,14 @@ import java.util.UUID;
  * @author Javier Rojas Blum
  * @version March 18, 2022
  */
-public class AuthorizedAcrValuesTest extends BaseTest {
+public class AuthnScriptAliasesTest extends BaseTest {
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
-    public void authorizedAcrValues(
+    public void acrAliasTest(
             final String userId, final String userSecret, final String redirectUris, final String redirectUri,
             final String sectorIdentifierUri) {
-        showTitle("authorizedAcrValues");
+        showTitle("acrAliasTest");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN);
 
@@ -38,9 +38,6 @@ public class AuthorizedAcrValuesTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-        registerRequest.setAuthorizedAcrValues(Arrays.asList(
-                "acr_1", "acr_2", "acr_3", "basic"
-        ));
 
         RegisterClient registerClient = newRegisterClient(registerRequest);
         RegisterResponse registerResponse = registerClient.exec();
@@ -58,7 +55,7 @@ public class AuthorizedAcrValuesTest extends BaseTest {
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
-        authorizationRequest.setAcrValues(Arrays.asList("basic"));
+        authorizationRequest.setAcrValues(Arrays.asList("basic_alias1"));
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(authorizationEndpoint,
                 authorizationRequest, userId, userSecret);
@@ -68,11 +65,12 @@ public class AuthorizedAcrValuesTest extends BaseTest {
                 .check();
     }
 
-    @Parameters({"redirectUris", "redirectUri", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
-    public void authorizedAcrValuesFail(
-            final String redirectUris, final String redirectUri, final String sectorIdentifierUri) {
-        showTitle("authorizedAcrValuesFail");
+    public void acrAliasAuthorizedAcsValuesTest(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) {
+        showTitle("acrAliasAuthorizedAcsValuesTest");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN);
 
@@ -82,7 +80,7 @@ public class AuthorizedAcrValuesTest extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setAuthorizedAcrValues(Arrays.asList(
-                "acr_1", "acr_2", "acr_3"
+                "basic_alias1", "basic_alias2"
         ));
 
         RegisterClient registerClient = newRegisterClient(registerRequest);
@@ -101,16 +99,13 @@ public class AuthorizedAcrValuesTest extends BaseTest {
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
-        authorizationRequest.setAcrValues(Arrays.asList("basic"));
+        authorizationRequest.setAcrValues(Arrays.asList("basic_alias2"));
 
-        AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
-        authorizeClient.setRequest(authorizationRequest);
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(authorizationEndpoint,
+                authorizationRequest, userId, userSecret);
 
-        AuthorizationResponse authorizationResponse = authorizeClient.exec();
-
-        showClient(authorizeClient);
         AssertBuilder.authorizationResponse(authorizationResponse)
-                .status(302)
+                .responseTypes(responseTypes)
                 .check();
     }
 }

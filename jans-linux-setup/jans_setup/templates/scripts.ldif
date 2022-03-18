@@ -393,6 +393,8 @@ objectClass: top
 objectClass: jansCustomScr
 jansEnabled: false
 jansProgLng: python
+jansAlias: basic_alias1
+jansAlias: basic_alias2
 
 dn: inum=A910-56AB,ou=scripts,o=jans
 description: Sample script for SCIM events
