@@ -29,12 +29,8 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Named;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 
 /**
  * Provides factory methods needed to create external authenticator
@@ -498,6 +494,15 @@ public class ExternalAuthenticationService extends ExternalScriptService {
                 map.put(level, acrs);
             }
             acrs.add(acr);
+
+            // Also publish alias configuration
+            if (script.getCustomScript() != null && script.getCustomScript().getAliases() != null) {
+                for (String alias : script.getCustomScript().getAliases()) {
+                    if (StringUtils.isNotBlank(alias)) {
+                        acrs.add(alias);
+                    }
+                }
+            }
         }
         return map;
     }
