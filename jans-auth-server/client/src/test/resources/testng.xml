@@ -3,7 +3,7 @@
 <suite name="jansAuthClient" parallel="tests" thread-count="4">
 
     <listeners>
-        <listener class-name="io.jans.as.client.RetryListener" />
+        <listener class-name="io.jans.as.client.RetryListener"/>
     </listeners>
 
     <test name="JsonApplier Client test" enabled="true">
@@ -36,8 +36,13 @@
         </classes>
     </test>
 
-    <!-- Token binding -->
+    <test name="Authn Script Aliases Test" enabled="true">
+        <classes>
+            <class name="io.jans.as.client.ws.rs.AuthnScriptAliasesTest"/>
+        </classes>
+    </test>
 
+    <!-- Token binding -->
     <test name="Token Binding test (HTTP)" enabled="true">
         <classes>
             <class name="io.jans.as.client.ws.rs.TokenBindingHttpTest"/>
@@ -93,6 +98,12 @@
     <test name="Authorization Support Custom Params" enabled="true">
         <classes>
             <class name="io.jans.as.client.ws.rs.AuthorizationSupportCustomParams"/>
+        </classes>
+    </test>
+
+    <test name="Authorized Acr Values Test" enabled="true">
+        <classes>
+            <class name="io.jans.as.client.ws.rs.AuthorizedAcrValuesTest"/>
         </classes>
     </test>
 
@@ -261,7 +272,7 @@
             <class name="io.jans.as.client.ws.rs.SetPublicSubjectIdentifierPerClientTest"/>
         </classes>
     </test>
-    
+
     <!-- SSO with Multiple Backend Services test -->
     <test name="SSO with Multiple Backend Services test (HTTP)" enabled="true">
         <classes>
@@ -905,7 +916,8 @@
             <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeFormPostJwtResponseTypeCodeIdTokenSignedHttpTest"/>
         </classes>
     </test>
-    <test name="Test Authorization Response Mode form_post.jwt Response Type code id_token token Encrypted" enabled="true">
+    <test name="Test Authorization Response Mode form_post.jwt Response Type code id_token token Encrypted"
+          enabled="true">
         <classes>
             <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeFormPostJwtResponseTypeCodeIdTokenTokenEncryptedHttpTest"/>
         </classes>
@@ -966,7 +978,8 @@
             <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeFragmentJwtResponseTypeCodeIdTokenSignedHttpTest"/>
         </classes>
     </test>
-    <test name="Test Authorization Response Mode fragment.jwt Response Type code id_token token Encrypted" enabled="true">
+    <test name="Test Authorization Response Mode fragment.jwt Response Type code id_token token Encrypted"
+          enabled="true">
         <classes>
             <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeFragmentJwtResponseTypeCodeIdTokenTokenEncryptedHttpTest"/>
         </classes>
