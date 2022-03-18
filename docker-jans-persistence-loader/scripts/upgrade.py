@@ -111,6 +111,10 @@ def _transform_auth_dynamic_config(conf):
         conf["redirectUrisRegexEnabled"] = True
         should_update = True
 
+    if "useHighestLevelScriptIfAcrScriptNotFound" not in conf:
+        conf["useHighestLevelScriptIfAcrScriptNotFound"] = True
+        should_update = True
+
     # return the conf and flag to determine whether it needs update or not
     return conf, should_update
 
