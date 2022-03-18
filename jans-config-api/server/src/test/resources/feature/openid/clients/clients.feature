@@ -81,6 +81,7 @@ And header Authorization = 'Bearer ' + accessToken
 And request read('client.json')
 When method POST
 Then status 201
+And print response
 Then def result = response
 Then set result.displayName = 'UpdatedQAAddedClient'
 Given url mainUrl
@@ -88,11 +89,13 @@ And header Authorization = 'Bearer ' + accessToken
 And request result
 When method PUT
 Then status 200
+And print response
 And assert response.displayName == 'UpdatedQAAddedClient'
 Given url mainUrl + '/' +response.inum
 And header Authorization = 'Bearer ' + accessToken
 When method DELETE
 Then status 204
+And print response
 
 
 Scenario: Delete a non-existion openid connect client by inum
@@ -100,6 +103,7 @@ Given url mainUrl + '/1402.66633-8675-473e-a749'
 And header Authorization = 'Bearer ' + accessToken
 When method GET
 Then status 404
+And print response
 
 
 Scenario: Patch openid connect client
