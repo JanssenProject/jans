@@ -18,8 +18,8 @@ Janssen enables organizations to build a scalable centralized authentication and
 
 **Table of Contents**
 
-- [What is the Janssen Project](#what-is-the-janssen-project)
-  - [Janssen Modules](#janssen-modules)
+
+- [Janssen Modules](#janssen-modules)
 - [Getting Started](#getting-started)
   - [Quick Start](#quick-start)
   - [Installation](#installation)
@@ -39,16 +39,8 @@ Janssen enables organizations to build a scalable centralized authentication and
   - [why the name Janssen](#why-the-name-janssen)
 
 
-## What is the Janssen Project
 
-The Janssen Project is a cloud native digital identity platform. Using Janssen, applications can quickly integrate basic to advance authentication and authorization flows. Janssen supports
-
-- **Single sign-on**: Janssen implements OAuth2 and enables applications to quickly implement single sign-on
-- **Two factor authentication**: Janssen implements FIDO2 standards to enable applications to use two factor authentication
-
-Janssen [user documentation](https://github.com/JanssenProject/jans/tree/main/docs/user) has full list of usecases and how to implement them using Janssen.
-
-### Janssen Modules
+## Janssen Modules
 
 Janssen is not a big monolith--it's a lot of services working together. Whether you deploy Janssen to a Kubernetes cluster, or you are a developer running everything on one server, it's important to understand the different parts. 
 
@@ -85,9 +77,11 @@ Complete list of Janssen usecases can be found under our [user documentation](do
 
 ## Users and Community
 
-Janssen is used by many internet facing applications and enterprise applications as their core digital identity platform. Janssen community actively helps in resolving issues. Community also makes sure that Janssen is upto date with new developments and standards in authentication and authorization domain.
-
 A BIG thanks to all amazing contributors!! 👏 👏
+
+There are many ways you can contribute. Of course you can contribute code. But we also need people to write documentation and guides, to help us with testing, to answer questions on the forums and chat, to review PR's, to help us with devops and CI/CD, to provide feedback on usability, and to promote the project through outreach. Also, by sharing metrics with us, we can gain valuable insights into how the software performs in the wild. 
+
+Building a large community is our number one goal. Please let us know what we can do to make you feel more welcome, no matter what you want to contribute.
 
 <a href="https://github.com/JanssenProject/jans/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=JanssenProject/jans" />
