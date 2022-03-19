@@ -30,10 +30,6 @@ Janssen enables organizations to build a scalable centralized authentication and
   - [Contribution Guidelines](#contribution-guidelines)
 - [Security](#security)
 - [Documentation](#documentation)
-  - [Community Documentation](#community-documentation)
-  - [Technical Documentation](#technical-documentation)
-  - [Developer Guides](#developer-guides)
-  - [Code Documentation](#code-documentation)
 - [Design](#design)
   - [Design Goals](#design-goals)
 - [Governance](#governance)
@@ -116,23 +112,7 @@ Refer to [Janssen Security Policy](.github/SECURITY.md)
 
 ## Documentation
 
-Janssen provides documentation that will help contributors at every step.
-
-### Community Documentation 
-
-[Community Documentation](docs/community) provides details on community charter, processes and structure.
-
-### Technical Documentation
-
-[Technical documentation](docs/technical) helps understanding architecture and design of various Janssen modules. 
-
-### Developer Guides
-
-[Developer guides](docs/developer) help contributors setup their workspace, setup local test environments, coding convensions and styles.
-
-### Code Documentation
-
-[Source code documentation](docs/code) that helps understanding Janssen code in finer details.
+Refer to [Janssen Wiki]() for documentation.
 
 ## Design
 
