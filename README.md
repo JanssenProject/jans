@@ -61,8 +61,6 @@ Janssen is not a big monolith--it's a lot of services working together. Whether 
 
 1. **[orm](jans-orm)**: This is the library for persistence and caching implemenations in Janssen. Currently LDAP and Couchbase are supported. RDBMS is coming soon.
 
-More details can be found under [Janssen technical documentation](docs/technical).
-
 ## Getting Started
 
 ### Quick start
@@ -70,10 +68,6 @@ More details can be found under [Janssen technical documentation](docs/technical
 #### Installation
 
 Janssen can be installed as cloud-native in a Kubernetes cluster or as a server on a single VM. Go to the [Janssen Project Wiki](https://github.com/JanssenProject/jans/wiki/) to know all the installation options
-
-#### Use cases
-
-Complete list of Janssen usecases can be found under our [user documentation](docs/user).
 
 ## Users and Community
 
