@@ -21,9 +21,7 @@ Janssen enables organizations to build a scalable centralized authentication and
 
 - [Janssen Modules](#janssen-modules)
 - [Getting Started](#getting-started)
-  - [Quick Start](#quick-start)
   - [Installation](#installation)
-  - [Use Cases](#use-cases)
 - [Users and Community](#users-and-community)
 - [Contributing](#contributing)
   - [Code of Conduct](#code-of-conduct)
@@ -63,9 +61,7 @@ Janssen is not a big monolith--it's a lot of services working together. Whether 
 
 ## Getting Started
 
-### Quick start
-
-#### Installation
+### Installation
 
 Janssen can be installed as cloud-native in a Kubernetes cluster or as a server on a single VM. Go to the [Janssen Project Wiki](https://github.com/JanssenProject/jans/wiki/) to know all the installation options
 
