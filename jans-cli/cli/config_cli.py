@@ -63,6 +63,7 @@ config = configparser.ConfigParser()
 host = os.environ.get('jans_host')
 client_id = os.environ.get(my_op_mode + 'jca_client_id')
 client_secret = os.environ.get(my_op_mode + 'jca_client_secret')
+access_token = None
 debug = os.environ.get('jans_client_debug')
 debug_log_file = os.environ.get('jans_debug_log_file')
 error_log_file = os.path.join(cur_dir, 'error.log')
@@ -129,10 +130,7 @@ parser.add_argument("--data", help="Path to json data file")
 args = parser.parse_args()
 
 ################## end of arguments #################
-access_token = args.access_token
-if access_token and os.path.isfile(access_token):
-    with open(access_token) as f:
-        access_token = f.read()
+
 
 
 if args.plugins:
@@ -143,14 +141,21 @@ def write_config():
     with open(config_ini_fn, 'w') as w:
         config.write(w)
 
-if not (host and client_id and client_secret):
+if not(host and (client_id and client_secret or access_token)):
     host = args.host
     client_id = args.client_id
     client_secret = args.client_secret
     debug = args.debug
     debug_log_file = args.debug_log_file
 
-if not (host and client_id and client_secret):
+    access_token = args.access_token
+    if access_token and os.path.isfile(access_token):
+        with open(access_token) as f:
+            access_token = f.read()
+
+
+if not(host and (client_id and client_secret or access_token)):
+
     if config_ini_fn.exists():
         config.read_string(config_ini_fn.read_text())
         host = config['DEFAULT']['jans_host']
@@ -1192,6 +1197,7 @@ class JCA_CLI:
         security = self.get_scope_for_endpoint(endpoint)
         if security.strip():
             self.get_access_token(security)
+
         client = getattr(swagger_client, self.get_api_class_name(endpoint.parent.name))
         api_instance = self.get_api_instance(client)
         api_caller = getattr(api_instance, endpoint.info['operationId'].replace('-', '_'))
@@ -1708,7 +1714,6 @@ class JCA_CLI:
         return api_caller
 
     def process_command_get(self, path, suffix_param, endpoint_params, data_fn, data=None):
-
         api_caller = self.get_path_api_caller_for_path(path)
         api_response = None
         encoded_param = urlencode(endpoint_params)
@@ -1996,7 +2001,8 @@ def main():
     cli_object = JCA_CLI(host, client_id, client_secret, access_token)
 
     try:
-        cli_object.check_connection()
+        if not access_token:
+            cli_object.check_connection()
         if not (args.operation_id or args.info or args.schema):
             # reset previous color
             print('\033[0m', end='')
