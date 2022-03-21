@@ -1,6 +1,6 @@
 # Technical Documentation
 
-Documentation here explains technical design, architecture and interations of various Janssen modules.
+This documentation explains technical design, architecture and interactions of various Janssen modules.
 
 Contents:
 
@@ -11,7 +11,7 @@ Contents:
   - [Testing](#testing)
   - [Deployment](#deployment)
   - [Security](#security)
-  - [Scallability and Cloud Infrastructure](#scallability-and-cloud-infrastructure)
+  - [Scalability and Cloud Infrastructure](#scalability-and-cloud-infrastructure)
 - [Technical Documentation Guidelines](#Technical Documentation Guidelines)
 
 
@@ -24,13 +24,13 @@ This section outlines high-level design principles, styles and design choices th
 ### Testing
 ### Deployment
 ### Security
-### Scallability and Cloud Infrastructure 
+### Scalability and Cloud Infrastructure 
 
 ## Technical Documentation Guidelines
   
 Each module directory will hold detailed technical documentation for that module. It should have README file that follows [Technical Overview Template](./technical-overview-template.md). Also create other directories as required and as mentioned in `Directory Structure` section below. 
 
 ### Directory Structure
-Create directories within your module's directory as below to support your documetation
+Create directories within your module's directory as below to support your documentation
  - `images` : to hold screenshots etc
  - `diagrams` : to hold interaction diagrams, class diagrams, sequence diagram etc
