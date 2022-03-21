@@ -1,0 +1,37 @@
+name: Build jans-fido2
+
+on:
+  push:
+    tags:
+    - '*'
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    env:
+      VERSION_NAME: main
+      PROFILE_NAME: jenkins-dev1.jans.io
+      MAVEN_SKIP_TESTS: true
+      DEPLOYMENT_BUILD: true
+
+    steps:
+    - name: Download AWS Corretto
+      run: wget https://corretto.aws/downloads/resources/11.0.13.8.1/amazon-corretto-11.0.13.8.1-linux-x64.tar.gz
+    - name: Set up AWS Corretto
+      uses: actions/setup-java@v2
+      with:
+        distribution: jdkfile
+        java-version: '11'
+        architecture: x64
+        jdkFile: ./amazon-corretto-11.0.13.8.1-linux-x64.tar.gz
+    - name: Checkout    
+      uses: actions/checkout@v2
+      with:
+        ref: main
+    - name: Run build step 1
+      run: |
+        cd jans-fido2
+        mvn --batch-mode deploy

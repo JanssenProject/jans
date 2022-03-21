@@ -1,0 +1,60 @@
+name: Build jans-scim
+
+on:
+  push:
+    tags:
+    - '*'
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    env:
+      VERSION_NAME: main
+      PROFILE_NAME: jenkins-dev1.jans.io
+      MAVEN_SKIP_TESTS: true
+      DEPLOYMENT_BUILD: true
+      TEST_CONF_IN_HOST: true
+      CONTAINER_NAME: ubuntu20-ldap
+
+    steps:
+    - name: Download AWS Corretto
+      run: wget https://corretto.aws/downloads/resources/11.0.13.8.1/amazon-corretto-11.0.13.8.1-linux-x64.tar.gz
+    - name: Set up AWS Corretto
+      uses: actions/setup-java@v2
+      with:
+        distribution: jdkfile
+        java-version: '11'
+        architecture: x64
+        jdkFile: ./amazon-corretto-11.0.13.8.1-linux-x64.tar.gz
+    - name: Checkout    
+      uses: actions/checkout@v2
+      with:
+        ref: main
+    - name: Run build step 1
+      run: |
+        cd jans-scim
+        # Clean old profiles
+        rm -rf ./client/profiles/$PROFILE_NAME
+        if [[ $MAVEN_SKIP_TESTS == "true" ]]; then
+          echo "Configuring to use default profile in build without tests execution"
+          cp -rf ./client/profiles/default ./client/profiles/$PROFILE_NAME
+        else
+          if [[ $TEST_CONF_IN_HOST == "true" ]]; then
+            scp -r -P 22222 root@$PROFILE_NAME:/opt/jans/jans-setup/output/test/scim-client ./
+          else
+            scp -r -P 22222 root@$PROFILE_NAME:/var/snap/lxd/common/lxd/storage-pools/default/containers/$CONTAINER_NAME/rootfs/opt/jans/jans-setup/output/test/scim-client ./
+          fi
+          # Create profile folders
+          mkdir -p ./client/profiles/$PROFILE_NAME
+          # Copy properties file
+          cp ./scim-client/client/config-scim-test.properties ./client/profiles/$PROFILE_NAME
+          # Remove file
+          rm -rf ./scim-client
+        fi              
+    - name: Run build step 2
+      run: |
+        cd jans-auth-server
+        mvn --batch-mode deploy

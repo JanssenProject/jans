@@ -1,0 +1,31 @@
+name: Build jans-eleven
+
+on:
+  push:
+    tags:
+    - '*'
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    env:
+      VERSION_NAME: main
+      PROFILE_NAME: jenkins-dev1.jans.io
+      MAVEN_SKIP_TESTS: true
+
+    steps:
+    - name: Set up JDK 1.8
+      uses: joschi/setup-jdk@v2
+      with:
+        java-version: '8'            
+    - name: Checkout    
+      uses: actions/checkout@v2
+      with:
+        ref: main
+    - name: Run build step 1
+      run: |
+        cd jans-eleven
+        mvn --batch-mode deploy
