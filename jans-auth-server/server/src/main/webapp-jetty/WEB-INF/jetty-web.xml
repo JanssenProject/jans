@@ -4,36 +4,40 @@
 <Configure class="org.eclipse.jetty.webapp.WebAppContext">
 
 	<!-- Start: Workaround for JRE 11 -->
-	<Get name="systemClasspathPattern">
+	<Get name="systemClassMatcher">
 		<Call name="add">
 			<Arg>-javax.mail.</Arg>
 		</Call>
 	</Get>
-	<Get name="serverClasspathPattern">
+	<Get name="systemClassMatcher">
 		<Call name="add">
 			<Arg>javax.mail.</Arg>
 		</Call>
 	</Get>
 	<!-- End: Workaround for JRE 11 -->
 
-	<Call name="prependServerClass">
-		<Arg>-org.eclipse.jetty.util.Decorator</Arg>
-	</Call>
-
-	<Call name="prependServerClass">
-		<Arg>-org.eclipse.jetty.util.DecoratedObjectFactory</Arg>
-	</Call>
-
-	<Call name="prependServerClass">
-		<Arg>-org.eclipse.jetty.server.handler.ContextHandler.</Arg>
-	</Call>
-
-	<Call name="prependServerClass">
-		<Arg>-org.eclipse.jetty.server.handler.ContextHandler</Arg>
-	</Call>
-
-	<Call name="prependServerClass">
-		<Arg>-org.eclipse.jetty.servlet.ServletContextHandler</Arg>
-	</Call>
+	<Get name="serverClassMatcher">
+  
+		<Call name="add">
+			<Arg>-org.eclipse.jetty.util.Decorator</Arg>
+		</Call>
+	
+		<Call name="add">
+			<Arg>-org.eclipse.jetty.util.DecoratedObjectFactory</Arg>
+		</Call>
+	
+		<Call name="add">
+			<Arg>-org.eclipse.jetty.server.handler.ContextHandler.</Arg>
+		</Call>
+	
+		<Call name="add">
+			<Arg>-org.eclipse.jetty.server.handler.ContextHandler</Arg>
+		</Call>
+	
+		<Call name="add">
+			<Arg>-org.eclipse.jetty.servlet.ServletContextHandler</Arg>
+		</Call>
+	
+	</Get>
 
 </Configure>

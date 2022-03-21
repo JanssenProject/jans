@@ -686,17 +686,22 @@
 				    <artifactId>jakarta.faces</artifactId>
 				</dependency>
 
-				<dependency>
+				<!-- <dependency>
 					<groupId>org.glassfish.web</groupId>
 					<artifactId>el-impl</artifactId>
 					<exclusions>
 						<exclusion>
-							<groupId>jakarta.el</groupId>
-							<artifactId>jakarta.el-api</artifactId>
+                            <groupId>javax.el</groupId>
+							<artifactId>el-api</artifactId>
 						</exclusion>
 					</exclusions>
-				</dependency>
+				</dependency> -->
 
+				<dependency>
+					<groupId>org.glassfish</groupId>
+					<artifactId>jakarta.el</artifactId>
+				</dependency>
+			
 				<dependency>
 					<groupId>jakarta.el</groupId>
 					<artifactId>jakarta.el-api</artifactId>

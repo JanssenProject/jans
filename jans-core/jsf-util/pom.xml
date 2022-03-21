@@ -36,8 +36,9 @@
       	<dependency>
         	<groupId>jakarta.el</groupId>
         	<artifactId>jakarta.el-api</artifactId>
-		    <!-- <scope>provided</scope> -->
+		    <scope>provided</scope>
       	</dependency>
+
         <dependency>
 		    <groupId>jakarta.enterprise</groupId>
 		    <artifactId>jakarta.enterprise.cdi-api</artifactId>
@@ -66,6 +67,11 @@
 		<dependency>
 		    <groupId>org.glassfish</groupId>
 			<artifactId>jakarta.faces</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish</groupId>
+			<artifactId>jakarta.el</artifactId>
+			<scope>provided</scope>
 		</dependency>
 	<!-- 	<dependency>
 			<groupId>org.glassfish.web</groupId>
