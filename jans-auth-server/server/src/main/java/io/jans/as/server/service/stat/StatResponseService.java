@@ -48,7 +48,7 @@ public class StatResponseService {
         final StatResponse cachedResponse = responseCache.getIfPresent(cacheKey);
         if (cachedResponse != null) {
             if (log.isTraceEnabled()) {
-                log.trace("Get stat response from cache for: {}", cacheKey);
+                log.trace("Get stat response from cache for: {}", escapeLog(cacheKey));
             }
             return cachedResponse;
         }
