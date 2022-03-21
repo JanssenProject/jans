@@ -33,6 +33,7 @@
 		<jakarta.jms.api.version>2.0.3</jakarta.jms.api.version>
 		<jakarta.websocket.api.version>2.0.0</jakarta.websocket.api.version>
 		<jakarta.interceptor.api.version>2.0.0</jakarta.interceptor.api.version>
+		<org.hibernate.validator.version>7.0.0.Final</org.hibernate.validator.version>
 
         <arquillian.version>1.4.0.Final</arquillian.version>
         <arquillian.rest.version>1.0.0.Alpha4</arquillian.rest.version>
@@ -198,7 +199,7 @@
 			<dependency>
 			    <groupId>org.hibernate</groupId>
 			    <artifactId>hibernate-validator-cdi</artifactId>
-			    <version>5.4.1.Final</version>
+			    <version>${org.hibernate.validator.version}</version>
 			</dependency>
 
 			<!-- Omnifaces -->
