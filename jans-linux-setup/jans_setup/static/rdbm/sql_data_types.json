@@ -544,13 +544,10 @@
   },
   "jansReqURI": {
     "mysql": {
-      "type": "TINYTEXT"
-    },
-    "pgsql": {
-      "type": "TEXT"
+      "type": "JSON"
     },
     "spanner": {
-      "type": "STRING(MAX)"
+      "type": "ARRAY<STRING(MAX)>"
     }
   },
   "jansSectorIdentifierURI": {
@@ -588,13 +585,10 @@
   },
   "jansClaimRedirectURI": {
     "mysql": {
-      "type": "TINYTEXT"
-    },
-    "pgsql": {
-      "type": "TEXT"
+      "type": "JSON"
     },
     "spanner": {
-      "type": "STRING(MAX)"
+      "type": "ARRAY<STRING(MAX)>"
     }
   },
   "jansJwt": {
@@ -1045,6 +1039,14 @@
     }
   },
   "mobile": {
+    "mysql": {
+      "type": "JSON"
+    },
+    "spanner": {
+      "type": "ARRAY<STRING(MAX)>"
+    }
+  },
+  "jansAuthorizedOrigins": {
     "mysql": {
       "type": "JSON"
     },
