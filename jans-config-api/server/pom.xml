@@ -119,7 +119,6 @@
 		<dependency>
 			<groupId>org.hibernate.validator</groupId>
 			<artifactId>hibernate-validator</artifactId>
-			<scope>provided</scope>
 		</dependency>
 
 		<!-- RestEasy -->
@@ -433,15 +432,11 @@
 		            <artifactId>jakarta.enterprise.cdi-api</artifactId>
 				</dependency>
 
+
 				<dependency>
-					<groupId>org.glassfish.web</groupId>
-					<artifactId>el-impl</artifactId>
-					<exclusions>
-						<exclusion>
-							<groupId>javax.el</groupId>
-							<artifactId>el-api</artifactId>
-						</exclusion>
-					</exclusions>
+					<groupId>org.glassfish</groupId>
+					<artifactId>jakarta.el</artifactId>
+					<scope>provided</scope>
 				</dependency>
 
 				<dependency>

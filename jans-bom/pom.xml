@@ -45,6 +45,9 @@
 		<jakarta.xml.soap.api.version>2.0.1</jakarta.xml.soap.api.version>
 		<org.glassfish.jakarta.el.version>4.0.0</org.glassfish.jakarta.el.version>
 		<org.glassfish.jakarta.faces.version>3.0.0</org.glassfish.jakarta.faces.version>
+		
+		<org.hibernate.validator.version>7.0.0.Final</org.hibernate.validator.version>
+		<org.hibernate.validator.cdi.version>7.0.0.Final</org.hibernate.validator.cdi.version>
 
 		<!-- <jsf-api.version>2.2.20</jsf-api.version> -->
 		<!-- <jsf-impl.version>3.0.0</jsf-impl.version> -->
@@ -297,14 +300,13 @@
 			    <artifactId>jakarta.jakartaee-api</artifactId>
 			    <version>9.0.0</version>
 			    <scope>provided</scope>
-			</dependency>
+			</dependency>			
 			
-			
-	      <!--   <dependency>
+	        <dependency>
 	            <groupId>jakarta.activation</groupId>
 	            <artifactId>jakarta.activation-api</artifactId>
 	            <version>${jakarta.activation.api.version}</version>
-	        </dependency> -->
+	        </dependency>
             <dependency>
                 <groupId>jakarta.annotation</groupId>
                 <artifactId>jakarta.annotation-api</artifactId>
@@ -465,6 +467,18 @@
 				<artifactId>persistence-api</artifactId>
 				<version>1.0.2</version>
 			</dependency> -->
+
+			<!-- hibernate -->
+			<dependency>
+			    <groupId>org.hibernate</groupId>
+			    <artifactId>hibernate-validator</artifactId>
+			    <version>${org.hibernate.validator.version}</version>
+			</dependency>
+			<dependency>
+			    <groupId>org.hibernate</groupId>
+			    <artifactId>hibernate-validator-cdi</artifactId>
+			    <version>${org.hibernate.validator.cdi.version}</version>
+			</dependency>
 
 			<!-- Richfaces. Deprecated-->
 			<dependency>
