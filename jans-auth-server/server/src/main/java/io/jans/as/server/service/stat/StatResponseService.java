@@ -47,6 +47,9 @@ public class StatResponseService {
         final String cacheKey = months.toString();
         final StatResponse cachedResponse = responseCache.getIfPresent(cacheKey);
         if (cachedResponse != null) {
+            if (log.isTraceEnabled()) {
+                log.trace("Get stat response from cache for: {}", cacheKey);
+            }
             return cachedResponse;
         }
 
@@ -65,12 +68,14 @@ public class StatResponseService {
     private StatResponseItem buildItem(String month) {
         try {
             String monthlyDn = String.format("ou=%s,%s", escapeLog(month), statService.getBaseDn());
+            log.trace("Trying to fetch stat for month: {}", monthlyDn);
 
             final List<StatEntry> entries = entryManager.findEntries(monthlyDn, StatEntry.class, Filter.createPresenceFilter("jansId"));
             if (entries == null || entries.isEmpty()) {
                 log.trace("Can't find stat entries for month: {}", monthlyDn);
                 return null;
             }
+            log.trace("Fetched stat entries for month {} successfully", monthlyDn);
 
             final StatResponseItem responseItem = new StatResponseItem();
             responseItem.setMonthlyActiveUsers(userCardinality(entries));
