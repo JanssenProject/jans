@@ -29,3 +29,5 @@ jobs:
       run: |
         cd jans-eleven
         mvn --batch-mode deploy
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}        
