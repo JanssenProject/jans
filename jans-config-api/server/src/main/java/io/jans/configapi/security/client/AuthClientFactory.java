@@ -23,6 +23,7 @@ import io.jans.configapi.core.util.Jackson;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;
@@ -41,6 +42,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @RegisterProvider(OpenIdClientService.class)
+@RegisterProvider(StatClient.class)
+@ApplicationScoped
 public class AuthClientFactory {
 
     private static final String CONTENT_TYPE = "Content-Type";

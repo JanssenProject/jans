@@ -3,11 +3,7 @@
 set -e
 
 python3 /app/scripts/wait.py
-
-if [ ! -f /deploy/touched ]; then
-    python3 /app/scripts/bootstrap.py
-    touch /deploy/touched
-fi
+python3 /app/scripts/bootstrap.py
 
 # run the server
 # customized `/opt/client-api/bin/client-api-start.sh`

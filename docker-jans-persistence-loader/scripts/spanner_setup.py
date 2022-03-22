@@ -494,6 +494,7 @@ class SpannerBackend:
             ("jansClnt", "jansDefAcrValues"),
             ("jansClnt", "jansLogoutURI"),
             ("jansPerson", "role"),
+            ("jansPerson", "mobile"),
         ]:
             column_to_array(mod[0], mod[1])
 
@@ -540,6 +541,7 @@ class SpannerBackend:
             ("jansDeviceRegistration", "jansDeviceKeyHandle"),
             ("jansUmaResource", "jansUmaScope"),
             ("jansU2fReq", "jansReq"),
+            ("jansFido2AuthnEntry", "jansAuthData"),
         ]:
             change_column_type(mod[0], mod[1])
 

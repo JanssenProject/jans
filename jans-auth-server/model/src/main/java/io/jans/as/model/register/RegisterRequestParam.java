@@ -13,7 +13,7 @@ import org.apache.commons.lang.StringUtils;
  *
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version March 2, 2022
+ * @version March 17, 2022
  */
 
 public enum RegisterRequestParam {
@@ -351,7 +351,9 @@ public enum RegisterRequestParam {
 
     REDIRECT_URIS_REGEX("redirect_uris_regex"),
 
-    DEFAULT_PROMPT_LOGIN("default_prompt_login");
+    DEFAULT_PROMPT_LOGIN("default_prompt_login"),
+
+    AUTHORIZED_ACR_VALUES("authorized_acr_values");
 
     /**
      * Parameter name

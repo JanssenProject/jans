@@ -10,7 +10,6 @@ jansAppTyp: web
 jansAttrs: {}
 # jansAttrs: {"tlsClientAuthSubjectDn":"","runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims":false,"keepClientAuthorizationAfterExpiration":false,"allowSpontaneousScopes":false,"spontaneousScopes":[],"spontaneousScopeScriptDns":[],"backchannelLogoutUri":[],"backchannelLogoutSessionRequired":false,"additionalAudience":[],"postAuthnScripts":[],"consentGatheringScripts":[],"introspectionScripts":[],"rptClaimsScripts":[],"parLifetime":600,"requirePar":false,"jansAuthSignedRespAlg":"RS256","jansAuthEncRespAlg":null,"jansAuthEncRespEnc":null}
 jansClntSecret: %(casa_client_encoded_pw)s
-jansDefAcrValues: simple_password_auth
 jansDisabled: false
 jansGrantTyp: authorization_code
 jansGrantTyp: refresh_token

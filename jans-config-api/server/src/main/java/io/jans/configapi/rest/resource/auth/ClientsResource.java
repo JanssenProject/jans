@@ -14,10 +14,12 @@ import io.jans.as.common.service.common.InumService;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.rest.model.SearchRequest;
 import io.jans.configapi.service.auth.ClientService;
+import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.util.AttributeNames;
 import io.jans.configapi.core.util.Jackson;
+import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.PagedResult;
 import io.jans.util.StringHelper;
 import io.jans.util.security.StringEncrypter.EncryptionException;
@@ -56,6 +58,9 @@ public class ClientsResource extends BaseResource {
     ClientService clientService;
     
     @Inject
+    ConfigurationService configurationService;
+    
+    @Inject
     private InumService inumService;
 
     @Inject
@@ -79,7 +84,7 @@ public class ClientsResource extends BaseResource {
                 startIndex, limit, null, null);
 
         final List<Client> clients = this.doSearch(searchReq);
-        log.trace("Client serach result:{}", clients);
+        logger.trace("Client serach result:{}", clients);
         return Response.ok(getClients(clients)).build();
     }
 
@@ -116,6 +121,9 @@ public class ClientsResource extends BaseResource {
         client.setClientSecret(encryptionService.encrypt(clientSecret));
         client.setDn(clientService.getDnForClient(inum));
         client.setDeletable(client.getClientSecretExpiresAt() != null);
+        ignoreCustomObjectClassesForNonLDAP(client);       
+        
+        logger.debug("Final Client details to be added - client:{}", client);      
         clientService.addClient(client);
         Client result = clientService.getClientByInum(inum);
         result.setClientSecret(encryptionService.decrypt(result.getClientSecret()));
@@ -140,6 +148,9 @@ public class ClientsResource extends BaseResource {
         if (client.getClientSecret() != null) {
             client.setClientSecret(encryptionService.encrypt(client.getClientSecret()));
         }
+        ignoreCustomObjectClassesForNonLDAP(client);
+   
+        logger.debug("Final Client details to be updated - client:{}", client);      
         clientService.updateClient(client);
         Client result = clientService.getClientByInum(existingClient.getClientId());
         result.setClientSecret(encryptionService.decrypt(client.getClientSecret()));
@@ -198,12 +209,12 @@ public class ClientsResource extends BaseResource {
 
         PagedResult<Client> pagedResult = clientService.searchClients(searchReq);
         if (logger.isTraceEnabled()) {
-            log.trace("PagedResult  - pagedResult:{}", pagedResult);
+            logger.trace("PagedResult  - pagedResult:{}", pagedResult);
         }
 
         List<Client> clients = new ArrayList<>();
         if (pagedResult != null) {
-            log.trace("Clients fetched  - pagedResult.getEntries():{}", pagedResult.getEntries());
+            logger.trace("Clients fetched  - pagedResult.getEntries():{}", pagedResult.getEntries());
             clients = pagedResult.getEntries();
         }
         if (logger.isDebugEnabled()) {
@@ -211,4 +222,17 @@ public class ClientsResource extends BaseResource {
         }
         return clients;
     }
+    
+    private Client ignoreCustomObjectClassesForNonLDAP(Client client) {
+        String persistenceType = configurationService.getPersistenceType();
+        logger.debug("persistenceType: {}",persistenceType);
+        if(!PersistenceEntryManager.PERSITENCE_TYPES.ldap.name().equals(persistenceType)) {
+            logger.debug("Setting CustomObjectClasses :{} to null as its used only for LDAP and current persistenceType is {} ", client.getCustomObjectClasses() , persistenceType);
+            client.setCustomObjectClasses(null);
+        }
+        return client;
+    }
+    
+  
+
 }
