@@ -135,7 +135,7 @@ jobs:
 
       - name: Cache Docker layers
         if: steps.build_docker_image.outputs.build && steps.prep.outputs.build
-        uses: actions/cache@v2.1.7
+        uses: actions/cache@v3
         with:
           path: /tmp/.buildx-cache
           key: ${{ runner.os }}-buildx-${{ github.sha }}
