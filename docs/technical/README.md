@@ -12,10 +12,19 @@ Contents:
   - [Deployment](#deployment)
   - [Security](#security)
   - [Scalability and Cloud Infrastructure](#scalability-and-cloud-infrastructure)
-- [Technical Documentation Guidelines](#Technical Documentation Guidelines)
+- [Technical Documentation Guidelines](#technical-documentation-guidelines)
 
 
 ## API Reference
+  
+| Service | API Reference | Javadoc |  
+| --- | --- | --- |  
+| Jans Auth Server | | [client](https://jenkins.jans.io/javadocs/jans-scim/main/client/) [model](https://jenkins.jans.io/javadocs/jans-scim/main/model/) [server](https://jenkins.jans.io/javadocs/jans-auth/main/server/) |  
+| Jans Client API | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans-client-api/master/server/src/main/resources/swagger.yaml)| |  
+| Jans Config API | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans-config-api/master/docs/jans-config-api-swagger.yaml)| |  
+| Jans Core | | [server](https://jenkins.jans.io/javadocs/jans-core/main/io/jans/server/filters/package-summary.html)|  
+| Jans FIDO 2 | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans-fido2/master/docs/jansFido2Swagger.yaml) | |  
+| Jans SCIM API | [Swagger](https://gluu.org/swagger-ui/?url=https:/raw.githubusercontent.com/JanssenProject/jans-scim/master/server/src/main/resources/jans-scim-openapi.yaml) | [client](https://jenkins.jans.io/javadocs/jans-scim/main/client/) [model](https://jenkins.jans.io/javadocs/jans-scim/main/model/) [server](https://jenkins.jans.io/javadocs/jans-scim/main/server/) |  
   
 ## Design Consideration and Guidelines
 This section outlines high-level design principles, styles and design choices that Janssen project follow. 
