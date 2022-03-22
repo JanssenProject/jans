@@ -17,7 +17,7 @@ Contents:
 
 ## API Reference
   
-| Service | API Reference | Javadoc |  
+| Service | REST API | Javadoc |  
 | --- | --- | --- |  
 | Jans Auth Server | | [client](https://jenkins.jans.io/javadocs/jans-scim/main/client/) [model](https://jenkins.jans.io/javadocs/jans-scim/main/model/) [server](https://jenkins.jans.io/javadocs/jans-auth/main/server/) |  
 | Jans Client API | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans-client-api/master/server/src/main/resources/swagger.yaml)| |  
