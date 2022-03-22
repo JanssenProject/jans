@@ -31,6 +31,6 @@ This section outlines high-level design principles, styles and design choices th
 Each module directory will hold detailed technical documentation for that module. It should have README file that follows [Technical Overview Template](./technical-overview-template.md). Also create other directories as required and as mentioned in `Directory Structure` section below. 
 
 ### Directory Structure
-Create directories within your module's directory as below to support your documentation
- - `images` : to hold screenshots etc
- - `diagrams` : to hold interaction diagrams, class diagrams, sequence diagram etc
+Create directories within your module's directory as below to support your documentation. 
+ - `images` : to hold screenshots and other images (Max size 1MB, preferrably `.png`)
+ - `diagrams` : to hold interaction diagrams, class diagrams, sequence diagram. (Preferrably as PDF)
