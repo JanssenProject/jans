@@ -96,7 +96,7 @@ Refer to [Janssen Security Policy](.github/SECURITY.md)
 
 ## Documentation
 
-Refer to [Janssen Wiki]() for documentation.
+Refer to [Janssen Wiki](https://github.com/JanssenProject/jans/wiki) for documentation.
 
 ## Design
 
