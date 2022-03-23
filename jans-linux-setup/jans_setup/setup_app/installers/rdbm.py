@@ -86,12 +86,6 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 
     def get_sql_col_type(self, attrname, table=None):
 
-        for attr_ in self.jans_attributes:
-            if attrname in attr_['names'] and attr_.get('multivalued'):
-                if Config.rdbm_type == 'spanner':
-                    return 'ARRAY<STRING(MAX)>'
-                return 'JSON'
-
         if attrname in self.dbUtils.sql_data_types:
             type_ = self.dbUtils.sql_data_types[attrname].get(Config.rdbm_type) or self.dbUtils.sql_data_types[attrname]['mysql']
             if table in type_.get('tables', {}):
