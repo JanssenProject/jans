@@ -5,6 +5,7 @@ FROM bellsoft/liberica-openjre-alpine:11.0.13-8
 # ===============
 
 RUN apk update \
+    && apk upgrade \
     && apk add --no-cache openssl py3-pip tini curl bash py3-cryptography py3-psycopg2 \
     && apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/v3.15/community py3-grpcio \
     && apk add --no-cache --virtual build-deps wget git zip \

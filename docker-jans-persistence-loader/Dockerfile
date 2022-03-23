@@ -5,6 +5,7 @@ FROM alpine:3.14.4
 # ===============
 
 RUN apk update \
+    && apk upgrade \
     && apk add --no-cache py3-pip curl tini py3-cryptography py3-psycopg2 \
     && apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/v3.15/community py3-grpcio \
     && apk add --no-cache --virtual build-deps git wget
