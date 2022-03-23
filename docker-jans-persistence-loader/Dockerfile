@@ -21,7 +21,7 @@ RUN pip3 install -U pip wheel \
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_LINUX_SETUP_VERSION=2add3e9ef4d29847f77d5d7389e22ded76cc3764
+ENV JANS_LINUX_SETUP_VERSION=e3d9dbffdab29d58d31dab004f5d392f5ada0591
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
