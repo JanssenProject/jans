@@ -10,16 +10,17 @@ There are many ways you can contribute. Of course you can contribute code. But w
   - [Code of Conduct](#code-of-conduct)
   - [Issues](#issues)
   - [Triaging](#triaging)
-  - [Code conventions](#code-conventions)
+  - [Code Conventions and Good Practices](#code-conventions-and-good-practices)
     - [Commits](#commits)
-    - [Branch Names](#branch-names)
-    - [PR Titles](#pr-titles)
+    - [Branches](#branches)
+    - [PRs](#prs)
   - [Developer Certificate Of Origin](#developer-certificate-of-origin)
 - [Contribution Workflow](#contribution-workflow)
   - [Find Something To Work On](#find-something-to-work-on)
   - [Start a Discussion](#start-a-discussion)
   - [Implement the Change](#implement-the-change)
   - [Document](#document)
+  - [Raise a PR](#raise-a-pr)
   - [Follow Through](#follow-through)
 
 # Join the Community
@@ -88,17 +89,22 @@ When you triage an issue, you:
 Here is how we [continously triage](./community/triage.md) new issues and PRs so that contributors can contribute faster and better.
 
 
-## Code conventions
+## Code Conventions and Good Practices
 
 ### Commits
 As commit convention, we adopt [Conventional Commits v1.0.0](https://www.conventionalcommits.org/en/v1.0.0/), we have an history
 of commits that do not adopt the convention but any new commit must follow it to be eligible for merge.
 
-### Branch names
-Branch name should have component name as prefix, eg `jans-core-mybranch`
+### Branches
+Branch name should have compotitlesnent name as prefix, eg `jans-core-mybranch`
 
-### PR titles
-PR titles should also follow [Conventional Commits v1.0.0](https://www.conventionalcommits.org/en/v1.0.0/). This will help in keeping merge commit messages inline with commit message standards
+### PRs
+- PR titles should also follow [Conventional Commits v1.0.0](https://www.conventionalcommits.org/en/v1.0.0/). This will help in keeping merge commit messages inline with commit message standards
+- Squash commits into small number of cohesive commits before raising a PR
+- PR should be rebased on main branch so that there are minimal or no conflicts at the time of merge
+- PR should only have changes related to target feature or issue. Create a separate PR for formatting or other quick bug fixes
+- PR should include relevent documentaton changes
+- PR should include unit and integration tests
 
 ## Developer Certificate Of Origin
 
