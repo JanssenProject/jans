@@ -26,12 +26,18 @@
 		<jetty.version>11.0.8</jetty.version>
 		<weld.version>4.0.3.Final</weld.version>
 		<resteasy.version>6.0.0.Final</resteasy.version>
-		<org.hibernate.validator.version>6.2.0.Final</org.hibernate.validator.version>
-		<org.hibernate.validator.cdi.version>6.2.0.Final</org.hibernate.validator.cdi.version>
+		<org.hibernate.validator.version>7.0.1.Final</org.hibernate.validator.version>
+		<org.hibernate.validator.cdi.version>7.0.1.Final</org.hibernate.validator.cdi.version>
 
 		<jackson.version>2.10.1</jackson.version>
-		<microprofile.version>3.0</microprofile.version>
-		<!-- <smallrye.version>2.2.0</smallrye.version> -->
+		<microprofile.config.version>1.3</microprofile.config.version>
+		<microprofile.health.version>3.0</microprofile.health.version>
+		<microprofile.metrics.version>3.0</microprofile.metrics.version>
+		<microprofile.rest.client.version>1.2.1</microprofile.rest.client.version>		
+		<smallrye.config.version>1.6.1</smallrye.config.version>
+		<smallrye.health.version>3.0.1</smallrye.health.version>
+		<smallrye.metrics.version>3.0.3</smallrye.metrics.version>
+		<smallrye.rest.client.version>1.2.2</smallrye.rest.client.version>
 		<log4j.version>2.17.1</log4j.version>
 		<slf4j.version>1.7.25</slf4j.version>
 		<rest-assured.version>4.3.3</rest-assured.version>
@@ -244,39 +250,45 @@
 			<dependency>
 			    <groupId>org.eclipse.microprofile.config</groupId>
 			    <artifactId>microprofile-config-api</artifactId>
-			    <version>${microprofile.version}</version>
+			    <version>${microprofile.config.version}</version>
 			</dependency>
 			<dependency>
 			    <groupId>org.eclipse.microprofile.health</groupId>
 			    <artifactId>microprofile-health-api</artifactId>
-			    <version>${microprofile.version}</version>
+			   <version>${microprofile.health.version}</version>
 			</dependency>
 		 	<dependency>
 				<groupId>org.eclipse.microprofile.metrics</groupId>
 				<artifactId>microprofile-metrics-api</artifactId>
-				<version>${microprofile.version}</version>
+				<version>${microprofile.metrics.version}</version>
 			</dependency>
 			<dependency>
 			    <groupId>org.eclipse.microprofile.rest.client</groupId>
 			    <artifactId>microprofile-rest-client-api</artifactId>
-			    <version>${microprofile.version}</version>
+			    <version>${microprofile.rest.client.version}</version>
 			</dependency>
-
-			<!-- <dependency>
-				<groupId>io.smallrye</groupId>
-				<artifactId>smallrye-metrics</artifactId>
-				<version>3.0.3</version>
+			
+			<!-- Microprofile implementation smallrye -->
+			<dependency>
+				<groupId>io.smallrye.config</groupId>
+				<artifactId>smallrye-config</artifactId>
+				<version>${smallrye.config.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.smallrye</groupId>
 				<artifactId>smallrye-health</artifactId>
-				<version>3.0.1</version>
-			</dependency> -->
-			<!-- <dependency>
+				<version>${smallrye.health.version}</version>
+			</dependency>			
+			<dependency>
+				<groupId>io.smallrye</groupId>
+				<artifactId>smallrye-metrics</artifactId>
+				<version>${smallrye.metrics.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>io.smallrye</groupId>
 				<artifactId>smallrye-rest-client</artifactId>
-				<version>1.2.2</version>
-			</dependency> -->
+				<version>${smallrye.rest.client.version}</version>
+			</dependency>
 
 			<!-- Validation -->
 		    <dependency>

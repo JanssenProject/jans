@@ -47,14 +47,9 @@
 
 		<!-- Microprofile -->
 		<dependency>
-		    <groupId>org.eclipse.microprofile.config</groupId>
-		    <artifactId>microprofile-config-api</artifactId>
-		</dependency>
-		<!-- <dependency>
-			<groupId>io.smallrye</groupId>
+			<groupId>io.smallrye.config</groupId>
 			<artifactId>smallrye-config</artifactId>
-			<version>1.5.0</version>
-		</dependency> -->
+		</dependency>
 
 		<!-- Others -->
 		<dependency>

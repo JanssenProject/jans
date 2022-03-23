@@ -47,14 +47,15 @@ import org.slf4j.LoggerFactory;
 public class AuthClientFactory {
 
     private static final String CONTENT_TYPE = "Content-Type";
-
-    @Inject
-    @RestClient
-    OpenIdClientService openIdClientService;
-
-    @Inject
-    @RestClient
-    StatClient statClient;
+    /*
+     * @Inject
+     * 
+     * @RestClient OpenIdClientService openIdClientService;
+     * 
+     * @Inject
+     * 
+     * @RestClient StatClient statClient;
+     */
 
     private static Logger log = LoggerFactory.getLogger(AuthClientFactory.class);
 
