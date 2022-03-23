@@ -2,7 +2,7 @@
 
 Purpose of this guide is to provide necessary information and resources to community in order to make successful contribution to the Janssen Project.
 
-There are many ways in which contributions can be made to the Janssen Project. And it is not just limited to fixing issues and raising pull requests. Janssen welcomes you to [raise issues](#issues), test, improve documentation, respond to queries, suggest new features, tell us your experience with Janssen, be it good or bad. All these are contributions towards making Janssen better.
+There are many ways you can contribute. Of course you can contribute code. But we also need people to write documentation and guides, to help us with testing, to answer questions on the forums and chat, to review PR's, to help us with devops and CI/CD, to provide feedback on usability, and to promote the project through outreach. Also, by sharing metrics with us, we can gain valuable insights into how the software performs in the wild. 
 
 - [Join the Community](#join-the-community)
 - [First Time Contributors](#first-time-contributors)
@@ -19,7 +19,6 @@ There are many ways in which contributions can be made to the Janssen Project. A
   - [Find Something To Work On](#find-something-to-work-on)
   - [Start a Discussion](#start-a-discussion)
   - [Implement the Change](#implement-the-change)
-  - [Test](#test)
   - [Document](#document)
   - [Follow Through](#follow-through)
 
@@ -152,9 +151,11 @@ Start working on changes as required.
 - Engage PR reviewers at the start so that they can continue to reivew code as it is developed and in small chunks.
 - For a change that is non-trivial(an enhancement or a new feature), design should be reviewed. This should be done via PR by adding appropriate code owners.
 
+<!-- TODO: enable this once the workspace guide is ready and developers can test locally from workspace
 ## Test 
 
 To run tests locally before pushing your code, refer to [TESTING] guide.
+-->
 
 ## Document
 
