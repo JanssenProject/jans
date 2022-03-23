@@ -60,7 +60,7 @@ public class LoggingResource {
         if (!StringUtils.isBlank(logging.getExternalLoggerConfiguration())) {
             conf.getDynamic().setExternalLoggerConfiguration(logging.getExternalLoggerConfiguration());
         }
-        conf.getDynamic().setHttpLoggingExludePaths(logging.getHttpLoggingExludePaths());
+        conf.getDynamic().setHttpLoggingExcludePaths(logging.getHttpLoggingExcludePaths());
 
         configurationService.merge(conf);
 
@@ -82,7 +82,7 @@ public class LoggingResource {
             logging.setEnabledOAuthAuditLogging(appConfiguration.getEnabledOAuthAuditLogging());
         }
         logging.setExternalLoggerConfiguration(appConfiguration.getExternalLoggerConfiguration());
-        logging.setHttpLoggingExludePaths(appConfiguration.getHttpLoggingExludePaths());
+        logging.setHttpLoggingExcludePaths(appConfiguration.getHttpLoggingExcludePaths());
         return logging;
     }
 
