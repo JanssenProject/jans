@@ -542,17 +542,6 @@
       "type": "STRING(MAX)"
     }
   },
-  "jansReqURI": {
-    "mysql": {
-      "type": "TINYTEXT"
-    },
-    "pgsql": {
-      "type": "TEXT"
-    },
-    "spanner": {
-      "type": "STRING(MAX)"
-    }
-  },
   "jansSectorIdentifierURI": {
     "mysql": {
       "type": "TINYTEXT"
@@ -576,17 +565,6 @@
     }
   },
   "jansTosURI": {
-    "mysql": {
-      "type": "TINYTEXT"
-    },
-    "pgsql": {
-      "type": "TEXT"
-    },
-    "spanner": {
-      "type": "STRING(MAX)"
-    }
-  },
-  "jansClaimRedirectURI": {
     "mysql": {
       "type": "TINYTEXT"
     },
@@ -756,14 +734,6 @@
       "type": "STRING(MAX)"
     }
   },
-  "memberOf": {
-    "mysql": {
-      "type": "JSON"
-    },
-    "spanner": {
-      "type": "ARRAY<STRING(MAX)>"
-    }
-  },
   "tknCde": {
     "mysql": {
       "size": 80,
@@ -772,14 +742,6 @@
     "spanner": {
       "size": 80,
       "type": "STRING"
-    }
-  },
-  "jansUmaPermission": {
-    "mysql": {
-      "type": "JSON"
-    },
-    "spanner": {
-      "type": "ARRAY<STRING(MAX)>"
     }
   },
   "jansScrError": {
@@ -831,14 +793,6 @@
     "spanner": {
       "size": 128,
       "type": "STRING"
-    }
-  },
-  "jansSmtpConf": {
-    "mysql": {
-      "type": "JSON"
-    },
-    "spanner": {
-      "type": "ARRAY<STRING(MAX)>"
     }
   },
   "jansResource": {
