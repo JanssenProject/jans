@@ -10,7 +10,7 @@ There are many ways you can contribute. Of course you can contribute code. But w
   - [Code of Conduct](#code-of-conduct)
   - [Issues](#issues)
   - [Triaging](#triaging)
-  - [Code Conventions and Good Practices](#code-conventions-and-good-practices)
+  - [Code Conventions and Guidelines](#code-conventions-and-guidelines)
     - [Commits](#commits)
     - [Branches](#branches)
     - [PRs](#prs)
@@ -89,7 +89,7 @@ When you triage an issue, you:
 Here is how we [continously triage](./community/triage.md) new issues and PRs so that contributors can contribute faster and better.
 
 
-## Code Conventions and Good Practices
+## Code Conventions and Guidelines
 
 ### Commits
 As commit convention, we adopt [Conventional Commits v1.0.0](https://www.conventionalcommits.org/en/v1.0.0/), we have an history
@@ -149,7 +149,7 @@ Fork [Janssen repository](https://github.com/JanssenProject/jans). And create a 
 
 Start working on changes as required. 
 
-- Make sure the [code conventions](#code-conventions) are being followed.
+- Make sure the [code conventions](#code-conventions-and-guidelines) are being followed.
 - Use static code analysis and linting tools to make sure the code is high-quality.
 - Write tests first and then code. Ensure that integration tests that cover your code are appropriately updated and reviewed.
 - Create PR early and push often. 
@@ -168,7 +168,7 @@ To run tests locally before pushing your code, refer to [TESTING] guide.
 PR should include changes in relevent documentation along with code changes.
 
 ## Raise a PR
-- Make sure that PR title follows the [convension](#pr-titles)
+- Make sure that PR title follows these [guidelines](#prs)
 - Janssen uses Github PR template. Template provides helpful instructions to ensure new PRs are complete in details and easy to review. Github will populate new PR's description with these instructions. You can edit PR description as per your requirements.
 - When PR is raised, Github will automatically assign reviewer to the PR based changed files and [CODEOWNERS](https://github.com/JanssenProject/jans/blob/main/.github%2FCODEOWNERS) list.
 - Once PR is raised, ensure that PR passes all the mandatory Github actions checks available on Github PR page. Github will not allow PR to be merged if any of the mandatory check is failing.
