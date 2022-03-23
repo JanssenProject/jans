@@ -47,8 +47,10 @@
 
 		<!-- Microprofile -->
 		<dependency>
-			<groupId>io.smallrye.config</groupId>
-			<artifactId>smallrye-config</artifactId>
+		    <groupId>io.smallrye.config</groupId>
+		    <artifactId>smallrye-config</artifactId>
+		    <version>3.0.0-RC1</version>
+		  <!--   <scope>test</scope> -->
 		</dependency>
 
 		<!-- Others -->

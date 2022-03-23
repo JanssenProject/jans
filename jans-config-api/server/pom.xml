@@ -118,11 +118,16 @@
 			<groupId>io.smallrye</groupId>
 			<artifactId>smallrye-metrics</artifactId>
 		</dependency>
-		<dependency>
+	<!-- 	<dependency>
 			<groupId>io.smallrye</groupId>
 			<artifactId>smallrye-rest-client</artifactId>
 		</dependency>
-
+ -->
+ 		<dependency>
+		    <groupId>org.jboss.resteasy</groupId>
+		    <artifactId>resteasy-client-microprofile</artifactId>
+		</dependency>
+		
 		<!-- Validation -->
 		<dependency>
 			<groupId>org.hibernate</groupId>
