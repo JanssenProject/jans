@@ -52,7 +52,7 @@ RUN wget -q https://github.com/fabioz/PyDev.Debugger/archive/refs/tags/pydev_deb
 # ===========
 
 ENV CN_VERSION=1.0.0-SNAPSHOT
-ENV CN_BUILD_DATE='2022-03-17 13:30'
+ENV CN_BUILD_DATE='2022-03-23 17:17'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-server/${CN_VERSION}/jans-auth-server-${CN_VERSION}.war
 
 # Install Jans Auth
@@ -87,7 +87,7 @@ RUN wget -q https://jenkins.gluu.org/maven/org/gluu/casa-config/${CASA_CONFIG_VE
 # Casa external scripts
 # =====================
 
-ARG CASA_EXTRAS_VERSION=2a4a7fcb16554d23ea0ff599d46f86b9de292e30
+ARG CASA_EXTRAS_VERSION=fe01bcb3d46311355b15a37b655253ca17997358
 ARG CASA_EXTRAS_DIR=casa/extras
 
 RUN mkdir -p /opt/jans/python/libs
