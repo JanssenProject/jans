@@ -163,6 +163,7 @@ public class AppConfiguration implements Configuration {
 
     //feature flags
     private Boolean redirectUrisRegexEnabled = false;
+    private Boolean useHighestLevelScriptIfAcrScriptNotFound = true;
 
     private Boolean authenticationFiltersEnabled;
     private Boolean clientAuthenticationFiltersEnabled;
@@ -2482,5 +2483,13 @@ public class AppConfiguration implements Configuration {
 
     public void setRedirectUrisRegexEnabled(Boolean redirectUrisRegexEnabled) {
         this.redirectUrisRegexEnabled = redirectUrisRegexEnabled;
+    }
+
+    public Boolean getUseHighestLevelScriptIfAcrScriptNotFound() {
+        return useHighestLevelScriptIfAcrScriptNotFound != null && useHighestLevelScriptIfAcrScriptNotFound;
+    }
+
+    public void setUseHighestLevelScriptIfAcrScriptNotFound(Boolean useHighestLevelScriptIfAcrScriptNotFound) {
+        this.useHighestLevelScriptIfAcrScriptNotFound = useHighestLevelScriptIfAcrScriptNotFound;
     }
 }

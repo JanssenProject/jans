@@ -1156,5 +1156,9 @@
             <class name="io.jans.as.client.ws.rs.jarm.AuthorizationServerMetadataHttpTest"/>
         </classes>
     </test>
-
+    <test name="Test Authorization ACR values" enabled="true">
+        <classes>
+            <class name="io.jans.as.client.ws.rs.AuthorizationAcrValuesTest"/>
+        </classes>
+    </test>
 </suite>

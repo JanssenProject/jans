@@ -4834,6 +4834,9 @@ components:
         redirectUrisRegexEnabled:
           type: boolean
           description: Enable/Disable redirect uris validation using regular expression.
+        useHighestLevelScriptIfAcrScriptNotFound:
+          type: boolean
+          description: Enable/Disable usage of highest level script in case ACR script does not exist.
 
     GluuAttribute:
       title: GluuAttribute
