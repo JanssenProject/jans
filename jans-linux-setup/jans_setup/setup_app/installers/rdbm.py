@@ -33,9 +33,12 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 
         self.local_install()
         jans_schema_files = []
-
+        self.jans_attributes = []
         for jans_schema_fn in ('jans_schema.json', 'custom_schema.json'):
-            jans_schema_files.append(os.path.join(Config.install_dir, 'schema', jans_schema_fn))
+            schema_full_path = os.path.join(Config.install_dir, 'schema', jans_schema_fn)
+            jans_schema_files.append(schema_full_path)
+            schema_ = base.readJsonFile(schema_full_path)
+            self.jans_attributes += schema_.get('attributeTypes', [])
 
         self.create_tables(jans_schema_files)
         self.create_subtables()
@@ -82,6 +85,12 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
         self.dbUtils.bind()
 
     def get_sql_col_type(self, attrname, table=None):
+
+        for attr_ in self.jans_attributes:
+            if attrname in attr_['names'] and attr_.get('multivalued'):
+                if Config.rdbm_type == 'spanner':
+                    return 'ARRAY<STRING(MAX)>'
+                return 'JSON'
 
         if attrname in self.dbUtils.sql_data_types:
             type_ = self.dbUtils.sql_data_types[attrname].get(Config.rdbm_type) or self.dbUtils.sql_data_types[attrname]['mysql']
