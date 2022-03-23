@@ -459,7 +459,7 @@ Select 1 to get all the details about Jans authorization server configuration. I
   "cibaEnabled": false,
   "discoveryCacheLifetimeInMinutes": 60,
   "httpLoggingEnabled": false,
-  "httpLoggingExludePaths": null,
+  "httpLoggingExcludePaths": null,
   "externalLoggerConfiguration": null,
   "redirectUrisRegexEnabled": false
 }

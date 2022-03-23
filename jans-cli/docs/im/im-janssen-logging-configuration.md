@@ -24,7 +24,7 @@ Getting access token for scope https://jans.io/oauth/config/logging.readonly
   "disableJdkLogger": true,
   "enabledOAuthAuditLogging": false,
   "externalLoggerConfiguration": null,
-  "httpLoggingExludePaths": null
+  "httpLoggingExcludePaths": null
 }
 ```
 To update the current logging configuration select option 2. For example, I have updated `logging level INFO to DEBUG` and enabled `enabledOAuthAuditLogging`.
@@ -57,7 +57,7 @@ externalLoggerConfiguration:
 
 «List of paths to exclude from logger. Type: array of string separated by _,»
 Example: /auth/img, /auth/stylesheet
-httpLoggingExludePaths: 
+httpLoggingExcludePaths: 
 Obtained Data:
 
 {
@@ -67,7 +67,7 @@ Obtained Data:
   "disableJdkLogger": true,
   "enabledOAuthAuditLogging": true,
   "externalLoggerConfiguration": null,
-  "httpLoggingExludePaths": null
+  "httpLoggingExcludePaths": null
 }
 
 Continue? y
@@ -81,7 +81,7 @@ Please wait while posting data ...
   "disableJdkLogger": true,
   "enabledOAuthAuditLogging": true,
   "externalLoggerConfiguration": null,
-  "httpLoggingExludePaths": null
+  "httpLoggingExcludePaths": null
 }
 
 ```
