@@ -8,7 +8,7 @@ package io.jans.eleven.client;
 
 import static io.jans.eleven.model.VerifySignatureResponseParam.VERIFIED;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 import org.json.JSONObject;
 
 /**
