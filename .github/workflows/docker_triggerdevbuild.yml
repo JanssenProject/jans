@@ -48,7 +48,7 @@ jobs:
       # Buggy behaviour with gh pr command. Will use the following action until bugs have been fixed.
       #PR=$(gh pr create --head $PR_DOCKER_DEV_BRANCH_NAME --assignee "moabu" --base "master" --body "Updated build date. Auto-generated." --label "enhancement,bot" --reviewer "moabu" --title "chore(Dockerfiles): updated build dates" || echo "PR Branch is already open")
       - name: Open PR
-        uses: peter-evans/create-pull-request@v3
+        uses: peter-evans/create-pull-request@v4
         with:
           token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
           committer: mo-auto <54212639+mo-auto@users.noreply.github.com>

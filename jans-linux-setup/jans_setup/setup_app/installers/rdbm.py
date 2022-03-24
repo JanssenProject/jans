@@ -33,9 +33,12 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 
         self.local_install()
         jans_schema_files = []
-
+        self.jans_attributes = []
         for jans_schema_fn in ('jans_schema.json', 'custom_schema.json'):
-            jans_schema_files.append(os.path.join(Config.install_dir, 'schema', jans_schema_fn))
+            schema_full_path = os.path.join(Config.install_dir, 'schema', jans_schema_fn)
+            jans_schema_files.append(schema_full_path)
+            schema_ = base.readJsonFile(schema_full_path)
+            self.jans_attributes += schema_.get('attributeTypes', [])
 
         self.create_tables(jans_schema_files)
         self.create_subtables()

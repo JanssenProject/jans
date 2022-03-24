@@ -495,6 +495,10 @@ class SpannerBackend:
             ("jansClnt", "jansLogoutURI"),
             ("jansPerson", "role"),
             ("jansPerson", "mobile"),
+            ("jansCustomScr", "jansAlias"),
+            ("jansClnt", "jansReqURI"),
+            ("jansClnt", "jansClaimRedirectURI"),
+            ("jansClnt", "jansAuthorizedOrigins"),
         ]:
             column_to_array(mod[0], mod[1])
 

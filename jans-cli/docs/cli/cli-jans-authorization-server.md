@@ -487,7 +487,8 @@ Getting access token for scope https://jans.io/oauth/jans-auth-server/config/pro
   "httpLoggingEnabled": false,
   "httpLoggingExludePaths": null,
   "externalLoggerConfiguration": null,
-  "redirectUrisRegexEnabled": false
+  "redirectUrisRegexEnabled": false,
+  "useHighestLevelScriptIfAcrScriptNotFound": true
 }
 ```
 
