@@ -45,6 +45,7 @@
 		<jakarta.xml.soap.api.version>2.0.1</jakarta.xml.soap.api.version>
 		<org.glassfish.jakarta.el.version>4.0.0</org.glassfish.jakarta.el.version>
 		<org.glassfish.jakarta.faces.version>3.0.0</org.glassfish.jakarta.faces.version>
+		<org.glassfish.jakarta.json.version>2.0.1</org.glassfish.jakarta.json.version>
 		
 		<org.hibernate.validator.version>7.0.0.Final</org.hibernate.validator.version>
 		<org.hibernate.validator.cdi.version>7.0.0.Final</org.hibernate.validator.cdi.version>
@@ -449,6 +450,11 @@
 				<groupId>org.glassfish</groupId>
 				<artifactId>jakarta.faces</artifactId>
 				<version>${org.glassfish.jakarta.faces.version}</version>
+			</dependency>
+			<dependency>
+		    	<groupId>org.glassfish</groupId>
+    			<artifactId>jakarta.json</artifactId>
+				<version>${org.glassfish.jakarta.json.version}</version>
 			</dependency>
 			<dependency>
 			    <groupId>org.jboss.spec.javax.annotation</groupId>
