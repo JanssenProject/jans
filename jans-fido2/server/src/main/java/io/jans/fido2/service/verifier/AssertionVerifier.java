@@ -18,8 +18,8 @@
 
 package io.jans.fido2.service.verifier;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.entry.Fido2AuthenticationData;

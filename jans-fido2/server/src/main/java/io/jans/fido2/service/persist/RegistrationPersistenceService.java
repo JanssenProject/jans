@@ -15,8 +15,8 @@ import java.util.Optional;
 import java.util.TimeZone;
 import java.util.UUID;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import org.apache.commons.lang.StringUtils;
 import io.jans.fido2.exception.Fido2RuntimeException;
