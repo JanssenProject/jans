@@ -1,25 +1,21 @@
 # raw swagger spec link:
-# https://raw.githubusercontent.com/GluuFederation/oxAuth/master/docs/oxAuthSwagger.yaml
-# https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/GluuFederation/oxAuth/master/docs/oxAuthSwagger.yaml
+# https://raw.githubusercontent.com/JanssenProject/jans/jans-auth-server/master/docs/swagger.yaml
+# https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/jans-auth-server/master/docs/swagger.yaml
 openapi: 3.0.1
 info:
-  title: oxAuth
-  description: oxAuth - OAuth 2.0 server; OpenID Connect Provider (OP) & UMA Authorization Server (AS)
+  title: Janssen Authorization Server
+  description: Janssen Authorization Server - OAuth 2.0 server; OpenID Connect Provider (OP) & UMA Authorization Server (AS)
   contact:
     email: yuriyz@gluu.org
   license:
     name: License
-    url: https://github.com/GluuFederation/oxAuth/blob/master/LICENSE
-  version: "4.2"
+    url: https://github.com/JanssenProject/jans/jans-auth-server/blob/master/LICENSE
+  version: "5.0"
 servers:
-
-  # Added by API Auto Mocking Plugin
-  - description: SwaggerHub API Auto Mocking
-    url: https://virtserver.swaggerhub.com/yuriyz1/oxauth/4.2
   - url: https://gluu.org/
 tags:
   - name: developers
-    description: oxAuth is an open source OpenID Connect Provider (OP) and UMA Authorization Server (AS). The project also includes OpenID Connect Client code which can be used by websites to validate tokens.oxAuth currently implements all required aspects of the OpenID Connect stack, including an OAuth 2.0 authorization server, Simple Web Discovery, Dynamic Client Registration, JSON Web Tokens, JSON Web Keys, and User Info Endpoint.oxAuth is tightly coupled with oxTrust.
+    description: Janssen Authorization Server is an open source OpenID Connect Provider (OP) and UMA Authorization Server (AS). The project also includes OpenID Connect Client code which can be used by websites to validate tokens. Server currently implements all required aspects of the OpenID Connect stack, including an OAuth 2.0 authorization server, Simple Web Discovery, Dynamic Client Registration, JSON Web Tokens, JSON Web Keys, and User Info Endpoint. Server is tightly coupled with Gluu Admin UI.
 
 paths:
   /authorize:
@@ -703,13 +699,13 @@ paths:
                   inum:
                     type: string
                     description: XRI i-number
-                  oxAuthAppType:
+                  jansAppType:
                     type: string
-                    description: oxAuth Appication type
-                  oxAuthIdTokenSignedResponseAlg:
+                    description: Appication type
+                  jansIdTokenSignedResponseAlg:
                     type: string
-                    description: oxAuth ID Token Signed Response Algorithm
-                  oxAuthRedirectURI:
+                    description: ID Token Signed Response Algorithm
+                  jansRedirectURI:
                     type: array
                     description: Array of redirect URIs values used in the Authorization
                     items:
@@ -717,7 +713,7 @@ paths:
                   oxId:
                     type: string
                     example:
-                    description: oxAuth Attribute Scope Id
+                    description: Attribute Scope Id
                   custom_attributes:
                     type: array
                     items:
@@ -780,13 +776,13 @@ paths:
                   inum:
                     type: string
                     description: XRI i-number
-                  oxAuthAppType:
+                  jansAppType:
                     type: string
-                    description: oxAuth Appication type
-                  oxAuthIdTokenSignedResponseAlg:
+                    description: Appication type
+                  jansIdTokenSignedResponseAlg:
                     type: string
-                    description: oxAuth ID Token Signed Response Algorithm
-                  oxAuthRedirectURI:
+                    description: ID Token Signed Response Algorithm
+                  jansRedirectURI:
                     type: array
                     description: Array of redirect URIs values used in the Authorization
                     items:
@@ -794,7 +790,7 @@ paths:
                   oxId:
                     type: string
                     example:
-                    description: oxAuth Attribute Scope Id
+                    description: Attribute Scope Id
                   custom_attributes:
                     type: array
                     items:
@@ -2626,19 +2622,19 @@ paths:
                   authorization_endpoint:
                     type: string
                     description: "URL of the authorization server's authorization endpoint.
-                    example: https://sample.com/oxauth/restv1/authorize
+                    example: https://sample.com/jans-auth/restv1/authorize
                   token_endpoint:
                     type: string
                     description: URL of the authorization server's token endpoint [RFC6749].  This is REQUIRED unless only the implicit grant type is used.
-                    example: https://sample.com/oxauth/restv1/token
+                    example: https://sample.com/jans-auth/restv1/token
                   jwks_uri:
                     type: string
                     description: URL of the authorization server's JWK Set [JWK] document.  The referenced document contains the signing key(s) the client uses to validate signatures from the authorization server. This URL MUST use the \"https\" scheme.  The JWK Set MAY also contain the server's encryption key(s), which are used by clients to encrypt requests to the server.  When both signing and encryption keys are made available, a \"use\" (public key use) parameter value is REQUIRED for all keys in the referenced JWK Set to indicate each key's intended usage.
-                    example: https://sample.com/oxauth/restv1/jwks
+                    example: https://sample.com/jans-auth/restv1/jwks
                   registration_endpoint:
                     type: string
                     description: URL of the authorization server's OAuth 2.0 Dynamic Client Registration endpoint [RFC7591]
-                    example: https://sample.com/oxauth/restv1/register
+                    example: https://sample.com/jans-auth/restv1/register
                   response_types_supported:
                     type: array
                     items:
@@ -2697,15 +2693,15 @@ paths:
                   op_policy_uri:
                     type: string
                     description: URL that the authorization server provides to the person registering the client to read about the authorization server's requirements on how the client can use the data provided by the authorization server.  The registration process SHOULD display this URL to the person registering the client if it is given.  As described in Section 5, despite the identifier \"op_policy_uri\", appearing to be OpenID-specific, its usage in this specification is actually referring to a general OAuth 2.0 feature that is not specific to OpenID Connect.
-                    example: http://ox.sample.com/doku.php?id=oxauth:policy
+                    example: http://gluu.sample.com/policy
                   op_tos_uri:
                     type: string
                     description: URL that the authorization server provides to the person registering the client to read about the authorization server's terms of service.  The registration process SHOULD display this URL to the person registering the client if it is given.  As described in Section 5, despite the identifier \"op_tos_uri\", appearing to be OpenID-specific, its usage in this specification is actually referring to a general OAuth 2.0 feature that is not specific to OpenID Connect.
-                    example: http://ox.sample.com/doku.php?id=oxauth:tos
+                    example: http://gluu.sample.com/tos
                   introspection_endpoint:
                     type: string
                     description: URL of the authorization server's OAuth 2.0 introspection endpoint [RFC7662].
-                    example: https://sample.com/oxauth/restv1/rpt/status
+                    example: https://sample.com/jans-auth/restv1/rpt/status
                   code_challenge_methods_supported:
                     type: array
                     items:
@@ -2714,7 +2710,7 @@ paths:
                   claims_interaction_endpoint:
                     type: string
                     description: Static endpoint URI at which the authorization server declares that it interacts with end-user requesting parties to gather claims. If the authorization server also provides a claims interaction endpoint URI as part of its redirect_user hint in a need_info response to a client on authorization failure (see Section 3.3.6), that value overrides this metadata value. Providing the static endpoint URI is useful for enabling interactive claims gathering prior to any pushed-claims flows taking place, so that, for example, it is possible to gather requesting party authorization interactively for collecting all other claims in a \"silent\" fashion."
-                    example: https://sample.com/oxauth/restv1/uma/gather_claims
+                    example: https://sample.com/jans-auth/restv1/uma/gather_claims
                   uma_profiles_supported:
                     type: array
                     items:
@@ -2723,15 +2719,15 @@ paths:
                   permission_endpoint:
                     type: string
                     description: The endpoint URI at which the resource server requests permissions on the client's behalf.
-                    example: https://sample.com/oxauth/restv1/host/rsrc_pr
+                    example: https://sample.com/jans-auth/restv1/host/rsrc_pr
                   resource_registration_endpoint:
                     type: string
                     description: The endpoint URI at which the resource server registers resources to put them under authorization manager protection.
-                    example: https://sample.com/oxauth/restv1/host/rsrc/resource_set
+                    example: https://sample.com/jans-auth/restv1/host/rsrc/resource_set
                   scope_endpoint:
                     type: string
                     description: The Scope endpoint URI.
-                    example: https://sample.com/oxauth/restv1/uma/scopes
+                    example: https://sample.com/jans-auth/restv1/uma/scopes
         500:
           description: Invalid parameters provided to endpoint.
           content:
