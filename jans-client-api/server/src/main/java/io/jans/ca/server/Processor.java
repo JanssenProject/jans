@@ -4,8 +4,8 @@
 package io.jans.ca.server;
 
 import com.google.inject.Inject;
-import javax.ws.rs.ClientErrorException;
-import javax.ws.rs.WebApplicationException;
+import jakarta.ws.rs.ClientErrorException;
+import jakarta.ws.rs.WebApplicationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.jans.ca.common.Command;

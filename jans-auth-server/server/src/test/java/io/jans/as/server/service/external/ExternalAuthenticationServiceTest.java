@@ -15,7 +15,7 @@ import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import javax.inject.Named;
+import jakarta.inject.Named;
 import java.util.*;
 
 import static org.mockito.ArgumentMatchers.anyList;
