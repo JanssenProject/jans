@@ -31,10 +31,10 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.Form;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.Invocation.Builder;
+import jakarta.ws.rs.core.Form;
+import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.*;
 

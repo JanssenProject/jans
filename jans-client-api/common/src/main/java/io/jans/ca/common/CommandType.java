@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonValue;
 import org.apache.commons.lang.StringUtils;
 
-import javax.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.MediaType;
 
 /**
  * @author Yuriy Zabrovarnyy

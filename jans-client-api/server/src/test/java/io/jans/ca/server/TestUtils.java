@@ -10,7 +10,7 @@ import io.jans.ca.common.Jackson2;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 
-import javax.ws.rs.WebApplicationException;
+import jakarta.ws.rs.WebApplicationException;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;

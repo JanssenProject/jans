@@ -5,8 +5,8 @@ import org.glassfish.jersey.client.proxy.WebResourceFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.WebTarget;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.WebTarget;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 

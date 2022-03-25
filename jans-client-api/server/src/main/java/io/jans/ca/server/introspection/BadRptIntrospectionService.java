@@ -2,10 +2,10 @@ package io.jans.ca.server.introspection;
 
 import io.jans.as.model.uma.UmaConstants;
 
-import javax.ws.rs.FormParam;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.Produces;
+import jakarta.ws.rs.FormParam;
+import jakarta.ws.rs.HeaderParam;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Produces;
 
 /**
  * @author yuriyz

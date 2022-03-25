@@ -1,7 +1,7 @@
 package io.jans.ca.server.introspection;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
 
 /**
  * Back compatibility with AS 3.1.1 and earlier.

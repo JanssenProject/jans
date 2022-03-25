@@ -17,7 +17,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import javax.ws.rs.BadRequestException;
+import jakarta.ws.rs.BadRequestException;
 
 import static io.jans.ca.server.TestUtils.notEmpty;
 import static org.testng.AssertJUnit.assertEquals;
