@@ -34,7 +34,7 @@ Getting access token for scope https://jans.io/oauth/config/logging.readonly
   "disableJdkLogger": true,
   "enabledOAuthAuditLogging": false,
   "externalLoggerConfiguration": null,
-  "httpLoggingExludePaths": null
+  "httpLoggingExcludePaths": null
 }
 ```
 
@@ -53,7 +53,7 @@ To update logging configuration, get the schema first:
   "disableJdkLogger": true,
   "enabledOAuthAuditLogging": false,
   "externalLoggerConfiguration": null,
-  "httpLoggingExludePaths": [
+  "httpLoggingExcludePaths": [
     "/auth/img",
     "/auth/stylesheet"
   ]
@@ -89,7 +89,7 @@ Server Response:
   "disableJdkLogger": false,
   "enabledOAuthAuditLogging": true,
   "externalLoggerConfiguration": null,
-  "httpLoggingExludePaths": [
+  "httpLoggingExcludePaths": [
     "/auth/img",
     "/auth/stylesheet"
   ]
