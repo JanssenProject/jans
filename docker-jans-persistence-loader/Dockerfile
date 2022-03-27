@@ -1,4 +1,4 @@
-FROM alpine:3.14.4
+FROM alpine:latest
 
 # ===============
 # Alpine packages
