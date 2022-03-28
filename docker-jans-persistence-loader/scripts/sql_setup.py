@@ -9,6 +9,8 @@ from string import Template
 from pathlib import Path
 
 from ldif import LDIFParser
+from sqlalchemy.exc import NotSupportedError
+from sqlalchemy.exc import OperationalError
 
 from jans.pycloudlib.persistence.sql import SQLClient
 
@@ -91,8 +93,6 @@ class SQLBackend:
         type_ = syntax_def.get(self.db_dialect) or syntax_def["mysql"]
 
         char_type = "VARCHAR"
-        if self.db_dialect == "spanner":
-            char_type = "STRING"
 
         if type_["type"] != char_type:
             data_type = type_["type"]
@@ -104,8 +104,6 @@ class SQLBackend:
             else:
                 data_type = "TEXT"
 
-        if data_type == "TEXT" and self.db_dialect == "spanner":
-            data_type = "STRING(MAX)"
         return data_type
 
     def create_tables(self):
@@ -138,8 +136,8 @@ class SQLBackend:
             doc_id_type = self.get_data_type("doc_id", table)
             table_columns[table].update({
                 "doc_id": doc_id_type,
-                "objectClass": "VARCHAR(48)" if self.db_dialect != "spanner" else "STRING(48)",
-                "dn": "VARCHAR(128)" if self.db_dialect != "spanner" else "STRING(128)",
+                "objectClass": "VARCHAR(48)",
+                "dn": "VARCHAR(128)",
             })
 
             # make sure ``oc["may"]`` doesn't have duplicate attribute
@@ -177,9 +175,8 @@ class SQLBackend:
             if column_name == "doc_id" or column_name not in fields:
                 continue
 
-            index_name = f"{table_name}_{FIELD_RE.sub('_', column_name)}"
-
             if column_type.lower() != "json":
+                index_name = f"{table_name}_{FIELD_RE.sub('_', column_name)}"
                 query = f"CREATE INDEX {self.client.quoted_id(index_name)} ON {self.client.quoted_id(table_name)} ({self.client.quoted_id(column_name)})"
                 self.client.create_index(query)
             else:
@@ -193,8 +190,13 @@ class SQLBackend:
                         "field": column_name, "data_type": column_type,
                     })
                     name = f"{table_name}_json_{i}"
-                    query = f"CREATE INDEX {self.client.quoted_id(name)} ON {self.client.quoted_id(table_name)} (({index_str_fmt}))"
-                    self.client.create_index(query)
+                    query = f"ALTER TABLE {self.client.quoted_id(table_name)} ADD INDEX {self.client.quoted_id(name)} (({index_str_fmt}))"
+
+                    try:
+                        self.client.create_index(query)
+                    except (NotSupportedError, OperationalError) as exc:
+                        msg = exc.orig.args[1] if self.db_dialect == "mysql" else exc.orig.pgerror
+                        logger.warning(f"Failed to create index {name} for {table_name}.{column_name} column; reason={msg}")
 
         for i, custom in enumerate(self.sql_indexes.get(table_name, {}).get("custom", []), start=1):
             # jansPerson table has unsupported custom index expressions that need to be skipped if mysql < 8.0
@@ -290,10 +292,6 @@ class SQLBackend:
             dval = values[0].strip("Z")
             sep = " "
             postfix = ""
-            if self.db_dialect == "spanner":
-                sep = "T"
-                postfix = "Z"
-            # return "{}-{}-{} {}:{}:{}{}".format(dval[0:4], dval[4:6], dval[6:8], dval[8:10], dval[10:12], dval[12:14], dval[14:17])
             return "{}-{}-{}{}{}:{}:{}{}{}".format(
                 dval[0:4],
                 dval[4:6],
@@ -307,11 +305,7 @@ class SQLBackend:
             )
 
         if data_type == "JSON":
-            # return json.dumps({"v": values})
             return {"v": values}
-
-        if data_type == "ARRAY<STRING(MAX)>":
-            return values
 
         # fallback
         return values[0]
