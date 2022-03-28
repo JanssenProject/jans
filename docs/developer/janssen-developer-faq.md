@@ -1,6 +1,6 @@
 # Janssen Developer - Frequently Asked Questions
 
-This Guide helps new community members and developers in getting familiarised with Janssen server. This guide is not intended to be an exhaustive reference to Janssen server but instead provides answers to questions that new members may have during initial period along with relevant resources.
+This documents captures frequenty asked questions by new community members and developers. Information here may not be exhaustive or complete in nature. Always refer to Janssen Project [README](https://github.com/JanssenProject/jans/blob/main/README.md) for latest updates.
 
 ## What is Janssen Project
 Start by going through links below:
