@@ -18,6 +18,12 @@
 		<maven.min-version>3.0.3</maven.min-version>
 
 		<janssen.version>1.0.0-SNAPSHOT</janssen.version>
+		
+		<jakarta.annotation.api.version>2.0.0</jakarta.annotation.api.version>
+		<jakarta.faces.api.version>3.0.0</jakarta.faces.api.version>
+		<jakarta.mail.api.version>2.0.1</jakarta.mail.api.version>
+		<jakarta.servlet.api.version>5.0.0</jakarta.servlet.api.version>
+		<jakarta.ws.rs.api.version>3.0.0</jakarta.ws.rs.api.version>
 
 		<jacoco.version>0.8.7</jacoco.version>
 		
