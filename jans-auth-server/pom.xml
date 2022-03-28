@@ -378,6 +378,12 @@
 				<version>0.4.8</version>
 				<scope>test</scope>
 			</dependency>
+			<dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-inline</artifactId>
+				<version>3.8.0</version>
+				<scope>test</scope>
+			</dependency>
 
 			<!-- Documentation -->
 			<dependency>
