@@ -1,4 +1,4 @@
-# Janssen Project Developer Guide
+# Janssen Developer - Frequently Asked Questions
 
 This Guide helps new community members and developers in getting familiarised with Janssen server. This guide is not intended to be an exhaustive reference to Janssen server but instead provides answers to questions that new members may have during initial period along with relevant resources.
 
