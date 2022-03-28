@@ -27,10 +27,12 @@
 		<weld.version>4.0.3.Final</weld.version>
 		<resteasy.version>6.0.0.Final</resteasy.version>
 		
+		<jakarta.annotation.api.version>2.0.0</jakarta.annotation.api.version>
 		<jakarta.ejb.api.version>4.0.0</jakarta.ejb.api.version>
 		<jakarta.enterprise.cdi.api.version>3.0.0</jakarta.enterprise.cdi.api.version>		
 		<jakarta.inject.api.version>2.0.1</jakarta.inject.api.version>
 		<jakarta.validation.api.version>3.0.0</jakarta.validation.api.version>
+		<jakarta.ws.rs.api.version>3.0.0</jakarta.ws.rs.api.version>
 		<org.hibernate.validator.version>7.0.1.Final</org.hibernate.validator.version>
 		<org.hibernate.validator.cdi.version>7.0.1.Final</org.hibernate.validator.cdi.version>
 		<org.glassfish.jakarta.el.version>4.0.0</org.glassfish.jakarta.el.version>
@@ -233,6 +235,11 @@
 			</dependency>
 			
 			<!-- jakarta -->
+			<dependency>
+                <groupId>jakarta.annotation</groupId>
+                <artifactId>jakarta.annotation-api</artifactId>
+                <version>${jakarta.annotation.api.version}</version>
+            </dependency>
 			<dependency>
                 <groupId>jakarta.ejb</groupId>
                 <artifactId>jakarta.ejb-api</artifactId>
