@@ -26,6 +26,7 @@
 		<jetty.version>11.0.8</jetty.version>
 		<weld.version>4.0.3.Final</weld.version>
 		<resteasy.version>6.0.0.Final</resteasy.version>
+		<jakarta.ejb.api.version>4.0.0</jakarta.ejb.api.version>
 		<jakarta.inject.api.version>2.0.1</jakarta.inject.api.version>
 		<org.hibernate.validator.version>7.0.1.Final</org.hibernate.validator.version>
 		<org.hibernate.validator.cdi.version>7.0.1.Final</org.hibernate.validator.cdi.version>
@@ -227,7 +228,19 @@
 				<artifactId>uma-rs-core</artifactId>
 				<version>${jans.version}</version>
 			</dependency>
-
+			
+			<!-- jakarta -->
+			<dependency>
+                <groupId>jakarta.ejb</groupId>
+                <artifactId>jakarta.ejb-api</artifactId>
+                <version>${jakarta.ejb.api.version}</version>
+            </dependency>
+			<dependency>
+				<groupId>jakarta.inject</groupId>
+				<artifactId>jakarta.inject-api</artifactId>
+				<version>${jakarta.inject.api.version}</version>
+			</dependency>
+      		
 			<!-- Security -->
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
