@@ -16,14 +16,14 @@ This documentation explains technical design, architecture and interactions of v
 
 ## API Reference
 
-| Service | REST API | Javadoc |  
+| Service | REST API | Java API |  
 | --- | --- | --- |  
-| Jans Auth Server | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/main/jans-auth-server/docs/swagger.yaml)| [server](https://jenkins.jans.io/javadocs/jans-auth/main/server/) [model](https://jenkins.jans.io/javadocs/jans-auth/main/model/) [client](https://jenkins.jans.io/javadocs/jans-auth/main/client/)|  
-| Jans Client API | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/main/jans-client-api/server/src/main/resources/swagger.yaml)| |  
+| Jans Auth Server | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/main/jans-auth-server/docs/swagger.yaml)| [Javadoc](https://jenkins.jans.io/javadocs/jans-auth/main/)|  
+| Jans Client API | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/main/jans-client-api/server/src/main/resources/swagger.yaml)| [Javadoc](https://jenkins.jans.io/javadocs/jans-client-api/main/)|  
 | Jans Config API | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/main/jans-config-api/docs/jans-config-api-swagger.yaml)| |  
-| Jans Core | | [server](https://jenkins.jans.io/javadocs/jans-core/main/io/jans/server/filters/package-summary.html)|  
+| Jans Core | | [Javadoc](https://jenkins.jans.io/javadocs/jans-core/main/)|  
 | Jans FIDO 2 | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/main/jans-fido2/docs/jansFido2Swagger.yaml) | |  
-| Jans SCIM API | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/main/jans-scim/server/src/main/resources/jans-scim-openapi.yaml) | [server](https://jenkins.jans.io/javadocs/jans-scim/main/server/) [model](https://jenkins.jans.io/javadocs/jans-scim/main/model/) [client](https://jenkins.jans.io/javadocs/jans-scim/main/client/) |     
+| Jans SCIM API | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/main/jans-scim/server/src/main/resources/jans-scim-openapi.yaml) | [Javadoc](https://jenkins.jans.io/javadocs/jans-scim/main/) |     
   
 ## Design Consideration and Guidelines
 
