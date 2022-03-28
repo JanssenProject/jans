@@ -71,7 +71,7 @@ public class ServletLoggingFilter implements Filter {
             chain.doFilter(httpRequest, httpResponse);
             return;
         }
-        Set<String> excludedPaths = appConfiguration.getHttpLoggingExludePaths();
+        Set<String> excludedPaths = appConfiguration.getHttpLoggingExcludePaths();
         if (!CollectionUtils.isEmpty(excludedPaths)) {
             for (String excludedPath : excludedPaths) {
                 String requestURI = httpRequest.getRequestURI();

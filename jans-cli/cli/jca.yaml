@@ -4764,7 +4764,7 @@ components:
         httpLoggingEnabled:
           type: boolean
           description: Enable/Disable request/response logging filter.
-        httpLoggingExludePaths:
+        httpLoggingExcludePaths:
           type: array
           description: List of base URI for which request/response logging filter should not record activity.
           items:
@@ -5796,7 +5796,7 @@ components:
         externalLoggerConfiguration:
           description: Path to external log4j2 configuration file.
           type: string
-        httpLoggingExludePaths:
+        httpLoggingExcludePaths:
           description: List of paths to exclude from logger.
           type: array
           items:

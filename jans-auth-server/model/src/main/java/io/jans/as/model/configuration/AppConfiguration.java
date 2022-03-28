@@ -310,7 +310,7 @@ public class AppConfiguration implements Configuration {
     private List<String> enabledComponents;
 
     private Boolean httpLoggingEnabled; // Used in ServletLoggingFilter to enable http request/response logging.
-    private Set<String> httpLoggingExludePaths; // Used in ServletLoggingFilter to exclude some paths from logger. Paths example: ["/jans-auth/img", "/jans-auth/stylesheet"]
+    private Set<String> httpLoggingExcludePaths; // Used in ServletLoggingFilter to exclude some paths from logger. Paths example: ["/jans-auth/img", "/jans-auth/stylesheet"]
     private String externalLoggerConfiguration; // Path to external log4j2 configuration file. This property might be configured from oxTrust: /identity/logviewer/configure
 
     public Boolean getRequireRequestObjectEncryption() {
@@ -1957,12 +1957,12 @@ public class AppConfiguration implements Configuration {
         this.httpLoggingEnabled = httpLoggingEnabled;
     }
 
-    public Set<String> getHttpLoggingExludePaths() {
-        return httpLoggingExludePaths;
+    public Set<String> getHttpLoggingExcludePaths() {
+        return httpLoggingExcludePaths;
     }
 
-    public void setHttpLoggingExludePaths(Set<String> httpLoggingExludePaths) {
-        this.httpLoggingExludePaths = httpLoggingExludePaths;
+    public void setHttpLoggingExcludePaths(Set<String> httpLoggingExcludePaths) {
+        this.httpLoggingExcludePaths = httpLoggingExcludePaths;
     }
 
     public String getLoggingLevel() {
