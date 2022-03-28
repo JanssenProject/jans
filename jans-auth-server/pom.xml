@@ -192,6 +192,11 @@
 				<version>${jans-notify.version}</version>
 			</dependency>
 
+		    <dependency>
+                <groupId>jakarta.ejb</groupId>
+                <artifactId>jakarta.ejb-api</artifactId>
+                <version>${jakarta.ejb.api.version}</version>
+            </dependency>
 			<dependency>
 				<groupId>jakarta.websocket</groupId>
 				<artifactId>jakarta.websocket-api</artifactId>
