@@ -65,4 +65,8 @@ public class ApiAccessConstants {
     public static final String ORG_CONFIG_READ_ACCESS = "https://jans.io/oauth/config/organization.readonly";
     public static final String ORG_CONFIG_WRITE_ACCESS = "https://jans.io/oauth/config/organization.write";
 
+    public static final String USER_READ_ACCESS = "https://jans.io/oauth/config/user.readonly";
+    public static final String USER_WRITE_ACCESS = "https://jans.io/oauth/config/user.write";
+    public static final String USER_DELETE_ACCESS = "https://jans.io/oauth/config/user.delete";
+
 }

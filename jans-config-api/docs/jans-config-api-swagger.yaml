@@ -6744,4 +6744,93 @@ components:
           $ref: '#/components/schemas/FacterData'
           description: Underlying Server stats
 
-  
+    User:
+      title: User object
+      description: User.
+      type: object
+      required:
+        - displayName
+      properties:
+        inum:
+          description: XRI i-number. Identifier to uniquely identify the user.
+          type: string
+        associatedClient:
+          description: dn of associated clients with the person.
+          type: array
+          items:
+            type: string
+        countryName:
+          description: county name.
+          type: string
+        displayName:
+          description: Name of the user suitable for display to end-users
+          type: string
+        givenName:
+          description: Given name(s) or first name(s) of the End-User.
+          type: string
+        managedOrganizations:
+          description: Organizations with which a person is associated.
+          type: array
+          items:
+            type: string
+        optOuts:
+          description: White pages attributes restricted by person in exclude profile management.
+          type: array
+          items:
+            type: string
+        status:
+          description: Status of the entry.
+          type: string
+        mail:
+          description: Primary Email Address.
+          type: string
+       memberOf:
+          description: Groups with which a person is associated.
+          type: array
+          items:
+            type: string
+        organization:
+          description: Users organization.
+          type: string
+        oxAuthPersistentJwt:
+          description: Persistent JWT.
+          type: array
+          items:
+            type: string
+        createdAt:
+          description: User creation date.
+          type: string
+          format: date-time
+        extUid:
+          description: List of associated external uid.
+          type: array
+          items:
+            type: string
+        otpCache:
+          description: List of used OTP to prevent a hacker from using it again. Complementary to jansExtUid attribute.
+          type: array
+          items:
+            type: string
+        lastLogonTime:
+          description: 'Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating last login time.'
+          type: string
+          format: date-time
+        active:
+          type: boolean
+          description: boolean value indicating if user is active.
+          default: true
+        addres:
+          description: List of users address.
+          type: array
+          items:
+            $ref: '#/components/schemas/Address'
+        email:
+          description: List of users email address.
+          type: array
+          items:
+            type: string
+        entitlements:
+          description: List of users entitlement.
+          type: array
+          items:
+           $ref: '#/components/schemas/Entitlement'
