@@ -6,6 +6,7 @@
             <class name="io.jans.as.common.AudienceTest"/>
             <class name="io.jans.as.common.util.RedirectUriTest"/>
             <class name="io.jans.as.common.service.common.UserServiceTest"/>
+            <class name="io.jans.as.common.service.common.InumServiceTest"/>
         </classes>
     </test>
 </suite>
