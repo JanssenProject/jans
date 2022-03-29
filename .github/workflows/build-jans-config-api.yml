@@ -84,3 +84,6 @@ jobs:
       run: |
         cd jans-config-api      
         mvn --batch-mode deploy
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        

@@ -56,5 +56,8 @@ jobs:
         fi              
     - name: Run build step 2
       run: |
-        cd jans-auth-server
+        cd jans-scim
         mvn --batch-mode deploy
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        

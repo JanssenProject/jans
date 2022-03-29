@@ -35,3 +35,6 @@ jobs:
       run: |
         cd jans-fido2
         mvn --batch-mode deploy
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
