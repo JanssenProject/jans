@@ -63,7 +63,7 @@
 			<artifactId>jython-standalone</artifactId>
 		</dependency>
 
-		<!-- CDI -->
+		<!-- Jakarta -->
 		<dependency>
         	<groupId>jakarta.annotation</groupId>
             <artifactId>jakarta.annotation-api</artifactId>
@@ -71,12 +71,10 @@
         <dependency>
 		    <groupId>jakarta.enterprise</groupId>
 		    <artifactId>jakarta.enterprise.cdi-api</artifactId>
-		    <scope>provided</scope>
    		</dependency>
       	<dependency>
             <groupId>jakarta.servlet</groupId>
         	<artifactId>jakarta.servlet-api</artifactId>
-			<scope>provided</scope>
    		</dependency>
    		<dependency>
             <groupId>jakarta.validation</groupId>
@@ -89,7 +87,6 @@
 		<dependency>
         	<groupId>jakarta.ws.rs</groupId>
         	<artifactId>jakarta.ws.rs-api</artifactId>
-        	<scope>provided</scope>
         </dependency>
 		
 		<!-- Google -->

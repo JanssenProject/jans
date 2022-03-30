@@ -24,6 +24,10 @@
 		<org.glassfish.jakarta.json.version>2.0.1</org.glassfish.jakarta.json.version>
 		<org.hibernate.validator.version>7.0.0.Final</org.hibernate.validator.version>
 		<org.hibernate.validator.cdi.version>7.0.0.Final</org.hibernate.validator.cdi.version>
+		<org.jboss.annotations.api.version>2.0.1.Final</org.jboss.annotations.api.version>
+		
+		<jakarta.xml.bind.api.version>3.0.0</jakarta.xml.bind.api.version>
+		<jakarta.mail.api.version>2.0.1</jakarta.mail.api.version>
 
 		<!-- <jsf-api.version>2.2.20</jsf-api.version> -->
 		<!-- <jsf-impl.version>3.0.0</jsf-impl.version> -->
@@ -270,6 +274,18 @@
 				<type>pom</type>
 			</dependency>
 			
+			<!-- Jakarta lib required but not part of Weld dependency -->
+			<dependency>
+				<groupId>jakarta.xml.bind</groupId>
+				<artifactId>jakarta.xml.bind-api</artifactId>
+				<version>${jakarta.xml.bind.api.version}</version>
+			</dependency>
+			<dependency>
+        		<groupId>jakarta.mail</groupId>
+        		<artifactId>jakarta.mail-api</artifactId>
+        		<version>${jakarta.mail.api.version}</version>
+      		</dependency>
+			
 				
 		<!-- 	<dependency>
 				<groupId>javax.enterprise</groupId>
@@ -305,25 +321,23 @@
 			</dependency> -->
 			
 			<!-- glassfish -->	
-			<dependency>
+			<!-- <dependency>
     			<groupId>org.glassfish</groupId>
 			    <artifactId>jakarta.el</artifactId>
-			    <version>${org.glassfish.jakarta.el.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.glassfish</groupId>
 				<artifactId>jakarta.faces</artifactId>
-				<version>${org.glassfish.jakarta.faces.version}</version>
-			</dependency>
+			</dependency> -->
 			<dependency>
 		    	<groupId>org.glassfish</groupId>
     			<artifactId>jakarta.json</artifactId>
-				<version>${org.glassfish.jakarta.json.version}</version>
+    			<version>${org.glassfish.jakarta.json.version}</version>
 			</dependency>
 			<dependency>
 			    <groupId>org.jboss.spec.javax.annotation</groupId>
 			    <artifactId>jboss-annotations-api_1.3_spec</artifactId>
-			    <version>2.0.1.Final</version>
+			    <version>${org.jboss.annotations.api.version}</version>
 				<scope>provided</scope>
 			</dependency>
 		<!-- 	<dependency>
