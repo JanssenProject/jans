@@ -63,7 +63,7 @@ It will create a `.json` file. Let's modify this file:
 nano /tmp/smtp.json
 ```
 
-![smtp update configuration](img/image-cl-update-smtp-03042021.png)
+![smtp update configuration](../../assets/user/using-jans-cli/images/image-cl-update-smtp-03042021.png)
 
 You can update each of its properties. To perform this operation, run the following command:
 
