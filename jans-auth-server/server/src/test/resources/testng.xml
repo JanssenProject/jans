@@ -6,7 +6,7 @@
 		<listener class-name="io.jans.as.server.JansUnitTestsListener" />
 	</listeners>
 
-    <test name="Unit Tests" enabled="true">
+    <test name="Unit Tests" enabled="false">
         <classes>
             <class name="io.jans.as.server.service.MTLSServiceTest" />
             <class name="io.jans.as.server.model.authorize.JwtAuthorizationRequestTest" />
@@ -17,82 +17,82 @@
         </classes>
     </test>
 
-    <test name="JsonApplierServerTest" enabled="true">
+    <test name="JsonApplierServerTest" enabled="false">
         <classes>
             <class name="io.jans.as.server.json.JsonApplierServerTest" />
         </classes>
     </test>
 
 	<!-- Application Type Restriction (embedded) -->
-	<test name="Application Type Restriction (embedded)" enabled="true">
+	<test name="Application Type Restriction (embedded)" enabled="false">
 		<classes>
 			<class name="io.jans.as.server.ws.rs.ApplicationTypeRestrictionEmbeddedTest" />
 		</classes>
 	</test>
 
 	<!-- Authorization Code Flow test -->
-	<test name="Authorization Code Flow test (embedded)" enabled="true">
+	<test name="Authorization Code Flow test (embedded)" enabled="false">
 		<classes>
 			<class name="io.jans.as.server.ws.rs.AuthorizationCodeFlowEmbeddedTest" />
 		</classes>
 	</test>
 
 	<!-- Authorize test -->
-	<test name="Authorize test (embedded)" enabled="true">
+	<test name="Authorize test (embedded)" enabled="false">
 		<classes>
 			<class name="io.jans.as.server.ws.rs.AuthorizeRestWebServiceEmbeddedTest" />
 		</classes>
 	</test>
 
 	<!-- Authorize with Response Mode test -->
-	<test name="Authorize with Response Mode test (embedded)" enabled="true">
+	<test name="Authorize with Response Mode test (embedded)" enabled="false">
 		<classes>
 			<class name="io.jans.as.server.ws.rs.AuthorizeWithResponseModeEmbeddedTest" />
 		</classes>
 	</test>
 
 	<!-- Client Authentication Filter test (embedded) -->
-	<test name="Client Authentication Filter test (embedded)" enabled="true">
+	<test name="Client Authentication Filter test (embedded)" enabled="false">
 		<classes>
 			<class name="io.jans.as.server.ws.rs.ClientAuthenticationFilterEmbeddedTest" />
 		</classes>
 	</test>
 
 	<!-- Client Info test -->
-	<test name="Client Info test (embedded)" enabled="true">
+	<test name="Client Info test (embedded)" enabled="false">
 		<classes>
 			<class name="io.jans.as.server.ws.rs.ClientInfoRestWebServiceEmbeddedTest" />
 		</classes>
 	</test>
 
 	<!-- End Session test -->
-	<test name="End Session test (embedded)" enabled="true">
+	<test name="End Session test (embedded)" enabled="false">
 		<classes>
 			<class name="io.jans.as.server.ws.rs.EndSessionRestWebServiceEmbeddedTest" />
 		</classes>
 	</test>
-    <test name="End Session Backchannel test (embedded)" enabled="true">
+    <test name="End Session Backchannel test (embedded)" enabled="false">
         <classes>
             <class name="io.jans.as.server.ws.rs.EndSessionBackchannelRestServerTest" />
         </classes>
     </test>
 
 	<!-- JWK test -->
-	<test name="JWK test (embedded)" enabled="true">
+	<test name="JWK test (embedded)" enabled="false">
 		<classes>
 			<class name="io.jans.as.server.ws.rs.JwkRestWebServiceEmbeddedTest" />
 		</classes>
 	</test>
 
 	<!-- Key Generation test -->
-	<test name="Key Generation test (embedded)" enabled="true">
+	<test name="Key Generation test (embedded)" enabled="false">
 		<classes>
 			<class name="io.jans.as.server.comp.KeyGenerationTest" />
 		</classes>
 	</test>
 
 	<!-- OpenID Request Object test -->
-	<test name="OpenID Request Object test (embedded)" enabled="true">
+	<test name="OpenID Request Object test (embedded)" enabled="false">
 		<classes>
 			<class name="io.jans.as.server.ws.rs.OpenIDRequestObjectEmbeddedTest" />
 			<class name="io.jans.as.server.ws.rs.OpenIDRequestObjectWithHSAlgEmbeddedTest" />
@@ -102,42 +102,42 @@
 	</test>
 
 	<!-- Register test -->
-	<test name="Register test (embedded)" enabled="true">
+	<test name="Register test (embedded)" enabled="false">
 		<classes>
 			<class name="io.jans.as.server.ws.rs.RegistrationRestWebServiceEmbeddedTest" />
 		</classes>
 	</test>
 
 	<!-- Request Object Signing Alg Restriction test -->
-	<test name="Request Object Signing Alg Restriction test (embedded)" enabled="true">
+	<test name="Request Object Signing Alg Restriction test (embedded)" enabled="false">
 		<classes>
 			<class name="io.jans.as.server.ws.rs.RequestObjectSigningAlgRestrictionEmbeddedTest" />
 		</classes>
 	</test>
 
 	<!-- Response Types Restriction -->
-	<test name="Response Types Restriction (embedded)" enabled="true">
+	<test name="Response Types Restriction (embedded)" enabled="false">
 		<classes>
 			<class name="io.jans.as.server.ws.rs.ResponseTypesRestrictionEmbeddedTest" />
 		</classes>
 	</test>
 
 	<!-- Sector Identifier URL Verification test -->
-	<test name="Sector Identifier URL Verification (embedded)" enabled="true">
+	<test name="Sector Identifier URL Verification (embedded)" enabled="false">
 		<classes>
 			<class name="io.jans.as.server.ws.rs.SectorIdentifierUrlVerificationEmbeddedTest" />
 		</classes>
 	</test>
 
 	<!-- Token Endpoint Auth Method Restriction test -->
-	<test name="Token Endpoint Auth Method Restriction (embedded)" enabled="true">
+	<test name="Token Endpoint Auth Method Restriction (embedded)" enabled="false">
 		<classes>
 			<class name="io.jans.as.server.ws.rs.TokenEndpointAuthMethodRestrictionEmbeddedTest" />
 		</classes>
 	</test>
 
 	<!-- Token test -->
-	<test name="Token test (embedded)" enabled="true">
+	<test name="Token test (embedded)" enabled="false">
 		<classes>
 			<class name="io.jans.as.server.ws.rs.TokenRestWebServiceEmbeddedTest" />
 			<class name="io.jans.as.server.ws.rs.TokenRestWebServiceWithHSAlgEmbeddedTest" />
@@ -147,89 +147,89 @@
 	</test>
 
 	<!-- User Authentication Filter test (embedded) -->
-	<test name="User Authentication Filter test (embedded)" enabled="true">
+	<test name="User Authentication Filter test (embedded)" enabled="false">
 		<classes>
 			<class name="io.jans.as.server.ws.rs.UserAuthenticationFilterEmbeddedTest" />
 		</classes>
 	</test>
 
 	<!-- User Info test -->
-	<test name="User Info test (embedded)" enabled="true">
+	<test name="User Info test (embedded)" enabled="false">
 		<classes>
 			<class name="io.jans.as.server.ws.rs.UserInfoRestWebServiceEmbeddedTest" />
 		</classes>
 	</test>
 
 	<!-- Signature test -->
-	<test name="Signature test (embedded)" enabled="true">
+	<test name="Signature test (embedded)" enabled="false">
 		<classes>
 			<class name="io.jans.as.server.comp.SignatureTest" />
 		</classes>
 	</test>
 
-	<test name="Utility methods test" enabled="true">
+	<test name="Utility methods test" enabled="false">
 		<classes>
 			<class name="io.jans.as.server.comp.UtilityMethodsTest" />
 		</classes>
 	</test>
 
-	<test name="Grant service test" enabled="true">
+	<test name="Grant service test" enabled="false">
 		<classes>
 			<class name="io.jans.as.server.comp.GrantServiceTest" />
 		</classes>
 	</test>
 
-	<test name="Configuration test" enabled="true">
+	<test name="Configuration test" enabled="false">
 		<classes>
 			<class name="io.jans.as.server.comp.ConfigurationTest" />
 		</classes>
 	</test>
 
-	<test name="Cross Encryption test" enabled="true">
+	<test name="Cross Encryption test" enabled="false">
 		<classes>
 			<class name="io.jans.as.server.comp.CrossEncryptionTest" />
 		</classes>
 	</test>
 
-	<test name="Session ID service test" enabled="true">
+	<test name="Session ID service test" enabled="false">
 		<classes>
 			<class name="io.jans.as.server.comp.SessionIdServiceTest" />
 		</classes>
 	</test>
 
-	<test name="Crypto Provider test" enabled="true">
+	<test name="Crypto Provider test" enabled="false">
 		<classes>
 			<class name="io.jans.as.server.comp.CryptoProviderTest" />
 		</classes>
 	</test>
 
-	<test name="Gluu Configuration test" enabled="true">
+	<test name="Gluu Configuration test" enabled="false">
 		<classes>
 			<class name="io.jans.as.server.jans.ws.rs.GluuConfigurationWSTest" />
 		</classes>
 	</test>
 
-	<test name="UMA. Configuration test" enabled="true">
+	<test name="UMA. Configuration test" enabled="false">
 		<classes>
 			<class name="io.jans.as.server.uma.ws.rs.UmaConfigurationWSTest" />
 		</classes>
 	</test>
-	<test name="UMA. Obtain PAT test" enabled="true">
+	<test name="UMA. Obtain PAT test" enabled="false">
 		<classes>
 			<class name="io.jans.as.server.uma.ws.rs.ObtainPatWSTest" />
 		</classes>
 	</test>
-	<test name="UMA. Obtain RPT test" enabled="true">
+	<test name="UMA. Obtain RPT test" enabled="false">
 		<classes>
 			<class name="io.jans.as.server.uma.ws.rs.ObtainRptWSTest" />
 		</classes>
 	</test>
-	<test name="UMA. Register resource set test" enabled="true">
+	<test name="UMA. Register resource set test" enabled="false">
 		<classes>
 			<class name="io.jans.as.server.uma.ws.rs.UmaRegisterResourceWSTest" />
 		</classes>
 	</test>
-	<test name="UMA. Register permission test" enabled="true">
+	<test name="UMA. Register permission test" enabled="false">
 		<classes>
 			<class name="io.jans.as.server.uma.ws.rs.RegisterPermissionWSTest" />
 		</classes>
@@ -239,23 +239,23 @@
 			<class name="io.jans.as.server.uma.ws.rs.AccessProtectedResourceFlowWSTest" />
 		</classes>
 	</test>
-	<test name="UMA. Scope test" enabled="true">
+	<test name="UMA. Scope test" enabled="false">
 		<classes>
 			<class name="io.jans.as.server.uma.ws.rs.UmaScopeWSTest" />
 		</classes>
 	</test>
-	<test name="Inum Generation test" enabled="true">
+	<test name="Inum Generation test" enabled="false">
 		<classes>
 			<class name="io.jans.as.server.comp.InumGeneratorTest" />
 		</classes>
 	</test>
-	<test name="Introspection endpoint test" enabled="true">
+	<test name="Introspection endpoint test" enabled="false">
 		<classes>
 			<class name="io.jans.as.server.ws.rs.IntrospectionWebServiceEmbeddedTest" />
 		</classes>
 	</test>
 
-	<test name="Locale test (embedded)" enabled="true">
+	<test name="Locale test (embedded)" enabled="false">
 		<classes>
 			<class name="io.jans.as.server.comp.LocaleTest" />
 		</classes>
@@ -267,7 +267,7 @@
         </classes>
     </test>
 
-	<test name="Remove unused clients test" enabled="true">
+	<test name="Remove unused clients test" enabled="false">
 		<classes>
 			<class name="io.jans.as.server.comp.CleanUpClientTest" />
 		</classes>
