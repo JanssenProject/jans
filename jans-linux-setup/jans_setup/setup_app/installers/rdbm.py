@@ -222,6 +222,16 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
         sql_indexes_fn = os.path.join(Config.static_rdbm_dir, Config.rdbm_type + '_index.json')
         sql_indexes = base.readJsonFile(sql_indexes_fn)
 
+        # read opendj indexes and add multivalued attributes to JSON indexing
+        opendj_index = base.readJsonFile(base.current_app.OpenDjInstaller.openDjIndexJson)
+        opendj_index_list = [ atribute['attribute'] for atribute in opendj_index ]
+
+        for attribute in self.jans_attributes:
+            if attribute.get('multivalued'):
+                for attr_name in attribute['names']:
+                    if attr_name in opendj_index_list and attr_name not in sql_indexes['__common__']['fields']:
+                        sql_indexes['__common__']['fields'].append(attr_name)
+
         if Config.rdbm_type == 'spanner':
             tables = self.dbUtils.spanner.get_tables()
             for tblCls in tables:
