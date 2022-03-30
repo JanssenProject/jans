@@ -247,7 +247,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                     data_type = attr['type']
 
                     if data_type == 'ARRAY':
-                        #TODO: How to index for ARRAY types in spanner?
+                        # How to index for ARRAY types in spanner?
                         pass
 
                     elif attr_name in tbl_fields:
@@ -350,7 +350,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
             ldif_files.remove(Config.ldif_site)
 
         Config.pbar.progress(self.service_name, "Importing ldif files to {}".format(Config.rdbm_type), False)
-        if not Config.ldif_base in ldif_files:
+        if Config.ldif_base not in ldif_files:
             if Config.rdbm_type == 'mysql':
                 force = BackendTypes.MYSQL
             elif Config.rdbm_type == 'pgsql':
