@@ -6996,16 +6996,19 @@ components:
           description: Transient Id
           type: string
         uid:
-          description: unique identifier
+          description: A domain issued and managed identifier for the person.Subject - Identifier for the End-User at the Issuer.
           type: string
         userPassword:
           description: user password
           type: string
         st:
+          description: State or Province
           type: string
         street:
           type: string
         l:
+        st:
+          description: State or Province
           type: string
         countInvalidLogin:
           description: Invalid login attempts count
