@@ -278,4 +278,4 @@ To patch data, the command looks like for this:
 
 It will update the configuration and will show the updated result as below image on the display.
 
-![patch-ldap](../img/cli-patch-ldap-configuration.png)
+![patch-ldap](../img/image-cli-patch-ldap-configuration-03042021.png)
