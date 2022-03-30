@@ -26,9 +26,10 @@
 		<org.hibernate.validator.cdi.version>7.0.0.Final</org.hibernate.validator.cdi.version>
 		<org.jboss.annotations.api.version>2.0.1.Final</org.jboss.annotations.api.version>
 		
-		<jakarta.xml.bind.api.version>3.0.0</jakarta.xml.bind.api.version>
+		<jakarta.ejb.api.version>4.0.0</jakarta.ejb.api.version>
 		<jakarta.mail.api.version>2.0.1</jakarta.mail.api.version>
-
+		<jakarta.websocket.api.version>2.0.0</jakarta.websocket.api.version>
+		<jakarta.xml.bind.api.version>3.0.0</jakarta.xml.bind.api.version>
 		<!-- <jsf-api.version>2.2.20</jsf-api.version> -->
 		<!-- <jsf-impl.version>3.0.0</jsf-impl.version> -->
 		<!-- <uel-api.version>2.2.1-b04</uel-api.version> -->
@@ -275,16 +276,27 @@
 			</dependency>
 			
 			<!-- Jakarta lib required but not part of Weld dependency -->
-			<dependency>
-				<groupId>jakarta.xml.bind</groupId>
-				<artifactId>jakarta.xml.bind-api</artifactId>
-				<version>${jakarta.xml.bind.api.version}</version>
-			</dependency>
+		  	<dependency>
+               <groupId>jakarta.ejb</groupId>
+               <artifactId>jakarta.ejb-api</artifactId>
+               <version>${jakarta.ejb.api.version}</version>
+            </dependency>
 			<dependency>
         		<groupId>jakarta.mail</groupId>
         		<artifactId>jakarta.mail-api</artifactId>
         		<version>${jakarta.mail.api.version}</version>
       		</dependency>
+      		  <dependency>
+                <groupId>jakarta.websocket</groupId>
+                <artifactId>jakarta.websocket-api</artifactId>
+                <version>${jakarta.websocket.api.version}</version>
+            </dependency>
+            <dependency>
+				<groupId>jakarta.xml.bind</groupId>
+				<artifactId>jakarta.xml.bind-api</artifactId>
+				<version>${jakarta.xml.bind.api.version}</version>
+			</dependency>
+            
 			
 				
 		<!-- 	<dependency>
