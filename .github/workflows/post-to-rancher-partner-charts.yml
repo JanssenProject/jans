@@ -49,20 +49,21 @@ jobs:
         git reset --hard upstream/main-source
         # take care, this will delete all changes on the forked main-source
         git push origin main-source --force
-        cp ../automation/rancher-partner-charts/package.yaml ./packages/gluu/package.yaml
-        export PACKAGE=gluu
+        mkdir ./packages/janssen || echo "directory exists!"
+        cp ../automation/rancher-partner-charts/package.yaml ./packages/janssen/package.yaml
+        export PACKAGE=janssen
         make prepare
-        cp ../automation/rancher-partner-charts/app-readme.md ./packages/gluu/charts/app-readme.md
-        cp ../automation/rancher-partner-charts/questions.yaml ./packages/gluu/charts/questions.yaml
+        cp ../automation/rancher-partner-charts/app-readme.md ./packages/janssen/charts/app-readme.md
+        cp ../automation/rancher-partner-charts/questions.yaml ./packages/janssen/charts/questions.yaml
         make patch
         make clean
         git add -A
-        git commit -S -s -m "feat(gluu): patch helm package"
+        git commit -S -s -m "feat(janssen): patch helm package"
         make charts
         git add -A
-        git commit -S -s -m "feat(gluu): chart helm package"
+        git commit -S -s -m "feat(janssen): chart helm package"
         git push origin
-        MESSAGE="feat(gluu): update Gluu helm partner chart"
+        MESSAGE="feat(janssen): update janssen helm partner chart"
         BODY=$(<../automation/rancher-partner-charts/pull_request_body.md)
         echo "${{ secrets.MOWORKFLOWTOKEN }}" > token.txt
         gh auth login --with-token < token.txt
