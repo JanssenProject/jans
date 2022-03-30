@@ -182,16 +182,7 @@ public abstract class JwtClaimSet {
         if (value == null) {
             setNullClaim(key);
         } else if (value instanceof String) {
-            if (overrideValue) {
-                setClaim(key, (String) value);
-            } else {
-                Object currentValue = getClaim(key);
-                if (currentValue != null) {
-                    setClaim(key, Lists.newArrayList(currentValue.toString(), (String) value));
-                } else {
-                    setClaim(key, (String) value);
-                }
-            }
+            setClaimString(key, value, overrideValue);
         } else if (value instanceof Date) {
             setClaim(key, (Date) value);
         } else if (value instanceof Boolean) {
@@ -212,6 +203,15 @@ public abstract class JwtClaimSet {
             setClaim(key, (JSONArray) value);
         } else {
             throw new UnsupportedOperationException("Claim value is not supported, key: " + key + ", value :" + value);
+        }
+    }
+
+    private void setClaimString(String key, Object value, boolean overrideValue) {
+        Object currentValue = getClaim(key);
+        if (overrideValue || currentValue == null) {
+            setClaim(key, (String) value);
+        } else {
+            setClaim(key, Lists.newArrayList(currentValue.toString(), (String) value));
         }
     }
 
@@ -243,7 +243,7 @@ public abstract class JwtClaimSet {
         claims.put(key, value);
     }
 
-    public void setClaim(String key, List values) {
+    public void setClaim(String key, List<?> values) {
         claims.put(key, values);
     }
 
@@ -288,7 +288,7 @@ public abstract class JwtClaimSet {
                     JwtSubClaimObject subClaimObject = (JwtSubClaimObject) claim.getValue();
                     jsonObject.put(subClaimObject.getName(), subClaimObject.toJsonObject());
                 } else if (claim.getValue() instanceof List) {
-                    List claimObjectList = (List) claim.getValue();
+                    List<?> claimObjectList = (List<?>) claim.getValue();
                     JSONArray claimsJSONArray = new JSONArray();
                     for (Object claimObj : claimObjectList) {
                         claimsJSONArray.put(claimObj);

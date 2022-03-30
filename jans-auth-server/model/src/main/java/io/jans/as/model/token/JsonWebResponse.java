@@ -22,8 +22,8 @@ public class JsonWebResponse implements Serializable {
 
     private static final long serialVersionUID = -4141298937204111173L;
 
-    protected JwtHeader header;
-    protected JwtClaims claims;
+    protected transient JwtHeader header;
+    protected transient JwtClaims claims;
 
     public JsonWebResponse() {
         this.header = new JwtHeader();

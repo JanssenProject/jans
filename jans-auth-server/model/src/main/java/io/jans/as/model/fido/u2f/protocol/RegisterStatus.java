@@ -44,7 +44,7 @@ public class RegisterStatus implements Serializable {
 
     @JsonIgnore
     public String getRequestId() {
-        return challenge;
+        return getChallenge();
     }
 
     @Override

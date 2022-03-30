@@ -112,7 +112,7 @@ public class ResourceRegistrar {
 
         } catch (Exception ex) {
             LOG.error(ex.getMessage(), ex);
-            throw ex;
+            throw (RuntimeException) ex;
         }
     }
 

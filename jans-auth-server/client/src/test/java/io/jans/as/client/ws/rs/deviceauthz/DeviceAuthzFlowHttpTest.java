@@ -334,7 +334,7 @@ public class DeviceAuthzFlowHttpTest extends BaseTest {
                 .check();
 
         // 6. Request new access token using the refresh token.
-        TokenResponse tokenResponse2 = processNewTokenWithRefreshToken(StringUtils.implode(scopes, " "),
+        TokenResponse tokenResponse2 = processNewTokenWithRefreshToken(StringUtils.implode(Collections.singleton(scopes), " "),
                 refreshToken, clientId, clientSecret);
         validateTokenSuccessfulResponse(tokenResponse2);
 

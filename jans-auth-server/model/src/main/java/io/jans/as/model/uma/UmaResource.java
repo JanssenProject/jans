@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import io.jans.as.model.exception.InvalidParameterException;
 import org.apache.commons.lang.StringUtils;
 import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
 
@@ -127,15 +128,15 @@ public class UmaResource {
         return scopeExpression;
     }
 
-    public void setScopeExpression(String scopeExpression) {
+    public void setScopeExpression(String scopeExpression) throws InvalidParameterException{
         assertValidExpression(scopeExpression);
         this.scopeExpression = scopeExpression;
     }
 
     @JsonIgnore
-    public static void assertValidExpression(String scopeExpression) {
+    public static void assertValidExpression(String scopeExpression)  throws InvalidParameterException{
         if (!isValidExpression(scopeExpression)) {
-            throw new RuntimeException("Scope expression is not valid json logic expression. Expression:" + scopeExpression);
+            throw new InvalidParameterException("Scope expression is not valid json logic expression. Expression:" + scopeExpression);
         }
     }
 

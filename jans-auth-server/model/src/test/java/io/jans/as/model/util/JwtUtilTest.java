@@ -28,7 +28,7 @@ public class JwtUtilTest {
         JwtUtil.transferIntoJwtClaims(json, jwt);
 
         final JwtClaims claims = jwt.getClaims();
-        assertEquals("true", claims.getClaimAsString("active"));
-        assertEquals("valueTest", claims.getClaimAsString("key"));
+        assertEquals(claims.getClaimAsString("active"), "true");
+        assertEquals(claims.getClaimAsString("key"), "valueTest");
     }
 }
