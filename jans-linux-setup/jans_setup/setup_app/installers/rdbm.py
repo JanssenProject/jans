@@ -289,13 +289,13 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                                             tblCls,
                                             ind_name,
                                             i+1,
-                                            tmp_str.safe_substitute({'field':attr.name, 'data_type': data_type})
+                                            tmp_str.safe_substitute({'field':attr.name})
                                             )
                                     self.dbUtils.exec_rdbm_query(sql_cmd)
                                 elif Config.rdbm_type == 'pgsql':
                                     sql_cmd ='CREATE INDEX ON "{}" (({}));'.format(
                                             tblCls,
-                                            tmp_str.safe_substitute({'field':attr.name, 'data_type': data_type})
+                                            tmp_str.safe_substitute({'field':attr.name})
                                             )
                                     self.dbUtils.exec_rdbm_query(sql_cmd)
 
