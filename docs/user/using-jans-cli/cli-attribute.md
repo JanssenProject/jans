@@ -387,7 +387,7 @@ Modify it to update attribute `name`, `display name`, `view type`:
 nano /tmp/attribute.json
 ```
 
-![post-attribute.png](../img/image-cl-post-attribute-03042021.png)
+![post-attribute.png](../assets/user/using-jans-cli/images/image-cl-post-attribute-03042021.png)
 
 Now, let's add this attribute using `post-attributes`:
 ```commandline
@@ -607,7 +607,7 @@ If we look at the description, we see that there is a schema file. Let's get the
 
 Let's modify this schema file to change the status of an attribute as below:
 
-![](../img/image-cl-attribute-patch-03042021.png)
+![](../assets/user/using-jans-cli/images/image-cl-attribute-patch-03042021.png)
 
 In the above image, added two tasks. To know more about how we can modify this schema file to perform a specific task, follow this link: [patch-request-schema](cli-tips.md#patch-request-schema)
 

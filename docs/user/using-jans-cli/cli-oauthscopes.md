@@ -156,7 +156,7 @@ Now edit file `tmp/scope.json` with an editor (like **nano**). As an example we 
 "description": "Test Scope created by jans-cli",
 ```
 
-![jans-cl Edit scope.json](../img/image-cl-oauthscope-json-03042021.png) 
+![jans-cl Edit scope.json](../assets/user/using-jans-cli/images/image-cl-oauthscope-json-03042021.png) 
 
 It is time to post the data:
 
@@ -279,7 +279,7 @@ Let's Get schema:
 
 We can edit this json as follows (remember to make it an array):
 
-![jans-cl Edit patch.json](../img/image-cl-oauthscope-patch-json-03042021.png)
+![jans-cl Edit patch.json](../assets/user/using-jans-cli/images/image-cl-oauthscope-patch-json-03042021.png)
 
 Let's do the operation:
 
