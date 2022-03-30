@@ -5,7 +5,7 @@
 	<groupId>io.jans</groupId>
 	<artifactId>jans-auth-server-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>1.0.0-jetty-SNAPSHOT</version>
 	<name>Jans authentication server parent</name>
 
 	<properties>
@@ -107,7 +107,7 @@
             <dependency>
                 <groupId>io.jans</groupId>
                 <artifactId>jans-bom</artifactId>
-                <version>1.0.0-SNAPSHOT</version>
+                <version>1.0.0-jetty-SNAPSHOT</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
