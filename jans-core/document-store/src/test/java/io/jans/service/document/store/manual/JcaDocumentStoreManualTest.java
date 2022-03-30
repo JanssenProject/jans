@@ -17,7 +17,7 @@ import io.jans.service.document.store.conf.JcaDocumentStoreConfiguration;
 import io.jans.service.document.store.conf.LocalDocumentStoreConfiguration;
 import io.jans.service.document.store.provider.DocumentStoreProvider;
 
-import jakarta.jcr.RepositoryException;
+import javax.jcr.RepositoryException;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
