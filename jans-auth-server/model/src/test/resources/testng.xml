@@ -7,23 +7,23 @@
         </classes>
     </test>
 
-    <test name="JS Engine test" enabled="true">
+    <test name="JS Engine test" enabled="false">
         <classes>
             <class name="io.jans.as.model.uma.JsonLogicTest" />
         </classes>
     </test>
-    <test name="JsonLogic Node Parser Test" enabled="true">
+    <test name="JsonLogic Node Parser Test" enabled="false">
         <classes>
             <class name="io.jans.as.model.uma.JsonLogicNodeParserTest" />
         </classes>
     </test>
-    <test name="CertUtils Test" enabled="true">
+    <test name="CertUtils Test" enabled="false">
         <classes>
             <class name="io.jans.as.model.util.CertUtilsTest"/>
         </classes>
     </test>
 
-    <test name="JWK Thumbprint Computation Test" enabled="true">
+    <test name="JWK Thumbprint Computation Test" enabled="false">
         <classes>
             <class name="io.jans.as.model.jwk.JSONWebKeyTest"/>
         </classes>
