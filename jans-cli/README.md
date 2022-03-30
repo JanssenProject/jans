@@ -87,18 +87,18 @@ python3 config-cli.pyz -h
     This command will install executable called `jans-cli` available in virtual environment `PATH`.
 
 
-![](docs/img/image-build-jans-cli-pyz-manually-03042021.png)
+![](../docs/assets/user/using-jans-cli/images/image-build-jans-cli-pyz-manually-03042021.png)
 
 
 ## Virtual Machine Setup
 
 **jans-cli** is automatically installed if you choose `jans-config-api` during [Janssen Server](https://github.com/JanssenProject/home/blob/main/development.md#install-janssen-into-vm) Installation on Virtual Machine. 
 
-![](docs/img/image-jans-config-api-03042021.png)
+![](../docs/assets/user/using-jans-cli/images/image-jans-config-api-03042021.png)
 
 After successfully installed Janssen Server, you will get two command-line arguments as below:
 
-![](docs/img/image-installed-03042021.png)
+![](../docs/assets/user/using-jans-cli/images/image-installed-03042021.png)
 
 # _Quick Start_
 
@@ -121,17 +121,17 @@ sudo update-alternatives --install /usr/bin/python python /usr/bin/python3 10
 
 You will get a menu as below image:
 
-![main-menu.png](docs/img/image-im-main-03042021.png)
+![main-menu.png](../docs/assets/user/using-jans-cli/images/image-im-main-03042021.png)
 
 From the following list, you can choose any options by selecting its number. For example, let's say number 2,
 to get **Default Authentication Method**.
 
 That returns another two options as below:
 
-![option-2-option.png](docs/img/image-im-default-auth-02-03042021.png)
+![option-2-option.png](../docs/assets/user/using-jans-cli/images/image-im-default-auth-02-03042021.png)
 
 Now selecting 1 and it returns our desired result as below image:
 
-![default-authentication-method.png](docs/img/image-im-cur-default-auth-03042021.png)
+![default-authentication-method.png](../docs/assets/user/using-jans-cli/images/image-im-cur-default-auth-03042021.png)
 
 So, That was a quick start to view how this _jans-cli_ Interactive Mode works. Please, follow this [link](docs) to read the _jans-cli_ docs for a better understanding of the Janssen Command-Line.
