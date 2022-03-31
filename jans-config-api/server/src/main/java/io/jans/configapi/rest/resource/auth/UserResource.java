@@ -9,6 +9,8 @@ package io.jans.configapi.rest.resource.auth;
 import com.github.fge.jsonpatch.JsonPatchException;
 import static io.jans.as.model.util.Util.escapeLog;
 import io.jans.as.common.model.common.User;
+import io.jans.as.common.model.registration.Client;
+import io.jans.as.common.service.common.EncryptionService;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.rest.model.SearchRequest;
 import io.jans.configapi.service.auth.UserService;
@@ -30,7 +32,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
 @Path(ApiConstants.USER)
@@ -43,6 +45,9 @@ public class UserResource extends BaseResource {
 
     @Inject
     Logger logger;
+
+    @Inject
+    EncryptionService encryptionService;
 
     @Inject
     UserService userSrv;
@@ -68,7 +73,7 @@ public class UserResource extends BaseResource {
 
         final List<User> users = this.doSearch(searchReq);
         logger.error("User serach result:{}", users);
-        return Response.ok(users).build();
+        return Response.ok(getUsers(users)).build();
     }
 
     @GET
@@ -89,8 +94,7 @@ public class UserResource extends BaseResource {
         if (logger.isDebugEnabled()) {
             logger.debug("User details to be added - user:{}", escapeLog(user));
         }
-
-        user = userSrv.addUser(user, true);
+        user = userSrv.addUser(encryptUserPassword(user), true);
         logger.error("User created {}", user);
         return Response.status(Response.Status.CREATED).entity(user).build();
     }
@@ -100,8 +104,8 @@ public class UserResource extends BaseResource {
     public Response updateUser(@Valid User user) throws EncryptionException {
         if (logger.isDebugEnabled()) {
             logger.debug("User details to be updated - user:{}", escapeLog(user));
-        }              
-        user = userSrv.updateUser(user);      
+        }
+        user = userSrv.updateUser(encryptUserPassword(user));
         logger.debug("Updated user:{}", user);
 
         return Response.ok(user).build();
@@ -156,6 +160,25 @@ public class UserResource extends BaseResource {
             logger.debug("Users fetched  - users:{}", users);
         }
         return users;
+    }
+
+    private List<User> getUsers(List<User> users) throws EncryptionException {
+        if (users != null && !users.isEmpty()) {
+            for (User user : users) {
+                if (StringUtils.isNotBlank(user.getAttribute("userPassword"))) {
+                    user.setAttribute("userPassword", encryptionService.decrypt(user.getAttribute("userPassword")),
+                            false);
+                }
+            }
+        }
+        return users;
+    }
+
+    private User encryptUserPassword(User user) throws EncryptionException {
+        if (StringUtils.isNotBlank(user.getAttribute("userPassword"))) {
+            user.setAttribute("userPassword", encryptionService.encrypt(user.getAttribute("userPassword")), false);
+        }
+        return user;
     }
 
 }
