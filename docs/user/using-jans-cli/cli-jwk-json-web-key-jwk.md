@@ -1,5 +1,7 @@
 # JSON Web Key (JWK)
 
+> Prerequisite: Know how to use the Janssen CLI in [command-line mode](cli-index.md)
+
 This operation is used to get the JSON Web Key Set (JWKS) from OP host. The JWKS is a set of keys containing the public keys that should be used to verify any JSON Web Token (JWT) issued by the authorization server.
 
 There are few operations we can do using `jans-cli` commands. To get list of operations id run below command:

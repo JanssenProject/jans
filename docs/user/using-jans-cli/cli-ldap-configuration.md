@@ -1,6 +1,8 @@
 
 # Lightweight Directory Active Protocol (LDAP) Configuration
 
+> Prerequisite: Know how to use the Janssen CLI in [command-line mode](cli-index.md)
+
 As like as [Interactive Menu](../im/im-ldap-configuration.md), We can do the same operations here.
 Let's run the following command to get operation-id details of LDAP Database COnfiguration.
 

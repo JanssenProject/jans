@@ -1,5 +1,7 @@
 # OAuth Scopes
 
+> Prerequisite: Know how to use the Janssen CLI in [command-line mode](cli-index.md)
+
 Let's get information for a task **OAuthScopes**
 
 ```
