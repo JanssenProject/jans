@@ -10,10 +10,13 @@ package io.jans.as.model.ciba;
  * @author Javier Rojas Blum
  * @version May 9, 2019
  */
-public interface PushErrorRequestParam {
+public class PushErrorRequestParam {
 
-    String AUTHORIZATION_REQUEST_ID = "auth_req_id";
-    String ERROR = "error";
-    String ERROR_DESCRIPTION = "error_description";
-    String ERROR_URI = "error_uri";
+    private PushErrorRequestParam() {
+    }
+
+    public static final String AUTHORIZATION_REQUEST_ID = "auth_req_id";
+    public static final String ERROR = "error";
+    public static final String ERROR_DESCRIPTION = "error_description";
+    public static final String ERROR_URI = "error_uri";
 }

@@ -86,9 +86,9 @@ public class UmaPermission implements Serializable {
     }
 
     public void resetTtlFromExpirationDate() {
-        final Integer ttl = Util.getNumberOfSecondFromNow(getExpirationDate());
-        if (ttl != null) {
-            setTtl(ttl);
+        final Integer calculatedTtl = Util.getNumberOfSecondFromNow(getExpirationDate());
+        if (calculatedTtl != null) {
+            setTtl(calculatedTtl);
         }
     }
 
