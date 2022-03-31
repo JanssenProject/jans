@@ -6,11 +6,8 @@
 
 package io.jans.configapi.model.user;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.jans.orm.annotation.AttributeName;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -18,26 +15,16 @@ public class Group {
 
     public enum Type {DIRECT, INDIRECT}
 
-    @Attribute(description = "The identifier of the User's group.",
-            isRequired = true,  //Specs says the converse, but doesn't make sense
-            mutability = AttributeDefinition.Mutability.READ_ONLY)
-    @StoreReference(ref = "memberOf")
+    @AttributeName(name = "value")
     private String value;
 
-    @Attribute(description = "The URI of the corresponding Group resource to which the user belongs",
-            referenceTypes = { "User", "Group" },
-            mutability = AttributeDefinition.Mutability.READ_ONLY,
-            type = AttributeDefinition.Type.REFERENCE)
-    @JsonProperty("$ref")
+    @AttributeName(name = "ref")
     private String ref;
 
-    @Attribute(description = "A human readable name, primarily used for display purposes.",
-            mutability = AttributeDefinition.Mutability.READ_ONLY)
+    @AttributeName(name = "display")
     private String display;
 
-    @Attribute(description = "A label indicating the attribute's function; e.g., 'direct' or 'indirect'.",
-            canonicalValues = { "direct", "indirect" },
-            mutability = AttributeDefinition.Mutability.READ_ONLY)
+    @AttributeName(name = "type")
     private String type;
 
     public String getValue() {
