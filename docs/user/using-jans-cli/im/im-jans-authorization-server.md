@@ -1,5 +1,7 @@
 # Janssen Authorization Server
 
+> Prerequisite: Know how to use the Janssen CLI in [interactive mode](im-index.md)
+
 From the Main Menu choose option 8 to `get/modify` Jans authorization server configuration properties.
 ```text
 Configuration – Properties

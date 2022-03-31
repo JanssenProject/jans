@@ -1,5 +1,6 @@
 # SMTP Condifuration
 
+> Prerequisite: Know how to use the Janssen CLI in [interactive mode](im-index.md)
 
 Janssen CLI also supports SMTP configuration. You can do the following things as stated below:
 - `View/Get`
