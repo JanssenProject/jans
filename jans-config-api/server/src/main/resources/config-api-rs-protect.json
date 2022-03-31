@@ -690,6 +690,29 @@
                 ]
             }
         ]
+    },
+	{
+        "path":"/jans-config-api/api/v1/user",
+        "conditions":[
+            {
+                "httpMethods":["GET"],
+                "scopes":[
+                    "https://jans.io/oauth/config/user.readonly"
+                ]
+            },
+            {
+                "httpMethods":["PATCH","POST","PUT"],
+                "scopes":[
+                    "https://jans.io/oauth/config/user.write"
+                ]
+            },
+            {
+                "httpMethods":["DELETE"],
+                "scopes":[
+                    "https://jans.io/oauth/config/user.delete"
+                ]
+            }
+        ]
     }
 ]
 }
