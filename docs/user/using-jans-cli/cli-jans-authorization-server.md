@@ -513,7 +513,7 @@ It will create a `.json` file in `/tmp` with schema.
 Let's modify this schema:
 `nano /tmp/patch-jans-auth.json`
 
-![patch jans auth](../img/cl-patch-jans-auth.png)
+![patch jans auth](../../assets/user/using-jans-cli/images/image-cl-patch-jans-auth-03042021.png)
 
 This schema has three properties; `op`, `path` & `value`.
 Let's perform a `replace` operation at `cibaEnabled` to change it from `false` to `true`.
@@ -539,6 +539,6 @@ Now, let's do the operation.
 
 If you run the following command line, you must see that `cibaEnabled` is `true`:
 
-![Update result Jans Auth](../img/cl-update-jans-auth.png)
+![Update result Jans Auth](../../assets/user/using-jans-cli/images/image-cl-update-jans-auth-03042021.png)
 
 
