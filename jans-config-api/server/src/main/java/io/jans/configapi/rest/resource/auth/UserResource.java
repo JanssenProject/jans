@@ -79,13 +79,13 @@ public class UserResource extends BaseResource {
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS })
     @Path(ApiConstants.INUM_PATH)
-    public Response getUserByInum(@PathParam(ApiConstants.INUM) @NotNull String inum) {
+    public Response getUserByInum(@PathParam(ApiConstants.INUM) @NotNull String inum) throws EncryptionException {
         if (logger.isDebugEnabled()) {
             logger.debug("User serach by inum:{}", escapeLog(inum));
         }
         User user = userSrv.getUserByInum(inum);
         logger.error("Based on inum:{}, user:{}", inum, user);
-        return Response.ok(user).build();
+        return Response.ok(decryptUserPassword(user)).build();
     }
 
     @POST
@@ -96,7 +96,7 @@ public class UserResource extends BaseResource {
         }
         user = userSrv.addUser(encryptUserPassword(user), true);
         logger.error("User created {}", user);
-        return Response.status(Response.Status.CREATED).entity(user).build();
+        return Response.status(Response.Status.CREATED).entity(decryptUserPassword(user)).build();
     }
 
     @PUT
@@ -106,9 +106,9 @@ public class UserResource extends BaseResource {
             logger.debug("User details to be updated - user:{}", escapeLog(user));
         }
         user = userSrv.updateUser(encryptUserPassword(user));
-        logger.debug("Updated user:{}", user);
+        logger.error("Updated user:{}", user);
 
-        return Response.ok(user).build();
+        return Response.ok(decryptUserPassword(user)).build();
     }
 
     @PATCH
@@ -116,7 +116,7 @@ public class UserResource extends BaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS })
     @Path(ApiConstants.INUM_PATH)
     public Response patchUser(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString)
-            throws JsonPatchException, IOException {
+            throws EncryptionException, JsonPatchException, IOException {
         if (logger.isDebugEnabled()) {
             logger.debug("User details to be patched - inum:{}, pathString:{}", escapeLog(inum), escapeLog(pathString));
         }
@@ -124,8 +124,9 @@ public class UserResource extends BaseResource {
         checkResourceNotNull(existingUser, USER);
 
         existingUser = Jackson.applyPatch(pathString, existingUser);
-        userSrv.updateUser(existingUser);
-        return Response.ok(existingUser).build();
+        existingUser = userSrv.updateUser(existingUser);
+        logger.error("Updated user:{}", existingUser);
+        return Response.ok(decryptUserPassword(existingUser)).build();
     }
 
     @DELETE
@@ -177,6 +178,13 @@ public class UserResource extends BaseResource {
     private User encryptUserPassword(User user) throws EncryptionException {
         if (StringUtils.isNotBlank(user.getAttribute("userPassword"))) {
             user.setAttribute("userPassword", encryptionService.encrypt(user.getAttribute("userPassword")), false);
+        }
+        return user;
+    }
+
+    private User decryptUserPassword(User user) throws EncryptionException {
+        if (StringUtils.isNotBlank(user.getAttribute("userPassword"))) {
+            user.setAttribute("userPassword", encryptionService.decrypt(user.getAttribute("userPassword")), false);
         }
         return user;
     }
