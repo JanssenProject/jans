@@ -2,7 +2,7 @@
 
 <suite name="UMA RS Resteasy Suite" parallel="false">
 
-    <test name="Core" enabled="false">
+    <test name="Core" enabled="true">
         <classes>
             <class name="io.jans.ca.rs.protect.resteasy.KeyTest"/>
             <class name="io.jans.ca.rs.protect.resteasy.ConfigurationLoaderTest"/>
