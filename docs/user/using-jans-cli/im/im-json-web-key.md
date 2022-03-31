@@ -1,5 +1,7 @@
 # JWT Management
 
+> Prerequisite: Know how to use the Janssen CLI in [interactive mode](im-index.md)
+
 This operation is used to get the JSON Web Key Set (JWKS) from OP host. The JWKS is a set of keys containing the public 
 keys that should be used to verify any JSON Web Token (JWT) issued by the authorization server.
 From the Main Menu, select option 12, It returns some options as stated below:
