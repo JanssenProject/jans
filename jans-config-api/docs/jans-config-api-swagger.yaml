@@ -34,6 +34,7 @@ tags:
   - name: Statistics - User
   - name: Health - Check
   - name: Server Stats
+  - name: User Management
   - name: SCIM - User Management
   - name: SCIM - Config Management
   - name: Organization Configuration
@@ -2396,6 +2397,193 @@ paths:
                 $ref: '#/components/schemas/StatsData'
         '500':
           description: Internal Server Error
+		  
+  /jans-config-api/api/v1/user:
+    get:
+      tags:
+        - User Management
+      summary: Gets list of users
+      description: Gets list of users
+      operationId: get-user
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: Users.
+                description: List of users.
+                items:
+                  $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          description: Internal Server Error
+      security:
+        - oauth2: [https://jans.io/oauth/config/user.readonly]
+      parameters:
+        - schema:
+            type: integer
+            default: 50
+          in: query
+          name: limit
+          description: Search size - max size of the results to return.
+        - schema:
+            type: string
+          in: query
+          name: pattern
+          description: Search pattern.
+        - schema:
+            type: integer
+            default: 1
+          in: query
+          name: startIndex
+          description: The 1-based index of the first query result.
+        - schema:
+            type: string
+            default: inum
+          in: query
+          name: sortBy
+          description: Attribute whose value will be used to order the returned response.
+        - schema:
+            type: string
+            default: ascending
+            enum:
+              - ascending
+              - descending
+          in: query
+          name: sortOrder
+          description: Order in which the sortBy param is applied. Allowed values are "ascending" and "descending".
+    post:
+      tags:
+        - User Management
+      summary: Create new User
+      description: Create new User
+      operationId: post-user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: User Details.
+              description: User Details.
+              $ref: '#/components/schemas/User'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                title: User Details.
+                $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          description: Internal Server Error
+      security:
+        - oauth2: [https://jans.io/oauth/config/user.write]
+    put:
+      tags:
+        - User Management
+      summary: Update User.
+      description: Update User.
+      operationId: put-user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: User Details.
+              $ref: '#/components/schemas/User'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: User Details.
+                $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          description: Internal Server Error
+      security:
+        - oauth2: [https://jans.io/oauth/config/user.write]
+  /jans-config-api/api/v1/user/{inum}:
+    parameters:
+      - schema:
+          type: string
+        name: inum
+        in: path
+        description: User identifier
+        required: true
+    get:
+      tags:
+        - User Management
+      summary: Get User by Inum
+      description: Get User by Inum.
+      operationId: get-user-by-inum
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          description: Internal Server Error
+      security:
+        - oauth2: [https://jans.io/oauth/config/user.readonly]
+    delete:
+      tags:
+        - User Management
+      summary: Delete User.
+      description: Delete User.
+      operationId: delete-user
+      responses:
+        '204':
+          description: No Content
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          description: Internal Server Error
+      security:
+        - oauth2: [https://jans.io/oauth/config/user.delete]
+    patch:
+      tags:
+        - User Management
+      summary: Update modified properties of user by Inum.
+      description: Update modified properties of user by Inum.
+      operationId: patch-user-by-inum
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/PatchRequest'
+                description: String representing patch-document.
+                example: '[ {op:replace, path: userId, value: test_user_100 } ]'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: User Details.
+                $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          description: Internal Server Error
+      security:
+        - oauth2: [https://jans.io/oauth/config/user.write]
 
   /jans-config-api/scim/user:
     get:
@@ -3433,6 +3621,10 @@ components:
             https://jans.io/scim/config.write: Manage SCIM App configuration
             https://jans.io/oauth/config/organization.readonly: View organization configuration information
             https://jans.io/oauth/config/organization.write: Manage organization configuration information
+            https://jans.io/oauth/config/user.readonly: View user related information
+            https://jans.io/oauth/config/user.write: Manage user related information
+            https://jans.io/oauth/config/user.delete: Delete user related information
+            
 
   responses:
     Found:
@@ -6292,7 +6484,7 @@ components:
           description: A human readable name, primarily used for  display purposes.
           type: string
         type:
-          description: 'A label indicating the attribute's  function; e.g., 'work' or 'home'.'
+          description: A label indicating the attribute's  function; e.g., 'work' or 'home'.
           type: string
           example: work
         primary:
@@ -6344,7 +6536,7 @@ components:
           description: A human readable name, primarily used for display purposes.
           type: string
         type:
-          description: 'A label indicating the attribute's function; e.g., 'photo' or 'thumbnail'.'
+          description: A label indicating the attribute's function; e.g., 'photo' or 'thumbnail'.
           type: string
           example: thumbnail
         primary:
@@ -6375,7 +6567,7 @@ components:
           description: Country expressed in ISO 3166-1 "alpha-2" code format
           example: UK
         type:
-          description: 'A label indicating the attribute's  function; e.g., 'work' or 'home'.'
+          description: A label indicating the attribute's  function; e.g., 'work' or 'home'.
           type: string
           example: home
         primary:
@@ -6806,7 +6998,7 @@ components:
         mail:
           description: Primary Email Address.
           type: string
-       memberOf:
+        memberOf:
           description: Groups with which a person is associated.
           type: array
           items:
@@ -6857,7 +7049,7 @@ components:
           items:
            $ref: '#/components/schemas/Entitlement'
         extId:
-          description: 'User's external id.'
+          description: User's external id.
           type: string
         imsValue:
           description: Instant messaging address value.
@@ -6865,11 +7057,11 @@ components:
           items:
             $ref: '#/components/schemas/InstantMessagingAddress'
         created:
-          description: 'Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating creation time.'
+          description: Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating creation time.
           type: string
           format: date-time
         lastModified:
-          description: 'Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating last modified time.'
+          description: Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating last modified time.
           type: string
           format: date-time
         location:
@@ -6954,11 +7146,11 @@ components:
           description: Date of birth of the user. Year of birth (four digits),Month of birth (1-12),Day of birth
           type: string
           format: date-time
-       timezone:
+        timezone:
          description: Time zone database representing the End-Usrs time zone. For example, Europe/Paris or America/Los_Angeles
          type: string
          example: America/Los_Angeles
-       locale:
+        locale:
          description: Locale of the person, represented as a BCP47 [RFC5646] language tag. Used for purposes of localizing items such as currency and dates.
          type: string
          example: en-US
@@ -7001,14 +7193,13 @@ components:
         userPassword:
           description: user password
           type: string
-        st:
+        state:
           description: State or Province
           type: string
         street:
           type: string
-        l:
-        st:
-          description: State or Province
+        city:
+          description: Locality Name or city	
           type: string
         countInvalidLogin:
           description: Invalid login attempts count
@@ -7020,7 +7211,7 @@ components:
           description: This data has information about your imap connection
           type: string		
         ppid:
-         description: Persistent Pairwise ID for OpenID Connect
+          description: Persistent Pairwise ID for OpenID Connect
           type: array
           items:
             type: string	
