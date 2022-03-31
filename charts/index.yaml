@@ -10,8 +10,6 @@ entries:
           image: janssenproject/auth-server:1.0.0_jetty_dev
         - name: auth-server-key-rotation
           image: janssenproject/certmanager:1.0.0_jetty_dev
-        - name:  client-api
-          image: janssenproject/client-api:1.0.0_jetty_dev
         - name: configuration-manager
           image: janssenproject/configurator:1.0.0_jetty_dev
         - name:  config-api
@@ -31,7 +29,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.0
-    created: "2022-03-31T10:32:54.3716274Z"
+    created: "2022-03-31T11:30:35.0949854Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -74,7 +72,7 @@ entries:
       repository: ""
       version: 1.0.0-dev
     description: Janssen Access and Identity Management
-    digest: 5f799a254b5d95e789ceabfcc5ba7dffb86e7ce826d0674cfd40bcf59de52550
+    digest: 965783767838f1c6f0c1c783b7c829d523f59e1ead675774348311b6d5615417
     home: https://jans.io
     icon: https://github.com/JanssenProject/jans/raw/main/docs/logo/janssen_project_favicon_transparent_50px_50px.png
     kubeVersion: '>=v1.21.0-0'
@@ -118,7 +116,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.0
-    created: "2022-03-31T10:32:54.3358252Z"
+    created: "2022-03-31T11:30:35.0819539Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -205,7 +203,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.0
-    created: "2022-03-31T10:32:54.2765225Z"
+    created: "2022-03-31T11:30:35.0671911Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -292,7 +290,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.0
-    created: "2022-03-31T10:32:54.2221189Z"
+    created: "2022-03-31T11:30:35.0517137Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -349,4 +347,4 @@ entries:
     urls:
     - janssen-1.0.0-beta.14.tgz
     version: 1.0.0-beta.14
-generated: "2022-03-31T10:32:54.1788093Z"
+generated: "2022-03-31T11:30:35.0369853Z"
