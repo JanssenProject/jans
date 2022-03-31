@@ -67,7 +67,7 @@ nano /tmp/log-config.json
 
 Here I have updated `loggingLevel` to `DEBUG` and `enabledOAuditLogging` to `true` as below image.
 
-![updated logging](../img/cl-update-logging.png)
+![updated logging](../../assets/user/using-jans-cli/images/image-cl-update-logging-03042021.png)
 
 
 Let's do the operation:
