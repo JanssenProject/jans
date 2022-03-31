@@ -10,7 +10,7 @@ package io.jans.as.model.authorize;
  * @author Javier Rojas Blum
  * @version July 28, 2021
  */
-public class AuthorizeResponseParam {
+public final class AuthorizeResponseParam {
 
     private AuthorizeResponseParam() { throw new IllegalStateException("Utility class");}
 

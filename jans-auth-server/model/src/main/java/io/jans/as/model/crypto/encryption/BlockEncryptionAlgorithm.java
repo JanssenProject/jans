@@ -8,14 +8,14 @@ package io.jans.as.model.crypto.encryption;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-
 /**
  * @author Javier Rojas Blum Date: 12.03.2012
  */
+
 public enum BlockEncryptionAlgorithm {
 
-    A128CBC_PLUS_HS256(new BasicEncryptionData("A128CBC+HS256", "CBC", "AES/CBC/PKCS5Padding", 256, 128), "SHA-256", "HMACSHA256",  128),
-    A256CBC_PLUS_HS512(new BasicEncryptionData("A256CBC+HS512", "CBC", "AES/CBC/PKCS5Padding", 512, 128), "SHA-512", "HMACSHA512", 256),
+    A128CBC_PLUS_HS256("A128CBC+HS256", "CBC", "AES/CBC/PKCS5Padding", "SHA-256", "HMACSHA256", 256, 128, 128),
+    A256CBC_PLUS_HS512("A256CBC+HS512", "CBC", "AES/CBC/PKCS5Padding", "SHA-512", "HMACSHA512", 512, 128, 256),
     A128GCM("A128GCM", "GCM", "AES/GCM/NoPadding", 128, 96),
     A256GCM("A256GCM", "GCM", "AES/GCM/NoPadding", 256, 96);
 
@@ -39,15 +39,16 @@ public enum BlockEncryptionAlgorithm {
         this.cekLength = null;
     }
 
-    BlockEncryptionAlgorithm(BasicEncryptionData basicEncryptionData, String messageDiggestAlgorithm,
-                             String integrityValueAlgorithm, int cekLength) {
-        this.name = basicEncryptionData.getName();
-        this.family = basicEncryptionData.getFamily();
-        this.algorithm = basicEncryptionData.getAlgorithm();
+    @SuppressWarnings("java:S107")
+    BlockEncryptionAlgorithm(String name, String family, String algorithm, String messageDiggestAlgorithm,
+                             String integrityValueAlgorithm, int cmkLength, int initVectorLength, int cekLength) {
+        this.name = name;
+        this.family = family;
+        this.algorithm = algorithm;
         this.messageDiggestAlgorithm = messageDiggestAlgorithm;
         this.integrityValueAlgorithm = integrityValueAlgorithm;
-        this.cmkLength = basicEncryptionData.getCmkLength();
-        this.initVectorLength = basicEncryptionData.getInitVectorLength();
+        this.cmkLength = cmkLength;
+        this.initVectorLength = initVectorLength;
         this.cekLength = cekLength;
     }
 

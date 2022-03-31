@@ -128,15 +128,16 @@ public class UmaResource {
         return scopeExpression;
     }
 
-    public void setScopeExpression(String scopeExpression) throws InvalidParameterException{
+    public void setScopeExpression(String scopeExpression) {
         assertValidExpression(scopeExpression);
         this.scopeExpression = scopeExpression;
     }
 
+    @SuppressWarnings("java:S112")
     @JsonIgnore
-    public static void assertValidExpression(String scopeExpression)  throws InvalidParameterException{
+    public static void assertValidExpression(String scopeExpression) {
         if (!isValidExpression(scopeExpression)) {
-            throw new InvalidParameterException("Scope expression is not valid json logic expression. Expression:" + scopeExpression);
+            throw new RuntimeException("Scope expression is not valid json logic expression. Expression:" + scopeExpression);
         }
     }
 

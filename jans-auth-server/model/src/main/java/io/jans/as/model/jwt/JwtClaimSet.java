@@ -16,14 +16,7 @@ import org.json.JSONObject;
 
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Javier Rojas Blum
@@ -156,6 +149,8 @@ public abstract class JwtClaimSet {
         if (claim != null) {
             if (claim instanceof Long) {
                 return (Long) claim;
+            } else if (claim instanceof Integer) {
+                return Long.valueOf((Integer) claim);
             } else {
                 return null;
             }

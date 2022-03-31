@@ -45,11 +45,16 @@ public class StringUtils {
         }
     }
 
+    /**
+     * Check if first and second String Params are equals, even if both are null.
+     * @param str1 first String param
+     * @param str2 second String param
+     * @return true if both are null, true if both are equals, false in other cases
+     * @deprecated it is possible to use directly:   org.apache.commons.lang.StringUtils.equals(str1, str2);
+     */
+    @Deprecated
     public static boolean equals(String str1, String str2) {
-        if (str1 == null) {
-            return str2 == null;
-        }
-        return str1.equals(str2);
+        return org.apache.commons.lang.StringUtils.equals(str1, str2);
     }
 
     public static boolean equalsIgnoringSpaces(String a, String b) {

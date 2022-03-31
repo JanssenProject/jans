@@ -10,7 +10,7 @@ package io.jans.as.model.ciba;
  * @author Javier Rojas Blum
  * @version May 28, 2020
  */
-public class BackchannelAuthenticationRequestParam {
+public final class BackchannelAuthenticationRequestParam {
 
     private BackchannelAuthenticationRequestParam() {
     }

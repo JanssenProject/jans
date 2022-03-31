@@ -10,7 +10,7 @@ package io.jans.as.model.configuration;
  * @author Javier Rojas Blum
  * @version September 30, 2021
  */
-public class ConfigurationResponseClaim {
+public final class ConfigurationResponseClaim {
 
     private ConfigurationResponseClaim() {
     }
