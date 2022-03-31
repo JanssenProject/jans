@@ -1,5 +1,7 @@
 # Cache Configuration
 
+> Prerequisite: Know how to use the Janssen CLI in [interactive mode](im-index.md)
+
 In the following Main Menu, Options `3, 4, 5, 6 & 7` are for **Cache Configuration**. 
 - Cache Configuration
 - Cache Configuration – Memcached
