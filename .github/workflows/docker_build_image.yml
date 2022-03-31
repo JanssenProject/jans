@@ -115,7 +115,7 @@ jobs:
           CN_VERSION=${{ github.event.inputs.cn_version }}
           if [ ! -z "$CN_VERSION" ]
           then
-            python3 -c "from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('./docker-jans-${{ matrix.docker-images }}') ; dfparser.envs["CN_VERSION"] = ${{ github.event.inputs.cn_version }}"
+            python3 -c "from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('./docker-jans-${{ matrix.docker-images }}') ; dfparser.envs['CN_VERSION'] = ${{ github.event.inputs.cn_version }}"
             echo "War vesrion has been modified."
           else
             echo "$CN_VERSION"
