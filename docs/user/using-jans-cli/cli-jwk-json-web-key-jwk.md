@@ -385,7 +385,7 @@ Server Response:
 
 We see it has replaced `use` from `enc` to `sig`.
 
-Please read [tips](cli/../cli-tips.md), You can get some idea how this patch method works to modify particular properties of any task.
+Please read about [patch method](cli-index.md#quick-patch-operations), You can get some idea how this patch method works to modify particular properties of any task.
 
 ## Delete Json Web Key using kid
 

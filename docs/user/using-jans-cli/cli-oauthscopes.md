@@ -271,7 +271,7 @@ Operation ID: patch-oauth-scopes-by-id
   Schema: Array of /components/schemas/PatchRequest
  ```
  
-This means we need schema `/components/schemas/PatchRequest`, be careful it states **Array of**, so we will make an array of this schema, in case you need multiple changes with patch method, you can put as many as of this schema into array. To know more about `PatchRequest` schema, please visit this [link](cli-tips.md#patch-request).
+This means we need schema `/components/schemas/PatchRequest`, be careful it states **Array of**, so we will make an array of this schema, in case you need multiple changes with patch method, you can put as many as of this schema into array. To know more about `PatchRequest` schema, please visit this [link](cli-index.md#patch-request-schema).
 
 Let's Get schema:
 
