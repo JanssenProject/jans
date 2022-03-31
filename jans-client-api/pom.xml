@@ -12,7 +12,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.min-version>3.0.3</maven.min-version>
-        <jans-core.version>1.0.0-SNAPSHOT</jans-core.version>
+        <jans-core.version>${project.version}</jans-core.version>
         <jackson.version>2.10.1</jackson.version>
         <httpcomponents.version>4.1.2</httpcomponents.version>
         <jans-auth-server.version>1.0.0-SNAPSHOT</jans-auth-server.version>
