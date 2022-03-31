@@ -1,5 +1,7 @@
 # Cache Configuration
 
+> Prerequisite: Know how to use the Janssen CLI in [command-line mode](cli-index.md)
+
 Cache Configuration supports two types of operation through the Single Line command of Janssen CLI.
 Let's get the information for Cache Configuration.
 

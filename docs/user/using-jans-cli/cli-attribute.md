@@ -48,6 +48,8 @@ Table of Contents
 
 ## Get Attributes
 
+> Prerequisite: Know how to use the Janssen CLI in [command-line mode](cli-index.md)
+
 As we know, Attributes are individual pieces of user data, like `uid` or `email`, that are required by applications in order to identify a user and grant access to protect resources. The user attributes that are available in your Janssen Server can be found by using this operation-ID. If we look at the description below:
 
 ```text
