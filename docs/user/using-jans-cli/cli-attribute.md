@@ -611,7 +611,7 @@ Let's modify this schema file to change the status of an attribute as below:
 
 ![](../../assets/user/using-jans-cli/images/image-cl-attribute-patch-03042021.png)
 
-In the above image, added two tasks. To know more about how we can modify this schema file to perform a specific task, follow this link: [patch-request-schema](cli-tips.md#patch-request-schema)
+In the above image, added two tasks. To know more about how we can modify this schema file to perform a specific task, follow this link: [patch-request-schema](cli-index.md#patch-request-schema)
 
 Let's update an attribute by its `inum` value. In our case, `inum`: 6EEB. Before patching the selected attribute, you can check its properties using [get-attributes-by-inum](#get-attribute-by-inum) operation.
 
