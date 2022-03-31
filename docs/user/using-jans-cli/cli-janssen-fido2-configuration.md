@@ -1,5 +1,7 @@
 # Janssen FIDO2 Configuration
 
+> Prerequisite: Know how to use the Janssen CLI in [command-line mode](cli-index.md)
+
 Using Janssen CLI, You can `get/update` Fido2 properties.
 To get the information of Janssen Fido2 CLI, run the following command:
 
