@@ -361,24 +361,6 @@ objectClass: jansCustomScr
 jansEnabled: false
 jansProgLng: python
 
-dn: inum=92F0-759E,ou=scripts,o=jans
-description: ThumbSignIn authentication module
-displayName: thumb_sign_in
-inum: 92F0-759E
-jansConfProperty: {"value1":"ts_host","value2":"https://ts.host.com","description":""}
-jansConfProperty: {"value1":"ts_apiKey","value2":"ts_api_key","description":""}
-jansConfProperty: {"value1":"ts_apiSecret","value2":"ts_api_secret","description":""}
-jansLevel: 50
-jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
-jansModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
-jansRevision: 1
-jansScr::%(person_authentication_thumbsigninexternalauthenticator)s
-jansScrTyp: person_authentication
-objectClass: top
-objectClass: jansCustomScr
-jansEnabled: false
-jansProgLng: python
-
 dn: inum=A51E-76DA,ou=scripts,o=jans
 description: Sample authentication module
 displayName: basic
