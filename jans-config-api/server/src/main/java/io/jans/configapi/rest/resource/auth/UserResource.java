@@ -8,7 +8,8 @@ package io.jans.configapi.rest.resource.auth;
 
 import com.github.fge.jsonpatch.JsonPatchException;
 import static io.jans.as.model.util.Util.escapeLog;
-import io.jans.as.common.model.common.User;
+import  io.jans.as.common.model.common.User;
+//import io.jans.configapi.rest.model.user.User;
 import io.jans.as.common.service.common.EncryptionService;
 import io.jans.as.common.service.common.InumService;
 import io.jans.configapi.core.rest.ProtectedApi;

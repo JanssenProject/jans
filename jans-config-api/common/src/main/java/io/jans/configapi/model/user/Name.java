@@ -10,41 +10,29 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.apache.commons.lang.StringUtils;
 
 import io.jans.orm.annotation.AttributeName;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Name {
 
-    @Attribute(description = "The family name of the User, or Last  Name in most Western languages (for example, Jensen " +
-            "given the full name Ms. Barbara J Jensen, III.).")
-    @StoreReference(ref = "sn")
+    @AttributeName(name = "familyName")
     private String familyName;
 
-    @Attribute(description = "The given name of the User, or First Name  in most Western languages (for example, Barbara " +
-            "given the full name Ms. Barbara J Jensen, III.).")
-    @StoreReference(ref = "givenName")
+    @AttributeName(name = "givenName")
     private String givenName;
 
-    @Attribute(description = "The middle name(s) of the User (for example,  Robert given the full name Ms. Barbara J " +
-            "Jensen, III.).")
-    @StoreReference(ref = "middleName")
+    @AttributeName(name = "middleName")
     private String middleName;
 
-    @Attribute(description = "The honorific prefix(es) of the User, or  Title in most Western languages (for example, Ms. " +
-            "given the full name Ms. Barbara J Jensen, III.).")
-    @StoreReference(ref = "jansHonorificPrefix")
+    @AttributeName(name = "honorificPrefix")
     private String honorificPrefix;
 
-    @Attribute(description = "The honorific suffix(es) of the User, or  Suffix in most Western languages (for example, " +
-            "III. given the full name Ms. Barbara J Jensen, III.)")
-    @StoreReference(ref = "jansHonorificSuffix")
+    @AttributeName(name = "honorificSuffix")
     private String honorificSuffix;
 
-    @Attribute(description = "The full name, including all middle names, titles, and suffixes as appropriate, formatted " +
-            "for display (for example, Ms. Barbara J Jensen, III.).")
-    //This field is computed iff a value is not passed (ie is null)
-    @StoreReference(ref = "jansNameFormatted")
+    @AttributeName(name = "formatted")
     private String formatted;
 
     /**

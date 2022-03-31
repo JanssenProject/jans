@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.configapi.rest.model;
+package io.jans.configapi.rest.model.user;
 
 import io.jans.as.model.exception.InvalidClaimException;
 import org.json.JSONArray;
