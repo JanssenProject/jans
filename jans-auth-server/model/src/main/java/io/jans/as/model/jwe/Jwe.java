@@ -7,7 +7,6 @@
 package io.jans.as.model.jwe;
 
 import io.jans.as.model.exception.InvalidJweException;
-import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.token.JsonWebResponse;
 
@@ -35,7 +34,7 @@ public class Jwe extends JsonWebResponse {
         encodedIntegrityValue = null;
     }
 
-    public static Jwe parse(String encodedJwe, PrivateKey privateKey, byte[] sharedSymmetricKey) throws InvalidJweException, InvalidJwtException {
+    public static Jwe parse(String encodedJwe, PrivateKey privateKey, byte[] sharedSymmetricKey) throws InvalidJweException {
         Jwe jwe = null;
 
         if (privateKey != null) {
