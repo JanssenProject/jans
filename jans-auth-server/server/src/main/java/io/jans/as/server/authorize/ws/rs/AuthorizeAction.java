@@ -49,6 +49,7 @@ import io.jans.service.net.NetworkService;
 import io.jans.util.StringHelper;
 import io.jans.util.ilocale.LocaleUtil;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 
@@ -735,7 +736,7 @@ public class AuthorizeAction {
     }
 
     public void setLoginHint(String loginHint) {
-        this.loginHint = loginHint;
+        this.loginHint = StringEscapeUtils.escapeEcmaScript(loginHint);
     }
 
     public String getAcrValues() {
