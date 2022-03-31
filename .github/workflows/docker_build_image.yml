@@ -104,17 +104,19 @@ jobs:
           fi
           # If the user passed a manual image tag to build a custom manual image
           MANUAL_IMAGE_TAG=${{ github.event.inputs.image_tag }}
-          if [ -z "$MANUAL_IMAGE_TAG" ]
+          if [ ! -z "$MANUAL_IMAGE_TAG" ]
           then
             TAGS="$TAGS,${DOCKER_IMAGE}:${MANUAL_IMAGE_TAG}"
+            echo "Manual image tag has been inputed by the user"
           else
             echo "$TAGS"
           fi
           # If the user passed a war version to build off ,change this war version.
           CN_VERSION=${{ github.event.inputs.cn_version }}
-          if [ -z "$CN_VERSION" ]
+          if [ ! -z "$CN_VERSION" ]
           then
             python3 -c "from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('./docker-jans-${{ matrix.docker-images }}') ; dfparser.envs["CN_VERSION"] = ${{ github.event.inputs.cn_version }}"
+            echo "War vesrion has been modified."
           else
             echo "$CN_VERSION"
           fi
