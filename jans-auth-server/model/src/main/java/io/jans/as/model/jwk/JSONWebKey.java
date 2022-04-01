@@ -93,9 +93,8 @@ public class JSONWebKey {
     }
 
     /**
-     * Returns the Key ID. The Key ID member can be used to match a specific key.
-     * This can be used, for instance, to choose among a set of keys within the JWK
-     * during key rollover.
+     * Returns the Key ID. The Key ID member can be used to match a specific key. This can be used, for instance,
+     * to choose among a set of keys within the JWK during key rollover.
      *
      * @return The Key ID.
      */
@@ -155,22 +154,18 @@ public class JSONWebKey {
     }
 
     /**
-     * Returns the curve member that identifies the cryptographic curve used with
-     * the key.
+     * Returns the curve member that identifies the cryptographic curve used with the key.
      *
-     * @return The curve member that identifies the cryptographic curve used with
-     *         the key.
+     * @return The curve member that identifies the cryptographic curve used with the key.
      */
     public EllipticEdvardsCurve getCrv() {
         return crv;
     }
 
     /**
-     * Sets the curve member that identifies the cryptographic curve used with the
-     * key.
+     * Sets the curve member that identifies the cryptographic curve used with the key.
      *
-     * @param crv The curve member that identifies the cryptographic curve used with
-     *            the key.
+     * @param crv The curve member that identifies the cryptographic curve used with the key.
      */
     public void setCrv(EllipticEdvardsCurve crv) {
         this.crv = crv;
@@ -185,8 +180,8 @@ public class JSONWebKey {
     }
 
     /**
-     * Returns the modulus value for the RSA public key. It is represented as the
-     * base64url encoding of the value's representation.
+     * Returns the modulus value for the RSA public key. It is represented as the base64url encoding of the value's
+     * representation.
      *
      * @return The modulus value for the RSA public key.
      */
@@ -222,46 +217,38 @@ public class JSONWebKey {
     }
 
     /**
-     * Returns the x member that contains the x coordinate for the elliptic curve
-     * point. It is represented as the base64url encoding of the coordinate's big
-     * endian representation.
+     * Returns the x member that contains the x coordinate for the elliptic curve point. It is represented as the
+     * base64url encoding of the coordinate's big endian representation.
      *
-     * @return The x member that contains the x coordinate for the elliptic curve
-     *         point.
+     * @return The x member that contains the x coordinate for the elliptic curve point.
      */
     public String getX() {
         return x;
     }
 
     /**
-     * Sets the x member that contains the x coordinate for the elliptic curve
-     * point.
+     * Sets the x member that contains the x coordinate for the elliptic curve point.
      *
-     * @param x The x member that contains the x coordinate for the elliptic curve
-     *          point.
+     * @param x The x member that contains the x coordinate for the elliptic curve point.
      */
     public void setX(String x) {
         this.x = x;
     }
 
     /**
-     * Returns the y member that contains the x coordinate for the elliptic curve
-     * point. It is represented as the base64url encoding of the coordinate's big
-     * endian representation.
+     * Returns the y member that contains the x coordinate for the elliptic curve point. It is represented as the
+     * base64url encoding of the coordinate's big endian representation.
      *
-     * @return The y member that contains the x coordinate for the elliptic curve
-     *         point.
+     * @return The y member that contains the x coordinate for the elliptic curve point.
      */
     public String getY() {
         return y;
     }
 
     /**
-     * Sets the y member that contains the y coordinate for the elliptic curve
-     * point.
+     * Sets the y member that contains the y coordinate for the elliptic curve point.
      *
-     * @param y The y member that contains the y coordinate for the elliptic curve
-     *          point.
+     * @param y The y member that contains the y coordinate for the elliptic curve point.
      */
     public void setY(String y) {
         this.y = y;
@@ -270,26 +257,22 @@ public class JSONWebKey {
     /**
      * Steps:
      * <p>
-     * 1. Construct a JSON object containing only the required members of a JWK
-     * representing the key and with no whitespace or line breaks before or after
-     * any syntactic elements and with the required members ordered
-     * lexicographically by the Unicode points of the member names. (This JSON
-     * object is itself a legal JWK representation of the key.
+     * 1. Construct a JSON object containing only the required members of a JWK representing the key and with no
+     * whitespace or line breaks before or after any syntactic elements and with the required members ordered
+     * lexicographically by the Unicode points of the member names. (This JSON object is itself a legal JWK
+     * representation of the key.
      * <p>
-     * 2. Hash the octets of the UTF-8 representation of this JSON object with a
-     * cryptographic hash function SHA-256.
+     * 2. Hash the octets of the UTF-8 representation of this JSON object with a cryptographic hash function SHA-256.
      * <p>
      * 3. Encode the JKW SHA-256 Thumbprint with base64url encoding.
      *
      * @return The thumbprint of a JSON Web Key (JWK)
-     * @see <a href="https://datatracker.ietf.org/doc/html/rfc7638">JSON Web Key
-     *      (JWK) Thumbprint</a>
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc7638">JSON Web Key (JWK) Thumbprint</a>
      */
     public String getJwkThumbprint() throws NoSuchAlgorithmException, NoSuchProviderException, JWKException {
         String result;
 
-        if (kty == null)
-            throw new JWKException("The kty param is required");
+        if (kty == null) throw new JWKException("The kty param is required");
 
         if (kty == KeyType.RSA) {
             result = contructJwkRSA();
@@ -297,37 +280,39 @@ public class JSONWebKey {
             result = contructJwkEC();
         } else if (kty == KeyType.OKP) {
             result = contructJwkOKP();
-        } else
-            throw new JWKException("Thumbprint not supported for the kty");
+        } else throw new JWKException("Thumbprint not supported for the kty");
 
         return result;
     }
 
     private String contructJwkRSA() throws NoSuchAlgorithmException, NoSuchProviderException, JWKException {
-        if (e == null)
-            throw new JWKException("The e param is required");
-        if (n == null)
-            throw new JWKException("The n param is required");
+        if (e == null) throw new JWKException("The e param is required");
+        if (n == null) throw new JWKException("The n param is required");
 
-        String jwkStr = new StringBuilder().append("{").append(E_PARAM_APPEND).append("\"").append(e).append("\",")
-                .append(KTY_PARAM_APPEND).append("\"").append(kty).append("\",").append(N_PARAM_APPEND).append("\"")
-                .append(n).append("\"").append("}").toString();
+        String jwkStr = new StringBuilder()
+                .append("{")
+                .append(E_PARAM_APPEND).append("\"").append(e).append("\",")
+                .append(KTY_PARAM_APPEND).append("\"").append(kty).append("\",")
+                .append(N_PARAM_APPEND).append("\"").append(n).append("\"")
+                .append("}")
+                .toString();
 
         byte[] hash = JwtUtil.getMessageDigestSHA256(jwkStr);
         return Base64Util.base64urlencode(hash);
     }
 
     private String contructJwkEC() throws NoSuchAlgorithmException, NoSuchProviderException, JWKException {
-        if (crv == null)
-            throw new JWKException("The crv is required");
-        if (x == null)
-            throw new JWKException("The x is required");
-        if (y == null)
-            throw new JWKException("The y is required");
+        if (crv == null) throw new JWKException("The crv is required");
+        if (x == null) throw new JWKException("The x is required");
+        if (y == null) throw new JWKException("The y is required");
 
-        String jwkStr = new StringBuilder().append("{").append(CRV_PARAM_APPEND).append("\"").append(crv).append("\",")
-                .append(KTY_PARAM_APPEND).append("\"").append(kty).append("\",").append(X_PARAM_APPEND).append("\"")
-                .append(x).append("\",").append(Y_PARAM_APPEND).append("\"").append(y).append("\"").append("}")
+        String jwkStr = new StringBuilder()
+                .append("{")
+                .append(CRV_PARAM_APPEND).append("\"").append(crv).append("\",")
+                .append(KTY_PARAM_APPEND).append("\"").append(kty).append("\",")
+                .append(X_PARAM_APPEND).append("\"").append(x).append("\",")
+                .append(Y_PARAM_APPEND).append("\"").append(y).append("\"")
+                .append("}")
                 .toString();
 
         byte[] hash = JwtUtil.getMessageDigestSHA256(jwkStr);
@@ -335,14 +320,16 @@ public class JSONWebKey {
     }
 
     private String contructJwkOKP() throws NoSuchAlgorithmException, NoSuchProviderException, JWKException {
-        if (crv == null)
-            throw new JWKException("The crv is required");
-        if (x == null)
-            throw new JWKException("The x is required");
+        if (crv == null) throw new JWKException("The crv is required");
+        if (x == null) throw new JWKException("The x is required");
 
-        String jwkStr = new StringBuilder().append("{").append(CRV_PARAM_APPEND).append("\"").append(crv).append("\",")
-                .append(KTY_PARAM_APPEND).append("\"").append(kty).append("\",").append(X_PARAM_APPEND).append("\"")
-                .append(y).append("\"").append("}").toString();
+        String jwkStr = new StringBuilder()
+                .append("{")
+                .append(CRV_PARAM_APPEND).append("\"").append(crv).append("\",")
+                .append(KTY_PARAM_APPEND).append("\"").append(kty).append("\",")
+                .append(X_PARAM_APPEND).append("\"").append(y).append("\"")
+                .append("}")
+                .toString();
 
         byte[] hash = JwtUtil.getMessageDigestSHA256(jwkStr);
         return Base64Util.base64urlencode(hash);
