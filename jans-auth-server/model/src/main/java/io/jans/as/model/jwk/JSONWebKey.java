@@ -41,6 +41,7 @@ public class JSONWebKey {
     private Long exp;
     private EllipticEdvardsCurve crv;
     private List<String> x5c;
+	private String jwkThumbprint;
 
     /**
      * Modulus
