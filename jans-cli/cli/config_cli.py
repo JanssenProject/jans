@@ -1234,7 +1234,7 @@ class JCA_CLI:
                 fill_optional = self.get_input(values=['y', 'n'], text='Populate optional fields?')
                 fields_numbers = []
                 if fill_optional == 'y':
-                    print("Optiaonal Fields:")
+                    print("Optional Fields:")
                     for i, field in enumerate(optional_fields):
                         print(i + 1, field)
                         fields_numbers.append(str(i + 1))
