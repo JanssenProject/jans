@@ -152,7 +152,7 @@ public enum ResponseType implements HasParamName, AttributeEnum {
 
     public static String[] toStringArray(ResponseType[] responseTypes) {
         if (responseTypes == null) {
-            return null;
+            return new String[0];
         }
 
         String[] resultResponseTypes = new String[responseTypes.length];

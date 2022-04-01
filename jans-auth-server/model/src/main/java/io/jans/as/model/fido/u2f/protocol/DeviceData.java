@@ -6,6 +6,7 @@
 
 package io.jans.as.model.fido.u2f.protocol;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -46,6 +47,7 @@ public class DeviceData implements Serializable {
     @JsonProperty(value = "custom_data")
     private final Map<String, String> customData;
 
+    @JsonCreator
     public DeviceData(@JsonProperty(value = "uuid") String uuid, @JsonProperty(value = "token") String pushToken,
                       @JsonProperty(value = "type") String type, @JsonProperty(value = "platform") String platform,
                       @JsonProperty(value = "name") String name, @JsonProperty(value = "os_name") String osName,

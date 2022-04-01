@@ -12,18 +12,7 @@ import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.exception.InvalidJwtException;
 import org.json.JSONObject;
 
-import static io.jans.as.model.jwt.JwtHeaderName.AGREEMENT_PARTY_U_INFO;
-import static io.jans.as.model.jwt.JwtHeaderName.AGREEMENT_PARTY_V_INFO;
-import static io.jans.as.model.jwt.JwtHeaderName.ALGORITHM;
-import static io.jans.as.model.jwt.JwtHeaderName.COMPRESSION_ALGORITHM;
-import static io.jans.as.model.jwt.JwtHeaderName.CONTENT_TYPE;
-import static io.jans.as.model.jwt.JwtHeaderName.ENCRYPTION_METHOD;
-import static io.jans.as.model.jwt.JwtHeaderName.ENCRYPTION_PARTY_U_INFO;
-import static io.jans.as.model.jwt.JwtHeaderName.ENCRYPTION_PARTY_V_INFO;
-import static io.jans.as.model.jwt.JwtHeaderName.EPHEMERAL_PUBLIC_KEY;
-import static io.jans.as.model.jwt.JwtHeaderName.JWK;
-import static io.jans.as.model.jwt.JwtHeaderName.KEY_ID;
-import static io.jans.as.model.jwt.JwtHeaderName.TYPE;
+import static io.jans.as.model.jwt.JwtHeaderName.*;
 
 /**
  * @author Javier Rojas Blum

@@ -34,9 +34,9 @@ public class CertUtilsTest extends BaseTest {
     @Test
     public void confirmationMethodHashS256_TestPem_rightConfirmation() {
         showTitle("confirmationMethodHashS256_TestPem_rightConfirmation");
-        Assert.assertEquals("A4DtL2JmUMhAsvJj5tKyn64SqzmuXbMrJa0n761y5v0", CertUtils.confirmationMethodHashS256(TEST_PEM_1));
-        Assert.assertEquals("A4DtL2JmUMhAsvJj5tKyn64SqzmuXbMrJa0n761y5v0", CertUtils.confirmationMethodHashS256(TEST_PEM_2));
-        Assert.assertEquals("A4DtL2JmUMhAsvJj5tKyn64SqzmuXbMrJa0n761y5v0", CertUtils.confirmationMethodHashS256(TEST_PEM_3));
+        Assert.assertEquals(CertUtils.confirmationMethodHashS256(TEST_PEM_1), "A4DtL2JmUMhAsvJj5tKyn64SqzmuXbMrJa0n761y5v0");
+        Assert.assertEquals(CertUtils.confirmationMethodHashS256(TEST_PEM_2), "A4DtL2JmUMhAsvJj5tKyn64SqzmuXbMrJa0n761y5v0");
+        Assert.assertEquals(CertUtils.confirmationMethodHashS256(TEST_PEM_3), "A4DtL2JmUMhAsvJj5tKyn64SqzmuXbMrJa0n761y5v0");
     }
 
     @Test

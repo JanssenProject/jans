@@ -10,8 +10,11 @@ package io.jans.as.model.token;
  * @author Javier Rojas Blum
  * @version January 16, 2019
  */
-public interface TokenRevocationRequestParam {
+public class TokenRevocationRequestParam {
 
-    String TOKEN = "token";
-    String TOKEN_TYPE_HINT = "token_type_hint";
+    private TokenRevocationRequestParam() {
+    }
+
+    public static final String TOKEN = "token";
+    public static final String TOKEN_TYPE_HINT = "token_type_hint";
 }
