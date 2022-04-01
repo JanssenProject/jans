@@ -70,17 +70,24 @@ python3 config-cli.pyz -h
 
 
 ### Standard Python package
+1. Install venv module
+    ```sh
+    pip3 install virtualenv
+    ```
 
 1.  Create virtual environment and activate:
 
     ```sh
-    python3 -m venv .venv
+    python3 -m virtualenv .venv
     source .venv/bin/activate
     ```
 
-1.  Install the package:
+1.  Download and install the package:
 
     ```
+    wget https://github.com/JanssenProject/jans/archive/refs/heads/main.zip
+    unzip main.zip
+    cd jans-main/jans-cli
     make install
     ```
 
