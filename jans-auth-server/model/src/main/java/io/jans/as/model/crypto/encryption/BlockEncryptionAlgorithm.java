@@ -8,10 +8,10 @@ package io.jans.as.model.crypto.encryption;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-
 /**
  * @author Javier Rojas Blum Date: 12.03.2012
  */
+
 public enum BlockEncryptionAlgorithm {
 
     A128CBC_PLUS_HS256("A128CBC+HS256", "CBC", "AES/CBC/PKCS5Padding", "SHA-256", "HMACSHA256", 256, 128, 128),
@@ -39,6 +39,7 @@ public enum BlockEncryptionAlgorithm {
         this.cekLength = null;
     }
 
+    @SuppressWarnings("java:S107")
     BlockEncryptionAlgorithm(String name, String family, String algorithm, String messageDiggestAlgorithm,
                              String integrityValueAlgorithm, int cmkLength, int initVectorLength, int cekLength) {
         this.name = name;
