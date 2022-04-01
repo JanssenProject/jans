@@ -98,7 +98,6 @@
 		<dependency>
 		    <groupId>jakarta.enterprise</groupId>
 		    <artifactId>jakarta.enterprise.cdi-api</artifactId>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
             <groupId>jakarta.inject</groupId>
@@ -116,7 +115,6 @@
 		<dependency>
 			<groupId>jakarta.servlet</groupId>
 			<artifactId>jakarta.servlet-api</artifactId>
-			<scope>provided</scope>
 		</dependency>
 
 		<!-- Commons libs -->

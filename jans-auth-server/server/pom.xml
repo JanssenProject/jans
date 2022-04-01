@@ -375,15 +375,14 @@
 		<dependency>
             <groupId>jakarta.validation</groupId>
             <artifactId>jakarta.validation-api</artifactId>
-			<scope>provided</scope>
 		</dependency>
 
-        <dependency>
+       <!--  <dependency>
             <groupId>net.bootsfaces</groupId>
             <artifactId>bootsfaces</artifactId>
             <version>1.4.1</version>
             <scope>compile</scope>
-        </dependency>
+        </dependency> -->
 
 			<!-- OmniFaces -->
 		<dependency>
