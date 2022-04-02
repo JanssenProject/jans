@@ -374,7 +374,7 @@ Selection:
 
 ## Create a New OpenID Client
 
-To create a new OpenID client, you need two enter '2' from OpenID Menu.
+To create a new OpenID client, you need to enter '2' from OpenID Menu.
 It will ask to enter below information:
 
 - frontChannelLogoutSessionRequired[false, true]
@@ -727,9 +727,9 @@ Selection:
 
 ## Get OpenID client by its inum
 
-`inum` is an unique identity of an OpenID client. You can use `inum` of an OpenID client to get details informaton.
+`inum` is a unique identity of an OpenID client. You can use `inum` of an OpenID client to get more details.
 
-In my case i'm using the `inum` of the above created OpenID client:
+In my case, I'm using the `inum` of the above created OpenID client:
 
 ```
 Get OpenId Connect Client by Inum
