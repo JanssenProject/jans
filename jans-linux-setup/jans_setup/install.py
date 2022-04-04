@@ -19,7 +19,7 @@ ssl._create_default_https_context = ssl._create_unverified_context
 
 app_versions = {
   "JANS_APP_VERSION": "1.0.0",
-  "JANS_BUILD": "-SNAPSHOT", 
+  "JANS_BUILD": "-jetty-SNAPSHOT", 
   "JETTY_VERSION": "11.0.8", 
   "AMAZON_CORRETTO_VERSION": "11.0.13.8.1", 
   "JYTHON_VERSION": "2.7.3",
