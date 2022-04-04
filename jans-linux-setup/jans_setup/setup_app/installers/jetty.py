@@ -99,12 +99,10 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         self.run([paths.cmd_chmod, '-R', '755', "%s/bin/jetty.sh" % self.jetty_home])
 
     def get_jetty_info(self):
-        self.jetty_dist_string = 'jetty-home'
         # first try latest versions
-        jetty_archive_list = glob.glob(os.path.join(Config.distAppFolder, 'jetty-home-*.tar.gz'))
-        if not jetty_archive_list:
-            jetty_archive_list = glob.glob(os.path.join(Config.distAppFolder, 'jetty-distribution-*.tar.gz'))
-            self.jetty_dist_string = 'jetty-distribution'
+        self.jetty_dist_string = 'jetty-home'
+        jetty_archive_list = glob.glob(os.path.join(Config.distAppFolder, '{}-*.tar.gz'.format(self.jetty_dist_string)))
+
         if not jetty_archive_list:
             self.logIt("Jetty archive not found in {}. Exiting...".format(Config.distAppFolder), True, True)
 
@@ -334,38 +332,6 @@ class JettyInstaller(BaseInstaller, SetupUtils):
 
         return self.calculate_aplications_memory(Config.application_max_ram, self.jetty_app_configuration, installedComponents)
 
-    def war_for_jetty10(self, war_file):
-        if self.jetty_dist_string == 'jetty-home':
-            tmp_dir = '/tmp/war_{}'.format(os.urandom(6).hex())
-            shutil.unpack_archive(war_file, tmp_dir, format='zip')
-            jetty_env_fn = os.path.join(tmp_dir, 'WEB-INF/jetty-env.xml')
-
-            tree = ET.parse(jetty_env_fn)
-            root = tree.getroot()
-
-            for new in root.findall("New"):
-                for arg in new.findall("Arg"):
-                    for ref in arg.findall("Ref"):
-                        if ref.attrib.get('id') == 'webAppCtx':
-                            ref.set('refid', 'webAppCtx')
-                            ref.attrib.pop('id')
-
-            jetty_web_fn = os.path.join(tmp_dir, 'WEB-INF/jetty-web.xml')
-            if os.path.exists(jetty_web_fn):
-                os.remove(jetty_web_fn)
-            xml_header = '<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "https://www.eclipse.org/jetty/configure_{}.dtd">\n\n'.format(self.jetty_version_string.replace('.', '_'))
-            with open(jetty_env_fn, 'wb') as f:
-                f.write(b'<?xml version="1.0" encoding="UTF-8"?>\n')
-                f.write(xml_header.encode())
-                f.write(ET.tostring(root,method='xml'))
-
-            tmp_war_fn = '/tmp/{}.war'.format(os.urandom(6).hex())
-            shutil.make_archive(tmp_war_fn, format='zip', root_dir=tmp_dir)
-            shutil.rmtree(tmp_dir)
-            os.remove(war_file)
-            shutil.move(tmp_war_fn+'.zip', war_file)
-
-
     def add_extra_class(self, class_path, xml_fn=None):
         if not xml_fn:
             xml_fn = self.web_app_xml_fn
@@ -380,7 +346,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         else:
             app_set = ET.Element("Set")
             app_set.set('name', 'extraClasspath')
-            
+
             root.append(app_set)
 
         for cp in class_path.split(','):
@@ -388,7 +354,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
                 path_list.append(cp.strip())
 
         app_set.text = ','.join(path_list)
-        
+
         with open(xml_fn, 'wb') as f:
             f.write(b'<?xml version="1.0"  encoding="ISO-8859-1"?>\n')
             f.write(b'<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "http://www.eclipse.org/jetty/configure_9_0.dtd">\n')
