@@ -122,7 +122,7 @@ Janssen Project mandates all commits to follow guidelines as below.
 In all, if you have your GPG verification setup, your commit command should look like 
 
 ```
-git commit -S -s -m 'message that follows convensional commit style'
+git commit -S -s -m 'message that follows conventional commit style'
 ```
 
 ### Branches
