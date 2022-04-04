@@ -53,7 +53,7 @@ The custom script has the following properties:
 
 ### Enable Google Script using Admin Console
 
-Follow the steps below to enable SMS OTP authentication:
+Follow the steps below to enable Google authentication:
 
 1. Navigate to `Admin` > `Scripts`   
 
@@ -72,7 +72,7 @@ Follow the steps below to enable SMS OTP authentication:
 
 
 !!! Note 
-    To make sure OTP SMS has been enabled successfully, you can check your Gluu Server's OpenID Connect configuration by navigating to the following URL: `https://<hostname>/.well-known/openid-configuration`. Find `"acr_values_supported":` and you should see `"google"`. 
+    To make sure Google has been enabled successfully, you can check your Gluu Server's OpenID Connect configuration by navigating to the following URL: `https://<hostname>/.well-known/openid-configuration`. Find `"acr_values_supported":` and you should see `"google"`. 
 
 ### Make Google the Default Authentication mechanism
 If `google` should be the default authentication mechanism, follow these instructions: 
