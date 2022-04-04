@@ -35,7 +35,7 @@
 		<!-- <uel-api.version>2.2.1-b04</uel-api.version> -->
 		<!-- <uel-impl.version>2.2.1-b05</uel-impl.version> -->
 
-		<jackson.version>2.13.0</jackson.version>
+		<jackson.version>2.13.2</jackson.version>
 		<jackson.databind.version>2.13.2.1</jackson.databind.version>
 		<json.version>20210307</json.version>
 

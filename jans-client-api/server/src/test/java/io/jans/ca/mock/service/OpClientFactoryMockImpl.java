@@ -260,9 +260,9 @@ public class OpClientFactoryMockImpl implements OpClientFactory {
             PermissionTicket permissionTicket = new PermissionTicket("d457e3de-30dd-400a-8698-2b98472b7a40");
             outboundMessageContext.setEntity(permissionTicket);
 
-            OutboundJaxrsResponse response = new OutboundJaxrsResponse(Response.Status.FORBIDDEN, outboundMessageContext);
+            OutboundJaxrsResponse response = new OutboundJaxrsResponse(javax.ws.rs.core.Response.Status.FORBIDDEN, outboundMessageContext);
 
-            when(client.registerTicketResponse(any(List.class), any())).thenReturn(response);
+            //when(client.registerTicketResponse(any(List.class), any())).thenReturn(response);
             opClientCache.put("RptPreProcessInterceptor", client);
         } else {
             client = (RptPreProcessInterceptor) opClientCache.getIfPresent("RptPreProcessInterceptor");
