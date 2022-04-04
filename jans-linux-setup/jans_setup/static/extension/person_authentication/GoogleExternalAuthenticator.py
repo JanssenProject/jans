@@ -98,7 +98,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 foundUser = self.findUserByGoogleId(google_Id)
                 if foundUser is None:
                     foundUser = User()
-                    foundUser.setAttribute("oxExternalUid", "passport-google:"+google_Id)
+                    foundUser.setAttribute("jansExtUid", "passport-google:"+google_Id)
                     foundUser.setAttribute(self.getLocalPrimaryKey(),google_Id)
 
                     userService = CdiUtil.bean(UserService)
@@ -146,7 +146,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def findUserByGoogleId(self, googleId):
         userService = CdiUtil.bean(UserService)
-        return userService.getUserByAttribute("oxExternalUid", "passport-google:"+googleId)
+        return userService.getUserByAttribute("jansExtUid", "passport-google:"+googleId)
 
     def getLocalPrimaryKey(self):
         entryManager = CdiUtil.bean(PersistenceEntryManager)
