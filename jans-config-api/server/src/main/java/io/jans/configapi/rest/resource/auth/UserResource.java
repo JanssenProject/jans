@@ -9,7 +9,6 @@ package io.jans.configapi.rest.resource.auth;
 import com.github.fge.jsonpatch.JsonPatchException;
 import static io.jans.as.model.util.Util.escapeLog;
 import io.jans.as.common.model.common.User;
-import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.common.EncryptionService;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.rest.model.SearchRequest;
@@ -18,7 +17,6 @@ import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.core.util.Jackson;
 import io.jans.orm.model.PagedResult;
-import io.jans.util.StringHelper;
 import io.jans.util.security.StringEncrypter.EncryptionException;
 
 import java.io.IOException;
@@ -53,7 +51,7 @@ public class UserResource extends BaseResource {
     UserService userSrv;
 
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.USER_READ_ACCESS })
+    //@ProtectedApi(scopes = { ApiAccessConstants.USER_READ_ACCESS })
     public Response getOpenIdConnectClients(
             @DefaultValue(DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
@@ -77,7 +75,7 @@ public class UserResource extends BaseResource {
     }
 
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS })
+    //@ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS })
     @Path(ApiConstants.INUM_PATH)
     public Response getUserByInum(@PathParam(ApiConstants.INUM) @NotNull String inum) throws EncryptionException {
         if (logger.isDebugEnabled()) {
@@ -89,7 +87,7 @@ public class UserResource extends BaseResource {
     }
 
     @POST
-    @ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS })
+    //@ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS })
     public Response createOpenIdConnect(@Valid User user) throws EncryptionException {
         if (logger.isDebugEnabled()) {
             logger.debug("User details to be added - user:{}", escapeLog(user));
@@ -100,7 +98,7 @@ public class UserResource extends BaseResource {
     }
 
     @PUT
-    @ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS })
+   // @ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS })
     public Response updateUser(@Valid User user) throws EncryptionException {
         if (logger.isDebugEnabled()) {
             logger.debug("User details to be updated - user:{}", escapeLog(user));
@@ -113,7 +111,7 @@ public class UserResource extends BaseResource {
 
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
-    @ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS })
+   // @ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS })
     @Path(ApiConstants.INUM_PATH)
     public Response patchUser(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString)
             throws EncryptionException, JsonPatchException, IOException {
@@ -131,7 +129,7 @@ public class UserResource extends BaseResource {
 
     @DELETE
     @Path(ApiConstants.INUM_PATH)
-    @ProtectedApi(scopes = { ApiAccessConstants.USER_DELETE_ACCESS })
+   // @ProtectedApi(scopes = { ApiAccessConstants.USER_DELETE_ACCESS })
     public Response deleteUser(@PathParam(ApiConstants.INUM) @NotNull String inum) {
         if (logger.isDebugEnabled()) {
             logger.debug("User to be deleted - inum:{} ", escapeLog(inum));
@@ -167,8 +165,7 @@ public class UserResource extends BaseResource {
         if (users != null && !users.isEmpty()) {
             for (User user : users) {
                 if (StringUtils.isNotBlank(user.getAttribute("userPassword"))) {
-                    user.setAttribute("userPassword", encryptionService.decrypt(user.getAttribute("userPassword")),
-                            false);
+                    decryptUserPassword(user);
                 }
             }
         }
@@ -177,14 +174,14 @@ public class UserResource extends BaseResource {
 
     private User encryptUserPassword(User user) throws EncryptionException {
         if (StringUtils.isNotBlank(user.getAttribute("userPassword"))) {
-            user.setAttribute("userPassword", encryptionService.encrypt(user.getAttribute("userPassword")), false);
+            //user.setAttribute("userPassword", encryptionService.encrypt(user.getAttribute("userPassword")), false);
         }
         return user;
     }
 
     private User decryptUserPassword(User user) throws EncryptionException {
         if (StringUtils.isNotBlank(user.getAttribute("userPassword"))) {
-            user.setAttribute("userPassword", encryptionService.decrypt(user.getAttribute("userPassword")), false);
+            //user.setAttribute("userPassword", encryptionService.decrypt(user.getAttribute("userPassword")), false);
         }
         return user;
     }
