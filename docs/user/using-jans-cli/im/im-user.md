@@ -538,7 +538,7 @@ Selection:
 
 This is an alternative option to update user resources. To use this option, you need to consider the following things: 
 
-    - **id**: an unique id of user resources
+    - **id**: a unique id of user resources
     - **op**: one operation to be done from [add, remove, replace] 
     - **path**: an attribute path where this operation to be done.
     - **value**: any string type value to `add` or `replace`.

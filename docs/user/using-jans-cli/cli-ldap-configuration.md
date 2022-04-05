@@ -157,7 +157,7 @@ Server Response:
 ```
 
 
-Please note that `configId` should be an unique identifier name for each configuration. Otherwise you will get error while going to post duplicate configuration into the server. In that case, you can go through the next option to replace instead of adding a new one.
+Please note that `configId` should be a unique identifier name for each configuration. Otherwise you will get error while going to post duplicate configuration into the server. In that case, you can go through the next option to replace instead of adding a new one.
 
 
 ## Updating LDAP Database Configurations
