@@ -6,6 +6,7 @@
 
 package io.jans.as.model.jwk;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.nimbusds.jose.jwk.JWKException;
 import io.jans.as.model.crypto.signature.EllipticEdvardsCurve;
 import io.jans.as.model.util.Base64Util;
@@ -268,6 +269,7 @@ public class JSONWebKey {
      * @return The thumbprint of a JSON Web Key (JWK)
      * @see <a href="https://datatracker.ietf.org/doc/html/rfc7638">JSON Web Key (JWK) Thumbprint</a>
      */
+    @JsonIgnore
     public String getJwkThumbprint() throws NoSuchAlgorithmException, NoSuchProviderException, JWKException {
         String result;
 
