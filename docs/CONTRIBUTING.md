@@ -14,7 +14,6 @@ There are many ways you can contribute. Of course you can contribute code. But w
     - [Commits](#commits)
     - [Branches](#branches)
     - [PRs](#prs)
-  - [Developer Certificate Of Origin](#developer-certificate-of-origin)
 - [Contribution Workflow](#contribution-workflow)
   - [Find Something To Work On](#find-something-to-work-on)
   - [Start a Discussion](#start-a-discussion)
@@ -45,7 +44,6 @@ We are really glad you are reading this, because we need volunteer developers to
 - [Issues](#issues)
 - [Triaging](#triaging)
 - [Coding Conventions](#code-conventions)
-- [Developer Certificate Of Origin](#developer-certificate-of-origin)
 
 ## Code of Conduct
 
@@ -91,8 +89,41 @@ Here is how we [continously triage](./community/triage.md) new issues and PRs so
 ## Code Conventions and Guidelines
 
 ### Commits
-As commit convention, we adopt [Conventional Commits v1.0.0](https://www.conventionalcommits.org/en/v1.0.0/), we have an history
-of commits that do not adopt the convention but any new commit must follow it to be eligible for merge.
+
+Janssen Project mandates all commits to follow guidelines as below.
+
+- **Commit messages**
+
+  As commit convention, we adopt [Conventional Commits v1.0.0](https://www.conventionalcommits.org/en/v1.0.0/), we have an history
+  of commits that do not adopt the convention but any new commit must follow it to be eligible for merge.
+
+- **Add GPG signature to your commit**
+
+  To ensure that contribution is coming for a trusted source, all commits should be signed using GPG key and verified by Github. If you have GPG key    setup already then just use `-S` switch with you commit to sign it. If you need to setup your GPG key and verification, then you can find detailed instructions [here](https://docs.github.com/en/authentication/managing-commit-signature-verification)
+
+- **Add DCO sign-off**
+  
+  The [Developer Certificate of Origin (DCO)](https://developercertificate.org/) is a lightweight way for contributors to certify that they wrote or otherwise have the right to submit the code they are contributing to the project.
+
+  Contributors to the Janssen project sign-off that they adhere to these requirements by adding a `Signed-off-by` line to commit messages.
+
+  ```
+  This is a commit message
+
+  Signed-off-by: Foo Bar <foobar@spam.org>
+  ```
+
+  Git even has a `-s` command line option to append this automatically to your commit message:
+
+  ```
+  $ git commit -s -m 'This is my commit message'
+  ```
+
+In all, if you have your GPG verification setup, your commit command should look like 
+
+```
+git commit -S -s -m 'message that follows conventional commit style'
+```
 
 ### Branches
 Branch name should have compotitlesnent name as prefix, eg `jans-core-mybranch`
@@ -104,24 +135,6 @@ Branch name should have compotitlesnent name as prefix, eg `jans-core-mybranch`
 - PR should only have changes related to target feature or issue. Create a separate PR for formatting or other quick bug fixes
 - PR should include relevent documentaton changes
 - PR should include unit and integration tests
-
-## Developer Certificate Of Origin
-
-The [Developer Certificate of Origin (DCO)](https://developercertificate.org/) is a lightweight way for contributors to certify that they wrote or otherwise have the right to submit the code they are contributing to the project.
-
-Contributors to the Janssen project sign-off that they adhere to these requirements by adding a `Signed-off-by` line to commit messages.
-
-```
-This is a commit message
-
-Signed-off-by: Foo Bar <foobar@spam.org>
-```
-
-Git even has a `-s` command line option to append this automatically to your commit message:
-
-```
-$ git commit -s -m 'This is my commit message'
-```
 
 # Contribution Workflow
 

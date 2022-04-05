@@ -70,35 +70,42 @@ python3 config-cli.pyz -h
 
 
 ### Standard Python package
+1. Install venv module
+    ```sh
+    pip3 install virtualenv
+    ```
 
 1.  Create virtual environment and activate:
 
     ```sh
-    python3 -m venv .venv
+    python3 -m virtualenv .venv
     source .venv/bin/activate
     ```
 
-1.  Install the package:
+1.  Download and install the package:
 
     ```
+    wget https://github.com/JanssenProject/jans/archive/refs/heads/main.zip
+    unzip main.zip
+    cd jans-main/jans-cli
     make install
     ```
 
     This command will install executable called `jans-cli` available in virtual environment `PATH`.
 
 
-![](docs/img/build-jans-cli-pyz-manually.png)
+![](../docs/assets/user/using-jans-cli/images/image-build-jans-cli-pyz-manually-03042021.png)
 
 
 ## Virtual Machine Setup
 
 **jans-cli** is automatically installed if you choose `jans-config-api` during [Janssen Server](https://github.com/JanssenProject/home/blob/main/development.md#install-janssen-into-vm) Installation on Virtual Machine. 
 
-![](docs/img/jans-config-api.png)
+![](../docs/assets/user/using-jans-cli/images/image-jans-config-api-03042021.png)
 
 After successfully installed Janssen Server, you will get two command-line arguments as below:
 
-![](docs/img/installed.png)
+![](../docs/assets/user/using-jans-cli/images/image-installed-03042021.png)
 
 # _Quick Start_
 
@@ -121,17 +128,17 @@ sudo update-alternatives --install /usr/bin/python python /usr/bin/python3 10
 
 You will get a menu as below image:
 
-![main-menu.png](docs/img/im-main.png)
+![main-menu.png](../docs/assets/user/using-jans-cli/images/image-im-main-03042021.png)
 
 From the following list, you can choose any options by selecting its number. For example, let's say number 2,
 to get **Default Authentication Method**.
 
 That returns another two options as below:
 
-![option-2-option.png](docs/img/im-default-auth-02.png)
+![option-2-option.png](../docs/assets/user/using-jans-cli/images/image-im-default-auth-02-03042021.png)
 
 Now selecting 1 and it returns our desired result as below image:
 
-![default-authentication-method.png](docs/img/im-cur-default-auth.png)
+![default-authentication-method.png](../docs/assets/user/using-jans-cli/images/image-im-cur-default-auth-03042021.png)
 
-So, That was a quick start to view how this _jans-cli_ Interactive Mode works. Please, follow this [link](docs) to read the _jans-cli_ docs for a better understanding of the Janssen Command-Line.
+So, That was a quick start to view how this _jans-cli_ Interactive Mode works. Please, follow this [link](../docs/user/using-jans-cli) to read the _jans-cli_ docs for a better understanding of the Janssen Command-Line.
