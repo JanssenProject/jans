@@ -7,6 +7,7 @@ package io.jans.as.server.register.ws.rs;
 
 import com.google.common.base.Strings;
 import io.jans.as.client.RegisterRequest;
+import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.SoftwareStatementValidationType;
 import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.configuration.AppConfiguration;
@@ -19,9 +20,12 @@ import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.register.RegisterErrorResponseType;
 import io.jans.as.model.util.JwtUtil;
+import io.jans.as.model.util.Pair;
+import io.jans.as.server.ciba.CIBARegisterParamsValidatorService;
 import io.jans.as.server.model.common.AbstractToken;
 import io.jans.as.server.model.common.AuthorizationGrant;
 import io.jans.as.server.model.common.AuthorizationGrantList;
+import io.jans.as.server.model.registration.RegisterParamsValidator;
 import io.jans.as.server.service.external.ExternalDynamicClientRegistrationService;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.Nullable;
@@ -64,6 +68,12 @@ public class RegisterValidator {
 
     @Inject
     private AuthorizationGrantList authorizationGrantList;
+
+    @Inject
+    private CIBARegisterParamsValidatorService cibaRegisterParamsValidatorService;
+
+    @Inject
+    private RegisterParamsValidator registerParamsValidator;
 
     public void validateNotBlank(String input, String errorReason) {
         if (StringUtils.isBlank(input)) {
@@ -337,4 +347,73 @@ public class RegisterValidator {
         }
     }
 
+    public void validateCiba(RegisterRequest r) {
+        if (!cibaRegisterParamsValidatorService.validateParams(
+                r.getBackchannelTokenDeliveryMode(),
+                r.getBackchannelClientNotificationEndpoint(),
+                r.getBackchannelAuthenticationRequestSigningAlg(),
+                r.getGrantTypes(),
+                r.getSubjectType(),
+                r.getSectorIdentifierUri(),
+                r.getJwks(),
+                r.getJwksUri()
+        )) { // CIBA
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_CLIENT_METADATA,
+                    "Invalid Client Metadata registering to use CIBA (Client Initiated Backchannel Authentication).");
+        }
+    }
+
+    public void validateRedirectUris(RegisterRequest r) {
+        if (!registerParamsValidator.validateRedirectUris(
+                r.getGrantTypes(), r.getResponseTypes(),
+                r.getApplicationType(), r.getSubjectType(),
+                r.getRedirectUris(), r.getSectorIdentifierUri())) {
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_REDIRECT_URI, "Failed to validate redirect uris.");
+        }
+    }
+
+    public void validateParamsClientRegister(RegisterRequest r) {
+        final Pair<Boolean, String> validateResult = registerParamsValidator.validateParamsClientRegister(
+                r.getApplicationType(), r.getSubjectType(),
+                r.getGrantTypes(), r.getResponseTypes(),
+                r.getRedirectUris());
+        if (isFalse(validateResult.getFirst())) {
+            log.trace("Client parameters are invalid, returns invalid_request error. Reason: {}", validateResult.getSecond());
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_CLIENT_METADATA, validateResult.getSecond());
+        }
+    }
+
+    public void validateInitiateLoginUri(RegisterRequest r) {
+        if (!Strings.isNullOrEmpty(r.getInitiateLoginUri()) && !registerParamsValidator.validateInitiateLoginUri(r.getInitiateLoginUri())) {
+            log.debug("The Initiate Login Uri is invalid. The initiate_login_uri must use the https schema: {}", r.getInitiateLoginUri());
+            throw errorResponseFactory.createWebApplicationException(
+                    Response.Status.BAD_REQUEST,
+                    RegisterErrorResponseType.INVALID_CLIENT_METADATA,
+                    "The Initiate Login Uri is invalid. The initiate_login_uri must use the https schema.");
+        }
+    }
+
+    public void validateClaimsRedirectUris(RegisterRequest r) {
+        if (r.getClaimsRedirectUris() != null &&
+                !r.getClaimsRedirectUris().isEmpty() &&
+                !registerParamsValidator.validateRedirectUris(r.getGrantTypes(), r.getResponseTypes(), r.getApplicationType(), r.getSubjectType(), r.getClaimsRedirectUris(), r.getSectorIdentifierUri())) {
+            log.debug("Value of one or more claims_redirect_uris is invalid, claims_redirect_uris: {}", r.getClaimsRedirectUris());
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_CLAIMS_REDIRECT_URI, "Value of one or more claims_redirect_uris is invalid");
+        }
+    }
+
+    public void validatePasswordGrantType(RegisterRequest r) {
+        if (isFalse(appConfiguration.getDynamicRegistrationPasswordGrantTypeEnabled())
+                && registerParamsValidator.checkIfThereIsPasswordGrantType(r.getGrantTypes())) {
+            log.info("Password Grant Type is not allowed for Dynamic Client Registration.");
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.ACCESS_DENIED, "Password Grant Type is not allowed for Dynamic Client Registration.");
+        }
+    }
+
+    public void validateDcrAuthorizationWithClientCredentials(RegisterRequest r) {
+        if (isTrue(appConfiguration.getDcrAuthorizationWithClientCredentials()) && !r.getGrantTypes().contains(GrantType.CLIENT_CREDENTIALS)) {
+            log.info("Register request does not contain grant_type=client_credentials, however dcrAuthorizationWithClientCredentials=true which is forbidden.");
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.ACCESS_DENIED, "Client Credentials Grant Type is not present in Dynamic Client Registration request.");
+        }
+    }
 }
