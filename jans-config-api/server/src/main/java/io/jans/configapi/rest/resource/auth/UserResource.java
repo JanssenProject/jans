@@ -11,7 +11,7 @@ import static io.jans.as.model.util.Util.escapeLog;
 import io.jans.as.common.model.common.User;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.rest.model.SearchRequest;
-import io.jans.configapi.service.auth.UserService;
+import io.jans.configapi.service.auth.UsrService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.core.util.Jackson;
@@ -42,7 +42,7 @@ public class UserResource extends BaseResource {
     Logger logger;
 
     @Inject
-    UserService userSrv;
+    UsrService userSrv;
 
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.USER_READ_ACCESS })
