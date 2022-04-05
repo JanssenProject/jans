@@ -61,11 +61,3 @@ These labels enrich issue/PR with metadata that will help during triage process 
 |`priority-4`|A relatively minor issue that is not relevant to core functions, or relates only to the attractiveness or pleasantness of use of the system. Good to have but not necessary changes/fixes.||
 |`priority-5`|The team acknowledges the request but (due to any number of reasons) does not plan to work on or accept contributions for this request. The issue remains open for discussion.||
 
-
-### Status labels
-
-These labels will help in planing and tracking active development activities for a issue/PR.
-
-|Label|Indicates That|Details|
-| --- | --- | --- |
-|TBD|TBD|TBD|
