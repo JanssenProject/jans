@@ -7,6 +7,7 @@
 package io.jans.configapi.service.auth;
 
 import io.jans.as.common.model.common.User;
+import io.jans.as.common.service.common.UserService;
 import io.jans.as.common.util.AttributeConstants;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
@@ -26,7 +27,7 @@ import org.slf4j.Logger;
 
 @ApplicationScoped
 @Named("userSrv")
-public class UserService extends io.jans.as.common.service.common.UserService {
+public class UsrService extends UserService {
   
     @Inject
     private Logger logger;
