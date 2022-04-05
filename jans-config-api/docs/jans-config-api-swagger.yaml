@@ -2553,37 +2553,7 @@ paths:
           description: Internal Server Error
       security:
         - oauth2: [https://jans.io/oauth/config/user.delete]
-    patch:
-      tags:
-        - User Management
-      summary: Update modified properties of user by Inum.
-      description: Update modified properties of user by Inum.
-      operationId: patch-user-by-inum
-      requestBody:
-        content:
-          application/json-patch+json:
-            schema:
-              type: array
-              items:
-                $ref: '#/components/schemas/PatchRequest'
-                description: String representing patch-document.
-                example: '[ {op:replace, path: userId, value: test_user_100 } ]'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                title: User Details.
-                $ref: '#/components/schemas/User'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          description: Internal Server Error
-      security:
-        - oauth2: [https://jans.io/oauth/config/user.write]
+
 
   /jans-config-api/scim/user:
     get:

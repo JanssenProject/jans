@@ -14,7 +14,6 @@ import io.jans.configapi.rest.model.SearchRequest;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;
 import io.jans.orm.search.filter.Filter;
-import io.jans.util.StringHelper;
 import static io.jans.as.model.util.Util.escapeLog;
 
 import java.util.List;
@@ -28,9 +27,7 @@ import org.slf4j.Logger;
 @ApplicationScoped
 @Named("userSrv")
 public class UserService extends io.jans.as.common.service.common.UserService {
-
-    public static final String[] USER_OBJECT_CLASSES = new String[] { AttributeConstants.JANS_PERSON };
-    
+  
     @Inject
     private Logger logger;
 
