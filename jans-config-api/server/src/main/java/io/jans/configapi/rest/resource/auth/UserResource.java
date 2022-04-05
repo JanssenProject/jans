@@ -73,7 +73,7 @@ public class UserResource extends BaseResource {
             logger.debug("User serach by inum:{}", escapeLog(inum));
         }
         User user = userSrv.getUserByInum(inum);
-        logger.debug("Based on inum:{}, user:{}", inum, user);
+        logger.debug("user:{}", user);
         return Response.ok(user).build();
     }
 
