@@ -222,6 +222,16 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
         sql_indexes_fn = os.path.join(Config.static_rdbm_dir, Config.rdbm_type + '_index.json')
         sql_indexes = base.readJsonFile(sql_indexes_fn)
 
+        # read opendj indexes and add multivalued attributes to JSON indexing
+        opendj_index = base.readJsonFile(base.current_app.OpenDjInstaller.openDjIndexJson)
+        opendj_index_list = [ atribute['attribute'] for atribute in opendj_index ]
+
+        for attribute in self.jans_attributes:
+            if attribute.get('multivalued'):
+                for attr_name in attribute['names']:
+                    if attr_name in opendj_index_list and attr_name not in sql_indexes['__common__']['fields']:
+                        sql_indexes['__common__']['fields'].append(attr_name)
+
         if Config.rdbm_type == 'spanner':
             tables = self.dbUtils.spanner.get_tables()
             for tblCls in tables:
@@ -237,7 +247,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                     data_type = attr['type']
 
                     if data_type == 'ARRAY':
-                        #TODO: How to index for ARRAY types in spanner?
+                        # How to index for ARRAY types in spanner?
                         pass
 
                     elif attr_name in tbl_fields:
@@ -279,13 +289,13 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                                             tblCls,
                                             ind_name,
                                             i+1,
-                                            tmp_str.safe_substitute({'field':attr.name, 'data_type': data_type})
+                                            tmp_str.safe_substitute({'field':attr.name})
                                             )
                                     self.dbUtils.exec_rdbm_query(sql_cmd)
                                 elif Config.rdbm_type == 'pgsql':
                                     sql_cmd ='CREATE INDEX ON "{}" (({}));'.format(
                                             tblCls,
-                                            tmp_str.safe_substitute({'field':attr.name, 'data_type': data_type})
+                                            tmp_str.safe_substitute({'field':attr.name})
                                             )
                                     self.dbUtils.exec_rdbm_query(sql_cmd)
 
@@ -340,7 +350,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
             ldif_files.remove(Config.ldif_site)
 
         Config.pbar.progress(self.service_name, "Importing ldif files to {}".format(Config.rdbm_type), False)
-        if not Config.ldif_base in ldif_files:
+        if Config.ldif_base not in ldif_files:
             if Config.rdbm_type == 'mysql':
                 force = BackendTypes.MYSQL
             elif Config.rdbm_type == 'pgsql':

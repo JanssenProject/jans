@@ -1,4 +1,3 @@
-# import itertools
 import hashlib
 import json
 import logging.config
@@ -54,11 +53,6 @@ class SpannerBackend:
         with open(f"/app/static/rdbm/{index_fn}") as f:
             self.sql_indexes = json.loads(f.read())
 
-        # with open("/app/static/couchbase/index.json") as f:
-        #     # prefix = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
-        #     txt = f.read()  # .replace("!bucket_prefix!", prefix)
-        #     self.cb_indexes = json.loads(txt)
-
         with open("/app/static/rdbm/sub_tables.json") as f:
             self.sub_tables = json.loads(f.read()).get(self.db_dialect) or {}
 
@@ -93,31 +87,15 @@ class SpannerBackend:
         syntax_def = self.sql_data_types_mapping[syntax]
         type_ = syntax_def.get(self.db_dialect)  # or syntax_def["mysql"]
 
-        # char_type = "VARCHAR"
-        # if self.db_dialect == "spanner":
         char_type = "STRING"
 
         if type_["type"] != char_type:
             # not STRING
             data_type = type_["type"]
         else:
-            # if "size" in type_:
-            #     size = type_["size"]
-            #     # data_type = f"{char_type}(type['size'])"
-            # else:
-            #     # data_type = "STRING(MAX)"
-            #     size = "MAX"
             size = type_.get("size") or "MAX"
             data_type = f"{char_type}({size})"
-            # if type_["size"] <= 127:
-            #     data_type = f"{char_type}({type_['size']})"
-            # elif type_["size"] <= 255:
-            #     data_type = "TINYTEXT" if self.db_dialect == "mysql" else "TEXT"
-            # else:
-            #     data_type = "TEXT"
 
-        # if data_type == "TEXT" and self.db_dialect == "spanner":
-        #     data_type = "STRING(MAX)"
         return data_type
 
     def create_tables(self):
@@ -175,32 +153,9 @@ class SpannerBackend:
         #     sql_cmd = f"ALTER TABLE {table} ADD {col_def};"
         #     logger.info(sql_cmd)
 
-    # def _fields_from_cb_indexes(self):
-    #     fields = []
-
-    #     for _, data in self.cb_indexes.items():
-    #         # extract and flatten
-    #         attrs = list(itertools.chain.from_iterable(data["attributes"]))
-    #         fields += attrs
-
-    #         for static in data["static"]:
-    #             attrs = [
-    #                 attr for attr in static[0]
-    #                 if "(" not in attr
-    #             ]
-    #             fields += attrs
-
-    #     fields = list(set(fields))
-    #     # exclude objectClass
-    #     if "objectClass" in fields:
-    #         fields.remove("objectClass")
-    #     return fields
-
     def get_index_fields(self, table_name):
-        # cb_fields = self._fields_from_cb_indexes()
         fields = self.sql_indexes.get(table_name, {}).get("fields", [])
         fields += self.sql_indexes["__common__"]["fields"]
-        # fields += cb_fields
 
         # make unique fields
         return list(set(fields))
@@ -214,7 +169,7 @@ class SpannerBackend:
 
             index_name = f"{table_name}_{FIELD_RE.sub('_', column_name)}"
 
-            if column_type.lower() != "array":
+            if not column_type.lower().startswith("array"):
                 query = f"CREATE INDEX {self.client.quoted_id(index_name)} ON {self.client.quoted_id(table_name)} ({self.client.quoted_id(column_name)})"
                 self.client.create_index(query)
             else:
@@ -279,12 +234,8 @@ class SpannerBackend:
 
         if data_type in ("DATETIME(3)", "TIMESTAMP",):
             dval = values[0].strip("Z")
-            # sep = " "
-            # postfix = ""
-            # if self.db_dialect == "spanner":
             sep = "T"
             postfix = "Z"
-            # return "{}-{}-{} {}:{}:{}{}".format(dval[0:4], dval[4:6], dval[6:8], dval[8:10], dval[10:12], dval[12:14], dval[14:17])
             return "{}-{}-{}{}{}:{}:{}{}{}".format(
                 dval[0:4],
                 dval[4:6],
@@ -298,7 +249,6 @@ class SpannerBackend:
             )
 
         if data_type == "JSON":
-            # return json.dumps({"v": values})
             return {"v": values}
 
         if data_type == "ARRAY<STRING(MAX)>":
@@ -323,8 +273,6 @@ class SpannerBackend:
                         continue
 
                 table_name = oc[-1]
-
-                # entry.pop(rdn_name)
 
                 if "objectClass" in entry:
                     entry.pop("objectClass")

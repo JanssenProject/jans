@@ -168,6 +168,12 @@ public class Util {
         }
     }
 
+    public static void addToJSONObjectIfNotNullOrEmpty(JSONObject jsonObject, String key, String[] value) throws JSONException {
+        if (jsonObject != null && value != null && value.length > 0 && StringUtils.isNotBlank(key)) {
+            jsonObject.put(key, new JSONArray(Arrays.asList(value)));
+        }
+    }
+
     public static String asString(List<? extends HasParamName> list) {
         final StringBuilder sb = new StringBuilder();
         if (list != null && !list.isEmpty()) {
