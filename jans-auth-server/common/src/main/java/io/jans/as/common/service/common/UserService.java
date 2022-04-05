@@ -64,7 +64,7 @@ public abstract class UserService {
         return persistenceEntryManager.find(dn, User.class, returnAttributes);
     }
 
-    public Person getUserByInum(String inum, String... returnAttributes) {
+    public User getUserByInum(String inum, String... returnAttributes) {
         if (StringHelper.isEmpty(inum)) {
             return null;
         }
