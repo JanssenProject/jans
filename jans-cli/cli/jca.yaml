@@ -6957,294 +6957,37 @@ components:
           type: object
           $ref: '#/components/schemas/FacterData'
           description: Underlying Server stats
-
+		  
     User:
       title: User object
       description: User.
       type: object
       required:
-        - displayName
+        - userId
       properties:
-        inum:
-          description: XRI i-number. Identifier to uniquely identify the user.
+        dn:
           type: string
-        associatedClient:
-          description: dn of associated clients with the person.
-          type: array
-          items:
-            type: string
-        countryName:
-          description: county name.
+          description: Domain name.
+        userId:
+          description: A domain issued and managed identifier for the user.
           type: string
-        displayName:
-          description: Name of the user suitable for display to end-users
+        createdAt:
+          description: User creation date.
           type: string
-        givenName:
-          description: Given name(s) or first name(s) of the End-User.
+          format: date-time
+        updatedAt:
+          description: Time the information of the person was last updated. Seconds from 1970-01-01T0:0:0Z
           type: string
-        managedOrganizations:
-          description: Organizations with which a person is associated.
-          type: array
-          items:
-            type: string
-        optOuts:
-          description: White pages attributes restricted by person in exclude profile management.
-          type: array
-          items:
-            type: string
-        status:
-          description: Status of the entry.
-          type: string
-        mail:
-          description: Primary Email Address.
-          type: string
-        memberOf:
-          description: Groups with which a person is associated.
-          type: array
-          items:
-            type: string
-        organization:
-          description: Users organization.
-          type: string
+          format: date-time
         oxAuthPersistentJwt:
           description: Persistent JWT.
           type: array
           items:
             type: string
-        createdAt:
-          description: User creation date.
-          type: string
-          format: date-time
-        externalUid:
-          description: List of associated external uid.
+        customAttributes:
+          description: dn of associated clients with the user.
           type: array
           items:
-            type: string
-        otpCache:
-          description: List of used OTP to prevent a hacker from using it again. Complementary to jansExtUid attribute.
-          type: array
-          items:
-            type: string
-        lastLogonTime:
-          description: 'Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating last login time.'
-          type: string
-          format: date-time
-        active:
-          type: boolean
-          description: boolean value indicating if user is active.
-          default: true
-        addres:
-          description: List of users address.
-          type: array
-          items:
-            $ref: '#/components/schemas/Address'
-        email:
-          description: List of users email address.
-          type: array
-          items:
-            $ref: '#/components/schemas/Email'
-        entitlements:
-          description: List of users entitlement.
-          type: array
-          items:
-           $ref: '#/components/schemas/Entitlement'
-        extId:
-          description: User's external id.
-          type: string
-        imsValue:
-          description: Instant messaging address value.
-          type: array
-          items:
-            $ref: '#/components/schemas/InstantMessagingAddress'
-        created:
-          description: Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating creation time.
-          type: string
-          format: date-time
-        lastModified:
-          description: Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating last modified time.
-          type: string
-          format: date-time
-        location:
-          description: The location (URI) of the user
-          type: string
-        version:
-          description: The version of the user data
-          type: string
-        nameFormatted:
-          description: The full name, including all middle names, titles, and suffixes as appropriate, formatted.
-          type: string
-        phoneValue:
-          description: Phone numbers of the user		
-          type: array
-          items:
-            $ref: '#/components/schemas/PhoneNumber'
-        photos:
-          description: User's photos
-          type: array
-          items:
-            $ref: '#/components/schemas/Photo'
-        profileURL:
-          description: URI pointing to a location representing the User's online profile
-          type: string
-        roles:
-          description: Users various roles
-          type: array
-          items:
-            $ref: '#/components/schemas/Role'
-        title:
-          description: Users titles
-          type: string
-          example: Vice President
-        userType:
-          description: Used to identify the relationship between the organization and the user
-          type: string
-          example: Contractor
-        honorificPrefix:
-          description: The honorific prefix(es) of the User, or  Title in most Western languages (for example, Ms. given the full name Ms. Barbara J Jensen, III.)
-          type: string
-          example: Ms.,Mr.,Miss.
-        honorificSuffix:
-          description: The honorific suffix(es) of the User, or  Suffix in most Western languages (for example,III. given the full name Ms. Barbara J Jensen, III.)
-          type: string
-        x509Certificates:
-          description: List of public certificate of the user
-          type: array
-          items:
-            $ref: '#/components/schemas/X509Certificate'
-        passwordExpirationDate:
-          description: 'Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating password expiration date.'
-          type: string
-          format: date-time
-        persistentId:
-          description: Persistent Id of the user
-          type: string
-        middleName:
-          type: string
-          description: Middle name of the user.
-        nickName:
-          type: string
-          description: Casual way to address the user in real life
-        preferredUsername:
-          type: string
-          description: Preferred name of the user.
-        profile:
-          type: string
-          description: Profile page URL of the user
-        picture:
-          type: string
-          description: Profile picture URL of the user
-        website:
-          type: string
-          description: Web page or blog URL of the person
-        emailVerified:
-          type: boolean
-          description: True if the e-mail address of the person has been verified; otherwise false
-        gender:
-          type: boolean
-          description: Gender of the person
-        birthdate:
-          description: Date of birth of the user. Year of birth (four digits),Month of birth (1-12),Day of birth
-          type: string
-          format: date-time
-        timezone:
-         description: Time zone database representing the End-Usrs time zone. For example, Europe/Paris or America/Los_Angeles
-         type: string
-         example: America/Los_Angeles
-        locale:
-         description: Locale of the person, represented as a BCP47 [RFC5646] language tag. Used for purposes of localizing items such as currency and dates.
-         type: string
-         example: en-US
-        phoneNumberVerified:
-          type: boolean
-          description: True if the phone number of the person has been verified, otherwise false
-        address:
-          description: OpenID Connect formatted JSON object representing the address of the person
-          type: array
-          items:
-            $ref: '#/components/schemas/Address'
-        updatedAt:
-          description: Time the information of the person was last updated. Seconds from 1970-01-01T0:0:0Z
-          type: string
-          format: date-time
-        preferredLanguage:
-          description: Preferred language as used in the Accept-Language HTTP header
-          type: string
-          example: en
-        secretAnswer:
-          description: Secret Answer
-          type: string
-        secretQuestion:
-          description: Secret Question
-          type: string
-        seeAlso:
-          type: string
-        sn:
-          description: This would be referred to as last name or surname.
-          type: string
-        cn:
-          description: Common Name
-          type: string
-        transientId:
-          description: Transient Id
-          type: string
-        uid:
-          description: A domain issued and managed identifier for the person.Subject - Identifier for the End-User at the Issuer.
-          type: string
-        userPassword:
-          description: user password
-          type: string
-        state:
-          description: State or Province
-          type: string
-        street:
-          type: string
-        city:
-          description: Locality Name or city	
-          type: string
-        countInvalidLogin:
-          description: Invalid login attempts count
-          type: integer
-        enrollmentCode:
-          description: Users enrollment code
-          type: string		  
-        imapData:
-          description: This data has information about your imap connection
-          type: string		
-        ppid:
-          description: Persistent Pairwise ID for OpenID Connect
-          type: array
-          items:
-            type: string	
-        guid:
-          description: A random string to mark temporary tokens
-          type: string	
-        preferredMethod:
-          description: Casa - Preferred method to use for user authentication
-          type: string	
-        userCertificate:
-          description: Casa - Preferred method to use for user authentication
-          type: string
-        otpDevices:
-          description: Casa - Json representation of OTP devices. Complementary to jansExtUid attribute
-          type: string
-        mobileDevices:
-          description: Casa - Json representation of mobile devices. Complementary to mobile attribute
-          type: string
-        trustedDevices:
-          description: Casa - Devices with which strong authentication may be skipped
-          type: string
-        strongAuthPolicy:
-          description: Casa - 2FA Enforcement Policy for User
-          type: string	  
-        unlinkedExternalUids:
-          description: Casa - List of unlinked social accounts (ie disabled jansExtUids)
-          type: array
-          items:
-            type: string
-        backchannelDeviceRegistrationTkn:
-          description: Backchannel Device Registration Tkn
-          type: string	    
-        backchannelUsrCode:
-          description: jans Backchannel User Code
-          type: string	  		  
-		  
+            $ref: '#/components/schemas/CustomAttribute'
+        
+	
