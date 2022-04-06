@@ -11,7 +11,7 @@ import static io.jans.as.model.util.Util.escapeLog;
 import io.jans.as.common.model.common.User;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.rest.model.SearchRequest;
-import io.jans.configapi.service.auth.UsrService;
+import io.jans.configapi.service.auth.UserService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.core.util.Jackson;
@@ -42,18 +42,18 @@ public class UserResource extends BaseResource {
     Logger logger;
 
     @Inject
-    UsrService userSrv;
+    UserService userSrv;
 
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.USER_READ_ACCESS })
-    public Response getOpenIdConnectClients(
+    public Response getUsers(
             @DefaultValue(DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
             @DefaultValue(DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
             @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
             @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder) {
         if (logger.isDebugEnabled()) {
-            logger.debug("User serach param - limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}",
+            logger.debug("User search param - limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}",
                     escapeLog(limit), escapeLog(pattern), escapeLog(startIndex), escapeLog(sortBy),
                     escapeLog(sortOrder));
         }
@@ -61,7 +61,7 @@ public class UserResource extends BaseResource {
                 limit, null, null);
 
         final List<User> users = this.doSearch(searchReq);
-        logger.debug("User serach result:{}", users);
+        logger.debug("User search result:{}", users);
         return Response.ok(users).build();
     }
 
@@ -70,7 +70,7 @@ public class UserResource extends BaseResource {
     @Path(ApiConstants.INUM_PATH)
     public Response getUserByInum(@PathParam(ApiConstants.INUM) @NotNull String inum) {
         if (logger.isDebugEnabled()) {
-            logger.debug("User serach by inum:{}", escapeLog(inum));
+            logger.debug("User search by inum:{}", escapeLog(inum));
         }
         User user = userSrv.getUserByInum(inum);
         logger.debug("user:{}", user);
@@ -79,7 +79,7 @@ public class UserResource extends BaseResource {
 
     @POST
     @ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS })
-    public Response createOpenIdConnect(@Valid User user) {
+    public Response createUser(@Valid User user) {
         if (logger.isDebugEnabled()) {
             logger.debug("User details to be added - user:{}", escapeLog(user));
         }
