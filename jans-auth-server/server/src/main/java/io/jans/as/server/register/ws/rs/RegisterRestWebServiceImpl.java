@@ -84,7 +84,7 @@ import static org.apache.commons.lang3.BooleanUtils.isTrue;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version March 17, 2022
+ * @version April 6, 2022
  */
 @Path("/")
 public class RegisterRestWebServiceImpl implements RegisterRestWebService {
@@ -606,9 +606,6 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         if (requestObject.getApplicationType() != null) {
             client.setApplicationType(requestObject.getApplicationType());
         }
-        if (StringUtils.isNotBlank(requestObject.getClientName())) {
-            client.setClientName(requestObject.getClientName());
-        }
         if (StringUtils.isNotBlank(requestObject.getSectorIdentifierUri())) {
             client.setSectorIdentifierUri(requestObject.getSectorIdentifierUri());
         }
@@ -656,18 +653,23 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             contacts = new ArrayList<>(new HashSet<>(contacts)); // Remove repeated elements
             client.setContacts(contacts.toArray(new String[0]));
         }
-        if (StringUtils.isNotBlank(requestObject.getLogoUri())) {
-            client.setLogoUri(requestObject.getLogoUri());
+
+        for (String key : requestObject.getClientNameLanguageTags()) {
+            client.setClientName(requestObject.getClientName(key), Locale.forLanguageTag(key));
         }
-        if (StringUtils.isNotBlank(requestObject.getClientUri())) {
-            client.setClientUri(requestObject.getClientUri());
+        for (String key : requestObject.getLogoUriLanguageTags()) {
+            client.setLogoUri(requestObject.getLogoUri(key), Locale.forLanguageTag(key));
         }
-        if (StringUtils.isNotBlank(requestObject.getPolicyUri())) {
-            client.setPolicyUri(requestObject.getPolicyUri());
+        for (String key : requestObject.getClientUriLanguageTags()) {
+            client.setClientUri(requestObject.getClientUri(key), Locale.forLanguageTag(key));
         }
-        if (StringUtils.isNotBlank(requestObject.getTosUri())) {
-            client.setTosUri(requestObject.getTosUri());
+        for (String key : requestObject.getPolicyUriLanguageTags()) {
+            client.setPolicyUri(requestObject.getPolicyUri(key), Locale.forLanguageTag(key));
         }
+        for (String key : requestObject.getTosUriLanguageTags()) {
+            client.setTosUri(requestObject.getTosUri(key), Locale.forLanguageTag(key));
+        }
+
         if (StringUtils.isNotBlank(requestObject.getJwksUri())) {
             client.setJwksUri(requestObject.getJwksUri());
         }
@@ -1095,17 +1097,18 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         responseJsonObject.put(CLIENT_SECRET_EXPIRES_AT.toString(), client.getClientSecretExpiresAt() != null && client.getClientSecretExpiresAt().getTime() > 0 ?
                 client.getClientSecretExpiresAt().getTime() / 1000 : 0);
 
+        Util.addToJSONObjectIfNotNull(responseJsonObject, CLIENT_NAME.toString(), client.getClientName());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, LOGO_URI.toString(), client.getLogoUri());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, CLIENT_URI.toString(), client.getClientUri());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, POLICY_URI.toString(), client.getPolicyUri());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, TOS_URI.toString(), client.getTosUri());
+
         Util.addToJSONObjectIfNotNull(responseJsonObject, REDIRECT_URIS.toString(), client.getRedirectUris());
         Util.addToJSONObjectIfNotNull(responseJsonObject, CLAIMS_REDIRECT_URIS.toString(), client.getClaimRedirectUris());
         Util.addToJSONObjectIfNotNull(responseJsonObject, RESPONSE_TYPES.toString(), ResponseType.toStringArray(client.getResponseTypes()));
         Util.addToJSONObjectIfNotNull(responseJsonObject, GRANT_TYPES.toString(), GrantType.toStringArray(client.getGrantTypes()));
         Util.addToJSONObjectIfNotNull(responseJsonObject, APPLICATION_TYPE.toString(), client.getApplicationType());
         Util.addToJSONObjectIfNotNull(responseJsonObject, CONTACTS.toString(), client.getContacts());
-        Util.addToJSONObjectIfNotNull(responseJsonObject, CLIENT_NAME.toString(), client.getClientName());
-        Util.addToJSONObjectIfNotNull(responseJsonObject, LOGO_URI.toString(), client.getLogoUri());
-        Util.addToJSONObjectIfNotNull(responseJsonObject, CLIENT_URI.toString(), client.getClientUri());
-        Util.addToJSONObjectIfNotNull(responseJsonObject, POLICY_URI.toString(), client.getPolicyUri());
-        Util.addToJSONObjectIfNotNull(responseJsonObject, TOS_URI.toString(), client.getTosUri());
         Util.addToJSONObjectIfNotNull(responseJsonObject, JWKS_URI.toString(), client.getJwksUri());
         Util.addToJSONObjectIfNotNull(responseJsonObject, SECTOR_IDENTIFIER_URI.toString(), client.getSectorIdentifierUri());
         Util.addToJSONObjectIfNotNull(responseJsonObject, SUBJECT_TYPE.toString(), client.getSubjectType());

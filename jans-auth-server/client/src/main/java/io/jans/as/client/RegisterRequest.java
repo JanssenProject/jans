@@ -20,6 +20,8 @@ import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.json.JsonApplier;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.register.RegisterRequestParam;
+import io.jans.orm.model.base.ClientMetadataValue;
+import static io.jans.orm.model.base.ClientMetadataValue.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
@@ -28,6 +30,8 @@ import org.json.JSONObject;
 
 import javax.ws.rs.core.MediaType;
 import java.util.*;
+import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 
 import static io.jans.as.client.util.ClientUtil.*;
 import static io.jans.as.model.register.RegisterRequestParam.*;
@@ -63,15 +67,15 @@ public class RegisterRequest extends BaseRequest {
     private List<GrantType> grantTypes;
     private ApplicationType applicationType;
     private List<String> contacts;
-    private String clientName;
-    private String logoUri;
-    private String clientUri;
-    private String policyUri;
+    private final ClientMetadataValue clientName;
+    private final ClientMetadataValue logoUri;
+    private final ClientMetadataValue clientUri;
+    private final ClientMetadataValue policyUri;
+    private final ClientMetadataValue tosUri;
     private String frontChannelLogoutUri;
     private Boolean frontChannelLogoutSessionRequired;
     private List<String> backchannelLogoutUris;
     private Boolean backchannelLogoutSessionRequired;
-    private String tosUri;
     private String jwksUri;
     private String jwks;
     private String sectorIdentifierUri;
@@ -159,6 +163,12 @@ public class RegisterRequest extends BaseRequest {
         this.claims = new ArrayList<>();
         this.customAttributes = new HashMap<>();
         this.authorizedAcrValues = new ArrayList<>();
+
+        clientName = new ClientMetadataValue();
+        logoUri = new ClientMetadataValue();
+        clientUri = new ClientMetadataValue();
+        policyUri = new ClientMetadataValue();
+        tosUri = new ClientMetadataValue();
     }
 
     /**
@@ -172,7 +182,7 @@ public class RegisterRequest extends BaseRequest {
                            List<String> redirectUris) {
         this();
         this.applicationType = applicationType;
-        this.clientName = clientName;
+        this.clientName.setValue(clientName);
         this.redirectUris = redirectUris;
     }
 
@@ -450,7 +460,21 @@ public class RegisterRequest extends BaseRequest {
      * @return The name of the Client to be presented to the user.
      */
     public String getClientName() {
-        return clientName;
+        return clientName.getValue();
+    }
+
+    /**
+     * Returns the name of the Client to be presented to the user represented in a language and script.
+     *
+     * @param languageTag Language tag
+     * @return The name of the Client to be presented to the user.
+     */
+    public String getClientName(String languageTag) {
+        return clientName.getValue(languageTag);
+    }
+
+    public Set<String> getClientNameLanguageTags() {
+        return clientName.getLanguageTags();
     }
 
     /**
@@ -459,7 +483,17 @@ public class RegisterRequest extends BaseRequest {
      * @param clientName The name of the Client to be presented to the user.
      */
     public void setClientName(String clientName) {
-        this.clientName = clientName;
+        this.clientName.setValue(clientName);
+    }
+
+    /**
+     * Sets the name of the Client to be presented to the user represented in a language and script.
+     *
+     * @param clientName The name of the Client to be presented to the user.
+     * @param locale     The locale
+     */
+    public void setClientName(String clientName, Locale locale) {
+        this.clientName.setValue(clientName, locale);
     }
 
     /**
@@ -468,74 +502,174 @@ public class RegisterRequest extends BaseRequest {
      * @return The URL that references a logo for the Client application.
      */
     public String getLogoUri() {
-        return logoUri;
+        return logoUri.getValue();
     }
 
     /**
-     * Sets an URL that references a logo for the Client application.
+     * Returns a URL that references a logo for the Client application in a language and script.
+     *
+     * @param languageTag Language tag
+     * @return The URL that references a logo for the Client application in a language and script.
+     */
+    public String getLogoUri(String languageTag) {
+        return logoUri.getValue(languageTag);
+    }
+
+    public Set<String> getLogoUriLanguageTags() {
+        return logoUri.getLanguageTags();
+    }
+
+    /**
+     * Sets a URL that references a logo for the Client application.
      *
      * @param logoUri The URL that references a logo for the Client application.
      */
     public void setLogoUri(String logoUri) {
-        this.logoUri = logoUri;
+        this.logoUri.setValue(logoUri);
     }
 
     /**
-     * Returns an URL of the home page of the Client.
+     * Sets a URL that references a logo for the Client application represented in a language and script.
+     *
+     * @param logoUri The URL that references a logo for the Client application represented in a language and script.
+     * @param locale  The locale
+     */
+    public void setLogoUri(String logoUri, Locale locale) {
+        this.logoUri.setValue(logoUri, locale);
+    }
+
+    /**
+     * Returns a URL of the home page of the Client.
      *
      * @return The URL of the home page of the Client.
      */
     public String getClientUri() {
-        return clientUri;
+        return clientUri.getValue();
+    }
+
+    public Set<String> getClientUriLanguageTags() {
+        return clientUri.getLanguageTags();
     }
 
     /**
-     * Sets an URL of the home page of the Client.
+     * Returns a URL of the home page of the Client represented in a language and script.
+     *
+     * @param languageTag Language tag
+     * @return The URL of the home page of the Client represented in a language and script.
+     */
+    public String getClientUri(String languageTag) {
+        return clientUri.getValue(languageTag);
+    }
+
+    /**
+     * Sets a URL of the home page of the Client.
      *
      * @param clientUri The URL of the home page of the Client.
      */
     public void setClientUri(String clientUri) {
-        this.clientUri = clientUri;
+        this.clientUri.setValue(clientUri);
     }
 
     /**
-     * Returns an URL that the Relying Party Client provides to the End-User to read about the how the profile data
+     * Sets a URL of the home page of the Client represented in a language and script.
+     *
+     * @param clientUri The URL of the home page of the Client represented in a language and script.
+     * @param locale    The locale
+     */
+    public void setClientUri(String clientUri, Locale locale) {
+        this.clientUri.setValue(clientUri, locale);
+    }
+
+    /**
+     * Returns a URL that the Relying Party Client provides to the End-User to read about how the profile data
      * will be used.
      *
      * @return The policy URL.
      */
     public String getPolicyUri() {
-        return policyUri;
+        return policyUri.getValue();
     }
 
     /**
-     * Sets an URL that the Relying Party Client provides to the End-User to read about the how the profile data will
+     * Returns a URL that the Relying Party Client provides to the End-User to read about how the profile data
+     * will be used in a language and script.
+     *
+     * @param languageTag Language tag
+     * @return The policy URL.
+     */
+    public String getPolicyUri(String languageTag) {
+        return policyUri.getValue(languageTag);
+    }
+
+    public Set<String> getPolicyUriLanguageTags() {
+        return policyUri.getLanguageTags();
+    }
+
+    /**
+     * Sets a URL that the Relying Party Client provides to the End-User to read about how the profile data will
      * be used.
      *
      * @param policyUri The policy URL.
      */
     public void setPolicyUri(String policyUri) {
-        this.policyUri = policyUri;
+        this.policyUri.setValue(policyUri);
     }
 
     /**
-     * Returns an URL that the Relying Party Client provides to the End-User to read about the Relying Party's terms
+     * Sets a URL that the Relying Party Client provides to the End-User to read about how the profile data will
+     * be used in a language and script.
+     *
+     * @param policyUri The policy URL.
+     * @param locale    The locale
+     */
+    public void setPolicyUri(String policyUri, Locale locale) {
+        this.policyUri.setValue(policyUri, locale);
+    }
+
+    /**
+     * Returns a URL that the Relying Party Client provides to the End-User to read about the Relying Party's terms
      * of service.
      *
      * @return The tems of service URL.
      */
     public String getTosUri() {
-        return tosUri;
+        return tosUri.getValue();
     }
 
     /**
-     * Sets an URL that the Relying Party Client provides to the End-User to read about the Relying Party's terms of
+     * Returns a URL that the Relying Party Client provides to the End-User to read about the Relying Party's terms
+     * of service in a language and script.
+     *
+     * @param languageTag Language tag
+     * @return The terms of service URL.
+     */
+    public String getTosUri(String languageTag) {
+        return tosUri.getValue(languageTag);
+    }
+
+    public Set<String> getTosUriLanguageTags() {
+        return tosUri.getLanguageTags();
+    }
+
+    /**
+     * Sets a URL that the Relying Party Client provides to the End-User to read about the Relying Party's terms of
      * service.
      *
      * @param tosUri The term of service URL.
      */
     public void setTosUri(String tosUri) {
-        this.tosUri = tosUri;
+        this.tosUri.setValue(tosUri);
+    }
+
+    /**
+     * Sets a URL that the Relying Party Client provides to the End-User to read about the Relying Party's terms of
+     * service in a language and script.
+     *
+     * @param locale The locale
+     * @param tosUri The term of service URL.
+     */
+    public void setTosUri(String tosUri, Locale locale) {
+        this.tosUri.setValue(tosUri, locale);
     }
 
     /**
@@ -1235,21 +1369,13 @@ public class RegisterRequest extends BaseRequest {
         if (contacts != null && !contacts.isEmpty()) {
             parameters.put(CONTACTS.toString(), toJSONArray(contacts).toString());
         }
-        if (StringUtils.isNotBlank(clientName)) {
-            parameters.put(CLIENT_NAME.toString(), clientName);
-        }
-        if (StringUtils.isNotBlank(logoUri)) {
-            parameters.put(LOGO_URI.toString(), logoUri);
-        }
-        if (StringUtils.isNotBlank(clientUri)) {
-            parameters.put(CLIENT_URI.toString(), clientUri);
-        }
-        if (StringUtils.isNotBlank(policyUri)) {
-            parameters.put(POLICY_URI.toString(), policyUri);
-        }
-        if (StringUtils.isNotBlank(tosUri)) {
-            parameters.put(TOS_URI.toString(), tosUri);
-        }
+
+        addClientMetadataParam(parameters, CLIENT_NAME, clientName);
+        addClientMetadataParam(parameters, LOGO_URI, logoUri);
+        addClientMetadataParam(parameters, CLIENT_URI, clientUri);
+        addClientMetadataParam(parameters, POLICY_URI, policyUri);
+        addClientMetadataParam(parameters, TOS_URI, tosUri);
+
         if (StringUtils.isNotBlank(jwksUri)) {
             parameters.put(JWKS_URI.toString(), jwksUri);
         }
@@ -1480,12 +1606,29 @@ public class RegisterRequest extends BaseRequest {
         result.setGrantTypes(extractGrantTypes(requestObject));
         result.setApplicationType(ApplicationType.fromString(requestObject.optString(APPLICATION_TYPE.toString())));
         result.setContacts(extractListByKey(requestObject, CONTACTS.toString()));
-        result.setClientName(requestObject.optString(CLIENT_NAME.toString()));
         result.setIdTokenTokenBindingCnf(requestObject.optString(ID_TOKEN_TOKEN_BINDING_CNF.toString(), ""));
-        result.setLogoUri(requestObject.optString(LOGO_URI.toString()));
-        result.setClientUri(requestObject.optString(CLIENT_URI.toString()));
-        result.setPolicyUri(requestObject.optString(POLICY_URI.toString()));
-        result.setTosUri(requestObject.optString(TOS_URI.toString()));
+
+        clientMetadataValueFromJson(requestObject, CLIENT_NAME, (String key, Locale locale) -> {
+            result.setClientName(key, locale);
+            return null;
+        });
+        clientMetadataValueFromJson(requestObject, LOGO_URI, (String key, Locale locale) -> {
+            result.setLogoUri(key, locale);
+            return null;
+        });
+        clientMetadataValueFromJson(requestObject, CLIENT_URI, (String key, Locale locale) -> {
+            result.setClientUri(key, locale);
+            return null;
+        });
+        clientMetadataValueFromJson(requestObject, POLICY_URI, (String key, Locale locale) -> {
+            result.setPolicyUri(key, locale);
+            return null;
+        });
+        clientMetadataValueFromJson(requestObject, TOS_URI, (String key, Locale locale) -> {
+            result.setTosUri(key, locale);
+            return null;
+        });
+
         result.setJwksUri(requestObject.optString(JWKS_URI.toString()));
         result.setJwks(requestObject.optString(JWKS.toString()));
         result.setSectorIdentifierUri(requestObject.optString(SECTOR_IDENTIFIER_URI.toString()));
@@ -1505,6 +1648,20 @@ public class RegisterRequest extends BaseRequest {
         return result;
     }
 
+    private static void clientMetadataValueFromJson(
+            JSONObject requestObject, RegisterRequestParam registerRequestParam, BiFunction<String, Locale, Void> function) {
+        List<String> keys = requestObject.keySet().stream()
+                .filter(k -> k.startsWith(registerRequestParam.getName()))
+                .collect(Collectors.toList());
+
+        keys.forEach(key -> {
+            key = key.replace(registerRequestParam.getName(), "");
+            String[] keyParts = key.split(LANG_CLAIM_SEPARATOR);
+            String languageTag = keyParts[keyParts.length - 1];
+            function.apply(requestObject.getString(registerRequestParam.getName() + key), Locale.forLanguageTag(languageTag));
+        });
+    }
+
     public static List<GrantType> extractGrantTypes(JSONObject requestObject) {
         final Set<GrantType> grantTypes = new HashSet<>();
         if (requestObject.has(GRANT_TYPES.toString())) {
@@ -1518,7 +1675,6 @@ public class RegisterRequest extends BaseRequest {
         }
         return new ArrayList<>(grantTypes);
     }
-
 
     @Override
     public JSONObject getJSONParameters() throws JSONException {
@@ -1544,9 +1700,6 @@ public class RegisterRequest extends BaseRequest {
         if (contacts != null && !contacts.isEmpty()) {
             parameters.put(CONTACTS.toString(), toJSONArray(contacts));
         }
-        if (StringUtils.isNotBlank(clientName)) {
-            parameters.put(CLIENT_NAME.toString(), clientName);
-        }
         if (StringUtils.isNotBlank(idTokenTokenBindingCnf)) {
             parameters.put(ID_TOKEN_TOKEN_BINDING_CNF.toString(), idTokenTokenBindingCnf);
         }
@@ -1565,18 +1718,13 @@ public class RegisterRequest extends BaseRequest {
         if (keepClientAuthorizationAfterExpiration != null) {
             parameters.put(KEEP_CLIENT_AUTHORIZATION_AFTER_EXPIRATION.toString(), keepClientAuthorizationAfterExpiration);
         }
-        if (StringUtils.isNotBlank(logoUri)) {
-            parameters.put(LOGO_URI.toString(), logoUri);
-        }
-        if (StringUtils.isNotBlank(clientUri)) {
-            parameters.put(CLIENT_URI.toString(), clientUri);
-        }
-        if (StringUtils.isNotBlank(policyUri)) {
-            parameters.put(POLICY_URI.toString(), policyUri);
-        }
-        if (StringUtils.isNotBlank(tosUri)) {
-            parameters.put(TOS_URI.toString(), tosUri);
-        }
+
+        addClientMetadataParam(parameters, CLIENT_NAME, clientName);
+        addClientMetadataParam(parameters, LOGO_URI, logoUri);
+        addClientMetadataParam(parameters, CLIENT_URI, clientUri);
+        addClientMetadataParam(parameters, POLICY_URI, policyUri);
+        addClientMetadataParam(parameters, TOS_URI, tosUri);
+
         if (StringUtils.isNotBlank(jwksUri)) {
             parameters.put(JWKS_URI.toString(), jwksUri);
         }
@@ -1789,5 +1937,29 @@ public class RegisterRequest extends BaseRequest {
 
     public void setRedirectUrisRegex(String redirectUrisRegex) {
         this.redirectUrisRegex = redirectUrisRegex;
+    }
+
+    private void addClientMetadataParam(Map<String, String> parameters, RegisterRequestParam registerRequestParam, ClientMetadataValue clientMetadataValue) {
+        if (clientMetadataValue != null && clientMetadataValue.size() > 0) {
+            for (String languageTag : clientMetadataValue.getLanguageTags()) {
+                if (StringUtils.isBlank(languageTag)) {
+                    parameters.put(registerRequestParam.toString(), clientMetadataValue.getValue());
+                } else {
+                    parameters.put(registerRequestParam.toString() + "#" + languageTag, clientMetadataValue.getValue(languageTag));
+                }
+            }
+        }
+    }
+
+    private void addClientMetadataParam(JSONObject parameters, RegisterRequestParam registerRequestParam, ClientMetadataValue clientMetadataValue) {
+        if (clientMetadataValue != null && clientMetadataValue.size() > 0) {
+            for (String languageTag : clientMetadataValue.getLanguageTags()) {
+                if (StringUtils.isBlank(languageTag)) {
+                    parameters.put(registerRequestParam.toString(), clientMetadataValue.getValue());
+                } else {
+                    parameters.put(registerRequestParam.toString() + "#" + languageTag, clientMetadataValue.getValue(languageTag));
+                }
+            }
+        }
     }
 }

@@ -148,6 +148,12 @@
         </classes>
     </test>
 
+    <test name="Client Language Metadata Test" enabled="true">
+        <classes>
+            <class name="io.jans.as.client.ws.rs.ClientLanguageMetadataTest"/>
+        </classes>
+    </test>
+
     <!-- Client Secret Basic test -->
     <test name="Client Secret Basic test" enabled="true">
         <classes>

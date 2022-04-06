@@ -22,7 +22,8 @@ import io.jans.as.server.service.ScopeService;
 import io.jans.as.server.service.token.TokenService;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.model.GluuAttribute;
-import org.json.JSONException;
+import io.jans.orm.model.base.ClientMetadataValue;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
@@ -32,11 +33,14 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import java.util.Set;
 
+import static io.jans.orm.model.base.ClientMetadataValue.EMPTY_LANG_TAG;
+import static io.jans.orm.model.base.ClientMetadataValue.LANG_CLAIM_SEPARATOR;
+
 /**
  * Provides interface for Client Info REST web services
  *
  * @author Javier Rojas Blum
- * @version 0.9 March 27, 2015
+ * @version April 6, 2022
  */
 @Path("/")
 public class ClientInfoRestWebServiceImpl implements ClientInfoRestWebService {
@@ -124,12 +128,21 @@ public class ClientInfoRestWebServiceImpl implements ClientInfoRestWebService {
                         Object attributeValue = clientService.getAttribute(client, ldapName);
 
                         String claimName = attribute.getClaimName();
-                        jsonObj.put(claimName, attributeValue);
+
+                        if (attributeValue instanceof ClientMetadataValue) {
+                            ClientMetadataValue clientMetadataValue = (ClientMetadataValue) attributeValue;
+                            clientMetadataValue.getLanguageTags()
+                                    .forEach(languageTag -> {
+                                        String key = claimName + (StringUtils.isNotBlank(languageTag)
+                                                ? LANG_CLAIM_SEPARATOR + languageTag : EMPTY_LANG_TAG);
+                                        jsonObj.put(key, clientMetadataValue.getValue(languageTag));
+                                    });
+                        } else {
+                            jsonObj.put(claimName, attributeValue);
+                        }
                     }
                 }
             }
-        } catch (JSONException e) {
-            log.error(e.getMessage(), e);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
