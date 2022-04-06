@@ -455,7 +455,7 @@ paths:
     parameters: []
   /jans-config-api/api/v1/config/database/ldap/{name}:
     parameters:
-      - name: configId
+      - name: name
         in: path
         required: true
         description: Name of LDAP configuration.
