@@ -59,9 +59,6 @@ jobs:
           echo "${{ secrets.MOWORKFLOWTOKEN }}" > token.txt
           gh auth login --with-token < token.txt          
           pull_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
-          echo "Starting to add labels for PR ${pull_number}"
           changed_files=$(gh pr view $pull_number --json files --jq '.files.[].path')
-          echo "Detected the following changed files ${changed_files}"
           branch=${{github.base_ref}}
-          echo "Detected the following head branch ${branch}"
-          sudo python3 ./automation/github-labels/label.py $pull_number $changed_files $branch
+          sudo python3 ./automation/github-labels/label.py ${pull_number} ${changed_files} ${branch}

@@ -93,8 +93,14 @@ def auto_label_pr(pr_number, paths=None, branch=None):
 
 
 def main():
+    pr_number = sys.argv[1]
+    changed_files = sys.argv[2]
+    branch = sys.argv[3]
+    print(f"Starting to add labels for PR {pr_number}")
+    print(f"Detected the following changed files {changed_files}")
+    print(f"Detected the following head branch {branch}")
     create_labels()
-    auto_label_pr(sys.argv[1], sys.argv[2], sys.argv[3])
+    auto_label_pr(pr_number, changed_files, branch)
 
 
 if __name__ == "__main__":
