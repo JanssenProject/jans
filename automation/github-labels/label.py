@@ -48,8 +48,8 @@ def create_labels():
             print(f"Label {k} already exists! Skipping...")
         else:
             try:
-                print(f"gh label create {k} --description {str(v['description'])} --color {str(v['color'])}")
-                exec_cmd(f"gh label create {k} --description {str(v['description'])} --color {str(v['color'])}")
+                print(f"gh label create {k} --description '{v['description']}' --color '{v['color']}'")
+                exec_cmd(f"gh label create {k} --description '{v['description']}' --color '{v['color']}'")
             except Exception as e:
                 print(f"Couldn't create label {k} because {e}")
 
@@ -83,7 +83,7 @@ def auto_label_pr(pr_number, paths=None, branch=None):
                         print("Got an index issue!")
     string_of_labels = ",".join(labels)
     try:
-        exec_cmd(f"gh pr edit {pr_number} --add-label {string_of_labels}")
+        exec_cmd(f"gh pr edit {pr_number} --add-label '{string_of_labels}'")
     except Exception as e:
         print(f"Couldn't add the label to the PR {pr_number} because {e}")
 
