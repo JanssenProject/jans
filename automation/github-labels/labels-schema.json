@@ -4,7 +4,8 @@
     "description": "Address in branch 1.0",
     "auto-label": {
       "branch": "1.0",
-      "paths": []
+      "paths": [],
+      "title-prefixes": []
     }
   },
   "area-CI": {
@@ -12,7 +13,8 @@
     "description": "Issue or changes required in automatic builds or CI infrastructure",
     "auto-label": {
       "branch": "",
-      "paths": [".github/workflows", ".github/dependabot.yml", "automation",  ".github/CODEOWNERS"]
+      "paths": [".github/workflows", ".github/dependabot.yml", "automation",  ".github/CODEOWNERS"],
+      "title-prefixes": ["ci", "test"]
     }
   },
   "area-documentation": {
@@ -20,7 +22,8 @@
     "description": "Documentation needs to change as part of issue or PR",
     "auto-label": {
       "branch": "",
-      "paths": []
+      "paths": [],
+      "title-prefixes": ["docs"]
     }
   },
   "autorelease: pending": {
@@ -28,7 +31,8 @@
     "description": "Used by Google Release Please flow. This should not be set by anyone!",
     "auto-label": {
       "branch": "",
-      "paths": []
+      "paths": [],
+      "title-prefixes": []
     }
   },
   "autorelease: tagged": {
@@ -36,7 +40,8 @@
     "description": "Used by Google Release Please flow. This should not be set by anyone!",
     "auto-label": {
       "branch": "",
-      "paths": []
+      "paths": [],
+      "title-prefixes": []
     }
   },
   "bot": {
@@ -44,7 +49,8 @@
     "description": "Created, modified or reviewed by bot",
     "auto-label": {
       "branch": "",
-      "paths": []
+      "paths": [],
+      "title-prefixes": []
     }
   },
   "comp-charts-jans": {
@@ -52,7 +58,8 @@
     "description": "Touching folder /charts",
     "auto-label": {
       "branch": "",
-      "paths": ["charts"]
+      "paths": ["charts"],
+      "title-prefixes": []
     }
   },
   "comp-docker-jans-auth-server": {
@@ -60,7 +67,8 @@
     "description": "Touching folder /docker-jans-auth-server",
     "auto-label": {
       "branch": "",
-      "paths": ["docker-jans-auth-server"]
+      "paths": ["docker-jans-auth-server"],
+      "title-prefixes": []
     }
   },
   "comp-docker-jans-certmanager": {
@@ -68,7 +76,8 @@
     "description": "Touching folder /docker-jans-certmanager",
     "auto-label": {
       "branch": "",
-      "paths": ["docker-jans-certmanager"]
+      "paths": ["docker-jans-certmanager"],
+      "title-prefixes": []
     }
   },
   "comp-docker-jans-client-api": {
@@ -76,7 +85,8 @@
     "description": "Touching folder /docker-jans-client-api",
     "auto-label": {
       "branch": "",
-      "paths": ["docker-jans-client-api"]
+      "paths": ["docker-jans-client-api"],
+      "title-prefixes": []
     }
   },
   "comp-docker-jans-config-api": {
@@ -84,7 +94,8 @@
     "description": "Touching folder /docker-jans-config-api",
     "auto-label": {
       "branch": "",
-      "paths": ["docker-jans-config-api"]
+      "paths": ["docker-jans-config-api"],
+      "title-prefixes": []
     }
   },
   "comp-docker-jans-configurator": {
@@ -92,7 +103,8 @@
     "description": "Touching folder /docker-jans-configurator",
     "auto-label": {
       "branch": "",
-      "paths": ["docker-jans-configurator"]
+      "paths": ["docker-jans-configurator"],
+      "title-prefixes": []
     }
   },
   "comp-docker-jans-fido2": {
@@ -100,7 +112,8 @@
     "description": "Touching folder /docker-jans-fido2",
     "auto-label": {
       "branch": "",
-      "paths": ["docker-jans-fido2"]
+      "paths": ["docker-jans-fido2"],
+      "title-prefixes": []
     }
   },
   "comp-docker-jans-persistence-loader": {
@@ -108,7 +121,8 @@
     "description": "Touching folder /docker-jans-persistence-loader",
     "auto-label": {
       "branch": "",
-      "paths": ["docker-jans-persistence-loader"]
+      "paths": ["docker-jans-persistence-loader"],
+      "title-prefixes": []
     }
   },
   "comp-docker-jans-scim": {
@@ -116,7 +130,8 @@
     "description": "Touching folder /docker-jans-scim",
     "auto-label": {
       "branch": "",
-      "paths": ["docker-jans-scim"]
+      "paths": ["docker-jans-scim"],
+      "title-prefixes": []
     }
   },
   "comp-jans-auth-server": {
@@ -124,7 +139,8 @@
     "description": "Touching folder /jans-auth-server",
     "auto-label": {
       "branch": "",
-      "paths": ["jans-auth-server"]
+      "paths": ["jans-auth-server"],
+      "title-prefixes": []
     }
   },
   "comp-jans-bom": {
@@ -132,7 +148,8 @@
     "description": "Touching folder /jans-bom",
     "auto-label": {
       "branch": "",
-      "paths": ["jans-bom"]
+      "paths": ["jans-bom"],
+      "title-prefixes": []
     }
   },
   "comp-jans-cli": {
@@ -140,7 +157,8 @@
     "description": "Touching folder /jans-cli",
     "auto-label": {
       "branch": "",
-      "paths": ["jans-cli"]
+      "paths": ["jans-cli"],
+      "title-prefixes": []
     }
   },
   "comp-jans-client-api": {
@@ -148,7 +166,8 @@
     "description": "Touching folder /jans-client-api",
     "auto-label": {
       "branch": "",
-      "paths": ["jans-client-api"]
+      "paths": ["jans-client-api"],
+      "title-prefixes": []
     }
   },
   "comp-jans-config-api": {
@@ -164,7 +183,8 @@
     "description": "Touching folder /jans-core",
     "auto-label": {
       "branch": "",
-      "paths": ["jans-core"]
+      "paths": ["jans-core"],
+      "title-prefixes": []
     }
   },
   "comp-jans-eleven": {
@@ -172,7 +192,8 @@
     "description": "Touching folder /jans-eleven",
     "auto-label": {
       "branch": "",
-      "paths": ["jans-eleven"]
+      "paths": ["jans-eleven"],
+      "title-prefixes": []
     }
   },
   "comp-jans-fido2": {
@@ -180,7 +201,8 @@
     "description": "Touching folder /jans-fido2",
     "auto-label": {
       "branch": "",
-      "paths": ["jans-fido2"]
+      "paths": ["jans-fido2"],
+      "title-prefixes": []
     }
   },
   "comp-jans-linux-setup": {
@@ -188,7 +210,8 @@
     "description": "Touching folder /jans-linux-setup",
     "auto-label": {
       "branch": "",
-      "paths": ["jans-linux-setup"]
+      "paths": ["jans-linux-setup"],
+      "title-prefixes": []
     }
   },
   "comp-jans-orm": {
@@ -196,7 +219,8 @@
     "description": "Touching folder /jans-orm",
     "auto-label": {
       "branch": "",
-      "paths": ["jans-orm"]
+      "paths": ["jans-orm"],
+      "title-prefixes": []
     }
   },
   "comp-jans-pycloudlib": {
@@ -204,7 +228,8 @@
     "description": "Touching folder /jans-pycloudlib",
     "auto-label": {
       "branch": "",
-      "paths": ["jans-pycloudlib"]
+      "paths": ["jans-pycloudlib"],
+      "title-prefixes": []
     }
   },
   "comp-jans-scim": {
@@ -212,7 +237,8 @@
     "description": "Touching folder /jans-scim",
     "auto-label": {
       "branch": "",
-      "paths": ["jans-scim"]
+      "paths": ["jans-scim"],
+      "title-prefixes": []
     }
   },
   "comp-super-jans": {
@@ -220,7 +246,8 @@
     "description": "Touching folder /super-jans",
     "auto-label": {
       "branch": "",
-      "paths": ["super-jans"]
+      "paths": ["super-jans"],
+      "title-prefixes": []
     }
   },
   "effort-1": {
@@ -228,7 +255,8 @@
     "description": "Relative effort required for completion of issue or PR",
     "auto-label": {
       "branch": "",
-      "paths": []
+      "paths": [],
+      "title-prefixes": []
     }
   },
   "effort-2": {
@@ -236,7 +264,8 @@
     "description": "Relative effort required for completion of issue or PR",
     "auto-label": {
       "branch": "",
-      "paths": []
+      "paths": [],
+      "title-prefixes": []
     }
   },
   "effort-3": {
@@ -244,7 +273,8 @@
     "description": "Relative effort required for completion of issue or PR",
     "auto-label": {
       "branch": "",
-      "paths": []
+      "paths": [],
+      "title-prefixes": []
     }
   },
   "effort-5": {
@@ -252,7 +282,8 @@
     "description": "Relative effort required for completion of issue or PR",
     "auto-label": {
       "branch": "",
-      "paths": []
+      "paths": [],
+      "title-prefixes": []
     }
   },
   "effort-8": {
@@ -260,7 +291,8 @@
     "description": "Relative effort required for completion of issue or PR",
     "auto-label": {
       "branch": "",
-      "paths": []
+      "paths": [],
+      "title-prefixes": []
     }
   },
   "effort-13": {
@@ -268,7 +300,8 @@
     "description": "Relative effort required for completion of issue or PR",
     "auto-label": {
       "branch": "",
-      "paths": []
+      "paths": [],
+      "title-prefixes": []
     }
   },
   "effort-21": {
@@ -276,15 +309,17 @@
     "description": "Relative effort required for completion of issue or PR",
     "auto-label": {
       "branch": "",
-      "paths": []
+      "paths": [],
+      "title-prefixes": []
     }
   },
   "enhancement": {
     "color": "ededed",
-    "description": "Relative effort required for completion of issue or PR",
+    "description": "Default label by Github",
     "auto-label": {
       "branch": "",
-      "paths": []
+      "paths": [],
+      "title-prefixes": []
     }
   },
   "github_actions": {
@@ -292,7 +327,8 @@
     "description": "Pull requests that update Github_actions code",
     "auto-label": {
       "branch": "",
-      "paths": []
+      "paths": [],
+      "title-prefixes": []
     }
   },
   "good first issue": {
@@ -300,7 +336,8 @@
     "description": "Good for newcomers",
     "auto-label": {
       "branch": "",
-      "paths": []
+      "paths": [],
+      "title-prefixes": []
     }
   },
   "help wanted": {
@@ -308,7 +345,8 @@
     "description": "Extra attention is needed",
     "auto-label": {
       "branch": "",
-      "paths": []
+      "paths": [],
+      "title-prefixes": []
     }
   },
   "invalid": {
@@ -316,7 +354,8 @@
     "description": " This doesn't seem right",
     "auto-label": {
       "branch": "",
-      "paths": []
+      "paths": [],
+      "title-prefixes": []
     }
   },
   "java": {
@@ -324,7 +363,8 @@
     "description": "Pull requests that update Java code. This is currently assigned and created by GitHub",
     "auto-label": {
       "branch": "",
-      "paths": []
+      "paths": [],
+      "title-prefixes": []
     }
   },
   "kind-bug": {
@@ -332,7 +372,8 @@
     "description": "Issue or PR is a bug in existing functionality",
     "auto-label": {
       "branch": "",
-      "paths": []
+      "paths": [],
+      "title-prefixes": ["fix"]
     }
   },
   "kind-duplicate": {
@@ -340,7 +381,8 @@
     "description": "This issue or pull request already exists",
     "auto-label": {
       "branch": "",
-      "paths": []
+      "paths": [],
+      "title-prefixes": []
     }
   },
   "kind-enhancement": {
@@ -348,7 +390,8 @@
     "description": "Issue or PR is an enhancement to an existing functionality",
     "auto-label": {
       "branch": "",
-      "paths": []
+      "paths": [],
+      "title-prefixes": ["refactor", "perf", "style"]
     }
   },
   "kind-feature": {
@@ -356,7 +399,8 @@
     "description": "Issue or PR is a new feature request",
     "auto-label": {
       "branch": "",
-      "paths": []
+      "paths": [],
+      "title-prefixes": ["feat"]
     }
   },
   "kind-question": {
@@ -364,7 +408,8 @@
     "description": "Issue is a question that can be addressed via pointers to documentation or user education",
     "auto-label": {
       "branch": "",
-      "paths": []
+      "paths": [],
+      "title-prefixes": []
     }
   },
   "needs-discussion": {
@@ -372,7 +417,8 @@
     "description": "Issue or PR needs discussion during triage meeting",
     "auto-label": {
       "branch": "",
-      "paths": []
+      "paths": [],
+      "title-prefixes": []
     }
   },
   "needs-information": {
@@ -380,7 +426,8 @@
     "description": "Creator of the issue or PR needs to add more information in order to be meaningfully triaged",
     "auto-label": {
       "branch": "",
-      "paths": []
+      "paths": [],
+      "title-prefixes": []
     }
   },
   "needs-triage": {
@@ -388,7 +435,8 @@
     "description": "Issue or PR yet to be triaged. Add more labels or details that will help during triage review",
     "auto-label": {
       "branch": "",
-      "paths": []
+      "paths": [],
+      "title-prefixes": []
     }
   },
   "priority-0": {
@@ -396,7 +444,8 @@
     "description": "Causes full outage, breakage, or major function unavailability for everyone, without a workaround",
     "auto-label": {
       "branch": "",
-      "paths": []
+      "paths": [],
+      "title-prefixes": []
     }
   },
   "priority-1": {
@@ -404,7 +453,8 @@
     "description": "Issue or PR significantly impacts majority of users; Workaround is partial or overly painful",
     "auto-label": {
       "branch": "",
-      "paths": []
+      "paths": [],
+      "title-prefixes": []
     }
   },
   "priority-2": {
@@ -412,7 +462,8 @@
     "description": "Issue or PR is important to majority of users, Currently workaround exists",
     "auto-label": {
       "branch": "",
-      "paths": []
+      "paths": [],
+      "title-prefixes": []
     }
   },
   "priority-3": {
@@ -420,7 +471,8 @@
     "description": "Issue or PR is relevant to core functions, but does not impede progress. Important, but not urgent",
     "auto-label": {
       "branch": "",
-      "paths": []
+      "paths": [],
+      "title-prefixes": []
     }
   },
   "priority-4": {
@@ -428,7 +480,8 @@
     "description": "Minor issue or PR is not relevant to core functions, or relates to the usability of system",
     "auto-label": {
       "branch": "",
-      "paths": []
+      "paths": [],
+      "title-prefixes": []
     }
   },
   "priority-5": {
@@ -436,7 +489,8 @@
     "description": "Issue or PR addresses a very minor concern. Not planned for active development. Will not be fixed.",
     "auto-label": {
       "branch": "",
-      "paths": []
+      "paths": [],
+      "title-prefixes": []
     }
   },
   "ready-for-triage": {
@@ -444,7 +498,8 @@
     "description": "Issue or PR has sufficient details and it is ready for triage review",
     "auto-label": {
       "branch": "",
-      "paths": []
+      "paths": [],
+      "title-prefixes": []
     }
   },
   "triaged": {
@@ -452,7 +507,8 @@
     "description": "Issue or PR is fully triaged",
     "auto-label": {
       "branch": "",
-      "paths": []
+      "paths": [],
+      "title-prefixes": []
     }
   },
   "wontfix": {
@@ -460,7 +516,8 @@
     "description": "This will not be worked on",
     "auto-label": {
       "branch": "",
-      "paths": []
+      "paths": [],
+      "title-prefixes": []
     }
   }
 }

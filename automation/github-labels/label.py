@@ -56,51 +56,71 @@ def create_labels():
                 print(f"Couldn't create label {k} because {e}")
 
 
-def auto_label_pr(pr_number, paths=None, branch=None):
+def auto_label(operation="pr", issue_or_pr_number=None, paths=None, branch=None, title=None):
     labels = []
     json_schema = load_labels_schema()
     # Loop over all labels
     for k, v in json_schema.items():
+        # Check title label. Label based on conventional commit title
+        if title:
+            for title_prefix in v["auto-label"]["title-prefixes"]:
+                try:
+                    if v["auto-label"]["title-prefixes"] in title.split(':')[0]:
+                        print(f"Detected label from title. Adding label {k}")
+                        labels.append(k)
+                except Exception as e:
+                    print(e)
+
         # Check branch label
-        if branch == v["auto-label"]["branch"]:
-            labels.append(k)
-        # Check if comp-*, area-* labels need to be added
-        allpaths = paths.split(",")
-        for path in allpaths:
-            # Check file path for direct hit
-            if path in v["auto-label"]["paths"]:
+        if branch:
+            if branch == v["auto-label"]["branch"]:
+                print(f"Detected label from branch. Adding label {k}")
                 labels.append(k)
-            else:
-                # Label all .md with area-documentation
-                if k == "area-documentation" and ".md" in path:
+
+        if paths:
+            # Check if comp-*, area-* labels need to be added
+            allpaths = paths.split(",")
+            for path in allpaths:
+                # Check file path for direct hit
+                if path in v["auto-label"]["paths"]:
+                    print(f"Detected label from exact path. Adding label {k}")
                     labels.append(k)
                 else:
-                    # Check if main directories need exist in paths
-                    try:
-                        for i in range(len(path.split("/"))):
-                            # Check main directories i.e docs .github .github/workflows
-                            if path.split("/")[i] in v["auto-label"]["paths"]:
-                                labels.append(k)
-                    except IndexError:
-                        print("Got an index issue!")
+                    # Label all .md with area-documentation
+                    if k == "area-documentation" and ".md" in path:
+                        print(f"Detected a markdown file in the path. Adding label {k}")
+                        labels.append(k)
+                    else:
+                        # Check if main directories need exist in paths
+                        try:
+                            for i in range(len(path.split("/"))):
+                                # Check main directories i.e docs .github .github/workflows
+                                if path.split("/")[i] in v["auto-label"]["paths"]:
+                                    print(f"Detected label from folder. Adding label {k}")
+                                    labels.append(k)
+                        except IndexError:
+                            print("Got an index issue!")
+
     # removes duplicate labels and joins them by comma
     string_of_labels = ",".join(list(dict.fromkeys(labels)))
     try:
-        print(f"gh pr edit {pr_number} --add-label '{string_of_labels}'")
-        exec_cmd(f"gh pr edit {pr_number} --add-label '{string_of_labels}'")
+        print(f"gh {operation} edit {issue_or_pr_number} --add-label '{string_of_labels}'")
+        exec_cmd(f"gh {operation} edit {issue_or_pr_number} --add-label '{string_of_labels}'")
     except Exception as e:
-        print(f"Couldn't add the label to the PR {pr_number} because {e}")
+        print(f"Couldn't add the label to the PR {issue_or_pr_number} because {e}")
 
 
 def main():
-    pr_number = sys.argv[1]
-    changed_files = sys.argv[2]
-    branch = sys.argv[3]
-    print(f"Starting to add labels for PR {pr_number}")
+    issue_or_pr_number = sys.argv[1]
+    changed_files = None if sys.argv[2] == "NONE" else sys.argv[2]
+    branch = None if sys.argv[3] == "NONE" else sys.argv[3]
+    operation = sys.argv[4]
+
+    print(f"Starting to add labels for {operation} {issue_or_pr_number}")
     print(f"Detected the following changed files {changed_files}")
     print(f"Detected the following head branch {branch}")
     create_labels()
-    auto_label_pr(pr_number, changed_files, branch)
+    auto_label(operation, issue_or_pr_number, changed_files, branch)
 
 
 if __name__ == "__main__":
