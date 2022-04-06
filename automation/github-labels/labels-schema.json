@@ -273,7 +273,11 @@
   },
   "effort-21": {
     "color": "D93F0B",
-    "description": "Relative effort required for completion of issue or PR"
+    "description": "Relative effort required for completion of issue or PR",
+    "auto-label": {
+      "branch": "",
+      "paths": []
+    }
   },
   "enhancement": {
     "color": "ededed",
