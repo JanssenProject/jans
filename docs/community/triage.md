@@ -39,8 +39,8 @@ These labels enrich issue/PR with metadata that will help during triage process 
 
 |Label|Indicates That|Details|
 | --- | --- | --- |
-|`comp-<module>`|Major Janssen components needing change in order to fix this issue/PR|e.g `comp-jans-auth-server`,`comp-jans-fido2`,|
-|`area-<concern>`|Cross-cutting concerns involved in fixing this issue/PR|e.g `area-documentation`, `area-release-notes`, `area-CI`|
+|`comp-<module>`|Major Janssen components needing change in order to fix this issue/PR. </br></br>For example, if this issue/PR would require change in files under fido2 module (under jans/fido2) , then apply `comp-jans-fido2` label|e.g `comp-jans-auth-server`,`comp-jans-fido2`,|
+|`area-<concern>`|Cross-cutting concerns involved in fixing this issue/PR.</br></br> For example, if changes introduced by this issue/PR will need changes in documentation and need to be mentioned in release notes as well, then apply `area-documentation`, `area-release-notes`.</br></br> `area-CI` should be applied when changes are required in artifacts relevent to automation, CI build infrastructure or release management process. An example of such artifact would be Github workflow scripts located under `.github/workflows`|Labels available: </br>`area-documentation`, </br>`area-release-notes`, </br>`area-CI`|
 |`kind-bug`|Issue/PR is a bug in existing functionality||
 |`kind-enhancement`|Issue/PR is an enhancement to an existing functionality||
 |`kind-feature`|Issue/PR is new feature request||
@@ -61,11 +61,3 @@ These labels enrich issue/PR with metadata that will help during triage process 
 |`priority-4`|A relatively minor issue that is not relevant to core functions, or relates only to the attractiveness or pleasantness of use of the system. Good to have but not necessary changes/fixes.||
 |`priority-5`|The team acknowledges the request but (due to any number of reasons) does not plan to work on or accept contributions for this request. The issue remains open for discussion.||
 
-
-### Status labels
-
-These labels will help in planing and tracking active development activities for a issue/PR.
-
-|Label|Indicates That|Details|
-| --- | --- | --- |
-|TBD|TBD|TBD|
