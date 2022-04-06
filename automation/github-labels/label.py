@@ -50,7 +50,7 @@ def create_labels():
             try:
                 stdout, stderr, retcode = exec_cmd(
                     f"gh label create {k} --description '{v['description']}' --color '{v['color']}'")
-                if "Label.name already exists" in str(stdout, "utf-8"):
+                if "Label.name already exists" in str(stderr, "utf-8"):
                     print(f"Label {k} already exists! Skipping...")
             except Exception as e:
                 print(f"Couldn't create label {k} because {e}")
@@ -66,6 +66,7 @@ def auto_label_pr(pr_number, paths=None, branch=None):
             labels.append(k)
         # Check if comp-*, area-* labels need to be added
         allpaths = paths.split()
+        print(allpaths)
         for path in allpaths:
             # Check file path for direct hit
             if path in v["auto-label"]["paths"]:
@@ -85,6 +86,7 @@ def auto_label_pr(pr_number, paths=None, branch=None):
                         print("Got an index issue!")
     string_of_labels = ",".join(labels)
     try:
+        print(f"gh pr edit {pr_number} --add-label '{string_of_labels}'")
         exec_cmd(f"gh pr edit {pr_number} --add-label '{string_of_labels}'")
     except Exception as e:
         print(f"Couldn't add the label to the PR {pr_number} because {e}")
