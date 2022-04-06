@@ -66,7 +66,6 @@ def auto_label_pr(pr_number, paths=None, branch=None):
             labels.append(k)
         # Check if comp-*, area-* labels need to be added
         allpaths = paths.split(",")
-        print(allpaths)
         for path in allpaths:
             # Check file path for direct hit
             if path in v["auto-label"]["paths"]:
@@ -84,7 +83,8 @@ def auto_label_pr(pr_number, paths=None, branch=None):
                                 labels.append(k)
                     except IndexError:
                         print("Got an index issue!")
-    string_of_labels = ",".join(labels)
+    # removes duplicate labels and joins them by comma
+    string_of_labels = ",".join(list(dict.fromkeys(labels)))
     try:
         print(f"gh pr edit {pr_number} --add-label '{string_of_labels}'")
         exec_cmd(f"gh pr edit {pr_number} --add-label '{string_of_labels}'")
