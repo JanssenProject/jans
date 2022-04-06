@@ -77,7 +77,7 @@ def auto_label_pr(pr_number, paths=None, branch=None):
                 else:
                     # Check if main directories need exist in paths
                     try:
-                        for i in range(len(allpaths.split("/"))):
+                        for i in range(len(path.split("/"))):
                             # Check main directories i.e docs .github .github/workflows
                             if path.split("/")[i] in v["auto-label"]["paths"]:
                                 labels.append(k)
