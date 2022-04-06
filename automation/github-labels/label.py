@@ -48,8 +48,8 @@ def create_labels():
             print(f"Label {k} already exists! Skipping...")
         else:
             try:
-                print(f"gh label create {k} --description {v['description']} --color {v['color']}")
-                exec_cmd(f"gh label create {k} --description {v['description']} --color {v['color']}")
+                print(f"gh label create {k} --description {str(v['description'])} --color {str(v['color'])}")
+                exec_cmd(f"gh label create {k} --description {str(v['description'])} --color {str(v['color'])}")
             except Exception as e:
                 print(f"Couldn't create label {k} because {e}")
 
