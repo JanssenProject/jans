@@ -26,7 +26,7 @@ jobs:
       - name: check out code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of sonarqube analysis
+          fetch-depth: 0
 
       - name: Import GPG key
         id: import_gpg
@@ -62,13 +62,14 @@ jobs:
           git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
           echo "${{ secrets.MOWORKFLOWTOKEN }}" > token.txt
           gh auth login --with-token < token.txt          
-          if [[ ${{github.event_name}} == 'issues' ]]; then
-            echo 
+          if [[ "${{github.event_name}}" == "issues" ]]; then
+            echo "Activated by an issue event"
             issue_or_pull_number=$(jq --raw-output .issue.number "$GITHUB_EVENT_PATH")
             changed_files="NONE"
             operation="issue"
             branch="NONE"
           else
+            echo "Activated by a PR event"
             issue_or_pull_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
             gh pr view $pull_number --json files --jq '.files.[].path' > changed_files
             changed_files=$(paste -s -d, changed_files)
