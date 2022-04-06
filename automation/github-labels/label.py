@@ -65,7 +65,7 @@ def auto_label(operation="pr", issue_or_pr_number=None, paths=None, branch=None,
         if title:
             for title_prefix in v["auto-label"]["title-prefixes"]:
                 try:
-                    if v["auto-label"]["title-prefixes"] in title.split(':')[0]:
+                    if title_prefix in title.split(':')[0]:
                         print(f"Detected label from title. Adding label {k}")
                         labels.append(k)
                 except Exception as e:
@@ -115,12 +115,14 @@ def main():
     changed_files = None if sys.argv[2] == "NONE" else sys.argv[2]
     branch = None if sys.argv[3] == "NONE" else sys.argv[3]
     operation = sys.argv[4]
+    title = sys.argv[5]
 
     print(f"Starting to add labels for {operation} {issue_or_pr_number}")
     print(f"Detected the following changed files {changed_files}")
     print(f"Detected the following head branch {branch}")
+    print(f"Detected the following title {title}")
     create_labels()
-    auto_label(operation, issue_or_pr_number, changed_files, branch)
+    auto_label(operation, issue_or_pr_number, changed_files, branch, title)
 
 
 if __name__ == "__main__":

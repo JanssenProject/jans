@@ -175,7 +175,8 @@
     "description": "Touching folder /jans-config-api",
     "auto-label": {
       "branch": "",
-      "paths": ["jans-config-api"]
+      "paths": ["jans-config-api"],
+      "title-prefixes": []
     }
   },
   "comp-jans-core": {
