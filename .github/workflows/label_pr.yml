@@ -49,7 +49,7 @@ jobs:
           git config --global user.name "mo-auto"
           git config --global user.email "54212639+mo-auto@users.noreply.github.com"
           git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
-          echo "${{ secrets.MOWORKFLOWTOKEN }}" > token.txt
+          echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" > token.txt
           gh auth login --with-token < token.txt          
           if [[ "${{github.event_name}}" == "issues" ]]; then
             echo "Activated by an issue event"
