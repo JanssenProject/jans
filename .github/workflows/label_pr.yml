@@ -60,7 +60,7 @@ jobs:
           else
             echo "Activated by a PR event"
             issue_or_pull_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
-            gh pr view $pull_number --json files --jq '.files.[].path' > changed_files
+            gh pr view $issue_or_pull_number --json files --jq '.files.[].path' > changed_files
             changed_files=$(paste -s -d, changed_files)
             operation="pr"
             branch=${{github.base_ref}}
