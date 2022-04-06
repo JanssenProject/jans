@@ -60,6 +60,7 @@ function() {
         logging_url: baseUrl + '/jans-config-api/api/v1/logging',
         auth_health_url: baseUrl + '/jans-config-api/api/v1/jans-auth-server/health',
 		org_configuration_url: baseUrl + '/jans-config-api/api/v1/org',
+        user_url: baseUrl + '/jans-config-api/api/v1/user',
     };
 
     karate.configure('connectTimeout', 30000);
