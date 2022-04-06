@@ -41,13 +41,14 @@ def load_labels_schema():
 
 def create_labels():
     json_schema = load_labels_schema()
-    stdout, stderr, retcode = exec_cmd("gh label list")
+    stdout, stderr, retcode = exec_cmd("gh label list", silent=True)
     existing_labels = str(stdout, "utf-8")
     for k, v in json_schema.items():
         if k in existing_labels:
             print(f"Label {k} already exists! Skipping...")
         else:
             try:
+                print(f"gh label create {k} --description {v['description']} --color {v['color']}")
                 exec_cmd(f"gh label create {k} --description {v['description']} --color {v['color']}")
             except Exception as e:
                 print(f"Couldn't create label {k} because {e}")
