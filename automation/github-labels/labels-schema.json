@@ -20,7 +20,7 @@
     "description": "Documentation needs to change as part of issue or PR",
     "auto-label": {
       "branch": "",
-      "paths": ["docs", ".github/dependabot.yml", "automation", ".github/ISSUE_TEMPLATE"]
+      "paths": []
     }
   },
   "autorelease: pending": {
@@ -317,7 +317,7 @@
   },
   "java": {
     "color": "ffa221",
-    "description": "Pull requests that update Java code",
+    "description": "Pull requests that update Java code. This is currently assigned and created by GitHub",
     "auto-label": {
       "branch": "",
       "paths": []

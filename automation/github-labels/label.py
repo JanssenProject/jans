@@ -47,28 +47,44 @@ def create_labels():
         if k in existing_labels:
             print(f"Label {k} already exists! Skipping...")
         else:
-            exec_cmd(f"gh label create {k} --description {v['description']} --color {v['color']}")
+            try:
+                exec_cmd(f"gh label create {k} --description {v['description']} --color {v['color']}")
+            except Exception as e:
+                print(f"Couldn't create label {k} because {e}")
 
 
 def auto_label_pr(pr_number, paths=None, branch=None):
     labels = []
     json_schema = load_labels_schema()
+    # Loop over all labels
     for k, v in json_schema.items():
         # Check branch label
         if branch == v["auto-label"]["branch"]:
             labels.append(k)
-        # Check if comp-* labels need to be added
+        # Check if comp-*, area-* labels need to be added
         allpaths = paths.split()
         for path in allpaths:
-            # Check file
+            # Check file path for direct hit
             if path in v["auto-label"]["paths"]:
                 labels.append(k)
             else:
-                # Check main directory
-                if allpaths.split("/")[0] in v["auto-label"]["paths"]:
+                # Label all .md with area-documentation
+                if k == "area-documentation" and ".md" in path:
                     labels.append(k)
+                else:
+                    # Check if main directories need exist in paths
+                    try:
+                        for i in range(len(allpaths.split("/"))):
+                            # Check main directories i.e docs .github .github/workflows
+                            if allpaths.split("/")[i] in v["auto-label"]["paths"]:
+                                labels.append(k)
+                    except IndexError:
+                        print("Got an index issue!")
     string_of_labels = ",".join(labels)
-    exec_cmd(f"gh pr edit {pr_number} --add-label {string_of_labels}")
+    try:
+        exec_cmd(f"gh pr edit {pr_number} --add-label {string_of_labels}")
+    except Exception as e:
+        print(f"Couldn't add the label to the PR {pr_number} because {e}")
 
 
 def main():
