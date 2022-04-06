@@ -39,7 +39,7 @@ class JythonInstaller(BaseInstaller, SetupUtils):
 
         try:
             self.run(['rm', '-rf', '/opt*-%s' % jython_version])
-            self.run([Config.cmd_java, '-jar', jython_installer, '-v', '-s', '-d', '/opt/jython-%s' % jython_version, '-t', 'standard'])
+            self.run([Config.cmd_java, '-jar', jython_installer, '-v', '-s', '-d', '/opt/jython-%s' % jython_version, '-t', 'standard', '-e', 'ensurepip'])
         except:
             self.logIt("Error installing jython-installer-%s.jar" % jython_version)
 
