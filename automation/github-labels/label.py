@@ -48,8 +48,10 @@ def create_labels():
             print(f"Label {k} already exists! Skipping...")
         else:
             try:
-                print(f"gh label create {k} --description '{v['description']}' --color '{v['color']}'")
-                exec_cmd(f"gh label create {k} --description '{v['description']}' --color '{v['color']}'")
+                stdout, stderr, retcode = exec_cmd(
+                    f"gh label create {k} --description '{v['description']}' --color '{v['color']}'")
+                if "Label.name already exists" in str(stdout, "utf-8"):
+                    print(f"Label {k} already exists! Skipping...")
             except Exception as e:
                 print(f"Couldn't create label {k} because {e}")
 
@@ -77,7 +79,7 @@ def auto_label_pr(pr_number, paths=None, branch=None):
                     try:
                         for i in range(len(allpaths.split("/"))):
                             # Check main directories i.e docs .github .github/workflows
-                            if allpaths.split("/")[i] in v["auto-label"]["paths"]:
+                            if path.split("/")[i] in v["auto-label"]["paths"]:
                                 labels.append(k)
                     except IndexError:
                         print("Got an index issue!")
