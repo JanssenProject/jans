@@ -53,6 +53,17 @@ class SpannerBackend:
         with open(f"/app/static/rdbm/{index_fn}") as f:
             self.sql_indexes = json.loads(f.read())
 
+        # add missing index determined from opendj indexes
+        with open("/app/static/opendj/index.json") as f:
+            opendj_indexes = [attr["attribute"] for attr in json.loads(f.read())]
+
+        for attr in self.attr_types:
+            if not attr.get("multivalued"):
+                continue
+            for attr_name in attr["names"]:
+                if attr_name in opendj_indexes and attr_name not in self.sql_indexes["__common__"]["fields"]:
+                    self.sql_indexes["__common__"]["fields"].append(attr_name)
+
         with open("/app/static/rdbm/sub_tables.json") as f:
             self.sub_tables = json.loads(f.read()).get(self.db_dialect) or {}
 
@@ -72,7 +83,7 @@ class SpannerBackend:
         type_def = self.sql_data_types.get(attr)
 
         if type_def:
-            type_ = type_def.get(self.db_dialect)  # or type_def["mysql"]
+            type_ = type_def.get(self.db_dialect)
 
             if table in type_.get("tables", {}):
                 type_ = type_["tables"][table]
@@ -221,7 +232,7 @@ class SpannerBackend:
             attr_syntax = self.get_attr_syntax(key)
             type_ = self.sql_data_types_mapping[attr_syntax]
 
-        type_ = type_.get(self.db_dialect)  # or type_["mysql"]
+        type_ = type_.get(self.db_dialect)
         data_type = type_["type"]
 
         if data_type in ("SMALLINT", "BOOL",):
@@ -229,7 +240,7 @@ class SpannerBackend:
                 return 1 if data_type == "SMALLINT" else True
             return 0 if data_type == "SMALLINT" else False
 
-        if data_type == "INT":
+        if data_type == "INT64":
             return int(values[0])
 
         if data_type in ("DATETIME(3)", "TIMESTAMP",):
@@ -428,9 +439,46 @@ class SpannerBackend:
                 # pass the list as its value and let transform_value
                 # determines the actual value
                 if value:
-                    new_value = value  # [0]
+                    new_value = value
                 else:
                     new_value = [""]
+                self.client.update(
+                    table_name,
+                    doc_id,
+                    {col_name: self.transform_value(col_name, new_value)}
+                )
+
+        def column_int_to_string(table_name, col_name):
+            old_data_type = table_mapping[table_name][col_name]
+            data_type = self.get_data_type(col_name, table_name)
+
+            if data_type == old_data_type:
+                return
+
+            # get the value first before updating column type
+            values = {
+                row["doc_id"]: row[col_name]
+                for row in self.client.search(table_name, ["doc_id", col_name])
+            }
+
+            # to change the storage format of a JSON column, drop the column and
+            # add the column back specifying the new storage format
+            self.client.database.update_ddl([
+                f"ALTER TABLE {self.client.quoted_id(table_name)} DROP COLUMN {self.client.quoted_id(col_name)}"
+            ])
+            self.client.database.update_ddl([
+                f"ALTER TABLE {self.client.quoted_id(table_name)} ADD COLUMN {self.client.quoted_id(col_name)} {data_type}"
+            ])
+
+            # pre-populate the modified column
+            for doc_id, value in values.items():
+                # pass the list as its value and let transform_value
+                # determines the actual value
+                if value:
+                    new_value = [value]
+                else:
+                    new_value = [""]
+
                 self.client.update(
                     table_name,
                     doc_id,
@@ -503,6 +551,12 @@ class SpannerBackend:
             ("jansPerson", "jansOTPDevices"),
         ]:
             column_from_array(mod[0], mod[1])
+
+        # int64 to string
+        for mod in [
+            ("jansFido2RegistrationEntry", "jansCodeChallengeHash"),
+        ]:
+            column_int_to_string(mod[0], mod[1])
 
     def import_custom_ldif(self, ctx):
         custom_dir = Path("/app/custom_ldif")
