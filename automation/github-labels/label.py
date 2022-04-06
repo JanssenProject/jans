@@ -65,7 +65,7 @@ def auto_label_pr(pr_number, paths=None, branch=None):
         if branch == v["auto-label"]["branch"]:
             labels.append(k)
         # Check if comp-*, area-* labels need to be added
-        allpaths = paths.split()
+        allpaths = paths.split(",")
         print(allpaths)
         for path in allpaths:
             # Check file path for direct hit
