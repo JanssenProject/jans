@@ -5,7 +5,7 @@ import shlex
 import sys
 
 # ./automation/github-labels
-label_schema_json = Path("labels-schema.json")
+label_schema_json = Path("./automation/github-labels/labels-schema.json")
 
 
 def exec_cmd(cmd, output_file=None, silent=False):
