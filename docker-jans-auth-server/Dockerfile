@@ -48,6 +48,9 @@ RUN wget -q https://github.com/fabioz/PyDev.Debugger/archive/refs/tags/pydev_deb
     && /opt/jython/bin/pip install . \
     && rm -rf /tmp/pydev_debugger* /tmp/PyDev.Debugger-*
 
+# uninstall Jython pip and easy_install to reduce vulnerabilities
+RUN /opt/jython/bin/pip uninstall -y pip
+
 # ===========
 # Auth server
 # ===========
