@@ -126,7 +126,7 @@ git commit -S -s -m 'message that follows conventional commit style'
 ```
 
 ### Branches
-Branch name should have compotitlesnent name as prefix, eg `jans-core-mybranch`
+Branch name should have component name as prefix, eg `jans-core-mybranch`
 
 ### PRs
 - PR titles should also follow [Conventional Commits v1.0.0](https://www.conventionalcommits.org/en/v1.0.0/). This will help in keeping merge commit messages inline with commit message standards
@@ -135,6 +135,9 @@ Branch name should have compotitlesnent name as prefix, eg `jans-core-mybranch`
 - PR should only have changes related to target feature or issue. Create a separate PR for formatting or other quick bug fixes
 - PR should include relevent documentaton changes
 - PR should include unit and integration tests
+
+### Issues
+- Issue titles should follow [Conventional Commits v1.0.0](https://www.conventionalcommits.org/en/v1.0.0/)
 
 # Contribution Workflow
 
