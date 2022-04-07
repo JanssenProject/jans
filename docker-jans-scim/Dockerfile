@@ -5,6 +5,7 @@ FROM bellsoft/liberica-openjre-alpine:11.0.13-8
 # ===============
 
 RUN apk update \
+    && apk upgrade \
     && apk add --no-cache openssl py3-pip tini curl bash py3-cryptography py3-psycopg2 \
     && apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/v3.15/community py3-grpcio \
     && apk add --no-cache --virtual build-deps wget git zip \
@@ -37,7 +38,7 @@ EXPOSE 8080
 ARG JYTHON_VERSION=2.7.3
 RUN wget -q https://ox.gluu.org/maven/org/gluufederation/jython-installer/${JYTHON_VERSION}/jython-installer-${JYTHON_VERSION}.jar -O /tmp/jython-installer.jar \
     && mkdir -p /opt/jython \
-    && java -jar /tmp/jython-installer.jar -v -s -d /opt/jython \
+    && java -jar /tmp/jython-installer.jar -v -s -d /opt/jython -e ensurepip \
     && rm -f /tmp/jython-installer.jar /tmp/*.properties
 
 # ====
@@ -45,7 +46,7 @@ RUN wget -q https://ox.gluu.org/maven/org/gluufederation/jython-installer/${JYTH
 # ====
 
 ENV CN_VERSION=1.0.0-SNAPSHOT
-ENV CN_BUILD_DATE='2022-03-15 20:30'
+ENV CN_BUILD_DATE='2022-03-23 09:01'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-scim-server/${CN_VERSION}/jans-scim-server-${CN_VERSION}.war
 
 # Install SCIM

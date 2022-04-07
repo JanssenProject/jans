@@ -8,6 +8,7 @@ package io.jans.as.model.jwt;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.crypto.signature.AsymmetricSignatureAlgorithm;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.exception.CryptoProviderException;
 import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.exception.InvalidParameterException;
 import io.jans.as.model.jwk.JSONWebKey;
@@ -230,7 +231,7 @@ public class DPoP extends Jwt {
         this.cryptoProvider = cryptoProvider;
     }
 
-    public String getEncodedJwt() throws Exception {
+    public String getEncodedJwt() throws InvalidJwtException, InvalidParameterException, CryptoProviderException {
         // Check header params:
         if (getType() != JwtType.DPOP_PLUS_JWT) {
             throw new InvalidJwtException("Type (typ) value must be dpop+jwt");

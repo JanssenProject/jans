@@ -108,6 +108,5 @@ public interface RegisterRestWebService {
     Response delete(
             @QueryParam("client_id") String clientId,
             @HeaderParam("Authorization") String authorization,
-            @Context HttpServletRequest httpRequest,
             @Context SecurityContext securityContext);
 }

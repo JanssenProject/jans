@@ -1,0 +1,274 @@
+{
+    "dn": "inum=B1F3-AEAE-B799,ou=people,o=jans",
+    "userId": "admin_user21,
+    "updatedAt": "2017-02-13T19:25:12",
+    "customAttributes": [
+        {
+            "name": "birthdate",
+            "multiValued": false,
+            "values": [
+                "19830106010101.253Z"
+            ],
+            "value": "19830106010101.253Z",
+            "displayValue": "19830106010101.253Z"
+        },
+        {
+            "name": "c",
+            "multiValued": false,
+            "values": [
+                "US"
+            ],
+            "value": "US",
+            "displayValue": "US"
+        },
+        {
+            "name": "cn",
+            "multiValued": false,
+            "values": [
+                "Test User2"
+            ],
+            "value": "Test User2",
+            "displayValue": "Test User2"
+        },
+        {
+            "name": "displayName",
+            "multiValued": false,
+            "values": [
+                "Jans Auth Test User2"
+            ],
+            "value": "Jans Auth Test User2",
+            "displayValue": "Jans Auth Test User2"
+        },
+        {
+            "name": "emailVerified",
+            "multiValued": false,
+            "values": [
+                "TRUE"
+            ],
+            "value": "TRUE",
+            "displayValue": "TRUE"
+        },
+        {
+            "name": "gender",
+            "multiValued": false,
+            "values": [
+                "Male"
+            ],
+            "value": "Male",
+            "displayValue": "Male"
+        },
+        {
+            "name": "givenName",
+            "multiValued": false,
+            "values": [
+                "Test2"
+            ],
+            "value": "Test2",
+            "displayValue": "Test2"
+        },
+        {
+            "name": "inum",
+            "multiValued": false,
+            "values": [
+                "B1F3-AEAE-B799"
+            ],
+            "value": "B1F3-AEAE-B799",
+            "displayValue": "B1F3-AEAE-B799"
+        },
+        {
+            "name": "jansPrefUsrName",
+            "multiValued": false,
+            "values": [
+                "user2"
+            ],
+            "value": "user2",
+            "displayValue": "user2"
+        },
+        {
+            "name": "jansStatus",
+            "multiValued": false,
+            "values": [
+                "active"
+            ],
+            "value": "active",
+            "displayValue": "active"
+        },
+        {
+            "name": "l",
+            "multiValued": false,
+            "values": [
+                "Austin"
+            ],
+            "value": "Austin",
+            "displayValue": "Austin"
+        },
+        {
+            "name": "locale",
+            "multiValued": false,
+            "values": [
+                "en-US"
+            ],
+            "value": "en-US",
+            "displayValue": "en-US"
+        },
+        {
+            "name": "mail",
+            "multiValued": false,
+            "values": [
+                "test_user2@test.org"
+            ],
+            "value": "test_user2@test.org",
+            "displayValue": "test_user2@test.org"
+        },
+        {
+            "name": "memberOf",
+            "multiValued": true,
+            "values": [
+                "inum=7890,ou=groups,o=jans",
+                "inum=7891,ou=groups,o=jans"
+            ],
+            "value": "inum=7890,ou=groups,o=jans",
+            "displayValue": "inum=7890,ou=groups,o=jans, inum=7891,ou=groups,o=jans"
+        },
+        {
+            "name": "middleName",
+            "multiValued": false,
+            "values": [
+                "User2"
+            ],
+            "value": "User2",
+            "displayValue": "User2"
+        },
+        {
+            "name": "mobile",
+            "multiValued": false,
+            "values": [
+                "(512) 516-2414"
+            ],
+            "value": "(512) 516-2414",
+            "displayValue": "(512) 516-2414"
+        },
+        {
+            "name": "nickname",
+            "multiValued": false,
+            "values": [
+                "user2"
+            ],
+            "value": "user2",
+            "displayValue": "user2"
+        },
+        {
+            "name": "o",
+            "multiValued": false,
+            "values": [
+                "Test"
+            ],
+            "value": "Test",
+            "displayValue": "Test"
+        },
+        {
+            "name": "phoneNumberVerified",
+            "multiValued": false,
+            "values": [
+                "TRUE"
+            ],
+            "value": "TRUE",
+            "displayValue": "TRUE"
+        },
+        {
+            "name": "picture",
+            "multiValued": false,
+            "values": [
+                "http://www.jans.org/wp-content/uploads/2012/04/mike3.png"
+            ],
+            "value": "http://www.jans.org/wp-content/uploads/2012/04/mike3.png",
+            "displayValue": "http://www.jans.org/wp-content/uploads/2012/04/mike3.png"
+        },
+        {
+            "name": "preferredLanguage",
+            "multiValued": false,
+            "values": [
+                "en_US"
+            ],
+            "value": "en_US",
+            "displayValue": "en_US"
+        },
+        {
+            "name": "profile",
+            "multiValued": false,
+            "values": [
+                "http://www.mywebsite.com/profile"
+            ],
+            "value": "http://www.mywebsite.com/profile",
+            "displayValue": "http://www.mywebsite.com/profile"
+        },
+        {
+            "name": "sn",
+            "multiValued": false,
+            "values": [
+                "User2"
+            ],
+            "value": "User2",
+            "displayValue": "User2"
+        },
+        {
+            "name": "st",
+            "multiValued": false,
+            "values": [
+                "Texas"
+            ],
+            "value": "Texas",
+            "displayValue": "Texas"
+        },
+        {
+            "name": "street",
+            "multiValued": false,
+            "values": [
+                "622 East 6th Street"
+            ],
+            "value": "622 East 6th Street",
+            "displayValue": "622 East 6th Street"
+        },
+        {
+            "name": "telephoneNumber",
+            "multiValued": false,
+            "values": [
+                "(512) 516-2414"
+            ],
+            "value": "(512) 516-2414",
+            "displayValue": "(512) 516-2414"
+        },
+        {
+            "name": "userPassword",
+            "multiValued": false,
+            "values": [
+                "{SSHA512}gFcj2ucCCyO8NLN+IfBIbdzr3xjI7b07vAdwkJ8sw9Ynghj4uWPjfSHI2pHZ9dsyAdL3+mFl8g0ywxp6jcKs3exo/gRLQtre"
+            ],
+            "value": "{SSHA512}gFcj2ucCCyO8NLN+IfBIbdzr3xjI7b07vAdwkJ8sw9Ynghj4uWPjfSHI2pHZ9dsyAdL3+mFl8g0ywxp6jcKs3exo/gRLQtre",
+            "displayValue": "{SSHA512}gFcj2ucCCyO8NLN+IfBIbdzr3xjI7b07vAdwkJ8sw9Ynghj4uWPjfSHI2pHZ9dsyAdL3+mFl8g0ywxp6jcKs3exo/gRLQtre"
+        },
+        {
+            "name": "website",
+            "multiValued": false,
+            "values": [
+                "http://www.jans.io"
+            ],
+            "value": "http://www.jans.io",
+            "displayValue": "http://www.jans.io"
+        },
+        {
+            "name": "zoneinfo",
+            "multiValued": false,
+            "values": [
+                "America/Chicago"
+            ],
+            "value": "America/Chicago",
+            "displayValue": "America/Chicago"
+        }
+    ],
+    "customObjectClasses": [
+        "top",
+        "jansCustomPerson"
+    ],
+    "baseDn": "inum=B1F3-AEAE-B799,ou=people,o=jans"
+}

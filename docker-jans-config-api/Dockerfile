@@ -5,6 +5,7 @@ FROM bellsoft/liberica-openjre-alpine:11.0.13-8
 # ===============
 
 RUN apk update \
+    && apk upgrade \
     && apk add --no-cache openssl py3-pip tini curl py3-cryptography py3-psycopg2 \
     && apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/v3.15/community py3-grpcio \
     && apk add --no-cache --virtual build-deps wget git zip \
@@ -32,7 +33,7 @@ RUN wget -q https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/${JETTY_
 # ==========
 
 ENV CN_VERSION=1.0.0-SNAPSHOT
-ENV CN_BUILD_DATE='2022-03-15 20:31'
+ENV CN_BUILD_DATE='2022-03-28 10:22'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api-server/${CN_VERSION}/jans-config-api-server-${CN_VERSION}.war
 
 # Install Jans Config API

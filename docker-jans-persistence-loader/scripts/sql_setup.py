@@ -1,4 +1,3 @@
-# import itertools
 import json
 import logging.config
 import os
@@ -9,6 +8,8 @@ from string import Template
 from pathlib import Path
 
 from ldif import LDIFParser
+from sqlalchemy.exc import NotSupportedError
+from sqlalchemy.exc import OperationalError
 
 from jans.pycloudlib.persistence.sql import SQLClient
 
@@ -59,6 +60,17 @@ class SQLBackend:
         with open(f"/app/static/rdbm/{index_fn}") as f:
             self.sql_indexes = json.loads(f.read())
 
+        # add missing index determined from opendj indexes
+        with open("/app/static/opendj/index.json") as f:
+            opendj_indexes = [attr["attribute"] for attr in json.loads(f.read())]
+
+        for attr in self.attr_types:
+            if not attr.get("multivalued"):
+                continue
+            for attr_name in attr["names"]:
+                if attr_name in opendj_indexes and attr_name not in self.sql_indexes["__common__"]["fields"]:
+                    self.sql_indexes["__common__"]["fields"].append(attr_name)
+
     def get_attr_syntax(self, attr):
         for attr_type in self.attr_types:
             if attr not in attr_type["names"]:
@@ -91,8 +103,6 @@ class SQLBackend:
         type_ = syntax_def.get(self.db_dialect) or syntax_def["mysql"]
 
         char_type = "VARCHAR"
-        if self.db_dialect == "spanner":
-            char_type = "STRING"
 
         if type_["type"] != char_type:
             data_type = type_["type"]
@@ -104,8 +114,6 @@ class SQLBackend:
             else:
                 data_type = "TEXT"
 
-        if data_type == "TEXT" and self.db_dialect == "spanner":
-            data_type = "STRING(MAX)"
         return data_type
 
     def create_tables(self):
@@ -138,8 +146,8 @@ class SQLBackend:
             doc_id_type = self.get_data_type("doc_id", table)
             table_columns[table].update({
                 "doc_id": doc_id_type,
-                "objectClass": "VARCHAR(48)" if self.db_dialect != "spanner" else "STRING(48)",
-                "dn": "VARCHAR(128)" if self.db_dialect != "spanner" else "STRING(128)",
+                "objectClass": "VARCHAR(48)",
+                "dn": "VARCHAR(128)",
             })
 
             # make sure ``oc["may"]`` doesn't have duplicate attribute
@@ -177,24 +185,26 @@ class SQLBackend:
             if column_name == "doc_id" or column_name not in fields:
                 continue
 
-            index_name = f"{table_name}_{FIELD_RE.sub('_', column_name)}"
-
             if column_type.lower() != "json":
+                index_name = f"{table_name}_{FIELD_RE.sub('_', column_name)}"
                 query = f"CREATE INDEX {self.client.quoted_id(index_name)} ON {self.client.quoted_id(table_name)} ({self.client.quoted_id(column_name)})"
                 self.client.create_index(query)
             else:
-                # TODO: revise JSON type
-                #
-                # some MySQL versions don't support JSON array (NotSupportedError)
-                # also some of them don't support functional index that returns
-                # JSON or Geometry value
                 for i, index_str in enumerate(self.sql_indexes["__common__"]["JSON"], start=1):
                     index_str_fmt = Template(index_str).safe_substitute({
-                        "field": column_name, "data_type": column_type,
+                        "field": column_name,  # "data_type": column_type,
                     })
                     name = f"{table_name}_json_{i}"
-                    query = f"CREATE INDEX {self.client.quoted_id(name)} ON {self.client.quoted_id(table_name)} (({index_str_fmt}))"
-                    self.client.create_index(query)
+                    query = f"ALTER TABLE {self.client.quoted_id(table_name)} ADD INDEX {self.client.quoted_id(name)} (({index_str_fmt}))"
+
+                    try:
+                        self.client.create_index(query)
+                    except (NotSupportedError, OperationalError) as exc:
+                        # some MySQL versions don't support JSON array (NotSupportedError)
+                        # also some of them don't support functional index that returns
+                        # JSON or Geometry value
+                        msg = exc.orig.args[1]
+                        logger.warning(f"Failed to create index {name} for {table_name}.{column_name} column; reason={msg}")
 
         for i, custom in enumerate(self.sql_indexes.get(table_name, {}).get("custom", []), start=1):
             # jansPerson table has unsupported custom index expressions that need to be skipped if mysql < 8.0
@@ -290,10 +300,6 @@ class SQLBackend:
             dval = values[0].strip("Z")
             sep = " "
             postfix = ""
-            if self.db_dialect == "spanner":
-                sep = "T"
-                postfix = "Z"
-            # return "{}-{}-{} {}:{}:{}{}".format(dval[0:4], dval[4:6], dval[6:8], dval[8:10], dval[10:12], dval[12:14], dval[14:17])
             return "{}-{}-{}{}{}:{}:{}{}{}".format(
                 dval[0:4],
                 dval[4:6],
@@ -307,11 +313,7 @@ class SQLBackend:
             )
 
         if data_type == "JSON":
-            # return json.dumps({"v": values})
             return {"v": values}
-
-        if data_type == "ARRAY<STRING(MAX)>":
-            return values
 
         # fallback
         return values[0]
@@ -442,6 +444,10 @@ class SQLBackend:
             ("jansClnt", "jansLogoutURI"),
             ("jansPerson", "role"),
             ("jansPerson", "mobile"),
+            ("jansCustomScr", "jansAlias"),
+            ("jansClnt", "jansReqURI"),
+            ("jansClnt", "jansClaimRedirectURI"),
+            ("jansClnt", "jansAuthorizedOrigins"),
         ]:
             column_to_json(mod[0], mod[1])
 
@@ -489,6 +495,7 @@ class SQLBackend:
             ("jansUmaResource", "jansUmaScope"),
             ("jansU2fReq", "jansReq"),
             ("jansFido2AuthnEntry", "jansAuthData"),
+            ("jansFido2RegistrationEntry", "jansCodeChallengeHash"),
         ]:
             change_column_type(mod[0], mod[1])
 

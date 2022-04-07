@@ -168,6 +168,12 @@ public class Util {
         }
     }
 
+    public static void addToJSONObjectIfNotNullOrEmpty(JSONObject jsonObject, String key, String[] value) throws JSONException {
+        if (jsonObject != null && value != null && value.length > 0 && StringUtils.isNotBlank(key)) {
+            jsonObject.put(key, new JSONArray(Arrays.asList(value)));
+        }
+    }
+
     public static void addToJSONObjectIfNotNull(JSONObject jsonObject, String key, ClientMetadataValue clientMetadataValue) throws JSONException {
         if (jsonObject != null && clientMetadataValue != null && StringUtils.isNotBlank(key)) {
             clientMetadataValue.getLanguageTags()

@@ -48,7 +48,7 @@ Use steps below to configure Janssen server.
     /opt/jans/jans-cli/config-cli.py`
     ```
   - Navigate through options to start registering new OpenID Connect client
-  - Provide inputs for following properties. Number in parathesis indicates menu option(may change) and are not part of input:
+  - Provide inputs for following properties:
     ```
     displayName: <name-of-choice>
     applicationType: web
@@ -69,9 +69,6 @@ Use steps below to configure Janssen server.
    ```
    - Output of this command would be a JSON response. Save this response to a file as some of the values in it will be required when configuring *mod-auth-openidc*.
  
-- create test users and scopes 
-> TODO: add steps
-
 
 ## Setup *mod-auth-openidc* 
 

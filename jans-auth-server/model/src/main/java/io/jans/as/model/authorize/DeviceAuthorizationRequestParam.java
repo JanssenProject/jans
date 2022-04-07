@@ -9,16 +9,19 @@ package io.jans.as.model.authorize;
 /**
  * RFC8628 section 3.1
  */
-public interface DeviceAuthorizationRequestParam {
+public class DeviceAuthorizationRequestParam {
+
+    private DeviceAuthorizationRequestParam() {
+    }
 
     /**
      * The client identifier as described in Section 2.2 of [RFC6749].
      */
-    String CLIENT_ID = "client_id";
+    public static final String CLIENT_ID = "client_id";
 
     /**
      * The scope of the access request as defined by Section 3.3 of [RFC6749].
      */
-    String SCOPE = "scope";
+    public static final String SCOPE = "scope";
 
 }

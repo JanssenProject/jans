@@ -5,6 +5,7 @@ FROM alpine:3.14.4
 # ===============
 
 RUN apk update \
+    && apk upgrade \
     && apk add --no-cache py3-pip curl tini py3-cryptography py3-psycopg2 \
     && apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/v3.15/community py3-grpcio \
     && apk add --no-cache --virtual build-deps git wget
@@ -21,7 +22,7 @@ RUN pip3 install -U pip wheel \
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_LINUX_SETUP_VERSION=2add3e9ef4d29847f77d5d7389e22ded76cc3764
+ENV JANS_LINUX_SETUP_VERSION=cfdc70e6a2ddcc9d2ba4e3cf07df19344d613944
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -32,7 +33,7 @@ RUN git clone --filter blob:none --no-checkout https://github.com/janssenproject
     && git checkout ${JANS_LINUX_SETUP_VERSION} \
     && git sparse-checkout set ${JANS_SETUP_DIR}
 
-RUN mkdir -p /app/static /app/static/couchbase /app/schema /app/openbanking/static
+RUN mkdir -p /app/static /app/static/couchbase /app/schema /app/openbanking/static /app/static/opendj
 
 # sync static files from linux-setup
 RUN cd /tmp/jans \
@@ -42,7 +43,8 @@ RUN cd /tmp/jans \
     && cp ${JANS_SETUP_DIR}/schema/opendj_types.json /app/schema/opendj_types.json \
     && cp -R ${JANS_SETUP_DIR}/static/rdbm /app/static/rdbm \
     && cp ${JANS_SETUP_DIR}/schema/jans_schema.json /app/schema/jans_schema.json \
-    && cp ${JANS_SETUP_DIR}/schema/custom_schema.json /app/schema/custom_schema.json
+    && cp ${JANS_SETUP_DIR}/schema/custom_schema.json /app/schema/custom_schema.json \
+    && cp ${JANS_SETUP_DIR}/static/opendj/index.json /app/static/opendj/index.json
 
 
 RUN mkdir -p /app/templates/jans-config-api
@@ -61,7 +63,7 @@ RUN cd /tmp/jans \
     && cp -R ${JANS_SETUP_DIR}/templates/jans-cli /app/templates/jans-cli
 
 # TODO: casa should be moved from this image
-ENV GLUU_CASA_VERSION=2a4a7fcb16554d23ea0ff599d46f86b9de292e30
+ENV GLUU_CASA_VERSION=a8251496ff2ade9dd8101873b45f4c490ae9c64e
 RUN wget -q https://github.com/GluuFederation/flex/raw/${GLUU_CASA_VERSION}/casa/extras/Casa.py -O /app/static/extension/person_authentication/Casa.py
 
 # cleanup

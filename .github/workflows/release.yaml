@@ -46,7 +46,7 @@ jobs:
       #max-parallel: 1
       fail-fast: false
       matrix:
-        simple: [ "docs", "jans-scim", "jans-orm", "jans-notify", "jans-fido2", "jans-eleven", "jans-core", "jans-config-api", "jans-client-api", "jans-bom", "jans-auth-server" ]
+        simple: [ "super-jans", "docs", "jans-scim", "jans-orm", "jans-notify", "jans-fido2", "jans-eleven", "jans-core", "jans-config-api", "jans-client-api", "jans-bom", "jans-auth-server" ]
     steps:
     - name: Checkout
       uses: actions/checkout@v3

@@ -37,7 +37,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        module: [jans-auth-server, jans-config-api, jans-core, jans-linux-setup, jans-cli, jans-client-api, jans-fido2, jans-notify, jans-orm, jans-scim, jans-eleven, jans-pycloudlib]
+        module: [jans-auth-server, jans-config-api, jans-core, jans-linux-setup, jans-cli, jans-client-api, jans-fido2, jans-notify, jans-orm, jans-scim, jans-eleven, jans-pycloudlib, super-jans]
     env:
       JVM_PROJECTS: |
         jans-auth-server
@@ -53,6 +53,7 @@ jobs:
         jans-linux-setup
         jans-cli
         jans-pycloudlib
+        super-jans
 
     steps:
       - name: check out code

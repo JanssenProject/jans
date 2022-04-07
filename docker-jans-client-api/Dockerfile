@@ -5,6 +5,7 @@ FROM bellsoft/liberica-openjre-alpine:11.0.13-8
 # ===============
 
 RUN apk update \
+    && apk upgrade \
     && apk add --no-cache openssl py3-pip tini curl py3-cryptography py3-psycopg2 \
     && apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/v3.15/community py3-grpcio \
     && apk add --no-cache --virtual build-deps unzip wget git \
@@ -16,7 +17,7 @@ RUN apk update \
 # ==========
 
 ENV CN_VERSION=1.0.0-SNAPSHOT
-ENV CN_BUILD_DATE='2022-03-15 08:49'
+ENV CN_BUILD_DATE='2022-03-23 08:49'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-client-api-server/${CN_VERSION}/jans-client-api-server-${CN_VERSION}-distribution.zip
 
 RUN wget -q ${CN_SOURCE_URL} -O /tmp/client-api.zip \

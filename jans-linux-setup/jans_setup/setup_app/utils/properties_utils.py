@@ -757,7 +757,7 @@ class PropertiesUtils(SetupUtils):
 
                 try:
                     pymysql.connect(host=Config.rdbm_host, user=Config.rdbm_user, password=Config.rdbm_password, database=Config.rdbm_db, port=Config.rdbm_port)
-                    print("  {}MySQL connection was successfull{}".format(colors.OKGREEN, colors.ENDC))
+                    print("  {}MySQL connection was successful{}".format(colors.OKGREEN, colors.ENDC))
                     break
                 except Exception as e:
                     print("  {}Can't connect to MySQL: {}{}".format(colors.DANGER, e, colors.ENDC))

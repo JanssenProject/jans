@@ -289,7 +289,7 @@
     "logClientIdOnClientAuthentication": true,
     "logClientNameOnClientAuthentication": false,
     "httpLoggingEnabled": false,
-    "httpLoggingExludePaths": [],
+    "httpLoggingExcludePaths": [],
     "externalLoggerConfiguration": "",
     "authorizationRequestCustomAllowedParameters" : [
         {

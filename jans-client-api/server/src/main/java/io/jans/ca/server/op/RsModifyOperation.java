@@ -101,7 +101,7 @@ public class RsModifyOperation extends BaseOperation<RsModifyParams> {
         return new RsModifyResponse(rp.getRpId());
     }
 
-    private UmaResource getResource(UmaResourceService resourceService, RsModifyParams params, String resourceId) {
+    private UmaResource getResource(UmaResourceService resourceService, RsModifyParams params, String resourceId) throws Exception{
         String pat = getUmaTokenService().getPat(params.getRpId()).getToken();
         UmaResourceWithId umaResourceWithId = resourceService.getResource("Bearer " + pat, resourceId);
 
