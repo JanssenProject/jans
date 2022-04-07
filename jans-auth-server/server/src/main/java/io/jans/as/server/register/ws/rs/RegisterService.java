@@ -35,11 +35,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static io.jans.as.model.util.StringUtils.toList;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
@@ -103,9 +99,6 @@ public class RegisterService {
         if (requestObject.getApplicationType() != null) {
             client.setApplicationType(requestObject.getApplicationType());
         }
-        if (StringUtils.isNotBlank(requestObject.getClientName())) {
-            client.setClientName(requestObject.getClientName());
-        }
         if (StringUtils.isNotBlank(requestObject.getSectorIdentifierUri())) {
             client.setSectorIdentifierUri(requestObject.getSectorIdentifierUri());
         }
@@ -153,18 +146,23 @@ public class RegisterService {
             contacts = new ArrayList<>(new HashSet<>(contacts)); // Remove repeated elements
             client.setContacts(contacts.toArray(new String[0]));
         }
-        if (StringUtils.isNotBlank(requestObject.getLogoUri())) {
-            client.setLogoUri(requestObject.getLogoUri());
+
+        for (String key : requestObject.getClientNameLanguageTags()) {
+            client.setClientName(requestObject.getClientName(key), Locale.forLanguageTag(key));
         }
-        if (StringUtils.isNotBlank(requestObject.getClientUri())) {
-            client.setClientUri(requestObject.getClientUri());
+        for (String key : requestObject.getLogoUriLanguageTags()) {
+            client.setLogoUri(requestObject.getLogoUri(key), Locale.forLanguageTag(key));
         }
-        if (StringUtils.isNotBlank(requestObject.getPolicyUri())) {
-            client.setPolicyUri(requestObject.getPolicyUri());
+        for (String key : requestObject.getClientUriLanguageTags()) {
+            client.setClientUri(requestObject.getClientUri(key), Locale.forLanguageTag(key));
         }
-        if (StringUtils.isNotBlank(requestObject.getTosUri())) {
-            client.setTosUri(requestObject.getTosUri());
+        for (String key : requestObject.getPolicyUriLanguageTags()) {
+            client.setPolicyUri(requestObject.getPolicyUri(key), Locale.forLanguageTag(key));
         }
+        for (String key : requestObject.getTosUriLanguageTags()) {
+            client.setTosUri(requestObject.getTosUri(key), Locale.forLanguageTag(key));
+        }
+
         if (StringUtils.isNotBlank(requestObject.getJwksUri())) {
             client.setJwksUri(requestObject.getJwksUri());
         }
