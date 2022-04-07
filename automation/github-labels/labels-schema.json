@@ -386,6 +386,15 @@
       "title-prefixes": []
     }
   },
+  "kind-dependencies": {
+    "color": "800080",
+    "description": "This issue or pull request already exists",
+    "auto-label": {
+      "branch": "",
+      "paths": [],
+      "title-prefixes": ["build", "chore"]
+    }
+  },
   "kind-enhancement": {
     "color": "800080",
     "description": "Issue or PR is an enhancement to an existing functionality",
