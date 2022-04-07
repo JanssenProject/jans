@@ -3,6 +3,10 @@
 name: Label PR and Schema
 on:
   pull_request:
+    types:
+      - opened
+      - edited
+      - synchronize
   issues:
     types:
       - opened
