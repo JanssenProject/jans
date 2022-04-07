@@ -19,6 +19,14 @@ We expect most of the isseus and PRs will be able to follow above path and quick
 
 Github labels help us annotate issues/PRs with additional data. Janssen community uses labels, as detailed below, to communicate information and help making decisions about issues/PRs.
 
+### Auto-labelling
+
+Janssen project utilizes automation to aid in Issue/PR labelling process. Automation would derive appropriate label based on certain attributes of issue/PR, for instance, directories where there is code change, title or issue/PR etc.
+
+While most of the labels are available for community members to manully apply to an issue/PR, there are certain labels which should not be manually applied. These labels are reserved for automated scripts. In the listing below, such labels will be marked accordingly in `Details` column. If a label is reseved for auto labelling on PRs, it'll be mentioned as `auto` in `Details` column. 
+
+> Know that a label may be automated for PR but available for manual application for on an issue.
+
 ### Communication labels
 
 These labels communicate status of current triage process for an issue/PR or indicate where community contribution is required. Most of communication labels would be replaced by other labels as triage process progresses and issue enters active development. For example, `help wanted` label would be removed once issue gets under active development and a community members takes ownership of the issue. Below is the list of labels which fall under this category:
@@ -39,8 +47,8 @@ These labels enrich issue/PR with metadata that will help during triage process 
 
 |Label|Indicates That|Details|
 | --- | --- | --- |
-|`comp-<module>`|Major Janssen components needing change in order to fix this issue/PR. </br></br>For example, if this issue/PR would require change in files under fido2 module (under jans/fido2) , then apply `comp-jans-fido2` label|e.g `comp-jans-auth-server`,`comp-jans-fido2`,|
-|`area-<concern>`|Cross-cutting concerns involved in fixing this issue/PR.</br></br> For example, if changes introduced by this issue/PR will need changes in documentation and need to be mentioned in release notes as well, then apply `area-documentation`, `area-release-notes`.</br></br> `area-CI` should be applied when changes are required in artifacts relevent to automation, CI build infrastructure or release management process. An example of such artifact would be Github workflow scripts located under `.github/workflows`|Labels available: </br>`area-documentation`, </br>`area-release-notes`, </br>`area-CI`|
+|`comp-<module>`|Major Janssen components needing change in order to fix this issue/PR. </br></br>For example, if this issue/PR would require change in files under fido2 module (under jans/fido2) , then apply `comp-jans-fido2` label|PR: `auto` </br></br> e.g:</br> `comp-jans-auth-server`</br>`comp-jans-fido2`|
+|`area-<concern>`|Cross-cutting concerns involved in fixing this issue/PR.</br></br> For example, if changes introduced by this issue/PR will need changes in documentation and need to be mentioned in release notes as well, then apply `area-documentation`, `area-release-notes`.</br></br> `area-CI` should be applied when changes are required in artifacts relevent to automation, CI build infrastructure or release management process. An example of such artifact would be Github workflow scripts located under `.github/workflows`|PR: `auto` </br></br> Labels available: </br>`area-documentation`, </br>`area-release-notes`, </br>`area-CI`|
 |`kind-bug`|Issue/PR is a bug in existing functionality||
 |`kind-enhancement`|Issue/PR is an enhancement to an existing functionality||
 |`kind-feature`|Issue/PR is new feature request||
