@@ -96,6 +96,8 @@ def check_title(title, label, title_prefixes, label_paths):
     labels = []
     for title_prefix in title_prefixes:
         try:
+            if title_prefix == "Snyk" and title_prefix in title:
+                labels.append(label)
             # Detect title prefix i.e feat, fix, refactor..etc
             if title_prefix in title.split(':')[0]:
                 print(f"Detected label from title prefix. Adding label {label}")
