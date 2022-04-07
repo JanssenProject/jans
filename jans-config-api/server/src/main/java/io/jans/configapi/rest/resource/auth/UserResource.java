@@ -14,8 +14,8 @@ import io.jans.configapi.rest.model.SearchRequest;
 import io.jans.configapi.service.auth.UserService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
-import io.jans.configapi.core.util.Jackson;
 import io.jans.orm.model.PagedResult;
+import io.jans.orm.model.base.CustomObjectAttribute;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -46,8 +46,7 @@ public class UserResource extends BaseResource {
 
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.USER_READ_ACCESS })
-    public Response getUsers(
-            @DefaultValue(DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
+    public Response getUsers(@DefaultValue(DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
             @DefaultValue(DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
             @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
@@ -104,17 +103,17 @@ public class UserResource extends BaseResource {
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS })
     @Path(ApiConstants.INUM_PATH)
-    public Response patchUser(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString)
-            throws JsonPatchException, IOException {
+    public Response patchUser(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString,
+            List<CustomObjectAttribute> customAttributes) throws JsonPatchException, IOException {
         if (logger.isDebugEnabled()) {
-            logger.debug("User details to be patched - inum:{}, pathString:{}", escapeLog(inum), escapeLog(pathString));
+            logger.debug("User details to be patched - inum:{}, pathString:{}, customAttributes:{} ", escapeLog(inum),
+                    escapeLog(pathString), escapeLog(customAttributes));
         }
         User existingUser = userSrv.getUserByInum(inum);
         checkResourceNotNull(existingUser, USER);
 
-        existingUser = Jackson.applyPatch(pathString, existingUser);
-        existingUser = userSrv.updateUser(existingUser);
-        logger.debug("Updated user:{}", existingUser);
+        existingUser = userSrv.patchUser(inum, pathString, customAttributes);
+        logger.debug("Patched user:{}", existingUser);
         return Response.ok(existingUser).build();
     }
 
@@ -150,6 +149,16 @@ public class UserResource extends BaseResource {
             logger.debug("Users fetched  - users:{}", users);
         }
         return users;
+    }
+
+    private CustomObjectAttribute getCustomObjectAttribute(List<CustomObjectAttribute> customAttributesList,
+            String name) {
+
+        if (customAttributesList != null && !customAttributesList.isEmpty()) {
+            return customAttributesList.stream().filter(x -> x.getName() != null && x.getName().equals(name)).findAny()
+                    .orElse(null);
+        }
+        return null;
     }
 
 }
