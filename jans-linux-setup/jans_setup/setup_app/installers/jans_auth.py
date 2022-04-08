@@ -76,29 +76,29 @@ class JansAuthInstaller(JettyInstaller):
             self.import_openbanking_key()
 
 
+    def get_config_api_scopes(self):
+        data = base.current_app.ConfigApiInstaller.read_config_api_swagger()
+        scope_list = []
+
+        for epath in data['paths']:
+            for m in data['paths'][epath]:
+                if 'security' in data['paths'][epath][m]:
+                    scope_items = [item['oauth2'] for item in data['paths'][epath][m]['security']]
+                    for scopes in scope_items:
+                        scope_list += scopes
+
+        return scope_list
+
 
     def role_scope_mappings(self):
 
         role_scope_mappings_fn = os.path.join(self.templates_folder, 'role-scope-mappings.json')
         role_mapping = base.readJsonFile(role_scope_mappings_fn)
-        data = base.current_app.ConfigApiInstaller.read_config_api_swagger()
 
-        scope_list = []
-
-        def add_to_list(scope_items):
-            for item in scope_items:
-                for scope in item['oauth2']:
-                    scope_list.append(scope)
-
-
-        for epath in data['paths']:
-            for m in data['paths'][epath]:
-                if 'security' in data['paths'][epath][m]:
-                    add_to_list(data['paths'][epath][m]['security'])
+        scope_list = self.get_config_api_scopes()
 
         for api_role in role_mapping['rolePermissionMapping']:
             if api_role['role'] == 'api-admin':
-                api_admin = api_role
                 break
 
         for scope in scope_list:
