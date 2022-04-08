@@ -355,7 +355,7 @@ public class AuthUtil {
     }
     
     public boolean doesObjectContainField(Object object, String fieldName) {
-        log.error("Check if object:{} contain fieldName:{} ", object, fieldName);
+        log.debug("Check if object:{} contain fieldName:{} ", object, fieldName);
         if(object == null || StringUtils.isEmpty(fieldName)) {
             return false;
         }
