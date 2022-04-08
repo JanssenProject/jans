@@ -47,7 +47,7 @@ public class UserService extends io.jans.as.common.service.common.UserService {
 
     @Inject
     private AppConfiguration appConfiguration;
-    
+
     @Inject
     AuthUtil authUtil;
 
@@ -86,10 +86,11 @@ public class UserService extends io.jans.as.common.service.common.UserService {
         persistenceEntryManager.removeRecursively(user.getDn(), User.class);
     }
 
-    public User patchUser(String inum, UserPatchRequest userPatchRequest)
-            throws JsonPatchException, IOException {
-
-        logger.error("Details to patch user  inum:{}, UserPatchRequest:{} ", escapeLog(inum), escapeLog(userPatchRequest));
+    public User patchUser(String inum, UserPatchRequest userPatchRequest) throws JsonPatchException, IOException {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Details to patch user  inum:{}, UserPatchRequest:{} ", escapeLog(inum),
+                    escapeLog(userPatchRequest));
+        }
         if (StringHelper.isEmpty(inum)) {
             return null;
         }
@@ -99,41 +100,51 @@ public class UserService extends io.jans.as.common.service.common.UserService {
             return null;
         }
 
-        logger.error("User to be patched- user:{}", user);
+        logger.debug("User to be patched- user:{}", user);
         // apply direct patch for basic attributes
-        if( StringUtils.isNotEmpty(userPatchRequest.getJsonPatchString())) {
-            logger.error("Patch basic attributes");
+        if (StringUtils.isNotEmpty(userPatchRequest.getJsonPatchString())) {
+            logger.debug("Patch basic attributes");
             user = Jackson.applyPatch(userPatchRequest.getJsonPatchString(), user);
-            logger.error("User after patching basic attributes - user:{}", user);
+            logger.debug("User after patching basic attributes - user:{}", user);
         }
 
         // patch for customAttributes
         if (userPatchRequest.getCustomAttributes() != null && !userPatchRequest.getCustomAttributes().isEmpty()) {
-            user = updateCustomAttributes(user, userPatchRequest.getCustomAttributes());
+            updateCustomAttributes(user, userPatchRequest.getCustomAttributes());
         }
 
-        logger.error("User before patch user:{}", user);
+        logger.debug("User before patch user:{}", user);
 
         // persist user
         user = updateUser(user);
-        logger.error("User after patch user:{}", user);
+        logger.debug("User after patch user:{}", user);
         return user;
 
     }
+    
+    public User getUserBasedOnInum(String inum) {
+        User result = null;
+        try {
+            result = getUserByInum(inum);
+        } catch (Exception ex) {
+            logger.error("Failed to load user entry", ex);
+        }
+        return result;
+    }
 
     private User updateCustomAttributes(User user, List<CustomObjectAttribute> customAttributes) {
-        logger.error("Custom Attributes to update for - user:{}, customAttributes:{} ", user, customAttributes);
+        logger.debug("Custom Attributes to update for - user:{}, customAttributes:{} ", user, customAttributes);
 
         if (customAttributes != null && !customAttributes.isEmpty()) {
             for (CustomObjectAttribute attribute : customAttributes) {
                 CustomObjectAttribute existingAttribute = getCustomAttribute(user, attribute.getName());
-                logger.error("Existing CustomAttributes with existingAttribute:{} ", existingAttribute);
+                logger.debug("Existing CustomAttributes with existingAttribute:{} ", existingAttribute);
 
                 // add
                 if (existingAttribute == null) {
                     boolean result = addUserAttribute(user, attribute.getName(), attribute.getValues(),
                             attribute.isMultiValued());
-                    logger.error("Result of adding CustomAttributes attribute:{} , result:{} ", attribute, result);
+                    logger.debug("Result of adding CustomAttributes attribute:{} , result:{} ", attribute, result);
                 }
                 // remove attribute
                 else if (attribute.getValue() == null || attribute.getValues() == null) {
@@ -146,44 +157,46 @@ public class UserService extends io.jans.as.common.service.common.UserService {
                     existingAttribute.setValues(attribute.getValues());
                 }
                 // Final attribute
-                logger.error("Finally user CustomAttributes user.getCustomAttributes:{} ", user.getCustomAttributes());
+                logger.debug("Finally user CustomAttributes user.getCustomAttributes:{} ", user.getCustomAttributes());
 
             }
         }
 
         return user;
     }
-    
-    public List<User> excludedAttributes(List<User> users, String commaSeparatedString) throws IllegalAccessException, InvocationTargetException {
-        logger.error("Attributes:{} to be excluded from users:{} ", commaSeparatedString, users);
-        for(User user: users) {
-            user = excludedAttributes(user, commaSeparatedString);
+
+    public List<User> excludedAttributes(List<User> users, String commaSeparatedString)
+            throws IllegalAccessException, InvocationTargetException {
+        logger.debug("Attributes:{} to be excluded from users:{} ", commaSeparatedString, users);
+        for (User user : users) {
+            excludedAttributes(user, commaSeparatedString);
         }
-        logger.error("Users:{} after excluding attribute:{} ", users, commaSeparatedString);
-        
+        logger.debug("Users:{} after excluding attribute:{} ", users, commaSeparatedString);
+
         return users;
     }
-    
-    public User excludedAttributes(User user, String commaSeparatedString) throws IllegalAccessException, InvocationTargetException {
-        logger.error("Attributes:{} to be excluded from user:{} ", commaSeparatedString, user);
-        if(user == null || StringUtils.isEmpty(commaSeparatedString)) {
+
+    public User excludedAttributes(User user, String commaSeparatedString)
+            throws IllegalAccessException, InvocationTargetException {
+        logger.debug("Attributes:{} to be excluded from user:{} ", commaSeparatedString, user);
+        if (user == null || StringUtils.isEmpty(commaSeparatedString)) {
             return user;
         }
         List<String> excludedAttributes = Arrays.asList(commaSeparatedString.split(","));
-        logger.error("Attributes List:{} to be excluded ", excludedAttributes);
-        
-        for(String attribute : excludedAttributes) {
-            logger.error("User class conatins attribute:{} ? :{}  ", attribute, authUtil.doesObjectContainField(user,attribute));
-            if(authUtil.doesObjectContainField(user,attribute)) {
-                BeanUtils.setProperty(user,attribute,null);
+        logger.debug("Attributes List:{} to be excluded ", excludedAttributes);
 
-            }
-            else {
-                logger.error("Removing custom attribute:{} from user:{} ", attribute, user);
+        for (String attribute : excludedAttributes) {
+            logger.debug("User class conatins attribute:{} ? :{}  ", attribute,
+                    authUtil.doesObjectContainField(user, attribute));
+            if (authUtil.doesObjectContainField(user, attribute)) {
+                BeanUtils.setProperty(user, attribute, null);
+
+            } else {
+                logger.debug("Removing custom attribute:{} from user:{} ", attribute, user);
                 user.removeAttribute(attribute);
             }
-        }        
-        
+        }
+
         return user;
     }
 

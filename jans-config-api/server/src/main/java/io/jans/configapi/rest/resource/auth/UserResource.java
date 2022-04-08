@@ -51,7 +51,8 @@ public class UserResource extends BaseResource {
             @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
             @DefaultValue(DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
             @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
-            @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder) throws IllegalAccessException, InvocationTargetException {
+            @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder)
+            throws IllegalAccessException, InvocationTargetException {
         if (logger.isDebugEnabled()) {
             logger.debug("User search param - limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}",
                     escapeLog(limit), escapeLog(pattern), escapeLog(startIndex), escapeLog(sortBy),
@@ -61,24 +62,26 @@ public class UserResource extends BaseResource {
                 limit, null, ApiConstants.USER_EXCLUDED_ATTRIBUTES);
 
         List<User> users = this.doSearch(searchReq);
-        logger.debug("User search result:{}", users);        
-  
+        logger.debug("User search result:{}", users);
+
         return Response.ok(users).build();
     }
 
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS })
     @Path(ApiConstants.INUM_PATH)
-    public Response getUserByInum(@PathParam(ApiConstants.INUM) @NotNull String inum) throws IllegalAccessException, InvocationTargetException {
+    public Response getUserByInum(@PathParam(ApiConstants.INUM) @NotNull String inum)
+            throws IllegalAccessException, InvocationTargetException {
         if (logger.isDebugEnabled()) {
             logger.debug("User search by inum:{}", escapeLog(inum));
         }
-        User user = userSrv.getUserByInum(inum);
+        User user = userSrv.getUserBasedOnInum(inum);
+        checkResourceNotNull(user, USER);
         logger.debug("user:{}", user);
-        
-        //excludedAttributes
+
+        // excludedAttributes
         user = userSrv.excludedAttributes(user, ApiConstants.USER_EXCLUDED_ATTRIBUTES);
-        
+
         return Response.ok(user).build();
     }
 
@@ -106,27 +109,24 @@ public class UserResource extends BaseResource {
     }
 
     @PATCH
-    //@Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS })
     @Path(ApiConstants.INUM_PATH)
-    public Response patchUser(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull UserPatchRequest userPatchRequest) throws JsonPatchException, IOException {
+    public Response patchUser(@PathParam(ApiConstants.INUM) @NotNull String inum,
+            @NotNull UserPatchRequest userPatchRequest) throws JsonPatchException, IOException {
         if (logger.isDebugEnabled()) {
-            logger.debug("User:{} to be patched with :{} ", escapeLog(inum),escapeLog(userPatchRequest));
+            logger.debug("User:{} to be patched with :{} ", escapeLog(inum), escapeLog(userPatchRequest));
         }
-        logger.error("User:{} to be patched with :{} ", escapeLog(inum),escapeLog(userPatchRequest));
-               
-        //check if user exists
-        User existingUser = userSrv.getUserByInum(inum);
+        // check if user exists
+        User existingUser = userSrv.getUserBasedOnInum(inum);
         checkResourceNotNull(existingUser, USER);
 
-        //patch user
+        // patch user
         existingUser = userSrv.patchUser(inum, userPatchRequest);
         logger.error("Patched user:{}", existingUser);
-        
+
         return Response.ok(existingUser).build();
     }
-    
-   
+
     @DELETE
     @Path(ApiConstants.INUM_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.USER_DELETE_ACCESS })
@@ -134,13 +134,13 @@ public class UserResource extends BaseResource {
         if (logger.isDebugEnabled()) {
             logger.debug("User to be deleted - inum:{} ", escapeLog(inum));
         }
-        User user = userSrv.getUserByInum(inum);
+        User user = userSrv.getUserBasedOnInum(inum);
         checkResourceNotNull(user, USER);
         userSrv.removeUser(user);
         return Response.noContent().build();
     }
 
-    private List<User> doSearch(SearchRequest searchReq) throws IllegalAccessException, InvocationTargetException{
+    private List<User> doSearch(SearchRequest searchReq) throws IllegalAccessException, InvocationTargetException {
         if (logger.isDebugEnabled()) {
             logger.debug("User search params - searchReq:{} ", escapeLog(searchReq));
         }
@@ -158,14 +158,11 @@ public class UserResource extends BaseResource {
         if (logger.isDebugEnabled()) {
             logger.debug("Users fetched  - users:{}", users);
         }
-        
-        //excludedAttributes
+
+        // excludedAttributes
         users = userSrv.excludedAttributes(users, searchReq.getExcludedAttributesStr());
-                
+
         return users;
     }
-    
-    
-
 
 }
