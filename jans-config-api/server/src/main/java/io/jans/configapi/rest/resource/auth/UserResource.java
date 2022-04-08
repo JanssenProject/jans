@@ -122,7 +122,7 @@ public class UserResource extends BaseResource {
 
         // patch user
         existingUser = userSrv.patchUser(inum, userPatchRequest);
-        logger.error("Patched user:{}", existingUser);
+        logger.debug("Patched user:{}", existingUser);
 
         return Response.ok(existingUser).build();
     }

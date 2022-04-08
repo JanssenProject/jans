@@ -50,7 +50,7 @@ public class Jackson {
     }
 
     public static <T> T applyPatch(String patchAsString, T obj) throws JsonPatchException, IOException {
-        LOG.error("\n\n\n Jackson::applyPatch() - patchAsString:{}, obj:{}", patchAsString, obj );
+        LOG.debug("Patch details - patchAsString:{}, obj:{}", patchAsString, obj );
         JsonPatch jsonPatch = JsonPatch.fromJson(Jackson.asJsonNode(patchAsString));
         return applyPatch(jsonPatch, obj);
     }
