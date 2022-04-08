@@ -11,6 +11,7 @@ import io.jans.as.common.model.common.User;
 import io.jans.as.common.util.AttributeConstants;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.configapi.util.AuthUtil;
 import io.jans.configapi.core.util.Jackson;
 import io.jans.configapi.model.user.UserPatchRequest;
 import io.jans.configapi.rest.model.SearchRequest;
@@ -23,13 +24,14 @@ import io.jans.util.StringHelper;
 import static io.jans.as.model.util.Util.escapeLog;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.List;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.ws.rs.core.Response;
 
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
@@ -45,6 +47,9 @@ public class UserService extends io.jans.as.common.service.common.UserService {
 
     @Inject
     private AppConfiguration appConfiguration;
+    
+    @Inject
+    AuthUtil authUtil;
 
     @Override
     public List<String> getPersonCustomObjectClassList() {
@@ -146,6 +151,39 @@ public class UserService extends io.jans.as.common.service.common.UserService {
             }
         }
 
+        return user;
+    }
+    
+    public List<User> excludedAttributes(List<User> users, String commaSeparatedString) throws IllegalAccessException, InvocationTargetException {
+        logger.error("Attributes:{} to be excluded from users:{} ", commaSeparatedString, users);
+        for(User user: users) {
+            user = excludedAttributes(user, commaSeparatedString);
+        }
+        logger.error("Users:{} after excluding attribute:{} ", users, commaSeparatedString);
+        
+        return users;
+    }
+    
+    public User excludedAttributes(User user, String commaSeparatedString) throws IllegalAccessException, InvocationTargetException {
+        logger.error("Attributes:{} to be excluded from user:{} ", commaSeparatedString, user);
+        if(user == null || StringUtils.isEmpty(commaSeparatedString)) {
+            return user;
+        }
+        List<String> excludedAttributes = Arrays.asList(commaSeparatedString.split(","));
+        logger.error("Attributes List:{} to be excluded ", excludedAttributes);
+        
+        for(String attribute : excludedAttributes) {
+            logger.error("User class conatins attribute:{} ? :{}  ", attribute, authUtil.doesObjectContainField(user,attribute));
+            if(authUtil.doesObjectContainField(user,attribute)) {
+                BeanUtils.setProperty(user,attribute,null);
+
+            }
+            else {
+                logger.error("Removing custom attribute:{} from user:{} ", attribute, user);
+                user.removeAttribute(attribute);
+            }
+        }        
+        
         return user;
     }
 

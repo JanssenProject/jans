@@ -18,6 +18,7 @@ import io.jans.configapi.util.ApiConstants;
 import io.jans.orm.model.PagedResult;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.enterprise.context.ApplicationScoped;
@@ -50,29 +51,34 @@ public class UserResource extends BaseResource {
             @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
             @DefaultValue(DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
             @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
-            @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder) {
+            @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder) throws IllegalAccessException, InvocationTargetException {
         if (logger.isDebugEnabled()) {
             logger.debug("User search param - limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}",
                     escapeLog(limit), escapeLog(pattern), escapeLog(startIndex), escapeLog(sortBy),
                     escapeLog(sortOrder));
         }
         SearchRequest searchReq = createSearchRequest(userSrv.getPeopleBaseDn(), pattern, sortBy, sortOrder, startIndex,
-                limit, null, null);
+                limit, null, ApiConstants.USER_EXCLUDED_ATTRIBUTES);
 
-        final List<User> users = this.doSearch(searchReq);
-        logger.debug("User search result:{}", users);
+        List<User> users = this.doSearch(searchReq);
+        logger.debug("User search result:{}", users);        
+  
         return Response.ok(users).build();
     }
 
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS })
     @Path(ApiConstants.INUM_PATH)
-    public Response getUserByInum(@PathParam(ApiConstants.INUM) @NotNull String inum) {
+    public Response getUserByInum(@PathParam(ApiConstants.INUM) @NotNull String inum) throws IllegalAccessException, InvocationTargetException {
         if (logger.isDebugEnabled()) {
             logger.debug("User search by inum:{}", escapeLog(inum));
         }
         User user = userSrv.getUserByInum(inum);
         logger.debug("user:{}", user);
+        
+        //excludedAttributes
+        user = userSrv.excludedAttributes(user, ApiConstants.USER_EXCLUDED_ATTRIBUTES);
+        
         return Response.ok(user).build();
     }
 
@@ -100,7 +106,7 @@ public class UserResource extends BaseResource {
     }
 
     @PATCH
-    @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
+    //@Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS })
     @Path(ApiConstants.INUM_PATH)
     public Response patchUser(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull UserPatchRequest userPatchRequest) throws JsonPatchException, IOException {
@@ -119,7 +125,8 @@ public class UserResource extends BaseResource {
         
         return Response.ok(existingUser).build();
     }
-
+    
+   
     @DELETE
     @Path(ApiConstants.INUM_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.USER_DELETE_ACCESS })
@@ -133,7 +140,7 @@ public class UserResource extends BaseResource {
         return Response.noContent().build();
     }
 
-    private List<User> doSearch(SearchRequest searchReq) {
+    private List<User> doSearch(SearchRequest searchReq) throws IllegalAccessException, InvocationTargetException{
         if (logger.isDebugEnabled()) {
             logger.debug("User search params - searchReq:{} ", escapeLog(searchReq));
         }
@@ -151,7 +158,14 @@ public class UserResource extends BaseResource {
         if (logger.isDebugEnabled()) {
             logger.debug("Users fetched  - users:{}", users);
         }
+        
+        //excludedAttributes
+        users = userSrv.excludedAttributes(users, searchReq.getExcludedAttributesStr());
+                
         return users;
     }
+    
+    
+
 
 }

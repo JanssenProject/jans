@@ -32,6 +32,7 @@ import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
 @ApplicationScoped
@@ -351,6 +352,15 @@ public class AuthUtil {
 
     public boolean isEqualCollection(List<String> list1, List<String> list2) {
         return CollectionUtils.isEqualCollection(list1, list2);
+    }
+    
+    public boolean doesObjectContainField(Object object, String fieldName) {
+        log.error("Check if object:{} contain fieldName:{} ", object, fieldName);
+        if(object == null || StringUtils.isEmpty(fieldName)) {
+            return false;
+        }
+        return Arrays.stream(object.getClass().getFields())
+                .anyMatch(f -> f.getName().equals(fieldName));
     }
 
 }
