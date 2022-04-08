@@ -84,18 +84,26 @@ class JansAuthInstaller(JettyInstaller):
         data = base.current_app.ConfigApiInstaller.read_config_api_swagger()
 
         scope_list = []
+
+        def add_to_list(scope_items):
+            for item in scope_items:
+                for scope in item['oauth2']:
+                    scope_list.append(scope)
+
+
         for epath in data['paths']:
             for m in data['paths'][epath]:
                 if 'security' in data['paths'][epath][m]:
-                    for item in data['paths'][epath][m]['security']:
-                        scope_list += item['oauth2']
+                    add_to_list(data['paths'][epath][m]['security'])
 
         for api_role in role_mapping['rolePermissionMapping']:
             if api_role['role'] == 'api-admin':
-                for scope in scope_list:
-                    if scope not in api_role['permissions']:
-                        api_role['permissions'].append(scope)
+                api_admin = api_role
                 break
+
+        for scope in scope_list:
+            if scope not in api_role['permissions']:
+                api_role['permissions'].append(scope)
 
         Config.templateRenderingDict['role_scope_mappings'] = json.dumps(role_mapping)
 
