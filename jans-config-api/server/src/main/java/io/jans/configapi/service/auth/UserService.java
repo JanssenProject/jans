@@ -12,6 +12,7 @@ import io.jans.as.common.util.AttributeConstants;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.configapi.core.util.Jackson;
+import io.jans.configapi.model.user.UserPatchRequest;
 import io.jans.configapi.rest.model.SearchRequest;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;
@@ -80,11 +81,10 @@ public class UserService extends io.jans.as.common.service.common.UserService {
         persistenceEntryManager.removeRecursively(user.getDn(), User.class);
     }
 
-    public User patchUser(String inum, String pathString, List<CustomObjectAttribute> customAttributes)
+    public User patchUser(String inum, UserPatchRequest userPatchRequest)
             throws JsonPatchException, IOException {
 
-        logger.debug("Details to patch user  inum:{}, pathString:{}, customAttributes:{} ", escapeLog(inum),
-                escapeLog(pathString), escapeLog(customAttributes));
+        logger.error("Details to patch user  inum:{}, UserPatchRequest:{} ", escapeLog(inum), escapeLog(userPatchRequest));
         if (StringHelper.isEmpty(inum)) {
             return null;
         }
@@ -94,38 +94,41 @@ public class UserService extends io.jans.as.common.service.common.UserService {
             return null;
         }
 
-        logger.debug("User to be patched- user:{}", user);
+        logger.error("User to be patched- user:{}", user);
         // apply direct patch for basic attributes
-        user = Jackson.applyPatch(pathString, user);
-        logger.debug("User after patching basic attributes - user:{}", user);
-
-        // patch for customAttributes
-        if (customAttributes != null && !customAttributes.isEmpty()) {
-            user = updateCustomAttributes(user, customAttributes);
+        if( StringUtils.isNotEmpty(userPatchRequest.getJsonPatchString())) {
+            logger.error("Patch basic attributes");
+            user = Jackson.applyPatch(userPatchRequest.getJsonPatchString(), user);
+            logger.error("User after patching basic attributes - user:{}", user);
         }
 
-        logger.debug("User before patch user:{}", user);
+        // patch for customAttributes
+        if (userPatchRequest.getCustomAttributes() != null && !userPatchRequest.getCustomAttributes().isEmpty()) {
+            user = updateCustomAttributes(user, userPatchRequest.getCustomAttributes());
+        }
+
+        logger.error("User before patch user:{}", user);
 
         // persist user
         user = updateUser(user);
-        logger.debug("User after patch user:{}", user);
+        logger.error("User after patch user:{}", user);
         return user;
 
     }
 
     private User updateCustomAttributes(User user, List<CustomObjectAttribute> customAttributes) {
-        logger.debug("Custom Attributes to update for - user:{}, customAttributes:{} ", user, customAttributes);
+        logger.error("Custom Attributes to update for - user:{}, customAttributes:{} ", user, customAttributes);
 
         if (customAttributes != null && !customAttributes.isEmpty()) {
             for (CustomObjectAttribute attribute : customAttributes) {
                 CustomObjectAttribute existingAttribute = getCustomAttribute(user, attribute.getName());
-                logger.debug("Existing CustomAttributes with existingAttribute:{} ", existingAttribute);
+                logger.error("Existing CustomAttributes with existingAttribute:{} ", existingAttribute);
 
                 // add
                 if (existingAttribute == null) {
                     boolean result = addUserAttribute(user, attribute.getName(), attribute.getValues(),
                             attribute.isMultiValued());
-                    logger.debug("Result of adding CustomAttributes attribute:{} , result:{} ", attribute, result);
+                    logger.error("Result of adding CustomAttributes attribute:{} , result:{} ", attribute, result);
                 }
                 // remove attribute
                 else if (attribute.getValue() == null || attribute.getValues() == null) {
@@ -138,7 +141,7 @@ public class UserService extends io.jans.as.common.service.common.UserService {
                     existingAttribute.setValues(attribute.getValues());
                 }
                 // Final attribute
-                logger.debug("Finally user CustomAttributes user.getCustomAttributes:{} ", user.getCustomAttributes());
+                logger.error("Finally user CustomAttributes user.getCustomAttributes:{} ", user.getCustomAttributes());
 
             }
         }

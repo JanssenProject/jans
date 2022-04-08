@@ -10,12 +10,12 @@ import com.github.fge.jsonpatch.JsonPatchException;
 import static io.jans.as.model.util.Util.escapeLog;
 import io.jans.as.common.model.common.User;
 import io.jans.configapi.core.rest.ProtectedApi;
+import io.jans.configapi.model.user.UserPatchRequest;
 import io.jans.configapi.rest.model.SearchRequest;
 import io.jans.configapi.service.auth.UserService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.orm.model.PagedResult;
-import io.jans.orm.model.base.CustomObjectAttribute;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -103,17 +103,20 @@ public class UserResource extends BaseResource {
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS })
     @Path(ApiConstants.INUM_PATH)
-    public Response patchUser(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString,
-            List<CustomObjectAttribute> customAttributes) throws JsonPatchException, IOException {
+    public Response patchUser(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull UserPatchRequest userPatchRequest) throws JsonPatchException, IOException {
         if (logger.isDebugEnabled()) {
-            logger.debug("User details to be patched - inum:{}, pathString:{}, customAttributes:{} ", escapeLog(inum),
-                    escapeLog(pathString), escapeLog(customAttributes));
+            logger.debug("User:{} to be patched with :{} ", escapeLog(inum),escapeLog(userPatchRequest));
         }
+        logger.error("User:{} to be patched with :{} ", escapeLog(inum),escapeLog(userPatchRequest));
+               
+        //check if user exists
         User existingUser = userSrv.getUserByInum(inum);
         checkResourceNotNull(existingUser, USER);
 
-        existingUser = userSrv.patchUser(inum, pathString, customAttributes);
-        logger.debug("Patched user:{}", existingUser);
+        //patch user
+        existingUser = userSrv.patchUser(inum, userPatchRequest);
+        logger.error("Patched user:{}", existingUser);
+        
         return Response.ok(existingUser).build();
     }
 
@@ -149,16 +152,6 @@ public class UserResource extends BaseResource {
             logger.debug("Users fetched  - users:{}", users);
         }
         return users;
-    }
-
-    private CustomObjectAttribute getCustomObjectAttribute(List<CustomObjectAttribute> customAttributesList,
-            String name) {
-
-        if (customAttributesList != null && !customAttributesList.isEmpty()) {
-            return customAttributesList.stream().filter(x -> x.getName() != null && x.getName().equals(name)).findAny()
-                    .orElse(null);
-        }
-        return null;
     }
 
 }
