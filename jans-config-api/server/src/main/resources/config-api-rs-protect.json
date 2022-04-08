@@ -592,7 +592,7 @@
         ]
     },
     {
-        "path":"/jans-config-api/scim/user",
+        "path":"/jans-config-api/scim/resource/user",
         "conditions":[
             {
                 "httpMethods":["GET"],
@@ -612,7 +612,7 @@
         ]
     },
     {
-        "path":"/jans-config-api/scim/user/{id}",
+        "path":"/jans-config-api/scim/resource/user/{id}",
         "conditions":[
             {
                 "httpMethods":["GET"],
@@ -646,7 +646,7 @@
         ]
     },
     {
-        "path":"/jans-config-api/scim/user/.search",
+        "path":"/jans-config-api/scim/resource/user/.search",
         "conditions":[
             {
                 "httpMethods":["GET"],
