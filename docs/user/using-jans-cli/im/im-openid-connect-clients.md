@@ -388,7 +388,7 @@ If you enter `y` to **Populate optional fields?** then you will get a lot of opt
 
 ```
 Populate optional fields? y
-Optiaonal Fields:
+Optional Fields:
 1 clientSecret
 2 frontChannelLogoutUri
 3 registrationAccessToken
