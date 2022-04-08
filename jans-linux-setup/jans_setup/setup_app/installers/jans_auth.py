@@ -4,6 +4,8 @@ import random
 import string
 import uuid
 import shutil
+import json
+
 from urllib.parse import urlparse
 
 from setup_app import paths
@@ -73,7 +75,34 @@ class JansAuthInstaller(JettyInstaller):
         if Config.get('use_external_key'):
             self.import_openbanking_key()
 
+
+
+    def role_scope_mappings(self):
+
+        role_scope_mappings_fn = os.path.join(self.templates_folder, 'role-scope-mappings.json')
+        role_mapping = base.readJsonFile(role_scope_mappings_fn)
+        data = base.current_app.ConfigApiInstaller.read_config_api_swagger()
+
+        scope_list = []
+        for epath in data['paths']:
+            for m in data['paths'][epath]:
+                if 'security' in data['paths'][epath][m]:
+                    for item in data['paths'][epath][m]['security']:
+                        scope_list += item['oauth2']
+
+        for api_role in role_mapping['rolePermissionMapping']:
+            if api_role['role'] == 'api-admin':
+                for scope in scope_list:
+                    if scope not in api_role['permissions']:
+                        api_role['permissions'].append(scope)
+                break
+
+        Config.templateRenderingDict['role_scope_mappings'] = json.dumps(role_mapping)
+
+
     def render_import_templates(self):
+
+        self.role_scope_mappings()
 
         templates = [self.oxauth_config_json]
         if Config.profile == 'jans':
