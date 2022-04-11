@@ -23,15 +23,18 @@ import io.jans.util.StringHelper;
 
 import static io.jans.as.model.util.Util.escapeLog;
 
+import java.lang.reflect.Field;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
@@ -127,7 +130,7 @@ public class UserService extends io.jans.as.common.service.common.UserService {
         try {
             result = getUserByInum(inum);
         } catch (Exception ex) {
-            logger.error("Failed to load user entry", ex);
+            logger.debug("Failed to load user entry", ex);
         }
         return result;
     }
@@ -165,18 +168,18 @@ public class UserService extends io.jans.as.common.service.common.UserService {
         return user;
     }
 
-    public List<User> excludedAttributes(List<User> users, String commaSeparatedString)
+    public List<User> excludeAttributes(List<User> users, String commaSeparatedString)
             throws IllegalAccessException, InvocationTargetException {
         logger.debug("Attributes:{} to be excluded from users:{} ", commaSeparatedString, users);
         for (User user : users) {
-            excludedAttributes(user, commaSeparatedString);
+            excludeAttributes(user, commaSeparatedString);
         }
         logger.debug("Users:{} after excluding attribute:{} ", users, commaSeparatedString);
 
         return users;
     }
 
-    public User excludedAttributes(User user, String commaSeparatedString)
+    public User excludeAttributes(User user, String commaSeparatedString)
             throws IllegalAccessException, InvocationTargetException {
         logger.debug("Attributes:{} to be excluded from user:{} ", commaSeparatedString, user);
         if (user == null || StringUtils.isEmpty(commaSeparatedString)) {
@@ -185,19 +188,33 @@ public class UserService extends io.jans.as.common.service.common.UserService {
         List<String> excludedAttributes = Arrays.asList(commaSeparatedString.split(","));
         logger.debug("Attributes List:{} to be excluded ", excludedAttributes);
 
+        List<Field> allFields = authUtil.getAllFields(user.getClass());
+        logger.debug("All user fields :{} ",allFields);
+        
+        
+        HashMap<String, String> map = new HashMap<>();
         for (String attribute : excludedAttributes) {
-            logger.debug("User class conatins attribute:{} ? :{}  ", attribute,
-                    authUtil.doesObjectContainField(user, attribute));
-            if (authUtil.doesObjectContainField(user, attribute)) {
-                BeanUtils.setProperty(user, attribute, null);
-
-            } else {
+            logger.debug("User class allFields:{} conatins attribute:{} ? :{} ", allFields, attribute,
+                    authUtil.containsField(allFields, attribute));
+            if (authUtil.containsField(allFields, attribute)) {
+                logger.debug("User class contains attribute:{} ! ",attribute);
+                map.put(attribute, null);
+            }
+            else {
                 logger.debug("Removing custom attribute:{} from user:{} ", attribute, user);
                 user.removeAttribute(attribute);
             }
+        }
+        
+        logger.debug("Attributes map:{} to be excluded ", map);
+        if(!map.isEmpty()) {
+            logger.debug("Removing simple attributes:{} from user object ", map);
+            BeanUtilsBean.getInstance().getConvertUtils().register(false, false, 0);
+            BeanUtils.populate(user, map);
         }
 
         return user;
     }
 
+    
 }
