@@ -80,7 +80,7 @@ public class LanguageBean implements Serializable {
 
     public Locale getLocale() {
         try {
-            Locale locale = getCookieLocale();
+            Locale locale = FacesContext.getCurrentInstance().getViewRoot().getLocale();
             if (locale != null) {
                 return locale;
             }
@@ -152,6 +152,8 @@ public class LanguageBean implements Serializable {
         response.addCookie(cookie);
     }
 
+    @Deprecated
+    // Cookie is not storing value first time. This is causing default language setting
     private Locale getCookieLocale() {
         String cookieValue = getCookieValue();
         if (StringHelper.isEmpty(cookieValue)) {
