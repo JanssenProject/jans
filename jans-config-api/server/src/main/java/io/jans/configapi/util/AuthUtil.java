@@ -17,6 +17,7 @@ import io.jans.configapi.service.auth.ScopeService;
 import io.jans.util.security.StringEncrypter.EncryptionException;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Arrays;
@@ -32,7 +33,6 @@ import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
 @ApplicationScoped
@@ -354,13 +354,29 @@ public class AuthUtil {
         return CollectionUtils.isEqualCollection(list1, list2);
     }
     
-    public boolean doesObjectContainField(Object object, String fieldName) {
-        log.debug("Check if object:{} contain fieldName:{} ", object, fieldName);
-        if(object == null || StringUtils.isEmpty(fieldName)) {
-            return false;
-        }
-        return Arrays.stream(object.getClass().getFields())
-                .anyMatch(f -> f.getName().equals(fieldName));
-    }
+    public boolean containsField(List<Field> allFields, String attribute) {
+        log.debug("allFields:{},  attribute:{}, allFields.contains(attribute):{} ", allFields ,  attribute, allFields.stream().anyMatch(f -> f.getName().equals(attribute)));
+         
+        return allFields.stream().anyMatch(f -> f.getName().equals(attribute));
+     }
+     
+     public List<Field> getAllFields(Class<?> type) {
+         List<Field> allFields =  new ArrayList<>();
+         allFields = getAllFields(allFields, type);
+         log.debug("All Fields of User class:{} ", allFields);
+                 
+         return allFields;
+     }
+     
+     public List<Field> getAllFields(List<Field> fields, Class<?> type) {
+         log.debug("fields:{} of type:{} ", fields, type);
+         fields.addAll(Arrays.asList(type.getDeclaredFields()));
+
+         if (type.getSuperclass() != null) {
+             getAllFields(fields, type.getSuperclass());
+         }
+         log.debug("Final fields:{} of type:{} ", fields, type);
+         return fields;
+     }
 
 }

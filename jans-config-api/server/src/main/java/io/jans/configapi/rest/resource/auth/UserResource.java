@@ -80,30 +80,37 @@ public class UserResource extends BaseResource {
         logger.debug("user:{}", user);
 
         // excludedAttributes
-        user = userSrv.excludedAttributes(user, ApiConstants.USER_EXCLUDED_ATTRIBUTES);
+        user = excludeUserAttributes(user);
 
         return Response.ok(user).build();
     }
 
     @POST
     @ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS })
-    public Response createUser(@Valid User user) {
+    public Response createUser(@Valid User user) throws IllegalAccessException, InvocationTargetException {
         if (logger.isDebugEnabled()) {
             logger.debug("User details to be added - user:{}", escapeLog(user));
         }
         user = userSrv.addUser(user, true);
         logger.debug("User created {}", user);
+        
+        // excludedAttributes
+        user = excludeUserAttributes(user);
+        
         return Response.status(Response.Status.CREATED).entity(user).build();
     }
 
     @PUT
     @ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS })
-    public Response updateUser(@Valid User user) {
+    public Response updateUser(@Valid User user) throws IllegalAccessException, InvocationTargetException {
         if (logger.isDebugEnabled()) {
             logger.debug("User details to be updated - user:{}", escapeLog(user));
         }
         user = userSrv.updateUser((user));
         logger.debug("Updated user:{}", user);
+        
+        // excludedAttributes
+        user = excludeUserAttributes(user);
 
         return Response.ok(user).build();
     }
@@ -112,7 +119,7 @@ public class UserResource extends BaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS })
     @Path(ApiConstants.INUM_PATH)
     public Response patchUser(@PathParam(ApiConstants.INUM) @NotNull String inum,
-            @NotNull UserPatchRequest userPatchRequest) throws JsonPatchException, IOException {
+            @NotNull UserPatchRequest userPatchRequest) throws IllegalAccessException, InvocationTargetException, JsonPatchException, IOException {
         if (logger.isDebugEnabled()) {
             logger.debug("User:{} to be patched with :{} ", escapeLog(inum), escapeLog(userPatchRequest));
         }
@@ -123,6 +130,9 @@ public class UserResource extends BaseResource {
         // patch user
         existingUser = userSrv.patchUser(inum, userPatchRequest);
         logger.debug("Patched user:{}", existingUser);
+        
+        // excludedAttributes
+        existingUser = excludeUserAttributes(existingUser);
 
         return Response.ok(existingUser).build();
     }
@@ -160,9 +170,13 @@ public class UserResource extends BaseResource {
         }
 
         // excludedAttributes
-        users = userSrv.excludedAttributes(users, searchReq.getExcludedAttributesStr());
+        users = userSrv.excludeAttributes(users, searchReq.getExcludedAttributesStr());
 
         return users;
+    }
+    
+    private User excludeUserAttributes(User user) throws IllegalAccessException, InvocationTargetException {
+        return userSrv.excludeAttributes(user, ApiConstants.USER_EXCLUDED_ATTRIBUTES);
     }
 
 }
