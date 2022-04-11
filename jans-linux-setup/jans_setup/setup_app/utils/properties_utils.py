@@ -105,7 +105,7 @@ class PropertiesUtils(SetupUtils):
 
             if not Config.admin_password and Config.ldapPass:
                 Config.admin_password = Config.ldapPass
-            
+
             if not Config.admin_password:
                 Config.admin_password = self.getPW()
 
@@ -122,7 +122,7 @@ class PropertiesUtils(SetupUtils):
                 if Config.rdbm_install:
                     Config.mappingLocations = { group: 'rdbm' for group in Config.couchbaseBucketDict }
 
-            if Config.opendj_install == InstallTypes.LOCAL:
+            if Config.opendj_install == InstallTypes.LOCAL and not Config.installed_instance:
                 used_ports = self.opendj_used_ports()
                 if used_ports:
                     print(msg.used_ports.format(','.join(used_ports)))
