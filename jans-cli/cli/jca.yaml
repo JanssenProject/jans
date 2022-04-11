@@ -2584,7 +2584,8 @@ paths:
       security:
         - oauth2: [https://jans.io/oauth/config/user.write]
 
-  /jans-config-api/scim/user:
+
+  /jans-config-api/scim/resource/user:
     get:
       tags:
         - SCIM - User Management
@@ -2734,7 +2735,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /jans-config-api/scim/user/{id}:
+  /jans-config-api/scim/resource/user/{id}:
     get:
       tags:
         - SCIM - User Management
@@ -2985,7 +2986,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /jans-config-api/scim/user/.search:
+  /jans-config-api/scim/resource/user/.search:
     post:
       tags:
         - SCIM - User Management
