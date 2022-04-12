@@ -114,6 +114,6 @@ public class ApiConstants {
     public static final String SORT_ORDER = "sortOrder";
     
     //commaSeparatedString of attributes to be excluded in User fetch request
-    public static final String USER_EXCLUDED_ATTRIBUTES = "userPassword,"; 
+    //public static final String USER_EXCLUDED_ATTRIBUTES = "userPassword,"; 
 
 }

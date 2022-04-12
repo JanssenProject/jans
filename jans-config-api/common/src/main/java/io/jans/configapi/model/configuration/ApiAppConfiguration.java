@@ -32,6 +32,9 @@ public class ApiAppConfiguration implements Configuration {
     private String externalLoggerConfiguration;
     private Boolean disableJdkLogger = true;
     private int maxCount;
+    
+    private List<String> userExclusionAttributes;
+    private List<String> userMandatoryAttributes;
 
     public boolean isConfigOauthEnabled() {
         return configOauthEnabled;
@@ -203,6 +206,22 @@ public class ApiAppConfiguration implements Configuration {
         this.maxCount = maxCount;
     }
 
+    public List<String> getUserExclusionAttributes() {
+        return userExclusionAttributes;
+    }
+
+    public void setUserExclusionAttributes(List<String> userExclusionAttributes) {
+        this.userExclusionAttributes = userExclusionAttributes;
+    }
+
+    public List<String> getUserMandatoryAttributes() {
+        return userMandatoryAttributes;
+    }
+
+    public void setUserMandatoryAttributes(List<String> userMandatoryAttributes) {
+        this.userMandatoryAttributes = userMandatoryAttributes;
+    }
+
     @Override
     public String toString() {
         return "ApiAppConfiguration [" + " apiApprovedIssuer=" + apiApprovedIssuer + ", apiProtectionType="
@@ -214,7 +233,10 @@ public class ApiAppConfiguration implements Configuration {
                 + ", corsConfigurationFilters=" + corsConfigurationFilters + ", exclusiveAuthScopes="
                 + exclusiveAuthScopes + ", loggingLevel=" + loggingLevel + " , loggingLayout=" + loggingLayout
                 + " , externalLoggerConfiguration=" + externalLoggerConfiguration + " , disableJdkLogger="
-                + disableJdkLogger + " , maxCount =" + maxCount + "]";
+                + disableJdkLogger + " , maxCount =" + maxCount
+                + " , userExclusionAttributes="+ userExclusionAttributes
+                + " , userMandatoryAttributes="+ userMandatoryAttributes
+                + "]";
     }
 
 }

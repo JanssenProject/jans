@@ -124,7 +124,7 @@ public class UserService extends io.jans.as.common.service.common.UserService {
         return user;
 
     }
-    
+
     public User getUserBasedOnInum(String inum) {
         User result = null;
         try {
@@ -189,25 +189,23 @@ public class UserService extends io.jans.as.common.service.common.UserService {
         logger.debug("Attributes List:{} to be excluded ", excludedAttributes);
 
         List<Field> allFields = authUtil.getAllFields(user.getClass());
-        logger.debug("All user fields :{} ",allFields);
-        
-        
+        logger.debug("All user fields :{} ", allFields);
+
         HashMap<String, String> map = new HashMap<>();
         for (String attribute : excludedAttributes) {
             logger.debug("User class allFields:{} conatins attribute:{} ? :{} ", allFields, attribute,
                     authUtil.containsField(allFields, attribute));
             if (authUtil.containsField(allFields, attribute)) {
-                logger.debug("User class contains attribute:{} ! ",attribute);
+                logger.debug("User class contains attribute:{} ! ", attribute);
                 map.put(attribute, null);
-            }
-            else {
+            } else {
                 logger.debug("Removing custom attribute:{} from user:{} ", attribute, user);
                 user.removeAttribute(attribute);
             }
         }
-        
+
         logger.debug("Attributes map:{} to be excluded ", map);
-        if(!map.isEmpty()) {
+        if (!map.isEmpty()) {
             logger.debug("Removing simple attributes:{} from user object ", map);
             BeanUtilsBean.getInstance().getConvertUtils().register(false, false, 0);
             BeanUtils.populate(user, map);
@@ -216,5 +214,44 @@ public class UserService extends io.jans.as.common.service.common.UserService {
         return user;
     }
 
-    
+    public String getUserExclusionAttributesAsString() {
+        return authUtil.getUserExclusionAttributesAsString();
+    }
+
+    public String checkMandatoryFields(User user)
+            throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        List<String> mandatoryAttributes = authUtil.getUserMandatoryAttributes();
+        logger.error("mandatoryAttributess :{} ", mandatoryAttributes);
+
+        StringBuilder missingAttributes = new StringBuilder();
+
+        if (mandatoryAttributes == null || mandatoryAttributes.isEmpty()) {
+            return missingAttributes.toString();
+        }
+
+        List<Field> allFields = authUtil.getAllFields(user.getClass());
+        logger.error("All user fields :{} ", allFields);
+
+        Object attributeValue = null;
+        for (String attribute : mandatoryAttributes) {
+            logger.error("User class allFields:{} conatins attribute:{} ? :{} ", allFields, attribute,
+                    authUtil.containsField(allFields, attribute));
+            if (authUtil.containsField(allFields, attribute)) {
+                logger.error("Checking if attribute:{} is simple attribute", attribute);
+                attributeValue = BeanUtils.getProperty(user, attribute);
+                logger.error("User basic attribute:{} - attributeValue:{} ", attribute, attributeValue);
+            } else {
+                logger.error("Checking if attribute:{} is custom attribute", attribute);
+                attributeValue = user.getAttribute(attribute);
+                logger.error("User custom attribute:{} - attributeValue:{} ", attribute, attributeValue);
+            }
+            
+            if(attributeValue == null) {
+                missingAttributes.append(attribute).append(",");
+            }
+        }
+        logger.error("Checking mandatory missingAttributes:{} ", missingAttributes);
+        return missingAttributes.toString();
+    }
+
 }
