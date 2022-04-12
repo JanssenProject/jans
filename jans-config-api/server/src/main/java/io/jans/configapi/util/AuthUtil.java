@@ -75,6 +75,19 @@ public class AuthUtil {
     public String getClientId() {
         return this.configurationFactory.getApiClientId();
     }
+    
+    public List<String> getUserExclusionAttributes() {
+        return this.configurationFactory.getApiAppConfiguration().getUserExclusionAttributes();
+    }
+    
+    public String getUserExclusionAttributesAsString() {
+        List<String> excludedAttributes = getUserExclusionAttributes();
+        return excludedAttributes == null ? null : excludedAttributes.stream().collect(Collectors.joining(","));
+    }
+    
+    public List<String> getUserMandatoryAttributes() {
+        return this.configurationFactory.getApiAppConfiguration().getUserMandatoryAttributes();
+    }
 
     public String getTokenUrl() {
         return this.configurationService.find().getTokenEndpoint();

@@ -15,7 +15,9 @@ import io.jans.configapi.rest.model.SearchRequest;
 import io.jans.configapi.service.auth.UserService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
+import io.jans.configapi.util.AttributeNames;
 import io.jans.orm.model.PagedResult;
+import io.jans.util.StringHelper;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -44,7 +46,7 @@ public class UserResource extends BaseResource {
 
     @Inject
     UserService userSrv;
-
+    
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.USER_READ_ACCESS })
     public Response getUsers(@DefaultValue(DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
@@ -59,7 +61,7 @@ public class UserResource extends BaseResource {
                     escapeLog(sortOrder));
         }
         SearchRequest searchReq = createSearchRequest(userSrv.getPeopleBaseDn(), pattern, sortBy, sortOrder, startIndex,
-                limit, null, ApiConstants.USER_EXCLUDED_ATTRIBUTES);
+                limit, null, userSrv.getUserExclusionAttributesAsString());
 
         List<User> users = this.doSearch(searchReq);
         logger.debug("User search result:{}", users);
@@ -93,6 +95,8 @@ public class UserResource extends BaseResource {
         }
         user = userSrv.addUser(user, true);
         logger.debug("User created {}", user);
+        
+        
         
         // excludedAttributes
         user = excludeUserAttributes(user);
@@ -176,7 +180,18 @@ public class UserResource extends BaseResource {
     }
     
     private User excludeUserAttributes(User user) throws IllegalAccessException, InvocationTargetException {
-        return userSrv.excludeAttributes(user, ApiConstants.USER_EXCLUDED_ATTRIBUTES);
+        return userSrv.excludeAttributes(user, userSrv.getUserExclusionAttributesAsString());
     }
-
+   
+    
+    private void checkMissingAttributes(User user)  throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        String missingAttributes = userSrv.checkMandatoryFields(user);
+        
+        if(StringHelper.isEmpty(missingAttributes)) {
+            return;
+        }
+        
+        checkNotNull(missingAttributes, "Mandatory User Attributes");
+    }
+    
 }
