@@ -1,4 +1,4 @@
-<h1 align="center"><img src="https://github.com/JanssenProject/jans/blob/eea33ea5c7740244b45f7bb1893167cd3fb93903/docs/logo/janssen_project_transparent_630px_182px.png" alt="Janssen Project - cloud native identity and access management platform"></h1>
+<h1 align="center"><img src="https://github.com/JanssenProject/jans/blob/main/docs/logo/janssen_project_transparent_630px_182px.png" alt="Janssen Project - cloud native identity and access management platform"></h1>
 
 ## Welcome to the Janssen Project
 
