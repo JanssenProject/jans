@@ -20,7 +20,7 @@ from jans.pycloudlib.utils import as_boolean
 from settings import LOGGING_CONFIG
 from utils import doc_id_from_dn
 from utils import id_from_dn
-from utils import get_config_api_scopes
+from utils import get_role_scope_mappings
 
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("entrypoint")
@@ -666,23 +666,30 @@ class Upgrade:
         if not entry:
             return
 
-        # compare jansConfDyn
-        role_mapping = json.loads(entry.attrs["jansConfDyn"])
-        scope_list = get_config_api_scopes()
+        # calculate new permissions for api-admin
+        role_mapping = get_role_scope_mappings()
+        api_admin_perms = []
+
+        for api_role in role_mapping["rolePermissionMapping"]:
+            if api_role["role"] == "api-admin":
+                api_admin_perms = api_role["permissions"]
+                break
+
+        # current permissions
+        current_role_mapping = json.loads(entry.attrs["jansConfDyn"])
         should_update = False
 
-        # safely mutating list while iterating it
-        for i, api_role in enumerate(role_mapping["rolePermissionMapping"]):
-            if api_role["role"] != "api-admin":
-                continue
-
-            for scope in scope_list:
-                if scope not in api_role["permissions"]:
-                    role_mapping["rolePermissionMapping"][i]["permissions"].append(scope)
+        for i, api_role in enumerate(current_role_mapping["rolePermissionMapping"]):
+            if api_role["role"] == "api-admin":
+                # compare permissions between the ones from persistence (current) and newer permissions
+                if sorted(api_role["permissions"]) != sorted(api_admin_perms):
+                    current_role_mapping["rolePermissionMapping"][i]["permissions"] = api_admin_perms
                     should_update = True
+                break
 
         if should_update:
-            entry.attrs["jansConfDyn"] = json.dumps(role_mapping)
+            entry.attrs["jansConfDyn"] = json.dumps(current_role_mapping)
+            entry.attrs["jansRevision"] += 1
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
 
     def update_api_dynamic_config(self):

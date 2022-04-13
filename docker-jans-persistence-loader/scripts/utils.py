@@ -235,7 +235,7 @@ def merge_auth_ctx(ctx):
             ctx[key] = generate_base64_contents(fp.read() % ctx)
 
     # determine role scope mappings
-    ctx["role_scope_mappings"] = json.dumps(role_scope_mappings())
+    ctx["role_scope_mappings"] = json.dumps(get_role_scope_mappings())
     return ctx
 
 
@@ -509,21 +509,22 @@ def get_config_api_scopes():
             if "security" not in attrs:
                 continue
             scope_list += [attr["oauth2"] for attr in attrs["security"]]
-    return list(chain(*scope_list))
+
+    # make sure there's no duplication
+    return list(set(chain(*scope_list)))
 
 
-def role_scope_mappings(path="/app/templates/jans-auth/role-scope-mappings.json"):
+def get_role_scope_mappings(path="/app/templates/jans-auth/role-scope-mappings.json"):
     with open(path) as f:
         role_mapping = json.loads(f.read())
 
     scope_list = get_config_api_scopes()
 
-    # safely mutating list while iterating it
     for i, api_role in enumerate(role_mapping["rolePermissionMapping"]):
-        if api_role["role"] != "api-admin":
-            continue
-
-        for scope in scope_list:
-            if scope not in api_role["permissions"]:
-                role_mapping["rolePermissionMapping"][i]["permissions"].append(scope)
+        if api_role["role"] == "api-admin":
+            # merge scopes without duplication
+            role_mapping["rolePermissionMapping"][i]["permissions"] = list(set(
+                role_mapping["rolePermissionMapping"][i]["permissions"] + scope_list
+            ))
+            break
     return role_mapping
