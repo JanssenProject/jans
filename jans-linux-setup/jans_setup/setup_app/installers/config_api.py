@@ -76,13 +76,17 @@ class ConfigApiInstaller(JettyInstaller):
         self.run([paths.cmd_chown, '-R', 'jetty:jetty', os.path.join(Config.jetty_base, self.service_name)])
 
 
-    def generate_configuration(self):
+    def read_config_api_swagger(self):
+        config_api_swagger_yaml_fn = os.path.join(Config.data_dir, 'jans-config-api-swagger.yaml')
+        yml_str = self.readFile(config_api_swagger_yaml_fn)
+        yml_str = yml_str.replace('\t', ' ')
+        cfg_yml = ruamel.yaml.load(yml_str, ruamel.yaml.RoundTripLoader)
+        return cfg_yml
 
+
+    def generate_configuration(self):
         try:
-            config_api_swagger_yaml_fn = os.path.join(Config.install_dir, 'setup_app/data/jans-config-api-swagger.yaml')
-            yml_str = self.readFile(config_api_swagger_yaml_fn)
-            yml_str = yml_str.replace('\t', ' ')
-            cfg_yml = ruamel.yaml.load(yml_str, ruamel.yaml.RoundTripLoader)
+            cfg_yml = self.read_config_api_swagger()
             scopes_def = cfg_yml['components']['securitySchemes']['oauth2']['flows']['clientCredentials']['scopes']
             scope_type = cfg_yml['components']['securitySchemes']['oauth2']['type']
         except:

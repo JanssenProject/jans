@@ -23,7 +23,7 @@ import io.jans.as.model.token.TokenRevocationErrorResponseType;
 import io.jans.as.model.uma.UmaErrorResponseType;
 import io.jans.as.model.userinfo.UserInfoErrorResponseType;
 import io.jans.as.model.util.Util;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.BooleanUtils;
 import org.apache.logging.log4j.ThreadContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -98,7 +98,7 @@ public class ErrorResponseFactory implements Configuration {
 
     public String errorAsJson(IErrorType type, String reason) {
         final DefaultErrorResponse error = getErrorResponse(type);
-        error.setReason(appConfiguration.getErrorReasonEnabled() ? reason : "");
+        error.setReason(BooleanUtils.isTrue(appConfiguration.getErrorReasonEnabled()) ? reason : "");
         return error.toJSonString();
     }
 

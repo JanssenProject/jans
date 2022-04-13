@@ -1,4 +1,3 @@
-# import itertools
 import json
 import logging.config
 import os
@@ -60,6 +59,17 @@ class SQLBackend:
 
         with open(f"/app/static/rdbm/{index_fn}") as f:
             self.sql_indexes = json.loads(f.read())
+
+        # add missing index determined from opendj indexes
+        with open("/app/static/opendj/index.json") as f:
+            opendj_indexes = [attr["attribute"] for attr in json.loads(f.read())]
+
+        for attr in self.attr_types:
+            if not attr.get("multivalued"):
+                continue
+            for attr_name in attr["names"]:
+                if attr_name in opendj_indexes and attr_name not in self.sql_indexes["__common__"]["fields"]:
+                    self.sql_indexes["__common__"]["fields"].append(attr_name)
 
     def get_attr_syntax(self, attr):
         for attr_type in self.attr_types:
@@ -180,14 +190,9 @@ class SQLBackend:
                 query = f"CREATE INDEX {self.client.quoted_id(index_name)} ON {self.client.quoted_id(table_name)} ({self.client.quoted_id(column_name)})"
                 self.client.create_index(query)
             else:
-                # TODO: revise JSON type
-                #
-                # some MySQL versions don't support JSON array (NotSupportedError)
-                # also some of them don't support functional index that returns
-                # JSON or Geometry value
                 for i, index_str in enumerate(self.sql_indexes["__common__"]["JSON"], start=1):
                     index_str_fmt = Template(index_str).safe_substitute({
-                        "field": column_name, "data_type": column_type,
+                        "field": column_name,  # "data_type": column_type,
                     })
                     name = f"{table_name}_json_{i}"
                     query = f"ALTER TABLE {self.client.quoted_id(table_name)} ADD INDEX {self.client.quoted_id(name)} (({index_str_fmt}))"
@@ -195,7 +200,10 @@ class SQLBackend:
                     try:
                         self.client.create_index(query)
                     except (NotSupportedError, OperationalError) as exc:
-                        msg = exc.orig.args[1] if self.db_dialect == "mysql" else exc.orig.pgerror
+                        # some MySQL versions don't support JSON array (NotSupportedError)
+                        # also some of them don't support functional index that returns
+                        # JSON or Geometry value
+                        msg = exc.orig.args[1]
                         logger.warning(f"Failed to create index {name} for {table_name}.{column_name} column; reason={msg}")
 
         for i, custom in enumerate(self.sql_indexes.get(table_name, {}).get("custom", []), start=1):
@@ -487,6 +495,7 @@ class SQLBackend:
             ("jansUmaResource", "jansUmaScope"),
             ("jansU2fReq", "jansReq"),
             ("jansFido2AuthnEntry", "jansAuthData"),
+            ("jansFido2RegistrationEntry", "jansCodeChallengeHash"),
         ]:
             change_column_type(mod[0], mod[1])
 

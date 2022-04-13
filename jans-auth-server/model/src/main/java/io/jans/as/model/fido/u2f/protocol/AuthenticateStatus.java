@@ -42,7 +42,7 @@ public class AuthenticateStatus implements Serializable {
 
     @JsonIgnore
     public String getRequestId() {
-        return challenge;
+        return getChallenge();
     }
 
     @Override

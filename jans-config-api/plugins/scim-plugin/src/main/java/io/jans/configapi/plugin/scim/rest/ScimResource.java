@@ -23,7 +23,7 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-@Path("/user")
+@Path("/resource/user")
 public class ScimResource {
 
     public static final String SEARCH_SUFFIX = ".search";
