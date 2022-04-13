@@ -15,7 +15,6 @@ import io.jans.configapi.rest.model.SearchRequest;
 import io.jans.configapi.service.auth.UserService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
-import io.jans.configapi.util.AttributeNames;
 import io.jans.orm.model.PagedResult;
 import io.jans.util.StringHelper;
 
@@ -46,7 +45,7 @@ public class UserResource extends BaseResource {
 
     @Inject
     UserService userSrv;
-    
+
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.USER_READ_ACCESS })
     public Response getUsers(@DefaultValue(DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
@@ -56,7 +55,7 @@ public class UserResource extends BaseResource {
             @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder)
             throws IllegalAccessException, InvocationTargetException {
         if (logger.isDebugEnabled()) {
-            logger.debug("User search param - limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}",
+            logger.error("User search param - limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}",
                     escapeLog(limit), escapeLog(pattern), escapeLog(startIndex), escapeLog(sortBy),
                     escapeLog(sortOrder));
         }
@@ -64,7 +63,7 @@ public class UserResource extends BaseResource {
                 limit, null, userSrv.getUserExclusionAttributesAsString());
 
         List<User> users = this.doSearch(searchReq);
-        logger.debug("User search result:{}", users);
+        logger.error("User search result:{}", users);
 
         return Response.ok(users).build();
     }
@@ -75,11 +74,11 @@ public class UserResource extends BaseResource {
     public Response getUserByInum(@PathParam(ApiConstants.INUM) @NotNull String inum)
             throws IllegalAccessException, InvocationTargetException {
         if (logger.isDebugEnabled()) {
-            logger.debug("User search by inum:{}", escapeLog(inum));
+            logger.error("User search by inum:{}", escapeLog(inum));
         }
         User user = userSrv.getUserBasedOnInum(inum);
         checkResourceNotNull(user, USER);
-        logger.debug("user:{}", user);
+        logger.error("user:{}", user);
 
         // excludedAttributes
         user = excludeUserAttributes(user);
@@ -89,30 +88,38 @@ public class UserResource extends BaseResource {
 
     @POST
     @ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS })
-    public Response createUser(@Valid User user) throws IllegalAccessException, InvocationTargetException {
+    public Response createUser(@Valid User user)
+            throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         if (logger.isDebugEnabled()) {
-            logger.debug("User details to be added - user:{}", escapeLog(user));
+            logger.error("User details to be added - user:{}", escapeLog(user));
         }
+
+        // checking mandatory attributes
+        checkMissingAttributes(user);
+
         user = userSrv.addUser(user, true);
-        logger.debug("User created {}", user);
-        
-        
-        
+        logger.error("User created {}", user);
+
         // excludedAttributes
         user = excludeUserAttributes(user);
-        
+
         return Response.status(Response.Status.CREATED).entity(user).build();
     }
 
     @PUT
     @ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS })
-    public Response updateUser(@Valid User user) throws IllegalAccessException, InvocationTargetException {
+    public Response updateUser(@Valid User user)
+            throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         if (logger.isDebugEnabled()) {
-            logger.debug("User details to be updated - user:{}", escapeLog(user));
+            logger.error("User details to be updated - user:{}", escapeLog(user));
         }
+
+        // checking mandatory attributes
+        checkMissingAttributes(user);
+
         user = userSrv.updateUser((user));
-        logger.debug("Updated user:{}", user);
-        
+        logger.error("Updated user:{}", user);
+
         // excludedAttributes
         user = excludeUserAttributes(user);
 
@@ -123,9 +130,10 @@ public class UserResource extends BaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS })
     @Path(ApiConstants.INUM_PATH)
     public Response patchUser(@PathParam(ApiConstants.INUM) @NotNull String inum,
-            @NotNull UserPatchRequest userPatchRequest) throws IllegalAccessException, InvocationTargetException, JsonPatchException, IOException {
+            @NotNull UserPatchRequest userPatchRequest)
+            throws IllegalAccessException, InvocationTargetException, JsonPatchException, IOException {
         if (logger.isDebugEnabled()) {
-            logger.debug("User:{} to be patched with :{} ", escapeLog(inum), escapeLog(userPatchRequest));
+            logger.error("User:{} to be patched with :{} ", escapeLog(inum), escapeLog(userPatchRequest));
         }
         // check if user exists
         User existingUser = userSrv.getUserBasedOnInum(inum);
@@ -133,8 +141,8 @@ public class UserResource extends BaseResource {
 
         // patch user
         existingUser = userSrv.patchUser(inum, userPatchRequest);
-        logger.debug("Patched user:{}", existingUser);
-        
+        logger.error("Patched user:{}", existingUser);
+
         // excludedAttributes
         existingUser = excludeUserAttributes(existingUser);
 
@@ -146,7 +154,7 @@ public class UserResource extends BaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.USER_DELETE_ACCESS })
     public Response deleteUser(@PathParam(ApiConstants.INUM) @NotNull String inum) {
         if (logger.isDebugEnabled()) {
-            logger.debug("User to be deleted - inum:{} ", escapeLog(inum));
+            logger.error("User to be deleted - inum:{} ", escapeLog(inum));
         }
         User user = userSrv.getUserBasedOnInum(inum);
         checkResourceNotNull(user, USER);
@@ -156,21 +164,21 @@ public class UserResource extends BaseResource {
 
     private List<User> doSearch(SearchRequest searchReq) throws IllegalAccessException, InvocationTargetException {
         if (logger.isDebugEnabled()) {
-            logger.debug("User search params - searchReq:{} ", escapeLog(searchReq));
+            logger.error("User search params - searchReq:{} ", escapeLog(searchReq));
         }
 
         PagedResult<User> pagedResult = userSrv.searchUsers(searchReq);
         if (logger.isTraceEnabled()) {
-            logger.trace("PagedResult  - pagedResult:{}", pagedResult);
+            logger.error("PagedResult  - pagedResult:{}", pagedResult);
         }
 
         List<User> users = new ArrayList<>();
         if (pagedResult != null) {
-            logger.trace("Users fetched  - pagedResult.getEntries():{}", pagedResult.getEntries());
+            logger.error("Users fetched  - pagedResult.getEntries():{}", pagedResult.getEntries());
             users = pagedResult.getEntries();
         }
         if (logger.isDebugEnabled()) {
-            logger.debug("Users fetched  - users:{}", users);
+            logger.error("Users fetched  - users:{}", users);
         }
 
         // excludedAttributes
@@ -178,20 +186,20 @@ public class UserResource extends BaseResource {
 
         return users;
     }
-    
+
     private User excludeUserAttributes(User user) throws IllegalAccessException, InvocationTargetException {
         return userSrv.excludeAttributes(user, userSrv.getUserExclusionAttributesAsString());
     }
-   
-    
-    private void checkMissingAttributes(User user)  throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+
+    private void checkMissingAttributes(User user)
+            throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         String missingAttributes = userSrv.checkMandatoryFields(user);
-        
-        if(StringHelper.isEmpty(missingAttributes)) {
+        logger.error("missingAttributes:{}", missingAttributes);
+
+        if (StringHelper.isEmpty(missingAttributes)) {
             return;
         }
-        
-        checkNotNull(missingAttributes, "Mandatory User Attributes");
+
+        throwMissingAttributeError(missingAttributes);
     }
-    
 }
