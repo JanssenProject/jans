@@ -348,7 +348,6 @@ class Upgrade:
         self.backend = backend_cls(manager)
 
     def invoke(self):
-        # TODO: refactor all self.backend.update_ to this class method
         logger.info("Running upgrade process (if required)")
 
         self.update_people_entries()
@@ -364,6 +363,7 @@ class Upgrade:
         self.update_attributes_entries()
         self.update_scripts_entries()
         self.update_admin_ui_config()
+        self.update_api_dynamic_config()
 
     def update_scripts_entries(self):
         # default to ldap persistence
@@ -684,3 +684,50 @@ class Upgrade:
         if should_update:
             entry.attrs["jansConfDyn"] = json.dumps(role_mapping)
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
+
+    def update_api_dynamic_config(self):
+        kwargs = {}
+        id_ = "ou=jans-config-api,ou=configuration,o=jans"
+
+        if self.backend.type in ("sql", "spanner"):
+            kwargs = {"table_name": "jansAppConf"}
+            id_ = doc_id_from_dn(id_)
+        elif self.backend.type == "couchbase":
+            kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
+            id_ = id_from_dn(id_)
+
+        entry = self.backend.get_entry(id_, **kwargs)
+
+        if not entry:
+            return
+
+        if self.backend.type != "couchbase":
+            entry.attrs["jansConfDyn"] = json.loads(entry.attrs["jansConfDyn"])
+
+        conf, should_update = _transform_api_dynamic_config(entry.attrs["jansConfDyn"])
+
+        if should_update:
+            if self.backend.type != "couchbase":
+                entry.attrs["jansConfDyn"] = json.dumps(conf)
+
+            entry.attrs["jansRevision"] += 1
+            self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
+
+
+def _transform_api_dynamic_config(conf):
+    should_update = False
+
+    if "userExclusionAttributes" not in conf:
+        conf["userExclusionAttributes"] = ["userPassword"]
+        should_update = True
+
+    if "userMandatoryAttributes" not in conf:
+        conf["userMandatoryAttributes"] = [
+            "mail",
+            "displayName",
+            "jansStatus",
+            "userPassword",
+            "givenName",
+        ]
+        should_update = True
+    return conf, should_update
