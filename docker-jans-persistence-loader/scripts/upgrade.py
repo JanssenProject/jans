@@ -20,6 +20,7 @@ from jans.pycloudlib.utils import as_boolean
 from settings import LOGGING_CONFIG
 from utils import doc_id_from_dn
 from utils import id_from_dn
+from utils import get_role_scope_mappings
 
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("entrypoint")
@@ -347,7 +348,6 @@ class Upgrade:
         self.backend = backend_cls(manager)
 
     def invoke(self):
-        # TODO: refactor all self.backend.update_ to this class method
         logger.info("Running upgrade process (if required)")
 
         self.update_people_entries()
@@ -362,6 +362,8 @@ class Upgrade:
         self.update_auth_dynamic_config()
         self.update_attributes_entries()
         self.update_scripts_entries()
+        self.update_admin_ui_config()
+        self.update_api_dynamic_config()
 
     def update_scripts_entries(self):
         # default to ldap persistence
@@ -647,3 +649,92 @@ class Upgrade:
 
         _update_jca_client()
         _update_token_server_client()
+
+    def update_admin_ui_config(self):
+        kwargs = {}
+        id_ = "ou=admin-ui,ou=configuration,o=jans"
+
+        if self.backend.type in ("sql", "spanner"):
+            kwargs = {"table_name": "jansAdminConfDyn"}
+            id_ = doc_id_from_dn(id_)
+        elif self.backend.type == "couchbase":
+            kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
+            id_ = id_from_dn(id_)
+
+        entry = self.backend.get_entry(id_, **kwargs)
+
+        if not entry:
+            return
+
+        # calculate new permissions for api-admin
+        role_mapping = get_role_scope_mappings()
+        api_admin_perms = []
+
+        for api_role in role_mapping["rolePermissionMapping"]:
+            if api_role["role"] == "api-admin":
+                api_admin_perms = api_role["permissions"]
+                break
+
+        # current permissions
+        current_role_mapping = json.loads(entry.attrs["jansConfDyn"])
+        should_update = False
+
+        for i, api_role in enumerate(current_role_mapping["rolePermissionMapping"]):
+            if api_role["role"] == "api-admin":
+                # compare permissions between the ones from persistence (current) and newer permissions
+                if sorted(api_role["permissions"]) != sorted(api_admin_perms):
+                    current_role_mapping["rolePermissionMapping"][i]["permissions"] = api_admin_perms
+                    should_update = True
+                break
+
+        if should_update:
+            entry.attrs["jansConfDyn"] = json.dumps(current_role_mapping)
+            entry.attrs["jansRevision"] += 1
+            self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
+
+    def update_api_dynamic_config(self):
+        kwargs = {}
+        id_ = "ou=jans-config-api,ou=configuration,o=jans"
+
+        if self.backend.type in ("sql", "spanner"):
+            kwargs = {"table_name": "jansAppConf"}
+            id_ = doc_id_from_dn(id_)
+        elif self.backend.type == "couchbase":
+            kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
+            id_ = id_from_dn(id_)
+
+        entry = self.backend.get_entry(id_, **kwargs)
+
+        if not entry:
+            return
+
+        if self.backend.type != "couchbase":
+            entry.attrs["jansConfDyn"] = json.loads(entry.attrs["jansConfDyn"])
+
+        conf, should_update = _transform_api_dynamic_config(entry.attrs["jansConfDyn"])
+
+        if should_update:
+            if self.backend.type != "couchbase":
+                entry.attrs["jansConfDyn"] = json.dumps(conf)
+
+            entry.attrs["jansRevision"] += 1
+            self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
+
+
+def _transform_api_dynamic_config(conf):
+    should_update = False
+
+    if "userExclusionAttributes" not in conf:
+        conf["userExclusionAttributes"] = ["userPassword"]
+        should_update = True
+
+    if "userMandatoryAttributes" not in conf:
+        conf["userMandatoryAttributes"] = [
+            "mail",
+            "displayName",
+            "jansStatus",
+            "userPassword",
+            "givenName",
+        ]
+        should_update = True
+    return conf, should_update
