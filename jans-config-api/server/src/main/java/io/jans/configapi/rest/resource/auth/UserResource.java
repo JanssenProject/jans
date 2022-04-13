@@ -55,7 +55,7 @@ public class UserResource extends BaseResource {
             @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder)
             throws IllegalAccessException, InvocationTargetException {
         if (logger.isDebugEnabled()) {
-            logger.error("User search param - limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}",
+            logger.debug("User search param - limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}",
                     escapeLog(limit), escapeLog(pattern), escapeLog(startIndex), escapeLog(sortBy),
                     escapeLog(sortOrder));
         }
@@ -63,7 +63,7 @@ public class UserResource extends BaseResource {
                 limit, null, userSrv.getUserExclusionAttributesAsString());
 
         List<User> users = this.doSearch(searchReq);
-        logger.error("User search result:{}", users);
+        logger.debug("User search result:{}", users);
 
         return Response.ok(users).build();
     }
@@ -74,11 +74,11 @@ public class UserResource extends BaseResource {
     public Response getUserByInum(@PathParam(ApiConstants.INUM) @NotNull String inum)
             throws IllegalAccessException, InvocationTargetException {
         if (logger.isDebugEnabled()) {
-            logger.error("User search by inum:{}", escapeLog(inum));
+            logger.debug("User search by inum:{}", escapeLog(inum));
         }
         User user = userSrv.getUserBasedOnInum(inum);
         checkResourceNotNull(user, USER);
-        logger.error("user:{}", user);
+        logger.debug("user:{}", user);
 
         // excludedAttributes
         user = excludeUserAttributes(user);
@@ -91,14 +91,14 @@ public class UserResource extends BaseResource {
     public Response createUser(@Valid User user)
             throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         if (logger.isDebugEnabled()) {
-            logger.error("User details to be added - user:{}", escapeLog(user));
+            logger.debug("User details to be added - user:{}", escapeLog(user));
         }
 
         // checking mandatory attributes
         checkMissingAttributes(user);
 
         user = userSrv.addUser(user, true);
-        logger.error("User created {}", user);
+        logger.debug("User created {}", user);
 
         // excludedAttributes
         user = excludeUserAttributes(user);
@@ -111,14 +111,14 @@ public class UserResource extends BaseResource {
     public Response updateUser(@Valid User user)
             throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         if (logger.isDebugEnabled()) {
-            logger.error("User details to be updated - user:{}", escapeLog(user));
+            logger.debug("User details to be updated - user:{}", escapeLog(user));
         }
 
         // checking mandatory attributes
         checkMissingAttributes(user);
 
         user = userSrv.updateUser((user));
-        logger.error("Updated user:{}", user);
+        logger.debug("Updated user:{}", user);
 
         // excludedAttributes
         user = excludeUserAttributes(user);
@@ -133,7 +133,7 @@ public class UserResource extends BaseResource {
             @NotNull UserPatchRequest userPatchRequest)
             throws IllegalAccessException, InvocationTargetException, JsonPatchException, IOException {
         if (logger.isDebugEnabled()) {
-            logger.error("User:{} to be patched with :{} ", escapeLog(inum), escapeLog(userPatchRequest));
+            logger.debug("User:{} to be patched with :{} ", escapeLog(inum), escapeLog(userPatchRequest));
         }
         // check if user exists
         User existingUser = userSrv.getUserBasedOnInum(inum);
@@ -141,7 +141,7 @@ public class UserResource extends BaseResource {
 
         // patch user
         existingUser = userSrv.patchUser(inum, userPatchRequest);
-        logger.error("Patched user:{}", existingUser);
+        logger.debug("Patched user:{}", existingUser);
 
         // excludedAttributes
         existingUser = excludeUserAttributes(existingUser);
@@ -154,7 +154,7 @@ public class UserResource extends BaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.USER_DELETE_ACCESS })
     public Response deleteUser(@PathParam(ApiConstants.INUM) @NotNull String inum) {
         if (logger.isDebugEnabled()) {
-            logger.error("User to be deleted - inum:{} ", escapeLog(inum));
+            logger.debug("User to be deleted - inum:{} ", escapeLog(inum));
         }
         User user = userSrv.getUserBasedOnInum(inum);
         checkResourceNotNull(user, USER);
@@ -164,21 +164,21 @@ public class UserResource extends BaseResource {
 
     private List<User> doSearch(SearchRequest searchReq) throws IllegalAccessException, InvocationTargetException {
         if (logger.isDebugEnabled()) {
-            logger.error("User search params - searchReq:{} ", escapeLog(searchReq));
+            logger.debug("User search params - searchReq:{} ", escapeLog(searchReq));
         }
 
         PagedResult<User> pagedResult = userSrv.searchUsers(searchReq);
         if (logger.isTraceEnabled()) {
-            logger.error("PagedResult  - pagedResult:{}", pagedResult);
+            logger.debug("PagedResult  - pagedResult:{}", pagedResult);
         }
 
         List<User> users = new ArrayList<>();
         if (pagedResult != null) {
-            logger.error("Users fetched  - pagedResult.getEntries():{}", pagedResult.getEntries());
+            logger.debug("Users fetched  - pagedResult.getEntries():{}", pagedResult.getEntries());
             users = pagedResult.getEntries();
         }
         if (logger.isDebugEnabled()) {
-            logger.error("Users fetched  - users:{}", users);
+            logger.debug("Users fetched  - users:{}", users);
         }
 
         // excludedAttributes
@@ -194,7 +194,7 @@ public class UserResource extends BaseResource {
     private void checkMissingAttributes(User user)
             throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         String missingAttributes = userSrv.checkMandatoryFields(user);
-        logger.error("missingAttributes:{}", missingAttributes);
+        logger.debug("missingAttributes:{}", missingAttributes);
 
         if (StringHelper.isEmpty(missingAttributes)) {
             return;
