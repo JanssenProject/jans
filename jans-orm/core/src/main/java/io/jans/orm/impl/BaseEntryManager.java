@@ -958,7 +958,12 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 			T entry;
 			List<String> customObjectClasses = null;
 			try {
-				entry = ReflectHelper.createObjectByDefaultConstructor(entryClass);
+				Class<?> declaringClass = entryClass.getDeclaringClass();
+				if (declaringClass == null) {
+					entry = ReflectHelper.createObjectByDefaultConstructor(entryClass);
+				} else {
+					entry = (T) ReflectHelper.getConstructor(entryClass, declaringClass).newInstance((Object) null);
+				}
 			} catch (Exception ex) {
 				throw new MappingException(String.format("Entry %s should has default constructor", entryClass));
 			}
