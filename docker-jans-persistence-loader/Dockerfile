@@ -15,14 +15,14 @@ RUN apk update \
 # ======
 
 COPY requirements.txt /app/requirements.txt
-RUN pip3 install -U pip wheel \
+RUN pip3 install --no-cache-dir -U pip wheel \
     && pip3 install --no-cache-dir --default-timeout=300 -r /app/requirements.txt
 
 # =====================
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_LINUX_SETUP_VERSION=cfdc70e6a2ddcc9d2ba4e3cf07df19344d613944
+ENV JANS_LINUX_SETUP_VERSION=b3059060bfa78d12a017b20e35c89f339971e190
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -46,7 +46,6 @@ RUN cd /tmp/jans \
     && cp ${JANS_SETUP_DIR}/schema/custom_schema.json /app/schema/custom_schema.json \
     && cp ${JANS_SETUP_DIR}/static/opendj/index.json /app/static/opendj/index.json
 
-
 RUN mkdir -p /app/templates/jans-config-api
 
 # partially sync templates from linux-setup
@@ -61,6 +60,9 @@ RUN cd /tmp/jans \
     && cp -R ${JANS_SETUP_DIR}/templates/jans-scim /app/templates/jans-scim \
     && cp ${JANS_SETUP_DIR}/templates/jans-config-api/config.ldif /app/templates/jans-config-api/config.ldif \
     && cp -R ${JANS_SETUP_DIR}/templates/jans-cli /app/templates/jans-cli
+
+# Download jans-config-api-swagger for role_scope_mapping
+RUN wget -q https://github.com/JanssenProject/jans/raw/${JANS_LINUX_SETUP_VERSION}/jans-config-api/docs/jans-config-api-swagger.yaml -P /app/static
 
 # TODO: casa should be moved from this image
 ENV GLUU_CASA_VERSION=a8251496ff2ade9dd8101873b45f4c490ae9c64e

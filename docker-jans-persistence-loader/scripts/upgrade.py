@@ -20,6 +20,7 @@ from jans.pycloudlib.utils import as_boolean
 from settings import LOGGING_CONFIG
 from utils import doc_id_from_dn
 from utils import id_from_dn
+from utils import get_config_api_scopes
 
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("entrypoint")
@@ -362,6 +363,7 @@ class Upgrade:
         self.update_auth_dynamic_config()
         self.update_attributes_entries()
         self.update_scripts_entries()
+        self.update_admin_ui_config()
 
     def update_scripts_entries(self):
         # default to ldap persistence
@@ -647,3 +649,38 @@ class Upgrade:
 
         _update_jca_client()
         _update_token_server_client()
+
+    def update_admin_ui_config(self):
+        kwargs = {}
+        id_ = "ou=admin-ui,ou=configuration,o=jans"
+
+        if self.backend.type in ("sql", "spanner"):
+            kwargs = {"table_name": "jansAdminConfDyn"}
+            id_ = doc_id_from_dn(id_)
+        elif self.backend.type == "couchbase":
+            kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
+            id_ = id_from_dn(id_)
+
+        entry = self.backend.get_entry(id_, **kwargs)
+
+        if not entry:
+            return
+
+        # compare jansConfDyn
+        role_mapping = json.loads(entry.attrs["jansConfDyn"])
+        scope_list = get_config_api_scopes()
+        should_update = False
+
+        # safely mutating list while iterating it
+        for i, api_role in enumerate(role_mapping["rolePermissionMapping"]):
+            if api_role["role"] != "api-admin":
+                continue
+
+            for scope in scope_list:
+                if scope not in api_role["permissions"]:
+                    role_mapping["rolePermissionMapping"][i]["permissions"].append(scope)
+                    should_update = True
+
+        if should_update:
+            entry.attrs["jansConfDyn"] = json.dumps(role_mapping)
+            self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
