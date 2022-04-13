@@ -24,9 +24,9 @@ import io.jans.util.security.StringEncrypter;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 import java.util.List;
 
