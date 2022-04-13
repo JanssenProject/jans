@@ -112,8 +112,5 @@ public class ApiConstants {
     public static final int DEFAULT_MAX_COUNT = 200;  
     public static final String SORT_BY = "sortBy";
     public static final String SORT_ORDER = "sortOrder";
-    
-    //commaSeparatedString of attributes to be excluded in User fetch request
-    //public static final String USER_EXCLUDED_ATTRIBUTES = "userPassword,"; 
 
 }
