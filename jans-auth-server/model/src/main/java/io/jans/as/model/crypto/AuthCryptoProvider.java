@@ -21,6 +21,7 @@ import io.jans.as.model.jwk.JWKParameter;
 import io.jans.as.model.jwk.KeySelectionStrategy;
 import io.jans.as.model.jwk.Use;
 import io.jans.as.model.util.Base64Util;
+import io.jans.as.model.util.CertUtils;
 import io.jans.as.model.util.Util;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
@@ -412,16 +413,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
         }
 
         X509Certificate cert = (X509Certificate) chain[0];
-
-        String sighAlgName = cert.getSigAlgName();
-
-        for (SignatureAlgorithm sa : SignatureAlgorithm.values()) {
-            if (sighAlgName.equalsIgnoreCase(sa.getAlgorithm())) {
-                return sa;
-            }
-        }
-
-        return null;
+        return CertUtils.getSignatureAlgorithm(cert);
     }
 
     private void checkKeyExpiration(String alias) {
