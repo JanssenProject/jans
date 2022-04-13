@@ -260,7 +260,7 @@ public class UserService extends io.jans.as.common.service.common.UserService {
             }
         }
         logger.debug("Checking mandatory missingAttributes:{} ", missingAttributes);
-        if (missingAttributes != null && missingAttributes.length() > 0) {
+        if (missingAttributes.length() > 0) {
             missingAttributes.replace(missingAttributes.lastIndexOf(","), missingAttributes.length(), "");
         }
 
