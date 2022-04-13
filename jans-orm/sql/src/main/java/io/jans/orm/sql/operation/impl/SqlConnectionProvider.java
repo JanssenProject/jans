@@ -14,11 +14,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
-import java.util.Set;
 
 import org.apache.commons.dbcp2.ConnectionFactory;
 import org.apache.commons.dbcp2.DriverManagerConnectionFactory;
@@ -246,7 +244,7 @@ public class SqlConnectionProvider {
 				tableColumns.put(columnName, columTypeName);
         	}
 
-        	tableColumnsMap.put(tableName, tableColumns);
+        	tableColumnsMap.put(StringHelper.toLowerCase(tableName), tableColumns);
     	}
 
     	takes = System.currentTimeMillis() - takes;
@@ -398,7 +396,7 @@ public class SqlConnectionProvider {
 
 	public TableMapping getTableMappingByKey(String key, String objectClass) {
 		String tableName = objectClass;
-		Map<String, String> columTypes = tableColumnsMap.get(tableName);
+		Map<String, String> columTypes = tableColumnsMap.get(StringHelper.toLowerCase(tableName));
 		if ("_".equals(key)) {
 			return new TableMapping("", tableName, objectClass, columTypes);
 		}
