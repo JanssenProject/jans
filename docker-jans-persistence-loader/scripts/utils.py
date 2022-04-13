@@ -149,6 +149,11 @@ def get_base_ctx(manager):
     # static kid
     ctx["staticKid"] = os.environ.get("CN_OB_STATIC_KID", "")
 
+    # WARNING:
+    # - deprecate configs and secrets for admin_ui and token_server_admin_ui
+    # - move the configs and secrets creation to configurator
+    # - remove them on future release
+
     # admin-ui plugins
     ctx["admin_ui_client_id"] = manager.config.get("admin_ui_client_id")
     if not ctx["admin_ui_client_id"]:
@@ -337,6 +342,11 @@ def merge_casa_ctx(manager, ctx):
 
 
 def merge_jans_cli_ctx(manager, ctx):
+    # WARNING:
+    # - deprecated configs and secrets for role_based
+    # - move the configs and secrets creation to configurator
+    # - remove them on future release
+
     # jans-cli client
     ctx["role_based_client_id"] = manager.config.get("role_based_client_id")
     if not ctx["role_based_client_id"]:

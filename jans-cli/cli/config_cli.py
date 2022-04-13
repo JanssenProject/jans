@@ -699,23 +699,27 @@ class JCA_CLI:
                 return default
 
             if itype == 'array' and sitype:
-                selection = selection.split('_,')
-                for i, item in enumerate(selection):
+                if selection == '_null':
+                    selection = []
                     data_ok = True
-                    try:
-                        selection[i] = self.check_type(item.strip(), sitype)
-                        if selection[i] == '_null':
-                            selection[i] = None
-                        if values:
-                            if not selection[i] in values:
-                                data_ok = False
-                                print(' ' * spacing, self.colored_text(
-                                    "Please enter array of {} separated by _,".format(', '.join(values)),
-                                    warning_color), sep='')
-                                break
-                    except TypeError as e:
-                        print(' ' * spacing, e, sep='')
-                        data_ok = False
+                else:
+                    selection = selection.split('_,')
+                    for i, item in enumerate(selection):
+                        data_ok = True
+                        try:
+                            selection[i] = self.check_type(item.strip(), sitype)
+                            if selection[i] == '_null':
+                                selection[i] = None
+                            if values:
+                                if not selection[i] in values:
+                                    data_ok = False
+                                    print(' ' * spacing, self.colored_text(
+                                        "Please enter array of {} separated by _,".format(', '.join(values)),
+                                        warning_color), sep='')
+                                    break
+                        except TypeError as e:
+                            print(' ' * spacing, e, sep='')
+                            data_ok = False
                 if data_ok:
                     break
             else:
@@ -1234,7 +1238,7 @@ class JCA_CLI:
                 fill_optional = self.get_input(values=['y', 'n'], text='Populate optional fields?')
                 fields_numbers = []
                 if fill_optional == 'y':
-                    print("Optiaonal Fields:")
+                    print("Optional Fields:")
                     for i, field in enumerate(optional_fields):
                         print(i + 1, field)
                         fields_numbers.append(str(i + 1))
