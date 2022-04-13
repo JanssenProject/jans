@@ -456,7 +456,7 @@ paths:
     parameters: []
   /jans-config-api/api/v1/config/database/ldap/{name}:
     parameters:
-      - name: configId
+      - name: name
         in: path
         required: true
         description: Name of LDAP configuration.
@@ -2556,18 +2556,17 @@ paths:
     patch:
       tags:
         - User Management
-      summary: Update modified properties of user by Inum.
-      description: Update modified properties of user by Inum.
+      summary: Patch user properties by Inum.
+      description: Patch user properties by Inum.
       operationId: patch-user-by-inum
       requestBody:
         content:
-          application/json-patch+json:
+          application/json:
             schema:
-              type: array
-              items:
-                $ref: '#/components/schemas/PatchRequest'
-                description: String representing patch-document.
-                example: '[ {op:replace, path: userId, value: test_user_100 } ]'
+              type: object
+              $ref: '#/components/schemas/UserPatchRequest'
+              description: Patch request object
+              example: '[ {"jsonPatchString": {"op": "add", "path": "userId","value": "test-user" }, "customAttributes": [{"name": "name, displayName, birthdate, email","multiValued": true,"values": ["string"]}]}]'
       responses:
         '200':
           description: OK
@@ -6985,6 +6984,21 @@ components:
           type: array
           items:
             type: string
+        customAttributes:
+          description: dn of associated clients with the user.
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomAttribute'
+			
+    UserPatchRequest:
+      title: User Patch Request object
+      description: UserPatchRequest.
+      type: object
+      properties:
+        jsonPatchString:
+          type: object
+          description: Possible errors assosiated with the script.
+          $ref: '#/components/schemas/PatchRequest'
         customAttributes:
           description: dn of associated clients with the user.
           type: array

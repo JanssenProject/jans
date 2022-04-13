@@ -1,5 +1,5 @@
 {
-    "userId": "config_test_user_1",
+    "userId": "config_test_user_01",
     "customAttributes": [
         {
             "name": "birthdate",
@@ -23,10 +23,10 @@
             "name": "cn",
             "multiValued": false,
             "values": [
-                "Config Test User 1"
+                "Config Test User 01"
             ],
-            "value": "Config Test User 1",
-            "displayValue": "Config Test User 1"
+            "value": "Config Test User 01",
+            "displayValue": "Config Test User 01"
         },
         {
             "name": "displayName",
@@ -34,8 +34,8 @@
             "values": [
                 "Config Test User"
             ],
-            "value": "Config Test User",
-            "displayValue": "Config Test User"
+            "value": "Config Test User 01",
+            "displayValue": "Config Test User 01"
         },
         {
             "name": "emailVerified",
@@ -70,8 +70,8 @@
             "values": [
                 "config_user_1"
             ],
-            "value": "config_user_1",
-            "displayValue": "config_user_1"
+            "value": "config_user_01",
+            "displayValue": "config_user_01"
         },
         {
             "name": "jansStatus",
@@ -104,10 +104,10 @@
             "name": "mail",
             "multiValued": false,
             "values": [
-                "config_user_1@test.org"
+                "config_user_01@test.org"
             ],
-            "value": "config_user_1@test.org",
-            "displayValue": "config_user_1@test.org"
+            "value": "config_user_01@test.org",
+            "displayValue": "config_user_01@test.org"
         },
         {
             "name": "memberOf",
@@ -123,10 +123,10 @@
             "name": "middleName",
             "multiValued": false,
             "values": [
-                "config_user_1"
+                "config_user_01"
             ],
-            "value": "config_user_1",
-            "displayValue": "config_user_1"
+            "value": "config_user_01",
+            "displayValue": "config_user_01"
         },
         {
             "name": "mobile",
@@ -143,8 +143,8 @@
             "values": [
                 "user1"
             ],
-            "value": "user1",
-            "displayValue": "user1"
+            "value": "user01",
+            "displayValue": "user01"
         },
         {
             "name": "o",
@@ -228,15 +228,6 @@
             "displayValue": "(512) 516-2414"
         },
         {
-            "name": "userPassword",
-            "multiValued": false,
-            "values": [
-                "{SSHA512}gFcj2ucCCyO8NLN+IfBIbdzr3xjI7b07vAdwkJ8sw9Ynghj4uWPjfSHI2pHZ9dsyAdL3+mFl8g0ywxp6jcKs3exo/gRLQtre"
-            ],
-            "value": "{SSHA512}gFcj2ucCCyO8NLN+IfBIbdzr3xjI7b07vAdwkJ8sw9Ynghj4uWPjfSHI2pHZ9dsyAdL3+mFl8g0ywxp6jcKs3exo/gRLQtre",
-            "displayValue": "{SSHA512}gFcj2ucCCyO8NLN+IfBIbdzr3xjI7b07vAdwkJ8sw9Ynghj4uWPjfSHI2pHZ9dsyAdL3+mFl8g0ywxp6jcKs3exo/gRLQtre"
-        },
-        {
             "name": "website",
             "multiValued": false,
             "values": [
@@ -254,9 +245,5 @@
             "value": "America/Chicago",
             "displayValue": "America/Chicago"
         }
-    ],
-    "customObjectClasses": [
-        "top",
-        "jansCustomPerson"
-    ] 
+    ]
 }
