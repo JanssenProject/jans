@@ -8,12 +8,9 @@ package io.jans.model.uma;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-<<<<<<< HEAD
 import jakarta.xml.bind.annotation.XmlElement;
-=======
-import javax.xml.bind.annotation.XmlElement;
+
 import java.io.Serializable;
->>>>>>> e2925f54ec370740cd2d82a6402d443377e93e01
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

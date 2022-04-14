@@ -190,7 +190,7 @@ public class JwtUtil {
 
     private static String getJwks(String jwksUri) {
         String jwks = "";
-        javax.ws.rs.client.Client clientRequest = ClientBuilder.newClient();
+        jakarta.ws.rs.client.Client clientRequest = ClientBuilder.newClient();
         try {
             Response clientResponse = clientRequest.target(jwksUri).request().buildGet().invoke();
 
@@ -262,7 +262,7 @@ public class JwtUtil {
                     ((ResteasyClientBuilder) clientBuilder).httpEngine(engine);
                 }
 
-                javax.ws.rs.client.Client clientRequest = clientBuilder.build();
+                jakarta.ws.rs.client.Client clientRequest = clientBuilder.build();
                 try {
                     Response clientResponse = clientRequest.target(jwksUri).request().buildGet().invoke();
 
