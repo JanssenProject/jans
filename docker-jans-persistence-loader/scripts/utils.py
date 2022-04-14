@@ -2,10 +2,12 @@ import contextlib
 import base64
 import json
 import os
+from itertools import chain
 from pathlib import Path
 from urllib.parse import urlparse
 from uuid import uuid4
 
+import ruamel.yaml
 from ldap3.utils import dn as dnutils
 
 from jans.pycloudlib.utils import as_boolean
@@ -231,6 +233,9 @@ def merge_auth_ctx(ctx):
         file_path = os.path.join(basedir, file_)
         with open(file_path) as fp:
             ctx[key] = generate_base64_contents(fp.read() % ctx)
+
+    # determine role scope mappings
+    ctx["role_scope_mappings"] = json.dumps(get_role_scope_mappings())
     return ctx
 
 
@@ -486,3 +491,40 @@ def id_from_dn(dn):
 
     # the actual key
     return '_'.join(dns) or "_"
+
+
+def get_config_api_swagger(path="/app/static/jans-config-api-swagger.yaml"):
+    with open(path) as f:
+        txt = f.read()
+    txt = txt.replace("\t", " ")
+    return ruamel.yaml.load(txt, Loader=ruamel.yaml.RoundTripLoader)
+
+
+def get_config_api_scopes():
+    swagger = get_config_api_swagger()
+    scope_list = []
+
+    for _, methods in swagger["paths"].items():
+        for _, attrs in methods.items():
+            if "security" not in attrs:
+                continue
+            scope_list += [attr["oauth2"] for attr in attrs["security"]]
+
+    # make sure there's no duplication
+    return list(set(chain(*scope_list)))
+
+
+def get_role_scope_mappings(path="/app/templates/jans-auth/role-scope-mappings.json"):
+    with open(path) as f:
+        role_mapping = json.loads(f.read())
+
+    scope_list = get_config_api_scopes()
+
+    for i, api_role in enumerate(role_mapping["rolePermissionMapping"]):
+        if api_role["role"] == "api-admin":
+            # merge scopes without duplication
+            role_mapping["rolePermissionMapping"][i]["permissions"] = list(set(
+                role_mapping["rolePermissionMapping"][i]["permissions"] + scope_list
+            ))
+            break
+    return role_mapping

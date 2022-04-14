@@ -52,6 +52,12 @@ public class BaseResource {
             throw new BadRequestException(getMissingAttributeError(attributeName));
         }
     }
+    
+    public static void throwMissingAttributeError(String attributeName) {
+        if (StringUtils.isNotEmpty(attributeName)) {
+            throw new BadRequestException(getMissingAttributeError(attributeName));
+        }
+    }
 
     public static <T> void checkNotEmpty(List<T> list, String attributeName) {
         if (list == null || list.isEmpty()) {
