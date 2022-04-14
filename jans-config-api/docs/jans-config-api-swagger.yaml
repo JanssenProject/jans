@@ -4676,9 +4676,10 @@ components:
             - NEWER
             - FIRST
         checkUserPresenceOnRefreshToken:
-          type: string
+          type: boolean
           description: Check whether user exists and is active before creating RefreshToken. Set it to true if check is needed(Default value is false - don't check.)
           example: false
+          default: false
         oxElevenTestModeToken:
           type: string
           description: oxEleven Test Mode Token.
