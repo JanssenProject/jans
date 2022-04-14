@@ -360,7 +360,7 @@ public class AppConfiguration implements Configuration {
     }
 
     public Boolean getCheckUserPresenceOnRefreshToken() {
-        if (checkUserPresenceOnRefreshToken == null) checkUserPresenceOnRefreshToken = true;
+        if (checkUserPresenceOnRefreshToken == null) checkUserPresenceOnRefreshToken = false;
         return checkUserPresenceOnRefreshToken;
     }
 
