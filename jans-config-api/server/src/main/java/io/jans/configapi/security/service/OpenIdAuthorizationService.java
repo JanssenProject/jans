@@ -41,7 +41,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
     private static final String AUTHENTICATION_SCHEME = "Bearer ";
 
     @Inject
-    Logger logger;
+    transient Logger logger;
 
     @Context
     transient HttpServletRequest request;
@@ -50,7 +50,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
     transient HttpServletResponse response;
 
     @Inject
-    JwtUtil jwtUtil;
+    transient JwtUtil jwtUtil;
 
     @Inject
     OpenIdService openIdService;

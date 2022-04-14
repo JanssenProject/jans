@@ -31,13 +31,13 @@ public class OpenIdService implements Serializable {
     private static final long serialVersionUID = 4564959567069741194L;
 
     @Inject
-    Logger log;
+    transient Logger log;
 
     @Inject
-    AuthUtil authUtil;
+    transient AuthUtil authUtil;
 
     @Inject
-    ConfigurationService configurationService;
+    transient ConfigurationService configurationService;
 
     private transient IntrospectionService introspectionService;
 
