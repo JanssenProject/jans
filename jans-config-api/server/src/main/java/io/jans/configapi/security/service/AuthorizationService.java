@@ -21,13 +21,13 @@ public abstract class AuthorizationService implements Serializable {
     private static final long serialVersionUID = 4012335221233316230L;
 
     @Inject
-    Logger log;
+    transient Logger log;
 
     @Inject
-    ConfigurationFactory configurationFactory;
+    transient ConfigurationFactory configurationFactory;
 
     @Inject
-    AuthUtil authUtil;
+    transient AuthUtil authUtil;
 
     public abstract String processAuthorization(String token, String issuer, ResourceInfo resourceInfo, String method,
             String path) throws Exception;

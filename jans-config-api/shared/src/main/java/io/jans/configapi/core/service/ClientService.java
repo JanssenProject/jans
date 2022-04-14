@@ -24,10 +24,10 @@ public class ClientService implements Serializable {
     private static final long serialVersionUID = 7912416439116338984L;
 
     @Inject
-    private PersistenceEntryManager persistenceEntryManager;
+    private transient PersistenceEntryManager persistenceEntryManager;
 
     @Inject
-    private Logger logger;
+    private transient Logger logger;
 
     public boolean contains(String clientDn) {
         return persistenceEntryManager.contains(clientDn, Client.class);

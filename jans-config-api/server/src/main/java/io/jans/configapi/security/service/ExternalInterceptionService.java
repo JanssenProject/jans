@@ -27,7 +27,7 @@ public class ExternalInterceptionService implements Serializable {
     private static final long serialVersionUID = 4564959567069741194L;
 
     @Inject
-    Logger log;
+    transient Logger log;
 
     @Inject
     ExternalConfigService externalConfigService;

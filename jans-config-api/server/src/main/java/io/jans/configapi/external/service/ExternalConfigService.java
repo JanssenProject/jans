@@ -28,7 +28,7 @@ public class ExternalConfigService extends ExternalScriptService {
     private static final long serialVersionUID = 1767751544454591666L;
 
     @Inject
-    Logger logger;
+    transient Logger logger;
 
     public ExternalConfigService() {
         super(CustomScriptType.CONFIG_API);

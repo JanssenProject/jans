@@ -24,18 +24,14 @@ import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.Invocation.Builder;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.UriBuilder;
 
 import org.eclipse.microprofile.rest.client.annotation.RegisterProvider;
-import org.eclipse.microprofile.rest.client.RestClientBuilder;
-import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
 import org.slf4j.Logger;
@@ -45,18 +41,10 @@ import org.slf4j.LoggerFactory;
 @RegisterProvider(StatClient.class)
 @ApplicationScoped
 public class AuthClientFactory {
+    
 
     private static final String CONTENT_TYPE = "Content-Type";
-    /*
-     * @Inject
-     * 
-     * @RestClient OpenIdClientService openIdClientService;
-     * 
-     * @Inject
-     * 
-     * @RestClient StatClient statClient;
-     */
-
+  
     private static Logger log = LoggerFactory.getLogger(AuthClientFactory.class);
 
     public static IntrospectionService getIntrospectionService(String url, boolean followRedirects) {
@@ -67,7 +55,6 @@ public class AuthClientFactory {
             boolean followRedirects) {
         log.debug("Introspect Token - url:{}, header:{}, token:{} ,followRedirects:{} ", url, header, token,
                 followRedirects);
-        RestClientBuilder client = getRestClientBuilder(url);
         ResteasyWebTarget target = (ResteasyWebTarget) ClientBuilder.newClient()
                 .property(CONTENT_TYPE, MediaType.APPLICATION_JSON).target(url);
         IntrospectionService proxy = target.proxy(IntrospectionService.class);
@@ -79,8 +66,7 @@ public class AuthClientFactory {
             log.debug("Stat Response Token - url:{}, token:{}, month:{} ,format:{} ", escapeLog(url), escapeLog(token),
                     escapeLog(month), escapeLog(format));
         }
-        RestClientBuilder restClientBuilder = getRestClientBuilder(url);
-        ResteasyWebTarget webTarget = (ResteasyWebTarget) ClientBuilder.newClient()
+       ResteasyWebTarget webTarget = (ResteasyWebTarget) ClientBuilder.newClient()
                 .target(url);
         StatService statService = webTarget.proxy(StatService.class);
         return statService.stat(token, month, format);
@@ -151,7 +137,6 @@ public class AuthClientFactory {
         ApacheHttpClient43Engine engine = null;
         try {
             engine = ClientFactoryUtil.createEngine(followRedirects);
-            RestClientBuilder restClient = getRestClientBuilder(url).register(engine);
             ResteasyWebTarget resteasyWebTarget = (ResteasyWebTarget) ClientBuilder
                     .newClient().target(url);
             return resteasyWebTarget.proxy(IntrospectionService.class);
@@ -201,10 +186,7 @@ public class AuthClientFactory {
         return null;
     }
 
-    private static RestClientBuilder getRestClientBuilder(String clientUrl) {
-        return RestClientBuilder.newBuilder().baseUri(UriBuilder.fromPath(clientUrl).build());
-    }
-
+  
     private static Builder getClientBuilder(String url) {
         return ClientBuilder.newClient().target(url).request();
     }

@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import jakarta.inject.Inject;
 import jakarta.servlet.FilterConfig;
 import jakarta.servlet.ServletContext;
 
@@ -77,15 +76,13 @@ public class CorsFilterConfig implements FilterConfig {
     public CorsFilterConfig(String filterName, ApiAppConfiguration appConfiguration) {
 
         this.filterName = filterName;
-        initParameters = new HashMap<String, String>();
+        initParameters = new HashMap<>();
         List<CorsConfigurationFilter> corsConfigurationFilters = appConfiguration.getCorsConfigurationFilters();
 
-        log.debug("\n\n CorsFilterConfig::CorsFilterConfig() -  filterName = " + filterName
-                + " , corsConfigurationFilters =  " + corsConfigurationFilters);
+        log.debug(" CorsFilterConfig::CorsFilterConfig() -  filterName:{} , corsConfigurationFilters:{} ",filterName, corsConfigurationFilters);
 
         for (CorsConfigurationFilter corsConfigurationFilter : corsConfigurationFilters) {
-            log.debug("\n  CorsFilterConfig::CorsFilterConfig() -  filterName = " + filterName
-                    + " , corsConfigurationFilter.getFilterName() =  " + corsConfigurationFilter.getFilterName());
+            log.debug("  CorsFilterConfig::CorsFilterConfig() corsConfigurationFilter.getFilterName():{}", corsConfigurationFilter.getFilterName());
             if (filterName.equals(corsConfigurationFilter.getFilterName())) {
                 initParameters.put(PARAM_CORS_ENABLED, corsConfigurationFilter.getCorsEnabled().toString());
                 initParameters.put(PARAM_CORS_ALLOWED_ORIGINS, corsConfigurationFilter.getCorsAllowedOrigins());
