@@ -263,6 +263,7 @@ public class AppConfiguration implements Configuration {
     private Boolean removeRefreshTokensForClientOnLogout = true;
     private Boolean skipRefreshTokenDuringRefreshing = false;
     private Boolean refreshTokenExtendLifetimeOnRotation = false;
+    private Boolean checkUserPresenceOnRefreshToken = false;
     private Boolean consentGatheringScriptBackwardCompatibility = false; // means ignore client configuration (as defined in 4.2) and determine it globally (as in 4.1 and earlier)
     private Boolean introspectionScriptBackwardCompatibility = false; // means ignore client configuration (as defined in 4.2) and determine it globally (as in 4.1 and earlier)
     private Boolean introspectionResponseScopesBackwardCompatibility = false;
@@ -356,6 +357,15 @@ public class AppConfiguration implements Configuration {
 
     public void setDiscoveryAllowedKeys(List<String> discoveryAllowedKeys) {
         this.discoveryAllowedKeys = discoveryAllowedKeys;
+    }
+
+    public Boolean getCheckUserPresenceOnRefreshToken() {
+        if (checkUserPresenceOnRefreshToken == null) checkUserPresenceOnRefreshToken = true;
+        return checkUserPresenceOnRefreshToken;
+    }
+
+    public void setCheckUserPresenceOnRefreshToken(Boolean checkUserPresenceOnRefreshToken) {
+        this.checkUserPresenceOnRefreshToken = checkUserPresenceOnRefreshToken;
     }
 
     public Set<ComponentType> getEnabledComponentTypes() {
