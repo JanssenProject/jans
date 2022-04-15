@@ -19,8 +19,8 @@ import javax.ws.rs.core.Response;
 @Path("/admin-ui/license")
 public class LicenseResource {
 
-    static final String CHECK_LICENSE = "/checkLicense";
-    static final String SAVE_LICENSE_CREDENTIALS = "/saveLicenseCredentials";
+    static final String IS_ACTIVE = "/isActive";
+    static final String SAVE_API_CREDENTIALS = "/saveApiCredentials";
     static final String ACTIVATE_LICENSE = "/activateLicense";
     static final String LICENSE_DETAILS = "/licenseDetails";
 
@@ -35,10 +35,10 @@ public class LicenseResource {
     LicenseDetailsService licenseDetailsService;
 
     @GET
-    @Path(CHECK_LICENSE)
+    @Path(IS_ACTIVE)
     @ProtectedApi(scopes={SCOPE_OPENID})
     @Produces(MediaType.APPLICATION_JSON)
-    public Response checkLicense() {
+    public Response isActive() {
         try {
             log.info("Check if active license present.");
             Boolean isLicenseActive = licenseDetailsService.checkLicense();
@@ -67,7 +67,7 @@ public class LicenseResource {
     }
 
     @POST
-    @Path(SAVE_LICENSE_CREDENTIALS)
+    @Path(SAVE_API_CREDENTIALS)
     @ProtectedApi(scopes={SCOPE_OPENID})
     @Produces(MediaType.TEXT_PLAIN)
     public Response saveLicenseCredentials(@Valid @NotNull LicenseSpringCredentials licenseSpringCredentials) {
