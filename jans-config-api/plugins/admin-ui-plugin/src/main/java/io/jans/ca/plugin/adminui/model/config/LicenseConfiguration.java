@@ -16,7 +16,7 @@ public class LicenseConfiguration {
     private String productCode;
     private String sharedKey;
     private String managementKey;
-    private Boolean enabled = Boolean.FALSE;
+    private Boolean enabled = Boolean.TRUE;
     LicenseSpringConfiguration licenseSpringConfiguration;
     LicenseManager licenseManager;
 

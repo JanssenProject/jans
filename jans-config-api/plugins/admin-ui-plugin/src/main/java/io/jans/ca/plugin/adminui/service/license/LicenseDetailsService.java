@@ -9,35 +9,64 @@ import com.licensespring.management.dto.request.SearchLicensesRequest;
 import com.licensespring.management.dto.request.UpdateLicenseRequest;
 import com.licensespring.management.model.BackOfficeLicense;
 import com.licensespring.model.ActivationLicense;
+import io.jans.as.model.config.adminui.AdminConf;
+import io.jans.as.model.config.adminui.AdminRole;
+import io.jans.as.model.config.adminui.LicenseSpringCredentials;
 import io.jans.ca.plugin.adminui.model.config.AUIConfiguration;
+import io.jans.ca.plugin.adminui.model.config.LicenseConfiguration;
 import io.jans.ca.plugin.adminui.model.exception.ApplicationException;
+import io.jans.ca.plugin.adminui.utils.AppConstants;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
 import io.jans.ca.plugin.adminui.model.auth.LicenseRequest;
 import io.jans.ca.plugin.adminui.model.auth.LicenseResponse;
 import io.jans.ca.plugin.adminui.service.config.AUIConfigurationService;
+import io.jans.orm.PersistenceEntryManager;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.core.Response;
+import java.util.List;
 
 @Singleton
 public class LicenseDetailsService {
+
     @Inject
     Logger log;
 
     @Inject
     AUIConfigurationService auiConfigurationService;
 
+    @Inject
+    private PersistenceEntryManager entryManager;
+
+    public Boolean saveLicenseSpringCredentials(LicenseSpringCredentials licenseSpringCredentials) {
+        try {
+            //set license-spring configuration
+            AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
+            LicenseConfiguration licenseConfiguration = initializeLicenseManager(licenseSpringCredentials);
+            auiConfiguration.setLicenseConfiguration(licenseConfiguration);
+
+            License activeLicense = auiConfiguration.getLicenseConfiguration().getLicenseManager().getCurrent();
+            if (activeLicense == null) {
+                log.info("Error in verifying entered licenseSpring credentials. Please check if the credentials are correct.");
+                return false;
+            }
+            //save license spring credentials
+            AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.CONFIG_DN);
+            adminConf.getDynamic().setLicenseSpringCredentials(licenseSpringCredentials);
+            entryManager.merge(adminConf);
+            return true;
+        } catch (Exception e) {
+            log.error(ErrorResponse.SAVE_LICENSE_SPRING_CREDENTIALS_ERROR.getDescription(), e);
+            return false;
+        }
+    }
+
     public Boolean checkLicense() {
         try {
             AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
 
-            Boolean isLicenseCheckEnabled = auiConfiguration.getLicenseConfiguration().getEnabled();
-            if (!Boolean.TRUE.equals(isLicenseCheckEnabled)) {
-                log.debug("License configuration is disabled. ");
-                return true;
-            }
             License activeLicense = auiConfiguration.getLicenseConfiguration().getLicenseManager().getCurrent();
             if (activeLicense == null) {
                 log.info("Active license for admin-ui not present ");
@@ -76,12 +105,6 @@ public class LicenseDetailsService {
         try {
             AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
 
-            Boolean isLicenseCheckEnabled = auiConfiguration.getLicenseConfiguration().getEnabled();
-            if (!Boolean.TRUE.equals(isLicenseCheckEnabled)) {
-                log.debug("License configuration is disabled.");
-                licenseResponse.setLicenseEnabled(false);
-                return licenseResponse;
-            }
             License activeLicense = auiConfiguration.getLicenseConfiguration().getLicenseManager().getCurrent();
             if (activeLicense == null) {
                 log.debug("Active license for admin-ui not present ");
@@ -175,5 +198,15 @@ public class LicenseDetailsService {
             log.error(ErrorResponse.UPDATE_LICENSE_DETAILS_ERROR.getDescription(), e);
             throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), ErrorResponse.UPDATE_LICENSE_DETAILS_ERROR.getDescription());
         }
+    }
+
+    private LicenseConfiguration initializeLicenseManager(LicenseSpringCredentials licenseSpringCredentials) {
+        LicenseConfiguration licenseConfiguration = new LicenseConfiguration();
+        licenseConfiguration.setApiKey(licenseSpringCredentials.getApiKey());
+        licenseConfiguration.setProductCode(licenseSpringCredentials.getProductCode());
+        licenseConfiguration.setSharedKey(licenseSpringCredentials.getSharedKey());
+        licenseConfiguration.setManagementKey(licenseSpringCredentials.getManagementKey());
+        licenseConfiguration.initializeLicenseManager();
+        return licenseConfiguration;
     }
 }

@@ -1,5 +1,6 @@
 package io.jans.ca.plugin.adminui.rest.license;
 
+import io.jans.as.model.config.adminui.LicenseSpringCredentials;
 import io.jans.ca.plugin.adminui.model.exception.ApplicationException;
 import io.jans.ca.plugin.adminui.model.auth.LicenseRequest;
 import io.jans.ca.plugin.adminui.model.auth.LicenseResponse;
@@ -19,6 +20,7 @@ import javax.ws.rs.core.Response;
 public class LicenseResource {
 
     static final String CHECK_LICENSE = "/checkLicense";
+    static final String SAVE_LICENSE_CREDENTIALS = "/saveLicenseCredentials";
     static final String ACTIVATE_LICENSE = "/activateLicense";
     static final String LICENSE_DETAILS = "/licenseDetails";
 
@@ -60,6 +62,22 @@ public class LicenseResource {
             return Response.ok(isLicenseActive).build();
         } catch (Exception e) {
             log.error(ErrorResponse.ACTIVATE_LICENSE_ERROR.getDescription(), e);
+            return Response.serverError().entity(false).build();
+        }
+    }
+
+    @POST
+    @Path(SAVE_LICENSE_CREDENTIALS)
+    @ProtectedApi(scopes={SCOPE_OPENID})
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response saveLicenseCredentials(@Valid @NotNull LicenseSpringCredentials licenseSpringCredentials) {
+        try {
+            log.info("Trying to save license-spring credentials.");
+            Boolean licenseSaved = licenseDetailsService.saveLicenseSpringCredentials(licenseSpringCredentials);
+            log.info("License saved (true/false): {}", licenseSaved);
+            return Response.ok(licenseSaved).build();
+        } catch (Exception e) {
+            log.error(ErrorResponse.SAVE_LICENSE_SPRING_CREDENTIALS_ERROR.getDescription(), e);
             return Response.serverError().entity(false).build();
         }
     }
