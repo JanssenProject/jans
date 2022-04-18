@@ -1546,24 +1546,24 @@ class JCA_CLI:
 
                         if selection == 'y':
                             schema_must = self.get_scheme_for_endpoint(endpoint)
-                            if schema_must != cur_model.__class__.__name__:
+                            if schema_must['__schema_name__'] != cur_model.__class__.__name__:
                                 for e in  endpoint.parent.children:
                                     if e.method == 'get':
                                         parent_model = self.process_get(e, return_value=True)
                                         break
-                            
 
-                            if parent_model and key_name:
-                                for i, wkey in enumerate(parent_model.keys):
-                                    if getattr(wkey, key_name) == getattr(cur_model, key_name):
-                                        parent_model.keys[i] = cur_model
-                                        cur_model = parent_model
-                                        break
+
+                                if parent_model and key_name and hasattr(parent_model, 'keys'):
+                                    for i, wkey in enumerate(parent_model.keys):
+                                        if getattr(wkey, key_name) == getattr(cur_model, key_name):
+                                            parent_model.keys[i] = cur_model
+                                            cur_model = parent_model
+                                            break
 
                             print("Please wait while posting data ...\n")
                             api_caller = self.get_api_caller(endpoint)
                             put_pname = self.get_url_param(endpoint.path)
-                            
+
                             try:
                                 if put_pname:
                                     args_ = {'body': cur_model, put_pname: end_point_param_val}
