@@ -699,23 +699,27 @@ class JCA_CLI:
                 return default
 
             if itype == 'array' and sitype:
-                selection = selection.split('_,')
-                for i, item in enumerate(selection):
+                if selection == '_null':
+                    selection = []
                     data_ok = True
-                    try:
-                        selection[i] = self.check_type(item.strip(), sitype)
-                        if selection[i] == '_null':
-                            selection[i] = None
-                        if values:
-                            if not selection[i] in values:
-                                data_ok = False
-                                print(' ' * spacing, self.colored_text(
-                                    "Please enter array of {} separated by _,".format(', '.join(values)),
-                                    warning_color), sep='')
-                                break
-                    except TypeError as e:
-                        print(' ' * spacing, e, sep='')
-                        data_ok = False
+                else:
+                    selection = selection.split('_,')
+                    for i, item in enumerate(selection):
+                        data_ok = True
+                        try:
+                            selection[i] = self.check_type(item.strip(), sitype)
+                            if selection[i] == '_null':
+                                selection[i] = None
+                            if values:
+                                if not selection[i] in values:
+                                    data_ok = False
+                                    print(' ' * spacing, self.colored_text(
+                                        "Please enter array of {} separated by _,".format(', '.join(values)),
+                                        warning_color), sep='')
+                                    break
+                        except TypeError as e:
+                            print(' ' * spacing, e, sep='')
+                            data_ok = False
                 if data_ok:
                     break
             else:
@@ -1234,7 +1238,7 @@ class JCA_CLI:
                 fill_optional = self.get_input(values=['y', 'n'], text='Populate optional fields?')
                 fields_numbers = []
                 if fill_optional == 'y':
-                    print("Optiaonal Fields:")
+                    print("Optional Fields:")
                     for i, field in enumerate(optional_fields):
                         print(i + 1, field)
                         fields_numbers.append(str(i + 1))
@@ -1386,6 +1390,8 @@ class JCA_CLI:
         initialised = False
         cur_model = None
         go_back = False
+        key_name = None
+        parent_model = None
 
         if endpoint.info.get('x-cli-getdata') != '_file':
             if 'x-cli-getdata' in endpoint.info and endpoint.info['x-cli-getdata'] != None:
@@ -1411,6 +1417,9 @@ class JCA_CLI:
                         while True:
                             while True:
                                 try:
+                                    key_name_desc = self.get_endpiont_url_param(m)
+                                    if key_name_desc and 'name' in key_name_desc:
+                                        key_name = key_name_desc['name']
                                     cur_model = self.process_get(m, return_value=True)
                                     break
                                 except ValueError as e:
@@ -1515,6 +1524,9 @@ class JCA_CLI:
                     elif selection in item_numbers:
                         item = attr_name_list[int(selection) - 1]
                         item_unmapped = self.get_model_key_map(cur_model, item)
+                        if schema['properties'].get('keys', {}).get('properties'):
+                            schema = schema['properties']['keys']
+
                         schema_item = schema['properties'][item]
                         schema_item['__name__'] = item
                         self.get_input_for_schema_(schema, cur_model, initialised=initialised, getitem=schema_item)
@@ -1533,10 +1545,25 @@ class JCA_CLI:
                         selection = self.get_input(values=['y', 'n'], text='Continue?')
 
                         if selection == 'y':
+                            schema_must = self.get_scheme_for_endpoint(endpoint)
+                            if schema_must['__schema_name__'] != cur_model.__class__.__name__:
+                                for e in  endpoint.parent.children:
+                                    if e.method == 'get':
+                                        parent_model = self.process_get(e, return_value=True)
+                                        break
+
+
+                                if parent_model and key_name and hasattr(parent_model, 'keys'):
+                                    for i, wkey in enumerate(parent_model.keys):
+                                        if getattr(wkey, key_name) == getattr(cur_model, key_name):
+                                            parent_model.keys[i] = cur_model
+                                            cur_model = parent_model
+                                            break
+
                             print("Please wait while posting data ...\n")
                             api_caller = self.get_api_caller(endpoint)
                             put_pname = self.get_url_param(endpoint.path)
-                            
+
                             try:
                                 if put_pname:
                                     args_ = {'body': cur_model, put_pname: end_point_param_val}

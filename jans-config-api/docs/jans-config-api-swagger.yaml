@@ -456,7 +456,7 @@ paths:
     parameters: []
   /jans-config-api/api/v1/config/database/ldap/{name}:
     parameters:
-      - name: configId
+      - name: name
         in: path
         required: true
         description: Name of LDAP configuration.
@@ -2553,9 +2553,38 @@ paths:
           description: Internal Server Error
       security:
         - oauth2: [https://jans.io/oauth/config/user.delete]
+    patch:
+      tags:
+        - User Management
+      summary: Patch user properties by Inum.
+      description: Patch user properties by Inum.
+      operationId: patch-user-by-inum
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              $ref: '#/components/schemas/UserPatchRequest'
+              description: Patch request object
+              example: '[ {"jsonPatchString": {"op": "add", "path": "userId","value": "test-user" }, "customAttributes": [{"name": "name, displayName, birthdate, email","multiValued": true,"values": ["string"]}]}]'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: User Details.
+                $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          description: Internal Server Error
+      security:
+        - oauth2: [https://jans.io/oauth/config/user.write]
 
-
-  /jans-config-api/scim/user:
+  /jans-config-api/scim/resource/user:
     get:
       tags:
         - SCIM - User Management
@@ -2705,7 +2734,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /jans-config-api/scim/user/{id}:
+  /jans-config-api/scim/resource/user/{id}:
     get:
       tags:
         - SCIM - User Management
@@ -2956,7 +2985,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /jans-config-api/scim/user/.search:
+  /jans-config-api/scim/resource/user/.search:
     post:
       tags:
         - SCIM - User Management
@@ -3480,6 +3509,95 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '500':
           $ref: '#/components/responses/InternalServerError'
+  /jans-config-api/admin-ui/license/isActive:
+    get:
+      tags:
+        - Admin UI - License
+      x-cli-plugin: admin-ui
+      summary: Check if admin-ui license is active.
+      description: Check if admin-ui license is active.
+      operationId: is-license-active
+      security:
+        - oauth2: [https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: Check if admin-ui license is active.
+                description: Check if admin-ui license is active.
+                $ref: '#/components/schemas/LicenseApiResponse'
+        '400':
+          $ref: '#/components/schemas/LicenseApiResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/schemas/LicenseApiResponse'
+  /jans-config-api/admin-ui/license/activateLicense:
+    post:
+      tags:
+        - Admin UI - License
+      x-cli-plugin: admin-ui
+      summary: Activate license using license-key.
+      description: Activate license using license-key.
+      operationId: activate-adminui-license
+      security:
+        - oauth2: [https://jans.io/oauth/jans-auth-server/config/adminui/license.write]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+                - licenseKey
+              $ref: '#/components/schemas/LicenseApiRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: Activate license using license-key.
+                description: Activate license using license-key.
+                $ref: '#/components/schemas/LicenseApiResponse'
+        '400':
+          $ref: '#/components/schemas/LicenseApiResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/schemas/LicenseApiResponse'
+  /jans-config-api/admin-ui/license/saveApiCredentials:
+    post:
+      tags:
+        - Admin UI - License
+      x-cli-plugin: admin-ui
+      summary: Save license api credentials.
+      description: Save license api credentials.
+      operationId: save-license-api-credentials
+      security:
+        - oauth2: [https://jans.io/oauth/jans-auth-server/config/adminui/license.write]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+                - licenseKey
+              $ref: '#/components/schemas/LicenseSpringCredentials'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: Save license api credentials.
+                description: Save license api credentials.
+                $ref: '#/components/schemas/LicenseApiResponse'
+        '400':
+          $ref: '#/components/schemas/LicenseApiResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/schemas/LicenseApiResponse'
   /jans-config-api/admin-ui/license/licenseDetails:
     get:
       tags:
@@ -3498,7 +3616,7 @@ paths:
               schema:
                 title: Get admin ui license details.
                 description: Get admin ui license details.
-                $ref: '#/components/schemas/LicenseResponse'
+                $ref: '#/components/schemas/LicenseDetailsResponse'
         '400':
           $ref: '#/components/responses/NotAcceptable'
         '401':
@@ -3520,7 +3638,7 @@ paths:
             schema:
               required:
                 - role
-              $ref: '#/components/schemas/LicenseRequest'
+              $ref: '#/components/schemas/LicenseDetailsRequest'
       responses:
         '200':
           description: OK
@@ -3529,7 +3647,7 @@ paths:
               schema:
                 title: Edit admin ui license details.
                 description: Edit admin ui license details.
-                $ref: '#/components/schemas/LicenseResponse'
+                $ref: '#/components/schemas/LicenseDetailsResponse'
         '400':
           $ref: '#/components/responses/NotAcceptable'
         '401':
@@ -4675,6 +4793,11 @@ components:
             - OLDER
             - NEWER
             - FIRST
+        checkUserPresenceOnRefreshToken:
+          type: boolean
+          description: Check whether user exists and is active before creating RefreshToken. Set it to true if check is needed(Default value is false - don't check.)
+          example: false
+          default: false
         oxElevenTestModeToken:
           type: string
           description: oxEleven Test Mode Token.
@@ -6725,9 +6848,9 @@ components:
           items:
             type: string
           description: permissions
-    LicenseRequest:
+    LicenseDetailsRequest:
       type: object
-      description: Admin license request
+      description: Admin license details request
       required:
         - validityPeriod
       properties:
@@ -6740,9 +6863,38 @@ components:
         licenseActive:
           type: string
           description: Is license active?
-    LicenseResponse:
+    LicenseApiRequest:
       type: object
-      description: Admin license response
+      description: Admin license api request
+      required:
+        - licenseKey
+      properties:
+        licenseKey:
+          type: string
+          description: The license-key.
+    LicenseSpringCredentials:
+      type: object
+      required:
+        - apiKey
+        - productCode
+        - sharedKey
+        - managementKey
+      properties:
+        apiKey:
+          type: string
+          description: The api-key.
+        productCode:
+          type: string
+          description: The product-code.
+        sharedKey:
+          type: string
+          description: The shared-key.
+        managementKey:
+          type: string
+          description: The management-key.
+    LicenseDetailsResponse:
+      type: object
+      description: Admin license details response
       properties:
         licenseEnabled:
           type: boolean
@@ -6782,6 +6934,18 @@ components:
         customerLastName:
           type: string
           description: The customer last name.
+    LicenseApiResponse:
+      type: object
+      properties:
+        apiResult:
+          type: boolean
+          description: liceseSpring api request success status
+        responseMessage:
+          type: string
+          description: Response Message
+        responseCode:
+          type: integer
+          description: Response code
     ScimAppConfiguration:
       type: object
       properties:
@@ -6954,6 +7118,21 @@ components:
           type: array
           items:
             type: string
+        customAttributes:
+          description: dn of associated clients with the user.
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomAttribute'
+			
+    UserPatchRequest:
+      title: User Patch Request object
+      description: UserPatchRequest.
+      type: object
+      properties:
+        jsonPatchString:
+          type: object
+          description: Possible errors assosiated with the script.
+          $ref: '#/components/schemas/PatchRequest'
         customAttributes:
           description: dn of associated clients with the user.
           type: array

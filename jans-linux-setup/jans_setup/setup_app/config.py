@@ -79,6 +79,7 @@ class Config:
     def init(self, install_dir=INSTALL_DIR):
 
         self.install_dir = install_dir
+        self.data_dir = os.path.join(Config.install_dir, 'setup_app/data')
         self.thread_queue = None
         self.jetty_user = 'jetty'
         self.dump_config_on_error = False

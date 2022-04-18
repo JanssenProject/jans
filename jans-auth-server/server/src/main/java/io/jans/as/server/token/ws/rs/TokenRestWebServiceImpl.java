@@ -593,11 +593,25 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         return response(builder, oAuth2AuditLog);
     }
 
+    private void checkUser(AuthorizationGrant authorizationGrant) {
+        if (!appConfiguration.getCheckUserPresenceOnRefreshToken()) {
+            return;
+        }
+
+        final User user = authorizationGrant.getUser();
+        if (user == null || "inactive".equalsIgnoreCase(user.getStatus())) {
+            log.trace("The user associated with this grant is not found or otherwise with status=inactive.");
+            throw new WebApplicationException(error(400, TokenErrorResponseType.INVALID_GRANT, "The user associated with this grant is not found or otherwise with status=inactive.").build());
+        }
+    }
+
     @Nullable
     private RefreshToken createRefreshToken(@NotNull HttpServletRequest request, @NotNull Client client, @NotNull String scope, @NotNull AuthorizationGrant grant, String dpop) {
         if (!isRefreshTokenAllowed(client, scope, grant)) {
             return null;
         }
+
+        checkUser(grant);
 
         ExecutionContext executionContext = new ExecutionContext(request, null);
         executionContext.setGrant(grant);

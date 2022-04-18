@@ -1,9 +1,13 @@
 package io.jans.ca.plugin.adminui.service.config;
 
+import io.jans.as.model.config.adminui.AdminConf;
+import io.jans.as.model.config.adminui.LicenseSpringCredentials;
 import io.jans.ca.plugin.adminui.model.config.AUIConfiguration;
 import io.jans.ca.plugin.adminui.model.config.LicenseConfiguration;
 import io.jans.ca.plugin.adminui.rest.auth.OAuth2Resource;
+import io.jans.ca.plugin.adminui.utils.AppConstants;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
+import io.jans.orm.PersistenceEntryManager;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
@@ -22,6 +26,9 @@ public class AUIConfigurationService {
     @Inject
     Logger log;
 
+    @Inject
+    private PersistenceEntryManager entryManager;
+
     public AUIConfiguration getAUIConfiguration() {
 
         try {
@@ -35,6 +42,10 @@ public class AUIConfigurationService {
             log.error(ErrorResponse.ERROR_READING_CONFIG.getDescription(), e);
             return null;
         }
+    }
+
+    public void setAuiConfiguration(AUIConfiguration auiConfiguration) {
+        this.auiConfiguration = auiConfiguration;
     }
 
     private AUIConfiguration addPropertiesToAUIConfiguration(Properties props) {
@@ -67,15 +78,18 @@ public class AUIConfigurationService {
         auiConfig.setTokenServerAcrValues(props.getProperty("tokenServer.acrValues"));
 
         LicenseConfiguration licenseConfiguration = new LicenseConfiguration();
-        licenseConfiguration.setApiKey(props.getProperty("licenseSpring.apiKey"));
-        licenseConfiguration.setProductCode(props.getProperty("licenseSpring.productCode"));
-        licenseConfiguration.setSharedKey(props.getProperty("licenseSpring.sharedKey"));
-        licenseConfiguration.setEnabled(Boolean.valueOf(props.getProperty("licenseSpring.enabled")));
-        licenseConfiguration.setManagementKey(props.getProperty("licenseSpring.managementKey"));
-        licenseConfiguration.initializeLicenseManager();
-
+        AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.CONFIG_DN);
+        LicenseSpringCredentials licenseSpringCredentials = adminConf.getDynamic().getLicenseSpringCredentials();
+        if(licenseSpringCredentials != null)
+        {
+            licenseConfiguration.setApiKey(licenseSpringCredentials.getApiKey());
+            licenseConfiguration.setProductCode(licenseSpringCredentials.getProductCode());
+            licenseConfiguration.setSharedKey(licenseSpringCredentials.getSharedKey());
+            licenseConfiguration.setManagementKey(licenseSpringCredentials.getManagementKey());
+            licenseConfiguration.setEnabled(Boolean.TRUE);
+            licenseConfiguration.initializeLicenseManager();
+        }
         auiConfig.setLicenseConfiguration(licenseConfiguration);
-
         return auiConfig;
     }
 
