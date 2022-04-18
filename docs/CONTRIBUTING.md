@@ -43,12 +43,12 @@ We are really glad you are reading this, because we need volunteer developers to
 - [Code of Conduct](#code-of-conduct)
 - [Issues](#issues)
 - [Triaging](#triaging)
-- [Coding Conventions](#code-conventions)
+- [Coding Conventions](#code-conventions-and-guidelines)
 
 ## Code of Conduct
 
 Janssen project has a
-[Code of Conduct](code-of-conduct.md)
+[Code of Conduct](CODE_OF_CONDUCT.md)
 to which all contributors must adhere, please read it before interacting with the repository or the community in any way.
 
 ## Issues
