@@ -1,6 +1,7 @@
 package io.jans.ca.plugin.adminui.rest.license;
 
 import io.jans.as.model.config.adminui.LicenseSpringCredentials;
+import io.jans.ca.plugin.adminui.model.auth.LicenseApiResponse;
 import io.jans.ca.plugin.adminui.model.exception.ApplicationException;
 import io.jans.ca.plugin.adminui.model.auth.LicenseRequest;
 import io.jans.ca.plugin.adminui.model.auth.LicenseResponse;
@@ -36,49 +37,52 @@ public class LicenseResource {
 
     @GET
     @Path(IS_ACTIVE)
-    @ProtectedApi(scopes={SCOPE_OPENID})
+    @ProtectedApi(scopes={SCOPE_LICENSE_READ})
     @Produces(MediaType.APPLICATION_JSON)
     public Response isActive() {
+        LicenseApiResponse licenseResponse = null;
         try {
             log.info("Check if active license present.");
-            Boolean isLicenseActive = licenseDetailsService.checkLicense();
-            log.info("Active license present (true/false): {}", isLicenseActive);
-            return Response.ok(isLicenseActive).build();
+            licenseResponse = licenseDetailsService.checkLicense();
+            log.info("Active license present (true/false): {}", licenseResponse.isApiResult());
+            return Response.ok(licenseResponse).build();
         } catch (Exception e) {
             log.error(ErrorResponse.CHECK_LICENSE_ERROR.getDescription(), e);
-            return Response.serverError().entity(false).build();
+            return Response.serverError().entity(licenseResponse).build();
         }
     }
 
     @POST
     @Path(ACTIVATE_LICENSE)
-    @ProtectedApi(scopes={SCOPE_OPENID})
-    @Produces(MediaType.TEXT_PLAIN)
+    @ProtectedApi(scopes={SCOPE_LICENSE_WRITE})
+    @Produces(MediaType.APPLICATION_JSON)
     public Response activateLicense(@Valid @NotNull LicenseRequest licenseRequest) {
+        LicenseApiResponse licenseResponse = null;
         try {
             log.info("Trying to activate license using licese-key.");
-            Boolean isLicenseActive = licenseDetailsService.activateLicense(licenseRequest);
-            log.info("License activated (true/false): {}", isLicenseActive);
-            return Response.ok(isLicenseActive).build();
+            licenseResponse = licenseDetailsService.activateLicense(licenseRequest);
+            log.info("License activated (true/false): {}", licenseResponse.isApiResult());
+            return Response.ok(licenseResponse).build();
         } catch (Exception e) {
             log.error(ErrorResponse.ACTIVATE_LICENSE_ERROR.getDescription(), e);
-            return Response.serverError().entity(false).build();
+            return Response.serverError().entity(licenseResponse).build();
         }
     }
 
     @POST
     @Path(SAVE_API_CREDENTIALS)
-    @ProtectedApi(scopes={SCOPE_OPENID})
-    @Produces(MediaType.TEXT_PLAIN)
+    @ProtectedApi(scopes={SCOPE_LICENSE_WRITE})
+    @Produces(MediaType.APPLICATION_JSON)
     public Response saveLicenseCredentials(@Valid @NotNull LicenseSpringCredentials licenseSpringCredentials) {
+        LicenseApiResponse licenseResponse = null;
         try {
             log.info("Trying to save license-spring credentials.");
-            Boolean licenseSaved = licenseDetailsService.saveLicenseSpringCredentials(licenseSpringCredentials);
-            log.info("License saved (true/false): {}", licenseSaved);
-            return Response.ok(licenseSaved).build();
+            licenseResponse = licenseDetailsService.saveLicenseSpringCredentials(licenseSpringCredentials);
+            log.info("License saved (true/false): {}", licenseResponse.isApiResult());
+            return Response.ok(licenseResponse).build();
         } catch (Exception e) {
             log.error(ErrorResponse.SAVE_LICENSE_SPRING_CREDENTIALS_ERROR.getDescription(), e);
-            return Response.serverError().entity(false).build();
+            return Response.serverError().entity(licenseResponse).build();
         }
     }
 

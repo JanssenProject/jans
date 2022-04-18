@@ -3,6 +3,7 @@ package io.jans.ca.plugin.adminui.service.license;
 import com.google.common.base.Strings;
 import com.licensespring.License;
 import com.licensespring.LicenseManager;
+import com.licensespring.internal.services.NowDateProvider;
 import com.licensespring.management.ManagementConfiguration;
 import com.licensespring.management.dto.SearchResult;
 import com.licensespring.management.dto.request.SearchLicensesRequest;
@@ -10,23 +11,36 @@ import com.licensespring.management.dto.request.UpdateLicenseRequest;
 import com.licensespring.management.model.BackOfficeLicense;
 import com.licensespring.model.ActivationLicense;
 import io.jans.as.model.config.adminui.AdminConf;
-import io.jans.as.model.config.adminui.AdminRole;
 import io.jans.as.model.config.adminui.LicenseSpringCredentials;
+import io.jans.ca.plugin.adminui.model.auth.LicenseApiResponse;
+import io.jans.ca.plugin.adminui.model.auth.LicenseRequest;
+import io.jans.ca.plugin.adminui.model.auth.LicenseResponse;
 import io.jans.ca.plugin.adminui.model.config.AUIConfiguration;
 import io.jans.ca.plugin.adminui.model.config.LicenseConfiguration;
 import io.jans.ca.plugin.adminui.model.exception.ApplicationException;
+import io.jans.ca.plugin.adminui.service.config.AUIConfigurationService;
 import io.jans.ca.plugin.adminui.utils.AppConstants;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
-import io.jans.ca.plugin.adminui.model.auth.LicenseRequest;
-import io.jans.ca.plugin.adminui.model.auth.LicenseResponse;
-import io.jans.ca.plugin.adminui.service.config.AUIConfigurationService;
 import io.jans.orm.PersistenceEntryManager;
+import org.jboss.resteasy.client.jaxrs.ResteasyClient;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
+import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
 import org.slf4j.Logger;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.json.JsonObject;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
-import java.util.List;
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 
 @Singleton
 public class LicenseDetailsService {
@@ -40,51 +54,67 @@ public class LicenseDetailsService {
     @Inject
     private PersistenceEntryManager entryManager;
 
-    public Boolean saveLicenseSpringCredentials(LicenseSpringCredentials licenseSpringCredentials) {
+    public LicenseApiResponse saveLicenseSpringCredentials(LicenseSpringCredentials licenseSpringCredentials) {
         try {
+            if (!licenseCredentialsValid(licenseSpringCredentials)) {
+                return createLicenseResponse(false, 400, "The license credentials are not valid.");
+            }
+            //check is license is already active
+            LicenseApiResponse licenseApiResponse = checkLicense();
+            if (licenseApiResponse.isApiResult()) {
+                return createLicenseResponse(false, 500, "The license has been already activated.");
+            }
             //set license-spring configuration
             AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
-            LicenseConfiguration licenseConfiguration = initializeLicenseManager(licenseSpringCredentials);
-            auiConfiguration.setLicenseConfiguration(licenseConfiguration);
 
-            License activeLicense = auiConfiguration.getLicenseConfiguration().getLicenseManager().getCurrent();
-            if (activeLicense == null) {
-                log.info("Error in verifying entered licenseSpring credentials. Please check if the credentials are correct.");
-                return false;
-            }
+            LicenseConfiguration licenseConfiguration = new LicenseConfiguration(licenseSpringCredentials.getApiKey(),
+                    licenseSpringCredentials.getProductCode(),
+                    licenseSpringCredentials.getSharedKey(),
+                    licenseSpringCredentials.getManagementKey(),
+                    Boolean.TRUE);
+
+            auiConfiguration.setLicenseConfiguration(licenseConfiguration);
+            auiConfigurationService.setAuiConfiguration(auiConfiguration);
+
             //save license spring credentials
             AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.CONFIG_DN);
             adminConf.getDynamic().setLicenseSpringCredentials(licenseSpringCredentials);
             entryManager.merge(adminConf);
-            return true;
+
+            return createLicenseResponse(true, 201, "Success!!");
         } catch (Exception e) {
             log.error(ErrorResponse.SAVE_LICENSE_SPRING_CREDENTIALS_ERROR.getDescription(), e);
-            return false;
+            return createLicenseResponse(false, 500, ErrorResponse.SAVE_LICENSE_SPRING_CREDENTIALS_ERROR.getDescription());
         }
     }
 
-    public Boolean checkLicense() {
+    public LicenseApiResponse checkLicense() {
         try {
             AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
 
             License activeLicense = auiConfiguration.getLicenseConfiguration().getLicenseManager().getCurrent();
             if (activeLicense == null) {
                 log.info("Active license for admin-ui not present ");
-                return false;
+                return createLicenseResponse(false, 500, "Active license not present.");
             } else {
                 log.debug("Active license for admin-ui found : {} ", activeLicense.getProduct());
                 License updatedLicense = auiConfiguration.getLicenseConfiguration()
                         .getLicenseManager()
                         .checkLicense(activeLicense);
-                return updatedLicense != null && !activeLicense.getData().isExpired();
+                return createLicenseResponse(updatedLicense != null && !activeLicense.getData().isExpired(), 200, "");
             }
         } catch (Exception e) {
             log.error(ErrorResponse.CHECK_LICENSE_ERROR.getDescription(), e);
-            return false;
+            return createLicenseResponse(false, 500, ErrorResponse.CHECK_LICENSE_ERROR.getDescription());
         }
     }
 
-    public Boolean activateLicense(LicenseRequest licenseRequest) {
+    public LicenseApiResponse activateLicense(LicenseRequest licenseRequest) {
+        //check is license is already active
+        LicenseApiResponse licenseApiResponse = checkLicense();
+        if (licenseApiResponse.isApiResult()) {
+            return createLicenseResponse(false, 500, "The license has been already activated.");
+        }
         AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
 
         LicenseManager licenseManager = auiConfiguration.getLicenseConfiguration().getLicenseManager();
@@ -93,10 +123,10 @@ public class LicenseDetailsService {
             ActivationLicense keyBased = ActivationLicense.fromKey(licenseRequest.getLicenseKey());
             License license = licenseManager.activateLicense(keyBased);
             log.debug("License activated : {} ", license.getProduct());
-            return !license.getData().isExpired();
+            return createLicenseResponse(!license.getData().isExpired(), 200, "");
         } catch (Exception e) {
             log.error(ErrorResponse.ACTIVATE_LICENSE_ERROR.getDescription(), e);
-            return false;
+            return createLicenseResponse(false, 500, ErrorResponse.ACTIVATE_LICENSE_ERROR.getDescription());
         }
     }
 
@@ -200,13 +230,53 @@ public class LicenseDetailsService {
         }
     }
 
-    private LicenseConfiguration initializeLicenseManager(LicenseSpringCredentials licenseSpringCredentials) {
-        LicenseConfiguration licenseConfiguration = new LicenseConfiguration();
-        licenseConfiguration.setApiKey(licenseSpringCredentials.getApiKey());
-        licenseConfiguration.setProductCode(licenseSpringCredentials.getProductCode());
-        licenseConfiguration.setSharedKey(licenseSpringCredentials.getSharedKey());
-        licenseConfiguration.setManagementKey(licenseSpringCredentials.getManagementKey());
-        licenseConfiguration.initializeLicenseManager();
-        return licenseConfiguration;
+    private MultivaluedMap<String, Object> createHeaderMap(LicenseSpringCredentials licenseSpringCredentials) {
+        NowDateProvider provider = new NowDateProvider();
+        String formattedDate = provider.getFormattedDate();
+        String signing_string = "licenseSpring\ndate: " + formattedDate;
+        try {
+            Mac sha256_HMAC = Mac.getInstance("HmacSHA256");
+
+            SecretKeySpec secret_key = new SecretKeySpec(licenseSpringCredentials.getSharedKey().getBytes(StandardCharsets.UTF_8), "HmacSHA256");
+            sha256_HMAC.init(secret_key);
+            String signature = Base64.getEncoder().encodeToString(sha256_HMAC.doFinal(signing_string.getBytes(StandardCharsets.UTF_8)));
+
+            MultivaluedMap<String, Object> headers = new MultivaluedHashMap<>();
+            headers.putSingle("Content-Type", "application/json");
+            headers.putSingle("Date", formattedDate);
+            headers.putSingle("Authorization", "algorithm=\"hmac-sha256\",headers=\"date\",signature=\"" + signature + "\",apiKey=\"" + licenseSpringCredentials.getApiKey() + "\"");
+            return headers;
+        } catch (NoSuchAlgorithmException | InvalidKeyException e) {
+            log.error("Error in generating authorization header", e);
+            return null;
+        }
+
+    }
+
+    private boolean licenseCredentialsValid(LicenseSpringCredentials licenseSpringCredentials) {
+        ApacheHttpClient43Engine engine = new ApacheHttpClient43Engine();
+
+        ResteasyClient client = ((ResteasyClientBuilder) ClientBuilder.newBuilder()).httpEngine(engine).build();
+        ResteasyWebTarget target = client.target("https://api.licensespring.com/api/v4/product_details?product=" + licenseSpringCredentials.getProductCode());
+        MultivaluedMap<String, Object> headers = createHeaderMap(licenseSpringCredentials);
+
+        Response response = target.request()
+                .headers(headers)
+                .get();
+        log.info("license Credentials request status code: {}", response.getStatus());
+        if (response.getStatus() == 200) {
+            JsonObject entity = response.readEntity(JsonObject.class);
+            log.info("Product Information: {}", entity.toString());
+            return true;
+        }
+        return false;
+    }
+
+    private LicenseApiResponse createLicenseResponse(boolean result, int responseCode, String responseMessage) {
+        LicenseApiResponse licenseResponse = new LicenseApiResponse();
+        licenseResponse.setResponseCode(responseCode);
+        licenseResponse.setResponseMessage(responseMessage);
+        licenseResponse.setApiResult(result);
+        return licenseResponse;
     }
 }

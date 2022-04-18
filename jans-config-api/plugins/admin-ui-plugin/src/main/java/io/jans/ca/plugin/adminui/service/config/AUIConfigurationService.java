@@ -44,6 +44,10 @@ public class AUIConfigurationService {
         }
     }
 
+    public void setAuiConfiguration(AUIConfiguration auiConfiguration) {
+        this.auiConfiguration = auiConfiguration;
+    }
+
     private AUIConfiguration addPropertiesToAUIConfiguration(Properties props) {
         AUIConfiguration auiConfig = new AUIConfiguration();
         auiConfig.setAuthServerHost(props.getProperty("authserver.host"));
@@ -85,9 +89,7 @@ public class AUIConfigurationService {
             licenseConfiguration.setEnabled(Boolean.TRUE);
             licenseConfiguration.initializeLicenseManager();
         }
-
         auiConfig.setLicenseConfiguration(licenseConfiguration);
-
         return auiConfig;
     }
 
