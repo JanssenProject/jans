@@ -244,6 +244,15 @@
             ],
             "value": "America/Chicago",
             "displayValue": "America/Chicago"
+        },
+        {
+            "name": "userPassword",
+            "multiValued": false,
+            "values": [
+                "pwd123"
+            ],
+            "value": "pwd123",
+            "displayValue": "pwd123"
         }
     ]
 }

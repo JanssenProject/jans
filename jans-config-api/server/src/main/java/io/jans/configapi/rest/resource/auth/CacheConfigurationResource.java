@@ -31,7 +31,7 @@ import org.slf4j.Logger;
 @Path(ApiConstants.CONFIG + ApiConstants.CACHE)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public class CacheConfigurationResource extends BaseResource {
+public class CacheConfigurationResource extends ConfigBaseResource {
 
     @Inject
     Logger log;

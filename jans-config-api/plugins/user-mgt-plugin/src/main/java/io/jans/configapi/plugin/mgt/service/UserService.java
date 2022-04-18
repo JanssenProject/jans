@@ -1,20 +1,14 @@
-/*
- * Janssen Project software is available under the Apache License (2004). See http://www.apache.org/licenses/ for full text.
- *
- * Copyright (c) 2020, Janssen Project
- */
-
-package io.jans.configapi.service.auth;
+package io.jans.configapi.plugin.mgt.service;
 
 import com.github.fge.jsonpatch.JsonPatchException;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.util.AttributeConstants;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.configapi.util.AuthUtil;
 import io.jans.configapi.core.util.Jackson;
-import io.jans.configapi.model.user.UserPatchRequest;
-import io.jans.configapi.rest.model.SearchRequest;
+import io.jans.configapi.plugin.mgt.model.user.UserPatchRequest;
+import io.jans.configapi.core.model.SearchRequest;
+import io.jans.configapi.util.AuthUtil;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;
 import io.jans.orm.model.base.CustomObjectAttribute;
