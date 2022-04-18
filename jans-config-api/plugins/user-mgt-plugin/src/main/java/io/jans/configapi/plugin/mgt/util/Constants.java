@@ -11,11 +11,4 @@ public class Constants {
     private Constants() {}
 
     public static final String CONFIG_USER = "/configuser"; 
-    public static final String LIMIT = "limit";
-    public static final String START_INDEX = "startIndex";
-    public static final String PATTERN = "pattern";
-    public static final String STATUS = "status";
-    public static final String INUM = "inum";
-    public static final String SORT_BY = "sortBy";
-    public static final String SORT_ORDER = "sortOrder";
 }

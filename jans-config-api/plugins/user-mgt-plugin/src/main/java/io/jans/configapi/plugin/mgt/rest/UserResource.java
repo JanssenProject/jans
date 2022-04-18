@@ -41,6 +41,7 @@ import org.slf4j.Logger;
 public class UserResource extends BaseResource {
 
     private static final String USER = "user";
+    private static final String USER_PWD = "userPassword";
 
     @Inject
     Logger logger;
@@ -214,7 +215,7 @@ public class UserResource extends BaseResource {
     private List<User> getUsers(List<User> users) throws EncryptionException {
         if (users != null && !users.isEmpty()) {
             for (User user : users) {
-                if (StringHelper.isNotEmpty(user.getAttribute("userPassword"))) {
+                if (StringHelper.isNotEmpty(user.getAttribute(USER_PWD))) {
                     decryptUserPassword(user);
                 }
             }
@@ -223,15 +224,15 @@ public class UserResource extends BaseResource {
     }
     
     private User encryptUserPassword(User user) throws EncryptionException {
-        if (StringHelper.isNotEmpty(user.getAttribute("userPassword"))) {
-            user.setAttribute("userPassword", encryptionService.encrypt(user.getAttribute("userPassword")), false);
+        if (StringHelper.isNotEmpty(user.getAttribute(USER_PWD))) {
+            user.setAttribute(USER_PWD, encryptionService.encrypt(user.getAttribute(USER_PWD)), false);
         }
         return user;
     }
 
     private User decryptUserPassword(User user) throws EncryptionException {
-        if (StringHelper .isNotEmpty(user.getAttribute("userPassword"))) {
-            user.setAttribute("userPassword", encryptionService.decrypt(user.getAttribute("userPassword")), false);
+        if (StringHelper .isNotEmpty(user.getAttribute(USER_PWD))) {
+            user.setAttribute(USER_PWD, encryptionService.decrypt(user.getAttribute(USER_PWD)), false);
         }
         return user;
     }
