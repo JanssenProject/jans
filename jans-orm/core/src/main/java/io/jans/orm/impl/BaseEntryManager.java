@@ -37,13 +37,11 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
-import static io.jans.orm.model.base.ClientMetadataValue.*;
-
 /**
  * Abstract Entry Manager
  *
  * @author Yuriy Movchan
- * @version April 6, 2022
+ * @version April 18, 2022
  */
 public abstract class BaseEntryManager implements PersistenceEntryManager {
 
@@ -992,19 +990,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
                                 .filter(x -> x.getKey().toLowerCase().startsWith(finalLdapAttributeName.toLowerCase()))
                                 .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 
-                        filteredAttrs.forEach((key, value) -> {
-                            AttributeData data = attributesMap.get(key);
-                            String[] keyParts = key.split(LANG_SEPARATOR);
-                            if (keyParts.length == 1) {
-                                clientMetadataValue.setValue(data.getValue().toString());
-                            } else if (keyParts.length == 2) {
-                                String lagTag = keyParts[1].replace(LANG_PREFIX + LANG_JOINER, "");
-                                clientMetadataValue.setValue(
-                                        data.getValue().toString(),
-                                        Locale.forLanguageTag(lagTag)
-                                );
-                            }
-                        });
+                        loadClientMetadataValue(attributesMap, clientMetadataValue, filteredAttrs);
 
                         continue;
                     }
@@ -1141,6 +1127,20 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 
 		return results;
 	}
+
+    protected void loadClientMetadataValue(Map<String, AttributeData> attributesMap, ClientMetadataValue clientMetadataValue, Map<String, AttributeData> filteredAttrs) {
+        filteredAttrs.forEach((key, value) -> {
+            AttributeData data = attributesMap.get(key);
+            if (data.getValues() != null && data.getValues().length == 1 && data.getValues()[0] instanceof Map<?, ?>) {
+                Map<?, ?> values = (Map<?, ?>) data.getValues()[0];
+                values.forEach((languageTag, val) -> {
+					if (languageTag instanceof String && val instanceof String) {
+						clientMetadataValue.setValue((String) val, Locale.forLanguageTag((String) languageTag));
+					}
+				});
+            }
+        });
+    }
 
 	@Override
 	public <T> List<T> createEntities(Class<T> entryClass, Map<String, List<AttributeData>> entriesAttributes) {
@@ -1578,7 +1578,6 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
             Object entry, Annotation ldapAttribute, String propertyName) {
 
         Class<?> entryClass = entry.getClass();
-        List<AttributeData> listAttributes = new ArrayList<>();
 
         Getter getter = getGetter(entryClass, propertyName);
         if (getter == null) {
@@ -1597,13 +1596,14 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
         ClientMetadataValue clientMetadataValue = (ClientMetadataValue) propertyValue;
         String ldapAttributeName = ((AttributeName) ldapAttribute).name();
 
-        for (String languageTag : clientMetadataValue.getLanguageTags()) {
-            String value = clientMetadataValue.getValue(languageTag);
-            String key = clientMetadataValue.addLdapLanguageTag(ldapAttributeName, languageTag);
-            AttributeData attributeData = new AttributeData(key, value);
+        return getAttributeDataFromClientMetadataValue(ldapAttributeName, clientMetadataValue);
+    }
 
-            listAttributes.add(attributeData);
-        }
+    protected List<AttributeData> getAttributeDataFromClientMetadataValue(String ldapAttributeName, ClientMetadataValue clientMetadataValue) {
+        List<AttributeData> listAttributes = new ArrayList<>();
+
+        AttributeData attributeData = new AttributeData(ldapAttributeName, clientMetadataValue.getValues());
+        listAttributes.add(attributeData);
 
         return listAttributes;
     }

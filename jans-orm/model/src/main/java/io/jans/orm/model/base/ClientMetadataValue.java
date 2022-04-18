@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 /**
  * @author Javier Rojas Blum
- * @version April 6, 2022
+ * @version April 18, 2022
  */
 public class ClientMetadataValue implements Serializable {
 
@@ -48,17 +48,16 @@ public class ClientMetadataValue implements Serializable {
         return values.getOrDefault(languageTag, null);
     }
 
+    public Map<String, String> getValues() {
+        return values;
+    }
+
     public int size() {
         return values.size();
     }
 
     public Set<String> getLanguageTags() {
         return values.keySet();
-    }
-
-    @Override
-    public String toString() {
-        return values.toString();
     }
 
     public String addLdapLanguageTag(String ldapAttributeName, String languageTag) {
@@ -75,5 +74,10 @@ public class ClientMetadataValue implements Serializable {
         return keyParts.stream()
                 .filter(StringUtils::isNotBlank)
                 .collect(Collectors.joining(LANG_JOINER));
+    }
+
+    @Override
+    public String toString() {
+        return values.toString();
     }
 }
