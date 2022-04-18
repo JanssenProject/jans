@@ -28,7 +28,7 @@ import java.util.Properties;
 @Path(ApiConstants.CONFIG + ApiConstants.DATABASE + ApiConstants.SQL)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class SqlConfigurationResource extends BaseResource {
+public class SqlConfigurationResource extends ConfigBaseResource {
 
     @Inject
     Logger log;

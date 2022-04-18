@@ -35,7 +35,7 @@ import org.slf4j.Logger;
 @Path(ApiConstants.UMA + ApiConstants.RESOURCES)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public class UmaResourcesResource extends BaseResource {
+public class UmaResourcesResource extends ConfigBaseResource {
 
     private static final String UMA_RESOURCE = "Uma resource";
 

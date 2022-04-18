@@ -1,4 +1,4 @@
-package io.jans.configapi.model.user;
+package io.jans.configapi.plugin.mgt.model.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 

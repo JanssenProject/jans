@@ -88,12 +88,9 @@ public class ApiConstants {
 
     public static final String ALL = "all";
     public static final String ACTIVE = "active";
-    public static final String INACTIVE = "inactive";
+    public static final String INACTIVE = "inactive"; 
 
-    public static final String MISSING_ATTRIBUTE_MESSAGE = "A required attribute is missing.";
 
-    // Custom CODE
-    public static final String MISSING_ATTRIBUTE_CODE = "OCA001";
 
     // API Protection
     public static final String PROTECTION_TYPE_OAUTH2 = "oauth2";

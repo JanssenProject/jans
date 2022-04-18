@@ -45,7 +45,6 @@ function() {
         
         
         //scim
-        scim_user_url: baseUrl + '/jans-config-api/scim/resource/user',
 		scim_config_url: baseUrl + '/jans-config-api/scim/config',
     };
 

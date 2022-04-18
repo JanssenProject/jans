@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.configapi.rest.model;
+package io.jans.configapi.core.model;
 
 import java.io.Serializable;
 
