@@ -25,14 +25,12 @@ public class UserMgtConfigSource implements ConfigSource {
         this.loadProperties();
     }
 
-    @SuppressWarnings
     @Override
     public Map<String, String> getProperties() {
         log.debug("Getting properties");
         return propertiesMap;
     }
 
-    @SuppressWarnings
     @Override
     public Set<String> getPropertyNames() {
         log.debug("Getting Property Names");
@@ -45,13 +43,11 @@ public class UserMgtConfigSource implements ConfigSource {
         return Collections.emptySet();
     }
 
-    @SuppressWarnings
     @Override
     public int getOrdinal() {
         return 800;
     }
-    
-    @SuppressWarnings
+
     @Override
     public String getValue(String name) {
         log.debug("UserMgtConfigSource()::getValue() - name:{}", name);
@@ -69,7 +65,6 @@ public class UserMgtConfigSource implements ConfigSource {
         return FILE_CONFIG;
     }
 
-    @SuppressWarnings
     private Properties loadProperties() {
         // Load the properties file
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
