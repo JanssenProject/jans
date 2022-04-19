@@ -21,7 +21,7 @@ import org.slf4j.Logger;
 public class ConfigBaseResource extends BaseResource {
 
     @Inject
-    Logger log;
+    Logger logger;
 
     @Inject
     ConfigurationFactory configurationFactory;
@@ -34,7 +34,7 @@ public class ConfigBaseResource extends BaseResource {
     protected static final int DEFAULT_MAX_COUNT = ApiConstants.DEFAULT_MAX_COUNT;
 
     protected int getMaxCount() {
-        log.trace(" MaxCount details - ApiAppConfiguration.MaxCount():{}, DEFAULT_MAX_COUNT:{} ",
+        logger.trace(" MaxCount details - ApiAppConfiguration.MaxCount():{}, DEFAULT_MAX_COUNT:{} ",
                 configurationFactory.getApiAppConfiguration().getMaxCount(), DEFAULT_MAX_COUNT);
         return (configurationFactory.getApiAppConfiguration().getMaxCount() > 0
                 ? configurationFactory.getApiAppConfiguration().getMaxCount()
