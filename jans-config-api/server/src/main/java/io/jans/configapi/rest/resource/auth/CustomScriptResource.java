@@ -8,6 +8,7 @@ package io.jans.configapi.rest.resource.auth;
 
 import static io.jans.as.model.util.Util.escapeLog;
 import io.jans.configapi.core.rest.ProtectedApi;
+import io.jans.configapi.core.util.Jackson;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.model.custom.script.CustomScriptType;
@@ -16,12 +17,16 @@ import io.jans.service.custom.CustomScriptService;
 import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
+import com.github.fge.jsonpatch.JsonPatchException;
+
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
+import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -126,6 +131,22 @@ public class CustomScriptResource extends ConfigBaseResource {
             log.info("Error deleting script by inum " + inum, ex);
             throw new NotFoundException(getNotFoundError(CUSTOM_SCRIPT));
         }
+    }
+    
+    @PATCH
+    @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
+    @ProtectedApi(scopes = { ApiAccessConstants.SCRIPTS_WRITE_ACCESS })
+    @Path(ApiConstants.INUM_PATH)
+    public Response patchAtribute(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString)
+            throws JsonPatchException, IOException {
+        log.error(" Custom Script Resource to patch - inum:{} , pathString:{}", inum, pathString);
+        CustomScript existingScript = customScriptService.getScriptByInum(inum);
+        checkResourceNotNull(existingScript, CUSTOM_SCRIPT);
+        existingScript = Jackson.applyPatch(pathString, existingScript);
+        customScriptService.update(existingScript);
+        existingScript = customScriptService.getScriptByInum(inum);
+        log.error(" Custom Script Resource after patch - inum:{} , pathString:{}", inum, pathString);
+        return Response.ok(existingScript).build();
     }
 
 }

@@ -1104,6 +1104,37 @@ paths:
           description: Internal Server Error
       security:
         - oauth2: [https://jans.io/oauth/config/scripts.delete]
+    patch:
+      summary: Partially update custom script.
+      description: Partially update custom script.
+      operationId: patch-config-scripts-by-inum
+      security:
+        - oauth2: [https://jans.io/oauth/config/scripts.write]
+      tags:
+        - Custom Scripts
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/PatchRequest'
+                description: String representing patch-document.
+                example: '[ {op:replace, path: enabled, value: \"false\" } ]'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomScript'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'	
+				
   /jans-config-api/api/v1/config/cache:
     get:
       summary: Returns cache configuration.
@@ -5051,9 +5082,6 @@ components:
           type: array
           items:
             type: string
-        clientName:
-          description: A human-readable name of the client.
-          type: string
         idTokenTokenBindingCnf:
           description: 'Specifies the JWT Confirmation Method member name (e.g. tbh) that the Relying Party expects when receiving Token Bound ID Tokens. The presence of this parameter indicates that the Relying Party supports Token Binding of ID Tokens. If omitted, the default is that the Relying Party does not support Token Binding of ID Tokens.'
           type: string

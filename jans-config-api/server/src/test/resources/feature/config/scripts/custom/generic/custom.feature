@@ -44,4 +44,24 @@ Feature: Verify Custom Script configuration endpoint
 	And assert response.length != null
 	
 	
-	
+	Scenario: Patch person custom script by inum
+    Given url  mainUrl
+    And header Authorization = 'Bearer ' + accessToken
+    When method GET
+    Then status 200
+    And print response
+    And assert response.length != null
+    And print response[0]
+	And print 'Script inum = '+response[0].inum
+    And assert response[0].inum != null
+	And print  'Script Type = '+response[0].scriptType
+	And print 'Patching script ' + '-' +response[0].scriptType + '-' +response[0].inum
+	Given url mainUrl + '/'+response[0].inum
+	And header Authorization = 'Bearer ' + accessToken
+	And def request_body = "[ {\"op\":\"replace\", \"path\": \"/enabled\", \"value\":"+response[0].enabled+" } ]")
+	And print 'request_body ='+request_body
+	And request request_body
+	When method PATCH
+	Then status 200
+	And print response
+	And assert response.length !=0	
