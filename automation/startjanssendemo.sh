@@ -1,5 +1,10 @@
 #!/bin/bash
 set -e
+JANS_FQDN=$1
+JANS_PERSISTENCE=$2
+JANS_CI_CD_RUN=$3
+EXT_IP=$4
+INSTALL_ISTIO=$5
 if [[ ! "$JANS_FQDN" ]]; then
   read -rp "Enter Hostname [demoexample.jans.io]:                           " JANS_FQDN
 fi
@@ -8,6 +13,25 @@ if ! [[ $JANS_FQDN == *"."*"."* ]]; then
     Please enter a FQDN with the format demoexample.jans.io"
   exit 1
 fi
+if [[ ! "$JANS_PERSISTENCE" ]]; then
+  read -rp "Enter persistence type [LDAP|MYSQL]:                            " JANS_PERSISTENCE
+fi
+if [[ $JANS_PERSISTENCE != "LDAP" ]] && [[ $JANS_PERSISTENCE != "MYSQL" ]]; then
+  echo "[E] Incorrect entry. Please enter either LDAP or MYSQL"
+  exit 1
+fi
+
+LOG_TARGET="FILE"
+LOG_LEVEL="TRACE"
+if [[ -z $JANS_CI_CD_RUN ]]; then
+  LOG_TARGET="STDOUT"
+  LOG_LEVEL="INFO"
+fi
+
+if [[ -z $EXT_IP ]]; then
+  EXT_IP=$(dig +short myip.opendns.com @resolver1.opendns.com)
+fi
+
 sudo apt-get update
 sudo apt-get install python3-pip -y
 sudo pip3 install pip --upgrade
@@ -31,15 +55,25 @@ curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scr
 chmod 700 get_helm.sh
 ./get_helm.sh
 sudo apt-get install docker-ce docker-ce-cli containerd.io -y
-sudo microk8s config > config
+sudo microk8s config | sudo tee config > /dev/null
 KUBECONFIG="$PWD"/config
 sudo microk8s.kubectl create namespace jans --kubeconfig="$KUBECONFIG" || echo "namespace exists"
-sudo helm repo add bitnami https://charts.bitnami.com/bitnami
-sudo microk8s.kubectl get po --kubeconfig="$KUBECONFIG"
-sudo helm install my-release --set auth.rootPassword=Test1234#,auth.database=jans bitnami/mysql -n jans --kubeconfig="$KUBECONFIG"
-EXT_IP=$(dig +short myip.opendns.com @resolver1.opendns.com)
-sudo echo "$EXT_IP $JANS_FQDN" >> /etc/hosts
-cat << EOF > override.yaml
+
+if [[ $INSTALL_ISTIO == "true" ]]; then
+  sudo microk8s.kubectl label ns jans istio-injection=enabled
+  sudo curl -L https://istio.io/downloadIstio | sh -
+  cd istio-1.13.3
+  export PATH=$PWD/bin:$PATH
+  sudo istioctl install --set profile=demo -y
+  cd ..
+fi
+
+PERSISTENCE_TYPE="sql"
+if [[ $JANS_PERSISTENCE == "MYSQL" ]]; then
+  sudo helm repo add bitnami https://charts.bitnami.com/bitnami
+  sudo microk8s.kubectl get po --kubeconfig="$KUBECONFIG"
+  sudo helm install my-release --set auth.rootPassword=Test1234#,auth.database=jans bitnami/mysql -n jans --kubeconfig="$KUBECONFIG"
+  cat << EOF > override.yaml
 config:
   countryCode: US
   email: support@gluu.org
@@ -53,20 +87,82 @@ config:
     cnSqlDbUser: root
     cnSqlDbTimezone: UTC
     cnSqldbUserPassword: Test1234#
+EOF
+fi
+
+ENABLE_LDAP="false"
+if [[ $JANS_PERSISTENCE == "LDAP" ]]; then
+  cat << EOF > override.yaml
+config:
+  countryCode: US
+  email: support@gluu.org
+  orgName: Gluu
+  city: Austin
+EOF
+  PERSISTENCE_TYPE="ldap"
+  ENABLE_LDAP="true"
+fi
+
+echo "$EXT_IP $JANS_FQDN" | sudo tee -a /etc/hosts > /dev/null
+cat << EOF >> override.yaml
 global:
+  istio:
+    enable: $INSTALL_ISTIO
+  cnPersistenceType: $PERSISTENCE_TYPE
   auth-server-key-rotation:
     enabled: true
+  auth-server:
+    appLoggers:
+      authLogTarget: "$LOG_TARGET"
+      authLogLevel: "$LOG_LEVEL"
+      httpLogTarget: "$LOG_TARGET"
+      httpLogLevel: "$LOG_LEVEL"
+      persistenceLogTarget: "$LOG_TARGET"
+      persistenceLogLevel: "$LOG_LEVEL"
+      persistenceDurationLogTarget: "$LOG_TARGET"
+      persistenceDurationLogLevel: "$LOG_LEVEL"
+      ldapStatsLogTarget: "$LOG_TARGET"
+      ldapStatsLogLevel: "$LOG_LEVEL"
+      scriptLogTarget: "$LOG_TARGET"
+      scriptLogLevel: "$LOG_LEVEL"
+      auditStatsLogTarget: "$LOG_TARGET"
+      auditStatsLogLevel: "$LOG_LEVEL"
   client-api:
     enabled: true
+    appLoggers:
+      clientApiLogTarget: "$LOG_TARGET"
+      clientApiLogLevel: "$LOG_LEVEL"
   config-api:
     enabled: true
+    appLoggers:
+      configApiLogTarget: "$LOG_TARGET"
+      configApiLogLevel: "$LOG_LEVEL"
   fido2:
     enabled: true
+    appLoggers:
+      fido2LogTarget: "$LOG_TARGET"
+      fido2LogLevel: "$LOG_LEVEL"
+      persistenceLogTarget: "$LOG_TARGET"
+      persistenceLogLevel: "$LOG_LEVEL"
   scim:
     enabled: true
+    appLoggers:
+      scimLogTarget: "$LOG_TARGET"
+      scimLogLevel: "$LOG_LEVEL"
+      persistenceLogTarget: "$LOG_TARGET"
+      persistenceLogLevel: "$LOG_LEVEL"
+      persistenceDurationLogTarget: "$LOG_TARGET"
+      persistenceDurationLogLevel: "$LOG_LEVEL"
+      ldapStatsLogTarget: "$LOG_TARGET"
+      ldapStatsLogLevel: "$LOG_LEVEL"
+      scriptLogTarget: "$LOG_TARGET"
+      scriptLogLevel: "$LOG_LEVEL"
   fqdn: $JANS_FQDN
   isFqdnRegistered: false
   lbIp: $EXT_IP
+  opendj:
+    # -- Boolean flag to enable/disable the OpenDJ  chart.
+    enabled: $ENABLE_LDAP
 # -- Nginx ingress definitions chart
 nginx-ingress:
   ingress:
@@ -89,9 +185,7 @@ nginx-ingress:
       hosts:
       - $JANS_FQDN
 auth-server:
-  # -- Configure the liveness healthcheck for the auth server if needed.
   livenessProbe:
-    # -- Executes the python3 healthcheck.
     # https://github.com/JanssenProject/docker-jans-auth-server/blob/master/scripts/healthcheck.py
     exec:
       command:
@@ -101,8 +195,6 @@ auth-server:
     initialDelaySeconds: 300
     periodSeconds: 30
     timeoutSeconds: 5
-  # -- Configure the readiness healthcheck for the auth server if needed.
-  # https://github.com/JanssenProject/docker-jans-auth-server/blob/master/scripts/healthcheck.py
   readinessProbe:
     exec:
       command:
