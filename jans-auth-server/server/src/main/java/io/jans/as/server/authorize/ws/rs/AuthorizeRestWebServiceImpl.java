@@ -193,10 +193,37 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             String sessionId, String originHeaders,
             String codeChallenge, String codeChallengeMethod, String customResponseHeaders, String claims, String authReqId,
             HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext securityContext) {
-        return requestAuthorization(scope, responseType, clientId, redirectUri, state, responseMode, nonce, display,
-                prompt, maxAge, uiLocales, idTokenHint, loginHint, acrValues, amrValues, request, requestUri,
-                sessionId, HttpMethod.GET, originHeaders, codeChallenge, codeChallengeMethod,
-                customResponseHeaders, claims, authReqId, httpRequest, httpResponse, securityContext);
+
+        AuthzRequest authzRequest = new AuthzRequest();
+        authzRequest.setScope(scope);
+        authzRequest.setResponseType(responseType);
+        authzRequest.setClientId(clientId);
+        authzRequest.setRedirectUri(redirectUri);
+        authzRequest.setState(state);
+        authzRequest.setResponseMode(responseMode);
+        authzRequest.setNonce(nonce);
+        authzRequest.setDisplay(display);
+        authzRequest.setPrompt(prompt);
+        authzRequest.setMaxAge(maxAge);
+        authzRequest.setUiLocales(uiLocales);
+        authzRequest.setIdTokenHint(idTokenHint);
+        authzRequest.setLoginHint(loginHint);
+        authzRequest.setAcrValues(acrValues);
+        authzRequest.setAmrValues(amrValues);
+        authzRequest.setRequest(request);
+        authzRequest.setRequestUri(requestUri);
+        authzRequest.setSessionId(sessionId);
+        authzRequest.setOriginHeaders(originHeaders);
+        authzRequest.setCodeChallenge(codeChallenge);
+        authzRequest.setCodeChallengeMethod(codeChallengeMethod);
+        authzRequest.setCustomResponseHeaders(customResponseHeaders);
+        authzRequest.setClaims(claims);
+        authzRequest.setAuthReqId(authReqId);
+        authzRequest.setHttpRequest(httpRequest);
+        authzRequest.setHttpResponse(httpResponse);
+        authzRequest.setSecurityContext(securityContext);
+
+        return requestAuthorization(authzRequest);
     }
 
     @Override
@@ -205,21 +232,42 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             String nonce, String display, String prompt, Integer maxAge, String uiLocales, String idTokenHint,
             String loginHint, String acrValues, String amrValues, String request, String requestUri,
             String sessionId, String originHeaders,
-            String codeChallenge, String codeChallengeMethod, String customResponseHeaders, String claims,
+            String codeChallenge, String codeChallengeMethod, String customResponseHeaders, String claims, String authReqId,
             HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext securityContext) {
-        return requestAuthorization(scope, responseType, clientId, redirectUri, state, responseMode, nonce, display,
-                prompt, maxAge, uiLocales, idTokenHint, loginHint, acrValues, amrValues, request, requestUri,
-                sessionId, HttpMethod.POST, originHeaders, codeChallenge, codeChallengeMethod,
-                customResponseHeaders, claims, null, httpRequest, httpResponse, securityContext);
+
+        AuthzRequest authzRequest = new AuthzRequest();
+        authzRequest.setScope(scope);
+        authzRequest.setResponseType(responseType);
+        authzRequest.setClientId(clientId);
+        authzRequest.setRedirectUri(redirectUri);
+        authzRequest.setState(state);
+        authzRequest.setResponseMode(responseMode);
+        authzRequest.setNonce(nonce);
+        authzRequest.setDisplay(display);
+        authzRequest.setPrompt(prompt);
+        authzRequest.setMaxAge(maxAge);
+        authzRequest.setUiLocales(uiLocales);
+        authzRequest.setIdTokenHint(idTokenHint);
+        authzRequest.setLoginHint(loginHint);
+        authzRequest.setAcrValues(acrValues);
+        authzRequest.setAmrValues(amrValues);
+        authzRequest.setRequest(request);
+        authzRequest.setRequestUri(requestUri);
+        authzRequest.setSessionId(sessionId);
+        authzRequest.setOriginHeaders(originHeaders);
+        authzRequest.setCodeChallenge(codeChallenge);
+        authzRequest.setCodeChallengeMethod(codeChallengeMethod);
+        authzRequest.setCustomResponseHeaders(customResponseHeaders);
+        authzRequest.setClaims(claims);
+        authzRequest.setAuthReqId(authReqId);
+        authzRequest.setHttpRequest(httpRequest);
+        authzRequest.setHttpResponse(httpResponse);
+        authzRequest.setSecurityContext(securityContext);
+
+        return requestAuthorization(authzRequest);
     }
 
-    private Response requestAuthorization(
-            String scope, String responseType, String clientId, String redirectUri, String state, String respMode,
-            String nonce, String display, String prompt, Integer maxAge, String uiLocalesStr, String idTokenHint,
-            String loginHint, String acrValuesStr, String amrValuesStr, String request, String requestUri,
-            String sessionId, String method, String originHeaders, String codeChallenge, String codeChallengeMethod,
-            String customRespHeaders, String claims, String authReqId,
-            HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext securityContext) {
+    private Response requestAuthorization(AuthzRequest authzRequest) {
         scope = ServerUtil.urlDecode(scope); // it may be encoded in uma case
 
         String tokenBindingHeader = httpRequest.getHeader("Sec-Token-Binding");
