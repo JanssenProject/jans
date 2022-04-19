@@ -61,6 +61,7 @@ class ConfigApiInstaller(JettyInstaller):
         self.copyFile(self.source_files[1][0], self.libDir)
         scim_plugin_path = os.path.join(self.libDir, os.path.basename(self.source_files[1][0]))
         self.add_extra_class(scim_plugin_path)
+        self.copyFile(self.source_files[4][0], self.libDir)
         user_mgt_plugin_path = os.path.join(self.libDir, os.path.basename(self.source_files[4][0]))
         self.add_extra_class(user_mgt_plugin_path)
         base.extract_file(
