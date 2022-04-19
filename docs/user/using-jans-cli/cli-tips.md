@@ -88,7 +88,7 @@ In this command line:
 - `memcachedConfiguration/bufferSize:32788` is a `key:value` pair
 
 ## CLI Authorization
-To run operations on Janssen Server, CLI client has to be authenticated and authorized by the server. Since CLI has limited input capabilities, it uses [Device Authorization Grant](https://datatracker.ietf.org/doc/html/rfc8628) flow to get required permissions in form of an access token. After successfully receiving the token, CLI can run operations on the Janssen server while the token is valid. The steps below will summarize this action.
+To run operations on Janssen Server, CLI client will need to be authenticated and authorized by the server. Since CLI has limited input capabilities, it uses [Device Authorization Grant](https://datatracker.ietf.org/doc/html/rfc8628) flow to get required permissions in form of an access token. After successfully receiving the token, CLI can run operations on the Janssen server while the token is valid. The steps below will summarize this process.
 
 1. Execution of CLI command will return the following message if a valid token is not found. 
    ```
