@@ -88,13 +88,37 @@ nginx-ingress:
     - secretName: tls-certificate
       hosts:
       - $JANS_FQDN
+auth-server:
+  # -- Configure the liveness healthcheck for the auth server if needed.
+  livenessProbe:
+    # -- Executes the python3 healthcheck.
+    # https://github.com/JanssenProject/docker-jans-auth-server/blob/master/scripts/healthcheck.py
+    exec:
+      command:
+        - python3
+        - /app/scripts/healthcheck.py
+    # Setting for testing purposes only. Under optimal resources the app should be up in 30-60 secs
+    initialDelaySeconds: 300
+    periodSeconds: 30
+    timeoutSeconds: 5
+  # -- Configure the readiness healthcheck for the auth server if needed.
+  # https://github.com/JanssenProject/docker-jans-auth-server/blob/master/scripts/healthcheck.py
+  readinessProbe:
+    exec:
+      command:
+        - python3
+        - /app/scripts/healthcheck.py
+    # Setting for testing purposes only. Under optimal resources the app should be up in 30-60 secs
+    initialDelaySeconds: 300
+    periodSeconds: 25
+    timeoutSeconds: 5
 EOF
 sudo helm repo add janssen https://janssenproject.github.io/jans/charts
 sudo helm repo update
 # remove --devel once we issue the first prod chart
 sudo helm install janssen janssen/janssen --devel -n jans -f override.yaml --kubeconfig="$KUBECONFIG"
 echo "Waiting for auth-server to come up. This may take 5-10 mins....Please do not cancel out...This will wait for the auth-server to be ready.."
-sleep 120
+sleep 300
 cat << EOF > testendpoints.sh
 sudo microk8s config > config
 KUBECONFIG="$PWD"/config
