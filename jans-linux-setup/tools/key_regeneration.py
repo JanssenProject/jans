@@ -121,8 +121,9 @@ class Spanner:
     def get_session(self):
         emulator_host = self.credentials.get('connection.emulator-host')
         if emulator_host:
-            parsed_host = urlparse(emulator_host)
-            spanner_base_url = 'http://{}:9020/v1/'.format(parsed_host.scheme)
+            host, port = emulator_host.split(':')
+            scheme = 'http'
+            spanner_base_url = '{}://{}:9020/v1/'.format(scheme, host)
             session_url = os.path.join(
                 spanner_base_url,
                 'projects/{}/instances/{}/databases/{}/sessions'.format(
