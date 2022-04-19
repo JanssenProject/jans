@@ -676,7 +676,10 @@ class Upgrade:
                 break
 
         # current permissions
-        current_role_mapping = json.loads(entry.attrs["jansConfDyn"])
+        try:
+            current_role_mapping = json.loads(entry.attrs["jansConfDyn"])
+        except TypeError:
+            current_role_mapping = entry.attrs["jansConfDyn"]
         should_update = False
 
         for i, api_role in enumerate(current_role_mapping["rolePermissionMapping"]):
