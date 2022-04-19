@@ -43,7 +43,7 @@ public class OrganizationResource extends ConfigBaseResource {
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { ApiAccessConstants.ORG_CONFIG_WRITE_ACCESS })
     public Response patchOrganization(@NotNull String pathString) throws JsonPatchException, IOException {
-        log.trace("Organization patch request - pathString:{} ", pathString);
+        logger.trace("Organization patch request - pathString:{} ", pathString);
         GluuOrganization organization = organizationService.getOrganization();
         organization = Jackson.applyPatch(pathString, organization);
         organizationService.updateOrganization(organization);
