@@ -60,7 +60,39 @@ When method GET
 Then status 404
 And print response
 
+@CreateUpdateDelete 
+Scenario: Create new user, patch and delete 
+	Given url mainUrl
+	And header Authorization = 'Bearer ' + accessToken 
+	And request read('user.json') 
+	When method POST 
+	Then status 201
+    And print response    
+	Then def result = response 
+    And print result
+    And assert result != null
+	And assert result.customAttributes.length != null
+    Then def inum = funGetCustomAttributes(result.customAttributes,'inum')
+    And print inum
+    And assert inum != null
+	And print result.userId
+	And print 'Patching user ' + '-' +result.userId + '-' +inum
+    Given url mainUrl + '/' +inum
+	And header Authorization = 'Bearer ' + accessToken 
+	And request read('user-patch.json') 
+	When method PATCH 
+	Then status 200
+    And print response    
+	Then def result = response 
+	And print 'About to delete user ' + '-' +result.userId + '-' +inum
+	Given url mainUrl + '/' +inum
+	And header Authorization = 'Bearer ' + accessToken 
+	When method DELETE 
+	Then status 204 
+	And print response
+    And print 'User successfully deleted'
 
+@ignore
 @CreateUpdateDelete 
 Scenario: Create new user, update and delete 
 	Given url mainUrl

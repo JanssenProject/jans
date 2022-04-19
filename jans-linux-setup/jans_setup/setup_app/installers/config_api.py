@@ -44,6 +44,7 @@ class ConfigApiInstaller(JettyInstaller):
                 (os.path.join(Config.distJansFolder, 'scim-plugin.jar'), 'https://maven.jans.io/maven/io/jans/scim-plugin/{0}/scim-plugin-{0}-distribution.jar'.format(Config.oxVersion)),
                 (os.path.join(Config.distJansFolder, 'facter'), 'https://raw.githubusercontent.com/GluuFederation/gluu-snap/master/facter/facter'),
                 (os.path.join(Config.install_dir, 'jans_setup/data/jans-config-api-swagger.yaml'), 'https://raw.githubusercontent.com/JanssenProject/jans/main/jans-config-api/docs/jans-config-api-swagger.yaml'),
+                (os.path.join(Config.distJansFolder, 'user-mgt-plugin.jar'), 'https://maven.jans.io/maven/io/jans/jans-config-api/plugins/user-mgt-plugin/{0}/user-mgt-plugin-{0}-distribution.jar'.format(Config.oxVersion)),
                 ]
 
     def install(self):
@@ -60,6 +61,9 @@ class ConfigApiInstaller(JettyInstaller):
         self.copyFile(self.source_files[1][0], self.libDir)
         scim_plugin_path = os.path.join(self.libDir, os.path.basename(self.source_files[1][0]))
         self.add_extra_class(scim_plugin_path)
+        self.copyFile(self.source_files[4][0], self.libDir)
+        user_mgt_plugin_path = os.path.join(self.libDir, os.path.basename(self.source_files[4][0]))
+        self.add_extra_class(user_mgt_plugin_path)
         base.extract_file(
                 os.path.join(Config.distJansFolder, 'jans.zip'),
                 'jans-config-api/server/src/main/resources/log4j2.xml',

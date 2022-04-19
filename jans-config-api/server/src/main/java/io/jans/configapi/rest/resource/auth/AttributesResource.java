@@ -35,7 +35,7 @@ import org.slf4j.Logger;
 @Path(ApiConstants.ATTRIBUTES)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public class AttributesResource extends BaseResource {
+public class AttributesResource extends ConfigBaseResource {
 
     private static final String GLUU_ATTRIBUTE = "gluu attribute";
 

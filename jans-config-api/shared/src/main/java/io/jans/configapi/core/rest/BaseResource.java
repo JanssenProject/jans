@@ -4,13 +4,11 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.configapi.rest.resource.auth;
+package io.jans.configapi.core.rest;
 
 import static io.jans.as.model.util.Util.escapeLog;
-import io.jans.configapi.rest.model.ApiError;
-import io.jans.configapi.rest.model.SearchRequest;
-import io.jans.configapi.util.ApiConstants;
-import io.jans.configapi.configuration.ConfigurationFactory;
+import io.jans.configapi.core.model.ApiError;
+import io.jans.configapi.core.model.SearchRequest;
 import io.jans.orm.model.SortOrder;
 
 import javax.inject.Inject;
@@ -22,24 +20,14 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
-/**
- * @author Mougang T.Gasmyr
- *
- */
 public class BaseResource {
+
+    // Custom CODE
+    public static final String MISSING_ATTRIBUTE_CODE = "OCA001";
+    public static final String MISSING_ATTRIBUTE_MESSAGE = "A required attribute is missing.";
 
     @Inject
     Logger log;
-
-    @Inject
-    ConfigurationFactory configurationFactory;
-
-    protected static final String READ_ACCESS = "config-api-read";
-    protected static final String WRITE_ACCESS = "config-api-write";
-    protected static final String DEFAULT_LIST_SIZE = ApiConstants.DEFAULT_LIST_SIZE;
-    // Pagination
-    protected static final String DEFAULT_LIST_START_INDEX = ApiConstants.DEFAULT_LIST_START_INDEX;
-    protected static final int DEFAULT_MAX_COUNT = ApiConstants.DEFAULT_MAX_COUNT;
 
     public static <T> void checkResourceNotNull(T resource, String objectName) {
         if (resource == null) {
@@ -52,7 +40,7 @@ public class BaseResource {
             throw new BadRequestException(getMissingAttributeError(attributeName));
         }
     }
-    
+
     public static void throwMissingAttributeError(String attributeName) {
         if (StringUtils.isNotEmpty(attributeName)) {
             throw new BadRequestException(getMissingAttributeError(attributeName));
@@ -80,8 +68,8 @@ public class BaseResource {
      * @return
      */
     protected static Response getMissingAttributeError(String attributeName) {
-        ApiError error = new ApiError.ErrorBuilder().withCode(ApiConstants.MISSING_ATTRIBUTE_CODE)
-                .withMessage(ApiConstants.MISSING_ATTRIBUTE_MESSAGE)
+        ApiError error = new ApiError.ErrorBuilder().withCode(MISSING_ATTRIBUTE_CODE)
+                .withMessage(MISSING_ATTRIBUTE_MESSAGE)
                 .andDescription("The attribute " + attributeName + " is required for this operation").build();
         return Response.status(Response.Status.BAD_REQUEST).entity(error).build();
     }
@@ -103,26 +91,28 @@ public class BaseResource {
                 .withCode(String.valueOf(Response.Status.BAD_REQUEST.getStatusCode())).withMessage(msg).build();
         return Response.status(Response.Status.BAD_REQUEST).entity(error).build();
     }
-    
+
     protected static Response getInternalServerException(String msg) {
         ApiError error = new ApiError.ErrorBuilder()
-                .withCode(String.valueOf(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode())).withMessage(msg).build();
+                .withCode(String.valueOf(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode())).withMessage(msg)
+                .build();
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(error).build();
     }
 
     protected SearchRequest createSearchRequest(String schemas, String filter, String sortBy, String sortOrder,
-            Integer startIndex, Integer count, String attrsList, String excludedAttrsList) {
+            Integer startIndex, Integer count, String attrsList, String excludedAttrsList, int maximumRecCount) {
         if (log.isDebugEnabled()) {
             log.debug(
-                    "Search Request params:: - schemas:{}, filter:{}, sortBy:{}, sortOrder:{}, startIndex:{}, count:{}, attrsList:{}, excludedAttrsList:{} ",
+                    "Search Request params:: - schemas:{}, filter:{}, sortBy:{}, sortOrder:{}, startIndex:{}, count:{}, attrsList:{}, excludedAttrsList:{}, maximumRecCount:{}",
                     escapeLog(schemas), escapeLog(filter), escapeLog(sortBy), escapeLog(sortOrder),
-                    escapeLog(startIndex), escapeLog(count), escapeLog(attrsList), escapeLog(excludedAttrsList));
+                    escapeLog(startIndex), escapeLog(count), escapeLog(attrsList), escapeLog(excludedAttrsList),
+                    escapeLog(maximumRecCount));
         }
         SearchRequest searchRequest = new SearchRequest();
 
         // Validation
         checkNotEmpty(schemas, "Schema");
-        int maxCount = getMaxCount();
+        int maxCount = maximumRecCount;
         log.debug(" count:{}, maxCount:{}", count, maxCount);
         if (count > maxCount) {
             thorwBadRequestException("Maximum number of results per page is " + maxCount);
@@ -150,18 +140,10 @@ public class BaseResource {
         searchRequest.setSortOrder(sortOrder);
         searchRequest.setStartIndex(startIndex);
         searchRequest.setCount(count);
-        searchRequest.setMaxCount(getMaxCount());
+        searchRequest.setMaxCount(maximumRecCount);
 
         return searchRequest;
 
-    }
-
-    protected int getMaxCount() {
-        log.trace(" MaxCount details - ApiAppConfiguration.MaxCount():{}, DEFAULT_MAX_COUNT:{} ",
-                configurationFactory.getApiAppConfiguration().getMaxCount(), DEFAULT_MAX_COUNT);
-        return (configurationFactory.getApiAppConfiguration().getMaxCount() > 0
-                ? configurationFactory.getApiAppConfiguration().getMaxCount()
-                : DEFAULT_MAX_COUNT);
     }
 
 }

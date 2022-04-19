@@ -34,8 +34,7 @@ tags:
   - name: Statistics - User
   - name: Health - Check
   - name: Server Stats
-  - name: User Management
-  - name: SCIM - User Management
+  - name: Configuration – User Management
   - name: SCIM - Config Management
   - name: Organization Configuration
   - name: Auth Server Health - Check
@@ -2398,10 +2397,10 @@ paths:
         '500':
           description: Internal Server Error
 		  
-  /jans-config-api/api/v1/user:
+  /jans-config-api/mgt/configuser:
     get:
       tags:
-        - User Management
+        - Configuration – User Management
       summary: Gets list of users
       description: Gets list of users
       operationId: get-user
@@ -2456,7 +2455,7 @@ paths:
           description: Order in which the sortBy param is applied. Allowed values are "ascending" and "descending".
     post:
       tags:
-        - User Management
+        - Configuration – User Management
       summary: Create new User
       description: Create new User
       operationId: post-user
@@ -2483,7 +2482,7 @@ paths:
         - oauth2: [https://jans.io/oauth/config/user.write]
     put:
       tags:
-        - User Management
+        - Configuration – User Management
       summary: Update User.
       description: Update User.
       operationId: put-user
@@ -2509,7 +2508,7 @@ paths:
           description: Internal Server Error
       security:
         - oauth2: [https://jans.io/oauth/config/user.write]
-  /jans-config-api/api/v1/user/{inum}:
+  /jans-config-api/mgt/configuser/{inum}:
     parameters:
       - schema:
           type: string
@@ -2519,7 +2518,7 @@ paths:
         required: true
     get:
       tags:
-        - User Management
+        - Configuration – User Management
       summary: Get User by Inum
       description: Get User by Inum.
       operationId: get-user-by-inum
@@ -2538,7 +2537,7 @@ paths:
         - oauth2: [https://jans.io/oauth/config/user.readonly]
     delete:
       tags:
-        - User Management
+        - Configuration – User Management
       summary: Delete User.
       description: Delete User.
       operationId: delete-user
@@ -2555,7 +2554,7 @@ paths:
         - oauth2: [https://jans.io/oauth/config/user.delete]
     patch:
       tags:
-        - User Management
+        - Configuration – User Management
       summary: Patch user properties by Inum.
       description: Patch user properties by Inum.
       operationId: patch-user-by-inum
@@ -2584,442 +2583,7 @@ paths:
       security:
         - oauth2: [https://jans.io/oauth/config/user.write]
 
-  /jans-config-api/scim/resource/user:
-    get:
-      tags:
-        - SCIM - User Management
-      x-cli-plugin: scim
-      summary: Gets list of SCIM users
-      description: Gets list of SCIM users
-      operationId: get-scim-users
-      responses:
-        '200':
-          description: Successful operation
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/UserListResponse'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserListResponse'
-        '400':
-          description: Parameter count exceeds the maximum allowed value or the filter
-            supplied was unparsable
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '500':
-          description: There was an unexpected failure executing the operation
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-      security:
-        - oauth2: [https://jans.io/oauth/config/scim/users.read https://jans.io/scim/users.read]
-      parameters:
-        - schema:
-            type: string
-          in: query
-          name: filter
-          description: Search filter pattern. For more details refer section 3.4.2.2 of RFC 7644
-          example: userName co \"mi\", userName eq \"admin\", displayName co \"1111\" or displayName co \"Group\"
-        - schema:
-            type: integer
-            default: 1
-          in: query
-          name: startIndex
-          description: The 1-based index of the first query result.
-        - schema:
-            type: integer
-          in: query
-          name: count
-          description: Search size - max size of the results to return.
-        - schema:
-            type: string
-          in: query
-          name: sortBy
-          description: The attribute whose value will be used to order the returned responses
-        - schema:
-            type: string
-            enum:
-              - '- ascending'
-              - '- descending'
-          in: query
-          name: sortOrder
-          description: Order in which the sortBy param is applied. Allowed values are "ascending" and "descending"
-        - schema:
-            type: string
-          in: query
-          name: attributes
-          description: A comma-separated list of attribute names to return in the response
-        - schema:
-            type: string
-          in: query
-          name: excludedAttributes
-          description: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list).
-
-    post:
-      tags:
-        - SCIM - User Management
-      x-cli-plugin: scim
-      operationId: post-create-user
-      summary: Create a SCIM user.
-      description: Allows creating a User resource via POST (see section 3.3 of RFC 7644)
-      security:
-        - oauth2: [https://jans.io/oauth/config/scim/users.write https://jans.io/scim/users.write]
-      parameters:
-        - name: attributes
-          in: query
-          description: A comma-separated list of attribute names to return in the response
-          schema:
-            type: string
-        - name: excludedAttributes
-          in: query
-          description: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list)
-          schema:
-            type: string
-      requestBody:
-        description: Payload that represents the Group to create
-        content:
-          application/scim+json:
-            schema:
-              $ref: '#/components/schemas/UserResource'
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UserResource'
-        required: true
-      responses:
-        '201':
-          description: Successful operation
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/UserResource'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserResource'
-        '400':
-          description: An invalid value was passed in the payload
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '409':
-          description: There is a conflict with an already existing user. Uniqueness
-            is assumed over userName
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '500':
-          description: There was an unexpected failure executing the operation
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-
-  /jans-config-api/scim/resource/user/{id}:
-    get:
-      tags:
-        - SCIM - User Management
-      x-cli-plugin: scim
-      operationId: get-user-by-id
-      summary: Retrieves SCIM user by Id.
-      description: Retrieves a User resource by Id (see section 3.4.1 of RFC 7644)
-      security:
-        - oauth2: [https://jans.io/oauth/config/scim/users.read https://jans.io/scim/users.read]
-      parameters:
-        - name: attributes
-          in: query
-          description: A comma-separated list of attribute names to return in the response
-          schema:
-            type: string
-        - name: excludedAttributes
-          in: query
-          description: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list)
-          schema:
-            type: string
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        200:
-          description: Successful operation
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/UserResource'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserResource'
-        404:
-          description: Id passed unknown
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        500:
-          description: There was an unexpected failure executing the operation
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-    put:
-      tags:
-        - SCIM - User Management
-      x-cli-plugin: scim
-      operationId: put-update-user-by-id
-      summary: Updates an SCIM user.
-      description: "Updates a User resource (see section 3.5.1 of RFC 7644). Update\
-        \ works in a replacement fashion&amp;#58; every\nattribute value found in the\
-        \ payload sent will replace the one in the existing resource representation.\
-        \ Attributes \nnot passed in the payload will be left intact.\n"
-      security:
-        - oauth2: [https://jans.io/oauth/config/scim/users.write https://jans.io/scim/users.write]
-      parameters:
-        - name: attributes
-          in: query
-          description: A comma-separated list of attribute names to return in the response
-          schema:
-            type: string
-        - name: excludedAttributes
-          in: query
-          description: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list)
-          schema:
-            type: string
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-      requestBody:
-        description: Payload with the data to replace in the existing user identified
-          by the id param
-        content:
-          application/scim+json:
-            schema:
-              $ref: '#/components/schemas/UserResource'
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UserResource'
-        required: true
-      responses:
-        200:
-          description: Successful operation
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/UserResource'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserResource'
-        400:
-          description: |
-            An invalid value was passed in the payload or there was an attempt to update an immutable attribute
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        404:
-          description: Id passed unknown
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        409:
-          description: There is a conflict with an already existing group. Uniqueness
-            is assumed over displayName
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        500:
-          description: There was an unexpected failure executing the operation
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-    delete:
-      tags:
-        - SCIM - User Management
-      x-cli-plugin: scim
-      operationId: delete-user-by-id
-      summary: Deletes a SCIM user.
-      description: Deletes a user resource
-      security:
-        - oauth2: [https://jans.io/oauth/config/scim/users.write https://jans.io/scim/users.write]
-      parameters:
-        - name: id
-          in: path
-          description: Identifier of the resource to delete
-          required: true
-          schema:
-            type: string
-      responses:
-        204:
-          description: Successful operation. Empty response
-          content: {}
-        404:
-          description: Id passed unknown
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        500:
-          description: There was an unexpected failure executing the operation
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-    patch:
-      tags:
-        - SCIM - User Management
-      x-cli-plugin: scim
-      operationId: patch-user-by-id
-      summary: Patches SCIM User attributes.
-      description: "Updates one or more attributes of a User resource using a sequence\
-        \ of additions, removals, and \nreplacements operations. See section 3.5.2\
-        \ of RFC 7644\n"
-      security:
-        - oauth2: [https://jans.io/oauth/config/scim/users.write https://jans.io/scim/users.write]
-      parameters:
-        - name: attributes
-          in: query
-          description: A comma-separated list of attribute names to return in the response
-          schema:
-            type: string
-        - name: excludedAttributes
-          in: query
-          description: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list)
-          schema:
-            type: string
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-      requestBody:
-        description: Payload describing the patch operations to apply upon the resource
-          identified by param id
-        content:
-          application/scim+json:
-            schema:
-              $ref: '#/components/schemas/ScimPatchRequest'
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ScimPatchRequest'
-          application/json-patch+json:
-            schema:
-              $ref: '#/components/schemas/ScimPatchRequest'
-        required: true
-      responses:
-        200:
-          description: Successful operation
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/UserResource'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserResource'
-        400:
-          description: |
-            One or more operations supplied in the request are specified incorrectly, there were attempts to
-            modify immutable attributes, or the resulting resource cannot pass intrinsic validations
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        500:
-          description: There was an unexpected failure executing the operation
-          content:
-            application/scim+json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-
-  /jans-config-api/scim/resource/user/.search:
-    post:
-      tags:
-        - SCIM - User Management
-      x-cli-plugin: scim
-      summary: Search SCIM user.
-      description: Gets list of users
-      operationId: post-search-scim-users
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SearchRequest'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserListResponse'
-        '400':
-          description: Parameter count exceeds the maximum allowed value or the filter supplied was unparsable
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '500':
-          description: There was an unexpected failure executing the operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-      security:
-        - oauth2: [https://jans.io/oauth/config/scim/users.read https://jans.io/scim/users.read]
-
+ 
   /jans-config-api/scim/config:
     get:
       summary: Retrieves SCIM App configuration.

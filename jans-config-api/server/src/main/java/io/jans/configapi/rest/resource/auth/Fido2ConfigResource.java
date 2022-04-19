@@ -24,7 +24,7 @@ import org.slf4j.Logger;
 @Path(ApiConstants.FIDO2 + ApiConstants.CONFIG)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public class Fido2ConfigResource extends BaseResource {
+public class Fido2ConfigResource extends ConfigBaseResource {
 
     private static final String FIDO2_CONFIGURATION = "fido2Configuration";
 
