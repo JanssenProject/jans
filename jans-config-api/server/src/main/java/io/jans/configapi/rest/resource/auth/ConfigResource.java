@@ -26,7 +26,7 @@ import org.slf4j.Logger;
 @Path(ApiConstants.JANS_AUTH + ApiConstants.CONFIG)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class ConfigResource extends BaseResource {
+public class ConfigResource extends ConfigBaseResource {
 
     @Inject
     Logger log;

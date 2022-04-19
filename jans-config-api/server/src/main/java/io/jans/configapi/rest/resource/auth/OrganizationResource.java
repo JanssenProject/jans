@@ -28,7 +28,7 @@ import javax.ws.rs.core.Response;
 @Path(ApiConstants.ORG)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public class OrganizationResource extends BaseResource {
+public class OrganizationResource extends ConfigBaseResource {
 
     @Inject
     OrganizationService organizationService;
