@@ -8,7 +8,6 @@ from string import Template
 from pathlib import Path
 
 from ldif import LDIFParser
-from sqlalchemy.exc import NotSupportedError
 from sqlalchemy.exc import OperationalError
 
 from jans.pycloudlib.persistence.sql import SQLClient
@@ -190,21 +189,31 @@ class SQLBackend:
                 query = f"CREATE INDEX {self.client.quoted_id(index_name)} ON {self.client.quoted_id(table_name)} ({self.client.quoted_id(column_name)})"
                 self.client.create_index(query)
             else:
-                for i, index_str in enumerate(self.sql_indexes["__common__"]["JSON"], start=1):
-                    index_str_fmt = Template(index_str).safe_substitute({
-                        "field": column_name,  # "data_type": column_type,
-                    })
-                    name = f"{table_name}_json_{i}"
-                    query = f"ALTER TABLE {self.client.quoted_id(table_name)} ADD INDEX {self.client.quoted_id(name)} (({index_str_fmt}))"
-
-                    try:
+                if self.client.server_version < "8.0":
+                    # prior to MySQL 8.0, CASTing on index creation will raise SQL syntax error;
+                    # switch to virtual column instead
+                    for i in range(4):
+                        index_str_fmt = f"{column_name}_mem_idx_{i}"
+                        query = " ".join([
+                            f"ALTER TABLE {self.client.quoted_id(table_name)}",
+                            f"ADD COLUMN {self.client.quoted_id(index_str_fmt)} CHAR(128) AS ({column_name}->'$.v[{i}]')",
+                            f", ADD INDEX ({self.client.quoted_id(index_str_fmt)})"
+                        ])
+                        try:
+                            self.client.create_index(query)
+                        except OperationalError as exc:
+                            # re-raise exception if the code isn't one of the following code
+                            # 1060 - duplicate column error
+                            if exc.orig.args[0] not in [1060]:
+                                raise exc
+                else:
+                    for i, index_str in enumerate(self.sql_indexes["__common__"]["JSON"], start=1):
+                        index_str_fmt = Template(index_str).safe_substitute({
+                            "field": column_name,  # "data_type": column_type,
+                        })
+                        name = f"{table_name}_json_{i}"
+                        query = f"ALTER TABLE {self.client.quoted_id(table_name)} ADD INDEX {self.client.quoted_id(name)} (({index_str_fmt}))"
                         self.client.create_index(query)
-                    except (NotSupportedError, OperationalError) as exc:
-                        # some MySQL versions don't support JSON array (NotSupportedError)
-                        # also some of them don't support functional index that returns
-                        # JSON or Geometry value
-                        msg = exc.orig.args[1]
-                        logger.warning(f"Failed to create index {name} for {table_name}.{column_name} column; reason={msg}")
 
         for i, custom in enumerate(self.sql_indexes.get(table_name, {}).get("custom", []), start=1):
             # jansPerson table has unsupported custom index expressions that need to be skipped if mysql < 8.0

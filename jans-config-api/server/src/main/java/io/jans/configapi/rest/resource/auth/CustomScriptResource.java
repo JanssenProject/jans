@@ -29,7 +29,7 @@ import java.util.UUID;
 @Path(ApiConstants.CONFIG + ApiConstants.SCRIPTS)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public class CustomScriptResource extends BaseResource {
+public class CustomScriptResource extends ConfigBaseResource {
 
     private static final String CUSTOM_SCRIPT = "custom script";
     private static final String PATH_SEPARATOR = "/";

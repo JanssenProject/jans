@@ -6,7 +6,7 @@
 
 package io.jans.configapi.exception;
 
-import io.jans.configapi.rest.model.ApiError;
+import io.jans.configapi.core.model.ApiError;
 import org.slf4j.Logger;
 
 import jakarta.inject.Inject;

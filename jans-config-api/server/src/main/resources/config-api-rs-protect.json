@@ -592,72 +592,6 @@
         ]
     },
     {
-        "path":"/jans-config-api/scim/resource/user",
-        "conditions":[
-            {
-                "httpMethods":["GET"],
-                "scopes":[
-                    "https://jans.io/oauth/config/scim/users.read",
-                    "https://jans.io/scim/users.read"
-                ]
-            },
-            {
-               "httpMethods":["POST"],
-                "scopes":[
-                    "https://jans.io/oauth/config/scim/users.write",
-                    "https://jans.io/scim/users.write"
-                ]
-            }
-            
-        ]
-    },
-    {
-        "path":"/jans-config-api/scim/resource/user/{id}",
-        "conditions":[
-            {
-                "httpMethods":["GET"],
-                "scopes":[
-                    "https://jans.io/oauth/config/scim/users.read",
-                    "https://jans.io/scim/users.read"
-                ]
-            },
-            {
-               "httpMethods":["PUT"],
-                "scopes":[
-                    "https://jans.io/oauth/config/scim/users.write",
-                    "https://jans.io/scim/users.write"
-                ]
-            },
-            {
-               "httpMethods":["DELETE"],
-                "scopes":[
-                    "https://jans.io/oauth/config/scim/users.write",
-                    "https://jans.io/scim/users.write"
-                ]
-            },
-            {
-               "httpMethods":["PATCH"],
-                "scopes":[
-                    "https://jans.io/oauth/config/scim/users.write",
-                    "https://jans.io/scim/users.write"
-                ]
-            }
-            
-        ]
-    },
-    {
-        "path":"/jans-config-api/scim/resource/user/.search",
-        "conditions":[
-            {
-                "httpMethods":["GET"],
-                "scopes":[
-                    "https://jans.io/oauth/config/scim/users.read",
-                    "https://jans.io/scim/users.read"
-                ]
-            }            
-        ]
-    },
-    {
         "path":"/jans-config-api/scim/config",
         "conditions":[
             {
@@ -692,7 +626,7 @@
         ]
     },
 	{
-        "path":"/jans-config-api/api/v1/user",
+        "path":"/jans-config-api/mgt/configuser",
         "conditions":[
             {
                 "httpMethods":["GET"],

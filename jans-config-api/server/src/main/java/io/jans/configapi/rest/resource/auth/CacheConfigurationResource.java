@@ -31,7 +31,7 @@ import org.slf4j.Logger;
 @Path(ApiConstants.CONFIG + ApiConstants.CACHE)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public class CacheConfigurationResource extends BaseResource {
+public class CacheConfigurationResource extends ConfigBaseResource {
 
     private static final String ERROR_MSG = "Unable to apply patch.";
 

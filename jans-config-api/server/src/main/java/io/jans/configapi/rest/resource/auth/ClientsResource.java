@@ -12,7 +12,7 @@ import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.common.EncryptionService;
 import io.jans.as.common.service.common.InumService;
 import io.jans.configapi.core.rest.ProtectedApi;
-import io.jans.configapi.rest.model.SearchRequest;
+import io.jans.configapi.core.model.SearchRequest;
 import io.jans.configapi.service.auth.ClientService;
 import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.util.ApiAccessConstants;
@@ -47,7 +47,7 @@ import org.slf4j.Logger;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @ApplicationScoped
-public class ClientsResource extends BaseResource {
+public class ClientsResource extends ConfigBaseResource {
 
     private static final String OPENID_CONNECT_CLIENT = "openid connect client";
 
@@ -81,7 +81,7 @@ public class ClientsResource extends BaseResource {
         }
 
         SearchRequest searchReq = createSearchRequest(clientService.getDnForClient(null), pattern, sortBy, sortOrder,
-                startIndex, limit, null, null);
+                startIndex, limit, null, null, this.getMaxCount());
 
         final List<Client> clients = this.doSearch(searchReq);
         logger.trace("Client serach result:{}", clients);

@@ -17,7 +17,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
 @Path(ApiConstants.STATISTICS)
-public class StatResource extends BaseResource {
+public class StatResource extends ConfigBaseResource {
 
     private final String statUrl = "/jans-auth/restv1/internal/stat";
 

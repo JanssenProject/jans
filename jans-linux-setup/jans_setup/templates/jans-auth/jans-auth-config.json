@@ -297,10 +297,7 @@
     "skipAuthorizationForOpenIdScopeAndPairwiseId": false,
     "dynamicRegistrationScopesParamEnabled":true,
     "dynamicRegistrationCustomObjectClass":"",
-    "personCustomObjectClassList":[
-        "jansCustomPerson",
-        "jansPerson"
-    ],
+    "personCustomObjectClassList": %(person_custom_object_class_list)s,
     "persistIdTokenInLdap":false,
     "persistRefreshTokenInLdap":true,
     "authenticationFiltersEnabled":false,

@@ -17,7 +17,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 import jakarta.enterprise.util.AnnotationLiteral;
-import javax.inject.Qualifier;
+import jakarta.inject.Qualifier;
 
 /**
  * @author Yuriy Movchan Date: 05/14/2019

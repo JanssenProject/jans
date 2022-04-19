@@ -376,7 +376,7 @@ public class AuthUtil {
      public List<Field> getAllFields(Class<?> type) {
          List<Field> allFields =  new ArrayList<>();
          allFields = getAllFields(allFields, type);
-         log.debug("All Fields of User class:{} ", allFields);
+         log.debug("Fields:{} of type:{}  ", allFields, type);
                  
          return allFields;
      }
@@ -391,5 +391,7 @@ public class AuthUtil {
          log.debug("Final fields:{} of type:{} ", fields, type);
          return fields;
      }
+
+   
 
 }

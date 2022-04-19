@@ -12,8 +12,6 @@ public class ApiApplication extends Application {
     public Set<Class<?>> getClasses() {
         HashSet<Class<?>> classes = new HashSet<>();
 
-        // General
-        classes.add(ScimResource.class);
         classes.add(ScimConfigResource.class);
         
         return classes;

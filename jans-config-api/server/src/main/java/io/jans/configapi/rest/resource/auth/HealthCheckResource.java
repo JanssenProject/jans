@@ -14,7 +14,7 @@ import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
 
 @Path(ApiConstants.JANS_AUTH + ApiConstants.HEALTH)
-public class HealthCheckResource extends BaseResource {
+public class HealthCheckResource extends ConfigBaseResource {
 
     private static final String HEALTH_CHECK_URL = "/jans-auth/sys/health-check";
 

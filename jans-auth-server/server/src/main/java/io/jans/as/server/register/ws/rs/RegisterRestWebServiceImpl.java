@@ -67,7 +67,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
     }
 
     @Override
-    public Response delete(String clientId, String authorization, SecurityContext securityContext) {
-        return registerDeleteAction.delete(clientId, authorization, securityContext);
+    public Response delete(String clientId, String authorization, HttpServletRequest httpRequest,  SecurityContext securityContext) {
+        return registerDeleteAction.delete(clientId, authorization, httpRequest, securityContext);
     }
 }

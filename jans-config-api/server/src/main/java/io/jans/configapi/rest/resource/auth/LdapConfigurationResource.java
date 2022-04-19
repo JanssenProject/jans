@@ -29,7 +29,7 @@ import java.util.NoSuchElementException;
 @Path(ApiConstants.CONFIG + ApiConstants.DATABASE + ApiConstants.LDAP)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class LdapConfigurationResource extends BaseResource {
+public class LdapConfigurationResource extends ConfigBaseResource {
 
     @Inject
     Logger log;

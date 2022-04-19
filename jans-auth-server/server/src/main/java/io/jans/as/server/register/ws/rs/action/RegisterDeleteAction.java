@@ -12,6 +12,9 @@ import io.jans.as.model.config.Constants;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.register.RegisterErrorResponseType;
+import io.jans.as.server.audit.ApplicationAuditLogger;
+import io.jans.as.server.model.audit.Action;
+import io.jans.as.server.model.audit.OAuth2AuditLog;
 import io.jans.as.server.model.registration.RegisterParamsValidator;
 import io.jans.as.server.register.ws.rs.RegisterValidator;
 import io.jans.as.server.service.ClientService;
@@ -22,6 +25,7 @@ import org.slf4j.Logger;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.SecurityContext;
@@ -56,7 +60,13 @@ public class RegisterDeleteAction {
     @Inject
     private RegisterValidator registerValidator;
 
-    public Response delete(String clientId, String authorization, SecurityContext securityContext) {
+    @Inject
+    private ApplicationAuditLogger applicationAuditLogger;
+
+    public Response delete(String clientId, String authorization, HttpServletRequest httpRequest, SecurityContext securityContext) {
+        OAuth2AuditLog auditLog = new OAuth2AuditLog(ServerUtil.getIpAddress(httpRequest), Action.CLIENT_DELETE);
+        auditLog.setClientId(clientId);
+
         try {
             errorResponseFactory.validateComponentEnabled(ComponentType.REGISTRATION);
             String accessToken = tokenService.getToken(authorization);
@@ -78,6 +88,7 @@ public class RegisterDeleteAction {
             }
 
             clientService.remove(client);
+            auditLog.setSuccess(true);
 
             return Response
                     .status(Response.Status.NO_CONTENT)
@@ -91,6 +102,8 @@ public class RegisterDeleteAction {
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             throw errorResponseFactory.createWebApplicationException(Response.Status.INTERNAL_SERVER_ERROR, RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Failed to process request.");
+        } finally {
+            applicationAuditLogger.sendMessage(auditLog);
         }
     }
 }
