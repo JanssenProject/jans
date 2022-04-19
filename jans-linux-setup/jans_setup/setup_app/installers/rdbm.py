@@ -82,7 +82,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                 for cmd in (cmd_create_db, cmd_create_user, cmd_grant_previlages):
                     self.run(cmd, shell=True)
 
-        self.dbUtils.bind()
+        self.dbUtils.bind(force=True)
 
     def get_sql_col_type(self, attrname, table=None):
 
