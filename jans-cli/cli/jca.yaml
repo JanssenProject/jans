@@ -4962,9 +4962,6 @@ components:
           type: array
           items:
             type: string
-        clientName:
-          description: A human-readable name of the client.
-          type: string
         idTokenTokenBindingCnf:
           description: 'Specifies the JWT Confirmation Method member name (e.g. tbh) that the Relying Party expects when receiving Token Bound ID Tokens. The presence of this parameter indicates that the Relying Party supports Token Binding of ID Tokens. If omitted, the default is that the Relying Party does not support Token Binding of ID Tokens.'
           type: string
