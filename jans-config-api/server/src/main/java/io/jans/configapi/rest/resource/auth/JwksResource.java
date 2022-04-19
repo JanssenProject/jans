@@ -31,7 +31,7 @@ import org.slf4j.Logger;
 @Path(ApiConstants.CONFIG + ApiConstants.JWKS)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class JwksResource extends BaseResource {
+public class JwksResource extends ConfigBaseResource {
 
     @Inject
     Logger log;

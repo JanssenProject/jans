@@ -32,7 +32,7 @@ import org.slf4j.Logger;
 @Path(ApiConstants.CONFIG + ApiConstants.SMTP)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class ConfigSmtpResource extends BaseResource {
+public class ConfigSmtpResource extends ConfigBaseResource {
 
     @Inject
     Logger log;

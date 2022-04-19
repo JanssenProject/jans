@@ -29,7 +29,7 @@ import java.util.Properties;
 @Path(ApiConstants.CONFIG + ApiConstants.DATABASE + ApiConstants.COUCHBASE)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class CouchbaseConfigurationResource extends BaseResource {
+public class CouchbaseConfigurationResource extends ConfigBaseResource {
 
     @Inject
     Logger log;

@@ -41,7 +41,7 @@ import org.slf4j.Logger;
 @Path(ApiConstants.SCOPES)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class ScopesResource extends BaseResource {
+public class ScopesResource extends ConfigBaseResource {
 
     private static final String SCOPE = "scope";
 

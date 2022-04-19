@@ -7,7 +7,7 @@
 package io.jans.configapi.rest.health;
 
 import io.jans.configapi.model.status.StatsData;
-import io.jans.configapi.rest.resource.auth.BaseResource;
+import io.jans.configapi.rest.resource.auth.ConfigBaseResource;
 import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.util.ApiConstants;
 
@@ -24,7 +24,7 @@ import org.slf4j.Logger;
 @Path(ApiConstants.HEALTH)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public class ApiHealthCheck extends BaseResource {
+public class ApiHealthCheck extends ConfigBaseResource {
     
     @Inject
     Logger logger;

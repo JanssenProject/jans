@@ -27,7 +27,7 @@ import org.slf4j.Logger;
 @Path(ApiConstants.ACRS)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public class AcrsResource extends BaseResource {
+public class AcrsResource extends ConfigBaseResource {
 
     @Inject
     Logger log;
