@@ -107,7 +107,8 @@ class CBM:
     def exec_query(self, query):
         print("Executing n1ql {}".format(query))
         data = {'statement': query}
-        result = requests.post(self.n1ql_api, data=data, auth=self.auth, verify=False)
+        verify_ssl = False
+        result = requests.post(self.n1ql_api, data=data, auth=self.auth, verify=verify_ssl)
         return result
 
 
@@ -315,7 +316,7 @@ class KeyRegenerator:
 
 
     def obtain_data_sql(self):
-        sql_type, sql_host, sql_port, sql_db = re.match(r'jdbc:(.*?):\/\/(.*?):(\d*?)\/(.*?)$', self.credidentials['connection.uri']).groups()
+        sql_type, sql_host, sql_port, sql_db = re.match(r'jdbc:(.*?):\/\/(.*?):(\d*?)\/(.*)$', self.credidentials['connection.uri']).groups()
         sql_password = unobscure(self.credidentials['auth.userPassword'], key=self.salt)
 
         if sql_type == 'mysql':
@@ -352,10 +353,6 @@ class KeyRegenerator:
 
 
     def generate_keys(self):
-
-        #with open(self.keys_json_fn) as f:
-        #    self.keys_json = f.read()
-        #return
 
         print("Creating empty JKS keystore")
         run_command([
@@ -395,7 +392,7 @@ class KeyRegenerator:
 
         backup_file(self.keys_json_fn)
 
-        output = run_command(args)
+        run_command(args)
 
         with open(self.keys_json_fn) as f:
             self.keys_json = f.read()
@@ -430,13 +427,13 @@ class KeyRegenerator:
 
         valid1 = True
         for alias_name in json_aliases:
-            if not alias_name in jsk_aliases:
+            if alias_name not in jsk_aliases:
                 print(keystore_fn, "does not contain", alias_name)
                 valid1 = False
 
         valid2 = True
         for alias_name in jsk_aliases:
-            if not alias_name in json_aliases:
+            if alias_name not in json_aliases:
                 print(oxauth_keys_json_fn, "does not contain", alias_name)
                 valid2 = False
 
@@ -475,8 +472,8 @@ class KeyRegenerator:
 
 
     def update_couchbase(self):
-        result = self.cbm.exec_query("UPDATE {0} USE KEYS '{1}' set {0}.jansConfWebKeys={2}".format(self.default_bucket, self.key, self.keys_json))
-        result = self.cbm.exec_query("UPDATE {0} USE KEYS '{1}' set {0}.jansRevision={2}".format(self.default_bucket, self.key, self.revision+1))
+        self.cbm.exec_query("UPDATE {0} USE KEYS '{1}' set {0}.jansConfWebKeys={2}".format(self.default_bucket, self.key, self.keys_json))
+        self.cbm.exec_query("UPDATE {0} USE KEYS '{1}' set {0}.jansRevision={2}".format(self.default_bucket, self.key, self.revision+1))
 
 
 key_regenerator = KeyRegenerator()
