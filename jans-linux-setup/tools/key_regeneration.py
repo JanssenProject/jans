@@ -86,7 +86,6 @@ def run_command(args):
 
 
 def unobscure(s, key):
-    engine = pyDes.triple_des(key, pyDes.ECB, pad=None, padmode=pyDes.PAD_PKCS5)
     cipher = pyDes.triple_des(key)
     decrypted = cipher.decrypt(base64.b64decode(s), padmode=pyDes.PAD_PKCS5)
     return decrypted.decode()
