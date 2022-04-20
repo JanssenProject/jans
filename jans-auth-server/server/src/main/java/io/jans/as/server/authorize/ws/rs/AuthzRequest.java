@@ -33,9 +33,18 @@ public class AuthzRequest {
     private String customResponseHeaders;
     private String claims;
     private String authReqId;
+    private String httpMethod;
     private HttpServletRequest httpRequest;
     private HttpServletResponse httpResponse;
     private SecurityContext securityContext;
+
+    public String getHttpMethod() {
+        return httpMethod;
+    }
+
+    public void setHttpMethod(String httpMethod) {
+        this.httpMethod = httpMethod;
+    }
 
     public String getScope() {
         return scope;
