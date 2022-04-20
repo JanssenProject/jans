@@ -411,8 +411,6 @@ class KeyRegenerator:
         with open(self.keys_json_fn) as f:
             self.keys_json = f.read()
 
-        run_command(['cp', '-f', self.keys_json_fn, '/etc/certs'])
-
 
     def validate_keys(self):
 
@@ -455,6 +453,8 @@ class KeyRegenerator:
             print("Validation failed, not updating db")
             sys.exit(1)
 
+        # validation passed, we can copy keystore to /etc/certs
+        run_command(['cp', '-f', self.keystore_fn, '/etc/certs'])
 
 
     def update_spanner(self):
