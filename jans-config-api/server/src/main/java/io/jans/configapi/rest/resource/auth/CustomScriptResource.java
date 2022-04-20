@@ -193,13 +193,18 @@ public class CustomScriptResource extends ConfigBaseResource {
     @Path(ApiConstants.INUM_PATH)
     public Response patchAtribute(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString)
             throws JsonPatchException, IOException {
-        log.debug(" Custom Script Resource to patch - inum:{} , pathString:{}", inum, pathString);
+        if (log.isDebugEnabled()) {
+            log.debug("Custom Script Resource to patch - inum:{} , pathString:{}", escapeLog(inum),
+                    escapeLog(pathString));
+        }
+        
         CustomScript existingScript = customScriptService.getScriptByInum(inum);
         checkResourceNotNull(existingScript, CUSTOM_SCRIPT);
         existingScript = Jackson.applyPatch(pathString, existingScript);
         customScriptService.update(existingScript);
         existingScript = customScriptService.getScriptByInum(inum);
-        log.debug(" Custom Script Resource after patch - inum:{} , pathString:{}", inum, pathString);
+
+        log.debug(" Custom Script Resource after patch - existingScript:{}", existingScript);
         return Response.ok(existingScript).build();
     }
 
