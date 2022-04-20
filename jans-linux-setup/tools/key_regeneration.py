@@ -31,13 +31,15 @@ pydes_b64 = b'QlpoOTFBWSZTWZIkrogADOB/gHxwQAB7///3P+/f77////pgJLwB7nCgOjs19VgGgA
 pyDes = ModuleType('mod')
 exec(bz2.decompress(base64.b64decode(pydes_b64)).decode(), pyDes.__dict__)
 
+_VENDOR_ = 'jans'
+_AUTH_NAME_ = 'oxAuth' if _VENDOR_ == 'gluu' else 'jans-auth'
 
-parser = argparse.ArgumentParser('This script removes current key and creates new key for oxauth.')
+parser = argparse.ArgumentParser('This script removes current key and creates new key for {}.'.format(_AUTH_NAME_))
 ldap_group = parser.add_mutually_exclusive_group()
 ldap_group.add_argument('-expiration_hours', help="Keys expire in hours", type=int)
 ldap_group.add_argument('-expiration', help="Keys expire in days", default=365, type=int)
-ldap_group.add_argument('-jans-auth-client', help="Path to jans-auth-client-jar-with-dependencies.jar")
-ldap_group.add_argument('-data-dir', help="Directory to keep keys", default='/opt/jans/keys')
+ldap_group.add_argument('-auth-client', help="Path to {}-client-jar-with-dependencies.jar".format(_AUTH_NAME_.lower()))
+ldap_group.add_argument('-data-dir', help="Directory to keep keys", default='/opt/{}/keys'.format(_VENDOR_))
 argsp = parser.parse_args()
 
 
@@ -86,7 +88,6 @@ def run_command(args):
 
 
 def unobscure(s, key):
-    engine = pyDes.triple_des(key, pyDes.ECB, pad=None, padmode=pyDes.PAD_PKCS5)
     cipher = pyDes.triple_des(key)
     decrypted = cipher.decrypt(base64.b64decode(s), padmode=pyDes.PAD_PKCS5)
     return decrypted.decode()
@@ -108,7 +109,8 @@ class CBM:
     def exec_query(self, query):
         print("Executing n1ql {}".format(query))
         data = {'statement': query}
-        result = requests.post(self.n1ql_api, data=data, auth=self.auth, verify=False)
+        verify_ssl = False
+        result = requests.post(self.n1ql_api, data=data, auth=self.auth, verify=verify_ssl)
         return result
 
 
@@ -121,8 +123,9 @@ class Spanner:
     def get_session(self):
         emulator_host = self.credentials.get('connection.emulator-host')
         if emulator_host:
-            parsed_host = urlparse(emulator_host)
-            spanner_base_url = 'http://{}:9020/v1/'.format(parsed_host.scheme)
+            host, port = emulator_host.split(':')
+            scheme = 'http'
+            spanner_base_url = '{}://{}:9020/v1/'.format(scheme, host)
             session_url = os.path.join(
                 spanner_base_url,
                 'projects/{}/instances/{}/databases/{}/sessions'.format(
@@ -186,7 +189,18 @@ class KeyRegenerator:
 
     def __init__(self):
 
-        self.conf_dir = '/etc/jans/conf'
+        self.conf_dir = os.path.join('/etc', _VENDOR_, 'conf')
+
+        # vendor specific definitions
+        self.conf_dyn = 'jansConfDyn'
+        self.conf_web_keys = 'jansConfWebKeys'
+        self.conf_rev = 'jansRevision'
+        self.conf_objc = 'jansAppConf'
+        self.dnname = 'CN=Jans Auth CA Certificates'
+        self.prop_dn = 'jansAuth_ConfigurationEntryDN'
+
+        self.conf_keystore_secret = 'keyStoreSecret'
+        self.key_regenerator_jar = '{}-client-jar-with-dependencies.jar'.format(_AUTH_NAME_.lower())
 
         self.java_cmd = '/opt/jre/bin/java'
         self.keytool_cmd = '/opt/jre/bin/keytool'
@@ -194,19 +208,15 @@ class KeyRegenerator:
             self.java_cmd = shutil.which('java')
             self.keytool_cmd = shutil.which('keytool')
 
-        self.doc_id = 'jans-auth'
-        self.key = 'configuration_jansauth'
-
         self.data_dir = argsp.data_dir
         if not os.path.exists(self.data_dir):
             os.makedirs(self.data_dir)
 
         self.keys_json_fn = os.path.join(self.data_dir, 'keys.json')
-        self.keystore_fn = os.path.join(self.data_dir, 'jans-auth-keys.p12')
+        store_ext = 'p12' if _VENDOR_ == 'jans' else 'pkcs12'
+        self.keystore_fn = os.path.join(self.data_dir, '{}-keys.{}'.format(_AUTH_NAME_.lower(), store_ext))
 
-        self.sig_keys = 'RS256 RS384 RS512 ES256 ES256K ES384 ES512 PS256 PS384 PS512'
-        self.enc_keys = 'RSA1_5 RSA-OAEP ECDH-ES'
-        self.dnname = 'CN=Jans Auth CA Certificates'
+
         salt_fn = os.path.join(self.conf_dir, 'salt')
         salt_dict = jproperties_parser(salt_fn)
         self.salt = salt_dict['encodeSalt']
@@ -229,18 +239,22 @@ class KeyRegenerator:
 
 
     def find_auth_client_key_path(self):
-        if argsp.jans_auth_client:
-            self.client_jar_fn = argsp.jans_auth_client
+        if argsp.auth_client:
+            self.client_jar_fn = argsp.auth_client
         else:
             cur_dir = os.path.dirname(__file__)
             
-            file_list = glob.glob(os.path.join(cur_dir, 'jans-auth-client-jar-with-dependencies*.jar'))
-            if file_list:
-                self.client_jar_fn = max(file_list)
+            cur_dir_jar = os.path.join(cur_dir, self.key_regenerator_jar)
+            if os.path.exists(cur_dir_jar):
+                self.client_jar_fn
             else:
-                self.client_jar_fn = '/opt/dist/jans/jans-auth-client-jar-with-dependencies.jar'
+                self.client_jar_fn = os.path.join('/opt/dist', _VENDOR_, self.key_regenerator_jar)
 
-        print("Determining oxauth key generator path")
+        if not os.path.exists(self.client_jar_fn):
+            print("Can't find {}. Exiting ...".format(self.key_regenerator_jar))
+            sys.exit()
+
+        print("Determining {} key generator path".format(_AUTH_NAME_))
         # Determine oxauth key generator path
         oxauth_client_jar_zf = zipfile.ZipFile(self.client_jar_fn)
         for fn in oxauth_client_jar_zf.namelist():
@@ -249,8 +263,8 @@ class KeyRegenerator:
                 self.key_gen_path = fp.replace('/','.')
                 break
         else:
-            print("Can't determine jans-auth-client KeyGenerator path. Exiting...")
-            sys.exit(False)
+            print("Can't determine {}-client KeyGenerator path. Exiting...".format(_AUTH_NAME_.lower()))
+            sys.exit()
 
 
     def get_sig_enc_algs(self, web_keys):
@@ -264,33 +278,30 @@ class KeyRegenerator:
 
 
     def get_persistence_type(self):
-        prop_fn = os.path.join(self.conf_dir, 'jans.properties')
-        jans_properties = jproperties_parser(prop_fn)
-        self.auth_config_dn = jans_properties['jansAuth_ConfigurationEntryDN']
-        self.persistence_type = getattr(PersistenceType, jans_properties['persistence.type'])
+        prop_fn = os.path.join(self.conf_dir, '{}.properties'.format(_VENDOR_))
+        auth_properties = jproperties_parser(prop_fn)
+        self.auth_config_dn = auth_properties[self.prop_dn]
+        self.persistence_type = getattr(PersistenceType, auth_properties['persistence.type'])
         dn_s = self.auth_config_dn.split(',')
         self.doc_id = dn_s[0].split('=')[1]
         self.key = dn_s[1].split('=')[1] + '_' + self.doc_id
 
 
     def read_credidentials(self):
-        prop_fn = os.path.join(self.conf_dir, 'jans-{}.properties'.format(self.persistence_type.name))
+        prop_fn = os.path.join(self.conf_dir, '{}-{}.properties'.format(_VENDOR_, self.persistence_type.name))
         self.credidentials = jproperties_parser(prop_fn)
 
 
     def obtain_data_spanner(self):
         self.spanner = Spanner(self.credidentials)
-        data = self.spanner.execute_sql('SELECT dn, jansConfDyn, jansConfWebKeys, jansRevision from jansAppConf WHERE doc_id ="{}"'.format(self.doc_id))
+        data = self.spanner.execute_sql('SELECT dn, {}, {}, {} from {} WHERE doc_id ="{}"'.format(self.conf_dyn, self.conf_web_keys, self.conf_rev, self.conf_objc, self.doc_id))
 
-        ox_auth_conf_dynamic = json.loads(data['jansConfDyn'])
-        self.key_store_secret = ox_auth_conf_dynamic['keyStoreSecret']
-        self.get_sig_enc_algs(json.loads(data['jansConfWebKeys']))
-        self.revision = int(data['jansRevision']) + 1
-
+        ox_auth_conf_dynamic = json.loads(data[self.conf_dyn])
+        self.key_store_secret = ox_auth_conf_dynamic[self.conf_keystore_secret]
+        self.get_sig_enc_algs(json.loads(data[self.conf_web_keys]))
+        self.revision = int(data[self.conf_rev]) + 1
 
     def obtain_data_ldap(self):
-        print(self.credidentials)
-
         ldap_password = unobscure(self.credidentials['bindPassword'], key=self.salt)
         ldap_host, ldap_port = self.credidentials['servers'].split(',')[0].split(':')
 
@@ -302,20 +313,21 @@ class KeyRegenerator:
         self.ldap_conn.search(
                     search_base=self.auth_config_dn,
                     search_scope=ldap3.BASE,
-                    search_filter='(objectClass=jansAppConf)',
-                    attributes=['jansConfDyn', 'jansConfWebKeys', 'jansRevision']
+                    search_filter='(objectClass={})'.format(self.conf_objc),
+                    attributes=[self.conf_dyn, self.conf_web_keys, self.conf_rev]
                     )
 
         result = self.ldap_conn.response
-
-        ox_auth_conf_dynamic = json.loads(result[0]['attributes']['jansConfDyn'][0])
-        self.key_store_secret = ox_auth_conf_dynamic['keyStoreSecret']
-        self.get_sig_enc_algs(json.loads(result[0]['attributes']['jansConfWebKeys'][0]))
-        self.revision = int(result[0]['attributes']['jansRevision'][0])
+        attributes_s = 'attributes'
+        ox_auth_conf_dynamic = json.loads(result[0][attributes_s][self.conf_dyn][0])
+        self.key_store_secret = ox_auth_conf_dynamic[self.conf_keystore_secret]
+        self.get_sig_enc_algs(json.loads(result[0][attributes_s][self.conf_web_keys][0]))
+        self.revision = int(result[0][attributes_s][self.conf_rev][0])
 
 
     def obtain_data_sql(self):
-        sql_type, sql_host, sql_port, sql_db = re.match(r'jdbc:(.*?):\/\/(.*?):(\d*?)\/(.*?)$', self.credidentials['connection.uri']).groups()
+        sql_type, sql_host, sql_port, sql_db = re.match(r'jdbc:(.*?):\/\/(.*?):(\d*?)\/(.*)$', self.credidentials['connection.uri']).groups()
+        sql_db = sql_db.split('?')[0]
         sql_password = unobscure(self.credidentials['auth.userPassword'], key=self.salt)
 
         if sql_type == 'mysql':
@@ -328,14 +340,14 @@ class KeyRegenerator:
                              cursorclass=pymysql.cursors.DictCursor)
 
             self.cursor = self.sql_conn.cursor()
-            sql = 'SELECT `jansConfDyn`, `jansConfWebKeys`, `jansRevision` from `jansAppConf` WHERE `doc_id`=%s'
+            sql = 'SELECT `{}`, `{}`, `{}` from `{}` WHERE `doc_id`=%s'.format(self.conf_dyn, self.conf_web_keys, self.conf_rev, self.conf_objc)
             self.cursor.execute(sql, (self.doc_id,))
             result = self.cursor.fetchone()
 
-            ox_auth_conf_dynamic = json.loads(result['jansConfDyn'])
-            self.key_store_secret = ox_auth_conf_dynamic['keyStoreSecret']
-            self.get_sig_enc_algs(json.loads(result['jansConfWebKeys']))
-            self.revision = int(result['jansRevision'])
+            ox_auth_conf_dynamic = json.loads(result[self.conf_dyn])
+            self.key_store_secret = ox_auth_conf_dynamic[self.conf_keystore_secret]
+            self.get_sig_enc_algs(json.loads(result[self.conf_web_keys]))
+            self.revision = int(result[self.conf_rev])
 
 
     def obtain_data_couchbase(self):
@@ -345,37 +357,37 @@ class KeyRegenerator:
         self.default_bucket = self.credidentials['bucket.default']
         result = self.cbm.exec_query('SELECT * FROM {} USE KEYS "{}"'.format(self.default_bucket, self.key))
         configuration_oxauth = result.json()
-        self.key_store_secret = configuration_oxauth['results'][0][self.default_bucket]['jansConfDyn']['keyStoreSecret']
-        self.get_sig_enc_algs(configuration_oxauth['results'][0][self.default_bucket]['jansConfWebKeys'])
-        self.revision = configuration_oxauth['results'][0][self.default_bucket]['jansRevision']
+        results_s = 'results'
+        self.key_store_secret = configuration_oxauth[results_s][0][self.default_bucket][self.conf_dyn][self.conf_keystore_secret]
+        self.get_sig_enc_algs(configuration_oxauth[results_s][0][self.default_bucket][self.conf_web_keys])
+        self.revision = configuration_oxauth[results_s][0][self.default_bucket][self.conf_rev]
 
 
 
     def generate_keys(self):
 
-        #with open(self.keys_json_fn) as f:
-        #    self.keys_json = f.read()
-        #return
+        if _VENDOR_ == 'jans':
 
-        print("Creating empty JKS keystore")
-        run_command([
-                self.keytool_cmd, '-genkey',
-                '-alias', 'dummy',
-                '-keystore', self.keystore_fn,
-                '-storepass', self.key_store_secret,
-                '-keypass', self.key_store_secret,
-                '-dname', '"{}"'.format(self.dnname)
-                ])
+            print("Creating empty JKS keystore")
+            run_command([
+                    self.keytool_cmd, '-genkey',
+                    '-alias', 'dummy',
+                    '-keystore', self.keystore_fn,
+                    '-storepass', self.key_store_secret,
+                    '-keypass', self.key_store_secret,
+                    '-dname', '"{}"'.format(self.dnname)
+                    ])
 
-        print("Delete dummy key from JKS")
-        run_command([
-                self.keytool_cmd, '-delete',
-                '-alias', 'dummy',
-                '-keystore', self.keystore_fn,
-                '-storepass', self.key_store_secret,
-                '-keypass', self.key_store_secret,
-                '-dname', '"{}"'.format(self.dnname)
-                ])
+            print("Delete dummy key from JKS")
+            run_command([
+                    self.keytool_cmd, '-delete',
+                    '-alias', 'dummy',
+                    '-keystore', self.keystore_fn,
+                    '-storepass', self.key_store_secret,
+                    '-keypass', self.key_store_secret,
+                    '-dname', '"{}"'.format(self.dnname)
+                    ])
+
         print("Generating keys")
         args = [self.java_cmd, '-Dlog4j.defaultInitOverride=true',
                 '-cp', self.client_jar_fn, self.key_gen_path,
@@ -395,12 +407,10 @@ class KeyRegenerator:
 
         backup_file(self.keys_json_fn)
 
-        output = run_command(args)
+        run_command(args)
 
         with open(self.keys_json_fn) as f:
             self.keys_json = f.read()
-
-        run_command(['cp', '-f', self.keys_json_fn, '/etc/certs'])
 
 
     def validate_keys(self):
@@ -414,7 +424,6 @@ class KeyRegenerator:
                 ])
 
 
-        print(output)
         jsk_aliases = []
         for l in output[0].splitlines():
             ls = l.decode().strip()
@@ -422,7 +431,6 @@ class KeyRegenerator:
             alias_name = ls[n+1:].strip()
             jsk_aliases.append(alias_name)
 
-        print(jsk_aliases)
 
         keys = json.loads(self.keys_json)
 
@@ -430,13 +438,13 @@ class KeyRegenerator:
 
         valid1 = True
         for alias_name in json_aliases:
-            if not alias_name in jsk_aliases:
+            if alias_name not in jsk_aliases:
                 print(keystore_fn, "does not contain", alias_name)
                 valid1 = False
 
         valid2 = True
         for alias_name in jsk_aliases:
-            if not alias_name in json_aliases:
+            if alias_name not in json_aliases:
                 print(oxauth_keys_json_fn, "does not contain", alias_name)
                 valid2 = False
 
@@ -446,11 +454,13 @@ class KeyRegenerator:
             print("Validation failed, not updating db")
             sys.exit(1)
 
+        # validation passed, we can copy keystore to /etc/certs
+        run_command(['cp', '-f', self.keystore_fn, '/etc/certs'])
 
 
     def update_spanner(self):
         print("Updating Spanner db")
-        self.spanner.put_data('jansAppConf', ['doc_id', 'jansRevision', 'jansConfWebKeys'], [[self.doc_id, str(self.revision+1), self.keys_json]])
+        self.spanner.put_data(self.conf_objc, ['doc_id', self.conf_rev, self.conf_web_keys], [[self.doc_id, str(self.revision+1), self.keys_json]])
 
 
     def update_ldap(self):
@@ -459,24 +469,26 @@ class KeyRegenerator:
         self.ldap_conn.modify(
                         self.auth_config_dn,
                         {
-                            "jansConfWebKeys": [ldap3.MODIFY_REPLACE, self.keys_json],
-                            "jansRevision": [ldap3.MODIFY_REPLACE, str(self.revision+1)]
+                            self.conf_web_keys: [ldap3.MODIFY_REPLACE, self.keys_json],
+                            self.conf_rev: [ldap3.MODIFY_REPLACE, str(self.revision+1)]
                         }
                     )
-        
+
         self.ldap_conn.unbind()
 
 
     def update_sql(self):
-        sql = 'UPDATE `jansAppConf` SET `jansConfWebKeys`=%s, `jansRevision`=%s WHERE `doc_id`=%s'
+        print("Updating SQL db")
+        sql = 'UPDATE `{}` SET `{}`=%s, `{}`=%s WHERE `doc_id`=%s'.format(self.conf_objc, self.conf_web_keys, self.conf_rev)
         self.cursor.execute(sql, (self.keys_json, self.revision+1, self.doc_id))
         self.sql_conn.commit()
         self.sql_conn.close()
 
 
     def update_couchbase(self):
-        result = self.cbm.exec_query("UPDATE {0} USE KEYS '{1}' set {0}.jansConfWebKeys={2}".format(self.default_bucket, self.key, self.keys_json))
-        result = self.cbm.exec_query("UPDATE {0} USE KEYS '{1}' set {0}.jansRevision={2}".format(self.default_bucket, self.key, self.revision+1))
+        print("Updating Couchbase db")
+        self.cbm.exec_query("UPDATE {0} USE KEYS '{1}' set {0}.{3}={2}".format(self.default_bucket, self.key, self.keys_json, self.conf_web_keys))
+        self.cbm.exec_query("UPDATE {0} USE KEYS '{1}' set {0}.{3}={2}".format(self.default_bucket, self.key, self.revision+1, self.conf_rev))
 
 
 key_regenerator = KeyRegenerator()
