@@ -13,6 +13,7 @@ import io.jans.orm.model.SortOrder;
 
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
+import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.Response;
 import java.util.List;
@@ -61,6 +62,10 @@ public class BaseResource {
 
     public static void thorwBadRequestException(String msg) {
         throw new BadRequestException(getBadRequestException(msg));
+    }
+    
+    public static void thorwInternalServerException(String msg) {
+        throw new InternalServerErrorException(getInternalServerException(msg));
     }
 
     /**
