@@ -55,8 +55,8 @@ curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scr
 chmod 700 get_helm.sh
 ./get_helm.sh
 sudo apt-get install docker-ce docker-ce-cli containerd.io -y
-sudo microk8s config | sudo tee config > /dev/null
-KUBECONFIG="$PWD"/config
+sudo microk8s config | sudo tee ~/.kube/config > /dev/null
+KUBECONFIG=~/.kube/config
 sudo microk8s.kubectl create namespace jans --kubeconfig="$KUBECONFIG" || echo "namespace exists"
 
 if [[ $INSTALL_ISTIO == "true" ]]; then
