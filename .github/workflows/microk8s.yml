@@ -1,4 +1,4 @@
-name: mysql
+name: microk8s
 on:
   push:
     branches:

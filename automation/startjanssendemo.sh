@@ -62,9 +62,9 @@ sudo microk8s.kubectl create namespace jans --kubeconfig="$KUBECONFIG" || echo "
 if [[ $INSTALL_ISTIO == "true" ]]; then
   sudo microk8s.kubectl label ns jans istio-injection=enabled
   sudo curl -L https://istio.io/downloadIstio | sh -
-  cd istio-1.13.3
+  cd istio-*
   export PATH=$PWD/bin:$PATH
-  sudo istioctl install --set profile=demo -y
+  sudo ./bin/istioctl install --set profile=demo -y
   cd ..
 fi
 
