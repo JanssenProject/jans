@@ -18,7 +18,7 @@ send -- "python3 install.py"
 expect -exact "python3 install.py"
 send -- "\r"
 
-if  { $expect_out(buffer) eq  "Do you want to install these now? \[Y\/n\]" }  {
+if  { $expect_out(buffer) eq  "Install now? \[Y\/n\]" }  {
 send -- "y\r"
 }
 expect -re "(.*)\n"

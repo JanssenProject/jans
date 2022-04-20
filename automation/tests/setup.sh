@@ -39,13 +39,14 @@ echo "your passwd is ${PASSWD}"
 
 #USER=(root root)
 
+
 expect <<EOF
 spawn ssh-keygen  -t rsa -P '' -f ~/.ssh/id_rsa
 expect { "Overwrite (y/n)?" {send "y\r"} }
 spawn ssh-copy-id -f -i ${USERNAME}@${HOST}
 expect {
-  "yes/no" { send "yes\n";exp_continue }
-  "password" { send "${PASSWD}\r" }
+#  "yes/no" { send "yes\n";exp_continue }
+  "password:" { send "${PASSWD}\r" }
 }
 expect eof
 EOF
@@ -74,7 +75,7 @@ echo $OSVERSION
 			Suse)
 				echo "Login to Suse Host"
 				
-				./install.exp ${HOST} ${USERNAME} 2>&1 >log/installation.log
+				./install.exp ${HOST} ${USERNAME} 2>&1 >$LOG_LOCATION/install.log
                                 break;;
 
 
@@ -82,7 +83,13 @@ echo $OSVERSION
 				echo "Login to RHEL8 Host"
 				
 
-				./install.exp ${HOST} ${USERNAME} 2>&1 >log/installation.log
+				./install.exp ${HOST} ${USERNAME} 
+                                break;;
+			Rocky)
+				echo "Login to Rocky Linux 8 Host"
+
+
+                                ./install.exp ${HOST} ${USERNAME}
                                 break;;
 
 		esac

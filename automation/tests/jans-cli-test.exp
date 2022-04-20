@@ -1,0 +1,242 @@
+#!/usr/bin/expect -f
+
+set HOST [lindex $argv 0]
+set USERNAME [lindex $argv 1]
+set timeout -1
+spawn $env(SHELL)
+match_max 100000
+expect  "$"
+send -- "ssh ${USERNAME}@${HOST}"
+expect -exact "${HOST}"
+send -- "\r"
+expect -re "(.*)\n"
+
+
+send -- "/opt/jans/jans-cli/config-cli.py"
+expect -exact "/opt/jans/jans-cli/config-cli.py"
+send -- "\r"
+expect "Selection:"
+
+
+
+puts "checking Attriute"
+
+send -- "1"
+expect -exact "1" 
+send -- "\r"
+puts "Gets a list of Gluu attributes"
+expect  "Selection:"
+send -- "1\r"
+expect "limit"
+
+send -- "\r"
+
+expect "pattern"
+send -- "\r"
+expect "status"
+send -- "\r"
+expect "Selection:"
+send -- "b\r"
+expect "Selection:"
+puts  "Adds a new attribute"
+
+send -- "2"
+
+expect "2"
+send -- "\r"
+
+expect "name"
+
+send -- "myAttr\r"
+expect "displayName"
+send -- "myAttr\r"
+
+expect "description"
+send -- "myAttr\r"
+
+expect "dataType"
+send -- "STRING\r"
+
+expect "status"
+send -- "ACTIVE\r"
+
+expect "editType"
+send -- "ADMIN\r"
+
+expect "viewType"
+send -- "ADMIN\r"
+
+
+expect "Populate optional fields?"
+send -- "n\r"
+
+expect "Continue?"
+send -- "y\r"
+
+
+
+
+
+#if { $expect_out(buffer) ne "0" }
+# puts $expect_out(0,string) 
+
+
+#if { $expect_out(1,string)} 
+       puts $expect_out(1,string) 
+
+
+#set var $expect_out(buffer);
+#set fid [open /tmp/capture.txt w]
+#puts $fid $var
+
+expect "Selection:"
+send -- "b\r"
+expect "Selection:"
+send -- "3"
+expect -exact "3"
+send -- "\r"
+
+expect "inum:"
+send -- "3B47\r"
+expect "Selection:"
+send -- "3\r"
+expect "dataType"
+
+send -- "JSON\r"
+expect "Selection:"
+send -- "s\r" 
+
+expect "Continue?"
+send -- "y\r"
+expect "Selection:"
+send -- "b\r"
+expect "Selection:"
+send -- "4\r"
+
+expect "inum:"
+
+send -- "3B47\r"
+
+expect "Selection:"
+send -- "b\r"
+expect "Selection:"
+send -- "6\r"
+expect "inum:"
+send -- "3B47\r"
+expect "op:"
+send -- "replace\r"
+expect "path:"
+send -- "dataType\r"
+expect "value"
+send -- "STRING\r"
+expect "Another patch operation?"
+send -- "n\r"
+expect "Continue?"
+send -- "y\r"
+#expect { -re inum=(.*?) {send_error "inum not found" exit} }
+
+send -- "\r"
+expect "Selection:"
+send -- "b\r"
+expect "Selection:"
+send -- "b\r"
+expect "Selection:"
+
+puts "checking  Default Authentication Method" 
+
+send -- "2\r"
+expect "Selection:"
+send -- "1\r"
+#expect { "defaultAcr" {send_error "inum not found" exit} }
+#send -- "\r"
+expect "Selection:"
+send -- "b\r"
+expect "Selection:"
+send -- "2\r"
+expect "Selection:"
+send -- "1\r"
+expect "defaultAcr:"
+send -- "passwd_auth\r"
+expect "Selection:"
+
+
+send -- "s\r"
+expect "Continue?"
+send -- "y\r"
+#expect { "passwd_auth" {send_error "inum not found" exit} }
+
+send -- "b\r"
+expect "Selection:"
+send -- "b\r"
+expect "Selection:"
+
+puts "Cache Configuration"
+
+send -- "3\r"
+expect "Selection:"
+send -- "1\r"
+expect "Selection:"
+send -- "b\r"
+expect "Selection:"
+send -- "2\r"
+expect "op:"
+send -- "replace\r"
+expect "path:"
+send -- "memcachedConfiguration/bufferSize\r"
+expect "value"
+send -- "33768\r"
+expect "Another patch operation?"
+send -- "n\r"
+expect "Continue?"
+send -- "y\r"
+expect "33768"
+send -- "b\r"
+expect "Selection:"
+send -- "b\r"
+expect "Selection:"
+
+
+puts "Cache Configuration – Memcached"
+
+send -- "4\r"
+expect "Selection:"
+send -- "1\r"
+expect "bufferSize"
+send -- "b\r"
+expect "Selection:"
+send -- "2\r"
+expect "Selection:"
+send -- "1\r"
+expect "bufferSize"
+send -- "33456\r"
+expect "Selection:"
+send -- "s\r"
+expect "Continue?"
+send -- "y\r"
+expect "33456"
+send -- "b\r"
+expect "Selection:"
+send -- "3\r"
+expect "Selection:"
+expect "op:"
+send -- "replace\r"
+expect "path:"
+send -- "bufferSize"
+expect "value"
+send -- "33768\r"
+expect "Another patch operation?"
+send -- "n\r"
+expect "Continue?"
+send -- "y\r"
+expect "33768"
+send -- "b\r"
+expect "Selection:"
+send -- "b\r"
+expect "Selection:"
+
+
+puts "Cache Configuration – Redis"
+
+
+expect eof
+
