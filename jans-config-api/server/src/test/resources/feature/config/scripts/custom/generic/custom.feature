@@ -58,7 +58,8 @@ Feature: Verify Custom Script configuration endpoint
 	And print 'Patching script ' + '-' +response[0].scriptType + '-' +response[0].inum
 	Given url mainUrl + '/'+response[0].inum
 	And header Authorization = 'Bearer ' + accessToken
-	And def request_body = "[ {\"op\":\"replace\", \"path\": \"/enabled\", \"value\":"+response[0].enabled+" } ]")
+	And header Content-Type = 'application/json-patch+json'
+	And def request_body = "[ {\"op\":\"replace\", \"path\": \"/enabled\", \"value\":"+response[0].enabled+" } ]"
 	And print 'request_body ='+request_body
 	And request request_body
 	When method PATCH
