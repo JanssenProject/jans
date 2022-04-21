@@ -26,17 +26,12 @@ import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.function.Function;
 
-import org.slf4j.Logger;
-
 @Path(ApiConstants.CONFIG + ApiConstants.CACHE)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class CacheConfigurationResource extends ConfigBaseResource {
 
     private static final String ERROR_MSG = "Unable to apply patch.";
-
-    @Inject
-    Logger logger;
 
     @Inject
     ConfigurationService configurationService;
@@ -74,7 +69,7 @@ public class CacheConfigurationResource extends ConfigBaseResource {
             try {
                 return Jackson.applyPatch(requestString, cache);
             } catch (IOException | JsonPatchException e) {
-                throw new RuntimeException(ERROR_MSG, e);
+                throw new InternalServerErrorException(ERROR_MSG, e);
             }
         });
         return Response.ok(modifiedCache).build();
@@ -111,7 +106,7 @@ public class CacheConfigurationResource extends ConfigBaseResource {
                         Jackson.applyPatch(requestString, loadCacheConfiguration().getRedisConfiguration()));
                 return cache;
             } catch (IOException | JsonPatchException e) {
-                throw new RuntimeException(ERROR_MSG, e);
+                throw new InternalServerErrorException(ERROR_MSG, e);
             }
         });
         return Response.ok(loadCacheConfiguration().getRedisConfiguration()).build();
@@ -148,7 +143,7 @@ public class CacheConfigurationResource extends ConfigBaseResource {
                 cache.setInMemoryConfiguration(Jackson.applyPatch(requestString, cache.getInMemoryConfiguration()));
                 return cache;
             } catch (IOException | JsonPatchException e) {
-                throw new RuntimeException(ERROR_MSG, e);
+                throw new InternalServerErrorException(ERROR_MSG, e);
             }
         });
         return Response.ok(loadCacheConfiguration().getInMemoryConfiguration()).build();
@@ -187,7 +182,7 @@ public class CacheConfigurationResource extends ConfigBaseResource {
                         Jackson.applyPatch(requestString, cache.getNativePersistenceConfiguration()));
                 return cache;
             } catch (IOException | JsonPatchException e) {
-                throw new RuntimeException(ERROR_MSG, e);
+                throw new InternalServerErrorException(ERROR_MSG, e);
             }
         });
         return Response.ok(loadCacheConfiguration().getNativePersistenceConfiguration()).build();
@@ -223,10 +218,10 @@ public class CacheConfigurationResource extends ConfigBaseResource {
                 cache.setMemcachedConfiguration(Jackson.applyPatch(requestString, cache.getMemcachedConfiguration()));
                 return cache;
             } catch (IOException | JsonPatchException e) {
-                throw new RuntimeException(ERROR_MSG, e);
+                throw new InternalServerErrorException(ERROR_MSG, e);
             }
         });
         return Response.ok(loadCacheConfiguration().getMemcachedConfiguration()).build();
-    }
-
+    }   
+    
 }

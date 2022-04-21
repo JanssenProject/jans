@@ -1,5 +1,5 @@
-import contextlib
 import base64
+import contextlib
 import json
 import os
 from itertools import chain
@@ -217,6 +217,11 @@ def merge_extension_ctx(ctx):
 
 
 def merge_auth_ctx(ctx):
+    if os.environ.get("CN_PERSISTENCE_TYPE") in ("sql", "spanner"):
+        ctx["person_custom_object_class_list"] = "[]"
+    else:
+        ctx["person_custom_object_class_list"] = '["jansCustomPerson", "jansPerson"]'
+
     basedir = '/app/templates/jans-auth'
     file_mappings = {
         'auth_static_conf_base64': 'jans-auth-static-conf.json',

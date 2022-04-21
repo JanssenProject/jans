@@ -315,6 +315,12 @@
                 "scopes":[
                     "https://jans.io/oauth/config/scripts.delete"
                 ]
+            },
+            {
+                "httpMethods":["PATCH"],
+                "scopes":[
+                    "https://jans.io/oauth/config/scripts.write"
+                ]
             }
         ]
     },
