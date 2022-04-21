@@ -16,7 +16,14 @@ on:
       - "automation/startjanssendemo.sh"
   workflow_dispatch:
 jobs:
-  mysql:
+  microk8s:
+    strategy:
+      max-parallel: 6
+      matrix:
+        istio: ["true", "false"]
+        # add '"pgsql" when supported
+        persistence-backends: ["LDAP","MYSQL"]
+      fail-fast: false
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
@@ -27,63 +34,5 @@ jobs:
       run: |
           ip=$(ifconfig eth0 | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1')
           chmod u+x automation/startjanssendemo.sh
-          sudo bash ./automation/startjanssendemo.sh demoexample.jans.io MYSQL true $ip
-
-    - name: Test Janssen authorization server
-      id: test_kubernetes
-      run: |
-          sudo microk8s kubectl get po -n jans --kubeconfig="$PWD/config"
-          sudo microk8s kubectl -n jans wait --for=condition=available --timeout=600s deploy/janssen-auth-server --kubeconfig="$PWD/config" || sudo bash ./automation/collect_logs.sh auth "${{ secrets.MOAUTO_ROCKETCHAT_ID }}" "${{ secrets.MOAUTO_ROCKETCHAT_TOKEN }}" || echo "Not Found"
-          sudo microk8s kubectl logs -l APP_NAME=persistence-loader -c persistence -n jans --kubeconfig="$PWD/config" || echo "Not Found"
-          sudo microk8s kubectl logs -l APP_NAME=configurator -c config -n jans --kubeconfig="$PWD/config" || echo "Not Found"
-          sudo microk8s kubectl -n jans wait --for=condition=available --timeout=300s deploy/janssen-client-api --kubeconfig="$PWD/config" || sudo bash ./automation/collect_logs.sh client-api "${{ secrets.MOAUTO_ROCKETCHAT_ID }}" "${{ secrets.MOAUTO_ROCKETCHAT_TOKEN }}" || echo "Not Found"
-          sudo microk8s kubectl -n jans wait --for=condition=available --timeout=300s deploy/janssen-fido2 --kubeconfig="$PWD/config" || sudo bash ./automation/collect_logs.sh fido2 "${{ secrets.MOAUTO_ROCKETCHAT_ID }}" "${{ secrets.MOAUTO_ROCKETCHAT_TOKEN }}" || echo "Not Found"
-          sudo microk8s kubectl -n jans wait --for=condition=available --timeout=300s deploy/janssen-scim --kubeconfig="$PWD/config" || sudo bash ./automation/collect_logs.sh scim "${{ secrets.MOAUTO_ROCKETCHAT_ID }}" "${{ secrets.MOAUTO_ROCKETCHAT_TOKEN }}" || echo "Not Found"
-  ldap:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-
-    - name: Test dev setup
-      id: start_up_script
-      run: |
-          ip=$(ifconfig eth0 | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1')
-          chmod u+x automation/startjanssendemo.sh
-          sudo bash ./automation/startjanssendemo.sh demoexample.jans.io LDAP true $ip
-
-    - name: Test Janssen authorization server
-      id: test_kubernetes
-      run: |
-          sudo microk8s kubectl get po -n jans --kubeconfig="$PWD/config"
-          sudo microk8s kubectl -n jans wait --for=condition=available --timeout=600s deploy/janssen-auth-server --kubeconfig="$PWD/config" || sudo bash ./automation/collect_logs.sh auth "${{ secrets.MOAUTO_ROCKETCHAT_ID }}" "${{ secrets.MOAUTO_ROCKETCHAT_TOKEN }}" || echo "Not Found"
-          sudo microk8s kubectl logs -l APP_NAME=persistence-loader -c persistence -n jans --kubeconfig="$PWD/config" || echo "Not Found"
-          sudo microk8s kubectl logs -l APP_NAME=configurator -c config -n jans --kubeconfig="$PWD/config" || echo "Not Found"
-          sudo microk8s kubectl -n jans wait --for=condition=available --timeout=300s deploy/janssen-client-api --kubeconfig="$PWD/config" || sudo bash ./automation/collect_logs.sh client-api "${{ secrets.MOAUTO_ROCKETCHAT_ID }}" "${{ secrets.MOAUTO_ROCKETCHAT_TOKEN }}" || echo "Not Found"
-          sudo microk8s kubectl -n jans wait --for=condition=available --timeout=300s deploy/janssen-fido2 --kubeconfig="$PWD/config" || sudo bash ./automation/collect_logs.sh fido2 "${{ secrets.MOAUTO_ROCKETCHAT_ID }}" "${{ secrets.MOAUTO_ROCKETCHAT_TOKEN }}" || echo "Not Found"
-          sudo microk8s kubectl -n jans wait --for=condition=available --timeout=300s deploy/janssen-scim --kubeconfig="$PWD/config" || sudo bash ./automation/collect_logs.sh scim "${{ secrets.MOAUTO_ROCKETCHAT_ID }}" "${{ secrets.MOAUTO_ROCKETCHAT_TOKEN }}" || echo "Not Found"
-
-  ldap-istio:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-
-    - name: Test dev setup
-      id: start_up_script
-      run: |
-          ip=$(ifconfig eth0 | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1')
-          chmod u+x automation/startjanssendemo.sh
-          sudo bash ./automation/startjanssendemo.sh demoexample.jans.io LDAP true $ip true
-
-    - name: Test Janssen authorization server
-      id: test_kubernetes
-      run: |
-          sudo microk8s kubectl get po -n jans --kubeconfig="$PWD/config"
-          sudo microk8s kubectl -n jans wait --for=condition=available --timeout=600s deploy/janssen-auth-server --kubeconfig="$PWD/config" || sudo bash ./automation/collect_logs.sh auth "${{ secrets.MOAUTO_ROCKETCHAT_ID }}" "${{ secrets.MOAUTO_ROCKETCHAT_TOKEN }}" || echo "Not Found"
-          sudo microk8s kubectl logs -l APP_NAME=persistence-loader -c persistence -n jans --kubeconfig="$PWD/config" || echo "Not Found"
-          sudo microk8s kubectl logs -l APP_NAME=configurator -c config -n jans --kubeconfig="$PWD/config" || echo "Not Found"
-          sudo microk8s kubectl -n jans wait --for=condition=available --timeout=300s deploy/janssen-client-api --kubeconfig="$PWD/config" || sudo bash ./automation/collect_logs.sh client-api "${{ secrets.MOAUTO_ROCKETCHAT_ID }}" "${{ secrets.MOAUTO_ROCKETCHAT_TOKEN }}" || echo "Not Found"
-          sudo microk8s kubectl -n jans wait --for=condition=available --timeout=300s deploy/janssen-fido2 --kubeconfig="$PWD/config" || sudo bash ./automation/collect_logs.sh fido2 "${{ secrets.MOAUTO_ROCKETCHAT_ID }}" "${{ secrets.MOAUTO_ROCKETCHAT_TOKEN }}" || echo "Not Found"
-          sudo microk8s kubectl -n jans wait --for=condition=available --timeout=300s deploy/janssen-scim --kubeconfig="$PWD/config" || sudo bash ./automation/collect_logs.sh scim "${{ secrets.MOAUTO_ROCKETCHAT_ID }}" "${{ secrets.MOAUTO_ROCKETCHAT_TOKEN }}" || echo "Not Found"
-
+          sudo bash ./automation/startjanssendemo.sh demoexample.jans.io ${{ matrix.persistence-backends }} true $ip ${{ matrix.istio }}
+          sudo bash ./automation/analyze_test_microk8s_setup.sh "${{ secrets.MOAUTO_ROCKETCHAT_TOKEN }}" "${{ secrets.MOAUTO_ROCKETCHAT_ID }}"

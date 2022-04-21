@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 JANS_FQDN=$1
 JANS_PERSISTENCE=$2
 JANS_CI_CD_RUN=$3
@@ -204,6 +204,10 @@ auth-server:
     initialDelaySeconds: 300
     periodSeconds: 25
     timeoutSeconds: 5
+opendj:
+  image:
+    repository: gluufedertaion/opendj
+    tag: 5.0.0_dev
 EOF
 sudo helm repo add janssen https://janssenproject.github.io/jans/charts
 sudo helm repo update
@@ -223,6 +227,6 @@ echo -e "Testing fido2-configuration endpoint.. \n"
 curl -k https://$JANS_FQDN/.well-known/fido2-configuration
 cd ..
 EOF
-sudo microk8s.kubectl -n jans wait --for=condition=available --timeout=600s deploy/janssen-auth-server --kubeconfig="$KUBECONFIG" || echo "Couldn't find deployment running tests anyways..."
+sudo microk8s.kubectl -n jans wait --for=condition=available --timeout=300s deploy/janssen-auth-server --kubeconfig="$KUBECONFIG" || echo "Couldn't find deployment running tests anyways..."
 sudo bash testendpoints.sh
 echo -e "You may re-execute bash testendpoints.sh to do a quick test to check the openid-configuration endpoint."
