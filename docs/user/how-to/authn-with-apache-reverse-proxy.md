@@ -46,7 +46,7 @@ Use steps below to configure Janssen server.
   - Run command below on host running Janssen Server
   
     ```
-    /opt/jans/jans-cli/config-cli.py`
+    /opt/jans/jans-cli/config-cli.py
     ```
    
   - Navigate through options to start registering new OpenID Connect client
