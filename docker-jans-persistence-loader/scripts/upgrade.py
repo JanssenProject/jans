@@ -60,8 +60,14 @@ JANS_STAT_SCOPE_DN = "inum=C4F7,ou=scopes,o=jans"
 
 def _transform_auth_dynamic_config(conf):
     should_update = False
+    distribution = os.environ.get("CN_DISTRIBUTION", "default")
 
-    if os.environ.get("CN_DISTRIBUTION", "default") == "openbanking":
+    if "redirectUrisRegexEnabled" not in conf:
+        # enable only if not using openbanking distro
+        conf["redirectUrisRegexEnabled"] = bool(distribution != "openbanking")
+        should_update = True
+
+    if distribution == "openbanking":
         if "dcrAuthorizationWithMTLS" not in conf:
             conf["dcrAuthorizationWithMTLS"] = False
             should_update = True
@@ -81,6 +87,14 @@ def _transform_auth_dynamic_config(conf):
 
         if "private_key_jwt" not in conf["tokenEndpointAuthMethodsSupported"]:
             conf["tokenEndpointAuthMethodsSupported"].append("private_key_jwt")
+            should_update = True
+
+        if "forceSignedRequestObject" not in conf:
+            conf["forceSignedRequestObject"] = False
+            should_update = True
+
+        if conf["redirectUrisRegexEnabled"]:
+            conf["redirectUrisRegexEnabled"] = False
             should_update = True
 
     if "grantTypesAndResponseTypesAutofixEnabled" not in conf:
@@ -108,16 +122,19 @@ def _transform_auth_dynamic_config(conf):
         ))
         should_update = True
 
-    if "redirectUrisRegexEnabled" not in conf:
-        conf["redirectUrisRegexEnabled"] = True
-        should_update = True
-
     if "useHighestLevelScriptIfAcrScriptNotFound" not in conf:
         conf["useHighestLevelScriptIfAcrScriptNotFound"] = True
         should_update = True
 
     if "httpLoggingExcludePaths" not in conf:
         conf["httpLoggingExcludePaths"] = conf.pop("httpLoggingExludePaths", [])
+        should_update = True
+
+    if all([
+        os.environ.get("CN_PERSISTENCE_TYPE") in ("sql", "spanner"),
+        conf["personCustomObjectClassList"]
+    ]):
+        conf["personCustomObjectClassList"] = []
         should_update = True
 
     # return the conf and flag to determine whether it needs update or not
