@@ -15,9 +15,9 @@ collect_logs() {
   t=0
   while true; do
     if [[ $SERVICE == "client-api" ]];then
-      kubectl cp -n jans "$POD_NAME":opt/client-api/logs/ jans-"$SERVICE"-logs && zip -r jans-"$SERVICE"-logs-"$DATE".zip jans-"$SERVICE"-logs && rm -rf jans-"$SERVICE"-logs/ || t=$(( t + 60 ))
+      kubectl cp -n jans "$POD_NAME":opt/client-api/logs/ jans-"$SERVICE"-logs && zip -r jans-"$SERVICE"-logs-"$DATE".zip jans-"$SERVICE"-logs && rm -rf jans-"$SERVICE"-logs/ && t=120 || t=$(( t + 60 ))
     else
-      kubectl cp -n jans "$POD_NAME":opt/jans/jetty/jans-"$SERVICE"/logs jans-"$SERVICE"-logs && zip -r jans-"$SERVICE"-logs-"$DATE".zip jans-"$SERVICE"-logs && rm -rf jans-"$SERVICE"-logs/ || t=$(( t + 60 ))
+      kubectl cp -n jans "$POD_NAME":opt/jans/jetty/jans-"$SERVICE"/logs jans-"$SERVICE"-logs && zip -r jans-"$SERVICE"-logs-"$DATE".zip jans-"$SERVICE"-logs && rm -rf jans-"$SERVICE"-logs/ && t=120 || t=$(( t + 60 ))
     fi
     if [[ $t == 120 ]];then
       break
