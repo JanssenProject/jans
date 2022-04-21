@@ -6,7 +6,7 @@ FROM alpine:3.15.4
 
 RUN apk update \
     && apk upgrade \
-    && apk add --no-cache py3-pip curl tini py3-cryptography py3-psycopg2 py3-grpcio \
+    && apk add --no-cache python3 curl tini py3-cryptography py3-psycopg2 py3-grpcio \
     && apk add --no-cache --virtual .build-deps git wget
 
 # ======
@@ -14,8 +14,10 @@ RUN apk update \
 # ======
 
 COPY requirements.txt /app/requirements.txt
-RUN pip3 install --no-cache-dir -U pip wheel \
-    && pip3 install --no-cache-dir --default-timeout=300 -r /app/requirements.txt
+RUN python3 -m ensurepip \
+    && pip3 install --no-cache-dir -U pip wheel \
+    && pip3 install --no-cache-dir --default-timeout=300 -r /app/requirements.txt \
+    && pip3 uninstall -y pip wheel
 
 # =====================
 # jans-linux-setup sync
