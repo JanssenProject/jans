@@ -12,11 +12,20 @@ collect_logs() {
   POD_NAME=$(kubectl get pods --selector=app="$APP" --output=jsonpath={.items[0]..metadata.name} -n jans)
   IFS="=" read name BUILD <<< "$(kubectl exec "$POD_NAME" -n jans -- printenv | grep "CN_BUILD_DATE=")"
   echo "Found $POD_NAME built on $BUILD"
-  if [[ $SERVICE == "client-api" ]];then
-    kubectl cp -n jans "$POD_NAME":opt/client-api/logs/ jans-"$SERVICE"-logs && zip -r jans-"$SERVICE"-logs-"$DATE".zip jans-"$SERVICE"-logs && rm -rf jans-"$SERVICE"-logs/
-  else
-    kubectl cp -n jans "$POD_NAME":opt/jans/jetty/jans-"$SERVICE"/logs jans-"$SERVICE"-logs && zip -r jans-"$SERVICE"-logs-"$DATE".zip jans-"$SERVICE"-logs && rm -rf jans-"$SERVICE"-logs/
-  fi
+  t=0
+  while true; do
+    if [[ $SERVICE == "client-api" ]];then
+      kubectl cp -n jans "$POD_NAME":opt/client-api/logs/ jans-"$SERVICE"-logs && zip -r jans-"$SERVICE"-logs-"$DATE".zip jans-"$SERVICE"-logs && rm -rf jans-"$SERVICE"-logs/ || t=$(( t + 60 ))
+    else
+      kubectl cp -n jans "$POD_NAME":opt/jans/jetty/jans-"$SERVICE"/logs jans-"$SERVICE"-logs && zip -r jans-"$SERVICE"-logs-"$DATE".zip jans-"$SERVICE"-logs && rm -rf jans-"$SERVICE"-logs/ || t=$(( t + 60 ))
+    fi
+    if [[ $t == 120 ]];then
+      break
+    else
+      echo "Pod is probably not up! Retrying fetching logs..."
+      sleep 60
+    fi
+  done
 
   curl "https://chat.gluu.org/api/v1/rooms.upload/YNz6rg7eNpngiygkv" \
       -F "file=@jans-$SERVICE-logs-$DATE.zip" \
