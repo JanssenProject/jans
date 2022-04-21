@@ -37,10 +37,10 @@ collect_logs() {
 
 kubectl get po -n jans
 echo "--------------------------------------Outputting persistence loader logs--------------------------------------"
-sudo microk8s kubectl logs -l APP_NAME=persistence-loader -c persistence -n jans
+kubectl logs -l APP_NAME=persistence-loader -c persistence -n jans
 echo "--------------------------------------------------------------------------------------------------------------"
 echo "--------------------------------------Outputting configurator logs--------------------------------------------"
-sudo microk8s kubectl logs -l APP_NAME=configurator -c config -n jans
+kubectl logs -l APP_NAME=configurator -c config -n jans
 echo "--------------------------------------------------------------------------------------------------------------"
 
 SERVICES="auth-server client-api fido2 scim"

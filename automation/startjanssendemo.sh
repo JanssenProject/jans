@@ -56,6 +56,7 @@ chmod 700 get_helm.sh
 ./get_helm.sh
 sudo apt-get install docker-ce docker-ce-cli containerd.io -y
 sudo microk8s config | sudo tee ~/.kube/config > /dev/null
+sudo snap alias microk8s.kubectl kubectl
 KUBECONFIG=~/.kube/config
 sudo microk8s.kubectl create namespace jans --kubeconfig="$KUBECONFIG" || echo "namespace exists"
 
@@ -206,7 +207,7 @@ auth-server:
     timeoutSeconds: 5
 opendj:
   image:
-    repository: gluufedertaion/opendj
+    repository: gluufederation/opendj
     tag: 5.0.0_dev
 EOF
 sudo helm repo add janssen https://janssenproject.github.io/jans/charts
