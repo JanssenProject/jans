@@ -1,4 +1,4 @@
-FROM alpine:3.14.4
+FROM alpine:3.15.4
 
 # ===============
 # Alpine packages
@@ -6,9 +6,8 @@ FROM alpine:3.14.4
 
 RUN apk update \
     && apk upgrade \
-    && apk add --no-cache py3-pip curl tini py3-cryptography py3-psycopg2 \
-    && apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/v3.15/community py3-grpcio \
-    && apk add --no-cache --virtual build-deps git wget
+    && apk add --no-cache py3-pip curl tini py3-cryptography py3-psycopg2 py3-grpcio \
+    && apk add --no-cache --virtual .build-deps git wget
 
 # ======
 # Python
@@ -22,7 +21,7 @@ RUN pip3 install --no-cache-dir -U pip wheel \
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_LINUX_SETUP_VERSION=f241cdfd569daf054c844978ee868f1879442dbf
+ENV JANS_LINUX_SETUP_VERSION=fc9544c861f30eb7370f635b07d9810ae33a7dba
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -75,7 +74,7 @@ RUN rm -rf /tmp/jans
 # Cleanup
 # =======
 
-RUN apk del build-deps \
+RUN apk del .build-deps \
     && rm -rf /var/cache/apk/*
 
 # =======
