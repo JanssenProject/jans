@@ -17,24 +17,15 @@ For development and POC purposes, 4GB RAM and 10 GB HDD should be available for 
   
 
 #### Prerequisites
-- Existing Apache reverse proxy that is SSL enabled. Application resources which need to be protected using authentication are accessed via this reverse proxy. Also, we will assume that Apache proxy server is accessible at FQDN `https://test.apache.rp.io/`
-- For simplicity, we will use one of the web page hosted directly on Apache server as application resource and configure authentication for the same.
+- Installed Apache reverse proxy that is SSL enabled
+- Installed Janssen server. Refer to [Janssen Installation Guide](https://github.com/JanssenProject/jans/wiki#janssen-installation) for instructions.
 
-## Setup Janssen server 
+## Component Setup
 
-Commands below can be used to install Janssen Authorization Server on an Ubuntu 20.04 system. More installation options are available [here](https://github.com/JanssenProject/jans/wiki#janssen-installation). For this guide, we would assume that Janssen server host is accessible via FQDN `https://janssen.op.io/`.
-
-```
-wget https://repo.gluu.org/jans/jans_1.0.0~ubuntu20.04_amd64.deb
-sudo dpkg -i jans_1.0.0~ubuntu20.04_amd64.deb
-sudo apt-get -f install
-sudo python3 /opt/jans/jans-setup/setup.py
-```
-  
-If Janssen server is correctly installed, metadata URL below should be accessible.
-```
-https://janssen.op.io/.well-known/openid-configuration
-```
+In this setup, we have four important components.
+- User agent
+- Apache reverse proxy with `mod_auth_openidc`. Together they work as `relying party (RP)`. We will assume that this host accessible with FQDN `https://test.apache.rp.io/`. For simplicity, we will also assume that resources that need to be protected via authentication are hosted on same server. In production setups protected resources are usually hosted on separate server that can only be accessed via proxy.
+- Janssen server, which is our open-id connect provider (OP). We will assume that Janssen server is accessible at FQDN `https://janssen.op.io/`
 
 #### Configure Janssen server
 
