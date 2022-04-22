@@ -17,6 +17,7 @@ import io.jans.orm.annotation.JsonObject;
 import io.jans.orm.annotation.ObjectClass;
 
 import java.io.Serializable;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -86,7 +87,8 @@ public class UmaPermission implements Serializable {
     }
 
     public void resetTtlFromExpirationDate() {
-        final Integer calculatedTtl = Util.getNumberOfSecondFromNow(getExpirationDate());
+        final Long duration = Duration.between(new Date().toInstant(), getExpirationDate().toInstant()).getSeconds();
+        final Integer calculatedTtl = duration.intValue();
         if (calculatedTtl != null) {
             setTtl(calculatedTtl);
         }

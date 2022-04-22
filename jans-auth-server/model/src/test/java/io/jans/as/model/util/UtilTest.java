@@ -417,33 +417,6 @@ public class UtilTest extends BaseTest {
     }
 
     @Test
-    public void getNumberOfSecondFromNow_null_zero() {
-        showTitle("getNumberOfSecondFromNow_null_zero");
-        Integer seconds = Util.getNumberOfSecondFromNow(null);
-        assertNotNull(seconds);
-        assertEquals(seconds, Integer.valueOf(0));
-    }
-
-    @Test
-    public void getNumberOfSecondFromNow_dateInPast_null() {
-        showTitle("getNumberOfSecondFromNow_dateInPast_null");
-        Calendar cal = Calendar.getInstance();
-        cal.setTimeInMillis(cal.getTimeInMillis() - 10000L);
-        Integer seconds = Util.getNumberOfSecondFromNow(cal.getTime());
-        assertNull(seconds);
-    }
-
-    @Test
-    public void getNumberOfSecondFromNow_dateInFuture_intNumberOfSeconds() {
-        showTitle("getNumberOfSecondFromNow_dateInFuture_intNumberOfSeconds");
-        Calendar cal = Calendar.getInstance();
-        cal.setTimeInMillis(cal.getTimeInMillis() + 10999L);
-        Integer seconds = Util.getNumberOfSecondFromNow(cal.getTime());
-        assertNotNull(seconds);
-        assertTrue(seconds >= 10);
-    }
-
-    @Test
     public void createExpirationDate_nullLifeTime_IllegalArgumentException() {
         showTitle("createExpirationDate_nullLifeTime_IllegalArgumentException");
         assertThrows(IllegalArgumentException.class, () -> Util.createExpirationDate(null));
