@@ -1,8 +1,22 @@
 # Janssen CLI
 
 `jans-cli` module is a command line interface for configuring the Janssen software, providing both interactive and simple single line options for configuration. This module interacts with Janssen server via RESTful configuration APIs that server exposes. Using these REST APIs, `jans-cli` allows configuration of authorization server and its major modules for FIDO2, SCIM, OpenID Connect etc. 
+</br>
+</br>
 
-![Component Diagram](../../assets/user/using-jans-cli/images/image-using-jans-cli-comp-04222022.png)
+<p align="center">
+ <img src="../../assets/user/using-jans-cli/images/image-using-jans-cli-comp-04222022.png">
+</p>
+
+`jans-cli` offers two modes in which it can be used. Command-line and interactive mode. 
+
+Using command-line mode you can run a single command with all the required inputs to perform the operation you want. A sample command-line may look like below:
+
+```
+/opt/jans/jans-cli/config-cli.py --operation-id get-attributes --endpoint-args limit:5
+```
+
+Interactive mode is a terminal based menu-driven mode where user can select intended action from available options and also provide input parameters required for that action.
 
 # Documentation Index
 
