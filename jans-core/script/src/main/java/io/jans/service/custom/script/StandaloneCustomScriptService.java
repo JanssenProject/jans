@@ -6,7 +6,7 @@
 
 package io.jans.service.custom.script;
 
-import javax.enterprise.inject.Vetoed;
+import jakarta.enterprise.inject.Vetoed;
 
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.service.PythonService;

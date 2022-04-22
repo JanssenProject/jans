@@ -11,13 +11,13 @@ import io.jans.scim2.client.UserBaseTest;
 
 import org.testng.annotations.Test;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static javax.ws.rs.core.Response.Status.*;
+import static jakarta.ws.rs.core.Response.Status.*;
 import static org.testng.Assert.*;
 
 public class ComplexSearchUserTest extends UserBaseTest {

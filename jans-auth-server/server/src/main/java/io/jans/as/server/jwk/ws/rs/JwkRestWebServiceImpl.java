@@ -11,10 +11,10 @@ import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.jwk.JSONWebKey;
 import org.slf4j.Logger;
 
-import javax.inject.Inject;
-import javax.ws.rs.Path;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.SecurityContext;
 import java.util.List;
 import java.util.stream.Collectors;
 

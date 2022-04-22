@@ -15,8 +15,8 @@ from io.jans.service.cdi.util import CdiUtil
 from io.jans.util import StringHelper
 from java.util import Arrays
 from java.util.concurrent.locks import ReentrantLock
-from javax.ws.rs import ClientErrorException
-from javax.ws.rs.core import Response
+from jakarta.ws.rs import ClientErrorException
+from jakarta.ws.rs.core import Response
 
 import java
 import sys

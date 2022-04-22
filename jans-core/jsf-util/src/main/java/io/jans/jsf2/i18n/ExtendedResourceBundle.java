@@ -25,7 +25,7 @@ import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
 
-import javax.faces.context.FacesContext;
+import jakarta.faces.context.FacesContext;
 
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;

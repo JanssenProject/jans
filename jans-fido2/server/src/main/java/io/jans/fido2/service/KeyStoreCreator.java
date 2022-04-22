@@ -16,8 +16,8 @@ import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import io.jans.fido2.model.cert.CertificateHolder;
 import org.slf4j.Logger;

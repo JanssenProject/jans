@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import io.jans.as.model.configuration.Configuration;
 
+import jakarta.enterprise.inject.Vetoed;
 /**
  * Represents the configuration JSON file.
  *
@@ -19,6 +20,7 @@ import io.jans.as.model.configuration.Configuration;
  * @version May 13, 2020
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Vetoed
 public class AppConfiguration implements Configuration {
 
     private String issuer;

@@ -11,10 +11,10 @@ import static io.jans.eleven.model.DeleteKeyResponseParam.DELETED;
 import java.security.KeyStoreException;
 import java.security.PublicKey;
 
-import javax.inject.Inject;
-import javax.ws.rs.Path;
-import javax.ws.rs.core.CacheControl;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.core.CacheControl;
+import jakarta.ws.rs.core.Response;
 
 import io.jans.eleven.service.PKCS11Service;
 import io.jans.eleven.util.StringUtils;

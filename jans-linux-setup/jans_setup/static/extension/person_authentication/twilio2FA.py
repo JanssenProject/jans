@@ -13,7 +13,7 @@ from io.jans.as.server.util import ServerUtil
 from io.jans.util import StringHelper
 from io.jans.util import ArrayHelper
 from java.util import Arrays
-from javax.faces.application import FacesMessage
+from jakarta.faces.application import FacesMessage
 from io.jans.jsf2.message import FacesMessages
 
 import com.twilio.Twilio as Twilio

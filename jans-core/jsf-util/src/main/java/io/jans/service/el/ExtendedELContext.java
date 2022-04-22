@@ -6,7 +6,7 @@
 
 package io.jans.service.el;
 
-import javax.el.ELContext;
+import jakarta.el.ELContext;
 
 /**
  * @author Yuriy Movchan Date: 05/22/2017

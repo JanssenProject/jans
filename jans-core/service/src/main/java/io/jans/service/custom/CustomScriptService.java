@@ -6,8 +6,8 @@
 
 package io.jans.service.custom;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import io.jans.service.OrganizationService;
 import io.jans.service.custom.script.AbstractCustomScriptService;

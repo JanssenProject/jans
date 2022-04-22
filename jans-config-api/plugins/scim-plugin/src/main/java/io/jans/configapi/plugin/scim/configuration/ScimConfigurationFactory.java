@@ -8,8 +8,8 @@ package io.jans.configapi.plugin.scim.configuration;
 
 import io.jans.configapi.configuration.ConfigurationFactory;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 

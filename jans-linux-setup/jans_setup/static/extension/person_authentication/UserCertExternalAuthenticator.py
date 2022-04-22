@@ -7,7 +7,7 @@
 
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
-from javax.faces.context import FacesContext
+from jakarta.faces.context import FacesContext
 from io.jans.as.server.security import Identity
 from io.jans.as.server.service import AuthenticationService
 from io.jans.as.server.service import UserService
@@ -251,11 +251,11 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "Cert. Prepare for step 2. Storing user certificate obtained from 'X-ClientCert' header"
                 return True
 
-            # Try to get certificate from attribute javax.servlet.request.X509Certificate
-            x509Certificates = request.getAttribute('javax.servlet.request.X509Certificate')
+            # Try to get certificate from attribute jakarta.servlet.request.X509Certificate
+            x509Certificates = request.getAttribute('jakarta.servlet.request.X509Certificate')
             if (x509Certificates != None) and (len(x509Certificates) > 0):
                 identity.setWorkingParameter("cert_x509", self.certToString(x509Certificates[0]))
-                print "Cert. Prepare for step 2. Storing user certificate obtained from 'javax.servlet.request.X509Certificate' attribute"
+                print "Cert. Prepare for step 2. Storing user certificate obtained from 'jakarta.servlet.request.X509Certificate' attribute"
                 return True
 
         if step < 4:

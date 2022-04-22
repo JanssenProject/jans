@@ -12,17 +12,20 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.min-version>3.0.3</maven.min-version>
-        <jans-core.version>1.0.0-SNAPSHOT</jans-core.version>
-        <jackson.version>2.10.1</jackson.version>
-        <httpcomponents.version>4.1.2</httpcomponents.version>
-        <jans-auth-server.version>1.0.0-SNAPSHOT</jans-auth-server.version>
+        <jans-core.version>${project.version}</jans-core.version>
+        <jans-auth-server.version>${project.version}</jans-auth-server.version>
+        
+        <jackson.version>2.13.2</jackson.version>
+        <httpcomponents.version>4.1.2</httpcomponents.version>        
         <licensing.version>1.1.0</licensing.version>
-        <resteasy.version>4.6.1.Final</resteasy.version>
+        <!-- <resteasy.version>6.0.0.Final</resteasy.version> -->
+        <resteasy.guice.version>4.7.5.Final</resteasy.guice.version>
+        
         <guice.version>3.0</guice.version>
         <guava.version>[24.1.1,)</guava.version>
         <selenium.version>3.141.59</selenium.version>
         <skip.swagger.client.generation>false</skip.swagger.client.generation>
-
+		<!-- <jakarta.servlet.api.version>5.0.0</jakarta.servlet.api.version> -->
         <jacoco.version>0.8.7</jacoco.version>
 
         <sonar.projectKey>JanssenProject_jans-client-api</sonar.projectKey>
@@ -83,7 +86,7 @@
             <dependency>
                 <groupId>io.jans</groupId>
                 <artifactId>jans-bom</artifactId>
-                <version>1.0.0-SNAPSHOT</version>
+                <version>${project.version}</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -204,11 +207,11 @@
                 <artifactId>guava</artifactId>
                 <version>${guava.version}</version>
             </dependency>
-            <dependency>
-                <groupId>javax.servlet</groupId>
-                <artifactId>servlet-api</artifactId>
-                <version>2.3</version>
-            </dependency>
+        <!--     <dependency>
+                <groupId>jakarta.servlet</groupId>
+                <artifactId>jakarta.servlet-api</artifactId>
+                <version>${jakarta.servlet.api.version}</version>
+            </dependency> -->
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpclient</artifactId>
@@ -217,7 +220,7 @@
             <dependency>
                 <groupId>org.jboss.resteasy</groupId>
                 <artifactId>resteasy-guice</artifactId>
-                <version>${resteasy.version}</version>
+                <version>${resteasy.guice.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>com.google.code.guice</groupId>
