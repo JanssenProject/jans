@@ -22,10 +22,13 @@ For development and POC purposes, 4GB RAM and 10 GB HDD should be available for 
 
 ## Component Setup
 
+![Component Diagram](../../assets/how-to/images/image-howto-mod-auth-comp-04222022.png)
+
 In this setup, we have four important components.
-- User agent
-- Apache reverse proxy with `mod_auth_openidc`. Together they work as `relying party (RP)`. We will assume that this host accessible with FQDN `https://test.apache.rp.io/`. For simplicity, we will also assume that resources that need to be protected via authentication are hosted on same server. In production setups protected resources are usually hosted on separate server that can only be accessed via proxy.
-- Janssen server, which is our open-id connect provider (OP). We will assume that Janssen server is accessible at FQDN `https://janssen.op.io/`
+- **User workstation**. From workstation, user will use browser(i.e user agent) to access protected resource. 
+- **Apache reverse proxy** with `mod_auth_openidc`. Together they work as `relying party (RP)`. We will assume that this host accessible with FQDN `https://test.apache.rp.io/`.
+- **Janssen server**, which is our open-id connect provider (OP). We will assume that Janssen server is accessible at FQDN `https://janssen.op.io/`
+- **Protected resource**. These are resources that we need to protect using authentication. For simplicity, we will also assume that resources that need to be protected via authentication are hosted on same server. In production setups protected resources are usually hosted on separate server that can only be accessed via proxy.
 
 #### Configure Janssen server
 
