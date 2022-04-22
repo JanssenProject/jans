@@ -29,9 +29,6 @@ public class Fido2Entry extends BaseEntry {
     @AttributeName(name = "jansCodeChallenge")
     private String challange;
 
-    @AttributeName(name = "jansCodeChallengeHash")
-    private String challangeHash;
-
     @AttributeName(name = "creationDate")
     private Date creationDate;
 
@@ -67,14 +64,6 @@ public class Fido2Entry extends BaseEntry {
 
     public void setChallange(String challange) {
         this.challange = challange;
-    }
-
-    public String getChallangeHash() {
-        return challangeHash;
-    }
-
-    public void setChallangeHash(String challangeHash) {
-        this.challangeHash = challangeHash;
     }
 
     public Date getCreationDate() {

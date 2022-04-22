@@ -44,6 +44,9 @@ public class Fido2RegistrationEntry extends Fido2Entry implements Serializable {
     @AttributeName(name = "jansDeviceNotificationConf")
     private String deviceNotificationConf;
 
+    @AttributeName(name = "jansCodeChallengeHash")
+    private String challangeHash;
+
     public Fido2RegistrationEntry() {
     }
 
@@ -99,6 +102,14 @@ public class Fido2RegistrationEntry extends Fido2Entry implements Serializable {
 
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
+    }
+
+    public String getChallangeHash() {
+        return challangeHash;
+    }
+
+    public void setChallangeHash(String challangeHash) {
+        this.challangeHash = challangeHash;
     }
 
     @Override
