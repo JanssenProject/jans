@@ -8,6 +8,7 @@ package io.jans.as.server.authorize.ws.rs;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.util.RedirectUri;
@@ -66,7 +67,6 @@ import io.jans.as.server.util.RedirectUtil;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.util.StringHelper;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.Nullable;
@@ -147,7 +147,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     private AppConfiguration appConfiguration;
 
     @Inject
-    private ConfigurationFactory сonfigurationFactory;
+    private ConfigurationFactory configurationFactory;
 
     @Inject
     private WebKeysConfiguration webKeysConfiguration;
@@ -330,12 +330,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 customParameters.putAll(par.getAttributes().getCustomParameters());
         }
 
-        List<String> uiLocales = Util.splittedStringAsList(authzRequest.getUiLocales(), " ");
         List<ResponseType> responseTypes = ResponseType.fromString(authzRequest.getResponseType(), " ");
         List<Prompt> prompts = Prompt.fromString(authzRequest.getPrompt(), " ");
-        List<String> acrValues = Util.splittedStringAsList(authzRequest.getAcrValues(), " ");
-        List<String> amrValues = Util.splittedStringAsList(authzRequest.getAmrValues(), " ");
-        ResponseMode responseMode = ResponseMode.getByValue(authzRequest.getResponseMode());
 
         SessionId sessionUser = identity.getSessionId();
         User user = sessionIdService.getUser(sessionUser);
@@ -348,11 +344,11 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             Client client = authorizeRestWebServiceValidator.validateClient(authzRequest.getClientId(), authzRequest.getState(), isPar);
             String deviceAuthzUserCode = deviceAuthorizationService.getUserCodeFromSession(authzRequest.getHttpRequest());
             authzRequest.setRedirectUri(authorizeRestWebServiceValidator.validateRedirectUri(client, authzRequest.getRedirectUri(), authzRequest.getState(), deviceAuthzUserCode, authzRequest.getHttpRequest()));
-            RedirectUriResponse redirectUriResponse = new RedirectUriResponse(new RedirectUri(authzRequest.getRedirectUri(), responseTypes, responseMode), authzRequest.getState(), authzRequest.getHttpRequest(), errorResponseFactory);
+            RedirectUriResponse redirectUriResponse = new RedirectUriResponse(new RedirectUri(authzRequest.getRedirectUri(), responseTypes, authzRequest.getResponseModeEnum()), authzRequest.getState(), authzRequest.getHttpRequest(), errorResponseFactory);
             redirectUriResponse.setFapiCompatible(appConfiguration.isFapi());
 
             if (!client.getAttributes().getAuthorizedAcrValues().isEmpty() &&
-                    !client.getAttributes().getAuthorizedAcrValues().containsAll(acrValues)) {
+                    !client.getAttributes().getAuthorizedAcrValues().containsAll(authzRequest.getAcrValuesList())) {
                 throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST,
                         "Restricted acr value request, please review the list of authorized acr values for this client");
             }
@@ -419,8 +415,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                         prompts = Lists.newArrayList(jwtRequest.getPrompts());
                     }
                     if (jwtRequest.getResponseMode() != null) {
-                        responseMode = jwtRequest.getResponseMode();
-                        redirectUriResponse.getRedirectUri().setResponseMode(responseMode);
+                        authzRequest.setResponseMode(jwtRequest.getResponseMode().getValue());
+                        redirectUriResponse.getRedirectUri().setResponseMode(jwtRequest.getResponseMode());
                     }
 
                     final IdTokenMember idTokenMember = jwtRequest.getIdTokenMember();
@@ -431,7 +427,6 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                         final Claim acrClaim = idTokenMember.getClaim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE);
                         if (acrClaim != null && acrClaim.getClaimValue() != null) {
                             authzRequest.setAcrValues(acrClaim.getClaimValue().getValueAsString());
-                            acrValues = Util.splittedStringAsList(authzRequest.getAcrValues(), " ");
                         }
 
                         Claim userIdClaim = idTokenMember.getClaim(JwtClaimName.SUBJECT_IDENTIFIER);
@@ -462,8 +457,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                             "The None algorithm in nested JWT is not allowed for FAPI"))
                                     .type(MediaType.APPLICATION_JSON_TYPE).build());
                         }
-                        responseMode = ResponseMode.getByValue(jwr.getClaims().getClaimAsString("response_mode"));
+                        ResponseMode responseMode = ResponseMode.getByValue(jwr.getClaims().getClaimAsString("response_mode"));
                         if (responseMode == ResponseMode.JWT) {
+                            authzRequest.setResponseMode(responseMode.getValue());
                             redirectUriResponse.getRedirectUri().setResponseMode(ResponseMode.JWT);
                             fillRedirectUriResponseforJARM(redirectUriResponse, jwr, client);
                             if (appConfiguration.isFapi()) {
@@ -481,8 +477,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             }
 
             // JARM
-            if (responseMode == ResponseMode.QUERY_JWT || responseMode == ResponseMode.FRAGMENT_JWT ||
-                    responseMode == ResponseMode.JWT || responseMode == ResponseMode.FORM_POST_JWT) {
+            Set<ResponseMode> jwtResponseModes = Sets.newHashSet(ResponseMode.QUERY_JWT, ResponseMode.FRAGMENT_JWT, ResponseMode.JWT, ResponseMode.FORM_POST_JWT);
+            if (jwtResponseModes.contains(authzRequest.getResponseModeEnum())) {
                 JsonWebResponse jwe = parseRequestToJwr(authzRequest.getRequest());
                 fillRedirectUriResponseforJARM(redirectUriResponse, jwe, client);
             }
@@ -498,11 +494,11 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 authorizeRestWebServiceValidator.validateRequestJwt(authzRequest.getRequest(), authzRequest.getRequestUri(), redirectUriResponse);
             }
 
-            authorizeRestWebServiceValidator.validate(responseTypes, prompts, authzRequest.getNonce(), authzRequest.getState(), authzRequest.getRedirectUri(), authzRequest.getHttpRequest(), client, responseMode);
+            authorizeRestWebServiceValidator.validate(responseTypes, prompts, authzRequest.getNonce(), authzRequest.getState(), authzRequest.getRedirectUri(), authzRequest.getHttpRequest(), client, authzRequest.getResponseModeEnum());
             authorizeRestWebServiceValidator.validatePkce(authzRequest.getCodeChallenge(), redirectUriResponse);
 
-            if (CollectionUtils.isEmpty(acrValues) && !ArrayUtils.isEmpty(client.getDefaultAcrValues())) {
-                acrValues = Lists.newArrayList(client.getDefaultAcrValues());
+            if (StringUtils.isBlank(authzRequest.getAcrValues()) && !ArrayUtils.isEmpty(client.getDefaultAcrValues())) {
+                authzRequest.setAcrValues(implode(client.getDefaultAcrValues(), " "));
             }
 
             if (scopes.contains(ScopeConstants.OFFLINE_ACCESS) && !client.getTrustedClient()) {
@@ -570,9 +566,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                         prompts.remove(Prompt.LOGIN);
                     }
 
-                    return redirectToAuthorizationPage(authzRequest, redirectUriResponse.getRedirectUri(), responseTypes, authzRequest.getScope(), authzRequest.getClientId(),
-                            authzRequest.getRedirectUri(), authzRequest.getState(), responseMode, prompts, authzRequest.getMaxAge(), uiLocales,
-                            acrValues, amrValues, customParameters, oAuth2AuditLog);
+                    return redirectToAuthorizationPage(authzRequest, redirectUriResponse.getRedirectUri(), prompts, customParameters, oAuth2AuditLog);
                 }
             }
 
@@ -581,9 +575,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 unauthenticateSession(authzRequest.getSessionId(), authzRequest.getHttpRequest());
                 authzRequest.setSessionId(null);
 
-                return redirectToAuthorizationPage(authzRequest, redirectUriResponse.getRedirectUri(), responseTypes, authzRequest.getScope(), authzRequest.getClientId(),
-                        authzRequest.getRedirectUri(), authzRequest.getState(), responseMode, prompts, authzRequest.getMaxAge(), uiLocales,
-                        acrValues, amrValues, customParameters, oAuth2AuditLog);
+                return redirectToAuthorizationPage(authzRequest, redirectUriResponse.getRedirectUri(), prompts, customParameters, oAuth2AuditLog);
             }
 
             oAuth2AuditLog.setUsername(user != null ? user.getUserId() : "");
@@ -594,25 +586,19 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 unauthenticateSession(authzRequest.getSessionId(), authzRequest.getHttpRequest());
                 authzRequest.setSessionId(null);
 
-                return redirectToAuthorizationPage(authzRequest, redirectUriResponse.getRedirectUri(), responseTypes, authzRequest.getScope(), authzRequest.getClientId(),
-                        authzRequest.getRedirectUri(), authzRequest.getState(), responseMode, prompts, authzRequest.getMaxAge(), uiLocales,
-                        acrValues, amrValues, customParameters, oAuth2AuditLog);
+                return redirectToAuthorizationPage(authzRequest, redirectUriResponse.getRedirectUri(), prompts, customParameters, oAuth2AuditLog);
             }
 
             final boolean forceAuthorization = externalPostAuthnService.externalForceAuthorization(client, postAuthnContext);
             if (forceAuthorization) {
-                return redirectToAuthorizationPage(authzRequest, redirectUriResponse.getRedirectUri(), responseTypes, authzRequest.getScope(), authzRequest.getClientId(),
-                        authzRequest.getRedirectUri(), authzRequest.getState(), responseMode, prompts, authzRequest.getMaxAge(), uiLocales,
-                        acrValues, amrValues, customParameters, oAuth2AuditLog);
+                return redirectToAuthorizationPage(authzRequest, redirectUriResponse.getRedirectUri(), prompts, customParameters, oAuth2AuditLog);
             }
 
             ClientAuthorization clientAuthorization = null;
             boolean clientAuthorizationFetched = false;
             if (!scopes.isEmpty()) {
                 if (prompts.contains(Prompt.CONSENT)) {
-                    return redirectToAuthorizationPage(authzRequest, redirectUriResponse.getRedirectUri(), responseTypes, authzRequest.getScope(), authzRequest.getClientId(),
-                            authzRequest.getRedirectUri(), authzRequest.getState(), responseMode, prompts, authzRequest.getMaxAge(), uiLocales,
-                            acrValues, amrValues, customParameters, oAuth2AuditLog);
+                    return redirectToAuthorizationPage(authzRequest, redirectUriResponse.getRedirectUri(), prompts, customParameters, oAuth2AuditLog);
                 }
                 // There is no need to present the consent page:
                 // If Client is a Trusted Client.
@@ -636,9 +622,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                             sessionUser.addPermission(authzRequest.getClientId(), true);
                             sessionIdService.updateSessionId(sessionUser);
                         } else {
-                            return redirectToAuthorizationPage(authzRequest, redirectUriResponse.getRedirectUri(), responseTypes, authzRequest.getScope(), authzRequest.getClientId(),
-                                    authzRequest.getRedirectUri(), authzRequest.getState(), responseMode, prompts, authzRequest.getMaxAge(), uiLocales,
-                                    acrValues, amrValues, customParameters, oAuth2AuditLog);
+                            return redirectToAuthorizationPage(authzRequest, redirectUriResponse.getRedirectUri(), prompts,
+                                    customParameters, oAuth2AuditLog);
                         }
                     }
                 }
@@ -660,9 +645,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 authzRequest.setSessionId(null);
                 prompts.remove(Prompt.LOGIN);
 
-                return redirectToAuthorizationPage(authzRequest, redirectUriResponse.getRedirectUri(), responseTypes, authzRequest.getScope(), authzRequest.getClientId(),
-                        authzRequest.getRedirectUri(), authzRequest.getState(), responseMode, prompts, authzRequest.getMaxAge(), uiLocales,
-                        acrValues, amrValues, customParameters, oAuth2AuditLog);
+                return redirectToAuthorizationPage(authzRequest, redirectUriResponse.getRedirectUri(), prompts,
+                        customParameters, oAuth2AuditLog);
             }
 
             if (prompts.contains(Prompt.CONSENT) || !isTrue(sessionUser.isPermissionGrantedForClient(authzRequest.getClientId()))) {
@@ -673,15 +657,13 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
                 prompts.remove(Prompt.CONSENT);
 
-                return redirectToAuthorizationPage(authzRequest, redirectUriResponse.getRedirectUri(), responseTypes, authzRequest.getScope(), authzRequest.getClientId(),
-                        authzRequest.getRedirectUri(), authzRequest.getState(), responseMode, prompts, authzRequest.getMaxAge(), uiLocales,
-                        acrValues, amrValues, customParameters, oAuth2AuditLog);
+                return redirectToAuthorizationPage(authzRequest, redirectUriResponse.getRedirectUri(),
+                        prompts, customParameters, oAuth2AuditLog);
             }
 
             if (prompts.contains(Prompt.SELECT_ACCOUNT)) {
-                return redirectToSelectAccountPage(authzRequest, redirectUriResponse.getRedirectUri(), responseTypes, authzRequest.getScope(), authzRequest.getClientId(),
-                        authzRequest.getRedirectUri(), authzRequest.getState(), responseMode, prompts, authzRequest.getMaxAge(), uiLocales,
-                        acrValues, amrValues, customParameters, oAuth2AuditLog);
+                return redirectToSelectAccountPage(authzRequest, redirectUriResponse.getRedirectUri(),
+                        prompts, customParameters, oAuth2AuditLog);
             }
 
             AuthorizationCode authorizationCode = null;
@@ -820,7 +802,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             log.error("ACR is changed, please provide a supported and enabled acr value");
             log.error(e.getMessage(), e);
 
-            RedirectUri redirectUriResponse = new RedirectUri(authzRequest.getRedirectUri(), responseTypes, responseMode);
+            RedirectUri redirectUriResponse = new RedirectUri(authzRequest.getRedirectUri(), responseTypes, authzRequest.getResponseModeEnum());
             redirectUriResponse.parseQueryString(errorResponseFactory.getErrorAsQueryString(
                     AuthorizeErrorResponseType.SESSION_SELECTION_REQUIRED, authzRequest.getState()));
             redirectUriResponse.addResponseParameter("hint", "Use prompt=login in order to alter existing session.");
@@ -1092,56 +1074,43 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         return result;
     }
 
-    private Response redirectToAuthorizationPage(AuthzRequest authzRequest, RedirectUri redirectUriResponse, List<ResponseType> responseTypes, String scope, String clientId,
-                                                 String redirectUri, String state, ResponseMode responseMode,
-                                                 List<Prompt> prompts, Integer maxAge, List<String> uiLocales,
-                                                 List<String> acrValues, List<String> amrValues,
+    private Response redirectToAuthorizationPage(AuthzRequest authzRequest, RedirectUri redirectUriResponse,
+                                                 List<Prompt> prompts,
                                                  Map<String, String> customParameters, OAuth2AuditLog oAuth2AuditLog) {
-        return redirectTo("/authorize", authzRequest, redirectUriResponse, responseTypes, scope, clientId, redirectUri,
-                state, responseMode, prompts, maxAge, uiLocales, acrValues, amrValues,
-                customParameters, oAuth2AuditLog);
+        return redirectTo("/authorize", authzRequest, redirectUriResponse, prompts, customParameters, oAuth2AuditLog);
     }
 
-    private Response redirectToSelectAccountPage(AuthzRequest authzRequest, RedirectUri redirectUriResponse, List<ResponseType> responseTypes, String scope, String clientId,
-                                                 String redirectUri, String state, ResponseMode responseMode,
-                                                 List<Prompt> prompts, Integer maxAge, List<String> uiLocales,
-                                                 List<String> acrValues, List<String> amrValues, Map<String, String> customParameters, OAuth2AuditLog oAuth2AuditLog) {
-        return redirectTo("/selectAccount", authzRequest, redirectUriResponse, responseTypes, scope, clientId, redirectUri,
-                state, responseMode, prompts, maxAge, uiLocales, acrValues, amrValues,
-                customParameters, oAuth2AuditLog);
+    private Response redirectToSelectAccountPage(AuthzRequest authzRequest, RedirectUri redirectUriResponse,
+                                                 List<Prompt> prompts, Map<String, String> customParameters, OAuth2AuditLog oAuth2AuditLog) {
+        return redirectTo("/selectAccount", authzRequest, redirectUriResponse, prompts, customParameters, oAuth2AuditLog);
     }
 
-    private Response redirectTo(String pathToRedirect, AuthzRequest authzRequest,
-                                RedirectUri redirectUriResponse, List<ResponseType> responseTypes, String scope, String clientId,
-                                String redirectUri, String state, ResponseMode responseMode,
-                                List<Prompt> prompts, Integer maxAge, List<String> uiLocales,
-                                List<String> acrValues, List<String> amrValues,
-                                Map<String, String> customParameters, OAuth2AuditLog oAuth2AuditLog) {
+    private Response redirectTo(String pathToRedirect, AuthzRequest authzRequest, RedirectUri redirectUriResponse,
+                                List<Prompt> prompts, Map<String, String> customParameters, OAuth2AuditLog oAuth2AuditLog) {
 
-        final URI contextUri = URI.create(appConfiguration.getIssuer()).resolve(servletRequest.getContextPath() + pathToRedirect + сonfigurationFactory.getFacesMapping());
+        final URI contextUri = URI.create(appConfiguration.getIssuer()).resolve(servletRequest.getContextPath() + pathToRedirect + configurationFactory.getFacesMapping());
 
         redirectUriResponse.setBaseRedirectUri(contextUri.toString());
         redirectUriResponse.setResponseMode(ResponseMode.QUERY);
 
         // oAuth parameters
-        String responseType = implode(responseTypes, " ");
-        if (StringUtils.isNotBlank(responseType)) {
-            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.RESPONSE_TYPE, responseType);
+        if (StringUtils.isNotBlank(authzRequest.getResponseType())) {
+            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.RESPONSE_TYPE, authzRequest.getResponseType());
         }
-        if (StringUtils.isNotBlank(scope)) {
-            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.SCOPE, scope);
+        if (StringUtils.isNotBlank(authzRequest.getScope())) {
+            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.SCOPE, authzRequest.getScope());
         }
-        if (StringUtils.isNotBlank(clientId)) {
-            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.CLIENT_ID, clientId);
+        if (StringUtils.isNotBlank(authzRequest.getClientId())) {
+            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.CLIENT_ID, authzRequest.getClientId());
         }
-        if (StringUtils.isNotBlank(redirectUri)) {
-            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.REDIRECT_URI, redirectUri);
+        if (StringUtils.isNotBlank(authzRequest.getRedirectUri())) {
+            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.REDIRECT_URI, authzRequest.getRedirectUri());
         }
-        if (StringUtils.isNotBlank(state)) {
-            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.STATE, state);
+        if (StringUtils.isNotBlank(authzRequest.getState())) {
+            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.STATE, authzRequest.getState());
         }
-        if (responseMode != null) {
-            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.RESPONSE_MODE, responseMode.getParamName());
+        if (StringUtils.isNotBlank(authzRequest.getResponseMode())) {
+            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.RESPONSE_MODE, authzRequest.getResponseMode());
         }
 
         // OIC parameters
@@ -1155,12 +1124,11 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         if (StringUtils.isNotBlank(prompt)) {
             redirectUriResponse.addResponseParameter(AuthorizeRequestParam.PROMPT, prompt);
         }
-        if (maxAge != null) {
-            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.MAX_AGE, maxAge.toString());
+        if (authzRequest.getMaxAge() != null) {
+            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.MAX_AGE, authzRequest.getMaxAge().toString());
         }
-        String uiLocalesStr = implode(uiLocales, " ");
-        if (StringUtils.isNotBlank(uiLocalesStr)) {
-            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.UI_LOCALES, uiLocalesStr);
+        if (StringUtils.isNotBlank(authzRequest.getUiLocales())) {
+            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.UI_LOCALES, authzRequest.getUiLocales());
         }
         if (StringUtils.isNotBlank(authzRequest.getIdTokenHint())) {
             redirectUriResponse.addResponseParameter(AuthorizeRequestParam.ID_TOKEN_HINT, authzRequest.getIdTokenHint());
@@ -1168,13 +1136,11 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         if (StringUtils.isNotBlank(authzRequest.getLoginHint())) {
             redirectUriResponse.addResponseParameter(AuthorizeRequestParam.LOGIN_HINT, authzRequest.getLoginHint());
         }
-        String acrValuesStr = implode(acrValues, " ");
-        if (StringUtils.isNotBlank(acrValuesStr)) {
-            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.ACR_VALUES, acrValuesStr);
+        if (StringUtils.isNotBlank(authzRequest.getAcrValues())) {
+            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.ACR_VALUES, authzRequest.getAcrValues());
         }
-        String amrValuesStr = implode(amrValues, " ");
-        if (StringUtils.isNotBlank(amrValuesStr)) {
-            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.AMR_VALUES, amrValuesStr);
+        if (StringUtils.isNotBlank(authzRequest.getAmrValues())) {
+            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.AMR_VALUES, authzRequest.getAmrValues());
         }
         if (StringUtils.isNotBlank(authzRequest.getRequest())) {
             redirectUriResponse.addResponseParameter(AuthorizeRequestParam.REQUEST, authzRequest.getRequest());

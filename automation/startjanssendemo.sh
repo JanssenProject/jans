@@ -1,5 +1,5 @@
 #!/bin/bash
-set -euo pipefail
+set -eo pipefail
 JANS_FQDN=$1
 JANS_PERSISTENCE=$2
 JANS_CI_CD_RUN=$3

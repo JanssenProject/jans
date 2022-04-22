@@ -3,6 +3,10 @@ package io.jans.as.server.authorize.ws.rs;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.core.SecurityContext;
+import io.jans.as.model.common.ResponseMode;
+import io.jans.as.model.util.Util;
+
+import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -90,6 +94,10 @@ public class AuthzRequest {
         return responseMode;
     }
 
+    public ResponseMode getResponseModeEnum() {
+        return ResponseMode.getByValue(responseMode);
+    }
+
     public void setResponseMode(String responseMode) {
         this.responseMode = responseMode;
     }
@@ -130,6 +138,10 @@ public class AuthzRequest {
         return uiLocales;
     }
 
+    public List<String> getUiLocalesList() {
+        return Util.splittedStringAsList(uiLocales, " ");
+    }
+
     public void setUiLocales(String uiLocales) {
         this.uiLocales = uiLocales;
     }
@@ -152,6 +164,10 @@ public class AuthzRequest {
 
     public String getAcrValues() {
         return acrValues;
+    }
+
+    public List<String> getAcrValuesList() {
+        return Util.splittedStringAsList(acrValues, " ");
     }
 
     public void setAcrValues(String acrValues) {
