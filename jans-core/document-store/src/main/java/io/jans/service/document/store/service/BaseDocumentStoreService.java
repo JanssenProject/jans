@@ -9,7 +9,7 @@ package io.jans.service.document.store.service;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import io.jans.service.document.store.conf.DocumentStoreType;
 import io.jans.service.document.store.provider.DocumentStore;

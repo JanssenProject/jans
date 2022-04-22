@@ -4,7 +4,7 @@ from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from io.jans.as.server.security import Identity
 from io.jans.util import StringHelper
 from io.jans.jsf2.service import FacesService
-from javax.faces.context import FacesContext
+from jakarta.faces.context import FacesContext
 from io.jans.jsf2.message import FacesMessages
 from io.jans.as.server.util import ServerUtil
 from io.jans.as.server.service import UserService, SessionIdService,AuthenticationService

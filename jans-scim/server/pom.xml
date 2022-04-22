@@ -54,11 +54,11 @@
 	</build>
 
 	<dependencies>
-		<!-- Gluu -->
+		<!-- Jans -->
 		<dependency>
 			<groupId>io.jans</groupId>
 			<artifactId>jans-scim-model</artifactId>
-			<version>${gluu.version}</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.jans</groupId>
@@ -83,7 +83,7 @@
 		<dependency>
 			<groupId>io.jans</groupId>
 			<artifactId>jans-scim-service</artifactId>
-			<version>${gluu.version}</version>
+			<version>${project.version}</version>
 		</dependency>
 
 		<!-- RestEasy -->

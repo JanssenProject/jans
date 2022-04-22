@@ -26,12 +26,12 @@ import org.glassfish.jersey.message.internal.OutboundJaxrsResponse;
 import org.glassfish.jersey.message.internal.OutboundMessageContext;
 import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
 
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation.Builder;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.Invocation.Builder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import javax.ws.rs.core.Form;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Form;
+import jakarta.ws.rs.core.Response;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -260,9 +260,9 @@ public class OpClientFactoryMockImpl implements OpClientFactory {
             PermissionTicket permissionTicket = new PermissionTicket("d457e3de-30dd-400a-8698-2b98472b7a40");
             outboundMessageContext.setEntity(permissionTicket);
 
-            OutboundJaxrsResponse response = new OutboundJaxrsResponse(Response.Status.FORBIDDEN, outboundMessageContext);
+            OutboundJaxrsResponse response = new OutboundJaxrsResponse(jakarta.ws.rs.core.Response.Status.FORBIDDEN, outboundMessageContext);
 
-            when(client.registerTicketResponse(any(List.class), any())).thenReturn(response);
+            //when(client.registerTicketResponse(any(List.class), any())).thenReturn(response);
             opClientCache.put("RptPreProcessInterceptor", client);
         } else {
             client = (RptPreProcessInterceptor) opClientCache.getIfPresent("RptPreProcessInterceptor");

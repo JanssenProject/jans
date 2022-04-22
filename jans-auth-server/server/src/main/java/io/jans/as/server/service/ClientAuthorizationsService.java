@@ -17,8 +17,8 @@ import io.jans.util.StringHelper;
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;

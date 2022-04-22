@@ -1,11 +1,11 @@
 package io.jans.as.server.authorize.ws.rs;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.core.SecurityContext;
 import io.jans.as.model.common.ResponseMode;
 import io.jans.as.model.util.Util;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.core.SecurityContext;
 import java.util.List;
 
 /**

@@ -2,8 +2,8 @@ package io.jans.configapi.service.auth;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import io.jans.configapi.security.client.AuthClientFactory;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 

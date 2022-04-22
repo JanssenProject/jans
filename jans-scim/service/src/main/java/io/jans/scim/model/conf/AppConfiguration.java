@@ -7,7 +7,7 @@ import io.jans.config.oxtrust.Configuration;
 
 import java.io.Serializable;
 
-import javax.enterprise.inject.Vetoed;
+import jakarta.enterprise.inject.Vetoed;
 
 
 /**

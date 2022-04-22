@@ -16,11 +16,12 @@
 		<plugin.version>0.1</plugin.version>
 
 		<jans.version>1.0.0-SNAPSHOT</jans.version>
-		<weld.version>3.1.2.Final</weld.version>
+		<weld.version>4.0.3.Final</weld.version>
 		<resteasy.version>4.5.7.Final</resteasy.version>
 		<log4j.version>2.17.1</log4j.version>
 		<slf4j.version>1.7.25</slf4j.version>
-		<validation.version>7.0.1.Final</validation.version>
+		<org.hibernate.validator.version>6.2.0.Final</org.hibernate.validator.version>
+		<org.hibernate.validator.cdi.version>6.2.0.Final</org.hibernate.validator.cdi.version>
 	</properties>
 
 	<repositories>
@@ -82,26 +83,23 @@
 
 		<!-- Weld -->
 		<dependency>
-			<groupId>javax.enterprise</groupId>
-			<artifactId>cdi-api</artifactId>
+		    <groupId>jakarta.enterprise</groupId>
+		    <artifactId>jakarta.enterprise.cdi-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 
 		<!-- Validation -->
+	    <dependency>
+			<groupId>org.hibernate.validator</groupId>
+			<artifactId>hibernate-validator</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-validator-cdi</artifactId>
-			<version>${validation.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.hibernate.validator</groupId>
-			<artifactId>hibernate-validator</artifactId>
-			<version>${validation.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>javax.validation</groupId>
-			<artifactId>validation-api</artifactId>
-			<version>2.0.1.Final</version>
+            <groupId>jakarta.validation</groupId>
+            <artifactId>jakarta.validation-api</artifactId>
 		</dependency>
 
 		<!-- RestEasy -->
@@ -144,10 +142,9 @@
 			<version>1.9</version>
 		</dependency>
 		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
-			<version>3.1.0</version>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
+			<scope>provided</scope>
 		</dependency>
-
 	</dependencies>
 </project>

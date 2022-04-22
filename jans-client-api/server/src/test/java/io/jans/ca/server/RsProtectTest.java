@@ -22,7 +22,7 @@ import org.testng.annotations.Guice;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import javax.ws.rs.BadRequestException;
+import jakarta.ws.rs.BadRequestException;
 import java.io.IOException;
 import java.util.List;
 

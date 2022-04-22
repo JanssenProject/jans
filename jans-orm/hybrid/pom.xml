@@ -39,15 +39,14 @@
 		</dependency>
 
 		<!-- Weld -->
+        <dependency>
+		    <groupId>jakarta.enterprise</groupId>
+		    <artifactId>jakarta.enterprise.cdi-api</artifactId>
+   		</dependency>
 		<dependency>
-			<groupId>javax.enterprise</groupId>
-			<artifactId>cdi-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>javax.inject</groupId>
-			<artifactId>javax.inject</artifactId>
-		</dependency>
+		    <groupId>jakarta.inject</groupId>
+        	<artifactId>jakarta.inject-api</artifactId>
+   		</dependency>	
 
 	</dependencies>
 
