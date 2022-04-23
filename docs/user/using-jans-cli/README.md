@@ -10,13 +10,14 @@
 
 `jans-cli` offers two modes in which it can be used. Command-line and interactive mode. 
 
-Using command-line mode you can run a single command with all the required inputs to perform the operation you want. A sample command-line may look like below:
+- **Command-line mode**: With command-line mode you can run a single command with all the required inputs to perform the operation you want. A sample command-line may look like below:
 
-```
-/opt/jans/jans-cli/config-cli.py --operation-id get-attributes --endpoint-args limit:5
-```
+ ```
+ /opt/jans/jans-cli/config-cli.py --operation-id get-attributes --endpoint-args limit:5
+ ```
 
-Interactive mode is a terminal based menu-driven mode where user can select intended action from available options and also provide input parameters required for that action.
+- **Interactive mode**: Interactive mode is a terminal based menu-driven mode where user can select intended action from available options and also provide input parameters required for that action.
+
 
 # Documentation Index
 
