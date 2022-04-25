@@ -7,16 +7,18 @@
 package io.jans.orm.model.base;
 
 import org.apache.commons.lang.StringUtils;
+import org.json.JSONObject;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 /**
  * @author Javier Rojas Blum
- * @version April 18, 2022
+ * @version April 25, 2022
  */
-public class ClientMetadataValue implements Serializable {
+public class LocalizedString implements Serializable {
 
     private static final long serialVersionUID = -7651487701235873969L;
 
@@ -28,7 +30,7 @@ public class ClientMetadataValue implements Serializable {
     public static final String LANG_PREFIX = "lang";
     public static final String LANG_JOINER = "-";
 
-    public ClientMetadataValue() {
+    public LocalizedString() {
         values = new HashMap<>();
     }
 
@@ -76,8 +78,37 @@ public class ClientMetadataValue implements Serializable {
                 .collect(Collectors.joining(LANG_JOINER));
     }
 
+    public Map<String, Object> addToMap(Map<String, Object> map, String key) {
+        if (values.isEmpty()) {
+            return map;
+        }
+
+        for (String languageTag : getLanguageTags()) {
+            if (StringUtils.isBlank(languageTag)) {
+                map.put(key, getValue());
+            } else {
+                map.put(key + "#" + languageTag, getValue(languageTag));
+            }
+        }
+        return map;
+    }
+
     @Override
     public String toString() {
         return values.toString();
+    }
+
+    public static void fromJson(
+            JSONObject requestObject, String registerRequestParam, BiFunction<String, Locale, Void> function) {
+        List<String> keys = requestObject.keySet().stream()
+                .filter(k -> k.startsWith(registerRequestParam))
+                .collect(Collectors.toList());
+
+        keys.forEach(key -> {
+            key = key.replace(registerRequestParam, "");
+            String[] keyParts = key.split(LANG_CLAIM_SEPARATOR);
+            String languageTag = keyParts[keyParts.length - 1];
+            function.apply(requestObject.getString(registerRequestParam + key), Locale.forLanguageTag(languageTag));
+        });
     }
 }

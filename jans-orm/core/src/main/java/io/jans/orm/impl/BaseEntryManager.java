@@ -17,7 +17,7 @@ import io.jans.orm.model.AttributeData;
 import io.jans.orm.model.AttributeDataModification;
 import io.jans.orm.model.AttributeDataModification.AttributeModificationType;
 import io.jans.orm.model.SearchScope;
-import io.jans.orm.model.base.ClientMetadataValue;
+import io.jans.orm.model.base.LocalizedString;
 import io.jans.orm.operation.PersistenceOperationService;
 import io.jans.orm.reflect.property.Getter;
 import io.jans.orm.reflect.property.PropertyAnnotation;
@@ -41,7 +41,7 @@ import java.util.stream.Collectors;
  * Abstract Entry Manager
  *
  * @author Yuriy Movchan
- * @version April 18, 2022
+ * @version April 25, 2022
  */
 public abstract class BaseEntryManager implements PersistenceEntryManager {
 
@@ -985,17 +985,17 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
                             return null;
                         }
 
-                        if (!(propertyValue instanceof ClientMetadataValue)) {
-                            throw new MappingException("Entry property should be ClientMetadataValue");
+                        if (!(propertyValue instanceof LocalizedString)) {
+                            throw new MappingException("Entry property should be LocalizedString");
                         }
 
-                        ClientMetadataValue clientMetadataValue = (ClientMetadataValue) propertyValue;
+                        LocalizedString localizedString = (LocalizedString) propertyValue;
                         final String finalLdapAttributeName = ldapAttributeName;
                         Map<String, AttributeData> filteredAttrs = attributesMap.entrySet().stream()
                                 .filter(x -> x.getKey().toLowerCase().startsWith(finalLdapAttributeName.toLowerCase()))
                                 .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 
-                        loadClientMetadataValue(attributesMap, clientMetadataValue, filteredAttrs);
+                        loadLocalizedString(attributesMap, localizedString, filteredAttrs);
 
                         continue;
                     }
@@ -1133,14 +1133,14 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		return results;
 	}
 
-    protected void loadClientMetadataValue(Map<String, AttributeData> attributesMap, ClientMetadataValue clientMetadataValue, Map<String, AttributeData> filteredAttrs) {
+    protected void loadLocalizedString(Map<String, AttributeData> attributesMap, LocalizedString localizedString, Map<String, AttributeData> filteredAttrs) {
         filteredAttrs.forEach((key, value) -> {
             AttributeData data = attributesMap.get(key);
             if (data.getValues() != null && data.getValues().length == 1 && data.getValues()[0] instanceof Map<?, ?>) {
                 Map<?, ?> values = (Map<?, ?>) data.getValues()[0];
                 values.forEach((languageTag, val) -> {
 					if (languageTag instanceof String && val instanceof String) {
-						clientMetadataValue.setValue((String) val, Locale.forLanguageTag((String) languageTag));
+						localizedString.setValue((String) val, Locale.forLanguageTag((String) languageTag));
 					}
 				});
             }
@@ -1521,7 +1521,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
                     LanguageTag.class);
 			if (ldapAttribute != null) {
                 if (languageTag != null) {
-                    List<AttributeData> listAttributes = getAttributeDataFromClientMetadataValue(
+                    List<AttributeData> listAttributes = getAttributeDataFromLocalizedString(
                             entry, ldapAttribute, propertyName);
                     if (listAttributes != null) {
                         attributes.addAll(listAttributes);
@@ -1579,7 +1579,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		return attribute;
 	}
 
-    private List<AttributeData> getAttributeDataFromClientMetadataValue(
+    private List<AttributeData> getAttributeDataFromLocalizedString(
             Object entry, Annotation ldapAttribute, String propertyName) {
 
         Class<?> entryClass = entry.getClass();
@@ -1594,20 +1594,20 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
             return null;
         }
 
-        if (!(propertyValue instanceof ClientMetadataValue)) {
-            throw new MappingException("Entry property should be ClientMetadataValue");
+        if (!(propertyValue instanceof LocalizedString)) {
+            throw new MappingException("Entry property should be LocalizedString");
         }
 
-        ClientMetadataValue clientMetadataValue = (ClientMetadataValue) propertyValue;
+        LocalizedString localizedString = (LocalizedString) propertyValue;
         String ldapAttributeName = ((AttributeName) ldapAttribute).name();
 
-        return getAttributeDataFromClientMetadataValue(ldapAttributeName, clientMetadataValue);
+        return getAttributeDataFromLocalizedString(ldapAttributeName, localizedString);
     }
 
-    protected List<AttributeData> getAttributeDataFromClientMetadataValue(String ldapAttributeName, ClientMetadataValue clientMetadataValue) {
+    protected List<AttributeData> getAttributeDataFromLocalizedString(String ldapAttributeName, LocalizedString localizedString) {
         List<AttributeData> listAttributes = new ArrayList<>();
 
-        AttributeData attributeData = new AttributeData(ldapAttributeName, clientMetadataValue.getValues());
+        AttributeData attributeData = new AttributeData(ldapAttributeName, localizedString.getValues());
         listAttributes.add(attributeData);
 
         return listAttributes;

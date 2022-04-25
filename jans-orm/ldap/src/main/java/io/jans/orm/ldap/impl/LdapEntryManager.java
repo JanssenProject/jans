@@ -23,7 +23,7 @@ import io.jans.orm.ldap.operation.impl.LdapOperationServiceImpl;
 import io.jans.orm.model.*;
 import io.jans.orm.model.SearchScope;
 import io.jans.orm.model.AttributeDataModification.AttributeModificationType;
-import io.jans.orm.model.base.ClientMetadataValue;
+import io.jans.orm.model.base.LocalizedString;
 import io.jans.orm.reflect.property.PropertyAnnotation;
 import io.jans.orm.search.filter.Filter;
 import io.jans.orm.util.ArrayHelper;
@@ -36,13 +36,13 @@ import java.io.Serializable;
 import java.text.ParseException;
 import java.util.*;
 
-import static io.jans.orm.model.base.ClientMetadataValue.*;
+import static io.jans.orm.model.base.LocalizedString.*;
 
 /**
  * LDAP Entry Manager
  *
  * @author Yuriy Movchan
- * @version April 18, 2022
+ * @version April 25, 2022
  */
 public class LdapEntryManager extends BaseEntryManager implements Serializable {
 
@@ -634,12 +634,12 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
     }
 
     @Override
-    protected List<AttributeData> getAttributeDataFromClientMetadataValue(String ldapAttributeName, ClientMetadataValue clientMetadataValue) {
+    protected List<AttributeData> getAttributeDataFromLocalizedString(String ldapAttributeName, LocalizedString localizedString) {
         List<AttributeData> listAttributes = new ArrayList<>();
 
-        clientMetadataValue.getLanguageTags().forEach(languageTag -> {
-            String value = clientMetadataValue.getValue(languageTag);
-            String key = clientMetadataValue.addLdapLanguageTag(ldapAttributeName, languageTag);
+        localizedString.getLanguageTags().forEach(languageTag -> {
+            String value = localizedString.getValue(languageTag);
+            String key = localizedString.addLdapLanguageTag(ldapAttributeName, languageTag);
             AttributeData attributeData = new AttributeData(key, value);
 
             listAttributes.add(attributeData);
@@ -649,15 +649,15 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
     }
 
     @Override
-    protected void loadClientMetadataValue(Map<String, AttributeData> attributesMap, ClientMetadataValue clientMetadataValue, Map<String, AttributeData> filteredAttrs) {
+    protected void loadLocalizedString(Map<String, AttributeData> attributesMap, LocalizedString localizedString, Map<String, AttributeData> filteredAttrs) {
         filteredAttrs.forEach((key, value) -> {
             AttributeData data = attributesMap.get(key);
             String[] keyParts = key.split(LANG_SEPARATOR);
             if (keyParts.length == 1) {
-                clientMetadataValue.setValue(data.getValue().toString());
+                localizedString.setValue(data.getValue().toString());
             } else if (keyParts.length == 2) {
                 String lagTag = keyParts[1].replace(LANG_PREFIX + LANG_JOINER, "");
-                clientMetadataValue.setValue(
+                localizedString.setValue(
                         data.getValue().toString(),
                         Locale.forLanguageTag(lagTag)
                 );
