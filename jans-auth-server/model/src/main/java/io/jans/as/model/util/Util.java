@@ -29,6 +29,7 @@ import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -328,20 +329,6 @@ public class Util {
             result.append(Integer.toString((value & 0xff) + 0x100, 16).substring(1));
         }
         return result.toString();
-    }
-
-    public static Integer getNumberOfSecondFromNow(Date date) {
-        if (date == null) {
-            return 0;
-        }
-
-        long now = new Date().getTime();
-        final long time = date.getTime();
-        if (time > now) {
-            return (int) (time - now) / 1000;
-        }
-
-        return null;
     }
 
     public static Date createExpirationDate(Integer lifetimeInSeconds) {
