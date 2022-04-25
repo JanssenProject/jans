@@ -1,5 +1,7 @@
 # SMTP Configuration
 
+> Prerequisite: Know how to use the Janssen CLI in [command-line mode](cli-index.md)
+
 Let's get the information of **SMTP Configuration** using Janssen CLI.
 
 ```commandline
