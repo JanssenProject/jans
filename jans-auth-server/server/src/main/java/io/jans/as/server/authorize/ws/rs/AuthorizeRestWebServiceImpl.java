@@ -180,7 +180,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     private ExternalUpdateTokenService externalUpdateTokenService;
 
     @Inject
-    private ParService parService;
+    private AuthzRequestService authzRequestService;
 
     @Context
     private HttpServletRequest servletRequest;
@@ -284,51 +284,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
         Map<String, String> customParameters = requestParameterService.getCustomParameters(QueryStringDecoder.decode(authzRequest.getHttpRequest().getQueryString()));
 
-        boolean isPar = Util.isPar(authzRequest.getRequestUri());
-        if (!isPar && isTrue(appConfiguration.getRequirePar())) {
-            log.debug("Server configured for PAR only (via requirePar conf property). Failed to find PAR by request_uri (id): {}", authzRequest.getRequestUri());
-            throw new WebApplicationException(Response
-                    .status(Response.Status.BAD_REQUEST)
-                    .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST, authzRequest.getState(), "Failed to find par by request_uri"))
-                    .type(MediaType.APPLICATION_JSON_TYPE)
-                    .build());
-        }
-
-        if (isPar) {
-            final Par par = parService.getParAndValidateForAuthorizationRequest(authzRequest.getRequestUri(), authzRequest.getState(), authzRequest.getClientId());
-
-            authzRequest.setRequestUri(null); // set it to null, we don't want to follow request uri for PAR
-            authzRequest.setRequest(null); // request is validated and parameters parsed by PAR endpoint before PAR persistence
-
-            log.debug("Setting request parameters from PAR - {}", par);
-
-            authzRequest.setResponseType(par.getAttributes().getResponseType());
-            authzRequest.setResponseMode(par.getAttributes().getResponseMode());
-            authzRequest.setScope(par.getAttributes().getScope());
-            authzRequest.setPrompt(par.getAttributes().getPrompt());
-            authzRequest.setRedirectUri(par.getAttributes().getRedirectUri());
-            authzRequest.setAcrValues(par.getAttributes().getAcrValuesStr());
-            authzRequest.setAmrValues(par.getAttributes().getAmrValuesStr());
-            authzRequest.setCodeChallenge(par.getAttributes().getCodeChallenge());
-            authzRequest.setCodeChallengeMethod(par.getAttributes().getCodeChallengeMethod());
-
-            authzRequest.setState(StringUtils.isNotBlank(par.getAttributes().getState()) ? par.getAttributes().getState() : "");
-
-            if (StringUtils.isNotBlank(par.getAttributes().getNonce()))
-                authzRequest.setNonce(par.getAttributes().getNonce());
-            if (StringUtils.isNotBlank(par.getAttributes().getSessionId()))
-                authzRequest.setSessionId(par.getAttributes().getSessionId());
-            if (StringUtils.isNotBlank(par.getAttributes().getCustomResponseHeaders()))
-                authzRequest.setCustomResponseHeaders(par.getAttributes().getCustomResponseHeaders());
-            if (StringUtils.isNotBlank(par.getAttributes().getClaims()))
-                authzRequest.setClaims(par.getAttributes().getClaims());
-            if (StringUtils.isNotBlank(par.getAttributes().getOriginHeaders()))
-                authzRequest.setOriginHeaders(par.getAttributes().getOriginHeaders());
-            if (StringUtils.isNotBlank(par.getAttributes().getUiLocales()))
-                authzRequest.setUiLocales(par.getAttributes().getUiLocales());
-            if (!par.getAttributes().getCustomParameters().isEmpty())
-                customParameters.putAll(par.getAttributes().getCustomParameters());
-        }
+        boolean isPar = authzRequestService.processPar(authzRequest, customParameters);
 
         List<ResponseType> responseTypes = ResponseType.fromString(authzRequest.getResponseType(), " ");
         List<Prompt> prompts = Prompt.fromString(authzRequest.getPrompt(), " ");
