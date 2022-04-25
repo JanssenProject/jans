@@ -21,7 +21,7 @@ import java.util.Map;
  * Represents a token request to send to the authorization server.
  *
  * @author Javier Rojas Blum
- * @version September 30, 2021
+ * @version April 25, 2022
  */
 public class TokenRequest extends ClientAuthnRequest {
 
@@ -281,8 +281,8 @@ public class TokenRequest extends ClientAuthnRequest {
      *
      * @return A collection of parameters.
      */
-    public Map<String, String> getParameters() {
-        Map<String, String> parameters = new HashMap<>();
+    public Map<String, Object> getParameters() {
+        Map<String, Object> parameters = new HashMap<>();
 
         if (grantType != null) {
             parameters.put("grant_type", grantType.toString());

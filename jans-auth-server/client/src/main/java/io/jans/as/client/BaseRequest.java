@@ -20,11 +20,11 @@ import java.util.Map;
 
 /**
  * @author Javier Rojas Blum
- * @version January 26. 2018
+ * @version April 25. 2022
  */
 public abstract class BaseRequest {
 
-    private static final Map<String, String> EMPTY_MAP = new HashMap<>();
+    private static final Map<String, Object> EMPTY_MAP = new HashMap<>();
     private static final JSONObject EMPTY_JSON_OBJECT = new JSONObject();
 
     private String contentType;
@@ -133,7 +133,7 @@ public abstract class BaseRequest {
         return Base64.encodeBase64String(Util.getBytes(URLEncoder.encode(clientId, Util.UTF8_STRING_ENCODING) + ":" + URLEncoder.encode(clientSecret, Util.UTF8_STRING_ENCODING)));
     }
 
-    public Map<String, String> getParameters() {
+    public Map<String, Object> getParameters() {
         return EMPTY_MAP;
     }
 

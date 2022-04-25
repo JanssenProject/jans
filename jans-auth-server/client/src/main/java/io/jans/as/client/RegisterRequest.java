@@ -20,8 +20,7 @@ import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.json.JsonApplier;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.register.RegisterRequestParam;
-import io.jans.orm.model.base.ClientMetadataValue;
-import static io.jans.orm.model.base.ClientMetadataValue.*;
+import io.jans.orm.model.base.LocalizedString;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
@@ -30,8 +29,6 @@ import org.json.JSONObject;
 
 import javax.ws.rs.core.MediaType;
 import java.util.*;
-import java.util.function.BiFunction;
-import java.util.stream.Collectors;
 
 import static io.jans.as.client.util.ClientUtil.*;
 import static io.jans.as.model.register.RegisterRequestParam.*;
@@ -43,7 +40,7 @@ import static io.jans.as.model.util.StringUtils.toJSONArray;
  *
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
- * @version March 17, 2022
+ * @version April 25, 2022
  */
 public class RegisterRequest extends BaseRequest {
 
@@ -67,11 +64,11 @@ public class RegisterRequest extends BaseRequest {
     private List<GrantType> grantTypes;
     private ApplicationType applicationType;
     private List<String> contacts;
-    private final ClientMetadataValue clientName;
-    private final ClientMetadataValue logoUri;
-    private final ClientMetadataValue clientUri;
-    private final ClientMetadataValue policyUri;
-    private final ClientMetadataValue tosUri;
+    private final LocalizedString clientName;
+    private final LocalizedString logoUri;
+    private final LocalizedString clientUri;
+    private final LocalizedString policyUri;
+    private final LocalizedString tosUri;
     private String frontChannelLogoutUri;
     private Boolean frontChannelLogoutSessionRequired;
     private List<String> backchannelLogoutUris;
@@ -164,11 +161,11 @@ public class RegisterRequest extends BaseRequest {
         this.customAttributes = new HashMap<>();
         this.authorizedAcrValues = new ArrayList<>();
 
-        clientName = new ClientMetadataValue();
-        logoUri = new ClientMetadataValue();
-        clientUri = new ClientMetadataValue();
-        policyUri = new ClientMetadataValue();
-        tosUri = new ClientMetadataValue();
+        clientName = new LocalizedString();
+        logoUri = new LocalizedString();
+        clientUri = new LocalizedString();
+        policyUri = new LocalizedString();
+        tosUri = new LocalizedString();
     }
 
     /**
@@ -1346,8 +1343,8 @@ public class RegisterRequest extends BaseRequest {
      * @return A collection of parameters.
      */
     @Override
-    public Map<String, String> getParameters() {
-        Map<String, String> parameters = new HashMap<>();
+    public Map<String, Object> getParameters() {
+        Map<String, Object> parameters = new HashMap<>();
 
         JsonApplier.getInstance().apply(this, parameters);
 
@@ -1370,11 +1367,11 @@ public class RegisterRequest extends BaseRequest {
             parameters.put(CONTACTS.toString(), toJSONArray(contacts).toString());
         }
 
-        addClientMetadataParam(parameters, CLIENT_NAME, clientName);
-        addClientMetadataParam(parameters, LOGO_URI, logoUri);
-        addClientMetadataParam(parameters, CLIENT_URI, clientUri);
-        addClientMetadataParam(parameters, POLICY_URI, policyUri);
-        addClientMetadataParam(parameters, TOS_URI, tosUri);
+        clientName.addToMap(parameters, CLIENT_NAME.getName());
+        clientName.addToMap(parameters, LOGO_URI.getName());
+        clientName.addToMap(parameters, CLIENT_URI.getName());
+        clientName.addToMap(parameters, POLICY_URI.getName());
+        clientName.addToMap(parameters, TOS_URI.getName());
 
         if (StringUtils.isNotBlank(jwksUri)) {
             parameters.put(JWKS_URI.toString(), jwksUri);
@@ -1608,23 +1605,23 @@ public class RegisterRequest extends BaseRequest {
         result.setContacts(extractListByKey(requestObject, CONTACTS.toString()));
         result.setIdTokenTokenBindingCnf(requestObject.optString(ID_TOKEN_TOKEN_BINDING_CNF.toString(), ""));
 
-        clientMetadataValueFromJson(requestObject, CLIENT_NAME, (String key, Locale locale) -> {
+        LocalizedString.fromJson(requestObject, CLIENT_NAME.getName(), (String key, Locale locale) -> {
             result.setClientName(key, locale);
             return null;
         });
-        clientMetadataValueFromJson(requestObject, LOGO_URI, (String key, Locale locale) -> {
+        LocalizedString.fromJson(requestObject, LOGO_URI.getName(), (String key, Locale locale) -> {
             result.setLogoUri(key, locale);
             return null;
         });
-        clientMetadataValueFromJson(requestObject, CLIENT_URI, (String key, Locale locale) -> {
+        LocalizedString.fromJson(requestObject, CLIENT_URI.getName(), (String key, Locale locale) -> {
             result.setClientUri(key, locale);
             return null;
         });
-        clientMetadataValueFromJson(requestObject, POLICY_URI, (String key, Locale locale) -> {
+        LocalizedString.fromJson(requestObject, POLICY_URI.getName(), (String key, Locale locale) -> {
             result.setPolicyUri(key, locale);
             return null;
         });
-        clientMetadataValueFromJson(requestObject, TOS_URI, (String key, Locale locale) -> {
+        LocalizedString.fromJson(requestObject, TOS_URI.getName(), (String key, Locale locale) -> {
             result.setTosUri(key, locale);
             return null;
         });
@@ -1646,20 +1643,6 @@ public class RegisterRequest extends BaseRequest {
         result.setAuthorizedAcrValues(extractListByKey(requestObject, AUTHORIZED_ACR_VALUES.getName()));
 
         return result;
-    }
-
-    private static void clientMetadataValueFromJson(
-            JSONObject requestObject, RegisterRequestParam registerRequestParam, BiFunction<String, Locale, Void> function) {
-        List<String> keys = requestObject.keySet().stream()
-                .filter(k -> k.startsWith(registerRequestParam.getName()))
-                .collect(Collectors.toList());
-
-        keys.forEach(key -> {
-            key = key.replace(registerRequestParam.getName(), "");
-            String[] keyParts = key.split(LANG_CLAIM_SEPARATOR);
-            String languageTag = keyParts[keyParts.length - 1];
-            function.apply(requestObject.getString(registerRequestParam.getName() + key), Locale.forLanguageTag(languageTag));
-        });
     }
 
     public static List<GrantType> extractGrantTypes(JSONObject requestObject) {
@@ -1719,11 +1702,13 @@ public class RegisterRequest extends BaseRequest {
             parameters.put(KEEP_CLIENT_AUTHORIZATION_AFTER_EXPIRATION.toString(), keepClientAuthorizationAfterExpiration);
         }
 
-        addClientMetadataParam(parameters, CLIENT_NAME, clientName);
-        addClientMetadataParam(parameters, LOGO_URI, logoUri);
-        addClientMetadataParam(parameters, CLIENT_URI, clientUri);
-        addClientMetadataParam(parameters, POLICY_URI, policyUri);
-        addClientMetadataParam(parameters, TOS_URI, tosUri);
+        Map<String, Object> paramsMap = parameters.toMap();
+        clientName.addToMap(paramsMap, CLIENT_NAME.getName());
+        logoUri.addToMap(paramsMap, LOGO_URI.getName());
+        clientUri.addToMap(paramsMap, CLIENT_URI.getName());
+        policyUri.addToMap(paramsMap, POLICY_URI.getName());
+        tosUri.addToMap(paramsMap, TOS_URI.getName());
+        parameters = new JSONObject(paramsMap);
 
         if (StringUtils.isNotBlank(jwksUri)) {
             parameters.put(JWKS_URI.toString(), jwksUri);
@@ -1937,29 +1922,5 @@ public class RegisterRequest extends BaseRequest {
 
     public void setRedirectUrisRegex(String redirectUrisRegex) {
         this.redirectUrisRegex = redirectUrisRegex;
-    }
-
-    private void addClientMetadataParam(Map<String, String> parameters, RegisterRequestParam registerRequestParam, ClientMetadataValue clientMetadataValue) {
-        if (clientMetadataValue != null && clientMetadataValue.size() > 0) {
-            for (String languageTag : clientMetadataValue.getLanguageTags()) {
-                if (StringUtils.isBlank(languageTag)) {
-                    parameters.put(registerRequestParam.toString(), clientMetadataValue.getValue());
-                } else {
-                    parameters.put(registerRequestParam.toString() + "#" + languageTag, clientMetadataValue.getValue(languageTag));
-                }
-            }
-        }
-    }
-
-    private void addClientMetadataParam(JSONObject parameters, RegisterRequestParam registerRequestParam, ClientMetadataValue clientMetadataValue) {
-        if (clientMetadataValue != null && clientMetadataValue.size() > 0) {
-            for (String languageTag : clientMetadataValue.getLanguageTags()) {
-                if (StringUtils.isBlank(languageTag)) {
-                    parameters.put(registerRequestParam.toString(), clientMetadataValue.getValue());
-                } else {
-                    parameters.put(registerRequestParam.toString() + "#" + languageTag, clientMetadataValue.getValue(languageTag));
-                }
-            }
-        }
     }
 }

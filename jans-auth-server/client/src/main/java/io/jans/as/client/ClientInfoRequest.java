@@ -14,7 +14,8 @@ import java.util.Map;
 /**
  * Represents a Client Info request to send to the authorization server.
  *
- * @author Javier Rojas Blum Date: 07.19.2012
+ * @author Javier Rojas Blum
+ * @version April 25, 2022
  */
 public class ClientInfoRequest extends BaseRequest {
 
@@ -74,8 +75,8 @@ public class ClientInfoRequest extends BaseRequest {
      *
      * @return A collection of parameters.
      */
-    public Map<String, String> getParameters() {
-        Map<String, String> parameters = new HashMap<>();
+    public Map<String, Object> getParameters() {
+        Map<String, Object> parameters = new HashMap<>();
 
         if (accessToken != null && !accessToken.isEmpty()) {
             if (getAuthorizationMethod() == AuthorizationMethod.FORM_ENCODED_BODY_PARAMETER

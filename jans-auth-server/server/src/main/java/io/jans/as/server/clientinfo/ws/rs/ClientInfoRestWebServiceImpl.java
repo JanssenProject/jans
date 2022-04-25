@@ -22,7 +22,7 @@ import io.jans.as.server.service.ScopeService;
 import io.jans.as.server.service.token.TokenService;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.model.GluuAttribute;
-import io.jans.orm.model.base.ClientMetadataValue;
+import io.jans.orm.model.base.LocalizedString;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -33,14 +33,14 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import java.util.Set;
 
-import static io.jans.orm.model.base.ClientMetadataValue.EMPTY_LANG_TAG;
-import static io.jans.orm.model.base.ClientMetadataValue.LANG_CLAIM_SEPARATOR;
+import static io.jans.orm.model.base.LocalizedString.EMPTY_LANG_TAG;
+import static io.jans.orm.model.base.LocalizedString.LANG_CLAIM_SEPARATOR;
 
 /**
  * Provides interface for Client Info REST web services
  *
  * @author Javier Rojas Blum
- * @version April 6, 2022
+ * @version April 25, 2022
  */
 @Path("/")
 public class ClientInfoRestWebServiceImpl implements ClientInfoRestWebService {
@@ -129,13 +129,13 @@ public class ClientInfoRestWebServiceImpl implements ClientInfoRestWebService {
 
                         String claimName = attribute.getClaimName();
 
-                        if (attributeValue instanceof ClientMetadataValue) {
-                            ClientMetadataValue clientMetadataValue = (ClientMetadataValue) attributeValue;
-                            clientMetadataValue.getLanguageTags()
+                        if (attributeValue instanceof LocalizedString) {
+                            LocalizedString localizedString = (LocalizedString) attributeValue;
+                            localizedString.getLanguageTags()
                                     .forEach(languageTag -> {
                                         String key = claimName + (StringUtils.isNotBlank(languageTag)
                                                 ? LANG_CLAIM_SEPARATOR + languageTag : EMPTY_LANG_TAG);
-                                        jsonObj.put(key, clientMetadataValue.getValue(languageTag));
+                                        jsonObj.put(key, localizedString.getValue(languageTag));
                                     });
                         } else {
                             jsonObj.put(claimName, attributeValue);

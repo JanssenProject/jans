@@ -20,6 +20,7 @@ import static org.testng.Assert.assertEquals;
 
 /**
  * @author Yuriy Zabrovarnyy
+ * @version April 25, 2022
  */
 public class JsonApplierTest {
 
@@ -40,7 +41,7 @@ public class JsonApplierTest {
         RegisterRequest request = new RegisterRequest();
         request.setAdditionalAudience(Lists.newArrayList("aud1", "aud2"));
 
-        Map<String, String> target = new HashMap<>();
+        Map<String, Object> target = new HashMap<>();
 
         JsonApplier.getInstance().apply(request, target);
 

@@ -15,7 +15,7 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
 import io.jans.as.model.common.HasParamName;
 import io.jans.orm.annotation.AttributeEnum;
-import io.jans.orm.model.base.ClientMetadataValue;
+import io.jans.orm.model.base.LocalizedString;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -45,7 +45,7 @@ import java.util.TimeZone;
 /**
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version April 6, 2022
+ * @version April 25, 2022
  */
 public class Util {
 
@@ -174,13 +174,11 @@ public class Util {
         }
     }
 
-    public static void addToJSONObjectIfNotNull(JSONObject jsonObject, String key, ClientMetadataValue clientMetadataValue) throws JSONException {
-        if (jsonObject != null && clientMetadataValue != null && StringUtils.isNotBlank(key)) {
-            clientMetadataValue.getLanguageTags()
-                    .forEach(languageTag -> {
-                        jsonObject.put(key + (StringUtils.isBlank(languageTag) ? "" : "#" + languageTag),
-                                clientMetadataValue.getValue(languageTag));
-                    });
+    public static void addToJSONObjectIfNotNull(JSONObject jsonObject, String key, LocalizedString localizedString) throws JSONException {
+        if (jsonObject != null && localizedString != null && StringUtils.isNotBlank(key)) {
+            localizedString.getLanguageTags()
+                    .forEach(languageTag -> jsonObject.put(key + (StringUtils.isBlank(languageTag) ? "" : "#" + languageTag),
+                            localizedString.getValue(languageTag)));
         }
     }
 

@@ -32,7 +32,7 @@ import static io.jans.as.model.util.Util.putNotBlank;
  * Represents an authorization request to send to the authorization server.
  *
  * @author Javier Rojas Blum
- * @version October 7, 2019
+ * @version April 25, 2022
  */
 public class AuthorizationRequest extends BaseRequest {
 
@@ -600,8 +600,8 @@ public class AuthorizationRequest extends BaseRequest {
      * @return A collection of parameters.
      */
     @Override
-    public Map<String, String> getParameters() {
-        Map<String, String> parameters = new HashMap<>();
+    public Map<String, Object> getParameters() {
+        Map<String, Object> parameters = new HashMap<>();
 
         try {
             // OAuth 2.0 request parameters

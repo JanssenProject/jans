@@ -13,9 +13,9 @@ import io.jans.as.model.crypto.signature.AsymmetricSignatureAlgorithm;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.persistence.model.ClientAttributes;
 import io.jans.orm.annotation.*;
-import io.jans.orm.model.base.ClientMetadataValue;
 import io.jans.orm.model.base.CustomAttribute;
 import io.jans.orm.model.base.DeletableEntity;
+import io.jans.orm.model.base.LocalizedString;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.Serializable;
@@ -26,7 +26,7 @@ import java.util.Locale;
 
 /**
  * @author Javier Rojas Blum
- * @version April 6, 2022
+ * @version April 25, 2022
  */
 @DataEntry(sortBy = {"displayName"})
 @ObjectClass(value = "jansClnt")
@@ -80,23 +80,23 @@ public class Client extends DeletableEntity implements Serializable {
 
     @AttributeName(name = "displayName")
     @LanguageTag
-    private ClientMetadataValue clientName = new ClientMetadataValue();
+    private LocalizedString clientName = new LocalizedString();
 
     @AttributeName(name = "jansLogoURI")
     @LanguageTag
-    private ClientMetadataValue logoUri = new ClientMetadataValue();
+    private LocalizedString logoUri = new LocalizedString();
 
     @AttributeName(name = "jansClntURI")
     @LanguageTag
-    private ClientMetadataValue clientUri = new ClientMetadataValue();
+    private LocalizedString clientUri = new LocalizedString();
 
     @AttributeName(name = "jansPolicyURI")
     @LanguageTag
-    private ClientMetadataValue policyUri = new ClientMetadataValue();
+    private LocalizedString policyUri = new LocalizedString();
 
     @AttributeName(name = "jansTosURI")
     @LanguageTag
-    private ClientMetadataValue tosUri = new ClientMetadataValue();
+    private LocalizedString tosUri = new LocalizedString();
 
     @AttributeName(name = "jansJwksURI")
     private String jwksUri;
@@ -570,7 +570,7 @@ public class Client extends DeletableEntity implements Serializable {
      *
      * @return The name of the Client to be presented to the user.
      */
-    public ClientMetadataValue getClientName() {
+    public LocalizedString getClientName() {
         return clientName;
     }
 
@@ -598,7 +598,7 @@ public class Client extends DeletableEntity implements Serializable {
      *
      * @return The URL of a logo image for the Client where it can be retrieved.
      */
-    public ClientMetadataValue getLogoUri() {
+    public LocalizedString getLogoUri() {
         return logoUri;
     }
 
@@ -626,7 +626,7 @@ public class Client extends DeletableEntity implements Serializable {
      *
      * @return The URL of the home page of the Client.
      */
-    public ClientMetadataValue getClientUri() {
+    public LocalizedString getClientUri() {
         return clientUri;
     }
 
@@ -655,7 +655,7 @@ public class Client extends DeletableEntity implements Serializable {
      *
      * @return A URL location about how the profile data will be used.
      */
-    public ClientMetadataValue getPolicyUri() {
+    public LocalizedString getPolicyUri() {
         return policyUri;
     }
 
@@ -686,7 +686,7 @@ public class Client extends DeletableEntity implements Serializable {
      *
      * @return The terms of service URL.
      */
-    public ClientMetadataValue getTosUri() {
+    public LocalizedString getTosUri() {
         return tosUri;
     }
 

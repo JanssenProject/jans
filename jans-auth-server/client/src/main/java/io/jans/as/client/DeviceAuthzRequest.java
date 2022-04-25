@@ -22,6 +22,7 @@ import java.util.Map;
 
 /**
  * Represents a device authorization request to send to the authorization server.
+ * @version April 25, 2022
  */
 public class DeviceAuthzRequest extends ClientAuthnRequest {
 
@@ -63,8 +64,8 @@ public class DeviceAuthzRequest extends ClientAuthnRequest {
      *
      * @return A collection of parameters.
      */
-    public Map<String, String> getParameters() {
-        Map<String, String> parameters = new HashMap<>();
+    public Map<String, Object> getParameters() {
+        Map<String, Object> parameters = new HashMap<>();
 
         try {
             // OAuth 2.0 request parameters
