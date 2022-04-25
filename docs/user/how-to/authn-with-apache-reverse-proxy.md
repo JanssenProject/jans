@@ -69,7 +69,7 @@ Use steps below to configure Janssen server.
    - Copy the resulting JSON data and save it to a file, say `register-apache-rp.json`.
    - Use `jans-cli` operations to register the client using the command below
    
-     > Note: </br> In order to run operations, the `jans-cli` has to be authenticated and authorized with respective Janssen server. If `jans-cli` operation is being executed for the first time or if there is no valid access token available, then running the command below will initiate authentication and authorization flow. In that case, follow the steps for [jans-cli authorization](../using-jans-cli/cli-tips.md#cli-authorization) to continue running the command.
+     > Note: </br> In order to run operations, the `jans-cli` has to be authenticated and authorized with respective Janssen server. If `jans-cli` operation is being executed for the first time or if there is no valid access token available, then running the command below will initiate authentication and authorization flow. In that case, follow the steps for [jans-cli authorization](../using-jans-cli/cli-index.md#cli-authorization) to continue running the command.
    
      ```
      /opt/jans/jans-cli/config-cli.py --operation-id post-oauth-openid-clients --data <path>/register-apache-rp.json
