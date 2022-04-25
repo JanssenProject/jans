@@ -24,3 +24,6 @@ Janssen Server provides interactive CLI base tool `jans-cli`. Read [quick start 
 
 ## How do I understand existing Janssen server code?
 Leverage [technical documentation](https://github.com/JanssenProject/jans/tree/main/docs/technical) to understand high-level module design, interactions. Use [Code](https://github.com/JanssenProject/jans/tree/main/docs/code) documents to gain understanding of code at granular level.
+
+## I have installed Janssen server, where can I see it installed in on file system?
+On Ubuntu system, most of the Janssen server artifacts are placed under `/opt`, and `/opt/jans`.  
