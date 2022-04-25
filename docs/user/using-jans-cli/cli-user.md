@@ -1,5 +1,7 @@
 # User Resources
 
+> Prerequisite: Know how to use the Janssen CLI in [command-line mode](cli-index.md)
+
 The first thing is to do, Let's get some information for the following task:
 
 ```

@@ -1,5 +1,7 @@
 # Log Management
 
+> Prerequisite: Know how to use the Janssen CLI in [command-line mode](cli-index.md)
+
 To `view/update` logging configuration, let's get the information of logging Configuration.
 
 `/opt/jans/jans-cli/config-cli.py --info ConfigurationLogging`
