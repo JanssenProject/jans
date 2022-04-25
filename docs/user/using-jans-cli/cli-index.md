@@ -190,3 +190,17 @@ In this command line:
 - `patch-replace` type of operation; used to replace values in
 - `memcachedConfiguration/bufferSize:32788` is a `key:value` pair
 
+## CLI Authorization
+To run operations on Janssen Server, CLI client will need to be authenticated and authorized by the server. Since CLI has limited input capabilities, it uses [Device Authorization Grant](https://datatracker.ietf.org/doc/html/rfc8628) flow to get required permissions in form of an access token. After successfully receiving the token, CLI can run operations on the Janssen server while the token is valid. The steps below will summarize this process.
+
+1. Execution of CLI command will return the following message if a valid token is not found.
+   ```
+   Access token was not found.
+   Please visit verification url <Janssen-server-device-code-url> and enter user code CGFZ-RTZR in 1800 seconds
+   Please press <<Enter>> when ready
+   ```
+2. Take `<Janssen-server-device-code-url>` from the message above and use any browser to access it from a different device
+3. User will be presented with a page where the user has to authenticate using id and password
+4. After successful user authentication, the next screen allows the user to enter the user code. Use the user code presented on command-line instruction in step 1 above.
+5. After successful code validation, the user is presented with OAuth permissions screen. This screen would list all the permissions requested by Jans CLI. The user can choose to `Allow` or `Not Allow` granting of these permissions.
+6. After allowing the grant of requested permissions, the user should come back to the command-line interface and hit <<Enter>> as instructed. This will enable CLI to run operations on the corresponding Janssen server.
