@@ -668,10 +668,13 @@ def test_sql_client_quoted_id(monkeypatch, gmanager, dialect, word, quoted_word)
     assert client.quoted_id(word) == quoted_word
 
 
+BUILTINS_OPEN = "builtins.open"
+
+
 def test_sql_sql_data_types(gmanager, monkeypatch):
     from jans.pycloudlib.persistence.sql import SqlClient
 
-    monkeypatch.setattr("builtins.open", lambda p: StringIO("{}"))
+    monkeypatch.setattr(BUILTINS_OPEN, lambda p: StringIO("{}"))
 
     client = SqlClient(gmanager)
     assert isinstance(client.sql_data_types, dict)
@@ -680,7 +683,7 @@ def test_sql_sql_data_types(gmanager, monkeypatch):
 def test_sql_sql_data_types_mapping(gmanager, monkeypatch):
     from jans.pycloudlib.persistence.sql import SqlClient
 
-    monkeypatch.setattr("builtins.open", lambda p: StringIO("{}"))
+    monkeypatch.setattr(BUILTINS_OPEN, lambda p: StringIO("{}"))
 
     client = SqlClient(gmanager)
     assert isinstance(client.sql_data_types_mapping, dict)
@@ -690,7 +693,7 @@ def test_sql_attr_types(gmanager, monkeypatch):
     from jans.pycloudlib.persistence.sql import SqlClient
 
     monkeypatch.setattr(
-        "builtins.open",
+        BUILTINS_OPEN,
         lambda p: StringIO('{"attributeTypes": []}'),
     )
 
