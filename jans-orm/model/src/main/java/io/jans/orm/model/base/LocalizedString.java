@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 /**
  * @author Javier Rojas Blum
- * @version April 25, 2022
+ * @version April 26, 2022
  */
 public class LocalizedString implements Serializable {
 
@@ -99,16 +99,16 @@ public class LocalizedString implements Serializable {
     }
 
     public static void fromJson(
-            JSONObject requestObject, String registerRequestParam, BiFunction<String, Locale, Void> function) {
+            JSONObject requestObject, String paramName, BiFunction<String, Locale, Void> function) {
         List<String> keys = requestObject.keySet().stream()
-                .filter(k -> k.startsWith(registerRequestParam))
+                .filter(k -> k.startsWith(paramName))
                 .collect(Collectors.toList());
 
         keys.forEach(key -> {
-            key = key.replace(registerRequestParam, "");
+            key = key.replace(paramName, "");
             String[] keyParts = key.split(LANG_CLAIM_SEPARATOR);
             String languageTag = keyParts[keyParts.length - 1];
-            function.apply(requestObject.getString(registerRequestParam + key), Locale.forLanguageTag(languageTag));
+            function.apply(requestObject.getString(paramName + key), Locale.forLanguageTag(languageTag));
         });
     }
 }
