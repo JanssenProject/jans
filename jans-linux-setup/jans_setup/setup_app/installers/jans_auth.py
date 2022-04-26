@@ -25,8 +25,8 @@ class JansAuthInstaller(JettyInstaller):
         self.register_progess()
 
         self.source_files = [
-                    (os.path.join(Config.distJansFolder, 'jans-auth.war'), os.path.join(Config.app_info['JANS_MAVEN'], 'maven/io/jans/jans-auth-server/{}/jans-auth-server-{}.war').format(Config.oxVersion, Config.oxVersion)),
-                    (os.path.join(Config.distJansFolder, 'jans-auth-rp.war'), os.path.join(Config.app_info['JANS_MAVEN'], 'maven/io/jans/jans-auth-rp/{}/jans-auth-rp-{}.war').format(Config.oxVersion, Config.oxVersion)),
+                    (os.path.join(Config.distJansFolder, 'jans-auth.war'), os.path.join(Config.app_info['JANS_MAVEN'], 'maven/io/jans/jans-auth-server/{0}/jans-auth-server-{0}.war').format(Config.ox_version)),
+                    (os.path.join(Config.distJansFolder, 'jans-auth-rp.war'), os.path.join(Config.app_info['JANS_MAVEN'], 'maven/io/jans/jans-auth-rp/{0}/jans-auth-rp-{0}.war').format(Config.ox_version)),
                     ]
 
         self.templates_folder = os.path.join(Config.templateFolder, self.service_name)

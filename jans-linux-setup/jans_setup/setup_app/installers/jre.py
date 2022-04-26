@@ -61,7 +61,7 @@ class JreInstaller(BaseInstaller, SetupUtils):
 
         self.fix_java_security()
 
-    def download_files(self, force=False):
+    def download_files(self, force=False, downloads=[]):
         jre_arch_list = glob.glob(os.path.join(Config.distAppFolder, 'amazon-corretto-*.tar.gz'))
 
         if not jre_arch_list:
@@ -74,7 +74,7 @@ class JreInstaller(BaseInstaller, SetupUtils):
             jdk_fn = os.path.basename(self.open_jdk_archive_link)
             
             self.jreArchive = os.path.join(Config.distAppFolder, jdk_fn)
-            if not os.path.exists(self.jreArchive) or force:
+            if not os.path.exists(self.jreArchive) or force and not (downloads and not src_name in downloads):
                 self.logIt("Downloading " + jdk_fn, pbar=self.service_name)
                 base.download(self.open_jdk_archive_link, self.jreArchive)
         else:

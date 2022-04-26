@@ -203,7 +203,7 @@ class BaseInstaller:
             if os.path.exists(src):
                 war_info = get_war_info(src)
                 if war_info.get('version'):
-                    return LooseVersion(war_info['version']) < LooseVersion(Config.oxVersion)
+                    return LooseVersion(war_info['version']) < LooseVersion(Config.ox_version)
 
         return True
 

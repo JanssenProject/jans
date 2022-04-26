@@ -173,7 +173,7 @@ if base.snap:
 print("Installing Janssen Server...\n\nFor more info see:\n  {}  \n  {}\n".format(paths.LOG_FILE, paths.LOG_ERROR_FILE))
 print("Profile         :  {}".format(Config.profile))
 print("Detected OS     :  {}".format(detected_os))
-print("Janssen Version :  {}".format(Config.oxVersion))
+print("Janssen Version :  {}".format(Config.ox_version))
 print("Detected init   :  {}".format(base.os_initdaemon))
 print("Detected Apache :  {}".format(base.determineApacheVersion()))
 print()

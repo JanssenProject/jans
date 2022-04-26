@@ -21,7 +21,7 @@ class ScimInstaller(JettyInstaller):
         self.register_progess()
 
         self.source_files = [
-                (os.path.join(Config.distJansFolder, 'jans-scim.war'), os.path.join(Config.app_info['JANS_MAVEN'], 'maven/io/jans/jans-scim-server/{0}/jans-scim-server-{0}.war').format(Config.oxVersion)),
+                (os.path.join(Config.distJansFolder, 'jans-scim.war'), os.path.join(Config.app_info['JANS_MAVEN'], 'maven/io/jans/jans-scim-server/{0}/jans-scim-server-{0}.war').format(Config.ox_version)),
                 (os.path.join(Config.install_dir, 'jans_setup/data/jans-scim-openapi.yaml'), 'https://raw.githubusercontent.com/JanssenProject/jans/main/jans-scim/server/src/main/resources/jans-scim-openapi.yaml'),
                 ]
 
