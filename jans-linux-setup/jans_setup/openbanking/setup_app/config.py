@@ -3,6 +3,7 @@ import os
 import time
 import pprint
 import inspect
+import json
 from collections import OrderedDict
 
 from setup_app.paths import INSTALL_DIR
@@ -34,16 +35,6 @@ class Config:
     def get(self, attr, default=None):
         return getattr(self, attr) if hasattr(self, attr) else default
 
-
-    @classmethod
-    def determine_version(self):
-        oxauth_info = get_war_info(os.path.join(self.distJansFolder, 'jans-auth.war'))
-        self.oxVersion = oxauth_info['version']
-        self.currentJansVersion = re.search('([\d.]+)', oxauth_info['version']).group().strip('.')
-        self.githubBranchName = oxauth_info['branch']
-
-        self.ce_setup_zip = 'https://github.com/JanssenProject/jans-setup/archive/%s.zip' % self.githubBranchName
-
     @classmethod
     def dump(self, dumpFile=False):
         if self.dump_config_on_error:
@@ -67,6 +58,11 @@ class Config:
     def init(self, install_dir=INSTALL_DIR):
 
         self.install_dir = install_dir
+        with open(os.path.join(self.install_dir, 'app_info.json')) as f:
+            self.app_info = json.load(f)
+
+        self.oxVersion = self.app_info['JANS_APP_VERSION'] + self.app_info['JANS_BUILD']
+
         self.thread_queue = None
         self.jetty_user = 'jetty'
         self.dump_config_on_error = False

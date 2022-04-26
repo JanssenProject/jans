@@ -38,7 +38,7 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
             self.register_progess()
 
         self.source_files = [
-                (os.path.join(Config.distJansFolder, 'jans.zip'), 'https://github.com/JanssenProject/jans/archive/refs/heads/{}.zip'.format(Config.githubBranchName)),
+                (os.path.join(Config.distJansFolder, 'jans.zip'), 'https://github.com/JanssenProject/jans/archive/refs/heads/{}.zip'.format(Config.app_info['SETUP_BRANCH'])),
                 (os.path.join(Config.distJansFolder, 'jca-swagger-client.zip'), 'https://ox.gluu.org/icrby8xcvbcv/cli-swagger/jca_swagger_client.zip'),
                 (os.path.join(Config.distJansFolder, 'scim-swagger-client.zip'), 'https://ox.gluu.org/icrby8xcvbcv/cli-swagger/scim_swagger_client.zip'),
                 (os.path.join(Config.distAppFolder, 'pyjwt.zip'), 'https://github.com/jpadilla/pyjwt/archive/refs/tags/2.3.0.zip'),
