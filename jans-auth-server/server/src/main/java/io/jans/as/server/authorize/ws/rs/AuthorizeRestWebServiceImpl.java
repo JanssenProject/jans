@@ -37,7 +37,6 @@ import io.jans.as.model.jwt.JwtHeaderName;
 import io.jans.as.model.token.JsonWebResponse;
 import io.jans.as.model.util.JwtUtil;
 import io.jans.as.model.util.Util;
-import io.jans.as.persistence.model.Par;
 import io.jans.as.server.audit.ApplicationAuditLogger;
 import io.jans.as.server.ciba.CIBAPingCallbackService;
 import io.jans.as.server.ciba.CIBAPushTokenDeliveryService;
@@ -52,7 +51,6 @@ import io.jans.as.server.model.exception.InvalidRedirectUrlException;
 import io.jans.as.server.model.exception.InvalidSessionStateException;
 import io.jans.as.server.model.ldap.ClientAuthorization;
 import io.jans.as.server.model.token.JwrService;
-import io.jans.as.server.par.ws.rs.ParService;
 import io.jans.as.server.security.Identity;
 import io.jans.as.server.service.*;
 import io.jans.as.server.service.ciba.CibaRequestService;
@@ -132,7 +130,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     private SessionIdService sessionIdService;
 
     @Inject
-    CookieService cookieService;
+    private CookieService cookieService;
 
     @Inject
     private ScopeChecker scopeChecker;
@@ -303,12 +301,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             RedirectUriResponse redirectUriResponse = new RedirectUriResponse(new RedirectUri(authzRequest.getRedirectUri(), responseTypes, authzRequest.getResponseModeEnum()), authzRequest.getState(), authzRequest.getHttpRequest(), errorResponseFactory);
             redirectUriResponse.setFapiCompatible(appConfiguration.isFapi());
 
-            if (!client.getAttributes().getAuthorizedAcrValues().isEmpty() &&
-                    !client.getAttributes().getAuthorizedAcrValues().containsAll(authzRequest.getAcrValuesList())) {
-                throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST,
-                        "Restricted acr value request, please review the list of authorized acr values for this client");
-            }
-            checkAcrChanged(authzRequest.getAcrValues(), prompts, sessionUser); // check after redirect uri is validated
+            authorizeRestWebServiceValidator.validateAcrs(authzRequest, client, redirectUriResponse);
 
             Set<String> scopes = scopeChecker.checkScopesPolicy(client, authzRequest.getScope());
 
@@ -450,7 +443,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 authorizeRestWebServiceValidator.validateRequestJwt(authzRequest.getRequest(), authzRequest.getRequestUri(), redirectUriResponse);
             }
 
-            authorizeRestWebServiceValidator.validate(responseTypes, prompts, authzRequest.getNonce(), authzRequest.getState(), authzRequest.getRedirectUri(), authzRequest.getHttpRequest(), client, authzRequest.getResponseModeEnum());
+            authorizeRestWebServiceValidator.validate(authzRequest, responseTypes, client);
             authorizeRestWebServiceValidator.validatePkce(authzRequest.getCodeChallenge(), redirectUriResponse);
 
             if (StringUtils.isBlank(authzRequest.getAcrValues()) && !ArrayUtils.isEmpty(client.getDefaultAcrValues())) {
@@ -994,30 +987,6 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             Map<String, String> requestParameterMap = requestParameterService.getAllowedParameters(parameterMap);
             sessionAttributes.putAll(requestParameterMap);
             sessionIdService.updateSessionId(sessionUser, true, true, true);
-        }
-    }
-
-    private void checkAcrChanged(String acrValuesStr, List<Prompt> prompts, SessionId sessionUser) throws AcrChangedException {
-        try {
-            sessionIdService.assertAuthenticatedSessionCorrespondsToNewRequest(sessionUser, acrValuesStr);
-        } catch (AcrChangedException e) { // Acr changed
-            //See https://github.com/GluuFederation/oxTrust/issues/797
-            if (e.isForceReAuthentication()) {
-                if (!prompts.contains(Prompt.LOGIN)) {
-                    log.info("ACR is changed, adding prompt=login to prompts");
-                    prompts.add(Prompt.LOGIN);
-
-                    sessionUser.setState(SessionIdState.UNAUTHENTICATED);
-                    sessionUser.getSessionAttributes().put("prompt", implode(prompts, " "));
-                    if (!sessionIdService.persistSessionId(sessionUser)) {
-                        log.trace("Unable persist session_id, trying to update it.");
-                        sessionIdService.updateSessionId(sessionUser);
-                    }
-                    sessionIdService.externalEvent(new SessionEvent(SessionEventType.UNAUTHENTICATED, sessionUser));
-                }
-            } else {
-                throw e;
-            }
         }
     }
 

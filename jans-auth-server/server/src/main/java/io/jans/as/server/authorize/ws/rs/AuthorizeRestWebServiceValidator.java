@@ -7,10 +7,12 @@
 package io.jans.as.server.authorize.ws.rs;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.util.RedirectUri;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.common.Prompt;
+import io.jans.as.model.common.ResponseMode;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.error.ErrorResponseFactory;
@@ -18,10 +20,16 @@ import io.jans.as.server.model.authorize.AuthorizeParamsValidator;
 import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.server.model.common.DeviceAuthorizationCacheControl;
 import io.jans.as.server.model.common.SessionId;
+import io.jans.as.server.model.common.SessionIdState;
+import io.jans.as.server.model.exception.AcrChangedException;
+import io.jans.as.server.security.Identity;
 import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.DeviceAuthorizationService;
 import io.jans.as.server.service.RedirectUriResponse;
 import io.jans.as.server.service.RedirectionUriService;
+import io.jans.as.server.service.SessionIdService;
+import io.jans.as.server.service.external.session.SessionEvent;
+import io.jans.as.server.service.external.session.SessionEventType;
 import io.jans.as.server.util.RedirectUtil;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.orm.exception.EntryPersistenceException;
@@ -46,6 +54,7 @@ import java.util.TimeZone;
 import static io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType.INVALID_REQUEST;
 import static io.jans.as.model.crypto.signature.SignatureAlgorithm.NONE;
 import static io.jans.as.model.crypto.signature.SignatureAlgorithm.RS256;
+import static io.jans.as.model.util.StringUtils.implode;
 import static org.apache.commons.lang.BooleanUtils.isTrue;
 
 /**
@@ -73,6 +82,12 @@ public class AuthorizeRestWebServiceValidator {
 
     @Inject
     private AppConfiguration appConfiguration;
+
+    @Inject
+    private SessionIdService sessionIdService;
+
+    @Inject
+    private Identity identity;
 
     public Client validateClient(String clientId, String state) {
         return validateClient(clientId, state, false);
@@ -148,23 +163,27 @@ public class AuthorizeRestWebServiceValidator {
         }
     }
 
-    public void validate(List<io.jans.as.model.common.ResponseType> responseTypes, List<Prompt> prompts, String nonce, String state, String redirectUri, HttpServletRequest httpRequest, Client client, io.jans.as.model.common.ResponseMode responseMode) {
-        if (!AuthorizeParamsValidator.validateParams(responseTypes, prompts, nonce, appConfiguration.isFapi(), responseMode)) {
+    public void validate(AuthzRequest authzRequest, List<io.jans.as.model.common.ResponseType> responseTypes, Client client) {
+        final ResponseMode responseMode = authzRequest.getResponseModeEnum();
+        final String redirectUri = authzRequest.getRedirectUri();
+        if (!AuthorizeParamsValidator.validateParams(responseTypes, authzRequest.getPromptList(), authzRequest.getNonce(), appConfiguration.isFapi(), responseMode)) {
+
             if (redirectUri != null && redirectionUriService.validateRedirectionUri(client, redirectUri) != null) {
                 RedirectUri redirectUriResponse = new RedirectUri(redirectUri, responseTypes, responseMode);
                 redirectUriResponse.parseQueryString(errorResponseFactory.getErrorAsQueryString(
-                        AuthorizeErrorResponseType.INVALID_REQUEST, state));
-                throw new WebApplicationException(RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest).build());
+                        AuthorizeErrorResponseType.INVALID_REQUEST, authzRequest.getState()));
+                throw new WebApplicationException(RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, authzRequest.getHttpRequest()).build());
             } else {
                 throw new WebApplicationException(Response
                         .status(Response.Status.BAD_REQUEST.getStatusCode())
                         .type(MediaType.APPLICATION_JSON_TYPE)
-                        .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST, state, "Invalid redirect uri."))
+                        .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST, authzRequest.getState(), "Invalid redirect uri."))
                         .build());
             }
         }
     }
 
+    @SuppressWarnings("java:S3776")
     public void validateRequestObject(JwtAuthorizationRequest jwtRequest, RedirectUriResponse redirectUriResponse) {
         if (!jwtRequest.getAud().isEmpty() && !jwtRequest.getAud().contains(appConfiguration.getIssuer())) {
             log.error("Failed to match aud to AS, aud: {}", jwtRequest.getAud());
@@ -228,6 +247,7 @@ public class AuthorizeRestWebServiceValidator {
      *
      * @param jwtRequest Object to be validated.
      */
+    @SuppressWarnings("java:S3776")
     public void validateCibaRequestObject(JwtAuthorizationRequest jwtRequest, String clientId) {
         if (jwtRequest.getAud().isEmpty() || !jwtRequest.getAud().contains(appConfiguration.getIssuer())) {
             log.error("Failed to match aud to AS, aud: {}", jwtRequest.getAud());
@@ -354,6 +374,42 @@ public class AuthorizeRestWebServiceValidator {
         if (isTrue(appConfiguration.getRequirePkce()) && Strings.isNullOrEmpty(codeChallenge)) {
             log.error("PKCE is required but code_challenge is blank.");
             throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST);
+        }
+    }
+
+    public void validateAcrs(AuthzRequest authzRequest, Client client, RedirectUriResponse redirectUriResponse) throws AcrChangedException {
+        if (!client.getAttributes().getAuthorizedAcrValues().isEmpty() &&
+                !client.getAttributes().getAuthorizedAcrValues().containsAll(authzRequest.getAcrValuesList())) {
+            throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST,
+                    "Restricted acr value request, please review the list of authorized acr values for this client");
+        }
+        checkAcrChanged(authzRequest, identity.getSessionId()); // check after redirect uri is validated
+    }
+
+
+    private void checkAcrChanged(AuthzRequest authzRequest, SessionId sessionUser) throws AcrChangedException {
+        try {
+            sessionIdService.assertAuthenticatedSessionCorrespondsToNewRequest(sessionUser, authzRequest.getAcrValues());
+        } catch (AcrChangedException e) { // Acr changed
+            //See https://github.com/GluuFederation/oxTrust/issues/797
+            if (e.isForceReAuthentication()) {
+                final List<Prompt> promptList = Lists.newArrayList(authzRequest.getPromptList());
+                if (!promptList.contains(Prompt.LOGIN)) {
+                    log.info("ACR is changed, adding prompt=login to prompts");
+                    promptList.add(Prompt.LOGIN);
+                    authzRequest.setPrompt(implode(promptList, " "));
+
+                    sessionUser.setState(SessionIdState.UNAUTHENTICATED);
+                    sessionUser.getSessionAttributes().put("prompt", authzRequest.getPrompt());
+                    if (!sessionIdService.persistSessionId(sessionUser)) {
+                        log.trace("Unable persist session_id, trying to update it.");
+                        sessionIdService.updateSessionId(sessionUser);
+                    }
+                    sessionIdService.externalEvent(new SessionEvent(SessionEventType.UNAUTHENTICATED, sessionUser));
+                }
+            } else {
+                throw e;
+            }
         }
     }
 }
