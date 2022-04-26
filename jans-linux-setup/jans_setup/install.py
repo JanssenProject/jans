@@ -396,7 +396,7 @@ def do_install():
         os.system(setup_cmd)
 
 def get_app_info():
-    app_versions_url = 'https://raw.githubusercontent.com/JanssenProject/jans/{}/jans-linux-setup/jans_setup/setup_app/app_info.json'.format(app_globals.argsp.setup_branch)
+    app_versions_url = 'https://raw.githubusercontent.com/JanssenProject/jans/{}/jans-linux-setup/jans_setup/app_info.json'.format(app_globals.argsp.setup_branch)
     with tempfile.TemporaryDirectory() as tmp_dir:
         tmp_fn = os.path.join(tmp_dir, os.path.basename(app_versions_url))
         download(app_versions_url, tmp_fn)
