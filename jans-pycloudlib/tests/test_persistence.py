@@ -704,7 +704,7 @@ def test_sql_attr_types(gmanager, monkeypatch):
 def test_sql_opendj_attr_types(gmanager, monkeypatch):
     from jans.pycloudlib.persistence.sql import SqlClient
 
-    monkeypatch.setattr("builtins.open", lambda p: StringIO("{}"))
+    monkeypatch.setattr(BUILTINS_OPEN, lambda p: StringIO("{}"))
 
     client = SqlClient(gmanager)
     assert isinstance(client.opendj_attr_types, dict)
@@ -794,7 +794,7 @@ def test_spanner_quoted_id(gmanager):
 def test_spanner_sql_data_types(gmanager, monkeypatch):
     from jans.pycloudlib.persistence.spanner import SpannerClient
 
-    monkeypatch.setattr("builtins.open", lambda p: StringIO("{}"))
+    monkeypatch.setattr(BUILTINS_OPEN, lambda p: StringIO("{}"))
 
     client = SpannerClient(gmanager)
     assert isinstance(client.sql_data_types, dict)
@@ -803,7 +803,7 @@ def test_spanner_sql_data_types(gmanager, monkeypatch):
 def test_spanner_sql_data_types_mapping(gmanager, monkeypatch):
     from jans.pycloudlib.persistence.spanner import SpannerClient
 
-    monkeypatch.setattr("builtins.open", lambda p: StringIO("{}"))
+    monkeypatch.setattr(BUILTINS_OPEN, lambda p: StringIO("{}"))
 
     client = SpannerClient(gmanager)
     assert isinstance(client.sql_data_types_mapping, dict)
@@ -813,7 +813,7 @@ def test_spanner_attr_types(gmanager, monkeypatch):
     from jans.pycloudlib.persistence.spanner import SpannerClient
 
     monkeypatch.setattr(
-        "builtins.open",
+        BUILTINS_OPEN,
         lambda p: StringIO('{"attributeTypes": []}'),
     )
 
@@ -824,7 +824,7 @@ def test_spanner_attr_types(gmanager, monkeypatch):
 def test_spanner_opendj_attr_types(gmanager, monkeypatch):
     from jans.pycloudlib.persistence.spanner import SpannerClient
 
-    monkeypatch.setattr("builtins.open", lambda p: StringIO("{}"))
+    monkeypatch.setattr(BUILTINS_OPEN, lambda p: StringIO("{}"))
 
     client = SpannerClient(gmanager)
     assert isinstance(client.opendj_attr_types, dict)
@@ -833,7 +833,7 @@ def test_spanner_opendj_attr_types(gmanager, monkeypatch):
 def test_spanner_sub_tables(gmanager, monkeypatch):
     from jans.pycloudlib.persistence.spanner import SpannerClient
 
-    monkeypatch.setattr("builtins.open", lambda p: StringIO("{}"))
+    monkeypatch.setattr(BUILTINS_OPEN, lambda p: StringIO("{}"))
 
     client = SpannerClient(gmanager)
     assert isinstance(client.sub_tables, dict)
