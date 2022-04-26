@@ -100,22 +100,4 @@ public class LicenseResource {
             return Response.serverError().entity(ErrorResponse.GET_LICENSE_DETAILS_ERROR.getDescription()).build();
         }
     }
-
-    @PUT
-    @Path(LICENSE_DETAILS)
-    @ProtectedApi(scopes={SCOPE_LICENSE_WRITE})
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response updateLicenseDetails(@Valid @NotNull LicenseRequest licenseRequest) {
-        try {
-            log.info("Trying to update license details.");
-            LicenseResponse licenseResponse = licenseDetailsService.updateLicenseDetails(licenseRequest);
-            return Response.ok(licenseResponse).build();
-        } catch (ApplicationException e) {
-            log.error(ErrorResponse.UPDATE_LICENSE_DETAILS_ERROR.getDescription(), e);
-            return Response.status(e.getErrorCode()).entity(e.getMessage()).build();
-        } catch (Exception e) {
-            log.error(ErrorResponse.UPDATE_LICENSE_DETAILS_ERROR.getDescription(), e);
-            return Response.serverError().entity(ErrorResponse.UPDATE_LICENSE_DETAILS_ERROR.getDescription()).build();
-        }
-    }
 }
