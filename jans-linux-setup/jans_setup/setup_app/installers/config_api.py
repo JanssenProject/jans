@@ -41,7 +41,7 @@ class ConfigApiInstaller(JettyInstaller):
 
         self.source_files = [
                 (os.path.join(Config.distJansFolder, 'jans-config-api.war'), os.path.join(Config.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api-server/{0}/jans-config-api-server-{0}.war').format(Config.oxVersion)),
-                (os.path.join(Config.distJansFolder, 'scim-plugin.jar'), os.path.join(Config.app_info['JANS_MAVEN'], 'maven/io/jans/scim-plugin/{0}/scim-plugin-{0}-distribution.jar').format(Config.oxVersion)),
+                (os.path.join(Config.distJansFolder, 'scim-plugin.jar'), os.path.join(Config.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/scim-plugin/{0}/scim-plugin-{0}-distribution.jar').format(Config.oxVersion)),
                 (os.path.join(Config.distJansFolder, 'facter'), 'https://raw.githubusercontent.com/GluuFederation/gluu-snap/master/facter/facter'),
                 (os.path.join(Config.install_dir, 'jans_setup/data/jans-config-api-swagger.yaml'), 'https://raw.githubusercontent.com/JanssenProject/jans/main/jans-config-api/docs/jans-config-api-swagger.yaml'),
                 (os.path.join(Config.distJansFolder, 'user-mgt-plugin.jar'), os.path.join(Config.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/user-mgt-plugin/{0}/user-mgt-plugin-{0}-distribution.jar').format(Config.oxVersion)),
