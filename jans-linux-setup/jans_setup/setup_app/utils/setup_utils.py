@@ -74,7 +74,7 @@ class SetupUtils(Crypto64):
 
         bc = 1
         while True:
-            backupFile_fn = destFile+'.jans-{0}-{1}~'.format(Config.currentJansVersion, bc)
+            backupFile_fn = destFile+'.jans-{0}-{1}~'.format(Config.app_info['JANS_APP_VERSION'], bc)
             if not os.path.exists(backupFile_fn):
                 break
             bc += 1

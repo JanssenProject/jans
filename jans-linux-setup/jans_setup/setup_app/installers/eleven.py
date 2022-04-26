@@ -22,7 +22,7 @@ class ElevenInstaller(JettyInstaller):
         self.register_progess()
 
         self.source_files = [
-                (os.path.join(Config.distJansFolder, 'jans-eleven.war'), 'https://jenkins.jans.io/maven/io/jans/jans-eleven-server/{0}/jans-eleven-server-{0}.war'.format(Config.oxVersion))
+                (os.path.join(Config.distJansFolder, 'jans-eleven.war'), os.path.join(Config.app_info['JANS_MAVEN'], 'maven/io/jans/jans-eleven-server/{0}/jans-eleven-server-{0}.war').format(Config.oxVersion))
                 ]
 
         self.output_folder = os.path.join(Config.outputFolder, 'jans-eleven')

@@ -20,7 +20,7 @@ class FidoInstaller(JettyInstaller):
         self.register_progess()
 
         self.source_files = [
-                (os.path.join(Config.distJansFolder, 'jans-fido2.war'), 'https://maven.jans.io/maven/io/jans/jans-fido2-server/{0}/fido2-server-{0}.war'.format(Config.oxVersion))
+                (os.path.join(Config.distJansFolder, 'jans-fido2.war'), os.path.join(Config.app_info['JANS_MAVEN'], 'maven/io/jans/jans-fido2-server/{0}/jans-fido2-server-{0}.war').format(Config.oxVersion))
                 ]
 
         self.fido2ConfigFolder = os.path.join(Config.configFolder, 'fido2')

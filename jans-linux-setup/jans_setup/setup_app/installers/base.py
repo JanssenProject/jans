@@ -28,8 +28,7 @@ class BaseInstaller:
         if self.needdb:
             self.dbUtils.bind()
 
-        if getattr(self, 'check_version', True):
-            self.check_for_download()
+        self.check_for_download()
 
         if not base.snap:
             self.create_user()
@@ -175,7 +174,7 @@ class BaseInstaller:
         # execute for each installer
         if Config.downloadWars:
             self.download_files(force=True)
-            
+
         elif Config.installed_instance:
             self.download_files()
 

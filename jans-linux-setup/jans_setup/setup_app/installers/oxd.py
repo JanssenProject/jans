@@ -144,7 +144,7 @@ class OxdInstaller(SetupUtils, BaseInstaller):
         return os.path.exists(self.oxd_server_yml_fn)
 
     def download_files(self, force=False):
-        oxd_url = 'https://ox.gluu.org/maven/org/gluu/oxd-server/{0}/oxd-server-{0}-distribution.zip'.format(Config.oxVersion)
+        oxd_url = os.path.join(Config.app_info['JANS_MAVEN'], 'maven/io/jans/oxd-server/{0}/oxd-server-{0}-distribution.zip').format(Config.oxVersion)
 
         self.logIt("Downloading {} and preparing package".format(os.path.basename(oxd_url)))
 
@@ -169,8 +169,8 @@ class OxdInstaller(SetupUtils, BaseInstaller):
         self.run(['tar', '-zcf', oxd_tgz_fn, 'oxd-server'], cwd=tmp_dir)
         #self.run(['rm', '-r', '-f', tmp_dir])
         Config.oxd_package = oxd_tgz_fn
-        
+
     def create_folders(self):
         if not os.path.exists(self.oxd_root):
             self.run([paths.cmd_mkdir, self.oxd_root])
-    
+

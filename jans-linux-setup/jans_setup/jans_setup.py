@@ -32,6 +32,7 @@ if not (os.path.exists('/opt/dist/jans/jans.zip') or os.path.exists('jans-auth.w
         sys.exit()
     else:
         print("Downloading Files")
+        install.get_app_info()
         install.download_files()
         install.extract_yaml_files()
         install.prepare_jans_cli_package()
@@ -132,7 +133,6 @@ if paths.IAMPACKAGED:
 
 # initialize config object
 Config.init(paths.INSTALL_DIR)
-Config.determine_version()
 
 base.profile = Config.profile
 if Config.profile != 'jans':
