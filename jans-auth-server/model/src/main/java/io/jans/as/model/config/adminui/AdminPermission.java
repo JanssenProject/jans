@@ -5,6 +5,7 @@ import java.util.Objects;
 public class AdminPermission {
     private String permission;
     private String description;
+    private Boolean defaultPermissionInToken;
 
     public String getPermission() {
         return permission;
@@ -20,6 +21,14 @@ public class AdminPermission {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Boolean getDefaultPermissionInToken() {
+        return defaultPermissionInToken;
+    }
+
+    public void setDefaultPermissionInToken(Boolean defaultPermissionInToken) {
+        this.defaultPermissionInToken = defaultPermissionInToken;
     }
 
     @Override
@@ -40,6 +49,7 @@ public class AdminPermission {
         return "AdminPermission{" +
                 "permission='" + permission + '\'' +
                 ", description='" + description + '\'' +
+                ", defaultPermissionInToken='" + defaultPermissionInToken + '\'' +
                 '}';
     }
 }

@@ -7,9 +7,9 @@
 import java
 import json
 from java.lang import StringBuilder
-from javax.faces.context import FacesContext
+from jakarta.faces.context import FacesContext
 from java.util import Arrays, ArrayList, HashMap, IdentityHashMap
-from javax.faces.application import FacesMessage
+from jakarta.faces.application import FacesMessage
 from io.jans.jsf2.message import FacesMessages
 from org.gluu.saml import SamlConfiguration, AuthRequest, Response
 from org.gluu.ldap.model import CustomAttribute

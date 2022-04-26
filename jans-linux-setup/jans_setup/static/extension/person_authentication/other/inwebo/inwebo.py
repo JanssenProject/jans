@@ -7,8 +7,8 @@ from io.jans.as.server.util import ServerUtil
 from io.jans.as.server.service import UserService, AuthenticationService,SessionIdService
 from io.jans.as.server.service.net import HttpService
 from io.jans.as.server.service.common import EncryptionService
-from javax.faces.application import FacesMessage
-from javax.faces.context import FacesContext
+from jakarta.faces.application import FacesMessage
+from jakarta.faces.context import FacesContext
 from io.jans.jsf2.service import FacesService
 from io.jans.jsf2.message import FacesMessages
 from java.util import Arrays

@@ -9,7 +9,7 @@ from io.jans.service.cdi.util import CdiUtil
 from io.jans.persist import PersistenceEntryManager
 from io.jans.as.model.config import StaticConfiguration
 from io.jans.as.model.ldap import TokenEntity
-from javax.faces.application import FacesMessage
+from jakarta.faces.application import FacesMessage
 from io.jans.jsf2.message import FacesMessages
 from io.jans.util import StringHelper, ArrayHelper
 from io.jans.as.model.config import Constants
@@ -48,7 +48,7 @@ class ApplicationSession(ApplicationSessionType):
         return
 
     # Application calls it at start session request to allow notify 3rd part systems
-    #   httpRequest is javax.servlet.http.HttpServletRequest
+    #   httpRequest is jakarta.servlet.http.HttpServletRequest
     #   sessionId is io.jans.as.model.common.SessionId
     #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
     def startSession(self, httpRequest, sessionId, configurationAttributes):
@@ -66,7 +66,7 @@ class ApplicationSession(ApplicationSessionType):
         return True
 
     # Application calls it at end session request to allow notify 3rd part systems
-    #   httpRequest is javax.servlet.http.HttpServletRequest
+    #   httpRequest is jakarta.servlet.http.HttpServletRequest
     #   sessionId is io.jans.as.model.common.SessionId
     #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
     def endSession(self, httpRequest, sessionId, configurationAttributes):

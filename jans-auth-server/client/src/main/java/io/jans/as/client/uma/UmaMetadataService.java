@@ -9,8 +9,8 @@ package io.jans.as.client.uma;
 import io.jans.as.model.uma.UmaConstants;
 import io.jans.as.model.uma.UmaMetadata;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Produces;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Produces;
 
 /**
  * The endpoint at which the requester can obtain UMA metadata.

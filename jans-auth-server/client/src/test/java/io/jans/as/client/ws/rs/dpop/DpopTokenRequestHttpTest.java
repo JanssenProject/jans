@@ -42,7 +42,7 @@ import org.testng.annotations.Test;
 import sun.security.ec.ECPublicKeyImpl;
 import sun.security.rsa.RSAPublicKeyImpl;
 
-import javax.ws.rs.HttpMethod;
+import jakarta.ws.rs.HttpMethod;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;

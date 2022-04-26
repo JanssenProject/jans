@@ -6,7 +6,7 @@
 
 package io.jans.notify.client;
 
-import javax.ws.rs.core.UriBuilder;
+import jakarta.ws.rs.core.UriBuilder;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.conn.ssl.SSLContexts;

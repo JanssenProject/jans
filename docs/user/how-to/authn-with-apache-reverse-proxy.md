@@ -38,17 +38,20 @@ https://janssen.op.io/.well-known/openid-configuration
 
 #### Configure Janssen server
 
-Janssen server provides `jans-cli` CLI tool to configure Janssen server. `jans-cli` has menu-driven interface that makes it easy to configure Janssen server.
+Janssen server provides `jans-cli` CLI tool to configure Janssen server. `jans-cli` has menu-driven interface that makes it easy to configure Janssen server. Here we will use menu-driven approach as well as command-line operations to configure Janssen server. To further understand how to use menu-driven approach and get complete list of supported command-line operations, refer to [jans-cli documentation](../using-jans-cli#command-line-interface).
 
 Use steps below to configure Janssen server.
 
 - Manually register client(RP) as OpenID Connect client
   - Run command below on host running Janssen Server
+  
     ```
     /opt/jans/jans-cli/config-cli.py`
     ```
+   
   - Navigate through options to start registering new OpenID Connect client
   - Provide inputs for following properties:
+  
     ```
     displayName: <name-of-choice>
     applicationType: web
@@ -62,11 +65,16 @@ Use steps below to configure Janssen server.
     responseTypes: code
     grantTypes: authorization_code
     ```
+    
    - Copy the resulting JSON data and save it to a file, say `register-apache-rp.json`.
-   - Register client usign following command
-   ```
-   /opt/jans/jans-cli/config-cli.py --operation-id post-oauth-openid-clients --data <path>/register-apache-rp.json
-   ```
+   - Use `jans-cli` operations to register the client using the command below
+   
+     > Note: </br> In order to run operations, the `jans-cli` has to be authenticated and authorized with respective Janssen server. If `jans-cli` operation is being executed for the first time or if there is no valid access token available, then running the command below will initiate authentication and authorization flow. In that case, follow the steps for [jans-cli authorization](../using-jans-cli/cli-index.md#cli-authorization) to continue running the command.
+   
+     ```
+     /opt/jans/jans-cli/config-cli.py --operation-id post-oauth-openid-clients --data <path>/register-apache-rp.json
+     ```
+     
    - Output of this command would be a JSON response. Save this response to a file as some of the values in it will be required when configuring *mod-auth-openidc*.
  
 

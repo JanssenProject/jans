@@ -13,7 +13,7 @@ import io.jans.as.model.token.ClientAssertionType;
 import io.jans.as.model.uma.UmaScopeType;
 import io.jans.as.model.util.QueryBuilder;
 
-import javax.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.MediaType;
 import java.util.HashMap;
 import java.util.Map;
 

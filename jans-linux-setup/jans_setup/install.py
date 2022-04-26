@@ -19,8 +19,8 @@ ssl._create_default_https_context = ssl._create_unverified_context
 
 app_versions = {
   "JANS_APP_VERSION": "1.0.0",
-  "JANS_BUILD": "-SNAPSHOT", 
-  "JETTY_VERSION": "9.4.44.v20210927", 
+  "JANS_BUILD": "-jetty-SNAPSHOT", 
+  "JETTY_VERSION": "11.0.8", 
   "AMAZON_CORRETTO_VERSION": "11.0.13.8.1", 
   "JYTHON_VERSION": "2.7.3",
   "OPENDJ_VERSION": "4.4.12",
@@ -28,7 +28,7 @@ app_versions = {
 }
 
 app_globals = SimpleNamespace()
-app_globals.jetty_dist_string = 'jetty-distribution'
+app_globals.jetty_dist_string = 'jetty-home'
 app_globals.jetty_services = ['jans-auth', 'jans-config-api']
 app_globals.package_dependencies = []
 
@@ -67,7 +67,7 @@ parser.add_argument('-setup-dir', help="Setup directory", default=os.path.join(j
 parser.add_argument('--force-download', help="Force downloading files", action='store_true')
 
 if '-a' in sys.argv:
-    parser.add_argument('--jetty-version', help="Jetty verison. For example 11.0.6")
+    parser.add_argument('--jetty-version', help="Jetty verison. For example 11.0.8")
 
 
 def init_installer():
@@ -80,15 +80,6 @@ def init_installer():
 
     if app_globals.argsp.setup_branch:
         app_versions['SETUP_BRANCH'] = app_globals.argsp.setup_branch
-
-    if getattr(app_globals.argsp, 'jetty_version', None):
-        result = re.findall('(\d*).', app_globals.argsp.jetty_version)
-        if result and result[0] and result[0].isdigit():
-            if int(result[0]) > 9:
-                app_globals.jetty_dist_string = 'jetty-home'
-                app_versions['JETTY_VERSION'] = app_globals.argsp.jetty_version
-        else:
-            print("Can't determine Jetty Version. Continuing with version {}".format(app_versions['JETTY_VERSION']))
 
     if app_globals.argsp.profile == 'jans':
         app_globals.jetty_services += ['jans-fido2', 'jans-scim', 'jans-eleven']

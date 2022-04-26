@@ -6,7 +6,7 @@
 
 package io.jans.service.document.store.conf;
 
-import javax.xml.bind.annotation.XmlEnum;
+import jakarta.xml.bind.annotation.XmlEnum;
 
 /**
  * @author Yuriy Movchan on 04/10/2020

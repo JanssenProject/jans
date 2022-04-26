@@ -21,7 +21,7 @@ import io.jans.as.server.uma.service.UmaSessionService;
 import io.jans.as.server.uma.ws.rs.UmaMetadataWS;
 import io.jans.model.SimpleCustomProperty;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

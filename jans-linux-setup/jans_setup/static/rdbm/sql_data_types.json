@@ -736,17 +736,6 @@
       "type": "STRING(MAX)"
     }
   },
-  "jansCodeChallengeHash": {
-    "mysql": {
-      "type": "TEXT"
-    },
-    "pgsql": {
-      "type": "TEXT"
-    },
-    "spanner": {
-      "type": "STRING(MAX)"
-    }
-  },
   "mobile": {
     "mysql": {
       "type": "JSON"

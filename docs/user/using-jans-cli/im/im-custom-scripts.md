@@ -1,5 +1,7 @@
 # Custom Scripts
 
+> Prerequisite: Know how to use the Janssen CLI in [interactive mode](im-index.md)
+
 Interception scripts can be used to implement custom business logic for authentication, authorization, and more in a way that is upgrade-proof and doesn't require forking the Gluu Server code. Using Janssen CLI, you can perform such an operation as listed below:
 
 ```text

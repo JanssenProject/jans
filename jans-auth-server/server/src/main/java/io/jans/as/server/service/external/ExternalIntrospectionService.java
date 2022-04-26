@@ -16,10 +16,10 @@ import io.jans.service.custom.script.ExternalScriptService;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 
-import javax.ejb.DependsOn;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.ejb.DependsOn;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import java.util.List;
 
 /**

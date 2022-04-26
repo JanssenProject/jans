@@ -9,7 +9,7 @@ from io.jans.oxtrust.service import PersonService
 from io.jans.util import StringHelper, ArrayHelper
 from java.util import Arrays, ArrayList
 from io.jans.config.oxtrust import AppConfiguration
-from javax.faces.context import ExternalContext
+from jakarta.faces.context import ExternalContext
 from io.jans.oxtrust.service import ConfigurationService
 
 import java

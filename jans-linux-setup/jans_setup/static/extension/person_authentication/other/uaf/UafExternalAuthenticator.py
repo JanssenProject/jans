@@ -21,7 +21,7 @@ from io.jans.as.server.service.common import UserService
 from io.jans.util import StringHelper, ArrayHelper
 from io.jans.as.server.util import ServerUtil
 from org.gluu.oxauth.model.config import Constants
-from javax.ws.rs.core import Response
+from jakarta.ws.rs.core import Response
 from java.util import Arrays
 from io.jans.as.server.service.net import HttpService
 from org.apache.http.params import CoreConnectionPNames

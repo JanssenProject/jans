@@ -8,12 +8,13 @@ There are many ways you can contribute. Of course you can contribute code. But w
 - [First Time Contributors](#first-time-contributors)
 - [Contribution Guidelines](#contribution-guidelines)
   - [Code of Conduct](#code-of-conduct)
-  - [Issues](#issues)
+  - [About Issues](#about-issues)
   - [Triaging](#triaging)
   - [Code Conventions and Guidelines](#code-conventions-and-guidelines)
     - [Commits](#commits)
     - [Branches](#branches)
     - [PRs](#prs)
+    - [Issues](#issues)
 - [Contribution Workflow](#contribution-workflow)
   - [Find Something To Work On](#find-something-to-work-on)
   - [Start a Discussion](#start-a-discussion)
@@ -51,7 +52,7 @@ Janssen project has a
 [Code of Conduct](CODE_OF_CONDUCT.md)
 to which all contributors must adhere, please read it before interacting with the repository or the community in any way.
 
-## Issues
+## About Issues
 
 There are four kinds of issues you can open:
 
@@ -136,7 +137,7 @@ Branch name should have component name as prefix, eg `jans-core-mybranch`
 - PR should include relevent documentaton changes
 - PR should include unit and integration tests
 
-### Issues
+### Issues 
 - Issue titles should follow [Conventional Commits v1.0.0](https://www.conventionalcommits.org/en/v1.0.0/)
 
 # Contribution Workflow

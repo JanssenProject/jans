@@ -12,7 +12,7 @@ import java.util.Collection;
 import java.util.Enumeration;
 import java.util.logging.Level;
 
-import javax.faces.application.ApplicationConfigurationPopulator;
+import jakarta.faces.application.ApplicationConfigurationPopulator;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 

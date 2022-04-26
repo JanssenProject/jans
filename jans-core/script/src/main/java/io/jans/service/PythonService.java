@@ -15,10 +15,10 @@ import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.util.Properties;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import io.jans.exception.PythonException;
 import io.jans.orm.reflect.util.ReflectHelper;
