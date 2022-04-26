@@ -1,5 +1,6 @@
 package io.jans.as.server.authorize.ws.rs;
 
+import io.jans.as.model.common.Prompt;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.core.SecurityContext;
@@ -116,6 +117,10 @@ public class AuthzRequest {
 
     public void setDisplay(String display) {
         this.display = display;
+    }
+
+    public List<Prompt> getPromptList() {
+        return Prompt.fromString(prompt, " ");
     }
 
     public String getPrompt() {
