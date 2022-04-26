@@ -1,0 +1,9 @@
+{
+  "JANS_APP_VERSION": "1.0.0",
+  "JANS_BUILD": "-SNAPSHOT",
+  "JETTY_VERSION": "11.0.9",
+  "AMAZON_CORRETTO_VERSION": "11.0.14.10.1",
+  "JYTHON_VERSION": "2.7.3",
+  "OPENDJ_VERSION": "4.4.12",
+  "JANS_MAVEN": "https://maven.jans.io"
+}
