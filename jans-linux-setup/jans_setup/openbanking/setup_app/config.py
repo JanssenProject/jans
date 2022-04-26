@@ -60,7 +60,7 @@ class Config:
         self.install_dir = install_dir
         with open(os.path.join(self.install_dir, 'app_info.json')) as f:
             self.app_info = json.load(f)
-        if not 'SETUP_BRANCH' in self.app_info:
+        if 'SETUP_BRANCH' not in self.app_info:
             self.app_info['SETUP_BRANCH'] = 'main'
 
         self.ox_version = self.app_info['JANS_APP_VERSION'] + self.app_info['JANS_BUILD']

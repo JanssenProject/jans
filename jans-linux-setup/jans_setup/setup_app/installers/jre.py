@@ -74,7 +74,7 @@ class JreInstaller(BaseInstaller, SetupUtils):
             jdk_fn = os.path.basename(self.open_jdk_archive_link)
             
             self.jreArchive = os.path.join(Config.distAppFolder, jdk_fn)
-            if not os.path.exists(self.jreArchive) or force and not (downloads and not src_name in downloads):
+            if not os.path.exists(self.jreArchive) or force and not (downloads and src_name not in downloads):
                 self.logIt("Downloading " + jdk_fn, pbar=self.service_name)
                 base.download(self.open_jdk_archive_link, self.jreArchive)
         else:
