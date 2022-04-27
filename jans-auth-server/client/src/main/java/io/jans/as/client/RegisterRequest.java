@@ -1343,8 +1343,8 @@ public class RegisterRequest extends BaseRequest {
      * @return A collection of parameters.
      */
     @Override
-    public Map<String, Object> getParameters() {
-        Map<String, Object> parameters = new HashMap<>();
+    public Map<String, String> getParameters() {
+        Map<String, String> parameters = new HashMap<>();
 
         JsonApplier.getInstance().apply(this, parameters);
 

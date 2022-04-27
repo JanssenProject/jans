@@ -600,8 +600,8 @@ public class AuthorizationRequest extends BaseRequest {
      * @return A collection of parameters.
      */
     @Override
-    public Map<String, Object> getParameters() {
-        Map<String, Object> parameters = new HashMap<>();
+    public Map<String, String> getParameters() {
+        Map<String, String> parameters = new HashMap<>();
 
         try {
             // OAuth 2.0 request parameters

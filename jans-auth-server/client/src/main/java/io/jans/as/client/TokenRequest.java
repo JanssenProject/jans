@@ -281,8 +281,8 @@ public class TokenRequest extends ClientAuthnRequest {
      *
      * @return A collection of parameters.
      */
-    public Map<String, Object> getParameters() {
-        Map<String, Object> parameters = new HashMap<>();
+    public Map<String, String> getParameters() {
+        Map<String, String> parameters = new HashMap<>();
 
         if (grantType != null) {
             parameters.put("grant_type", grantType.toString());

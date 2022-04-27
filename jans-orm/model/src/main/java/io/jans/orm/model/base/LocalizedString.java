@@ -78,7 +78,7 @@ public class LocalizedString implements Serializable {
                 .collect(Collectors.joining(LANG_JOINER));
     }
 
-    public Map<String, Object> addToMap(Map<String, Object> map, String key) {
+    public Map addToMap(Map map, String key) {
         if (values.isEmpty()) {
             return map;
         }

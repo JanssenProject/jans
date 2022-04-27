@@ -75,8 +75,8 @@ public class ClientInfoRequest extends BaseRequest {
      *
      * @return A collection of parameters.
      */
-    public Map<String, Object> getParameters() {
-        Map<String, Object> parameters = new HashMap<>();
+    public Map<String, String> getParameters() {
+        Map<String, String> parameters = new HashMap<>();
 
         if (accessToken != null && !accessToken.isEmpty()) {
             if (getAuthorizationMethod() == AuthorizationMethod.FORM_ENCODED_BODY_PARAMETER

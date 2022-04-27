@@ -44,13 +44,13 @@ public class JsonApplier {
         }
     }
 
-    public void apply(Object source, Map<String, Object> parameters) {
+    public void apply(Object source, Map<String, String> parameters) {
         for (PropertyDefinition definition : PropertyDefinition.values()) {
             apply(source, parameters, definition);
         }
     }
 
-    private void apply(Object source, Map<String, Object> target, PropertyDefinition property) {
+    private void apply(Object source, Map<String, String> target, PropertyDefinition property) {
         try {
             if (!isAllowed(source, target, property, source.getClass())) {
                 return;
