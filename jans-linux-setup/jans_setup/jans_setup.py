@@ -22,21 +22,6 @@ queue = Queue()
 dir_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(dir_path)
 
-if not (os.path.exists('/opt/dist/jans/jans.zip') or os.path.exists('jans-auth.war')) or '-uninstall' in sys.argv:
-    import install
-    install.setup_dir = dir_path
-    install.app_globals.argsp = install.parser.parse_known_args()[0]
-
-    if '-uninstall' in sys.argv:
-        install.uninstall_jans()
-        sys.exit()
-    else:
-        print("Downloading Files")
-        install.get_app_info()
-        install.download_files()
-        install.extract_yaml_files()
-        install.prepare_jans_cli_package()
-
 os.environ['LC_ALL'] = 'C'
 from setup_app.utils import arg_parser
 
@@ -82,6 +67,20 @@ from setup_app.utils import base
 
 # we will access args via base module
 base.argsp = argsp
+
+if 'SETUP_BRANCH' not in base.current_app.app_info:
+    base.current_app.app_info['SETUP_BRANCH'] = argsp.setup_branch
+
+base.current_app.app_info['ox_version'] = base.current_app.app_info['JANS_APP_VERSION'] + base.current_app.app_info['JANS_BUILD']
+
+
+# download pre-required apps
+from setup_app import downloads
+downloads.download_apps()
+
+sys.path.insert(0, base.pylib_dir)
+sys.path.insert(0, os.path.join(base.pylib_dir, 'gcs'))
+
 
 from setup_app.utils.package_utils import packageUtils
 
@@ -173,7 +172,7 @@ if base.snap:
 print("Installing Janssen Server...\n\nFor more info see:\n  {}  \n  {}\n".format(paths.LOG_FILE, paths.LOG_ERROR_FILE))
 print("Profile         :  {}".format(Config.profile))
 print("Detected OS     :  {}".format(detected_os))
-print("Janssen Version :  {}".format(Config.ox_version))
+print("Janssen Version :  {}".format(base.current_app.app_info['ox_version']))
 print("Detected init   :  {}".format(base.os_initdaemon))
 print("Detected Apache :  {}".format(base.determineApacheVersion()))
 print()

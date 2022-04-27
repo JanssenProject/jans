@@ -71,14 +71,8 @@ class Config:
     def init(self, install_dir=INSTALL_DIR):
 
         self.install_dir = install_dir
-        with open(os.path.join(self.install_dir, 'app_info.json')) as f:
-            self.app_info = json.load(f)
-        if 'SETUP_BRANCH' not in self.app_info:
-            self.app_info['SETUP_BRANCH'] = 'main'
-
-        self.ox_version = self.app_info['JANS_APP_VERSION'] + self.app_info['JANS_BUILD']
-
         self.data_dir = os.path.join(self.install_dir, 'setup_app/data')
+
         self.thread_queue = None
         self.jetty_user = 'jetty'
         self.dump_config_on_error = False
@@ -178,7 +172,6 @@ class Config:
         self.installOxTrust = True
         self.installHttpd = True
         self.installSaml = False
-        self.installOxAuthRP = False
         self.installPassport = False
         self.installJansRadius = False
         self.installScimServer = True

@@ -242,7 +242,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         if Config.get('config_patch_creds'):
             data = None
             datajs = None
-            patch_url = os.path.join(Config.app_info['JANS_MAVEN'], 'protected/jans-auth/jans-auth-test-config-patch.json')
+            patch_url = os.path.join(base.current_app.app_info['JANS_MAVEN'], 'protected/jans-auth/jans-auth-test-config-patch.json')
             req = urllib.request.Request(patch_url)
             credentials = Config.get('config_patch_creds')
             encoded_credentials = base64.b64encode(credentials.encode('ascii'))

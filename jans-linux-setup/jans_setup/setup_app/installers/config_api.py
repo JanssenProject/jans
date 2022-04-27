@@ -40,12 +40,14 @@ class ConfigApiInstaller(JettyInstaller):
         self.custom_config_dir = os.path.join(self.jetty_base, self.service_name, 'custom/config')
 
         self.source_files = [
-                (os.path.join(Config.distJansFolder, 'jans-config-api.war'), os.path.join(Config.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api-server/{0}/jans-config-api-server-{0}.war').format(Config.ox_version)),
-                (os.path.join(Config.distJansFolder, 'scim-plugin.jar'), os.path.join(Config.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/scim-plugin/{0}/scim-plugin-{0}-distribution.jar').format(Config.ox_version)),
+                (os.path.join(Config.distJansFolder, 'jans-config-api.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api-server/{0}/jans-config-api-server-{0}.war').format(base.current_app.app_info['ox_version'])),
+                (os.path.join(Config.distJansFolder, 'scim-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/scim-plugin/{0}/scim-plugin-{0}-distribution.jar').format(base.current_app.app_info['ox_version'])),
                 (os.path.join(Config.distJansFolder, 'facter'), 'https://raw.githubusercontent.com/GluuFederation/gluu-snap/master/facter/facter'),
-                (os.path.join(Config.install_dir, 'jans_setup/data/jans-config-api-swagger.yaml'), 'https://raw.githubusercontent.com/JanssenProject/jans/main/jans-config-api/docs/jans-config-api-swagger.yaml'),
-                (os.path.join(Config.distJansFolder, 'user-mgt-plugin.jar'), os.path.join(Config.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/user-mgt-plugin/{0}/user-mgt-plugin-{0}-distribution.jar').format(Config.ox_version)),
+                (os.path.join(Config.data_dir, 'jans-config-api-swagger.yaml'), 'https://raw.githubusercontent.com/JanssenProject/jans/main/jans-config-api/docs/jans-config-api-swagger.yaml'),
+                (os.path.join(Config.distJansFolder, 'user-mgt-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/user-mgt-plugin/{0}/user-mgt-plugin-{0}-distribution.jar').format(base.current_app.app_info['ox_version'])),
                 ]
+
+        self.extract_files()
 
     def install(self):
         if not os.path.exists(self.source_files[3][0]):
@@ -63,13 +65,13 @@ class ConfigApiInstaller(JettyInstaller):
         self.copyFile(self.source_files[4][0], self.libDir)
         user_mgt_plugin_path = os.path.join(self.libDir, os.path.basename(self.source_files[4][0]))
         self.add_extra_class(user_mgt_plugin_path)
-        base.extract_file(
-                os.path.join(Config.distJansFolder, 'jans.zip'),
-                'jans-config-api/server/src/main/resources/log4j2.xml',
-                self.custom_config_dir
-                 )
 
         self.enable()
+
+
+    def extract_files(self):
+        base.extract_file(base.current_app.jans_zip, 'jans-config-api/server/src/main/resources/log4j2.xml', self.custom_config_dir)
+        base.extract_file(base.current_app.jans_zip, 'jans-config-api/docs/jans-config-api-swagger.yaml', Config.data_dir)
 
 
     def create_folders(self):

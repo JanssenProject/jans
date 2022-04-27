@@ -25,8 +25,8 @@ class JansAuthInstaller(JettyInstaller):
         self.register_progess()
 
         self.source_files = [
-                    (os.path.join(Config.distJansFolder, 'jans-auth.war'), os.path.join(Config.app_info['JANS_MAVEN'], 'maven/io/jans/jans-auth-server/{0}/jans-auth-server-{0}.war').format(Config.ox_version)),
-                    (os.path.join(Config.distJansFolder, 'jans-auth-rp.war'), os.path.join(Config.app_info['JANS_MAVEN'], 'maven/io/jans/jans-auth-rp/{0}/jans-auth-rp-{0}.war').format(Config.ox_version)),
+                    (os.path.join(Config.distJansFolder, 'jans-auth.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-auth-server/{0}/jans-auth-server-{0}.war'.format(base.current_app.app_info['ox_version']))),
+                    (os.path.join(Config.distJansFolder, 'jans-auth-client-jar-with-dependencies.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-auth-client/{0}/jans-auth-client-{0}-jar-with-dependencies.jar'.format(base.current_app.app_info['ox_version']))),
                     ]
 
         self.templates_folder = os.path.join(Config.templateFolder, self.service_name)
@@ -135,21 +135,6 @@ class JansAuthInstaller(JettyInstaller):
             self.dbUtils.import_ldif([self.ldif_people, self.ldif_groups])
         if Config.profile == 'openbanking':
             self.import_openbanking_certificate()
-
-    def install_oxauth_rp(self):
-        self.download_files(downloads=[self.source_files[1][0]])
-
-        Config.pbar.progress(self.service_name, "Installing OxAuthRP", False)
-
-        self.logIt("Copying jans-auth-rp.war into jetty webapps folder...")
-
-        jettyServiceName = 'jans-auth-rp'
-        self.installJettyService(self.jetty_app_configuration[jettyServiceName])
-
-        jettyServiceWebapps = os.path.join(self.jetty_base, jettyServiceName, 'webapps')
-        self.copyFile(self.source_files[1][0], jettyServiceWebapps)
-
-        self.enable('jans-auth-rp')
 
     def genRandomString(self, N):
         return ''.join(random.SystemRandom().choice(string.ascii_lowercase

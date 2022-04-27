@@ -38,10 +38,9 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
             self.register_progess()
 
         self.source_files = [
-                (os.path.join(Config.distJansFolder, 'jans.zip'), 'https://github.com/JanssenProject/jans/archive/refs/heads/{}.zip'.format(Config.app_info['SETUP_BRANCH'])),
-                (os.path.join(Config.distJansFolder, 'jca-swagger-client.zip'), 'https://ox.gluu.org/icrby8xcvbcv/cli-swagger/jca_swagger_client.zip'),
-                (os.path.join(Config.distJansFolder, 'scim-swagger-client.zip'), 'https://ox.gluu.org/icrby8xcvbcv/cli-swagger/scim_swagger_client.zip'),
-                (os.path.join(Config.distAppFolder, 'pyjwt.zip'), 'https://github.com/jpadilla/pyjwt/archive/refs/tags/2.3.0.zip'),
+                (os.path.join(Config.distJansFolder, 'jca-swagger-client.zip'), os.path.join(base.current_app.app_info['EXTERNAL_LIBS'], 'cli-swagger/jca_swagger_client.zip')),
+                (os.path.join(Config.distJansFolder, 'scim-swagger-client.zip'), os.path.join(base.current_app.app_info['EXTERNAL_LIBS'], 'cli-swagger/scim_swagger_client.zip')),
+                (os.path.join(Config.distAppFolder, 'pyjwt.zip'), base.current_app.app_info['PYJWT']),
                 ]
 
     def install(self):
@@ -53,17 +52,17 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
             self.run(['mv', '-f', self.jans_cli_install_dir, self.jans_cli_install_dir+'_backup-{}'.format(time.ctime())])
 
         #extract jans-cli tgz archieve
-        base.extract_from_zip(self.source_files[0][0], 'jans-cli/cli', self.jans_cli_install_dir)
+        base.extract_from_zip(base.current_app.jans_zip, 'jans-cli/cli', self.jans_cli_install_dir)
 
         self.run([paths.cmd_ln, '-s', os.path.join(self.jans_cli_install_dir, 'config_cli.py'), os.path.join(self.jans_cli_install_dir, 'config-cli.py')])
         self.run([paths.cmd_ln, '-s', os.path.join(self.jans_cli_install_dir, 'config_cli.py'), os.path.join(self.jans_cli_install_dir, 'scim-cli.py')])
         self.run([paths.cmd_chmod, '+x', os.path.join(self.jans_cli_install_dir, 'config_cli.py')])
 
-        base.extract_from_zip(self.source_files[1][0], 'jca', os.path.join(self.jans_cli_install_dir, 'jca'))
-        base.extract_from_zip(self.source_files[2][0], 'scim', os.path.join(self.jans_cli_install_dir, 'scim'))
+        base.extract_from_zip(self.source_files[0][0], 'jca', os.path.join(self.jans_cli_install_dir, 'jca'))
+        base.extract_from_zip(self.source_files[1][0], 'scim', os.path.join(self.jans_cli_install_dir, 'scim'))
 
         #extract pyjwt from archieve
-        base.extract_from_zip(self.source_files[3][0], 'jwt', os.path.join(self.jans_cli_install_dir, 'pylib/jwt'))
+        base.extract_from_zip(self.source_files[2][0], 'jwt', os.path.join(self.jans_cli_install_dir, 'pylib/jwt'))
 
 
     def generate_configuration(self):
