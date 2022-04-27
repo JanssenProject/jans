@@ -7,12 +7,9 @@ from pathlib import Path
 from ldap3.core.exceptions import LDAPSessionTerminatedByServerError
 from ldap3.core.exceptions import LDAPSocketOpenError
 
-from ldif import LDIFParser
-
 from jans.pycloudlib.persistence.ldap import LdapClient
 
 from settings import LOGGING_CONFIG
-from utils import render_ldif
 from utils import prepare_template_ctx
 from utils import get_ldif_mappings
 
@@ -79,20 +76,6 @@ class LDAPBackend:
             for file_ in files:
                 self._import_ldif(f"/app/templates/{file_}", ctx)
 
-    def add_entry(self, dn, attrs):
-        max_wait_time = 300
-        sleep_duration = 10
-
-        for _ in range(0, max_wait_time, sleep_duration):
-            try:
-                added, msg = self.client.add(dn, attributes=attrs)
-                if not added and "name already exists" not in msg:
-                    logger.warning(f"Unable to add entry with DN {dn}; reason={msg}")
-                break
-            except (LDAPSessionTerminatedByServerError, LDAPSocketOpenError) as exc:
-                logger.warning(f"Unable to add entry with DN {dn}; reason={exc}; retrying in {sleep_duration} seconds")
-            time.sleep(sleep_duration)
-
     def initialize(self):
         ctx = prepare_template_ctx(self.manager)
 
@@ -109,21 +92,5 @@ class LDAPBackend:
             self._import_ldif(file_, ctx)
 
     def _import_ldif(self, path, ctx):
-        src = Path(path).resolve()
-
-        # generated template will be saved under ``/app/tmp`` directory
-        # examples:
-        # - ``/app/templates/groups.ldif`` will be saved as ``/app/tmp/templates/groups.ldif``
-        # - ``/app/custom_ldif/groups.ldif`` will be saved as ``/app/tmp/custom_ldif/groups.ldif``
-        dst = Path("/app/tmp").joinpath(str(src).removeprefix("/app/")).resolve()
-
-        # ensure directory for generated template is exist
-        dst.parent.mkdir(parents=True, exist_ok=True)
-
-        logger.info(f"Importing {src} file")
-        render_ldif(src, dst, ctx)
-
-        with open(dst, "rb") as fd:
-            parser = LDIFParser(fd)
-            for dn, entry in parser.parse():
-                self.add_entry(dn, entry)
+        logger.info(f"Importing {path} file")
+        self.client.create_from_ldif(path, ctx)
