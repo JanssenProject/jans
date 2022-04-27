@@ -93,6 +93,16 @@ public class LocalizedString implements Serializable {
         return map;
     }
 
+    public void addToJSON(JSONObject jsonObj, String claimName) {
+        getLanguageTags()
+                .forEach(languageTag -> {
+                    StringBuilder keyStringBuilder = new StringBuilder()
+                            .append(claimName)
+                            .append(StringUtils.isNotBlank(languageTag) ? LANG_CLAIM_SEPARATOR + languageTag : EMPTY_LANG_TAG);
+                    jsonObj.put(keyStringBuilder.toString(), getValue(languageTag));
+                });
+    }
+
     @Override
     public String toString() {
         return values.toString();

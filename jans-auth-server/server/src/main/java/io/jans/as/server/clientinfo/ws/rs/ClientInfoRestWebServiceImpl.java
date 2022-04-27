@@ -131,12 +131,7 @@ public class ClientInfoRestWebServiceImpl implements ClientInfoRestWebService {
 
                         if (attributeValue instanceof LocalizedString) {
                             LocalizedString localizedString = (LocalizedString) attributeValue;
-                            localizedString.getLanguageTags()
-                                    .forEach(languageTag -> {
-                                        String key = claimName + (StringUtils.isNotBlank(languageTag)
-                                                ? LANG_CLAIM_SEPARATOR + languageTag : EMPTY_LANG_TAG);
-                                        jsonObj.put(key, localizedString.getValue(languageTag));
-                                    });
+                            localizedString.addToJSON(jsonObj, claimName);
                         } else {
                             jsonObj.put(claimName, attributeValue);
                         }

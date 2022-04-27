@@ -112,6 +112,19 @@ public class LocalizedStringTest {
         }
     }
 
+    @Test(dependsOnMethods = "testSetValue")
+    public void addToJSON() {
+        JSONObject jsonObject = new JSONObject();
+
+        localizedString.addToJSON(jsonObject, "client_name");
+
+        assertEquals(jsonObject.keySet().size(), CLAIM_NAMES.length);
+        for (int i = 0; i < CLAIM_NAMES.length; i++) {
+            assertTrue(jsonObject.keySet().contains(CLAIM_NAMES[i]));
+            assertEquals(jsonObject.get(CLAIM_NAMES[i]), LOCALIZED_VALUES[i]);
+        }
+    }
+
     @Test
     public void fromJson() {
         JSONObject jsonObject = new JSONObject(REQUEST_JSON);
