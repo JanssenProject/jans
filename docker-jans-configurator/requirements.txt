@@ -4,6 +4,4 @@ click==6.7
 marshmallow==3.10.0
 fqdn==1.4.0
 libcst<0.4
-# @TODO: remove ldif package after jans-pycloudlib updated
-ldif==4.1.1
 git+https://github.com/JanssenProject/jans@12cf1be739f320483365e0e50b37b894b5364a6f#egg=jans-pycloudlib&subdirectory=jans-pycloudlib

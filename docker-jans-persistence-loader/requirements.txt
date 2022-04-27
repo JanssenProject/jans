@@ -1,7 +1,5 @@
 # pinned to py3-grpcio version to avoid failure on native extension build
 grpcio==1.41.0
-# @TODO: remove ldif package after jans-pycloudlib updated
-ldif==4.1.1
 libcst<0.4
 ruamel.yaml==0.16.10
 git+https://github.com/JanssenProject/jans@12cf1be739f320483365e0e50b37b894b5364a6f#egg=jans-pycloudlib&subdirectory=jans-pycloudlib
