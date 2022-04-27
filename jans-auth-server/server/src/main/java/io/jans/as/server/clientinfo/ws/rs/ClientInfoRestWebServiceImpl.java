@@ -23,18 +23,14 @@ import io.jans.as.server.service.token.TokenService;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.model.GluuAttribute;
 import io.jans.orm.model.base.LocalizedString;
-import org.apache.commons.lang3.StringUtils;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.SecurityContext;
-import java.util.Set;
+import org.json.JSONObject;
+import org.slf4j.Logger;
 
-import static io.jans.orm.model.base.LocalizedString.EMPTY_LANG_TAG;
-import static io.jans.orm.model.base.LocalizedString.LANG_CLAIM_SEPARATOR;
+import java.util.Set;
 
 /**
  * Provides interface for Client Info REST web services
