@@ -13,15 +13,18 @@ import io.jans.as.common.util.RedirectUri;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseMode;
+import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.server.model.authorize.AuthorizeParamsValidator;
 import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.server.model.common.DeviceAuthorizationCacheControl;
 import io.jans.as.server.model.common.SessionId;
 import io.jans.as.server.model.common.SessionIdState;
 import io.jans.as.server.model.exception.AcrChangedException;
+import io.jans.as.server.model.exception.InvalidRedirectUrlException;
 import io.jans.as.server.security.Identity;
 import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.DeviceAuthorizationService;
@@ -410,6 +413,31 @@ public class AuthorizeRestWebServiceValidator {
             } else {
                 throw e;
             }
+        }
+    }
+
+    public void validateJwtRequest(String clientId, String state, HttpServletRequest httpRequest, List<ResponseType> responseTypes, RedirectUriResponse redirectUriResponse, JwtAuthorizationRequest jwtRequest) {
+        try {
+            jwtRequest.validate();
+
+            validateRequestObject(jwtRequest, redirectUriResponse);
+
+            // MUST be equal
+            if (!jwtRequest.getResponseTypes().containsAll(responseTypes) || !responseTypes.containsAll(jwtRequest.getResponseTypes())) {
+                throw createInvalidJwtRequestException(redirectUriResponse, "The responseType parameter is not the same in the JWT");
+            }
+            if (StringUtils.isBlank(jwtRequest.getClientId()) || !jwtRequest.getClientId().equals(clientId)) {
+                throw createInvalidJwtRequestException(redirectUriResponse, "The clientId parameter is not the same in the JWT");
+            }
+        } catch (WebApplicationException | InvalidRedirectUrlException e) {
+            throw e;
+        } catch (InvalidJwtException e) {
+            log.debug("Invalid JWT authorization request. {}", e.getMessage());
+            redirectUriResponse.getRedirectUri().parseQueryString(errorResponseFactory.getErrorAsQueryString(
+                    AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT, state));
+            throw new WebApplicationException(RedirectUtil.getRedirectResponseBuilder(redirectUriResponse.getRedirectUri(), httpRequest).build());
+        } catch (Exception e) {
+            log.error("Unexpected exception. " + e.getMessage(), e);
         }
     }
 }
