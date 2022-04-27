@@ -22,6 +22,12 @@ class JythonInstaller(BaseInstaller, SetupUtils):
 
         self.needdb = False # we don't need backend connection in this class
 
+        jython_link = 'https://maven.gluu.org/maven/org/gluufederation/jython-installer/{0}/jython-installer-{0}.jar'.format(base.current_app.app_info['JYTHON_VERSION'])
+        self.source_files = [
+                (os.path.join(Config.distAppFolder, os.path.basename(jython_link)), jython_link),
+                ]
+
+
     def install(self):
 
         jython_installer_list = glob.glob(os.path.join(Config.distAppFolder, 'jython-installer-*'))

@@ -33,6 +33,11 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
         self.ldapDsconfigCommand = os.path.join(Config.ldapBinFolder, 'dsconfig')
         self.ldapDsCreateRcCommand = os.path.join(Config.ldapBinFolder, 'create-rc-script')
 
+        opendj_link = 'https://maven.gluu.org/maven/org/gluufederation/opendj/opendj-server-legacy/{0}/opendj-server-legacy-{0}.zip'.format(base.current_app.app_info['OPENDJ_VERSION'])
+        self.source_files = [
+                (os.path.join(Config.distAppFolder, os.path.basename(opendj_link)), opendj_link),
+                ]
+
 
     def install(self):
         self.logIt("Running OpenDJ Setup")
@@ -88,7 +93,7 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
 
     def extractOpenDJ(self):
 
-        openDJArchive = max(glob.glob(os.path.join(Config.distFolder, 'app/opendj-server-*4*.zip')))
+        openDJArchive = max(glob.glob(os.path.join(Config.distAppFolder, 'opendj-server-*4*.zip')))
 
         try:
             self.logIt("Unzipping %s in /opt/" % openDJArchive)

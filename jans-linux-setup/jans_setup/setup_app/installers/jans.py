@@ -102,7 +102,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
         #Download jans-auth-client-jar-with-dependencies
         if not os.path.exists(Config.non_setup_properties['oxauth_client_jar_fn']):
-            oxauth_client_jar_url = os.path.join(Config.app_info['JANS_MAVEN'], 'maven/io/jans/jans-auth-client/{0}/jans-auth-client-{0}-jar-with-dependencies.jar').format(Config.ox_version)
+            oxauth_client_jar_url = os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-auth-client/{0}/jans-auth-client-{0}-jar-with-dependencies.jar').format(base.current_app.app_info['ox_version'])
             self.logIt("Downloading {}".format(os.path.basename(oxauth_client_jar_url)))
             base.download(oxauth_client_jar_url, Config.non_setup_properties['oxauth_client_jar_fn'])
 
@@ -136,7 +136,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
         # Create these folder on all instances
         for folder in (Config.jansOptFolder, Config.jansOptBinFolder, Config.jansOptSystemFolder,
                         Config.jansOptPythonFolder, Config.configFolder, Config.certFolder,
-                        Config.outputFolder, Config.osDefault):
+                        Config.outputFolder, Config.osDefault, os.path.join(Config.distFolder, 'scripts')):
 
             if not os.path.exists(folder):
                 self.run([paths.cmd_mkdir, '-p', folder])
@@ -145,6 +145,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
             self.run([paths.cmd_chown, '-R', 'root:jans', Config.certFolder])
             self.run([paths.cmd_chmod, '551', Config.certFolder])
             self.run([paths.cmd_chmod, 'ga+w', "/tmp"]) # Allow write to /tmp
+
 
     def customiseSystem(self):
         if not base.snap:

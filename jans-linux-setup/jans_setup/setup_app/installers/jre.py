@@ -25,6 +25,7 @@ class JreInstaller(BaseInstaller, SetupUtils):
             self.register_progess()
 
         self.open_jdk_archive_link = 'https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.9.1%2B1/OpenJDK11U-jdk_x64_linux_hotspot_11.0.9.1_1.tar.gz'
+        self.amazon_corretto_link = 'https://corretto.aws/downloads/resources/{0}/amazon-corretto-{0}-linux-x64.tar.gz'.format(base.current_app.app_info['AMAZON_CORRETTO_VERSION'])
 
 
     def install(self):
@@ -62,24 +63,12 @@ class JreInstaller(BaseInstaller, SetupUtils):
         self.fix_java_security()
 
     def download_files(self, force=False, downloads=[]):
-        jre_arch_list = glob.glob(os.path.join(Config.distAppFolder, 'amazon-corretto-*.tar.gz'))
-
-        if not jre_arch_list:
-            self.logIt("JRE packgage not found in {}. Will download jdk".format(Config.distAppFolder))
-            Config.java_type = 'jdk'
-        else:
-            Config.java_type = 'jre'
-
-        if Config.java_type != 'jre':
-            jdk_fn = os.path.basename(self.open_jdk_archive_link)
-            
-            self.jreArchive = os.path.join(Config.distAppFolder, jdk_fn)
-            if not os.path.exists(self.jreArchive) or force and not (downloads and src_name not in downloads):
-                self.logIt("Downloading " + jdk_fn, pbar=self.service_name)
-                base.download(self.open_jdk_archive_link, self.jreArchive)
-        else:
-            self.jreArchive = max(jre_arch_list)
-
+        download_link = self.open_jdk_archive_link if Config.java_type == 'jdk' else self.amazon_corretto_link
+        jre_fn = os.path.basename(download_link)
+        self.jreArchive = os.path.join(Config.distAppFolder, jre_fn)
+        if not os.path.exists(self.jreArchive) or force and not (downloads and src_name not in downloads):
+            self.logIt("Downloading " + jre_fn, pbar=self.service_name)
+            base.download(download_link, self.jreArchive)
 
     def fix_java_security(self):
         # https://github.com/OpenIdentityPlatform/OpenDJ/issues/78

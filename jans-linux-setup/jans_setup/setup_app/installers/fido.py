@@ -20,7 +20,8 @@ class FidoInstaller(JettyInstaller):
         self.register_progess()
 
         self.source_files = [
-                (os.path.join(Config.distJansFolder, 'jans-fido2.war'), os.path.join(Config.app_info['JANS_MAVEN'], 'maven/io/jans/jans-fido2-server/{0}/jans-fido2-server-{0}.war').format(Config.ox_version))
+                (os.path.join(Config.distJansFolder, 'jans-fido2.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-fido2-server/{0}/jans-fido2-server-{0}.war').format(base.current_app.app_info['ox_version'])),
+                (os.path.join(Config.distAppFolder, os.path.basename(base.current_app.app_info['APPLE_WEBAUTHN'])), base.current_app.app_info['APPLE_WEBAUTHN'])
                 ]
 
         self.fido2ConfigFolder = os.path.join(Config.configFolder, 'fido2')
@@ -80,9 +81,8 @@ class FidoInstaller(JettyInstaller):
             )
 
         # copy Apple_WebAuthn_Root_CA
-        apple_weauthn = os.path.join(Config.distAppFolder, 'Apple_WebAuthn_Root_CA.pem')
-        if os.path.exists(apple_weauthn):
+        if os.path.exists(self.source_files[1][0]):
             target_dir = os.path.join(self.fido2ConfigFolder, 'apple')
             self.run([paths.cmd_mkdir, '-p', target_dir])
-            self.copyFile(apple_weauthn, target_dir)
+            self.copyFile(self.source_files[1][0], target_dir)
 

@@ -172,10 +172,9 @@ class BaseInstaller:
 
     def check_for_download(self):
         # execute for each installer
-        if Config.downloadWars:
+        if base.argsp.force_download:
             self.download_files(force=True)
-
-        elif Config.installed_instance:
+        else:
             self.download_files()
 
     def download_file(self, url, src):
@@ -193,17 +192,18 @@ class BaseInstaller:
                     continue
 
                 if force or self.check_download_needed(src):
-                    src = os.path.join('/tmp' if base.snap else Config.distJansFolder, src_name)
-                    self.source_files[i] = (src, url)
                     self.download_file(url, src)
 
     def check_download_needed(self, src):
+        if not os.path.exists(src):
+            return True
+
         froot, fext = os.path.splitext(src)
         if fext in ('.war', '.jar'):
             if os.path.exists(src):
                 war_info = get_war_info(src)
                 if war_info.get('version'):
-                    return LooseVersion(war_info['version']) < LooseVersion(Config.ox_version)
+                    return LooseVersion(war_info['version']) < LooseVersion(base.current_app.app_info['ox_version'])
 
         return True
 

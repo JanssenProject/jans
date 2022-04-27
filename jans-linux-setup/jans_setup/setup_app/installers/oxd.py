@@ -144,7 +144,7 @@ class OxdInstaller(SetupUtils, BaseInstaller):
         return os.path.exists(self.oxd_server_yml_fn)
 
     def download_files(self, force=False):
-        oxd_url = os.path.join(Config.app_info['JANS_MAVEN'], 'maven/io/jans/oxd-server/{0}/oxd-server-{0}-distribution.zip').format(Config.ox_version)
+        oxd_url = os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/oxd-server/{0}/oxd-server-{0}-distribution.zip').format(base.current_app.app_info['ox_version'])
 
         self.logIt("Downloading {} and preparing package".format(os.path.basename(oxd_url)))
 
@@ -160,7 +160,7 @@ class OxdInstaller(SetupUtils, BaseInstaller):
         
         if not base.snap:
             service_file = 'oxd-server.init.d' if base.deb_sysd_clone else 'oxd-server.service'
-            service_url = 'https://raw.githubusercontent.com/GluuFederation/community-edition-package/master/package/systemd/oxd-server.service'.format(Config.ox_version, service_file)
+            service_url = 'https://raw.githubusercontent.com/GluuFederation/community-edition-package/master/package/systemd/oxd-server.service'.format(base.current_app.app_info['ox_version'], service_file)
             self.download_file(service_url, os.path.join(oxd_tmp_dir, service_file))
 
         oxd_server_sh_url = 'https://raw.githubusercontent.com/GluuFederation/oxd/master/debian/oxd-server'
