@@ -41,7 +41,7 @@ public class JsonApplierTest {
         RegisterRequest request = new RegisterRequest();
         request.setAdditionalAudience(Lists.newArrayList("aud1", "aud2"));
 
-        Map<String, Object> target = new HashMap<>();
+        Map<String, String> target = new HashMap<>();
 
         JsonApplier.getInstance().apply(request, target);
 
