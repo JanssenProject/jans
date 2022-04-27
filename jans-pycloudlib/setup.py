@@ -45,6 +45,7 @@ setup(
         "psycopg2>=2.8.6",
         "google-cloud-spanner>=3.3.0",
         "Click>=6.7",
+        "ldif>=4.1.1",
     ],
     classifiers=[
         "Intended Audience :: Developers",

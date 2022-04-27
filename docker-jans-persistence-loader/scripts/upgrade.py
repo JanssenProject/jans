@@ -7,14 +7,10 @@ from collections import namedtuple
 
 from ldif import LDIFParser
 
-from jans.pycloudlib.persistence.couchbase import get_couchbase_user
-from jans.pycloudlib.persistence.couchbase import get_couchbase_superuser
-from jans.pycloudlib.persistence.couchbase import get_couchbase_password
-from jans.pycloudlib.persistence.couchbase import get_couchbase_superuser_password
 from jans.pycloudlib.persistence.couchbase import CouchbaseClient
 from jans.pycloudlib.persistence.ldap import LdapClient
 from jans.pycloudlib.persistence.spanner import SpannerClient
-from jans.pycloudlib.persistence.sql import SQLClient
+from jans.pycloudlib.persistence.sql import SqlClient
 from jans.pycloudlib.utils import as_boolean
 
 from settings import LOGGING_CONFIG
@@ -233,7 +229,7 @@ class LDAPBackend:
 class SQLBackend:
     def __init__(self, manager):
         self.manager = manager
-        self.client = SQLClient()
+        self.client = SqlClient(manager)
         self.type = "sql"
 
     def get_entry(self, key, filter_="", attrs=None, **kwargs):
@@ -253,15 +249,7 @@ class SQLBackend:
 class CouchbaseBackend:
     def __init__(self, manager):
         self.manager = manager
-        hostname = os.environ.get("CN_COUCHBASE_URL", "localhost")
-        user = get_couchbase_superuser(manager) or get_couchbase_user(manager)
-
-        password = ""
-        with contextlib.suppress(FileNotFoundError):
-            password = get_couchbase_superuser_password(manager)
-        password = password or get_couchbase_password(manager)
-
-        self.client = CouchbaseClient(hostname, user, password)
+        self.client = CouchbaseClient(manager)
         self.type = "couchbase"
 
     def get_entry(self, key, filter_="", attrs=None, **kwargs):
@@ -332,7 +320,7 @@ class CouchbaseBackend:
 class SpannerBackend:
     def __init__(self, manager):
         self.manager = manager
-        self.client = SpannerClient()
+        self.client = SpannerClient(manager)
         self.type = "spanner"
 
     def get_entry(self, key, filter_="", attrs=None, **kwargs):
