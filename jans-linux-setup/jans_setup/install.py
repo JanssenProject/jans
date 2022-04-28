@@ -239,8 +239,8 @@ def do_install():
     if argsp.download_exit:
         setup_args += ' --download-exit'
 
-    if argsp.args:
-        setup_cmd += ' ' + argsp.args
+    if setup_args:
+        setup_cmd += ' ' + setup_args
 
     print("Executing", setup_cmd)
     os.system(setup_cmd)
