@@ -172,7 +172,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         jettyEnv = os.environ.copy()
         jettyEnv['PATH'] = '%s/bin:' % Config.jre_home + jettyEnv['PATH']
 
-        self.run([Config.cmd_java, '-jar', '%s/start.jar' % self.jetty_home, 'jetty.home=%s' % self.jetty_home, 'jetty.base=%s' % jettyServiceBase, '--add-to-start=%s' % jettyModules], None, jettyEnv)
+        self.run([Config.cmd_java, '-jar', '%s/start.jar' % self.jetty_home, 'jetty.home=%s' % self.jetty_home, 'jetty.base=%s' % jettyServiceBase, '--add-module=%s' % jettyModules], None, jettyEnv)
         self.run([paths.cmd_chown, '-R', 'jetty:jetty', jettyServiceBase])
 
         # make variables of this class accesible from Config
