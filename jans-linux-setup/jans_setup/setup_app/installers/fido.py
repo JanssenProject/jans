@@ -76,7 +76,7 @@ class FidoInstaller(JettyInstaller):
 
         #copy fido2 server metadata
         self.copyTree(
-            os.path.join(Config.install_dir, 'static/auth/fido2/server_metadata'),
+            os.path.join(Config.install_dir, 'static/fido2/server_metadata'),
             os.path.join(self.fido2ConfigFolder, 'server_metadata')
             )
 
