@@ -1,14 +1,16 @@
 import os
 import sys
+import glob
 import shutil
-import tempfile
 import zipfile
+import tempfile
+import importlib.util
 
 from setup_app.utils import base
 
 def download_jans_acrhieve():
 
-    if base.argsp.use_downloaded and os.path.exists(base.current_app.jans_zip):
+    if not base.argsp.force_download and os.path.exists(base.current_app.jans_zip):
         return
 
     base.download(
@@ -69,6 +71,28 @@ def download_sqlalchemy():
         sqlalchemy_zip_file = os.path.join(tmp_dir, os.path.basename(base.current_app.app_info['SQLALCHEMY']))
         base.download(base.current_app.app_info['SQLALCHEMY'], sqlalchemy_zip_file, verbose=True)
         base.extract_subdir(sqlalchemy_zip_file, 'lib/sqlalchemy', sqlalchemy_dir)
+
+
+def download_all():
+    download_files = []
+
+    modules = glob.glob(os.path.join(base.ces_dir, 'installers/*.py'))
+
+    for installer in modules:
+        if installer.startswith('__') or not os.path.isfile(installer):
+            continue
+        spec = importlib.util.spec_from_file_location('module.name', installer)
+        foo = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(foo)
+
+        for m in dir(foo):
+            module = getattr(foo, m)
+            if hasattr(module, 'source_files'):
+                download_files += module.source_files
+
+    for path, url in download_files:
+        base.download(url, path, verbose=True)
+
 
 def download_apps():
     download_jans_acrhieve()

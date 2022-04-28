@@ -31,6 +31,9 @@ class Config:
     node_home = '/opt/node'
     outputFolder = None
     jetty_base = os.path.join(jansOptFolder, 'jetty')
+    distAppFolder = os.path.join(distFolder, 'app')
+    distJansFolder = os.path.join(distFolder, 'jans')
+
     installed_instance = False
     profile = 'jans'
 
