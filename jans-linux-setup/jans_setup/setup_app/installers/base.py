@@ -191,21 +191,8 @@ class BaseInstaller:
                 if downloads and not src_name in downloads:
                     continue
 
-                if force or self.check_download_needed(src):
+                if force or not os.path.exists(src):
                     self.download_file(url, src)
-
-    def check_download_needed(self, src):
-        if not os.path.exists(src):
-            return True
-
-        froot, fext = os.path.splitext(src)
-        if fext in ('.war', '.jar'):
-            if os.path.exists(src):
-                war_info = get_war_info(src)
-                if war_info.get('version'):
-                    return LooseVersion(war_info['version']) < LooseVersion(base.current_app.app_info['ox_version'])
-
-        return True
 
 
     def create_user(self):

@@ -85,11 +85,12 @@ spanner_cred_group.add_argument('-google-application-credentials', help="Path to
 
 parser.add_argument('-approved-issuer', help="Api Approved Issuer")
 
-parser.add_argument('-use-downloaded', help="Use already downloaded components", action='store_true')
 parser.add_argument('--force-download', help="Force downloading files", action='store_true')
+parser.add_argument('--download-exit', help="Download files and exits", action='store_true')
 parser.add_argument('-jans-app-version', help="Version for Jannses applications")
 parser.add_argument('-jans-build', help="Buid version for Janssen applications")
 parser.add_argument('-setup-branch', help="Jannsen setup github branch", default='main')
+
 
 
 def add_to_me(you):

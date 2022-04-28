@@ -16,6 +16,11 @@ from setup_app.installers.base import BaseInstaller
 
 class OpenDjInstaller(BaseInstaller, SetupUtils):
 
+    opendj_link = 'https://maven.gluu.org/maven/org/gluufederation/opendj/opendj-server-legacy/{0}/opendj-server-legacy-{0}.zip'.format(base.current_app.app_info['OPENDJ_VERSION'])
+    source_files = [
+            (os.path.join(Config.distAppFolder, os.path.basename(opendj_link)), opendj_link),
+            ]
+
     def __init__(self):
         setattr(base.current_app, self.__class__.__name__, self)
         self.service_name = 'opendj'
@@ -32,11 +37,6 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
         self.opendj_service_centos7 = os.path.join(Config.install_dir, 'static/opendj/systemd/opendj.service')
         self.ldapDsconfigCommand = os.path.join(Config.ldapBinFolder, 'dsconfig')
         self.ldapDsCreateRcCommand = os.path.join(Config.ldapBinFolder, 'create-rc-script')
-
-        opendj_link = 'https://maven.gluu.org/maven/org/gluufederation/opendj/opendj-server-legacy/{0}/opendj-server-legacy-{0}.zip'.format(base.current_app.app_info['OPENDJ_VERSION'])
-        self.source_files = [
-                (os.path.join(Config.distAppFolder, os.path.basename(opendj_link)), opendj_link),
-                ]
 
 
     def install(self):

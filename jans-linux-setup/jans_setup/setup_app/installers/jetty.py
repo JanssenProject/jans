@@ -18,6 +18,11 @@ class JettyInstaller(BaseInstaller, SetupUtils):
     jetty_base = Config.jetty_base
     jetty_app_configuration = base.readJsonFile(os.path.join(paths.DATA_DIR, 'jetty_app_configuration.json'), ordered=True)
 
+    jetty_link = 'https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/{0}/jetty-home-{0}.tar.gz'.format(base.current_app.app_info['JETTY_VERSION'])
+    source_files = [
+            (os.path.join(Config.distAppFolder, os.path.basename(jetty_link)), jetty_link),
+            ]
+
     def __init__(self):
         setattr(base.current_app, self.__class__.__name__, self)
         self.service_name = 'jetty'
@@ -56,10 +61,6 @@ class JettyInstaller(BaseInstaller, SetupUtils):
             }
         }
 
-        jetty_link = 'https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/{0}/jetty-home-{0}.tar.gz'.format(base.current_app.app_info['JETTY_VERSION'])
-        self.source_files = [
-                (os.path.join(Config.distAppFolder, os.path.basename(jetty_link)), jetty_link),
-                ]
 
     def install(self):
 

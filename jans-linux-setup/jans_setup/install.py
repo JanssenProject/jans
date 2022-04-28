@@ -12,7 +12,6 @@ import re
 import json
 import tempfile
 
-from types import SimpleNamespace
 from urllib import request
 from urllib.parse import urljoin, urlparse
 from pathlib import Path
@@ -22,10 +21,11 @@ ssl._create_default_https_context = ssl._create_unverified_context
 SETUP_BRANCH = 'main'
 
 
-app_globals.package_dependencies = []
-
+package_dependencies = []
+jans_dir = '/opt/jans'
 jans_app_dir = '/opt/dist/jans'
 maven_base_url = 'https://maven.jans.io/maven/io/jans/'
+jetty_home = '/opt/jans/jetty'
 jans_zip_file = os.path.join(jans_app_dir, 'jans.zip')
 
 package_installer = shutil.which('apt') or shutil.which('dnf') or shutil.which('yum') or shutil.which('zypper')
@@ -42,91 +42,39 @@ parser.add_argument('--args', help="Arguments to be passed to setup.py")
 parser.add_argument('-yes', help="No prompt", action='store_true')
 parser.add_argument('--keep-downloads', help="Keep downloaded files (applicable for uninstallation only)", action='store_true')
 parser.add_argument('--profile', help="Setup profile", choices=['jans', 'openbanking'], default='jans')
-parser.add_argument('--no-setup', help="Do not launch setup", action='store_true')
-parser.add_argument('--no-jans-setup', help="Do not extract jans-setup", action='store_true')
-parser.add_argument('--no-gcs', help="Do not download gcs", action='store_true')
-parser.add_argument('-setup-dir', help="Setup directory", default=os.path.join(jans_dir, 'jans-setup'))
-parser.add_argument('--force-download', help="Force downloading files", action='store_true')
+parser.add_argument('-download-exit', help="Downloads files and exits", action='store_true')
+parser.add_argument('--setup-branch', help="Jannsen setup github branch", default="main")
+parser.add_argument('--setup-dir', help="Setup directory", default=os.path.join(jans_dir, 'jans-setup'))
+parser.add_argument('-force-download', help="Force downloading files", action='store_true')
 
+argsp = parser.parse_args()
 
 def check_install_dependencies():
 
     try:
         from distutils import dist
     except:
-        app_globals.package_dependencies.append('python3-distutils')
+        package_dependencies.append('python3-distutils')
 
     try:
         import ldap3
     except:
-        app_globals.package_dependencies.append('python3-ldap3')
+        package_dependencies.append('python3-ldap3')
 
-    if app_globals.package_dependencies and not app_globals.argsp.yes:
-        install_dist = input('Required package(s): {}. Install now? [Y/n] '.format(', '.join(app_globals.package_dependencies)))
+    if package_dependencies and not argsp.yes:
+        install_dist = input('Required package(s): {}. Install now? [Y/n] '.format(', '.join(package_dependencies)))
         if install_dist.lower().startswith('n'):
             print("Can't continue...")
             sys.exit()
 
-        os.system('{} install -y {}'.format(package_installer, ' '.join(app_globals.package_dependencies)))
+        os.system('{} install -y {}'.format(package_installer, ' '.join(package_dependencies)))
 
 
-def extract_subdir(zip_fn, sub_dir, target_dir, zipf=None):
-    zip_obj = zipfile.ZipFile(zip_fn, "r")
-    par_dir = zip_obj.namelist()[0]
+def download_jans_acrhieve():
+    jans_acrhieve_url = 'https://github.com/JanssenProject/jans/archive/refs/heads/{}.zip'.format(argsp.setup_branch)
+    print("Downloading {} as {}".format(jans_acrhieve_url, jans_zip_file))
+    request.urlretrieve(jans_acrhieve_url, jans_zip_file)
 
-    if not sub_dir.endswith('/'):
-        sub_dir += '/'
-
-    if zipf:
-        target_zip_obj = zipfile.ZipFile(zipf, "w")
-
-    ssub_dir = os.path.join(par_dir, sub_dir)
-    target_dir_path = Path(target_dir)
-
-    if target_dir_path.exists():
-        shutil.rmtree(target_dir_path)
-
-    target_dir_path.mkdir(parents=True)
-
-    for member in zip_obj.infolist():
-        if member.filename.startswith(ssub_dir):
-            p = Path(member.filename)
-            pr = p.relative_to(ssub_dir)
-            target_fn = target_dir_path.joinpath(pr)
-            if member.is_dir():
-                if zipf:
-                    z_dirn = target_fn.as_posix()
-                    if not z_dirn.endswith('/'):
-                        z_dirn += '/'
-                    zinfodir = zipfile.ZipInfo(filename=z_dirn)
-                    zinfodir.external_attr=0x16
-                    target_zip_obj.writestr(zinfodir, '')
-                elif not target_fn.exists():
-                    target_fn.mkdir(parents=True)
-            else:
-                if zipf:
-                    target_zip_obj.writestr(target_fn.as_posix(), zip_obj.read(member))
-                else:
-                    if not target_fn.parent.exists():
-                        target_fn.parent.mkdir(parents=True)
-                    target_fn.write_bytes(zip_obj.read(member))
-    if zipf:
-        target_zip_obj.close()
-
-    zip_obj.close()
-
-
-def download(url, target_fn):
-    dst = target_fn if target_fn.startswith('/') else os.path.join(app_dir, target_fn)
-    pardir, fn = os.path.split(dst)
-    if not os.path.exists(pardir):
-        os.makedirs(pardir)
-    print("Downloading", url, "to", dst)
-    request.urlretrieve(url, dst)
-
-
-setup_url = 'https://github.com/JanssenProject/jans/archive/refs/heads/{}.zip'.format(app_globals.app_versions['SETUP_BRANCH'])
-download(setup_url, jans_zip_file)
 
 
 def check_installation():
@@ -136,8 +84,8 @@ def check_installation():
 
 
 def profile_setup():
-    print("Preparing Setup for profile {}".format(app_globals.argsp.profile))
-    profile_dir = os.path.join(app_globals.argsp.setup_dir, app_globals.argsp.profile)
+    print("Preparing Setup for profile {}".format(argsp.profile))
+    profile_dir = os.path.join(argsp.setup_dir, argsp.profile)
     replace_dirs = []
     if not os.path.exists(profile_dir):
         print("Profile directory {} does not exist. Exiting ...".format(profile_dir))
@@ -154,11 +102,11 @@ def profile_setup():
     replaced_dirs = []
     for pdir in replace_dirs:
         source_dir = os.path.join(profile_dir, pdir)
-        target_dir = os.path.join(app_globals.argsp.setup_dir, pdir)
+        target_dir = os.path.join(argsp.setup_dir, pdir)
         replaced_dirs.append(source_dir)
         if os.path.exists(source_dir) and os.path.exists(target_dir):
             shutil.rmtree(target_dir)
-            copy_target = os.path.join(app_globals.argsp.setup_dir, os.path.sep.join(os.path.split(pdir)[:-1]))
+            copy_target = os.path.join(argsp.setup_dir, os.path.sep.join(os.path.split(pdir)[:-1]))
             print(target_dir)
             shutil.copytree(source_dir, target_dir)
 
@@ -166,7 +114,7 @@ def profile_setup():
         if root.startswith(tuple(replaced_dirs)):
             continue
         if files:
-            target_dir = Path(app_globals.argsp.setup_dir).joinpath(Path(root).relative_to(Path(profile_dir)))
+            target_dir = Path(argsp.setup_dir).joinpath(Path(root).relative_to(Path(profile_dir)))
             for f in files:
                 if f in ['.profiledirs']:
                     continue
@@ -175,24 +123,36 @@ def profile_setup():
                 shutil.copy(source_file, target_dir)
 
 def extract_setup():
-    if os.path.exists(app_globals.argsp.setup_dir):
-        shutil.move(app_globals.argsp.setup_dir, app_globals.argsp.setup_dir + '-back.' + time.ctime())
-    print("Extracting jans-setup package")
-    extract_subdir(jans_zip_file, 'jans-linux-setup/jans_setup', app_globals.argsp.setup_dir)
+    if os.path.exists(argsp.setup_dir):
+        shutil.move(argsp.setup_dir, argsp.setup_dir + '-back.' + time.ctime())
 
-    target_setup = os.path.join(app_globals.argsp.setup_dir, 'setup.py')
+    print("Extracting jans-setup package")
+    jans_zip = zipfile.ZipFile(jans_zip_file)
+    parent_dir = jans_zip.filelist[0].orig_filename
+
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        jans_zip.extractall(tmp_dir)
+        shutil.copytree(os.path.join(tmp_dir, parent_dir, 'jans-linux-setup/jans_setup'), argsp.setup_dir)
+
+    jans_zip.close()
+
+    target_setup = os.path.join(argsp.setup_dir, 'setup.py')
     if not os.path.exists(target_setup):
-        os.symlink(os.path.join(app_globals.argsp.setup_dir, 'jans_setup.py'), target_setup)
+        os.symlink(os.path.join(argsp.setup_dir, 'jans_setup.py'), target_setup)
 
     o = urlparse(maven_base_url)
-    app_globals.app_versions['JANS_MAVEN'] = o._replace(path='').geturl()
-    app_info_fn = os.path.join(app_globals.argsp.setup_dir, 'app_info.json')
+    app_info_fn = os.path.join(argsp.setup_dir, 'app_info.json')
+    with open(app_info_fn) as f:
+        app_info = json.load(f)
+
+    app_info['JANS_MAVEN'] = o._replace(path='').geturl()
+
     with open(app_info_fn, 'w') as w:
-        json.dump(app_globals.app_versions, w, indent=2)
+        json.dump(app_info, w, indent=2)
 
 def uninstall_jans():
     check_installation()
-    if not app_globals.argsp.yes:
+    if not argsp.yes:
         print('\033[31m')
         print("This process is irreversible.")
         print("You will lose all data related to Janssen Server.")
@@ -211,7 +171,7 @@ def uninstall_jans():
                 print("Please type \033[1m yes \033[0m to uninstall")
 
     print("Uninstalling Jannsen Server...")
-    for service in app_globals.jetty_services:
+    for service in os.listdir(jetty_home):
         if os.path.exists(os.path.join(jetty_home, service)):
             default_fn = os.path.join('/etc/default/', service)
             if os.path.exists(default_fn):
@@ -220,14 +180,14 @@ def uninstall_jans():
             print("Stopping", service)
             os.system('systemctl stop ' + service)
 
-    if app_globals.argsp.profile == 'jans':
+    if argsp.profile == 'jans':
         print("Stopping OpenDj Server")
         os.system('/opt/opendj/bin/stop-ds')
 
     remove_list = ['/etc/certs', '/etc/jans', '/opt/jans', '/opt/amazon-corretto*', '/opt/jre', '/opt/node*', '/opt/jetty*', '/opt/jython*']
-    if app_globals.argsp.profile == 'jans':
+    if argsp.profile == 'jans':
         remove_list.append('/opt/opendj')
-    if not app_globals.argsp.keep_downloads:
+    if not argsp.keep_downloads:
         remove_list.append('/opt/dist')
 
     for p in remove_list:
@@ -239,7 +199,7 @@ def uninstall_jans():
 def upgrade():
     check_installation()
 
-    for service in app_globals.jetty_services:
+    for service in os.listdir(jetty_home):
         source_fn = os.path.join('/opt/dist/jans', service +'.war')
         target_fn = os.path.join(jetty_home, service, 'webapps', service +'.war' )
         if os.path.exists(target_fn):
@@ -259,39 +219,43 @@ def upgrade():
         os.system('systemctl restart jans-config-api')
 
 def do_install():
-    if not app_globals.argsp.no_jans_setup:
-        extract_setup()
 
-    if app_globals.argsp.profile != 'jans':
+    extract_setup()
+
+    if argsp.profile != 'jans':
         profile_setup()
 
-    if not app_globals.argsp.no_setup:
-        print("Launching Janssen Setup")
 
-        setup_cmd = 'python3 {}/setup.py'.format(app_globals.argsp.setup_dir)
+    print("Launching Janssen Setup")
 
-        if app_globals.argsp.args:
-            setup_cmd += ' ' + app_globals.argsp.args
+    setup_cmd = 'python3 {}/setup.py'.format(argsp.setup_dir)
+    setup_args = argsp.args or ''
+    if argsp.force_download:
+        setup_args += ' --force-download'
 
-        os.system(setup_cmd)
+    if argsp.use_downloaded:
+        setup_args += ' --use-downloaded'
 
+    if argsp.download_exit:
+        setup_args += ' --download-exit'
 
-def download_files():
-    pass
+    if argsp.args:
+        setup_cmd += ' ' + argsp.args
 
+    print("Executing", setup_cmd)
+    os.system(setup_cmd)
 
 def main():
 
-    app_globals.argsp = parser.parse_known_args()[0]
-    if not app_globals.argsp.uninstall:
+    if not argsp.uninstall:
         check_install_dependencies()
 
-    if not (app_globals.argsp.use_downloaded or app_globals.argsp.uninstall):
-        download_files()
+    if not (argsp.use_downloaded or argsp.uninstall):
+        download_jans_acrhieve()
 
-    if app_globals.argsp.upgrade:
+    if argsp.upgrade:
         upgrade()
-    elif app_globals.argsp.uninstall:
+    elif argsp.uninstall:
         uninstall_jans()
     else:
         do_install()
