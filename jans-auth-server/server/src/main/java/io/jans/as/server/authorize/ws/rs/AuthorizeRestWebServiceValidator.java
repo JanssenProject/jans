@@ -141,7 +141,7 @@ public class AuthorizeRestWebServiceValidator {
         }
     }
 
-    public boolean validateAuthnMaxAge(Integer maxAge, SessionId sessionUser, Client client) {
+    public boolean isAuthnMaxAgeValid(Integer maxAge, SessionId sessionUser, Client client) {
         if (maxAge == null) {
             maxAge = client.getDefaultMaxAge();
         }
@@ -438,6 +438,12 @@ public class AuthorizeRestWebServiceValidator {
             throw new WebApplicationException(RedirectUtil.getRedirectResponseBuilder(redirectUriResponse.getRedirectUri(), httpRequest).build());
         } catch (Exception e) {
             log.error("Unexpected exception. " + e.getMessage(), e);
+        }
+    }
+
+    public void checkSignedRequestRequired(AuthzRequest authzRequest, RedirectUriResponse redirectUriResponse) {
+        if (Boolean.TRUE.equals(appConfiguration.getForceSignedRequestObject()) && StringUtils.isBlank(authzRequest.getRequest()) && StringUtils.isBlank(authzRequest.getRequestUri())) {
+            throw createInvalidJwtRequestException(redirectUriResponse, "A signed request object is required");
         }
     }
 }

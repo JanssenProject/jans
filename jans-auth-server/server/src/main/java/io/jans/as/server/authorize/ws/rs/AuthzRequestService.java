@@ -41,6 +41,7 @@ import jakarta.inject.Named;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
@@ -390,6 +391,12 @@ public class AuthzRequestService {
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    public void setDefaultAcrsIfNeeded(AuthzRequest authzRequest, Client client) {
+        if (StringUtils.isBlank(authzRequest.getAcrValues()) && !ArrayUtils.isEmpty(client.getDefaultAcrValues())) {
+            authzRequest.setAcrValues(implode(client.getDefaultAcrValues(), " "));
         }
     }
 }
