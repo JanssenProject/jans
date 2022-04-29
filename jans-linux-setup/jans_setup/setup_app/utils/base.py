@@ -15,6 +15,7 @@ import re
 import shutil
 import multiprocessing
 import ssl
+import tempfile
 
 from pathlib import Path
 from collections import OrderedDict
@@ -368,15 +369,13 @@ def extract_from_zip(zip_file, sub_dir, target_dir, remove_target_dir=False):
                 target_fn.write_bytes(zipobj.read(member))
     zipobj.close()
 
-def extract_subdir(zip_fn, sub_dir, target_dir, zipf=None):
-    zip_obj = zipfile.ZipFile(zip_fn, "r")
+def extract_subdir(zip_fn, sub_dir, target_dir):
+    zip_obj = zipfile.ZipFile(zip_fn, 'r')
     par_dir = zip_obj.namelist()[0]
+    zip_obj.close()
 
     if not sub_dir.endswith('/'):
         sub_dir += '/'
-
-    if zipf:
-        target_zip_obj = zipfile.ZipFile(zipf, "w")
 
     ssub_dir = os.path.join(par_dir, sub_dir)
     target_dir_path = Path(target_dir)
@@ -384,34 +383,9 @@ def extract_subdir(zip_fn, sub_dir, target_dir, zipf=None):
     if target_dir_path.exists():
         shutil.rmtree(target_dir_path)
 
-    target_dir_path.mkdir(parents=True)
-
-    for member in zip_obj.infolist():
-        if member.filename.startswith(ssub_dir):
-            p = Path(member.filename)
-            pr = p.relative_to(ssub_dir)
-            target_fn = target_dir_path.joinpath(pr)
-            if member.is_dir():
-                if zipf:
-                    z_dirn = target_fn.as_posix()
-                    if not z_dirn.endswith('/'):
-                        z_dirn += '/'
-                    zinfodir = zipfile.ZipInfo(filename=z_dirn)
-                    zinfodir.external_attr=0x16
-                    target_zip_obj.writestr(zinfodir, '')
-                elif not target_fn.exists():
-                    target_fn.mkdir(parents=True)
-            else:
-                if zipf:
-                    target_zip_obj.writestr(target_fn.as_posix(), zip_obj.read(member))
-                else:
-                    if not target_fn.parent.exists():
-                        target_fn.parent.mkdir(parents=True)
-                    target_fn.write_bytes(zip_obj.read(member))
-    if zipf:
-        target_zip_obj.close()
-
-    zip_obj.close()
+    with tempfile.TemporaryDirectory() as unpack_dir:
+        shutil.unpack_archive(zip_fn, unpack_dir)
+        shutil.copytree(os.path.join(unpack_dir, par_dir, sub_dir), target_dir)
 
 current_app.app_info = readJsonFile(os.path.join(par_dir, 'app_info.json'))
 current_app.jans_zip = os.path.join(Config.distFolder, 'jans/jans.zip')

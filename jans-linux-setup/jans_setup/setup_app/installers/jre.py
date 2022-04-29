@@ -16,7 +16,7 @@ class JreInstaller(BaseInstaller, SetupUtils):
 
     amazon_corretto_link = 'https://corretto.aws/downloads/resources/{0}/amazon-corretto-{0}-linux-x64.tar.gz'.format(base.current_app.app_info['AMAZON_CORRETTO_VERSION'])
     source_files = [
-            (os.path.join(Config.distAppFolder, os.path.basename(amazon_corretto_link)), amazon_corretto_link),
+            (os.path.join(Config.dist_app_dir, os.path.basename(amazon_corretto_link)), amazon_corretto_link),
             ]
 
     def __init__(self):
@@ -33,17 +33,17 @@ class JreInstaller(BaseInstaller, SetupUtils):
 
         if Config.java_type == 'jdk':
             open_jdk_archive_link = 'https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.9.1%2B1/OpenJDK11U-jdk_x64_linux_hotspot_11.0.9.1_1.tar.gz'
-            target_fn = os.path.join(Config.distAppFolder, os.path.basename(open_jdk_archive_link))
+            target_fn = os.path.join(Config.dist_app_dir, os.path.basename(open_jdk_archive_link))
             base.download(open_jdk_archive_link, target_fn)
-            jreArchive = target_fn
+            jre_archive = target_fn
         else:
-            jreArchive = self.source_files[0][0]
+            jre_archive = self.source_files[0][0]
 
-        self.logIt("Installing server JRE {} ...".format(os.path.basename(jreArchive)))
+        self.logIt("Installing server JRE {} ...".format(os.path.basename(jre_archive)))
 
         try:
-            self.logIt("Extracting %s into /opt/" % os.path.basename(jreArchive))
-            self.run([paths.cmd_tar, '-xzf', jreArchive, '-C', '/opt/', '--no-xattrs', '--no-same-owner', '--no-same-permissions'])
+            self.logIt("Extracting %s into /opt/" % os.path.basename(jre_archive))
+            self.run([paths.cmd_tar, '-xzf', jre_archive, '-C', '/opt/', '--no-xattrs', '--no-same-owner', '--no-same-permissions'])
         except Exception as e:
             self.logIt("Error encountered while extracting archive {}".format(e))
 

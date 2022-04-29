@@ -18,9 +18,9 @@ from pathlib import Path
 class JansCliInstaller(BaseInstaller, SetupUtils):
 
     source_files = [
-                (os.path.join(Config.distJansFolder, 'jca-swagger-client.zip'), os.path.join(base.current_app.app_info['EXTERNAL_LIBS'], 'cli-swagger/jca_swagger_client.zip')),
-                (os.path.join(Config.distJansFolder, 'scim-swagger-client.zip'), os.path.join(base.current_app.app_info['EXTERNAL_LIBS'], 'cli-swagger/scim_swagger_client.zip')),
-                (os.path.join(Config.distAppFolder, 'pyjwt.zip'), base.current_app.app_info['PYJWT']),
+                (os.path.join(Config.dist_jans_dir, 'jca-swagger-client.zip'), os.path.join(base.current_app.app_info['EXTERNAL_LIBS'], 'cli-swagger/jca_swagger_client.zip')),
+                (os.path.join(Config.dist_jans_dir, 'scim-swagger-client.zip'), os.path.join(base.current_app.app_info['EXTERNAL_LIBS'], 'cli-swagger/scim_swagger_client.zip')),
+                (os.path.join(Config.dist_app_dir, 'pyjwt.zip'), base.current_app.app_info['PYJWT']),
                 ]
 
     def __init__(self):

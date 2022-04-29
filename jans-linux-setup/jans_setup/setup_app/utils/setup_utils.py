@@ -246,31 +246,16 @@ class SetupUtils(Crypto64):
         except:
             self.logIt("Error copying %s to %s" % (inFile, destFolder), True)
 
-    def copyTree(self, src, dst, overwrite=False, except_list=[]):
-        try:
-            if not os.path.exists(dst):
-                os.makedirs(dst)
-
-            for item in os.listdir(src):
-                if item in except_list:
-                    continue
-                s = os.path.join(src, item)
-                d = os.path.join(dst, item)
-                if os.path.isdir(s):
-                    self.copyTree(s, d, overwrite)
-                else:
-                    if overwrite and os.path.exists(d):
-                        self.removeFile(d)
-
-                    if not os.path.exists(d) or os.stat(s).st_mtime - os.stat(d).st_mtime > 1:
-                        with open(s, 'rb') as fi:
-                            cur_content = fi.read()
-                        self.backupFile(s, d, cur_content=cur_content)
-                        shutil.copy2(s, d)
-
-            self.logIt("Copied tree %s to %s" % (src, dst))
-        except Exception as e:
-            self.logIt("Error copying tree {} to {}: {}".format(src, dst, e), True)
+    def copy_tree(self, src, dest, ignore=[]):
+        if os.path.isdir(src):
+            if not os.path.isdir(dest):
+                os.makedirs(dest)
+            files = os.listdir(src)
+            for f in files:
+                if f not in ignore:
+                    self.CopyTree(os.path.join(src, f), os.path.join(dest, f), ignore)
+        else:
+            shutil.copyfile(src, dest)
 
     def createDirs(self, name):
         try:

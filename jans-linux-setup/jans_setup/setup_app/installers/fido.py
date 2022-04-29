@@ -1,6 +1,7 @@
 import os
 import glob
 import shutil
+from pathlib import Path
 
 from setup_app import paths
 from setup_app.utils import base
@@ -11,8 +12,8 @@ from setup_app.installers.jetty import JettyInstaller
 class FidoInstaller(JettyInstaller):
 
     source_files = [
-                (os.path.join(Config.distJansFolder, 'jans-fido2.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-fido2-server/{0}/jans-fido2-server-{0}.war').format(base.current_app.app_info['ox_version'])),
-                (os.path.join(Config.distAppFolder, os.path.basename(base.current_app.app_info['APPLE_WEBAUTHN'])), base.current_app.app_info['APPLE_WEBAUTHN'])
+                (os.path.join(Config.dist_jans_dir, 'jans-fido2.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-fido2-server/{0}/jans-fido2-server-{0}.war').format(base.current_app.app_info['ox_version'])),
+                (os.path.join(Config.dist_app_dir, os.path.basename(base.current_app.app_info['APPLE_WEBAUTHN'])), base.current_app.app_info['APPLE_WEBAUTHN'])
                 ]
 
     def __init__(self):
@@ -75,12 +76,9 @@ class FidoInstaller(JettyInstaller):
             )
 
         #copy fido2 server metadata
-        target = os.path.join(self.fido2ConfigFolder, 'server_metadata')
-        self.copyTree(
-            os.path.join(Config.install_dir, 'static/fido2/server_metadata'),
-            os.path.join(self.fido2ConfigFolder, 'server_metadata'),
-            except_list=['.dontdelete']
-            )
+        src_dir = os.path.join(Config.install_dir, 'static/fido2/server_metadata')
+        trgt_dir = os.path.join(self.fido2ConfigFolder, 'server_metadata')
+        self.copy_tree(src_dir, trgt_dir, ignore='.dontdelete')
 
         # copy Apple_WebAuthn_Root_CA
         if os.path.exists(self.source_files[1][0]):

@@ -18,7 +18,7 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
 
     opendj_link = 'https://maven.gluu.org/maven/org/gluufederation/opendj/opendj-server-legacy/{0}/opendj-server-legacy-{0}.zip'.format(base.current_app.app_info['OPENDJ_VERSION'])
     source_files = [
-            (os.path.join(Config.distAppFolder, os.path.basename(opendj_link)), opendj_link),
+            (os.path.join(Config.dist_app_dir, os.path.basename(opendj_link)), opendj_link),
             ]
 
     def __init__(self):
@@ -93,13 +93,13 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
 
     def extractOpenDJ(self):
 
-        openDJArchive = max(glob.glob(os.path.join(Config.distAppFolder, 'opendj-server-*4*.zip')))
+        opendj_archive = max(glob.glob(os.path.join(Config.dist_app_dir, 'opendj-server-*4*.zip')))
 
         try:
-            self.logIt("Unzipping %s in /opt/" % openDJArchive)
-            self.run([paths.cmd_unzip, '-n', '-q', '%s' % (openDJArchive), '-d', '/opt/' ])
+            self.logIt("Unzipping %s in /opt/" % opendj_archive)
+            self.run([paths.cmd_unzip, '-n', '-q', '%s' % (opendj_archive), '-d', '/opt/' ])
         except:
-            self.logIt("Error encountered while doing unzip %s -d /opt/" % (openDJArchive))
+            self.logIt("Error encountered while doing unzip %s -d /opt/" % (opendj_archive))
 
         realLdapBaseFolder = os.path.realpath(Config.ldapBaseFolder)
         self.run([paths.cmd_chown, '-R', 'ldap:ldap', realLdapBaseFolder])

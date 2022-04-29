@@ -19,6 +19,21 @@ def download_jans_acrhieve():
             verbose=True
             )
 
+def get_grpcio_package(data):
+
+    pyversion = 'cp{0}{1}'.format(sys.version_info.major, sys.version_info.minor)
+
+    package = {}
+
+    for package_ in data['urls']:
+
+        if package_['python_version'] == pyversion and 'manylinux' in package_['filename'] and package_['filename'].endswith('x86_64.whl'):
+            if package_['upload_time'] > package.get('upload_time',''):
+                package = package_
+                break
+
+    return package
+
 def download_gcs():
     gcs_dir = os.path.join(base.pylib_dir, 'gcs')
 
@@ -38,15 +53,7 @@ def download_gcs():
         base.download('https://pypi.org/pypi/grpcio/1.37.0/json', grpcio_fn, verbose=True)
         data = base.readJsonFile(grpcio_fn)
 
-        pyversion = 'cp{0}{1}'.format(sys.version_info.major, sys.version_info.minor)
-
-        package = {}
-
-        for package_ in data['urls']:
-
-            if package_['python_version'] == pyversion and 'manylinux' in package_['filename'] and package_['filename'].endswith('x86_64.whl'):
-                if package_['upload_time'] > package.get('upload_time',''):
-                    package = package_
+        package = get_grpcio_package(data)
 
         if package.get('url'):
             target_whl_fn = os.path.join(tmp_dir, os.path.basename(package['url']))

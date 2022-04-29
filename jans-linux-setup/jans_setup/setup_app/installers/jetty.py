@@ -20,7 +20,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
 
     jetty_link = 'https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/{0}/jetty-home-{0}.tar.gz'.format(base.current_app.app_info['JETTY_VERSION'])
     source_files = [
-            (os.path.join(Config.distAppFolder, os.path.basename(jetty_link)), jetty_link),
+            (os.path.join(Config.dist_app_dir, os.path.basename(jetty_link)), jetty_link),
             ]
 
     def __init__(self):
@@ -106,10 +106,10 @@ class JettyInstaller(BaseInstaller, SetupUtils):
     def get_jetty_info(self):
         # first try latest versions
         self.jetty_dist_string = 'jetty-home'
-        jetty_archive_list = glob.glob(os.path.join(Config.distAppFolder, '{}-*.tar.gz'.format(self.jetty_dist_string)))
+        jetty_archive_list = glob.glob(os.path.join(Config.dist_app_dir, '{}-*.tar.gz'.format(self.jetty_dist_string)))
 
         if not jetty_archive_list:
-            self.logIt("Jetty archive not found in {}. Exiting...".format(Config.distAppFolder), True, True)
+            self.logIt("Jetty archive not found in {}. Exiting...".format(Config.dist_app_dir), True, True)
 
         jettyArchive = max(jetty_archive_list)
 
@@ -132,7 +132,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
     def installJettyService(self, serviceConfiguration, supportCustomizations=False, supportOnlyPageCustomizations=False):
         serviceName = serviceConfiguration['name']
         self.logIt("Installing jetty service %s..." % serviceName)
-
+        self.logIt("Deploying Jetty Service", pbar=serviceName)
         self.get_jetty_info()
         jettyServiceBase = '%s/%s' % (self.jetty_base, serviceName)
         jettyModules = serviceConfiguration['jetty']['modules']
