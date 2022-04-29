@@ -49,6 +49,9 @@ parser.add_argument('-force-download', help="Force downloading files", action='s
 
 argsp = parser.parse_args()
 
+
+bacup_ext = '-back.' + time.ctime()
+
 def check_install_dependencies():
 
     try:
@@ -106,8 +109,6 @@ def profile_setup():
         replaced_dirs.append(source_dir)
         if os.path.exists(source_dir) and os.path.exists(target_dir):
             shutil.rmtree(target_dir)
-            copy_target = os.path.join(argsp.setup_dir, os.path.sep.join(os.path.split(pdir)[:-1]))
-            print(target_dir)
             shutil.copytree(source_dir, target_dir)
 
     for root, dirs, files in os.walk(profile_dir):
@@ -124,7 +125,7 @@ def profile_setup():
 
 def extract_setup():
     if os.path.exists(argsp.setup_dir):
-        shutil.move(argsp.setup_dir, argsp.setup_dir + '-back.' + time.ctime())
+        shutil.move(argsp.setup_dir, argsp.setup_dir + bacup_ext)
 
     print("Extracting jans-setup package")
     jans_zip = zipfile.ZipFile(jans_zip_file)
@@ -204,14 +205,14 @@ def upgrade():
         target_fn = os.path.join(jetty_home, service, 'webapps', service +'.war' )
         if os.path.exists(target_fn):
             print("Copying", source_fn, "as", target_fn)
-            shutil.move(target_fn, target_fn+'-back.' + time.ctime())
+            shutil.move(target_fn, target_fn + bacup_ext)
             shutil.copy(source_fn, target_fn)
             print("Restarting", service)
             os.system('systemctl restart ' + service)
 
     jans_config_api_fn = '/opt/jans/config-api/jans-config-api-runner.jar'
     if os.path.exists(jans_config_api_fn):
-        shutil.move(jans_config_api_fn, jans_config_api_fn + '-back.' + time.ctime())
+        shutil.move(jans_config_api_fn, jans_config_api_fn + bacup_ext)
         source_fn = '/opt/dist/jans/jans-config-api-runner.jar'
         print("Copying", source_fn, "as", jans_config_api_fn)
         shutil.copy(source_fn, jans_config_api_fn)

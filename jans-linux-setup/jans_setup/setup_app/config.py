@@ -31,8 +31,8 @@ class Config:
     node_home = '/opt/node'
     outputFolder = None
     jetty_base = os.path.join(jansOptFolder, 'jetty')
-    distAppFolder = os.path.join(distFolder, 'app')
-    distJansFolder = os.path.join(distFolder, 'jans')
+    dist_app_dir = os.path.join(distFolder, 'app')
+    dist_jans_dir = os.path.join(distFolder, 'jans')
 
     installed_instance = False
     profile = 'jans'
@@ -111,8 +111,8 @@ class Config:
         self.properties_password = None
         self.noPrompt = False
 
-        self.distAppFolder = os.path.join(self.distFolder, 'app')
-        self.distJansFolder = os.path.join(self.distFolder, 'jans')
+        self.dist_app_dir = os.path.join(self.distFolder, 'app')
+        self.dist_jans_dir = os.path.join(self.distFolder, 'jans')
         self.distTmpFolder = os.path.join(self.distFolder, 'tmp')
 
         self.downloadWars = None
@@ -235,7 +235,7 @@ class Config:
         self.ldapCertFn = self.opendj_cert_fn = os.path.join(self.certFolder, 'opendj.crt')
         self.ldapTrustStoreFn = self.opendj_p12_fn = os.path.join(self.certFolder, 'opendj.p12')
 
-        self.oxd_package = base.determine_package(os.path.join(self.distJansFolder, 'oxd-server*.tgz'))
+        self.oxd_package = base.determine_package(os.path.join(self.dist_jans_dir, 'oxd-server*.tgz'))
 
         self.opendj_p12_pass = None
 
@@ -381,7 +381,7 @@ class Config:
 
         self.mappingLocations = { group: 'ldap' for group in self.couchbaseBucketDict }  #default locations are OpenDJ
         self.non_setup_properties = {
-            'oxauth_client_jar_fn': os.path.join(self.distJansFolder, 'jans-auth-client-jar-with-dependencies.jar')
+            'oxauth_client_jar_fn': os.path.join(self.dist_jans_dir, 'jans-auth-client-jar-with-dependencies.jar')
                 }
         Config.addPostSetupService = []
 

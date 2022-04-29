@@ -149,15 +149,15 @@ class OxdInstaller(SetupUtils, BaseInstaller):
         self.logIt("Downloading {} and preparing package".format(os.path.basename(oxd_url)))
 
         oxd_zip_fn = '/tmp/oxd-server.zip'
-        oxd_tgz_fn = '/tmp/oxd-server.tgz' if base.snap else os.path.join(Config.distJansFolder, 'oxd-server.tgz')
+        oxd_tgz_fn = '/tmp/oxd-server.tgz' if base.snap else os.path.join(Config.dist_jans_dir, 'oxd-server.tgz')
         tmp_dir = os.path.join('/tmp', os.urandom(5).hex())
         oxd_tmp_dir = os.path.join(tmp_dir, 'oxd-server')
-        
+
         self.run([paths.cmd_mkdir, '-p', oxd_tmp_dir])
         self.download_file(oxd_url, oxd_zip_fn)
         self.run([paths.cmd_unzip, '-qqo', oxd_zip_fn, '-d', oxd_tmp_dir])
         self.run([paths.cmd_mkdir, os.path.join(oxd_tmp_dir, 'data')])
-        
+
         if not base.snap:
             service_file = 'oxd-server.init.d' if base.deb_sysd_clone else 'oxd-server.service'
             service_url = 'https://raw.githubusercontent.com/GluuFederation/community-edition-package/master/package/systemd/oxd-server.service'.format(base.current_app.app_info['ox_version'], service_file)
