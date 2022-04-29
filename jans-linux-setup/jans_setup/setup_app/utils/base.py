@@ -377,7 +377,6 @@ def extract_subdir(zip_fn, sub_dir, target_dir):
     if not sub_dir.endswith('/'):
         sub_dir += '/'
 
-    ssub_dir = os.path.join(par_dir, sub_dir)
     target_dir_path = Path(target_dir)
 
     if target_dir_path.exists():
