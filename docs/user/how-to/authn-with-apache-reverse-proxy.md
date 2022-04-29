@@ -28,27 +28,38 @@ In this setup, we have four important components.
 - **User workstation**. From workstation, user will use browser(i.e user agent) to access protected resource. 
 - **Apache reverse proxy** with `mod_auth_openidc`. Together they work as `relying party (RP)`. We will assume that this host accessible with FQDN `https://test.apache.rp.io/`.
 - **Janssen server**, which is our open-id connect provider (OP). We will assume that Janssen server is accessible at FQDN `https://janssen.op.io/`
-- **Protected resource**. These are resources that we need to protect using authentication. For simplicity, we will also assume that resources that need to be protected via authentication are hosted on same server. In production setups protected resources are usually hosted on separate server that can only be accessed via proxy.
+- **Protected resource**. These are resources that we need to protect using authentication. In production setups, the protected resources are usually hosted on separate server that can only be accessed via proxy. For simplicity, we will also assume that resources that need to be protected via authentication are hosted on Apache reverse proxy itself and can be accessed through `https://test.apache.rp.io/protected`. 
 
 #### Configure Janssen server
 
-Janssen server provides `jans-cli` CLI tool to configure Janssen server. `jans-cli` has menu-driven interface that makes it easy to configure Janssen server. Here we will use menu-driven approach as well as command-line operations to configure Janssen server. To further understand how to use menu-driven approach and get complete list of supported command-line operations, refer to [jans-cli documentation](../using-jans-cli#command-line-interface).
+In this section, we will register a new OpenID Connect client on Janssen server. This client registration will be used by Apache reverse proxy which is working as relying party using mod_auth-openidc.
 
-Use steps below to configure Janssen server.
+To register a new OpenID connect client on Janssen server, we will used `jans-cli` tool provided by Janssen server. `jans-cli` has menu-driven interface that makes it easy to configure Janssen server. Here we will use menu-driven approach to register a new client. To further understand how to use menu-driven approach and get complete list of supported command-line operations, refer to [jans-cli documentation](../using-jans-cli#command-line-interface).
 
-- Manually register client(RP) as OpenID Connect client
-  - Run command below on host running Janssen Server
+  - Run command below to enter interactive mode.
+
+
+     > Note: </br> In order to run operations, the `jans-cli` has to be authenticated and authorized with respective Janssen server. If `jans-cli` operation is being executed for the first time or if there is no valid access token available, then running the command below will initiate authentication and authorization flow. In that case, follow the steps for [jans-cli authorization](../using-jans-cli/cli-tips.md#cli-authorization) to continue running the command.
   
     ```
     /opt/jans/jans-cli/config-cli.py
     ```
+
+
+
+    Running above command will bring up interactive mode main menu. Sample below:
+    
+    ![CLI-main-menu](../../assets/how-to/images/image-howto-mod-auth-cli-main-menu-04292022.png)
+    
+    For our purpose of registering a new OpenID Connect client, select option which is available at `16` in above sample. Selecting appropriate option will bring up related sub-menu. 
+
    
-  - Navigate through options to start registering new OpenID Connect client
+  - From sub-menu, select option for `Create new OpenId connect client`. Upon selecting this option, CLI will prompt for inputs which will help describe the new OpenID connect client.
   - Provide inputs for following properties:
   
     ```
     displayName: <name-of-choice>
-    applicationType: web
+    application Type: web
     includeClaimsInIdToken  [false]: _true
     Populate optional fields? y
     clientSecret: <secret-of-your-choice>
@@ -60,17 +71,98 @@ Use steps below to configure Janssen server.
     grantTypes: authorization_code
     ```
     
-   - Copy the resulting JSON data and save it to a file, say `register-apache-rp.json`.
-   - Use `jans-cli` operations to register the client using the command below
+   - Once values for all above properties are provided, input `c` in selection to instruct jans-cli to create schema using inputs provided till now. At this time, jans-cli will show the schema(JSON) which will be used to create new OpenID Connect client on Janssen server. Verify that schema has captured all the provided inputs correctly.
+   - Now next step is for `jans-cli` to post this JSON schema to Janssen server to actually register new client. To do this, input `y` on the prompt.
+   - If client is successfully registered then we will receive JSON data back which describes newly registered client. Complete with `inum` and `clientSecret` for new client. See a sample of JSON response below:
    
-     > Note: </br> In order to run operations, the `jans-cli` has to be authenticated and authorized with respective Janssen server. If `jans-cli` operation is being executed for the first time or if there is no valid access token available, then running the command below will initiate authentication and authorization flow. In that case, follow the steps for [jans-cli authorization](../using-jans-cli/cli-tips.md#cli-authorization) to continue running the command.
+      ```
+      {
+        "dn": "inum=165bdf95-f15e-44f0-bdd7-cdac71fda8e0,ou=clients,o=jans",
+        "inum": "165bdf95-f15e-44f0-bdd7-cdac71fda8e0",
+        "displayName": "dm",
+        "clientSecret": "a9894ba8-eb01-4a26-a69d-026f10a49272",
+        "frontChannelLogoutUri": null,
+        "frontChannelLogoutSessionRequired": false,
+        "registrationAccessToken": null,
+        "clientIdIssuedAt": null,
+        "clientSecretExpiresAt": null,
+        "redirectUris": null,
+        "claimRedirectUris": null,
+        "responseTypes": null,
+        "grantTypes": [],
+        "applicationType": "web",
+        "contacts": null,
+        "clientName": "dm",
+        "idTokenTokenBindingCnf": null,
+        "logoUri": null,
+        "clientUri": null,
+        "policyUri": null,
+        "tosUri": null,
+        "jwksUri": null,
+        "jwks": null,
+        "sectorIdentifierUri": null,
+        "subjectType": "public",
+        "idTokenSignedResponseAlg": null,
+        "idTokenEncryptedResponseAlg": null,
+        "idTokenEncryptedResponseEnc": null,
+        "userInfoSignedResponseAlg": null,
+        "userInfoEncryptedResponseAlg": null,
+        "userInfoEncryptedResponseEnc": null,
+        "requestObjectSigningAlg": null,
+        "requestObjectEncryptionAlg": null,
+        "requestObjectEncryptionEnc": null,
+        "tokenEndpointAuthMethod": null,
+        "tokenEndpointAuthSigningAlg": null,
+        "defaultMaxAge": null,
+        "requireAuthTime": false,
+        "defaultAcrValues": null,
+        "initiateLoginUri": null,
+        "postLogoutRedirectUris": null,
+        "requestUris": null,
+        "scopes": null,
+        "claims": null,
+        "trustedClient": false,
+        "lastAccessTime": null,
+        "lastLogonTime": null,
+        "persistClientAuthorizations": false,
+        "includeClaimsInIdToken": false,
+        "refreshTokenLifetime": null,
+        "accessTokenLifetime": null,
+        "customAttributes": [],
+        "customObjectClasses": null,
+        "rptAsJwt": false,
+        "accessTokenAsJwt": false,
+        "accessTokenSigningAlg": null,
+        "disabled": false,
+        "authorizedOrigins": null,
+        "softwareId": null,
+        "softwareVersion": null,
+        "softwareStatement": null,
+        "attributes": {
+          "tlsClientAuthSubjectDn": null,
+          "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": false,
+          "keepClientAuthorizationAfterExpiration": false,
+          "allowSpontaneousScopes": false,
+          "spontaneousScopes": null,
+          "spontaneousScopeScriptDns": null,
+          "backchannelLogoutUri": null,
+          "backchannelLogoutSessionRequired": false,
+          "additionalAudience": null,
+          "postAuthnScripts": null,
+          "consentGatheringScripts": null,
+          "introspectionScripts": null,
+          "rptClaimsScripts": null
+        },
+        "backchannelTokenDeliveryMode": null,
+        "backchannelClientNotificationEndpoint": null,
+        "backchannelAuthenticationRequestSigningAlg": null,
+        "backchannelUserCodeParameter": null,
+        "expirationDate": null,
+        "deletable": false,
+        "jansId": null
+      }
+      ```
    
-     ```
-     /opt/jans/jans-cli/config-cli.py --operation-id post-oauth-openid-clients --data <path>/register-apache-rp.json
-     ```
-     
-   - Output of this command would be a JSON response. Save this response to a file as some of the values in it will be required when configuring *mod-auth-openidc*.
- 
 
 ## Setup *mod-auth-openidc* 
 
