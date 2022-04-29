@@ -10,6 +10,7 @@ import ssl
 import json
 import re
 import json
+import tempfile
 
 from urllib import request
 from urllib.parse import urljoin, urlparse
@@ -129,7 +130,7 @@ def extract_setup():
     jans_zip = zipfile.ZipFile(jans_zip_file)
     parent_dir = jans_zip.filelist[0].orig_filename
 
-    tmp_dir = os.path.join(jans_app_dir, os.urandom(4).hex())
+    tmp_dir = './' + os.urandom(4).hex()
     jans_zip.extractall(tmp_dir)
     shutil.copytree(os.path.join(tmp_dir, parent_dir, 'jans-linux-setup/jans_setup'), argsp.setup_dir)
     jans_zip.close()
