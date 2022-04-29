@@ -10,7 +10,6 @@ import ssl
 import json
 import re
 import json
-import tempfile
 
 from urllib import request
 from urllib.parse import urljoin, urlparse
