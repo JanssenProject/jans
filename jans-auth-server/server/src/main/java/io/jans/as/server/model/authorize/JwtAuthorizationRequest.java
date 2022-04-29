@@ -6,9 +6,9 @@
 
 package io.jans.as.server.model.authorize;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.common.util.CommonUtils;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.common.Display;
 import io.jans.as.model.common.Prompt;
@@ -322,9 +322,7 @@ public class JwtAuthorizationRequest {
     private boolean validateSignature(@NotNull AbstractCryptoProvider cryptoProvider, SignatureAlgorithm signatureAlgorithm, Client client, String signingInput, String signature) throws Exception {
         ClientService clientService = CdiUtil.bean(ClientService.class);
         String sharedSecret = clientService.decryptSecret(client.getClientSecret());
-        JSONObject jwks = Strings.isNullOrEmpty(client.getJwks()) ?
-                JwtUtil.getJSONWebKeys(client.getJwksUri()) :
-                new JSONObject(client.getJwks());
+        JSONObject jwks = CommonUtils.getJwks(client);
         return cryptoProvider.verifySignature(signingInput, signature, keyId, jwks, sharedSecret, signatureAlgorithm);
     }
 
