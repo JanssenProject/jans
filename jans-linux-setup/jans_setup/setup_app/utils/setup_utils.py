@@ -246,12 +246,14 @@ class SetupUtils(Crypto64):
         except:
             self.logIt("Error copying %s to %s" % (inFile, destFolder), True)
 
-    def copyTree(self, src, dst, overwrite=False):
+    def copyTree(self, src, dst, overwrite=False, except_list=[]):
         try:
             if not os.path.exists(dst):
                 os.makedirs(dst)
 
             for item in os.listdir(src):
+                if item in except_list:
+                    continue
                 s = os.path.join(src, item)
                 d = os.path.join(dst, item)
                 if os.path.isdir(s):
@@ -263,13 +265,12 @@ class SetupUtils(Crypto64):
                     if not os.path.exists(d) or os.stat(s).st_mtime - os.stat(d).st_mtime > 1:
                         with open(s, 'rb') as fi:
                             cur_content = fi.read()
-                        self.backupFile(s, d, cur_content=cur_content)    
+                        self.backupFile(s, d, cur_content=cur_content)
                         shutil.copy2(s, d)
-                        
 
             self.logIt("Copied tree %s to %s" % (src, dst))
-        except:
-            self.logIt("Error copying tree %s to %s" % (src, dst), True)
+        except Exception as e:
+            self.logIt("Error copying tree {} to {}: {}".format(src, dst, e), True)
 
     def createDirs(self, name):
         try:
