@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.common.util.CommonUtils;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.common.ResponseMode;
 import io.jans.as.model.config.WebKeysConfiguration;
@@ -352,7 +353,7 @@ public class AuthzRequestService {
                     String nestedKeyId = new ServerCryptoProvider(cryptoProvider).getKeyId(webKeysConfiguration,
                             Algorithm.fromString(signatureAlgorithm.getName()), Use.SIGNATURE);
 
-                    JSONObject jsonWebKeys = JwtUtil.getJSONWebKeys(client.getJwksUri());
+                    JSONObject jsonWebKeys = CommonUtils.getJwks(client);
                     redirectUriResponse.getRedirectUri().setNestedJsonWebKeys(jsonWebKeys);
 
                     String clientSecret = clientService.decryptSecret(client.getClientSecret());
@@ -361,7 +362,7 @@ public class AuthzRequestService {
                 }
 
                 // Encrypted response
-                JSONObject jsonWebKeys = JwtUtil.getJSONWebKeys(client.getJwksUri());
+                JSONObject jsonWebKeys = CommonUtils.getJwks(client);
                 if (jsonWebKeys != null) {
                     keyId = new ServerCryptoProvider(cryptoProvider).getKeyId(JSONWebKeySet.fromJSONObject(jsonWebKeys),
                             Algorithm.fromString(client.getAttributes().getAuthorizationEncryptedResponseAlg()),
@@ -382,7 +383,7 @@ public class AuthzRequestService {
                 keyId = new ServerCryptoProvider(cryptoProvider).getKeyId(webKeysConfiguration,
                         Algorithm.fromString(signatureAlgorithm.getName()), Use.SIGNATURE);
 
-                JSONObject jsonWebKeys = JwtUtil.getJSONWebKeys(client.getJwksUri());
+                JSONObject jsonWebKeys = CommonUtils.getJwks(client);
                 redirectUriResponse.getRedirectUri().setJsonWebKeys(jsonWebKeys);
 
                 String clientSecret = clientService.decryptSecret(client.getClientSecret());

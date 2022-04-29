@@ -6,8 +6,8 @@
 
 package io.jans.as.server.auth;
 
-import com.google.common.base.Strings;
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.common.util.CommonUtils;
 import io.jans.as.model.authorize.AuthorizeRequestParam;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.Prompt;
@@ -19,7 +19,6 @@ import io.jans.as.model.jwk.JSONWebKeySet;
 import io.jans.as.model.token.TokenErrorResponseType;
 import io.jans.as.model.util.CertUtils;
 import io.jans.as.model.util.HashUtil;
-import io.jans.as.model.util.JwtUtil;
 import io.jans.as.server.model.common.SessionId;
 import io.jans.as.server.model.common.SessionIdState;
 import io.jans.as.server.service.SessionIdService;
@@ -130,9 +129,7 @@ public class MTLSService {
             final PublicKey publicKey = cert.getPublicKey();
             final byte[] encodedKey = publicKey.getEncoded();
 
-            JSONObject jsonWebKeys = Strings.isNullOrEmpty(client.getJwks())
-                    ? JwtUtil.getJSONWebKeys(client.getJwksUri())
-                    : new JSONObject(client.getJwks());
+            JSONObject jsonWebKeys = CommonUtils.getJwks(client);
 
             if (jsonWebKeys == null) {
                 log.debug("Unable to load json web keys for client: {}, jwks_uri: {}, jks: {}", client.getClientId(),
