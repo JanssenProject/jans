@@ -130,11 +130,11 @@ def extract_setup():
     jans_zip = zipfile.ZipFile(jans_zip_file)
     parent_dir = jans_zip.filelist[0].orig_filename
 
-    with tempfile.TemporaryDirectory() as tmp_dir:
-        jans_zip.extractall(tmp_dir)
-        shutil.copytree(os.path.join(tmp_dir, parent_dir, 'jans-linux-setup/jans_setup'), argsp.setup_dir)
-
+    tmp_dir = os.path.join(jans_app_dir, os.urandom(4).hex())
+    jans_zip.extractall(tmp_dir)
+    shutil.copytree(os.path.join(tmp_dir, parent_dir, 'jans-linux-setup/jans_setup'), argsp.setup_dir)
     jans_zip.close()
+    shutil.rmtree(tmp_dir)
 
     target_setup = os.path.join(argsp.setup_dir, 'setup.py')
     if not os.path.exists(target_setup):

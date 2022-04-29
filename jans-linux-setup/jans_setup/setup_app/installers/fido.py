@@ -75,9 +75,11 @@ class FidoInstaller(JettyInstaller):
             )
 
         #copy fido2 server metadata
+        target = os.path.join(self.fido2ConfigFolder, 'server_metadata')
         self.copyTree(
             os.path.join(Config.install_dir, 'static/fido2/server_metadata'),
-            os.path.join(self.fido2ConfigFolder, 'server_metadata')
+            os.path.join(self.fido2ConfigFolder, 'server_metadata'),
+            except_list=['.dontdelete']
             )
 
         # copy Apple_WebAuthn_Root_CA
