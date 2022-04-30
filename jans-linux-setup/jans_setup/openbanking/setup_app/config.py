@@ -25,7 +25,7 @@ class Config:
     osDefault = '/etc/default'
     sysemProfile = '/etc/profile'
     jython_home = '/opt/jython'
-    ldapBaseFolder = '/opt/opendj'
+    ldap_base_dir = '/opt/opendj'
     network = '/etc/sysconfig/network'
     jetty_home = '/opt/jetty'
     jetty_base = os.path.join(jansOptFolder, 'jetty')
@@ -69,7 +69,7 @@ class Config:
 
         self.ox_version = self.app_info['JANS_APP_VERSION'] + self.app_info['JANS_BUILD']
         self.data_dir = os.path.join(self.install_dir, 'setup_app/data')
-        self.ldapBinFolder = os.path.join(self.ldapBaseFolder, 'bin')
+        self.ldap_bin_dir = os.path.join(self.ldap_base_dir, 'bin')
 
         self.thread_queue = None
         self.jetty_user = 'jetty'
