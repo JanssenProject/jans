@@ -32,11 +32,11 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
         self.register_progess()
 
         self.openDjIndexJson = os.path.join(Config.install_dir, 'static/opendj/index.json')
-        self.openDjSchemaFolder = os.path.join(Config.ldapBaseFolder, 'config/schema')
+        self.openDjSchemaFolder = os.path.join(Config.ldap_base_dir, 'config/schema')
 
         self.opendj_service_centos7 = os.path.join(Config.install_dir, 'static/opendj/systemd/opendj.service')
-        self.ldapDsconfigCommand = os.path.join(Config.ldapBinFolder, 'dsconfig')
-        self.ldapDsCreateRcCommand = os.path.join(Config.ldapBinFolder, 'create-rc-script')
+        self.ldapDsconfigCommand = os.path.join(Config.ldap_bin_dir , 'dsconfig')
+        self.ldapDsCreateRcCommand = os.path.join(Config.ldap_bin_dir , 'create-rc-script')
 
 
     def install(self):
@@ -101,7 +101,7 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
         except:
             self.logIt("Error encountered while doing unzip %s -d /opt/" % (opendj_archive))
 
-        realLdapBaseFolder = os.path.realpath(Config.ldapBaseFolder)
+        realLdapBaseFolder = os.path.realpath(Config.ldap_base_dir)
         self.run([paths.cmd_chown, '-R', 'ldap:ldap', realLdapBaseFolder])
 
         if Config.opendj_install == InstallTypes.REMOTE:
@@ -115,17 +115,17 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
     def install_opendj(self):
         self.logIt("Running OpenDJ Setup")
 
-        #if base.snap and not os.path.exists(Config.ldapBaseFolder):
-        #    self.run([paths.cmd_mkdir, Config.ldapBaseFolder])
+        #if base.snap and not os.path.exists(Config.ldap_base_dir):
+        #    self.run([paths.cmd_mkdir, Config.ldap_base_dir])
 
         # Copy opendj-setup.properties so user ldap can find it in /opt/opendj
-        setupPropsFN = os.path.join(Config.ldapBaseFolder, 'opendj-setup.properties')
+        setupPropsFN = os.path.join(Config.ldap_base_dir, 'opendj-setup.properties')
         shutil.copy("%s/opendj-setup.properties" % Config.outputFolder, setupPropsFN)
 
         self.run([paths.cmd_chown, 'ldap:ldap', setupPropsFN])
 
 
-        ldapSetupCommand = os.path.join(os.path.dirname(Config.ldapBinFolder), 'setup')
+        ldapSetupCommand = os.path.join(os.path.dirname(Config.ldap_bin_dir ), 'setup')
 
         setupCmd = " ".join([ldapSetupCommand,
                                 '--no-prompt',
@@ -151,7 +151,7 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
 
         try:
             self.logIt('Stopping opendj server')
-            cmd = os.path.join(Config.ldapBinFolder, 'stop-ds')
+            cmd = os.path.join(Config.ldap_bin_dir , 'stop-ds')
             self.run(cmd, shell=True)
         except:
             self.logIt("Error stopping opendj", True)
@@ -161,7 +161,7 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
         
         self.logIt("Setting OpenDJ params: {}".format(str(data)))
 
-        opendj_java_properties_fn = os.path.join(Config.ldapBaseFolder, 'config/java.properties')
+        opendj_java_properties_fn = os.path.join(Config.ldap_base_dir, 'config/java.properties')
         opendj_java_properties = self.readFile(opendj_java_properties_fn)
         opendj_java_properties_list = opendj_java_properties.splitlines()
 
@@ -183,9 +183,9 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
 
     def post_install_opendj(self):
         try:
-            os.remove(os.path.join(Config.ldapBaseFolder, 'opendj-setup.properties'))
+            os.remove(os.path.join(Config.ldap_base_dir, 'opendj-setup.properties'))
         except:
-            self.logIt("Error deleting OpenDJ properties. Make sure %s/opendj-setup.properties is deleted" % Config.ldapBaseFolder)
+            self.logIt("Error deleting OpenDJ properties. Make sure %s/opendj-setup.properties is deleted" % Config.ldap_base_dir)
 
 
     def create_backends(self):
@@ -197,7 +197,7 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
             backends.append(['create-backend', '--backend-name', 'site', '--set', 'base-dn:o=site', '--type %s' % Config.ldap_backend_type, '--set', 'enabled:true', '--set', 'db-cache-percent:20'])
 
         for changes in backends:
-            cwd = os.path.join(Config.ldapBinFolder)
+            cwd = os.path.join(Config.ldap_bin_dir )
             dsconfigCmd = " ".join([
                                     self.ldapDsconfigCommand,
                                     '--trustAll',
@@ -338,8 +338,8 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
         for schema_file in opendj_schema_files:
             self.copyFile(schema_file, self.openDjSchemaFolder)
 
-        self.run([paths.cmd_chmod, '-R', 'a+rX', Config.ldapBaseFolder])
-        self.run([paths.cmd_chown, '-R', 'ldap:ldap', Config.ldapBaseFolder])
+        self.run([paths.cmd_chmod, '-R', 'a+rX', Config.ldap_base_dir])
+        self.run([paths.cmd_chown, '-R', 'ldap:ldap', Config.ldap_base_dir])
 
         self.logIt("Re-starting OpenDj after schema update")
         self.stop()

@@ -278,7 +278,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         if self.dbUtils.moddb == static.BackendTypes.LDAP:
             # Update LDAP schema
             Config.pbar.progress(self.service_name, "Updating schema", False)
-            openDjSchemaFolder = os.path.join(Config.ldapBaseFolder, 'config/schema/')
+            openDjSchemaFolder = os.path.join(Config.ldap_base_dir, 'config/schema/')
             self.copyFile(os.path.join(Config.outputFolder, 'test/jans-auth/schema/102-oxauth_test.ldif'), openDjSchemaFolder)
             self.copyFile(os.path.join(Config.outputFolder, 'test/scim-client/schema/103-scim_test.ldif'), openDjSchemaFolder)
 

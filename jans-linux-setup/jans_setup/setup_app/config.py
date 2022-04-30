@@ -25,7 +25,7 @@ class Config:
     osDefault = '/etc/default'
     sysemProfile = '/etc/profile'
     jython_home = '/opt/jython'
-    ldapBaseFolder = '/opt/opendj'
+    ldap_base_dir = '/opt/opendj'
     network = '/etc/sysconfig/network'
     jetty_home = '/opt/jetty'
     node_home = '/opt/node'
@@ -82,9 +82,9 @@ class Config:
         if not self.outputFolder:
             self.outputFolder = os.path.join(install_dir, 'output')
 
-        self.ldapBinFolder = os.path.join(self.ldapBaseFolder, 'bin')
+        self.ldap_bin_dir = os.path.join(self.ldap_base_dir, 'bin')
         if base.snap:
-            self.ldapBaseFolder = os.path.join(base.snap_common, 'opendj')
+            self.ldap_base_dir = os.path.join(base.snap_common, 'opendj')
             self.jetty_user = 'root'
 
         #create dummy progress bar that logs to file in case not defined
@@ -223,8 +223,6 @@ class Config:
         self.jans_max_mem = int(base.current_mem_size * .85 * 1000) # 85% of physical memory
         self.calculate_mem()
 
-        self.ldapBaseFolderldapPass = None
-
         self.templateFolder = os.path.join(self.install_dir, 'templates')
         self.staticFolder = os.path.join(self.install_dir, 'static')
 
@@ -246,7 +244,7 @@ class Config:
         self.ldaps_port = '1636'
         self.ldap_admin_port = '4444'
 
-        self.ldap_user_home = self.ldapBaseFolder
+        self.ldap_user_home = self.ldap_base_dir
         self.ldapPassFn = os.path.join(self.ldap_user_home, '.pw')
         self.ldap_backend_type = 'je'
 
