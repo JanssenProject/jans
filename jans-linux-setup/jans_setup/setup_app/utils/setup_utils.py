@@ -385,15 +385,15 @@ class SetupUtils(Crypto64):
         return text % dictionary
 
 
-    def renderTemplateInOut(self, filePath, templateFolder, outputFolder, me='', pystring=False):
+    def renderTemplateInOut(self, filePath, templateFolder, output_dir, me='', pystring=False):
         fn = os.path.basename(filePath)
         in_fp = os.path.join(templateFolder, fn) 
         self.logIt("Rendering template %s" % in_fp)
         template_text = self.readFile(in_fp)
 
         # Create output folder if needed
-        if not os.path.exists(outputFolder):
-            os.makedirs(outputFolder)
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
 
         format_dict = self.merge_dicts(Config.__dict__, Config.templateRenderingDict)
         for k in format_dict:
@@ -404,12 +404,12 @@ class SetupUtils(Crypto64):
             rendered_text = Template(template_text).substitute(format_dict)
         else:
             rendered_text = self.fomatWithDict(template_text, format_dict)
-        out_fp = os.path.join(outputFolder, fn)
+        out_fp = os.path.join(output_dir, fn)
 
         self.writeFile(out_fp, rendered_text)
 
     def renderTemplate(self, filePath):
-        self.renderTemplateInOut(filePath, Config.templateFolder, Config.outputFolder)
+        self.renderTemplateInOut(filePath, Config.templateFolder, Config.output_dir)
 
     def createUser(self, userName, homeDir, shell='/bin/bash'):
 
@@ -517,8 +517,8 @@ class SetupUtils(Crypto64):
                 output_dir = rp.parent
                 template_name = rp.name
 
-                fullOutputDir = Path(Config.outputFolder, output_dir)
-                fullOutputFile = Path(Config.outputFolder, rp)
+                fullOutputDir = Path(Config.output_dir, output_dir)
+                fullOutputFile = Path(Config.output_dir, rp)
 
                 if not fullOutputDir.exists():
                     fullOutputDir.mkdir(parents=True, exist_ok=True)

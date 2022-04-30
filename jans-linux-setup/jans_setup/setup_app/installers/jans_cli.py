@@ -34,7 +34,7 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
         config_dir = home_dir.joinpath('.config')
         config_dir.mkdir(parents=True, exist_ok=True)
 
-        self.output_folder = os.path.join(Config.outputFolder, self.service_name)
+        self.output_folder = os.path.join(Config.output_dir, self.service_name)
         self.jans_cli_install_dir = os.path.join(Config.jansOptFolder, 'jans-cli')
         self.config_ini_fn = config_dir.joinpath('jans-cli.ini')
         self.ldif_client = os.path.join(self.output_folder, 'client.ldif')

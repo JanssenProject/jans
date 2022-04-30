@@ -25,7 +25,7 @@ class ScimInstaller(JettyInstaller):
         self.register_progess()
 
         self.templates_folder = os.path.join(Config.templateFolder, self.service_name)
-        self.output_folder = os.path.join(Config.outputFolder, self.service_name)
+        self.output_folder = os.path.join(Config.output_dir, self.service_name)
 
         self.dynamic_config_fn = os.path.join(self.output_folder, 'dynamic-conf.json')
         self.static_config_fn = os.path.join(self.output_folder, 'static-conf.json')

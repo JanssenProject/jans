@@ -26,7 +26,7 @@ class FidoInstaller(JettyInstaller):
         self.register_progess()
 
         self.fido2ConfigFolder = os.path.join(Config.configFolder, 'fido2')
-        self.output_folder = os.path.join(Config.outputFolder, 'jans-fido2')
+        self.output_folder = os.path.join(Config.output_dir, 'jans-fido2')
         self.template_folder = os.path.join(Config.templateFolder, 'jans-fido2')
         self.fido2_dynamic_conf_json = os.path.join(self.output_folder, 'dynamic-conf.json')
         self.fido2_static_conf_json = os.path.join(self.output_folder, 'static-conf.json')

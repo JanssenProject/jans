@@ -179,11 +179,11 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         self.update_rendering_dict()
 
         try:
-            self.renderTemplateInOut(serviceName, '%s/jetty' % Config.templateFolder, '%s/jetty' % Config.outputFolder)
+            self.renderTemplateInOut(serviceName, '%s/jetty' % Config.templateFolder, '%s/jetty' % Config.output_dir)
         except:
             self.logIt("Error rendering service '%s' defaults" % serviceName, True)
 
-        jettyServiceConfiguration = '%s/jetty/%s' % (Config.outputFolder, serviceName)
+        jettyServiceConfiguration = '%s/jetty/%s' % (Config.output_dir, serviceName)
         self.copyFile(jettyServiceConfiguration, Config.osDefault)
         self.run([paths.cmd_chown, 'root:root', os.path.join(Config.osDefault, serviceName)])
 
@@ -191,8 +191,8 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         try:
             web_resources = '%s_web_resources.xml' % serviceName
             if os.path.exists('%s/jetty/%s' % (Config.templateFolder, web_resources)):
-                self.renderTemplateInOut(web_resources, '%s/jetty' % Config.templateFolder, '%s/jetty' % Config.outputFolder)
-                self.copyFile('%s/jetty/%s' % (Config.outputFolder, web_resources), "%s/%s/webapps" % (self.jetty_base, serviceName))
+                self.renderTemplateInOut(web_resources, '%s/jetty' % Config.templateFolder, '%s/jetty' % Config.output_dir)
+                self.copyFile('%s/jetty/%s' % (Config.output_dir, web_resources), "%s/%s/webapps" % (self.jetty_base, serviceName))
         except:
             self.logIt("Error rendering service '%s' web_resources.xml" % serviceName, True)
 
@@ -200,8 +200,8 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         try:
             web_context = '%s.xml' % serviceName
             if os.path.exists('%s/jetty/%s' % (Config.templateFolder, web_context)):
-                self.renderTemplateInOut(web_context, '%s/jetty' % Config.templateFolder, '%s/jetty' % Config.outputFolder)
-                self.copyFile('%s/jetty/%s' % (Config.outputFolder, web_context), "%s/%s/webapps" % (self.jetty_base, serviceName))
+                self.renderTemplateInOut(web_context, '%s/jetty' % Config.templateFolder, '%s/jetty' % Config.output_dir)
+                self.copyFile('%s/jetty/%s' % (Config.output_dir, web_context), "%s/%s/webapps" % (self.jetty_base, serviceName))
         except:
             self.logIt("Error rendering service '%s' context xml" % serviceName, True)
 

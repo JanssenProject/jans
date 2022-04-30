@@ -70,7 +70,7 @@ from ldap.schema.models import AttributeType, ObjectClass
 
 jansInstaller.createLdapPw()
 
-current_ldif_fn = os.path.join(Config.outputFolder, 'current_data.ldif')
+current_ldif_fn = os.path.join(Config.output_dir, 'current_data.ldif')
 
 print("Dumping all database from LDAP to {}. This may take a while...".format(current_ldif_fn))
 

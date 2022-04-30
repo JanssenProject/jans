@@ -308,7 +308,7 @@ class CouchbaseInstaller(PackageUtils, BaseInstaller):
         prop = open(os.path.join(Config.templateFolder, prop_file)).read()
         prop_dict = self.couchbaseDict()
         prop = prop % prop_dict
-        out_file = os.path.join(Config.outputFolder, prop_file)
+        out_file = os.path.join(Config.output_dir, prop_file)
         self.writeFile(out_file, prop)
         self.writeFile(Config.jansCouchebaseProperties, prop)
 

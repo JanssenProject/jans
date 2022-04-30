@@ -237,7 +237,7 @@ class SampleInstaller(JettyInstaller):
         self.oxtrust_war = 'https://ox.gluu.org/maven/org/gluu/oxtrust-server/%s/oxtrust-server-%s.war' % (Config.oxVersion, Config.oxVersion)
         
         self.templates_folder = os.path.join(Config.templateFolder, 'sample-app') # folder where themplates of this application exists
-        self.output_folder = os.path.join(Config.outputFolder, 'sample-app') # folder where rendered templates to be written
+        self.output_folder = os.path.join(Config.output_dir, 'sample-app') # folder where rendered templates to be written
 
 
         self.app_client_jks_fn = os.path.join(Config.certFolder, 'sample-app.jks')

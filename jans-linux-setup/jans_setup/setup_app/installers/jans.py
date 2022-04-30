@@ -136,7 +136,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
         # Create these folder on all instances
         for folder in (Config.jansOptFolder, Config.jansOptBinFolder, Config.jansOptSystemFolder,
                         Config.jansOptPythonFolder, Config.configFolder, Config.certFolder,
-                        Config.outputFolder, Config.osDefault, os.path.join(Config.distFolder, 'scripts')):
+                        Config.output_dir, Config.osDefault, os.path.join(Config.distFolder, 'scripts')):
 
             if not os.path.exists(folder):
                 self.run([paths.cmd_mkdir, '-p', folder])
@@ -323,11 +323,11 @@ class JansInstaller(BaseInstaller, SetupUtils):
             self.run(['/usr/bin/hostnamectl', 'set-hostname', Config.hostname])
         else:
             if Config.os_type in ['debian', 'ubuntu']:
-                self.copyFile("%s/hostname" % Config.outputFolder, Config.etc_hostname)
+                self.copyFile("%s/hostname" % Config.output_dir, Config.etc_hostname)
                 self.run(['/bin/chmod', '-f', '644', Config.etc_hostname])
 
             if Config.os_type in ['centos', 'red', 'fedora']:
-                self.copyFile("%s/network" % Config.outputFolder, Config.network)
+                self.copyFile("%s/network" % Config.output_dir, Config.network)
 
             self.run(['/bin/hostname', Config.hostname])
 
@@ -365,7 +365,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
         for dest_fn in list(Config.ce_templates.keys()):
             if Config.ce_templates[dest_fn]:
                 fn = os.path.split(dest_fn)[-1]
-                output_fn = os.path.join(Config.outputFolder, fn)
+                output_fn = os.path.join(Config.output_dir, fn)
                 try:
                     self.logIt("Copying %s to %s" % (output_fn, dest_fn))
                     dest_dir = os.path.dirname(dest_fn)
