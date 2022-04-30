@@ -247,13 +247,14 @@ class SetupUtils(Crypto64):
             self.logIt("Error copying %s to %s" % (inFile, destFolder), True)
 
     def copy_tree(self, src, dest, ignore=[]):
+        self.logIt("Copying directory {} to {}".format(src, dest))
         if os.path.isdir(src):
             if not os.path.isdir(dest):
                 os.makedirs(dest)
             files = os.listdir(src)
             for f in files:
                 if f not in ignore:
-                    self.CopyTree(os.path.join(src, f), os.path.join(dest, f), ignore)
+                    self.copy_tree(os.path.join(src, f), os.path.join(dest, f), ignore)
         else:
             shutil.copyfile(src, dest)
 
