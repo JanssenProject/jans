@@ -50,6 +50,12 @@ parser.add_argument('-ob-alias', help="Openbanking key alias")
 parser.add_argument('-static-kid', help="Openbanking static kid")
 parser.add_argument('-jwks-uri', help="Openbanking jwksUri", default="https://keystore.openbankingtest.org.uk/0014H00001lFE7dQAG/axV5umCvTMBMjPwjFQgEvb.jwks")
 
+parser.add_argument('--force-download', help="Force downloading files", action='store_true')
+parser.add_argument('--download-exit', help="Download files and exits", action='store_true')
+parser.add_argument('-jans-app-version', help="Version for Jannses applications")
+parser.add_argument('-jans-build', help="Buid version for Janssen applications")
+parser.add_argument('-setup-branch', help="Jannsen setup github branch", default='main')
+
 
 def add_to_me(you):
 
