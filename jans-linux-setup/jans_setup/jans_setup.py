@@ -108,9 +108,9 @@ from setup_app.installers.jre import JreInstaller
 from setup_app.installers.jetty import JettyInstaller
 from setup_app.installers.jython import JythonInstaller
 from setup_app.installers.jans_auth import JansAuthInstaller
+from setup_app.installers.opendj import OpenDjInstaller
 
 if Config.profile == 'jans':
-    from setup_app.installers.opendj import OpenDjInstaller
     from setup_app.installers.couchbase import CouchbaseInstaller
     from setup_app.installers.scim import ScimInstaller
     from setup_app.installers.fido import FidoInstaller
