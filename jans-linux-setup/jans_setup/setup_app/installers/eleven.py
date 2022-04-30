@@ -26,7 +26,7 @@ class ElevenInstaller(JettyInstaller):
         self.register_progess()
 
 
-        self.output_folder = os.path.join(Config.outputFolder, 'jans-eleven')
+        self.output_folder = os.path.join(Config.output_dir, 'jans-eleven')
         self.template_folder = os.path.join(Config.templateFolder, 'jans-eleven')
         self.eleven_conf_json = os.path.join(self.output_folder, 'jans-eleven.json')
     

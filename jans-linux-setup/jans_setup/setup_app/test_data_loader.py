@@ -34,8 +34,8 @@ class TestDataLoader(BaseInstaller, SetupUtils):
 
     def create_test_client_keystore(self):
         self.logIt("Creating client_keystore.p12")
-        client_keystore_fn = os.path.join(Config.outputFolder, 'test/jans-auth/client/client_keystore.p12')
-        keys_json_fn =  os.path.join(Config.outputFolder, 'test/jans-auth/client/keys_client_keystore.json')
+        client_keystore_fn = os.path.join(Config.output_dir, 'test/jans-auth/client/client_keystore.p12')
+        keys_json_fn =  os.path.join(Config.output_dir, 'test/jans-auth/client/keys_client_keystore.json')
 
         args = [Config.cmd_keytool, '-genkey', '-alias', 'dummy', '-keystore', 
                     client_keystore_fn, '-storepass', 'secret', '-keypass', 
@@ -59,8 +59,8 @@ class TestDataLoader(BaseInstaller, SetupUtils):
 
         self.run(cmd, shell=True)
 
-        self.copyFile(client_keystore_fn, os.path.join(Config.outputFolder, 'test/jans-auth/server'))
-        self.copyFile(keys_json_fn, os.path.join(Config.outputFolder, 'test/jans-auth/server'))
+        self.copyFile(client_keystore_fn, os.path.join(Config.output_dir, 'test/jans-auth/server'))
+        self.copyFile(keys_json_fn, os.path.join(Config.output_dir, 'test/jans-auth/server'))
 
     def load_test_data(self):
         Config.pbar.progress(self.service_name, "Loading Test Data", False)
@@ -127,15 +127,15 @@ class TestDataLoader(BaseInstaller, SetupUtils):
 
             schema2json(
                     os.path.join(Config.templateFolder, 'test/jans-auth/schema/102-oxauth_test.ldif'),
-                    os.path.join(Config.outputFolder, 'test/jans-auth/schema/')
+                    os.path.join(Config.output_dir, 'test/jans-auth/schema/')
                     )
             schema2json(
                     os.path.join(Config.templateFolder, 'test/scim-client/schema/103-scim_test.ldif'),
-                    os.path.join(Config.outputFolder, 'test/scim-client/schema/'),
+                    os.path.join(Config.output_dir, 'test/scim-client/schema/'),
                     )
 
-            oxauth_json_schema_fn =os.path.join(Config.outputFolder, 'test/jans-auth/schema/102-oxauth_test.json')
-            scim_json_schema_fn = os.path.join(Config.outputFolder, 'test/scim-client/schema/103-scim_test.json')
+            oxauth_json_schema_fn =os.path.join(Config.output_dir, 'test/jans-auth/schema/102-oxauth_test.json')
+            scim_json_schema_fn = os.path.join(Config.output_dir, 'test/scim-client/schema/103-scim_test.json')
             jans_schema_json_files = [ oxauth_json_schema_fn, scim_json_schema_fn ]
 
             scim_schema = base.readJsonFile(scim_json_schema_fn)
@@ -166,7 +166,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                 self.dbUtils.rdm_automapper(force=True)
 
         self.writeFile(
-            os.path.join(Config.outputFolder, 'test/jans-auth/server/config-oxauth-test.properties'),
+            os.path.join(Config.output_dir, 'test/jans-auth/server/config-oxauth-test.properties'),
             config_oxauth_test_properties
             )
 
@@ -180,11 +180,11 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         self.logIt("Loading test ldif files")
         Config.pbar.progress(self.service_name, "Importing ldif files", False)
 
-        ox_auth_test_ldif = os.path.join(Config.outputFolder, 'test/jans-auth/data/oxauth-test-data.ldif')
-        ox_auth_test_user_ldif = os.path.join(Config.outputFolder, 'test/jans-auth/data/oxauth-test-data-user.ldif')
+        ox_auth_test_ldif = os.path.join(Config.output_dir, 'test/jans-auth/data/oxauth-test-data.ldif')
+        ox_auth_test_user_ldif = os.path.join(Config.output_dir, 'test/jans-auth/data/oxauth-test-data-user.ldif')
 
-        scim_test_ldif = os.path.join(Config.outputFolder, 'test/scim-client/data/scim-test-data.ldif')
-        scim_test_user_ldif = os.path.join(Config.outputFolder, 'test/scim-client/data/scim-test-data-user.ldif')
+        scim_test_ldif = os.path.join(Config.output_dir, 'test/scim-client/data/scim-test-data.ldif')
+        scim_test_user_ldif = os.path.join(Config.output_dir, 'test/scim-client/data/scim-test-data-user.ldif')
 
         ldif_files = (ox_auth_test_ldif, scim_test_ldif, ox_auth_test_user_ldif, scim_test_user_ldif)
         self.dbUtils.import_ldif(ldif_files)
@@ -279,8 +279,8 @@ class TestDataLoader(BaseInstaller, SetupUtils):
             # Update LDAP schema
             Config.pbar.progress(self.service_name, "Updating schema", False)
             openDjSchemaFolder = os.path.join(Config.ldap_base_dir, 'config/schema/')
-            self.copyFile(os.path.join(Config.outputFolder, 'test/jans-auth/schema/102-oxauth_test.ldif'), openDjSchemaFolder)
-            self.copyFile(os.path.join(Config.outputFolder, 'test/scim-client/schema/103-scim_test.ldif'), openDjSchemaFolder)
+            self.copyFile(os.path.join(Config.output_dir, 'test/jans-auth/schema/102-oxauth_test.ldif'), openDjSchemaFolder)
+            self.copyFile(os.path.join(Config.output_dir, 'test/scim-client/schema/103-scim_test.ldif'), openDjSchemaFolder)
 
             schema_fn = os.path.join(openDjSchemaFolder, '77-customAttributes.ldif')
 

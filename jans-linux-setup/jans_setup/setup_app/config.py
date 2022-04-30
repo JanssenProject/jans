@@ -29,7 +29,7 @@ class Config:
     network = '/etc/sysconfig/network'
     jetty_home = '/opt/jetty'
     node_home = '/opt/node'
-    outputFolder = None
+    output_dir = None
     jetty_base = os.path.join(jansOptFolder, 'jetty')
     dist_app_dir = os.path.join(distFolder, 'app')
     dist_jans_dir = os.path.join(distFolder, 'jans')
@@ -79,8 +79,8 @@ class Config:
         self.thread_queue = None
         self.jetty_user = 'jetty'
         self.dump_config_on_error = False
-        if not self.outputFolder:
-            self.outputFolder = os.path.join(install_dir, 'output')
+        if not self.output_dir:
+            self.output_dir = os.path.join(install_dir, 'output')
 
         self.ldap_bin_dir = os.path.join(self.ldap_base_dir, 'bin')
         if base.snap:
@@ -269,16 +269,16 @@ class Config:
         self.jansRDBMProperties = os.path.join(self.configFolder, 'jans-sql.properties')
         self.jansSpannerProperties = os.path.join(self.configFolder, 'jans-spanner.properties')
 
-        self.ldif_base = os.path.join(self.outputFolder, 'base.ldif')
-        self.ldif_attributes = os.path.join(self.outputFolder, 'attributes.ldif')
-        self.ldif_scopes = os.path.join(self.outputFolder, 'scopes.ldif')
+        self.ldif_base = os.path.join(self.output_dir, 'base.ldif')
+        self.ldif_attributes = os.path.join(self.output_dir, 'attributes.ldif')
+        self.ldif_scopes = os.path.join(self.output_dir, 'scopes.ldif')
 
         self.ldif_metric = os.path.join(self.staticFolder, 'metric/o_metric.ldif')
         self.ldif_site = os.path.join(self.install_dir, 'static/cache-refresh/o_site.ldif')
-        self.ldif_configuration = os.path.join(self.outputFolder, 'configuration.ldif')
+        self.ldif_configuration = os.path.join(self.output_dir, 'configuration.ldif')
 
-        self.system_profile_update_init = os.path.join(self.outputFolder, 'system_profile_init')
-        self.system_profile_update_systemd = os.path.join(self.outputFolder, 'system_profile_systemd')
+        self.system_profile_update_init = os.path.join(self.output_dir, 'system_profile_init')
+        self.system_profile_update_systemd = os.path.join(self.output_dir, 'system_profile_systemd')
 
         ### rsyslog file customised for init.d
         self.rsyslogUbuntuInitFile = os.path.join(self.install_dir, 'static/system/ubuntu/rsyslog')

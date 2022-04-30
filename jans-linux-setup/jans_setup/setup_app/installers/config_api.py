@@ -38,7 +38,7 @@ class ConfigApiInstaller(JettyInstaller):
 
         self.templates_folder = os.path.join(Config.templateFolder, self.service_name)
         self.rs_protect_fn = os.path.join(Config.install_dir, 'setup_app/data/config-api-rs-protect.json')
-        self.output_folder = os.path.join(Config.outputFolder,'jans-config-api')
+        self.output_folder = os.path.join(Config.output_dir,'jans-config-api')
         self.scope_ldif_fn = os.path.join(self.output_folder, 'scopes.ldif')
         self.clients_ldif_fn = os.path.join(self.output_folder, 'clients.ldif')
         self.dynamic_conf_json = os.path.join(self.output_folder, 'dynamic-conf.json')

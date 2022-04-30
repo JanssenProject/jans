@@ -130,9 +130,9 @@ if base.snap:
         sys.exit()
 
 if paths.IAMPACKAGED:
-    Config.outputFolder = os.path.join(__STATIC_SETUP_DIR__, 'output')
-    if not os.path.exists(Config.outputFolder):
-        os.makedirs(Config.outputFolder)
+    Config.output_dir = os.path.join(__STATIC_SETUP_DIR__, 'output')
+    if not os.path.exists(Config.output_dir):
+        os.makedirs(Config.output_dir)
 
 # initialize config object
 Config.init(paths.INSTALL_DIR)

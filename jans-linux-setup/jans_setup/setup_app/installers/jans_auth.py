@@ -30,7 +30,7 @@ class JansAuthInstaller(JettyInstaller):
                     ]
 
         self.templates_folder = os.path.join(Config.templateFolder, self.service_name)
-        self.output_folder = os.path.join(Config.outputFolder, self.service_name)
+        self.output_folder = os.path.join(Config.output_dir, self.service_name)
 
         self.ldif_config = os.path.join(self.output_folder, 'configuration.ldif')
         self.ldif_role_scope_mappings = os.path.join(self.output_folder, 'role-scope-mappings.ldif')
@@ -125,8 +125,8 @@ class JansAuthInstaller(JettyInstaller):
         Config.templateRenderingDict['oxauth_error_base64'] = self.generate_base64_ldap_file(self.oxauth_error_json)
         Config.templateRenderingDict['oxauth_openid_key_base64'] = self.generate_base64_ldap_file(self.oxauth_openid_jwks_fn)
 
-        self.ldif_scripts = os.path.join(Config.outputFolder, 'scripts.ldif')
-        self.renderTemplateInOut(self.ldif_scripts, Config.templateFolder, Config.outputFolder)
+        self.ldif_scripts = os.path.join(Config.output_dir, 'scripts.ldif')
+        self.renderTemplateInOut(self.ldif_scripts, Config.templateFolder, Config.output_dir)
         for temp in (self.ldif_config, self.ldif_role_scope_mappings):
             self.renderTemplateInOut(temp, self.templates_folder, self.output_folder)
 

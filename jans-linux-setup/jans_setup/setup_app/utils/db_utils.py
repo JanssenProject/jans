@@ -791,7 +791,7 @@ class DBUtils:
 
         base.logIt("Importing ldif file(s): {} ".format(', '.join(ldif_files)))
 
-        sql_data_fn = os.path.join(Config.outputFolder, Config.rdbm_type, 'jans_data.sql')
+        sql_data_fn = os.path.join(Config.output_dir, Config.rdbm_type, 'jans_data.sql')
 
         for ldif_fn in ldif_files:
             base.logIt("Importing entries from " + ldif_fn)
@@ -1030,7 +1030,7 @@ class DBUtils:
 
         base.logIt("Importing templates file(s): {} ".format(', '.join(templates)))
 
-        sql_data_fn = os.path.join(Config.outputFolder, Config.rdbm_type, 'jans_data.sql')
+        sql_data_fn = os.path.join(Config.output_dir, Config.rdbm_type, 'jans_data.sql')
 
         for template in templates:
             base.logIt("Importing entries from " + template)

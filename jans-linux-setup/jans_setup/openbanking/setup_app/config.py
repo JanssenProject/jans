@@ -178,7 +178,7 @@ class Config:
         self.jans_max_mem = int(base.current_mem_size * .85 * 1000) # 85% of physical memory
         self.application_max_ram = int(int(Config.jans_max_mem) * .8)
 
-        self.outputFolder = os.path.join(self.install_dir, 'output')
+        self.output_dir = os.path.join(self.install_dir, 'output')
         self.templateFolder = os.path.join(self.install_dir, 'templates')
         self.staticFolder = os.path.join(self.install_dir, 'static')
 
@@ -203,7 +203,7 @@ class Config:
         self.jans_python_readme = os.path.join(self.jansOptPythonFolder, 'libs/python.txt')
         self.jansRDBMProperties = os.path.join(self.configFolder, 'jans-sql.properties')
 
-        self.system_profile_update_systemd = os.path.join(self.outputFolder, 'system_profile_systemd')
+        self.system_profile_update_systemd = os.path.join(self.output_dir, 'system_profile_systemd')
 
         # OpenID key generation default setting
         self.default_openid_jks_dn_name = 'CN=Jans Auth CA Certificates'
@@ -213,10 +213,10 @@ class Config:
 
         self.post_messages = []
 
-        self.ldif_base = os.path.join(self.outputFolder, 'base.ldif')
-        self.ldif_attributes = os.path.join(self.outputFolder, 'attributes.ldif')
-        self.ldif_scopes = os.path.join(self.outputFolder, 'scopes.ldif')
-        self.ldif_configuration = os.path.join(self.outputFolder, 'configuration.ldif')
+        self.ldif_base = os.path.join(self.output_dir, 'base.ldif')
+        self.ldif_attributes = os.path.join(self.output_dir, 'attributes.ldif')
+        self.ldif_scopes = os.path.join(self.output_dir, 'scopes.ldif')
+        self.ldif_configuration = os.path.join(self.output_dir, 'configuration.ldif')
 
         self.ce_templates = {
                              self.jans_python_readme: True,

@@ -101,8 +101,8 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
         except:
             self.logIt("Error encountered while doing unzip %s -d /opt/" % (opendj_archive))
 
-        realLdapBaseFolder = os.path.realpath(Config.ldap_base_dir)
-        self.run([paths.cmd_chown, '-R', 'ldap:ldap', realLdapBaseFolder])
+        real_ldap_base_dir = os.path.realpath(Config.ldap_base_dir)
+        self.run([paths.cmd_chown, '-R', 'ldap:ldap', real_ldap_base_dir])
 
         if Config.opendj_install == InstallTypes.REMOTE:
             self.run([paths.cmd_ln, '-s', '/opt/opendj/template/config/', '/opt/opendj/config'])
@@ -119,19 +119,19 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
         #    self.run([paths.cmd_mkdir, Config.ldap_base_dir])
 
         # Copy opendj-setup.properties so user ldap can find it in /opt/opendj
-        setupPropsFN = os.path.join(Config.ldap_base_dir, 'opendj-setup.properties')
-        shutil.copy("%s/opendj-setup.properties" % Config.outputFolder, setupPropsFN)
+        setup_props_fn = os.path.join(Config.ldap_base_dir, 'opendj-setup.properties')
+        shutil.copy("%s/opendj-setup.properties" % Config.output_dir, setup_props_fn)
 
-        self.run([paths.cmd_chown, 'ldap:ldap', setupPropsFN])
+        self.run([paths.cmd_chown, 'ldap:ldap', setup_props_fn])
 
 
-        ldapSetupCommand = os.path.join(os.path.dirname(Config.ldap_bin_dir ), 'setup')
+        ldap_setup_command = os.path.join(os.path.dirname(Config.ldap_bin_dir ), 'setup')
 
-        setupCmd = " ".join([ldapSetupCommand,
+        setupCmd = " ".join([ldap_setup_command,
                                 '--no-prompt',
                                 '--cli',
                                 '--propertiesFilePath',
-                                setupPropsFN,
+                                setup_props_fn,
                                 '--acceptLicense'])
         if base.snap:
             self.run(setupCmd, shell=True)
