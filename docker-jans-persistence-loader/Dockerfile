@@ -65,10 +65,6 @@ RUN cd /tmp/jans \
 # Download jans-config-api-swagger for role_scope_mapping
 RUN wget -q https://github.com/JanssenProject/jans/raw/${JANS_LINUX_SETUP_VERSION}/jans-config-api/docs/jans-config-api-swagger.yaml -P /app/static
 
-# TODO: casa should be moved from this image
-ENV GLUU_CASA_VERSION=a8251496ff2ade9dd8101873b45f4c490ae9c64e
-RUN wget -q https://github.com/GluuFederation/flex/raw/${GLUU_CASA_VERSION}/casa/extras/Casa.py -O /app/static/extension/person_authentication/Casa.py
-
 # cleanup
 RUN rm -rf /tmp/jans
 
@@ -157,7 +153,6 @@ ENV CN_CACHE_TYPE=NATIVE_PERSISTENCE \
     CN_REDIS_SENTINEL_GROUP="" \
     CN_MEMCACHED_URL=localhost:11211 \
     CN_WAIT_SLEEP_DURATION=10 \
-    CN_CASA_ENABLED=false \
     CN_SCIM_ENABLED=false \
     CN_PERSISTENCE_SKIP_INITIALIZED=false \
     CN_DOCUMENT_STORE_TYPE=LOCAL \
