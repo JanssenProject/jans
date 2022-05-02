@@ -144,7 +144,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
 
         jetty_modules_list = [m.strip() for m in jetty_modules.split(',')]
         if self.jetty_dist_string == 'jetty-home':
-            if not 'cdi-decorate' in jetty_modules_list:
+            if 'cdi-decorate' not in jetty_modules_list:
                 jetty_modules_list.append('cdi-decorate')
             jetty_modules = ','.join(jetty_modules_list)
 
