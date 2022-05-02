@@ -190,7 +190,6 @@ As mentioned under [component setup](#component-setup), our protected resource w
 
     d = os.environ
     k = d.keys()
-    #k.sort()
 
     print "Content-type: text/html\n\n"
 
@@ -200,6 +199,16 @@ As mentioned under [component setup](#component-setup), our protected resource w
       print "<p><B>%s</B>: %s </p>" % (item, d[item])
     print "</BODY></HTML>"
     ```
+ 3. Add Apache `cgi` module to enable execution of CGI
+    ```
+    a2enmod cgi
+    ```
+ 4. Change permissions for CGI script so that it can be executed by Apache
+    ```
+    chown www-data:www-data /var/www/protected/printHeaders.py
+    chmod ug+x /var/www/protected/printHeaders.py
+    ```
+    
 
 ## Setup *mod-auth-openidc* 
 
