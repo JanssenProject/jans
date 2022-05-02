@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.common.util.RedirectUri;
 import io.jans.as.common.util.CommonUtils;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.common.ResponseMode;
@@ -27,6 +28,8 @@ import io.jans.as.model.token.JsonWebResponse;
 import io.jans.as.model.util.JwtUtil;
 import io.jans.as.model.util.Util;
 import io.jans.as.persistence.model.Par;
+import io.jans.as.server.model.audit.Action;
+import io.jans.as.server.model.audit.OAuth2AuditLog;
 import io.jans.as.server.model.authorize.Claim;
 import io.jans.as.server.model.authorize.IdTokenMember;
 import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
@@ -36,6 +39,7 @@ import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.RedirectUriResponse;
 import io.jans.as.server.service.RequestParameterService;
 import io.jans.as.server.service.ServerCryptoProvider;
+import io.jans.as.server.util.ServerUtil;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
@@ -151,13 +155,14 @@ public class AuthzRequestService {
     }
 
     @SuppressWarnings("java:S3776")
-    public void processRequestObject(AuthzRequest authzRequest, Client client, RedirectUriResponse redirectUriResponse, Set<String> scopes, User user) {
+    public void processRequestObject(AuthzRequest authzRequest, Client client, Set<String> scopes, User user) {
         JwtAuthorizationRequest jwtRequest = null;
 
         if (StringUtils.isBlank(authzRequest.getRequest()) && StringUtils.isBlank(authzRequest.getRequestUri())) {
             return;
         }
 
+        RedirectUriResponse redirectUriResponse = authzRequest.getRedirectUriResponse();
         try {
             jwtRequest = JwtAuthorizationRequest.createJwtRequest(authzRequest.getRequest(), authzRequest.getRequestUri(), client, redirectUriResponse, cryptoProvider, appConfiguration);
 
@@ -399,5 +404,20 @@ public class AuthzRequestService {
         if (StringUtils.isBlank(authzRequest.getAcrValues()) && !ArrayUtils.isEmpty(client.getDefaultAcrValues())) {
             authzRequest.setAcrValues(implode(client.getDefaultAcrValues(), " "));
         }
+    }
+
+    public void createRedirectUriResponse(AuthzRequest authzRequest) {
+        RedirectUriResponse redirectUriResponse = new RedirectUriResponse(new RedirectUri(authzRequest.getRedirectUri(), authzRequest.getResponseTypeList(), authzRequest.getResponseModeEnum()), authzRequest.getState(), authzRequest.getHttpRequest(), errorResponseFactory);
+        redirectUriResponse.setFapiCompatible(appConfiguration.isFapi());
+
+        authzRequest.setRedirectUriResponse(redirectUriResponse);
+    }
+
+    public void createOauth2AuditLog(AuthzRequest authzRequest) {
+        OAuth2AuditLog oAuth2AuditLog = new OAuth2AuditLog(ServerUtil.getIpAddress(authzRequest.getHttpRequest()), Action.USER_AUTHORIZATION);
+        oAuth2AuditLog.setClientId(authzRequest.getClientId());
+        oAuth2AuditLog.setScope(authzRequest.getScope());
+
+        authzRequest.setAuditLog(oAuth2AuditLog);
     }
 }
