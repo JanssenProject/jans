@@ -103,6 +103,6 @@ def download_all():
 
 def download_apps():
     download_jans_acrhieve()
-    if base.Config.profile == 'jans':
+    if base.current_app.profile == 'jans':
         download_gcs()
     download_sqlalchemy()

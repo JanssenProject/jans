@@ -22,7 +22,7 @@ from setup_app.utils.setup_utils import SetupUtils
 from setup_app.utils.db_utils import dbUtils
 from setup_app.pylib.jproperties import Properties
 
-if Config.profile == 'jans':
+if base.current_app.profile == 'jans':
     from setup_app.utils.spanner import Spanner
 
 
