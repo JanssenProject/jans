@@ -21,7 +21,7 @@ class ScimInstaller(JettyInstaller):
         self.needdb = True
         self.app_type = AppType.SERVICE
         self.install_type = InstallOption.OPTONAL
-        self.install_var = 'installScimServer'
+        self.install_var = 'install_scim_server'
         self.register_progess()
 
         self.templates_folder = os.path.join(Config.templateFolder, self.service_name)

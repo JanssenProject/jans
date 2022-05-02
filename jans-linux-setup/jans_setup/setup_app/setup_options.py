@@ -12,9 +12,9 @@ def get_setup_options():
         'noPrompt': False,
         'downloadWars': False,
         'installOxAuth': True,
-        'installConfigApi': True,
+        'install_config_api': True,
         'installHTTPD': True,
-        'installScimServer': True if base.current_app.profile == 'jans' else False,
+        'install_scim_server': True if base.current_app.profile == 'jans' else False,
         'installOxd': False,
         'installFido2': True,
         'installEleven': False,
@@ -90,10 +90,10 @@ def get_setup_options():
             setupOptions['installOxAuth'] = False
 
         if base.argsp.no_config_api:
-            setupOptions['installConfigApi'] = False
+            setupOptions['install_config_api'] = False
 
         if base.argsp.no_scim:
-            setupOptions['installScimServer'] = False
+            setupOptions['install_scim_server'] = False
 
         if base.argsp.no_fido2:
             setupOptions['installFido2'] = False

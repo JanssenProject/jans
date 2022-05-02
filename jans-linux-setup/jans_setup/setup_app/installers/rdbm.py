@@ -335,7 +335,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
     def import_ldif(self):
         ldif_files = []
 
-        if Config.mappingLocations['default'] == 'rdbm':
+        if Config.mapping_locations['default'] == 'rdbm':
             ldif_files += Config.couchbaseBucketDict['default']['ldif']
 
         ldap_mappings = self.getMappingType('rdbm')

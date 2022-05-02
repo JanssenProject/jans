@@ -37,7 +37,7 @@ class msg:
     installing_label = "Current"
     installOxd_label = "Install Oxd"
     installCasa_label = "Install Casa"
-    installScimServer_label = "Install Scim"
+    install_scim_server_label = "Install Scim"
     installFido2_label = "Install Fido2"
 
     insufficient_free_disk_space = "Available free disk space was determined to be {1:0.1f} GB. This is less than the required disk space of {} GB."
@@ -79,7 +79,7 @@ class msg:
     ask_installCasa = "Install Casa"
     ask_installOxd = "Install Oxd"
     ask_opendj_install = "Install OpenDJ"
-    ask_installScimServer = "Install Scim Server"
+    ask_install_scim_server = "Install Scim Server"
     ask_installFido2 = "Install Fido2"
 
     opendj_install_options = ["Don't Install","Install Locally","Use Remote OpenDJ"]

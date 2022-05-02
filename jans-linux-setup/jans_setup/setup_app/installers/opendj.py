@@ -30,6 +30,7 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
         self.install_type = InstallOption.OPTONAL
         self.install_var = 'opendj_install'
         self.register_progess()
+        self.ldap_str = 'ldap'
 
         self.openDjIndexJson = os.path.join(Config.install_dir, 'static/opendj/index.json')
         self.openDjSchemaFolder = os.path.join(Config.ldap_base_dir, 'config/schema')
@@ -71,10 +72,10 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
 
             ldif_files = []
 
-            if Config.mappingLocations['default'] == 'ldap':
+            if Config.mapping_locations['default'] == self.ldap_str:
                 ldif_files += Config.couchbaseBucketDict['default']['ldif']
 
-            ldap_mappings = self.getMappingType('ldap')
+            ldap_mappings = self.getMappingType(self.ldap_str)
 
             for group in ldap_mappings:
                 ldif_files +=  Config.couchbaseBucketDict[group]['ldif']
@@ -102,44 +103,41 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
             self.logIt("Error encountered while doing unzip %s -d /opt/" % (opendj_archive))
 
         real_ldap_base_dir = os.path.realpath(Config.ldap_base_dir)
-        self.run([paths.cmd_chown, '-R', 'ldap:ldap', real_ldap_base_dir])
+        self.chown(real_ldap_base_dir, Config.ldap_user, Config.ldap_group, recursive=True)
 
         if Config.opendj_install == InstallTypes.REMOTE:
             self.run([paths.cmd_ln, '-s', '/opt/opendj/template/config/', '/opt/opendj/config'])
 
     def create_user(self):
-        self.createUser('ldap', Config.ldap_user_home)
-        self.addUserToGroup('jans', 'ldap')
-        self.addUserToGroup('adm', 'ldap')
+        self.createUser(Config.ldap_user, Config.ldap_user_home)
+        self.addUserToGroup('jans', Config.ldap_group)
+        self.addUserToGroup('adm', Config.ldap_group)
 
     def install_opendj(self):
         self.logIt("Running OpenDJ Setup")
-
-        #if base.snap and not os.path.exists(Config.ldap_base_dir):
-        #    self.run([paths.cmd_mkdir, Config.ldap_base_dir])
 
         # Copy opendj-setup.properties so user ldap can find it in /opt/opendj
         setup_props_fn = os.path.join(Config.ldap_base_dir, 'opendj-setup.properties')
         shutil.copy("%s/opendj-setup.properties" % Config.output_dir, setup_props_fn)
 
-        self.run([paths.cmd_chown, 'ldap:ldap', setup_props_fn])
+        self.chown(setup_props_fn, Config.ldap_user, Config.ldap_group)
 
 
         ldap_setup_command = os.path.join(os.path.dirname(Config.ldap_bin_dir ), 'setup')
 
-        setupCmd = " ".join([ldap_setup_command,
+        setup_cmd = " ".join([ldap_setup_command,
                                 '--no-prompt',
                                 '--cli',
                                 '--propertiesFilePath',
                                 setup_props_fn,
                                 '--acceptLicense'])
         if base.snap:
-            self.run(setupCmd, shell=True)
+            self.run(setup_cmd, shell=True)
         else:
             self.run(['/bin/su',
-                          'ldap',
+                          Config.ldap_user,
                           '-c',
-                          setupCmd],
+                          setup_cmd],
                           cwd='/opt/opendj',
                       )
 
@@ -193,7 +191,7 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
                     ['create-backend', '--backend-name', 'metric', '--set', 'base-dn:o=metric', '--type %s' % Config.ldap_backend_type, '--set', 'enabled:true', '--set', 'db-cache-percent:20'],
                     ]
 
-        if Config.mappingLocations['site'] == 'ldap':
+        if Config.mapping_locations['site'] == self.ldap_str:
             backends.append(['create-backend', '--backend-name', 'site', '--set', 'base-dn:o=site', '--type %s' % Config.ldap_backend_type, '--set', 'enabled:true', '--set', 'db-cache-percent:20'])
 
         for changes in backends:
@@ -214,7 +212,7 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
                 self.run(dsconfigCmd, shell=True)
             else:
                 self.run(['/bin/su',
-                      'ldap',
+                      Config.ldap_user,
                       '-c',
                       dsconfigCmd], cwd=cwd)
 
@@ -303,7 +301,7 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
 
         index_backends = ['userRoot']
 
-        if Config.mappingLocations['site'] == 'ldap':
+        if Config.mapping_locations['site'] == self.ldap_str:
             index_backends.append('site')
 
         for attrDict in index_json:
@@ -339,7 +337,7 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
             self.copyFile(schema_file, self.openDjSchemaFolder)
 
         self.run([paths.cmd_chmod, '-R', 'a+rX', Config.ldap_base_dir])
-        self.run([paths.cmd_chown, '-R', 'ldap:ldap', Config.ldap_base_dir])
+        self.chown(Config.ldap_base_dir, Config.ldap_user, Config.ldap_group, recursive=True)
 
         self.logIt("Re-starting OpenDj after schema update")
         self.stop()
@@ -359,7 +357,7 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
                 if os.path.exists(init_script_fn):
                     self.run(['rm', '-f', init_script_fn])
             else:
-                self.run([self.ldapDsCreateRcCommand, "--outputFile", "/etc/init.d/opendj", "--userName",  "ldap"])
+                self.run([self.ldapDsCreateRcCommand, '--outputFile', '/etc/init.d/opendj', '--userName', Config.ldap_user])
                 # Make the generated script LSB compliant
                 lsb_str=(
                         '### BEGIN INIT INFO\n'

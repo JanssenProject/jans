@@ -284,7 +284,7 @@ if Config.profile == 'jans':
         print("Exiting ...")
         sys.exit()
 
-Config.installJansCli = Config.installConfigApi or Config.installScimServer
+Config.install_jans_cli = Config.install_config_api or Config.install_scim_server
 
 app_vars = locals().copy()
 
@@ -393,15 +393,15 @@ def main():
                         not Config.installed_instance and Config.installFido2):
                     fidoInstaller.start_installation()
 
-                if (Config.installed_instance and 'installScimServer' in Config.addPostSetupService) or (
-                        not Config.installed_instance and Config.installScimServer):
+                if (Config.installed_instance and 'install_scim_server' in Config.addPostSetupService) or (
+                        not Config.installed_instance and Config.install_scim_server):
                     scimInstaller.start_installation()
 
                 if (Config.installed_instance and elevenInstaller.install_var in Config.addPostSetupService) or (
                         not Config.installed_instance and Config.get(elevenInstaller.install_var)):
                     elevenInstaller.start_installation()
 
-            if Config.installJansCli:
+            if Config.install_jans_cli:
                 jansCliInstaller.start_installation()
                 jansCliInstaller.configure()
 
@@ -443,11 +443,11 @@ def main():
     if base.current_app.proceed_installation:
         do_installation()
         print('\n', static.colors.OKGREEN)
-        if Config.installConfigApi or Config.installScimServer:
+        if Config.install_config_api or Config.install_scim_server:
             msg.installation_completed += "CLI available to manage Jannsen Server:\n"
-            if Config.installConfigApi:
+            if Config.install_config_api:
                 msg.installation_completed += "/opt/jans/jans-cli/config-cli.py\n"
-            if  Config.profile == 'jans' and Config.installScimServer:
+            if  Config.profile == 'jans' and Config.install_scim_server:
                 msg.installation_completed += "/opt/jans/jans-cli/scim-cli.py"
 
         msg_text = msg.post_installation if Config.installed_instance else msg.installation_completed.format(

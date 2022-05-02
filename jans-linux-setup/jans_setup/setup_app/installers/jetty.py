@@ -11,6 +11,9 @@ from setup_app.config import Config
 from setup_app.utils.setup_utils import SetupUtils
 from setup_app.installers.base import BaseInstaller
 
+NAME_STR = 'jetty'
+WEBAPPS = 'webapps'
+
 class JettyInstaller(BaseInstaller, SetupUtils):
 
     # let's borrow these variables from Config
@@ -36,8 +39,8 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         self.jetty_user_home_lib = os.path.join(self.jetty_user_home, 'lib')
 
         self.app_custom_changes = {
-            'jetty' : {
-                'name' : 'jetty',
+            NAME_STR : {
+                'name' : NAME_STR,
                 'files' : [
                     {
                         'path' : os.path.join(self.jetty_home, 'etc/webdefault.xml'),
@@ -64,15 +67,15 @@ class JettyInstaller(BaseInstaller, SetupUtils):
 
     def install(self):
 
-        self.createUser('jetty', self.jetty_user_home)
-        self.addUserToGroup('jans', 'jetty')
+        self.createUser(Config.jetty_user, self.jetty_user_home)
+        self.addUserToGroup('jans', Config.jetty_user)
         self.run([paths.cmd_mkdir, '-p', self.jetty_user_home_lib])
 
         jettyArchive, jetty_dist = self.get_jetty_info()
 
         jettyTemp = os.path.join(jetty_dist, 'temp')
         self.run([paths.cmd_mkdir, '-p', jettyTemp])
-        self.run([paths.cmd_chown, '-R', 'jetty:jetty', jettyTemp])
+        self.chown(jettyTemp, Config.jetty_user, Config.jetty_group, recursive=True)
 
         try:
             self.logIt("Extracting %s into /opt/jetty" % jettyArchive)
@@ -85,23 +88,24 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         self.run([paths.cmd_ln, '-sf', jettyDestinationPath, self.jetty_home])
         self.run([paths.cmd_chmod, '-R', "755", "%s/bin/" % jettyDestinationPath])
 
-        self.applyChangesInFiles(self.app_custom_changes['jetty'])
+        self.applyChangesInFiles(self.app_custom_changes[NAME_STR])
 
-        self.run([paths.cmd_chown, '-R', 'jetty:jetty', jettyDestinationPath])
-        self.run([paths.cmd_chown, '-h', 'jetty:jetty', self.jetty_home])
+        self.chown(jettyDestinationPath, Config.jetty_user, Config.jetty_group, recursive=True)
+        self.run([paths.cmd_chown, '-h', '{}:{}'.format(Config.jetty_user, Config.jetty_group), self.jetty_home])
 
         self.run([paths.cmd_mkdir, '-p', self.jetty_base])
-        self.run([paths.cmd_chown, '-R', 'jetty:jetty', self.jetty_base])
+        self.chown(self.jetty_base, Config.jetty_user, Config.jetty_group, recursive=True)
 
         jettyRunFolder = '/var/run/jetty'
         self.run([paths.cmd_mkdir, '-p', jettyRunFolder])
         self.run([paths.cmd_chmod, '-R', '775', jettyRunFolder])
-        self.run([paths.cmd_chgrp, '-R', 'jetty', jettyRunFolder])
+        self.run([paths.cmd_chgrp, '-R', Config.jetty_group, jettyRunFolder])
 
+        jetty_bin_sh_fn = os.path.join(self.jetty_home, 'bin/jetty.sh')
         self.run(['rm', '-rf', '/opt/jetty/bin/jetty.sh'])
-        self.copyFile("%s/system/initd/jetty.sh" % Config.staticFolder, "%s/bin/jetty.sh" % self.jetty_home)
-        self.run([paths.cmd_chown, '-R', 'jetty:jetty', "%s/bin/jetty.sh" % self.jetty_home])
-        self.run([paths.cmd_chmod, '-R', '755', "%s/bin/jetty.sh" % self.jetty_home])
+        self.copyFile("%s/system/initd/jetty.sh" % Config.staticFolder, jetty_bin_sh_fn)
+        self.chown(jetty_bin_sh_fn, Config.jetty_user, Config.jetty_group, recursive=True)
+        self.run([paths.cmd_chmod, '-R', '755', jetty_bin_sh_fn])
 
     def get_jetty_info(self):
         # first try latest versions
@@ -126,7 +130,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
 
     @property
     def web_app_xml_fn(self):
-        return os.path.join(self.jetty_base, self.service_name, 'webapps', self.service_name+'.xml')
+        return os.path.join(self.jetty_base, self.service_name, WEBAPPS, self.service_name+'.xml')
 
 
     def installJettyService(self, serviceConfiguration, supportCustomizations=False, supportOnlyPageCustomizations=False):
@@ -135,7 +139,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         self.logIt("Deploying Jetty Service", pbar=serviceName)
         self.get_jetty_info()
         jettyServiceBase = '%s/%s' % (self.jetty_base, serviceName)
-        jettyModules = serviceConfiguration['jetty']['modules']
+        jettyModules = serviceConfiguration[NAME_STR]['modules']
         jettyModulesList = jettyModules.split(',')
 
         jettyModulesList = [m.strip() for m in jettyModules.split(',')]
@@ -173,35 +177,49 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         jettyEnv['PATH'] = '%s/bin:' % Config.jre_home + jettyEnv['PATH']
 
         self.run([Config.cmd_java, '-jar', '%s/start.jar' % self.jetty_home, 'jetty.home=%s' % self.jetty_home, 'jetty.base=%s' % jettyServiceBase, '--add-module=%s' % jettyModules], None, jettyEnv)
-        self.run([paths.cmd_chown, '-R', 'jetty:jetty', jettyServiceBase])
+        self.chown(jettyServiceBase, Config.jetty_user, Config.jetty_group, recursive=True)
 
         # make variables of this class accesible from Config
         self.update_rendering_dict()
 
         try:
-            self.renderTemplateInOut(serviceName, '%s/jetty' % Config.templateFolder, '%s/jetty' % Config.output_dir)
+            self.renderTemplateInOut(serviceName, os.path.join(Config.templateFolder, NAME_STR), os.path.join(Config.output_dir, NAME_STR))
         except:
             self.logIt("Error rendering service '%s' defaults" % serviceName, True)
 
-        jettyServiceConfiguration = '%s/jetty/%s' % (Config.output_dir, serviceName)
+        jettyServiceConfiguration = os.path.join(Config.output_dir, NAME_STR, serviceName)
         self.copyFile(jettyServiceConfiguration, Config.osDefault)
-        self.run([paths.cmd_chown, 'root:root', os.path.join(Config.osDefault, serviceName)])
+        self.chown(os.path.join(Config.osDefault, serviceName), Config.root_user)
 
         # Render web eources file
         try:
             web_resources = '%s_web_resources.xml' % serviceName
-            if os.path.exists('%s/jetty/%s' % (Config.templateFolder, web_resources)):
-                self.renderTemplateInOut(web_resources, '%s/jetty' % Config.templateFolder, '%s/jetty' % Config.output_dir)
-                self.copyFile('%s/jetty/%s' % (Config.output_dir, web_resources), "%s/%s/webapps" % (self.jetty_base, serviceName))
+            if os.path.exists(os.path.join(Config.templateFolder, NAME_STR, web_resources)):
+                self.renderTemplateInOut(
+                        web_resources,
+                        os.path.join(Config.templateFolder, NAME_STR),
+                        os.path.join(Config.output_dir, NAME_STR)
+                        )
+                self.copyFile(
+                        os.path.join(Config.output_dir, NAME_STR, web_resources),
+                        os.path.join(self.jetty_base, serviceName, WEBAPPS)
+                        )
         except:
             self.logIt("Error rendering service '%s' web_resources.xml" % serviceName, True)
 
         # Render web context file
         try:
             web_context = '%s.xml' % serviceName
-            if os.path.exists('%s/jetty/%s' % (Config.templateFolder, web_context)):
-                self.renderTemplateInOut(web_context, '%s/jetty' % Config.templateFolder, '%s/jetty' % Config.output_dir)
-                self.copyFile('%s/jetty/%s' % (Config.output_dir, web_context), "%s/%s/webapps" % (self.jetty_base, serviceName))
+            if os.path.exists(os.path.join(Config.templateFolder, NAME_STR, web_context)):
+                self.renderTemplateInOut(
+                        web_context,
+                        os.path.join(Config.templateFolder, NAME_STR),
+                        os.path.join(Config.output_dir, NAME_STR)
+                        )
+                self.copyFile(
+                        os.path.join(Config.output_dir, NAME_STR, web_context),
+                        os.path.join(self.jetty_base, serviceName, WEBAPPS)
+                        )
         except:
             self.logIt("Error rendering service '%s' context xml" % serviceName, True)
 
@@ -215,7 +233,8 @@ class JettyInstaller(BaseInstaller, SetupUtils):
                 jetty_tmpfiles_src = '%s/jetty.conf.tmpfiles.d' % Config.templateFolder
                 jetty_tmpfiles_dst = '%s/jetty.conf' % tmpfiles_base
                 self.copyFile(jetty_tmpfiles_src, jetty_tmpfiles_dst)
-                self.run([paths.cmd_chown, 'root:root', jetty_tmpfiles_dst])
+                self.chown(jetty_tmpfiles_dst, Config.root_user, Config.root_group)
+                
                 self.run([paths.cmd_chmod, '644', jetty_tmpfiles_dst])
 
             self.copyFile(os.path.join(self.jetty_home, 'bin/jetty.sh'), os.path.join(Config.distFolder, 'scripts', serviceName), backup=False)
@@ -327,9 +346,9 @@ class JettyInstaller(BaseInstaller, SetupUtils):
 
         # Jetty apps
         for config_var, service in [('installOxAuth', 'jans-auth'),
-                                    ('installScimServer', 'jans-scim'),
+                                    ('install_scim_server', 'jans-scim'),
                                     ('installFido2', 'jans-fido2'),
-                                    ('installConfigApi', 'jans-config-api'),
+                                    ('install_config_api', 'jans-config-api'),
                                     ('installEleven', 'jans-eleven')]:
 
             if Config.get(config_var) and service in self.jetty_app_configuration:
@@ -361,14 +380,14 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         app_set.text = ','.join(path_list)
 
         with open(xml_fn, 'wb') as f:
-            f.write(b'<?xml version="1.0"  encoding="ISO-8859-1"?>\n')
+            f.write(b'<?xml version="1.0" encoding="ISO-8859-1"?>\n')
             f.write(b'<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "http://www.eclipse.org/jetty/configure_9_0.dtd">\n')
             f.write(ET.tostring(root, method='xml'))
 
 
     def get_plugins(self):
         plugins = []
-        webapps_xml_fn = os.path.join(self.jetty_base, self.service_name, 'webapps', self.service_name+'.xml')
+        webapps_xml_fn = os.path.join(self.jetty_base, self.service_name, WEBAPPS, self.service_name+'.xml')
 
         if os.path.exists(webapps_xml_fn):
 
