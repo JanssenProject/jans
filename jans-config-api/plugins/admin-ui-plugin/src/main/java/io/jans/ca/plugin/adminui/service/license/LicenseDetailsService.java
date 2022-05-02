@@ -32,6 +32,8 @@ import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 @Singleton
@@ -142,10 +144,10 @@ public class LicenseDetailsService {
             Invocation.Builder request = ClientFactory.instance().getClientBuilder(activateLicenseUrl);
             request.headers(headers);
 
-            MultivaluedMap<String, String> body = new MultivaluedHashMap<>();
-            body.putSingle("license_key", licenseRequest.getLicenseKey());
-            body.putSingle("hardware_id", licenseConfiguration.getHardwareId());
-            body.putSingle("product", licenseConfiguration.getProductCode());
+            Map<String, String> body = new HashMap<>();
+            body.put("license_key", licenseRequest.getLicenseKey());
+            body.put("hardware_id", licenseConfiguration.getHardwareId());
+            body.put("product", licenseConfiguration.getProductCode());
 
             Response response = request
                     .post(Entity.entity(body, MediaType.APPLICATION_JSON));

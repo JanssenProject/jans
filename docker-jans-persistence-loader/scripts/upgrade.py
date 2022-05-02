@@ -680,13 +680,16 @@ class Upgrade:
                 api_admin_perms = api_role["permissions"]
                 break
 
-        # current permissions
         try:
             current_role_mapping = json.loads(entry.attrs["jansConfDyn"])
         except TypeError:
             current_role_mapping = entry.attrs["jansConfDyn"]
+
         should_update = False
 
+        # check for rolePermissionMapping
+        #
+        # - compare role permissions for api-admin
         for i, api_role in enumerate(current_role_mapping["rolePermissionMapping"]):
             if api_role["role"] == "api-admin":
                 # compare permissions between the ones from persistence (current) and newer permissions
@@ -694,6 +697,30 @@ class Upgrade:
                     current_role_mapping["rolePermissionMapping"][i]["permissions"] = api_admin_perms
                     should_update = True
                 break
+
+        # check for permissions
+        #
+        # - add new permission if not exist
+        # - add defaultPermissionInToken (if not exist) in each permission
+
+        # determine current permission with index/position
+        current_perms = {
+            permission["permission"]: {"index": i}
+            for i, permission in enumerate(current_role_mapping["permissions"])
+        }
+
+        for perm in role_mapping["permissions"]:
+            if perm["permission"] not in current_perms:
+                # add missing permission
+                current_role_mapping["permissions"].append(perm)
+                should_update = True
+            else:
+                # add missing defaultPermissionInToken
+                index = current_perms[perm["permission"]]["index"]
+                if "defaultPermissionInToken" in current_role_mapping["permissions"][index]:
+                    continue
+                current_role_mapping["permissions"][index]["defaultPermissionInToken"] = perm["defaultPermissionInToken"]
+                should_update = True
 
         if should_update:
             entry.attrs["jansConfDyn"] = json.dumps(current_role_mapping)
