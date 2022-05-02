@@ -80,7 +80,7 @@ Collection of utilities used by SetupApp.
 - `db_utils.py` Database management (both ldap and cocuhbase) class is inclueded `DBUtils` in this file. Since `DBUtils`
    class is assigned to `self.dbutils` variable in base class for installers, we generally don't include this module
    in installers. Functions in `DBUtils` class automatically determines which database to be used for operations by examining
-   `mappingLocations` defined in `Config` and populated during install time (or later from `setup.properties`).
+   `mapping_locations` defined in `Config` and populated during install time (or later from `setup.properties`).
    Some most commanly functions are:
    
    - `import_lidf(ldif_files)`: imports to list of ldif files to database. It automatically determines database location 

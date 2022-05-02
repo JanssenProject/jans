@@ -32,7 +32,7 @@ class ConfigApiInstaller(JettyInstaller):
         self.check_version = False #TODO: remove this when version format is changed to 1.0.0
         self.app_type = AppType.SERVICE
         self.install_type = InstallOption.OPTONAL
-        self.install_var = 'installConfigApi'
+        self.install_var = 'install_config_api'
         self.register_progess()
 
 

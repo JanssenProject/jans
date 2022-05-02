@@ -86,7 +86,7 @@ class OxdInstaller(SetupUtils, BaseInstaller):
             oxd_yaml['storage'] = 'jans_server_configuration'
             oxd_yaml['storage_configuration']['baseDn'] = 'o=jans'
             oxd_yaml['storage_configuration']['type'] = Config.jans_properties_fn
-            oxd_yaml['storage_configuration']['connection'] = Config.ox_ldap_properties if Config.mappingLocations['default'] == 'ldap' else Config.jansCouchebaseProperties
+            oxd_yaml['storage_configuration']['connection'] = Config.ox_ldap_properties if Config.mapping_locations['default'] == 'ldap' else Config.jansCouchebaseProperties
             oxd_yaml['storage_configuration']['salt'] = os.path.join(Config.configFolder, "salt")
 
         if base.snap:

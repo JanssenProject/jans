@@ -70,10 +70,10 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
             txt += 'Install Apache 2 web server'.ljust(30) + repr(Config.installHttpd).rjust(35) + (' *' if 'installHttpd' in Config.addPostSetupService else '') + "\n"
             txt += 'Install Auth Server'.ljust(30) + repr(Config.installOxAuth).rjust(35) + "\n"
-            txt += 'Install Jans Auth Config Api'.ljust(30) + repr(Config.installConfigApi).rjust(35) + "\n"
+            txt += 'Install Jans Auth Config Api'.ljust(30) + repr(Config.install_config_api).rjust(35) + "\n"
             if Config.profile == 'jans':
                 txt += 'Install Fido2 Server'.ljust(30) + repr(Config.installFido2).rjust(35) + (' *' if 'installFido2' in Config.addPostSetupService else '') + "\n"
-                txt += 'Install Scim Server'.ljust(30) + repr(Config.installScimServer).rjust(35) + (' *' if 'installScimServer' in Config.addPostSetupService else '') + "\n"
+                txt += 'Install Scim Server'.ljust(30) + repr(Config.install_scim_server).rjust(35) + (' *' if 'install_scim_server' in Config.addPostSetupService else '') + "\n"
                 txt += 'Install Eleven Server'.ljust(30) + repr(Config.installEleven).rjust(35) + (' *' if 'installEleven' in Config.addPostSetupService else '') + "\n"
                 #txt += 'Install Oxd '.ljust(30) + repr(Config.installOxd).rjust(35) + (' *' if 'installOxd' in Config.addPostSetupService else '') + "\n"
             return txt
@@ -220,12 +220,12 @@ class JansInstaller(BaseInstaller, SetupUtils):
         ldap_mappings = self.getMappingType('ldap')
         couchbase_mappings = self.getMappingType('couchbase')
         
-        for group in Config.mappingLocations:
+        for group in Config.mapping_locations:
             if group == 'default':
-                default_mapping = Config.mappingLocations[group]
+                default_mapping = Config.mapping_locations[group]
                 break
 
-        storages = set(Config.mappingLocations.values())
+        storages = set(Config.mapping_locations.values())
 
         jans_hybrid_roperties = [
                         'storages: {0}'.format(', '.join(storages)),

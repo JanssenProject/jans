@@ -78,7 +78,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
 
         if not base.current_app.ScimInstaller.installed():
             self.logIt("Scim was not installed. Installing")
-            Config.installScimServer = True
+            Config.install_scim_server = True
             base.current_app.ScimInstaller.start_installation()
 
         self.encode_test_passwords()
@@ -172,7 +172,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
 
         ignoredirs = []
 
-        if not Config.installConfigApi:
+        if not Config.install_config_api:
             ignoredirs.append(os.path.join(self.template_base, 'jans-config-api'))
 
         self.render_templates_folder(self.template_base, ignoredirs=ignoredirs)
@@ -383,13 +383,13 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                 os.makedirs(target_dir)
             self.run([paths.cmd_tar, '-zxf', eleven_tokens_package, '-C', target_dir])
 
-        if Config.installScimServer:
+        if Config.install_scim_server:
             self.restart('jans-scim')
 
         if Config.installFido2:
             self.restart('jans-fido2')
 
-        if Config.installConfigApi:
+        if Config.install_config_api:
             self.restart('jans-config-api')
 
         if Config.installEleven:

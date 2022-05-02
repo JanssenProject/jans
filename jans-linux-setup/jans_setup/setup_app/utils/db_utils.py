@@ -52,9 +52,9 @@ class DBUtils:
                 format='%(asctime)s %(levelname)s - %(message)s'
                 )
 
-        if Config.mappingLocations['default'] == 'ldap':
+        if Config.mapping_locations['default'] == 'ldap':
             self.moddb = BackendTypes.LDAP
-        elif Config.mappingLocations['default'] == 'rdbm':
+        elif Config.mapping_locations['default'] == 'rdbm':
             self.read_jans_schema()
             if Config.rdbm_type == 'mysql':
                 self.moddb = BackendTypes.MYSQL
@@ -67,8 +67,8 @@ class DBUtils:
             self.moddb = BackendTypes.COUCHBASE
 
         if not hasattr(self, 'ldap_conn') or force:
-            for group in Config.mappingLocations:
-                if Config.mappingLocations[group] == 'ldap':
+            for group in Config.mapping_locations:
+                if Config.mapping_locations[group] == 'ldap':
                     base.logIt("Making LDAP Conncetion")
                     ldap_server = ldap3.Server(Config.ldap_hostname, port=int(Config.ldaps_port), use_ssl=use_ssl)
                     self.ldap_conn = ldap3.Connection(
@@ -81,8 +81,8 @@ class DBUtils:
                     break
 
         if not self.session or force:
-            for group in Config.mappingLocations:
-                if Config.mappingLocations[group] == 'rdbm':
+            for group in Config.mapping_locations:
+                if Config.mapping_locations[group] == 'rdbm':
                     if Config.rdbm_type in ('mysql', 'pgsql'):
                         base.logIt("Making MySql Conncetion")
                         result = self.mysqlconnection()
@@ -1156,10 +1156,10 @@ class DBUtils:
         key = ldif_utils.get_key_from(dn)
         group = self.get_group_for_key(key)
 
-        if Config.mappingLocations[group] == 'ldap':
+        if Config.mapping_locations[group] == 'ldap':
             return static.BackendTypes.LDAP
 
-        if Config.mappingLocations[group] == 'rdbm':
+        if Config.mapping_locations[group] == 'rdbm':
             if Config.rdbm_type == 'mysql':
                 return static.BackendTypes.MYSQL
             elif Config.rdbm_type == 'pgsql':
@@ -1167,7 +1167,7 @@ class DBUtils:
             elif Config.rdbm_type == 'spanner':
                 return static.BackendTypes.SPANNER
 
-        if Config.mappingLocations[group] == 'couchbase':
+        if Config.mapping_locations[group] == 'couchbase':
             return static.BackendTypes.COUCHBASE
 
 

@@ -111,7 +111,7 @@ class JansAuthInstaller(JettyInstaller):
 
         self.role_scope_mappings()
 
-        Config.templateRenderingDict['person_custom_object_class_list'] = '[]' if Config.mappingLocations['default'] == 'rdbm' else '["jansCustomPerson", "jansPerson"]'
+        Config.templateRenderingDict['person_custom_object_class_list'] = '[]' if Config.mapping_locations['default'] == 'rdbm' else '["jansCustomPerson", "jansPerson"]'
 
         templates = [self.oxauth_config_json]
         if Config.profile == 'jans':

@@ -72,7 +72,7 @@ class CouchbaseInstaller(PackageUtils, BaseInstaller):
 
         couchbase_mappings = self.getMappingType('couchbase')
 
-        if Config.mappingLocations['default'] == 'couchbase':
+        if Config.mapping_locations['default'] == 'couchbase':
             self.dbUtils.import_ldif(Config.couchbaseBucketDict['default']['ldif'], Config.couchbase_bucket_prefix)
         else:
             self.dbUtils.import_ldif([Config.ldif_base], force=BackendTypes.COUCHBASE)
@@ -288,7 +288,7 @@ class CouchbaseInstaller(PackageUtils, BaseInstaller):
             bucket = Config.couchbase_bucket_prefix if group == 'default' else Config.couchbase_bucket_prefix + '_' + group
             if bucket in Config.couchbase_buckets:
                 cb_key = 'couchbase_{}_mapping'.format(group)
-                if Config.mappingLocations[group] == 'couchbase':
+                if Config.mapping_locations[group] == 'couchbase':
                     if Config.couchbaseBucketDict[group]['mapping']:
                         couchbase_mappings.append('bucket.{}_{}.mapping: {}'.format(Config.couchbase_bucket_prefix, group, Config.couchbaseBucketDict[group]['mapping']))
                         Config.templateRenderingDict[cb_key] = Config.couchbaseBucketDict[group]['mapping']
@@ -343,13 +343,13 @@ class CouchbaseInstaller(PackageUtils, BaseInstaller):
 
         if not Config.couchbase_bucket_prefix in existing_buckets:
 
-            if Config.mappingLocations['default'] != 'couchbase':
+            if Config.mapping_locations['default'] != 'couchbase':
                 self.couchebaseCreateBucket(Config.couchbase_bucket_prefix, bucketRamsize=100)
             else:
                 bucketRamsize = int((Config.couchbaseBucketDict['default']['memory_allocation']/min_cb_ram)*couchbaseClusterRamsize)
                 self.couchebaseCreateBucket(Config.couchbase_bucket_prefix, bucketRamsize=bucketRamsize)
 
-        if Config.mappingLocations['default'] == 'couchbase':
+        if Config.mapping_locations['default'] == 'couchbase':
             self.couchebaseCreateIndexes(Config.couchbase_bucket_prefix)
 
         for group in couchbase_mappings:

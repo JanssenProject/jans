@@ -80,7 +80,10 @@ class Config:
         self.profile = base.current_app.profile 
 
         self.thread_queue = None
-        self.jetty_user = 'jetty'
+        self.jetty_user = self.jetty_group = 'jetty'
+        self.root_user = self.root_group = 'root'
+        self.ldap_user = self.ldap_group = 'ldap'
+
         self.dump_config_on_error = False
         if not self.output_dir:
             self.output_dir = os.path.join(install_dir, 'output')
@@ -186,13 +189,13 @@ class Config:
         self.installSaml = False
         self.installPassport = False
         self.installJansRadius = False
-        self.installScimServer = True
+        self.install_scim_server = True
         self.installFido2 = True
-        self.installConfigApi = True
+        self.install_config_api = True
         self.installCasa = False
         self.installOxd = False
         self.installEleven = False
-        self.installJansCli = True
+        self.install_jans_cli = True
         self.loadTestData = False
         self.allowPreReleasedFeatures = False
 
@@ -394,10 +397,10 @@ class Config:
 
         if self.profile == OPENBANKING_PROFILE:
             #default locations are rdbm
-            self.mappingLocations = {'default': 'rdbm'}
+            self.mapping_locations = {'default': 'rdbm'}
         else:
             #default locations are OpenDJ
-            self.mappingLocations = { group: 'ldap' for group in self.couchbaseBucketDict }
+            self.mapping_locations = { group: 'ldap' for group in self.couchbaseBucketDict }
 
         self.non_setup_properties = {
             'oxauth_client_jar_fn': os.path.join(self.dist_jans_dir, 'jans-auth-client-jar-with-dependencies.jar')

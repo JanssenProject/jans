@@ -27,7 +27,7 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
         setattr(base.current_app, self.__class__.__name__, self)
         self.service_name = 'jans-cli'
         self.needdb = False # we don't need backend connection in this class
-        self.install_var = 'installJansCli'
+        self.install_var = 'install_jans_cli'
         self.app_type = AppType.APPLICATION
         self.install_type = InstallOption.OPTONAL
         home_dir = Path.home()
@@ -86,11 +86,11 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
         for key_ in options:
             config['DEFAULT'][key_] = options[key_]
 
-        if Config.installConfigApi:
+        if Config.install_config_api:
             config['DEFAULT']['jca_client_id'] = Config.role_based_client_id
             config['DEFAULT']['jca_client_secret_enc'] = Config.role_based_client_encoded_pw
 
-        if Config.get('installScimServer'):
+        if Config.get('install_scim_server'):
             config['DEFAULT']['scim_client_id'] = Config.scim_client_id
             config['DEFAULT']['scim_client_secret_enc'] = Config.scim_client_encoded_pw
 
