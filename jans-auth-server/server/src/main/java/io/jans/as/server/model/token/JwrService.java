@@ -7,6 +7,7 @@
 package io.jans.as.server.model.token;
 
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.common.util.CommonUtils;
 import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
@@ -22,12 +23,12 @@ import io.jans.as.model.jwk.Use;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtType;
 import io.jans.as.model.token.JsonWebResponse;
-import io.jans.as.model.util.JwtUtil;
 import io.jans.as.server.model.common.IAuthorizationGrant;
 import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.SectorIdentifierService;
 import io.jans.as.server.service.ServerCryptoProvider;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
@@ -91,7 +92,7 @@ public class JwrService {
 
     private Jwe encryptJwe(Jwe jwe, Client client) throws Exception {
 
-        if (appConfiguration.getUseNestedJwtDuringEncryption()) {
+        if (BooleanUtils.isTrue(appConfiguration.getUseNestedJwtDuringEncryption())) {
             JwtSigner jwtSigner = JwtSigner.newJwtSigner(appConfiguration, webKeysConfiguration, client);
             Jwt jwt = jwtSigner.newJwt();
             jwt.setClaims(jwe.getClaims());
@@ -102,7 +103,7 @@ public class JwrService {
         final BlockEncryptionAlgorithm encryptionMethod = jwe.getHeader().getEncryptionMethod();
 
         if (keyEncryptionAlgorithm == KeyEncryptionAlgorithm.RSA_OAEP || keyEncryptionAlgorithm == KeyEncryptionAlgorithm.RSA1_5) {
-            JSONObject jsonWebKeys = JwtUtil.getJSONWebKeys(client.getJwksUri());
+            JSONObject jsonWebKeys = CommonUtils.getJwks(client);
             String keyId = new ServerCryptoProvider(cryptoProvider).getKeyId(JSONWebKeySet.fromJSONObject(jsonWebKeys),
                     Algorithm.fromString(keyEncryptionAlgorithm.getName()),
                     Use.ENCRYPTION);

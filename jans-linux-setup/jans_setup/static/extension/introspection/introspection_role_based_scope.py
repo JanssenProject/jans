@@ -50,7 +50,17 @@ class Introspection(IntrospectionType):
             ujwt = context.getHttpRequest().getParameter("ujwt")
             print ujwt
             if not ujwt:
-                print "UJWT is empty or null"
+                print "UJWT is empty or null. Only the default scopes will be added to the token."
+                entryManager = CdiUtil.bean(PersistenceEntryManager)
+                adminConf = AdminConf()
+                adminUIConfig = entryManager.find(adminConf.getClass(), "ou=admin-ui,ou=configuration,o=jans")
+                permissions = adminUIConfig.getDynamic().getPermissions()
+                scopes = []
+                for ele in permissions:
+                    if ele.getDefaultPermissionInToken() is not None and ele.getDefaultPermissionInToken():
+                        scopes.append(ele.getPermission())
+
+                responseAsJsonObject.accumulate("scope", scopes)
                 return True
 
             # Parse jwt
