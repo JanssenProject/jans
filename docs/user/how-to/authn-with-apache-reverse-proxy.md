@@ -67,12 +67,12 @@ To register a new OpenID connect client on Janssen server, we will used `jans-cl
     ```
     displayName: <name-of-choice>
     application Type: web
-    includeClaimsInIdToken  [false]: _true
+    includeClaimsInIdToken  [false]: 
     Populate optional fields? y
     clientSecret: <secret-of-your-choice>
     subjectType: public
     tokenEndpointAuthMethod: client_secret_basic
-    redirectUris: https://test.apache.rp.io/redirect
+    redirectUris: https://test.apache.rp.io/callback
     scopes: email_,openid_,profile
     responseTypes: code
     grantTypes: authorization_code
@@ -173,14 +173,11 @@ To register a new OpenID connect client on Janssen server, we will used `jans-cl
 
 ## Configure protected resource
 
-As mentioned under [component setup](#component-setup), our protected resource will be hosted on Apache reverse proxy itself and can be accessed through `https://test.apache.rp.io/protected`. Our protected resource is a simple Python based cgi script that will print request header information. Use steps below on Apache host to set up protected resource:
-1. Create directory named `protected` under `/var/www/`
+As mentioned under [component setup](#component-setup), our protected resource will be hosted on Apache reverse proxy itself. It is a simple Python based cgi script that will print request header information. and can be accessed through `https://test.apache.rp.io/cgi-bin/printHeaders.py`. Use steps below on Apache host to set up protected resource:
+
+1. Create script file `printHeaders.py`
     ```
-    mkdir /var/www/protected
-    ```
-2. Create script file `printHeaders.py`
-    ```
-    vi /var/www/protected/printHeaders.py
+    vi /usr/lib/cgi-bin/printHeaders.py
     ```
     with content as below
     ```
@@ -205,11 +202,11 @@ As mentioned under [component setup](#component-setup), our protected resource w
     ```
  4. Change permissions for CGI script so that it can be executed by Apache
     ```
-    chown www-data:www-data /var/www/protected/printHeaders.py
-    chmod ug+x /var/www/protected/printHeaders.py
+    chown www-data:www-data /usr/lib/cgi-bin/printHeaders.py
+    chmod ug+x /usr/lib/cgi-bin/printHeaders.py
     ```
     
-
+/var/www/protected/
 ## Configure *mod-auth-openidc* 
 
 #### Install *mod-auth-openidc* 
@@ -233,7 +230,7 @@ OIDCResponseType code
 OIDCProviderTokenEndpointAuth client_secret_basic
 OIDCSSLValidateServer Off
 OIDCProviderIssuer https://janssen.op.io
-OIDCRedirectURI https://test.apache.rp.io/redirect
+OIDCRedirectURI https://test.apache.rp.io/callback
 OIDCCryptoPassphrase <crypto-passphrase-of-choice>
 <Location "/">
     Require valid-user
@@ -246,4 +243,4 @@ Restart Apache service
 
 ## Test Complete Flow
 
-- Accessing `https://test.apache.rp.io/` should redirect to Janssen authentication screen. Upon successful authentication, browser should be redirected to `https://test.apache.rp.io/redirect`.
+- Accessing `https://test.apache.rp.io/` should redirect to Janssen authentication screen.
