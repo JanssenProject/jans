@@ -46,10 +46,10 @@ import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 
+import jakarta.enterprise.inject.Vetoed;
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-import javax.enterprise.inject.Vetoed;
 import javax.security.auth.x500.X500Principal;
 
 import io.jans.eleven.model.SignatureAlgorithm;

@@ -12,7 +12,7 @@ import io.jans.as.model.token.TokenRevocationRequestParam;
 import io.jans.as.model.util.QueryBuilder;
 import org.apache.log4j.Logger;
 
-import javax.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.MediaType;
 
 /**
  * @author Javier Rojas Blum

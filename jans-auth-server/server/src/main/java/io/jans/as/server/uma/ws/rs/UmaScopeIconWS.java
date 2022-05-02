@@ -15,12 +15,12 @@ import io.jans.as.server.uma.service.UmaScopeService;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
-import javax.inject.Inject;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.Response;
 import java.net.URI;
 
 /**

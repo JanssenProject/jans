@@ -1,5 +1,7 @@
 # Attribute
 
+> Prerequisite: Know how to use the Janssen CLI in [interactive mode](im-index.md)
+
 Using **Janssen CLI**, You can perform some quick operations in _Attribute_. Such as:
 - `view/find` list of Attributes in detail.
 - `add` new attributes.

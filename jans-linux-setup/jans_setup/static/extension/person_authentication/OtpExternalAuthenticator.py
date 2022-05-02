@@ -28,7 +28,7 @@ from com.lochbridge.oath.otp.keyprovisioning.OTPKey import OTPType
 from java.security import SecureRandom
 from java.util import Arrays
 from java.util.concurrent import TimeUnit
-from javax.faces.application import FacesMessage
+from jakarta.faces.application import FacesMessage
 from io.jans.jsf2.message import FacesMessages
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from io.jans.as.server.security import Identity

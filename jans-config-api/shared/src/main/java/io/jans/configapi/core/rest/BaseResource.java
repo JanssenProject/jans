@@ -11,11 +11,11 @@ import io.jans.configapi.core.model.ApiError;
 import io.jans.configapi.core.model.SearchRequest;
 import io.jans.orm.model.SortOrder;
 
-import javax.inject.Inject;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.InternalServerErrorException;
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.core.Response;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;

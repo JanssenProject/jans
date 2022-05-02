@@ -18,8 +18,8 @@ import io.jans.orm.model.base.Deletable;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
-import javax.inject.Named;
-import javax.persistence.Transient;
+import jakarta.inject.Named;
+import jakarta.persistence.Transient;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;

@@ -75,6 +75,7 @@ To register a new OpenID connect client on Janssen server, we will used `jans-cl
    - Now next step is for `jans-cli` to post this JSON schema to Janssen server to actually register new client. To do this, input `y` on the prompt.
    - If client is successfully registered then we will receive JSON data back which describes newly registered client. Complete with `inum` and `clientSecret` for new client. See a sample of JSON response below:
    
+
       ```
       {
         "dn": "inum=165bdf95-f15e-44f0-bdd7-cdac71fda8e0,ou=clients,o=jans",
@@ -162,7 +163,6 @@ To register a new OpenID connect client on Janssen server, we will used `jans-cl
         "jansId": null
       }
       ```
-   
 
 ## Setup *mod-auth-openidc* 
 

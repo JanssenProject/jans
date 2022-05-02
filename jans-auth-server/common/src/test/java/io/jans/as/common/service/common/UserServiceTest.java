@@ -380,7 +380,7 @@ public class UserServiceTest {
         User user = spy(getBasicUser("123", "dn123"));
         user.setCustomAttributes(new ArrayList<>());
 
-        when(persistenceEntryManager.find(any(), any(), any())).thenReturn(user);
+        when(persistenceEntryManager.find(anyString(), any(), any())).thenReturn(user);
         doNothing().when(persistenceEntryManager).merge(user);
         User resultUser = userService.addUserAttributeByUserInum(inumUser, attributeName, attributeValue);
         assertNotNull(resultUser);
@@ -400,7 +400,7 @@ public class UserServiceTest {
         user.getCustomAttributes().add(customAttribute1);
         user.getCustomAttributes().add(customAttribute2);
 
-        when(persistenceEntryManager.find(any(), any(), any())).thenReturn(user);
+        when(persistenceEntryManager.find(anyString(), any(), any())).thenReturn(user);
         doNothing().when(persistenceEntryManager).merge(user);
         User resultUser = userService.addUserAttributeByUserInum(inumUser, "attribute2", "value3");
 
@@ -425,7 +425,7 @@ public class UserServiceTest {
         user.getCustomAttributes().add(customAttribute1);
         user.getCustomAttributes().add(customAttribute2);
 
-        when(persistenceEntryManager.find(any(), any(), any())).thenReturn(user);
+        when(persistenceEntryManager.find(anyString(), any(), any())).thenReturn(user);
         doNothing().when(persistenceEntryManager).merge(user);
         User resultUser = userService.addUserAttributeByUserInum(inumUser, "attribute2", "value2");
 

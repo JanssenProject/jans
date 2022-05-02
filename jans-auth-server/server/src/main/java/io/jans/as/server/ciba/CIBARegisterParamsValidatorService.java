@@ -17,11 +17,11 @@ import org.json.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.core.Response;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.core.Response;
 import java.util.List;
 
 import static io.jans.as.model.common.BackchannelTokenDeliveryMode.PING;
@@ -80,7 +80,7 @@ public class CIBARegisterParamsValidatorService {
                 }
 
                 if (Strings.isNotBlank(sectorIdentifierUri)) {
-                    javax.ws.rs.client.Client clientRequest = ClientBuilder.newClient();
+                    jakarta.ws.rs.client.Client clientRequest = ClientBuilder.newClient();
                     String entity = null;
                     try {
                         Response clientResponse = clientRequest.target(sectorIdentifierUri).request().buildGet().invoke();

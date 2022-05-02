@@ -16,10 +16,10 @@ import org.slf4j.Logger;
 import io.jans.scim.model.GluuConfiguration;
 import io.jans.scim.model.GluuOxTrustStat;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.faces.context.FacesContext;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.faces.context.FacesContext;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;

@@ -11,7 +11,7 @@ import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;

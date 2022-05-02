@@ -5,17 +5,21 @@ jans.pycloudlib.persistence.sql
 This module contains various helpers related to SQL persistence.
 """
 
+import json
 import logging
 import os
 from collections import defaultdict
+from tempfile import NamedTemporaryFile
 
 from sqlalchemy import create_engine
 from sqlalchemy import MetaData
 from sqlalchemy import func
 from sqlalchemy import select
+from ldif import LDIFParser
+from ldap3.utils import dn as dnutils
 
-from jans.pycloudlib import get_manager
 from jans.pycloudlib.utils import encode_text
+from jans.pycloudlib.utils import safe_render
 
 logger = logging.getLogger(__name__)
 
@@ -47,18 +51,157 @@ def get_sql_password(manager) -> str:
     return password
 
 
-class BaseClient:
-    """Base class for SQL client adapter.
+class PostgresqlAdapter:
+    """Class for PostgreSQL adapter.
     """
 
-    def __init__(self, manager):
+    #: Dialect name
+    dialect = "pgsql"
+
+    #: Connector name.
+    connector = "postgresql+psycopg2"
+
+    #: Character used for quoting identifier.
+    quote_char = '"'
+
+    #: Query to display server version
+    server_version_query = "SHOW server_version"
+
+    def on_create_table_error(self, exc):
+        # re-raise exception UNLESS error code is in the following list
+        # - 42P07: relation exists
+        if exc.orig.pgcode not in ["42P07"]:
+            raise exc
+
+    def on_create_index_error(self, exc):
+        # re-raise exception UNLESS error code is in the following list
+        # - 42P07: relation exists
+        if exc.orig.pgcode not in ["42P07"]:
+            raise exc
+
+    def on_insert_into_error(self, exc):
+        # re-raise exception UNLESS error code is in the following list
+        # - 23505: unique violation
+        if exc.orig.pgcode not in ["23505"]:
+            raise exc
+
+
+class MysqlAdapter:
+    """Class for MySQL adapter.
+    """
+
+    #: Dialect name
+    dialect = "mysql"
+
+    #: Connector name.
+    connector = "mysql+pymysql"
+
+    #: Character used for quoting identifier.
+    quote_char = "`"
+
+    #: Query to display server version
+    server_version_query = "SELECT VERSION()"
+
+    def on_create_table_error(self, exc):
+        # re-raise exception UNLESS error code is in the following list
+        # - 1050: table exists
+        if exc.orig.args[0] not in [1050]:
+            raise exc
+
+    def on_create_index_error(self, exc):
+        # re-raise exception UNLESS error code is in the following list
+        # - 1061: duplicate key name (index)
+        if exc.orig.args[0] not in [1061]:
+            raise exc
+
+    def on_insert_into_error(self, exc):
+        # re-raise exception UNLESS error code is in the following list
+        # - 1062: duplicate entry
+        if exc.orig.args[0] not in [1062]:
+            raise exc
+
+
+def doc_id_from_dn(dn):
+    parsed_dn = dnutils.parse_dn(dn)
+    doc_id = parsed_dn[0][1]
+
+    if doc_id == "jans":
+        doc_id = "_"
+    return doc_id
+
+
+class SqlClient:
+    """This class interacts with SQL database.
+    """
+
+    def __init__(self, manager, *args, **kwargs):
         self.manager = manager
-        self.engine = create_engine(
-            self.engine_url,
-            pool_pre_ping=True,
-            hide_parameters=True,
-        )
+
+        dialect = os.environ.get("CN_SQL_DB_DIALECT", "mysql")
+        if dialect in ("pgsql", "postgresql"):
+            self.adapter = PostgresqlAdapter()
+        else:
+            self.adapter = MysqlAdapter()
+
+        self.dialect = self.adapter.dialect
+        self.schema_files = [
+            "/app/schema/jans_schema.json",
+            "/app/schema/custom_schema.json",
+        ]
+
+        self._sql_data_types = {}
+        self._sql_data_types_mapping = {}
+        self._attr_types = []
+        self._opendj_attr_types = {}
+        self._engine = None
         self._metadata = None
+
+    @property
+    def sql_data_types(self):
+        if not self._sql_data_types:
+            with open("/app/static/rdbm/sql_data_types.json") as f:
+                self._sql_data_types = json.loads(f.read())
+        return self._sql_data_types
+
+    @property
+    def sql_data_types_mapping(self):
+        if not self._sql_data_types_mapping:
+            with open("/app/static/rdbm/ldap_sql_data_type_mapping.json") as f:
+                self._sql_data_types_mapping = json.loads(f.read())
+        return self._sql_data_types_mapping
+
+    @property
+    def attr_types(self):
+        if not self._attr_types:
+            for fn in self.schema_files:
+                with open(fn) as f:
+                    schema = json.loads(f.read())
+                    self._attr_types += schema["attributeTypes"]
+        return self._attr_types
+
+    @property
+    def opendj_attr_types(self):
+        if not self._opendj_attr_types:
+            with open("/app/static/rdbm/opendj_attributes_syntax.json") as f:
+                self._opendj_attr_types = json.loads(f.read())
+        return self._opendj_attr_types
+
+    @property
+    def engine(self):
+        if not self._engine:
+            self._engine = create_engine(self.engine_url, pool_pre_ping=True, hide_parameters=True)
+        return self._engine
+
+    @property
+    def engine_url(self):
+        """Engine connection URL."""
+
+        host = os.environ.get("CN_SQL_DB_HOST", "localhost")
+        port = os.environ.get("CN_SQL_DB_PORT", 3306)
+        database = os.environ.get("CN_SQL_DB_NAME", "jans")
+        user = os.environ.get("CN_SQL_DB_USER", "jans")
+        password = get_sql_password(self.manager)
+        return f"{self.adapter.connector}://{user}:{password}@{host}:{port}/{database}"
 
     @property
     def metadata(self):
@@ -69,26 +212,6 @@ class BaseClient:
             self._metadata.reflect()
         return self._metadata
 
-    @property
-    def dialect(self):
-        """Dialect name."""
-        raise NotImplementedError
-
-    @property
-    def connector(self):
-        """Connector name."""
-        raise NotImplementedError
-
-    @property
-    def quote_char(self):
-        """Character used for quoting identifier."""
-        raise NotImplementedError
-
-    @property
-    def engine_url(self):
-        """Engine connection URL."""
-        raise NotImplementedError
-
     def connected(self):
         """Check whether connection is alive by executing simple query.
         """
@@ -96,37 +219,6 @@ class BaseClient:
         with self.engine.connect() as conn:
             result = conn.execute("SELECT 1 AS is_alive")
             return result.fetchone()[0] > 0
-
-    def get_table_mapping(self) -> dict:
-        """Get mapping of column name and type from all tables.
-        """
-
-        table_mapping = defaultdict(dict)
-        for table_name, table in self.metadata.tables.items():
-            for column in table.c:
-                # truncate COLLATION string
-                if getattr(column.type, "collation", None):
-                    column.type.collation = None
-                table_mapping[table_name][column.name] = str(column.type)
-        return dict(table_mapping)
-
-    def row_exists(self, table_name, id_):
-        """Check whether a row is exist."""
-
-        table = self.metadata.tables.get(table_name)
-        if table is None:
-            return False
-
-        query = select([func.count()]).select_from(table).where(
-            table.c.doc_id == id_
-        )
-        with self.engine.connect() as conn:
-            result = conn.execute(query)
-            return result.fetchone()[0] > 0
-
-    def quoted_id(self, identifier):
-        """Get quoted identifier name."""
-        return f"{self.quote_char}{identifier}{self.quote_char}"
 
     def create_table(self, table_name: str, column_mapping: dict, pk_column: str):
         """Create table with its columns."""
@@ -149,11 +241,20 @@ class BaseClient:
                 # refresh metadata as we have newly created table
                 self.metadata.reflect()
             except Exception as exc:  # noqa: B902
-                self.on_create_table_error(exc)
+                self.adapter.on_create_table_error(exc)
 
-    def on_create_table_error(self, exc):
-        """Callback called when error occured during table creation."""
-        raise NotImplementedError
+    def get_table_mapping(self) -> dict:
+        """Get mapping of column name and type from all tables.
+        """
+
+        table_mapping = defaultdict(dict)
+        for table_name, table in self.metadata.tables.items():
+            for column in table.c:
+                # truncate COLLATION string
+                if getattr(column.type, "collation", None):
+                    column.type.collation = None
+                table_mapping[table_name][column.name] = str(column.type)
+        return dict(table_mapping)
 
     def create_index(self, query):
         """Create index using raw query."""
@@ -162,11 +263,25 @@ class BaseClient:
             try:
                 conn.execute(query)
             except Exception as exc:  # noqa: B902
-                self.on_create_index_error(exc)
+                self.adapter.on_create_index_error(exc)
 
-    def on_create_index_error(self, exc):
-        """Callback called when error occured during index creation."""
-        raise NotImplementedError
+    def quoted_id(self, identifier):
+        """Get quoted identifier name."""
+        return f"{self.adapter.quote_char}{identifier}{self.adapter.quote_char}"
+
+    def row_exists(self, table_name, id_):
+        """Check whether a row is exist."""
+
+        table = self.metadata.tables.get(table_name)
+        if table is None:
+            return False
+
+        query = select([func.count()]).select_from(table).where(
+            table.c.doc_id == id_
+        )
+        with self.engine.connect() as conn:
+            result = conn.execute(query)
+            return result.fetchone()[0] > 0
 
     def insert_into(self, table_name, column_mapping):
         """Insert a row into a table."""
@@ -186,11 +301,7 @@ class BaseClient:
             try:
                 conn.execute(query)
             except Exception as exc:  # noqa: B902
-                self.on_insert_into_error(exc)
-
-    def on_insert_into_error(self, exc):
-        """Callback called when error occured during row insertion."""
-        raise NotImplementedError
+                self.adapter.on_insert_into_error(exc)
 
     def get(self, table_name, id_, column_names=None) -> dict:
         """Get a row from a table with matching ID."""
@@ -244,163 +355,104 @@ class BaseClient:
     @property
     def server_version(self):
         """Display server version."""
-        raise NotImplementedError
+        return self.engine.scalar(self.adapter.server_version_query)
 
+    def get_attr_syntax(self, attr):
+        for attr_type in self.attr_types:
+            if attr not in attr_type["names"]:
+                continue
+            if attr_type.get("multivalued"):
+                return "JSON"
+            return attr_type["syntax"]
 
-class PostgresqlClient(BaseClient):
-    """Class for PostgreSQL adapter.
-    """
+        # fallback to OpenDJ attribute type
+        return self.opendj_attr_types.get(attr) or "1.3.6.1.4.1.1466.115.121.1.15"
 
-    @property
-    def dialect(self):
-        return "pgsql"
+    def _transform_value(self, key, values):
+        type_ = self.sql_data_types.get(key)
 
-    @property
-    def connector(self):
-        """Connector name."""
-        return "postgresql+psycopg2"
+        if not type_:
+            attr_syntax = self.get_attr_syntax(key)
+            type_ = self.sql_data_types_mapping[attr_syntax]
 
-    @property
-    def quote_char(self):
-        """Character used for quoting identifier."""
-        return '"'
+        type_ = type_.get(self.dialect) or type_["mysql"]
+        data_type = type_["type"]
 
-    @property
-    def engine_url(self):
-        host = os.environ.get("CN_SQL_DB_HOST", "localhost")
-        port = os.environ.get("CN_SQL_DB_PORT", 5432)
-        database = os.environ.get("CN_SQL_DB_NAME", "jans")
-        user = os.environ.get("CN_SQL_DB_USER", "jans")
-        password = get_sql_password(self.manager)
-        return f"{self.connector}://{user}:{password}@{host}:{port}/{database}"
+        if data_type in ("SMALLINT", "BOOL",):
+            if values[0].lower() in ("1", "on", "true", "yes", "ok"):
+                return 1 if data_type == "SMALLINT" else True
+            return 0 if data_type == "SMALLINT" else False
 
-    def on_create_table_error(self, exc):
-        if exc.orig.pgcode in ["42P07"]:
-            # error with following code will be suppressed
-            # - 42P07: relation exists
-            pass
-        else:
-            raise exc
+        if data_type == "INT":
+            return int(values[0])
 
-    def on_create_index_error(self, exc):
-        if exc.orig.pgcode in ["42P07"]:
-            # error with following code will be suppressed
-            # - 42P07: relation exists
-            pass
-        else:
-            raise exc
+        if data_type in ("DATETIME(3)", "TIMESTAMP",):
+            dval = values[0].strip("Z")
+            sep = " "
+            postfix = ""
+            return "{}-{}-{}{}{}:{}:{}{}{}".format(
+                dval[0:4],
+                dval[4:6],
+                dval[6:8],
+                sep,
+                dval[8:10],
+                dval[10:12],
+                dval[12:14],
+                dval[14:17],
+                postfix,
+            )
 
-    def on_insert_into_error(self, exc):
-        if exc.orig.pgcode in ["23505"]:
-            # error with following code will be suppressed
-            # - 23505: unique violation
-            pass
-        else:
-            raise exc
+        if data_type == "JSON":
+            return {"v": values}
 
-    @property
-    def server_version(self):
-        """Display server version."""
-        return self.engine.scalar("SHOW server_version")
+        # fallback
+        return values[0]
 
+    def _data_from_ldif(self, filename):
+        with open(filename, "rb") as fd:
+            parser = LDIFParser(fd)
 
-class MysqlClient(BaseClient):
-    """Class for MySQL adapter.
-    """
+            for dn, entry in parser.parse():
+                doc_id = doc_id_from_dn(dn)
 
-    @property
-    def dialect(self):
-        return "mysql"
+                oc = entry.get("objectClass") or entry.get("objectclass")
+                if oc:
+                    if "top" in oc:
+                        oc.remove("top")
 
-    @property
-    def connector(self):
-        """Connector name."""
-        return "mysql+pymysql"
+                    if len(oc) == 1 and oc[0].lower() in ("organizationalunit", "organization"):
+                        continue
 
-    @property
-    def quote_char(self):
-        """Character used for quoting identifier."""
-        return "`"
+                table_name = oc[-1]
 
-    @property
-    def engine_url(self):
-        host = os.environ.get("CN_SQL_DB_HOST", "localhost")
-        port = os.environ.get("CN_SQL_DB_PORT", 3306)
-        database = os.environ.get("CN_SQL_DB_NAME", "jans")
-        user = os.environ.get("CN_SQL_DB_USER", "jans")
-        password = get_sql_password(self.manager)
-        return f"{self.connector}://{user}:{password}@{host}:{port}/{database}"
+                # remove objectClass
+                entry.pop("objectClass", None)
+                entry.pop("objectclass", None)
 
-    def on_create_table_error(self, exc):
-        if exc.orig.args[0] in [1050]:
-            # error with following code will be suppressed
-            # - 1050: table exists
-            pass
-        else:
-            raise exc
+                attr_mapping = {
+                    "doc_id": doc_id,
+                    "objectClass": table_name,
+                    "dn": dn,
+                }
 
-    def on_create_index_error(self, exc):
-        if exc.orig.args[0] in [1061]:
-            # error with following code will be suppressed
-            # - 1061: duplicate key name (index)
-            pass
-        else:
-            raise exc
+                for attr in entry:
+                    attr_mapping[attr] = self._transform_value(attr, entry[attr])
+                yield table_name, attr_mapping
 
-    def on_insert_into_error(self, exc):
-        if exc.orig.args[0] in [1062]:
-            # error with following code will be suppressed
-            # - 1062: duplicate entry
-            pass
-        else:
-            raise exc
+    def create_from_ldif(self, filepath, ctx):
+        """Create entry with data loaded from an LDIF template file.
 
-    @property
-    def server_version(self):
-        """Display server version."""
-        return self.engine.scalar("SELECT VERSION()")
+        :param filepath: Path to LDIF template file.
+        :param ctx: Key-value pairs of context that rendered into LDIF template file.
+        """
 
+        with open(filepath) as src, NamedTemporaryFile("w+") as dst:
+            dst.write(safe_render(src.read(), ctx))
+            # ensure rendered template is written
+            dst.flush()
 
-class SQLClient:
-    """This class interacts with SQL database.
-    """
-
-    #: Methods from adapter
-    _allowed_adapter_methods = (
-        "connected",
-        "create_table",
-        "get_table_mapping",
-        "create_index",
-        "quoted_id",
-        "row_exists",
-        "insert_into",
-        "get",
-        "update",
-        "search",
-        "server_version",
-    )
-
-    def __init__(self, manager=None):
-        manager = manager or get_manager()
-        dialect = os.environ.get("CN_SQL_DB_DIALECT", "mysql")
-        if dialect in ("pgsql", "postgresql"):
-            self.adapter = PostgresqlClient(manager)
-        elif dialect == "mysql":
-            self.adapter = MysqlClient(manager)
-
-        self._adapter_methods = [
-            method for method in dir(self.adapter)
-            if method in self._allowed_adapter_methods
-        ]
-
-    def __getattr__(self, name):
-        # call adapter method first (if any)
-        if name in self._adapter_methods:
-            return getattr(self.adapter, name)
-
-        raise AttributeError(
-            f"'{self.__class__.__name__}' object has no attribute '{name}'"
-        )
+            for table_name, column_mapping in self._data_from_ldif(dst.name):
+                self.insert_into(table_name, column_mapping)
 
 
 def render_sql_properties(manager, src: str, dest: str) -> None:

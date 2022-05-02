@@ -10,8 +10,8 @@ import io.jans.ca.plugin.adminui.utils.ErrorResponse;
 import io.jans.orm.PersistenceEntryManager;
 import org.slf4j.Logger;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -80,14 +80,15 @@ public class AUIConfigurationService {
         LicenseConfiguration licenseConfiguration = new LicenseConfiguration();
         AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.CONFIG_DN);
         LicenseSpringCredentials licenseSpringCredentials = adminConf.getDynamic().getLicenseSpringCredentials();
+
         if(licenseSpringCredentials != null)
         {
             licenseConfiguration.setApiKey(licenseSpringCredentials.getApiKey());
             licenseConfiguration.setProductCode(licenseSpringCredentials.getProductCode());
             licenseConfiguration.setSharedKey(licenseSpringCredentials.getSharedKey());
             licenseConfiguration.setManagementKey(licenseSpringCredentials.getManagementKey());
-            licenseConfiguration.setEnabled(Boolean.TRUE);
-            licenseConfiguration.initializeLicenseManager();
+            licenseConfiguration.setHardwareId(licenseSpringCredentials.getHardwareId());
+            licenseConfiguration.setLicenseKey(licenseSpringCredentials.getLicenseKey());
         }
         auiConfig.setLicenseConfiguration(licenseConfiguration);
         return auiConfig;

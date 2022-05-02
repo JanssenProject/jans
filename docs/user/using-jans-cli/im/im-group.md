@@ -1,5 +1,7 @@
 # Group Resources
 
+> Prerequisite: Know how to use the Janssen CLI in [interactive mode](im-index.md)
+
 Group resources are used to organize user resources. These are the following options:
 
 ```

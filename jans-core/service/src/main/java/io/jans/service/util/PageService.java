@@ -10,8 +10,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Created by eugeniuparvan on 12/22/16.

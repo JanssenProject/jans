@@ -1,8 +1,17 @@
 package io.jans.as.server.authorize.ws.rs;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.core.SecurityContext;
+import io.jans.as.model.common.Prompt;
+import io.jans.as.model.common.ResponseType;
+import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.core.SecurityContext;
+import io.jans.as.model.common.ResponseMode;
+import io.jans.as.model.util.Util;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -37,6 +46,27 @@ public class AuthzRequest {
     private HttpServletRequest httpRequest;
     private HttpServletResponse httpResponse;
     private SecurityContext securityContext;
+    private Map<String, String> customParameters;
+    private JwtAuthorizationRequest jwtRequest;
+
+    public JwtAuthorizationRequest getJwtRequest() {
+        return jwtRequest;
+    }
+
+    public void setJwtRequest(JwtAuthorizationRequest jwtRequest) {
+        this.jwtRequest = jwtRequest;
+    }
+
+    public Map<String, String> getCustomParameters() {
+        if (customParameters == null) {
+            customParameters = new HashMap<>();
+        }
+        return customParameters;
+    }
+
+    public void setCustomParameters(Map<String, String> customParameters) {
+        this.customParameters = customParameters;
+    }
 
     public String getHttpMethod() {
         return httpMethod;
@@ -52,6 +82,10 @@ public class AuthzRequest {
 
     public void setScope(String scope) {
         this.scope = scope;
+    }
+
+    public List<ResponseType> getResponseTypeList() {
+        return ResponseType.fromString(responseType, " ");
     }
 
     public String getResponseType() {
@@ -90,6 +124,10 @@ public class AuthzRequest {
         return responseMode;
     }
 
+    public ResponseMode getResponseModeEnum() {
+        return ResponseMode.getByValue(responseMode);
+    }
+
     public void setResponseMode(String responseMode) {
         this.responseMode = responseMode;
     }
@@ -110,6 +148,10 @@ public class AuthzRequest {
         this.display = display;
     }
 
+    public List<Prompt> getPromptList() {
+        return Prompt.fromString(prompt, " ");
+    }
+
     public String getPrompt() {
         return prompt;
     }
@@ -128,6 +170,10 @@ public class AuthzRequest {
 
     public String getUiLocales() {
         return uiLocales;
+    }
+
+    public List<String> getUiLocalesList() {
+        return Util.splittedStringAsList(uiLocales, " ");
     }
 
     public void setUiLocales(String uiLocales) {
@@ -152,6 +198,10 @@ public class AuthzRequest {
 
     public String getAcrValues() {
         return acrValues;
+    }
+
+    public List<String> getAcrValuesList() {
+        return Util.splittedStringAsList(acrValues, " ");
     }
 
     public void setAcrValues(String acrValues) {

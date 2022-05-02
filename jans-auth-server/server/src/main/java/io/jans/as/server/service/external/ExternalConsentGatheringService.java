@@ -14,10 +14,10 @@ import io.jans.service.LookupService;
 import io.jans.service.custom.script.ExternalScriptService;
 import io.jans.util.StringHelper;
 
-import javax.ejb.DependsOn;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.ejb.DependsOn;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

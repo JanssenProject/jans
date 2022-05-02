@@ -16,10 +16,10 @@ import io.jans.model.custom.script.type.session.ApplicationSessionType;
 import io.jans.service.custom.script.ExternalScriptService;
 import org.json.JSONArray;
 
-import javax.ejb.DependsOn;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.ejb.DependsOn;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Named;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.Map;
 
 /**

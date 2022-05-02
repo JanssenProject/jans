@@ -1,6 +1,8 @@
 # Default Authentication Method
 
-Sometimes It's getting hard to change **Default Authentication Method** from a web browser if you can't log in using the web interface. Here Janssen CLI is going to help you a lot. 
+> Prerequisite: Know how to use the Janssen CLI in [interactive mode](im-index.md)
+
+Sometimes It's getting hard to change **Default Authentication Method** from a web browser if you can't log in using the web interface. Here Janssen CLI is going to help you a lot.
 
 ![default-auth](../../../assets/user/using-jans-cli/images/image-im-default-auth-03042021.png)
 

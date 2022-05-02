@@ -11,8 +11,8 @@ import io.jans.ca.plugin.adminui.rest.user.UserManagementResource;
 import io.jans.ca.plugin.adminui.rest.license.LicenseResource;
 import io.jans.ca.plugin.adminui.rest.logging.AuditLoggerResource;
 
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
+import jakarta.ws.rs.ApplicationPath;
+import jakarta.ws.rs.core.Application;
 import java.util.HashSet;
 import java.util.Set;
 

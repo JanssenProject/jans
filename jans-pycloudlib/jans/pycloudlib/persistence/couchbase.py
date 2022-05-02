@@ -5,18 +5,23 @@ jans.pycloudlib.persistence.couchbase
 This module contains various helpers related to Couchbase persistence.
 """
 
+import contextlib
 import json
 import logging
 import os
+from datetime import datetime
 from functools import partial
 from typing import NoReturn
+from tempfile import NamedTemporaryFile
 
 import requests
 from requests_toolbelt.adapters.host_header_ssl import HostHeaderSSLAdapter
+from ldif import LDIFParser
 
 from jans.pycloudlib.utils import encode_text
 from jans.pycloudlib.utils import cert_to_truststore
 from jans.pycloudlib.utils import as_boolean
+from jans.pycloudlib.utils import safe_render
 
 CN_COUCHBASE_TRUSTSTORE_PASSWORD = "newsecret"
 
@@ -346,14 +351,14 @@ class BaseClient:
                 logger.warning(f"Unable to connect to {_host}:{self.port}; reason={exc}")
         return self.host
 
-    def healthcheck(self, host) -> NoReturn:
+    def healthcheck(self, host) -> NoReturn:  # pragma: no cover
         """Run healthcheck to a host.
 
         Subclass **MUST** implement this method.
         """
         raise NotImplementedError
 
-    def exec_api(self, path, **kwargs) -> NoReturn:
+    def exec_api(self, path, **kwargs) -> NoReturn:  # pragma: no cover
         """Execute a request to an API server.
 
         Subclass **MUST** implement this method.
@@ -479,25 +484,98 @@ class RestClient(BaseClient):
         return resp
 
 
+class AttrProcessor:
+    def __init__(self):
+        self._attrs = {}
+        self._attr_maps = {}
+        self._schemas = {}
+
+    @property
+    def attr_maps(self):
+        if not self._attr_maps:
+            with open("/app/schema/opendj_types.json") as f:
+                self._attr_maps = json.loads(f.read())
+        return self._attr_maps
+
+    @property
+    def schemas(self):
+        if not self._schemas:
+            with open("/app/schema/jans_schema.json") as f:
+                self._schemas = json.loads(f.read()).get("attributeTypes", {})
+        return self._schemas
+
+    @property
+    def syntax_types(self):
+        return {
+            '1.3.6.1.4.1.1466.115.121.1.7': 'boolean',
+            '1.3.6.1.4.1.1466.115.121.1.27': 'integer',
+            '1.3.6.1.4.1.1466.115.121.1.24': 'datetime',
+        }
+
+    def process(self):
+        attrs = {}
+
+        for type_, names in self.attr_maps.items():
+            for name in names:
+                attrs[name] = {"type": type_, "multivalued": False}
+
+        for schema in self.schemas:
+            if schema.get("json"):
+                type_ = "json"
+            elif schema["syntax"] in self.syntax_types:
+                type_ = self.syntax_types[schema["syntax"]]
+            else:
+                type_ = "string"
+
+            multivalued = schema.get("multivalued", False)
+            for name in schema["names"]:
+                attrs[name] = {
+                    "type": type_,
+                    "multivalued": multivalued,
+                }
+
+        # override `member`
+        attrs["member"]["multivalued"] = True
+        return attrs
+
+    @property
+    def attrs(self):
+        if not self._attrs:
+            self._attrs = self.process()
+        return self._attrs
+
+    def is_multivalued(self, name):
+        return self.attrs.get(name, {}).get("multivalued", False)
+
+    def get_type(self, name):
+        return self.attrs.get(name, {}).get("type", "string")
+
+
 class CouchbaseClient:
     """This class interacts with Couchbase server.
     """
 
-    def __init__(self, hosts, user, password):
-        self.hosts = hosts
-        self.user = user
-        self.password = password
+    def __init__(self, manager, *args, **kwargs):
+        self.manager = manager
+
+        self.hosts = kwargs.get("hosts") or os.environ.get("CN_COUCHBASE_URL", "localhost")
+        self.user = kwargs.get("user") or get_couchbase_superuser(manager) or get_couchbase_user(manager)
+
+        password = kwargs.get("password", "")
+        with contextlib.suppress(FileNotFoundError):
+            password = get_couchbase_superuser_password(manager)
+        self.password = password or get_couchbase_password(manager)
+
         self._rest_client = None
         self._n1ql_client = None
+        self.attr_processor = AttrProcessor()
 
     @property
     def rest_client(self):
         """An instance of :class:`~jans.pycloudlib.persistence.couchbase.RestClient`.
         """
         if not self._rest_client:
-            self._rest_client = RestClient(
-                self.hosts, self.user, self.password,
-            )
+            self._rest_client = RestClient(self.hosts, self.user, self.password)
             self._rest_client.resolve_host()
             if not self._rest_client.host:
                 raise ValueError(f"Unable to resolve host for data service from {self.hosts} list")
@@ -508,9 +586,7 @@ class CouchbaseClient:
         """An instance of :class:`~jans.pycloudlib.persistence.couchbase.N1qlClient`.
         """
         if not self._n1ql_client:
-            self._n1ql_client = N1qlClient(
-                self.hosts, self.user, self.password,
-            )
+            self._n1ql_client = N1qlClient(self.hosts, self.user, self.password)
             self._n1ql_client.resolve_host()
             if not self._n1ql_client.host:
                 raise ValueError(f"Unable to resolve host for query service from {self.hosts} list")
@@ -579,6 +655,99 @@ class CouchbaseClient:
             return []
         return [node for node in resp.json()["nodes"] if "index" in node["services"]]
 
+    def _transform_value(self, name, values):
+        def as_dict(val):
+            return json.loads(val)
+
+        def as_bool(val):
+            return val.lower() in ("true", "yes", "1", "on")
+
+        def as_int(val):
+            try:
+                val = int(val)
+            except (TypeError, ValueError):
+                pass
+            return val
+
+        def as_datetime(val):
+            if '.' in val:
+                date_format = '%Y%m%d%H%M%S.%fZ'
+            else:
+                date_format = '%Y%m%d%H%M%SZ'
+
+            if not val.lower().endswith('z'):
+                val += 'Z'
+
+            dt = datetime.strptime(val, date_format)
+            return dt.isoformat()
+
+        callbacks = {
+            "json": as_dict,
+            "boolean": as_bool,
+            "integer": as_int,
+            "datetime": as_datetime,
+        }
+
+        type_ = self.attr_processor.get_type(name)
+        callback = callbacks.get(type_)
+
+        # maybe string
+        if not callable(callback):
+            return values
+        return [callback(item) for item in values]
+
+    def _transform_entry(self, entry):
+        for k, v in entry.items():
+            v = self._transform_value(k, v)
+
+            if len(v) == 1 and self.attr_processor.is_multivalued(k) is False:
+                entry[k] = v[0]
+
+            if k != "objectClass":
+                continue
+
+            entry[k].remove("top")
+            ocs = entry[k]
+
+            for oc in ocs:
+                remove_oc = any(["Custom" in oc, "jans" not in oc.lower()])
+                if len(ocs) > 1 and remove_oc:
+                    ocs.remove(oc)
+            entry[k] = ocs[0]
+        return entry
+
+    def create_from_ldif(self, filepath, ctx):
+        """Create entry with data loaded from an LDIF template file.
+
+        :param filepath: Path to LDIF template file.
+        :param ctx: Key-value pairs of context that rendered into LDIF template file.
+        """
+
+        with open(filepath) as src, NamedTemporaryFile("w+") as dst:
+            dst.write(safe_render(src.read(), ctx))
+            # ensure rendered template is written
+            dst.flush()
+
+            with open(dst.name, "rb") as fd:
+                parser = LDIFParser(fd)
+
+                for dn, entry in parser.parse():
+                    if len(entry) <= 2:
+                        continue
+
+                    key = id_from_dn(dn)
+                    bucket = get_bucket_for_key(key)
+                    entry["dn"] = [dn]
+                    entry = self._transform_entry(entry)
+                    data = json.dumps(entry)
+
+                    # using INSERT will cause duplication error, but the data is left intact
+                    query = 'INSERT INTO `%s` (KEY, VALUE) VALUES ("%s", %s)' % (bucket, key, data)
+                    req = self.exec_query(query)
+
+                    if not req.ok:
+                        logger.warning("Failed to execute query, reason={}".format(req.json()))
+
 
 # backward-compat
 def suppress_verification_warning():
@@ -620,3 +789,32 @@ def get_couchbase_keepalive_timeout():
     except ValueError:
         val = default
     return val
+
+
+def id_from_dn(dn):
+    # for example: `"inum=29DA,ou=attributes,o=jans"`
+    # becomes `["29DA", "attributes"]`
+    dns = [i.split("=")[-1] for i in dn.split(",") if i != "o=jans"]
+    dns.reverse()
+
+    # the actual key
+    return '_'.join(dns) or "_"
+
+
+def get_bucket_for_key(key):
+    bucket_prefix = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
+
+    cursor = key.find("_")
+    key_prefix = key[:cursor + 1]
+
+    if key_prefix in ("groups_", "people_", "authorizations_"):
+        bucket = f"{bucket_prefix}_user"
+    elif key_prefix in ("site_", "cache-refresh_"):
+        bucket = f"{bucket_prefix}_site"
+    elif key_prefix in ("tokens_",):
+        bucket = f"{bucket_prefix}_token"
+    elif key_prefix in ("cache_",):
+        bucket = f"{bucket_prefix}_cache"
+    else:
+        bucket = bucket_prefix
+    return bucket

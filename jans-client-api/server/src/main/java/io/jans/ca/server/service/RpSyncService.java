@@ -10,7 +10,7 @@ import io.jans.ca.server.persistence.service.PersistenceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.HttpMethod;
+import jakarta.ws.rs.HttpMethod;
 import java.util.Calendar;
 import java.util.Date;
 

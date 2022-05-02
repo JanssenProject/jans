@@ -54,16 +54,17 @@
 
 		<!-- CDI -->
 		<dependency>
-			<groupId>javax.enterprise</groupId>
-			<artifactId>cdi-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-
+        	<groupId>jakarta.annotation</groupId>
+            <artifactId>jakarta.annotation-api</artifactId>
+        </dependency>
+        <dependency>
+		    <groupId>jakarta.enterprise</groupId>
+		    <artifactId>jakarta.enterprise.cdi-api</artifactId>
+   		</dependency>
 		<dependency>
-			<groupId>javax.inject</groupId>
-			<artifactId>javax.inject</artifactId>
-		</dependency>
-
+		    <groupId>jakarta.inject</groupId>
+        	<artifactId>jakarta.inject-api</artifactId>
+   		</dependency>
 		<!-- Cache -->
 		<dependency>
 			<groupId>net.spy</groupId>
@@ -84,10 +85,6 @@
 			<artifactId>testng</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>javax.annotation</groupId>
-			<artifactId>javax.annotation-api</artifactId>
-		</dependency>
 	</dependencies>
 
 </project>
