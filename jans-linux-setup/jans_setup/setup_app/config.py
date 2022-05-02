@@ -24,7 +24,7 @@ class Config:
     oxBaseDataFolder = '/var/jans'
     etc_hosts = '/etc/hosts'
     etc_hostname = '/etc/hostname'
-    osDefault = '/etc/default'
+    os_default = '/etc/default'
     sysemProfile = '/etc/profile'
     jython_home = '/opt/jython'
     ldap_base_dir = '/opt/opendj'

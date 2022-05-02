@@ -136,7 +136,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
         # Create these folder on all instances
         for folder in (Config.jansOptFolder, Config.jansOptBinFolder, Config.jansOptSystemFolder,
                         Config.jansOptPythonFolder, Config.configFolder, Config.certFolder,
-                        Config.output_dir, Config.osDefault, os.path.join(Config.distFolder, 'scripts')):
+                        Config.output_dir, Config.os_default, os.path.join(Config.distFolder, 'scripts')):
 
             if not os.path.exists(folder):
                 self.run([paths.cmd_mkdir, '-p', folder])
