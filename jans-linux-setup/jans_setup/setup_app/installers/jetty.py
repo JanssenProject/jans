@@ -139,15 +139,14 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         self.logIt("Installing jetty service %s..." % service_name)
         self.logIt("Deploying Jetty Service", pbar=service_name)
         self.get_jetty_info()
-        jettyServiceBase = '%s/%s' % (self.jetty_base, service_name)
-        jettyModules = serviceConfiguration[NAME_STR]['modules']
-        jetty_modules_list = jettyModules.split(',')
+        jetty_service_base = '%s/%s' % (self.jetty_base, service_name)
+        jetty_modules = serviceConfiguration[NAME_STR]['modules']
 
-        jetty_modules_list = [m.strip() for m in jettyModules.split(',')]
+        jetty_modules_list = [m.strip() for m in jetty_modules.split(',')]
         if self.jetty_dist_string == 'jetty-home':
             if not 'cdi-decorate' in jetty_modules_list:
                 jetty_modules_list.append('cdi-decorate')
-            jettyModules = ','.join(jetty_modules_list)
+            jetty_modules = ','.join(jetty_modules_list)
 
         if base.snap:
             Config.templateRenderingDict['jetty_dist'] = self.jetty_base
@@ -156,29 +155,29 @@ class JettyInstaller(BaseInstaller, SetupUtils):
             jettyArchive, jetty_dist = self.get_jetty_info()
 
         self.logIt("Preparing %s service base folders" % service_name)
-        self.run([paths.cmd_mkdir, '-p', jettyServiceBase])
+        self.run([paths.cmd_mkdir, '-p', jetty_service_base])
 
         # Create ./ext/lib folder for custom libraries only if installed Jetty "ext" module
         if "ext" in jetty_modules_list:
-            self.run([paths.cmd_mkdir, '-p', "%s/lib/ext" % jettyServiceBase])
+            self.run([paths.cmd_mkdir, '-p', "%s/lib/ext" % jetty_service_base])
 
         # Create ./custom/pages and ./custom/static folders for custom pages and static resources, only if application supports them
         if supportCustomizations:
-            if not os.path.exists("%s/custom" % jettyServiceBase):
-                self.run([paths.cmd_mkdir, '-p', "%s/custom" % jettyServiceBase])
-            self.run([paths.cmd_mkdir, '-p', "%s/custom/pages" % jettyServiceBase])
+            if not os.path.exists("%s/custom" % jetty_service_base):
+                self.run([paths.cmd_mkdir, '-p', "%s/custom" % jetty_service_base])
+            self.run([paths.cmd_mkdir, '-p', "%s/custom/pages" % jetty_service_base])
 
             if not supportOnlyPageCustomizations:
-                self.run([paths.cmd_mkdir, '-p', "%s/custom/i18n" % jettyServiceBase])
-                self.run([paths.cmd_mkdir, '-p', "%s/custom/static" % jettyServiceBase])
-                self.run([paths.cmd_mkdir, '-p', "%s/custom/libs" % jettyServiceBase])
+                self.run([paths.cmd_mkdir, '-p', "%s/custom/i18n" % jetty_service_base])
+                self.run([paths.cmd_mkdir, '-p', "%s/custom/static" % jetty_service_base])
+                self.run([paths.cmd_mkdir, '-p', "%s/custom/libs" % jetty_service_base])
 
         self.logIt("Preparing %s service base configuration" % service_name)
         jettyEnv = os.environ.copy()
         jettyEnv['PATH'] = '%s/bin:' % Config.jre_home + jettyEnv['PATH']
 
-        self.run([Config.cmd_java, '-jar', '%s/start.jar' % self.jetty_home, 'jetty.home=%s' % self.jetty_home, 'jetty.base=%s' % jettyServiceBase, '--add-module=%s' % jettyModules], None, jettyEnv)
-        self.chown(jettyServiceBase, Config.jetty_user, Config.jetty_group, recursive=True)
+        self.run([Config.cmd_java, '-jar', '%s/start.jar' % self.jetty_home, 'jetty.home=%s' % self.jetty_home, 'jetty.base=%s' % jetty_service_base, '--add-module=%s' % jetty_modules], None, jettyEnv)
+        self.chown(jetty_service_base, Config.jetty_user, Config.jetty_group, recursive=True)
 
         # make variables of this class accesible from Config
         self.update_rendering_dict()
@@ -245,7 +244,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         self.set_jetty_param(service_name, 'jetty.httpConfig.sendServerVersion', 'false', inifile=inifile)
 
         if base.snap:
-            run_dir = os.path.join(jettyServiceBase, 'run')
+            run_dir = os.path.join(jetty_service_base, 'run')
             if not os.path.exists(run_dir):
                 self.run([paths.cmd_mkdir, '-p', run_dir])
 
