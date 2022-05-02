@@ -96,6 +96,12 @@ public class AuthorizeRestWebServiceValidator {
         return validateClient(clientId, state, false);
     }
 
+    public Client validateClient(AuthzRequest authzRequest, boolean isPar) {
+        final Client client = validateClient(authzRequest.getClientId(), authzRequest.getState(), isPar);
+        authzRequest.setClient(client);
+        return client;
+    }
+
     public Client validateClient(String clientId, String state, boolean isPar) {
         if (StringUtils.isBlank(clientId)) {
             throw new WebApplicationException(Response
@@ -380,10 +386,10 @@ public class AuthorizeRestWebServiceValidator {
         }
     }
 
-    public void validateAcrs(AuthzRequest authzRequest, Client client, RedirectUriResponse redirectUriResponse) throws AcrChangedException {
+    public void validateAcrs(AuthzRequest authzRequest, Client client) throws AcrChangedException {
         if (!client.getAttributes().getAuthorizedAcrValues().isEmpty() &&
                 !client.getAttributes().getAuthorizedAcrValues().containsAll(authzRequest.getAcrValuesList())) {
-            throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST,
+            throw authzRequest.getRedirectUriResponse().createWebException(AuthorizeErrorResponseType.INVALID_REQUEST,
                     "Restricted acr value request, please review the list of authorized acr values for this client");
         }
         checkAcrChanged(authzRequest, identity.getSessionId()); // check after redirect uri is validated
@@ -441,9 +447,9 @@ public class AuthorizeRestWebServiceValidator {
         }
     }
 
-    public void checkSignedRequestRequired(AuthzRequest authzRequest, RedirectUriResponse redirectUriResponse) {
+    public void checkSignedRequestRequired(AuthzRequest authzRequest) {
         if (Boolean.TRUE.equals(appConfiguration.getForceSignedRequestObject()) && StringUtils.isBlank(authzRequest.getRequest()) && StringUtils.isBlank(authzRequest.getRequestUri())) {
-            throw createInvalidJwtRequestException(redirectUriResponse, "A signed request object is required");
+            throw createInvalidJwtRequestException(authzRequest.getRedirectUriResponse(), "A signed request object is required");
         }
     }
 }
