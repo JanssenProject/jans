@@ -3,8 +3,8 @@
 - [Overview](#overview)
 - [Component Setup](#component-setup)
 - [Configure Janssen server](#configure-janssen-server)
-- [Setup Protected Resource](#setup-protected-resource)
-- [Setup mod-auth-openidc](#setup-mod-auth-openidc)
+- [Configure Protected Resource](#configure-protected-resource)
+- [Configure mod-auth-openidc](#configure-mod-auth-openidc)
 - [Test Complete Flow](#test-complete-flow)
 
 ## Overview
@@ -171,7 +171,7 @@ To register a new OpenID connect client on Janssen server, we will used `jans-cl
       }
       ```
 
-## Setup protected resource
+## Configure protected resource
 
 As mentioned under [component setup](#component-setup), our protected resource will be hosted on Apache reverse proxy itself and can be accessed through `https://test.apache.rp.io/protected`. Our protected resource is a simple Python based cgi script that will print request header information. Use steps below on Apache host to set up protected resource:
 1. Create directory named `protected` under `/var/www/`
@@ -210,7 +210,7 @@ As mentioned under [component setup](#component-setup), our protected resource w
     ```
     
 
-## Setup *mod-auth-openidc* 
+## Configure *mod-auth-openidc* 
 
 #### Install *mod-auth-openidc* 
 
