@@ -22,7 +22,15 @@ queue = Queue()
 dir_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(dir_path)
 
+profile_fn = os.path.join(dir_path, 'profile')
+if os.path.exists(profile_fn):
+    with open(profile_fn) as f:
+        profile = f.read().strip()
+else:
+    profile = 'jans'
+
 os.environ['LC_ALL'] = 'C'
+os.environ['JANS_PROFILE'] = profile
 from setup_app.utils import arg_parser
 
 argsp = arg_parser.get_parser()
@@ -64,6 +72,7 @@ from setup_app import static
 
 # second import module base, this makes some initial settings
 from setup_app.utils import base
+base.current_app.profile = profile
 
 # we will access args via base module
 base.argsp = argsp
@@ -110,7 +119,7 @@ from setup_app.installers.jython import JythonInstaller
 from setup_app.installers.jans_auth import JansAuthInstaller
 from setup_app.installers.opendj import OpenDjInstaller
 
-if Config.profile == 'jans':
+if base.current_app.profile == 'jans':
     from setup_app.installers.couchbase import CouchbaseInstaller
     from setup_app.installers.scim import ScimInstaller
     from setup_app.installers.fido import FidoInstaller
@@ -137,7 +146,7 @@ if paths.IAMPACKAGED:
 # initialize config object
 Config.init(paths.INSTALL_DIR)
 
-base.profile = Config.profile
+
 if Config.profile != 'jans':
     argsp.t = False
 
@@ -217,9 +226,9 @@ propertiesUtils.check_properties()
 jreInstaller = JreInstaller()
 jettyInstaller = JettyInstaller()
 jythonInstaller = JythonInstaller()
+openDjInstaller = OpenDjInstaller()
 
 if Config.profile == 'jans':
-    openDjInstaller = OpenDjInstaller()
     couchbaseInstaller = CouchbaseInstaller()
 
 rdbmInstaller = RDBMInstaller()

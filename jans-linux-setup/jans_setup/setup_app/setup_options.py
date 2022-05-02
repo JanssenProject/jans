@@ -14,7 +14,7 @@ def get_setup_options():
         'installOxAuth': True,
         'installConfigApi': True,
         'installHTTPD': True,
-        'installScimServer': True if base.profile == 'jans' else False,
+        'installScimServer': True if base.current_app.profile == 'jans' else False,
         'installOxd': False,
         'installFido2': True,
         'installEleven': False,
@@ -60,7 +60,7 @@ def get_setup_options():
         if base.argsp.rdbm_password:
             setupOptions['rdbm_password'] = base.argsp.rdbm_password
 
-        if base.profile == 'jans':
+        if base.current_app.profile == 'jans':
             if base.argsp.spanner_project:
                 setupOptions['spanner_project'] = base.argsp.spanner_project
             if base.argsp.spanner_instance:
@@ -73,7 +73,7 @@ def get_setup_options():
                 setupOptions['google_application_credentials'] = base.argsp.google_application_credentials
 
 
-    if base.profile == 'jans':
+    if base.current_app.profile == 'jans':
         if base.argsp.disable_local_ldap:
             setupOptions['opendj_install'] = InstallTypes.NONE
 
@@ -146,7 +146,7 @@ def get_setup_options():
 
         setupOptions['properties_password'] = base.argsp.properties_password
 
-    if base.profile == 'openbanking':
+    if base.current_app.profile == 'openbanking':
         setupOptions['opendj_install'] = InstallTypes.NONE
         if base.argsp.static_kid:
             setupOptions['staticKid'] = base.argsp.static_kid

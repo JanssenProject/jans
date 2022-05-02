@@ -151,6 +151,9 @@ def extract_setup():
     with open(app_info_fn, 'w') as w:
         json.dump(app_info, w, indent=2)
 
+    with open(os.path.join(argsp.setup_dir, 'profile'), 'w') as w:
+        w.write(argsp.profile)
+
 def uninstall_jans():
     check_installation()
     if not argsp.yes:

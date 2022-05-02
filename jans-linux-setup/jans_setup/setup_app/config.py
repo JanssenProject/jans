@@ -11,6 +11,8 @@ from setup_app.static import InstallTypes
 from setup_app.utils.printVersion import get_war_info
 from setup_app.utils import base
 
+OPENBANKING_PROFILE = 'openbanking'
+
 class Config:
 
     # we define statics here so that is is acessible without construction
@@ -35,7 +37,7 @@ class Config:
     dist_jans_dir = os.path.join(distFolder, 'jans')
 
     installed_instance = False
-    profile = 'jans'
+
 
     @classmethod
     def get(self, attr, default=None):
@@ -75,6 +77,7 @@ class Config:
 
         self.install_dir = install_dir
         self.data_dir = os.path.join(self.install_dir, 'setup_app/data')
+        self.profile = base.current_app.profile 
 
         self.thread_queue = None
         self.jetty_user = 'jetty'
@@ -130,6 +133,12 @@ class Config:
         self.cmd_jar = os.path.join(self.jre_home, 'bin/jar')
         os.environ['OPENDJ_JAVA_HOME'] =  self.jre_home
 
+        if self.profile == OPENBANKING_PROFILE:
+            self.use_external_key = True
+            self.ob_key_fn = '/root/obsigning-axV5umCvTMBMjPwjFQgEvb_NO_UPLOAD.key'
+            self.ob_cert_fn = '/root/obsigning.pem'
+            self.ob_alias = 'GkwIzWy88xWSlcWnLiEc8ip9s2M'
+
         # Component ithversions
         self.apache_version = None
         self.opendj_version = None
@@ -144,17 +153,17 @@ class Config:
         #DB installation types
         self.opendj_install = InstallTypes.LOCAL
         self.cb_install = InstallTypes.NONE
-        self.rdbm_install = False
-        
+        self.rdbm_install = InstallTypes.LOCAL if self.profile == OPENBANKING_PROFILE else False
+
         self.couchbase_buckets = []
-        
+
         #rdbm
-        self.rdbm_install_type = InstallTypes.NONE
+        self.rdbm_install_type = InstallTypes.LOCAL if self.profile == OPENBANKING_PROFILE else InstallTypes.NONE
         self.rdbm_type = 'mysql'
         self.rdbm_host = 'localhost'
         self.rdbm_port = 3306
-        self.rdbm_db = 'jans'
-        self.rdbm_user = None
+        self.rdbm_db = 'jansdb'
+        self.rdbm_user = 'jans'
         self.rdbm_password = None
         self.static_rdbm_dir = os.path.join(self.install_dir, 'static/rdbm')
 
@@ -183,7 +192,7 @@ class Config:
         self.installCasa = False
         self.installOxd = False
         self.installEleven = False
-        self.installJansCli = False
+        self.installJansCli = True
         self.loadTestData = False
         self.allowPreReleasedFeatures = False
 
@@ -192,7 +201,7 @@ class Config:
         self.os_version = base.os_version
         self.os_initdaemon = base.os_initdaemon
 
-        self.persistence_type = 'ldap'
+        self.persistence_type = 'sql' if self.profile == OPENBANKING_PROFILE else 'ldap'
 
         self.setup_properties_fn = os.path.join(self.install_dir, 'setup.properties')
         self.savedProperties = os.path.join(self.install_dir, 'setup.properties.last')
@@ -259,7 +268,6 @@ class Config:
         self.defaultTrustStoreFN = os.path.join(self.jre_home, 'jre/lib/security/cacerts')
         self.defaultTrustStorePW = 'changeit'
 
-
         # Stuff that gets rendered; filename is necessary. Full path should
         # reflect final path if the file must be copied after its rendered.
 
@@ -286,7 +294,11 @@ class Config:
 
         # OpenID key generation default setting
         self.default_openid_jks_dn_name = 'CN=Jans Auth CA Certificates'
-        self.default_sig_key_algs = 'RS256 RS384 RS512 ES256 ES256K ES384 ES512 PS256 PS384 PS512'
+        if self.profile == OPENBANKING_PROFILE:
+            self.default_key_algs = 'RS256 RS384 RS512 ES256 ES384 ES512'
+        else:
+            self.default_sig_key_algs = 'RS256 RS384 RS512 ES256 ES256K ES384 ES512 PS256 PS384 PS512'
+
         self.default_enc_key_algs = 'RSA1_5 RSA-OAEP ECDH-ES'
         self.default_key_expiration = 365
 
@@ -302,16 +314,19 @@ class Config:
 
 
         self.ce_templates = {
-                             self.jans_python_readme: True,
-                             self.ox_ldap_properties: True,
-                             self.ldap_setup_properties: False,
+                            self.jans_python_readme: True,
                              self.etc_hostname: False,
+                             self.network: False,
+                             self.jans_properties_fn: True,
                              self.ldif_base: False,
                              self.ldif_attributes: False,
                              self.ldif_scopes: False,
-                             self.network: False,
-                             self.jans_properties_fn: True,
                              }
+
+        if self.profile != OPENBANKING_PROFILE:
+            self.ce_templates[self.ox_ldap_properties] = True
+            self.ce_templates[self.ldap_setup_properties] = False
+
 
         self.service_requirements = {
                         'opendj': ['', 70],
@@ -377,10 +392,15 @@ class Config:
 
                     ))
 
-        self.mappingLocations = { group: 'ldap' for group in self.couchbaseBucketDict }  #default locations are OpenDJ
+        if self.profile == OPENBANKING_PROFILE:
+            #default locations are rdbm
+            self.mappingLocations = {'default': 'rdbm'}
+        else:
+            #default locations are OpenDJ
+            self.mappingLocations = { group: 'ldap' for group in self.couchbaseBucketDict }
+
         self.non_setup_properties = {
             'oxauth_client_jar_fn': os.path.join(self.dist_jans_dir, 'jans-auth-client-jar-with-dependencies.jar')
                 }
-        Config.addPostSetupService = []
 
-    
+        Config.addPostSetupService = []
