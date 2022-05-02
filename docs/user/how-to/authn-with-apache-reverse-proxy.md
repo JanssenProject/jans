@@ -1,7 +1,9 @@
 ## Contents:
 
 - [Overview](#overview)
-- [Setup Janssen server](#setup-janssen-server)
+- [Component Setup](#component-setup)
+- [Configure Janssen server](#configure-janssen-server)
+- [Setup Protected Resource](#setup-protected-resource)
 - [Setup mod-auth-openidc](#setup-mod-auth-openidc)
 - [Test Complete Flow](#test-complete-flow)
 
@@ -25,21 +27,26 @@ For development and POC purposes, 4GB RAM and 10 GB HDD should be available for 
 ![Component Diagram](../../assets/how-to/images/image-howto-mod-auth-comp-04222022.png)
 
 In this setup, we have four important components.
-- **User workstation**. From workstation, user will use browser(i.e user agent) to access protected resource. 
-- **Apache reverse proxy** with `mod_auth_openidc`. Together they work as `relying party (RP)`. We will assume that this host accessible with FQDN `https://test.apache.rp.io/`.
-- **Janssen server**, which is our open-id connect provider (OP). We will assume that Janssen server is accessible at FQDN `https://janssen.op.io/`
-- **Protected resource**. These are resources that we need to protect using authentication. In production setups, the protected resources are usually hosted on separate server that can only be accessed via proxy. For simplicity, we will also assume that resources that need to be protected via authentication are hosted on Apache reverse proxy itself and can be accessed through `https://test.apache.rp.io/protected`. 
+- **Protected resource** is the resources that we need to protect using authentication. In production setups, the protected resources are usually hosted on separate server that can only be accessed via proxy. For simplicity, we will also assume that resources that need to be protected via authentication are hosted on Apache reverse proxy itself and can be accessed through `https://test.apache.rp.io/protected`.
+- **User workstation** is from where the user will use browser(i.e user agent) to access the protected resource
+- **Apache reverse proxy** with `mod_auth_openidc`. Together they work as `relying party (RP)` or OpenID Connect client. We will assume that this host is accessible at FQDN `https://test.apache.rp.io/`
+- **Janssen server** is our open-id connect provider (OP). We will assume that Janssen server is accessible at FQDN `https://janssen.op.io/`
+ 
 
-#### Configure Janssen server
+## Configure Janssen server
 
-In this section, we will register a new OpenID Connect client on Janssen server. This client registration will be used by Apache reverse proxy which is working as relying party using mod_auth-openidc.
+In this section, we will register a new OpenID Connect client on Janssen server. In our setup, the relying party (Apache with mod_auth-openidc) is the OIDC client. There are two ways you can register OIDC client with Janssen server.
+1. Manual Client Registration
+2. Dynamic Client Registration (DCR)
+
+Here we will use manual client registration.
 
 To register a new OpenID connect client on Janssen server, we will used `jans-cli` tool provided by Janssen server. `jans-cli` has menu-driven interface that makes it easy to configure Janssen server. Here we will use menu-driven approach to register a new client. To further understand how to use menu-driven approach and get complete list of supported command-line operations, refer to [jans-cli documentation](../using-jans-cli#command-line-interface).
 
   - Run command below to enter interactive mode.
 
 
-     > Note: </br> In order to run operations, the `jans-cli` has to be authenticated and authorized with respective Janssen server. If `jans-cli` operation is being executed for the first time or if there is no valid access token available, then running the command below will initiate authentication and authorization flow. In that case, follow the steps for [jans-cli authorization](../using-jans-cli/cli-tips.md#cli-authorization) to continue running the command.
+     > Note: </br> `jans-cli` has to be authenticated and authorized with respective Janssen server. If `jans-cli` is being executed for the first time or if there is no valid access token available, then running the command below will initiate device authentication and authorization flow. In that case, follow the steps for [jans-cli authorization](../using-jans-cli/cli-tips.md#cli-authorization) to continue running the command.
   
     ```
     /opt/jans/jans-cli/config-cli.py
@@ -66,14 +73,14 @@ To register a new OpenID connect client on Janssen server, we will used `jans-cl
     subjectType: public
     tokenEndpointAuthMethod: client_secret_basic
     redirectUris: https://test.apache.rp.io/redirect
-    scopes: email openid profile
+    scopes: email_,openid_,profile
     responseTypes: code
     grantTypes: authorization_code
     ```
     
    - Once values for all above properties are provided, input `c` in selection to instruct jans-cli to create schema using inputs provided till now. At this time, jans-cli will show the schema(JSON) which will be used to create new OpenID Connect client on Janssen server. Verify that schema has captured all the provided inputs correctly.
    - Now next step is for `jans-cli` to post this JSON schema to Janssen server to actually register new client. To do this, input `y` on the prompt.
-   - If client is successfully registered then we will receive JSON data back which describes newly registered client. Complete with `inum` and `clientSecret` for new client. See a sample of JSON response below:
+   - If client is successfully registered then we will receive JSON data back which describes newly registered client. Complete with `inum` and `clientSecret` for new client. Few of these values (like `inum`) will be required when we configure `mod_auth_openidc` as client so keep this reponse handy. See a sample of the JSON response below:
    
 
       ```
@@ -164,14 +171,44 @@ To register a new OpenID connect client on Janssen server, we will used `jans-cl
       }
       ```
 
+## Setup protected resource
+
+As mentioned under [component setup](#component-setup), our protected resource will be hosted on Apache reverse proxy itself and can be accessed through `https://test.apache.rp.io/protected`. Our protected resource is a simple Python based cgi script that will print request header information. Use steps below on Apache host to set up protected resource:
+1. Create directory named `protected` under `/var/www/`
+    ```
+    mkdir /var/www/protected
+    ```
+2. Create script file `printHeaders.py`
+    ```
+    vi /var/www/protected/printHeaders.py
+    ```
+    with content as below
+    ```
+    #!/usr/bin/python3
+
+    import os
+
+    d = os.environ
+    k = d.keys()
+    #k.sort()
+
+    print "Content-type: text/html\n\n"
+
+    print "<HTML><HEAD><TITLE>printHeaders.cgi</TITLE></Head><BODY>"
+    print "<h1>Environment Variables</H1>"
+    for item in k:
+      print "<p><B>%s</B>: %s </p>" % (item, d[item])
+    print "</BODY></HTML>"
+    ```
+
 ## Setup *mod-auth-openidc* 
 
 #### Install *mod-auth-openidc* 
 
 On Apache reverse proxy host, add mod-auth-openidc using commands below
 ```
-sudo apt-get install libapache2-mod-auth-openidc
-sudo a2enmod auth_openidc
+apt-get install libapache2-mod-auth-openidc
+a2enmod auth_openidc
 service apache2 restart
 ```
 #### Configure *mod-auth-openidc* 
