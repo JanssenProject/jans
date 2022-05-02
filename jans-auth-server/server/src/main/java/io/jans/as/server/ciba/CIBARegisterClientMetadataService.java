@@ -13,9 +13,9 @@ import io.jans.as.model.crypto.signature.AsymmetricSignatureAlgorithm;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 /**
  * @author Javier Rojas Blum

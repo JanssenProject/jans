@@ -11,9 +11,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Instance;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
 
 import io.jans.service.external.context.PersistenceExternalContext;
 import io.jans.model.SimpleCustomProperty;

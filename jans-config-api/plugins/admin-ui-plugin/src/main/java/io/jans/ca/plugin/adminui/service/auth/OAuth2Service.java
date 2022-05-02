@@ -14,8 +14,10 @@ import io.jans.ca.plugin.adminui.model.auth.UserInfoRequest;
 import io.jans.ca.plugin.adminui.model.auth.UserInfoResponse;
 import io.jans.ca.plugin.adminui.rest.auth.OAuth2Resource;
 import io.jans.ca.plugin.adminui.service.config.AUIConfigurationService;
+import io.jans.ca.plugin.adminui.utils.ClientFactory;
 import io.jans.ca.plugin.adminui.utils.CommonUtils;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
+import jakarta.ws.rs.client.Invocation;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
@@ -24,14 +26,14 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilder;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.core.MultivaluedHashMap;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriBuilder;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.List;
@@ -136,7 +138,6 @@ public class OAuth2Service {
     }
 
     public UserInfoResponse getUserInfo(UserInfoRequest userInfoRequest) throws ApplicationException {
-        ApacheHttpClient43Engine engine = new ApacheHttpClient43Engine();
         try {
             log.debug("Getting User-Info from auth-server: {}", userInfoRequest.getAccessToken());
             AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
@@ -156,11 +157,10 @@ public class OAuth2Service {
             MultivaluedMap<String, String> body = new MultivaluedHashMap<>();
             body.putSingle("access_token", accessToken);
 
-            ResteasyClient client = ((ResteasyClientBuilder) ClientBuilder.newBuilder()).httpEngine(engine).build();
-            ResteasyWebTarget target = client.target(UriBuilder.fromPath(auiConfiguration.getAuthServerUserInfoEndpoint()));
+            Invocation.Builder request = ClientFactory.instance().getClientBuilder(auiConfiguration.getAuthServerUserInfoEndpoint());
+            request.header("Authorization", "Bearer " + accessToken);
 
-            Response response = target.request()
-                    .header("Authorization", "Bearer " + accessToken)
+            Response response = request
                     .post(Entity.form(body));
 
             log.debug("User-Info response status code: {}", response.getStatus());
@@ -187,10 +187,6 @@ public class OAuth2Service {
         } catch (Exception e) {
             log.error(ErrorResponse.GET_USER_INFO_ERROR.getDescription(), e);
             throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), ErrorResponse.GET_USER_INFO_ERROR.getDescription());
-        } finally {
-            if (engine != null) {
-                engine.close();
-            }
         }
         return null;
     }
@@ -204,10 +200,8 @@ public class OAuth2Service {
     }
 
     public io.jans.as.client.TokenResponse getToken(TokenRequest tokenRequest, String tokenEndpoint, String userInfoJwt) {
-        ApacheHttpClient43Engine engine = new ApacheHttpClient43Engine();
-        try {
-            engine.setFollowRedirects(false);
 
+        try {
             MultivaluedMap<String, String> body = new MultivaluedHashMap<>();
             if (!Strings.isNullOrEmpty(tokenRequest.getCode())) {
                 body.putSingle("code", tokenRequest.getCode());
@@ -225,10 +219,8 @@ public class OAuth2Service {
             body.putSingle("redirect_uri", tokenRequest.getRedirectUri());
             body.putSingle("client_id", tokenRequest.getAuthUsername());
 
-            ResteasyClient client = ((ResteasyClientBuilder) ClientBuilder.newBuilder()).httpEngine(engine).build();
-            ResteasyWebTarget target = client.target(UriBuilder.fromPath(tokenEndpoint));
-
-            Response response = target.request()
+            Invocation.Builder request = ClientFactory.instance().getClientBuilder(tokenEndpoint);
+            Response response = request
                     .header("Authorization", "Basic " + tokenRequest.getEncodedCredentials())
                     .post(Entity.form(body));
 
@@ -247,8 +239,6 @@ public class OAuth2Service {
             log.error("Problems processing token call");
             throw e;
 
-        } finally {
-                engine.close();
         }
         return null;
     }

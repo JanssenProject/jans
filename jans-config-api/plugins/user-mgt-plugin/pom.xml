@@ -61,6 +61,25 @@
 			<artifactId>httpcore-nio</artifactId>
 			<version>${httpcore.version}</version>
 		</dependency>
+		
+		<!-- CDI -->
+		<dependency>
+		    <groupId>jakarta.enterprise</groupId>
+		    <artifactId>jakarta.enterprise.cdi-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.inject</groupId>
+			<artifactId>jakarta.inject-api</artifactId>
+		</dependency>
+		<dependency>
+            <groupId>jakarta.validation</groupId>
+            <artifactId>jakarta.validation-api</artifactId>
+        </dependency>
+		<dependency>
+     	    <groupId>jakarta.ws.rs</groupId>
+     		<artifactId>jakarta.ws.rs-api</artifactId>
+   		</dependency>
+		
 
 		<!-- Testing -->
 		<dependency>

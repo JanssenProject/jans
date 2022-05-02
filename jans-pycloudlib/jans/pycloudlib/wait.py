@@ -11,12 +11,9 @@ import os
 import sys
 
 import backoff
-import requests
 
-from jans.pycloudlib.persistence.couchbase import get_couchbase_user
-from jans.pycloudlib.persistence.couchbase import get_couchbase_password
 from jans.pycloudlib.persistence.couchbase import CouchbaseClient
-from jans.pycloudlib.persistence.sql import SQLClient
+from jans.pycloudlib.persistence.sql import SqlClient
 from jans.pycloudlib.persistence.spanner import SpannerClient
 from jans.pycloudlib.utils import as_boolean
 from jans.pycloudlib.persistence.ldap import LdapClient
@@ -215,9 +212,6 @@ def wait_for_couchbase(manager, **kwargs):
 
     :param manager: An instance of :class:`~jans.pycloudlib.manager._Manager`.
     """
-    host = os.environ.get("CN_COUCHBASE_URL", "localhost")
-    user = get_couchbase_user(manager)
-    password = get_couchbase_password(manager)
 
     persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "couchbase")
     ldap_mapping = os.environ.get("CN_PERSISTENCE_LDAP_MAPPING", "default")
@@ -233,7 +227,7 @@ def wait_for_couchbase(manager, **kwargs):
     if persistence_type == "hybrid" and ldap_mapping == "default":
         bucket, key = f"{bucket_prefix}_user", "groups_60B7"
 
-    cb_client = CouchbaseClient(host, user, password)
+    cb_client = CouchbaseClient(manager)
 
     req = cb_client.exec_query(
         f"SELECT objectClass FROM {bucket} USE KEYS $key",
@@ -260,68 +254,11 @@ def wait_for_couchbase_conn(manager, **kwargs):
 
     :param manager: An instance of :class:`~jans.pycloudlib.manager._Manager`.
     """
-    host = os.environ.get("CN_COUCHBASE_URL", "localhost")
-    user = get_couchbase_user(manager)
-    password = get_couchbase_password(manager)
-
-    cb_client = CouchbaseClient(host, user, password)
+    cb_client = CouchbaseClient(manager)
     req = cb_client.get_buckets()
 
     if not req.ok:
-        raise WaitError(f"Unable to connect to host in {host} list")
-
-
-@retry_on_exception
-def wait_for_oxauth(manager, **kwargs):
-    """Wait for readiness/availability of oxAuth server.
-
-    This function makes a request to specific URL in oxAuth.
-
-    :param manager: An instance of :class:`~jans.pycloudlib.manager._Manager`.
-    """
-    addr = os.environ.get("CN_OXAUTH_BACKEND", "localhost:8081")
-    url = f"http://{addr}/oxauth/.well-known/openid-configuration"
-    req = requests.get(url)
-
-    if not req.ok:
-        raise WaitError(req.reason)
-
-
-@retry_on_exception
-def wait_for_oxtrust(manager, **kwargs):
-    """Wait for readiness/availability of oxTrust server.
-
-    This function makes a request to specific URL in oxTrust.
-
-    :param manager: An instance of :class:`~jans.pycloudlib.manager._Manager`.
-    """
-    addr = os.environ.get("CN_OXTRUST_BACKEND", "localhost:8082")
-    url = f"http://{addr}/identity/finishlogout.htm"
-    req = requests.get(url)
-
-    if not req.ok:
-        raise WaitError(req.reason)
-
-
-@retry_on_exception
-def wait_for_oxd(manager, **kwargs):
-    """Wait for readiness/availability of oxd server.
-
-    This function makes a request to specific URL in oxd.
-
-    :param manager: An instance of :class:`~jans.pycloudlib.manager._Manager`.
-    """
-    import urllib3
-
-    urllib3.disable_warnings()
-
-    addr = os.environ.get("CN_OXD_SERVER_URL", "localhost:8443")
-    verify = as_boolean(os.environ.get("CN_OXD_SERVER_VERIFY", False))
-    url = f"https://{addr}/health-check"
-    req = requests.get(url, verify=verify)
-
-    if not req.ok:
-        raise WaitError(req.reason)
+        raise WaitError(f"Unable to connect to host in {cb_client.host} list")
 
 
 @retry_on_exception
@@ -329,7 +266,7 @@ def wait_for_sql_conn(manager, **kwargs):
     """Wait for readiness/liveness of an SQL database connection.
     """
     # checking connection
-    init = SQLClient().connected()
+    init = SqlClient(manager).connected()
     if not init:
         raise WaitError("SQL backend is unreachable")
 
@@ -338,7 +275,7 @@ def wait_for_sql_conn(manager, **kwargs):
 def wait_for_sql(manager, **kwargs):
     """Wait for readiness/liveness of an SQL database.
     """
-    init = SQLClient().row_exists("jansClnt", manager.config.get("jca_client_id"))
+    init = SqlClient(manager).row_exists("jansClnt", manager.config.get("jca_client_id"))
 
     if not init:
         raise WaitError("SQL is not fully initialized")
@@ -349,7 +286,7 @@ def wait_for_spanner_conn(manager, **kwargs):
     """Wait for readiness/liveness of an Spanner database connection.
     """
     # checking connection
-    init = SpannerClient().connected()
+    init = SpannerClient(manager).connected()
     if not init:
         raise WaitError("Spanner backend is unreachable")
 
@@ -358,7 +295,7 @@ def wait_for_spanner_conn(manager, **kwargs):
 def wait_for_spanner(manager, **kwargs):
     """Wait for readiness/liveness of an Spanner database.
     """
-    init = SpannerClient().row_exists("jansClnt", manager.config.get("jca_client_id"))
+    init = SpannerClient(manager).row_exists("jansClnt", manager.config.get("jca_client_id"))
 
     if not init:
         raise WaitError("Spanner is not fully initialized")
@@ -377,9 +314,6 @@ def wait_for(manager, deps=None):
     - `couchbase_conn`
     - `secret`
     - `secret_conn`
-    - `oxauth`
-    - `oxtrust`
-    - `oxd`
     - `sql`
     - `sql_conn`
     - `spanner`
@@ -416,9 +350,6 @@ def wait_for(manager, deps=None):
             "func": wait_for_secret,
             "kwargs": {"label": "Secret", "conn_only": True},
         },
-        "oxauth": {"func": wait_for_oxauth, "kwargs": {"label": "oxAuth"}},
-        "oxtrust": {"func": wait_for_oxtrust, "kwargs": {"label": "oxTrust"}},
-        "oxd": {"func": wait_for_oxd, "kwargs": {"label": "oxd"}},
         "sql_conn": {"func": wait_for_sql_conn, "kwargs": {"label": "SQL"}},
         "sql": {"func": wait_for_sql, "kwargs": {"label": "SQL"}},
         "spanner_conn": {"func": wait_for_spanner_conn, "kwargs": {"label": "Spanner"}},

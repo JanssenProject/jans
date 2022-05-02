@@ -10,9 +10,9 @@ import io.jans.configapi.util.AuthUtil;
 import io.jans.configapi.configuration.ConfigurationFactory;
 import org.slf4j.Logger;
 
-import javax.inject.Inject;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.container.ResourceInfo;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.container.ResourceInfo;
 import java.io.Serializable;
 import java.util.List;
 
@@ -21,13 +21,13 @@ public abstract class AuthorizationService implements Serializable {
     private static final long serialVersionUID = 4012335221233316230L;
 
     @Inject
-    Logger log;
+    transient Logger log;
 
     @Inject
-    ConfigurationFactory configurationFactory;
+    transient ConfigurationFactory configurationFactory;
 
     @Inject
-    AuthUtil authUtil;
+    transient AuthUtil authUtil;
 
     public abstract String processAuthorization(String token, String issuer, ResourceInfo resourceInfo, String method,
             String path) throws Exception;

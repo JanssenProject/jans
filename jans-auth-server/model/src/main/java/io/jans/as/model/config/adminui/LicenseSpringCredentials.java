@@ -5,6 +5,8 @@ public class LicenseSpringCredentials {
     private String productCode;
     private String sharedKey;
     private String managementKey;
+    private String hardwareId;
+    private String licenseKey;
 
     public String getApiKey() {
         return apiKey;
@@ -36,6 +38,22 @@ public class LicenseSpringCredentials {
 
     public void setManagementKey(String managementKey) {
         this.managementKey = managementKey;
+    }
+
+    public String getHardwareId() {
+        return hardwareId;
+    }
+
+    public void setHardwareId(String hardwareId) {
+        this.hardwareId = hardwareId;
+    }
+
+    public String getLicenseKey() {
+        return licenseKey;
+    }
+
+    public void setLicenseKey(String licenseKey) {
+        this.licenseKey = licenseKey;
     }
 
     @Override

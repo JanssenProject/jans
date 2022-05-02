@@ -5,7 +5,10 @@ jans.pycloudlib.persistence.ldap
 This module contains various helpers related to LDAP persistence.
 """
 
+import logging
 import os
+import time
+from tempfile import NamedTemporaryFile
 
 from ldap3 import BASE
 from ldap3 import Connection
@@ -13,9 +16,15 @@ from ldap3 import Server
 from ldap3 import SUBTREE
 from ldap3 import MODIFY_REPLACE
 from ldap3 import MODIFY_DELETE
+from ldap3.core.exceptions import LDAPSessionTerminatedByServerError
+from ldap3.core.exceptions import LDAPSocketOpenError
+from ldif import LDIFParser
 
 from jans.pycloudlib.utils import as_boolean
 from jans.pycloudlib.utils import decode_text
+from jans.pycloudlib.utils import safe_render
+
+logger = logging.getLogger(__name__)
 
 
 def render_ldap_properties(manager, src: str, dest: str) -> None:
@@ -92,19 +101,19 @@ class LdapClient:
     # shortcut to ldap3.MODIFY_DELETE
     MODIFY_DELETE = MODIFY_DELETE
 
-    def __init__(self, manager, host="", user="", password=""):
+    def __init__(self, manager, *args, **kwargs):
         """
         Initialize instance.
 
         :params manager: An instance of :class:`~pygluu.containerlib.manager._Manager`.
         """
 
-        host = host or os.environ.get("CN_LDAP_URL", "localhost:1636")
+        host = kwargs.get("host") or os.environ.get("CN_LDAP_URL", "localhost:1636")
         # we only need host part as port will be resolved from env that controls
         # SSL or non-SSL connetion
         host = extract_ldap_host(host)
-        user = user or manager.config.get("ldap_binddn")
-        password = password or decode_text(
+        user = kwargs.get("user") or manager.config.get("ldap_binddn")
+        password = kwargs.get("password") or decode_text(
             manager.secret.get("encoded_ox_ldap_pw"),
             manager.secret.get("encoded_salt")
         )
@@ -113,6 +122,7 @@ class LdapClient:
         port = resolve_ldap_port()
         self.server = Server(host, port=port, use_ssl=use_ssl)
         self.conn = Connection(self.server, user, password)
+        self.manager = manager
 
     def is_connected(self):
         """
@@ -198,3 +208,35 @@ class LdapClient:
             modified = bool(conn.result["description"] == "success")
             message = conn.result["message"]
             return modified, message
+
+    def _add_entry(self, dn, attrs):
+        max_wait_time = 300
+        sleep_duration = 10
+
+        for _ in range(0, max_wait_time, sleep_duration):
+            try:
+                added, msg = self.add(dn, attributes=attrs)
+                if not added and "name already exists" not in msg:
+                    logger.warning(f"Unable to add entry with DN {dn}; reason={msg}")
+                break
+            except (LDAPSessionTerminatedByServerError, LDAPSocketOpenError) as exc:
+                logger.warning(f"Unable to add entry with DN {dn}; reason={exc}; retrying in {sleep_duration} seconds")
+            time.sleep(sleep_duration)
+
+    def create_from_ldif(self, filepath, ctx):
+        """Create entry with data loaded from an LDIF template file.
+
+        :param filepath: Path to LDIF template file.
+        :param ctx: Key-value pairs of context that rendered into LDIF template file.
+        """
+
+        with open(filepath) as src, NamedTemporaryFile("w+") as dst:
+            dst.write(safe_render(src.read(), ctx))
+            # ensure rendered template is written
+            dst.flush()
+
+            with open(dst.name, "rb") as fd:
+                parser = LDIFParser(fd)
+
+                for dn, entry in parser.parse():
+                    self._add_entry(dn, entry)

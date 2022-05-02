@@ -16,7 +16,7 @@
     </parent>
 
     <properties>
-        <jersey.version>2.6</jersey.version> <!-- stick to 2.6 because 2.6 depends on Jackson 1.x, we don't want conflicts with Jackson 2.x-->
+        <jersey.version>3.0.2</jersey.version> <!-- stick to 2.6 because 2.6 depends on Jackson 1.x, we don't want conflicts with Jackson 2.x-->
         <skip.swagger.client.generation>true</skip.swagger.client.generation>
     </properties>
 

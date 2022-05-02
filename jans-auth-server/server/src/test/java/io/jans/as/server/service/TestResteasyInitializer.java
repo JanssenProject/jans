@@ -22,8 +22,8 @@ import io.jans.as.server.uma.ws.rs.UmaRptIntrospectionWS;
 import io.jans.as.server.uma.ws.rs.UmaScopeWS;
 import io.jans.as.server.userinfo.ws.rs.UserInfoRestWebServiceImpl;
 
-import javax.ws.rs.core.Application;
-import javax.ws.rs.ext.Provider;
+import jakarta.ws.rs.core.Application;
+import jakarta.ws.rs.ext.Provider;
 import java.util.HashSet;
 import java.util.Set;
 

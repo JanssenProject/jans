@@ -11,14 +11,14 @@ import java.security.Principal;
 import java.security.acl.Group;
 import java.util.HashMap;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.Priority;
-import javax.enterprise.context.RequestScoped;
-import javax.enterprise.event.Event;
-import javax.enterprise.inject.Alternative;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.interceptor.Interceptor;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Priority;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.enterprise.event.Event;
+import jakarta.enterprise.inject.Alternative;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.interceptor.Interceptor;
 import javax.security.auth.Subject;
 import javax.security.auth.login.LoginException;
 

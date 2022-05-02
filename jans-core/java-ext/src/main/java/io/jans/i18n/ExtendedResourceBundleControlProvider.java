@@ -39,7 +39,7 @@ public class ExtendedResourceBundleControlProvider implements ResourceBundleCont
     }
 
     public ResourceBundle.Control getControl(String baseName) {
-		if (baseName.equals("javax.faces.Messages")) {
+		if (baseName.equals("jakarta.faces.Messages")) {
 			System.out.println("Preparing control to load bundle with baseName: " + baseName);
 			return new CustomControl();
 		}

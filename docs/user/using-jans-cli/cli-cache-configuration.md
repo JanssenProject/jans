@@ -1,5 +1,7 @@
 # Cache Configuration
 
+> Prerequisite: Know how to use the Janssen CLI in [command-line mode](cli-index.md)
+
 Cache Configuration supports two types of operation through the Single Line command of Janssen CLI.
 Let's get the information for Cache Configuration.
 
@@ -154,7 +156,7 @@ Server Response:
   }
 ```
 
-You see `bufferSize` has changed. You may want to know more about patching cache configuration. Please, have a look to [this link](cli-tips.md#patch-request) to know more about how you can modify the schema file.
+You see `bufferSize` has changed. You may want to know more about patching cache configuration. Please, have a look to [this link](cli-index.md#patch-request-schema) to know more about how you can modify the schema file.
 
 
 ## Quick Patch Operation
@@ -165,5 +167,5 @@ In case you need to do a quick patch operation, you can do that also. For exampl
 /opt/jans/jans-cli/config-cli.py --operation-id patch-config-cache --patch-replace nativePersistenceConfiguration/defaultPutExpiration:90
 ```
 
-It will change the value with given one. There are few option to do such quick patch operations. Please check them out from [here](cli-tips.md#quick-patch-operations).
+It will change the value with given one. There are few option to do such quick patch operations. Please check them out from [here](cli-index.md#quick-patch-operations).
 

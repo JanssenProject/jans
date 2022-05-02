@@ -16,7 +16,7 @@ from org.xdi.oxauth.util import ServerUtil
 from io.jans.as.common.service.common import ConfigurationService
 from io.jans.as.common.service.common import EncryptionService
 from io.jans.jsf2.message import FacesMessages
-from javax.faces.application import FacesMessage
+from jakarta.faces.application import FacesMessage
 from io.jans.orm.exception import AuthenticationException
 
 #dealing with smtp server

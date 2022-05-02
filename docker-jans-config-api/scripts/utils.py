@@ -3,10 +3,8 @@ import os
 from urllib.parse import urlparse
 
 from jans.pycloudlib import get_manager
-from jans.pycloudlib.persistence.couchbase import get_couchbase_user
-from jans.pycloudlib.persistence.couchbase import get_couchbase_password
 from jans.pycloudlib.persistence.couchbase import CouchbaseClient
-from jans.pycloudlib.persistence.sql import SQLClient
+from jans.pycloudlib.persistence.sql import SqlClient
 from jans.pycloudlib.persistence.ldap import LdapClient
 from jans.pycloudlib.persistence.spanner import SpannerClient
 
@@ -27,10 +25,7 @@ class LdapPersistence:
 
 class CouchbasePersistence:
     def __init__(self, manager):
-        host = os.environ.get("CN_COUCHBASE_URL", "localhost")
-        user = get_couchbase_user(manager)
-        password = get_couchbase_password(manager)
-        self.client = CouchbaseClient(host, user, password)
+        self.client = CouchbaseClient(manager)
 
     def get_auth_config(self):
         bucket = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
@@ -48,7 +43,7 @@ class CouchbasePersistence:
 
 class SqlPersistence:
     def __init__(self, manager):
-        self.client = SQLClient()
+        self.client = SqlClient(manager)
 
     def get_auth_config(self):
         config = self.client.get(
@@ -61,7 +56,7 @@ class SqlPersistence:
 
 class SpannerPersistence(SqlPersistence):
     def __init__(self, manager):
-        self.client = SpannerClient()
+        self.client = SpannerClient(manager)
 
 
 def transform_url(url):

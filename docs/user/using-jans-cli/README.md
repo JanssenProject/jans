@@ -2,7 +2,7 @@
 
 ## [Command Line Interface](cli-index.md)
 
-* [Basic Information](cli-tips.md)
+* [Basic Information](cli-index.md#basic-command-line-switches)
 * [Attribute](cli-attribute.md)
 * [Default Authentication](cli-default-authentication-method.md)
 * [Cache Configuration](cli-cache-configuration.md)

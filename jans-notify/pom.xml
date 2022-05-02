@@ -13,7 +13,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.min-version>3.3.9</maven.min-version>
 
-		<janssen.version>1.0.0-SNAPSHOT</janssen.version>
+		<janssen.version>${project.version}</janssen.version>
 
 		<jacoco.version>0.8.7</jacoco.version>
 

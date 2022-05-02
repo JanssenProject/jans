@@ -6,14 +6,21 @@ This module contains classes and functions for interacting
 with Google Spanner database.
 """
 
+import hashlib
+import json
 import logging
 import os
 from contextlib import suppress
+from tempfile import NamedTemporaryFile
 
 from google.api_core.exceptions import AlreadyExists
 from google.api_core.exceptions import NotFound
 from google.api_core.exceptions import FailedPrecondition
 from google.cloud import spanner
+from ldif import LDIFParser
+
+from jans.pycloudlib.persistence.sql import doc_id_from_dn
+from jans.pycloudlib.utils import safe_render
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +29,7 @@ class SpannerClient:
     """Class to interact with Spanner database.
     """
 
-    def __init__(self):
+    def __init__(self, manager, *args, **kwargs):
         """Create instance of Spanner client.
 
         The following envvars are required:
@@ -34,13 +41,80 @@ class SpannerClient:
         - ``CN_GOOGLE_SPANNER_DATABASE_ID``: Spanner database ID
         """
 
-        project_id = os.environ.get("GOOGLE_PROJECT_ID", "")
-        client = spanner.Client(project=project_id)
-        instance_id = os.environ.get("CN_GOOGLE_SPANNER_INSTANCE_ID", "")
-        self.instance = client.instance(instance_id)
+        self.manager = manager
+        self.dialect = "spanner"
+        self.schema_files = [
+            "/app/schema/jans_schema.json",
+            "/app/schema/custom_schema.json",
+        ]
 
-        database_id = os.environ.get("CN_GOOGLE_SPANNER_DATABASE_ID", "")
-        self.database = self.instance.database(database_id)
+        self._client = None
+        self._instance = None
+        self._database = None
+
+        self._sql_data_types = {}
+        self._sql_data_types_mapping = {}
+        self._attr_types = []
+        self._opendj_attr_types = {}
+        self._sub_tables = {}
+
+    @property
+    def client(self):
+        if not self._client:
+            project_id = os.environ.get("GOOGLE_PROJECT_ID", "")
+            self._client = spanner.Client(project=project_id)
+        return self._client
+
+    @property
+    def instance(self):
+        if not self._instance:
+            instance_id = os.environ.get("CN_GOOGLE_SPANNER_INSTANCE_ID", "")
+            self._instance = self.client.instance(instance_id)
+        return self._instance
+
+    @property
+    def database(self):
+        if not self._database:
+            database_id = os.environ.get("CN_GOOGLE_SPANNER_DATABASE_ID", "")
+            self._database = self.instance.database(database_id)
+        return self._database
+
+    @property
+    def sql_data_types(self):
+        if not self._sql_data_types:
+            with open("/app/static/rdbm/sql_data_types.json") as f:
+                self._sql_data_types = json.loads(f.read())
+        return self._sql_data_types
+
+    @property
+    def sql_data_types_mapping(self):
+        if not self._sql_data_types_mapping:
+            with open("/app/static/rdbm/ldap_sql_data_type_mapping.json") as f:
+                self._sql_data_types_mapping = json.loads(f.read())
+        return self._sql_data_types_mapping
+
+    @property
+    def attr_types(self):
+        if not self._attr_types:
+            for fn in self.schema_files:
+                with open(fn) as f:
+                    schema = json.loads(f.read())
+                    self._attr_types += schema["attributeTypes"]
+        return self._attr_types
+
+    @property
+    def opendj_attr_types(self):
+        if not self._opendj_attr_types:
+            with open("/app/static/rdbm/opendj_attributes_syntax.json") as f:
+                self._opendj_attr_types = json.loads(f.read())
+        return self._opendj_attr_types
+
+    @property
+    def sub_tables(self):
+        if not self._sub_tables:
+            with open("/app/static/rdbm/sub_tables.json") as f:
+                self._sub_tables = json.loads(f.read()).get(self.dialect) or {}
+        return self._sub_tables
 
     def connected(self):
         """Check whether connection is alive by executing simple query.
@@ -228,6 +302,139 @@ class SpannerClient:
             )
             for row in result:
                 yield dict(zip(column_names, row))
+
+    def insert_into_subtable(self, table_name, column_mapping):
+        for column, value in column_mapping.items():
+            if not self.column_in_subtable(table_name, column):
+                continue
+
+            for item in value:
+                hashed = hashlib.sha256()
+                hashed.update(item.encode())
+                dict_doc_id = hashed.digest().hex()
+
+                self.insert_into(
+                    f"{table_name}_{column}",
+                    {
+                        "doc_id": column_mapping["doc_id"],
+                        "dict_doc_id": dict_doc_id,
+                        column: item
+                    },
+                )
+
+    def get_attr_syntax(self, attr):
+        for attr_type in self.attr_types:
+            if attr not in attr_type["names"]:
+                continue
+            if attr_type.get("multivalued"):
+                return "JSON"
+            return attr_type["syntax"]
+
+        # fallback to OpenDJ attribute type
+        return self.opendj_attr_types.get(attr) or "1.3.6.1.4.1.1466.115.121.1.15"
+
+    def _transform_value(self, key, values):
+        type_ = self.sql_data_types.get(key)
+
+        if not type_:
+            attr_syntax = self.get_attr_syntax(key)
+            type_ = self.sql_data_types_mapping[attr_syntax]
+
+        type_ = type_.get(self.dialect)
+        data_type = type_["type"]
+
+        if data_type in ("SMALLINT", "BOOL",):
+            if values[0].lower() in ("1", "on", "true", "yes", "ok"):
+                return 1 if data_type == "SMALLINT" else True
+            return 0 if data_type == "SMALLINT" else False
+
+        if data_type == "INT64":
+            return int(values[0])
+
+        if data_type in ("DATETIME(3)", "TIMESTAMP",):
+            dval = values[0].strip("Z")
+            sep = "T"
+            postfix = "Z"
+            return "{}-{}-{}{}{}:{}:{}{}{}".format(
+                dval[0:4],
+                dval[4:6],
+                dval[6:8],
+                sep,
+                dval[8:10],
+                dval[10:12],
+                dval[12:14],
+                dval[14:17],
+                postfix,
+            )
+
+        if data_type == "JSON":
+            return {"v": values}
+
+        if data_type == "ARRAY<STRING(MAX)>":
+            return values
+
+        # fallback
+        return values[0]
+
+    def _data_from_ldif(self, filename):
+        with open(filename, "rb") as fd:
+            parser = LDIFParser(fd)
+
+            for dn, entry in parser.parse():
+                doc_id = doc_id_from_dn(dn)
+
+                oc = entry.get("objectClass") or entry.get("objectclass")
+                if oc:
+                    if "top" in oc:
+                        oc.remove("top")
+
+                    if len(oc) == 1 and oc[0].lower() in ("organizationalunit", "organization"):
+                        continue
+
+                table_name = oc[-1]
+
+                # remove objectClass
+                entry.pop("objectClass", None)
+                entry.pop("objectclass", None)
+
+                attr_mapping = {
+                    "doc_id": doc_id,
+                    "objectClass": table_name,
+                    "dn": dn,
+                }
+
+                for attr in entry:
+                    # TODO: check if attr in sub table
+                    value = self._transform_value(attr, entry[attr])
+                    attr_mapping[attr] = value
+                yield table_name, attr_mapping
+
+    def create_from_ldif(self, filepath, ctx):
+        """Create entry with data loaded from an LDIF template file.
+
+        :param filepath: Path to LDIF template file.
+        :param ctx: Key-value pairs of context that rendered into LDIF template file.
+        """
+
+        with open(filepath) as src, NamedTemporaryFile("w+") as dst:
+            dst.write(safe_render(src.read(), ctx))
+            # ensure rendered template is written
+            dst.flush()
+
+            for table_name, column_mapping in self._data_from_ldif(dst.name):
+                self.insert_into(table_name, column_mapping)
+                self.insert_into_subtable(table_name, column_mapping)
+
+    def column_in_subtable(self, table_name, column):
+        exists = False
+
+        # column_mapping is a list
+        column_mapping = self.sub_tables.get(table_name, [])
+        for cm in column_mapping:
+            if column == cm[0]:
+                exists = True
+                break
+        return exists
 
 
 def render_spanner_properties(manager, src: str, dest: str) -> None:

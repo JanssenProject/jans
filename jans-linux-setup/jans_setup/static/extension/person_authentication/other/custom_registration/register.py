@@ -12,7 +12,7 @@ from io.jans.as.server.service import UserService, AuthenticationService
 from io.jans.as.server.util import ServerUtil
 from io.jans.util import StringHelper, ArrayHelper
 from java.util import Arrays
-from javax.faces.application import FacesMessage
+from jakarta.faces.application import FacesMessage
 from io.jans.jsf2.message import FacesMessages
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText

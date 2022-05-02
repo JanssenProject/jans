@@ -14,7 +14,7 @@ import io.jans.as.model.uma.UmaTestUtil;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import javax.ws.rs.ClientErrorException;
+import jakarta.ws.rs.ClientErrorException;
 
 /**
  * Test cases for getting meta data configuration flow (HTTP)
