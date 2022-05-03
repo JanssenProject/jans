@@ -74,7 +74,7 @@ class SetupUtils(Crypto64):
 
         bc = 1
         while True:
-            backupFile_fn = destFile+'.jans-{0}-{1}~'.format(Config.currentJansVersion, bc)
+            backupFile_fn = destFile+'.jans-{0}-{1}~'.format(base.current_app.app_info['JANS_APP_VERSION'], bc)
             if not os.path.exists(backupFile_fn):
                 break
             bc += 1
@@ -246,30 +246,17 @@ class SetupUtils(Crypto64):
         except:
             self.logIt("Error copying %s to %s" % (inFile, destFolder), True)
 
-    def copyTree(self, src, dst, overwrite=False):
-        try:
-            if not os.path.exists(dst):
-                os.makedirs(dst)
-
-            for item in os.listdir(src):
-                s = os.path.join(src, item)
-                d = os.path.join(dst, item)
-                if os.path.isdir(s):
-                    self.copyTree(s, d, overwrite)
-                else:
-                    if overwrite and os.path.exists(d):
-                        self.removeFile(d)
-
-                    if not os.path.exists(d) or os.stat(s).st_mtime - os.stat(d).st_mtime > 1:
-                        with open(s, 'rb') as fi:
-                            cur_content = fi.read()
-                        self.backupFile(s, d, cur_content=cur_content)    
-                        shutil.copy2(s, d)
-                        
-
-            self.logIt("Copied tree %s to %s" % (src, dst))
-        except:
-            self.logIt("Error copying tree %s to %s" % (src, dst), True)
+    def copy_tree(self, src, dest, ignore=[]):
+        self.logIt("Copying directory {} to {}".format(src, dest))
+        if os.path.isdir(src):
+            if not os.path.isdir(dest):
+                os.makedirs(dest)
+            files = os.listdir(src)
+            for f in files:
+                if f not in ignore:
+                    self.copy_tree(os.path.join(src, f), os.path.join(dest, f), ignore)
+        else:
+            shutil.copyfile(src, dest)
 
     def createDirs(self, name):
         try:
@@ -367,8 +354,8 @@ class SetupUtils(Crypto64):
 
     def getMappingType(self, mtype):
         location = []
-        for group in Config.mappingLocations:
-            if group != 'default' and Config.mappingLocations[group] == mtype:
+        for group in Config.mapping_locations:
+            if group != 'default' and Config.mapping_locations[group] == mtype:
                 location.append(group)
 
         return location
@@ -398,15 +385,15 @@ class SetupUtils(Crypto64):
         return text % dictionary
 
 
-    def renderTemplateInOut(self, filePath, templateFolder, outputFolder, me='', pystring=False):
-        fn = os.path.basename(filePath)
-        in_fp = os.path.join(templateFolder, fn) 
+    def renderTemplateInOut(self, file_path, template_folder, output_dir, pystring=False):
+        fn = os.path.basename(file_path)
+        in_fp = os.path.join(template_folder, fn) 
         self.logIt("Rendering template %s" % in_fp)
         template_text = self.readFile(in_fp)
 
         # Create output folder if needed
-        if not os.path.exists(outputFolder):
-            os.makedirs(outputFolder)
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
 
         format_dict = self.merge_dicts(Config.__dict__, Config.templateRenderingDict)
         for k in format_dict:
@@ -417,12 +404,12 @@ class SetupUtils(Crypto64):
             rendered_text = Template(template_text).substitute(format_dict)
         else:
             rendered_text = self.fomatWithDict(template_text, format_dict)
-        out_fp = os.path.join(outputFolder, fn)
+        out_fp = os.path.join(output_dir, fn)
 
         self.writeFile(out_fp, rendered_text)
 
     def renderTemplate(self, filePath):
-        self.renderTemplateInOut(filePath, Config.templateFolder, Config.outputFolder)
+        self.renderTemplateInOut(filePath, Config.templateFolder, Config.output_dir)
 
     def createUser(self, userName, homeDir, shell='/bin/bash'):
 
@@ -530,16 +517,16 @@ class SetupUtils(Crypto64):
                 output_dir = rp.parent
                 template_name = rp.name
 
-                fullOutputDir = Path(Config.outputFolder, output_dir)
-                fullOutputFile = Path(Config.outputFolder, rp)
+                full_output_dir = Path(Config.output_dir, output_dir)
+                full_output_file = Path(Config.output_dir, rp)
 
-                if not fullOutputDir.exists():
-                    fullOutputDir.mkdir(parents=True, exist_ok=True)
+                if not full_output_dir.exists():
+                    full_output_dir.mkdir(parents=True, exist_ok=True)
 
                 template_text = te.read_text()
                 rendered_text = template_text % self.merge_dicts(Config.templateRenderingDict, Config.__dict__)
-                self.logIt("Writing rendered template {}".format(fullOutputFile))
-                fullOutputFile.write_text(rendered_text)
+                self.logIt("Writing rendered template {}".format(full_output_file))
+                full_output_file.write_text(rendered_text)
 
     def add_yacron_job(self, command, schedule, name=None, args={}):
         import ruamel.yaml
@@ -580,3 +567,11 @@ class SetupUtils(Crypto64):
             if self.port_used(port):
                 ports.append(port)
         return ports
+
+    def chown(self, fn, user, group=None, recursive=False):
+        cmd = [paths.cmd_chown]
+        if recursive:
+            cmd.append('-R')
+        usr_grp = '{}:{}'.format(user, group) if group else user
+        cmd += [usr_grp, fn]
+        self.run(cmd)

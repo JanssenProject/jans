@@ -3,12 +3,15 @@ import os
 import time
 import pprint
 import inspect
+import json
 from collections import OrderedDict
 
 from setup_app.paths import INSTALL_DIR, LOG_DIR
 from setup_app.static import InstallTypes
 from setup_app.utils.printVersion import get_war_info
 from setup_app.utils import base
+
+OPENBANKING_PROFILE = 'openbanking'
 
 class Config:
 
@@ -21,31 +24,25 @@ class Config:
     oxBaseDataFolder = '/var/jans'
     etc_hosts = '/etc/hosts'
     etc_hostname = '/etc/hostname'
-    osDefault = '/etc/default'
+    os_default = '/etc/default'
     sysemProfile = '/etc/profile'
     jython_home = '/opt/jython'
-    ldapBaseFolder = '/opt/opendj'
+    ldap_base_dir = '/opt/opendj'
     network = '/etc/sysconfig/network'
     jetty_home = '/opt/jetty'
     node_home = '/opt/node'
-    outputFolder = None
+    output_dir = None
     jetty_base = os.path.join(jansOptFolder, 'jetty')
+    dist_app_dir = os.path.join(distFolder, 'app')
+    dist_jans_dir = os.path.join(distFolder, 'jans')
+
     installed_instance = False
-    profile = 'jans'
+
 
     @classmethod
     def get(self, attr, default=None):
         return getattr(self, attr) if hasattr(self, attr) else default
 
-
-    @classmethod
-    def determine_version(self):
-        oxauth_info = get_war_info(os.path.join(self.distJansFolder, 'jans-auth.war'))
-        self.oxVersion = oxauth_info['version']
-        self.currentJansVersion = re.search('([\d.]+)', oxauth_info['version']).group().strip('.')
-        self.githubBranchName = oxauth_info['branch']
-
-        self.ce_setup_zip = 'https://github.com/JanssenProject/jans-setup/archive/%s.zip' % self.githubBranchName
 
     @classmethod
     def dump(self, dumpFile=False):
@@ -79,16 +76,21 @@ class Config:
     def init(self, install_dir=INSTALL_DIR):
 
         self.install_dir = install_dir
-        self.data_dir = os.path.join(Config.install_dir, 'setup_app/data')
-        self.thread_queue = None
-        self.jetty_user = 'jetty'
-        self.dump_config_on_error = False
-        if not self.outputFolder:
-            self.outputFolder = os.path.join(install_dir, 'output')
+        self.data_dir = os.path.join(self.install_dir, 'setup_app/data')
+        self.profile = base.current_app.profile 
 
-        self.ldapBinFolder = os.path.join(self.ldapBaseFolder, 'bin')
+        self.thread_queue = None
+        self.jetty_user = self.jetty_group = 'jetty'
+        self.root_user = self.root_group = 'root'
+        self.ldap_user = self.ldap_group = 'ldap'
+
+        self.dump_config_on_error = False
+        if not self.output_dir:
+            self.output_dir = os.path.join(install_dir, 'output')
+
+        self.ldap_bin_dir = os.path.join(self.ldap_base_dir, 'bin')
         if base.snap:
-            self.ldapBaseFolder = os.path.join(base.snap_common, 'opendj')
+            self.ldap_base_dir = os.path.join(base.snap_common, 'opendj')
             self.jetty_user = 'root'
 
         #create dummy progress bar that logs to file in case not defined
@@ -115,8 +117,8 @@ class Config:
         self.properties_password = None
         self.noPrompt = False
 
-        self.distAppFolder = os.path.join(self.distFolder, 'app')
-        self.distJansFolder = os.path.join(self.distFolder, 'jans')
+        self.dist_app_dir = os.path.join(self.distFolder, 'app')
+        self.dist_jans_dir = os.path.join(self.distFolder, 'jans')
         self.distTmpFolder = os.path.join(self.distFolder, 'tmp')
 
         self.downloadWars = None
@@ -134,6 +136,12 @@ class Config:
         self.cmd_jar = os.path.join(self.jre_home, 'bin/jar')
         os.environ['OPENDJ_JAVA_HOME'] =  self.jre_home
 
+        if self.profile == OPENBANKING_PROFILE:
+            self.use_external_key = True
+            self.ob_key_fn = '/root/obsigning-axV5umCvTMBMjPwjFQgEvb_NO_UPLOAD.key'
+            self.ob_cert_fn = '/root/obsigning.pem'
+            self.ob_alias = 'GkwIzWy88xWSlcWnLiEc8ip9s2M'
+
         # Component ithversions
         self.apache_version = None
         self.opendj_version = None
@@ -148,17 +156,17 @@ class Config:
         #DB installation types
         self.opendj_install = InstallTypes.LOCAL
         self.cb_install = InstallTypes.NONE
-        self.rdbm_install = False
-        
+        self.rdbm_install = InstallTypes.LOCAL if self.profile == OPENBANKING_PROFILE else False
+
         self.couchbase_buckets = []
-        
+
         #rdbm
-        self.rdbm_install_type = InstallTypes.NONE
+        self.rdbm_install_type = InstallTypes.LOCAL if self.profile == OPENBANKING_PROFILE else InstallTypes.NONE
         self.rdbm_type = 'mysql'
         self.rdbm_host = 'localhost'
         self.rdbm_port = 3306
-        self.rdbm_db = 'jans'
-        self.rdbm_user = None
+        self.rdbm_db = 'jansdb'
+        self.rdbm_user = 'jans'
         self.rdbm_password = None
         self.static_rdbm_dir = os.path.join(self.install_dir, 'static/rdbm')
 
@@ -179,16 +187,15 @@ class Config:
         self.installOxTrust = True
         self.installHttpd = True
         self.installSaml = False
-        self.installOxAuthRP = False
         self.installPassport = False
         self.installJansRadius = False
-        self.installScimServer = True
+        self.install_scim_server = True
         self.installFido2 = True
-        self.installConfigApi = True
+        self.install_config_api = True
         self.installCasa = False
         self.installOxd = False
         self.installEleven = False
-        self.installJansCli = False
+        self.install_jans_cli = True
         self.loadTestData = False
         self.allowPreReleasedFeatures = False
 
@@ -197,7 +204,7 @@ class Config:
         self.os_version = base.os_version
         self.os_initdaemon = base.os_initdaemon
 
-        self.persistence_type = 'ldap'
+        self.persistence_type = 'sql' if self.profile == OPENBANKING_PROFILE else 'ldap'
 
         self.setup_properties_fn = os.path.join(self.install_dir, 'setup.properties')
         self.savedProperties = os.path.join(self.install_dir, 'setup.properties.last')
@@ -228,8 +235,6 @@ class Config:
         self.jans_max_mem = int(base.current_mem_size * .85 * 1000) # 85% of physical memory
         self.calculate_mem()
 
-        self.ldapBaseFolderldapPass = None
-
         self.templateFolder = os.path.join(self.install_dir, 'templates')
         self.staticFolder = os.path.join(self.install_dir, 'static')
 
@@ -240,7 +245,7 @@ class Config:
         self.ldapCertFn = self.opendj_cert_fn = os.path.join(self.certFolder, 'opendj.crt')
         self.ldapTrustStoreFn = self.opendj_p12_fn = os.path.join(self.certFolder, 'opendj.p12')
 
-        self.oxd_package = base.determine_package(os.path.join(self.distJansFolder, 'oxd-server*.tgz'))
+        self.oxd_package = base.determine_package(os.path.join(self.dist_jans_dir, 'oxd-server*.tgz'))
 
         self.opendj_p12_pass = None
 
@@ -251,7 +256,7 @@ class Config:
         self.ldaps_port = '1636'
         self.ldap_admin_port = '4444'
 
-        self.ldap_user_home = self.ldapBaseFolder
+        self.ldap_user_home = self.ldap_base_dir
         self.ldapPassFn = os.path.join(self.ldap_user_home, '.pw')
         self.ldap_backend_type = 'je'
 
@@ -266,7 +271,6 @@ class Config:
         self.defaultTrustStoreFN = os.path.join(self.jre_home, 'jre/lib/security/cacerts')
         self.defaultTrustStorePW = 'changeit'
 
-
         # Stuff that gets rendered; filename is necessary. Full path should
         # reflect final path if the file must be copied after its rendered.
 
@@ -276,16 +280,16 @@ class Config:
         self.jansRDBMProperties = os.path.join(self.configFolder, 'jans-sql.properties')
         self.jansSpannerProperties = os.path.join(self.configFolder, 'jans-spanner.properties')
 
-        self.ldif_base = os.path.join(self.outputFolder, 'base.ldif')
-        self.ldif_attributes = os.path.join(self.outputFolder, 'attributes.ldif')
-        self.ldif_scopes = os.path.join(self.outputFolder, 'scopes.ldif')
+        self.ldif_base = os.path.join(self.output_dir, 'base.ldif')
+        self.ldif_attributes = os.path.join(self.output_dir, 'attributes.ldif')
+        self.ldif_scopes = os.path.join(self.output_dir, 'scopes.ldif')
 
         self.ldif_metric = os.path.join(self.staticFolder, 'metric/o_metric.ldif')
         self.ldif_site = os.path.join(self.install_dir, 'static/cache-refresh/o_site.ldif')
-        self.ldif_configuration = os.path.join(self.outputFolder, 'configuration.ldif')
+        self.ldif_configuration = os.path.join(self.output_dir, 'configuration.ldif')
 
-        self.system_profile_update_init = os.path.join(self.outputFolder, 'system_profile_init')
-        self.system_profile_update_systemd = os.path.join(self.outputFolder, 'system_profile_systemd')
+        self.system_profile_update_init = os.path.join(self.output_dir, 'system_profile_init')
+        self.system_profile_update_systemd = os.path.join(self.output_dir, 'system_profile_systemd')
 
         ### rsyslog file customised for init.d
         self.rsyslogUbuntuInitFile = os.path.join(self.install_dir, 'static/system/ubuntu/rsyslog')
@@ -293,7 +297,11 @@ class Config:
 
         # OpenID key generation default setting
         self.default_openid_jks_dn_name = 'CN=Jans Auth CA Certificates'
-        self.default_sig_key_algs = 'RS256 RS384 RS512 ES256 ES256K ES384 ES512 PS256 PS384 PS512'
+        if self.profile == OPENBANKING_PROFILE:
+            self.default_key_algs = 'RS256 RS384 RS512 ES256 ES384 ES512'
+        else:
+            self.default_sig_key_algs = 'RS256 RS384 RS512 ES256 ES256K ES384 ES512 PS256 PS384 PS512'
+
         self.default_enc_key_algs = 'RSA1_5 RSA-OAEP ECDH-ES'
         self.default_key_expiration = 365
 
@@ -309,16 +317,19 @@ class Config:
 
 
         self.ce_templates = {
-                             self.jans_python_readme: True,
-                             self.ox_ldap_properties: True,
-                             self.ldap_setup_properties: False,
+                            self.jans_python_readme: True,
                              self.etc_hostname: False,
+                             self.network: False,
+                             self.jans_properties_fn: True,
                              self.ldif_base: False,
                              self.ldif_attributes: False,
                              self.ldif_scopes: False,
-                             self.network: False,
-                             self.jans_properties_fn: True,
                              }
+
+        if self.profile != OPENBANKING_PROFILE:
+            self.ce_templates[self.ox_ldap_properties] = True
+            self.ce_templates[self.ldap_setup_properties] = False
+
 
         self.service_requirements = {
                         'opendj': ['', 70],
@@ -384,10 +395,15 @@ class Config:
 
                     ))
 
-        self.mappingLocations = { group: 'ldap' for group in self.couchbaseBucketDict }  #default locations are OpenDJ
-        self.non_setup_properties = {
-            'oxauth_client_jar_fn': os.path.join(self.distJansFolder, 'jans-auth-client-jar-with-dependencies.jar')
-                }
-        Config.addPostSetupService = []
+        if self.profile == OPENBANKING_PROFILE:
+            #default locations are rdbm
+            self.mapping_locations = {'default': 'rdbm'}
+        else:
+            #default locations are OpenDJ
+            self.mapping_locations = { group: 'ldap' for group in self.couchbaseBucketDict }
 
-    
+        self.non_setup_properties = {
+            'oxauth_client_jar_fn': os.path.join(self.dist_jans_dir, 'jans-auth-client-jar-with-dependencies.jar')
+                }
+
+        Config.addPostSetupService = []
