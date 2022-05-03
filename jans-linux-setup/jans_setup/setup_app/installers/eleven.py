@@ -12,6 +12,10 @@ from setup_app.installers.jetty import JettyInstaller
 
 class ElevenInstaller(JettyInstaller):
 
+    source_files = [
+            (os.path.join(Config.dist_jans_dir, 'jans-eleven.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-eleven-server/{0}/jans-eleven-server-{0}.war').format(base.current_app.app_info['ox_version']))
+            ]
+
     def __init__(self):
         setattr(base.current_app, self.__class__.__name__, self)
         self.service_name = 'jans-eleven'
@@ -21,11 +25,8 @@ class ElevenInstaller(JettyInstaller):
         self.install_var = 'installEleven'
         self.register_progess()
 
-        self.source_files = [
-                (os.path.join(Config.distJansFolder, 'jans-eleven.war'), 'https://jenkins.jans.io/maven/io/jans/jans-eleven-server/{0}/jans-eleven-server-{0}.war'.format(Config.oxVersion))
-                ]
 
-        self.output_folder = os.path.join(Config.outputFolder, 'jans-eleven')
+        self.output_folder = os.path.join(Config.output_dir, 'jans-eleven')
         self.template_folder = os.path.join(Config.templateFolder, 'jans-eleven')
         self.eleven_conf_json = os.path.join(self.output_folder, 'jans-eleven.json')
     

@@ -70,7 +70,7 @@ from ldap.schema.models import AttributeType, ObjectClass
 
 jansInstaller.createLdapPw()
 
-current_ldif_fn = os.path.join(Config.outputFolder, 'current_data.ldif')
+current_ldif_fn = os.path.join(Config.output_dir, 'current_data.ldif')
 
 print("Dumping all database from LDAP to {}. This may take a while...".format(current_ldif_fn))
 
@@ -157,7 +157,7 @@ for a in rdbm_config_params:
 Config.opendj_install = static.InstallTypes.NONE
 Config.rdbm_install = static.InstallTypes.REMOTE
 
-Config.mappingLocations = { group: 'rdbm' for group in Config.couchbaseBucketDict }
+Config.mapping_locations = { group: 'rdbm' for group in Config.couchbaseBucketDict }
 
 rdbmInstaller.dbUtils.bind(force=True)
 propertiesUtils.set_persistence_type()
