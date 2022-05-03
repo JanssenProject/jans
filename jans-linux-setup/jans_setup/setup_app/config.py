@@ -128,6 +128,7 @@ class Config:
                                         'oxauthClient_4_inum': 'FF81-2D39',
                                         'idp_attribute_resolver_ldap.search_filter': '(|(uid=$requestContext.principalName)(mail=$requestContext.principalName))',
                                         'oxd_port': '8443',
+                                        'server_time_zone': 'UTC' + time.strftime("%z"),
                                      }
 
         # java commands
