@@ -132,6 +132,20 @@ class JansInstaller(BaseInstaller, SetupUtils):
         if Config.persistence_type == 'hybrid':
             self.writeHybridProperties()
 
+        # set systemd start timeout to 5 mins
+        systemd_conf_fn = '/etc/systemd/system.conf'
+        systemd_conf = []
+
+        for l in open(systemd_conf_fn):
+            tl = l.strip('#').strip()
+            if tl.startswith('DefaultTimeoutStartSec'):
+                systemd_conf.append('DefaultTimeoutStartSec=300s\n')
+            else:
+                systemd_conf.append(l)
+
+        self.writeFile(systemd_conf_fn, ''.join(systemd_conf))
+
+
     def makeFolders(self):
         # Create these folder on all instances
         for folder in (Config.jansOptFolder, Config.jansOptBinFolder, Config.jansOptSystemFolder,
