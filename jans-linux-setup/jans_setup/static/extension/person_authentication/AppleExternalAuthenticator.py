@@ -8,7 +8,7 @@ from io.jans.as.server.util import ServerUtil
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.model.security import Identity
 from io.jans.as.common.model.common import User
-from javax.faces.context import FacesContext
+from jakarta.faces.context import FacesContext
 from io.jans.as.server.service.net import HttpService
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from io.jans.as.server.service import AuthenticationService, UserService
