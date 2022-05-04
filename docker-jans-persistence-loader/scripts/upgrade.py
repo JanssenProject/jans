@@ -7,14 +7,10 @@ from collections import namedtuple
 
 from ldif import LDIFParser
 
-from jans.pycloudlib.persistence.couchbase import get_couchbase_user
-from jans.pycloudlib.persistence.couchbase import get_couchbase_superuser
-from jans.pycloudlib.persistence.couchbase import get_couchbase_password
-from jans.pycloudlib.persistence.couchbase import get_couchbase_superuser_password
 from jans.pycloudlib.persistence.couchbase import CouchbaseClient
 from jans.pycloudlib.persistence.ldap import LdapClient
 from jans.pycloudlib.persistence.spanner import SpannerClient
-from jans.pycloudlib.persistence.sql import SQLClient
+from jans.pycloudlib.persistence.sql import SqlClient
 from jans.pycloudlib.utils import as_boolean
 
 from settings import LOGGING_CONFIG
@@ -60,8 +56,14 @@ JANS_STAT_SCOPE_DN = "inum=C4F7,ou=scopes,o=jans"
 
 def _transform_auth_dynamic_config(conf):
     should_update = False
+    distribution = os.environ.get("CN_DISTRIBUTION", "default")
 
-    if os.environ.get("CN_DISTRIBUTION", "default") == "openbanking":
+    if "redirectUrisRegexEnabled" not in conf:
+        # enable only if not using openbanking distro
+        conf["redirectUrisRegexEnabled"] = bool(distribution != "openbanking")
+        should_update = True
+
+    if distribution == "openbanking":
         if "dcrAuthorizationWithMTLS" not in conf:
             conf["dcrAuthorizationWithMTLS"] = False
             should_update = True
@@ -81,6 +83,14 @@ def _transform_auth_dynamic_config(conf):
 
         if "private_key_jwt" not in conf["tokenEndpointAuthMethodsSupported"]:
             conf["tokenEndpointAuthMethodsSupported"].append("private_key_jwt")
+            should_update = True
+
+        if "forceSignedRequestObject" not in conf:
+            conf["forceSignedRequestObject"] = False
+            should_update = True
+
+        if conf["redirectUrisRegexEnabled"]:
+            conf["redirectUrisRegexEnabled"] = False
             should_update = True
 
     if "grantTypesAndResponseTypesAutofixEnabled" not in conf:
@@ -108,16 +118,19 @@ def _transform_auth_dynamic_config(conf):
         ))
         should_update = True
 
-    if "redirectUrisRegexEnabled" not in conf:
-        conf["redirectUrisRegexEnabled"] = True
-        should_update = True
-
     if "useHighestLevelScriptIfAcrScriptNotFound" not in conf:
         conf["useHighestLevelScriptIfAcrScriptNotFound"] = True
         should_update = True
 
     if "httpLoggingExcludePaths" not in conf:
         conf["httpLoggingExcludePaths"] = conf.pop("httpLoggingExludePaths", [])
+        should_update = True
+
+    if all([
+        os.environ.get("CN_PERSISTENCE_TYPE") in ("sql", "spanner"),
+        conf["personCustomObjectClassList"]
+    ]):
+        conf["personCustomObjectClassList"] = []
         should_update = True
 
     # return the conf and flag to determine whether it needs update or not
@@ -216,7 +229,7 @@ class LDAPBackend:
 class SQLBackend:
     def __init__(self, manager):
         self.manager = manager
-        self.client = SQLClient()
+        self.client = SqlClient(manager)
         self.type = "sql"
 
     def get_entry(self, key, filter_="", attrs=None, **kwargs):
@@ -236,15 +249,7 @@ class SQLBackend:
 class CouchbaseBackend:
     def __init__(self, manager):
         self.manager = manager
-        hostname = os.environ.get("CN_COUCHBASE_URL", "localhost")
-        user = get_couchbase_superuser(manager) or get_couchbase_user(manager)
-
-        password = ""
-        with contextlib.suppress(FileNotFoundError):
-            password = get_couchbase_superuser_password(manager)
-        password = password or get_couchbase_password(manager)
-
-        self.client = CouchbaseClient(hostname, user, password)
+        self.client = CouchbaseClient(manager)
         self.type = "couchbase"
 
     def get_entry(self, key, filter_="", attrs=None, **kwargs):
@@ -315,7 +320,7 @@ class CouchbaseBackend:
 class SpannerBackend:
     def __init__(self, manager):
         self.manager = manager
-        self.client = SpannerClient()
+        self.client = SpannerClient(manager)
         self.type = "spanner"
 
     def get_entry(self, key, filter_="", attrs=None, **kwargs):
@@ -675,10 +680,16 @@ class Upgrade:
                 api_admin_perms = api_role["permissions"]
                 break
 
-        # current permissions
-        current_role_mapping = json.loads(entry.attrs["jansConfDyn"])
+        try:
+            current_role_mapping = json.loads(entry.attrs["jansConfDyn"])
+        except TypeError:
+            current_role_mapping = entry.attrs["jansConfDyn"]
+
         should_update = False
 
+        # check for rolePermissionMapping
+        #
+        # - compare role permissions for api-admin
         for i, api_role in enumerate(current_role_mapping["rolePermissionMapping"]):
             if api_role["role"] == "api-admin":
                 # compare permissions between the ones from persistence (current) and newer permissions
@@ -686,6 +697,30 @@ class Upgrade:
                     current_role_mapping["rolePermissionMapping"][i]["permissions"] = api_admin_perms
                     should_update = True
                 break
+
+        # check for permissions
+        #
+        # - add new permission if not exist
+        # - add defaultPermissionInToken (if not exist) in each permission
+
+        # determine current permission with index/position
+        current_perms = {
+            permission["permission"]: {"index": i}
+            for i, permission in enumerate(current_role_mapping["permissions"])
+        }
+
+        for perm in role_mapping["permissions"]:
+            if perm["permission"] not in current_perms:
+                # add missing permission
+                current_role_mapping["permissions"].append(perm)
+                should_update = True
+            else:
+                # add missing defaultPermissionInToken
+                index = current_perms[perm["permission"]]["index"]
+                if "defaultPermissionInToken" in current_role_mapping["permissions"][index]:
+                    continue
+                current_role_mapping["permissions"][index]["defaultPermissionInToken"] = perm["defaultPermissionInToken"]
+                should_update = True
 
         if should_update:
             entry.attrs["jansConfDyn"] = json.dumps(current_role_mapping)

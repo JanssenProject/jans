@@ -96,6 +96,12 @@ public class RedirectUri {
         }
     }
 
+    public void addResponseParameterIfNotBlank(String key, String value) {
+        if (StringUtils.isNotBlank(value)) {
+            addResponseParameter(key, value);
+        }
+    }
+
     @Nullable
     public String getResponseParameter(@NotNull String key) {
         return responseParameters.get(key);

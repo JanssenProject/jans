@@ -13,10 +13,10 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
 import java.security.UnrecoverableEntryException;
 
-import javax.inject.Inject;
-import javax.ws.rs.Path;
-import javax.ws.rs.core.CacheControl;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.core.CacheControl;
+import jakarta.ws.rs.core.Response;
 
 import io.jans.eleven.model.SignRequestParam;
 import io.jans.eleven.model.SignResponseParam;

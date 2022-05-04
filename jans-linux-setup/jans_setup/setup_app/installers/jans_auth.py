@@ -25,12 +25,12 @@ class JansAuthInstaller(JettyInstaller):
         self.register_progess()
 
         self.source_files = [
-                    (os.path.join(Config.distJansFolder, 'jans-auth.war'), 'https://ox.gluu.org/maven/org/gluu/oxauth-server/%s/oxauth-server-%s.war' % (Config.oxVersion, Config.oxVersion)),
-                    (os.path.join(Config.distJansFolder, 'jans-auth-rp.war'), 'https://ox.gluu.org/maven/org/gluu/jans-auth-rp/%s/jans-auth-rp-%s.war' % (Config.oxVersion, Config.oxVersion))
+                    (os.path.join(Config.dist_jans_dir, 'jans-auth.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-auth-server/{0}/jans-auth-server-{0}.war'.format(base.current_app.app_info['ox_version']))),
+                    (os.path.join(Config.dist_jans_dir, 'jans-auth-client-jar-with-dependencies.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-auth-client/{0}/jans-auth-client-{0}-jar-with-dependencies.jar'.format(base.current_app.app_info['ox_version']))),
                     ]
 
         self.templates_folder = os.path.join(Config.templateFolder, self.service_name)
-        self.output_folder = os.path.join(Config.outputFolder, self.service_name)
+        self.output_folder = os.path.join(Config.output_dir, self.service_name)
 
         self.ldif_config = os.path.join(self.output_folder, 'configuration.ldif')
         self.ldif_role_scope_mappings = os.path.join(self.output_folder, 'role-scope-mappings.ldif')
@@ -52,7 +52,6 @@ class JansAuthInstaller(JettyInstaller):
 
         jettyServiceWebapps = os.path.join(self.jetty_base, self.service_name, 'webapps')
         self.copyFile(self.source_files[0][0], jettyServiceWebapps)
-        self.war_for_jetty10(os.path.join(jettyServiceWebapps, os.path.basename(self.source_files[0][0])))
 
         self.enable()
 
@@ -112,7 +111,7 @@ class JansAuthInstaller(JettyInstaller):
 
         self.role_scope_mappings()
 
-        Config.templateRenderingDict['person_custom_object_class_list'] = '[]' if Config.mappingLocations['default'] == 'rdbm' else '["jansCustomPerson", "jansPerson"]'
+        Config.templateRenderingDict['person_custom_object_class_list'] = '[]' if Config.mapping_locations['default'] == 'rdbm' else '["jansCustomPerson", "jansPerson"]'
 
         templates = [self.oxauth_config_json]
         if Config.profile == 'jans':
@@ -126,8 +125,8 @@ class JansAuthInstaller(JettyInstaller):
         Config.templateRenderingDict['oxauth_error_base64'] = self.generate_base64_ldap_file(self.oxauth_error_json)
         Config.templateRenderingDict['oxauth_openid_key_base64'] = self.generate_base64_ldap_file(self.oxauth_openid_jwks_fn)
 
-        self.ldif_scripts = os.path.join(Config.outputFolder, 'scripts.ldif')
-        self.renderTemplateInOut(self.ldif_scripts, Config.templateFolder, Config.outputFolder)
+        self.ldif_scripts = os.path.join(Config.output_dir, 'scripts.ldif')
+        self.renderTemplateInOut(self.ldif_scripts, Config.templateFolder, Config.output_dir)
         for temp in (self.ldif_config, self.ldif_role_scope_mappings):
             self.renderTemplateInOut(temp, self.templates_folder, self.output_folder)
 
@@ -136,21 +135,6 @@ class JansAuthInstaller(JettyInstaller):
             self.dbUtils.import_ldif([self.ldif_people, self.ldif_groups])
         if Config.profile == 'openbanking':
             self.import_openbanking_certificate()
-
-    def install_oxauth_rp(self):
-        self.download_files(downloads=[self.source_files[1][0]])
-
-        Config.pbar.progress(self.service_name, "Installing OxAuthRP", False)
-
-        self.logIt("Copying jans-auth-rp.war into jetty webapps folder...")
-
-        jettyServiceName = 'jans-auth-rp'
-        self.installJettyService(self.jetty_app_configuration[jettyServiceName])
-
-        jettyServiceWebapps = os.path.join(self.jetty_base, jettyServiceName, 'webapps')
-        self.copyFile(self.source_files[1][0], jettyServiceWebapps)
-
-        self.enable('jans-auth-rp')
 
     def genRandomString(self, N):
         return ''.join(random.SystemRandom().choice(string.ascii_lowercase

@@ -14,8 +14,8 @@ import io.jans.as.model.exception.InvalidParameterException;
 import org.apache.commons.lang.StringUtils;
 import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
 import java.util.List;
 
 /**

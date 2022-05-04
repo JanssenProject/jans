@@ -48,10 +48,10 @@ installLdap=True
 application_max_ram=
 
 ### If you want to install Janssen Config Api, set this to True
-installConfigApi=
+install_config_api=
 
 ### If you want to install Fido2 Server, set this to True
 installFido2=
 
 ### If you want to install Scim Server, set this to True
-installScimServer=
+install_scim_server=

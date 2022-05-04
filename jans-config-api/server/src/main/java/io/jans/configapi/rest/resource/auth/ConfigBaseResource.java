@@ -10,7 +10,7 @@ import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.configuration.ConfigurationFactory;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 

@@ -1,4 +1,4 @@
-FROM alpine:3.14.4
+FROM alpine:3.15.4
 
 # ===============
 # Alpine packages
@@ -6,23 +6,24 @@ FROM alpine:3.14.4
 
 RUN apk update \
     && apk upgrade \
-    && apk add --no-cache py3-pip curl tini py3-cryptography py3-psycopg2 \
-    && apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/v3.15/community py3-grpcio \
-    && apk add --no-cache --virtual build-deps git wget
+    && apk add --no-cache python3 curl tini py3-cryptography py3-psycopg2 py3-grpcio \
+    && apk add --no-cache --virtual .build-deps git wget
 
 # ======
 # Python
 # ======
 
 COPY requirements.txt /app/requirements.txt
-RUN pip3 install --no-cache-dir -U pip wheel \
-    && pip3 install --no-cache-dir --default-timeout=300 -r /app/requirements.txt
+RUN python3 -m ensurepip \
+    && pip3 install --no-cache-dir -U pip wheel \
+    && pip3 install --no-cache-dir --default-timeout=300 -r /app/requirements.txt \
+    && pip3 uninstall -y pip wheel
 
 # =====================
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_LINUX_SETUP_VERSION=f241cdfd569daf054c844978ee868f1879442dbf
+ENV JANS_LINUX_SETUP_VERSION=eb113d09421b95671fe1ab4eaa5c4bafc2aed6af
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -64,10 +65,6 @@ RUN cd /tmp/jans \
 # Download jans-config-api-swagger for role_scope_mapping
 RUN wget -q https://github.com/JanssenProject/jans/raw/${JANS_LINUX_SETUP_VERSION}/jans-config-api/docs/jans-config-api-swagger.yaml -P /app/static
 
-# TODO: casa should be moved from this image
-ENV GLUU_CASA_VERSION=a8251496ff2ade9dd8101873b45f4c490ae9c64e
-RUN wget -q https://github.com/GluuFederation/flex/raw/${GLUU_CASA_VERSION}/casa/extras/Casa.py -O /app/static/extension/person_authentication/Casa.py
-
 # cleanup
 RUN rm -rf /tmp/jans
 
@@ -75,7 +72,7 @@ RUN rm -rf /tmp/jans
 # Cleanup
 # =======
 
-RUN apk del build-deps \
+RUN apk del .build-deps \
     && rm -rf /var/cache/apk/*
 
 # =======
@@ -156,7 +153,6 @@ ENV CN_CACHE_TYPE=NATIVE_PERSISTENCE \
     CN_REDIS_SENTINEL_GROUP="" \
     CN_MEMCACHED_URL=localhost:11211 \
     CN_WAIT_SLEEP_DURATION=10 \
-    CN_CASA_ENABLED=false \
     CN_SCIM_ENABLED=false \
     CN_PERSISTENCE_SKIP_INITIALIZED=false \
     CN_DOCUMENT_STORE_TYPE=LOCAL \

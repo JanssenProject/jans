@@ -20,12 +20,12 @@ import io.jans.service.custom.script.ExternalScriptService;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 
-import javax.ejb.DependsOn;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.WebApplicationException;
+import jakarta.ejb.DependsOn;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.WebApplicationException;
 import java.security.cert.X509Certificate;
 
 /**

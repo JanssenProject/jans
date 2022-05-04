@@ -1,4 +1,4 @@
-FROM bellsoft/liberica-openjre-alpine:11.0.13-8
+FROM bellsoft/liberica-openjre-alpine:11.0.15
 
 # ===============
 # Alpine packages
@@ -6,9 +6,8 @@ FROM bellsoft/liberica-openjre-alpine:11.0.13-8
 
 RUN apk update \
     && apk upgrade \
-    && apk add --no-cache openssl py3-pip tini curl bash py3-cryptography py3-psycopg2 \
-    && apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/v3.15/community py3-grpcio \
-    && apk add --no-cache --virtual build-deps wget git zip \
+    && apk add --no-cache openssl python3 tini curl bash py3-cryptography py3-psycopg2 py3-grpcio \
+    && apk add --no-cache --virtual .build-deps wget git zip \
     && mkdir -p /usr/java/latest \
     && ln -sf /usr/lib/jvm/jre /usr/java/latest/jre
 
@@ -16,7 +15,7 @@ RUN apk update \
 # Jetty
 # =====
 
-ARG JETTY_VERSION=10.0.6
+ARG JETTY_VERSION=11.0.8
 ARG JETTY_HOME=/opt/jetty
 ARG JETTY_BASE=/opt/jans/jetty
 ARG JETTY_USER_HOME_LIB=/home/jetty/lib
@@ -46,7 +45,7 @@ RUN wget -q https://ox.gluu.org/maven/org/gluufederation/jython-installer/${JYTH
 # ====
 
 ENV CN_VERSION=1.0.0-SNAPSHOT
-ENV CN_BUILD_DATE='2022-03-23 09:01'
+ENV CN_BUILD_DATE='2022-04-21 10:29'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-scim-server/${CN_VERSION}/jans-scim-server-${CN_VERSION}.war
 
 # Install SCIM
@@ -65,14 +64,16 @@ RUN mkdir -p ${JETTY_BASE}/jans-scim/webapps \
 # ======
 
 COPY requirements.txt /app/requirements.txt
-RUN pip3 install -U pip wheel \
-    && pip3 install --no-cache-dir -r /app/requirements.txt
+RUN python3 -m ensurepip \
+    && pip3 install --no-cache-dir -U pip wheel \
+    && pip3 install --no-cache-dir -r /app/requirements.txt \
+    && pip3 uninstall -y pip wheel
 
 # =======
 # Cleanup
 # =======
 
-RUN apk del build-deps \
+RUN apk del .build-deps \
     && rm -rf /var/cache/apk/*
 
 # =======

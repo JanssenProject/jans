@@ -1,24 +1,14 @@
-import contextlib
-import datetime
 import json
 import logging.config
 import os
 import time
 from pathlib import Path
 
-from ldif import LDIFParser
-
-from jans.pycloudlib.persistence.couchbase import get_couchbase_user
-from jans.pycloudlib.persistence.couchbase import get_couchbase_superuser
-from jans.pycloudlib.persistence.couchbase import get_couchbase_password
-from jans.pycloudlib.persistence.couchbase import get_couchbase_superuser_password
 from jans.pycloudlib.persistence.couchbase import CouchbaseClient
 
 from settings import LOGGING_CONFIG
 from utils import prepare_template_ctx
-from utils import render_ldif
 from utils import get_ldif_mappings
-from utils import id_from_dn
 
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("entrypoint")
@@ -75,138 +65,11 @@ def get_bucket_mappings(manager):
     return bucket_mappings
 
 
-class AttrProcessor(object):
-    def __init__(self):
-        self._attrs = {}
-
-    @property
-    def syntax_types(self):
-        return {
-            '1.3.6.1.4.1.1466.115.121.1.7': 'boolean',
-            '1.3.6.1.4.1.1466.115.121.1.27': 'integer',
-            '1.3.6.1.4.1.1466.115.121.1.24': 'datetime',
-        }
-
-    def process(self):
-        attrs = {}
-
-        with open("/app/schema/opendj_types.json") as f:
-            attr_maps = json.loads(f.read())
-            for type_, names in attr_maps.items():
-                for name in names:
-                    attrs[name] = {"type": type_, "multivalued": False}
-
-        with open("/app/schema/jans_schema.json") as f:
-            schemas = json.loads(f.read()).get("attributeTypes", {})
-            for schema in schemas:
-                if schema.get("json"):
-                    type_ = "json"
-                elif schema["syntax"] in self.syntax_types:
-                    type_ = self.syntax_types[schema["syntax"]]
-                else:
-                    type_ = "string"
-
-                multivalued = schema.get("multivalued", False)
-                for name in schema["names"]:
-                    attrs[name] = {
-                        "type": type_,
-                        "multivalued": multivalued,
-                    }
-
-        # override `member`
-        attrs["member"]["multivalued"] = True
-        return attrs
-
-    @property
-    def attrs(self):
-        if not self._attrs:
-            self._attrs = self.process()
-        return self._attrs
-
-    def is_multivalued(self, name):
-        return self.attrs.get(name, {}).get("multivalued", False)
-
-    def get_type(self, name):
-        return self.attrs.get(name, {}).get("type", "string")
-
-
-def transform_values(name, values, attr_processor):
-    def as_dict(val):
-        return json.loads(val)
-
-    def as_bool(val):
-        return val.lower() in ("true", "yes", "1", "on")
-
-    def as_int(val):
-        try:
-            val = int(val)
-        except (TypeError, ValueError):
-            pass
-        return val
-
-    def as_datetime(val):
-        if '.' in val:
-            date_format = '%Y%m%d%H%M%S.%fZ'
-        else:
-            date_format = '%Y%m%d%H%M%SZ'
-
-        if not val.lower().endswith('z'):
-            val += 'Z'
-
-        dt = datetime.datetime.strptime(val, date_format)
-        return dt.isoformat()
-
-    callbacks = {
-        "json": as_dict,
-        "boolean": as_bool,
-        "integer": as_int,
-        "datetime": as_datetime,
-    }
-
-    type_ = attr_processor.get_type(name)
-    callback = callbacks.get(type_)
-
-    # maybe string
-    if not callable(callback):
-        return values
-    return [callback(item) for item in values]
-
-
-def transform_entry(entry, attr_processor):
-    for k, v in entry.items():
-        v = transform_values(k, v, attr_processor)
-
-        if len(v) == 1 and attr_processor.is_multivalued(k) is False:
-            entry[k] = v[0]
-
-        if k != "objectClass":
-            continue
-
-        entry[k].remove("top")
-        ocs = entry[k]
-
-        for oc in ocs:
-            remove_oc = any(["Custom" in oc, "jans" not in oc.lower()])
-            if len(ocs) > 1 and remove_oc:
-                ocs.remove(oc)
-        entry[k] = ocs[0]
-    return entry
-
-
 class CouchbaseBackend:
     def __init__(self, manager):
-        hostname = os.environ.get("CN_COUCHBASE_URL", "localhost")
-        user = get_couchbase_superuser(manager) or get_couchbase_user(manager)
-
-        password = ""
-        with contextlib.suppress(FileNotFoundError):
-            password = get_couchbase_superuser_password(manager)
-        password = password or get_couchbase_password(manager)
-
-        self.client = CouchbaseClient(hostname, user, password)
+        self.client = CouchbaseClient(manager)
         self.manager = manager
         self.index_num_replica = 0
-        self.attr_processor = AttrProcessor()
 
     def create_buckets(self, bucket_mappings, bucket_type="couchbase"):
         sys_info = self.client.get_system_info()
@@ -326,7 +189,7 @@ class CouchbaseBackend:
                         error = req.json()["errors"][0]
                         if error["code"] in (4300,):
                             continue
-                        logger.warning("Failed to execute query, reason={}".format(error["msg"]))
+                        logger.warning(f"Failed to execute query, reason={error['msg'].strip()}")  # .format(error["msg"]))
 
     def import_builtin_ldif(self, bucket_mappings, ctx):
         for _, mapping in bucket_mappings.items():
@@ -373,56 +236,5 @@ class CouchbaseBackend:
             self._import_ldif(file_, ctx)
 
     def _import_ldif(self, path, ctx):
-        src = Path(path).resolve()
-
-        # generated template will be saved under ``/app/tmp`` directory
-        # examples:
-        # - ``/app/templates/groups.ldif`` will be saved as ``/app/tmp/templates/groups.ldif``
-        # - ``/app/custom_ldif/groups.ldif`` will be saved as ``/app/tmp/custom_ldif/groups.ldif``
-        dst = Path("/app/tmp").joinpath(str(src).removeprefix("/app/")).resolve()
-
-        # ensure directory for generated template is exist
-        dst.parent.mkdir(parents=True, exist_ok=True)
-
-        logger.info(f"Importing {src} file")
-        render_ldif(src, dst, ctx)
-
-        with open(dst, "rb") as fd:
-            parser = LDIFParser(fd)
-
-            for dn, entry in parser.parse():
-                if len(entry) <= 2:
-                    continue
-
-                key = id_from_dn(dn)
-                bucket = get_bucket_for_key(key)
-                entry["dn"] = [dn]
-                entry = transform_entry(entry, self.attr_processor)
-                data = json.dumps(entry)
-
-                # TODO: get the bucket based on key prefix
-                # using INSERT will cause duplication error, but the data is left intact
-                query = 'INSERT INTO `%s` (KEY, VALUE) VALUES ("%s", %s)' % (bucket, key, data)
-                req = self.client.exec_query(query)
-
-                if not req.ok:
-                    logger.warning("Failed to execute query, reason={}".format(req.json()))
-
-
-def get_bucket_for_key(key):
-    bucket_prefix = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
-
-    cursor = key.find("_")
-    key_prefix = key[:cursor + 1]
-
-    if key_prefix in ("groups_", "people_", "authorizations_"):
-        bucket = f"{bucket_prefix}_user"
-    elif key_prefix in ("site_", "cache-refresh_"):
-        bucket = f"{bucket_prefix}_site"
-    elif key_prefix in ("tokens_"):
-        bucket = f"{bucket_prefix}_token"
-    elif key_prefix in ("cache_"):
-        bucket = f"{bucket_prefix}_cache"
-    else:
-        bucket = bucket_prefix
-    return bucket
+        logger.info(f"Importing {path} file")
+        self.client.create_from_ldif(path, ctx)

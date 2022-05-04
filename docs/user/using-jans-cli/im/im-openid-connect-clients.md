@@ -1,5 +1,6 @@
 # OpenID Connect Configuration
 
+> Prerequisite: Know how to use the Janssen CLI in [interactive mode](im-index.md)
 
 OpenID Connect Interactive Mode supports the following list of actions:
 

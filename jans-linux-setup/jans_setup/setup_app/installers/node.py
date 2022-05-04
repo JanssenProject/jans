@@ -29,7 +29,7 @@ class NodeInstaller(BaseInstaller, SetupUtils):
 
     def install(self):
 
-        node_archieve_list = glob.glob(os.path.join(Config.distAppFolder, 'node-*-linux-x64.tar.xz'))
+        node_archieve_list = glob.glob(os.path.join(Config.dist_app_dir, 'node-*-linux-x64.tar.xz'))
 
         if not node_archieve_list:
             self.logIt("Can't find node archive", True, True)

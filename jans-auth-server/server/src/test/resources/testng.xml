@@ -234,7 +234,7 @@
 			<class name="io.jans.as.server.uma.ws.rs.RegisterPermissionWSTest" />
 		</classes>
 	</test>
-	<test name="UMA. Workflow test" enabled="false">
+	<test name="UMA. Workflow test" enabled="true">
 		<classes>
 			<class name="io.jans.as.server.uma.ws.rs.AccessProtectedResourceFlowWSTest" />
 		</classes>
@@ -261,7 +261,7 @@
 		</classes>
 	</test>
 
-    <test name="Cleaner timer test" enabled="false">
+    <test name="Cleaner timer test" enabled="true">
         <classes>
             <class name="io.jans.as.server.comp.CleanerTimerTest" />
         </classes>
@@ -274,7 +274,7 @@
 	</test>
 
     <!-- Enable it when client jks is regenerated -->
-    <test name="JWT cross-check test" enabled="false">
+    <test name="JWT cross-check test" enabled="true">
         <classes>
             <class name="io.jans.as.server.comp.JwtCrossCheckTest" />
         </classes>

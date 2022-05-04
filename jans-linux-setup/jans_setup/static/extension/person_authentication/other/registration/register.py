@@ -7,7 +7,7 @@
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.as.server.security import Identity
 from io.jans.jsf2.message import FacesMessages
-from javax.faces.application import FacesMessage
+from jakarta.faces.application import FacesMessage
 from io.jans.util import StringHelper, ArrayHelper
 from java.util import Arrays, ArrayList, HashMap, IdentityHashMap
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
@@ -19,7 +19,7 @@ from io.jans.jsf2.service import FacesService
 from org.gluu.oxauth.model.util import Base64Util
 from org.python.core.util import StringUtil
 from io.jans.as.server.service.net import HttpService
-from javax.faces.context import FacesContext
+from jakarta.faces.context import FacesContext
 
 import java
 

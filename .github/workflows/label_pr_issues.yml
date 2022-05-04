@@ -1,6 +1,6 @@
 # Please do not attempt to edit this flow without the direct consent from the DevOps team. This file is managed centrally.
 # Contact @moabu
-name: Label PR and Schema
+name: Label PRs and Issues
 on:
   pull_request:
     types:

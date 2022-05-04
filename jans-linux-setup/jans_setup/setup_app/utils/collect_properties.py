@@ -42,7 +42,7 @@ class CollectProperties(SetupUtils, BaseInstaller):
 
         if Config.persistence_type in ('couchbase', 'sql', 'spanner'):
             ptype = 'rdbm' if Config.persistence_type in ('sql', 'spanner') else 'couchbase'
-            Config.mappingLocations = { group: ptype for group in Config.couchbaseBucketDict }
+            Config.mapping_locations = { group: ptype for group in Config.couchbaseBucketDict }
             default_storage = Config.persistence_type
 
 
@@ -99,13 +99,13 @@ class CollectProperties(SetupUtils, BaseInstaller):
 
         if Config.persistence_type in ['hybrid']:
              jans_hybrid_properties = base.read_properties_file(jans_hybrid_properties_fn)
-             Config.mappingLocations = {'default': jans_hybrid_properties['storage.default']}
+             Config.mapping_locations = {'default': jans_hybrid_properties['storage.default']}
              storages = [ storage.strip() for storage in jans_hybrid_properties['storages'].split(',') ]
 
              for ml, m in (('user', 'people'), ('cache', 'cache'), ('site', 'cache-refresh'), ('token', 'tokens')):
                  for storage in storages:
                      if m in jans_hybrid_properties.get('storage.{}.mapping'.format(storage),[]):
-                         Config.mappingLocations[ml] = storage
+                         Config.mapping_locations[ml] = storage
 
         if not Config.get('couchbase_bucket_prefix'):
             Config.couchbase_bucket_prefix = 'jans'
@@ -247,10 +247,10 @@ class CollectProperties(SetupUtils, BaseInstaller):
         if not Config.get('ip'):
             Config.ip = self.detect_ip()
 
-        Config.installScimServer = os.path.exists(os.path.join(Config.jetty_base, 'jans-scim/start.ini'))
+        Config.install_scim_server = os.path.exists(os.path.join(Config.jetty_base, 'jans-scim/start.ini'))
         Config.installFido2 = os.path.exists(os.path.join(Config.jetty_base, 'jans-fido2/start.ini'))
         Config.installEleven = os.path.exists(os.path.join(Config.jetty_base, 'jans-eleven/start.ini'))
-        Config.installConfigApi = os.path.exists(os.path.join(Config.jansOptFolder, 'jans-config-api'))
+        Config.install_config_api = os.path.exists(os.path.join(Config.jansOptFolder, 'jans-config-api'))
 
         result = dbUtils.search('ou=people,o=jans', search_filter='(&(uid=admin)(objectClass=jansPerson))')
         if result:

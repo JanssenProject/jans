@@ -1,5 +1,5 @@
-import contextlib
 import base64
+import contextlib
 import json
 import os
 from itertools import chain
@@ -76,7 +76,6 @@ def get_base_ctx(manager):
     redis_ssl_truststore = os.environ.get("CN_REDIS_SSL_TRUSTSTORE", "")
     redis_sentinel_group = os.environ.get("CN_REDIS_SENTINEL_GROUP", "")
     memcached_url = os.environ.get('CN_MEMCACHED_URL', 'localhost:11211')
-    casa_enabled = os.environ.get("CN_CASA_ENABLED", False)
     scim_enabled = os.environ.get("CN_SCIM_ENABLED", False)
 
     ctx = {
@@ -131,7 +130,6 @@ def get_base_ctx(manager):
         "admin_inum": manager.config.get("admin_inum"),
         "scim_client_id": manager.config.get("scim_client_id"),
         "scim_client_encoded_pw": manager.secret.get("scim_client_encoded_pw"),
-        "casa_enable_script": str(as_boolean(casa_enabled)).lower(),
         "jca_client_id": manager.config.get("jca_client_id"),
         "jca_client_encoded_pw": manager.secret.get("jca_client_encoded_pw"),
     }
@@ -217,6 +215,11 @@ def merge_extension_ctx(ctx):
 
 
 def merge_auth_ctx(ctx):
+    if os.environ.get("CN_PERSISTENCE_TYPE") in ("sql", "spanner"):
+        ctx["person_custom_object_class_list"] = "[]"
+    else:
+        ctx["person_custom_object_class_list"] = '["jansCustomPerson", "jansPerson"]'
+
     basedir = '/app/templates/jans-auth'
     file_mappings = {
         'auth_static_conf_base64': 'jans-auth-static-conf.json',
@@ -324,28 +327,6 @@ def merge_config_api_ctx(ctx):
     return ctx
 
 
-def merge_casa_ctx(manager, ctx):
-    # Casa client
-    ctx["casa_client_id"] = manager.config.get("casa_client_id")
-    if not ctx["casa_client_id"]:
-        ctx["casa_client_id"] = f"1902.{uuid4()}"
-        manager.config.set("casa_client_id", ctx["casa_client_id"])
-
-    ctx["casa_client_pw"] = manager.secret.get("casa_client_pw")
-    if not ctx["casa_client_pw"]:
-        ctx["casa_client_pw"] = get_random_chars()
-        manager.secret.set("casa_client_pw", ctx["casa_client_pw"])
-
-    ctx["casa_client_encoded_pw"] = manager.secret.get("casa_client_encoded_pw")
-    if not ctx["casa_client_encoded_pw"]:
-        ctx["casa_client_encoded_pw"] = encode_text(
-            ctx["casa_client_pw"], manager.secret.get("encoded_salt"),
-        ).decode()
-        manager.secret.set("casa_client_encoded_pw", ctx["casa_client_encoded_pw"])
-
-    return ctx
-
-
 def merge_jans_cli_ctx(manager, ctx):
     # WARNING:
     # - deprecated configs and secrets for role_based
@@ -373,8 +354,6 @@ def merge_jans_cli_ctx(manager, ctx):
 
 
 def prepare_template_ctx(manager):
-    opt_scopes = json.loads(manager.config.get("optional_scopes", "[]"))
-
     ctx = get_base_ctx(manager)
     ctx = merge_extension_ctx(ctx)
     ctx = merge_auth_ctx(ctx)
@@ -382,9 +361,6 @@ def prepare_template_ctx(manager):
     ctx = merge_fido2_ctx(ctx)
     ctx = merge_scim_ctx(ctx)
     ctx = merge_jans_cli_ctx(manager, ctx)
-
-    if "casa" in opt_scopes:
-        ctx = merge_casa_ctx(manager, ctx)
     return ctx
 
 
@@ -434,13 +410,6 @@ def get_ldif_mappings(optional_scopes=None):
         if "fido2" in optional_scopes:
             files += [
                 "jans-fido2/fido2.ldif",
-            ]
-
-        if "casa" in optional_scopes:
-            files += [
-                "gluu-casa/configuration.ldif",
-                "gluu-casa/clients.ldif",
-                "gluu-casa/scripts.ldif",
             ]
         return files
 

@@ -10,6 +10,7 @@ import io.jans.as.common.claims.Audience;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.AttributeService;
+import io.jans.as.common.util.CommonUtils;
 import io.jans.as.model.common.ComponentType;
 import io.jans.as.model.common.ScopeType;
 import io.jans.as.model.config.Constants;
@@ -60,12 +61,12 @@ import io.jans.orm.exception.EntryPersistenceException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Path;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
+import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.SecurityContext;
 import java.nio.charset.StandardCharsets;
 import java.security.PublicKey;
 import java.text.ParseException;
@@ -290,7 +291,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         // Encryption
         if (keyEncryptionAlgorithm == KeyEncryptionAlgorithm.RSA_OAEP
                 || keyEncryptionAlgorithm == KeyEncryptionAlgorithm.RSA1_5) {
-            JSONObject jsonWebKeys = JwtUtil.getJSONWebKeys(authorizationGrant.getClient().getJwksUri());
+            JSONObject jsonWebKeys = CommonUtils.getJwks(authorizationGrant.getClient());
             String keyId = new ServerCryptoProvider(cryptoProvider).getKeyId(JSONWebKeySet.fromJSONObject(jsonWebKeys),
                     Algorithm.fromString(keyEncryptionAlgorithm.getName()),
                     Use.ENCRYPTION);

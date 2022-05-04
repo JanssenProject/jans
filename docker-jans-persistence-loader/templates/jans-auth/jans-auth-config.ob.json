@@ -116,6 +116,7 @@
     ],
     "idTokenEncryptionEncValuesSupported":[
     ],
+    "forceSignedRequestObject": false,
     "requestObjectSigningAlgValuesSupported":[
         "HS256",
         "RS256",
@@ -360,6 +361,6 @@
     "deviceAuthzResponseTypeToProcessAuthz": "code",
     "staticKid": "%(staticKid)s",
     "forceOfflineAccessScopeToEnableRefreshToken" : false,
-    "redirectUrisRegexEnabled": true,
+    "redirectUrisRegexEnabled": false,
     "useHighestLevelScriptIfAcrScriptNotFound": true
 }

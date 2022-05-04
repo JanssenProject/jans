@@ -65,18 +65,20 @@ def gk8s_secret():
 def gmanager(gconsul_config, gvault_secret):
     from jans.pycloudlib.manager import get_manager
 
-    def get_config(key, default=None):
+    ENCODED_PW = "fHL54sT5qHk="
+
+    def get_config(key, default=""):
         ctx = {
             "ldap_binddn": "cn=Directory Manager",
             "couchbase_server_user": "admin",
         }
         return ctx.get(key) or default
 
-    def get_secret(key, default=None):
+    def get_secret(key, default=""):
         ctx = {
-            "encoded_ox_ldap_pw": "YgH8NDxhxmA=",
-            "encoded_ldapTrustStorePass": "YgH8NDxhxmA=",
-            "ldap_pkcs12_base64": "YgH8NDxhxmA=",
+            "encoded_ox_ldap_pw": ENCODED_PW,
+            "encoded_ldapTrustStorePass": ENCODED_PW,
+            "ldap_pkcs12_base64": ENCODED_PW,
             "encoded_salt": "7MEDWVFAG3DmakHRyjMqp5EE",
             "sql_password": "secret",
             "couchbase_password": "secret",

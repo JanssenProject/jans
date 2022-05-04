@@ -7,7 +7,7 @@
 package io.jans.configapi.rest.resource;
 
 import org.junit.jupiter.api.Test;
-import javax.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.MediaType;
 import static io.restassured.RestAssured.given;
 
 /**

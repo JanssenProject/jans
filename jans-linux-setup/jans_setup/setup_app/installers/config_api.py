@@ -17,6 +17,14 @@ from setup_app.pylib.ldif4.ldif import LDIFWriter
 
 class ConfigApiInstaller(JettyInstaller):
 
+    source_files = [
+                (os.path.join(Config.dist_jans_dir, 'jans-config-api.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api-server/{0}/jans-config-api-server-{0}.war').format(base.current_app.app_info['ox_version'])),
+                (os.path.join(Config.dist_jans_dir, 'scim-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/scim-plugin/{0}/scim-plugin-{0}-distribution.jar').format(base.current_app.app_info['ox_version'])),
+                (os.path.join(Config.dist_jans_dir, 'facter'), 'https://raw.githubusercontent.com/GluuFederation/gluu-snap/master/facter/facter'),
+                #(os.path.join(Config.data_dir, 'jans-config-api-swagger.yaml'), 'https://raw.githubusercontent.com/JanssenProject/jans/main/jans-config-api/docs/jans-config-api-swagger.yaml'),
+                (os.path.join(Config.dist_jans_dir, 'user-mgt-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/user-mgt-plugin/{0}/user-mgt-plugin-{0}-distribution.jar').format(base.current_app.app_info['ox_version'])),
+                ]
+
     def __init__(self):
         setattr(base.current_app, self.__class__.__name__, self)
         self.service_name = 'jans-config-api'
@@ -24,13 +32,13 @@ class ConfigApiInstaller(JettyInstaller):
         self.check_version = False #TODO: remove this when version format is changed to 1.0.0
         self.app_type = AppType.SERVICE
         self.install_type = InstallOption.OPTONAL
-        self.install_var = 'installConfigApi'
+        self.install_var = 'install_config_api'
         self.register_progess()
 
 
         self.templates_folder = os.path.join(Config.templateFolder, self.service_name)
         self.rs_protect_fn = os.path.join(Config.install_dir, 'setup_app/data/config-api-rs-protect.json')
-        self.output_folder = os.path.join(Config.outputFolder,'jans-config-api')
+        self.output_folder = os.path.join(Config.output_dir,'jans-config-api')
         self.scope_ldif_fn = os.path.join(self.output_folder, 'scopes.ldif')
         self.clients_ldif_fn = os.path.join(self.output_folder, 'clients.ldif')
         self.dynamic_conf_json = os.path.join(self.output_folder, 'dynamic-conf.json')
@@ -39,17 +47,9 @@ class ConfigApiInstaller(JettyInstaller):
         self.libDir = os.path.join(self.jetty_base, self.service_name, 'custom/libs/')
         self.custom_config_dir = os.path.join(self.jetty_base, self.service_name, 'custom/config')
 
-        self.source_files = [
-                (os.path.join(Config.distJansFolder, 'jans-config-api.war'), 'https://maven.jans.io/maven/io/jans/jans-config-api-server/{0}/jans-config-api-server-{0}.war'.format(Config.oxVersion)),
-                (os.path.join(Config.distJansFolder, 'scim-plugin.jar'), 'https://maven.jans.io/maven/io/jans/scim-plugin/{0}/scim-plugin-{0}-distribution.jar'.format(Config.oxVersion)),
-                (os.path.join(Config.distJansFolder, 'facter'), 'https://raw.githubusercontent.com/GluuFederation/gluu-snap/master/facter/facter'),
-                (os.path.join(Config.install_dir, 'jans_setup/data/jans-config-api-swagger.yaml'), 'https://raw.githubusercontent.com/JanssenProject/jans/main/jans-config-api/docs/jans-config-api-swagger.yaml'),
-                (os.path.join(Config.distJansFolder, 'user-mgt-plugin.jar'), 'https://maven.jans.io/maven/io/jans/jans-config-api/plugins/user-mgt-plugin/{0}/user-mgt-plugin-{0}-distribution.jar'.format(Config.oxVersion)),
-                ]
+        self.extract_files()
 
     def install(self):
-        if not os.path.exists(self.source_files[3][0]):
-            base.download(self.source_files[3][1], self.source_files[3][0])
 
         self.copyFile(self.source_files[2][0], '/usr/sbin')
         self.run([paths.cmd_chmod, '+x', '/usr/sbin/facter'])
@@ -57,20 +57,19 @@ class ConfigApiInstaller(JettyInstaller):
         self.logIt("Copying fido.war into jetty webapps folder...")
         jettyServiceWebapps = os.path.join(self.jetty_base, self.service_name, 'webapps')
         self.copyFile(self.source_files[0][0], jettyServiceWebapps)
-        self.war_for_jetty10(os.path.join(jettyServiceWebapps, os.path.basename(self.source_files[0][0])))
         self.copyFile(self.source_files[1][0], self.libDir)
         scim_plugin_path = os.path.join(self.libDir, os.path.basename(self.source_files[1][0]))
         self.add_extra_class(scim_plugin_path)
-        self.copyFile(self.source_files[4][0], self.libDir)
-        user_mgt_plugin_path = os.path.join(self.libDir, os.path.basename(self.source_files[4][0]))
+        self.copyFile(self.source_files[3][0], self.libDir)
+        user_mgt_plugin_path = os.path.join(self.libDir, os.path.basename(self.source_files[3][0]))
         self.add_extra_class(user_mgt_plugin_path)
-        base.extract_file(
-                os.path.join(Config.distJansFolder, 'jans.zip'),
-                'jans-config-api/server/src/main/resources/log4j2.xml',
-                self.custom_config_dir
-                 )
 
         self.enable()
+
+
+    def extract_files(self):
+        base.extract_file(base.current_app.jans_zip, 'jans-config-api/server/src/main/resources/log4j2.xml', self.custom_config_dir)
+        base.extract_file(base.current_app.jans_zip, 'jans-config-api/docs/jans-config-api-swagger.yaml', Config.data_dir)
 
 
     def create_folders(self):

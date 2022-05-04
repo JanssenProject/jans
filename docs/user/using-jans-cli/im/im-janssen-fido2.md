@@ -1,5 +1,7 @@
 # Janssen FIDO2 Configuration
 
+> Prerequisite: Know how to use the Janssen CLI in [interactive mode](im-index.md)
+
 Janssen includes a FIDO2 component to implement a two-step, two-factor authentication (2FA) with a username/password as the first step, and any FIDO2 device as the second step. During Janssen installation, the administrator will have an option to install the FIDO2 component.
 
 Using Janssen CLI, you can `view/update` details of the FIDO2 configuration.

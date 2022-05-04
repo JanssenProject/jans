@@ -1,5 +1,7 @@
 # Log Management
 
+> Prerequisite: Know how to use the Janssen CLI in [interactive mode](im-index.md)
+
 Using Janssen CLI, you can easily update the logging configuration. Just go with option 11 from Main Menu, It will display two options.
 
 ```text

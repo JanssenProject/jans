@@ -25,6 +25,7 @@
 					<include>**/*.xml</include>
 					<include>**/*.properties</include>
 					<include>**/*.js</include>
+					<include>META-INF/services/*.*</include>
 				</includes>
 			</resource>
 		</resources>
@@ -137,8 +138,8 @@
             <artifactId>weld-core-impl</artifactId>
         </dependency>
 		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		

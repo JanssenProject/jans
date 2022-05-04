@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.security.cert.X509Certificate;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Enumerated;

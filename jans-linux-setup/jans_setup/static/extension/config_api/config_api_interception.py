@@ -16,8 +16,8 @@ from io.jans.configapi.model.configuration import ApiAppConfiguration
 
 from org.json import JSONObject
 from java.lang import String
-from javax.servlet.http import HttpServletRequest
-from javax.servlet.http import HttpServletResponse
+from jakarta.servlet.http import HttpServletRequest
+from jakarta.servlet.http import HttpServletResponse
 
 
 class ConfigApiAuthorization(ConfigApiType):

@@ -10,10 +10,10 @@ import java.io.Serializable;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
-import javax.annotation.Priority;
-import javax.interceptor.AroundInvoke;
-import javax.interceptor.Interceptor;
-import javax.interceptor.InvocationContext;
+import jakarta.annotation.Priority;
+import jakarta.interceptor.AroundInvoke;
+import jakarta.interceptor.Interceptor;
+import jakarta.interceptor.InvocationContext;
 
 /**
  * @author Yuriy Movchan Date: 07/07/2017

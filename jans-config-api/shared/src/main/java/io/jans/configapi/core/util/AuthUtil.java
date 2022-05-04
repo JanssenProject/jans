@@ -6,8 +6,8 @@ import io.jans.configapi.core.service.ClientService;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;

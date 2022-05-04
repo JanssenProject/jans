@@ -12,11 +12,6 @@
     <groupId>io.jans.jans-config-api.plugins</groupId>
     <artifactId>admin-ui-plugin</artifactId>
 
-    <properties>
-        <licenseSpring.version>2.4.5</licenseSpring.version>
-        <jna.version>5.8.0</jna.version>
-    </properties>
-
     <repositories>
         <repository>
             <id>jdk-java</id>
@@ -25,27 +20,6 @@
     </repositories>
 
     <dependencies>
-        <!-- license spring-->
-        <dependency>
-            <groupId>com.licensespring</groupId>
-            <artifactId>licensespring-license-client</artifactId>
-            <version>${licenseSpring.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.licensespring</groupId>
-            <artifactId>licensespring-license-management</artifactId>
-            <version>${licenseSpring.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>net.java.dev.jna</groupId>
-            <artifactId>jna</artifactId>
-            <version>${jna.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>net.java.dev.jna</groupId>
-            <artifactId>jna-platform</artifactId>
-            <version>${jna.version}</version>
-        </dependency>
         <!-- config api -->
         <dependency>
             <groupId>io.jans</groupId>
@@ -91,6 +65,19 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+        </dependency>
+        <!-- API, java.xml.bind module -->
+        <dependency>
+            <groupId>jakarta.xml.bind</groupId>
+            <artifactId>jakarta.xml.bind-api</artifactId>
+            <version>2.3.2</version>
+        </dependency>
+
+        <!-- Runtime, com.sun.xml.bind module -->
+        <dependency>
+            <groupId>org.glassfish.jaxb</groupId>
+            <artifactId>jaxb-runtime</artifactId>
+            <version>2.3.2</version>
         </dependency>
     </dependencies>
 

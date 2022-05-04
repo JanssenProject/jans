@@ -12,9 +12,9 @@ import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.MediaType;
+import jakarta.ws.rs.HttpMethod;
+import jakarta.ws.rs.client.Invocation.Builder;
+import jakarta.ws.rs.core.MediaType;
 
 import static io.jans.as.model.configuration.ConfigurationResponseClaim.ACR_VALUES_SUPPORTED;
 import static io.jans.as.model.configuration.ConfigurationResponseClaim.AUTHORIZATION_ENCRYPTION_ALG_VALUES_SUPPORTED;

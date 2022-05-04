@@ -11,7 +11,7 @@ from io.jans.as.server.service import AuthenticationService
 from io.jans.orm import PersistenceEntryManager
 from org.gluu.oxauth.model.ldap import TokenEntity
 from io.jans.util import StringHelper
-from javax.faces.application import FacesMessage
+from jakarta.faces.application import FacesMessage
 from io.jans.jsf2.message import FacesMessages
 from org.gluu.oxauth.model.config import StaticConfiguration
 

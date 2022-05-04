@@ -6,7 +6,7 @@
 
 package io.jans.orm.ldap.impl;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import io.jans.orm.exception.operation.SearchException;
 import io.jans.orm.search.filter.Filter;

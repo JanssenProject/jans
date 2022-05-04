@@ -16,9 +16,6 @@
 		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 
-	<properties>
-        <resteasy.version>4.7.2.Final</resteasy.version>
-	</properties>
     <build>
         <finalName>SCIM-Client</finalName>
         <filters>
@@ -108,7 +105,7 @@
         <dependency>
             <groupId>io.jans</groupId>
             <artifactId>jans-scim-model</artifactId>
-            <version>${gluu.version}</version>
+            <version>${project.version}</version>
         </dependency>
 
         <!-- commons -->
@@ -121,22 +118,18 @@
         <dependency>
             <groupId>org.jboss.resteasy</groupId>
             <artifactId>resteasy-core</artifactId>
-            <version>${resteasy.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jboss.resteasy</groupId>
             <artifactId>resteasy-client</artifactId>
-            <version>${resteasy.version}</version>
         </dependency>
         <dependency>
            <groupId>org.jboss.resteasy</groupId>
            <artifactId>resteasy-jackson2-provider</artifactId>
-           <version>${resteasy.version}</version>
         </dependency>
         <dependency>
            <groupId>org.jboss.resteasy</groupId>
            <artifactId>resteasy-jaxb-provider</artifactId>
-           <version>${resteasy.version}</version>
         </dependency>
 
         <!-- Test -->

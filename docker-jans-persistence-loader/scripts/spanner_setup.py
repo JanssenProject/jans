@@ -1,20 +1,14 @@
-import hashlib
 import json
 import logging.config
 import re
-from collections import OrderedDict
 from collections import defaultdict
 from pathlib import Path
-
-from ldif import LDIFParser
 
 from jans.pycloudlib.persistence.spanner import SpannerClient
 
 from settings import LOGGING_CONFIG
 from utils import prepare_template_ctx
-from utils import render_ldif
 from utils import get_ldif_mappings
-from utils import doc_id_from_dn
 
 FIELD_RE = re.compile(r"[^0-9a-zA-Z\s]+")
 
@@ -25,29 +19,7 @@ logger = logging.getLogger("entrypoint")
 class SpannerBackend:
     def __init__(self, manager):
         self.manager = manager
-        self.db_dialect = "spanner"
-
-        self.schema_files = [
-            "/app/schema/jans_schema.json",
-            "/app/schema/custom_schema.json",
-        ]
-
-        self.client = SpannerClient()
-
-        with open("/app/static/rdbm/sql_data_types.json") as f:
-            self.sql_data_types = json.loads(f.read())
-
-        self.attr_types = []
-        for fn in self.schema_files:
-            with open(fn) as f:
-                schema = json.loads(f.read())
-            self.attr_types += schema["attributeTypes"]
-
-        with open("/app/static/rdbm/opendj_attributes_syntax.json") as f:
-            self.opendj_attr_types = json.loads(f.read())
-
-        with open("/app/static/rdbm/ldap_sql_data_type_mapping.json") as f:
-            self.sql_data_types_mapping = json.loads(f.read())
+        self.client = SpannerClient(manager)
 
         index_fn = "spanner_index.json"
         with open(f"/app/static/rdbm/{index_fn}") as f:
@@ -57,33 +29,19 @@ class SpannerBackend:
         with open("/app/static/opendj/index.json") as f:
             opendj_indexes = [attr["attribute"] for attr in json.loads(f.read())]
 
-        for attr in self.attr_types:
+        for attr in self.client.attr_types:
             if not attr.get("multivalued"):
                 continue
             for attr_name in attr["names"]:
                 if attr_name in opendj_indexes and attr_name not in self.sql_indexes["__common__"]["fields"]:
                     self.sql_indexes["__common__"]["fields"].append(attr_name)
 
-        with open("/app/static/rdbm/sub_tables.json") as f:
-            self.sub_tables = json.loads(f.read()).get(self.db_dialect) or {}
-
-    def get_attr_syntax(self, attr):
-        for attr_type in self.attr_types:
-            if attr not in attr_type["names"]:
-                continue
-            if attr_type.get("multivalued"):
-                return "JSON"
-            return attr_type["syntax"]
-
-        # fallback to OpenDJ attribute type
-        return self.opendj_attr_types.get(attr) or "1.3.6.1.4.1.1466.115.121.1.15"
-
     def get_data_type(self, attr, table=None):
         # check from SQL data types first
-        type_def = self.sql_data_types.get(attr)
+        type_def = self.client.sql_data_types.get(attr)
 
         if type_def:
-            type_ = type_def.get(self.db_dialect)
+            type_ = type_def.get(self.client.dialect)
 
             if table in type_.get("tables", {}):
                 type_ = type_["tables"][table]
@@ -94,9 +52,9 @@ class SpannerBackend:
             return data_type
 
         # data type is undefined, hence check from syntax
-        syntax = self.get_attr_syntax(attr)
-        syntax_def = self.sql_data_types_mapping[syntax]
-        type_ = syntax_def.get(self.db_dialect)  # or syntax_def["mysql"]
+        syntax = self.client.get_attr_syntax(attr)
+        syntax_def = self.client.sql_data_types_mapping[syntax]
+        type_ = syntax_def.get(self.client.dialect)
 
         char_type = "STRING"
 
@@ -115,7 +73,7 @@ class SpannerBackend:
         # cached schemas that holds table's column and its type
         table_columns = defaultdict(dict)
 
-        for fn in self.schema_files:
+        for fn in self.client.schema_files:
             with open(fn) as f:
                 schema = json.loads(f.read())
 
@@ -225,85 +183,8 @@ class SpannerBackend:
         logger.info("Importing custom LDIF files (if any)")
         self.import_custom_ldif(ctx)
 
-    def transform_value(self, key, values):
-        type_ = self.sql_data_types.get(key)
-
-        if not type_:
-            attr_syntax = self.get_attr_syntax(key)
-            type_ = self.sql_data_types_mapping[attr_syntax]
-
-        type_ = type_.get(self.db_dialect)
-        data_type = type_["type"]
-
-        if data_type in ("SMALLINT", "BOOL",):
-            if values[0].lower() in ("1", "on", "true", "yes", "ok"):
-                return 1 if data_type == "SMALLINT" else True
-            return 0 if data_type == "SMALLINT" else False
-
-        if data_type == "INT64":
-            return int(values[0])
-
-        if data_type in ("DATETIME(3)", "TIMESTAMP",):
-            dval = values[0].strip("Z")
-            sep = "T"
-            postfix = "Z"
-            return "{}-{}-{}{}{}:{}:{}{}{}".format(
-                dval[0:4],
-                dval[4:6],
-                dval[6:8],
-                sep,
-                dval[8:10],
-                dval[10:12],
-                dval[12:14],
-                dval[14:17],
-                postfix,
-            )
-
-        if data_type == "JSON":
-            return {"v": values}
-
-        if data_type == "ARRAY<STRING(MAX)>":
-            return values
-
-        # fallback
-        return values[0]
-
-    def data_from_ldif(self, filename):
-        with open(filename, "rb") as fd:
-            parser = LDIFParser(fd)
-
-            for dn, entry in parser.parse():
-                doc_id = doc_id_from_dn(dn)
-
-                oc = entry.get("objectClass") or entry.get("objectclass")
-                if oc:
-                    if "top" in oc:
-                        oc.remove("top")
-
-                    if len(oc) == 1 and oc[0].lower() in ("organizationalunit", "organization"):
-                        continue
-
-                table_name = oc[-1]
-
-                if "objectClass" in entry:
-                    entry.pop("objectClass")
-                elif "objectclass" in entry:
-                    entry.pop("objectclass")
-
-                attr_mapping = OrderedDict({
-                    "doc_id": doc_id,
-                    "objectClass": table_name,
-                    "dn": dn,
-                })
-
-                for attr in entry:
-                    # TODO: check if attr in sub table
-                    value = self.transform_value(attr, entry[attr])
-                    attr_mapping[attr] = value
-                yield table_name, attr_mapping
-
     def create_subtables(self):
-        for table_name, columns in self.sub_tables.items():
+        for table_name, columns in self.client.sub_tables.items():
             for column_name, column_type in columns:
                 subtable_name = f"{table_name}_{column_name}"
                 self.client.create_subtable(
@@ -321,36 +202,6 @@ class SpannerBackend:
                 index_name = f"{subtable_name}Idx"
                 query = f"CREATE INDEX {self.client.quoted_id(index_name)} ON {self.client.quoted_id(subtable_name)} ({self.client.quoted_id(column_name)})"
                 self.client.create_index(query)
-
-    def column_in_subtable(self, table_name, column):
-        exists = False
-
-        # column_mapping is a list
-        column_mapping = self.sub_tables.get(table_name, [])
-        for cm in column_mapping:
-            if column == cm[0]:
-                exists = True
-                break
-        return exists
-
-    def insert_into_subtable(self, table_name, column_mapping):
-        for column, value in column_mapping.items():
-            if not self.column_in_subtable(table_name, column):
-                continue
-
-            for item in value:
-                hashed = hashlib.sha256()
-                hashed.update(item.encode())
-                dict_doc_id = hashed.digest().hex()
-
-                self.client.insert_into(
-                    f"{table_name}_{column}",
-                    {
-                        "doc_id": column_mapping["doc_id"],
-                        "dict_doc_id": dict_doc_id,
-                        column: item
-                    },
-                )
 
     def update_schema(self):
         """Updates schema (may include data migration)"""
@@ -389,7 +240,7 @@ class SpannerBackend:
                 self.client.update(
                     table_name,
                     doc_id,
-                    {col_name: self.transform_value(col_name, value_list)}
+                    {col_name: self.client._transform_value(col_name, value_list)}
                 )
 
         def add_column(table_name, col_name):
@@ -445,7 +296,7 @@ class SpannerBackend:
                 self.client.update(
                     table_name,
                     doc_id,
-                    {col_name: self.transform_value(col_name, new_value)}
+                    {col_name: self.client._transform_value(col_name, new_value)}
                 )
 
         def column_int_to_string(table_name, col_name):
@@ -482,7 +333,7 @@ class SpannerBackend:
                 self.client.update(
                     table_name,
                     doc_id,
-                    {col_name: self.transform_value(col_name, new_value)}
+                    {col_name: self.client._transform_value(col_name, new_value)}
                 )
 
         # the following columns are changed to multivalued (ARRAY type)
@@ -565,21 +416,5 @@ class SpannerBackend:
             self._import_ldif(file_, ctx)
 
     def _import_ldif(self, path, ctx):
-        src = Path(path).resolve()
-
-        # generated template will be saved under ``/app/tmp`` directory
-        # examples:
-        # - ``/app/templates/groups.ldif`` will be saved as ``/app/tmp/templates/groups.ldif``
-        # - ``/app/custom_ldif/groups.ldif`` will be saved as ``/app/tmp/custom_ldif/groups.ldif``
-        dst = Path("/app/tmp").joinpath(str(src).removeprefix("/app/")).resolve()
-
-        # ensure directory for generated template is exist
-        dst.parent.mkdir(parents=True, exist_ok=True)
-
-        logger.info(f"Importing {src} file")
-        render_ldif(src, dst, ctx)
-
-        for table_name, column_mapping in self.data_from_ldif(dst):
-            self.client.insert_into(table_name, column_mapping)
-            # inject rows into subtable (if any)
-            self.insert_into_subtable(table_name, column_mapping)
+        logger.info(f"Importing {path} file")
+        self.client.create_from_ldif(path, ctx)
