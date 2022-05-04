@@ -220,6 +220,7 @@ public class AppInitializer {
         supportedCustomScriptTypes.remove(CustomScriptType.USER_REGISTRATION);
         supportedCustomScriptTypes.remove(CustomScriptType.SCIM);
         supportedCustomScriptTypes.remove(CustomScriptType.IDP);
+        supportedCustomScriptTypes.remove(CustomScriptType.CONFIG_API);
 
         statService.init();
 
