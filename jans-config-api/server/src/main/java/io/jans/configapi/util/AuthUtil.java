@@ -1,5 +1,6 @@
 package io.jans.configapi.util;
 
+import com.unboundid.ldap.sdk.DN;
 import io.jans.as.client.TokenResponse;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.common.EncryptionService;
@@ -390,6 +391,15 @@ public class AuthUtil {
          }
          log.debug("Final fields:{} of type:{} ", fields, type);
          return fields;
+     }
+     
+     public boolean isValidDn(String dn) {
+         return isValidDn(dn, false);
+     }
+
+     
+     public boolean isValidDn(String dn, boolean strictNameChecking) {
+         return DN.isValidDN(dn, strictNameChecking);
      }
 
    
