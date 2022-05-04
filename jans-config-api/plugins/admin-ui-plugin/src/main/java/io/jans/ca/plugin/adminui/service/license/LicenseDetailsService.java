@@ -118,6 +118,7 @@ public class LicenseDetailsService {
                     return createLicenseResponse(true, 200, "Valid license present.");
                 }
             }
+            log.error("license Credentials error response: {}", response.readEntity(String.class));
             return createLicenseResponse(false, 500, "Active license not present.");
 
         } catch (Exception e) {
@@ -169,6 +170,7 @@ public class LicenseDetailsService {
                     return createLicenseResponse(true, 200, "License have been activated.");
                 }
             }
+            log.error("license Activation error response: {}", response.readEntity(String.class));
             return createLicenseResponse(false, response.getStatus(), "License is not activated.");
         } catch (Exception e) {
             log.error(ErrorResponse.ACTIVATE_LICENSE_ERROR.getDescription(), e);
@@ -197,7 +199,7 @@ public class LicenseDetailsService {
 
             Response response = request.get();
 
-            log.info("license Credentials request status code: {}", response.getStatus());
+            log.info("license details request status code: {}", response.getStatus());
             if (response.getStatus() == 200) {
                 JsonObject entity = response.readEntity(JsonObject.class);
                 if (entity.getBoolean("license_active") && !entity.getBoolean("is_expired")) {
@@ -217,7 +219,8 @@ public class LicenseDetailsService {
                     return licenseResponse;
                 }
             }
-            log.debug("Active license for admin-ui not present ");
+            log.error("license details error response: {}", response.readEntity(String.class));
+            log.info("Active license for admin-ui not present ");
             licenseResponse.setLicenseEnabled(false);
             return licenseResponse;
         } catch (Exception e) {
@@ -237,7 +240,8 @@ public class LicenseDetailsService {
             SecretKeySpec secret_key = new SecretKeySpec(licenseConfiguration.getSharedKey().getBytes(StandardCharsets.UTF_8), "HmacSHA256");
             sha256_HMAC.init(secret_key);
             String signature = Base64.getEncoder().encodeToString(sha256_HMAC.doFinal(signing_string.getBytes(StandardCharsets.UTF_8)));
-
+            log.debug("header signature for license api: {}", signature);
+            log.debug("header signature date for license api: {}", formattedDate);
             MultivaluedMap<String, Object> headers = new MultivaluedHashMap<>();
             headers.putSingle("Content-Type", "application/json");
             headers.putSingle("Date", formattedDate);
