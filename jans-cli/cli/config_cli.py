@@ -275,14 +275,39 @@ class JCA_CLI:
         self.host = host
         self.client_id = client_id
         self.client_secret = client_secret
+        self.use_test_client = test_client
+
         self.swagger_configuration = swagger_client.Configuration()
         self.swagger_configuration.host = 'https://{}'.format(self.host)
         self.access_token = access_token or config['DEFAULT'].get('access_token')
-        self.use_test_client = test_client
 
+        self.set_user()
+        self.plugins()
+
+        if not self.access_token and config['DEFAULT'].get('access_token_enc'):
+            self.access_token = encode_decode(config['DEFAULT']['access_token_enc'], decode=True)
+
+        if my_op_mode == 'scim':
+            self.swagger_configuration.host += '/jans-scim/restv1/v2'
+
+        self.ssl_settings()
+
+        self.swagger_configuration.debug = debug
+        if self.swagger_configuration.debug:
+            self.swagger_configuration.logger_file = debug_log_file
+
+        self.swagger_yaml_fn = os.path.join(cur_dir, my_op_mode + '.yaml')
+
+        self.cfg_yml = self.get_yaml()
+        self.make_menu()
+        self.current_menu = self.menu
+
+
+    def set_user(self):
         self.auth_username = None
         self.auth_password = None
         self.askuser = get_bool(config['DEFAULT'].get('askuser'))
+
         if self.askuser:
             if args.username:
                 self.auth_username = args.username
@@ -299,18 +324,13 @@ class JCA_CLI:
                 print("I need username and password. Exiting ...")
                 sys.exit()
 
+    def plugins(self):
         for plugin_s in config['DEFAULT'].get(my_op_mode + '_plugins', '').split(','):
             plugin = plugin_s.strip()
             if plugin:
                 plugins.append(plugin)
 
-        if not self.access_token and config['DEFAULT'].get('access_token_enc'):
-            self.access_token = encode_decode(config['DEFAULT']['access_token_enc'], decode=True)
-
-
-        if my_op_mode == 'scim':
-            self.swagger_configuration.host += '/jans-scim/restv1/v2'
-
+    def ssl_settings(self):
         if args.noverify:
             self.swagger_configuration.verify_ssl = False
         else:
@@ -321,16 +341,6 @@ class JCA_CLI:
 
         if args.config_api_mtls_client_key:
             self.swagger_configuration.key_file = args.config_api_mtls_client_key
-
-        self.swagger_configuration.debug = debug
-        if self.swagger_configuration.debug:
-            self.swagger_configuration.logger_file = debug_log_file
-
-        self.swagger_yaml_fn = os.path.join(cur_dir, my_op_mode + '.yaml')
-
-        self.cfg_yml = self.get_yaml()
-        self.make_menu()
-        self.current_menu = self.menu
 
     def drop_to_shell(self, mylocals):
         locals_ = locals()
@@ -470,9 +480,10 @@ class JCA_CLI:
                 sys.stderr.write("Error while getting access token")
                 sys.stderr.write(data)
                 sys.stderr.write('\n')
-        except:
+        except Exception as e:
             print("Error while getting access token")
             sys.stderr.write(response.data)
+            sys.stderr.write(e)
             sys.stderr.write('\n')
 
 
