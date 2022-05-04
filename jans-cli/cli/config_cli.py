@@ -164,8 +164,7 @@ if not(host and (client_id and client_secret or access_token)):
         config.read_string(config_ini_fn.read_text())
         host = config['DEFAULT']['jans_host']
 
-        if 'jca_test_client_id' in config['DEFAULT']:
-            test_client =True
+        if 'jca_test_client_id' in config['DEFAULT'] and test_client:
             client_id = config['DEFAULT']['jca_test_client_id']
             secret_key_str = 'jca_test_client_secret'
         else:
