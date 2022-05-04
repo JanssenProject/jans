@@ -32,7 +32,6 @@ parser.add_argument('-city', help="City field used for generating X.509 certific
 parser.add_argument('-state', help="State field used for generating X.509 certificates")
 parser.add_argument('-country', help="Two letters country coude used for generating X.509 certificates")
 
-
 parser.add_argument('-rdbm-user', help="RDBM username")
 parser.add_argument('-rdbm-password', help="RDBM password")
 parser.add_argument('-rdbm-port', help="RDBM port")
@@ -54,6 +53,7 @@ parser.add_argument('-jans-build', help="Buid version for Janssen applications")
 parser.add_argument('-setup-branch', help="Jannsen setup github branch", default='main')
 
 parser.add_argument('--disable-config-api-security', help="Turn off oauth2 security validation for jans-config-api", action='store_true')
+parser.add_argument('--cli-test-client', help="Use config api test client for CLI", action='store_true')
 
 if PROFILE != OPENBANKING_PROFILE:
 

@@ -89,6 +89,9 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
         if Config.install_config_api:
             config['DEFAULT']['jca_client_id'] = Config.role_based_client_id
             config['DEFAULT']['jca_client_secret_enc'] = Config.role_based_client_encoded_pw
+            if base.argsp.cli_test_client:
+                config['DEFAULT']['jca_test_client_id'] = Config.jca_client_id
+                config['DEFAULT']['jca_test_client_secret_enc'] = Config.jca_client_encoded_pw
 
         if Config.get('install_scim_server'):
             config['DEFAULT']['scim_client_id'] = Config.scim_client_id
