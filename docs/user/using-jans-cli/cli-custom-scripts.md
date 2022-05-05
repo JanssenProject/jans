@@ -103,11 +103,11 @@ We need to fill some of these properties with valid data to add this new script.
 
 ```
 {
-  "name": "custom_script_update_user",
+  "name": "custom_script_client",
   "aliases": null,
   "description": "Testing custom script addition",
-  "script": "_file /root/update_user.py",
-  "scriptType": "UPDATE_USER",
+  "script": "_file /root/client_registration.py",
+  "scriptType": "CLIENT_REGISTRATION",
   "programmingLanguage": "PYTHON",
   "moduleProperties": [{
     "value1": "myvalue1",
@@ -128,7 +128,7 @@ We can remove `dn`, `inum`. As because these two items are auto generated with r
 ### Name of the type of scripts
 
 ```
-PERSON_AUTHENTICATION, INTROSPECTION, RESOURCE_OWNER_PASSWORD_CREDENTIALS, APPLICATION_SESSION, CACHE_REFRESH, UPDATE_USER, USER_REGISTRATION, CLIENT_REGISTRATION, ID_GENERATOR, UMA_RPT_POLICY, UMA_RPT_CLAIMS, UMA_CLAIMS_GATHERING, CONSENT_GATHERING, DYNAMIC_SCOPE, SPONTANEOUS_SCOPE, END_SESSION, POST_AUTHN, SCIM, CIBA_END_USER_NOTIFICATION, PERSISTENCE_EXTENSION, IDP, UPDATE_TOKEN
+PERSON_AUTHENTICATION, INTROSPECTION, RESOURCE_OWNER_PASSWORD_CREDENTIALS, APPLICATION_SESSION, CACHE_REFRESH, CLIENT_REGISTRATION, ID_GENERATOR, UMA_RPT_POLICY, UMA_RPT_CLAIMS, UMA_CLAIMS_GATHERING, CONSENT_GATHERING, DYNAMIC_SCOPE, SPONTANEOUS_SCOPE, END_SESSION, POST_AUTHN, SCIM, CIBA_END_USER_NOTIFICATION, PERSISTENCE_EXTENSION, IDP, UPDATE_TOKEN
 ```
 
 ### Programming Language
@@ -147,11 +147,11 @@ Server Response:
 {
   "dn": "inum=61aef81b-b22d-42c0-89d5-b098c976a2b7,ou=scripts,o=jans",
   "inum": "61aef81b-b22d-42c0-89d5-b098c976a2b7",
-  "name": "custom_script_update_user",
+  "name": "custom_script_client",
   "aliases": null,
   "description": "Testing custom script addition",
   "script": "...",
-  "scriptType": "UPDATE_USER",
+  "scriptType": "CLIENT_REGISTRATION",
   "programmingLanguage": "PYTHON",
   "moduleProperties": [
     {
@@ -186,11 +186,11 @@ As we created a custom script in the [above](cli-custom-scripts.md#adds-a-new-cu
 {
   "dn": "inum=61aef81b-b22d-42c0-89d5-b098c976a2b7,ou=scripts,o=jans",
   "inum": "61aef81b-b22d-42c0-89d5-b098c976a2b7",
-  "name": "custom_script_update_user",
+  "name": "custom_script_client",
   "aliases": null,
   "description": "Testing custom script addition",
-  "script": "_file /root/update_user.py",
-  "scriptType": "UPDATE_USER",
+  "script": "_file /root/client_registrationj.py",
+  "scriptType": "CLIENT_REGISTRATION",
   "programmingLanguage": "PYTHON",
   "moduleProperties": [{
     "value1": "myvalue1",
@@ -224,11 +224,11 @@ Server Response:
 {
   "dn": "inum=61aef81b-b22d-42c0-89d5-b098c976a2b7,ou=scripts,o=jans",
   "inum": "61aef81b-b22d-42c0-89d5-b098c976a2b7",
-  "name": "custom_script_update_user",
+  "name": "custom_script_client",
   "aliases": null,
   "description": "Testing custom script addition",
   "script": "...",
-  "scriptType": "UPDATE_USER",
+  "scriptType": "CLIENT_REGISTRATION",
   "programmingLanguage": "PYTHON",
   "moduleProperties": [
     {
@@ -269,13 +269,13 @@ The command line is:
 /opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts-by-type --url-suffix type:script-type-name
 ```
 
-For an example, let's find all the scripts of `UPDATE_USER` type. So, the command line is:
+For an example, let's find all the scripts of `CLIENT_REGISTRATION` type. So, the command line is:
 
 ```
-/opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts-by-type --url-suffix type:UPDATE_USER
+/opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts-by-type --url-suffix type:CLIENT_REGISTRATION
 ```
 
-It returns all the custom scripts that are related to the `UPDATE_USER` type available in the Janssen Server. You will find the name of all the types [here](cli-custom-scripts.md#name-of-the-type-of-scripts)
+It returns all the custom scripts that are related to the `CLIENT_REGISTRATION` type available in the Janssen Server. You will find the name of all the types [here](cli-custom-scripts.md#name-of-the-type-of-scripts)
 
 ## Get Custom Scripts by it's `inum`
 
@@ -309,11 +309,11 @@ Getting access token for scope https://jans.io/oauth/config/scripts.readonly
 {
   "dn": "inum=61aef81b-b22d-42c0-89d5-b098c976a2b7,ou=scripts,o=jans",
   "inum": "61aef81b-b22d-42c0-89d5-b098c976a2b7",
-  "name": "custom_script_update_user",
+  "name": "custom_script_client",
   "aliases": null,
   "description": "Testing custom script addition",
   "script": "...",
-  "scriptType": "UPDATE_USER",
+  "scriptType": "CLIENT_REGISTRATION",
   "programmingLanguage": "PYTHON",
   "moduleProperties": [
     {

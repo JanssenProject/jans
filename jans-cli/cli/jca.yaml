@@ -995,8 +995,6 @@ paths:
             - '- resource_owner_password_credentials'
             - '- application_session'
             - '- cache_refresh'
-            - '- update_user'
-            - '- user_registration'
             - '- client_registration'
             - '- id_generator'
             - '- uma_rpt_policy'
@@ -3404,8 +3402,6 @@ components:
             - RESOURCE_OWNER_PASSWORD_CREDENTIALS
             - APPLICATION_SESSION
             - CACHE_REFRESH
-            - UPDATE_USER
-            - USER_REGISTRATION
             - CLIENT_REGISTRATION
             - ID_GENERATOR
             - UMA_RPT_POLICY
