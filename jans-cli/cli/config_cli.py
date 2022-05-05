@@ -300,6 +300,13 @@ class JCA_CLI:
         self.cfg_yml = self.get_yaml()
         self.make_menu()
         self.current_menu = self.menu
+        self.enums()
+
+    def enums(self):
+        self.enum_dict = {}
+        enum_json = Path(os.path.join(cur_dir, 'enums.json'))
+        if enum_json.is_file():
+            self.enum_dict = json.loads(enum_json.read_text())
 
 
     def set_user(self):
@@ -1013,21 +1020,23 @@ class JCA_CLI:
 
         print(tabulate(tab_data, headers, tablefmt="grid"))
 
-    def process_get(self, endpoint, return_value=False):
+    def process_get(self, endpoint, return_value=False, parameters={}):
         clear()
-        title = endpoint.name
-        if endpoint.name != endpoint.info['description'].strip('.'):
-            title += '\n' + endpoint.info['description']
+        if not return_value:
+            title = endpoint.name
+            if endpoint.name != endpoint.info['description'].strip('.'):
+                title += '\n' + endpoint.info['description']
 
-        self.print_underlined(title)
+            self.print_underlined(title)
 
-        parameters = self.obtain_parameters(endpoint, single=return_value)
+        if not parameters:
+            parameters = self.obtain_parameters(endpoint, single=return_value)
 
-        for param in parameters.copy():
-            if not parameters[param]:
-                del parameters[param]
+            for param in parameters.copy():
+                if not parameters[param]:
+                    del parameters[param]
 
-        if parameters:
+        if parameters and not return_value:
             print("Calling Api with parameters:", parameters)
 
         print("Please wait while retreiving data ...\n")
@@ -1169,7 +1178,37 @@ class JCA_CLI:
             if model.swagger_types[attribute] == name:
                 return attribute
 
+    def get_attrib_list(self):
+        for parent in self.menu:
+            for children in parent:
+                if children.info['operationId'] == 'get-attributes':
+                    attributes = self.process_get(children, return_value=True, parameters={'limit': 1000} )
+                    attrib_names = []
+                    for a in attributes:
+                        attrib_names.append(a.name)
+                    attrib_names.sort()
+                    return attrib_names
+
+    def get_enum(self, schema):
+        if schema['__schema_name__'] in self.enum_dict:
+            enum_obj = schema
+            
+            for path in self.enum_dict[schema['__schema_name__']].copy():
+                for p in path.split('.'):
+                    enum_obj = enum_obj[p]
+
+                if not 'enum' in self.enum_dict[schema['__schema_name__']][path]:
+                    self.enum_dict[schema['__schema_name__']][path]['enum'] = getattr(self, self.enum_dict[schema['__schema_name__']][path]['f'])()
+
+                enum_obj['enum'] = self.enum_dict[schema['__schema_name__']][path]['enum']
+
+
     def get_input_for_schema_(self, schema, model, spacing=0, initialised=False, getitem=None, required_only=False):
+        #print(self.current_menu, self.current_menu.path)
+        #print(schema)
+        #input("enter: ")
+        self.get_enum(schema)
+
         data = {}
         for prop in schema['properties']:
             item = schema['properties'][prop]
