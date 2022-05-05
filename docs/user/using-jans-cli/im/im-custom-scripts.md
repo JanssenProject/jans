@@ -70,35 +70,29 @@ Getting access token for scope https://jans.io/oauth/config/scripts.readonly
 +----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
 | 22 | PERSON_AUTHENTICATION               | uaf                                                       | False     | 5018-AF9C |
 +----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
-| 23 | USER_REGISTRATION                   | user_registration                                         | False     | 6EA0-8F0C |
+| 23 | UMA_RPT_POLICY                      | scim_access_policy                                        | False     | 2DAF-F9A5 |
 +----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
-| 24 | UMA_RPT_POLICY                      | scim_access_policy                                        | False     | 2DAF-F9A5 |
+| 24 | UMA_RPT_POLICY                      | uma_rpt_policy                                            | False     | 2DAF-F995 |
 +----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
-| 25 | UMA_RPT_POLICY                      | uma_rpt_policy                                            | False     | 2DAF-F995 |
+| 25 | DYNAMIC_SCOPE                       | org_name                                                  | False     | 031C-5621 |
 +----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
-| 26 | DYNAMIC_SCOPE                       | org_name                                                  | False     | 031C-5621 |
+| 26 | PERSISTENCE_EXTENSION               | persistence_extension                                     | False     | 8AF7.D82A |
 +----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
-| 27 | PERSISTENCE_EXTENSION               | persistence_extension                                     | False     | 8AF7.D82A |
+| 27 | ID_GENERATOR                        | id_generator                                              | False     | 031C-4A65 |
 +----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
-| 28 | ID_GENERATOR                        | id_generator                                              | False     | 031C-4A65 |
+| 28 | IDP                                 | idp                                                       | False     | 8AF7.D82B |
 +----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
-| 29 | IDP                                 | idp                                                       | False     | 8AF7.D82B |
+| 29 | CACHE_REFRESH                       | cache_refresh                                             | False     | 13D3-E7AD |
 +----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
-| 30 | CACHE_REFRESH                       | cache_refresh                                             | False     | 13D3-E7AD |
+| 30 | APPLICATION_SESSION                 | application_session                                       | False     | DAA9-B789 |
 +----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
-| 31 | APPLICATION_SESSION                 | application_session                                       | False     | DAA9-B789 |
+| 31 | DYNAMIC_SCOPE                       | dynamic_permission                                        | True      | CB5B-3211 |
 +----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
-| 32 | DYNAMIC_SCOPE                       | dynamic_permission                                        | True      | CB5B-3211 |
+| 32 | SCIM                                | scim_event_handler                                        | False     | A910-56AB |
 +----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
-| 33 | SCIM                                | scim_event_handler                                        | False     | A910-56AB |
+| 33 | CLIENT_REGISTRATION                 | client_registration                                       | False     | DAA9-B788 |
 +----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
-| 34 | CLIENT_REGISTRATION                 | client_registration                                       | False     | DAA9-B788 |
-+----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
-| 35 | DYNAMIC_SCOPE                       | work_phone                                                | False     | 031C-5622 |
-+----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
-| 36 | USER_REGISTRATION                   | user_confirm_registration                                 | False     | 6EA0-8F0D |
-+----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
-| 37 | UPDATE_USER                         | update_user                                               | False     | 522F-CDC5 |
+| 34 | DYNAMIC_SCOPE                       | work_phone                                                | False     | 031C-5622 |
 +----+-------------------------------------+-----------------------------------------------------------+-----------+-----------+
 
 
@@ -110,7 +104,7 @@ To add a new script, choose option 2 and fill each property:
 
 `dn, inum, display name, valid script`
 ```
-ScriptType: [PERSON_AUTHENTICATION, INTROSPECTION, RESOURCE_OWNER_PASSWORD_CREDENTIALS, APPLICATION_SESSION, CACHE_REFRESH, UPDATE_USER, USER_REGISTRATION, CLIENT_REGISTRATION, ID_GENERATOR, UMA_RPT_POLICY, UMA_RPT_CLAIMS, UMA_CLAIMS_GATHERING, CONSENT_GATHERING, DYNAMIC_SCOPE, SPONTANEOUS_SCOPE, END_SESSION, POST_AUTHN, SCIM, CIBA_END_USER_NOTIFICATION, PERSISTENCE_EXTENSION, IDP]
+ScriptType: [PERSON_AUTHENTICATION, INTROSPECTION, RESOURCE_OWNER_PASSWORD_CREDENTIALS, APPLICATION_SESSION, CACHE_REFRESH, CLIENT_REGISTRATION, ID_GENERATOR, UMA_RPT_POLICY, UMA_RPT_CLAIMS, UMA_CLAIMS_GATHERING, CONSENT_GATHERING, DYNAMIC_SCOPE, SPONTANEOUS_SCOPE, END_SESSION, POST_AUTHN, SCIM, CIBA_END_USER_NOTIFICATION, PERSISTENCE_EXTENSION, IDP]
 
 Programming Language: [PYTHON, JAVA]
 ```
