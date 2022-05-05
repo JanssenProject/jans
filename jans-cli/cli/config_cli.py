@@ -303,11 +303,13 @@ class JCA_CLI:
         self.enums()
 
     def enums(self):
-        self.enum_dict = {}
-        enum_json = Path(os.path.join(cur_dir, 'enums.json'))
-        if enum_json.is_file():
-            self.enum_dict = json.loads(enum_json.read_text())
-
+        self.enum_dict = {
+                            "CustomAttribute": {
+                              "properties.name": {
+                                "f": "get_attrib_list"
+                              }
+                            }
+                          }
 
     def set_user(self):
         self.auth_username = None
