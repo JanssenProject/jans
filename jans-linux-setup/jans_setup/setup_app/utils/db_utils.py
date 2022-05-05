@@ -21,7 +21,7 @@ from setup_app.utils import base
 from setup_app.utils.cbm import CBM
 from setup_app.utils import ldif_utils
 from setup_app.utils.attributes import attribDataTypes
-if Config.profile == 'jans':
+if base.current_app.profile == 'jans':
     from setup_app.utils.spanner import Spanner
 
 my_path = PurePath(os.path.dirname(os.path.realpath(__file__)))
@@ -52,9 +52,9 @@ class DBUtils:
                 format='%(asctime)s %(levelname)s - %(message)s'
                 )
 
-        if Config.mappingLocations['default'] == 'ldap':
+        if Config.mapping_locations['default'] == 'ldap':
             self.moddb = BackendTypes.LDAP
-        elif Config.mappingLocations['default'] == 'rdbm':
+        elif Config.mapping_locations['default'] == 'rdbm':
             self.read_jans_schema()
             if Config.rdbm_type == 'mysql':
                 self.moddb = BackendTypes.MYSQL
@@ -67,8 +67,8 @@ class DBUtils:
             self.moddb = BackendTypes.COUCHBASE
 
         if not hasattr(self, 'ldap_conn') or force:
-            for group in Config.mappingLocations:
-                if Config.mappingLocations[group] == 'ldap':
+            for group in Config.mapping_locations:
+                if Config.mapping_locations[group] == 'ldap':
                     base.logIt("Making LDAP Conncetion")
                     ldap_server = ldap3.Server(Config.ldap_hostname, port=int(Config.ldaps_port), use_ssl=use_ssl)
                     self.ldap_conn = ldap3.Connection(
@@ -81,8 +81,8 @@ class DBUtils:
                     break
 
         if not self.session or force:
-            for group in Config.mappingLocations:
-                if Config.mappingLocations[group] == 'rdbm':
+            for group in Config.mapping_locations:
+                if Config.mapping_locations[group] == 'rdbm':
                     if Config.rdbm_type in ('mysql', 'pgsql'):
                         base.logIt("Making MySql Conncetion")
                         result = self.mysqlconnection()
@@ -791,7 +791,7 @@ class DBUtils:
 
         base.logIt("Importing ldif file(s): {} ".format(', '.join(ldif_files)))
 
-        sql_data_fn = os.path.join(Config.outputFolder, Config.rdbm_type, 'jans_data.sql')
+        sql_data_fn = os.path.join(Config.output_dir, Config.rdbm_type, 'jans_data.sql')
 
         for ldif_fn in ldif_files:
             base.logIt("Importing entries from " + ldif_fn)
@@ -1030,7 +1030,7 @@ class DBUtils:
 
         base.logIt("Importing templates file(s): {} ".format(', '.join(templates)))
 
-        sql_data_fn = os.path.join(Config.outputFolder, Config.rdbm_type, 'jans_data.sql')
+        sql_data_fn = os.path.join(Config.output_dir, Config.rdbm_type, 'jans_data.sql')
 
         for template in templates:
             base.logIt("Importing entries from " + template)
@@ -1156,10 +1156,10 @@ class DBUtils:
         key = ldif_utils.get_key_from(dn)
         group = self.get_group_for_key(key)
 
-        if Config.mappingLocations[group] == 'ldap':
+        if Config.mapping_locations[group] == 'ldap':
             return static.BackendTypes.LDAP
 
-        if Config.mappingLocations[group] == 'rdbm':
+        if Config.mapping_locations[group] == 'rdbm':
             if Config.rdbm_type == 'mysql':
                 return static.BackendTypes.MYSQL
             elif Config.rdbm_type == 'pgsql':
@@ -1167,7 +1167,7 @@ class DBUtils:
             elif Config.rdbm_type == 'spanner':
                 return static.BackendTypes.SPANNER
 
-        if Config.mappingLocations[group] == 'couchbase':
+        if Config.mapping_locations[group] == 'couchbase':
             return static.BackendTypes.COUCHBASE
 
 

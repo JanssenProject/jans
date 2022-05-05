@@ -13,15 +13,18 @@ import io.jans.as.common.util.RedirectUri;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseMode;
+import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.server.model.authorize.AuthorizeParamsValidator;
 import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.server.model.common.DeviceAuthorizationCacheControl;
 import io.jans.as.server.model.common.SessionId;
 import io.jans.as.server.model.common.SessionIdState;
 import io.jans.as.server.model.exception.AcrChangedException;
+import io.jans.as.server.model.exception.InvalidRedirectUrlException;
 import io.jans.as.server.security.Identity;
 import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.DeviceAuthorizationService;
@@ -93,6 +96,12 @@ public class AuthorizeRestWebServiceValidator {
         return validateClient(clientId, state, false);
     }
 
+    public Client validateClient(AuthzRequest authzRequest, boolean isPar) {
+        final Client client = validateClient(authzRequest.getClientId(), authzRequest.getState(), isPar);
+        authzRequest.setClient(client);
+        return client;
+    }
+
     public Client validateClient(String clientId, String state, boolean isPar) {
         if (StringUtils.isBlank(clientId)) {
             throw new WebApplicationException(Response
@@ -138,7 +147,7 @@ public class AuthorizeRestWebServiceValidator {
         }
     }
 
-    public boolean validateAuthnMaxAge(Integer maxAge, SessionId sessionUser, Client client) {
+    public boolean isAuthnMaxAgeValid(Integer maxAge, SessionId sessionUser, Client client) {
         if (maxAge == null) {
             maxAge = client.getDefaultMaxAge();
         }
@@ -377,10 +386,10 @@ public class AuthorizeRestWebServiceValidator {
         }
     }
 
-    public void validateAcrs(AuthzRequest authzRequest, Client client, RedirectUriResponse redirectUriResponse) throws AcrChangedException {
+    public void validateAcrs(AuthzRequest authzRequest, Client client) throws AcrChangedException {
         if (!client.getAttributes().getAuthorizedAcrValues().isEmpty() &&
                 !client.getAttributes().getAuthorizedAcrValues().containsAll(authzRequest.getAcrValuesList())) {
-            throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST,
+            throw authzRequest.getRedirectUriResponse().createWebException(AuthorizeErrorResponseType.INVALID_REQUEST,
                     "Restricted acr value request, please review the list of authorized acr values for this client");
         }
         checkAcrChanged(authzRequest, identity.getSessionId()); // check after redirect uri is validated
@@ -410,6 +419,37 @@ public class AuthorizeRestWebServiceValidator {
             } else {
                 throw e;
             }
+        }
+    }
+
+    public void validateJwtRequest(String clientId, String state, HttpServletRequest httpRequest, List<ResponseType> responseTypes, RedirectUriResponse redirectUriResponse, JwtAuthorizationRequest jwtRequest) {
+        try {
+            jwtRequest.validate();
+
+            validateRequestObject(jwtRequest, redirectUriResponse);
+
+            // MUST be equal
+            if (!jwtRequest.getResponseTypes().containsAll(responseTypes) || !responseTypes.containsAll(jwtRequest.getResponseTypes())) {
+                throw createInvalidJwtRequestException(redirectUriResponse, "The responseType parameter is not the same in the JWT");
+            }
+            if (StringUtils.isBlank(jwtRequest.getClientId()) || !jwtRequest.getClientId().equals(clientId)) {
+                throw createInvalidJwtRequestException(redirectUriResponse, "The clientId parameter is not the same in the JWT");
+            }
+        } catch (WebApplicationException | InvalidRedirectUrlException e) {
+            throw e;
+        } catch (InvalidJwtException e) {
+            log.debug("Invalid JWT authorization request. {}", e.getMessage());
+            redirectUriResponse.getRedirectUri().parseQueryString(errorResponseFactory.getErrorAsQueryString(
+                    AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT, state));
+            throw new WebApplicationException(RedirectUtil.getRedirectResponseBuilder(redirectUriResponse.getRedirectUri(), httpRequest).build());
+        } catch (Exception e) {
+            log.error("Unexpected exception. " + e.getMessage(), e);
+        }
+    }
+
+    public void checkSignedRequestRequired(AuthzRequest authzRequest) {
+        if (Boolean.TRUE.equals(appConfiguration.getForceSignedRequestObject()) && StringUtils.isBlank(authzRequest.getRequest()) && StringUtils.isBlank(authzRequest.getRequestUri())) {
+            throw createInvalidJwtRequestException(authzRequest.getRedirectUriResponse(), "A signed request object is required");
         }
     }
 }

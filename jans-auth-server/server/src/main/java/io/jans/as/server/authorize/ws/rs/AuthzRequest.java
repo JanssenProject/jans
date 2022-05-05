@@ -1,13 +1,20 @@
 package io.jans.as.server.authorize.ws.rs;
 
+import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.common.Prompt;
+import io.jans.as.model.common.ResponseType;
+import io.jans.as.server.model.audit.OAuth2AuditLog;
+import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
+import io.jans.as.server.service.RedirectUriResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.core.SecurityContext;
 import io.jans.as.model.common.ResponseMode;
 import io.jans.as.model.util.Util;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -42,6 +49,54 @@ public class AuthzRequest {
     private HttpServletRequest httpRequest;
     private HttpServletResponse httpResponse;
     private SecurityContext securityContext;
+    private Map<String, String> customParameters;
+    private JwtAuthorizationRequest jwtRequest;
+    private RedirectUriResponse redirectUriResponse;
+    private Client client;
+    private OAuth2AuditLog auditLog;
+
+    public OAuth2AuditLog getAuditLog() {
+        return auditLog;
+    }
+
+    public void setAuditLog(OAuth2AuditLog auditLog) {
+        this.auditLog = auditLog;
+    }
+
+    public Client getClient() {
+        return client;
+    }
+
+    public void setClient(Client client) {
+        this.client = client;
+    }
+
+    public RedirectUriResponse getRedirectUriResponse() {
+        return redirectUriResponse;
+    }
+
+    public void setRedirectUriResponse(RedirectUriResponse redirectUriResponse) {
+        this.redirectUriResponse = redirectUriResponse;
+    }
+
+    public JwtAuthorizationRequest getJwtRequest() {
+        return jwtRequest;
+    }
+
+    public void setJwtRequest(JwtAuthorizationRequest jwtRequest) {
+        this.jwtRequest = jwtRequest;
+    }
+
+    public Map<String, String> getCustomParameters() {
+        if (customParameters == null) {
+            customParameters = new HashMap<>();
+        }
+        return customParameters;
+    }
+
+    public void setCustomParameters(Map<String, String> customParameters) {
+        this.customParameters = customParameters;
+    }
 
     public String getHttpMethod() {
         return httpMethod;
@@ -57,6 +112,10 @@ public class AuthzRequest {
 
     public void setScope(String scope) {
         this.scope = scope;
+    }
+
+    public List<ResponseType> getResponseTypeList() {
+        return ResponseType.fromString(responseType, " ");
     }
 
     public String getResponseType() {

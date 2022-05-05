@@ -22,7 +22,7 @@ from setup_app.utils.setup_utils import SetupUtils
 from setup_app.utils.db_utils import dbUtils
 from setup_app.pylib.jproperties import Properties
 
-if Config.profile == 'jans':
+if base.current_app.profile == 'jans':
     from setup_app.utils.spanner import Spanner
 
 
@@ -117,10 +117,10 @@ class PropertiesUtils(SetupUtils):
 
             if not Config.opendj_install:
                 if Config.cb_install:
-                    Config.mappingLocations = { group: 'couchbase' for group in Config.couchbaseBucketDict }
+                    Config.mapping_locations = { group: 'couchbase' for group in Config.couchbaseBucketDict }
 
                 if Config.rdbm_install:
-                    Config.mappingLocations = { group: 'rdbm' for group in Config.couchbaseBucketDict }
+                    Config.mapping_locations = { group: 'rdbm' for group in Config.couchbaseBucketDict }
 
             if Config.opendj_install == InstallTypes.LOCAL and not Config.installed_instance:
                 used_ports = self.opendj_used_ports()
@@ -205,12 +205,12 @@ class PropertiesUtils(SetupUtils):
                 continue
             try:
                 setattr(Config, prop, p[prop])
-                if prop == 'mappingLocations':
-                    mappingLocations = json.loads(p[prop])
-                    setattr(Config, prop, mappingLocations)
-                    for l in mappingLocations:
-                        if not mappingLocations[l] in map_db:
-                            map_db.append(mappingLocations[l])
+                if prop == 'mapping_locations':
+                    mapping_locations = json.loads(p[prop])
+                    setattr(Config, prop, mapping_locations)
+                    for l in mapping_locations:
+                        if not mapping_locations[l] in map_db:
+                            map_db.append(mapping_locations[l])
 
                 if p[prop] == 'True':
                     setattr(Config, prop, True)
@@ -307,7 +307,7 @@ class PropertiesUtils(SetupUtils):
 
                 if not obj_name.startswith('__') and (not callable(obj)):
 
-                    if obj_name == 'mappingLocations':
+                    if obj_name == 'mapping_locations':
                         p[obj_name] = json.dumps(obj)
                     else:
                         value = getString(obj)
@@ -488,7 +488,7 @@ class PropertiesUtils(SetupUtils):
             couchbase_mappings.remove(m)
 
         for m in couchbase_mappings:
-            Config.mappingLocations[m] = 'couchbase'
+            Config.mapping_locations[m] = 'couchbase'
 
     def set_persistence_type(self):
         if Config.opendj_install and (not Config.cb_install) and (not Config.rdbm_install):
@@ -518,20 +518,20 @@ class PropertiesUtils(SetupUtils):
 
 
     def promptForScimServer(self):
-        if Config.installed_instance and Config.installScimServer:
+        if Config.installed_instance and Config.install_scim_server:
             return
 
         promptForScimServer = self.getPrompt("Install Scim Server?",
-                                            self.getDefaultOption(Config.installScimServer)
+                                            self.getDefaultOption(Config.install_scim_server)
                                             )[0].lower()
         
         if promptForScimServer == 'y':
-            Config.installScimServer = True
+            Config.install_scim_server = True
         else:
-            Config.installScimServer = False
+            Config.install_scim_server = False
 
-        if Config.installed_instance and Config.installScimServer:
-            Config.addPostSetupService.append('installScimServer')
+        if Config.installed_instance and Config.install_scim_server:
+            Config.addPostSetupService.append('install_scim_server')
 
     def promptForFido2Server(self):
         if Config.installed_instance and Config.installFido2:
@@ -585,17 +585,17 @@ class PropertiesUtils(SetupUtils):
 
 
     def promptForConfigApi(self):
-        if Config.installed_instance and Config.installConfigApi:
+        if Config.installed_instance and Config.install_config_api:
             return
 
         promptForConfigApi = self.getPrompt("Install Jans Auth Config Api?", 
-                            self.getDefaultOption(Config.installConfigApi)
+                            self.getDefaultOption(Config.install_config_api)
                             )[0].lower()
 
-        Config.installConfigApi = True if promptForConfigApi == 'y' else False
+        Config.install_config_api = True if promptForConfigApi == 'y' else False
 
-        if Config.installed_instance and Config.installConfigApi:
-            Config.addPostSetupService.append('installConfigApi')
+        if Config.installed_instance and Config.install_config_api:
+            Config.addPostSetupService.append('install_config_api')
 
     def prompt_for_rdbm(self):
         while True:
@@ -715,7 +715,7 @@ class PropertiesUtils(SetupUtils):
                     print("Password must be at least 6 characters and include one uppercase letter, one lowercase letter, one digit, and one special character.")
 
             Config.cb_password = cbPass
-            Config.mappingLocations = { group: 'couchbase' for group in Config.couchbaseBucketDict }
+            Config.mapping_locations = { group: 'couchbase' for group in Config.couchbaseBucketDict }
 
         elif backend_type_str == 'Remote Couchbase':
             Config.opendj_install = InstallTypes.NONE
@@ -729,7 +729,7 @@ class PropertiesUtils(SetupUtils):
                 if result['result']:
                     break
 
-            Config.mappingLocations = { group: 'couchbase' for group in Config.couchbaseBucketDict }
+            Config.mapping_locations = { group: 'couchbase' for group in Config.couchbaseBucketDict }
 
         elif backend_type_str == 'Local MySQL':
             Config.opendj_install = InstallTypes.NONE

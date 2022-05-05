@@ -99,6 +99,10 @@ public class ScopeService {
             return new ArrayList<>();
         }
     }
+    
+    public Scope getScopeByDn(String dn) {
+        return persistenceEntryManager.find(Scope.class, dn);
+    }
 
     public List<Scope> searchScopes(String pattern, int sizeLimit, String scopeType) {
         String[] targetArray = new String[] { pattern };

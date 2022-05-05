@@ -1,6 +1,7 @@
 import os
 import glob
 import shutil
+from pathlib import Path
 
 from setup_app import paths
 from setup_app.utils import base
@@ -9,6 +10,11 @@ from setup_app.config import Config
 from setup_app.installers.jetty import JettyInstaller
 
 class FidoInstaller(JettyInstaller):
+
+    source_files = [
+                (os.path.join(Config.dist_jans_dir, 'jans-fido2.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-fido2-server/{0}/jans-fido2-server-{0}.war').format(base.current_app.app_info['ox_version'])),
+                (os.path.join(Config.dist_app_dir, os.path.basename(base.current_app.app_info['APPLE_WEBAUTHN'])), base.current_app.app_info['APPLE_WEBAUTHN'])
+                ]
 
     def __init__(self):
         setattr(base.current_app, self.__class__.__name__, self)
@@ -19,12 +25,8 @@ class FidoInstaller(JettyInstaller):
         self.install_var = 'installFido2'
         self.register_progess()
 
-        self.source_files = [
-                (os.path.join(Config.distJansFolder, 'jans-fido2.war'), 'https://maven.jans.io/maven/io/jans/jans-fido2-server/{0}/fido2-server-{0}.war'.format(Config.oxVersion))
-                ]
-
         self.fido2ConfigFolder = os.path.join(Config.configFolder, 'fido2')
-        self.output_folder = os.path.join(Config.outputFolder, 'jans-fido2')
+        self.output_folder = os.path.join(Config.output_dir, 'jans-fido2')
         self.template_folder = os.path.join(Config.templateFolder, 'jans-fido2')
         self.fido2_dynamic_conf_json = os.path.join(self.output_folder, 'dynamic-conf.json')
         self.fido2_static_conf_json = os.path.join(self.output_folder, 'static-conf.json')
@@ -74,15 +76,13 @@ class FidoInstaller(JettyInstaller):
             )
 
         #copy fido2 server metadata
-        self.copyTree(
-            os.path.join(Config.install_dir, 'static/auth/fido2/server_metadata'),
-            os.path.join(self.fido2ConfigFolder, 'server_metadata')
-            )
+        src_dir = os.path.join(Config.install_dir, 'static/fido2/server_metadata')
+        trgt_dir = os.path.join(self.fido2ConfigFolder, 'server_metadata')
+        self.copy_tree(src_dir, trgt_dir, ignore='.dontdelete')
 
         # copy Apple_WebAuthn_Root_CA
-        apple_weauthn = os.path.join(Config.distAppFolder, 'Apple_WebAuthn_Root_CA.pem')
-        if os.path.exists(apple_weauthn):
+        if os.path.exists(self.source_files[1][0]):
             target_dir = os.path.join(self.fido2ConfigFolder, 'apple')
             self.run([paths.cmd_mkdir, '-p', target_dir])
-            self.copyFile(apple_weauthn, target_dir)
+            self.copyFile(self.source_files[1][0], target_dir)
 
