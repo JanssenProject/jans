@@ -58,10 +58,6 @@ import io.jans.model.custom.script.type.uma.UmaRptClaimsType;
 import io.jans.model.custom.script.type.uma.UmaRptPolicyType;
 import io.jans.model.custom.script.type.user.CacheRefreshType;
 import io.jans.model.custom.script.type.user.DummyCacheRefreshType;
-import io.jans.model.custom.script.type.user.DummyUpdateUserType;
-import io.jans.model.custom.script.type.user.DummyUserRegistrationType;
-import io.jans.model.custom.script.type.user.UpdateUserType;
-import io.jans.model.custom.script.type.user.UserRegistrationType;
 import io.jans.orm.annotation.AttributeEnum;
 
 /**
@@ -79,9 +75,6 @@ public enum CustomScriptType implements AttributeEnum {
             new DummyApplicationSessionType()),
     CACHE_REFRESH("cache_refresh", "Cache Refresh", CacheRefreshType.class, CustomScript.class, "CacheRefresh",
             new DummyCacheRefreshType()),
-    UPDATE_USER("update_user", "Update User", UpdateUserType.class, CustomScript.class, "UpdateUser", new DummyUpdateUserType()),
-    USER_REGISTRATION("user_registration", "User Registration", UserRegistrationType.class, CustomScript.class, "UserRegistration",
-            new DummyUserRegistrationType()),
     CLIENT_REGISTRATION("client_registration", "Client Registration", ClientRegistrationType.class, CustomScript.class, "ClientRegistration",
             new DummyClientRegistrationType()),
     ID_GENERATOR("id_generator", "Id Generator", IdGeneratorType.class, CustomScript.class, "IdGenerator",
