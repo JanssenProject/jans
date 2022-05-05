@@ -48,7 +48,7 @@ To register a new OpenID connect client on the Janssen server, we will use `jans
   - Run the command below on Janssen server to enter interactive mode.
 
 
-     > Note: </br> `jans-cli` has to be authenticated and authorized with the respective Janssen server. If `jans-cli` is being executed for the first time or if there is no valid access token available, then running the command below will initiate device authentication and authorization flow. In that case, follow the steps for [jans-cli authorization](../using-jans-cli/cli-tips.md#cli-authorization) to continue running the command.
+     > Note: </br> `jans-cli` has to be authenticated and authorized with the respective Janssen server. If `jans-cli` is being executed for the first time or if there is no valid access token available, then running the command below will initiate device authentication and authorization flow. In that case, follow the steps for [jans-cli authorization](../using-jans-cli/cli-index.md#cli-authorization) to continue running the command.
   
     ```
     /opt/jans/jans-cli/config-cli.py
