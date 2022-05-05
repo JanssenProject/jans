@@ -251,7 +251,7 @@ public class ClientsResource extends ConfigBaseResource {
         }
 
         // check scope
-        logger.debug("Checking client.getScopes():{}", client.getScopes());
+        logger.error("Checking client.getScopes():{}", client.getScopes());
         if (client.getScopes() == null || client.getScopes().length == 0) {
             return client;
         }
@@ -260,21 +260,24 @@ public class ClientsResource extends ConfigBaseResource {
         List<String> invalidScopes = new ArrayList<>();
 
         for (String scope : client.getScopes()) {
-            logger.debug("Is scope:{} valid:{}", scope, authUtil.isValidDn(scope));
-            List<Scope> scopes = null;
+            logger.error("Is scope:{} valid:{}", scope, authUtil.isValidDn(scope));
+            List<Scope> scopes = new ArrayList<>();
             if (authUtil.isValidDn(scope)) {
-                scopes = scopeService.searchScopesByDN(scope);
+                Scope scp = scopeService.getScopeByDn(scope);
+                if(scp!=null) {
+                    scopes.add(scp);
+                }
             } else {
                 scopes = scopeService.searchScopesById(scope);
             }
-            logger.debug("Scopes from DB - {}'", scopes);
+            logger.error("Scopes from DB - {}'", scopes);
             if (scopes != null && !scopes.isEmpty()) {
                 validScopes.add(scopes.get(0).getDn());
             } else {
                 invalidScopes.add(scope);
             }
         }
-        logger.debug("Scope validation result - validScopes:{}, invalidScopes:{} ", validScopes, invalidScopes);
+        logger.error("Scope validation result - validScopes:{}, invalidScopes:{} ", validScopes, invalidScopes);
 
         if (!invalidScopes.isEmpty()) {
             thorwBadRequestException("Invalid scope in request -> " + invalidScopes.toString());
