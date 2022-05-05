@@ -39,8 +39,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import org.slf4j.Logger;
-
 /**
  * @author Mougang T.Gasmyr
  *
@@ -248,50 +246,46 @@ public class ClientsResource extends ConfigBaseResource {
     }
     
     private Client checkScopeFormat(Client client) {
-        
-        if(client==null) {
+        if (client == null) {
             return client;
         }
-        
-        //check scope
-        
-        logger.debug("Checking client.getScopes():{}",client.getScopes());
-        if(client.getScopes()==null || client.getScopes().length==0) {
+
+        // check scope
+        logger.debug("Checking client.getScopes():{}", client.getScopes());
+        if (client.getScopes() == null || client.getScopes().length == 0) {
             return client;
         }
-       
-        
+
         List<String> validScopes = new ArrayList<>();
         List<String> invalidScopes = new ArrayList<>();
-        
-        for(String scope : client.getScopes()) {
+
+        for (String scope : client.getScopes()) {
             logger.debug("Is scope:{} valid:{}", scope, authUtil.isValidDn(scope));
-            
-            if(!authUtil.isValidDn(scope)) {
-                //Get dn based on name
-                List<Scope> scopes = scopeService.searchScopesById(scope);
-                logger.debug("Scopes from DB - {}'", scopes);
-                if(scopes!=null && !scopes.isEmpty()) {
-                    validScopes.add(scope);
-                }
-                else {                    
-                    invalidScopes.add(scope);
-                }
+            List<Scope> scopes = null;
+            if (authUtil.isValidDn(scope)) {
+                scopes = scopeService.searchScopesByDN(scope);
+            } else {
+                scopes = scopeService.searchScopesById(scope);
             }
-            else {
-                validScopes.add(scope);
+            logger.debug("Scopes from DB - {}'", scopes);
+            if (scopes != null && !scopes.isEmpty()) {
+                validScopes.add(scopes.get(0).getDn());
+            } else {
+                invalidScopes.add(scope);
             }
         }
-        logger.debug("Scope validation result - validScopes:{}, invalidScopes:{} ",validScopes, invalidScopes);
-        
-        if(!invalidScopes.isEmpty()) {
-            thorwBadRequestException("Invalid scope in request -> "+invalidScopes.toString());
+        logger.debug("Scope validation result - validScopes:{}, invalidScopes:{} ", validScopes, invalidScopes);
+
+        if (!invalidScopes.isEmpty()) {
+            thorwBadRequestException("Invalid scope in request -> " + invalidScopes.toString());
         }
-        
-        //reset scopes 
-        client.setScopes((String[]) validScopes.toArray()); 
-        return client;        
+
+        // reset scopes
+        if (!validScopes.isEmpty()) {
+            String[] scopeArr = validScopes.stream().toArray(String[]::new);
+            client.setScopes(scopeArr);
+        }
+        return client;
     }
-    
 
 }

@@ -99,6 +99,16 @@ public class ScopeService {
             return new ArrayList<>();
         }
     }
+    
+    public List<Scope> searchScopesByDN(String dn) {
+        Filter searchFilter = Filter.createEqualityFilter("dn", dn);
+        try {
+            return persistenceEntryManager.findEntries(getDnForScope(null), Scope.class, searchFilter);
+        } catch (Exception e) {
+            logger.error("No scopes found by DN: " + dn, e);
+            return new ArrayList<>();
+        }
+    }
 
     public List<Scope> searchScopes(String pattern, int sizeLimit, String scopeType) {
         String[] targetArray = new String[] { pattern };
