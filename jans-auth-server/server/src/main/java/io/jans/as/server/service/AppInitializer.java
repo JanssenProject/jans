@@ -216,8 +216,6 @@ public class AppInitializer {
         List<CustomScriptType> supportedCustomScriptTypes = Lists.newArrayList(CustomScriptType.values());
 
         supportedCustomScriptTypes.remove(CustomScriptType.CACHE_REFRESH);
-        supportedCustomScriptTypes.remove(CustomScriptType.UPDATE_USER);
-        supportedCustomScriptTypes.remove(CustomScriptType.USER_REGISTRATION);
         supportedCustomScriptTypes.remove(CustomScriptType.SCIM);
         supportedCustomScriptTypes.remove(CustomScriptType.IDP);
         supportedCustomScriptTypes.remove(CustomScriptType.CONFIG_API);
