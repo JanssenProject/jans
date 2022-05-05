@@ -23,6 +23,7 @@ import io.jans.configapi.util.AttributeNames;
 import io.jans.configapi.util.AuthUtil;
 import io.jans.configapi.core.util.Jackson;
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.model.PagedResult;
 import io.jans.util.StringHelper;
 import io.jans.util.security.StringEncrypter.EncryptionException;
@@ -251,7 +252,7 @@ public class ClientsResource extends ConfigBaseResource {
         }
 
         // check scope
-        logger.error("Checking client.getScopes():{}", client.getScopes());
+        logger.debug("Checking client.getScopes():{}", client.getScopes());
         if (client.getScopes() == null || client.getScopes().length == 0) {
             return client;
         }
@@ -260,24 +261,24 @@ public class ClientsResource extends ConfigBaseResource {
         List<String> invalidScopes = new ArrayList<>();
 
         for (String scope : client.getScopes()) {
-            logger.error("Is scope:{} valid:{}", scope, authUtil.isValidDn(scope));
+            logger.debug("Is scope:{} valid:{}", scope, authUtil.isValidDn(scope));
             List<Scope> scopes = new ArrayList<>();
             if (authUtil.isValidDn(scope)) {
-                Scope scp = scopeService.getScopeByDn(scope);
+                Scope scp = findScopeByDn(scope);
                 if(scp!=null) {
                     scopes.add(scp);
                 }
             } else {
                 scopes = scopeService.searchScopesById(scope);
             }
-            logger.error("Scopes from DB - {}'", scopes);
-            if (scopes != null && !scopes.isEmpty()) {
+            logger.debug("Scopes from DB - {}'", scopes);
+            if (!scopes.isEmpty()) {
                 validScopes.add(scopes.get(0).getDn());
             } else {
                 invalidScopes.add(scope);
             }
         }
-        logger.error("Scope validation result - validScopes:{}, invalidScopes:{} ", validScopes, invalidScopes);
+        logger.debug("Scope validation result - validScopes:{}, invalidScopes:{} ", validScopes, invalidScopes);
 
         if (!invalidScopes.isEmpty()) {
             thorwBadRequestException("Invalid scope in request -> " + invalidScopes.toString());
@@ -291,4 +292,11 @@ public class ClientsResource extends ConfigBaseResource {
         return client;
     }
 
+    private Scope findScopeByDn(String scopeDn) {
+        try {
+            return scopeService.getScopeByDn(scopeDn);
+        } catch (EntryPersistenceException e) {
+            return null;
+        }
+    }
 }
