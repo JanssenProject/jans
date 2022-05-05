@@ -1020,7 +1020,7 @@ class JCA_CLI:
 
         print(tabulate(tab_data, headers, tablefmt="grid"))
 
-    def process_get(self, endpoint, return_value=False, parameters={}):
+    def process_get(self, endpoint, return_value=False, parameters=None):
         clear()
         if not return_value:
             title = endpoint.name
@@ -1204,11 +1204,8 @@ class JCA_CLI:
 
 
     def get_input_for_schema_(self, schema, model, spacing=0, initialised=False, getitem=None, required_only=False):
-        #print(self.current_menu, self.current_menu.path)
-        #print(schema)
-        #input("enter: ")
-        self.get_enum(schema)
 
+        self.get_enum(schema)
         data = {}
         for prop in schema['properties']:
             item = schema['properties'][prop]
