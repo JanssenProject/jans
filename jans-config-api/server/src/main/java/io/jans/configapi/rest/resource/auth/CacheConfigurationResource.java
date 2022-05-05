@@ -17,24 +17,21 @@ import io.jans.configapi.core.util.Jackson;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.service.cache.*;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.function.Function;
-
-import org.slf4j.Logger;
 
 @Path(ApiConstants.CONFIG + ApiConstants.CACHE)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public class CacheConfigurationResource extends BaseResource {
+public class CacheConfigurationResource extends ConfigBaseResource {
 
-    @Inject
-    Logger log;
+    private static final String ERROR_MSG = "Unable to apply patch.";
 
     @Inject
     ConfigurationService configurationService;
@@ -67,12 +64,12 @@ public class CacheConfigurationResource extends BaseResource {
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS })
     public Response patchCacheConfiguration(@NotNull String requestString) {
-        log.debug(" CACHE details to patch - requestString = " + requestString);
+        logger.debug(" CACHE details to patch - requestString:{}", requestString);
         final CacheConfiguration modifiedCache = mergeModifiedCache(cache -> {
             try {
                 return Jackson.applyPatch(requestString, cache);
             } catch (IOException | JsonPatchException e) {
-                throw new RuntimeException("Unable to apply patch.", e);
+                throw new InternalServerErrorException(ERROR_MSG, e);
             }
         });
         return Response.ok(modifiedCache).build();
@@ -89,7 +86,7 @@ public class CacheConfigurationResource extends BaseResource {
     @Path(ApiConstants.REDIS)
     @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS })
     public Response updateRedisConfiguration(@NotNull RedisConfiguration redisConfiguration) {
-        log.debug("REDIS CACHE details to update - redisConfiguration = " + redisConfiguration);
+        logger.debug("REDIS CACHE details to update - redisConfiguration:{}", redisConfiguration);
         final CacheConfiguration modifiedCache = mergeModifiedCache(cache -> {
             cache.setRedisConfiguration(redisConfiguration);
             return cache;
@@ -102,12 +99,14 @@ public class CacheConfigurationResource extends BaseResource {
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS })
     public Response patchRedisConfiguration(@NotNull String requestString) {
-        log.debug("REDIS CACHE details to patch - requestString = " + requestString);
-        final CacheConfiguration modifiedCache = mergeModifiedCache(cache -> {
+        logger.debug("REDIS CACHE details to patch - requestString:{} ", requestString);
+        mergeModifiedCache(cache -> {
             try {
-                return Jackson.applyPatch(requestString, cache);
+                cache.setRedisConfiguration(
+                        Jackson.applyPatch(requestString, loadCacheConfiguration().getRedisConfiguration()));
+                return cache;
             } catch (IOException | JsonPatchException e) {
-                throw new RuntimeException("Unable to apply patch.", e);
+                throw new InternalServerErrorException(ERROR_MSG, e);
             }
         });
         return Response.ok(loadCacheConfiguration().getRedisConfiguration()).build();
@@ -124,7 +123,7 @@ public class CacheConfigurationResource extends BaseResource {
     @Path(ApiConstants.IN_MEMORY)
     @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS })
     public Response updateInMemoryConfiguration(@NotNull InMemoryConfiguration inMemoryConfiguration) {
-        log.debug("IN_MEMORY CACHE details to update - inMemoryConfiguration = " + inMemoryConfiguration);
+        logger.debug("IN_MEMORY CACHE details to update - inMemoryConfiguration:{}", inMemoryConfiguration);
         final CacheConfiguration modifiedCache = mergeModifiedCache(cache -> {
             cache.setInMemoryConfiguration(inMemoryConfiguration);
             return cache;
@@ -138,12 +137,13 @@ public class CacheConfigurationResource extends BaseResource {
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS })
     public Response patchInMemoryConfiguration(@NotNull String requestString) {
-        log.debug("IN_MEMORY CACHE details to patch - requestString = " + requestString);
-        final CacheConfiguration modifiedCache = mergeModifiedCache(cache -> {
+        logger.debug("IN_MEMORY CACHE details to patch - requestString:{}", requestString);
+        mergeModifiedCache(cache -> {
             try {
-                return Jackson.applyPatch(requestString, cache);
+                cache.setInMemoryConfiguration(Jackson.applyPatch(requestString, cache.getInMemoryConfiguration()));
+                return cache;
             } catch (IOException | JsonPatchException e) {
-                throw new RuntimeException("Unable to apply patch.", e);
+                throw new InternalServerErrorException(ERROR_MSG, e);
             }
         });
         return Response.ok(loadCacheConfiguration().getInMemoryConfiguration()).build();
@@ -161,8 +161,8 @@ public class CacheConfigurationResource extends BaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS })
     public Response updateNativePersistenceConfiguration(
             @NotNull NativePersistenceConfiguration nativePersistenceConfiguration) {
-        log.debug("NATIVE_PERSISTENCE CACHE details to update - nativePersistenceConfiguration = "
-                + nativePersistenceConfiguration);
+        logger.debug("NATIVE_PERSISTENCE CACHE details to update - nativePersistenceConfiguration:{}",
+                nativePersistenceConfiguration);
         final CacheConfiguration modifiedCache = mergeModifiedCache(cache -> {
             cache.setNativePersistenceConfiguration(nativePersistenceConfiguration);
             return cache;
@@ -175,12 +175,14 @@ public class CacheConfigurationResource extends BaseResource {
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS })
     public Response patchNativePersistenceConfiguration(@NotNull String requestString) {
-        log.debug("NATIVE_PERSISTENCE CACHE details to patch - requestString = " + requestString);
-        final CacheConfiguration modifiedCache = mergeModifiedCache(cache -> {
+        logger.debug("NATIVE_PERSISTENCE CACHE details to patch - requestString:{} ", requestString);
+        mergeModifiedCache(cache -> {
             try {
-                return Jackson.applyPatch(requestString, cache);
+                cache.setNativePersistenceConfiguration(
+                        Jackson.applyPatch(requestString, cache.getNativePersistenceConfiguration()));
+                return cache;
             } catch (IOException | JsonPatchException e) {
-                throw new RuntimeException("Unable to apply patch.", e);
+                throw new InternalServerErrorException(ERROR_MSG, e);
             }
         });
         return Response.ok(loadCacheConfiguration().getNativePersistenceConfiguration()).build();
@@ -197,7 +199,7 @@ public class CacheConfigurationResource extends BaseResource {
     @Path(ApiConstants.MEMCACHED)
     @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS })
     public Response updateMemcachedConfiguration(@NotNull MemcachedConfiguration memcachedConfiguration) {
-        log.debug("MEMCACHED CACHE details to update - memcachedConfiguration = " + memcachedConfiguration);
+        logger.debug("MEMCACHED CACHE details to update - memcachedConfiguration:{} ", memcachedConfiguration);
         final CacheConfiguration modifiedCache = mergeModifiedCache(cache -> {
             cache.setMemcachedConfiguration(memcachedConfiguration);
             return cache;
@@ -210,15 +212,16 @@ public class CacheConfigurationResource extends BaseResource {
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { ApiAccessConstants.CACHE_WRITE_ACCESS })
     public Response patchMemcachedConfiguration(@NotNull String requestString) {
-        log.debug("MEMCACHED CACHE details to patch - requestString = " + requestString);
-        final CacheConfiguration modifiedCache = mergeModifiedCache(cache -> {
+        logger.debug("MEMCACHED CACHE details to patch - requestString:{} ", requestString);
+        mergeModifiedCache(cache -> {
             try {
-                return Jackson.applyPatch(requestString, cache);
+                cache.setMemcachedConfiguration(Jackson.applyPatch(requestString, cache.getMemcachedConfiguration()));
+                return cache;
             } catch (IOException | JsonPatchException e) {
-                throw new RuntimeException("Unable to apply patch.", e);
+                throw new InternalServerErrorException(ERROR_MSG, e);
             }
         });
         return Response.ok(loadCacheConfiguration().getMemcachedConfiguration()).build();
-    }
-
+    }   
+    
 }

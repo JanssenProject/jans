@@ -18,9 +18,8 @@
 		<maven.min-version>3.0.3</maven.min-version>
 
 		<janssen.version>1.0.0-SNAPSHOT</janssen.version>
-
 		<jacoco.version>0.8.7</jacoco.version>
-
+		
 		<sonar.projectKey>JanssenProject_jans-core</sonar.projectKey>
 		<sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
 		<sonar.organization>janssenproject</sonar.organization>
@@ -61,11 +60,6 @@
 				<version>${janssen.version}</version>
 				<scope>import</scope>
 				<type>pom</type>
-			</dependency>
-			<dependency>
-				<groupId>jakarta.xml.bind</groupId>
-				<artifactId>jakarta.xml.bind-api</artifactId>
-				<version>2.3.3</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

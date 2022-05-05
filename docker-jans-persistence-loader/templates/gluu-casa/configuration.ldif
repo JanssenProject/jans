@@ -1,5 +1,0 @@
-dn: ou=casa,ou=configuration,o=jans
-objectClass: top
-objectClass: jansAppConf
-ou: casa
-jansConfApp: {"enable_pass_reset": true, "oidc_config": {"authz_redirect_uri": "https://%(hostname)s/casa", "post_logout_uri": "https://%(hostname)s/casa/bye.zul", "frontchannel_logout_uri": "https://%(hostname)s/casa/autologout", "scopes": ["openid", "profile", "user_name", "clientinfo"], "op_host": "%(hostname)s", "client": {"clientId": "%(casa_client_id)s", "clientSecret": "%(casa_client_pw)s", "clientName": "Casa"}}, "log_level": "INFO"}

@@ -131,6 +131,19 @@
 			<artifactId>testng</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-testng</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-inline</artifactId>
+		</dependency>
+
+		<dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcprov-jdk15on</artifactId>
 			<scope>provided</scope>
@@ -151,8 +164,8 @@
 		</dependency>
 
 		<dependency>
-			<groupId>javax.validation</groupId>
-			<artifactId>validation-api</artifactId>
+            <groupId>jakarta.validation</groupId>
+            <artifactId>jakarta.validation-api</artifactId>
 		</dependency>
         <dependency>
             <groupId>org.jetbrains</groupId>

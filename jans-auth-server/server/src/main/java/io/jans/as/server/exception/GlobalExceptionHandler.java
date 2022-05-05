@@ -11,13 +11,13 @@ import org.apache.commons.lang.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.faces.FacesException;
-import javax.faces.context.ExceptionHandler;
-import javax.faces.context.ExceptionHandlerWrapper;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.faces.event.ExceptionQueuedEvent;
-import javax.faces.event.ExceptionQueuedEventContext;
+import jakarta.faces.FacesException;
+import jakarta.faces.context.ExceptionHandler;
+import jakarta.faces.context.ExceptionHandlerWrapper;
+import jakarta.faces.context.ExternalContext;
+import jakarta.faces.context.FacesContext;
+import jakarta.faces.event.ExceptionQueuedEvent;
+import jakarta.faces.event.ExceptionQueuedEventContext;
 import java.util.Iterator;
 
 /**

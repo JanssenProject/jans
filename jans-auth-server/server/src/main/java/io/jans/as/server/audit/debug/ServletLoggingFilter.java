@@ -18,16 +18,16 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.BooleanUtils;
 import org.slf4j.Logger;
 
-import javax.inject.Inject;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.annotation.WebFilter;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.inject.Inject;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.FilterConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.annotation.WebFilter;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
@@ -71,7 +71,7 @@ public class ServletLoggingFilter implements Filter {
             chain.doFilter(httpRequest, httpResponse);
             return;
         }
-        Set<String> excludedPaths = appConfiguration.getHttpLoggingExludePaths();
+        Set<String> excludedPaths = appConfiguration.getHttpLoggingExcludePaths();
         if (!CollectionUtils.isEmpty(excludedPaths)) {
             for (String excludedPath : excludedPaths) {
                 String requestURI = httpRequest.getRequestURI();

@@ -4,9 +4,9 @@ import io.jans.ca.common.ErrorResponse;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.Jackson2;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.util.Objects;
 
 /**

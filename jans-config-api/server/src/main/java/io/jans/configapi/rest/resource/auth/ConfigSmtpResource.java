@@ -16,11 +16,11 @@ import io.jans.model.SmtpConfiguration;
 import io.jans.service.MailService;
 import io.jans.util.security.StringEncrypter.EncryptionException;
 
-import javax.inject.Inject;
-import javax.validation.Valid;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.validation.Valid;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.util.Objects;
 
 import org.slf4j.Logger;
@@ -32,7 +32,7 @@ import org.slf4j.Logger;
 @Path(ApiConstants.CONFIG + ApiConstants.SMTP)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class ConfigSmtpResource extends BaseResource {
+public class ConfigSmtpResource extends ConfigBaseResource {
 
     @Inject
     Logger log;

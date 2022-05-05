@@ -163,6 +163,7 @@ public class AppConfiguration implements Configuration {
 
     //feature flags
     private Boolean redirectUrisRegexEnabled = false;
+    private Boolean useHighestLevelScriptIfAcrScriptNotFound = true;
 
     private Boolean authenticationFiltersEnabled;
     private Boolean clientAuthenticationFiltersEnabled;
@@ -262,6 +263,7 @@ public class AppConfiguration implements Configuration {
     private Boolean removeRefreshTokensForClientOnLogout = true;
     private Boolean skipRefreshTokenDuringRefreshing = false;
     private Boolean refreshTokenExtendLifetimeOnRotation = false;
+    private Boolean checkUserPresenceOnRefreshToken = false;
     private Boolean consentGatheringScriptBackwardCompatibility = false; // means ignore client configuration (as defined in 4.2) and determine it globally (as in 4.1 and earlier)
     private Boolean introspectionScriptBackwardCompatibility = false; // means ignore client configuration (as defined in 4.2) and determine it globally (as in 4.1 and earlier)
     private Boolean introspectionResponseScopesBackwardCompatibility = false;
@@ -309,7 +311,7 @@ public class AppConfiguration implements Configuration {
     private List<String> enabledComponents;
 
     private Boolean httpLoggingEnabled; // Used in ServletLoggingFilter to enable http request/response logging.
-    private Set<String> httpLoggingExludePaths; // Used in ServletLoggingFilter to exclude some paths from logger. Paths example: ["/jans-auth/img", "/jans-auth/stylesheet"]
+    private Set<String> httpLoggingExcludePaths; // Used in ServletLoggingFilter to exclude some paths from logger. Paths example: ["/jans-auth/img", "/jans-auth/stylesheet"]
     private String externalLoggerConfiguration; // Path to external log4j2 configuration file. This property might be configured from oxTrust: /identity/logviewer/configure
 
     public Boolean getRequireRequestObjectEncryption() {
@@ -355,6 +357,15 @@ public class AppConfiguration implements Configuration {
 
     public void setDiscoveryAllowedKeys(List<String> discoveryAllowedKeys) {
         this.discoveryAllowedKeys = discoveryAllowedKeys;
+    }
+
+    public Boolean getCheckUserPresenceOnRefreshToken() {
+        if (checkUserPresenceOnRefreshToken == null) checkUserPresenceOnRefreshToken = false;
+        return checkUserPresenceOnRefreshToken;
+    }
+
+    public void setCheckUserPresenceOnRefreshToken(Boolean checkUserPresenceOnRefreshToken) {
+        this.checkUserPresenceOnRefreshToken = checkUserPresenceOnRefreshToken;
     }
 
     public Set<ComponentType> getEnabledComponentTypes() {
@@ -1956,12 +1967,12 @@ public class AppConfiguration implements Configuration {
         this.httpLoggingEnabled = httpLoggingEnabled;
     }
 
-    public Set<String> getHttpLoggingExludePaths() {
-        return httpLoggingExludePaths;
+    public Set<String> getHttpLoggingExcludePaths() {
+        return httpLoggingExcludePaths;
     }
 
-    public void setHttpLoggingExludePaths(Set<String> httpLoggingExludePaths) {
-        this.httpLoggingExludePaths = httpLoggingExludePaths;
+    public void setHttpLoggingExcludePaths(Set<String> httpLoggingExcludePaths) {
+        this.httpLoggingExcludePaths = httpLoggingExcludePaths;
     }
 
     public String getLoggingLevel() {
@@ -2482,5 +2493,13 @@ public class AppConfiguration implements Configuration {
 
     public void setRedirectUrisRegexEnabled(Boolean redirectUrisRegexEnabled) {
         this.redirectUrisRegexEnabled = redirectUrisRegexEnabled;
+    }
+
+    public Boolean getUseHighestLevelScriptIfAcrScriptNotFound() {
+        return useHighestLevelScriptIfAcrScriptNotFound != null && useHighestLevelScriptIfAcrScriptNotFound;
+    }
+
+    public void setUseHighestLevelScriptIfAcrScriptNotFound(Boolean useHighestLevelScriptIfAcrScriptNotFound) {
+        this.useHighestLevelScriptIfAcrScriptNotFound = useHighestLevelScriptIfAcrScriptNotFound;
     }
 }

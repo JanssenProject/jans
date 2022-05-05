@@ -6,7 +6,7 @@
 
 package io.jans.configapi.core.util;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
 public class Util {

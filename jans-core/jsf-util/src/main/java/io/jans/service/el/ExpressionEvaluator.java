@@ -9,9 +9,9 @@ package io.jans.service.el;
 import java.io.Serializable;
 import java.util.Map;
 
-import javax.el.ExpressionFactory;
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
+import jakarta.el.ExpressionFactory;
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
 
 /**
  * @author Yuriy Movchan Date: 05/22/2017

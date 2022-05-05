@@ -25,7 +25,7 @@
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		
-		<janssen.version>1.0.0-SNAPSHOT</janssen.version>
+		<janssen.version>${project.version}</janssen.version>
 
 		<jacoco.version>0.8.7</jacoco.version>
 

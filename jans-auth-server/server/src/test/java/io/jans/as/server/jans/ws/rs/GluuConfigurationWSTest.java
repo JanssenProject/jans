@@ -16,10 +16,10 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.net.URI;
 

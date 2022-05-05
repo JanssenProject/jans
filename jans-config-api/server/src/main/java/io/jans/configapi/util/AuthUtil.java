@@ -17,6 +17,7 @@ import io.jans.configapi.service.auth.ScopeService;
 import io.jans.util.security.StringEncrypter.EncryptionException;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Arrays;
@@ -25,11 +26,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.container.ResourceInfo;
-import javax.ws.rs.core.Response;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.container.ResourceInfo;
+import jakarta.ws.rs.core.Response;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
@@ -73,6 +74,19 @@ public class AuthUtil {
 
     public String getClientId() {
         return this.configurationFactory.getApiClientId();
+    }
+    
+    public List<String> getUserExclusionAttributes() {
+        return this.configurationFactory.getApiAppConfiguration().getUserExclusionAttributes();
+    }
+    
+    public String getUserExclusionAttributesAsString() {
+        List<String> excludedAttributes = getUserExclusionAttributes();
+        return excludedAttributes == null ? null : excludedAttributes.stream().collect(Collectors.joining(","));
+    }
+    
+    public List<String> getUserMandatoryAttributes() {
+        return this.configurationFactory.getApiAppConfiguration().getUserMandatoryAttributes();
     }
 
     public String getTokenUrl() {
@@ -352,5 +366,32 @@ public class AuthUtil {
     public boolean isEqualCollection(List<String> list1, List<String> list2) {
         return CollectionUtils.isEqualCollection(list1, list2);
     }
+    
+    public boolean containsField(List<Field> allFields, String attribute) {
+        log.debug("allFields:{},  attribute:{}, allFields.contains(attribute):{} ", allFields ,  attribute, allFields.stream().anyMatch(f -> f.getName().equals(attribute)));
+         
+        return allFields.stream().anyMatch(f -> f.getName().equals(attribute));
+     }
+     
+     public List<Field> getAllFields(Class<?> type) {
+         List<Field> allFields =  new ArrayList<>();
+         allFields = getAllFields(allFields, type);
+         log.debug("Fields:{} of type:{}  ", allFields, type);
+                 
+         return allFields;
+     }
+     
+     public List<Field> getAllFields(List<Field> fields, Class<?> type) {
+         log.debug("fields:{} of type:{} ", fields, type);
+         fields.addAll(Arrays.asList(type.getDeclaredFields()));
+
+         if (type.getSuperclass() != null) {
+             getAllFields(fields, type.getSuperclass());
+         }
+         log.debug("Final fields:{} of type:{} ", fields, type);
+         return fields;
+     }
+
+   
 
 }

@@ -6,29 +6,26 @@
 
 package io.jans.configapi.rest.resource.auth;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.github.fge.jsonpatch.JsonPatchException;
 
 import io.jans.as.persistence.model.GluuOrganization;
 import io.jans.configapi.service.auth.OrganizationService;
 import io.jans.configapi.core.rest.ProtectedApi;
-import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.core.util.Jackson;
 
 import java.io.IOException;
-import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 @Path(ApiConstants.ORG)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public class OrganizationResource extends BaseResource {
+public class OrganizationResource extends ConfigBaseResource {
 
     @Inject
     OrganizationService organizationService;
@@ -43,7 +40,7 @@ public class OrganizationResource extends BaseResource {
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { ApiAccessConstants.ORG_CONFIG_WRITE_ACCESS })
     public Response patchOrganization(@NotNull String pathString) throws JsonPatchException, IOException {
-        log.trace("Organization patch request - pathString:{} ", pathString);
+        logger.trace("Organization patch request - pathString:{} ", pathString);
         GluuOrganization organization = organizationService.getOrganization();
         organization = Jackson.applyPatch(pathString, organization);
         organizationService.updateOrganization(organization);

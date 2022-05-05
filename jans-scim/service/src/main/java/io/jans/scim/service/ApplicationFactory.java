@@ -6,10 +6,10 @@
 
 package io.jans.scim.service;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.RequestScoped;
-import javax.enterprise.inject.Produces;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.enterprise.inject.Produces;
+import jakarta.inject.Inject;
 
 import io.jans.scim.model.conf.AppConfiguration;
 import io.jans.model.SmtpConfiguration;

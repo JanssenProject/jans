@@ -9,8 +9,8 @@ package io.jans.as.server.filter;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.configuration.CorsConfigurationFilter;
 
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletContext;
+import jakarta.servlet.FilterConfig;
+import jakarta.servlet.ServletContext;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;

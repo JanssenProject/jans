@@ -6,9 +6,9 @@
 
 package io.jans.as.server.model.authorize;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.common.util.CommonUtils;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.common.Display;
 import io.jans.as.model.common.Prompt;
@@ -41,9 +41,9 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.core.Response;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLDecoder;
@@ -322,9 +322,7 @@ public class JwtAuthorizationRequest {
     private boolean validateSignature(@NotNull AbstractCryptoProvider cryptoProvider, SignatureAlgorithm signatureAlgorithm, Client client, String signingInput, String signature) throws Exception {
         ClientService clientService = CdiUtil.bean(ClientService.class);
         String sharedSecret = clientService.decryptSecret(client.getClientSecret());
-        JSONObject jwks = Strings.isNullOrEmpty(client.getJwks()) ?
-                JwtUtil.getJSONWebKeys(client.getJwksUri()) :
-                new JSONObject(client.getJwks());
+        JSONObject jwks = CommonUtils.getJwks(client);
         return cryptoProvider.verifySignature(signingInput, signature, keyId, jwks, sharedSecret, signatureAlgorithm);
     }
 
@@ -477,7 +475,7 @@ public class JwtAuthorizationRequest {
             String reqUriHash = reqUri.getFragment();
             String reqUriWithoutFragment = reqUri.getScheme() + ":" + reqUri.getSchemeSpecificPart();
 
-            javax.ws.rs.client.Client clientRequest = ClientBuilder.newClient();
+            jakarta.ws.rs.client.Client clientRequest = ClientBuilder.newClient();
 
             String request = null;
             try {

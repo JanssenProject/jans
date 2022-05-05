@@ -7,14 +7,14 @@
 package io.jans.configapi.rest.health;
 
 import io.jans.configapi.model.status.StatsData;
-import io.jans.configapi.rest.resource.auth.BaseResource;
+import io.jans.configapi.rest.resource.auth.ConfigBaseResource;
 import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.util.ApiConstants;
 
-import javax.inject.Inject;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 import org.json.JSONObject;
 import org.json.JSONArray;
@@ -24,7 +24,7 @@ import org.slf4j.Logger;
 @Path(ApiConstants.HEALTH)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public class ApiHealthCheck extends BaseResource {
+public class ApiHealthCheck extends ConfigBaseResource {
     
     @Inject
     Logger logger;

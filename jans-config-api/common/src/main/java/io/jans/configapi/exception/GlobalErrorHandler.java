@@ -6,15 +6,15 @@
 
 package io.jans.configapi.exception;
 
-import io.jans.configapi.rest.model.ApiError;
+import io.jans.configapi.core.model.ApiError;
 import org.slf4j.Logger;
 
-import javax.inject.Inject;
-import javax.validation.ConstraintViolationException;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.ExceptionMapper;
-import javax.ws.rs.ext.Provider;
+import jakarta.inject.Inject;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.ext.ExceptionMapper;
+import jakarta.ws.rs.ext.Provider;
 
 /**
  * @author Mougang T.Gasmyr

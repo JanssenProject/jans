@@ -58,18 +58,18 @@ import io.jans.util.security.StringEncrypter.EncryptionException;
 import org.jboss.weld.util.reflection.ParameterizedTypeImpl;
 import org.slf4j.Logger;
 
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.BeforeDestroyed;
-import javax.enterprise.context.Initialized;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.Produces;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.ServletContext;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.BeforeDestroyed;
+import jakarta.enterprise.context.Initialized;
+import jakarta.enterprise.event.Event;
+import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.inject.Instance;
+import jakarta.enterprise.inject.Produces;
+import jakarta.enterprise.inject.spi.BeanManager;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.servlet.ServletContext;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
@@ -220,6 +220,7 @@ public class AppInitializer {
         supportedCustomScriptTypes.remove(CustomScriptType.USER_REGISTRATION);
         supportedCustomScriptTypes.remove(CustomScriptType.SCIM);
         supportedCustomScriptTypes.remove(CustomScriptType.IDP);
+        supportedCustomScriptTypes.remove(CustomScriptType.CONFIG_API);
 
         statService.init();
 

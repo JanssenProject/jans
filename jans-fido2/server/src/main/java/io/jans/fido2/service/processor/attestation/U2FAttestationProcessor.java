@@ -25,8 +25,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import io.jans.fido2.ctap.AttestationFormat;
 import io.jans.fido2.exception.Fido2MissingAttestationCertException;

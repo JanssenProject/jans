@@ -1,4 +1,4 @@
-<h1 align="center"><img src="https://github.com/JanssenProject/jans/blob/eea33ea5c7740244b45f7bb1893167cd3fb93903/docs/logo/janssen_project_transparent_630px_182px.png" alt="Janssen Project - cloud native identity and access management platform"></h1>
+<h1 align="center"><img src="https://github.com/JanssenProject/jans/blob/main/docs/logo/janssen_project_transparent_630px_182px.png" alt="Janssen Project - cloud native identity and access management platform"></h1>
 
 ## Welcome to the Janssen Project
 
@@ -18,22 +18,16 @@ Janssen enables organizations to build a scalable centralized authentication and
 
 **Table of Contents**
 
-- [What is the Janssen Project](#what-is-the-janssen-project)
-  - [Janssen Modules](#janssen-modules)
+
+- [Janssen Modules](#janssen-modules)
 - [Getting Started](#getting-started)
-  - [Quick Start](#quick-start)
   - [Installation](#installation)
-  - [Use Cases](#use-cases)
 - [Users and Community](#users-and-community)
 - [Contributing](#contributing)
   - [Code of Conduct](#code-of-conduct)
   - [Contribution Guidelines](#contribution-guidelines)
 - [Security](#security)
 - [Documentation](#documentation)
-  - [Community Documentation](#community-documentation)
-  - [Technical Documentation](#technical-documentation)
-  - [Developer Guides](#developer-guides)
-  - [Code Documentation](#code-documentation)
 - [Design](#design)
   - [Design Goals](#design-goals)
 - [Governance](#governance)
@@ -43,16 +37,8 @@ Janssen enables organizations to build a scalable centralized authentication and
   - [why the name Janssen](#why-the-name-janssen)
 
 
-## What is the Janssen Project
 
-The Janssen Project is a cloud native digital identity platform. Using Janssen, applications can quickly integrate basic to advance authentication and authorization flows. Janssen supports
-
-- **Single sign-on**: Janssen implements OAuth2 and enables applications to quickly implement single sign-on
-- **Two factor authentication**: Janssen implements FIDO2 standards to enable applications to use two factor authentication
-
-Janssen [user documentation](https://github.com/JanssenProject/jans/tree/main/docs/user) has full list of usecases and how to implement them using Janssen.
-
-### Janssen Modules
+## Janssen Modules
 
 Janssen is not a big monolith--it's a lot of services working together. Whether you deploy Janssen to a Kubernetes cluster, or you are a developer running everything on one server, it's important to understand the different parts. 
 
@@ -73,25 +59,19 @@ Janssen is not a big monolith--it's a lot of services working together. Whether 
 
 1. **[orm](jans-orm)**: This is the library for persistence and caching implemenations in Janssen. Currently LDAP and Couchbase are supported. RDBMS is coming soon.
 
-More details can be found under [Janssen technical documentation](docs/technical).
-
 ## Getting Started
 
-### Quick start
-
-#### Installation
+### Installation
 
 Janssen can be installed as cloud-native in a Kubernetes cluster or as a server on a single VM. Go to the [Janssen Project Wiki](https://github.com/JanssenProject/jans/wiki/) to know all the installation options
 
-#### Use cases
-
-Complete list of Janssen usecases can be found under our [user documentation](docs/user).
-
 ## Users and Community
 
-Janssen is used by many internet facing applications and enterprise applications as their core digital identity platform. Janssen community actively helps in resolving issues. Community also makes sure that Janssen is upto date with new developments and standards in authentication and authorization domain.
-
 A BIG thanks to all amazing contributors!! 👏 👏
+
+There are many ways you can contribute. Of course you can contribute code. But we also need people to write documentation and guides, to help us with testing, to answer questions on the forums and chat, to review PR's, to help us with devops and CI/CD, to provide feedback on usability, and to promote the project through outreach. Also, by sharing metrics with us, we can gain valuable insights into how the software performs in the wild. 
+
+Building a large community is our number one goal. Please let us know what we can do to make you feel more welcome, no matter what you want to contribute.
 
 <a href="https://github.com/JanssenProject/jans/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=JanssenProject/jans" />
@@ -116,23 +96,7 @@ Refer to [Janssen Security Policy](.github/SECURITY.md)
 
 ## Documentation
 
-Janssen provides documentation that will help contributors at every step.
-
-### Community Documentation 
-
-[Community Documentation](docs/community) provides details on community charter, processes and structure.
-
-### Technical Documentation
-
-[Technical documentation](docs/technical) helps understanding architecture and design of various Janssen modules. 
-
-### Developer Guides
-
-[Developer guides](docs/developer) help contributors setup their workspace, setup local test environments, coding convensions and styles.
-
-### Code Documentation
-
-[Source code documentation](docs/code) that helps understanding Janssen code in finer details.
+Refer to [Janssen Wiki](https://github.com/JanssenProject/jans/wiki) for documentation.
 
 ## Design
 

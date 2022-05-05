@@ -19,13 +19,13 @@ import io.jans.jsf2.service.FacesService;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.RequestScoped;
-import javax.faces.context.ExternalContext;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.faces.context.ExternalContext;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Map;
@@ -194,7 +194,7 @@ public class SelectAccountAction {
 
         for (Map.Entry<String, String> entry : parameterMap.entrySet()) {
             final String key = entry.getKey();
-            if (key.equals("javax.faces.ViewState") || key.equals(FORM_ID) || key.contains(LOGIN_BUTTON_REF)) {
+            if (key.equals("jakarta.faces.ViewState") || key.equals(FORM_ID) || key.contains(LOGIN_BUTTON_REF)) {
                 continue;
             }
             if (key.startsWith(formIdWithColon)) {

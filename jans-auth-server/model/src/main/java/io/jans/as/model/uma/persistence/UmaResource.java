@@ -15,8 +15,9 @@ import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.Expiration;
 import io.jans.orm.annotation.ObjectClass;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -91,9 +92,10 @@ public class UmaResource implements Serializable {
     }
 
     public void resetTtlFromExpirationDate() {
-        final Integer ttl = Util.getNumberOfSecondFromNow(getExpirationDate());
-        if (ttl != null) {
-            setTtl(ttl);
+        final Long duration = Duration.between(new Date().toInstant(), getExpirationDate().toInstant()).getSeconds();
+        final Integer calculatedTtl = duration.intValue();
+        if (calculatedTtl != null) {
+            setTtl(calculatedTtl);
         }
     }
 

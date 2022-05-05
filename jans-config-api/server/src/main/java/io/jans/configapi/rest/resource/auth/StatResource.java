@@ -8,16 +8,16 @@ import io.jans.configapi.service.auth.AuthService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 
-import javax.inject.Inject;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
 @Path(ApiConstants.STATISTICS)
-public class StatResource extends BaseResource {
+public class StatResource extends ConfigBaseResource {
 
     private final String statUrl = "/jans-auth/restv1/internal/stat";
 

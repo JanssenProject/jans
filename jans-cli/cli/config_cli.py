@@ -121,6 +121,9 @@ parser.add_argument("-CK", "--config-api-mtls-client-key", help="Path to SSL Key
 parser.add_argument("--key-password", help="Password for SSL Key file")
 parser.add_argument("-noverify", help="Ignore verifying the SSL certificate", action='store_true', default=True)
 
+parser.add_argument("-use-test-client", help="Use test client without device authorization", action='store_true')
+
+
 parser.add_argument("--patch-add", help="Colon delimited key:value pair for add patch operation. For example loggingLevel:DEBUG")
 parser.add_argument("--patch-replace", help="Colon delimited key:value pair for replace patch operation. For example loggingLevel:DEBUG")
 parser.add_argument("--patch-remove", help="Key for remove patch operation. For example imgLocation")
@@ -131,6 +134,7 @@ args = parser.parse_args()
 
 ################## end of arguments #################
 
+test_client = args.use_test_client
 
 
 if args.plugins:
@@ -159,12 +163,21 @@ if not(host and (client_id and client_secret or access_token)):
     if config_ini_fn.exists():
         config.read_string(config_ini_fn.read_text())
         host = config['DEFAULT']['jans_host']
-        client_id = config['DEFAULT']['jca_client_id']
-        if config['DEFAULT'].get('jca_client_secret'):
-            client_secret = config['DEFAULT']['jca_client_secret']
-        elif config['DEFAULT'].get('jca_client_secret_enc'):
-            client_secret_enc = config['DEFAULT']['jca_client_secret_enc']
+
+        if 'jca_test_client_id' in config['DEFAULT'] and test_client:
+            client_id = config['DEFAULT']['jca_test_client_id']
+            secret_key_str = 'jca_test_client_secret'
+        else:
+            client_id = config['DEFAULT']['jca_client_id']
+            secret_key_str = 'jca_client_secret'
+
+        secret_enc_key_str = secret_key_str + '_enc'
+        if config['DEFAULT'].get(secret_key_str):
+            client_secret = config['DEFAULT'][secret_key_str]
+        elif config['DEFAULT'].get(secret_enc_key_str):
+            client_secret_enc = config['DEFAULT'][secret_enc_key_str]
             client_secret = encode_decode(client_secret_enc, decode=True)
+
         debug = config['DEFAULT'].get('debug')
         debug_log_file = config['DEFAULT'].get('debug_log_file')
     else:
@@ -257,36 +270,26 @@ class Menu(object):
 
 class JCA_CLI:
 
-    def __init__(self, host, client_id, client_secret, access_token):
+    def __init__(self, host, client_id, client_secret, access_token, test_client=False):
         self.host = host
         self.client_id = client_id
         self.client_secret = client_secret
+        self.use_test_client = test_client
+
         self.swagger_configuration = swagger_client.Configuration()
         self.swagger_configuration.host = 'https://{}'.format(self.host)
         self.access_token = access_token or config['DEFAULT'].get('access_token')
 
-        for plugin_s in config['DEFAULT'].get(my_op_mode + '_plugins', '').split(','):
-            plugin = plugin_s.strip()
-            if plugin:
-                plugins.append(plugin)
+        self.set_user()
+        self.plugins()
 
         if not self.access_token and config['DEFAULT'].get('access_token_enc'):
             self.access_token = encode_decode(config['DEFAULT']['access_token_enc'], decode=True)
 
-
         if my_op_mode == 'scim':
             self.swagger_configuration.host += '/jans-scim/restv1/v2'
 
-        if args.noverify:
-            self.swagger_configuration.verify_ssl = False
-        else:
-            self.swagger_configuration.verify_ssl = True
-
-        if args.config_api_mtls_client_cert:
-            self.swagger_configuration.cert_file = args.config_api_mtls_client_cert
-
-        if args.config_api_mtls_client_key:
-            self.swagger_configuration.key_file = args.config_api_mtls_client_key
+        self.ssl_settings()
 
         self.swagger_configuration.debug = debug
         if self.swagger_configuration.debug:
@@ -297,6 +300,46 @@ class JCA_CLI:
         self.cfg_yml = self.get_yaml()
         self.make_menu()
         self.current_menu = self.menu
+
+
+    def set_user(self):
+        self.auth_username = None
+        self.auth_password = None
+        self.askuser = get_bool(config['DEFAULT'].get('askuser'))
+
+        if self.askuser:
+            if args.username:
+                self.auth_username = args.username
+            if args.password:
+                self.auth_password = args.password
+            elif args.j:
+                if os.path.isfile(args.j):
+                    with open(args.j) as reader:
+                        self.auth_password = reader.read()
+                else:
+                    print(args.j, "does not exist. Exiting ...")
+                    sys.exit()
+            if not (self.auth_username and self.auth_password):
+                print("I need username and password. Exiting ...")
+                sys.exit()
+
+    def plugins(self):
+        for plugin_s in config['DEFAULT'].get(my_op_mode + '_plugins', '').split(','):
+            plugin = plugin_s.strip()
+            if plugin:
+                plugins.append(plugin)
+
+    def ssl_settings(self):
+        if args.noverify:
+            self.swagger_configuration.verify_ssl = False
+        else:
+            self.swagger_configuration.verify_ssl = True
+
+        if args.config_api_mtls_client_cert:
+            self.swagger_configuration.cert_file = args.config_api_mtls_client_cert
+
+        if args.config_api_mtls_client_key:
+            self.swagger_configuration.key_file = args.config_api_mtls_client_key
 
     def drop_to_shell(self, mylocals):
         locals_ = locals()
@@ -341,7 +384,7 @@ class JCA_CLI:
 
 
     def check_access_token(self):
-        if not self.access_token:
+        if not self.access_token :
             print(self.colored_text("Access token was not found.", warning_color))
             return
 
@@ -409,6 +452,39 @@ class JCA_CLI:
             except:
                 pass
         return js_data
+
+    def get_scoped_access_token(self, scope):
+        sys.stderr.write("Getting access token for scope {}\n".format(scope))
+        rest = self.get_rest_client()
+        headers = urllib3.make_headers(basic_auth='{}:{}'.format(self.client_id, self.client_secret))
+        url = 'https://{}/jans-auth/restv1/token'.format(self.host)
+        headers['Content-Type'] = 'application/x-www-form-urlencoded'
+        if self.askuser:
+            post_params = {"grant_type": "password", "scope": scope, "username": self.auth_username,
+                           "password": self.auth_password}
+        else:
+            post_params = {"grant_type": "client_credentials", "scope": scope}
+
+        response = rest.POST(
+            url,
+            headers=headers,
+            post_params=post_params
+        )
+
+        try:
+            data = json.loads(response.data)
+            if 'access_token' in data:
+                self.swagger_configuration.access_token = data['access_token']
+            else:
+                sys.stderr.write("Error while getting access token")
+                sys.stderr.write(data)
+                sys.stderr.write('\n')
+        except Exception as e:
+            print("Error while getting access token")
+            sys.stderr.write(response.data)
+            sys.stderr.write(e)
+            sys.stderr.write('\n')
+
 
     def get_jwt_access_token(self):
 
@@ -523,10 +599,14 @@ class JCA_CLI:
 
 
     def get_access_token(self, scope):
-        self.check_access_token()
-        if not self.access_token:
+        if self.use_test_client:
+            self.get_scoped_access_token(scope)
+        elif not self.access_token:
+            self.check_access_token()
             self.get_jwt_access_token()
-        self.swagger_configuration.access_token = self.access_token
+
+        if not self.use_test_client:
+            self.swagger_configuration.access_token = self.access_token
 
     def print_exception(self, e):
         error_printed = False
@@ -699,23 +779,27 @@ class JCA_CLI:
                 return default
 
             if itype == 'array' and sitype:
-                selection = selection.split('_,')
-                for i, item in enumerate(selection):
+                if selection == '_null':
+                    selection = []
                     data_ok = True
-                    try:
-                        selection[i] = self.check_type(item.strip(), sitype)
-                        if selection[i] == '_null':
-                            selection[i] = None
-                        if values:
-                            if not selection[i] in values:
-                                data_ok = False
-                                print(' ' * spacing, self.colored_text(
-                                    "Please enter array of {} separated by _,".format(', '.join(values)),
-                                    warning_color), sep='')
-                                break
-                    except TypeError as e:
-                        print(' ' * spacing, e, sep='')
-                        data_ok = False
+                else:
+                    selection = selection.split('_,')
+                    for i, item in enumerate(selection):
+                        data_ok = True
+                        try:
+                            selection[i] = self.check_type(item.strip(), sitype)
+                            if selection[i] == '_null':
+                                selection[i] = None
+                            if values:
+                                if not selection[i] in values:
+                                    data_ok = False
+                                    print(' ' * spacing, self.colored_text(
+                                        "Please enter array of {} separated by _,".format(', '.join(values)),
+                                        warning_color), sep='')
+                                    break
+                        except TypeError as e:
+                            print(' ' * spacing, e, sep='')
+                            data_ok = False
                 if data_ok:
                     break
             else:
@@ -1234,7 +1318,7 @@ class JCA_CLI:
                 fill_optional = self.get_input(values=['y', 'n'], text='Populate optional fields?')
                 fields_numbers = []
                 if fill_optional == 'y':
-                    print("Optiaonal Fields:")
+                    print("Optional Fields:")
                     for i, field in enumerate(optional_fields):
                         print(i + 1, field)
                         fields_numbers.append(str(i + 1))
@@ -1386,6 +1470,8 @@ class JCA_CLI:
         initialised = False
         cur_model = None
         go_back = False
+        key_name = None
+        parent_model = None
 
         if endpoint.info.get('x-cli-getdata') != '_file':
             if 'x-cli-getdata' in endpoint.info and endpoint.info['x-cli-getdata'] != None:
@@ -1411,6 +1497,9 @@ class JCA_CLI:
                         while True:
                             while True:
                                 try:
+                                    key_name_desc = self.get_endpiont_url_param(m)
+                                    if key_name_desc and 'name' in key_name_desc:
+                                        key_name = key_name_desc['name']
                                     cur_model = self.process_get(m, return_value=True)
                                     break
                                 except ValueError as e:
@@ -1515,6 +1604,9 @@ class JCA_CLI:
                     elif selection in item_numbers:
                         item = attr_name_list[int(selection) - 1]
                         item_unmapped = self.get_model_key_map(cur_model, item)
+                        if schema['properties'].get('keys', {}).get('properties'):
+                            schema = schema['properties']['keys']
+
                         schema_item = schema['properties'][item]
                         schema_item['__name__'] = item
                         self.get_input_for_schema_(schema, cur_model, initialised=initialised, getitem=schema_item)
@@ -1533,10 +1625,25 @@ class JCA_CLI:
                         selection = self.get_input(values=['y', 'n'], text='Continue?')
 
                         if selection == 'y':
+                            schema_must = self.get_scheme_for_endpoint(endpoint)
+                            if schema_must['__schema_name__'] != cur_model.__class__.__name__:
+                                for e in  endpoint.parent.children:
+                                    if e.method == 'get':
+                                        parent_model = self.process_get(e, return_value=True)
+                                        break
+
+
+                                if parent_model and key_name and hasattr(parent_model, 'keys'):
+                                    for i, wkey in enumerate(parent_model.keys):
+                                        if getattr(wkey, key_name) == getattr(cur_model, key_name):
+                                            parent_model.keys[i] = cur_model
+                                            cur_model = parent_model
+                                            break
+
                             print("Please wait while posting data ...\n")
                             api_caller = self.get_api_caller(endpoint)
                             put_pname = self.get_url_param(endpoint.path)
-                            
+
                             try:
                                 if put_pname:
                                     args_ = {'body': cur_model, put_pname: end_point_param_val}
@@ -1998,7 +2105,7 @@ class JCA_CLI:
 
 def main():
 
-    cli_object = JCA_CLI(host, client_id, client_secret, access_token)
+    cli_object = JCA_CLI(host, client_id, client_secret, access_token, test_client)
 
     try:
         if not access_token:

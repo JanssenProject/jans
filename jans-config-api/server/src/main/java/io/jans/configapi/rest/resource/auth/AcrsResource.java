@@ -13,11 +13,11 @@ import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 
-import javax.inject.Inject;
-import javax.validation.Valid;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.validation.Valid;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 import org.slf4j.Logger;
 
@@ -27,7 +27,7 @@ import org.slf4j.Logger;
 @Path(ApiConstants.ACRS)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public class AcrsResource extends BaseResource {
+public class AcrsResource extends ConfigBaseResource {
 
     @Inject
     Logger log;

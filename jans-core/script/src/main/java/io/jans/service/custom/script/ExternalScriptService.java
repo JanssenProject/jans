@@ -11,9 +11,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.event.Observes;
+import jakarta.inject.Inject;
 
 import io.jans.service.custom.inject.ReloadScript;
 import io.jans.model.custom.script.CustomScriptType;

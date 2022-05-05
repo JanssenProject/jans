@@ -1,13 +1,13 @@
-FROM bellsoft/liberica-openjre-alpine:11.0.13-8
+FROM bellsoft/liberica-openjre-alpine:11.0.15
 
 # ===============
 # Alpine packages
 # ===============
 
 RUN apk update \
-    && apk add --no-cache openssl py3-pip tini curl py3-cryptography py3-psycopg2 \
-    && apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/v3.15/community py3-grpcio \
-    && apk add --no-cache --virtual build-deps wget git zip \
+    && apk upgrade \
+    && apk add --no-cache openssl python3 tini curl py3-cryptography py3-psycopg2 py3-grpcio \
+    && apk add --no-cache --virtual .build-deps wget git zip \
     && mkdir -p /usr/java/latest \
     && ln -sf /usr/lib/jvm/jre /usr/java/latest/jre
 
@@ -15,7 +15,7 @@ RUN apk update \
 # Jetty
 # =====
 
-ARG JETTY_VERSION=10.0.6
+ARG JETTY_VERSION=11.0.8
 ARG JETTY_HOME=/opt/jetty
 ARG JETTY_BASE=/opt/jans/jetty
 ARG JETTY_USER_HOME_LIB=/home/jetty/lib
@@ -35,7 +35,7 @@ EXPOSE 8080
 # =====
 
 ENV CN_VERSION=1.0.0-SNAPSHOT
-ENV CN_BUILD_DATE='2022-03-15 17:18'
+ENV CN_BUILD_DATE='2022-04-21 08:13'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-fido2-server/${CN_VERSION}/jans-fido2-server-${CN_VERSION}.war
 
 # Install FIDO2
@@ -50,19 +50,53 @@ RUN mkdir -p ${JETTY_BASE}/jans-fido2/webapps \
     && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-fido2 --add-module=server,deploy,resources,http,http-forwarded,threadpool,jsp,cdi-decorate \
     && rm -rf /tmp/jans-fido2.war /tmp/WEB-INF
 
+# =====================
+# jans-linux-setup sync
+# =====================
+
+ENV JANS_LINUX_SETUP_VERSION=cfdc70e6a2ddcc9d2ba4e3cf07df19344d613944
+ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
+
+# note that as we're pulling from a monorepo (with multiple project in it)
+# we are using partial-clone and sparse-checkout to get the jans-linux-setup code
+RUN git clone --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
+    && cd /tmp/jans \
+    && git sparse-checkout init --cone \
+    && git checkout ${JANS_LINUX_SETUP_VERSION} \
+    && git sparse-checkout set ${JANS_SETUP_DIR}
+
+RUN mkdir -p /etc/jans/conf \
+    /etc/jans/conf/fido2/mds/cert \
+    /etc/jans/conf/fido2/mds/toc \
+    /etc/jans/conf/fido2/server_metadata
+
+# COPY conf/fido2 /etc/jans/conf/fido2
+# sync static files from linux-setup
+RUN cd /tmp/jans \
+    && cp -R ${JANS_SETUP_DIR}/static/fido2/authenticator_cert /etc/jans/conf/fido2/authenticator_cert \
+    && cp ${JANS_SETUP_DIR}/static/fido2/mds_toc_cert/metadata-root-ca.cer /etc/jans/conf/fido2/mds/cert/
+
+# cleanup
+RUN rm -rf /tmp/jans
+
+# download Apple cert
+RUN wget -q https://www.apple.com/certificateauthority/Apple_WebAuthn_Root_CA.pem -P /etc/jans/conf/fido2
+
 # ======
 # Python
 # ======
 
 COPY requirements.txt /app/requirements.txt
-RUN pip3 install -U pip wheel \
-    && pip3 install --no-cache-dir -r /app/requirements.txt
+RUN python3 -m ensurepip \
+    && pip3 install --no-cache-dir -U pip wheel \
+    && pip3 install --no-cache-dir -r /app/requirements.txt \
+    && pip3 uninstall -y pip wheel
 
 # =======
 # Cleanup
 # =======
 
-RUN apk del build-deps \
+RUN apk del .build-deps \
     && rm -rf /var/cache/apk/*
 
 # =======
@@ -158,17 +192,12 @@ LABEL name="janssenproject/fido2" \
     description="FIDO2 server"
 
 RUN mkdir -p /etc/certs \
-    /etc/jans/conf \
-    /etc/jans/conf/fido2/mds/cert \
-    /etc/jans/conf/fido2/mds/toc \
-    /etc/jans/conf/fido2/server_metadata \
     /app/templates \
     /opt/jetty/temp
 
 COPY jetty/jans-fido2.xml ${JETTY_BASE}/jans-fido2/webapps/
 COPY jetty/log4j2.xml ${JETTY_BASE}/jans-fido2/resources/
 COPY conf/*.tmpl /app/templates/
-COPY conf/fido2 /etc/jans/conf/fido2
 
 COPY scripts /app/scripts
 RUN chmod +x /app/scripts/entrypoint.sh

@@ -14,7 +14,7 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import javax.interceptor.InterceptorBinding;
+import jakarta.interceptor.InterceptorBinding;
 
 /**
  * @author Yuriy Movchan Date: 05/22/2017

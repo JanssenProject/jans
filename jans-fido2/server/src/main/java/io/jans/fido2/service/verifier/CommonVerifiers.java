@@ -11,9 +11,9 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Instance;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
 
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;

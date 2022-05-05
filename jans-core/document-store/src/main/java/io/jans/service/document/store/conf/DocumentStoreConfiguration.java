@@ -8,7 +8,7 @@ package io.jans.service.document.store.conf;
 
 import java.io.Serializable;
 
-import javax.enterprise.inject.Vetoed;
+import jakarta.enterprise.inject.Vetoed;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 

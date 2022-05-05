@@ -2,7 +2,7 @@ package io.jans.configapi.model.configuration;
 
 import java.util.*;
 import java.util.Optional;
-import javax.servlet.*;
+import jakarta.servlet.*;
 
 public class CorsConfiguration {
 

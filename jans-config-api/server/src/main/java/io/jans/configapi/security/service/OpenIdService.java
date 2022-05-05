@@ -15,9 +15,9 @@ import io.jans.configapi.util.AuthUtil;
 
 import java.io.Serializable;
 import java.util.List;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Named;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Named;
+import jakarta.inject.Inject;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -31,13 +31,13 @@ public class OpenIdService implements Serializable {
     private static final long serialVersionUID = 4564959567069741194L;
 
     @Inject
-    Logger log;
+    transient Logger log;
 
     @Inject
-    AuthUtil authUtil;
+    transient AuthUtil authUtil;
 
     @Inject
-    ConfigurationService configurationService;
+    transient ConfigurationService configurationService;
 
     private transient IntrospectionService introspectionService;
 

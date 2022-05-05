@@ -12,9 +12,9 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 import static io.jans.as.model.configuration.ConfigurationResponseClaim.BACKCHANNEL_AUTHENTICATION_ENDPOINT;
 import static io.jans.as.model.configuration.ConfigurationResponseClaim.BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG_VALUES_SUPPORTED;

@@ -18,8 +18,8 @@ import io.jans.orm.search.filter.Filter;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import java.util.List;
 import java.util.UUID;
 

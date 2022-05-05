@@ -40,7 +40,7 @@ import org.testng.ITestContext;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import javax.ws.rs.HttpMethod;
+import jakarta.ws.rs.HttpMethod;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;

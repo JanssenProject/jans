@@ -286,10 +286,7 @@
     "skipAuthorizationForOpenIdScopeAndPairwiseId": false,
     "dynamicRegistrationScopesParamEnabled":true,
     "dynamicRegistrationCustomObjectClass":"",
-    "personCustomObjectClassList":[
-        "jansCustomPerson",
-        "jansPerson"
-    ],
+    "personCustomObjectClassList": %(person_custom_object_class_list)s,
     "persistIdTokenInLdap":false,
     "persistRefreshTokenInLdap":true,
     "authenticationFiltersEnabled":false,
@@ -366,7 +363,7 @@
     "logClientIdOnClientAuthentication": true,
     "logClientNameOnClientAuthentication": false,
     "httpLoggingEnabled": false,
-    "httpLoggingExludePaths": [],
+    "httpLoggingExcludePaths": [],
     "externalLoggerConfiguration": "",
     "authorizationRequestCustomAllowedParameters" : [
         {
@@ -436,5 +433,6 @@
     "deviceAuthzRequestExpiresIn": 1800,
     "deviceAuthzTokenPollInterval": 5,
     "deviceAuthzResponseTypeToProcessAuthz": "code",
-    "redirectUrisRegexEnabled": true
+    "redirectUrisRegexEnabled": true,
+    "useHighestLevelScriptIfAcrScriptNotFound": true
 }

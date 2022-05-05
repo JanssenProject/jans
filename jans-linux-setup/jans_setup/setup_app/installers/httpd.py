@@ -29,7 +29,7 @@ class HttpdInstaller(BaseInstaller, SetupUtils):
 
 
         self.templates_folder = os.path.join(Config.templateFolder, 'apache')
-        self.output_folder = os.path.join(Config.outputFolder, 'apache')
+        self.output_folder = os.path.join(Config.output_dir, 'apache')
 
         self.apache2_conf = os.path.join(self.output_folder, 'httpd.conf')
         self.apache2_ssl_conf = os.path.join(self.output_folder, 'https_jans.conf')

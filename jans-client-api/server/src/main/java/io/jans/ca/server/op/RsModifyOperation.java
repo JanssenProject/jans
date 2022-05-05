@@ -20,10 +20,10 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.ClientErrorException;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.ClientErrorException;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -101,7 +101,7 @@ public class RsModifyOperation extends BaseOperation<RsModifyParams> {
         return new RsModifyResponse(rp.getRpId());
     }
 
-    private UmaResource getResource(UmaResourceService resourceService, RsModifyParams params, String resourceId) {
+    private UmaResource getResource(UmaResourceService resourceService, RsModifyParams params, String resourceId) throws Exception{
         String pat = getUmaTokenService().getPat(params.getRpId()).getToken();
         UmaResourceWithId umaResourceWithId = resourceService.getResource("Bearer " + pat, resourceId);
 

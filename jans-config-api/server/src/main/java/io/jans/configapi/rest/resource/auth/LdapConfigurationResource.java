@@ -16,12 +16,12 @@ import io.jans.configapi.core.util.Jackson;
 import io.jans.model.ldap.GluuLdapConfiguration;
 import org.slf4j.Logger;
 
-import javax.inject.Inject;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -29,7 +29,7 @@ import java.util.NoSuchElementException;
 @Path(ApiConstants.CONFIG + ApiConstants.DATABASE + ApiConstants.LDAP)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class LdapConfigurationResource extends BaseResource {
+public class LdapConfigurationResource extends ConfigBaseResource {
 
     @Inject
     Logger log;

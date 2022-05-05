@@ -12,7 +12,7 @@ import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.common.EncryptionService;
 import io.jans.as.common.service.common.InumService;
 import io.jans.configapi.core.rest.ProtectedApi;
-import io.jans.configapi.rest.model.SearchRequest;
+import io.jans.configapi.core.model.SearchRequest;
 import io.jans.configapi.service.auth.ClientService;
 import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.util.ApiAccessConstants;
@@ -24,13 +24,13 @@ import io.jans.orm.model.PagedResult;
 import io.jans.util.StringHelper;
 import io.jans.util.security.StringEncrypter.EncryptionException;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +47,7 @@ import org.slf4j.Logger;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @ApplicationScoped
-public class ClientsResource extends BaseResource {
+public class ClientsResource extends ConfigBaseResource {
 
     private static final String OPENID_CONNECT_CLIENT = "openid connect client";
 
@@ -81,7 +81,7 @@ public class ClientsResource extends BaseResource {
         }
 
         SearchRequest searchReq = createSearchRequest(clientService.getDnForClient(null), pattern, sortBy, sortOrder,
-                startIndex, limit, null, null);
+                startIndex, limit, null, null, this.getMaxCount());
 
         final List<Client> clients = this.doSearch(searchReq);
         logger.trace("Client serach result:{}", clients);

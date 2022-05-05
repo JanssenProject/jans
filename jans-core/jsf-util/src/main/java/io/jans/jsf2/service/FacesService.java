@@ -13,15 +13,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import javax.enterprise.context.RequestScoped;
-import javax.faces.application.NavigationHandler;
-import javax.faces.application.ViewHandler;
-import javax.faces.component.UIViewRoot;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.faces.context.PartialViewContext;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.faces.application.NavigationHandler;
+import jakarta.faces.application.ViewHandler;
+import jakarta.faces.component.UIViewRoot;
+import jakarta.faces.context.ExternalContext;
+import jakarta.faces.context.FacesContext;
+import jakarta.faces.context.PartialViewContext;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 import io.jans.jsf2.exception.RedirectException;
 

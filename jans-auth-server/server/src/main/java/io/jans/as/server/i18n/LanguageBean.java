@@ -14,13 +14,13 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Observes;
-import javax.faces.context.FacesContext;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
+import jakarta.faces.context.FacesContext;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
@@ -80,7 +80,7 @@ public class LanguageBean implements Serializable {
 
     public Locale getLocale() {
         try {
-            Locale locale = getCookieLocale();
+            Locale locale = FacesContext.getCurrentInstance().getViewRoot().getLocale();
             if (locale != null) {
                 return locale;
             }
@@ -152,6 +152,8 @@ public class LanguageBean implements Serializable {
         response.addCookie(cookie);
     }
 
+    @Deprecated
+    // Cookie is not storing value first time. This is causing default language setting
     private Locale getCookieLocale() {
         String cookieValue = getCookieValue();
         if (StringHelper.isEmpty(cookieValue)) {

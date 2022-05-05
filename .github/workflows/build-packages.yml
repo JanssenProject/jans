@@ -185,7 +185,7 @@ jobs:
         make zipapp 
         mv jans-cli.pyz jans-cli-linux-ubuntu-X86-64.pyz
         sha256sum jans-cli-linux-ubuntu-X86-64.pyz > jans-cli-linux-ubuntu-X86-64.pyz.sha256sum
-    - uses: actions/cache@v2.1.7
+    - uses: actions/cache@v3
       id: cache-installers
       with:
         path: |
@@ -212,7 +212,7 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v3
-    - uses: actions/cache@v2.1.7
+    - uses: actions/cache@v3
       id: cache-installers
       with:
         path: |

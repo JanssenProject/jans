@@ -1,22 +1,17 @@
-# import itertools
 import json
 import logging.config
-import os
 import re
-from collections import OrderedDict
 from collections import defaultdict
 from string import Template
 from pathlib import Path
 
-from ldif import LDIFParser
+from sqlalchemy.exc import OperationalError
 
-from jans.pycloudlib.persistence.sql import SQLClient
+from jans.pycloudlib.persistence.sql import SqlClient
 
 from settings import LOGGING_CONFIG
 from utils import prepare_template_ctx
-from utils import render_ldif
 from utils import get_ldif_mappings
-from utils import doc_id_from_dn
 
 FIELD_RE = re.compile(r"[^0-9a-zA-Z\s]+")
 
@@ -27,31 +22,9 @@ logger = logging.getLogger("entrypoint")
 class SQLBackend:
     def __init__(self, manager):
         self.manager = manager
+        self.client = SqlClient(manager)
 
-        self.db_dialect = os.environ.get("CN_SQL_DB_DIALECT", "mysql")
-        self.schema_files = [
-            "/app/schema/jans_schema.json",
-            "/app/schema/custom_schema.json",
-        ]
-
-        self.client = SQLClient()
-
-        with open("/app/static/rdbm/sql_data_types.json") as f:
-            self.sql_data_types = json.loads(f.read())
-
-        self.attr_types = []
-        for fn in self.schema_files:
-            with open(fn) as f:
-                schema = json.loads(f.read())
-            self.attr_types += schema["attributeTypes"]
-
-        with open("/app/static/rdbm/opendj_attributes_syntax.json") as f:
-            self.opendj_attr_types = json.loads(f.read())
-
-        with open("/app/static/rdbm/ldap_sql_data_type_mapping.json") as f:
-            self.sql_data_types_mapping = json.loads(f.read())
-
-        if self.db_dialect == "mysql":
+        if self.client.dialect == "mysql":
             index_fn = "mysql_index.json"
         else:
             index_fn = "pgsql_index.json"
@@ -59,23 +32,23 @@ class SQLBackend:
         with open(f"/app/static/rdbm/{index_fn}") as f:
             self.sql_indexes = json.loads(f.read())
 
-    def get_attr_syntax(self, attr):
-        for attr_type in self.attr_types:
-            if attr not in attr_type["names"]:
-                continue
-            if attr_type.get("multivalued"):
-                return "JSON"
-            return attr_type["syntax"]
+        # add missing index determined from opendj indexes
+        with open("/app/static/opendj/index.json") as f:
+            opendj_indexes = [attr["attribute"] for attr in json.loads(f.read())]
 
-        # fallback to OpenDJ attribute type
-        return self.opendj_attr_types.get(attr) or "1.3.6.1.4.1.1466.115.121.1.15"
+        for attr in self.client.attr_types:
+            if not attr.get("multivalued"):
+                continue
+            for attr_name in attr["names"]:
+                if attr_name in opendj_indexes and attr_name not in self.sql_indexes["__common__"]["fields"]:
+                    self.sql_indexes["__common__"]["fields"].append(attr_name)
 
     def get_data_type(self, attr, table=None):
         # check from SQL data types first
-        type_def = self.sql_data_types.get(attr)
+        type_def = self.client.sql_data_types.get(attr)
 
         if type_def:
-            type_ = type_def.get(self.db_dialect) or type_def["mysql"]
+            type_ = type_def.get(self.client.dialect) or type_def["mysql"]
 
             if table in type_.get("tables", {}):
                 type_ = type_["tables"][table]
@@ -86,13 +59,11 @@ class SQLBackend:
             return data_type
 
         # data type is undefined, hence check from syntax
-        syntax = self.get_attr_syntax(attr)
-        syntax_def = self.sql_data_types_mapping[syntax]
-        type_ = syntax_def.get(self.db_dialect) or syntax_def["mysql"]
+        syntax = self.client.get_attr_syntax(attr)
+        syntax_def = self.client.sql_data_types_mapping[syntax]
+        type_ = syntax_def.get(self.client.dialect) or syntax_def["mysql"]
 
         char_type = "VARCHAR"
-        if self.db_dialect == "spanner":
-            char_type = "STRING"
 
         if type_["type"] != char_type:
             data_type = type_["type"]
@@ -100,12 +71,10 @@ class SQLBackend:
             if type_["size"] <= 127:
                 data_type = f"{char_type}({type_['size']})"
             elif type_["size"] <= 255:
-                data_type = "TINYTEXT" if self.db_dialect == "mysql" else "TEXT"
+                data_type = "TINYTEXT" if self.client.dialect == "mysql" else "TEXT"
             else:
                 data_type = "TEXT"
 
-        if data_type == "TEXT" and self.db_dialect == "spanner":
-            data_type = "STRING(MAX)"
         return data_type
 
     def create_tables(self):
@@ -114,7 +83,7 @@ class SQLBackend:
         # cached schemas that holds table's column and its type
         table_columns = defaultdict(dict)
 
-        for fn in self.schema_files:
+        for fn in self.client.schema_files:
             with open(fn) as f:
                 schema = json.loads(f.read())
 
@@ -138,8 +107,8 @@ class SQLBackend:
             doc_id_type = self.get_data_type("doc_id", table)
             table_columns[table].update({
                 "doc_id": doc_id_type,
-                "objectClass": "VARCHAR(48)" if self.db_dialect != "spanner" else "STRING(48)",
-                "dn": "VARCHAR(128)" if self.db_dialect != "spanner" else "STRING(128)",
+                "objectClass": "VARCHAR(48)",
+                "dn": "VARCHAR(128)",
             })
 
             # make sure ``oc["may"]`` doesn't have duplicate attribute
@@ -177,24 +146,36 @@ class SQLBackend:
             if column_name == "doc_id" or column_name not in fields:
                 continue
 
-            index_name = f"{table_name}_{FIELD_RE.sub('_', column_name)}"
-
             if column_type.lower() != "json":
+                index_name = f"{table_name}_{FIELD_RE.sub('_', column_name)}"
                 query = f"CREATE INDEX {self.client.quoted_id(index_name)} ON {self.client.quoted_id(table_name)} ({self.client.quoted_id(column_name)})"
                 self.client.create_index(query)
             else:
-                # TODO: revise JSON type
-                #
-                # some MySQL versions don't support JSON array (NotSupportedError)
-                # also some of them don't support functional index that returns
-                # JSON or Geometry value
-                for i, index_str in enumerate(self.sql_indexes["__common__"]["JSON"], start=1):
-                    index_str_fmt = Template(index_str).safe_substitute({
-                        "field": column_name, "data_type": column_type,
-                    })
-                    name = f"{table_name}_json_{i}"
-                    query = f"CREATE INDEX {self.client.quoted_id(name)} ON {self.client.quoted_id(table_name)} (({index_str_fmt}))"
-                    self.client.create_index(query)
+                if self.client.server_version < "8.0":
+                    # prior to MySQL 8.0, CASTing on index creation will raise SQL syntax error;
+                    # switch to virtual column instead
+                    for i in range(4):
+                        index_str_fmt = f"{column_name}_mem_idx_{i}"
+                        query = " ".join([
+                            f"ALTER TABLE {self.client.quoted_id(table_name)}",
+                            f"ADD COLUMN {self.client.quoted_id(index_str_fmt)} CHAR(128) AS ({column_name}->'$.v[{i}]')",
+                            f", ADD INDEX ({self.client.quoted_id(index_str_fmt)})"
+                        ])
+                        try:
+                            self.client.create_index(query)
+                        except OperationalError as exc:
+                            # re-raise exception if the code isn't one of the following code
+                            # 1060 - duplicate column error
+                            if exc.orig.args[0] not in [1060]:
+                                raise exc
+                else:
+                    for i, index_str in enumerate(self.sql_indexes["__common__"]["JSON"], start=1):
+                        index_str_fmt = Template(index_str).safe_substitute({
+                            "field": column_name,  # "data_type": column_type,
+                        })
+                        name = f"{table_name}_json_{i}"
+                        query = f"ALTER TABLE {self.client.quoted_id(table_name)} ADD INDEX {self.client.quoted_id(name)} (({index_str_fmt}))"
+                        self.client.create_index(query)
 
         for i, custom in enumerate(self.sql_indexes.get(table_name, {}).get("custom", []), start=1):
             # jansPerson table has unsupported custom index expressions that need to be skipped if mysql < 8.0
@@ -232,9 +213,9 @@ class SQLBackend:
 
     def create_indexes(self):
         for table_name, column_mapping in self.client.get_table_mapping().items():
-            if self.db_dialect == "pgsql":
+            if self.client.dialect == "pgsql":
                 index_func = self.create_pgsql_indexes
-            elif self.db_dialect == "mysql":
+            else:
                 index_func = self.create_mysql_indexes
             # run the callback
             index_func(table_name, column_mapping)
@@ -255,7 +236,7 @@ class SQLBackend:
         self.update_schema()
 
         # force-reload metadata as we may have changed the schema
-        self.client.adapter._metadata = None
+        self.client._metadata = None
 
         logger.info("Creating indexes (if not exist)")
         self.create_indexes()
@@ -267,87 +248,6 @@ class SQLBackend:
 
         logger.info("Importing custom LDIF files (if any)")
         self.import_custom_ldif(ctx)
-
-    def transform_value(self, key, values):
-        type_ = self.sql_data_types.get(key)
-
-        if not type_:
-            attr_syntax = self.get_attr_syntax(key)
-            type_ = self.sql_data_types_mapping[attr_syntax]
-
-        type_ = type_.get(self.db_dialect) or type_["mysql"]
-        data_type = type_["type"]
-
-        if data_type in ("SMALLINT", "BOOL",):
-            if values[0].lower() in ("1", "on", "true", "yes", "ok"):
-                return 1 if data_type == "SMALLINT" else True
-            return 0 if data_type == "SMALLINT" else False
-
-        if data_type == "INT":
-            return int(values[0])
-
-        if data_type in ("DATETIME(3)", "TIMESTAMP",):
-            dval = values[0].strip("Z")
-            sep = " "
-            postfix = ""
-            if self.db_dialect == "spanner":
-                sep = "T"
-                postfix = "Z"
-            # return "{}-{}-{} {}:{}:{}{}".format(dval[0:4], dval[4:6], dval[6:8], dval[8:10], dval[10:12], dval[12:14], dval[14:17])
-            return "{}-{}-{}{}{}:{}:{}{}{}".format(
-                dval[0:4],
-                dval[4:6],
-                dval[6:8],
-                sep,
-                dval[8:10],
-                dval[10:12],
-                dval[12:14],
-                dval[14:17],
-                postfix,
-            )
-
-        if data_type == "JSON":
-            # return json.dumps({"v": values})
-            return {"v": values}
-
-        if data_type == "ARRAY<STRING(MAX)>":
-            return values
-
-        # fallback
-        return values[0]
-
-    def data_from_ldif(self, filename):
-        with open(filename, "rb") as fd:
-            parser = LDIFParser(fd)
-
-            for dn, entry in parser.parse():
-                doc_id = doc_id_from_dn(dn)
-
-                oc = entry.get("objectClass") or entry.get("objectclass")
-                if oc:
-                    if "top" in oc:
-                        oc.remove("top")
-
-                    if len(oc) == 1 and oc[0].lower() in ("organizationalunit", "organization"):
-                        continue
-
-                table_name = oc[-1]
-
-                if "objectClass" in entry:
-                    entry.pop("objectClass")
-                elif "objectclass" in entry:
-                    entry.pop("objectclass")
-
-                attr_mapping = OrderedDict({
-                    "doc_id": doc_id,
-                    "objectClass": table_name,
-                    "dn": dn,
-                })
-
-                for attr in entry:
-                    value = self.transform_value(attr, entry[attr])
-                    attr_mapping[attr] = value
-                yield table_name, attr_mapping
 
     def update_schema(self):
         """Updates schema (may include data migration)"""
@@ -369,12 +269,12 @@ class SQLBackend:
 
             # to change the storage format of a JSON column, drop the column and
             # add the column back specifying the new storage format
-            with self.client.adapter.engine.connect() as conn:
+            with self.client.engine.connect() as conn:
                 conn.execute(f"ALTER TABLE {self.client.quoted_id(table_name)} DROP COLUMN {self.client.quoted_id(col_name)}")
                 conn.execute(f"ALTER TABLE {self.client.quoted_id(table_name)} ADD COLUMN {self.client.quoted_id(col_name)} {data_type}")
 
             # force-reload metadata as we may have changed the schema before migrating old data
-            self.client.adapter._metadata = None
+            self.client._metadata = None
 
             # pre-populate the modified column
             for doc_id, value in values.items():
@@ -389,7 +289,7 @@ class SQLBackend:
                 return
 
             data_type = self.get_data_type(col_name, table_name)
-            with self.client.adapter.engine.connect() as conn:
+            with self.client.engine.connect() as conn:
                 conn.execute(f"ALTER TABLE {self.client.quoted_id(table_name)} ADD COLUMN {self.client.quoted_id(col_name)} {data_type}")
 
         def change_column_type(table_name, col_name):
@@ -401,7 +301,7 @@ class SQLBackend:
 
             query = f"ALTER TABLE {self.client.quoted_id(table_name)} " \
                     f"MODIFY COLUMN {self.client.quoted_id(col_name)} {data_type}"
-            with self.client.adapter.engine.connect() as conn:
+            with self.client.engine.connect() as conn:
                 conn.execute(query)
 
         def column_from_json(table_name, col_name):
@@ -419,12 +319,12 @@ class SQLBackend:
 
             # to change the storage format of a JSON column, drop the column and
             # add the column back specifying the new storage format
-            with self.client.adapter.engine.connect() as conn:
+            with self.client.engine.connect() as conn:
                 conn.execute(f"ALTER TABLE {self.client.quoted_id(table_name)} DROP COLUMN {self.client.quoted_id(col_name)}")
                 conn.execute(f"ALTER TABLE {self.client.quoted_id(table_name)} ADD COLUMN {self.client.quoted_id(col_name)} {data_type}")
 
             # force-reload metadata as we may have changed the schema before migrating old data
-            self.client.adapter._metadata = None
+            self.client._metadata = None
 
             # pre-populate the modified column
             for doc_id, value in values.items():
@@ -442,6 +342,10 @@ class SQLBackend:
             ("jansClnt", "jansLogoutURI"),
             ("jansPerson", "role"),
             ("jansPerson", "mobile"),
+            ("jansCustomScr", "jansAlias"),
+            ("jansClnt", "jansReqURI"),
+            ("jansClnt", "jansClaimRedirectURI"),
+            ("jansClnt", "jansAuthorizedOrigins"),
         ]:
             column_to_json(mod[0], mod[1])
 
@@ -489,6 +393,7 @@ class SQLBackend:
             ("jansUmaResource", "jansUmaScope"),
             ("jansU2fReq", "jansReq"),
             ("jansFido2AuthnEntry", "jansAuthData"),
+            ("jansFido2RegistrationEntry", "jansCodeChallengeHash"),
         ]:
             change_column_type(mod[0], mod[1])
 
@@ -506,19 +411,5 @@ class SQLBackend:
             self._import_ldif(file_, ctx)
 
     def _import_ldif(self, path, ctx):
-        src = Path(path).resolve()
-
-        # generated template will be saved under ``/app/tmp`` directory
-        # examples:
-        # - ``/app/templates/groups.ldif`` will be saved as ``/app/tmp/templates/groups.ldif``
-        # - ``/app/custom_ldif/groups.ldif`` will be saved as ``/app/tmp/custom_ldif/groups.ldif``
-        dst = Path("/app/tmp").joinpath(str(src).removeprefix("/app/")).resolve()
-
-        # ensure directory for generated template is exist
-        dst.parent.mkdir(parents=True, exist_ok=True)
-
-        logger.info(f"Importing {src} file")
-        render_ldif(src, dst, ctx)
-
-        for table_name, column_mapping in self.data_from_ldif(dst):
-            self.client.insert_into(table_name, column_mapping)
+        logger.info(f"Importing {path} file")
+        self.client.create_from_ldif(path, ctx)

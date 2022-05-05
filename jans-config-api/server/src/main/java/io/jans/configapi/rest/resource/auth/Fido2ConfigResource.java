@@ -13,18 +13,18 @@ import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.core.util.Jackson;
 
-import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 import org.slf4j.Logger;
 
 @Path(ApiConstants.FIDO2 + ApiConstants.CONFIG)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public class Fido2ConfigResource extends BaseResource {
+public class Fido2ConfigResource extends ConfigBaseResource {
 
     private static final String FIDO2_CONFIGURATION = "fido2Configuration";
 

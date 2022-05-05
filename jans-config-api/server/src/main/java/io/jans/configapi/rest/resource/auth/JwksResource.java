@@ -16,11 +16,11 @@ import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.core.util.Jackson;
 
-import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 
 import org.slf4j.Logger;
@@ -31,7 +31,7 @@ import org.slf4j.Logger;
 @Path(ApiConstants.CONFIG + ApiConstants.JWKS)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class JwksResource extends BaseResource {
+public class JwksResource extends ConfigBaseResource {
 
     @Inject
     Logger log;

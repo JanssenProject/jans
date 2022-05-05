@@ -10,8 +10,8 @@ import io.jans.as.common.model.registration.Client;
 import io.jans.as.server.model.common.ExecutionContext;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * @author Yuriy Zabrovarnyy

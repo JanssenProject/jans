@@ -33,6 +33,16 @@
       "corsRequestDecorate": true,
       "corsEnabled": true
     }
+  ],
+  "userExclusionAttributes": [
+    "userPassword"
+  ],
+   "userMandatoryAttributes": [
+	"mail",
+	"displayName",
+	"jansStatus",
+	"userPassword",
+	"givenName"
   ]
 }
 

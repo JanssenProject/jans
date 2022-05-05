@@ -145,7 +145,7 @@ public enum GrantType implements HasParamName, AttributeEnum {
 
     public static String[] toStringArray(GrantType[] grantTypes) {
         if (grantTypes == null) {
-            return null;
+            return new String[0];
         }
 
         String[] resultGrantTypes = new String[grantTypes.length];

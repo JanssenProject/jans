@@ -31,6 +31,14 @@ on:
         description: 'One or set of the docker images. Format as following: "docker-jans-auth-server docker-jans-certmanager docker-jans-client-api docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim"'
         required: true
         default: 'docker-jans-auth-server docker-jans-certmanager docker-jans-client-api docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim'
+      cn_version:
+        description: 'The war version to build the image off'
+        required: false
+        default: ''
+      image_tag:
+        description: 'The manual image tag to post'
+        required: false
+        default: ''
       tags:
         description: 'Tags'
         required: false
@@ -94,6 +102,24 @@ jobs:
           if [[ $VERSION =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\_[a-b]{1}[0-9]{1,3}$ ]]; then
             TAGS="$TAGS,${DOCKER_IMAGE}:${MAIN_VERSION}_dev"
           fi
+          # If the user passed a manual image tag to build a custom manual image
+          MANUAL_IMAGE_TAG=${{ github.event.inputs.image_tag }}
+          if [ ! -z "$MANUAL_IMAGE_TAG" ]
+          then
+            TAGS="$TAGS,${DOCKER_IMAGE}:${MANUAL_IMAGE_TAG}"
+            echo "Manual image tag has been inputed by the user"
+          else
+            echo "$TAGS"
+          fi
+          # If the user passed a war version to build off ,change this war version.
+          CN_VERSION=${{ github.event.inputs.cn_version }}
+          if [ ! -z "$CN_VERSION" ]
+          then
+            python3 -c "from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('./docker-jans-${{ matrix.docker-images }}') ; dfparser.envs['CN_VERSION'] = '${{ github.event.inputs.cn_version }}'"
+            echo "War vesrion has been modified."
+          else
+            echo "$CN_VERSION"
+          fi
           echo ::set-output name=tags::${TAGS}
           echo ::set-output name=build::${BUILD}
 
@@ -135,7 +161,7 @@ jobs:
 
       - name: Cache Docker layers
         if: steps.build_docker_image.outputs.build && steps.prep.outputs.build
-        uses: actions/cache@v2.1.7
+        uses: actions/cache@v3
         with:
           path: /tmp/.buildx-cache
           key: ${{ runner.os }}-buildx-${{ github.sha }}

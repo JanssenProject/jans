@@ -14,15 +14,15 @@ import io.jans.as.common.util.AttributeConstants;
 import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.register.ApplicationType;
-import io.jans.configapi.rest.model.SearchRequest;
+import io.jans.configapi.core.model.SearchRequest;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;
 import io.jans.orm.search.filter.Filter;
 import io.jans.util.StringHelper;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import java.io.Serializable;
 import java.util.List;
 
@@ -39,16 +39,16 @@ public class ClientService implements Serializable {
     private static final long serialVersionUID = 7912416439116338984L;
 
     @Inject
-    private PersistenceEntryManager persistenceEntryManager;
+    private transient PersistenceEntryManager persistenceEntryManager;
 
     @Inject
-    private Logger logger;
+    private transient Logger logger;
 
     @Inject
     private OrganizationService organizationService;
 
     @Inject
-    private InumService inumService;
+    private transient InumService inumService;
 
     public boolean contains(String clientDn) {
         return persistenceEntryManager.contains(clientDn, Client.class);

@@ -16,19 +16,19 @@ import io.jans.configapi.core.util.Jackson;
 import io.jans.orm.sql.operation.impl.SqlConnectionProvider;
 import org.slf4j.Logger;
 
-import javax.inject.Inject;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.util.Optional;
 import java.util.Properties;
 
 @Path(ApiConstants.CONFIG + ApiConstants.DATABASE + ApiConstants.SQL)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class SqlConfigurationResource extends BaseResource {
+public class SqlConfigurationResource extends ConfigBaseResource {
 
     @Inject
     Logger log;

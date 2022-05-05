@@ -1,7 +1,7 @@
 
 package io.jans.configapi.service.auth;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 /**
  * @author Yuriy Zabrovarnyy

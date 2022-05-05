@@ -12,7 +12,7 @@ import io.jans.as.model.crypto.signature.AsymmetricSignatureAlgorithm;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.register.ApplicationType;
 
-import javax.ws.rs.HttpMethod;
+import jakarta.ws.rs.HttpMethod;
 import java.util.List;
 
 public class RegistrationBuilder implements Builder {

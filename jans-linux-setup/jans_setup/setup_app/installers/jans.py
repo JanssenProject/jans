@@ -70,10 +70,10 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
             txt += 'Install Apache 2 web server'.ljust(30) + repr(Config.installHttpd).rjust(35) + (' *' if 'installHttpd' in Config.addPostSetupService else '') + "\n"
             txt += 'Install Auth Server'.ljust(30) + repr(Config.installOxAuth).rjust(35) + "\n"
-            txt += 'Install Jans Auth Config Api'.ljust(30) + repr(Config.installConfigApi).rjust(35) + "\n"
+            txt += 'Install Jans Auth Config Api'.ljust(30) + repr(Config.install_config_api).rjust(35) + "\n"
             if Config.profile == 'jans':
                 txt += 'Install Fido2 Server'.ljust(30) + repr(Config.installFido2).rjust(35) + (' *' if 'installFido2' in Config.addPostSetupService else '') + "\n"
-                txt += 'Install Scim Server'.ljust(30) + repr(Config.installScimServer).rjust(35) + (' *' if 'installScimServer' in Config.addPostSetupService else '') + "\n"
+                txt += 'Install Scim Server'.ljust(30) + repr(Config.install_scim_server).rjust(35) + (' *' if 'install_scim_server' in Config.addPostSetupService else '') + "\n"
                 txt += 'Install Eleven Server'.ljust(30) + repr(Config.installEleven).rjust(35) + (' *' if 'installEleven' in Config.addPostSetupService else '') + "\n"
                 #txt += 'Install Oxd '.ljust(30) + repr(Config.installOxd).rjust(35) + (' *' if 'installOxd' in Config.addPostSetupService else '') + "\n"
             return txt
@@ -102,7 +102,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
         #Download jans-auth-client-jar-with-dependencies
         if not os.path.exists(Config.non_setup_properties['oxauth_client_jar_fn']):
-            oxauth_client_jar_url = 'https://ox.gluu.org/maven/org/gluu/jans-auth-client/{0}/jans-auth-client-{0}-jar-with-dependencies.jar'.format(Config.oxVersion)
+            oxauth_client_jar_url = os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-auth-client/{0}/jans-auth-client-{0}-jar-with-dependencies.jar').format(base.current_app.app_info['ox_version'])
             self.logIt("Downloading {}".format(os.path.basename(oxauth_client_jar_url)))
             base.download(oxauth_client_jar_url, Config.non_setup_properties['oxauth_client_jar_fn'])
 
@@ -132,11 +132,25 @@ class JansInstaller(BaseInstaller, SetupUtils):
         if Config.persistence_type == 'hybrid':
             self.writeHybridProperties()
 
+        # set systemd start timeout to 5 mins
+        systemd_conf_fn = '/etc/systemd/system.conf'
+        systemd_conf = []
+
+        for l in open(systemd_conf_fn):
+            tl = l.strip('#').strip()
+            if tl.startswith('DefaultTimeoutStartSec'):
+                systemd_conf.append('DefaultTimeoutStartSec=300s\n')
+            else:
+                systemd_conf.append(l)
+
+        self.writeFile(systemd_conf_fn, ''.join(systemd_conf))
+
+
     def makeFolders(self):
         # Create these folder on all instances
         for folder in (Config.jansOptFolder, Config.jansOptBinFolder, Config.jansOptSystemFolder,
                         Config.jansOptPythonFolder, Config.configFolder, Config.certFolder,
-                        Config.outputFolder, Config.osDefault):
+                        Config.output_dir, Config.os_default, os.path.join(Config.distFolder, 'scripts')):
 
             if not os.path.exists(folder):
                 self.run([paths.cmd_mkdir, '-p', folder])
@@ -145,6 +159,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
             self.run([paths.cmd_chown, '-R', 'root:jans', Config.certFolder])
             self.run([paths.cmd_chmod, '551', Config.certFolder])
             self.run([paths.cmd_chmod, 'ga+w', "/tmp"]) # Allow write to /tmp
+
 
     def customiseSystem(self):
         if not base.snap:
@@ -219,12 +234,12 @@ class JansInstaller(BaseInstaller, SetupUtils):
         ldap_mappings = self.getMappingType('ldap')
         couchbase_mappings = self.getMappingType('couchbase')
         
-        for group in Config.mappingLocations:
+        for group in Config.mapping_locations:
             if group == 'default':
-                default_mapping = Config.mappingLocations[group]
+                default_mapping = Config.mapping_locations[group]
                 break
 
-        storages = set(Config.mappingLocations.values())
+        storages = set(Config.mapping_locations.values())
 
         jans_hybrid_roperties = [
                         'storages: {0}'.format(', '.join(storages)),
@@ -322,11 +337,11 @@ class JansInstaller(BaseInstaller, SetupUtils):
             self.run(['/usr/bin/hostnamectl', 'set-hostname', Config.hostname])
         else:
             if Config.os_type in ['debian', 'ubuntu']:
-                self.copyFile("%s/hostname" % Config.outputFolder, Config.etc_hostname)
+                self.copyFile("%s/hostname" % Config.output_dir, Config.etc_hostname)
                 self.run(['/bin/chmod', '-f', '644', Config.etc_hostname])
 
             if Config.os_type in ['centos', 'red', 'fedora']:
-                self.copyFile("%s/network" % Config.outputFolder, Config.network)
+                self.copyFile("%s/network" % Config.output_dir, Config.network)
 
             self.run(['/bin/hostname', Config.hostname])
 
@@ -364,7 +379,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
         for dest_fn in list(Config.ce_templates.keys()):
             if Config.ce_templates[dest_fn]:
                 fn = os.path.split(dest_fn)[-1]
-                output_fn = os.path.join(Config.outputFolder, fn)
+                output_fn = os.path.join(Config.output_dir, fn)
                 try:
                     self.logIt("Copying %s to %s" % (output_fn, dest_fn))
                     dest_dir = os.path.dirname(dest_fn)

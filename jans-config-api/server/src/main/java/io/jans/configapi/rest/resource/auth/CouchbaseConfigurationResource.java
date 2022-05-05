@@ -17,19 +17,19 @@ import io.jans.orm.couchbase.model.CouchbaseConnectionConfiguration;
 import io.jans.orm.couchbase.operation.impl.CouchbaseConnectionProvider;
 import org.slf4j.Logger;
 
-import javax.inject.Inject;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.util.Optional;
 import java.util.Properties;
 
 @Path(ApiConstants.CONFIG + ApiConstants.DATABASE + ApiConstants.COUCHBASE)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class CouchbaseConfigurationResource extends BaseResource {
+public class CouchbaseConfigurationResource extends ConfigBaseResource {
 
     @Inject
     Logger log;

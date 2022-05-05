@@ -6,15 +6,15 @@ import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.service.auth.AuthService;
 import io.jans.configapi.util.ApiConstants;
 
-import javax.inject.Inject;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 import org.slf4j.Logger;
 
 @Path(ApiConstants.JANS_AUTH + ApiConstants.HEALTH)
-public class HealthCheckResource extends BaseResource {
+public class HealthCheckResource extends ConfigBaseResource {
 
     private static final String HEALTH_CHECK_URL = "/jans-auth/sys/health-check";
 

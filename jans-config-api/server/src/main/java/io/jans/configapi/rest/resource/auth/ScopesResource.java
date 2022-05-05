@@ -17,14 +17,14 @@ import io.jans.configapi.util.AttributeNames;
 import io.jans.configapi.core.util.Jackson;
 import io.jans.util.StringHelper;
 
-import javax.inject.Inject;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
+import jakarta.inject.Inject;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
@@ -41,7 +41,7 @@ import org.slf4j.Logger;
 @Path(ApiConstants.SCOPES)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class ScopesResource extends BaseResource {
+public class ScopesResource extends ConfigBaseResource {
 
     private static final String SCOPE = "scope";
 

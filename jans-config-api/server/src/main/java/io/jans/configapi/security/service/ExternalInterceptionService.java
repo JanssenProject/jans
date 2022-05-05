@@ -11,11 +11,11 @@ import io.jans.configapi.model.configuration.ApiAppConfiguration;
 
 import java.util.Map;
 import java.io.Serializable;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Named;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.inject.Inject;
 
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -27,7 +27,7 @@ public class ExternalInterceptionService implements Serializable {
     private static final long serialVersionUID = 4564959567069741194L;
 
     @Inject
-    Logger log;
+    transient Logger log;
 
     @Inject
     ExternalConfigService externalConfigService;

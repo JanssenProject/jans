@@ -15,12 +15,12 @@ import io.jans.configapi.util.AttributeNames;
 import io.jans.configapi.core.util.Jackson;
 import io.jans.model.GluuAttribute;
 
-import javax.inject.Inject;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +35,7 @@ import org.slf4j.Logger;
 @Path(ApiConstants.ATTRIBUTES)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public class AttributesResource extends BaseResource {
+public class AttributesResource extends ConfigBaseResource {
 
     private static final String GLUU_ATTRIBUTE = "gluu attribute";
 

@@ -315,6 +315,12 @@
                 "scopes":[
                     "https://jans.io/oauth/config/scripts.delete"
                 ]
+            },
+            {
+                "httpMethods":["PATCH"],
+                "scopes":[
+                    "https://jans.io/oauth/config/scripts.write"
+                ]
             }
         ]
     },
@@ -592,72 +598,6 @@
         ]
     },
     {
-        "path":"/jans-config-api/scim/user",
-        "conditions":[
-            {
-                "httpMethods":["GET"],
-                "scopes":[
-                    "https://jans.io/oauth/config/scim/users.read",
-                    "https://jans.io/scim/users.read"
-                ]
-            },
-            {
-               "httpMethods":["POST"],
-                "scopes":[
-                    "https://jans.io/oauth/config/scim/users.write",
-                    "https://jans.io/scim/users.write"
-                ]
-            }
-            
-        ]
-    },
-    {
-        "path":"/jans-config-api/scim/user/{id}",
-        "conditions":[
-            {
-                "httpMethods":["GET"],
-                "scopes":[
-                    "https://jans.io/oauth/config/scim/users.read",
-                    "https://jans.io/scim/users.read"
-                ]
-            },
-            {
-               "httpMethods":["PUT"],
-                "scopes":[
-                    "https://jans.io/oauth/config/scim/users.write",
-                    "https://jans.io/scim/users.write"
-                ]
-            },
-            {
-               "httpMethods":["DELETE"],
-                "scopes":[
-                    "https://jans.io/oauth/config/scim/users.write",
-                    "https://jans.io/scim/users.write"
-                ]
-            },
-            {
-               "httpMethods":["PATCH"],
-                "scopes":[
-                    "https://jans.io/oauth/config/scim/users.write",
-                    "https://jans.io/scim/users.write"
-                ]
-            }
-            
-        ]
-    },
-    {
-        "path":"/jans-config-api/scim/user/.search",
-        "conditions":[
-            {
-                "httpMethods":["GET"],
-                "scopes":[
-                    "https://jans.io/oauth/config/scim/users.read",
-                    "https://jans.io/scim/users.read"
-                ]
-            }            
-        ]
-    },
-    {
         "path":"/jans-config-api/scim/config",
         "conditions":[
             {
@@ -687,6 +627,29 @@
                 "httpMethods":["PATCH"],
                 "scopes":[
                     "https://jans.io/oauth/config/organization.write"
+                ]
+            }
+        ]
+    },
+	{
+        "path":"/jans-config-api/mgt/configuser",
+        "conditions":[
+            {
+                "httpMethods":["GET"],
+                "scopes":[
+                    "https://jans.io/oauth/config/user.readonly"
+                ]
+            },
+            {
+                "httpMethods":["PATCH","POST","PUT"],
+                "scopes":[
+                    "https://jans.io/oauth/config/user.write"
+                ]
+            },
+            {
+                "httpMethods":["DELETE"],
+                "scopes":[
+                    "https://jans.io/oauth/config/user.delete"
                 ]
             }
         ]

@@ -6,10 +6,10 @@
 
 package io.jans.notify.service;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
 

@@ -79,7 +79,7 @@
                <class name="io.swagger.client.api.AuthorizationCodeFlowTest"/>
            </classes>
        </test>
-       <test name="Migration Service Test" enabled="false">
+       <test name="Migration Service Test" enabled="true">
            <classes>
                <class name="io.swagger.client.api.service.MigrationServiceTest"/>
            </classes>

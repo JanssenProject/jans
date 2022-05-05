@@ -9,6 +9,7 @@ package io.jans.as.server.service.external;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import io.jans.as.common.service.common.ApplicationFactory;
+import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.server.service.cdi.event.ReloadAuthScript;
 import io.jans.as.server.service.external.internal.InternalDefaultPersonAuthenticationType;
 import io.jans.model.AuthenticationScriptUsageType;
@@ -25,10 +26,10 @@ import io.jans.util.OxConstants;
 import io.jans.util.StringHelper;
 import org.apache.commons.lang.StringUtils;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -48,6 +49,9 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 
     @Inject
     private InternalDefaultPersonAuthenticationType internalDefaultPersonAuthenticationType;
+
+    @Inject
+    private AppConfiguration appConfiguration;
 
     private static final long serialVersionUID = 7339887464253044927L;
 
@@ -354,7 +358,7 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 
         if (authModes.size() > 0) {
             for (String authMode : authModes) {
-                for (CustomScriptConfiguration customScriptConfiguration : this.customScriptConfigurationsMapByUsageType.get(usageType)) {
+                for (CustomScriptConfiguration customScriptConfiguration : this.customScriptConfigurationsMapByUsageType.get(usageType) ) {
                     if (StringHelper.equalsIgnoreCase(authMode, customScriptConfiguration.getName())) {
                         return customScriptConfiguration;
                     }
@@ -362,6 +366,9 @@ public class ExternalAuthenticationService extends ExternalScriptService {
             }
         }
 
+        if (appConfiguration.getUseHighestLevelScriptIfAcrScriptNotFound()) {
+            return getDefaultExternalAuthenticator(usageType);
+        }
         return null;
     }
 
@@ -539,5 +546,13 @@ public class ExternalAuthenticationService extends ExternalScriptService {
         customScript.setInternal(true);
 
         return new CustomScriptConfiguration(customScript, internalDefaultPersonAuthenticationType, new HashMap<>(0));
+    }
+
+    public void setCustomScriptConfigurationsMapByUsageType(Map<AuthenticationScriptUsageType, List<CustomScriptConfiguration>> customScriptConfigurationsMapByUsageType) {
+        this.customScriptConfigurationsMapByUsageType = customScriptConfigurationsMapByUsageType;
+    }
+
+    public void setDefaultExternalAuthenticators(Map<AuthenticationScriptUsageType, CustomScriptConfiguration> defaultExternalAuthenticators) {
+        this.defaultExternalAuthenticators = defaultExternalAuthenticators;
     }
 }

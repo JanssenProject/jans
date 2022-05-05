@@ -11,8 +11,8 @@ import com.google.common.collect.Maps;
 import io.jans.orm.annotation.*;
 import io.jans.orm.model.base.Deletable;
 
-import javax.inject.Named;
-import javax.persistence.Transient;
+import jakarta.inject.Named;
+import jakarta.persistence.Transient;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;

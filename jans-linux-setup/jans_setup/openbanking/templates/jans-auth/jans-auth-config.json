@@ -289,7 +289,7 @@
     "logClientIdOnClientAuthentication": true,
     "logClientNameOnClientAuthentication": false,
     "httpLoggingEnabled": false,
-    "httpLoggingExludePaths": [],
+    "httpLoggingExcludePaths": [],
     "externalLoggerConfiguration": "",
     "authorizationRequestCustomAllowedParameters" : [
         {
@@ -361,5 +361,6 @@
     "deviceAuthzResponseTypeToProcessAuthz": "code",
     "staticKid": "%(staticKid)s",
     "forceOfflineAccessScopeToEnableRefreshToken" : false,
-    "redirectUrisRegexEnabled": false
+    "redirectUrisRegexEnabled": false,
+    "useHighestLevelScriptIfAcrScriptNotFound": true
 }
