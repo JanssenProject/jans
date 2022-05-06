@@ -40,6 +40,7 @@ except ModuleNotFoundError:
 
 tabulate_endpoints = {
     'jca.get-config-scripts': ['scriptType', 'name', 'enabled', 'inum'],
+    'jca.get-user': ['inum', 'userId', 'mail','sn', 'givenName', 'jansStatus'],
 }
 
 my_op_mode = 'scim' if 'scim' in os.path.basename(sys.argv[0]) else 'jca'
@@ -1017,7 +1018,7 @@ class JCA_CLI:
         for i, entry in enumerate(data):
             row_ = [i + 1]
             for header in headers:
-                row_.append(entry[header])
+                row_.append(entry.get(header, ''))
             tab_data.append(row_)
 
         print(tabulate(tab_data, headers, tablefmt="grid"))
@@ -1087,9 +1088,18 @@ class JCA_CLI:
                 api_response_unmapped = data_dict
 
             op_mode_endpoint = my_op_mode + '.' + endpoint.info['operationId']
-
+            import copy
             if op_mode_endpoint in tabulate_endpoints:
-                self.tabular_data(api_response_unmapped, op_mode_endpoint)
+                api_response_unmapped_ext = copy.deepcopy(api_response_unmapped)
+                if endpoint.info['operationId'] == 'get-user':
+                    for entry in api_response_unmapped_ext:
+                        for attrib in entry['customAttributes']:
+                            if attrib['name'] == 'mail':
+                                entry['mail'] = ', '.join(attrib['values'])
+                            elif attrib['name'] in tabulate_endpoints[op_mode_endpoint]:
+                                entry[attrib['name']] = attrib['values'][0]
+
+                self.tabular_data(api_response_unmapped_ext, op_mode_endpoint)
                 item_counters = [str(i + 1) for i in range(len(api_response_unmapped))]
                 tabulated = True
             else:
