@@ -149,51 +149,6 @@ def get_base_ctx(manager):
     # static kid
     ctx["staticKid"] = os.environ.get("CN_OB_STATIC_KID", "")
 
-    # WARNING:
-    # - deprecate configs and secrets for admin_ui and token_server_admin_ui
-    # - move the configs and secrets creation to configurator
-    # - remove them on future release
-
-    # admin-ui plugins
-    ctx["admin_ui_client_id"] = manager.config.get("admin_ui_client_id")
-    if not ctx["admin_ui_client_id"]:
-        ctx["admin_ui_client_id"] = f"1901.{uuid4()}"
-        manager.config.set("admin_ui_client_id", ctx["admin_ui_client_id"])
-
-    ctx["admin_ui_client_pw"] = manager.secret.get("admin_ui_client_pw")
-    if not ctx["admin_ui_client_pw"]:
-        ctx["admin_ui_client_pw"] = get_random_chars()
-        manager.secret.set("admin_ui_client_pw", ctx["admin_ui_client_pw"])
-
-    ctx["admin_ui_client_encoded_pw"] = manager.secret.get("admin_ui_client_encoded_pw")
-    if not ctx["admin_ui_client_encoded_pw"]:
-        ctx["admin_ui_client_encoded_pw"] = encode_text(ctx["admin_ui_client_pw"], manager.secret.get("encoded_salt")).decode()
-        manager.secret.set(
-            "admin_ui_client_encoded_pw",
-            ctx["admin_ui_client_encoded_pw"],
-        )
-
-    # token server client
-    ctx["token_server_admin_ui_client_id"] = manager.config.get("token_server_admin_ui_client_id")
-    if not ctx["token_server_admin_ui_client_id"]:
-        ctx["token_server_admin_ui_client_id"] = f"1901.{uuid4()}"
-        manager.config.set("token_server_admin_ui_client_id", ctx["token_server_admin_ui_client_id"])
-
-    ctx["token_server_admin_ui_client_pw"] = manager.secret.get("token_server_admin_ui_client_pw")
-    if not ctx["token_server_admin_ui_client_pw"]:
-        ctx["token_server_admin_ui_client_pw"] = get_random_chars()
-        manager.secret.set("token_server_admin_ui_client_pw", ctx["token_server_admin_ui_client_pw"])
-
-    ctx["token_server_admin_ui_client_encoded_pw"] = manager.secret.get("token_server_admin_ui_client_encoded_pw")
-    if not ctx["token_server_admin_ui_client_encoded_pw"]:
-        ctx["token_server_admin_ui_client_encoded_pw"] = encode_text(
-            ctx["token_server_admin_ui_client_pw"], manager.secret.get("encoded_salt"),
-        ).decode()
-        manager.secret.set(
-            "token_server_admin_ui_client_encoded_pw",
-            ctx["token_server_admin_ui_client_encoded_pw"],
-        )
-
     # finalize ctx
     return ctx
 
@@ -394,7 +349,6 @@ def get_ldif_mappings(optional_scopes=None):
 
         files += [
             "jans-config-api/config.ldif",
-            "jans-config-api/admin-ui-clients.ldif",
             "jans-auth/configuration.ldif",
             "jans-auth/role-scope-mappings.ldif",
             "jans-cli/client.ldif",
@@ -411,6 +365,7 @@ def get_ldif_mappings(optional_scopes=None):
             files += [
                 "jans-fido2/fido2.ldif",
             ]
+
         return files
 
     def user_files():

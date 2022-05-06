@@ -32,7 +32,7 @@ RUN wget -q https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/${JETTY_
 # ==========
 
 ENV CN_VERSION=1.0.0-SNAPSHOT
-ENV CN_BUILD_DATE='2022-04-21 11:27'
+ENV CN_BUILD_DATE='2022-04-30 08:16'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api-server/${CN_VERSION}/jans-config-api-server-${CN_VERSION}.war
 
 # Install Jans Config API
@@ -63,11 +63,11 @@ RUN wget -q https://github.com/GluuFederation/gluu-snap/raw/${PYFACTER_VERSION}/
 
 RUN mkdir -p /usr/share/java
 
-ENV SCIM_PLUGIN_BUILD_DATE='2022-02-21 16:26'
+ENV SCIM_PLUGIN_BUILD_DATE='2022-04-30 08:16'
 ENV SCIM_PLUGIN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/scim-plugin/${CN_VERSION}/scim-plugin-${CN_VERSION}-distribution.jar
 RUN wget -q ${SCIM_PLUGIN_SOURCE_URL} -O /usr/share/java/scim-plugin.jar
 
-ENV ADMIN_UI_PLUGIN_BUILD_DATE='2022-02-21 16:26'
+ENV ADMIN_UI_PLUGIN_BUILD_DATE='2022-04-30 08:16'
 ENV ADMIN_UI_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/admin-ui-plugin/${CN_VERSION}/admin-ui-plugin-${CN_VERSION}-distribution.jar
 RUN wget -q ${ADMIN_UI_SOURCE_URL} -O /usr/share/java/admin-ui-plugin.jar
 
@@ -168,11 +168,8 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_WAIT_SLEEP_DURATION=10 \
     CN_JAVA_OPTIONS="" \
     GOOGLE_PROJECT_ID="" \
-    GOOGLE_APPLICATION_CREDENTIALS=/etc/jans/conf/google-credentials.json \
-    CN_LICENSE_ADMIN_UI_API_KEY=/etc/jans/conf/admin_ui_api_key \
-    CN_LICENSE_ADMIN_UI_PRODUCT_CODE=/etc/jans/conf/admin_ui_product_code \
-    CN_LICENSE_ADMIN_UI_SHARED_KEY=/etc/jans/conf/admin_ui_shared_key \
-    CN_LICENSE_ADMIN_UI_MANAGEMENT_KEY=/etc/jans/conf/admin_ui_management_key
+    GOOGLE_APPLICATION_CREDENTIALS=/etc/jans/conf/google-credentials.json
+
 # ====
 # misc
 # ====
