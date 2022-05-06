@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.configapi.service.auth;
+package io.jans.configapi.plugin.fido2.service;
 
 import io.jans.config.oxtrust.DbApplicationConfiguration;
 import io.jans.configapi.configuration.ConfigurationFactory;
@@ -15,9 +15,6 @@ import org.slf4j.Logger;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
-/**
- * @author Yuriy Zabrovarnyy
- */
 @ApplicationScoped
 public class Fido2Service {
 
