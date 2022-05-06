@@ -6,6 +6,8 @@
 
 package io.jans.configapi.plugin.fido2.rest;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 import io.jans.config.oxtrust.DbApplicationConfiguration;
 import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
@@ -31,7 +33,7 @@ public class Fido2ConfigResource extends BaseResource {
     private static final String FIDO2_CONFIGURATION = "fido2Configuration";
 
     @Inject
-    Logger log;
+    Logger logger;
 
     @Inject
     Fido2Service fido2Service;
@@ -41,16 +43,16 @@ public class Fido2ConfigResource extends BaseResource {
 
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.FIDO2_CONFIG_READ_ACCESS })
-    public Response getFido2Configuration() throws Exception {
+    public Response getFido2Configuration()  throws JsonProcessingException {
         DbApplicationConfiguration dbApplicationConfiguration = this.fido2Service.find();
-        log.debug("FIDO2 details dbApplicationConfiguration.getDynamicConf():{}" ,dbApplicationConfiguration.getDynamicConf());
+        logger.debug("FIDO2 details dbApplicationConfiguration.getDynamicConf():{}" ,dbApplicationConfiguration.getDynamicConf());
         return Response.ok(Jackson.asJsonNode(dbApplicationConfiguration.getDynamicConf())).build();
     }
 
     @PUT
     @ProtectedApi(scopes = { ApiAccessConstants.FIDO2_CONFIG_WRITE_ACCESS })
     public Response updateFido2Configuration(@NotNull String fido2ConfigJson) {
-        log.debug("FIDO2 details to be updated - fido2ConfigJson:{} ",fido2ConfigJson);
+        logger.debug("FIDO2 details to be updated - fido2ConfigJson:{} ",fido2ConfigJson);
         checkResourceNotNull(fido2ConfigJson, FIDO2_CONFIGURATION);
         this.fido2Service.merge(fido2ConfigJson);
         return Response.ok(fido2ConfigJson).build();
