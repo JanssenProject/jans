@@ -23,13 +23,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-/**
- * @author Yuriy Zabrovarnyy
- */
-public class JenkinsTestRunner {
+public class TestJenkinsRunner {
 
     @Test
-    public void testParallel() {
+    void testParallel() {
         System.setProperty("karate.env", "jenkins");
         Results results = Runner.path("src/test/resources/feature").tags("~@ignore").parallel(1);
         generateReport(results.getReportDir());
