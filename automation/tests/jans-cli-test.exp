@@ -13,9 +13,9 @@ expect -exact "${HOST}"
 send -- "\r"
 expect -re "(.*)\n"
 
-
-send -- "/opt/jans/jans-cli/config-cli.py --no-suggestion"
-expect -exact "/opt/jans/jans-cli/config-cli.py --no-suggestion"
+#--no-suggestion
+send -- "/opt/jans/jans-cli/config-cli.py"
+expect -exact "/opt/jans/jans-cli/config-cli.py"
 send -- "\r"
 expect "Selection:"
 
@@ -147,9 +147,10 @@ proc defaultMethods {} {
 			send -- "2\r"
 			expect "Selection:"
 			send -- "1\r"
-			#expect { "defaultAcr" {send_error "inum not found" exit} }
+			expect  {"defaultAcr::" {send_error "inum not found" 
+				break }} 
 			#send -- "\r"
-			expect "Selection:"
+			#expect "Selection:"
 			send -- "b\r"
 			expect "Selection:"
 			send -- "2\r"
@@ -199,15 +200,17 @@ proc cacheconfg {} {
 			expect "Selection:"
 		}
 proc  memcacheconf {} {
-			puts "Cache Configuration – Memcached"
+			puts "Cache Configuration"
 
 			send -- "4\r"
-			expect "Cache Configuration - Memcached"
+		sleep 10
+			expect "Cache Configuration"
 			send -- "1\r"
 			expect "bufferSize"
 			send -- "b\r"
-			expect "Cache Configuration - Memcached"
+			expect "Cache Configuration"
 			send -- "2\r"
+		sleep 10	
 			expect "Selection:"
 			send -- "1\r"
 			expect "bufferSize"
@@ -218,7 +221,7 @@ proc  memcacheconf {} {
 			send -- "y\r"
 			expect "33456"
 			send -- "b\r"
-			expect "Cache Configuration - Memcached"	
+			expect "Cache Configuration"	
 			send -- "3\r"
 			expect "Selection:"
 			expect "op:"
@@ -455,6 +458,7 @@ proc smtpconf  {} {
 					send -- "\r"
 					expect "from_name"
 					send -- "manoj\r"
+				sleep 10
 					expect "from_email_address"
 					send  -- "manojsurya78@gmail.com\r"
 					expect "requires_authentication"
@@ -480,20 +484,22 @@ proc smtpconf  {} {
 					send -- "y\r"
 					expect  "manojsurya@gmail.com"
 					send -- "b\r"
+					sleep 10
 					expect "Configuration – SMTP"
 					send -- "4\r"
 					expect "Are you sure want to delete"
 					send -- "y\r"
 					expect "Entry  was deleted successfully"
 					send -- "b\r"
+					sleep 10
 					expect "Configuration – SMTP"
 					send -- "b\r"
 					expect "Attribute"
 
-
-
+		}
+proc Logging {} {
 					puts "Configuration – Logging"
-					send -- "10\r"
+					send -- "11\r"
 					expect "Configuration – Logging"
 					send -- "1\r"
 					expect "loggingLevel"
@@ -696,6 +702,9 @@ proc openIdconnet {}	{
 				send -- "\r"
 				expect "startIndex"
 				send -- "\r"
+				expect "sortBy"
+				send -- "\r"
+
 				expect "sortOrder"
 				send -- "\r"
 				expect "backchannelTokenDeliveryMode"
@@ -712,8 +721,12 @@ proc openIdconnet {}	{
 				send -- "n\r"
 				expect "Continue?"
 				send -- "y\r"
-				expect "myopenclient"
+				sleep 20
+				#expect "myopenclient"
+				expect -re "[0-9a-zA-Z]*+\,"
+				puts "expect_out (1, string)"
 				#------------------------------------
+				interact	
 				send -- "b\r"
 				expect "OAuth - OpenID Connect - Clients"
 				send -- "3\r"
@@ -1083,21 +1096,22 @@ proc scimusrmgmt {}	{
 #defaultMethods
 #cacheconfg
 #memcacheconf
-rediscacheconf
+#rediscacheconf
 #inmemcacheconf
-nativepersistcacheconf
-confprop	
-fido2conf
-smtpconf
-ldapconf
-cochbaseDbconf
+#nativepersistcacheconf
+#confprop	
+#fido2conf
+#smtpconf
+#Logging
+#ldapconf
+#cochbaseDbconf
 openIdconnet
-uma
-oauth
-stats
-health
-serverstats
-scimusrmgmt
+#uma
+#oauth
+#stats
+#health
+#serverstats
+#scimusrmgmt
 
 
 
