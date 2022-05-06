@@ -17,9 +17,10 @@ import code
 import traceback
 import ast
 import base64
-
 import pprint
+
 from pathlib import Path
+from types import SimpleNamespace
 from urllib.parse import urlencode
 from collections import OrderedDict
 from prompt_toolkit import prompt, HTML
@@ -209,6 +210,7 @@ class Menu(object):
 
     def __init__(self, name, method='', info={}, path=''):
         self.name = name
+        self.display_name = name
         self.method = method
         self.info = info
         self.path = path
@@ -221,7 +223,7 @@ class Menu(object):
         return self
 
     def __repr__(self):
-        return self.name
+        return self.display_name
         self.__print_child(self)
 
     def tree(self):
@@ -420,35 +422,94 @@ class JCA_CLI:
 
     def make_menu(self):
 
-        menu = Menu('Main Menu')
+        menu_groups = []
+
+        def get_sep_pos(s):
+            for i, c in enumerate(s):
+                if c in ('-', '–'):
+                    return i
+            return -1
+
+        def get_group_obj(mname):
+            for grp in menu_groups:
+                if grp.mname == mname:
+                    return grp
+
 
         for tag in self.cfg_yml['tags']:
-            if tag['name'] != 'developers':
-                m = Menu(name=tag['name'])
-                menu.add_child(m)
-                for path in self.cfg_yml['paths']:
-                    for method in self.cfg_yml['paths'][path]:
+            tname = tag['name'].strip()
+            if tname == 'developers':
+                continue
+            n = get_sep_pos(tname)
+            mname = tname[:n].strip() if n > -1 else tname
+            grp = get_group_obj(mname)
+            if not grp:
+                grp = SimpleNamespace()
+                grp.tag = None if n > -1 else tname
+                grp.mname = mname
+                grp.submenu = []
+                menu_groups.append(grp)
 
-                        if 'tags' in self.cfg_yml['paths'][path][method] and m.name in \
-                                self.cfg_yml['paths'][path][method]['tags'] and 'operationId' in \
-                                self.cfg_yml['paths'][path][method]:
+            if n > -1:
+                sname = tname[n+1:].strip()
+                sub = SimpleNamespace()
+                sub.tag = tname
+                sub.mname = sname
+                grp.submenu.append(sub)
 
-                            if isinstance(self.cfg_yml['paths'][path][method], dict) and self.cfg_yml['paths'][path][method].get('x-cli-plugin') and not self.cfg_yml['paths'][path][method]['x-cli-plugin'] in plugins:
-                                if m in menu.children:
-                                    menu.children.remove(m)
-                                continue
 
-                            menu_name = self.cfg_yml['paths'][path][method].get('summary') or \
-                                        self.cfg_yml['paths'][path][method].get('description')
+        def get_methods_of_tag(tag):
+            methods = []
+            if tag:
+                for path_name in self.cfg_yml['paths']:
+                    path = self.cfg_yml['paths'][path_name]
+                    for method_name in path:
+                        method = path[method_name]
+                        if 'tags' in method and tag in method['tags'] and 'operationId' in method:
+                            method['__method_name__'] = method_name
+                            method['__path_name__'] = path_name
+                            methods.append(method)
 
-                            sm = Menu(
-                                name=menu_name.strip('.'),
-                                method=method,
-                                info=self.cfg_yml['paths'][path][method],
-                                path=path,
-                            )
+            return methods
 
-                            m.add_child(sm)
+        menu = Menu('Main Menu')
+
+        
+        for grp in menu_groups:
+            m = Menu(name=grp.mname)
+            m.display_name = m.name + ' ˅'
+            menu.add_child(m)
+            methods = get_methods_of_tag(grp.tag)
+
+            for method in methods:
+                for tag in method['tags']:
+                    menu_name = method.get('summary') or method.get('description')
+                    sm = Menu(
+                        name=menu_name.strip('.'),
+                        method=method['__method_name__'],
+                        info=method,
+                        path=method['__path_name__'],
+                    )
+                    m.add_child(sm)
+
+            if grp.submenu:
+                m.display_name = m.name + ' ˅'
+                for sub in grp.submenu:
+                    smenu = Menu(name=sub.mname)
+                    smenu.display_name = smenu.name + ' ˅'
+                    m.add_child(smenu)
+                    methods = get_methods_of_tag(sub.tag)
+                    for method in methods:
+                        for tag in method['tags']:
+
+                            sub_menu_name = method.get('summary') or method.get('description')
+                            ssm = Menu(
+                                    name=sub_menu_name.strip('.'),
+                                    method=method['__method_name__'],
+                                    info=method,
+                                    path=method['__path_name__'],
+                                )
+                            smenu.add_child(ssm)
 
         self.menu = menu
 
@@ -1330,7 +1391,7 @@ class JCA_CLI:
         if security.strip():
             self.get_access_token(security)
 
-        client = getattr(swagger_client, self.get_api_class_name(endpoint.parent.name))
+        client = getattr(swagger_client, self.get_api_class_name(endpoint.info['tags'][0]))
         api_instance = self.get_api_instance(client)
         api_caller = getattr(api_instance, endpoint.info['operationId'].replace('-', '_'))
 
@@ -1719,7 +1780,18 @@ class JCA_CLI:
         clear()
         self.current_menu = menu
 
-        self.print_underlined(menu.name)
+        name_list = [menu.name]
+        par = menu
+        while True:
+            par = par.parent
+            if not par:
+                break
+            name_list.insert(0, par.name)
+
+        if len(name_list) > 1:
+            del name_list[0]
+
+        self.print_underlined(': '.join(name_list))
 
         selection_values = ['q', 'x', 'b']
 
@@ -1745,6 +1817,8 @@ class JCA_CLI:
             self.display_menu(menu.get_child(menu_numbering[int(selection)]))
         else:
             m = menu.get_child(menu_numbering[int(selection)])
+            #print(m.info)
+            #input("E")
             getattr(self, 'process_' + m.method)(m)
 
     def parse_command_args(self, args):
