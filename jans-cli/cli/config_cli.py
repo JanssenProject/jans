@@ -1817,8 +1817,6 @@ class JCA_CLI:
             self.display_menu(menu.get_child(menu_numbering[int(selection)]))
         else:
             m = menu.get_child(menu_numbering[int(selection)])
-            #print(m.info)
-            #input("E")
             getattr(self, 'process_' + m.method)(m)
 
     def parse_command_args(self, args):
