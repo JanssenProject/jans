@@ -19,16 +19,16 @@ class ConfigApiInstaller(JettyInstaller):
 
     source_files = [
                 (os.path.join(Config.dist_jans_dir, 'jans-config-api.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api-server/{0}/jans-config-api-server-{0}.war').format(base.current_app.app_info['ox_version'])),
-                (os.path.join(Config.dist_jans_dir, 'scim-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/scim-plugin/{0}/scim-plugin-{0}-distribution.jar').format(base.current_app.app_info['ox_version'])),
                 (os.path.join(Config.dist_jans_dir, 'facter'), 'https://raw.githubusercontent.com/GluuFederation/gluu-snap/master/facter/facter'),
+                (os.path.join(Config.dist_jans_dir, 'scim-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/scim-plugin/{0}/scim-plugin-{0}-distribution.jar').format(base.current_app.app_info['ox_version'])),
                 (os.path.join(Config.dist_jans_dir, 'user-mgt-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/user-mgt-plugin/{0}/user-mgt-plugin-{0}-distribution.jar').format(base.current_app.app_info['ox_version'])),
+                (os.path.join(Config.dist_jans_dir, 'fido2-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/fido2-plugin/{0}/fido2-plugin-{0}-distribution.jar').format(base.current_app.app_info['ox_version'])),
                 ]
 
     def __init__(self):
         setattr(base.current_app, self.__class__.__name__, self)
         self.service_name = 'jans-config-api'
         self.needdb = True # we don't need backend connection in this class
-        self.check_version = False #TODO: remove this when version format is changed to 1.0.0
         self.app_type = AppType.SERVICE
         self.install_type = InstallOption.OPTONAL
         self.install_var = 'install_config_api'
@@ -50,18 +50,24 @@ class ConfigApiInstaller(JettyInstaller):
 
     def install(self):
 
-        self.copyFile(self.source_files[2][0], '/usr/sbin')
+        self.copyFile(self.source_files[1][0], '/usr/sbin')
         self.run([paths.cmd_chmod, '+x', '/usr/sbin/facter'])
         self.installJettyService(self.jetty_app_configuration[self.service_name], True)
         self.logIt("Copying fido.war into jetty webapps folder...")
         jettyServiceWebapps = os.path.join(self.jetty_base, self.service_name, 'webapps')
         self.copyFile(self.source_files[0][0], jettyServiceWebapps)
-        self.copyFile(self.source_files[1][0], self.libDir)
-        scim_plugin_path = os.path.join(self.libDir, os.path.basename(self.source_files[1][0]))
+
+        self.copyFile(self.source_files[2][0], self.libDir)
+        scim_plugin_path = os.path.join(self.libDir, os.path.basename(self.source_files[2][0]))
         self.add_extra_class(scim_plugin_path)
+
         self.copyFile(self.source_files[3][0], self.libDir)
         user_mgt_plugin_path = os.path.join(self.libDir, os.path.basename(self.source_files[3][0]))
         self.add_extra_class(user_mgt_plugin_path)
+
+        self.copyFile(self.source_files[4][0], self.libDir)
+        fido2_plugin_path = os.path.join(self.libDir, os.path.basename(self.source_files[4][0]))
+        self.add_extra_class(fido2_plugin_path)
 
         self.enable()
 
