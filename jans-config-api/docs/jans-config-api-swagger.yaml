@@ -6679,7 +6679,7 @@ components:
           type: object
           $ref: '#/components/schemas/FacterData'
           description: Underlying Server stats
-		  
+
     User:
       title: User object
       description: User.
@@ -6711,7 +6711,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CustomAttribute'
-			
+
     UserPatchRequest:
       title: User Patch Request object
       description: UserPatchRequest.
@@ -6726,5 +6726,3 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CustomAttribute'
-        
-	
