@@ -143,10 +143,19 @@ LABEL name="janssenproject/certmanager" \
     summary="Janssen Certmanager" \
     description="Manage certs and crypto keys for Janssen Server"
 
-COPY scripts /app/scripts
+RUN mkdir -p /etc/certs /etc/jans/conf
 
-RUN mkdir -p /etc/certs \
-    && chmod +x /app/scripts/entrypoint.sh
+COPY scripts /app/scripts
+RUN chmod +x /app/scripts/entrypoint.sh
+
+# create non-root user
+RUN adduser -s /bin/sh -D -G root -u 1000 1000
+
+# adjust ownership and permission
+RUN chmod -R g=u /etc/certs \
+    && chmod -R g=u /etc/jans
+
+USER 1000
 
 ENTRYPOINT ["tini", "-g", "--", "sh", "/app/scripts/entrypoint.sh"]
 CMD ["--help"]
