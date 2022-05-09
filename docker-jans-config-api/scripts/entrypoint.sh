@@ -37,7 +37,7 @@ exec java \
     -Djans.base=/etc/jans \
     -Dserver.base=/opt/jans/jetty/jans-config-api \
     -Dlog.base=/opt/jans/jetty/jans-config-api \
-    -Djava.io.tmpdir=/opt/jetty/temp \
+    -Djava.io.tmpdir=/tmp \
     -Dlog4j2.configurationFile=$(get_logging_files) \
     ${CN_JAVA_OPTIONS} \
     -jar /opt/jetty/start.jar \

@@ -144,24 +144,22 @@ LABEL name="janssenproject/client-api" \
     summary="Janssen Client API" \
     description="Client software to secure apps with OAuth 2.0, OpenID Connect, and UMA"
 
-RUN mkdir -p /etc/certs /app/templates/ /etc/jans/conf /opt/client-api/logs
+RUN mkdir -p /etc/certs \
+    /etc/jans/conf \
+    /opt/client-api/logs
 COPY scripts /app/scripts
 COPY templates/*.tmpl /app/templates/
 RUN chmod +x /app/scripts/entrypoint.sh
 
-# # create non-root user
+# create non-root user
 RUN adduser -s /bin/sh -D -G root -u 1000 1000
 
- # adjust ownership
-RUN chown -R 1000:1000 /app/templates \
-    && chown -R 1000:1000 /etc/jans \
-    && chown -R 1000:1000 /tmp \
-    && chown -R 1000:1000 /opt/client-api \
-    && chgrp -R 0 /tmp && chmod -R g=u /tmp \
-    && chgrp -R 0 /etc/certs && chmod -R g=u /etc/certs \
-    && chgrp -R 0 /etc/jans && chmod -R g=u /etc/jans \
-    && chgrp -R 0 /opt/client-api && chmod -R g=u /opt/client-api \
-    && chmod -R +w /usr/java/latest/jre/lib/security/cacerts && chgrp -R 0 /usr/java/latest/jre/lib/security/cacerts && chmod -R g=u /usr/java/latest/jre/lib/security/cacerts
+# adjust ownership and permission
+RUN chmod -R g=u /opt/client-api/conf \
+    && chmod -R g=u /opt/client-api/logs \
+    && chmod -R g=u /etc/certs \
+    && chmod -R g=u /etc/jans \
+    && chmod 664 /usr/java/latest/jre/lib/security/cacerts
 
 USER 1000
 
