@@ -61,7 +61,7 @@ class ConfigApiInstaller(JettyInstaller):
         user_mgt_plugin_path = os.path.join(self.libDir, os.path.basename(self.source_files[3][0]))
         self.add_extra_class(user_mgt_plugin_path)
 
-        if Config.self.install_scim_server:
+        if Config.install_scim_server:
             self.copyFile(self.source_files[2][0], self.libDir)
             scim_plugin_path = os.path.join(self.libDir, os.path.basename(self.source_files[2][0]))
             self.add_extra_class(scim_plugin_path)
