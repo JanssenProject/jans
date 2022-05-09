@@ -44,7 +44,7 @@ tabulate_endpoints = {
     'jca.get-user': ['inum', 'userId', 'mail','sn', 'givenName', 'jansStatus'],
     'jca.get-attributes': ['inum', 'name', 'displayName', 'status', 'dataType', 'claimName'],
     'jca.get-oauth-openid-clients': ['inum', 'displayName', 'clientName', 'applicationType'],
-    'jca.get-oauth-scopes': ['inum', 'displayName', 'scopeType']
+    'jca.get-oauth-scopes': ['dn', 'id', 'scopeType']
 }
 
 my_op_mode = 'scim' if 'scim' in os.path.basename(sys.argv[0]) else 'jca'
