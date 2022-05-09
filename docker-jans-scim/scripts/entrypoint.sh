@@ -14,7 +14,7 @@ exec java \
     -Djans.base=/etc/jans \
     -Dserver.base=/opt/jans/jetty/jans-scim \
     -Dlog.base=/opt/jans/jetty/jans-scim \
-    -Djava.io.tmpdir=/opt/jetty/temp \
+    -Djava.io.tmpdir=/tmp \
     -Dpython.home=/opt/jython \
     -Dlog4j2.configurationFile=resources/log4j2.xml \
     ${CN_JAVA_OPTIONS} \

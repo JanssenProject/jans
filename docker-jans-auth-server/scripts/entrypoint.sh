@@ -54,7 +54,7 @@ exec java \
     -Dserver.base=/opt/jans/jetty/jans-auth \
     -Dlog.base=/opt/jans/jetty/jans-auth \
     -Dpython.home=/opt/jython \
-    -Djava.io.tmpdir=/opt/jetty/temp \
+    -Djava.io.tmpdir=/tmp \
     -Dlog4j2.configurationFile=resources/log4j2.xml \
     $(get_debug_opt) \
     ${CN_JAVA_OPTIONS} \
