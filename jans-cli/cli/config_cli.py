@@ -42,6 +42,7 @@ except ModuleNotFoundError:
 tabulate_endpoints = {
     'jca.get-config-scripts': ['scriptType', 'name', 'enabled', 'inum'],
     'jca.get-user': ['inum', 'userId', 'mail','sn', 'givenName', 'jansStatus'],
+    'jca.get-attributes': ['inum', 'name', 'displayName', 'status', 'dataType', 'claimName'],
 }
 
 my_op_mode = 'scim' if 'scim' in os.path.basename(sys.argv[0]) else 'jca'
