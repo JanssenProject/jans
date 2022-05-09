@@ -42,6 +42,9 @@ except ModuleNotFoundError:
 tabulate_endpoints = {
     'jca.get-config-scripts': ['scriptType', 'name', 'enabled', 'inum'],
     'jca.get-user': ['inum', 'userId', 'mail','sn', 'givenName', 'jansStatus'],
+    'jca.get-attributes': ['inum', 'name', 'displayName', 'status', 'dataType', 'claimName'],
+    'jca.get-oauth-openid-clients': ['inum', 'displayName', 'clientName', 'applicationType'],
+    'jca.get-oauth-scopes': ['inum', 'displayName', 'scopeType']
 }
 
 my_op_mode = 'scim' if 'scim' in os.path.basename(sys.argv[0]) else 'jca'
@@ -1509,8 +1512,10 @@ class JCA_CLI:
             for item in schema['properties']:
                 if not 'type' in schema['properties'][item]:
                     schema['properties'][item]['type'] = 'string'
+            schema['__schema_name__'] = 'PatchOperation'
         else:
             schema = self.cfg_yml['components']['schemas']['PatchRequest'].copy()
+            schema['__schema_name__'] = 'PatchRequest'
             model = getattr(swagger_client.models, 'PatchRequest')
 
         url_param_val = None

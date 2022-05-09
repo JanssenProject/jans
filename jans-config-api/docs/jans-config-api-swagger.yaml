@@ -4848,6 +4848,7 @@ components:
         path:
           type: string
           description: A JSON-Pointer
+          example: '/client/customattribute/[0]'
         value:
           type: object
           description: The value to be used within the operations.
