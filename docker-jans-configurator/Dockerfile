@@ -120,20 +120,21 @@ LABEL name="janssenproject/configurator" \
     summary="Janssen Configuration Manager" \
     description="Manage config and secret"
 
+RUN mkdir -p /etc/certs \
+    /etc/jans/conf \
+    /app/db
+
 COPY scripts /app/scripts
-RUN mkdir -p /etc/certs /app/db \
-    && chmod +x /app/scripts/entrypoint.sh
+RUN chmod +x /app/scripts/entrypoint.sh
 
 # create non-root user
 RUN adduser -s /bin/sh -D -G root -u 1000 1000
 
- # adjust ownership
-RUN chown -R 1000:1000 /tmp \
-    && chown -R 1000:1000 /app/db \
-    && chgrp -R 0 /app/db && chmod -R g=u /app/db \
-    && chgrp -R 0 /tmp && chmod -R g=u /tmp \
-    && chgrp -R 0 /etc/certs && chmod -R g=u /etc/certs \
-    && chmod -R +w /usr/java/latest/jre/lib/security/cacerts && chgrp -R 0 /usr/java/latest/jre/lib/security/cacerts && chmod -R g=u /usr/java/latest/jre/lib/security/cacerts
+# adjust ownership and permission
+RUN chmod -R g=u /app/db \
+    && chmod -R g=u /etc/certs \
+    && chmod -R g=u /etc/jans \
+    && chmod 664 /usr/java/latest/jre/lib/security/cacerts
 
 USER 1000
 
