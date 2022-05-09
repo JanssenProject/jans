@@ -1510,8 +1510,10 @@ class JCA_CLI:
             for item in schema['properties']:
                 if not 'type' in schema['properties'][item]:
                     schema['properties'][item]['type'] = 'string'
+            schema['__schema_name__'] = 'PatchOperation'
         else:
             schema = self.cfg_yml['components']['schemas']['PatchRequest'].copy()
+            schema['__schema_name__'] = 'PatchRequest'
             model = getattr(swagger_client.models, 'PatchRequest')
 
         url_param_val = None
