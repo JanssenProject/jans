@@ -5263,7 +5263,7 @@ components:
           items:
             type: string
         scopes:
-          description: Provide list of scopes granted to the client.
+          description: Provide list of scopes granted to the client (scope dn or scope id).
           type: array
           items:
             type: string
