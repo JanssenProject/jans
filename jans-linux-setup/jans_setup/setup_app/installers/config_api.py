@@ -57,17 +57,19 @@ class ConfigApiInstaller(JettyInstaller):
         jettyServiceWebapps = os.path.join(self.jetty_base, self.service_name, 'webapps')
         self.copyFile(self.source_files[0][0], jettyServiceWebapps)
 
-        self.copyFile(self.source_files[2][0], self.libDir)
-        scim_plugin_path = os.path.join(self.libDir, os.path.basename(self.source_files[2][0]))
-        self.add_extra_class(scim_plugin_path)
-
         self.copyFile(self.source_files[3][0], self.libDir)
         user_mgt_plugin_path = os.path.join(self.libDir, os.path.basename(self.source_files[3][0]))
         self.add_extra_class(user_mgt_plugin_path)
 
-        self.copyFile(self.source_files[4][0], self.libDir)
-        fido2_plugin_path = os.path.join(self.libDir, os.path.basename(self.source_files[4][0]))
-        self.add_extra_class(fido2_plugin_path)
+        if Config.self.install_scim_server:
+            self.copyFile(self.source_files[2][0], self.libDir)
+            scim_plugin_path = os.path.join(self.libDir, os.path.basename(self.source_files[2][0]))
+            self.add_extra_class(scim_plugin_path)
+
+        if Config.installFido2:
+            self.copyFile(self.source_files[4][0], self.libDir)
+            fido2_plugin_path = os.path.join(self.libDir, os.path.basename(self.source_files[4][0]))
+            self.add_extra_class(fido2_plugin_path)
 
         self.enable()
 
