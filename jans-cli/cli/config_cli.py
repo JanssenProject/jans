@@ -965,7 +965,7 @@ class JCA_CLI:
             if not param_name in parameters:
                 text_ = param['name']
                 help_text = param.get('description') or param.get('summary')
-                enforce = True if end_point_param and end_point_param['name'] == param['name'] else False
+                enforce = True if param['schema']['type'] == 'integer' or (end_point_param and end_point_param['name'] == param['name']) else False
 
                 parameters[param_name] = self.get_input(
                     text=text_.strip('.'),
@@ -973,7 +973,8 @@ class JCA_CLI:
                     default=param['schema'].get('default'),
                     enforce=enforce,
                     help_text=help_text,
-                    example=param.get('example')
+                    example=param.get('example'),
+                    values=param['schema'].get('enum', [])
                 )
 
         return parameters
