@@ -38,7 +38,6 @@ public class ApiApplication extends Application {
         classes.add(ConfigSmtpResource.class);
         classes.add(CouchbaseConfigurationResource.class);
         classes.add(CustomScriptResource.class);
-        classes.add(Fido2ConfigResource.class);
         classes.add(JwksResource.class);
         classes.add(LdapConfigurationResource.class);
         classes.add(LoggingResource.class);
