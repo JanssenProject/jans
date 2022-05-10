@@ -4,13 +4,17 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.configapi.rest.resource.auth;
+package io.jans.configapi.plugin.fido2.rest;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 import io.jans.config.oxtrust.DbApplicationConfiguration;
+import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
-import io.jans.configapi.service.auth.Fido2Service;
+import io.jans.configapi.plugin.fido2.service.Fido2Service;
+import io.jans.configapi.plugin.fido2.util.Fido2Util;
 import io.jans.configapi.util.ApiAccessConstants;
-import io.jans.configapi.util.ApiConstants;
+import io.jans.configapi.plugin.fido2.util.Constants;
 import io.jans.configapi.core.util.Jackson;
 
 import jakarta.inject.Inject;
@@ -21,30 +25,34 @@ import jakarta.ws.rs.core.Response;
 
 import org.slf4j.Logger;
 
-@Path(ApiConstants.FIDO2 + ApiConstants.CONFIG)
+@Path(Constants.CONFIG)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public class Fido2ConfigResource extends ConfigBaseResource {
+public class Fido2ConfigResource extends BaseResource {
 
     private static final String FIDO2_CONFIGURATION = "fido2Configuration";
 
     @Inject
-    Logger log;
+    Logger logger;
 
     @Inject
     Fido2Service fido2Service;
+    
+    @Inject
+    Fido2Util fido2Util;
 
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.FIDO2_CONFIG_READ_ACCESS })
-    public Response getFido2Configuration() throws Exception {
+    public Response getFido2Configuration()  throws JsonProcessingException {
         DbApplicationConfiguration dbApplicationConfiguration = this.fido2Service.find();
+        logger.debug("FIDO2 details dbApplicationConfiguration.getDynamicConf():{}" ,dbApplicationConfiguration.getDynamicConf());
         return Response.ok(Jackson.asJsonNode(dbApplicationConfiguration.getDynamicConf())).build();
     }
 
     @PUT
     @ProtectedApi(scopes = { ApiAccessConstants.FIDO2_CONFIG_WRITE_ACCESS })
     public Response updateFido2Configuration(@NotNull String fido2ConfigJson) {
-        log.debug("FIDO2 details to be updated - fido2ConfigJson = " + fido2ConfigJson);
+        logger.debug("FIDO2 details to be updated - fido2ConfigJson:{} ",fido2ConfigJson);
         checkResourceNotNull(fido2ConfigJson, FIDO2_CONFIGURATION);
         this.fido2Service.merge(fido2ConfigJson);
         return Response.ok(fido2ConfigJson).build();
