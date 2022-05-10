@@ -114,7 +114,7 @@ public class LdapConfigurationResource extends ConfigBaseResource {
         log.info("Test ldapConfiguration " + ldapConfiguration);
         boolean status = connectionStatus.isUp(ldapConfiguration);
         log.info("\n\n\n LdapConfigurationResource:::testLdapConfigurationByName() - status = " + status + "\n\n\n");
-        return Response.ok(status).build();
+           return Response.ok(String.valueOf(status)).build();
     }
 
     private GluuLdapConfiguration findLdapConfigurationByName(String name) {
