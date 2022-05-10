@@ -21,14 +21,15 @@ import io.jans.as.model.json.JsonApplier;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.register.RegisterRequestParam;
 import io.jans.orm.model.base.LocalizedString;
+import jakarta.ws.rs.core.MediaType;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import jakarta.ws.rs.core.MediaType;
 import java.util.*;
+import java.util.function.BiFunction;
 
 import static io.jans.as.client.util.ClientUtil.*;
 import static io.jans.as.model.register.RegisterRequestParam.*;
@@ -40,7 +41,7 @@ import static io.jans.as.model.util.StringUtils.toJSONArray;
  *
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
- * @version April 25, 2022
+ * @version May 10, 2022
  */
 public class RegisterRequest extends BaseRequest {
 
@@ -1348,204 +1349,17 @@ public class RegisterRequest extends BaseRequest {
 
         JsonApplier.getInstance().apply(this, parameters);
 
-        if (redirectUris != null && !redirectUris.isEmpty()) {
-            parameters.put(REDIRECT_URIS.toString(), toJSONArray(redirectUris).toString());
-        }
-        if (claimsRedirectUris != null && !claimsRedirectUris.isEmpty()) {
-            parameters.put(CLAIMS_REDIRECT_URIS.toString(), toJSONArray(claimsRedirectUris).toString());
-        }
-        if (responseTypes != null && !responseTypes.isEmpty()) {
-            parameters.put(RESPONSE_TYPES.toString(), toJSONArray(responseTypes).toString());
-        }
-        if (grantTypes != null && !grantTypes.isEmpty()) {
-            parameters.put(GRANT_TYPES.toString(), toJSONArray(grantTypes).toString());
-        }
-        if (applicationType != null) {
-            parameters.put(APPLICATION_TYPE.toString(), applicationType.toString());
-        }
-        if (contacts != null && !contacts.isEmpty()) {
-            parameters.put(CONTACTS.toString(), toJSONArray(contacts).toString());
-        }
-
         clientName.addToMap(parameters, CLIENT_NAME.getName());
         clientName.addToMap(parameters, LOGO_URI.getName());
         clientName.addToMap(parameters, CLIENT_URI.getName());
         clientName.addToMap(parameters, POLICY_URI.getName());
         clientName.addToMap(parameters, TOS_URI.getName());
 
-        if (StringUtils.isNotBlank(jwksUri)) {
-            parameters.put(JWKS_URI.toString(), jwksUri);
-        }
-        if (StringUtils.isNotBlank(jwks)) {
-            parameters.put(JWKS.toString(), jwks);
-        }
-        if (StringUtils.isNotBlank(sectorIdentifierUri)) {
-            parameters.put(SECTOR_IDENTIFIER_URI.toString(), sectorIdentifierUri);
-        }
-        if (subjectType != null) {
-            parameters.put(SUBJECT_TYPE.toString(), subjectType.toString());
-        }
-        if (StringUtils.isNotBlank(subjectIdentifierAttribute)) {
-            parameters.put(PUBLIC_SUBJECT_IDENTIFIER_ATTRIBUTE.getName(), subjectIdentifierAttribute);
-        }
-        if (rptAsJwt != null) {
-            parameters.put(RPT_AS_JWT.toString(), rptAsJwt.toString());
-        }
-        if (accessTokenAsJwt != null) {
-            parameters.put(ACCESS_TOKEN_AS_JWT.toString(), accessTokenAsJwt.toString());
-        }
-        if (accessTokenSigningAlg != null) {
-            parameters.put(ACCESS_TOKEN_SIGNING_ALG.toString(), accessTokenSigningAlg.toString());
-        }
-        if (authorizationSignedResponseAlg != null) {
-            parameters.put(AUTHORIZATION_SIGNED_RESPONSE_ALG.toString(), authorizationSignedResponseAlg.getName());
-        }
-        if (authorizationEncryptedResponseAlg != null) {
-            parameters.put(AUTHORIZATION_ENCRYPTED_RESPONSE_ALG.toString(), authorizationEncryptedResponseAlg.getName());
-        }
-        if (authorizationEncryptedResponseEnc != null) {
-            parameters.put(AUTHORIZATION_ENCRYPTED_RESPONSE_ENC.toString(), authorizationEncryptedResponseEnc.getName());
-        }
-        if (idTokenSignedResponseAlg != null) {
-            parameters.put(ID_TOKEN_SIGNED_RESPONSE_ALG.toString(), idTokenSignedResponseAlg.getName());
-        }
-        if (idTokenEncryptedResponseAlg != null) {
-            parameters.put(ID_TOKEN_ENCRYPTED_RESPONSE_ALG.toString(), idTokenEncryptedResponseAlg.getName());
-        }
-        if (idTokenEncryptedResponseEnc != null) {
-            parameters.put(ID_TOKEN_ENCRYPTED_RESPONSE_ENC.toString(), idTokenEncryptedResponseEnc.getName());
-        }
-        if (userInfoSignedResponseAlg != null) {
-            parameters.put(USERINFO_SIGNED_RESPONSE_ALG.toString(), userInfoSignedResponseAlg.getName());
-        }
-        if (userInfoEncryptedResponseAlg != null) {
-            parameters.put(USERINFO_ENCRYPTED_RESPONSE_ALG.toString(), userInfoEncryptedResponseAlg.getName());
-        }
-        if (userInfoEncryptedResponseEnc != null) {
-            parameters.put(USERINFO_ENCRYPTED_RESPONSE_ENC.toString(), userInfoEncryptedResponseEnc.getName());
-        }
-        if (requestObjectSigningAlg != null) {
-            parameters.put(REQUEST_OBJECT_SIGNING_ALG.toString(), requestObjectSigningAlg.getName());
-        }
-        if (requestObjectEncryptionAlg != null) {
-            parameters.put(REQUEST_OBJECT_ENCRYPTION_ALG.toString(), requestObjectEncryptionAlg.getName());
-        }
-        if (requestObjectEncryptionEnc != null) {
-            parameters.put(REQUEST_OBJECT_ENCRYPTION_ENC.toString(), requestObjectEncryptionEnc.getName());
-        }
-        if (tokenEndpointAuthMethod != null) {
-            parameters.put(TOKEN_ENDPOINT_AUTH_METHOD.toString(), tokenEndpointAuthMethod.toString());
-        }
-        if (tokenEndpointAuthSigningAlg != null) {
-            parameters.put(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString(), tokenEndpointAuthSigningAlg.toString());
-        }
-        if (defaultMaxAge != null) {
-            parameters.put(DEFAULT_MAX_AGE.toString(), defaultMaxAge.toString());
-        }
-        if (requireAuthTime != null) {
-            parameters.put(REQUIRE_AUTH_TIME.toString(), requireAuthTime.toString());
-        }
-        if (defaultAcrValues != null && !defaultAcrValues.isEmpty()) {
-            parameters.put(DEFAULT_ACR_VALUES.toString(), toJSONArray(defaultAcrValues).toString());
-        }
-        if (StringUtils.isNotBlank(initiateLoginUri)) {
-            parameters.put(INITIATE_LOGIN_URI.toString(), initiateLoginUri);
-        }
-        if (postLogoutRedirectUris != null && !postLogoutRedirectUris.isEmpty()) {
-            parameters.put(POST_LOGOUT_REDIRECT_URIS.toString(), toJSONArray(postLogoutRedirectUris).toString());
-        }
-        if (StringUtils.isNotBlank(frontChannelLogoutUri)) {
-            parameters.put(FRONT_CHANNEL_LOGOUT_URI.toString(), frontChannelLogoutUri);
-        }
-        if (frontChannelLogoutSessionRequired != null) {
-            parameters.put(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString(), frontChannelLogoutSessionRequired.toString());
-        }
-        if (backchannelLogoutUris != null && !backchannelLogoutUris.isEmpty()) {
-            parameters.put(BACKCHANNEL_LOGOUT_URI.toString(), toJSONArray(backchannelLogoutUris).toString());
-        }
-        if (backchannelLogoutSessionRequired != null) {
-            parameters.put(BACKCHANNEL_LOGOUT_SESSION_REQUIRED.toString(), backchannelLogoutSessionRequired.toString());
-        }
-        if (requestUris != null && !requestUris.isEmpty()) {
-            parameters.put(REQUEST_URIS.toString(), toJSONArray(requestUris).toString());
-        }
-        if (authorizedOrigins != null && !authorizedOrigins.isEmpty()) {
-            parameters.put(AUTHORIZED_ORIGINS.toString(), toJSONArray(authorizedOrigins).toString());
-        }
-        if (scope != null && !scope.isEmpty()) {
-            parameters.put(SCOPE.toString(), implode(scope, " "));
-        }
-        if (StringUtils.isNotBlank(idTokenTokenBindingCnf)) {
-            parameters.put(ID_TOKEN_TOKEN_BINDING_CNF.toString(), idTokenTokenBindingCnf);
-        }
-        if (StringUtils.isNotBlank(tlsClientAuthSubjectDn)) {
-            parameters.put(TLS_CLIENT_AUTH_SUBJECT_DN.toString(), tlsClientAuthSubjectDn);
-        }
-        if (allowSpontaneousScopes != null) {
-            parameters.put(ALLOW_SPONTANEOUS_SCOPES.toString(), allowSpontaneousScopes.toString());
-        }
-        if (spontaneousScopes != null && !spontaneousScopes.isEmpty()) {
-            parameters.put(SPONTANEOUS_SCOPES.toString(), implode(spontaneousScopes, " "));
-        }
-        if (runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims != null) {
-            parameters.put(RUN_INTROSPECTION_SCRIPT_BEFORE_ACCESS_TOKEN_CREATION_AS_JWT_AND_INCLUDE_CLAIMS.toString(), runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims.toString());
-        }
-        if (keepClientAuthorizationAfterExpiration != null) {
-            parameters.put(KEEP_CLIENT_AUTHORIZATION_AFTER_EXPIRATION.toString(), keepClientAuthorizationAfterExpiration.toString());
-        }
-        if (claims != null && !claims.isEmpty()) {
-            parameters.put(CLAIMS.toString(), implode(claims, " "));
-        }
-        if (accessTokenLifetime != null) {
-            parameters.put(ACCESS_TOKEN_LIFETIME.toString(), accessTokenLifetime.toString());
-        }
-        if (parLifetime != null) {
-            parameters.put(PAR_LIFETIME.toString(), parLifetime.toString());
-        }
-        if (requirePar != null) {
-            parameters.put(REQUIRE_PAR.toString(), requirePar.toString());
-        }
-        if (StringUtils.isNotBlank(softwareId)) {
-            parameters.put(SOFTWARE_ID.toString(), softwareId);
-        }
-        if (StringUtils.isNotBlank(softwareVersion)) {
-            parameters.put(SOFTWARE_VERSION.toString(), softwareVersion);
-        }
-        if (StringUtils.isNotBlank(softwareStatement)) {
-            parameters.put(SOFTWARE_STATEMENT.toString(), softwareStatement);
-        }
-        if (backchannelTokenDeliveryMode != null) {
-            parameters.put(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString(), backchannelTokenDeliveryMode.toString());
-        }
-        if (StringUtils.isNotBlank(backchannelClientNotificationEndpoint)) {
-            parameters.put(BACKCHANNEL_CLIENT_NOTIFICATION_ENDPOINT.toString(), backchannelClientNotificationEndpoint);
-        }
-        if (backchannelAuthenticationRequestSigningAlg != null) {
-            parameters.put(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString(), backchannelAuthenticationRequestSigningAlg.toString());
-        }
-        if (backchannelUserCodeParameter != null && backchannelUserCodeParameter) {
-            parameters.put(BACKCHANNEL_USER_CODE_PARAMETER.toString(), backchannelUserCodeParameter.toString());
-        }
-        if (defaultPromptLogin != null) {
-            parameters.put(DEFAULT_PROMPT_LOGIN.getName(), defaultPromptLogin.toString());
-        }
-        if (authorizedAcrValues != null && !authorizedAcrValues.isEmpty()) {
-            parameters.put(AUTHORIZED_ACR_VALUES.getName(), toJSONArray(authorizedAcrValues).toString());
-        }
-        if (redirectUrisRegex != null) {
-            parameters.put(REDIRECT_URIS_REGEX.toString(), redirectUrisRegex.toString());
-        }
+        getParameters((name, value) -> {
+            parameters.put(name, value.toString());
+            return null;
+        });
 
-        // Custom params
-        if (customAttributes != null && !customAttributes.isEmpty()) {
-            for (Map.Entry<String, String> entry : customAttributes.entrySet()) {
-                final String name = entry.getKey();
-                final String value = entry.getValue();
-                if (RegisterRequestParam.isCustomParameterValid(name) && StringUtils.isNotBlank(value)) {
-                    parameters.put(name, value);
-                }
-            }
-        }
         return parameters;
     }
 
@@ -1661,46 +1475,9 @@ public class RegisterRequest extends BaseRequest {
 
     @Override
     public JSONObject getJSONParameters() throws JSONException {
-        JSONObject parameters = new JSONObject();
+        final JSONObject parameters = new JSONObject();
 
         JsonApplier.getInstance().apply(this, parameters);
-
-        if (redirectUris != null && !redirectUris.isEmpty()) {
-            parameters.put(REDIRECT_URIS.toString(), toJSONArray(redirectUris));
-        }
-        if (claimsRedirectUris != null && !claimsRedirectUris.isEmpty()) {
-            parameters.put(CLAIMS_REDIRECT_URIS.toString(), toJSONArray(claimsRedirectUris));
-        }
-        if (responseTypes != null && !responseTypes.isEmpty()) {
-            parameters.put(RESPONSE_TYPES.toString(), toJSONArray(responseTypes));
-        }
-        if (grantTypes != null && !grantTypes.isEmpty()) {
-            parameters.put(GRANT_TYPES.toString(), toJSONArray(grantTypes));
-        }
-        if (applicationType != null) {
-            parameters.put(APPLICATION_TYPE.toString(), applicationType.toString());
-        }
-        if (contacts != null && !contacts.isEmpty()) {
-            parameters.put(CONTACTS.toString(), toJSONArray(contacts));
-        }
-        if (StringUtils.isNotBlank(idTokenTokenBindingCnf)) {
-            parameters.put(ID_TOKEN_TOKEN_BINDING_CNF.toString(), idTokenTokenBindingCnf);
-        }
-        if (StringUtils.isNotBlank(tlsClientAuthSubjectDn)) {
-            parameters.put(TLS_CLIENT_AUTH_SUBJECT_DN.toString(), tlsClientAuthSubjectDn);
-        }
-        if (allowSpontaneousScopes != null) {
-            parameters.put(ALLOW_SPONTANEOUS_SCOPES.toString(), allowSpontaneousScopes);
-        }
-        if (spontaneousScopes != null && !spontaneousScopes.isEmpty()) {
-            parameters.put(SPONTANEOUS_SCOPES.toString(), toJSONArray(spontaneousScopes));
-        }
-        if (runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims != null) {
-            parameters.put(RUN_INTROSPECTION_SCRIPT_BEFORE_ACCESS_TOKEN_CREATION_AS_JWT_AND_INCLUDE_CLAIMS.toString(), runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims);
-        }
-        if (keepClientAuthorizationAfterExpiration != null) {
-            parameters.put(KEEP_CLIENT_AUTHORIZATION_AFTER_EXPIRATION.toString(), keepClientAuthorizationAfterExpiration);
-        }
 
         Map<String, Object> paramsMap = parameters.toMap();
         clientName.addToMap(paramsMap, CLIENT_NAME.getName());
@@ -1708,153 +1485,203 @@ public class RegisterRequest extends BaseRequest {
         clientUri.addToMap(paramsMap, CLIENT_URI.getName());
         policyUri.addToMap(paramsMap, POLICY_URI.getName());
         tosUri.addToMap(paramsMap, TOS_URI.getName());
-        parameters = new JSONObject(paramsMap);
+        parameters.clear();
+        paramsMap.forEach(parameters::put);
+
+        getParameters((name, value) -> {
+            parameters.put(name, value);
+            return null;
+        });
+
+        return parameters;
+    }
+
+    public void getParameters(BiFunction<String, Object, Void> function) {
+        if (redirectUris != null && !redirectUris.isEmpty()) {
+            function.apply(REDIRECT_URIS.toString(), toJSONArray(redirectUris));
+        }
+        if (claimsRedirectUris != null && !claimsRedirectUris.isEmpty()) {
+            function.apply(CLAIMS_REDIRECT_URIS.toString(), toJSONArray(claimsRedirectUris));
+        }
+        if (responseTypes != null && !responseTypes.isEmpty()) {
+            function.apply(RESPONSE_TYPES.toString(), toJSONArray(responseTypes));
+        }
+        if (grantTypes != null && !grantTypes.isEmpty()) {
+            function.apply(GRANT_TYPES.toString(), toJSONArray(grantTypes));
+        }
+        if (applicationType != null) {
+            function.apply(APPLICATION_TYPE.toString(), applicationType.toString());
+        }
+        if (contacts != null && !contacts.isEmpty()) {
+            function.apply(CONTACTS.toString(), toJSONArray(contacts));
+        }
 
         if (StringUtils.isNotBlank(jwksUri)) {
-            parameters.put(JWKS_URI.toString(), jwksUri);
+            function.apply(JWKS_URI.toString(), jwksUri);
         }
         if (StringUtils.isNotBlank(jwks)) {
-            parameters.put(JWKS.toString(), jwks);
+            function.apply(JWKS.toString(), jwks);
         }
         if (StringUtils.isNotBlank(sectorIdentifierUri)) {
-            parameters.put(SECTOR_IDENTIFIER_URI.toString(), sectorIdentifierUri);
+            function.apply(SECTOR_IDENTIFIER_URI.toString(), sectorIdentifierUri);
         }
         if (subjectType != null) {
-            parameters.put(SUBJECT_TYPE.toString(), subjectType.toString());
+            function.apply(SUBJECT_TYPE.toString(), subjectType.toString());
         }
         if (StringUtils.isNotBlank(subjectIdentifierAttribute)) {
-            parameters.put(PUBLIC_SUBJECT_IDENTIFIER_ATTRIBUTE.getName(), subjectIdentifierAttribute);
+            function.apply(PUBLIC_SUBJECT_IDENTIFIER_ATTRIBUTE.getName(), subjectIdentifierAttribute);
         }
         if (rptAsJwt != null) {
-            parameters.put(RPT_AS_JWT.toString(), rptAsJwt.toString());
+            function.apply(RPT_AS_JWT.toString(), rptAsJwt.toString());
         }
         if (accessTokenAsJwt != null) {
-            parameters.put(ACCESS_TOKEN_AS_JWT.toString(), accessTokenAsJwt.toString());
+            function.apply(ACCESS_TOKEN_AS_JWT.toString(), accessTokenAsJwt.toString());
         }
         if (accessTokenSigningAlg != null) {
-            parameters.put(ACCESS_TOKEN_SIGNING_ALG.toString(), accessTokenSigningAlg.toString());
+            function.apply(ACCESS_TOKEN_SIGNING_ALG.toString(), accessTokenSigningAlg.toString());
         }
         if (authorizationSignedResponseAlg != null) {
-            parameters.put(AUTHORIZATION_SIGNED_RESPONSE_ALG.toString(), authorizationSignedResponseAlg.toString());
+            function.apply(AUTHORIZATION_SIGNED_RESPONSE_ALG.toString(), authorizationSignedResponseAlg.toString());
         }
         if (authorizationEncryptedResponseAlg != null) {
-            parameters.put(AUTHORIZATION_ENCRYPTED_RESPONSE_ALG.toString(), authorizationEncryptedResponseAlg.toString());
+            function.apply(AUTHORIZATION_ENCRYPTED_RESPONSE_ALG.toString(), authorizationEncryptedResponseAlg.toString());
         }
         if (authorizationEncryptedResponseEnc != null) {
-            parameters.put(AUTHORIZATION_ENCRYPTED_RESPONSE_ENC.toString(), authorizationEncryptedResponseEnc.toString());
+            function.apply(AUTHORIZATION_ENCRYPTED_RESPONSE_ENC.toString(), authorizationEncryptedResponseEnc.toString());
         }
+
         if (idTokenSignedResponseAlg != null) {
-            parameters.put(ID_TOKEN_SIGNED_RESPONSE_ALG.toString(), idTokenSignedResponseAlg.getName());
+            function.apply(ID_TOKEN_SIGNED_RESPONSE_ALG.toString(), idTokenSignedResponseAlg.getName());
         }
         if (idTokenEncryptedResponseAlg != null) {
-            parameters.put(ID_TOKEN_ENCRYPTED_RESPONSE_ALG.toString(), idTokenEncryptedResponseAlg.getName());
+            function.apply(ID_TOKEN_ENCRYPTED_RESPONSE_ALG.toString(), idTokenEncryptedResponseAlg.getName());
         }
         if (idTokenEncryptedResponseEnc != null) {
-            parameters.put(ID_TOKEN_ENCRYPTED_RESPONSE_ENC.toString(), idTokenEncryptedResponseEnc.getName());
+            function.apply(ID_TOKEN_ENCRYPTED_RESPONSE_ENC.toString(), idTokenEncryptedResponseEnc.getName());
         }
         if (userInfoSignedResponseAlg != null) {
-            parameters.put(USERINFO_SIGNED_RESPONSE_ALG.toString(), userInfoSignedResponseAlg.getName());
+            function.apply(USERINFO_SIGNED_RESPONSE_ALG.toString(), userInfoSignedResponseAlg.getName());
         }
         if (userInfoEncryptedResponseAlg != null) {
-            parameters.put(USERINFO_ENCRYPTED_RESPONSE_ALG.toString(), userInfoEncryptedResponseAlg.getName());
+            function.apply(USERINFO_ENCRYPTED_RESPONSE_ALG.toString(), userInfoEncryptedResponseAlg.getName());
         }
         if (userInfoEncryptedResponseEnc != null) {
-            parameters.put(USERINFO_ENCRYPTED_RESPONSE_ENC.toString(), userInfoEncryptedResponseEnc.getName());
+            function.apply(USERINFO_ENCRYPTED_RESPONSE_ENC.toString(), userInfoEncryptedResponseEnc.getName());
         }
         if (requestObjectSigningAlg != null) {
-            parameters.put(REQUEST_OBJECT_SIGNING_ALG.toString(), requestObjectSigningAlg.getName());
+            function.apply(REQUEST_OBJECT_SIGNING_ALG.toString(), requestObjectSigningAlg.getName());
         }
         if (requestObjectEncryptionAlg != null) {
-            parameters.put(REQUEST_OBJECT_ENCRYPTION_ALG.toString(), requestObjectEncryptionAlg.getName());
+            function.apply(REQUEST_OBJECT_ENCRYPTION_ALG.toString(), requestObjectEncryptionAlg.getName());
         }
         if (requestObjectEncryptionEnc != null) {
-            parameters.put(REQUEST_OBJECT_ENCRYPTION_ENC.toString(), requestObjectEncryptionEnc.getName());
+            function.apply(REQUEST_OBJECT_ENCRYPTION_ENC.toString(), requestObjectEncryptionEnc.getName());
         }
         if (tokenEndpointAuthMethod != null) {
-            parameters.put(TOKEN_ENDPOINT_AUTH_METHOD.toString(), tokenEndpointAuthMethod.toString());
+            function.apply(TOKEN_ENDPOINT_AUTH_METHOD.toString(), tokenEndpointAuthMethod.toString());
         }
         if (tokenEndpointAuthSigningAlg != null) {
-            parameters.put(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString(), tokenEndpointAuthSigningAlg.toString());
+            function.apply(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString(), tokenEndpointAuthSigningAlg.toString());
         }
         if (defaultMaxAge != null) {
-            parameters.put(DEFAULT_MAX_AGE.toString(), defaultMaxAge.toString());
+            function.apply(DEFAULT_MAX_AGE.toString(), defaultMaxAge.toString());
         }
         if (requireAuthTime != null) {
-            parameters.put(REQUIRE_AUTH_TIME.toString(), requireAuthTime.toString());
+            function.apply(REQUIRE_AUTH_TIME.toString(), requireAuthTime.toString());
         }
         if (defaultAcrValues != null && !defaultAcrValues.isEmpty()) {
-            parameters.put(DEFAULT_ACR_VALUES.toString(), toJSONArray(defaultAcrValues));
+            function.apply(DEFAULT_ACR_VALUES.toString(), toJSONArray(defaultAcrValues).toString());
         }
         if (StringUtils.isNotBlank(initiateLoginUri)) {
-            parameters.put(INITIATE_LOGIN_URI.toString(), initiateLoginUri);
+            function.apply(INITIATE_LOGIN_URI.toString(), initiateLoginUri);
         }
         if (postLogoutRedirectUris != null && !postLogoutRedirectUris.isEmpty()) {
-            parameters.put(POST_LOGOUT_REDIRECT_URIS.toString(), toJSONArray(postLogoutRedirectUris));
+            function.apply(POST_LOGOUT_REDIRECT_URIS.toString(), toJSONArray(postLogoutRedirectUris).toString());
         }
         if (StringUtils.isNotBlank(frontChannelLogoutUri)) {
-            parameters.put(FRONT_CHANNEL_LOGOUT_URI.toString(), frontChannelLogoutUri);
+            function.apply(FRONT_CHANNEL_LOGOUT_URI.toString(), frontChannelLogoutUri);
         }
         if (frontChannelLogoutSessionRequired != null) {
-            parameters.put(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString(), frontChannelLogoutSessionRequired.toString());
+            function.apply(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString(), frontChannelLogoutSessionRequired.toString());
         }
         if (backchannelLogoutUris != null && !backchannelLogoutUris.isEmpty()) {
-            parameters.put(BACKCHANNEL_LOGOUT_URI.toString(), toJSONArray(backchannelLogoutUris));
+            function.apply(BACKCHANNEL_LOGOUT_URI.toString(), toJSONArray(backchannelLogoutUris).toString());
         }
         if (backchannelLogoutSessionRequired != null) {
-            parameters.put(BACKCHANNEL_LOGOUT_SESSION_REQUIRED.toString(), backchannelLogoutSessionRequired.toString());
+            function.apply(BACKCHANNEL_LOGOUT_SESSION_REQUIRED.toString(), backchannelLogoutSessionRequired.toString());
         }
         if (requestUris != null && !requestUris.isEmpty()) {
-            parameters.put(REQUEST_URIS.toString(), toJSONArray(requestUris));
+            function.apply(REQUEST_URIS.toString(), toJSONArray(requestUris).toString());
         }
         if (authorizedOrigins != null && !authorizedOrigins.isEmpty()) {
-            parameters.put(AUTHORIZED_ORIGINS.toString(), toJSONArray(authorizedOrigins));
+            function.apply(AUTHORIZED_ORIGINS.toString(), toJSONArray(authorizedOrigins).toString());
         }
         if (scope != null && !scope.isEmpty()) {
-            parameters.put(SCOPE.toString(), implode(scope, " "));
+            function.apply(SCOPE.toString(), implode(scope, " "));
         }
-        if (claims != null && !claims.isEmpty()) {
-            parameters.put(CLAIMS.toString(), implode(claims, " "));
-        }
-        if (accessTokenLifetime != null) {
-            parameters.put(ACCESS_TOKEN_LIFETIME.toString(), accessTokenLifetime);
-        }
-        if (parLifetime != null) {
-            parameters.put(PAR_LIFETIME.toString(), parLifetime);
-        }
-        if (requirePar != null) {
-            parameters.put(REQUIRE_PAR.toString(), requirePar);
-        }
+
         if (StringUtils.isNotBlank(softwareId)) {
-            parameters.put(SOFTWARE_ID.toString(), softwareId);
+            function.apply(SOFTWARE_ID.toString(), softwareId);
         }
         if (StringUtils.isNotBlank(softwareVersion)) {
-            parameters.put(SOFTWARE_VERSION.toString(), softwareVersion);
+            function.apply(SOFTWARE_VERSION.toString(), softwareVersion);
         }
         if (StringUtils.isNotBlank(softwareStatement)) {
-            parameters.put(SOFTWARE_STATEMENT.toString(), softwareStatement);
+            function.apply(SOFTWARE_STATEMENT.toString(), softwareStatement);
         }
         if (backchannelTokenDeliveryMode != null) {
-            parameters.put(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString(), backchannelTokenDeliveryMode);
+            function.apply(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString(), backchannelTokenDeliveryMode.toString());
         }
         if (StringUtils.isNotBlank(backchannelClientNotificationEndpoint)) {
-            parameters.put(BACKCHANNEL_CLIENT_NOTIFICATION_ENDPOINT.toString(), backchannelClientNotificationEndpoint);
+            function.apply(BACKCHANNEL_CLIENT_NOTIFICATION_ENDPOINT.toString(), backchannelClientNotificationEndpoint);
         }
         if (backchannelAuthenticationRequestSigningAlg != null) {
-            parameters.put(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString(), backchannelAuthenticationRequestSigningAlg.toString());
+            function.apply(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString(), backchannelAuthenticationRequestSigningAlg.toString());
         }
-        if (backchannelUserCodeParameter != null) {
-            parameters.put(BACKCHANNEL_USER_CODE_PARAMETER.toString(), backchannelUserCodeParameter);
+        if (backchannelUserCodeParameter != null && backchannelUserCodeParameter) {
+            function.apply(BACKCHANNEL_USER_CODE_PARAMETER.toString(), backchannelUserCodeParameter.toString());
+        }
+
+        if (StringUtils.isNotBlank(idTokenTokenBindingCnf)) {
+            function.apply(ID_TOKEN_TOKEN_BINDING_CNF.toString(), idTokenTokenBindingCnf);
+        }
+        if (StringUtils.isNotBlank(tlsClientAuthSubjectDn)) {
+            function.apply(TLS_CLIENT_AUTH_SUBJECT_DN.toString(), tlsClientAuthSubjectDn);
+        }
+        if (allowSpontaneousScopes != null) {
+            function.apply(ALLOW_SPONTANEOUS_SCOPES.toString(), allowSpontaneousScopes.toString());
+        }
+        if (spontaneousScopes != null && !spontaneousScopes.isEmpty()) {
+            function.apply(SPONTANEOUS_SCOPES.toString(), implode(spontaneousScopes, " "));
+        }
+        if (runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims != null) {
+            function.apply(RUN_INTROSPECTION_SCRIPT_BEFORE_ACCESS_TOKEN_CREATION_AS_JWT_AND_INCLUDE_CLAIMS.toString(), runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims.toString());
+        }
+        if (keepClientAuthorizationAfterExpiration != null) {
+            function.apply(KEEP_CLIENT_AUTHORIZATION_AFTER_EXPIRATION.toString(), keepClientAuthorizationAfterExpiration.toString());
+        }
+        if (claims != null && !claims.isEmpty()) {
+            function.apply(CLAIMS.toString(), implode(claims, " "));
+        }
+        if (accessTokenLifetime != null) {
+            function.apply(ACCESS_TOKEN_LIFETIME.toString(), accessTokenLifetime.toString());
+        }
+        if (parLifetime != null) {
+            function.apply(PAR_LIFETIME.toString(), parLifetime.toString());
+        }
+        if (requirePar != null) {
+            function.apply(REQUIRE_PAR.toString(), requirePar.toString());
         }
 
         if (redirectUrisRegex != null) {
-            parameters.put(REDIRECT_URIS_REGEX.toString(), redirectUrisRegex);
+            function.apply(REDIRECT_URIS_REGEX.toString(), redirectUrisRegex);
         }
 
         if (defaultPromptLogin != null) {
-            parameters.put(DEFAULT_PROMPT_LOGIN.getName(), defaultPromptLogin);
+            function.apply(DEFAULT_PROMPT_LOGIN.getName(), defaultPromptLogin);
         }
         if (authorizedAcrValues != null && !authorizedAcrValues.isEmpty()) {
-            parameters.put(AUTHORIZED_ACR_VALUES.toString(), toJSONArray(authorizedAcrValues));
+            function.apply(AUTHORIZED_ACR_VALUES.toString(), toJSONArray(authorizedAcrValues));
         }
 
         // Custom params
@@ -1863,11 +1690,10 @@ public class RegisterRequest extends BaseRequest {
                 final String name = entry.getKey();
                 final String value = entry.getValue();
                 if (RegisterRequestParam.isCustomParameterValid(name) && StringUtils.isNotBlank(value)) {
-                    parameters.put(name, value);
+                    function.apply(name, value);
                 }
             }
         }
-        return parameters;
     }
 
     public JSONObject getJsonObject() {
