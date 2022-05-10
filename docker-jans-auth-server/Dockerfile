@@ -233,7 +233,6 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/custom/pages \
 
 COPY certs /etc/certs
 COPY jetty/jans-auth_web_resources.xml ${JETTY_BASE}/jans-auth/webapps/
-COPY jetty/jans-auth.xml ${JETTY_BASE}/jans-auth/webapps/
 COPY jetty/log4j2.xml ${JETTY_BASE}/jans-auth/resources/
 COPY conf/*.tmpl /app/templates/
 COPY scripts /app/scripts
@@ -241,6 +240,8 @@ RUN chmod +x /app/scripts/entrypoint.sh
 
 # create non-root user
 RUN adduser -s /bin/sh -D -G root -u 1000 jetty
+
+COPY --chown=1000:0 jetty/jans-auth.xml ${JETTY_BASE}/jans-auth/webapps/
 
 # adjust ownership and permission
 RUN chmod -R g=u ${JETTY_BASE}/jans-auth/custom \
