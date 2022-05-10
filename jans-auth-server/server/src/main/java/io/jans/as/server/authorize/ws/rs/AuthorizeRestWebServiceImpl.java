@@ -288,7 +288,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             builder = authorize(authzRequest);
         } catch (WebApplicationException e) {
             applicationAuditLogger.sendMessage(authzRequest.getAuditLog());
-            if (log.isErrorEnabled())
+            if (log.isErrorEnabled() && canLogWebApplicationException(e))
                 log.error(e.getMessage(), e);
             throw e;
         } catch (AcrChangedException e) { // Acr changed
@@ -320,6 +320,14 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
         applicationAuditLogger.sendMessage(authzRequest.getAuditLog());
         return builder.build();
+    }
+
+    private static boolean canLogWebApplicationException(WebApplicationException e) {
+        if (e == null || e.getResponse() == null) {
+            return false;
+        }
+        final int status = e.getResponse().getStatus();
+        return status != 302;
     }
 
     private ResponseBuilder authorize(AuthzRequest authzRequest) throws AcrChangedException, SearchException, TokenBindingParseException {
