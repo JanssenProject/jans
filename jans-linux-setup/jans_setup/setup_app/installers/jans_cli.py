@@ -65,6 +65,10 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
         #extract pyjwt from archieve
         base.extract_from_zip(self.source_files[2][0], 'jwt', os.path.join(self.jans_cli_install_dir, 'pylib/jwt'))
 
+        # extract yaml files
+        base.extract_file(base.current_app.jans_zip, 'jans-config-api/docs/jans-config-api-swagger.yaml', os.path.join(self.jans_cli_install_dir, 'jca.yaml'), ren=True)
+        base.extract_file(base.current_app.jans_zip, 'jans-scim/server/src/main/resources/jans-scim-openapi.yaml', os.path.join(self.jans_cli_install_dir, 'scim.yaml'), ren=True)
+
 
     def generate_configuration(self):
         self.check_clients([('role_based_client_id', '2000.')])

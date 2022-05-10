@@ -14,7 +14,7 @@ exec java \
     -Djans.base=/etc/jans \
     -Dserver.base=/opt/jans/jetty/jans-fido2 \
     -Dlog.base=/opt/jans/jetty/jans-fido2 \
-    -Djava.io.tmpdir=/opt/jetty/temp \
+    -Djava.io.tmpdir=/tmp \
     -Dlog4j2.configurationFile=resources/log4j2.xml \
     ${CN_JAVA_OPTIONS} \
     -jar /opt/jetty/start.jar jetty.deploy.scanInterval=0 jetty.httpConfig.sendServerVersion=false

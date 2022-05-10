@@ -4848,6 +4848,7 @@ components:
         path:
           type: string
           description: A JSON-Pointer
+          example: '/client/customattribute/[0]'
         value:
           type: object
           description: The value to be used within the operations.
@@ -5262,7 +5263,7 @@ components:
           items:
             type: string
         scopes:
-          description: Provide list of scopes granted to the client.
+          description: Provide list of scopes granted to the client (scope dn or scope id).
           type: array
           items:
             type: string
@@ -6679,7 +6680,7 @@ components:
           type: object
           $ref: '#/components/schemas/FacterData'
           description: Underlying Server stats
-		  
+
     User:
       title: User object
       description: User.
@@ -6711,7 +6712,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CustomAttribute'
-			
+
     UserPatchRequest:
       title: User Patch Request object
       description: UserPatchRequest.
@@ -6726,5 +6727,3 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CustomAttribute'
-        
-	
