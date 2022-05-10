@@ -21,7 +21,7 @@ tags:
   - name: Cache Configuration – in-Memory
   - name: Cache Configuration – Native-Persistence
   - name: Configuration – Properties
-  - name: Configuration – Fido2
+  - name: Fido2 - Configuration
   - name: Configuration – SMTP
   - name: Configuration – Logging
   - name: Configuration – JWK - JSON Web Key (JWK)
@@ -117,13 +117,13 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '500':
           $ref: '#/components/responses/InternalServerError'
-  /jans-config-api/api/v1/fido2/config:
+  /jans-config-api/fido2/config:
     get:
       summary: Gets Jans Authorization Server Fido2 configuration properties.
       description: Gets Jans Authorization Server Fido2 configuration properties.
       operationId: get-properties-fido2
       tags:
-        - Configuration – Fido2
+        - Fido2 - Configuration
       responses:
         '200':
           description: OK
@@ -142,7 +142,7 @@ paths:
       description: Updates Fido2 configuration properties.
       operationId: put-properties-fido2
       tags:
-        - Configuration – Fido2
+        - Fido2 - Configuration
       requestBody:
         content:
           application/json:
