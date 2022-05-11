@@ -13,8 +13,8 @@ import java.io.Serializable;
 )
 public class H2Configuration implements Serializable {
 
-    public static final String DEFAULT_DB_FILE_LOCATION_LINUX = "/opt/jans_client_api/data/rp_db";
-    public static final String DEFAULT_DB_FILE_LOCATION_WINDOWS = "C:\\opt\\jans_client_api\\data\\rp_db";
+    public static final String DEFAULT_DB_FILE_LOCATION_LINUX = "/opt/jans/jans-client-api/data/rp_db";
+    public static final String DEFAULT_DB_FILE_LOCATION_WINDOWS = "C:\\opt\\jans\\jans-client-api\\data\\rp_db";
 
     private String dbFileLocation = SystemUtils.IS_OS_LINUX ? DEFAULT_DB_FILE_LOCATION_LINUX : DEFAULT_DB_FILE_LOCATION_WINDOWS;
     private String username;

@@ -4,45 +4,57 @@
 
 jans-client-api is a middleware service which can be used by web application developers to facilitate user authentication and authorization with an external [OAuth 2.0](https://tools.ietf.org/html/rfc6749) identity provider. It includes the server which is a simple REST application designed to work over the web (via https), making it possible for many apps across many servers to leverage a central jans-client-api service for [OAuth 2.0](https://tools.ietf.org/html/rfc6749) security.
 
-## Installation
-
-### Source Install
-
-If you're a Java geek, you can build the jans-client-api server using [Maven](https://maven.apache.org). The code is available in [Github](https://github.com/JanssenProject/jans-client-api).
-
+## Packaging and running the application
+### Prerequisites
+- A working installation of jans-auth-server
+### Verify jans-auth-server necessary configuration
+1. Verify configurationEntryDN in jans.properties
 ```
+clientApi_ConfigurationEntryDN=ou=jans-client-api,ou=configuration,o=jans
+```
+2. Verify `clientApi_ConfigurationEntryDN` in DB configuration, if no exist execute respective the insert. 
+
+- [MySQL](https://github.com/JanssenProject/jans-client-api/blob/master/server/src/main/resources/scripts/clientApi_ConfigurationEntryDN.sql)
+
+3. Verify file route of next parameters in `clientApi_ConfigurationEntryDN` field:`jansConfDyn` configuration json:
+```
+  "keyStorePath"
+  "cryptProviderKeyStorePath"
+  "mtlsClientKeyStorePath"
+  "storageConfiguration"  
+```
+
+### Source Packaging
+
+You can build the jans-client-api server using [Maven](https://maven.apache.org). The code is available in [Github](https://github.com/JanssenProject/jans-client-api).
+
+Create a folder to clone ${PATH_REPOSITORY}, and clone inside.
+```
+cd ${PATH_REPOSITORY}
 git clone https://github.com/JanssenProject/jans-client-api.git
 cd jans-client-api
-mvn clean install -X
+mvn clean install -Dmaven.test.skip=true -Dcompile.jans.base={JANS_AUTH_SERVER_CONFIG_PATH, example: /etc/jans}
 ```
 
-After the built is finished `jans-client-api-server-distribution.zip` is generated in `${JANS_CLIENT_API_HOME}/server/target/`. 
+After the built is finished `jans-client-api-server.war` is generated in `${PATH_REPOSITORY}/jans-client-api/server/target/`. 
 
-### Maven Repository
+### Jetty 11 Deploy
 
-The distribution zip can be directly downloaded from maven repository `https://maven.jans.io/maven/io/jans/jans-client-api-server/<version>/jans-client-api-server-<version>-distribution.zip`.
+Download jetty 11 zip, here a link:
+https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/11.0.9/jetty-home-11.0.9.zip
 
-#### To run jans-client-api-server:
-
-1. Create a new directory ($JANS_CLIENT_API_SERVER_HOME) with appropriate name and unzip the downloaded `jans-client-api-server-<version>-distribution.zip` into it.
-
-1. Change directory to `$JANS_CLIENT_API_SERVER_HOME/conf` folder and edit client-api-server.yml file to make necessary configuration changes (like setting correct absolute path of `client-api-server.keystore` in keyStorePath property etc.)
-
-1. Now go to $JANS_CLIENT_API_SERVER_HOME/bin folder and start server using below command.
-
-Windows:
-
+Create a folder to unzip Jetty ${PATH_FOLDER_JETTY}, and unzip Jetty inside.
 ```
-client-api-start.bat
+cd ${PATH_FOLDER_JETTY}
+export JETTY_HOME=${PATH_FOLDER_JETTY}/jetty-home-11.0.9
+mkdir jetty-base
+export JETTY_BASE=${PATH_FOLDER_JETTY}/jetty-base/
+cd jetty-base
+java -jar $JETTY_HOME/start.jar --add-module=server,deploy,annotations,webapp,servlet,resources,http,http-forwarded,threadpool,jsp,websocket,logging/slf4j,logging-jetty
+cp ${PATH_REPOSITORY}/jans-client-api/server/target/jans-client-api-server.war $JETTY_BASE/webapps/
+java -jar  $JETTY_HOME/start.jar jetty.http.port=9999
 ```
-
-Linux:
-
-```
-sh client-api-start.sh
-```
-
-After `jans-client-api` server is started, status can be checked using `health-check` url: https://localhost:8443/health-check.
+After `jans-client-api` server is started, status can be checked using `health-check` url: http://localhost:9999/jans-client-api-server/api/health-check.
 
 ## Api Description
 
@@ -73,6 +85,4 @@ HTTP request | Method | Description
 /get-request-object-uri | POST | Get Request Object Uri.
 /get-request-object/{request_object_id} | GET | Get Request Object.
 
-## Swagger
 
-jans-client-api has defined swagger specification [here](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans-client-api/master/server/src/main/resources/swagger.yaml). It is possible to generated native library in your favorite language by [Swagger Code Generator](https://swagger.io/tools/swagger-codegen/).

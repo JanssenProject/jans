@@ -1,10 +1,6 @@
 package io.jans.ca.server.op;
 
 import com.google.common.collect.Lists;
-import com.google.inject.Injector;
-import io.jans.ca.server.HttpException;
-import io.jans.ca.server.Utils;
-import org.apache.commons.lang.StringUtils;
 import io.jans.as.model.uma.UmaMetadata;
 import io.jans.ca.common.Command;
 import io.jans.ca.common.ErrorResponseCode;
@@ -12,7 +8,13 @@ import io.jans.ca.common.ExpiredObjectType;
 import io.jans.ca.common.params.RpGetClaimsGatheringUrlParams;
 import io.jans.ca.common.response.IOpResponse;
 import io.jans.ca.common.response.RpGetClaimsGatheringUrlResponse;
-import io.jans.ca.server.service.Rp;
+import io.jans.ca.server.HttpException;
+import io.jans.ca.server.Utils;
+import io.jans.ca.server.configuration.model.Rp;
+import io.jans.ca.server.service.DiscoveryService;
+import io.jans.ca.server.service.ServiceProvider;
+import io.jans.ca.server.service.StateService;
+import org.apache.commons.lang.StringUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -25,19 +27,23 @@ import java.util.stream.Collectors;
 
 public class RpGetGetClaimsGatheringUrlOperation extends BaseOperation<RpGetClaimsGatheringUrlParams> {
 
-//    private static final Logger LOG = LoggerFactory.getLogger(RpGetGetClaimsGatheringUrlOperation.class);
+    //    private static final Logger LOG = LoggerFactory.getLogger(RpGetGetClaimsGatheringUrlOperation.class);
+    private DiscoveryService discoveryService;
+    private StateService stateService;
 
-    protected RpGetGetClaimsGatheringUrlOperation(Command command, final Injector injector) {
-        super(command, injector, RpGetClaimsGatheringUrlParams.class);
+    public RpGetGetClaimsGatheringUrlOperation(Command command, ServiceProvider serviceProvider) {
+        super(command, serviceProvider, RpGetClaimsGatheringUrlParams.class);
+        this.discoveryService = serviceProvider.getDiscoveryService();
+        this.stateService = serviceProvider.getStateService();
     }
 
     @Override
     public IOpResponse execute(RpGetClaimsGatheringUrlParams params) throws Exception {
         validate(params);
 
-        final UmaMetadata metadata = getDiscoveryService().getUmaDiscoveryByRpId(params.getRpId());
+        final UmaMetadata metadata = discoveryService.getUmaDiscoveryByRpId(params.getRpId());
         final Rp rp = getRp();
-        final String state = StringUtils.isNotBlank(params.getState()) ? getStateService().putState(getStateService().encodeExpiredObject(params.getState(), ExpiredObjectType.STATE)) : getStateService().generateState();
+        final String state = StringUtils.isNotBlank(params.getState()) ? stateService.putState(stateService.encodeExpiredObject(params.getState(), ExpiredObjectType.STATE)) : stateService.generateState();
 
         String url = metadata.getClaimsInteractionEndpoint() +
                 "?client_id=" + rp.getClientId() +

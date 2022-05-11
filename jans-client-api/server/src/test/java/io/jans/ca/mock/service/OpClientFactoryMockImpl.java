@@ -21,17 +21,17 @@ import io.jans.ca.rs.protect.resteasy.*;
 import io.jans.ca.server.introspection.ClientFactory;
 import io.jans.ca.server.introspection.CorrectRptIntrospectionService;
 import io.jans.ca.server.op.OpClientFactory;
-import org.apache.commons.lang.StringUtils;
-import org.glassfish.jersey.message.internal.OutboundJaxrsResponse;
-import org.glassfish.jersey.message.internal.OutboundMessageContext;
-import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
-
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.Invocation.Builder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import jakarta.ws.rs.core.Form;
 import jakarta.ws.rs.core.Response;
+import org.apache.commons.lang.StringUtils;
+//import org.glassfish.jersey.message.internal.OutboundJaxrsResponse;
+//import org.glassfish.jersey.message.internal.OutboundMessageContext;
+import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -256,11 +256,11 @@ public class OpClientFactoryMockImpl implements OpClientFactory {
         if (!rptPreProcessInterceptor.isPresent()) {
             client = mock(RptPreProcessInterceptor.class);
 
-            OutboundMessageContext outboundMessageContext = new OutboundMessageContext();
-            PermissionTicket permissionTicket = new PermissionTicket("d457e3de-30dd-400a-8698-2b98472b7a40");
-            outboundMessageContext.setEntity(permissionTicket);
-
-            OutboundJaxrsResponse response = new OutboundJaxrsResponse(jakarta.ws.rs.core.Response.Status.FORBIDDEN, outboundMessageContext);
+//            OutboundMessageContext outboundMessageContext = new OutboundMessageContext();
+//            PermissionTicket permissionTicket = new PermissionTicket("d457e3de-30dd-400a-8698-2b98472b7a40");
+//            outboundMessageContext.setEntity(permissionTicket);
+//
+//            OutboundJaxrsResponse response = new OutboundJaxrsResponse(Response.Status.FORBIDDEN, outboundMessageContext);
 
             //when(client.registerTicketResponse(any(List.class), any())).thenReturn(response);
             opClientCache.put("RptPreProcessInterceptor", client);

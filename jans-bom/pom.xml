@@ -30,6 +30,8 @@
 		<jakarta.mail.api.version>2.0.1</jakarta.mail.api.version>
 		<jakarta.websocket.api.version>2.0.0</jakarta.websocket.api.version>
 		<jakarta.xml.bind.api.version>3.0.0</jakarta.xml.bind.api.version>
+		<org.glassfish.jakarta.el.api.version>5.0.0-M1</org.glassfish.jakarta.el.api.version>
+		<jakarta.el.api.version>5.0.0-RC1</jakarta.el.api.version>
 		<!-- <jsf-api.version>2.2.20</jsf-api.version> -->
 		<!-- <jsf-impl.version>3.0.0</jsf-impl.version> -->
 		<!-- <uel-api.version>2.2.1-b04</uel-api.version> -->
@@ -333,11 +335,17 @@
 			</dependency> -->
 			
 			<!-- glassfish -->	
-			<!-- <dependency>
+			<dependency>
     			<groupId>org.glassfish</groupId>
 			    <artifactId>jakarta.el</artifactId>
+				<version>${org.glassfish.jakarta.el.api.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>jakarta.el</groupId>
+				<artifactId>jakarta.el-api</artifactId>
+				<version>${jakarta.el.api.version}</version>
+			</dependency>
+			<!-- <dependency>
 				<groupId>org.glassfish</groupId>
 				<artifactId>jakarta.faces</artifactId>
 			</dependency> -->
@@ -598,6 +606,12 @@
 				<artifactId>resteasy-json-p-provider</artifactId>
 				<version>${resteasy.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>org.jboss.resteasy</groupId>
+				<artifactId>resteasy-core-spi</artifactId>
+				<version>${resteasy.version}</version>
+			</dependency>
+
 			<!-- <dependency>
 			    <groupId>javax.ws.rs</groupId>
 			    <artifactId>javax.ws.rs-api</artifactId>

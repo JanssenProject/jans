@@ -2,9 +2,6 @@ package io.jans.ca.server.op;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import com.google.inject.Injector;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import io.jans.as.client.AuthorizationRequest;
 import io.jans.as.client.AuthorizationResponse;
 import io.jans.as.client.AuthorizeClient;
@@ -14,7 +11,14 @@ import io.jans.ca.common.Command;
 import io.jans.ca.common.params.GetAuthorizationCodeParams;
 import io.jans.ca.common.response.GetAuthorizationCodeResponse;
 import io.jans.ca.common.response.IOpResponse;
-import io.jans.ca.server.service.Rp;
+import io.jans.ca.server.configuration.model.Rp;
+import io.jans.ca.server.service.DiscoveryService;
+import io.jans.ca.server.service.HttpService;
+import io.jans.ca.server.service.ServiceProvider;
+import io.jans.ca.server.service.StateService;
+import jakarta.inject.Inject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.UUID;
@@ -28,13 +32,23 @@ public class GetAuthorizationCodeOperation extends BaseOperation<GetAuthorizatio
 
     private static final Logger LOG = LoggerFactory.getLogger(GetAuthorizationCodeOperation.class);
 
+    DiscoveryService discoveryService;
+    HttpService httpService;
+    OpClientFactoryImpl opClientFactory;
+    StateService stateService;
+
     /**
      * Base constructor
      *
      * @param p_command command
      */
-    protected GetAuthorizationCodeOperation(Command p_command, final Injector injector) {
-        super(p_command, injector, GetAuthorizationCodeParams.class);
+    public GetAuthorizationCodeOperation(Command p_command, ServiceProvider serviceProvider) {
+        super(p_command, GetAuthorizationCodeParams.class);
+        this.discoveryService = serviceProvider.getDiscoveryService();
+        this.stateService = serviceProvider.getStateService();
+        this.opClientFactory = discoveryService.getOpClientFactory();
+        this.httpService = discoveryService.getHttpService();
+
     }
 
     @Override
@@ -52,17 +66,17 @@ public class GetAuthorizationCodeOperation extends BaseOperation<GetAuthorizatio
         request.getPrompts().add(Prompt.NONE);
         request.setAcrValues(acrValues(params, rp));
 
-        getStateService().putNonce(nonce);
-        getStateService().putState(state);
+        stateService.putNonce(nonce);
+        stateService.putState(state);
 
-        final AuthorizeClient authorizeClient = getOpClientFactory().createAuthorizeClient(getDiscoveryService().getConnectDiscoveryResponse(rp).getAuthorizationEndpoint());
+        final AuthorizeClient authorizeClient = opClientFactory.createAuthorizeClient(discoveryService.getConnectDiscoveryResponse(rp).getAuthorizationEndpoint());
         authorizeClient.setRequest(request);
-        authorizeClient.setExecutor(getHttpService().getClientEngine());
+        authorizeClient.setExecutor(httpService.getClientEngine());
         final AuthorizationResponse response = authorizeClient.exec();
 
         if (response != null) {
-            if (!getStateService().isExpiredObjectPresent(params.getState())) {
-                getStateService().putState(params.getState());
+            if (!stateService.isExpiredObjectPresent(params.getState())) {
+                stateService.putState(params.getState());
             }
             return new GetAuthorizationCodeResponse(response.getCode());
         } else {

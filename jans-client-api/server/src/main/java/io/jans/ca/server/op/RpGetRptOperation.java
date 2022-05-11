@@ -3,9 +3,6 @@
  */
 package io.jans.ca.server.op;
 
-import com.google.inject.Injector;
-import io.jans.ca.server.HttpException;
-import org.apache.commons.lang.StringUtils;
 import io.jans.as.model.uma.UmaNeedInfoResponse;
 import io.jans.as.model.util.Util;
 import io.jans.ca.common.Command;
@@ -13,14 +10,20 @@ import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.Jackson2;
 import io.jans.ca.common.params.RpGetRptParams;
 import io.jans.ca.common.response.IOpResponse;
-import jakarta.ws.rs.ClientErrorException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.jans.ca.server.HttpException;
 
+import io.jans.ca.server.service.ServiceProvider;
+import jakarta.ws.rs.ClientErrorException;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
+
+import io.jans.ca.server.service.UmaTokenService;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 
 /**
@@ -31,16 +34,18 @@ import java.io.IOException;
 public class RpGetRptOperation extends BaseOperation<RpGetRptParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(RpGetRptOperation.class);
+    private UmaTokenService umaTokenService;
 
-    protected RpGetRptOperation(Command command, final Injector injector) {
-        super(command, injector, RpGetRptParams.class);
+    public RpGetRptOperation(Command command, ServiceProvider serviceProvider) {
+        super(command, serviceProvider, RpGetRptParams.class);
+        this.umaTokenService = serviceProvider.getUmaTokenService();
     }
 
     @Override
     public IOpResponse execute(RpGetRptParams params) throws Exception {
         try {
             validate(params);
-            return getUmaTokenService().getRpt(params);
+            return umaTokenService.getRpt(params);
         } catch (ClientErrorException ex) {
             LOG.trace(ex.getMessage(), ex);
             String entity = ex.getResponse().readEntity(String.class);

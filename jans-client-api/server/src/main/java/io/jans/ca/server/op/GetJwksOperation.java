@@ -3,19 +3,19 @@
 */
 package io.jans.ca.server.op;
 
-import com.google.inject.Injector;
 import io.jans.as.client.JwkClient;
 import io.jans.as.client.JwkResponse;
 import io.jans.as.client.OpenIdConfigurationResponse;
-import io.jans.ca.server.HttpException;
-import org.apache.commons.lang.StringUtils;
 import io.jans.ca.common.Command;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.params.GetJwksParams;
 import io.jans.ca.common.response.GetJwksResponse;
 import io.jans.ca.common.response.IOpResponse;
 import io.jans.ca.common.response.POJOResponse;
+import io.jans.ca.server.HttpException;
 import io.jans.ca.server.service.DiscoveryService;
+import io.jans.ca.server.service.ServiceProvider;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * Service class for fetching JSON Web Key set
@@ -26,8 +26,11 @@ import io.jans.ca.server.service.DiscoveryService;
 
 public class GetJwksOperation extends BaseOperation<GetJwksParams> {
 
-    protected GetJwksOperation(Command command, Injector injector) {
-        super(command, injector, GetJwksParams.class);
+    private DiscoveryService discoveryService;
+
+    public GetJwksOperation(Command command, ServiceProvider serviceProvider) {
+        super(command, serviceProvider, GetJwksParams.class);
+        this.discoveryService = serviceProvider.getDiscoveryService();
     }
 
     @Override
@@ -39,14 +42,12 @@ public class GetJwksOperation extends BaseOperation<GetJwksParams> {
 
         try {
 
-            final DiscoveryService discoveryService = getDiscoveryService();
-
             final OpenIdConfigurationResponse openIdConfigurationResponse = discoveryService.getConnectDiscoveryResponse(params.getOpConfigurationEndpoint(), params.getOpHost(), params.getOpDiscoveryPath());
 
             final String jwksUri = openIdConfigurationResponse.getJwksUri();
 
             final JwkClient jwkClient = new JwkClient(jwksUri);
-            jwkClient.setExecutor(getHttpService().getClientEngine());
+            jwkClient.setExecutor(discoveryService.getHttpService().getClientEngine());
 
             final JwkResponse serverResponse = jwkClient.exec();
 

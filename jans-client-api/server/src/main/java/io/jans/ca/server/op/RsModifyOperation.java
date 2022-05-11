@@ -2,12 +2,10 @@ package io.jans.ca.server.op;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import com.google.inject.Injector;
 import io.jans.as.client.uma.UmaClientFactory;
 import io.jans.as.client.uma.UmaResourceService;
 import io.jans.as.model.uma.JsonLogicNodeParser;
 import io.jans.as.model.uma.UmaMetadata;
-import io.jans.as.model.uma.UmaResource;
 import io.jans.as.model.uma.UmaResourceWithId;
 import io.jans.ca.common.*;
 import io.jans.ca.common.params.RsModifyParams;
@@ -15,15 +13,17 @@ import io.jans.ca.common.response.IOpResponse;
 import io.jans.ca.common.response.RsModifyResponse;
 import io.jans.ca.rs.protect.resteasy.PatProvider;
 import io.jans.ca.server.HttpException;
-import io.jans.ca.server.service.Rp;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import io.jans.ca.server.configuration.model.Rp;
+import io.jans.ca.server.configuration.model.UmaResource;
+import io.jans.ca.server.service.*;
 import jakarta.ws.rs.ClientErrorException;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,13 +31,17 @@ public class RsModifyOperation extends BaseOperation<RsModifyParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(RsModifyOperation.class);
 
-    /**
-     * Constructor
-     *
-     * @param command command
-     */
-    protected RsModifyOperation(Command command, final Injector injector) {
-        super(command, injector, RsModifyParams.class);
+    private UmaTokenService umaTokenService;
+    private DiscoveryService discoveryService;
+    private RpService rpService;
+    private HttpService httpService;
+
+    public RsModifyOperation(Command command, ServiceProvider serviceProvider) {
+        super(command, serviceProvider, RsModifyParams.class);
+        this.discoveryService = serviceProvider.getDiscoveryService();
+        this.umaTokenService = serviceProvider.getUmaTokenService();
+        this.httpService = serviceProvider.getHttpService();
+        this.rpService = serviceProvider.getRpService();
     }
 
 
@@ -50,7 +54,7 @@ public class RsModifyOperation extends BaseOperation<RsModifyParams> {
         PatProvider patProvider = new PatProvider() {
             @Override
             public String getPatToken() {
-                return getUmaTokenService().getPat(params.getRpId()).getToken();
+                return umaTokenService.getPat(params.getRpId()).getToken();
             }
 
             @Override
@@ -59,7 +63,7 @@ public class RsModifyOperation extends BaseOperation<RsModifyParams> {
             }
         };
 
-        io.jans.ca.server.model.UmaResource umaResource = rp.umaResource(params.getPath(), params.getHttpMethod());
+        UmaResource umaResource = rp.umaResource(params.getPath(), params.getHttpMethod());
         if (umaResource == null) {
             final ErrorResponse error = new ErrorResponse("invalid_request");
             error.setErrorDescription("Resource is not protected with path: " + params.getPath() + " and httpMethod: " + params.getHttpMethod() +
@@ -72,19 +76,19 @@ public class RsModifyOperation extends BaseOperation<RsModifyParams> {
                     .build());
         }
 
-        UmaMetadata discovery = getDiscoveryService().getUmaDiscoveryByRpId(params.getRpId());
-        UmaResourceService resourceService = UmaClientFactory.instance().createResourceService(discovery, getHttpService().getClientEngine());
+        UmaMetadata discovery = discoveryService.getUmaDiscoveryByRpId(params.getRpId());
+        UmaResourceService resourceService = UmaClientFactory.instance().createResourceService(discovery, httpService.getClientEngine());
 
-        UmaResource opUmaResource = getResource(resourceService, params, umaResource.getId());
+        io.jans.as.model.uma.UmaResource opUmaResource = getResource(resourceService, params, umaResource.getId());
 
         try {
-            String pat = getUmaTokenService().getPat(params.getRpId()).getToken();
+            String pat = umaTokenService.getPat(params.getRpId()).getToken();
             return update(pat, umaResource.getId(), rp, resourceService, opUmaResource);
         } catch (ClientErrorException e) {
             LOG.debug("Failed to update resource. Entity: " + e.getResponse().readEntity(String.class) + ", status: " + e.getResponse().getStatus(), e);
             if (e.getResponse().getStatus() == 400 || e.getResponse().getStatus() == 401) {
                 LOG.debug("Try maybe PAT is lost on AS, force refresh PAT and re-try ...");
-                return update(getUmaTokenService().obtainPat(params.getRpId()).getToken(), umaResource.getId(), rp, resourceService, opUmaResource);
+                return update(umaTokenService.obtainPat(params.getRpId()).getToken(), umaResource.getId(), rp, resourceService, opUmaResource);
             } else {
                 throw e;
             }
@@ -94,18 +98,18 @@ public class RsModifyOperation extends BaseOperation<RsModifyParams> {
         }
     }
 
-    public RsModifyResponse update(String pat, String resourceId, Rp rp, UmaResourceService resourceService, UmaResource opUmaResource) {
+    public RsModifyResponse update(String pat, String resourceId, Rp rp, UmaResourceService resourceService, io.jans.as.model.uma.UmaResource opUmaResource) {
         resourceService.updateResource("Bearer " + pat, resourceId, opUmaResource);
         updateRp(opUmaResource, rp, resourceId);
 
         return new RsModifyResponse(rp.getRpId());
     }
 
-    private UmaResource getResource(UmaResourceService resourceService, RsModifyParams params, String resourceId) throws Exception{
-        String pat = getUmaTokenService().getPat(params.getRpId()).getToken();
+    private io.jans.as.model.uma.UmaResource getResource(UmaResourceService resourceService, RsModifyParams params, String resourceId) throws Exception {
+        String pat = umaTokenService.getPat(params.getRpId()).getToken();
         UmaResourceWithId umaResourceWithId = resourceService.getResource("Bearer " + pat, resourceId);
 
-        UmaResource umaResource = new UmaResource();
+        io.jans.as.model.uma.UmaResource umaResource = new io.jans.as.model.uma.UmaResource();
         umaResource.setDescription(umaResourceWithId.getDescription());
         umaResource.setIat(umaResourceWithId.getIat());
         umaResource.setIconUri(umaResourceWithId.getIconUri());
@@ -121,8 +125,8 @@ public class RsModifyOperation extends BaseOperation<RsModifyParams> {
         return umaResource;
     }
 
-    private void updateRp(UmaResource opUmaResource, Rp rp, String resourceId) {
-        List<io.jans.ca.server.model.UmaResource> umaResourceList = rp.getUmaProtectedResources();
+    private void updateRp(io.jans.as.model.uma.UmaResource opUmaResource, Rp rp, String resourceId) {
+        List<UmaResource> umaResourceList = rp.getUmaProtectedResources();
 
         rp.setUmaProtectedResources(umaResourceList.stream().map(res -> {
             if (res.getId().equals(resourceId)) {
@@ -138,7 +142,7 @@ public class RsModifyOperation extends BaseOperation<RsModifyParams> {
             return res;
         }).collect(Collectors.toList()));
 
-        getRpService().update(rp);
+        rpService.update(rp);
     }
 
     private void validate(RsModifyParams params) {

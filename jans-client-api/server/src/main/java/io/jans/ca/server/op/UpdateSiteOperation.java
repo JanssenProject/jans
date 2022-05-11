@@ -3,12 +3,6 @@ package io.jans.ca.server.op;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.google.inject.Injector;
-import io.jans.ca.server.HttpException;
-import io.jans.ca.server.Utils;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.NumberUtils;
 import io.jans.as.client.RegisterClient;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
@@ -22,12 +16,20 @@ import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.params.UpdateSiteParams;
 import io.jans.ca.common.response.IOpResponse;
 import io.jans.ca.common.response.UpdateSiteResponse;
+import io.jans.ca.server.HttpException;
+import io.jans.ca.server.Utils;
+import io.jans.ca.server.configuration.model.Rp;
 import io.jans.ca.server.mapper.RegisterRequestMapper;
-import io.jans.ca.server.service.Rp;
+import io.jans.ca.server.service.RpService;
+import io.jans.ca.server.persistence.service.JansConfigurationService;
+import io.jans.ca.server.service.ServiceProvider;
+import jakarta.ws.rs.HttpMethod;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.ws.rs.HttpMethod;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -41,6 +43,9 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(UpdateSiteOperation.class);
 
+    private RpService rpService;
+    private JansConfigurationService jansConfigurationService;
+
     private Rp rp;
 
     /**
@@ -48,8 +53,10 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
      *
      * @param command command
      */
-    protected UpdateSiteOperation(Command command, final Injector injector) {
-        super(command, injector, UpdateSiteParams.class);
+    public UpdateSiteOperation(Command command, ServiceProvider serviceProvider) {
+        super(command, serviceProvider, UpdateSiteParams.class);
+        this.rpService = serviceProvider.getRpService();
+        this.jansConfigurationService = rpService.getConfigurationService();
     }
 
     @Override
@@ -70,7 +77,7 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
             RegisterRequest registerRequest = createRegisterClientRequest(rp, params);
             updateRegisteredClient(rp, registerRequest);
             RegisterRequestMapper.fillRp(rp, registerRequest);
-            getRpService().update(rp);
+            rpService.update(rp);
 
             LOG.info("RP updated: " + rp);
         } catch (Exception e) {
@@ -84,9 +91,7 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
             throw new HttpException(ErrorResponseCode.INVALID_REGISTRATION_CLIENT_URL);
         }
 
-        final RegisterClient registerClient = new RegisterClient(rp.getClientRegistrationClientUri());
-        registerClient.setRequest(registerRequest);
-        registerClient.setExecutor(getHttpService().getClientEngine());
+        final RegisterClient registerClient = rpService.createRegisterClient(rp.getClientRegistrationClientUri(), registerRequest);
         final RegisterResponse response = registerClient.exec();
         if (response != null) {
             if (response.getStatus() == 200) {
@@ -248,7 +253,7 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
                 throw new HttpException(ErrorResponseCode.INVALID_SIGNATURE_ALGORITHM);
             }
 
-            if (signatureAlgorithms == SignatureAlgorithm.NONE && !getConfigurationService().getConfiguration().getAcceptIdTokenWithoutSignature()) {
+            if (signatureAlgorithms == SignatureAlgorithm.NONE && !jansConfigurationService.find().getAcceptIdTokenWithoutSignature()) {
                 LOG.error("`ID_TOKEN` without signature is not allowed. To allow `ID_TOKEN` without signature set `accept_id_token_without_signature` field to 'true' in client-api-server.yml.");
                 throw new HttpException(ErrorResponseCode.ID_TOKEN_WITHOUT_SIGNATURE_NOT_ALLOWED);
             }

@@ -1,7 +1,6 @@
 package io.jans.ca.server.op;
 
 import com.google.common.collect.Sets;
-import com.google.inject.Injector;
 import io.jans.as.client.TokenClient;
 import io.jans.as.client.TokenRequest;
 import io.jans.as.client.TokenResponse;
@@ -16,6 +15,9 @@ import io.jans.ca.common.response.GetClientTokenResponse;
 import io.jans.ca.common.response.IOpResponse;
 import io.jans.ca.server.HttpException;
 import io.jans.ca.server.Utils;
+import io.jans.ca.server.service.DiscoveryService;
+import io.jans.ca.server.service.HttpService;
+import io.jans.ca.server.service.ServiceProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,22 +33,31 @@ public class GetClientTokenOperation extends BaseOperation<GetClientTokenParams>
 
     private static final Logger LOG = LoggerFactory.getLogger(GetClientTokenOperation.class);
 
+    private DiscoveryService discoveryService;
+
+    private HttpService httpService;
+
+    private OpClientFactoryImpl opClientFactory;
+
     /**
      * Base constructor
      *
      * @param command command
      */
-    protected GetClientTokenOperation(Command command, final Injector injector) {
-        super(command, injector, GetClientTokenParams.class);
+    public GetClientTokenOperation(Command command, ServiceProvider serviceProvider) {
+        super(command, serviceProvider, GetClientTokenParams.class);
+        this.discoveryService = serviceProvider.getDiscoveryService();
+        this.httpService = discoveryService.getHttpService();
+        this.opClientFactory = discoveryService.getOpClientFactory();
     }
 
     @Override
     public IOpResponse execute(GetClientTokenParams params) {
         try {
             final AuthenticationMethod authenticationMethod = AuthenticationMethod.fromString(params.getAuthenticationMethod());
-            final String tokenEndpoint = getDiscoveryService().getConnectDiscoveryResponse(params.getOpConfigurationEndpoint(), params.getOpHost(), params.getOpDiscoveryPath()).getTokenEndpoint();
-            final TokenClient tokenClient = getOpClientFactory().createTokenClient(tokenEndpoint);
-            tokenClient.setExecutor(getHttpService().getClientEngine());
+            final String tokenEndpoint = discoveryService.getConnectDiscoveryResponse(params.getOpConfigurationEndpoint(), params.getOpHost(), params.getOpDiscoveryPath()).getTokenEndpoint();
+            final TokenClient tokenClient = opClientFactory.createTokenClient(tokenEndpoint);
+            tokenClient.setExecutor(httpService.getClientEngine());
 
             final TokenResponse tokenResponse;
             if (authenticationMethod == AuthenticationMethod.PRIVATE_KEY_JWT) {
@@ -71,7 +82,7 @@ public class GetClientTokenOperation extends BaseOperation<GetClientTokenParams>
             } else {
                 tokenResponse = tokenClient.execClientCredentialsGrant(scopeAsString(params), params.getClientId(), params.getClientSecret());
             }
-
+            LOG.info("Token response: {} {} {}", tokenResponse.getAccessToken(), tokenResponse.getRefreshToken(), tokenResponse.getIdToken());
             if (tokenResponse != null) {
                 if (Util.allNotBlank(tokenResponse.getAccessToken())) {
                     GetClientTokenResponse response = new GetClientTokenResponse();

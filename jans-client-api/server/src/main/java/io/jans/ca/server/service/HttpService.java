@@ -3,14 +3,15 @@
  */
 package io.jans.ca.server.service;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Strings;
-import com.google.inject.Inject;
-import io.jans.ca.server.RpServerConfiguration;
-import org.apache.http.client.HttpClient;
 import io.jans.ca.common.CoreUtils;
-import io.jans.ca.common.Jackson2;
 import io.jans.ca.common.proxy.ProxyConfiguration;
+import io.jans.ca.server.configuration.ApiAppConfiguration;
+import io.jans.ca.server.configuration.ConfigurationFactory;
+import io.jans.ca.server.persistence.service.JansConfigurationService;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import org.apache.http.client.HttpClient;
 import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
 import org.slf4j.Logger;
@@ -23,19 +24,15 @@ import java.util.Optional;
 /**
  * @author Yuriy Zabrovarnyy
  */
-
+@ApplicationScoped
 public class HttpService {
 
     private static final Logger LOG = LoggerFactory.getLogger(HttpService.class);
-
-    private RpServerConfiguration configuration;
-
     @Inject
-    public HttpService(RpServerConfiguration configuration) {
-        this.configuration = configuration;
-    }
+    ConfigurationFactory configurationFactory;
 
     public HttpClient getHttpClient() {
+        ApiAppConfiguration configuration = configurationFactory.getAppConfiguration();
         final Optional<ProxyConfiguration> proxyConfig = asProxyConfiguration(configuration);
         final String[] tlsVersions = listToArray(configuration.getTlsVersion());
         final String[] tlsSecureCiphers = listToArray(configuration.getTlsSecureCipher());
@@ -75,16 +72,16 @@ public class HttpService {
             return CoreUtils.createHttpClientWithKeyStore(trustStoreFile, configuration.getKeyStorePassword(), tlsVersions, tlsSecureCiphers, proxyConfig);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
-            LOG.error("Failed to create http client based on jans_client_api configuration. Created default client.");
+            LOG.error("Failed to create http client based on jans_client_api configuration. Creating default client...");
         }
         return CoreUtils.createClientFallback(proxyConfig);
     }
 
-    private static Optional<ProxyConfiguration> asProxyConfiguration(RpServerConfiguration configuration) {
+    private static Optional<ProxyConfiguration> asProxyConfiguration(ApiAppConfiguration configuration) {
         try {
-            JsonNode node = configuration.getProxyConfiguration();
+            ProxyConfiguration node = configuration.getProxyConfiguration();
             if (node != null) {
-                return Optional.ofNullable(Jackson2.createJsonMapper().treeToValue(node, ProxyConfiguration.class));
+                return Optional.ofNullable(node);
             }
         } catch (Exception e) {
             LOG.error("Failed to parse ProxyConfiguration.", e);
@@ -99,7 +96,7 @@ public class HttpService {
         }
 
         if (Strings.isNullOrEmpty(proxyConfiguration.get().getHost())) {
-            throw new RuntimeException("Invalid proxy server `hostname` provided (empty or null). jans_client_api will connect to OP_HOST without proxy configuration.");
+            LOG.warn("Invalid proxy server `hostname` provided (empty or null). jans_client_api will connect to OP_HOST without proxy configuration.");
         }
     }
 

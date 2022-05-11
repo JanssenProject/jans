@@ -2,7 +2,6 @@ package io.jans.ca.server.op;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import com.google.inject.Injector;
 import io.jans.as.client.OpenIdConfigurationResponse;
 import io.jans.as.client.TokenClient;
 import io.jans.as.client.TokenRequest;
@@ -21,7 +20,9 @@ import io.jans.ca.common.params.GetTokensByCodeParams;
 import io.jans.ca.common.response.GetTokensByCodeResponse;
 import io.jans.ca.common.response.IOpResponse;
 import io.jans.ca.server.HttpException;
-import io.jans.ca.server.service.Rp;
+import io.jans.ca.server.configuration.model.Rp;
+import io.jans.ca.server.service.*;
+import io.jans.ca.server.persistence.service.JansConfigurationService;
 import org.python.jline.internal.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,14 +35,25 @@ import org.slf4j.LoggerFactory;
 public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(GetTokensByCodeOperation.class);
+    private StateService stateService;
+    private DiscoveryService discoveryService;
+    private RpService rpService;
+    private KeyGeneratorService keyGeneratorService;
+    private PublicOpKeyService publicOpKeyService;
+    private JansConfigurationService jansConfigurationService;
+    private OpClientFactoryImpl opClientFactory;
+    private HttpService httpService;
 
-    /**
-     * Base constructor
-     *
-     * @param command command
-     */
-    protected GetTokensByCodeOperation(Command command, final Injector injector) {
-        super(command, injector, GetTokensByCodeParams.class);
+    public GetTokensByCodeOperation(Command command, ServiceProvider serviceProvider) {
+        super(command, serviceProvider, GetTokensByCodeParams.class);
+        this.discoveryService = serviceProvider.getDiscoveryService();
+        this.stateService = serviceProvider.getStateService();
+        this.rpService = serviceProvider.getRpService();
+        this.keyGeneratorService = serviceProvider.getKeyGeneratorService();
+        this.httpService = discoveryService.getHttpService();
+        this.opClientFactory = discoveryService.getOpClientFactory();
+        this.jansConfigurationService = stateService.getConfigurationService();
+        this.publicOpKeyService = serviceProvider.getPublicOpKeyService();
     }
 
     @Override
@@ -49,7 +61,7 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
         validate(params);
 
         final Rp rp = getRp();
-        OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponse(rp);
+        OpenIdConfigurationResponse discoveryResponse = discoveryService.getConnectDiscoveryResponse(rp);
 
         final TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(params.getCode());
@@ -74,20 +86,20 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
 
             tokenRequest.setAlgorithm(SignatureAlgorithm.fromString(rp.getTokenEndpointAuthSigningAlg()));
 
-            if (!getConfigurationService().getConfiguration().getEnableJwksGeneration()) {
+            if (!jansConfigurationService.find().getEnableJwksGeneration()) {
                 LOG.error("The Token Authentication Method is {}. Please set `enable_jwks_generation` (to `true`), `crypt_provider_key_store_path` and `crypt_provider_key_store_password` in `client-api-server.yml` to enable RP-jwks generation in jans-client-api.", authenticationMethod.toString());
                 throw new HttpException(ErrorResponseCode.JWKS_GENERATION_DISABLE);
             }
 
-            tokenRequest.setCryptoProvider(getKeyGeneratorService().getCryptoProvider());
-            tokenRequest.setKeyId(getKeyGeneratorService().getCryptoProvider().getKeyId(getKeyGeneratorService().getKeys(), algorithm, Use.SIGNATURE));
+            tokenRequest.setCryptoProvider(keyGeneratorService.getCryptoProvider());
+            tokenRequest.setKeyId(keyGeneratorService.getCryptoProvider().getKeyId(keyGeneratorService.getKeys(), algorithm, Use.SIGNATURE));
             tokenRequest.setAudience(discoveryResponse.getTokenEndpoint());
         } else {
             tokenRequest.setAuthPassword(rp.getClientSecret());
         }
 
-        final TokenClient tokenClient = getOpClientFactory().createTokenClient(discoveryResponse.getTokenEndpoint());
-        tokenClient.setExecutor(getHttpService().getClientEngine());
+        final TokenClient tokenClient = opClientFactory.createTokenClient(discoveryResponse.getTokenEndpoint());
+        tokenClient.setExecutor(httpService.getClientEngine());
         tokenClient.setRequest(tokenRequest);
         final TokenResponse response = tokenClient.exec();
 
@@ -109,23 +121,23 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
             final Validator validator = new Validator.Builder()
                     .discoveryResponse(discoveryResponse)
                     .idToken(idToken)
-                    .keyService(getKeyService())
-                    .opClientFactory(getOpClientFactory())
-                    .rpServerConfiguration(getConfigurationService().getConfiguration())
+                    .keyService(publicOpKeyService)
+                    .opClientFactory(opClientFactory)
+                    .rpServerConfiguration(jansConfigurationService.find())
                     .rp(rp)
                     .build();
 
-            String state = getStateService().encodeExpiredObject(params.getState(), ExpiredObjectType.STATE);
+            String state = stateService.encodeExpiredObject(params.getState(), ExpiredObjectType.STATE);
 
-            validator.validateNonce(getStateService());
+            validator.validateNonce(stateService);
             validator.validateIdToken();
             validator.validateAccessToken(response.getAccessToken());
             validator.validateState(state);
             // persist tokens
             rp.setIdToken(response.getIdToken());
             rp.setAccessToken(response.getAccessToken());
-            getRpService().update(rp);
-            getStateService().deleteExpiredObjectsByKey(state);
+            rpService.update(rp);
+            stateService.deleteExpiredObjectsByKey(state);
 
             LOG.trace("Scope: " + response.getScope());
 
@@ -154,7 +166,7 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
             throw new HttpException(ErrorResponseCode.BAD_REQUEST_NO_STATE);
         }
         try {
-            if (!getStateService().isExpiredObjectPresent(getStateService().encodeExpiredObject(params.getState(), ExpiredObjectType.STATE))) {
+            if (!stateService.isExpiredObjectPresent(stateService.encodeExpiredObject(params.getState(), ExpiredObjectType.STATE))) {
                 throw new HttpException(ErrorResponseCode.BAD_REQUEST_STATE_NOT_VALID);
             }
         } catch (Exception e) {

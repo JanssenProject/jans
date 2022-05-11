@@ -1,27 +1,25 @@
 package io.jans.ca.server.service;
 
-import com.google.inject.Inject;
 import io.jans.ca.common.ExpiredObject;
 import io.jans.ca.common.ExpiredObjectType;
+import io.jans.ca.server.persistence.service.JansConfigurationService;
 import io.jans.ca.server.persistence.service.PersistenceService;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@ApplicationScoped
 public class RequestObjectService {
     private static final Logger LOG = LoggerFactory.getLogger(RequestObjectService.class);
 
-    private PersistenceService persistenceService;
-
-    private ConfigurationService configurationService;
-
     @Inject
-    public RequestObjectService(PersistenceService persistenceService, ConfigurationService configurationService) {
-        this.persistenceService = persistenceService;
-        this.configurationService = configurationService;
-    }
+    PersistenceService persistenceService;
+    @Inject
+    JansConfigurationService configurationService;
 
     public void put(String requestUriId, String requestObject) {
-        persistenceService.createExpiredObject(new ExpiredObject(requestUriId, requestObject, ExpiredObjectType.REQUEST_OBJECT, configurationService.get().getRequestObjectExpirationInMinutes()));
+        persistenceService.createExpiredObject(new ExpiredObject(requestUriId, requestObject, ExpiredObjectType.REQUEST_OBJECT, configurationService.find().getRequestObjectExpirationInMinutes()));
     }
 
     public ExpiredObject get(String requestUriId) {

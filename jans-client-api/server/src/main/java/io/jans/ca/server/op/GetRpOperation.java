@@ -1,13 +1,15 @@
 package io.jans.ca.server.op;
 
-import com.google.inject.Injector;
 import io.jans.ca.common.Command;
 import io.jans.ca.common.Jackson2;
 import io.jans.ca.common.params.GetRpParams;
 import io.jans.ca.common.response.GetRpResponse;
 import io.jans.ca.common.response.IOpResponse;
-import io.jans.ca.server.service.MinimumRp;
-import io.jans.ca.server.service.Rp;
+import io.jans.ca.server.configuration.model.MinimumRp;
+import io.jans.ca.server.configuration.model.Rp;
+import io.jans.ca.server.service.RpService;
+import io.jans.ca.server.service.RpSyncService;
+import io.jans.ca.server.service.ServiceProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,28 +22,26 @@ import java.util.List;
 public class GetRpOperation extends BaseOperation<GetRpParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(GetRpOperation.class);
+    private RpService rpService;
+    private RpSyncService rpSyncService;
 
-    /**
-     * Base constructor
-     *
-     * @param command  command
-     * @param injector injector
-     */
-    protected GetRpOperation(Command command, Injector injector) {
-        super(command, injector, GetRpParams.class);
+    public GetRpOperation(Command command, ServiceProvider serviceProvider) {
+        super(command, serviceProvider, GetRpParams.class);
+        this.rpService = serviceProvider.getRpService();
+        this.rpSyncService = serviceProvider.getRpSyncService();
     }
 
     @Override
     public IOpResponse execute(GetRpParams params) {
         if (params.getList() != null && params.getList()) {
             List<MinimumRp> rps = new ArrayList<>();
-            for (Rp rp : getRpService().getRps().values()) {
+            for (Rp rp : rpService.getRps().values()) {
                 rps.add(rp.asMinimumRp());
             }
             return new GetRpResponse(Jackson2.createJsonMapper().valueToTree(rps));
         }
 
-        Rp rp = getRpSyncService().getRp(params.getRpId());
+        Rp rp = rpSyncService.getRp(params.getRpId());
         if (rp != null) {
             return new GetRpResponse(Jackson2.createJsonMapper().valueToTree(rp));
         } else {

@@ -1,19 +1,21 @@
 package io.jans.ca.server.op;
 
 import com.google.common.base.Strings;
-import com.google.inject.Injector;
-import io.jans.ca.common.ExpiredObjectType;
-import io.jans.ca.server.HttpException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import io.jans.as.client.OpenIdConfigurationResponse;
 import io.jans.ca.common.Command;
 import io.jans.ca.common.ErrorResponseCode;
+import io.jans.ca.common.ExpiredObjectType;
 import io.jans.ca.common.params.GetLogoutUrlParams;
-import io.jans.ca.common.response.IOpResponse;
 import io.jans.ca.common.response.GetLogoutUriResponse;
-import io.jans.ca.server.service.ConfigurationService;
-import io.jans.ca.server.service.Rp;
+import io.jans.ca.common.response.IOpResponse;
+import io.jans.ca.server.HttpException;
+import io.jans.ca.server.configuration.model.Rp;
+import io.jans.ca.server.persistence.service.JansConfigurationService;
+import io.jans.ca.server.service.DiscoveryService;
+import io.jans.ca.server.service.ServiceProvider;
+import io.jans.ca.server.service.StateService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URLEncoder;
 
@@ -28,20 +30,22 @@ public class GetLogoutUrlOperation extends BaseOperation<GetLogoutUrlParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(GetLogoutUrlOperation.class);
 
-    /**
-     * Base constructor
-     *
-     * @param command command
-     */
-    protected GetLogoutUrlOperation(Command command, final Injector injector) {
-        super(command, injector, GetLogoutUrlParams.class);
+    private DiscoveryService discoveryService;
+    private JansConfigurationService configurationService;
+    private StateService stateService;
+
+    public GetLogoutUrlOperation(Command command, ServiceProvider serviceProvider) {
+        super(command, serviceProvider, GetLogoutUrlParams.class);
+        this.discoveryService = serviceProvider.getDiscoveryService();
+        this.stateService = serviceProvider.getStateService();
+        this.configurationService = serviceProvider.getConfigurationService();
     }
 
     @Override
     public IOpResponse execute(GetLogoutUrlParams params) throws Exception {
         final Rp rp = getRp();
 
-        OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponse(rp);
+        OpenIdConfigurationResponse discoveryResponse = discoveryService.getConnectDiscoveryResponse(rp);
         String endSessionEndpoint = discoveryResponse.getEndSessionEndpoint();
 
         String postLogoutRedirectUrl = params.getPostLogoutRedirectUri();
@@ -53,12 +57,12 @@ public class GetLogoutUrlOperation extends BaseOperation<GetLogoutUrlParams> {
         }
 
         if (Strings.isNullOrEmpty(endSessionEndpoint)) {
-            if (rp.getOpHost().startsWith(GOOGLE_OP_HOST) && getInstance(ConfigurationService.class).get().getSupportGoogleLogout()) {
+            if (rp.getOpHost().startsWith(GOOGLE_OP_HOST) && configurationService.find().getSupportGoogleLogout()) {
                 String logoutUrl = "https://www.google.com/accounts/Logout?continue=https://appengine.google.com/_ah/logout?continue=" + postLogoutRedirectUrl;
                 return new GetLogoutUriResponse(logoutUrl);
             }
 
-            LOG.error("Failed to get end_session_endpoint at: " + getDiscoveryService().getConnectDiscoveryUrl(rp));
+            LOG.error("Failed to get end_session_endpoint at: " + discoveryService.getConnectDiscoveryUrl(rp));
             throw new HttpException(ErrorResponseCode.FAILED_TO_GET_END_SESSION_ENDPOINT);
         }
 
@@ -67,7 +71,7 @@ public class GetLogoutUrlOperation extends BaseOperation<GetLogoutUrlParams> {
             uri += separator(uri) + "post_logout_redirect_uri=" + URLEncoder.encode(postLogoutRedirectUrl, "UTF-8");
         }
         if (!Strings.isNullOrEmpty(params.getState())) {
-            uri += separator(uri) + "state=" + getStateService().encodeExpiredObject(params.getState(), ExpiredObjectType.STATE);
+            uri += separator(uri) + "state=" + stateService.encodeExpiredObject(params.getState(), ExpiredObjectType.STATE);
         }
         if (!Strings.isNullOrEmpty(params.getSessionState())) {
             uri += separator(uri) + "session_state=" + params.getSessionState();

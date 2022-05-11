@@ -4,12 +4,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.google.inject.Injector;
-import io.jans.ca.server.HttpException;
-import io.jans.ca.server.Utils;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.NumberUtils;
 import io.jans.as.client.RegisterClient;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
@@ -26,8 +20,17 @@ import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.params.RegisterSiteParams;
 import io.jans.ca.common.response.IOpResponse;
 import io.jans.ca.common.response.RegisterSiteResponse;
+import io.jans.ca.server.HttpException;
+import io.jans.ca.server.Utils;
+import io.jans.ca.server.configuration.model.Rp;
 import io.jans.ca.server.mapper.RegisterRequestMapper;
-import io.jans.ca.server.service.Rp;
+import io.jans.ca.server.service.DiscoveryService;
+import io.jans.ca.server.service.RpService;
+import io.jans.ca.server.persistence.service.JansConfigurationService;
+import io.jans.ca.server.service.ServiceProvider;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,13 +49,20 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
 
     private Rp rp;
 
+    private RpService rpService;
+    private DiscoveryService discoveryService;
+    private JansConfigurationService jansConfigurationService;
+
     /**
      * Base constructor
      *
      * @param command command
      */
-    protected RegisterSiteOperation(Command command, final Injector injector) {
-        super(command, injector, RegisterSiteParams.class);
+    public RegisterSiteOperation(Command command, ServiceProvider serviceProvider) {
+        super(command, serviceProvider, RegisterSiteParams.class);
+        this.discoveryService = serviceProvider.getDiscoveryService();
+        this.rpService = serviceProvider.getRpService();
+        this.jansConfigurationService = rpService.getConfigurationService();
     }
 
     public RegisterSiteResponse execute_(RegisterSiteParams params) {
@@ -99,7 +109,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
             throw new HttpException(ErrorResponseCode.INVALID_CLIENT_ID_REQUIRED);
         }
 
-        Rp fallback = getConfigurationService().defaultRp();
+        Rp fallback = rpService.defaultRp();
 
         //op_configuration_endpoint
         LOG.info("Either 'op_configuration_endpoint' or 'op_host' should be set. jans_client_api will now check which of these parameter is available.");
@@ -129,7 +139,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
             grantTypes.addAll(fallback.getGrantType());
         }
 
-        if (!grantTypes.contains(GrantType.CLIENT_CREDENTIALS.getValue()) && getConfigurationService().getConfiguration().getAddClientCredentialsGrantTypeAutomaticallyDuringClientRegistration()) {
+        if (!grantTypes.contains(GrantType.CLIENT_CREDENTIALS.getValue()) && jansConfigurationService.find().getAddClientCredentialsGrantTypeAutomaticallyDuringClientRegistration()) {
             grantTypes.add(GrantType.CLIENT_CREDENTIALS.getValue());
         }
 
@@ -164,11 +174,11 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         } else {
             throw new HttpException(ErrorResponseCode.INVALID_REDIRECT_URI);
         }
-        final Boolean autoRegister = getConfigurationService().getConfiguration().getUma2AuthRegisterClaimsGatheringEndpointAsRedirectUriOfClient();
+        final Boolean autoRegister = jansConfigurationService.find().getUma2AutoRegisterClaimsGatheringEndpointAsRedirectUriOfClient();
         if (autoRegister != null && autoRegister && !redirectUris.isEmpty()) {
             String first = redirectUris.iterator().next();
-            if (first.contains(getDiscoveryService().getConnectDiscoveryResponse(params.getOpConfigurationEndpoint(), params.getOpHost(), params.getOpDiscoveryPath()).getIssuer())) {
-                final UmaMetadata discovery = getDiscoveryService().getUmaDiscovery(params.getOpConfigurationEndpoint(), params.getOpHost(), params.getOpDiscoveryPath());
+            if (first.contains(discoveryService.getConnectDiscoveryResponse(params.getOpConfigurationEndpoint(), params.getOpHost(), params.getOpDiscoveryPath()).getIssuer())) {
+                final UmaMetadata discovery = discoveryService.getUmaDiscovery(params.getOpConfigurationEndpoint(), params.getOpHost(), params.getOpDiscoveryPath());
                 String autoRedirectUri = discovery.getClaimsInteractionEndpoint() + "?authentication=true";
 
                 LOG.trace("Register claims interaction endpoint as redirect_uri: " + autoRedirectUri);
@@ -425,7 +435,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
             rp = createRp(registerRequest);
             rp.setRpId(rpId);
             rp.setApplicationType("web");
-            rp.setOpHost(getDiscoveryService().getConnectDiscoveryResponse(params.getOpConfigurationEndpoint(), params.getOpHost(), params.getOpDiscoveryPath()).getIssuer());
+            rp.setOpHost(discoveryService.getConnectDiscoveryResponse(params.getOpConfigurationEndpoint(), params.getOpHost(), params.getOpDiscoveryPath()).getIssuer());
             rp.setOpDiscoveryPath(params.getOpDiscoveryPath());
             rp.setOpConfigurationEndpoint(params.getOpConfigurationEndpoint());
             rp.setUiLocales(params.getUiLocales());
@@ -446,7 +456,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
                 rp.setClientSecret(params.getClientSecret());
             }
 
-            getRpService().create(rp);
+            rpService.create(rp);
         } catch (HttpException e) {
             throw e;
         } catch (Exception e) {
@@ -463,16 +473,14 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         String opHostEndpoint = Strings.isNullOrEmpty(params.getOpConfigurationEndpoint()) ? params.getOpHost() : params.getOpConfigurationEndpoint();
         Preconditions.checkState(!Strings.isNullOrEmpty(opHostEndpoint), "Both op_configuration_endpoint and op_host contains blank value. Please specify valid OP public address.");
 
-        final String registrationEndpoint = getDiscoveryService().getConnectDiscoveryResponse(params.getOpConfigurationEndpoint(), params.getOpHost(), params.getOpDiscoveryPath()).getRegistrationEndpoint();
+        final String registrationEndpoint = discoveryService.getConnectDiscoveryResponse(params.getOpConfigurationEndpoint(), params.getOpHost(), params.getOpDiscoveryPath()).getRegistrationEndpoint();
         if (Strings.isNullOrEmpty(registrationEndpoint)) {
             LOG.error("This OP (" + opHostEndpoint + ") does not provide registration_endpoint. It means that jans_client_api is not able dynamically register client. " +
                     "Therefore it is required to obtain/register client manually on OP site and provide client_id and client_secret to jans_client_api register_site command.");
             throw new HttpException(ErrorResponseCode.NO_REGISTRATION_ENDPOINT);
         }
 
-        final RegisterClient registerClient = getOpClientFactory().createRegisterClient(registrationEndpoint);
-        registerClient.setRequest(request);
-        registerClient.setExecutor(getHttpService().getClientEngine());
+        final RegisterClient registerClient = rpService.createRegisterClient(registrationEndpoint, request);
         final RegisterResponse response = registerClient.exec();
         if (response != null) {
             if (!Strings.isNullOrEmpty(response.getClientId()) && !Strings.isNullOrEmpty(response.getClientSecret())) {
@@ -609,7 +617,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
                 throw new HttpException(ErrorResponseCode.INVALID_SIGNATURE_ALGORITHM);
             }
 
-            if (signatureAlgorithms == SignatureAlgorithm.NONE && !getConfigurationService().getConfiguration().getAcceptIdTokenWithoutSignature()) {
+            if (signatureAlgorithms == SignatureAlgorithm.NONE && !jansConfigurationService.find().getAcceptIdTokenWithoutSignature()) {
                 LOG.error("`ID_TOKEN` without signature is not allowed. To allow `ID_TOKEN` without signature set `accept_id_token_without_signature` field to 'true' in client-api-server.yml.");
                 throw new HttpException(ErrorResponseCode.ID_TOKEN_WITHOUT_SIGNATURE_NOT_ALLOWED);
             }

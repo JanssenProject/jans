@@ -1,10 +1,9 @@
 package io.jans.ca.server.service;
 
+import com.google.common.base.Strings;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
-import com.google.inject.Inject;
-import io.dropwizard.util.Strings;
 import io.jans.as.client.JwkClient;
 import io.jans.as.client.JwkResponse;
 import io.jans.as.model.crypto.PublicKey;
@@ -15,7 +14,9 @@ import io.jans.as.model.jwk.JSONWebKey;
 import io.jans.as.model.jwk.JSONWebKeySet;
 import io.jans.as.model.jwk.Use;
 import io.jans.ca.server.op.OpClientFactory;
+import io.jans.ca.server.persistence.service.JansConfigurationService;
 import io.jans.util.Pair;
+import jakarta.inject.Inject;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,18 +33,13 @@ public class PublicOpKeyService {
 
     private static final Logger LOG = LoggerFactory.getLogger(PublicOpKeyService.class);
 
-    private final Cache<Pair<String, String>, PublicKey> cache;
-    private final HttpService httpService;
-    private OpClientFactory opClientFactory;
-
+    private static Cache<Pair<String, String>, PublicKey> cache;
     @Inject
-    public PublicOpKeyService(ConfigurationService configurationService, HttpService httpService, OpClientFactory opClientFactory) {
-        this.cache = CacheBuilder.newBuilder()
-                .expireAfterWrite(configurationService.get().getPublicOpKeyCacheExpirationInMinutes(), TimeUnit.MINUTES)
-                .build();
-        this.httpService = httpService;
-        this.opClientFactory = opClientFactory;
-    }
+    private HttpService httpService;
+    @Inject
+    OpClientFactory opClientFactory;
+    @Inject
+    JansConfigurationService jansConfigurationService;
 
     public PublicKey getPublicKey(String jwkSetUrl, String keyId, SignatureAlgorithm signatureAlgorithm, Use use) {
         //Get keys from cache if present
@@ -103,6 +99,11 @@ public class PublicOpKeyService {
     private Optional<PublicKey> getCachedKey(String jwkSetUrl, String keyId) {
         if (Strings.isNullOrEmpty(keyId)) {
             return Optional.empty();
+        }
+        if (cache == null) {
+            cache = CacheBuilder.newBuilder()
+                    .expireAfterWrite(jansConfigurationService.find().getPublicOpKeyCacheExpirationInMinutes(), TimeUnit.MINUTES)
+                    .build();
         }
         Pair<String, String> mapKey = new Pair<>(jwkSetUrl, keyId);
         return Optional.ofNullable(cache.getIfPresent(mapKey));

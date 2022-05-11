@@ -3,9 +3,8 @@ package io.jans.ca.server.persistence.providers;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Strings;
 import io.jans.ca.common.Jackson2;
-import io.jans.ca.server.RpServerConfiguration;
+import io.jans.ca.server.configuration.ApiAppConfiguration;
 import io.jans.ca.server.persistence.configuration.H2Configuration;
-import io.jans.ca.server.service.ConfigurationService;
 import org.h2.jdbcx.JdbcConnectionPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,16 +21,16 @@ public class H2PersistenceProvider implements SqlPersistenceProvider {
 
     private static final Logger LOG = LoggerFactory.getLogger(H2PersistenceProvider.class);
 
-    private ConfigurationService configurationService;
+    private ApiAppConfiguration configuration;
     private JdbcConnectionPool pool = null;
 
-    public H2PersistenceProvider(ConfigurationService configurationService) {
-        this.configurationService = configurationService;
+    public H2PersistenceProvider(ApiAppConfiguration configuration) {
+        this.configuration = configuration;
     }
 
     @Override
     public void onCreate() {
-        H2Configuration h2Configuration = asH2Configuration(configurationService.getConfiguration());
+        H2Configuration h2Configuration = asH2Configuration(configuration);
         setDefaultUsernamePasswordIfEmpty(h2Configuration);
         pool = JdbcConnectionPool.create("jdbc:h2:file:" + h2Configuration.getDbFileLocation(), h2Configuration.getUsername(), h2Configuration.getPassword());
     }
@@ -46,7 +45,7 @@ public class H2PersistenceProvider implements SqlPersistenceProvider {
         return pool.getConnection();
     }
 
-    public static H2Configuration asH2Configuration(RpServerConfiguration configuration) {
+    public static H2Configuration asH2Configuration(ApiAppConfiguration configuration) {
         try {
             JsonNode node = configuration.getStorageConfiguration();
             if (node != null) {

@@ -5,13 +5,16 @@ import io.jans.as.model.common.IntrospectionResponse;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.params.*;
 import io.jans.ca.server.HttpException;
-import io.jans.ca.server.RpServerConfiguration;
-import io.jans.ca.server.ServerLauncher;
+import io.jans.ca.server.configuration.ApiAppConfiguration;
+import io.jans.ca.server.configuration.model.Rp;
+import io.jans.ca.server.persistence.service.JansConfigurationService;
 import io.jans.util.Pair;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
@@ -19,11 +22,24 @@ import java.util.List;
 /**
  * @author Yuriy Zabrovarnyy
  */
-
+@ApplicationScoped
 public class ValidationService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ValidationService.class);
-    final RpServerConfiguration configuration = ServerLauncher.getInjector().getInstance(ConfigurationService.class).get();
+
+    @Inject
+    RpSyncService rpSyncService;
+    @Inject
+    RpService rpService;
+    @Inject
+    IntrospectionService introspectionService;
+
+    @Inject
+    JansConfigurationService jansConfigurationService;
+
+    private ApiAppConfiguration getConfiguration(){
+        return jansConfigurationService.find();
+    }
 
     private void notNull(IParams params) {
         if (params == null) {
@@ -50,7 +66,7 @@ public class ValidationService {
     }
 
     public void isOpHostAllowed(String opHost) {
-        List<String> allowedOpHosts = configuration.getAllowedOpHosts();
+        List<String> allowedOpHosts = getConfiguration().getAllowedOpHosts();
         if (!Strings.isNullOrEmpty(opHost) && !allowedOpHosts.isEmpty()) {
             if (!allowedOpHosts.stream().anyMatch(allowedUrl -> {
                         try {
@@ -79,7 +95,6 @@ public class ValidationService {
             try {
                 String rpId = ((HasRpIdParams) params).getRpId();
                 if (StringUtils.isNotBlank(rpId)) {
-                    final RpSyncService rpSyncService = ServerLauncher.getInjector().getInstance(RpSyncService.class);
                     final Rp rp = rpSyncService.getRp(rpId);
                     if (rp != null) {
                         return new Pair<>(rp, false);
@@ -94,7 +109,6 @@ public class ValidationService {
         if (params instanceof GetClientTokenParams) {
             GetClientTokenParams p = (GetClientTokenParams) params;
             String clientId = p.getClientId();
-            final RpService rpService = ServerLauncher.getInjector().getInstance(RpService.class);
             Rp rp = rpService.getRpByClientId(clientId);
             if (rp != null) {
                 return new Pair<>(rp, false);
@@ -104,7 +118,6 @@ public class ValidationService {
             GetRpParams p = (GetRpParams) params;
             String rpId = p.getRpId();
             if (StringUtils.isNotBlank(rpId) && (p.getList() == null || !p.getList())) {
-                final RpSyncService rpSyncService = ServerLauncher.getInjector().getInstance(RpSyncService.class);
                 Rp rp = rpSyncService.getRp(rpId);
                 if (rp != null) {
                     return new Pair<>(rp, true);
@@ -125,8 +138,6 @@ public class ValidationService {
         if (StringUtils.isBlank(accessToken)) {
             throw new HttpException(ErrorResponseCode.BLANK_ACCESS_TOKEN);
         }
-
-        final RpSyncService rpSyncService = ServerLauncher.getInjector().getInstance(RpSyncService.class);
 
         final Rp rp = rpSyncService.getRp(rpId);
 
@@ -155,12 +166,10 @@ public class ValidationService {
             throw new HttpException(ErrorResponseCode.BLANK_ACCESS_TOKEN);
         }
 
-        final RpSyncService rpSyncService = ServerLauncher.getInjector().getInstance(RpSyncService.class);
         final Rp rp = rpSyncService.getRp(rpId);
 
         LOG.trace("Introspect token with rp: " + rp);
 
-        final IntrospectionService introspectionService = ServerLauncher.getInjector().getInstance(IntrospectionService.class);
         final IntrospectionResponse response = introspectionService.introspectToken(rpId, accessToken);
 
         if (!response.isActive()) {

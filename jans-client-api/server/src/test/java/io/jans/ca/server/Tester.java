@@ -4,11 +4,10 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import io.jans.ca.client.ClientInterface;
-import io.jans.ca.client.RpClient;
 import io.jans.ca.common.params.GetClientTokenParams;
 import io.jans.ca.common.response.GetClientTokenResponse;
 import io.jans.ca.common.response.RegisterSiteResponse;
-import org.apache.commons.lang.StringUtils;
+import io.jans.ca.server.arquillian.ClientIterfaceImpl;
 
 import static org.testng.AssertJUnit.assertNotNull;
 import static org.testng.AssertJUnit.assertTrue;
@@ -28,21 +27,11 @@ public class Tester {
     private static String HOST;
     private static String OP_HOST;
 
-    public static ClientInterface newClient(String targetHost) {
-        return RpClient.newClient(getTargetHost(targetHost));
+    public static ClientInterface newClient(String targeHosttUrl) {
+        return ClientIterfaceImpl.getInstanceClient(targeHosttUrl);
     }
 
-    public static String getTargetHost(String targetHost) {
-        if (StringUtils.countMatches(targetHost, ":") < 2 && "http://localhost".equalsIgnoreCase(targetHost) || "http://127.0.0.1".equalsIgnoreCase(targetHost) ) {
-            targetHost = targetHost + ":" + SetUpTest.SUPPORT.getLocalPort();
-        }
-        if ("localhost".equalsIgnoreCase(targetHost)) {
-            targetHost = "http://localhost:" + SetUpTest.SUPPORT.getLocalPort();
-        }
-        return targetHost;
-    }
-
-    public static String getAuthorization() {
+    public static String getAuthorization(String url) {
         Preconditions.checkNotNull(SETUP_CLIENT);
         if (Strings.isNullOrEmpty(AUTHORIZATION)) {
             final GetClientTokenParams params = new GetClientTokenParams();
@@ -51,7 +40,7 @@ public class Tester {
             params.setClientId(Tester.getSetupClient().getClientId());
             params.setClientSecret(Tester.getSetupClient().getClientSecret());
 
-            GetClientTokenResponse resp = Tester.newClient(HOST).getClientToken(params);
+            GetClientTokenResponse resp = Tester.newClient(url).getClientToken(params);
             assertNotNull(resp);
             assertTrue(!Strings.isNullOrEmpty(resp.getAccessToken()));
 
@@ -60,14 +49,14 @@ public class Tester {
         return AUTHORIZATION;
     }
 
-    public static String getAuthorization(RegisterSiteResponse site) {
+    public static String getAuthorization(String url, RegisterSiteResponse site) {
         final GetClientTokenParams params = new GetClientTokenParams();
         params.setScope(Lists.newArrayList("openid", "jans_client_api"));
         params.setOpHost(site.getOpHost());
         params.setClientId(site.getClientId());
         params.setClientSecret(site.getClientSecret());
 
-        GetClientTokenResponse resp = Tester.newClient(HOST).getClientToken(params);
+        GetClientTokenResponse resp = Tester.newClient(url).getClientToken(params);
         assertNotNull(resp);
         assertTrue(!Strings.isNullOrEmpty(resp.getAccessToken()));
 

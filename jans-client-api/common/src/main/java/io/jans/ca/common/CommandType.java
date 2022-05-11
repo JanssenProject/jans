@@ -52,7 +52,8 @@ public enum CommandType {
     ISSUER_DISCOVERY("issuer_discovery", false, MediaType.APPLICATION_JSON),
     GET_RP_JWKS("get_rp_jwks", false, MediaType.APPLICATION_JSON),
     GET_REQUEST_OBJECT_JWT("get_request_object_jwt", false, MediaType.TEXT_PLAIN),
-    GET_REQUEST_URI("get_request_uri", true, MediaType.APPLICATION_JSON);
+    GET_REQUEST_URI("get_request_uri", true, MediaType.APPLICATION_JSON),
+    CLEAR_TESTS("clear_tests", false, MediaType.APPLICATION_JSON);
 
     private final String value;
     private final boolean authorizationRequired;

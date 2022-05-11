@@ -2,11 +2,6 @@ package io.jans.ca.server.op;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
-import com.google.inject.Injector;
-import io.jans.ca.server.HttpException;
-import io.jans.ca.server.Utils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import io.jans.as.client.TokenClient;
 import io.jans.as.client.TokenResponse;
 import io.jans.as.model.util.Util;
@@ -15,7 +10,13 @@ import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.params.GetAccessTokenByRefreshTokenParams;
 import io.jans.ca.common.response.GetClientTokenResponse;
 import io.jans.ca.common.response.IOpResponse;
-import io.jans.ca.server.service.Rp;
+import io.jans.ca.server.HttpException;
+import io.jans.ca.server.Utils;
+import io.jans.ca.server.configuration.model.Rp;
+import io.jans.ca.server.service.DiscoveryService;
+import io.jans.ca.server.service.ServiceProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Set;
@@ -26,14 +27,11 @@ import java.util.Set;
 public class GetAccessTokenByRefreshTokenOperation extends BaseOperation<GetAccessTokenByRefreshTokenParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(GetAccessTokenByRefreshTokenOperation.class);
+    private DiscoveryService discoveryService;
 
-    /**
-     * Base constructor
-     *
-     * @param command command
-     */
-    protected GetAccessTokenByRefreshTokenOperation(Command command, final Injector injector) {
-        super(command, injector, GetAccessTokenByRefreshTokenParams.class);
+    public GetAccessTokenByRefreshTokenOperation(Command command, ServiceProvider serviceProvider) {
+        super(command, serviceProvider, GetAccessTokenByRefreshTokenParams.class);
+        this.discoveryService = serviceProvider.getDiscoveryService();
     }
 
     @Override
@@ -41,8 +39,8 @@ public class GetAccessTokenByRefreshTokenOperation extends BaseOperation<GetAcce
         try {
             validate(params);
             final Rp rp = getRp();
-            final TokenClient tokenClient = new TokenClient(getDiscoveryService().getConnectDiscoveryResponse(rp).getTokenEndpoint());
-            tokenClient.setExecutor(getHttpService().getClientEngine());
+            final TokenClient tokenClient = new TokenClient(discoveryService.getConnectDiscoveryResponse(rp).getTokenEndpoint());
+            tokenClient.setExecutor(discoveryService.getHttpService().getClientEngine());
             final TokenResponse tokenResponse = tokenClient.execRefreshToken(scopeAsString(params), params.getRefreshToken(), rp.getClientId(), rp.getClientSecret());
             if (tokenResponse != null) {
                 if (Util.allNotBlank(tokenResponse.getAccessToken())) {

@@ -4,8 +4,6 @@
 package io.jans.ca.server.op;
 
 import com.google.common.collect.Lists;
-import com.google.inject.Injector;
-import org.apache.commons.lang.StringUtils;
 import io.jans.as.client.*;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
@@ -16,6 +14,10 @@ import io.jans.ca.common.Command;
 import io.jans.ca.common.params.AuthorizationCodeFlowParams;
 import io.jans.ca.common.response.AuthorizationCodeFlowResponse;
 import io.jans.ca.common.response.IOpResponse;
+import io.jans.ca.server.service.DiscoveryService;
+import io.jans.ca.server.service.HttpService;
+import io.jans.ca.server.service.ServiceProvider;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,13 +35,18 @@ public class AuthorizationCodeFlowOperation extends BaseOperation<AuthorizationC
 
     private static final Logger LOG = LoggerFactory.getLogger(AuthorizationCodeFlowOperation.class);
 
-    protected AuthorizationCodeFlowOperation(Command command, final Injector injector) {
-        super(command, injector, AuthorizationCodeFlowParams.class);
+    private DiscoveryService discoveryService;
+    private HttpService httpService;
+
+    public AuthorizationCodeFlowOperation(Command command, ServiceProvider serviceProvider) {
+        super(command, serviceProvider, AuthorizationCodeFlowParams.class);
+        this.discoveryService = serviceProvider.getDiscoveryService();
+        this.httpService = serviceProvider.getHttpService();
     }
 
     @Override
     public IOpResponse execute(AuthorizationCodeFlowParams params) {
-        final OpenIdConfigurationResponse discovery = getDiscoveryService().getConnectDiscoveryResponseByRpId(params.getRpId());
+        final OpenIdConfigurationResponse discovery = discoveryService.getConnectDiscoveryResponseByRpId(params.getRpId());
         if (discovery != null) {
             return requestToken(discovery, params);
         }
@@ -66,7 +73,7 @@ public class AuthorizationCodeFlowOperation extends BaseOperation<AuthorizationC
 
         final AuthorizeClient authorizeClient = new AuthorizeClient(discovery.getAuthorizationEndpoint());
         authorizeClient.setRequest(request);
-        authorizeClient.setExecutor(getHttpService().getClientEngine());
+        authorizeClient.setExecutor(httpService.getClientEngine());
         final AuthorizationResponse response1 = authorizeClient.exec();
 
         final String scope = response1.getScope();
@@ -84,7 +91,7 @@ public class AuthorizationCodeFlowOperation extends BaseOperation<AuthorizationC
             tokenRequest.setScope(scope);
 
             final TokenClient tokenClient1 = new TokenClient(discovery.getTokenEndpoint());
-            tokenClient1.setExecutor(getHttpService().getClientEngine());
+            tokenClient1.setExecutor(httpService.getClientEngine());
             tokenClient1.setRequest(tokenRequest);
             final TokenResponse response2 = tokenClient1.exec();
 
