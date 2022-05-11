@@ -1,7 +1,7 @@
 
 Feature: Verify Fido2 configuration endpoint
 
-	Background:
+	Background:fido2Url
   	* def mainUrl = fido2Url
 
   	
