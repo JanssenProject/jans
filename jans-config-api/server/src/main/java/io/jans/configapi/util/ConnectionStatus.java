@@ -37,9 +37,9 @@ public class ConnectionStatus {
 
         FileConfiguration configuration = loadFileConfiguration();
         logger.debug(
-                " configuration:{}, ldapConfiguration.getBindDN():{}, ldapConfiguration.getBindPassword()):{},  buildServersString(getServers(ldapConfiguration)):{}, Boolean.toString(ldapConfiguration.isUseSSL()):{} ",
-                configuration, ldapConfiguration.getBindDN(), ldapConfiguration.getBindPassword(),
-                buildServersString(getServers(ldapConfiguration)), Boolean.toString(ldapConfiguration.isUseSSL()));
+                " configuration:{}, ldapConfiguration:{}, ldapConfiguration.getBindDN():{}, ldapConfiguration.getBindPassword()):{}, ldapConfiguration.isUseSSL():{} ",
+                configuration, ldapConfiguration, ldapConfiguration.getBindDN(), ldapConfiguration.getBindPassword(),
+                ldapConfiguration.isUseSSL());
 
         Properties properties = configuration.getProperties();
         properties.setProperty("bindDN", ldapConfiguration.getBindDN());
@@ -60,15 +60,11 @@ public class ConnectionStatus {
         logger.debug("Connection status connectionProvider.isConnected(): {}", connectionProvider.isConnected());
         
         if (connectionProvider.isConnected()) {
-            connectionProvider.closeConnectionPool();
-            logger.debug(" Connected to LDAP:{} ", connectionProvider.isConnected());
+            logger.trace("Connect to LDAP");
             connectionProvider.closeConnectionPool();
             return true;
         }
-        if (connectionProvider.getConnectionPool() != null) {
-            connectionProvider.closeConnectionPool();
-        }
-
+       
         return false;
     }
 
