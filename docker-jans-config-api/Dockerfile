@@ -190,7 +190,6 @@ RUN mkdir -p /etc/certs \
     ${JETTY_BASE}/jans-config-api/logs
 
 RUN touch /etc/hosts.back
-COPY jetty/jans-config-api.xml ${JETTY_BASE}/jans-config-api/webapps/
 COPY jetty/log4j2.xml ${JETTY_BASE}/jans-config-api/resources/
 COPY conf/*.tmpl /app/templates/
 COPY plugins /app/plugins
@@ -199,6 +198,8 @@ RUN chmod +x /app/scripts/entrypoint.sh
 
 # create non-root user
 RUN adduser -s /bin/sh -D -G root -u 1000 jetty
+
+COPY --chown=1000:0 jetty/jans-config-api.xml ${JETTY_BASE}/jans-config-api/webapps/
 
 # adjust ownership and permission
 RUN chmod -R g=u ${JETTY_BASE}/jans-config-api/custom \
