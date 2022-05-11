@@ -2178,6 +2178,12 @@ paths:
       parameters:
         - schema:
             type: string
+            enum:
+              - openid
+              - dynamic
+              - uma
+              - spontaneous
+              - oauth
           in: query
           name: type
           description: Scope type.
