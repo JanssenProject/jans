@@ -42,9 +42,9 @@ function() {
         testProps: testProps,
         issuer: issuer,
         accessToken: '123',
-        statUrl: baseUrl + '/jans-config-api/api/v1/stat',
+        
+		statUrl: baseUrl + '/jans-config-api/api/v1/stat',
         healthUrl: baseUrl + '/jans-config-api/api/v1/health',
-        fido2Url: baseUrl + '/jans-config-api/api/v1/fido2/config',
         acrsUrl: baseUrl + '/jans-config-api/api/v1/acrs',
         authConfigurationUrl: baseUrl + '/jans-config-api/api/v1/jans-auth-server/config',
         scriptsUrl: baseUrl + '/jans-config-api/api/v1/config/scripts',

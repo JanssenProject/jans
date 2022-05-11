@@ -21,7 +21,7 @@ tags:
   - name: Cache Configuration – in-Memory
   - name: Cache Configuration – Native-Persistence
   - name: Configuration – Properties
-  - name: Configuration – Fido2
+  - name: Fido2 - Configuration
   - name: Configuration – SMTP
   - name: Configuration – Logging
   - name: Configuration – JWK - JSON Web Key (JWK)
@@ -117,13 +117,13 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '500':
           $ref: '#/components/responses/InternalServerError'
-  /jans-config-api/api/v1/fido2/config:
+  /jans-config-api/fido2/config:
     get:
       summary: Gets Jans Authorization Server Fido2 configuration properties.
       description: Gets Jans Authorization Server Fido2 configuration properties.
       operationId: get-properties-fido2
       tags:
-        - Configuration – Fido2
+        - Fido2 - Configuration
       responses:
         '200':
           description: OK
@@ -142,7 +142,7 @@ paths:
       description: Updates Fido2 configuration properties.
       operationId: put-properties-fido2
       tags:
-        - Configuration – Fido2
+        - Fido2 - Configuration
       requestBody:
         content:
           application/json:
@@ -4848,6 +4848,7 @@ components:
         path:
           type: string
           description: A JSON-Pointer
+          example: '/client/customattribute/[0]'
         value:
           type: object
           description: The value to be used within the operations.
@@ -5262,7 +5263,7 @@ components:
           items:
             type: string
         scopes:
-          description: Provide list of scopes granted to the client.
+          description: Provide list of scopes granted to the client (scope dn or scope id).
           type: array
           items:
             type: string
@@ -6679,7 +6680,7 @@ components:
           type: object
           $ref: '#/components/schemas/FacterData'
           description: Underlying Server stats
-		  
+
     User:
       title: User object
       description: User.
@@ -6711,7 +6712,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CustomAttribute'
-			
+
     UserPatchRequest:
       title: User Patch Request object
       description: UserPatchRequest.
@@ -6726,5 +6727,3 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CustomAttribute'
-        
-	

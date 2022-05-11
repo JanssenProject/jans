@@ -32,7 +32,7 @@ RUN wget -q https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/${JETTY_
 # ==========
 
 ENV CN_VERSION=1.0.0-SNAPSHOT
-ENV CN_BUILD_DATE='2022-04-21 11:27'
+ENV CN_BUILD_DATE='2022-04-30 08:16'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api-server/${CN_VERSION}/jans-config-api-server-${CN_VERSION}.war
 
 # Install Jans Config API
@@ -63,11 +63,11 @@ RUN wget -q https://github.com/GluuFederation/gluu-snap/raw/${PYFACTER_VERSION}/
 
 RUN mkdir -p /usr/share/java
 
-ENV SCIM_PLUGIN_BUILD_DATE='2022-02-21 16:26'
+ENV SCIM_PLUGIN_BUILD_DATE='2022-04-30 08:16'
 ENV SCIM_PLUGIN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/scim-plugin/${CN_VERSION}/scim-plugin-${CN_VERSION}-distribution.jar
 RUN wget -q ${SCIM_PLUGIN_SOURCE_URL} -O /usr/share/java/scim-plugin.jar
 
-ENV ADMIN_UI_PLUGIN_BUILD_DATE='2022-02-21 16:26'
+ENV ADMIN_UI_PLUGIN_BUILD_DATE='2022-04-30 08:16'
 ENV ADMIN_UI_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/admin-ui-plugin/${CN_VERSION}/admin-ui-plugin-${CN_VERSION}-distribution.jar
 RUN wget -q ${ADMIN_UI_SOURCE_URL} -O /usr/share/java/admin-ui-plugin.jar
 
@@ -168,11 +168,8 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_WAIT_SLEEP_DURATION=10 \
     CN_JAVA_OPTIONS="" \
     GOOGLE_PROJECT_ID="" \
-    GOOGLE_APPLICATION_CREDENTIALS=/etc/jans/conf/google-credentials.json \
-    CN_LICENSE_ADMIN_UI_API_KEY=/etc/jans/conf/admin_ui_api_key \
-    CN_LICENSE_ADMIN_UI_PRODUCT_CODE=/etc/jans/conf/admin_ui_product_code \
-    CN_LICENSE_ADMIN_UI_SHARED_KEY=/etc/jans/conf/admin_ui_shared_key \
-    CN_LICENSE_ADMIN_UI_MANAGEMENT_KEY=/etc/jans/conf/admin_ui_management_key
+    GOOGLE_APPLICATION_CREDENTIALS=/etc/jans/conf/google-credentials.json
+
 # ====
 # misc
 # ====
@@ -190,7 +187,7 @@ RUN mkdir -p /etc/certs \
     /etc/jans/conf \
     ${JETTY_BASE}/jans-config-api/custom/libs \
     ${JETTY_BASE}/jans-config-api/custom/config \
-    /opt/jetty/temp
+    ${JETTY_BASE}/jans-config-api/logs
 
 RUN touch /etc/hosts.back
 COPY jetty/jans-config-api.xml ${JETTY_BASE}/jans-config-api/webapps/
@@ -203,18 +200,14 @@ RUN chmod +x /app/scripts/entrypoint.sh
 # create non-root user
 RUN adduser -s /bin/sh -D -G root -u 1000 jetty
 
-# adjust ownership
-RUN chown -R 1000:1000 /opt/jans/jetty \
-    && chown -R 1000:1000 /opt/jetty \
-    && chown -R 1000:1000 /tmp \
-    && chown -R 1000:1000 /etc/hosts.back \
-    && chgrp -R 0 /etc/hosts.back && chmod -R g=u /etc/hosts.back \
-    && chgrp -R 0 /opt/jans/jetty && chmod -R g=u /opt/jans/jetty \
-    && chgrp -R 0 /opt/jetty && chmod -R g=u /opt/jetty \
-    && chgrp -R 0 /tmp && chmod -R g=u /tmp \
-    && chgrp -R 0 /etc/certs && chmod -R g=u /etc/certs \
-    && chgrp -R 0 /etc/jans && chmod -R g=u /etc/jans \
-    && chmod -R +w /usr/java/latest/jre/lib/security/cacerts && chgrp -R 0 /usr/java/latest/jre/lib/security/cacerts && chmod -R g=u /usr/java/latest/jre/lib/security/cacerts \
+# adjust ownership and permission
+RUN chmod -R g=u ${JETTY_BASE}/jans-config-api/custom \
+    && chmod -R g=u ${JETTY_BASE}/jans-config-api/resources \
+    && chmod -R g=u ${JETTY_BASE}/jans-config-api/logs \
+    && chmod -R g=u /etc/certs \
+    && chmod -R g=u /etc/jans \
+    && chmod 664 /etc/hosts.back \
+    && chmod 664 /usr/java/latest/jre/lib/security/cacerts \
     && chmod 664 /opt/jetty/etc/jetty.xml \
     && chmod 664 /opt/jetty/etc/webdefault.xml
 
