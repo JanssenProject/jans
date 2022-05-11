@@ -12,9 +12,9 @@ jans-client-api is a middleware service which can be used by web application dev
 ```
 clientApi_ConfigurationEntryDN=ou=jans-client-api,ou=configuration,o=jans
 ```
-2. Verify `clientApi_ConfigurationEntryDN` in DB configuration, if no exist execute respective the insert. 
+2. Verify `clientApi_ConfigurationEntryDN` in DB configuration, if not exist execute respective insert. 
 
-- [MySQL](https://github.com/JanssenProject/jans-client-api/blob/master/server/scripts/mysql/clientApi_ConfigurationEntryDN.sql)
+- [MySql](https://github.com/JanssenProject/jans-client-api/blob/master/server/scripts/mysql/clientApi_ConfigurationEntryDN.sql)
 - [Ldap](https://github.com/JanssenProject/jans-client-api/blob/master/server/scripts/ldap/clientApi_ConfigurationEntryDN.ldif)
 
 3. Verify file route of next parameters in `clientApi_ConfigurationEntryDN` field:`jansConfDyn` configuration json:
