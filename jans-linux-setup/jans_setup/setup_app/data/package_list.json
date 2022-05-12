@@ -46,7 +46,7 @@
   },
   "ubuntu 22": {
     "optional": "",
-    "mondatory": "apache2 curl wget xz-utils unzip rsyslog bzip2",
-    "python": {"ldap3":"python3-ldap3", "requests":"python3-requests", "ruamel.yaml":"python3-ruamel.yaml", "certifi":"python3-certifi", "pymysql":"python3-pymysql", "urllib3": "python3-urllib3", "distutils.util": "python3-distutils", "prompt_toolkit": "python3-prompt-toolkit", "certifi":"python3-certifi"}
+    "mondatory": "apache2 curl wget xz-utils unzip rsyslog bzip2 python3-urllib3 python3-certifi",
+    "python": {"ldap3":"python3-ldap3", "requests":"python3-requests", "ruamel.yaml":"python3-ruamel.yaml", "pymysql":"python3-pymysql", "distutils.util": "python3-distutils", "prompt_toolkit": "python3-prompt-toolkit", "certifi":"python3-certifi"}
   }
 }
