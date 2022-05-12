@@ -293,7 +293,7 @@ class Crypto64:
             return None
 
         plain_text = ''.join(lines)
-        plain_b64encoded_text = base64.encodestring(plain_text.encode('utf-8')).decode('utf-8').strip()
+        plain_b64encoded_text = base64.encodebytes(plain_text.encode('utf-8')).decode('utf-8').strip()
 
         if num_spaces > 0:
             plain_b64encoded_text = self.reindent(plain_b64encoded_text, num_spaces)
