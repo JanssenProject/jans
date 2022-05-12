@@ -633,6 +633,11 @@ class Upgrade:
         def _update_token_server_client():
             kwargs = {}
             token_server_admin_ui_client_id = self.manager.config.get("token_server_admin_ui_client_id")
+
+            # admin-ui is not available
+            if not token_server_admin_ui_client_id:
+                return
+
             id_ = f"inum={token_server_admin_ui_client_id},ou=clients,o=jans"
 
             if self.backend.type in ("sql", "spanner"):
