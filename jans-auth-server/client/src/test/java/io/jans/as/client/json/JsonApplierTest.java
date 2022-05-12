@@ -20,6 +20,7 @@ import static org.testng.Assert.assertEquals;
 
 /**
  * @author Yuriy Zabrovarnyy
+ * @version April 25, 2022
  */
 public class JsonApplierTest {
 
