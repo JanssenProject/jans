@@ -11,8 +11,8 @@
   },
   "centos 7": {
     "optional": "",
-    "mondatory": "httpd mod_ssl curl mod_auth_openidc wget tar xz unzip bzip2 rsyslog ",
-    "python": {"ldap3":"python3-ldap3", "requests":"python3-requests", "ruamel.yaml":"python3-ruamel-yaml", "certifi":"python3-certifi", "pymysql":"python3-PyMySQL", "Crypto": "python3-cryptography", "prompt_toolkit": "python3-prompt-toolkit"}
+    "mondatory": "httpd mod_ssl curl mod_auth_openidc wget tar xz unzip bzip2 rsyslog  python3-certifi",
+    "python": {"ldap3":"python3-ldap3", "requests":"python3-requests", "ruamel.yaml":"python3-ruamel-yaml", "pymysql":"python3-PyMySQL", "Crypto": "python3-cryptography", "prompt_toolkit": "python3-prompt-toolkit"}
   },
   "centos 8": {
     "optional": "",
@@ -34,15 +34,10 @@
     "mondatory": "apache2 curl wget tar xz-utils unzip rsyslog bzip2",
     "python": {"ldap3":"python3-ldap3", "requests":"python3-requests", "ruamel.yaml":"python3-ruamel.yaml", "certifi":"python3-certifi", "pymysql":"python3-pymysql", "Crypto": "python3-crypto", "distutils.util": "python3-distutils", "prompt_toolkit": "python3-prompt-toolkit"}
   },
-  "ubuntu 18": {
-    "optional": "",
-    "mondatory": "apache2 curl wget xz-utils unzip rsyslog net-tools bzip2",
-    "python": {"ldap3":"python3-ldap3", "requests":"python3-requests", "ruamel.yaml":"python3-ruamel.yaml", "certifi":"python3-certifi", "pymysql":"python3-pymysql", "Crypto": "python3-crypto", "distutils.util": "python3-distutils", "prompt_toolkit": "python3-prompt-toolkit"}
-  },
   "ubuntu 20": {
     "optional": "",
-    "mondatory": "apache2 curl wget xz-utils unzip rsyslog bzip2",
-    "python": {"ldap3":"python3-ldap3", "requests":"python3-requests", "ruamel.yaml":"python3-ruamel.yaml", "certifi":"python3-certifi", "pymysql":"python3-pymysql", "Crypto": "python3-crypto", "distutils.util": "python3-distutils", "prompt_toolkit": "python3-prompt-toolkit"}
+    "mondatory": "apache2 curl wget xz-utils unzip rsyslog bzip2 python3-urllib3 python3-certifi",
+    "python": {"ldap3":"python3-ldap3", "requests":"python3-requests", "ruamel.yaml":"python3-ruamel.yaml", "pymysql":"python3-pymysql", "Crypto": "python3-crypto", "distutils.util": "python3-distutils", "prompt_toolkit": "python3-prompt-toolkit"}
   },
   "ubuntu 22": {
     "optional": "",
