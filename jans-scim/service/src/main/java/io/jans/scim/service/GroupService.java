@@ -6,16 +6,8 @@
 
 package io.jans.scim.service;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
-import org.slf4j.Logger;
-
+import io.jans.as.common.service.common.ExternalIdGeneratorService;
+import io.jans.as.model.common.IdType;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.exception.operation.DuplicateEntryException;
@@ -28,6 +20,15 @@ import io.jans.scim.model.GluuGroupVisibility;
 import io.jans.scim.util.OxTrustConstants;
 import io.jans.util.ArrayHelper;
 import io.jans.util.StringHelper;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+import org.slf4j.Logger;
 
 /**
  * Provides operations with groups
@@ -50,6 +51,9 @@ public class GroupService implements Serializable {
 
 	@Inject
 	private PersonService personService;
+
+	@Inject
+	private ExternalIdGeneratorService idGeneratorService;
 
 	public void addGroup(GluuGroup group) throws Exception {
 		GluuGroup displayNameGroup = new GluuGroup();
@@ -179,7 +183,19 @@ public class GroupService implements Serializable {
 	 * @return New inum for group
 	 */
 	private String generateInumForNewGroupImpl() throws Exception {
-		return UUID.randomUUID().toString();
+	    
+	    String id = null;
+	    if (idGeneratorService.isEnabled()) {
+	        id = idGeneratorService.executeExternalGenerateIdMethod(
+	            //Use the first enabled script only
+	            idGeneratorService.getCustomScriptConfigurations().stream().findFirst().orElse(null)
+	            , ""    //appId 
+	            , IdType.GROUP.getType()    //idType
+	            , ""    //idPrefix
+            );
+	    }
+        return id == null ? UUID.randomUUID().toString() : id;
+
 	}
 
 	public GluuGroup getGroupByDn(String Dn) {
