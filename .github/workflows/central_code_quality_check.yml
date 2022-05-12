@@ -49,6 +49,7 @@ jobs:
         jans-notify
         jans-fido2
         jans-eleven
+        agama
       NON_JVM_PROJECTS: |
         jans-linux-setup
         jans-cli
