@@ -67,10 +67,10 @@ public class AuthnScriptAliasesTest extends BaseTest {
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
-    public void acrAliasAuthorizedAcsValuesTest(
+    public void acrAliasAuthorizedAcrValuesTest(
             final String userId, final String userSecret, final String redirectUris, final String redirectUri,
             final String sectorIdentifierUri) {
-        showTitle("acrAliasAuthorizedAcsValuesTest");
+        showTitle("acrAliasAuthorizedAcrValuesTest");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN);
 

@@ -9,19 +9,19 @@ package io.jans.as.client.client;
 import io.jans.as.client.RegisterResponse;
 import io.jans.as.model.register.RegisterRequestParam;
 
+import java.util.Arrays;
+
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 /**
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version February 11, 2022
+ * @version April 6, 2022
  */
-
 public class Asserter {
 
     private Asserter() {
-
     }
 
     public static void assertRegisterResponseClaimsNotNull(RegisterResponse response, RegisterRequestParam... claimsToVerify) {
@@ -29,8 +29,16 @@ public class Asserter {
             return;
         }
         for (RegisterRequestParam claim : claimsToVerify) {
-            assertNotNull(response.getClaims().get(claim.toString()), "Claim " + claim.toString() + " is null in response claims - code" + response.getEntity());
+            assertNotNull(response.getClaims().get(claim.toString()), "Claim " + claim + " is null in response claims - code" + response.getEntity());
         }
+    }
+
+    public static void assertRegisterResponseClaimsNotNull(RegisterResponse response, String... claimsToVerify) {
+        if (response == null || claimsToVerify == null) {
+            return;
+        }
+        Arrays.stream(claimsToVerify).forEach(
+                claim -> assertNotNull(response.getClaims().get(claim), "Claim " + claim + " is null in response claims - code" + response.getEntity()));
     }
 
     public static void assertRegisterResponseClaimsAreContained(RegisterResponse response, RegisterRequestParam... claimsToVerify) {
@@ -38,7 +46,7 @@ public class Asserter {
             return;
         }
         for (RegisterRequestParam claim : claimsToVerify) {
-            assertTrue(response.getClaims().containsKey(claim.toString()), "Claim " + claim.toString() + " is not contained in response claims - code" + response.getEntity());
+            assertTrue(response.getClaims().containsKey(claim.toString()), "Claim " + claim + " is not contained in response claims - code" + response.getEntity());
         }
     }
 }

@@ -32,7 +32,7 @@ import static io.jans.as.model.util.Util.putNotBlank;
  * Represents an authorization request to send to the authorization server.
  *
  * @author Javier Rojas Blum
- * @version October 7, 2019
+ * @version April 25, 2022
  */
 public class AuthorizationRequest extends BaseRequest {
 

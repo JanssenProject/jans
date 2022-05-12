@@ -21,7 +21,7 @@ import java.util.Map;
  * Represents a token request to send to the authorization server.
  *
  * @author Javier Rojas Blum
- * @version September 30, 2021
+ * @version April 25, 2022
  */
 public class TokenRequest extends ClientAuthnRequest {
 
