@@ -1,3 +1,9 @@
+/*
+ * Janssen Project software is available under the Apache License (2004). See http://www.apache.org/licenses/ for full text.
+ *
+ * Copyright (c) 2020, Janssen Project
+ */
+
 package io.jans.as.client.client;
 
 import io.jans.as.client.*;
@@ -23,6 +29,10 @@ public class AssertBuilder {
 
     public static UserInfoResponseAssertBuilder userInfoResponse(UserInfoResponse response) {
         return new UserInfoResponseAssertBuilder(response);
+    }
+
+    public static ClientInfoResponseAssertBuilder clientInfoResponse(ClientInfoResponse response) {
+        return new ClientInfoResponseAssertBuilder(response);
     }
 
     public static BackchannelAuthenticationResponseAssertBuilder backchannelAuthenticationResponse(BackchannelAuthenticationResponse response) {
