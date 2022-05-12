@@ -85,7 +85,8 @@ public class AppInitializer {
         configurationFactory.initTimer();
         loggerService.initTimer();
         //externalScimService.init();
-        customScriptManager.initTimer(Arrays.asList(CustomScriptType.SCIM, CustomScriptType.PERSISTENCE_EXTENSION));
+        customScriptManager.initTimer(Arrays.asList(
+            CustomScriptType.SCIM, CustomScriptType.PERSISTENCE_EXTENSION, CustomScriptType.ID_GENERATOR));
         logger.info("Initialized!");
 
     }
