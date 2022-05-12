@@ -5,6 +5,7 @@ import string
 import uuid
 import shutil
 import json
+import tempfile
 
 from urllib.parse import urlparse
 
@@ -159,17 +160,16 @@ class JansAuthInstaller(JettyInstaller):
         jwksUri = oxauth_config_json['jwksUri']
         o = urlparse(jwksUri)
         jwks_addr = o.netloc
-        ssl_cmd = shutil.which('openssl')
-        random_crt_fn = os.path.join(self.output_folder, '{}.crt'.format(os.urandom(3).hex()))
-        cmd = "echo -n | {} s_client -connect {}:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > {}".format(ssl_cmd, jwks_addr, random_crt_fn)
-        self.run(cmd, shell=True)
+        open_banking_cert = self.get_server_certificate(jwks_addr)
         alias = jwks_addr.replace('.', '_')
 
-        self.run([Config.cmd_keytool, '-import', '-trustcacerts', '-keystore', 
-                            Config.defaultTrustStoreFN, '-storepass', 'changeit', 
-                            '-noprompt', '-alias', alias, '-file', random_crt_fn])
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_fn = os.path.join(tmp_dir, jwks_addr+'.crt')
+            self.writeFile(tmp_fn, open_banking_cert)
+            self.run([Config.cmd_keytool, '-import', '-trustcacerts', '-keystore', 
+                      Config.defaultTrustStoreFN, '-storepass', 'changeit', 
+                      '-noprompt', '-alias', alias, '-file', tmp_fn])
 
-        #os.remove(random_crt_fn)
 
     def import_openbanking_key(self):
         if os.path.isfile(Config.ob_key_fn) and os.path.isfile(Config.ob_cert_fn):
