@@ -61,24 +61,6 @@
         </dependency>
         <dependency>
             <groupId>io.jans</groupId>
-            <artifactId>jans-orm-couchbase</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.jans</groupId>
-            <artifactId>jans-orm-sql</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.google.protobuf</groupId>
-                    <artifactId>protobuf-java</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>io.jans</groupId>
-            <artifactId>jans-orm-spanner</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.jans</groupId>
             <artifactId>jans-core-model</artifactId>
         </dependency>
         <dependency>
@@ -120,7 +102,7 @@
         <dependency>
             <groupId>io.jans</groupId>
             <artifactId>jans-client-api-common</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>io.jans</groupId>
@@ -327,11 +309,13 @@
         <dependency>
             <groupId>org.jboss.arquillian.extension</groupId>
             <artifactId>arquillian-rest-client-impl-3x</artifactId>
+            <version>${arquillian.rest.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.eu.ingwar.tools</groupId>
             <artifactId>arquillian-suite-extension</artifactId>
+            <version>${arquillian.ingwar.tools.version}</version>
             <scope>test</scope>
         </dependency>
 
@@ -339,30 +323,30 @@
         <dependency>
             <groupId>org.jboss.arquillian.container</groupId>
             <artifactId>arquillian-container-test-impl-base</artifactId>
-            <version>1.4.0.Final</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jboss.arquillian.container</groupId>
             <artifactId>arquillian-container-spi</artifactId>
-            <version>1.4.0.Final</version>
+            <version>${arquillian.test.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jboss.arquillian.container</groupId>
             <artifactId>arquillian-container-test-spi</artifactId>
-            <version>1.4.0.Final</version>
+            <version>${arquillian.test.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jboss.arquillian.testenricher</groupId>
             <artifactId>arquillian-testenricher-cdi</artifactId>
-            <version>1.4.0.Final</version>
+            <version>${arquillian.test.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jboss.arquillian.test</groupId>
             <artifactId>arquillian-test-impl-base</artifactId>
+            <version>${arquillian.test.version}</version>
         </dependency>
 
         <!-- Test: Shrinkwrap -->
@@ -650,7 +634,7 @@
                 <dependency>
                     <groupId>org.jboss.arquillian.container</groupId>
                     <artifactId>arquillian-jetty-embedded-11</artifactId>
-                    <scope>test</scope>
+                    <version>${arquillian.jetty.embedded.11.version}</version>
                 </dependency>
                 <dependency>
                     <groupId>org.eclipse.jetty</groupId>

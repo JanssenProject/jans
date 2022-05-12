@@ -43,6 +43,9 @@
         <arquillian.drone.version>2.0.0.Final</arquillian.drone.version>
         <arquillian.graphene.version>2.1.0.CR1</arquillian.graphene.version>
         <arquillian.test.version>1.6.0.Final</arquillian.test.version>
+        <arquillian.jetty.embedded.11.version>1.0.0.CR4</arquillian.jetty.embedded.11.version>
+        <arquillian.ingwar.tools.version>1.2.0</arquillian.ingwar.tools.version>
+
         <shrinkwrap.version>2.1.0</shrinkwrap.version>
         <selenium.version>3.141.59</selenium.version>
         <argLine>-Xms1024m -Xmx2048m -XX:+DisableExplicitGC</argLine>
@@ -396,37 +399,11 @@
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>org.jboss.arquillian.extension</groupId>
-                <artifactId>arquillian-rest-client-impl-3x</artifactId>
-                <version>${arquillian.rest.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.jboss.arquillian.test</groupId>
-                <artifactId>arquillian-test-impl-base</artifactId>
-                <version>1.6.0.Final</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.eu.ingwar.tools</groupId>
-                <artifactId>arquillian-suite-extension</artifactId>
-                <version>1.2.0</version>
-                <scope>test</scope>
-            </dependency>
-
-            <dependency>
-                <groupId>org.jboss.arquillian.container</groupId>
-                <artifactId>arquillian-jetty-embedded-11</artifactId>
-                <version>1.0.0.CR4</version>
-            </dependency>
-
-            <dependency>
                 <groupId>javax.servlet</groupId>
                 <artifactId>javax.servlet-api</artifactId>
                 <version>4.0.1</version>
                 <scope>test</scope>
             </dependency>
-
         </dependencies>
     </dependencyManagement>
     <build>
