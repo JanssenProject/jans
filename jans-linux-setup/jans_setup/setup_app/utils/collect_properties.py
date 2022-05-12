@@ -196,10 +196,9 @@ class CollectProperties(SetupUtils, BaseInstaller):
 
         ssl_subj = self.get_ssl_subject('/etc/certs/httpd.crt')
 
-        Config.countryCode = ssl_subj['C']
-        Config.state = ssl_subj['ST']
-        Config.city = ssl_subj['L']
-        Config.city = ssl_subj['L']
+        Config.countryCode = ssl_subj.get('countryName', '')
+        Config.state = ssl_subj.get('stateOrProvinceName', '')
+        Config.city = ssl_subj.get('localityName', '')
 
          #this is not good, but there is no way to retreive password from ldap
         if not Config.get('admin_password'):
@@ -209,7 +208,7 @@ class CollectProperties(SetupUtils, BaseInstaller):
                 Config.admin_password = Config.cb_password
 
         if not Config.get('orgName'):
-            Config.orgName = ssl_subj['O']
+            Config.orgName = ssl_subj.get('organizationName', '')
 
         #for service in jetty_services:
         #    setup_prop[jetty_services[service][0]] = os.path.exists('/opt/jans/jetty/{0}/webapps/{0}.war'.format(service))

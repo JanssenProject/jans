@@ -4,7 +4,6 @@ import time
 import subprocess
 import re
 import socket
-import ssl
 import shutil
 import uuid
 import base64
@@ -576,11 +575,3 @@ class SetupUtils(Crypto64):
         usr_grp = '{}:{}'.format(user, group) if group else user
         cmd += [usr_grp, fn]
         self.run(cmd)
-
-    def get_server_certificate(self, host):
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        context = ssl.SSLContext()
-        ssl_sock = context.wrap_socket(sock, server_hostname=host)
-        ssl_sock.connect((host, 443))
-        cert_der = ssl_sock.getpeercert(True)
-        return ssl.DER_cert_to_PEM_cert(cert_der)
