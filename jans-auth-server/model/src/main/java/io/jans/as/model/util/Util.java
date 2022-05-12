@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
 import io.jans.as.model.common.HasParamName;
 import io.jans.orm.annotation.AttributeEnum;
+import io.jans.orm.model.base.LocalizedString;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -45,9 +46,8 @@ import java.util.TimeZone;
 /**
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version September 4, 2019
+ * @version April 25, 2022
  */
-
 public class Util {
 
     private static final Logger LOG = LoggerFactory.getLogger(Util.class);
@@ -172,6 +172,14 @@ public class Util {
     public static void addToJSONObjectIfNotNullOrEmpty(JSONObject jsonObject, String key, String[] value) throws JSONException {
         if (jsonObject != null && value != null && value.length > 0 && StringUtils.isNotBlank(key)) {
             jsonObject.put(key, new JSONArray(Arrays.asList(value)));
+        }
+    }
+
+    public static void addToJSONObjectIfNotNull(JSONObject jsonObject, String key, LocalizedString localizedString) throws JSONException {
+        if (jsonObject != null && localizedString != null && StringUtils.isNotBlank(key)) {
+            localizedString.getLanguageTags()
+                    .forEach(languageTag -> jsonObject.put(key + (StringUtils.isBlank(languageTag) ? "" : "#" + languageTag),
+                            localizedString.getValue(languageTag)));
         }
     }
 

@@ -23,6 +23,7 @@ import java.util.Set;
 
 /**
  * @author Yuriy Zabrovarnyy
+ * @version April 25, 2022
  */
 public class JsonApplier {
 

@@ -8,33 +8,25 @@ package io.jans.as.common.model.registration;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.jans.as.model.common.AuthenticationMethod;
-import io.jans.as.model.common.BackchannelTokenDeliveryMode;
-import io.jans.as.model.common.GrantType;
-import io.jans.as.model.common.ResponseType;
-import io.jans.as.model.common.SubjectType;
+import io.jans.as.model.common.*;
 import io.jans.as.model.crypto.signature.AsymmetricSignatureAlgorithm;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.persistence.model.ClientAttributes;
-import io.jans.orm.annotation.AttributeName;
-import io.jans.orm.annotation.AttributesList;
-import io.jans.orm.annotation.CustomObjectClass;
-import io.jans.orm.annotation.DataEntry;
-import io.jans.orm.annotation.Expiration;
-import io.jans.orm.annotation.JsonObject;
-import io.jans.orm.annotation.ObjectClass;
+import io.jans.orm.annotation.*;
 import io.jans.orm.model.base.CustomAttribute;
 import io.jans.orm.model.base.DeletableEntity;
+import io.jans.orm.model.base.LocalizedString;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * @author Javier Rojas Blum
- * @version July 30, 2021
+ * @version April 25, 2022
  */
 @DataEntry(sortBy = {"displayName"})
 @ObjectClass(value = "jansClnt")
@@ -83,23 +75,28 @@ public class Client extends DeletableEntity implements Serializable {
     @AttributeName(name = "jansContact")
     private String[] contacts;
 
-    @AttributeName(name = "displayName")
-    private String clientName;
-
     @AttributeName(name = "tknBndCnf")
     private String idTokenTokenBindingCnf;
 
+    @AttributeName(name = "displayName")
+    @LanguageTag
+    private LocalizedString clientName = new LocalizedString();
+
     @AttributeName(name = "jansLogoURI")
-    private String logoUri;
+    @LanguageTag
+    private LocalizedString logoUri = new LocalizedString();
 
     @AttributeName(name = "jansClntURI")
-    private String clientUri;
+    @LanguageTag
+    private LocalizedString clientUri = new LocalizedString();
 
     @AttributeName(name = "jansPolicyURI")
-    private String policyUri;
+    @LanguageTag
+    private LocalizedString policyUri = new LocalizedString();
 
     @AttributeName(name = "jansTosURI")
-    private String tosUri;
+    @LanguageTag
+    private LocalizedString tosUri = new LocalizedString();
 
     @AttributeName(name = "jansJwksURI")
     private String jwksUri;
@@ -556,24 +553,6 @@ public class Client extends DeletableEntity implements Serializable {
         this.contacts = contacts;
     }
 
-    /**
-     * Returns the name of the Client to be presented to the user.
-     *
-     * @return The name of the Client to be presented to the user.
-     */
-    public String getClientName() {
-        return clientName;
-    }
-
-    /**
-     * Sets the name of the Client to be presented to the user.
-     *
-     * @param clientName The name of the Client to be presented to the user.
-     */
-    public void setClientName(String clientName) {
-        this.clientName = clientName;
-    }
-
     public String getIdTokenTokenBindingCnf() {
         return idTokenTokenBindingCnf;
     }
@@ -587,79 +566,149 @@ public class Client extends DeletableEntity implements Serializable {
     }
 
     /**
-     * Returns an URL that references a logo for the Client application.
+     * Returns the name of the Client to be presented to the user represented in a language and a script.
+     *
+     * @return The name of the Client to be presented to the user.
+     */
+    public LocalizedString getClientName() {
+        return clientName;
+    }
+
+    /**
+     * Sets the name of the Client to be presented to the user.
+     *
+     * @param clientName The name of the Client to be presented to the user.
+     */
+    public void setClientName(String clientName) {
+        this.clientName.setValue(clientName);
+    }
+
+    /**
+     * Sets the name of the Client to be presented to the user represented in a language and a script.
+     *
+     * @param clientName The name of the Client to be presented to the user.
+     * @param locale     The locale
+     */
+    public void setClientName(String clientName, Locale locale) {
+        this.clientName.setValue(clientName, locale);
+    }
+
+    /**
+     * Returns a URL that references a logo for the Client application represented in a language and a script.
      *
      * @return The URL of a logo image for the Client where it can be retrieved.
      */
-    public String getLogoUri() {
+    public LocalizedString getLogoUri() {
         return logoUri;
     }
 
     /**
-     * Sets an URL that references a logo for the Client application.
+     * Sets a URL that references a logo for the Client application.
      *
      * @param logoUri The URL of a logo image for the Client where it can be retrieved.
      */
     public void setLogoUri(String logoUri) {
-        this.logoUri = logoUri;
+        this.logoUri.setValue(logoUri);
     }
 
     /**
-     * Returns an URL of the home page of the Client.
+     * Sets a URL that references a logo for the Client application represented in a language and script.
+     *
+     * @param logoUri The URL of a logo image for the Client where it can be retrieved.
+     * @param locale  The locale
+     */
+    public void setLogoUri(String logoUri, Locale locale) {
+        this.logoUri.setValue(logoUri, locale);
+    }
+
+    /**
+     * Returns a URL of the home page of the Client represented in a language and script
      *
      * @return The URL of the home page of the Client.
      */
-    public String getClientUri() {
+    public LocalizedString getClientUri() {
         return clientUri;
     }
 
     /**
-     * Sets an URL of the home page of the Client.
+     * Sets a URL of the home page of the Client.
      *
      * @param clientUri The URL of the home page of the Client.
      */
     public void setClientUri(String clientUri) {
-        this.clientUri = clientUri;
+        this.clientUri.setValue(clientUri);
     }
 
     /**
-     * Returns an that the Relying Party Client provides to the End-User to read about the how the profile data will
-     * be used.
+     * Sets a URL of the home page of the Client represented in a language and script.
      *
-     * @return An URL location about the how the profile data will be used.
+     * @param clientUri The URL of the home page of the Client.
+     * @param locale    The locale
      */
-    public String getPolicyUri() {
+    public void setClientUri(String clientUri, Locale locale) {
+        this.clientUri.setValue(clientUri, locale);
+    }
+
+    /**
+     * Returns a URL that the Relying Party Client provides to the End-User to read about how the profile data will
+     * be used represented in a language and script.
+     *
+     * @return A URL location about how the profile data will be used.
+     */
+    public LocalizedString getPolicyUri() {
         return policyUri;
     }
 
     /**
-     * Sets an that the Relying Party Client provides to the End-User to read about the how the profile data will
+     * Sets a URL that the Relying Party Client provides to the End-User to read about how the profile data will
      * be used.
      *
-     * @param policyUri An URL location about the how the profile data will be used.
+     * @param policyUri A URL location about how the profile data will be used.
      */
     public void setPolicyUri(String policyUri) {
-        this.policyUri = policyUri;
+        this.policyUri.setValue(policyUri);
     }
 
     /**
-     * Returns an URL that the Relying Party Client provides to the End-User to read about the Relying Party's terms
-     * of service.
+     * Sets a URL that the Relying Party Client provides to the End-User to read about how the profile data will
+     * be used represented in a language and script.
+     *
+     * @param policyUri A URL location about how the profile data will be used.
+     * @param locale    The locale
+     */
+    public void setPolicyUri(String policyUri, Locale locale) {
+        this.policyUri.setValue(policyUri, locale);
+    }
+
+    /**
+     * Returns a URL that the Relying Party Client provides to the End-User to read about the Relying Party's terms
+     * of service represented in a language and script.
      *
      * @return The terms of service URL.
      */
-    public String getTosUri() {
+    public LocalizedString getTosUri() {
         return tosUri;
     }
 
     /**
-     * Sets an URL that the Relying Party Client provides to the End-User to read about the Relying Party's terms of
+     * Sets a URL that the Relying Party Client provides to the End-User to read about the Relying Party's terms of
      * service.
      *
      * @param tosUri The terms of service URL.
      */
     public void setTosUri(String tosUri) {
-        this.tosUri = tosUri;
+        this.tosUri.setValue(tosUri);
+    }
+
+    /**
+     * Sets a URL that the Relying Party Client provides to the End-User to read about the Relying Party's terms of
+     * service represented in a language and script.
+     *
+     * @param tosUri The terms of service URL.
+     * @param locale The Locale
+     */
+    public void setTosUri(String tosUri, Locale locale) {
+        this.tosUri.setValue(tosUri, locale);
     }
 
     /**
@@ -1235,11 +1284,11 @@ public class Client extends DeletableEntity implements Serializable {
     }
 
     public String getDisplayName() {
-        return getClientName();
+        return getClientName().getValue();
     }
 
     public void setDisplayName(String displayName) {
-        this.clientName = displayName;
+        setClientName(displayName);
     }
 
     public String getDescription() {
@@ -1249,5 +1298,4 @@ public class Client extends DeletableEntity implements Serializable {
     public void setDescription(String description) {
         this.description = description;
     }
-
 }
