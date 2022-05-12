@@ -199,6 +199,7 @@ class CollectProperties(SetupUtils, BaseInstaller):
         Config.countryCode = ssl_subj.get('countryName', '')
         Config.state = ssl_subj.get('stateOrProvinceName', '')
         Config.city = ssl_subj.get('localityName', '')
+        Config.admin_email = ssl_subj.get('emailAddress', '')
 
          #this is not good, but there is no way to retreive password from ldap
         if not Config.get('admin_password'):
@@ -209,10 +210,6 @@ class CollectProperties(SetupUtils, BaseInstaller):
 
         if not Config.get('orgName'):
             Config.orgName = ssl_subj.get('organizationName', '')
-
-        #for service in jetty_services:
-        #    setup_prop[jetty_services[service][0]] = os.path.exists('/opt/jans/jetty/{0}/webapps/{0}.war'.format(service))
-
 
         for s in ['jansScimEnabled']:
             setattr(Config, s, oxConfiguration.get(s, False))
@@ -250,13 +247,6 @@ class CollectProperties(SetupUtils, BaseInstaller):
         Config.installFido2 = os.path.exists(os.path.join(Config.jetty_base, 'jans-fido2/start.ini'))
         Config.installEleven = os.path.exists(os.path.join(Config.jetty_base, 'jans-eleven/start.ini'))
         Config.install_config_api = os.path.exists(os.path.join(Config.jansOptFolder, 'jans-config-api'))
-
-        result = dbUtils.search('ou=people,o=jans', search_filter='(&(uid=admin)(objectClass=jansPerson))')
-        if result:
-            Config.admin_inum = result['inum']
-            if 'mail' in result:
-                Config.admin_email = result['mail']
-
 
     def save(self):
         if os.path.exists(Config.setup_properties_fn):
