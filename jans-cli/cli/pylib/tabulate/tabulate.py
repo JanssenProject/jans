@@ -8,12 +8,14 @@ from collections import namedtuple
 from platform import python_version_tuple
 import re
 import math
+import sys
 
 
-if python_version_tuple() >= ("3", "3", "0"):
+if sys.version_info.major >= 3 and sys.version_info.minor >= 3:
     from collections.abc import Iterable
 else:
     from collections import Iterable
+
 
 if python_version_tuple()[0] < "3":
     from itertools import izip_longest
