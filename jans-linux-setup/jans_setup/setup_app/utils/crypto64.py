@@ -2,6 +2,8 @@ import os
 import re
 import base64
 import json
+import socket
+import ssl
 
 from collections import OrderedDict
 from pathlib import Path
@@ -15,15 +17,10 @@ from setup_app.config import Config
 class Crypto64:
 
     def get_ssl_subject(self, ssl_fn):
+        cert_info = ssl._ssl._test_decode_cert(ssl_fn)    
         retDict = {}
-        cmd = paths.cmd_openssl + ' x509  -noout -subject -nameopt RFC2253 -in {}'.format(ssl_fn)
-        s = self.run(cmd, shell=True)
-        s = s.strip() + ','
-
-        for k in ('emailAddress', 'CN', 'O', 'L', 'ST', 'C'):
-            rex = re.search('{}=(.*?),'.format(k), s)
-            retDict[k] = rex.groups()[0] if rex else ''
-
+        for subj in cert_info["subject"]:
+            retDict[subj[0][0]] = subj[0][1]
         return retDict
 
     def obscure(self, data=""):
@@ -327,3 +324,11 @@ class Crypto64:
             Config.templateRenderingDict['oxauthClient_4_encoded_pw'] = self.obscure(Config.templateRenderingDict['oxauthClient_4_pw'])
         except:
             self.logIt("Error encoding test passwords", True)
+
+    def get_server_certificate(self, host):
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        context = ssl.SSLContext()
+        ssl_sock = context.wrap_socket(sock, server_hostname=host)
+        ssl_sock.connect((host, 443))
+        cert_der = ssl_sock.getpeercert(True)
+        return ssl.DER_cert_to_PEM_cert(cert_der)
