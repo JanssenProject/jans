@@ -112,10 +112,10 @@ public enum CustomScriptType implements AttributeEnum {
     private String displayName;
     private Class<? extends BaseExternalType> customScriptType;
     private Class<? extends CustomScript> customScriptModel;
-    private String pythonClass;
+    private String className;
     private BaseExternalType defaultImplementation;
 
-    private static Map<String, CustomScriptType> MAP_BY_VALUES = new HashMap<String, CustomScriptType>();
+    private static final Map<String, CustomScriptType> MAP_BY_VALUES = new HashMap<>();
 
     static {
         for (CustomScriptType enumType : values()) {
@@ -124,12 +124,12 @@ public enum CustomScriptType implements AttributeEnum {
     }
 
     CustomScriptType(String value, String displayName, Class<? extends BaseExternalType> customScriptType,
-            Class<? extends CustomScript> customScriptModel, String pythonClass, BaseExternalType defaultImplementation) {
+                     Class<? extends CustomScript> customScriptModel, String className, BaseExternalType defaultImplementation) {
         this.displayName = displayName;
         this.value = value;
         this.customScriptType = customScriptType;
         this.customScriptModel = customScriptModel;
-        this.pythonClass = pythonClass;
+        this.className = className;
         this.defaultImplementation = defaultImplementation;
     }
 
@@ -153,8 +153,8 @@ public enum CustomScriptType implements AttributeEnum {
         return customScriptModel;
     }
 
-    public String getPythonClass() {
-        return pythonClass;
+    public String getClassName() {
+        return className;
     }
 
     public BaseExternalType getDefaultImplementation() {
