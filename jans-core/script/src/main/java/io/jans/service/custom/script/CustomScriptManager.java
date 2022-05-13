@@ -371,7 +371,7 @@ public class CustomScriptManager {
 			return externalType.destroy(configurationAttributes);
 		} catch (Exception ex) {
 			log.error(ex.getMessage(), ex);
-			externalTypeCreator.saveScriptError(customScriptConfiguration.getCustomScript(), ex);
+			saveScriptError(customScriptConfiguration.getCustomScript(), ex);
 		}
 
 		return false;
@@ -402,5 +402,13 @@ public class CustomScriptManager {
 	public boolean isSupportedType(CustomScriptType customScriptType) {
 		return supportedCustomScriptTypes.contains(customScriptType);
 	}
+
+    public void saveScriptError(CustomScript customScript, Exception exception) {
+        externalTypeCreator.saveScriptError(customScript, exception);
+    }
+
+    public void clearScriptError(CustomScript customScript) {
+        externalTypeCreator.clearScriptError(customScript);
+    }
 
 }
