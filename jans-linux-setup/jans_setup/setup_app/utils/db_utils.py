@@ -241,6 +241,7 @@ class DBUtils:
 
 
     def enable_script(self, inum):
+        base.logIt("Enabling script {}".format(inum))
         if self.moddb == BackendTypes.LDAP:
             ldap_operation_result = self.ldap_conn.modify(
                     'inum={},ou=scripts,o=jans'.format(inum),
