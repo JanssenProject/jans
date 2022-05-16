@@ -1590,13 +1590,13 @@ public class RegisterRequest extends BaseRequest {
             function.apply(REQUIRE_AUTH_TIME.toString(), requireAuthTime.toString());
         }
         if (defaultAcrValues != null && !defaultAcrValues.isEmpty()) {
-            function.apply(DEFAULT_ACR_VALUES.toString(), toJSONArray(defaultAcrValues).toString());
+            function.apply(DEFAULT_ACR_VALUES.toString(), toJSONArray(defaultAcrValues));
         }
         if (StringUtils.isNotBlank(initiateLoginUri)) {
             function.apply(INITIATE_LOGIN_URI.toString(), initiateLoginUri);
         }
         if (postLogoutRedirectUris != null && !postLogoutRedirectUris.isEmpty()) {
-            function.apply(POST_LOGOUT_REDIRECT_URIS.toString(), toJSONArray(postLogoutRedirectUris).toString());
+            function.apply(POST_LOGOUT_REDIRECT_URIS.toString(), toJSONArray(postLogoutRedirectUris));
         }
         if (StringUtils.isNotBlank(frontChannelLogoutUri)) {
             function.apply(FRONT_CHANNEL_LOGOUT_URI.toString(), frontChannelLogoutUri);
@@ -1605,16 +1605,16 @@ public class RegisterRequest extends BaseRequest {
             function.apply(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString(), frontChannelLogoutSessionRequired.toString());
         }
         if (backchannelLogoutUris != null && !backchannelLogoutUris.isEmpty()) {
-            function.apply(BACKCHANNEL_LOGOUT_URI.toString(), toJSONArray(backchannelLogoutUris).toString());
+            function.apply(BACKCHANNEL_LOGOUT_URI.toString(), toJSONArray(backchannelLogoutUris));
         }
         if (backchannelLogoutSessionRequired != null) {
             function.apply(BACKCHANNEL_LOGOUT_SESSION_REQUIRED.toString(), backchannelLogoutSessionRequired.toString());
         }
         if (requestUris != null && !requestUris.isEmpty()) {
-            function.apply(REQUEST_URIS.toString(), toJSONArray(requestUris).toString());
+            function.apply(REQUEST_URIS.toString(), toJSONArray(requestUris));
         }
         if (authorizedOrigins != null && !authorizedOrigins.isEmpty()) {
-            function.apply(AUTHORIZED_ORIGINS.toString(), toJSONArray(authorizedOrigins).toString());
+            function.apply(AUTHORIZED_ORIGINS.toString(), toJSONArray(authorizedOrigins));
         }
         if (scope != null && !scope.isEmpty()) {
             function.apply(SCOPE.toString(), implode(scope, " "));
