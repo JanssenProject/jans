@@ -516,3 +516,17 @@ jansRevision: 1
 jansProgLng: python
 jansScrTyp: config_api_auth
 jansScr::%(config_api_config_api_interception)s
+
+dn: inum=0300-BA90,ou=scripts,o=jans
+objectClass: jansCustomScr
+objectClass: top
+description: Java Custom Sample Script
+displayName: discovery_java_params
+inum: 0300-BA90
+jansEnabled: FALSE
+jansLevel: 1
+jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+jansProgLng: java
+jansRevision: 11
+jansScr::%(discovery_discovery)s
+jansScrTyp: discovery
