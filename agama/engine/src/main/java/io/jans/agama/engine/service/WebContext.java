@@ -28,10 +28,6 @@ public class WebContext {
     public String getRelativePath() {
         return relativePath;
     }
-
-    public String getRpFlowInitiatorUrl() {
-        return rpFlowInitiatorUrl;
-    }
     
     public String getRequestUrl() {
         
@@ -43,10 +39,6 @@ public class WebContext {
         }
         return request.getRequestURL().toString() + queryString;
 
-    }
-
-    public void setRpFlowInitiatorUrl(String rpFlowInitiatorUrl) {
-        this.rpFlowInitiatorUrl = rpFlowInitiatorUrl;
     }
     
     @PostConstruct
