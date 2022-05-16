@@ -407,7 +407,7 @@
         "delayTime": 2,
         "bruteForceProtectionEnabled": false
     },
-    "loggingLevel": "INFO",
+    "loggingLevel": "%(jans_auth_logging_level)s",
     "loggingLayout": "text",
     "errorHandlingMethod":"internal",
     "useLocalCache":true,
