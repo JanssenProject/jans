@@ -35,6 +35,12 @@ public interface AuthnFlowVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitBase(AuthnFlowParser.BaseContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link AuthnFlowParser#configs}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitConfigs(AuthnFlowParser.ConfigsContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link AuthnFlowParser#inputs}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -233,27 +239,21 @@ public interface AuthnFlowVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitQuit_stmt(AuthnFlowParser.Quit_stmtContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link AuthnFlowParser#statusr_block}.
+	 * Visit a parse tree produced by {@link AuthnFlowParser#stchk_block}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitStatusr_block(AuthnFlowParser.Statusr_blockContext ctx);
+	T visitStchk_block(AuthnFlowParser.Stchk_blockContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link AuthnFlowParser#statusr_allow}.
+	 * Visit a parse tree produced by {@link AuthnFlowParser#stchk_open}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitStatusr_allow(AuthnFlowParser.Statusr_allowContext ctx);
+	T visitStchk_open(AuthnFlowParser.Stchk_openContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link AuthnFlowParser#statusr_reply}.
+	 * Visit a parse tree produced by {@link AuthnFlowParser#stchk_close}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitStatusr_reply(AuthnFlowParser.Statusr_replyContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link AuthnFlowParser#statusr_until}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitStatusr_until(AuthnFlowParser.Statusr_untilContext ctx);
+	T visitStchk_close(AuthnFlowParser.Stchk_closeContext ctx);
 }

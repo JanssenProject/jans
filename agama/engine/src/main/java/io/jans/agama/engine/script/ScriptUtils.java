@@ -10,10 +10,13 @@ import io.jans.agama.engine.continuation.PendingRenderException;
 import io.jans.agama.engine.misc.PrimitiveUtils;
 import io.jans.agama.engine.service.ActionService;
 import io.jans.agama.engine.service.FlowService;
+import io.jans.service.cdi.util.CdiUtil;
 import io.jans.util.Pair;
+
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
 import org.mozilla.javascript.NativeContinuation;
+import org.mozilla.javascript.NativeJavaObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -98,19 +101,20 @@ public class ScriptUtils {
     }
     
     //Issue a call to this method only if the request scope is active
-    public static Function prepareSubflow(String qname, String parentBasepath, String[] pathOverrides)
-            throws IOException {
-        return managedBean(FlowService.class).prepareSubflow(qname, parentBasepath, pathOverrides);
+    public static Pair<Function, NativeJavaObject> prepareSubflow(String qname, String parentBasepath,
+        String[] pathOverrides) throws IOException {
+
+        return CdiUtil.bean(FlowService.class).prepareSubflow(qname, parentBasepath, pathOverrides);
         
     }
     
     public static Object callAction(Object instance, String actionClassName, String methodName,
             Object[] params) throws Exception {
         
-        return managedBean(ActionService.class).callAction(instance, actionClassName, methodName, params);
+        return CdiUtil.bean(ActionService.class).callAction(instance, actionClassName, methodName, params);
         //TODO: remove?
         //if (Map.class.isInstance(value) && !NativeJavaMap.class.equals(value.getClass())) {
-        //    Scriptable scope = managedBean(FlowService.class).getGlobalScope();
+        //    Scriptable scope = CdiUtil.bean(FlowService.class).getGlobalScope();
         //    return new NativeJavaMap(scope, value);
         //}
         
@@ -118,7 +122,7 @@ public class ScriptUtils {
 
     //Issue a call to this method only if the request scope is active
     public static void closeSubflow() throws IOException {
-        managedBean(FlowService.class).closeSubflow();
+        CdiUtil.bean(FlowService.class).closeSubflow();
     }
     
     private static String simpleName(Class<?> cls) {
@@ -133,10 +137,6 @@ public class ScriptUtils {
         }
         return name;
         
-    }
-    
-    public static <T> T managedBean(Class<T> cls) {
-        return CDI.current().select(cls).get();
     }
 
 }
