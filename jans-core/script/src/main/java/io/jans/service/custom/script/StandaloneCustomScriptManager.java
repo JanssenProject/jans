@@ -26,7 +26,7 @@ public class StandaloneCustomScriptManager extends CustomScriptManager {
 
 	private static final long serialVersionUID = -7212146007659551839L;
 	
-	private List<ExternalScriptService> externalScriptServices = new ArrayList<ExternalScriptService>();
+	private List<ExternalScriptService> externalScriptServices = new ArrayList<>();
 	
 	public StandaloneCustomScriptManager(PersistenceEntryManager entryManager, String scriptsBaseDn, String pythonModulesDir) {
 		// Configure python service
@@ -40,9 +40,13 @@ public class StandaloneCustomScriptManager extends CustomScriptManager {
 		StandaloneCustomScriptService standaloneCustomScriptService = new StandaloneCustomScriptService();
 		standaloneCustomScriptService.configure(entryManager, scriptsBaseDn);
 
+		ExternalTypeCreator externalTypeCreator = new ExternalTypeCreator();
+		externalTypeCreator.pythonService = pythonService;
+		externalTypeCreator.customScriptService = standaloneCustomScriptService;
+
 		this.log = LoggerFactory.getLogger(StandaloneCustomScriptManager.class);
-		this.supportedCustomScriptTypes = new ArrayList<CustomScriptType>();
-		this.pythonService = pythonService;
+		this.supportedCustomScriptTypes = new ArrayList<>();
+		this.externalTypeCreator = externalTypeCreator;
 		this.customScriptService = standaloneCustomScriptService;
 	}
 
