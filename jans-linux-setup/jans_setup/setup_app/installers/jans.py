@@ -76,6 +76,10 @@ class JansInstaller(BaseInstaller, SetupUtils):
                 txt += 'Install Scim Server'.ljust(30) + repr(Config.install_scim_server).rjust(35) + (' *' if 'install_scim_server' in Config.addPostSetupService else '') + "\n"
                 txt += 'Install Eleven Server'.ljust(30) + repr(Config.installEleven).rjust(35) + (' *' if 'installEleven' in Config.addPostSetupService else '') + "\n"
                 #txt += 'Install Oxd '.ljust(30) + repr(Config.installOxd).rjust(35) + (' *' if 'installOxd' in Config.addPostSetupService else '') + "\n"
+
+            if base.argsp.t:
+                txt += 'Load Test Data '.ljust(30) + repr( base.argsp.t).rjust(35) + "\n"
+
             return txt
 
         except Exception as e:
