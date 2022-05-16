@@ -15,6 +15,8 @@ import java.util.stream.Stream;
 
 import io.jans.agama.model.EngineConfig;
 import io.jans.util.Pair;
+import io.jans.service.cdi.util.CdiUtil;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +26,7 @@ public class LogUtils {
     //MUST be a single character string
     private static final String PLACEHOLDER = "%";
 
-    private static final int MAX_ITERABLE_ITEMS = ScriptUtils.managedBean(EngineConfig.class)
+    private static final int MAX_ITERABLE_ITEMS = CdiUtil.bean(EngineConfig.class)
             .getMaxItemsLoggedInCollections();
     
     private enum LogLevel {
