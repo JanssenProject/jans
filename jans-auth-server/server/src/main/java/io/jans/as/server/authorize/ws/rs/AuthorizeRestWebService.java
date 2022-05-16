@@ -190,7 +190,6 @@ public interface AuthorizeRestWebService {
             @QueryParam("code_challenge_method") String codeChallengeMethod,
             @QueryParam(AuthorizeRequestParam.CUSTOM_RESPONSE_HEADERS) String customResponseHeaders,
             @QueryParam("claims") String claims,
-            @QueryParam("auth_req_id") String authReqId,
             @Context HttpServletRequest httpRequest,
             @Context HttpServletResponse httpResponse,
             @Context SecurityContext securityContext);

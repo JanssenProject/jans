@@ -172,6 +172,24 @@ public class AuthorizeRestWebServiceValidator {
         }
     }
 
+    @Deprecated // remove
+    public void validate(List<io.jans.as.model.common.ResponseType> responseTypes, List<Prompt> prompts, String nonce, String state, String redirectUri, HttpServletRequest httpRequest, Client client, io.jans.as.model.common.ResponseMode responseMode) {
+        if (!AuthorizeParamsValidator.validateParams(responseTypes, prompts, nonce, appConfiguration.isFapi(), responseMode)) {
+            if (redirectUri != null && redirectionUriService.validateRedirectionUri(client, redirectUri) != null) {
+                RedirectUri redirectUriResponse = new RedirectUri(redirectUri, responseTypes, responseMode);
+                redirectUriResponse.parseQueryString(errorResponseFactory.getErrorAsQueryString(
+                        AuthorizeErrorResponseType.INVALID_REQUEST, state));
+                throw new WebApplicationException(RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest).build());
+            } else {
+                throw new WebApplicationException(Response
+                        .status(Response.Status.BAD_REQUEST.getStatusCode())
+                        .type(MediaType.APPLICATION_JSON_TYPE)
+                        .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST, state, "Invalid redirect uri."))
+                        .build());
+            }
+        }
+    }
+
     public void validate(AuthzRequest authzRequest, List<io.jans.as.model.common.ResponseType> responseTypes, Client client) {
         final ResponseMode responseMode = authzRequest.getResponseModeEnum();
         final String redirectUri = authzRequest.getRedirectUri();
