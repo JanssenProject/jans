@@ -30,6 +30,10 @@ public class ExecutionServlet extends BaseServlet {
     public static final String URL_PREFIX = "/fl/";
     public static final String CALLBACK_PATH = URL_PREFIX + "callback";
     public static final String ABORT_PATH = URL_PREFIX + "abort";
+    
+    //TODO: put string in agama resource bundle
+    private static final String NO_ACTIVE_FLOW = "No flow running currently " +
+        "or your flow may have already finished/timed out";
 
     @Inject
     private Logger logger;
@@ -48,7 +52,7 @@ public class ExecutionServlet extends BaseServlet {
         String path = request.getServletPath();
 
         if (fstatus == null || fstatus.getStartedAt() == FlowStatus.FINISHED) {
-            sendNotFound(response);
+            sendNotFound(response, NO_ACTIVE_FLOW);
             return;
         }
         
@@ -97,7 +101,7 @@ public class ExecutionServlet extends BaseServlet {
         String path = request.getServletPath();
 
         if (fstatus == null || fstatus.getStartedAt() == FlowStatus.FINISHED) {
-            sendNotFound(response);
+            sendNotFound(response, NO_ACTIVE_FLOW);
             return;
         }
         
@@ -135,7 +139,7 @@ public class ExecutionServlet extends BaseServlet {
                 response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
             }
         } else {
-            sendNotFound(response);
+            sendNotFound(response, null);
             logger.debug("Unexpected path {}", path);
         }
    
@@ -181,8 +185,8 @@ public class ExecutionServlet extends BaseServlet {
             if (fstatus.isAllowCallbackResume()) {
                 continueFlow(request, response, fstatus, true, false);
             } else {
-                logger.warn("Unexpected incoming response at flow callback endpoint");
-                sendNotFound(response);
+                logger.warn("Unexpected incoming request at flow callback endpoint");
+                sendNotFound(response, null);
             }
             return true;
         }
@@ -190,8 +194,14 @@ public class ExecutionServlet extends BaseServlet {
         
     }
     
-    private void sendNotFound(HttpServletResponse response) {
-        response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+    private void sendNotFound(HttpServletResponse response, String msg) throws IOException {
+
+        if (msg == null) {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+        } else {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, msg);
+        }
+
     }
     
     private void sendRedirect(HttpServletResponse response, String contextPath, FlowStatus fls,
