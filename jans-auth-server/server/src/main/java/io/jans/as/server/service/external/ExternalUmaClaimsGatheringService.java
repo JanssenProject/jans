@@ -13,6 +13,7 @@ import io.jans.model.custom.script.type.uma.UmaClaimsGatheringType;
 import io.jans.service.LookupService;
 import io.jans.service.custom.script.CustomScriptManager;
 import io.jans.service.custom.script.ExternalScriptService;
+import io.jans.service.custom.script.ExternalTypeCreator;
 import io.jans.util.StringHelper;
 
 import jakarta.ejb.DependsOn;
@@ -39,6 +40,8 @@ public class ExternalUmaClaimsGatheringService extends ExternalScriptService {
     private LookupService lookupService;
     @Inject
     private CustomScriptManager scriptManager;
+    @Inject
+    private ExternalTypeCreator externalTypeCreator;
 
     protected Map<String, CustomScriptConfiguration> scriptInumMap;
 
@@ -104,7 +107,7 @@ public class ExternalUmaClaimsGatheringService extends ExternalScriptService {
     }
 
     private UmaClaimsGatheringType gatherScript(CustomScriptConfiguration script) {
-        return ExternalUmaRptPolicyService.HOTSWAP_UMA_SCRIPT ? (UmaClaimsGatheringType) ExternalUmaRptPolicyService.hotswap(scriptManager, script, false) : (UmaClaimsGatheringType) script.getExternalType();
+        return ExternalUmaRptPolicyService.HOTSWAP_UMA_SCRIPT ? (UmaClaimsGatheringType) ExternalUmaRptPolicyService.hotswap(externalTypeCreator, script, false) : (UmaClaimsGatheringType) script.getExternalType();
     }
 
     public boolean gather(CustomScriptConfiguration script, int step, UmaGatherContext context) {
