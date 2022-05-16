@@ -91,7 +91,6 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
 import jakarta.ws.rs.core.SecurityContext;
-import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
@@ -315,47 +314,18 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
             Set<String> scopes = scopeChecker.checkScopesPolicy(client, authzRequest.getScope());
 
-            if (Boolean.TRUE.equals(appConfiguration.getForceSignedRequestObject()) && StringUtils.isBlank(authzRequest.getRequest()) && StringUtils.isBlank(authzRequest.getRequestUri())) {
-                throw authorizeRestWebServiceValidator.createInvalidJwtRequestException(redirectUriResponse, "A signed request object is required");
-            }
+            authorizeRestWebServiceValidator.checkSignedRequestRequired(authzRequest);
 
             authzRequestService.processRequestObject(authzRequest, client, scopes, user);
-
-            if (!cibaRequestService.hasCibaCompatibility(client) && !isPar) {
-                if (appConfiguration.isFapi() && authzRequest.getJwtRequest() == null) {
-                    throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST);
-                }
-                authorizeRestWebServiceValidator.validateRequestJwt(authzRequest.getRequest(), authzRequest.getRequestUri(), redirectUriResponse);
-            }
+            validateRequestJwt(authzRequest, isPar, client, redirectUriResponse);
 
             authorizeRestWebServiceValidator.validate(authzRequest, responseTypes, client);
             authorizeRestWebServiceValidator.validatePkce(authzRequest.getCodeChallenge(), redirectUriResponse);
 
-            if (StringUtils.isBlank(authzRequest.getAcrValues()) && !ArrayUtils.isEmpty(client.getDefaultAcrValues())) {
-                authzRequest.setAcrValues(implode(client.getDefaultAcrValues(), " "));
-            }
+            authzRequestService.setDefaultAcrsIfNeeded(authzRequest, client);
 
-            if (scopes.contains(ScopeConstants.OFFLINE_ACCESS) && !client.getTrustedClient()) {
-                if (!responseTypes.contains(ResponseType.CODE)) {
-                    log.trace("Removed (ignored) offline_scope. Can't find `code` in response_type which is required.");
-                    scopes.remove(ScopeConstants.OFFLINE_ACCESS);
-                }
-
-                if (scopes.contains(ScopeConstants.OFFLINE_ACCESS) && !prompts.contains(Prompt.CONSENT)) {
-                    log.error("Removed offline_access. Can't find prompt=consent. Consent is required for offline_access.");
-                    scopes.remove(ScopeConstants.OFFLINE_ACCESS);
-                }
-            }
-
-            final boolean isResponseTypeValid = AuthorizeParamsValidator.validateResponseTypes(responseTypes, client)
-                    && AuthorizeParamsValidator.validateGrantType(responseTypes, client.getGrantTypes(), appConfiguration);
-
-            if (!isResponseTypeValid) {
-                throw new WebApplicationException(Response
-                        .status(Response.Status.BAD_REQUEST)
-                        .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.UNSUPPORTED_RESPONSE_TYPE, authzRequest.getState(), ""))
-                        .build());
-            }
+            checkScopes(responseTypes, prompts, client, scopes);
+            checkResponseType(authzRequest, responseTypes, client);
 
             AuthorizationGrant authorizationGrant = null;
 
@@ -365,70 +335,23 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 sessionUser = pair.getSecond();
             }
 
-            boolean validAuthenticationMaxAge = authorizeRestWebServiceValidator.isAuthnMaxAgeValid(authzRequest.getMaxAge(), sessionUser, client);
-            if (!validAuthenticationMaxAge) {
-                unauthenticateSession(authzRequest.getSessionId(), authzRequest.getHttpRequest());
-                authzRequest.setSessionId(null);
-
-                return redirectToAuthorizationPage(authzRequest, redirectUriResponse.getRedirectUri(), prompts, oAuth2AuditLog);
-            }
+            validateMaxAge(authzRequest, oAuth2AuditLog, prompts, sessionUser, client, redirectUriResponse);
 
             oAuth2AuditLog.setUsername(user.getUserId());
 
             ExternalPostAuthnContext postAuthnContext = new ExternalPostAuthnContext(client, sessionUser, authzRequest.getHttpRequest(), authzRequest.getHttpResponse());
-            final boolean forceReAuthentication = externalPostAuthnService.externalForceReAuthentication(client, postAuthnContext);
-            if (forceReAuthentication) {
-                unauthenticateSession(authzRequest.getSessionId(), authzRequest.getHttpRequest());
-                authzRequest.setSessionId(null);
-
-                return redirectToAuthorizationPage(authzRequest, redirectUriResponse.getRedirectUri(), prompts, oAuth2AuditLog);
-            }
-
-            final boolean forceAuthorization = externalPostAuthnService.externalForceAuthorization(client, postAuthnContext);
-            if (forceAuthorization) {
-                return redirectToAuthorizationPage(authzRequest, redirectUriResponse.getRedirectUri(), prompts, oAuth2AuditLog);
-            }
+            checkForceReAuthentication(authzRequest, oAuth2AuditLog, prompts, client, redirectUriResponse, postAuthnContext);
+            checkForceAuthorization(authzRequest, oAuth2AuditLog, prompts, client, redirectUriResponse, postAuthnContext);
 
             ClientAuthorization clientAuthorization = null;
             boolean clientAuthorizationFetched = false;
             if (!scopes.isEmpty()) {
-                if (prompts.contains(Prompt.CONSENT)) {
-                    return redirectToAuthorizationPage(authzRequest, redirectUriResponse.getRedirectUri(), prompts, oAuth2AuditLog);
-                }
-                // There is no need to present the consent page:
-                // If Client is a Trusted Client.
-                // If a client is configured for pairwise identifiers, and the openid scope is the only scope requested.
-                // Also, we should make sure that the claims request is not enabled.
-                final boolean isPairwiseWithOnlyOpenIdScope = client.getSubjectType() == SubjectType.PAIRWISE
-                        && scopes.size() == 1
-                        && scopes.contains(DefaultScope.OPEN_ID.toString())
-                        && authzRequest.getClaims() == null
-                        && (authzRequest.getJwtRequest() == null || (authzRequest.getJwtRequest().getUserInfoMember() == null && authzRequest.getJwtRequest().getIdTokenMember() == null));
-                if (client.getTrustedClient() || isPairwiseWithOnlyOpenIdScope) {
-                    sessionUser.addPermission(authzRequest.getClientId(), true);
-                    sessionIdService.updateSessionId(sessionUser);
-                } else {
-                    clientAuthorization = clientAuthorizationsService.find(user.getAttribute("inum"), client.getClientId());
-                    clientAuthorizationFetched = true;
-                    if (clientAuthorization != null && clientAuthorization.getScopes() != null) {
-                        if (log.isTraceEnabled())
-                            log.trace("ClientAuthorization - scope: {}, dn: {}, requestedScope: {}", authzRequest.getScope(), clientAuthorization.getDn(), scopes);
-                        if (Arrays.asList(clientAuthorization.getScopes()).containsAll(scopes)) {
-                            sessionUser.addPermission(authzRequest.getClientId(), true);
-                            sessionIdService.updateSessionId(sessionUser);
-                        } else {
-                            return redirectToAuthorizationPage(authzRequest, redirectUriResponse.getRedirectUri(), prompts, oAuth2AuditLog);
-                        }
-                    }
-                }
+                final Pair<ClientAuthorization, Boolean> pair = fetchClientAuthorization(authzRequest, redirectUriResponse, client, sessionUser, user, scopes, oAuth2AuditLog);
+                clientAuthorization = pair.getFirst();
+                clientAuthorizationFetched = pair.getSecond();
             }
 
-            if (identity != null && identity.getSessionId() != null && identity.getSessionId().getState() == SessionIdState.AUTHENTICATED
-                    && client != null && Boolean.TRUE.equals(client.getAttributes().getDefaultPromptLogin())
-                    && identity.getSessionId().getAuthenticationTime() != null
-                    && new Date().getTime() - identity.getSessionId().getAuthenticationTime().getTime() > 200) {
-                prompts.add(Prompt.LOGIN);
-            }
+            addPromptLoginIfNeeded(prompts, client);
 
             if (prompts.contains(Prompt.LOGIN)) {
 
@@ -439,7 +362,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 authzRequest.setSessionId(null);
                 prompts.remove(Prompt.LOGIN);
 
-                return redirectToAuthorizationPage(authzRequest, redirectUriResponse.getRedirectUri(), prompts, oAuth2AuditLog);
+                throw new WebApplicationException(redirectToAuthorizationPage(authzRequest, redirectUriResponse.getRedirectUri(), prompts, oAuth2AuditLog));
             }
 
             if (prompts.contains(Prompt.CONSENT) || !isTrue(sessionUser.isPermissionGrantedForClient(authzRequest.getClientId()))) {
@@ -622,6 +545,118 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         return builder.build();
     }
 
+    private void addPromptLoginIfNeeded(List<Prompt> prompts, Client client) {
+        if (identity != null && identity.getSessionId() != null && identity.getSessionId().getState() == SessionIdState.AUTHENTICATED
+                && Boolean.TRUE.equals(client.getAttributes().getDefaultPromptLogin())
+                && identity.getSessionId().getAuthenticationTime() != null
+                && new Date().getTime() - identity.getSessionId().getAuthenticationTime().getTime() > 200) {
+            prompts.add(Prompt.LOGIN);
+        }
+    }
+
+    private Pair<ClientAuthorization, Boolean> fetchClientAuthorization(AuthzRequest authzRequest, RedirectUriResponse redirectUriResponse, Client client, SessionId sessionUser, User user, Set<String> scopes, OAuth2AuditLog oAuth2AuditLog) {
+        ClientAuthorization clientAuthorization = null;
+        boolean clientAuthorizationFetched = false;
+
+        final List<Prompt> prompts = authzRequest.getPromptList();
+
+        if (prompts.contains(Prompt.CONSENT)) {
+            throw new WebApplicationException(redirectToAuthorizationPage(authzRequest, redirectUriResponse.getRedirectUri(), prompts, oAuth2AuditLog));
+        }
+        // There is no need to present the consent page:
+        // If Client is a Trusted Client.
+        // If a client is configured for pairwise identifiers, and the openid scope is the only scope requested.
+        // Also, we should make sure that the claims request is not enabled.
+        if (client.getTrustedClient() || isPairwiseWithOnlyOpenIdScope(client, authzRequest, scopes)) {
+            sessionUser.addPermission(authzRequest.getClientId(), true);
+            sessionIdService.updateSessionId(sessionUser);
+        } else {
+            clientAuthorization = clientAuthorizationsService.find(user.getAttribute("inum"), client.getClientId());
+            clientAuthorizationFetched = true;
+            if (clientAuthorization != null && clientAuthorization.getScopes() != null) {
+                if (log.isTraceEnabled())
+                    log.trace("ClientAuthorization - scope: {}, dn: {}, requestedScope: {}", authzRequest.getScope(), clientAuthorization.getDn(), scopes);
+                if (Arrays.asList(clientAuthorization.getScopes()).containsAll(scopes)) {
+                    sessionUser.addPermission(authzRequest.getClientId(), true);
+                    sessionIdService.updateSessionId(sessionUser);
+                } else {
+                    throw new WebApplicationException(redirectToAuthorizationPage(authzRequest, redirectUriResponse.getRedirectUri(), prompts, oAuth2AuditLog));
+                }
+            }
+        }
+        return new Pair<>(clientAuthorization, clientAuthorizationFetched);
+    }
+
+    private boolean isPairwiseWithOnlyOpenIdScope(Client client, AuthzRequest authzRequest, Set<String> scopes) {
+        return client.getSubjectType() == SubjectType.PAIRWISE
+                && scopes.size() == 1
+                && scopes.contains(DefaultScope.OPEN_ID.toString())
+                && authzRequest.getClaims() == null
+                && (authzRequest.getJwtRequest() == null || (authzRequest.getJwtRequest().getUserInfoMember() == null && authzRequest.getJwtRequest().getIdTokenMember() == null));
+    }
+
+    private void validateRequestJwt(AuthzRequest authzRequest, boolean isPar, Client client, RedirectUriResponse redirectUriResponse) {
+        if (!cibaRequestService.hasCibaCompatibility(client) && !isPar) {
+            if (appConfiguration.isFapi() && authzRequest.getJwtRequest() == null) {
+                throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST);
+            }
+            authorizeRestWebServiceValidator.validateRequestJwt(authzRequest.getRequest(), authzRequest.getRequestUri(), redirectUriResponse);
+        }
+    }
+
+    private void checkResponseType(AuthzRequest authzRequest, List<ResponseType> responseTypes, Client client) {
+        final boolean isResponseTypeValid = AuthorizeParamsValidator.validateResponseTypes(responseTypes, client)
+                && AuthorizeParamsValidator.validateGrantType(responseTypes, client.getGrantTypes(), appConfiguration);
+
+        if (!isResponseTypeValid) {
+            throw new WebApplicationException(Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.UNSUPPORTED_RESPONSE_TYPE, authzRequest.getState(), ""))
+                    .build());
+        }
+    }
+
+    private void checkForceAuthorization(AuthzRequest authzRequest, OAuth2AuditLog oAuth2AuditLog, List<Prompt> prompts, Client client, RedirectUriResponse redirectUriResponse, ExternalPostAuthnContext postAuthnContext) {
+        final boolean forceAuthorization = externalPostAuthnService.externalForceAuthorization(client, postAuthnContext);
+        if (forceAuthorization) {
+            throw new WebApplicationException(redirectToAuthorizationPage(authzRequest, redirectUriResponse.getRedirectUri(), prompts, oAuth2AuditLog));
+        }
+    }
+
+    private void checkForceReAuthentication(AuthzRequest authzRequest, OAuth2AuditLog oAuth2AuditLog, List<Prompt> prompts, Client client, RedirectUriResponse redirectUriResponse, ExternalPostAuthnContext postAuthnContext) {
+        final boolean forceReAuthentication = externalPostAuthnService.externalForceReAuthentication(client, postAuthnContext);
+        if (forceReAuthentication) {
+            unauthenticateSession(authzRequest.getSessionId(), authzRequest.getHttpRequest());
+            authzRequest.setSessionId(null);
+
+            throw new WebApplicationException(redirectToAuthorizationPage(authzRequest, redirectUriResponse.getRedirectUri(), prompts, oAuth2AuditLog));
+        }
+    }
+
+    private void validateMaxAge(AuthzRequest authzRequest, OAuth2AuditLog oAuth2AuditLog, List<Prompt> prompts, SessionId sessionUser, Client client, RedirectUriResponse redirectUriResponse) {
+        boolean validAuthenticationMaxAge = authorizeRestWebServiceValidator.isAuthnMaxAgeValid(authzRequest.getMaxAge(), sessionUser, client);
+        if (!validAuthenticationMaxAge) {
+            unauthenticateSession(authzRequest.getSessionId(), authzRequest.getHttpRequest());
+            authzRequest.setSessionId(null);
+
+            throw new WebApplicationException(redirectToAuthorizationPage(authzRequest, redirectUriResponse.getRedirectUri(), prompts, oAuth2AuditLog));
+        }
+    }
+
+    private void checkScopes(List<ResponseType> responseTypes, List<Prompt> prompts, Client client, Set<String> scopes) {
+        if (scopes.contains(ScopeConstants.OFFLINE_ACCESS) && !client.getTrustedClient()) {
+            if (!responseTypes.contains(ResponseType.CODE)) {
+                log.trace("Removed (ignored) offline_scope. Can't find `code` in response_type which is required.");
+                scopes.remove(ScopeConstants.OFFLINE_ACCESS);
+            }
+
+            if (scopes.contains(ScopeConstants.OFFLINE_ACCESS) && !prompts.contains(Prompt.CONSENT)) {
+                log.error("Removed offline_access. Can't find prompt=consent. Consent is required for offline_access.");
+                scopes.remove(ScopeConstants.OFFLINE_ACCESS);
+            }
+        }
+    }
+
     private Pair<User, SessionId> ifUserIsNull(AuthzRequest authzRequest, RedirectUriResponse redirectUriResponse, OAuth2AuditLog oAuth2AuditLog) throws SearchException {
         identity.logout();
         final List<Prompt> prompts = authzRequest.getPromptList();
@@ -786,82 +821,35 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         redirectUriResponse.setResponseMode(ResponseMode.QUERY);
 
         // oAuth parameters
-        if (StringUtils.isNotBlank(authzRequest.getResponseType())) {
-            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.RESPONSE_TYPE, authzRequest.getResponseType());
-        }
-        if (StringUtils.isNotBlank(authzRequest.getScope())) {
-            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.SCOPE, authzRequest.getScope());
-        }
-        if (StringUtils.isNotBlank(authzRequest.getClientId())) {
-            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.CLIENT_ID, authzRequest.getClientId());
-        }
-        if (StringUtils.isNotBlank(authzRequest.getRedirectUri())) {
-            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.REDIRECT_URI, authzRequest.getRedirectUri());
-        }
-        if (StringUtils.isNotBlank(authzRequest.getState())) {
-            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.STATE, authzRequest.getState());
-        }
-        if (StringUtils.isNotBlank(authzRequest.getResponseMode())) {
-            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.RESPONSE_MODE, authzRequest.getResponseMode());
-        }
+        redirectUriResponse.addResponseParameterIfNotBlank(AuthorizeRequestParam.RESPONSE_TYPE, authzRequest.getResponseType());
+        redirectUriResponse.addResponseParameterIfNotBlank(AuthorizeRequestParam.SCOPE, authzRequest.getScope());
+        redirectUriResponse.addResponseParameterIfNotBlank(AuthorizeRequestParam.CLIENT_ID, authzRequest.getClientId());
+        redirectUriResponse.addResponseParameterIfNotBlank(AuthorizeRequestParam.REDIRECT_URI, authzRequest.getRedirectUri());
+        redirectUriResponse.addResponseParameterIfNotBlank(AuthorizeRequestParam.STATE, authzRequest.getState());
+        redirectUriResponse.addResponseParameterIfNotBlank(AuthorizeRequestParam.RESPONSE_MODE, authzRequest.getResponseMode());
 
         // OIC parameters
-        if (StringUtils.isNotBlank(authzRequest.getNonce())) {
-            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.NONCE, authzRequest.getNonce());
-        }
-        if (StringUtils.isNotBlank(authzRequest.getDisplay())) {
-            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.DISPLAY, authzRequest.getDisplay());
-        }
-        String prompt = implode(prompts, " ");
-        if (StringUtils.isNotBlank(prompt)) {
-            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.PROMPT, prompt);
-        }
-        if (authzRequest.getMaxAge() != null) {
-            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.MAX_AGE, authzRequest.getMaxAge().toString());
-        }
-        if (StringUtils.isNotBlank(authzRequest.getUiLocales())) {
-            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.UI_LOCALES, authzRequest.getUiLocales());
-        }
-        if (StringUtils.isNotBlank(authzRequest.getIdTokenHint())) {
-            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.ID_TOKEN_HINT, authzRequest.getIdTokenHint());
-        }
-        if (StringUtils.isNotBlank(authzRequest.getLoginHint())) {
-            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.LOGIN_HINT, authzRequest.getLoginHint());
-        }
-        if (StringUtils.isNotBlank(authzRequest.getAcrValues())) {
-            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.ACR_VALUES, authzRequest.getAcrValues());
-        }
-        if (StringUtils.isNotBlank(authzRequest.getAmrValues())) {
-            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.AMR_VALUES, authzRequest.getAmrValues());
-        }
-        if (StringUtils.isNotBlank(authzRequest.getRequest())) {
-            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.REQUEST, authzRequest.getRequest());
-        }
-        if (StringUtils.isNotBlank(authzRequest.getRequestUri())) {
-            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.REQUEST_URI, authzRequest.getRequestUri());
-        }
-        if (StringUtils.isNotBlank(authzRequest.getCodeChallenge())) {
-            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.CODE_CHALLENGE, authzRequest.getCodeChallenge());
-        }
-        if (StringUtils.isNotBlank(authzRequest.getCodeChallengeMethod())) {
-            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.CODE_CHALLENGE_METHOD, authzRequest.getCodeChallengeMethod());
-        }
-        if (StringUtils.isNotBlank(authzRequest.getSessionId()) && isTrue(appConfiguration.getSessionIdRequestParameterEnabled())) {
-            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.SESSION_ID, authzRequest.getSessionId());
-        }
-        if (StringUtils.isNotBlank(authzRequest.getClaims())) {
-            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.CLAIMS, authzRequest.getClaims());
-        }
+        redirectUriResponse.addResponseParameterIfNotBlank(AuthorizeRequestParam.NONCE, authzRequest.getNonce());
+        redirectUriResponse.addResponseParameterIfNotBlank(AuthorizeRequestParam.DISPLAY, authzRequest.getDisplay());
+        redirectUriResponse.addResponseParameterIfNotBlank(AuthorizeRequestParam.PROMPT, implode(prompts, " "));
+        redirectUriResponse.addResponseParameterIfNotBlank(AuthorizeRequestParam.MAX_AGE, authzRequest.getMaxAge() != null ? authzRequest.getMaxAge().toString() : null);
+        redirectUriResponse.addResponseParameterIfNotBlank(AuthorizeRequestParam.UI_LOCALES, authzRequest.getUiLocales());
+        redirectUriResponse.addResponseParameterIfNotBlank(AuthorizeRequestParam.ID_TOKEN_HINT, authzRequest.getIdTokenHint());
+        redirectUriResponse.addResponseParameterIfNotBlank(AuthorizeRequestParam.LOGIN_HINT, authzRequest.getLoginHint());
+        redirectUriResponse.addResponseParameterIfNotBlank(AuthorizeRequestParam.ACR_VALUES, authzRequest.getAcrValues());
+        redirectUriResponse.addResponseParameterIfNotBlank(AuthorizeRequestParam.AMR_VALUES, authzRequest.getAmrValues());
+        redirectUriResponse.addResponseParameterIfNotBlank(AuthorizeRequestParam.REQUEST, authzRequest.getRequest());
+        redirectUriResponse.addResponseParameterIfNotBlank(AuthorizeRequestParam.REQUEST_URI, authzRequest.getRequestUri());
+        redirectUriResponse.addResponseParameterIfNotBlank(AuthorizeRequestParam.CODE_CHALLENGE, authzRequest.getCodeChallenge());
+        redirectUriResponse.addResponseParameterIfNotBlank(AuthorizeRequestParam.CODE_CHALLENGE_METHOD, authzRequest.getCodeChallengeMethod());
+        redirectUriResponse.addResponseParameterIfNotBlank(AuthorizeRequestParam.SESSION_ID, authzRequest.getSessionId());
+        redirectUriResponse.addResponseParameterIfNotBlank(AuthorizeRequestParam.CLAIMS, authzRequest.getClaims());
 
         // CIBA param
-        if (StringUtils.isNotBlank(authzRequest.getAuthReqId())) {
-            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.AUTH_REQ_ID, authzRequest.getAuthReqId());
-        }
+        redirectUriResponse.addResponseParameterIfNotBlank(AuthorizeRequestParam.AUTH_REQ_ID, authzRequest.getAuthReqId());
 
         // mod_ox param
-        if (StringUtils.isNotBlank(authzRequest.getOriginHeaders())) {
-            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.ORIGIN_HEADERS, authzRequest.getOriginHeaders());
-        }
+        redirectUriResponse.addResponseParameterIfNotBlank(AuthorizeRequestParam.ORIGIN_HEADERS, authzRequest.getOriginHeaders());
 
         final Map<String, String> customParameters = authzRequest.getCustomParameters();
         if (customParameters != null && customParameters.size() > 0) {
@@ -871,7 +859,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         }
 
         ResponseBuilder builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, authzRequest.getHttpRequest());
-        applicationAuditLogger.sendMessage(oAuth2AuditLog);
+        if (oAuth2AuditLog != null) {
+            applicationAuditLogger.sendMessage(oAuth2AuditLog);
+        }
         return builder.build();
     }
 
