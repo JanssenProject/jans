@@ -6,6 +6,7 @@
 
 package io.jans.model.custom.script.model;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -13,7 +14,7 @@ import java.util.Date;
  *
  * @author Yuriy Movchan Date: 02/27/2018
  */
-public class ScriptError {
+public class ScriptError implements Serializable {
 
     private Date raisedAt;
 
