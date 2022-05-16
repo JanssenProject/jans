@@ -220,7 +220,7 @@ public class ActionService {
 
         URL url = null;
         try {
-            url = new URL("file://" + econf.getRootDir() + econf.getScriptsPath());
+            url = new URL(String.format("file://%s%s/", econf.getRootDir(), econf.getScriptsPath()));
         } catch(MalformedURLException e) {
             logger.error(e.getMessage());
             throw new RuntimeException(e);
