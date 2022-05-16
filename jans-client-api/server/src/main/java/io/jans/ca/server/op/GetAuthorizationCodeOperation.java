@@ -43,7 +43,7 @@ public class GetAuthorizationCodeOperation extends BaseOperation<GetAuthorizatio
      * @param p_command command
      */
     public GetAuthorizationCodeOperation(Command p_command, ServiceProvider serviceProvider) {
-        super(p_command, GetAuthorizationCodeParams.class);
+        super(p_command, serviceProvider, GetAuthorizationCodeParams.class);
         this.discoveryService = serviceProvider.getDiscoveryService();
         this.stateService = serviceProvider.getStateService();
         this.opClientFactory = discoveryService.getOpClientFactory();

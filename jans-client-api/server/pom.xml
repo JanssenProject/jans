@@ -348,6 +348,11 @@
             <artifactId>arquillian-test-impl-base</artifactId>
             <version>${arquillian.test.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.jboss.arquillian.protocol</groupId>
+            <artifactId>arquillian-protocol-servlet</artifactId>
+            <scope>test</scope>
+        </dependency>
 
         <!-- Test: Shrinkwrap -->
         <dependency>
@@ -491,9 +496,9 @@
                                 </resource>
                             </resources>
                             <filters>
-                                <filter>${basedir}/profiles/${cfg}/config-oxd.properties</filter>
-                                <filter>${basedir}/profiles/${cfg}/config-oxd-sql.properties</filter>
-                                <filter>${basedir}/profiles/${cfg}/config-oxd-ldap.properties</filter>
+                                <filter>${basedir}/profiles/${cfg}/config-client-api.properties</filter>
+                                <filter>${basedir}/profiles/${cfg}/config-client-api-sql.properties</filter>
+                                <filter>${basedir}/profiles/${cfg}/config-client-api-ldap.properties</filter>
                             </filters>
                         </configuration>
                     </execution>
@@ -805,6 +810,33 @@
                     <name>jetty.embedded</name>
                 </property>
             </activation>
+            <dependencies>
+                <!-- Remove after jans client update to same version -->
+                <dependency>
+                    <groupId>org.jboss.resteasy</groupId>
+                    <artifactId>resteasy-jaxrs</artifactId>
+                    <version>3.0.21.Final</version>
+                    <scope>test</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.jboss.resteasy</groupId>
+                    <artifactId>resteasy-cdi</artifactId>
+                    <version>3.0.21.Final</version>
+                    <scope>test</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.jboss.resteasy</groupId>
+                    <artifactId>resteasy-client</artifactId>
+                    <version>3.0.21.Final</version>
+                    <scope>test</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.jboss.resteasy</groupId>
+                    <artifactId>resteasy-servlet-initializer</artifactId>
+                    <version>3.0.21.Final</version>
+                    <scope>test</scope>
+                </dependency>
+            </dependencies>
         </profile>
     </profiles>
 

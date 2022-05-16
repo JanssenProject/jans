@@ -9,7 +9,6 @@ import io.jans.ca.common.params.IParams;
 import io.jans.ca.common.response.IOpResponse;
 import io.jans.ca.server.op.*;
 import io.jans.ca.server.service.ServiceProvider;
-import io.jans.ca.server.service.ValidationService;
 import io.jans.ca.server.utils.Convertor;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -18,7 +17,7 @@ import jakarta.ws.rs.WebApplicationException;
 import org.slf4j.Logger;
 
 /**
- * oxD operation processor.
+ * client-api operation processor.
  *
  * @author Yuriy Zabrovarnyy
  */
@@ -27,10 +26,7 @@ public class Processor {
     @Inject
     Logger logger;
     @Inject
-    ValidationService validationService;
-    @Inject
     ServiceProvider serviceProvider;
-
 
     public IOpResponse process(Command command) {
         if (command != null) {
@@ -38,7 +34,7 @@ public class Processor {
                 final IOperation<IParams> operation = (IOperation<IParams>) create(command);
                 if (operation != null) {
                     IParams iParams = Convertor.asParams(operation.getParameterClass(), command);
-                    validationService.validate(iParams);
+                    serviceProvider.getValidationService().validate(iParams);
 
                     IOpResponse operationResponse = operation.execute(iParams);
                     if (operationResponse != null) {
@@ -112,8 +108,16 @@ public class Processor {
                     return new GetRequestObjectOperation(command, serviceProvider);
                 case RS_MODIFY:
                     return new RsModifyOperation(command, serviceProvider);
-                case CLEAR_TESTS:
-                    return new TestClearRpOperation(command, serviceProvider);
+                case VALIDATE:
+                    return new ValidateOperation(command, serviceProvider);
+                case IMPLICIT_FLOW:
+                    return new ImplicitFlowOperation(command, serviceProvider);
+                case CHECK_ACCESS_TOKEN:
+                    return new CheckAccessTokenOperation(command, serviceProvider);
+                case ISSUER_DISCOVERY:
+                    return new GetIssuerOperation(command, serviceProvider);
+                case GET_REQUEST_URI:
+                    return new GetRequestObjectUriOperation(command, serviceProvider);
             }
             logger.error("Command is not supported. Command: {}", command);
         } else {

@@ -40,7 +40,7 @@ public class GetJwksTest extends BaseTest {
         params.setOpHost(opHost);
         params.setOpDiscoveryPath(opDiscoveryPath);
 
-        final GetJwksResponse response = client.getJwks(Tester.getAuthorization(client.getApitargetURL()), null, params);
+        final GetJwksResponse response = client.getJwks(Tester.getSetupAuthorization(client.getApitargetURL()), null, params);
         assertNotNull(response);
         assertNotNull(response.getKeys());
         assertFalse(response.getKeys().isEmpty());
@@ -55,7 +55,7 @@ public class GetJwksTest extends BaseTest {
         final GetJwksParams params = new GetJwksParams();
         params.setOpConfigurationEndpoint(opConfigurationEndpoint);
 
-        final GetJwksResponse response = client.getJwks(Tester.getAuthorization(client.getApitargetURL()), null, params);
+        final GetJwksResponse response = client.getJwks(Tester.getSetupAuthorization(client.getApitargetURL()), null, params);
         assertNotNull(response);
         assertNotNull(response.getKeys());
         assertFalse(response.getKeys().isEmpty());

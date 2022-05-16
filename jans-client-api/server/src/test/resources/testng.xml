@@ -45,14 +45,6 @@
         <listener class-name="io.jans.ca.server.JansUnitTestsListener"/>
     </listeners>
 
-
-    <!-- Connect -->
-    <test name="ClearAndPrepareTest" enabled="true">
-        <classes>
-            <class name="io.jans.ca.server.tests.ClearAndPrepareTest"></class>
-        </classes>
-    </test>
-
     <test name="HealthCheckTest" enabled="true">
         <classes>
             <class name="io.jans.ca.server.tests.HealthCheckTest"></class>
@@ -77,11 +69,11 @@
         </classes>
     </test>
 
-    <test name="Get Client Token" enabled="true">
-        <classes>
-            <class name="io.jans.ca.server.tests.GetClientTokenTest"/>
-        </classes>
-    </test>
+<!--    <test name="Get Client Token" enabled="true">-->
+<!--        <classes>-->
+<!--            <class name="io.jans.ca.server.tests.GetClientTokenTest"/>-->
+<!--        </classes>-->
+<!--    </test>-->
 
     <!--    <test name="Get Tokens by Code" enabled="true">-->
     <!--        <classes>-->

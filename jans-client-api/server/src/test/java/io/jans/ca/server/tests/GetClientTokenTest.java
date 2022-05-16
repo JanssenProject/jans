@@ -30,8 +30,8 @@ public class GetClientTokenTest extends BaseTest {
         final GetClientTokenParams params = new GetClientTokenParams();
         params.setOpHost(opHost);
         params.setScope(Lists.newArrayList("openid"));
-        params.setClientId(Tester.getSetupClient().getClientId());
-        params.setClientSecret(Tester.getSetupClient().getClientSecret());
+        params.setClientId(Tester.getSetupClient(getApiTagetURL(url)).getClientId());
+        params.setClientSecret(Tester.getSetupClient(getApiTagetURL(url)).getClientSecret());
 
         GetClientTokenResponse resp = getClientInterface(url).getClientToken(params);
 
@@ -46,8 +46,8 @@ public class GetClientTokenTest extends BaseTest {
         final GetClientTokenParams params = new GetClientTokenParams();
         params.setOpConfigurationEndpoint(opConfigurationEndpoint);
         params.setScope(Lists.newArrayList("openid"));
-        params.setClientId(Tester.getSetupClient().getClientId());
-        params.setClientSecret(Tester.getSetupClient().getClientSecret());
+        params.setClientId(Tester.getSetupClient(getApiTagetURL(url)).getClientId());
+        params.setClientSecret(Tester.getSetupClient(getApiTagetURL(url)).getClientSecret());
 
         GetClientTokenResponse resp = getClientInterface(url).getClientToken(params);
 

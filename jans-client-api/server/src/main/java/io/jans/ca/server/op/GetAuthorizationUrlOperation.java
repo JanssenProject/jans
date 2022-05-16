@@ -16,7 +16,7 @@ import io.jans.ca.server.configuration.model.Rp;
 import io.jans.ca.server.service.DiscoveryService;
 import io.jans.ca.server.service.ServiceProvider;
 import io.jans.ca.server.service.StateService;
-import io.jans.ca.server.persistence.service.JansConfigurationService;
+import io.jans.ca.server.persistence.service.MainPersistenceService;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +35,7 @@ public class GetAuthorizationUrlOperation extends BaseOperation<GetAuthorization
 
     DiscoveryService discoveryService;
     StateService stateService;
-    JansConfigurationService jansConfigurationService;
+    MainPersistenceService jansConfigurationService;
 
     /**
      * Base constructor

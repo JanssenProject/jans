@@ -13,7 +13,9 @@ import io.jans.as.model.configuration.Configuration;
 import io.jans.as.model.util.SecurityProviderUtility;
 import io.jans.ca.server.Utils;
 import io.jans.ca.server.configuration.model.ApiConf;
-import io.jans.ca.server.persistence.service.JansConfigurationService;
+import io.jans.ca.server.op.OpClientFactory;
+import io.jans.ca.server.op.OpClientFactoryImpl;
+import io.jans.ca.server.persistence.service.MainPersistenceService;
 import io.jans.ca.server.service.*;
 import io.jans.exception.ConfigurationException;
 import io.jans.orm.PersistenceEntryManager;
@@ -41,8 +43,6 @@ import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Inject;
 
 import java.io.*;
-import java.net.URL;
-import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -67,7 +67,8 @@ public class ConfigurationFactory {
         } else if (System.getProperty("jboss.home.dir") != null) {
             BASE_DIR = System.getProperty("jboss.home.dir");
         } else {
-            String jansBase = Utils.readCompileProterty("compile.jans.base");;
+            String jansBase = Utils.readCompileProterty("compile.jans.base");
+            ;
             BASE_DIR = jansBase;
             System.setProperty("jans.base", jansBase);
         }
@@ -98,7 +99,7 @@ public class ConfigurationFactory {
     ValidationService validationService;
 
     @Inject
-    JansConfigurationService jansConfigurationService;
+    MainPersistenceService jansConfigurationService;
 
     @Inject
     RpSyncService rpSyncService;
@@ -123,6 +124,9 @@ public class ConfigurationFactory {
 
     @Inject
     RequestObjectService requestObjectService;
+
+    @Inject
+    OpClientFactoryImpl opClientFactory;
 
     public final static String PERSISTENCE_CONFIGUARION_RELOAD_EVENT_TYPE = "persistenceConfigurationReloadEvent";
     public final static String BASE_CONFIGUARION_RELOAD_EVENT_TYPE = "baseConfigurationReloadEvent";
@@ -167,6 +171,7 @@ public class ConfigurationFactory {
         serviceProvider.setKeyGeneratorService(keyGeneratorService);
         serviceProvider.setPublicOpKeyService(publicOpKeyService);
         serviceProvider.setRequestObjectService(requestObjectService);
+        serviceProvider.setOpClientFactory(opClientFactory);
         return serviceProvider;
     }
 

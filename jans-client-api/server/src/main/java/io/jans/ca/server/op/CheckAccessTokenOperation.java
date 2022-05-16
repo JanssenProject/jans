@@ -16,7 +16,7 @@ import io.jans.ca.common.params.CheckAccessTokenParams;
 import io.jans.ca.common.response.CheckAccessTokenResponse;
 import io.jans.ca.common.response.IOpResponse;
 import io.jans.ca.server.service.DiscoveryService;
-import jakarta.inject.Inject;
+import io.jans.ca.server.service.ServiceProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,12 +31,11 @@ public class CheckAccessTokenOperation extends BaseOperation<CheckAccessTokenPar
 
     private static final Logger LOG = LoggerFactory.getLogger(CheckAccessTokenOperation.class);
 
-    @Inject
-    DiscoveryService discoveryService;
+    private DiscoveryService discoveryService;
 
-    protected CheckAccessTokenOperation(Command command, DiscoveryService discoveryService) {
-        super(command, CheckAccessTokenParams.class);
-        this.discoveryService = discoveryService;
+    public CheckAccessTokenOperation(Command command, ServiceProvider serviceProvider) {
+        super(command, serviceProvider, CheckAccessTokenParams.class);
+        this.discoveryService = serviceProvider.getDiscoveryService();
     }
 
     @Override

@@ -213,7 +213,7 @@ public class Validator {
             throw new HttpException(ErrorResponseCode.INVALID_ALGORITHM);
 
         if (Strings.isNullOrEmpty(kid) && (signatureAlgorithm.getFamily() == AlgorithmFamily.RSA || signatureAlgorithm.getFamily() == AlgorithmFamily.EC)) {
-            LOG.warn("Warning:`kid` is missing in id_token header. oxd will throw error if RP is unable to determine the key to used for `id_token` validation.");
+            LOG.warn("Warning:`kid` is missing in id_token header. jans-client-apì will throw error if RP is unable to determine the key to used for `id_token` validation.");
         }
         if (signatureAlgorithm == SignatureAlgorithm.NONE) {
 
@@ -248,7 +248,7 @@ public class Validator {
     public void validateNonce(StateService stateService) {
         final String nonceFromToken = idToken.getClaims().getClaimAsString(JwtClaimName.NONCE);
         if (!stateService.isExpiredObjectPresent(nonceFromToken)) {
-            LOG.error("Nonce value from `id_token` is not registered with oxd.");
+            LOG.error("Nonce value from `id_token` is not registered with jans-client-apì.");
             throw new HttpException(ErrorResponseCode.INVALID_NONCE);
         }
     }

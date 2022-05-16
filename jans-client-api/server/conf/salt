@@ -1,1 +1,1 @@
-encodeSalt=${config.oxd.salt}
+encodeSalt=${config.salt}

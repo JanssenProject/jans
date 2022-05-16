@@ -1,12 +1,12 @@
 package io.jans.ca.server.service;
 
-import io.jans.ca.server.persistence.service.JansConfigurationService;
-import jakarta.inject.Inject;
+import io.jans.ca.server.op.OpClientFactoryImpl;
+import io.jans.ca.server.persistence.service.MainPersistenceService;
 
 public class ServiceProvider {
 
     private ValidationService validationService;
-    private JansConfigurationService jansConfigurationService;
+    private MainPersistenceService jansConfigurationService;
     private HttpService httpService;
     private RpSyncService rpSyncService;
     private DiscoveryService discoveryService;
@@ -20,6 +20,8 @@ public class ServiceProvider {
 
     private RequestObjectService requestObjectService;
 
+    private OpClientFactoryImpl opClientFactory;
+
 
 
     public ValidationService getValidationService() {
@@ -30,11 +32,7 @@ public class ServiceProvider {
         this.validationService = validationService;
     }
 
-    public JansConfigurationService getConfigurationService() {
-        return jansConfigurationService;
-    }
-
-    public void setConfigurationService(JansConfigurationService jansConfigurationService) {
+    public void setConfigurationService(MainPersistenceService jansConfigurationService) {
         this.jansConfigurationService = jansConfigurationService;
     }
 
@@ -78,11 +76,11 @@ public class ServiceProvider {
         this.introspectionService = introspectionService;
     }
 
-    public JansConfigurationService getJansConfigurationService() {
+    public MainPersistenceService getJansConfigurationService() {
         return jansConfigurationService;
     }
 
-    public void setJansConfigurationService(JansConfigurationService jansConfigurationService) {
+    public void setJansConfigurationService(MainPersistenceService jansConfigurationService) {
         this.jansConfigurationService = jansConfigurationService;
     }
 
@@ -124,5 +122,13 @@ public class ServiceProvider {
 
     public void setRequestObjectService(RequestObjectService requestObjectService) {
         this.requestObjectService = requestObjectService;
+    }
+
+    public void setOpClientFactory(OpClientFactoryImpl opClientFactory) {
+        this.opClientFactory = opClientFactory;
+    }
+
+    public OpClientFactoryImpl getOpClientFactory() {
+        return opClientFactory;
     }
 }

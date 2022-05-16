@@ -2,7 +2,7 @@ package io.jans.ca.server.service;
 
 import io.jans.ca.common.ExpiredObject;
 import io.jans.ca.common.ExpiredObjectType;
-import io.jans.ca.server.persistence.service.JansConfigurationService;
+import io.jans.ca.server.persistence.service.MainPersistenceService;
 import io.jans.ca.server.persistence.service.PersistenceService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -16,7 +16,7 @@ public class RequestObjectService {
     @Inject
     PersistenceService persistenceService;
     @Inject
-    JansConfigurationService configurationService;
+    MainPersistenceService configurationService;
 
     public void put(String requestUriId, String requestObject) {
         persistenceService.createExpiredObject(new ExpiredObject(requestUriId, requestObject, ExpiredObjectType.REQUEST_OBJECT, configurationService.find().getRequestObjectExpirationInMinutes()));

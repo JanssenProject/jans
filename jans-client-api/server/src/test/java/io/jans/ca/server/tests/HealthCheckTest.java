@@ -26,7 +26,7 @@ public class HealthCheckTest extends BaseTest {
         assertNotNull(resp);
         Map<String, String> map = Jackson2.createRpMapper().readValue(resp, Map.class);
 
-        assertEquals(map.get("application"), "oxd");
+        assertEquals(map.get("application"), "jans-client-api");
         assertEquals(map.get("status"), "running");
         assertEquals(map.get("version"), System.getProperty("projectVersion"));
     }

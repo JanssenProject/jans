@@ -4,7 +4,7 @@ import io.jans.ca.common.ExpiredObject;
 import io.jans.ca.common.ExpiredObjectType;
 import io.jans.ca.server.Utils;
 import io.jans.ca.server.persistence.service.PersistenceServiceImpl;
-import io.jans.ca.server.persistence.service.JansConfigurationService;
+import io.jans.ca.server.persistence.service.MainPersistenceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +24,7 @@ public class StateService {
     @Inject
     PersistenceServiceImpl persistenceService;
     @Inject
-    JansConfigurationService jansConfigurationService;
+    MainPersistenceService jansConfigurationService;
 
     private final SecureRandom random = new SecureRandom();
 
@@ -70,7 +70,7 @@ public class StateService {
         return expiredObject;
     }
 
-    public JansConfigurationService getConfigurationService() {
+    public MainPersistenceService getConfigurationService() {
         return jansConfigurationService;
     }
 }

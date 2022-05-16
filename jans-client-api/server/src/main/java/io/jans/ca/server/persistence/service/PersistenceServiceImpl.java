@@ -4,6 +4,7 @@ import io.jans.ca.common.ExpiredObject;
 import io.jans.ca.server.configuration.ApiAppConfiguration;
 import io.jans.ca.server.configuration.model.Rp;
 import io.jans.ca.server.persistence.providers.H2PersistenceProvider;
+import jakarta.ejb.Stateless;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +21,7 @@ public class PersistenceServiceImpl {
 
     private static final Logger LOG = LoggerFactory.getLogger(PersistenceServiceImpl.class);
     @Inject
-    JansConfigurationService jansConfigurationService;
+    MainPersistenceService jansConfigurationService;
     private PersistenceService persistenceService;
 
     public void create() {

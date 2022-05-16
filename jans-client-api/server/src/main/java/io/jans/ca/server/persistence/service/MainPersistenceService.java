@@ -37,7 +37,7 @@ import static io.jans.ca.server.configuration.ConfigurationFactory.CONFIGURATION
  * @author Yuriy Zabrovarnyy
  */
 @ApplicationScoped
-public class JansConfigurationService implements PersistenceService {
+public class MainPersistenceService implements PersistenceService {
 
     @Inject
     @Named(ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME)

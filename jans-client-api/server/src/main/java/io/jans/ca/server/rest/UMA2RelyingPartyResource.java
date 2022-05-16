@@ -5,6 +5,7 @@ import io.jans.ca.common.params.RpGetClaimsGatheringUrlParams;
 import io.jans.ca.common.params.RpGetRptParams;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 @Path("/")
 public class UMA2RelyingPartyResource extends BaseResource {
@@ -13,18 +14,20 @@ public class UMA2RelyingPartyResource extends BaseResource {
     @Path("/uma-rp-get-rpt")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public String umaRpGetRpt(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String AuthorizationRpId, String params) {
+    public Response umaRpGetRpt(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String AuthorizationRpId, String params) {
         logger.info("Api Resource: /uma-rp-get-rpt  Params: {}", params);
-        return process(CommandType.RP_GET_RPT, params, RpGetRptParams.class, authorization, AuthorizationRpId);
+        String result = process(CommandType.RP_GET_RPT, params, RpGetRptParams.class, authorization, AuthorizationRpId);
+        return Response.ok(result).build();
     }
 
     @POST
     @Path("/uma-rp-get-claims-gathering-url")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public String umaRpGetClaimsGatheringUrl(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String AuthorizationRpId, String params) {
+    public Response umaRpGetClaimsGatheringUrl(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String AuthorizationRpId, String params) {
         logger.info("Api Resource: /uma-rp-get-claims-gathering-url  Params: {}", params);
-        return process(CommandType.RP_GET_CLAIMS_GATHERING_URL, params, RpGetClaimsGatheringUrlParams.class, authorization, AuthorizationRpId);
+        String result = process(CommandType.RP_GET_CLAIMS_GATHERING_URL, params, RpGetClaimsGatheringUrlParams.class, authorization, AuthorizationRpId);
+        return Response.ok(result).build();
     }
 
 }

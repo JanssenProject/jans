@@ -22,7 +22,7 @@ import io.jans.ca.common.response.IOpResponse;
 import io.jans.ca.server.HttpException;
 import io.jans.ca.server.configuration.model.Rp;
 import io.jans.ca.server.service.*;
-import io.jans.ca.server.persistence.service.JansConfigurationService;
+import io.jans.ca.server.persistence.service.MainPersistenceService;
 import org.python.jline.internal.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +40,7 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
     private RpService rpService;
     private KeyGeneratorService keyGeneratorService;
     private PublicOpKeyService publicOpKeyService;
-    private JansConfigurationService jansConfigurationService;
+    private MainPersistenceService jansConfigurationService;
     private OpClientFactoryImpl opClientFactory;
     private HttpService httpService;
 

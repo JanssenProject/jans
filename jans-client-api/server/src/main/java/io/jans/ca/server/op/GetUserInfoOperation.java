@@ -16,7 +16,7 @@ import io.jans.ca.server.HttpException;
 import io.jans.ca.server.service.DiscoveryService;
 import io.jans.ca.server.service.HttpService;
 import io.jans.ca.server.service.ServiceProvider;
-import io.jans.ca.server.persistence.service.JansConfigurationService;
+import io.jans.ca.server.persistence.service.MainPersistenceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +31,7 @@ public class GetUserInfoOperation extends BaseOperation<GetUserInfoParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(GetUserInfoOperation.class);
     DiscoveryService discoveryService;
-    JansConfigurationService jansConfigurationService;
+    MainPersistenceService jansConfigurationService;
     OpClientFactoryImpl opClientFactory;
     HttpService httpService;
 
@@ -39,7 +39,7 @@ public class GetUserInfoOperation extends BaseOperation<GetUserInfoParams> {
     public GetUserInfoOperation(Command command, ServiceProvider serviceProvider) {
         super(command, serviceProvider, GetUserInfoParams.class);
         this.discoveryService = serviceProvider.getDiscoveryService();
-        this.jansConfigurationService = serviceProvider.getConfigurationService();
+        this.jansConfigurationService = serviceProvider.getJansConfigurationService();
         this.opClientFactory = discoveryService.getOpClientFactory();
         this.httpService = discoveryService.getHttpService();
     }

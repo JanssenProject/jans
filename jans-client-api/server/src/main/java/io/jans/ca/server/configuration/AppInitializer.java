@@ -8,7 +8,8 @@ package io.jans.ca.server.configuration;
 
 import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.as.model.util.SecurityProviderUtility;
-import io.jans.ca.server.Utils;
+import io.jans.ca.server.persistence.service.PersistenceServiceImpl;
+import io.jans.ca.server.service.RpService;
 import io.jans.ca.server.service.logger.LoggerService;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.orm.PersistenceEntryManager;
@@ -23,8 +24,6 @@ import io.jans.service.custom.script.CustomScriptManager;
 import io.jans.service.timer.QuartzSchedulerManager;
 import io.jans.util.security.PropertiesDecrypter;
 import io.jans.util.security.StringEncrypter;
-import org.slf4j.Logger;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.BeforeDestroyed;
 import jakarta.enterprise.context.Initialized;
@@ -35,8 +34,10 @@ import jakarta.enterprise.inject.spi.BeanManager;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.ServletContext;
+import org.slf4j.Logger;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 
 @ApplicationScoped
@@ -77,15 +78,14 @@ public class AppInitializer {
 
     @Inject
     PersistenceConfiguration persistenceConfiguration;
+    @Inject
+    PersistenceServiceImpl persistenceService;
+    @Inject
+    RpService rpService;
 
     public void onStart(@Observes @Initialized(ApplicationScoped.class) Object init) {
 
         logger.info("=============  STARTING CLIENT API APPLICATION  ========================");
-        if (System.getProperty("jans.base") == null) {
-            String jansBase = Utils.readCompileProterty("compile.jans.base");
-            ;
-            System.setProperty("jans.base", jansBase);
-        }
         logger.info("init:{}", init);
 
         SecurityProviderUtility.installBCProvider();
@@ -108,6 +108,11 @@ public class AppInitializer {
 
         // Schedule timer tasks
         configurationFactory.initTimer();
+
+        //Clear Test Data with System param
+        if (System.getProperties().containsKey("clearTestData")) {
+            clearTestData();
+        }
 
         logger.info("============== CLIENT API APPLICATION IS UP AND RUNNING ===================");
     }
@@ -183,6 +188,7 @@ public class AppInitializer {
         logger.info("================================================================");
         logger.info("===========  jans-client-api service STOPPED  ==========================");
         logger.info("servletContext:{}", context);
+
         logger.info("================================================================");
     }
 
@@ -196,5 +202,23 @@ public class AppInitializer {
             quartzSchedulerManager.standby();
         }
     }
+
+    private void clearTestData() {
+        try {
+            String val = System.getProperty("clearTestData");
+            if (val != null && !val.isEmpty() && Boolean.valueOf(val)) {
+                persistenceService.create();
+                rpService.removeAllRps();
+                rpService.load();
+                logger.info("Finished removeExistingRps successfullly.");
+            } else {
+                logger.info("Invalid value clearTestData.");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error("Failed to remove existing RPs.", e);
+        }
+    }
+
 
 }

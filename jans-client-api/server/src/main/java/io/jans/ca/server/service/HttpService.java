@@ -8,7 +8,6 @@ import io.jans.ca.common.CoreUtils;
 import io.jans.ca.common.proxy.ProxyConfiguration;
 import io.jans.ca.server.configuration.ApiAppConfiguration;
 import io.jans.ca.server.configuration.ConfigurationFactory;
-import io.jans.ca.server.persistence.service.JansConfigurationService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.apache.http.client.HttpClient;

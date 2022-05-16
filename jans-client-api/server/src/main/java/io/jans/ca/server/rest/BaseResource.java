@@ -15,7 +15,7 @@ import io.jans.ca.server.configuration.ApiAppConfiguration;
 import io.jans.ca.server.configuration.model.Rp;
 import io.jans.ca.server.service.RpSyncService;
 import io.jans.ca.server.service.ValidationService;
-import io.jans.ca.server.persistence.service.JansConfigurationService;
+import io.jans.ca.server.persistence.service.MainPersistenceService;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.WebApplicationException;
@@ -33,7 +33,7 @@ public class BaseResource {
     Logger logger;
 
     @Inject
-    JansConfigurationService jansConfigurationService;
+    MainPersistenceService jansConfigurationService;
     @Inject
     RpSyncService rpSyncService;
     @Inject

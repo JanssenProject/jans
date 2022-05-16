@@ -10,7 +10,7 @@ import io.jans.ca.common.response.GetLogoutUriResponse;
 import io.jans.ca.common.response.IOpResponse;
 import io.jans.ca.server.HttpException;
 import io.jans.ca.server.configuration.model.Rp;
-import io.jans.ca.server.persistence.service.JansConfigurationService;
+import io.jans.ca.server.persistence.service.MainPersistenceService;
 import io.jans.ca.server.service.DiscoveryService;
 import io.jans.ca.server.service.ServiceProvider;
 import io.jans.ca.server.service.StateService;
@@ -31,14 +31,14 @@ public class GetLogoutUrlOperation extends BaseOperation<GetLogoutUrlParams> {
     private static final Logger LOG = LoggerFactory.getLogger(GetLogoutUrlOperation.class);
 
     private DiscoveryService discoveryService;
-    private JansConfigurationService configurationService;
+    private MainPersistenceService configurationService;
     private StateService stateService;
 
     public GetLogoutUrlOperation(Command command, ServiceProvider serviceProvider) {
         super(command, serviceProvider, GetLogoutUrlParams.class);
         this.discoveryService = serviceProvider.getDiscoveryService();
         this.stateService = serviceProvider.getStateService();
-        this.configurationService = serviceProvider.getConfigurationService();
+        this.configurationService = serviceProvider.getJansConfigurationService();
     }
 
     @Override

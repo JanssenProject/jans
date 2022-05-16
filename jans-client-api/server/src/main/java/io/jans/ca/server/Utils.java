@@ -7,7 +7,6 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import io.jans.as.model.util.Util;
 import io.jans.ca.common.ErrorResponseCode;
-import io.jans.ca.server.configuration.ConfigurationFactory;
 import io.jans.ca.server.rest.ApiApplication;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
@@ -142,7 +141,7 @@ public class Utils {
         }
     }
 
-    public static String getOxdVersion() {
+    public static String getJansClientApiVersion() {
         return !Strings.isNullOrEmpty(System.getProperty("projectVersion")) ? System.getProperty("projectVersion") : ApiApplication.class.getPackage().getImplementationVersion();
     }
 

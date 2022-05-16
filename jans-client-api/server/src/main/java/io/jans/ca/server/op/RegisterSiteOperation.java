@@ -26,7 +26,7 @@ import io.jans.ca.server.configuration.model.Rp;
 import io.jans.ca.server.mapper.RegisterRequestMapper;
 import io.jans.ca.server.service.DiscoveryService;
 import io.jans.ca.server.service.RpService;
-import io.jans.ca.server.persistence.service.JansConfigurationService;
+import io.jans.ca.server.persistence.service.MainPersistenceService;
 import io.jans.ca.server.service.ServiceProvider;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -51,7 +51,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
 
     private RpService rpService;
     private DiscoveryService discoveryService;
-    private JansConfigurationService jansConfigurationService;
+    private MainPersistenceService jansConfigurationService;
 
     /**
      * Base constructor

@@ -10,7 +10,7 @@ import io.jans.as.client.RegisterRequest;
 import io.jans.ca.server.configuration.model.Rp;
 import io.jans.ca.server.op.OpClientFactoryImpl;
 import io.jans.ca.server.persistence.service.PersistenceServiceImpl;
-import io.jans.ca.server.persistence.service.JansConfigurationService;
+import io.jans.ca.server.persistence.service.MainPersistenceService;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
@@ -33,7 +33,7 @@ public class RpService {
     private static Cache<String, Rp> rpCache;
 
     @Inject
-    JansConfigurationService jansConfigurationService;
+    MainPersistenceService jansConfigurationService;
 
     @Inject
     ValidationService validationService;
@@ -148,7 +148,7 @@ public class RpService {
         return registerClient;
     }
 
-    public JansConfigurationService getConfigurationService() {
+    public MainPersistenceService getConfigurationService() {
         return jansConfigurationService;
     }
 

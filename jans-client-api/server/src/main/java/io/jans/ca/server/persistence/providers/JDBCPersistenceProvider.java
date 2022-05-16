@@ -5,7 +5,7 @@ import com.google.common.base.Strings;
 import io.jans.ca.common.Jackson2;
 import io.jans.ca.server.configuration.ApiAppConfiguration;
 import io.jans.ca.server.persistence.configuration.JDBCConfiguration;
-import io.jans.ca.server.persistence.service.JansConfigurationService;
+import io.jans.ca.server.persistence.service.MainPersistenceService;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.slf4j.Logger;
 
@@ -20,7 +20,7 @@ public class JDBCPersistenceProvider implements SqlPersistenceProvider {
     Logger logger;
 
     @Inject
-    JansConfigurationService jansConfigurationService;
+    MainPersistenceService jansConfigurationService;
     private BasicDataSource dataSource = null;
 
     @Override

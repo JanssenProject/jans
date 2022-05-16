@@ -6,6 +6,7 @@
 
 package io.jans.ca.server.arquillian;
 
+import io.jans.ca.server.Tester;
 import io.jans.util.StringHelper;
 import io.jans.util.properties.FileConfiguration;
 import org.apache.commons.io.IOUtils;
@@ -83,6 +84,7 @@ public abstract class ConfigurableTest extends Arquillian {
 
         // Override test parameters
         context.getSuite().getXmlSuite().setParameters(parameters);
+        Tester.setSetupTestParams(parameters);
 
         LOG.debug("Finished beforeSuite!");
         initialized = true;

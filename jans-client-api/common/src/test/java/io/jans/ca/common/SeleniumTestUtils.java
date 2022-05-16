@@ -140,14 +140,6 @@ public class SeleniumTestUtils {
             authorizationRequest.setState(state);
 
             return URLDecoder.decode(opHost + "/jans-auth/restv1/authorize?" +authorizationRequest.getQueryString(), Util.UTF8_STRING_ENCODING);
-
-            /*return URLDecoder.decode(opHost + "/oxauth/restv1/authorize?" +
-                    "response_type=code+id_token+token" +
-                    "&state=" + state +
-                    "&nonce=" + nonce +
-                    "&client_id=" + clientId +
-                    "&redirect_uri=" + redirectUrls.split(" ")[0] +
-                    "&scope=openid+profile+oxd+uma_protection", Util.UTF8_STRING_ENCODING);*/
         } catch (UnsupportedEncodingException ex) {
             fail("Failed to decode the authorization URL.");
             return null;

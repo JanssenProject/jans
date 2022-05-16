@@ -18,14 +18,12 @@ public class SetUpTest {
 
     public static void beforeSuite(String url, String host, String opHost, String redirectUrls) {
         try {
-            removeExistingRps(url);
-            LOG.debug("Existing RPs are removed.");
 
             RegisterSiteResponse setupClient = SetupClientTest.setupClient(Tester.newClient(url), opHost, redirectUrls);
             Tester.setSetupClient(setupClient, host, opHost);
             LOG.debug("SETUP_CLIENT is set in Tester.");
 
-            Preconditions.checkNotNull(Tester.getAuthorization(url));
+            Preconditions.checkNotNull(Tester.getSetupAuthorization(url));
             LOG.debug("Tester's authorization is set.");
 
             LOG.debug("Finished beforeSuite!");
@@ -33,19 +31,6 @@ public class SetUpTest {
             LOG.error("Failed to start suite.", e);
             throw new AssertionError("Failed to start suite.");
         }
-    }
-
-    public static void removeExistingRps(String url) {
-        LOG.info("URL removeExistingRps" + url);
-        Invocation.Builder request = ResteasyClientBuilder.newClient().target(url + PathTestEndPoint.CLEAR_TESTS).request();
-
-        Response response = request.get();
-        String entity = response.readEntity(String.class);
-
-        ClientIterfaceImpl.showResponse("removeExistingRps", response, entity);
-
-        Assert.assertEquals(response.getStatus(), 200, "Unexpected response code. " + entity);
-        Assert.assertNotNull(entity, "Unexpected result: " + entity);
     }
 
     public static void afterSuite() {
