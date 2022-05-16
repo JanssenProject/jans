@@ -388,6 +388,18 @@ public class AuthnFlowBaseListener implements AuthnFlowListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterBool_expr(AuthnFlowParser.Bool_exprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitBool_expr(AuthnFlowParser.Bool_exprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterBoolean_op_expr(AuthnFlowParser.Boolean_op_exprContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -460,49 +472,37 @@ public class AuthnFlowBaseListener implements AuthnFlowListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterStatusr_block(AuthnFlowParser.Statusr_blockContext ctx) { }
+	@Override public void enterStchk_block(AuthnFlowParser.Stchk_blockContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitStatusr_block(AuthnFlowParser.Statusr_blockContext ctx) { }
+	@Override public void exitStchk_block(AuthnFlowParser.Stchk_blockContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterStatusr_allow(AuthnFlowParser.Statusr_allowContext ctx) { }
+	@Override public void enterStchk_open(AuthnFlowParser.Stchk_openContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitStatusr_allow(AuthnFlowParser.Statusr_allowContext ctx) { }
+	@Override public void exitStchk_open(AuthnFlowParser.Stchk_openContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterStatusr_reply(AuthnFlowParser.Statusr_replyContext ctx) { }
+	@Override public void enterStchk_close(AuthnFlowParser.Stchk_closeContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitStatusr_reply(AuthnFlowParser.Statusr_replyContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterStatusr_until(AuthnFlowParser.Statusr_untilContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitStatusr_until(AuthnFlowParser.Statusr_untilContext ctx) { }
+	@Override public void exitStchk_close(AuthnFlowParser.Stchk_closeContext ctx) { }
 
 	/**
 	 * {@inheritDoc}
