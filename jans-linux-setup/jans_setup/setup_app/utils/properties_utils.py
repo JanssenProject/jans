@@ -801,7 +801,11 @@ class PropertiesUtils(SetupUtils):
 
         self.prompt_for_rdbm()
 
-        Config.staticKid = self.getPrompt("Enter Openbanking static kid")
+        while True:
+            Config.staticKid = input("Enter Openbanking static kid: ")
+            confirm = input('Use one of generated keys as static kid? [y|N] : ')
+            if confirm and confirm.lower().startswith('y'):
+                break
 
         use_external_key_prompt = input('Use external key? [Y|n] : ')
         Config.use_external_key = not use_external_key_prompt.lower().startswith('n')

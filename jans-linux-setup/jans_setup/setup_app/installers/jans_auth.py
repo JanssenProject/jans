@@ -13,7 +13,7 @@ from setup_app import paths
 from setup_app.utils import base
 from setup_app.config import Config
 from setup_app.installers.jetty import JettyInstaller
-from setup_app.static import AppType, InstallOption
+from setup_app.static import AppType, InstallOption, SetupProfiles
 
 class JansAuthInstaller(JettyInstaller):
 
@@ -43,7 +43,7 @@ class JansAuthInstaller(JettyInstaller):
         self.ldif_people = os.path.join(self.output_folder, 'people.ldif')
         self.ldif_groups = os.path.join(self.output_folder, 'groups.ldif')
 
-        if Config.profile == 'openbanking':
+        if Config.profile == SetupProfiles.OPENBANKING:
             Config.jwksUri = base.argsp.jwks_uri
 
     def install(self):
@@ -63,7 +63,7 @@ class JansAuthInstaller(JettyInstaller):
         if not Config.get('admin_inum'):
             Config.admin_inum = str(uuid.uuid4())
 
-        if Config.profile == 'jans':
+        if Config.profile == SetupProfiles.JANS:
             Config.encoded_admin_password = self.ldap_encode(Config.admin_password)
 
         self.logIt("Generating OAuth openid keys", pbar=self.service_name)
@@ -71,6 +71,14 @@ class JansAuthInstaller(JettyInstaller):
         enc_keys = 'RSA1_5 RSA-OAEP ECDH-ES'
         jwks = self.gen_openid_jwks_jks_keys(self.oxauth_openid_jks_fn, Config.oxauth_openid_jks_pass, key_expiration=2, key_algs=sig_keys, enc_keys=enc_keys)
         self.write_openid_keys(self.oxauth_openid_jwks_fn, jwks)
+
+        if Config.profile == SetupProfiles.OPENBANKING and not Config.staticKid:
+            jwks_str = '\n'.join(jwks)
+            keys_dict = json.loads(jwks_str)
+            for k in keys_dict['keys']:
+                if k['use'] == 'sig' and k['kty']== 'RSA':
+                    Config.staticKid = k['kid']
+                    break
 
         if Config.get('use_external_key'):
             self.import_openbanking_key()
@@ -115,11 +123,20 @@ class JansAuthInstaller(JettyInstaller):
         Config.templateRenderingDict['person_custom_object_class_list'] = '[]' if Config.mapping_locations['default'] == 'rdbm' else '["jansCustomPerson", "jansPerson"]'
 
         templates = [self.oxauth_config_json]
-        if Config.profile == 'jans':
+        if Config.profile == SetupProfiles.JANS:
             templates += [self.ldif_people, self.ldif_groups]
 
         for tmp in templates:
             self.renderTemplateInOut(tmp, self.templates_folder, self.output_folder)
+
+        if Config.profile == SetupProfiles.OPENBANKING:
+            base.extract_file(
+                base.current_app.jans_zip,
+                'jans-linux-setup/jans_setup/static/extension/introspection/introspection_role_based_scope.py',
+                os.path.join(Config.extensionFolder, 'introspection/')
+                )
+
+        self.prepare_base64_extension_scripts()
 
         Config.templateRenderingDict['oxauth_config_base64'] = self.generate_base64_ldap_file(self.oxauth_config_json)
         Config.templateRenderingDict['oxauth_static_conf_base64'] = self.generate_base64_ldap_file(self.oxauth_static_conf_json)
@@ -132,9 +149,9 @@ class JansAuthInstaller(JettyInstaller):
             self.renderTemplateInOut(temp, self.templates_folder, self.output_folder)
 
         self.dbUtils.import_ldif([self.ldif_config, self.ldif_scripts, self.ldif_role_scope_mappings])
-        if Config.profile == 'jans':
+        if Config.profile == SetupProfiles.JANS:
             self.dbUtils.import_ldif([self.ldif_people, self.ldif_groups])
-        if Config.profile == 'openbanking':
+        if Config.profile == SetupProfiles.OPENBANKING:
             self.import_openbanking_certificate()
 
     def genRandomString(self, N):

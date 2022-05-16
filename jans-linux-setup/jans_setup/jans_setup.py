@@ -351,7 +351,6 @@ def main():
                     Config.ldapTrustStoreFn = Config.opendj_p12_fn
                     Config.encoded_ldapTrustStorePass = Config.encoded_opendj_p12_pass
 
-                jansInstaller.prepare_base64_extension_scripts()
                 jansInstaller.render_templates()
                 jansInstaller.render_configuration_template()
 

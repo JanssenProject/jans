@@ -72,3 +72,16 @@ jansScrTyp: introspection
 objectClass: top
 objectClass: jansCustomScr
 
+dn: inum=A44E-4F3D,ou=scripts,o=jans
+objectClass: top
+objectClass: jansCustomScr
+description: Role Based Scopes
+displayName: role_based_scopes
+inum: A44E-4F3D
+jansEnabled: true
+jansLevel: 1
+jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+jansProgLng: python
+jansRevision: 1
+jansScr::%(introspection_introspection_role_based_scope)s
+jansScrTyp: introspection
