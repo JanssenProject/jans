@@ -823,6 +823,13 @@
 				<scope>test</scope>
 			</dependency>
 
+            <!-- java compiler lib -->
+            <dependency>
+                <groupId>net.openhft</groupId>
+                <artifactId>compiler</artifactId>
+                <version>2.21ea82</version>
+            </dependency>
+
 			<!-- Jetty -->
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
