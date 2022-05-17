@@ -4,11 +4,10 @@ package io.jans.configapi.plugin.mgt.rest;
 import com.github.fge.jsonpatch.JsonPatchException;
 
 import static io.jans.as.model.util.Util.escapeLog;
-import io.jans.as.common.model.common.User;
+import io.jans.configapi.plugin.mgt.model.user.User;
 import io.jans.as.common.service.common.EncryptionService;
 import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
-import io.jans.configapi.plugin.mgt.model.config.UserMgtConfigSource;
 import io.jans.configapi.plugin.mgt.model.user.UserPatchRequest;
 import io.jans.configapi.plugin.mgt.service.UserService;
 import io.jans.configapi.plugin.mgt.util.Constants;
@@ -94,7 +93,7 @@ public class UserResource extends BaseResource {
 
         return Response.ok(decryptUserPassword(user)).build();
     }
-
+/*
     @POST
     @ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS })
     public Response createUser(@Valid User user)
@@ -171,6 +170,8 @@ public class UserResource extends BaseResource {
         return Response.noContent().build();
     }
 
+  */
+    
     private List<User> doSearch(SearchRequest searchReq) throws IllegalAccessException, InvocationTargetException {
         if (logger.isDebugEnabled()) {
             logger.debug("User search params - searchReq:{} ", escapeLog(searchReq));
@@ -236,6 +237,6 @@ public class UserResource extends BaseResource {
         }
         return user;
     }
-    
+  
   
 }
