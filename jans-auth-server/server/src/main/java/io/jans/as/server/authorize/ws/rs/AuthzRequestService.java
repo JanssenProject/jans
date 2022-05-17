@@ -274,7 +274,7 @@ public class AuthzRequestService {
         }
     }
 
-    private void checkIdTokenMember(AuthzRequest authzRequest, RedirectUriResponse redirectUriResponse, User user, JwtAuthorizationRequest jwtRequest) {
+    public void checkIdTokenMember(AuthzRequest authzRequest, RedirectUriResponse redirectUriResponse, User user, JwtAuthorizationRequest jwtRequest) {
         final IdTokenMember idTokenMember = jwtRequest.getIdTokenMember();
         if (idTokenMember == null) {
             return;
@@ -330,7 +330,7 @@ public class AuthzRequestService {
         }
     }
 
-    private void fillRedirectUriResponseforJARM(RedirectUriResponse redirectUriResponse, JsonWebResponse jwr, Client client) {
+    public void fillRedirectUriResponseforJARM(RedirectUriResponse redirectUriResponse, JsonWebResponse jwr, Client client) {
         try {
             if (jwr != null) {
                 String tempRedirectUri = jwr.getClaims().getClaimAsString("redirect_uri");
