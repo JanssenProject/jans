@@ -406,11 +406,12 @@ public class AuthzRequestService {
         }
     }
 
-    public void createRedirectUriResponse(AuthzRequest authzRequest) {
+    public RedirectUriResponse createRedirectUriResponse(AuthzRequest authzRequest) {
         RedirectUriResponse redirectUriResponse = new RedirectUriResponse(new RedirectUri(authzRequest.getRedirectUri(), authzRequest.getResponseTypeList(), authzRequest.getResponseModeEnum()), authzRequest.getState(), authzRequest.getHttpRequest(), errorResponseFactory);
         redirectUriResponse.setFapiCompatible(appConfiguration.isFapi());
 
         authzRequest.setRedirectUriResponse(redirectUriResponse);
+        return redirectUriResponse;
     }
 
     public void createOauth2AuditLog(AuthzRequest authzRequest) {
