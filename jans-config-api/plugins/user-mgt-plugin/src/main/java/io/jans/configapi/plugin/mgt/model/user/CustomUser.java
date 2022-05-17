@@ -2,12 +2,10 @@ package io.jans.configapi.plugin.mgt.model.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import io.jans.orm.model.base.CustomObjectAttribute;
-
-import java.util.List;
+import io.jans.as.common.model.common.User;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class User extends io.jans.as.common.model.common.User {
+public class CustomUser extends User {
  
     private static final long serialVersionUID = 1L;
 
@@ -49,9 +47,8 @@ public class User extends io.jans.as.common.model.common.User {
     }
     @Override
     public String toString() {
-        return "User [mail=" + mail + ", displayName=" + displayName + ", jansStatus=" + jansStatus + ", givenName="
+        return "CustomUser [mail=" + mail + ", displayName=" + displayName + ", jansStatus=" + jansStatus + ", givenName="
                 + givenName + ", userPassword= XXXXX ]";
     }
-   
     
 }
