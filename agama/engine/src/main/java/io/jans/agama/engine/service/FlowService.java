@@ -38,6 +38,7 @@ import org.mozilla.javascript.Function;
 import org.mozilla.javascript.NativeContinuation;
 import org.mozilla.javascript.NativeJavaList;
 import org.mozilla.javascript.NativeJavaMap;
+import org.mozilla.javascript.NativeJavaObject;
 import org.mozilla.javascript.NativeObject;
 import org.mozilla.javascript.RhinoException;
 import org.mozilla.javascript.Scriptable;
@@ -113,7 +114,7 @@ public class FlowService {
                 logger.info("Executing function {}", funcName);
                 Function f = (Function) globalScope.get(funcName, globalScope);
 
-                Object[] params = getFlowParams(fl.getInputs(), status.getJsonInput());
+                Object[] params = getFuncParams(fl, status.getJsonInput());
                 NativeObject result = (NativeObject) scriptCtx.callFunctionWithContinuations(f, globalScope, params);                
                 finishFlow(result, status);
                 
@@ -175,9 +176,9 @@ public class FlowService {
     }
     
     // This is called in the middle of a cx.resumeContinuation invocation (see util.js#_flowCall)
-    public Function prepareSubflow(String subflowName, String parentBasepath, String[] pathOverrides)
-            throws IOException {
-        
+    public Pair<Function, NativeJavaObject> prepareSubflow(String subflowName, String parentBasepath, 
+        String[] pathOverrides) throws IOException {
+
         Flow flow = aps.getFlow(subflowName, false);
         FlowMetadata fl = flow.getMetadata();
         String funcName = fl.getFuncName();
@@ -193,13 +194,14 @@ public class FlowService {
         Function f = (Function) globalScope.get(funcName, globalScope);
         //The values set below are useful when saving the state, see method processPause
         
-        ParentFlowData pfd = new ParentFlowData();        
+        ParentFlowData pfd = new ParentFlowData();
         pfd.setParentBasepath(parentBasepath);
         pfd.setPathOverrides(pathOverrides);
         parentFlowData = pfd;
 
         logger.info("Evaluating subflow code");
-        return f;
+        Map<String, Object> configs = Optional.ofNullable(fl.getProperties()).orElse(Collections.emptyMap());
+        return new Pair<>(f, wrapListOrMap(configs));
         
     }
     
@@ -312,36 +314,47 @@ public class FlowService {
 
     }
     
-    private Object[] getFlowParams(List<String> inputNames, String strParams) throws JsonProcessingException {
+    private Object[] getFuncParams(FlowMetadata metadata, String strParams) throws JsonProcessingException {
+        
+        List<String> inputs = Optional.ofNullable(metadata.getInputs()).orElse(Collections.emptyList());
+        Map<String, Object> configs = Optional.ofNullable(metadata.getProperties()).orElse(Collections.emptyMap());
 
-        List<String> inputs = Optional.ofNullable(inputNames).orElse(Collections.emptyList());
-        Object[] params = new Object[inputs.size()];
-
+        Object[] params = new Object[inputs.size() + 1];
+        params[0] = wrapListOrMap(configs);
+        
         if (strParams != null) {
             Map<String, Object> map = mapper.readValue(strParams, new TypeReference<Map<String, Object>>(){});
-            for (int i = 0; i < params.length; i++) {
-                params[i] = map.get(inputs.get(i));
+            for (int i = 1; i < params.length; i++) {
+                params[i] = map.get(inputs.get(i - 1));
             }
         }
-        for (int i = 0; i < params.length; i++) {
-            String input = inputs.get(i);
+        for (int i = 1; i < params.length; i++) {
+            String input = inputs.get(i - 1);
 
             if (params[i] == null) {
                 logger.warn("Setting parameter '{}' to null", input);                
             } else {
                 logger.debug("Setting parameter '{}' to an instance of {}", input, params[i].getClass().getName());
 
-                //This helps prevent exception "Invalid JavaScript value of type ..."
-                //when typeof is applied over this param in JavaScript code
-                if (Map.class.isInstance(params[i])) {
-                    params[i] = new NativeJavaMap(globalScope, params[i]);
-                } else if (List.class.isInstance(params[i])) {
-                    params[i] = new NativeJavaList(globalScope, params[i]);                    
-                }
+                NativeJavaObject wrapped = wrapListOrMap(params[i]); 
+                params[i] = wrapped == null ? params[i] : wrapped;
             }
         }
         return params;
 
+    }
+    
+    private NativeJavaObject wrapListOrMap(Object obj) {
+
+        //This helps prevent exception "Invalid JavaScript value of type ..."
+        //when typeof is applied over this param in JavaScript code
+        if (Map.class.isInstance(obj)) {
+            return new NativeJavaMap(globalScope, obj);
+        } else if (List.class.isInstance(obj)) {
+            return new NativeJavaList(globalScope, obj);                    
+        }
+        return null;
+        
     }
     
     private void makeCrashException(Exception e) throws FlowCrashException {
