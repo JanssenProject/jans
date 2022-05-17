@@ -349,8 +349,6 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         SessionId sessionUser = identity.getSessionId();
         User user = sessionIdService.getUser(sessionUser);
 
-        Map<String, String> customResponseHeaders = Util.jsonObjectArrayStringAsMap(authzRequest.getCustomResponseHeaders());
-
         updateSessionForROPC(authzRequest.getHttpRequest(), sessionUser);
 
         Client client = authorizeRestWebServiceValidator.validateClient(authzRequest, isPar);
@@ -470,12 +468,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             authorizeRestWebServiceValidator.validateJwtRequest(authzRequest.getClientId(), authzRequest.getState(), authzRequest.getHttpRequest(), responseTypes, redirectUriResponse, jwtRequest);
         }
 
-        if (!cibaRequestService.hasCibaCompatibility(client) && !isPar) {
-            if (appConfiguration.isFapi() && authzRequest.getJwtRequest() == null) {
-                throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST);
-            }
-            authorizeRestWebServiceValidator.validateRequestJwt(authzRequest.getRequest(), authzRequest.getRequestUri(), redirectUriResponse);
-        }
+        validateRequestJwt(authzRequest, isPar, client);
 
         authorizeRestWebServiceValidator.validate(authzRequest, responseTypes, client);
         authorizeRestWebServiceValidator.validatePkce(authzRequest.getCodeChallenge(), authzRequest.getRedirectUriResponse());
@@ -620,16 +613,22 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
         ResponseBuilder builder = RedirectUtil.getRedirectResponseBuilder(authzRequest.getRedirectUriResponse().getRedirectUri(), authzRequest.getHttpRequest());
 
-        if (isTrue(appConfiguration.getCustomHeadersWithAuthorizationResponse())) {
-            for (Entry<String, String> entry : customResponseHeaders.entrySet()) {
-                builder.header(entry.getKey(), entry.getValue());
-            }
-        }
+        addCustomHeaders(builder, authzRequest);
 
         runCiba(authzRequest.getAuthReqId(), client, authzRequest.getHttpRequest(), authzRequest.getHttpResponse());
         processDeviceAuthorization(deviceAuthzUserCode, user);
 
         return builder;
+    }
+
+    private void addCustomHeaders(ResponseBuilder builder, AuthzRequest authzRequest) {
+        if (isTrue(appConfiguration.getCustomHeadersWithAuthorizationResponse())) {
+
+            Map<String, String> customResponseHeaders = Util.jsonObjectArrayStringAsMap(authzRequest.getCustomResponseHeaders());
+            for (Entry<String, String> entry : customResponseHeaders.entrySet()) {
+                builder.header(entry.getKey(), entry.getValue());
+            }
+        }
     }
 
     private void addResponseParameterScope(AuthzRequest authzRequest, AuthorizationGrant authorizationGrant) {
