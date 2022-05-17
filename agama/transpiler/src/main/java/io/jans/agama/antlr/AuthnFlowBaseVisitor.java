@@ -45,6 +45,13 @@ public class AuthnFlowBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
+	@Override public T visitConfigs(AuthnFlowParser.ConfigsContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
 	@Override public T visitInputs(AuthnFlowParser.InputsContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
@@ -276,26 +283,19 @@ public class AuthnFlowBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitStatusr_block(AuthnFlowParser.Statusr_blockContext ctx) { return visitChildren(ctx); }
+	@Override public T visitStchk_block(AuthnFlowParser.Stchk_blockContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitStatusr_allow(AuthnFlowParser.Statusr_allowContext ctx) { return visitChildren(ctx); }
+	@Override public T visitStchk_open(AuthnFlowParser.Stchk_openContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitStatusr_reply(AuthnFlowParser.Statusr_replyContext ctx) { return visitChildren(ctx); }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.</p>
-	 */
-	@Override public T visitStatusr_until(AuthnFlowParser.Statusr_untilContext ctx) { return visitChildren(ctx); }
+	@Override public T visitStchk_close(AuthnFlowParser.Stchk_closeContext ctx) { return visitChildren(ctx); }
 }

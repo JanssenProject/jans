@@ -21,8 +21,8 @@ public class AuthnFlowLexer extends Lexer {
 		new PredictionContextCache();
 	public static final int
 		T__0=1, T__1=2, T__2=3, T__3=4, T__4=5, T__5=6, T__6=7, T__7=8, NL=9, 
-		COMMENT=10, FLOWSTART=11, BASE=12, FLOWINPUTS=13, LOG=14, FLOWCALL=15, 
-		ACTIONCALL=16, RRFCALL=17, STATUS_REQ=18, ALLOW=19, REPLY=20, UNTIL=21, 
+		COMMENT=10, FLOWSTART=11, BASE=12, CONFIGS=13, FLOWINPUTS=14, LOG=15, 
+		FLOWCALL=16, ACTIONCALL=17, RRFCALL=18, STATUS_CHK=19, OPEN=20, CLOSE=21, 
 		OVERRIDE=22, WHEN=23, OTHERWISE=24, REPEAT=25, ITERATE=26, MATCH=27, QUIT=28, 
 		FINISH=29, RFAC=30, IS=31, NOT=32, AND=33, OR=34, SECS=35, TO=36, MAXTIMES=37, 
 		USE=38, EQ=39, MINUS=40, NUL=41, BOOL=42, STRING=43, UINT=44, SINT=45, 
@@ -40,8 +40,8 @@ public class AuthnFlowLexer extends Lexer {
 		return new String[] {
 			"T__0", "T__1", "T__2", "T__3", "T__4", "T__5", "T__6", "T__7", "NL", 
 			"DIGIT", "CH", "ALNUM", "SPACES", "COMMA", "COMMENT", "FLOWSTART", "BASE", 
-			"FLOWINPUTS", "LOG", "FLOWCALL", "ACTIONCALL", "RRFCALL", "STATUS_REQ", 
-			"ALLOW", "REPLY", "UNTIL", "OVERRIDE", "WHEN", "OTHERWISE", "REPEAT", 
+			"CONFIGS", "FLOWINPUTS", "LOG", "FLOWCALL", "ACTIONCALL", "RRFCALL", 
+			"STATUS_CHK", "OPEN", "CLOSE", "OVERRIDE", "WHEN", "OTHERWISE", "REPEAT", 
 			"ITERATE", "MATCH", "QUIT", "FINISH", "RFAC", "IS", "NOT", "AND", "OR", 
 			"SECS", "TO", "MAXTIMES", "USE", "EQ", "MINUS", "NUL", "BOOL", "STRING", 
 			"UINT", "SINT", "DECIMAL", "ALPHANUM", "QNAME", "EVALNUM", "DOTEXPR", 
@@ -53,8 +53,8 @@ public class AuthnFlowLexer extends Lexer {
 	private static String[] makeLiteralNames() {
 		return new String[] {
 			null, "'|'", "'$'", "'#'", "'['", "']'", "'{'", "'}'", "':'", null, null, 
-			"'Flow'", "'Basepath'", "'Inputs'", "'Log'", "'Trigger'", "'Call'", "'RRF'", 
-			"'Status requests'", "'Allow for'", "'Reply'", "'Until'", "'Override templates'", 
+			"'Flow'", "'Basepath'", "'Configs'", "'Inputs'", "'Log'", "'Trigger'", 
+			"'Call'", "'RRF'", "'Status checker'", "'Open for'", "'Close'", "'Override templates'", 
 			"'When'", "'Otherwise'", "'Repeat'", "'Iterate over'", "'Match'", "'Quit'", 
 			"'Finish'", "'RFAC'", "'is'", "'not'", "'and'", "'or'", "'seconds'", 
 			"'to'", "'times max'", "'using'", "'='", "'-'", "'null'"
@@ -64,8 +64,8 @@ public class AuthnFlowLexer extends Lexer {
 	private static String[] makeSymbolicNames() {
 		return new String[] {
 			null, null, null, null, null, null, null, null, null, "NL", "COMMENT", 
-			"FLOWSTART", "BASE", "FLOWINPUTS", "LOG", "FLOWCALL", "ACTIONCALL", "RRFCALL", 
-			"STATUS_REQ", "ALLOW", "REPLY", "UNTIL", "OVERRIDE", "WHEN", "OTHERWISE", 
+			"FLOWSTART", "BASE", "CONFIGS", "FLOWINPUTS", "LOG", "FLOWCALL", "ACTIONCALL", 
+			"RRFCALL", "STATUS_CHK", "OPEN", "CLOSE", "OVERRIDE", "WHEN", "OTHERWISE", 
 			"REPEAT", "ITERATE", "MATCH", "QUIT", "FINISH", "RFAC", "IS", "NOT", 
 			"AND", "OR", "SECS", "TO", "MAXTIMES", "USE", "EQ", "MINUS", "NUL", "BOOL", 
 			"STRING", "UINT", "SINT", "DECIMAL", "ALPHANUM", "QNAME", "EVALNUM", 
@@ -156,11 +156,11 @@ public class AuthnFlowLexer extends Lexer {
 		"\3\r\3\r\7\r\u009a\n\r\f\r\16\r\u009d\13\r\3\16\6\16\u00a0\n\16\r\16\16"+
 		"\16\u00a1\3\17\3\17\3\20\3\20\3\20\3\20\7\20\u00aa\n\20\f\20\16\20\u00ad"+
 		"\13\20\3\20\3\20\3\21\3\21\3\21\3\21\3\21\3\22\3\22\3\22\3\22\3\22\3\22"+
-		"\3\22\3\22\3\22\3\23\3\23\3\23\3\23\3\23\3\23\3\23\3\24\3\24\3\24\3\24"+
-		"\3\25\3\25\3\25\3\25\3\25\3\25\3\25\3\25\3\26\3\26\3\26\3\26\3\26\3\27"+
-		"\3\27\3\27\3\27\3\30\3\30\3\30\3\30\3\30\3\30\3\30\3\30\3\30\3\30\3\30"+
-		"\3\30\3\30\3\30\3\30\3\30\3\31\3\31\3\31\3\31\3\31\3\31\3\31\3\31\3\31"+
-		"\3\31\3\32\3\32\3\32\3\32\3\32\3\32\3\33\3\33\3\33\3\33\3\33\3\33\3\34"+
+		"\3\22\3\22\3\22\3\23\3\23\3\23\3\23\3\23\3\23\3\23\3\23\3\24\3\24\3\24"+
+		"\3\24\3\24\3\24\3\24\3\25\3\25\3\25\3\25\3\26\3\26\3\26\3\26\3\26\3\26"+
+		"\3\26\3\26\3\27\3\27\3\27\3\27\3\27\3\30\3\30\3\30\3\30\3\31\3\31\3\31"+
+		"\3\31\3\31\3\31\3\31\3\31\3\31\3\31\3\31\3\31\3\31\3\31\3\31\3\32\3\32"+
+		"\3\32\3\32\3\32\3\32\3\32\3\32\3\32\3\33\3\33\3\33\3\33\3\33\3\33\3\34"+
 		"\3\34\3\34\3\34\3\34\3\34\3\34\3\34\3\34\3\34\3\34\3\34\3\34\3\34\3\34"+
 		"\3\34\3\34\3\34\3\34\3\35\3\35\3\35\3\35\3\35\3\36\3\36\3\36\3\36\3\36"+
 		"\3\36\3\36\3\36\3\36\3\36\3\37\3\37\3\37\3\37\3\37\3\37\3\37\3 \3 \3 "+
@@ -193,8 +193,8 @@ public class AuthnFlowLexer extends Lexer {
 		"\3\2\2\2\13\177\3\2\2\2\r\u0081\3\2\2\2\17\u0083\3\2\2\2\21\u0085\3\2"+
 		"\2\2\23\u0088\3\2\2\2\25\u0091\3\2\2\2\27\u0093\3\2\2\2\31\u0095\3\2\2"+
 		"\2\33\u009f\3\2\2\2\35\u00a3\3\2\2\2\37\u00a5\3\2\2\2!\u00b0\3\2\2\2#"+
-		"\u00b5\3\2\2\2%\u00be\3\2\2\2\'\u00c5\3\2\2\2)\u00c9\3\2\2\2+\u00d1\3"+
-		"\2\2\2-\u00d6\3\2\2\2/\u00da\3\2\2\2\61\u00ea\3\2\2\2\63\u00f4\3\2\2\2"+
+		"\u00b5\3\2\2\2%\u00be\3\2\2\2\'\u00c6\3\2\2\2)\u00cd\3\2\2\2+\u00d1\3"+
+		"\2\2\2-\u00d9\3\2\2\2/\u00de\3\2\2\2\61\u00e2\3\2\2\2\63\u00f1\3\2\2\2"+
 		"\65\u00fa\3\2\2\2\67\u0100\3\2\2\29\u0113\3\2\2\2;\u0118\3\2\2\2=\u0122"+
 		"\3\2\2\2?\u0129\3\2\2\2A\u0136\3\2\2\2C\u013c\3\2\2\2E\u0141\3\2\2\2G"+
 		"\u0148\3\2\2\2I\u014d\3\2\2\2K\u0150\3\2\2\2M\u0154\3\2\2\2O\u0158\3\2"+
@@ -222,24 +222,24 @@ public class AuthnFlowLexer extends Lexer {
 		"\u00b1\u00b2\7n\2\2\u00b2\u00b3\7q\2\2\u00b3\u00b4\7y\2\2\u00b4\"\3\2"+
 		"\2\2\u00b5\u00b6\7D\2\2\u00b6\u00b7\7c\2\2\u00b7\u00b8\7u\2\2\u00b8\u00b9"+
 		"\7g\2\2\u00b9\u00ba\7r\2\2\u00ba\u00bb\7c\2\2\u00bb\u00bc\7v\2\2\u00bc"+
-		"\u00bd\7j\2\2\u00bd$\3\2\2\2\u00be\u00bf\7K\2\2\u00bf\u00c0\7p\2\2\u00c0"+
-		"\u00c1\7r\2\2\u00c1\u00c2\7w\2\2\u00c2\u00c3\7v\2\2\u00c3\u00c4\7u\2\2"+
-		"\u00c4&\3\2\2\2\u00c5\u00c6\7N\2\2\u00c6\u00c7\7q\2\2\u00c7\u00c8\7i\2"+
-		"\2\u00c8(\3\2\2\2\u00c9\u00ca\7V\2\2\u00ca\u00cb\7t\2\2\u00cb\u00cc\7"+
-		"k\2\2\u00cc\u00cd\7i\2\2\u00cd\u00ce\7i\2\2\u00ce\u00cf\7g\2\2\u00cf\u00d0"+
-		"\7t\2\2\u00d0*\3\2\2\2\u00d1\u00d2\7E\2\2\u00d2\u00d3\7c\2\2\u00d3\u00d4"+
-		"\7n\2\2\u00d4\u00d5\7n\2\2\u00d5,\3\2\2\2\u00d6\u00d7\7T\2\2\u00d7\u00d8"+
-		"\7T\2\2\u00d8\u00d9\7H\2\2\u00d9.\3\2\2\2\u00da\u00db\7U\2\2\u00db\u00dc"+
-		"\7v\2\2\u00dc\u00dd\7c\2\2\u00dd\u00de\7v\2\2\u00de\u00df\7w\2\2\u00df"+
-		"\u00e0\7u\2\2\u00e0\u00e1\7\"\2\2\u00e1\u00e2\7t\2\2\u00e2\u00e3\7g\2"+
-		"\2\u00e3\u00e4\7s\2\2\u00e4\u00e5\7w\2\2\u00e5\u00e6\7g\2\2\u00e6\u00e7"+
-		"\7u\2\2\u00e7\u00e8\7v\2\2\u00e8\u00e9\7u\2\2\u00e9\60\3\2\2\2\u00ea\u00eb"+
-		"\7C\2\2\u00eb\u00ec\7n\2\2\u00ec\u00ed\7n\2\2\u00ed\u00ee\7q\2\2\u00ee"+
-		"\u00ef\7y\2\2\u00ef\u00f0\7\"\2\2\u00f0\u00f1\7h\2\2\u00f1\u00f2\7q\2"+
-		"\2\u00f2\u00f3\7t\2\2\u00f3\62\3\2\2\2\u00f4\u00f5\7T\2\2\u00f5\u00f6"+
-		"\7g\2\2\u00f6\u00f7\7r\2\2\u00f7\u00f8\7n\2\2\u00f8\u00f9\7{\2\2\u00f9"+
-		"\64\3\2\2\2\u00fa\u00fb\7W\2\2\u00fb\u00fc\7p\2\2\u00fc\u00fd\7v\2\2\u00fd"+
-		"\u00fe\7k\2\2\u00fe\u00ff\7n\2\2\u00ff\66\3\2\2\2\u0100\u0101\7Q\2\2\u0101"+
+		"\u00bd\7j\2\2\u00bd$\3\2\2\2\u00be\u00bf\7E\2\2\u00bf\u00c0\7q\2\2\u00c0"+
+		"\u00c1\7p\2\2\u00c1\u00c2\7h\2\2\u00c2\u00c3\7k\2\2\u00c3\u00c4\7i\2\2"+
+		"\u00c4\u00c5\7u\2\2\u00c5&\3\2\2\2\u00c6\u00c7\7K\2\2\u00c7\u00c8\7p\2"+
+		"\2\u00c8\u00c9\7r\2\2\u00c9\u00ca\7w\2\2\u00ca\u00cb\7v\2\2\u00cb\u00cc"+
+		"\7u\2\2\u00cc(\3\2\2\2\u00cd\u00ce\7N\2\2\u00ce\u00cf\7q\2\2\u00cf\u00d0"+
+		"\7i\2\2\u00d0*\3\2\2\2\u00d1\u00d2\7V\2\2\u00d2\u00d3\7t\2\2\u00d3\u00d4"+
+		"\7k\2\2\u00d4\u00d5\7i\2\2\u00d5\u00d6\7i\2\2\u00d6\u00d7\7g\2\2\u00d7"+
+		"\u00d8\7t\2\2\u00d8,\3\2\2\2\u00d9\u00da\7E\2\2\u00da\u00db\7c\2\2\u00db"+
+		"\u00dc\7n\2\2\u00dc\u00dd\7n\2\2\u00dd.\3\2\2\2\u00de\u00df\7T\2\2\u00df"+
+		"\u00e0\7T\2\2\u00e0\u00e1\7H\2\2\u00e1\60\3\2\2\2\u00e2\u00e3\7U\2\2\u00e3"+
+		"\u00e4\7v\2\2\u00e4\u00e5\7c\2\2\u00e5\u00e6\7v\2\2\u00e6\u00e7\7w\2\2"+
+		"\u00e7\u00e8\7u\2\2\u00e8\u00e9\7\"\2\2\u00e9\u00ea\7e\2\2\u00ea\u00eb"+
+		"\7j\2\2\u00eb\u00ec\7g\2\2\u00ec\u00ed\7e\2\2\u00ed\u00ee\7m\2\2\u00ee"+
+		"\u00ef\7g\2\2\u00ef\u00f0\7t\2\2\u00f0\62\3\2\2\2\u00f1\u00f2\7Q\2\2\u00f2"+
+		"\u00f3\7r\2\2\u00f3\u00f4\7g\2\2\u00f4\u00f5\7p\2\2\u00f5\u00f6\7\"\2"+
+		"\2\u00f6\u00f7\7h\2\2\u00f7\u00f8\7q\2\2\u00f8\u00f9\7t\2\2\u00f9\64\3"+
+		"\2\2\2\u00fa\u00fb\7E\2\2\u00fb\u00fc\7n\2\2\u00fc\u00fd\7q\2\2\u00fd"+
+		"\u00fe\7u\2\2\u00fe\u00ff\7g\2\2\u00ff\66\3\2\2\2\u0100\u0101\7Q\2\2\u0101"+
 		"\u0102\7x\2\2\u0102\u0103\7g\2\2\u0103\u0104\7t\2\2\u0104\u0105\7t\2\2"+
 		"\u0105\u0106\7k\2\2\u0106\u0107\7f\2\2\u0107\u0108\7g\2\2\u0108\u0109"+
 		"\7\"\2\2\u0109\u010a\7v\2\2\u010a\u010b\7g\2\2\u010b\u010c\7o\2\2\u010c"+

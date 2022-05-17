@@ -15,7 +15,7 @@ public class FlowMetadata {
     private long timestamp;
 
     private String description;
-    private Map<String, Object> customProps;
+    private Map<String, Object> properties;
 
     public String getFuncName() {
         return funcName;
@@ -65,12 +65,12 @@ public class FlowMetadata {
         this.description = description;
     }
 
-    public Map<String, Object> getCustomProps() {
-        return customProps;
+    public Map<String, Object> getProperties() {
+        return properties;
     }
 
-    public void setCustomProps(Map<String, Object> customProps) {
-        this.customProps = customProps;
+    public void setProperties(Map<String, Object> properties) {
+        this.properties = properties;
     }
 
 }
