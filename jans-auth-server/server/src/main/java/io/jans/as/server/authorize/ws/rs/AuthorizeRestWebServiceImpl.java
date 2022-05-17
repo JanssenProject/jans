@@ -290,12 +290,12 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
         log.debug("Attempting to request authorization: {}", authzRequest);
 
-        ResponseBuilder builder = Response.ok();
+        ResponseBuilder builder;
 
         authzRequest.setCustomParameters(requestParameterService.getCustomParameters(QueryStringDecoder.decode(authzRequest.getHttpRequest().getQueryString())));
 
         try {
-            builder = authorize(authzRequest, builder);
+            builder = authorize(authzRequest);
         } catch (WebApplicationException e) {
             applicationAuditLogger.sendMessage(authzRequest.getAuditLog());
             if (log.isErrorEnabled() && canLogWebApplicationException(e))
@@ -340,7 +340,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         return status != 302;
     }
 
-    private ResponseBuilder authorize(AuthzRequest authzRequest, ResponseBuilder builder) throws AcrChangedException, SearchException, TokenBindingParseException {
+    private ResponseBuilder authorize(AuthzRequest authzRequest) throws AcrChangedException, SearchException, TokenBindingParseException {
         String tokenBindingHeader = authzRequest.getHttpRequest().getHeader("Sec-Token-Binding");
         boolean isPar = authzRequestService.processPar(authzRequest);
 
@@ -481,69 +481,32 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         authorizeRestWebServiceValidator.validate(authzRequest, responseTypes, client);
         authorizeRestWebServiceValidator.validatePkce(authzRequest.getCodeChallenge(), redirectUriResponse);
 
-        if (StringUtils.isBlank(authzRequest.getAcrValues()) && !ArrayUtils.isEmpty(client.getDefaultAcrValues())) {
-            authzRequest.setAcrValues(implode(client.getDefaultAcrValues(), " "));
-        }
+        authzRequestService.setDefaultAcrsIfNeeded(authzRequest, client);
 
-        if (scopes.contains(ScopeConstants.OFFLINE_ACCESS) && !client.getTrustedClient()) {
-            if (!responseTypes.contains(ResponseType.CODE)) {
-                log.trace("Removed (ignored) offline_scope. Can't find `code` in response_type which is required.");
-                scopes.remove(ScopeConstants.OFFLINE_ACCESS);
-            }
-
-            if (scopes.contains(ScopeConstants.OFFLINE_ACCESS) && !prompts.contains(Prompt.CONSENT)) {
-                log.error("Removed offline_access. Can't find prompt=consent. Consent is required for offline_access.");
-                scopes.remove(ScopeConstants.OFFLINE_ACCESS);
-            }
-        }
-
-        final boolean isResponseTypeValid = AuthorizeParamsValidator.validateResponseTypes(responseTypes, client)
-                && AuthorizeParamsValidator.validateGrantType(responseTypes, client.getGrantTypes(), appConfiguration);
-
-        if (!isResponseTypeValid) {
-            throw new WebApplicationException(Response
-                    .status(Response.Status.BAD_REQUEST)
-                    .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.UNSUPPORTED_RESPONSE_TYPE, authzRequest.getState(), ""))
-                    .build());
-        }
+        checkScopes(responseTypes, prompts, client, scopes);
+        checkResponseType(authzRequest, responseTypes, client);
 
         AuthorizationGrant authorizationGrant = null;
 
         if (user == null) {
-            final Pair<User, SessionId> pair = ifUserIsNull(authzRequest, redirectUriResponse);
+            final Pair<User, SessionId> pair = ifUserIsNull(authzRequest);
             user = pair.getFirst();
             sessionUser = pair.getSecond();
         }
 
-        boolean validAuthenticationMaxAge = authorizeRestWebServiceValidator.isAuthnMaxAgeValid(authzRequest.getMaxAge(), sessionUser, client);
-        if (!validAuthenticationMaxAge) {
-            unauthenticateSession(authzRequest.getSessionId(), authzRequest.getHttpRequest());
-            authzRequest.setSessionId(null);
-
-            return redirectToAuthorizationPage(authzRequest, redirectUriResponse.getRedirectUri(), prompts);
-        }
+        validateMaxAge(authzRequest, prompts, sessionUser, client);
 
         authzRequest.getAuditLog().setUsername(user.getUserId());
 
         ExternalPostAuthnContext postAuthnContext = new ExternalPostAuthnContext(client, sessionUser, authzRequest.getHttpRequest(), authzRequest.getHttpResponse());
-        final boolean forceReAuthentication = externalPostAuthnService.externalForceReAuthentication(client, postAuthnContext);
-        if (forceReAuthentication) {
-            unauthenticateSession(authzRequest.getSessionId(), authzRequest.getHttpRequest());
-            authzRequest.setSessionId(null);
-
-            return redirectToAuthorizationPage(authzRequest, redirectUriResponse.getRedirectUri(), prompts);
-        }
-
-        final boolean forceAuthorization = externalPostAuthnService.externalForceAuthorization(client, postAuthnContext);
-        if (forceAuthorization) {
-            return redirectToAuthorizationPage(authzRequest, redirectUriResponse.getRedirectUri(), prompts);
-        }
+        checkForceReAuthentication(authzRequest, prompts, client, postAuthnContext);
+        checkForceAuthorization(authzRequest, prompts, client, postAuthnContext);
 
         ClientAuthorization clientAuthorization = null;
         boolean clientAuthorizationFetched = false;
         if (!scopes.isEmpty()) {
             if (prompts.contains(Prompt.CONSENT)) {
-                return redirectToAuthorizationPage(authzRequest, redirectUriResponse.getRedirectUri(), prompts);
+                return redirectToAuthorizationPage(authzRequest, prompts);
             }
             // There is no need to present the consent page:
             // If Client is a Trusted Client.
@@ -567,7 +530,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                         sessionUser.addPermission(authzRequest.getClientId(), true);
                         sessionIdService.updateSessionId(sessionUser);
                     } else {
-                        return redirectToAuthorizationPage(authzRequest, redirectUriResponse.getRedirectUri(), prompts);
+                        return redirectToAuthorizationPage(authzRequest, prompts);
                     }
                 }
             }
@@ -589,7 +552,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             authzRequest.setSessionId(null);
             prompts.remove(Prompt.LOGIN);
 
-            return redirectToAuthorizationPage(authzRequest, redirectUriResponse.getRedirectUri(), prompts);
+            return redirectToAuthorizationPage(authzRequest, prompts);
         }
 
         if (prompts.contains(Prompt.CONSENT) || !isTrue(sessionUser.isPermissionGrantedForClient(authzRequest.getClientId()))) {
@@ -600,12 +563,10 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
             prompts.remove(Prompt.CONSENT);
 
-            return redirectToAuthorizationPage(authzRequest, redirectUriResponse.getRedirectUri(), prompts);
+            return redirectToAuthorizationPage(authzRequest, prompts);
         }
 
-        if (prompts.contains(Prompt.SELECT_ACCOUNT)) {
-            return redirectToSelectAccountPage(authzRequest, redirectUriResponse.getRedirectUri(), prompts);
-        }
+        checkPromptSelectAccount(authzRequest, prompts);
 
         AuthorizationCode authorizationCode = null;
         if (responseTypes.contains(ResponseType.CODE)) {
@@ -703,12 +664,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             sessionUser.setId(newSessionId);
             log.trace("newSessionId = {}", newSessionId);
         }
-        if (!appConfiguration.isFapi() && isTrue(appConfiguration.getSessionIdRequestParameterEnabled())) {
-            redirectUriResponse.getRedirectUri().addResponseParameter(AuthorizeResponseParam.SESSION_ID, sessionUser.getId());
-        }
-        if (isTrue(appConfiguration.getIncludeSidInResponse())) { // by defalut we do not include sid in response. It should be read by RP from id_token
-            redirectUriResponse.getRedirectUri().addResponseParameter(AuthorizeResponseParam.SID, sessionUser.getOutsideSid());
-        }
+
+        addRespnseParameterSessionId(authzRequest, sessionUser);
+        addResponseParameterSid(authzRequest, sessionUser);
         redirectUriResponse.getRedirectUri().addResponseParameter(AuthorizeResponseParam.SESSION_STATE, sessionIdService.computeSessionState(sessionUser, authzRequest.getClientId(), authzRequest.getRedirectUri()));
         redirectUriResponse.getRedirectUri().addResponseParameter(AuthorizeResponseParam.STATE, authzRequest.getState());
         if (StringUtils.isNotBlank(authzRequest.getScope()) && authorizationGrant != null && !appConfiguration.isFapi()) {
@@ -720,7 +678,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         clientService.updateAccessTime(client, false);
         authzRequest.getAuditLog().setSuccess(true);
 
-        builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse.getRedirectUri(), authzRequest.getHttpRequest());
+        ResponseBuilder builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse.getRedirectUri(), authzRequest.getHttpRequest());
 
         if (isTrue(appConfiguration.getCustomHeadersWithAuthorizationResponse())) {
             for (Entry<String, String> entry : customResponseHeaders.entrySet()) {
@@ -728,16 +686,190 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             }
         }
 
-        if (StringUtils.isNotBlank(authzRequest.getAuthReqId())) {
-            runCiba(authzRequest.getAuthReqId(), client, authzRequest.getHttpRequest(), authzRequest.getHttpResponse());
-        }
-        if (StringUtils.isNotBlank(deviceAuthzUserCode)) {
-            processDeviceAuthorization(deviceAuthzUserCode, user);
-        }
+        runCiba(authzRequest.getAuthReqId(), client, authzRequest.getHttpRequest(), authzRequest.getHttpResponse());
+        processDeviceAuthorization(deviceAuthzUserCode, user);
+
         return builder;
     }
 
-    private Pair<User, SessionId> ifUserIsNull(AuthzRequest authzRequest, RedirectUriResponse redirectUriResponse) throws SearchException {
+    private void addResponseParameterScope(AuthzRequest authzRequest, AuthorizationGrant authorizationGrant) {
+        if (authorizationGrant != null && !appConfiguration.isFapi()) {
+            authzRequest.setScope(authorizationGrant.checkScopesPolicy(authzRequest.getScope()));
+
+            authzRequest.getRedirectUriResponse().getRedirectUri().addResponseParameterIfNotBlank(AuthorizeResponseParam.SCOPE, authzRequest.getScope());
+        }
+    }
+
+    private void addResponseParameterSid(AuthzRequest authzRequest, SessionId sessionUser) {
+        if (isTrue(appConfiguration.getIncludeSidInResponse())) { // by default we do not include sid in response. It should be read by RP from id_token
+            authzRequest.getRedirectUriResponse().getRedirectUri().addResponseParameter(AuthorizeResponseParam.SID, sessionUser.getOutsideSid());
+        }
+    }
+
+    private void addRespnseParameterSessionId(AuthzRequest authzRequest, SessionId sessionUser) {
+        if (!appConfiguration.isFapi() && isTrue(appConfiguration.getSessionIdRequestParameterEnabled())) {
+            authzRequest.getRedirectUriResponse().getRedirectUri().addResponseParameter(AuthorizeResponseParam.SESSION_ID, sessionUser.getId());
+        }
+    }
+
+    private void addResponseParameterCustomParameters(AuthzRequest authzRequest) {
+        for (Entry<String, String> customParam : requestParameterService.getCustomParameters(authzRequest.getCustomParameters(), true).entrySet()) {
+            authzRequest.getRedirectUriResponse().getRedirectUri().addResponseParameter(customParam.getKey(), customParam.getValue());
+        }
+    }
+
+    private void addResponseParameterAcrValues(AuthzRequest authzRequest, AuthorizationGrant authorizationGrant) {
+        if (authorizationGrant != null && !appConfiguration.isFapi()) {
+            authzRequest.getRedirectUriResponse().getRedirectUri().addResponseParameterIfNotBlank(AuthorizeResponseParam.ACR_VALUES, authzRequest.getAcrValues());
+        }
+    }
+
+    private void checkPromptSelectAccount(AuthzRequest authzRequest, List<Prompt> prompts) {
+        if (prompts.contains(Prompt.SELECT_ACCOUNT)) {
+            throw new WebApplicationException(redirectToSelectAccountPage(authzRequest, authzRequest.getRedirectUriResponse().getRedirectUri(), prompts).build());
+        }
+    }
+
+    private void checkPromptConsent(AuthzRequest authzRequest, List<Prompt> prompts, SessionId sessionUser, User user, ClientAuthorization clientAuthorization, boolean clientAuthorizationFetched) {
+        if (prompts.contains(Prompt.CONSENT) || !isTrue(sessionUser.isPermissionGrantedForClient(authzRequest.getClientId()))) {
+            if (!clientAuthorizationFetched) {
+                clientAuthorization = clientAuthorizationsService.find(user.getAttribute("inum"), authzRequest.getClient().getClientId());
+            }
+            clientAuthorizationsService.clearAuthorizations(clientAuthorization, authzRequest.getClient().getPersistClientAuthorizations());
+
+            prompts.remove(Prompt.CONSENT);
+
+            throw new WebApplicationException(redirectToAuthorizationPage(authzRequest, prompts).build());
+        }
+    }
+
+    private void checkPromptLogin(AuthzRequest authzRequest, List<Prompt> prompts) {
+        if (prompts.contains(Prompt.LOGIN)) {
+
+            //  workaround for #1030 - remove only authenticated session, for set up acr we set it unauthenticated and then drop in AuthorizeAction
+            if (identity.getSessionId().getState() == SessionIdState.AUTHENTICATED) {
+                unauthenticateSession(authzRequest.getSessionId(), authzRequest.getHttpRequest());
+            }
+            authzRequest.setSessionId(null);
+            prompts.remove(Prompt.LOGIN);
+
+            throw new WebApplicationException(redirectToAuthorizationPage(authzRequest, prompts).build());
+        }
+    }
+
+    private void addPromptLoginIfNeeded(List<Prompt> prompts, Client client) {
+        if (identity != null && identity.getSessionId() != null && identity.getSessionId().getState() == SessionIdState.AUTHENTICATED
+                && Boolean.TRUE.equals(client.getAttributes().getDefaultPromptLogin())
+                && identity.getSessionId().getAuthenticationTime() != null
+                && new Date().getTime() - identity.getSessionId().getAuthenticationTime().getTime() > 200) {
+            prompts.add(Prompt.LOGIN);
+        }
+    }
+
+    private Pair<ClientAuthorization, Boolean> fetchClientAuthorization(AuthzRequest authzRequest, Client client, SessionId sessionUser, User user, Set<String> scopes) {
+        ClientAuthorization clientAuthorization = null;
+        boolean clientAuthorizationFetched = false;
+
+        final List<Prompt> prompts = authzRequest.getPromptList();
+
+        if (prompts.contains(Prompt.CONSENT)) {
+            throw new WebApplicationException(redirectToAuthorizationPage(authzRequest, prompts).build());
+        }
+        // There is no need to present the consent page:
+        // If Client is a Trusted Client.
+        // If a client is configured for pairwise identifiers, and the openid scope is the only scope requested.
+        // Also, we should make sure that the claims request is not enabled.
+        if (client.getTrustedClient() || isPairwiseWithOnlyOpenIdScope(client, authzRequest, scopes)) {
+            sessionUser.addPermission(authzRequest.getClientId(), true);
+            sessionIdService.updateSessionId(sessionUser);
+        } else {
+            clientAuthorization = clientAuthorizationsService.find(user.getAttribute("inum"), client.getClientId());
+            clientAuthorizationFetched = true;
+            if (clientAuthorization != null && clientAuthorization.getScopes() != null) {
+                if (log.isTraceEnabled())
+                    log.trace("ClientAuthorization - scope: {}, dn: {}, requestedScope: {}", authzRequest.getScope(), clientAuthorization.getDn(), scopes);
+                if (Arrays.asList(clientAuthorization.getScopes()).containsAll(scopes)) {
+                    sessionUser.addPermission(authzRequest.getClientId(), true);
+                    sessionIdService.updateSessionId(sessionUser);
+                } else {
+                    throw new WebApplicationException(redirectToAuthorizationPage(authzRequest, prompts).build());
+                }
+            }
+        }
+        return new Pair<>(clientAuthorization, clientAuthorizationFetched);
+    }
+
+    private boolean isPairwiseWithOnlyOpenIdScope(Client client, AuthzRequest authzRequest, Set<String> scopes) {
+        return client.getSubjectType() == SubjectType.PAIRWISE
+                && scopes.size() == 1
+                && scopes.contains(DefaultScope.OPEN_ID.toString())
+                && authzRequest.getClaims() == null
+                && (authzRequest.getJwtRequest() == null || (authzRequest.getJwtRequest().getUserInfoMember() == null && authzRequest.getJwtRequest().getIdTokenMember() == null));
+    }
+
+    private void validateRequestJwt(AuthzRequest authzRequest, boolean isPar, Client client) {
+        if (!cibaRequestService.hasCibaCompatibility(client) && !isPar) {
+            if (appConfiguration.isFapi() && authzRequest.getJwtRequest() == null) {
+                throw authzRequest.getRedirectUriResponse().createWebException(AuthorizeErrorResponseType.INVALID_REQUEST);
+            }
+            authorizeRestWebServiceValidator.validateRequestJwt(authzRequest.getRequest(), authzRequest.getRequestUri(), authzRequest.getRedirectUriResponse());
+        }
+    }
+
+    private void checkResponseType(AuthzRequest authzRequest, List<ResponseType> responseTypes, Client client) {
+        final boolean isResponseTypeValid = AuthorizeParamsValidator.validateResponseTypes(responseTypes, client)
+                && AuthorizeParamsValidator.validateGrantType(responseTypes, client.getGrantTypes(), appConfiguration);
+
+        if (!isResponseTypeValid) {
+            throw new WebApplicationException(Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.UNSUPPORTED_RESPONSE_TYPE, authzRequest.getState(), ""))
+                    .build());
+        }
+    }
+
+    private void checkForceAuthorization(AuthzRequest authzRequest, List<Prompt> prompts, Client client, ExternalPostAuthnContext postAuthnContext) {
+        final boolean forceAuthorization = externalPostAuthnService.externalForceAuthorization(client, postAuthnContext);
+        if (forceAuthorization) {
+            throw new WebApplicationException(redirectToAuthorizationPage(authzRequest, prompts).build());
+        }
+    }
+
+    private void checkForceReAuthentication(AuthzRequest authzRequest, List<Prompt> prompts, Client client, ExternalPostAuthnContext postAuthnContext) {
+        final boolean forceReAuthentication = externalPostAuthnService.externalForceReAuthentication(client, postAuthnContext);
+        if (forceReAuthentication) {
+            unauthenticateSession(authzRequest.getSessionId(), authzRequest.getHttpRequest());
+            authzRequest.setSessionId(null);
+
+            throw new WebApplicationException(redirectToAuthorizationPage(authzRequest, prompts).build());
+        }
+    }
+
+    private void validateMaxAge(AuthzRequest authzRequest, List<Prompt> prompts, SessionId sessionUser, Client client) {
+        boolean validAuthenticationMaxAge = authorizeRestWebServiceValidator.isAuthnMaxAgeValid(authzRequest.getMaxAge(), sessionUser, client);
+        if (!validAuthenticationMaxAge) {
+            unauthenticateSession(authzRequest.getSessionId(), authzRequest.getHttpRequest());
+            authzRequest.setSessionId(null);
+
+            throw new WebApplicationException(redirectToAuthorizationPage(authzRequest, prompts).build());
+        }
+    }
+
+    private void checkScopes(List<ResponseType> responseTypes, List<Prompt> prompts, Client client, Set<String> scopes) {
+        if (scopes.contains(ScopeConstants.OFFLINE_ACCESS) && !client.getTrustedClient()) {
+            if (!responseTypes.contains(ResponseType.CODE)) {
+                log.trace("Removed (ignored) offline_scope. Can't find `code` in response_type which is required.");
+                scopes.remove(ScopeConstants.OFFLINE_ACCESS);
+            }
+
+            if (scopes.contains(ScopeConstants.OFFLINE_ACCESS) && !prompts.contains(Prompt.CONSENT)) {
+                log.error("Removed offline_access. Can't find prompt=consent. Consent is required for offline_access.");
+                scopes.remove(ScopeConstants.OFFLINE_ACCESS);
+            }
+        }
+    }
+
+    private Pair<User, SessionId> ifUserIsNull(AuthzRequest authzRequest) throws SearchException {
         identity.logout();
         final List<Prompt> prompts = authzRequest.getPromptList();
         if (prompts.contains(Prompt.NONE)) {
@@ -765,10 +897,10 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     return new Pair<>(user, sessionUser);
                 } else {
                     applicationAuditLogger.sendMessage(authzRequest.getAuditLog());
-                    throw new WebApplicationException(redirectUriResponse.createErrorBuilder(AuthorizeErrorResponseType.LOGIN_REQUIRED).build());
+                    throw new WebApplicationException(authzRequest.getRedirectUriResponse().createErrorBuilder(AuthorizeErrorResponseType.LOGIN_REQUIRED).build());
                 }
             } else {
-                throw new WebApplicationException(redirectUriResponse.createErrorBuilder(AuthorizeErrorResponseType.LOGIN_REQUIRED).build());
+                throw new WebApplicationException(authzRequest.getRedirectUriResponse().createErrorBuilder(AuthorizeErrorResponseType.LOGIN_REQUIRED).build());
             }
         } else {
             if (prompts.contains(Prompt.LOGIN)) {
@@ -778,7 +910,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 authzRequest.setPrompt(implode(prompts, " "));
             }
 
-            throw new WebApplicationException(redirectToAuthorizationPage(authzRequest, redirectUriResponse.getRedirectUri(), prompts).build());
+            throw new WebApplicationException(redirectToAuthorizationPage(authzRequest, prompts).build());
         }
     }
 
@@ -788,6 +920,10 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     }
 
     private void runCiba(String authReqId, Client client, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
+        if (StringUtils.isBlank(authReqId)) {
+            return;
+        }
+
         CibaRequestCacheControl cibaRequest = cibaRequestService.getCibaRequest(authReqId);
 
         if (cibaRequest == null || cibaRequest.getStatus() == CibaRequestStatus.EXPIRED) {
@@ -882,8 +1018,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         return result;
     }
 
-    private ResponseBuilder redirectToAuthorizationPage(AuthzRequest authzRequest, RedirectUri redirectUriResponse, List<Prompt> prompts) {
-        return redirectTo("/authorize", authzRequest, redirectUriResponse, prompts);
+    private ResponseBuilder redirectToAuthorizationPage(AuthzRequest authzRequest, List<Prompt> prompts) {
+        return redirectTo("/authorize", authzRequest, authzRequest.getRedirectUriResponse().getRedirectUri(), prompts);
     }
 
     private ResponseBuilder redirectToSelectAccountPage(AuthzRequest authzRequest, RedirectUri redirectUriResponse, List<Prompt> prompts) {
@@ -1026,6 +1162,10 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
      * @param user     Authenticated user that is giving the permissions.
      */
     private void processDeviceAuthorization(String userCode, User user) {
+        if (StringUtils.isBlank(userCode)) {
+            return;
+        }
+
         DeviceAuthorizationCacheControl cacheData = deviceAuthorizationService.getDeviceAuthzByUserCode(userCode);
         if (cacheData == null || cacheData.getStatus() == DeviceAuthorizationStatus.EXPIRED) {
             log.trace("User responded too late and the authorization {} has expired, {}", userCode, cacheData);
@@ -1037,5 +1177,4 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
         log.info("Granted device authorization request, user_code: {}, device_code: {}, grant_id: {}", userCode, cacheData.getDeviceCode(), deviceCodeGrant.getGrantId());
     }
-
 }
