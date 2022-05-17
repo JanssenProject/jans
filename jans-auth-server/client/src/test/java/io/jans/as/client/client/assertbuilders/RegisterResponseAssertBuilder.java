@@ -3,6 +3,7 @@ package io.jans.as.client.client.assertbuilders;
 import io.jans.as.client.RegisterResponse;
 import io.jans.as.model.common.BackchannelTokenDeliveryMode;
 import io.jans.as.model.crypto.signature.AsymmetricSignatureAlgorithm;
+import org.apache.commons.lang3.BooleanUtils;
 
 import static io.jans.as.model.register.RegisterRequestParam.*;
 import static org.testng.Assert.*;
@@ -84,7 +85,7 @@ public class RegisterResponseAssertBuilder extends BaseAssertBuilder {
                 assertTrue(response.getClaims().containsKey(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()));
                 assertEquals(response.getClaims().get(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()), backchannelRequestSigningAlgorithm.getValue());
             }
-            if (backchannelUserCodeParameter != null) {
+            if (BooleanUtils.isTrue(backchannelUserCodeParameter)) {
                 assertTrue(response.getClaims().containsKey(BACKCHANNEL_USER_CODE_PARAMETER.toString()));
                 assertEquals(response.getClaims().get(BACKCHANNEL_USER_CODE_PARAMETER.toString()), String.valueOf(backchannelUserCodeParameter));
             }
