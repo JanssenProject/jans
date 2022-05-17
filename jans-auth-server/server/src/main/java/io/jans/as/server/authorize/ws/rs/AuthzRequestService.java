@@ -69,6 +69,8 @@ import static org.apache.commons.lang3.BooleanUtils.isTrue;
 @Named
 public class AuthzRequestService {
 
+    public static final String INVALID_JWT_AUTHORIZATION_REQUEST = "Invalid JWT authorization request";
+
     @Inject
     private Logger log;
 
@@ -244,7 +246,7 @@ public class AuthzRequestService {
                         fillRedirectUriResponseforJARM(redirectUriResponse, jwr, client);
                         if (appConfiguration.isFapi()) {
                             authorizeRestWebServiceValidator.throwInvalidJwtRequestExceptionAsJwtMode(
-                                    redirectUriResponse, "Invalid JWT authorization request",
+                                    redirectUriResponse, INVALID_JWT_AUTHORIZATION_REQUEST,
                                     jwr.getClaims().getClaimAsString("state"), authzRequest.getHttpRequest());
                         }
                     }
@@ -252,7 +254,7 @@ public class AuthzRequestService {
                 throw e;
             } catch (Exception e) {
                 log.error("Invalid JWT authorization request. Message : " + e.getMessage(), e);
-                throw authorizeRestWebServiceValidator.createInvalidJwtRequestException(redirectUriResponse, "Invalid JWT authorization request");
+                throw authorizeRestWebServiceValidator.createInvalidJwtRequestException(redirectUriResponse, INVALID_JWT_AUTHORIZATION_REQUEST);
             }
         }
 
@@ -288,7 +290,7 @@ public class AuthzRequestService {
             fillRedirectUriResponseforJARM(redirectUriResponse, jwr, client);
             if (appConfiguration.isFapi()) {
                 authorizeRestWebServiceValidator.throwInvalidJwtRequestExceptionAsJwtMode(
-                        redirectUriResponse, "Invalid JWT authorization request",
+                        redirectUriResponse, INVALID_JWT_AUTHORIZATION_REQUEST,
                         jwr.getClaims().getClaimAsString("state"), authzRequest.getHttpRequest());
             }
         }
@@ -426,12 +428,11 @@ public class AuthzRequestService {
         }
     }
 
-    public RedirectUriResponse createRedirectUriResponse(AuthzRequest authzRequest) {
+    public void createRedirectUriResponse(AuthzRequest authzRequest) {
         RedirectUriResponse redirectUriResponse = new RedirectUriResponse(new RedirectUri(authzRequest.getRedirectUri(), authzRequest.getResponseTypeList(), authzRequest.getResponseModeEnum()), authzRequest.getState(), authzRequest.getHttpRequest(), errorResponseFactory);
         redirectUriResponse.setFapiCompatible(appConfiguration.isFapi());
 
         authzRequest.setRedirectUriResponse(redirectUriResponse);
-        return redirectUriResponse;
     }
 
     public void createOauth2AuditLog(AuthzRequest authzRequest) {

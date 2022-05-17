@@ -6,9 +6,7 @@
 
 package io.jans.as.server.authorize.ws.rs;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.util.RedirectUri;
@@ -26,7 +24,6 @@ import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.crypto.binding.TokenBindingMessage;
 import io.jans.as.model.crypto.binding.TokenBindingParseException;
-import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.token.JsonWebResponse;
 import io.jans.as.model.util.Util;
@@ -34,7 +31,6 @@ import io.jans.as.server.audit.ApplicationAuditLogger;
 import io.jans.as.server.ciba.CIBAPingCallbackService;
 import io.jans.as.server.ciba.CIBAPushTokenDeliveryService;
 import io.jans.as.server.model.authorize.AuthorizeParamsValidator;
-import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.server.model.authorize.ScopeChecker;
 import io.jans.as.server.model.common.AccessToken;
 import io.jans.as.server.model.common.AuthorizationCode;
@@ -66,7 +62,6 @@ import io.jans.as.server.service.ClientAuthorizationsService;
 import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.CookieService;
 import io.jans.as.server.service.DeviceAuthorizationService;
-import io.jans.as.server.service.RedirectUriResponse;
 import io.jans.as.server.service.RequestParameterService;
 import io.jans.as.server.service.SessionIdService;
 import io.jans.as.server.service.UserService;
@@ -188,9 +183,6 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
     @Inject
     private ExternalUpdateTokenService externalUpdateTokenService;
-
-    @Inject
-    private AbstractCryptoProvider cryptoProvider;
 
     @Inject
     private AuthzRequestService authzRequestService;
@@ -355,6 +347,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
         String deviceAuthzUserCode = deviceAuthorizationService.getUserCodeFromSession(authzRequest.getHttpRequest());
         authzRequest.setRedirectUri(authorizeRestWebServiceValidator.validateRedirectUri(client, authzRequest.getRedirectUri(), authzRequest.getState(), deviceAuthzUserCode, authzRequest.getHttpRequest()));
+        authzRequestService.createRedirectUriResponse(authzRequest);
 
         authorizeRestWebServiceValidator.validateAcrs(authzRequest, client);
 
