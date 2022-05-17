@@ -356,117 +356,13 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         String deviceAuthzUserCode = deviceAuthorizationService.getUserCodeFromSession(authzRequest.getHttpRequest());
         authzRequest.setRedirectUri(authorizeRestWebServiceValidator.validateRedirectUri(client, authzRequest.getRedirectUri(), authzRequest.getState(), deviceAuthzUserCode, authzRequest.getHttpRequest()));
 
-        RedirectUriResponse redirectUriResponse = authzRequestService.createRedirectUriResponse(authzRequest);
-
         authorizeRestWebServiceValidator.validateAcrs(authzRequest, client);
 
         Set<String> scopes = scopeChecker.checkScopesPolicy(client, authzRequest.getScope());
 
         authorizeRestWebServiceValidator.checkSignedRequestRequired(authzRequest);
 
-        JwtAuthorizationRequest jwtRequest = null;
-        if (StringUtils.isNotBlank(authzRequest.getRequest()) || StringUtils.isNotBlank(authzRequest.getRequestUri())) {
-            try {
-                jwtRequest = JwtAuthorizationRequest.createJwtRequest(authzRequest.getRequest(), authzRequest.getRequestUri(), client, redirectUriResponse, cryptoProvider, appConfiguration);
-
-                if (jwtRequest == null) {
-                    throw authorizeRestWebServiceValidator.createInvalidJwtRequestException(redirectUriResponse, "Failed to parse jwt.");
-                }
-                authzRequest.setJwtRequest(jwtRequest);
-
-                if (StringUtils.isNotBlank(jwtRequest.getState())) {
-                    authzRequest.setState(jwtRequest.getState());
-                    redirectUriResponse.setState(authzRequest.getState());
-                }
-                if (appConfiguration.isFapi() && StringUtils.isBlank(jwtRequest.getState())) {
-                    authzRequest.setState(""); // #1250 - FAPI : discard state if in JWT we don't have state
-                    redirectUriResponse.setState("");
-                }
-
-                if (jwtRequest.getRedirectUri() != null) {
-                    redirectUriResponse.getRedirectUri().setBaseRedirectUri(jwtRequest.getRedirectUri());
-                }
-
-                SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(jwtRequest.getAlgorithm());
-                if (Boolean.TRUE.equals(appConfiguration.getForceSignedRequestObject()) && signatureAlgorithm == SignatureAlgorithm.NONE) {
-                    throw authorizeRestWebServiceValidator.createInvalidJwtRequestException(redirectUriResponse, "A signed request object is required");
-                }
-
-                // JWT wins
-                if (!jwtRequest.getScopes().isEmpty()) {
-                    if (!scopes.contains("openid")) { // spec: Even if a scope parameter is present in the Request Object value, a scope parameter MUST always be passed using the OAuth 2.0 request syntax containing the openid scope value
-                        throw new WebApplicationException(Response
-                                .status(Response.Status.BAD_REQUEST)
-                                .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_SCOPE, authzRequest.getState(), "scope parameter does not contain openid value which is required."))
-                                .build());
-                    }
-                    scopes = scopeChecker.checkScopesPolicy(client, Lists.newArrayList(jwtRequest.getScopes()));
-                }
-                if (jwtRequest.getRedirectUri() != null && !jwtRequest.getRedirectUri().equals(authzRequest.getRedirectUri())) {
-                    throw authorizeRestWebServiceValidator.createInvalidJwtRequestException(redirectUriResponse, "The redirect_uri parameter is not the same in the JWT");
-                }
-                if (StringUtils.isNotBlank(jwtRequest.getNonce())) {
-                    authzRequest.setNonce(jwtRequest.getNonce());
-                }
-                if (StringUtils.isNotBlank(jwtRequest.getCodeChallenge())) {
-                    authzRequest.setCodeChallenge(jwtRequest.getCodeChallenge());
-                }
-                if (StringUtils.isNotBlank(jwtRequest.getCodeChallengeMethod())) {
-                    authzRequest.setCodeChallengeMethod(jwtRequest.getCodeChallengeMethod());
-                }
-                if (jwtRequest.getDisplay() != null && StringUtils.isNotBlank(jwtRequest.getDisplay().getParamName())) {
-                    authzRequest.setDisplay(jwtRequest.getDisplay().getParamName());
-                }
-                if (!jwtRequest.getPrompts().isEmpty()) {
-                    prompts = Lists.newArrayList(jwtRequest.getPrompts());
-                }
-                if (jwtRequest.getResponseMode() != null) {
-                    authzRequest.setResponseMode(jwtRequest.getResponseMode().getValue());
-                    redirectUriResponse.getRedirectUri().setResponseMode(jwtRequest.getResponseMode());
-                }
-
-                authzRequestService.checkIdTokenMember(authzRequest, redirectUriResponse, user, jwtRequest);
-                requestParameterService.getCustomParameters(jwtRequest, authzRequest.getCustomParameters());
-            } catch (WebApplicationException e) {
-                JsonWebResponse jwr = authzRequestService.parseRequestToJwr(authzRequest.getRequest());
-                if (jwr != null) {
-                    String checkForAlg = jwr.getClaims().getClaimAsString("alg"); // to handle Jans Issue#310
-                    if ("none".equals(checkForAlg)) {
-                        throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST)
-                                .entity(errorResponseFactory.getErrorAsJson(
-                                        AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT, "",
-                                        "The None algorithm in nested JWT is not allowed for FAPI"))
-                                .type(MediaType.APPLICATION_JSON_TYPE).build());
-                    }
-                    ResponseMode responseMode = ResponseMode.getByValue(jwr.getClaims().getClaimAsString("response_mode"));
-                    if (responseMode == ResponseMode.JWT) {
-                        authzRequest.setResponseMode(responseMode.getValue());
-                        redirectUriResponse.getRedirectUri().setResponseMode(ResponseMode.JWT);
-                        authzRequestService.fillRedirectUriResponseforJARM(redirectUriResponse, jwr, client);
-                        if (appConfiguration.isFapi()) {
-                            authorizeRestWebServiceValidator.throwInvalidJwtRequestExceptionAsJwtMode(
-                                    redirectUriResponse, "Invalid JWT authorization request",
-                                    jwr.getClaims().getClaimAsString("state"), authzRequest.getHttpRequest());
-                        }
-                    }
-                }
-                throw e;
-            } catch (Exception e) {
-                log.error("Invalid JWT authorization request. Message : " + e.getMessage(), e);
-                throw authorizeRestWebServiceValidator.createInvalidJwtRequestException(redirectUriResponse, "Invalid JWT authorization request");
-            }
-        }
-
-        // JARM
-        Set<ResponseMode> jwtResponseModes = Sets.newHashSet(ResponseMode.QUERY_JWT, ResponseMode.FRAGMENT_JWT, ResponseMode.JWT, ResponseMode.FORM_POST_JWT);
-        if (jwtResponseModes.contains(authzRequest.getResponseModeEnum())) {
-            JsonWebResponse jwe = authzRequestService.parseRequestToJwr(authzRequest.getRequest());
-            authzRequestService.fillRedirectUriResponseforJARM(redirectUriResponse, jwe, client);
-        }
-        // Validate JWT request object after JARM check, because we want to return errors well formatted (JSON/JWT).
-        if (jwtRequest != null) {
-            authorizeRestWebServiceValidator.validateJwtRequest(authzRequest.getClientId(), authzRequest.getState(), authzRequest.getHttpRequest(), responseTypes, redirectUriResponse, jwtRequest);
-        }
+        authzRequestService.processRequestObject(authzRequest, client, scopes, user, prompts);
 
         validateRequestJwt(authzRequest, isPar, client);
 
