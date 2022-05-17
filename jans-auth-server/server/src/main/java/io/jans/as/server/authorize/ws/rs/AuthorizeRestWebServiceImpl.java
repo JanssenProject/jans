@@ -21,7 +21,6 @@ import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.common.ScopeConstants;
 import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.crypto.binding.TokenBindingMessage;
 import io.jans.as.model.crypto.binding.TokenBindingParseException;
 import io.jans.as.model.error.ErrorResponseFactory;
