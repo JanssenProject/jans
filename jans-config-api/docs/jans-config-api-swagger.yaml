@@ -6697,6 +6697,12 @@ components:
         dn:
           type: string
           description: Domain name.
+        baseDN:
+          type: string
+          description: Base DN for the User entity
+        status:
+          type: string
+          description: User status
         userId:
           description: A domain issued and managed identifier for the user.
           type: string
