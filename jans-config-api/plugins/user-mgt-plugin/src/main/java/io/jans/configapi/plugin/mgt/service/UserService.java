@@ -1,19 +1,17 @@
 package io.jans.configapi.plugin.mgt.service;
 
 import com.github.fge.jsonpatch.JsonPatchException;
-import io.jans.configapi.plugin.mgt.model.user.User;
+import io.jans.as.common.model.common.User;
 import io.jans.as.common.util.AttributeConstants;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.configapi.core.util.Jackson;
 import io.jans.configapi.plugin.mgt.model.user.UserPatchRequest;
 import io.jans.configapi.core.model.SearchRequest;
-import io.jans.configapi.core.util.DataUtil;
 import io.jans.configapi.util.AuthUtil;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;
 import io.jans.orm.model.base.CustomObjectAttribute;
-import io.jans.orm.reflect.property.Setter;
 import io.jans.orm.search.filter.Filter;
 import io.jans.util.StringHelper;
 
@@ -80,27 +78,12 @@ public class UserService extends io.jans.as.common.service.common.UserService {
                 searchRequest.getStartIndex() - 1, searchRequest.getCount(), searchRequest.getMaxCount());
 
     }
-    
-    public User getUserBasedOnInum(String inum) {
-        User result = null;
-        try {
-            io.jans.as.common.model.common.User user = getUserByInum(inum);
-            result = getConfigUser(user);
-        } catch (Exception ex) {
-            logger.error("Failed to load user entry", ex);
-        }
-        return result;
-    }
-    
-    private User getConfigUser(io.jans.as.common.model.common.User user) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException {
-       return populateConfigUser(user);     
-    }
 
     public void removeUser(User user) {
         persistenceEntryManager.removeRecursively(user.getDn(), User.class);
     }
 
-    public io.jans.as.common.model.common.User patchUser(String inum, UserPatchRequest userPatchRequest) throws JsonPatchException, IOException {
+    public User patchUser(String inum, UserPatchRequest userPatchRequest) throws JsonPatchException, IOException {
         if (logger.isDebugEnabled()) {
             logger.debug("Details to patch user  inum:{}, UserPatchRequest:{} ", escapeLog(inum),
                     escapeLog(userPatchRequest));
@@ -109,7 +92,7 @@ public class UserService extends io.jans.as.common.service.common.UserService {
             return null;
         }
 
-        io.jans.as.common.model.common.User user = getUserByInum(inum);
+        User user = getUserByInum(inum);
         if (user == null) {
             return null;
         }
@@ -136,9 +119,17 @@ public class UserService extends io.jans.as.common.service.common.UserService {
 
     }
 
-   
+    public User getUserBasedOnInum(String inum) {
+        User result = null;
+        try {
+            result = getUserByInum(inum);
+        } catch (Exception ex) {
+            logger.error("Failed to load user entry", ex);
+        }
+        return result;
+    }
 
-    private io.jans.as.common.model.common.User updateCustomAttributes(io.jans.as.common.model.common.User user, List<CustomObjectAttribute> customAttributes) {
+    private User updateCustomAttributes(User user, List<CustomObjectAttribute> customAttributes) {
         logger.debug("Custom Attributes to update for - user:{}, customAttributes:{} ", user, customAttributes);
 
         if (customAttributes == null || customAttributes.isEmpty()) {
@@ -230,7 +221,6 @@ public class UserService extends io.jans.as.common.service.common.UserService {
         return authUtil.getUserExclusionAttributesAsString();
     }
 
-
     public String checkMandatoryFields(User user)
             throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         List<String> mandatoryAttributes = authUtil.getUserMandatoryAttributes();
@@ -272,43 +262,4 @@ public class UserService extends io.jans.as.common.service.common.UserService {
         return missingAttributes.toString();
     }
 
-    private User populateConfigUser(io.jans.as.common.model.common.User user) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException
-             {
-        List<String> mandatoryAttributes = authUtil.getUserMandatoryAttributes();
-        logger.debug("mandatoryAttributess :{} ", mandatoryAttributes);
-
-        User userConfig = (User) user;
-        StringBuilder missingAttributes = new StringBuilder();
-        if (mandatoryAttributes == null || mandatoryAttributes.isEmpty()) {
-            return userConfig;
-        }
-
-        List<Field> allFields = authUtil.getAllFields(user.getClass());
-        logger.debug("All user fields :{} ", allFields);
-
-        Object attributeValue = null;
-        for (String attribute : mandatoryAttributes) {
-            logger.debug("User class allFields:{} conatins attribute:{} ? :{} ", allFields, attribute,
-                    authUtil.containsField(allFields, attribute));
-            if (authUtil.containsField(allFields, attribute)) {
-                logger.debug("Checking if attribute:{} is simple attribute", attribute);
-                attributeValue = BeanUtils.getProperty(user, attribute);
-                logger.debug("User basic attribute:{} - attributeValue:{} ", attribute, attributeValue);
-            } else {
-                logger.debug("Checking if attribute:{} is custom attribute", attribute);
-                attributeValue = user.getAttribute(attribute);
-                logger.debug("User custom attribute:{} - attributeValue:{} ", attribute, attributeValue);
-            }
-
-           //set attribute 
-            Setter setterMethod = DataUtil.getSetterMethod(userConfig.getClass(), attribute);
-            Object propertyValue = setterMethod.getMethod().invoke(userConfig, attributeValue);
-            logger.error("After setterMethod invoked attribute:{}, propertyValue:{} ", attribute, propertyValue);
-        }//for
-        logger.debug("Checking mandatory userConfig:{} ", userConfig);
-        
-        logger.debug("Returning missingAttributes:{} ", missingAttributes);
-        
-        return userConfig;
-    }
 }
