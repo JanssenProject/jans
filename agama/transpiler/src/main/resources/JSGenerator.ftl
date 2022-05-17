@@ -11,8 +11,9 @@ function ${flow.@id}<#recurse flow>
 
 <#macro header>
 (
+<#if .node.configs?size = 0>_p<#else>${.node.configs.short_var}</#if>
 <#if .node.inputs?size gt 0>
-    ${.node.inputs.short_var?join(", ")}
+    , ${.node.inputs.short_var?join(", ")}
 </#if>
 ) {
 const _basePath = ${.node.base.STRING}
