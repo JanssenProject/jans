@@ -1,6 +1,5 @@
 package io.jans.service.custom.javacompiler;
 
-import net.openhft.compiler.CachedCompiler;
 import net.openhft.compiler.CompilerUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,9 +37,13 @@ public class CachedCompilerA implements Closeable {
     static JavaCompiler s_compiler;
     static StandardJavaFileManager s_standardJavaFileManager;
 
-    public static final CachedCompilerA CACHED_COMPILER = new CachedCompilerA(null, null);
+    public static final CachedCompilerA CACHED_COMPILER;
 
     static {
+        CompilerUtils.addClassPath("WEB-INF/lib");
+        CompilerUtils.addClassPath("WEB-INF/classes");
+
+        CACHED_COMPILER = new CachedCompilerA(null, null);
         s_compiler = ToolProvider.getSystemJavaCompiler();
         if (s_compiler == null) {
             try {
@@ -85,16 +88,16 @@ public class CachedCompilerA implements Closeable {
                               String javaCode) throws ClassNotFoundException {
         return loadFromJava(classLoader, className, javaCode, DEFAULT_WRITER);
     }
-    
+
     public Map<String, byte[]> compileFromJava(String className, String javaCode, MyJavaFileManager fileManager) {
         return compileFromJava(className, javaCode, DEFAULT_WRITER, fileManager);
     }
 
-    
+
     public Map<String, byte[]> compileFromJava(String className,
-                                        String javaCode,
-                                        final PrintWriter writer,
-                                        MyJavaFileManager fileManager) {
+                                               String javaCode,
+                                               final PrintWriter writer,
+                                               MyJavaFileManager fileManager) {
         Iterable<? extends JavaFileObject> compilationUnits;
         if (sourceDir != null) {
             String filename = className.replaceAll("\\.", '\\' + File.separator) + ".java";
@@ -129,8 +132,7 @@ public class CachedCompilerA implements Closeable {
 
             // nothing to return due to compiler error
             return Collections.emptyMap();
-        }
-        else {
+        } else {
             Map<String, byte[]> result = fileManager.getAllBuffers();
 
             return result;
