@@ -9,4 +9,5 @@ Some of the advantages of using Agama include:
 1. Flow composition is supported out-of-the-box: reuse of an existing flow in another requires no effort
 1. Reasoning about flows behavior is straightforward (as consequence of points 1 and 2). This makes flow modifications easy
 1. Small cognitive load. Agama DSL is a very small language with simple, non-distracting syntax
-1. Fiendly UI templating engine. No complexities when authoring web pages - stay focused on writing HTML markup  
+1. Fiendly UI templating engine. No complexities when authoring web pages - stay focused on writing HTML markup
+
