@@ -1,6 +1,5 @@
 package io.jans.agama.engine.service;
 
-import io.jans.agama.timer.ConfigReloader;
 import io.jans.agama.timer.FlowRunsCleaner;
 import io.jans.agama.timer.Transpilation;
 import io.jans.service.cdi.event.ApplicationInitialized;
@@ -23,15 +22,11 @@ public class AppInitializer {
     
     @Inject
     private FlowRunsCleaner fcleaner;
-    
-    @Inject
-    private ConfigReloader creloader;
 
     public void run(@Observes @ApplicationInitialized(ApplicationScoped.class) 
             ApplicationInitializedEvent event) {
         
         logger.info("Initializing Agama services");
-        creloader.initTimer();
         trTimer.initTimer();
         fcleaner.initTimer();
         

@@ -14,8 +14,10 @@ import io.jans.agama.dsl.error.RecognitionErrorListener;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.Reader;
 import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -47,10 +49,16 @@ import org.slf4j.LoggerFactory;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class Transpiler {
-
+    
+    public static final String UTIL_SCRIPT_NAME = "util.js";    
+    public static final String UTIL_SCRIPT_CONTENTS;
+    
     private static final String FTL_LOCATION = "JSGenerator.ftl";
 
-    private Logger logger = LoggerFactory.getLogger(getClass());
+    private static final ClassLoader CLS_LOADER = Transpiler.class.getClassLoader();
+
+    private final Logger logger = LoggerFactory.getLogger(Transpiler.class);
+
     private String flowId;
     private Set<String> flowNames;
     private String fanny;
@@ -59,9 +67,24 @@ public class Transpiler {
     private XPathCompiler xpathCompiler;
     private Template jsGenerator;
 
+    static {
+
+        try (
+            Reader r = new InputStreamReader(CLS_LOADER.getResourceAsStream(UTIL_SCRIPT_NAME), UTF_8);
+            StringWriter sw = new StringWriter()) {
+            
+            r.transferTo(sw);
+            UTIL_SCRIPT_CONTENTS = sw.toString();
+        } catch (IOException e) {
+            throw new RuntimeException("Unable to read utility script", e);
+        }
+        
+    }
+    
     public Transpiler(String flowQName, Set<String> flowQNames) throws TranspilerException {
 
-        if (flowQName == null) throw new TranspilerException("Qualified name cannot be null", new NullPointerException());
+        if (flowQName == null)
+            throw new TranspilerException("Qualified name cannot be null", new NullPointerException());
         
         this.flowId = flowQName;
         fanny = "_" + flowQName.replaceAll("\\.", "_");    //Generates a valid JS function name
@@ -87,7 +110,7 @@ public class Transpiler {
         
         try{
             Configuration fmConfig = new Configuration(Configuration.VERSION_2_3_31);
-            fmConfig.setClassLoaderForTemplateLoading(getClass().getClassLoader(), "/");
+            fmConfig.setClassLoaderForTemplateLoading(CLS_LOADER, "/");
             fmConfig.setDefaultEncoding(UTF_8.toString());
             //TODO: ?
             //fmConfig.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);

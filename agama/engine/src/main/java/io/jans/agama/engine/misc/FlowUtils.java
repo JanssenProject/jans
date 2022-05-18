@@ -2,7 +2,10 @@ package io.jans.agama.engine.misc;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jans.agama.model.EngineConfig;
+import io.jans.as.model.configuration.AppConfiguration;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import java.io.IOException;
@@ -36,7 +39,19 @@ public class FlowUtils {
     
     @Inject
     private ObjectMapper mapper;
+
+    @Inject
+    private AppConfiguration asConfig;
     
+    @Inject
+    private EngineConfig engineConfig;
+    
+    private int effectiveInterruptionTime;
+    
+    public int getEffectiveInterruptionTime() {
+        return effectiveInterruptionTime;
+    }
+
     /**
      * It is assumed that values in the map are String arrays with at least one element
      * @param map
@@ -80,5 +95,18 @@ public class FlowUtils {
         return p.getProperty("encodeSalt");
         
     }
-        
+
+    @PostConstruct
+    private void init() {
+       
+        int unauth = asConfig.getSessionIdUnauthenticatedUnusedLifetime();
+        effectiveInterruptionTime = engineConfig.getInterruptionTime();
+        if (effectiveInterruptionTime == 0 || effectiveInterruptionTime > unauth) {
+            //Ensure interruption time is lower than or equal to unauthenticated unused
+            effectiveInterruptionTime = unauth;
+            logger.warn("Agama flow interruption time modified to {}", unauth);
+        }
+
+    }
+    
 }
