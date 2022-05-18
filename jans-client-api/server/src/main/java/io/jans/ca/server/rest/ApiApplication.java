@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 import java.util.HashSet;
 import java.util.Set;
 
-@ApplicationPath("/api")
+@ApplicationPath("/")
 public class ApiApplication extends Application {
 
     private static final Logger LOG = LoggerFactory.getLogger(ApiApplication.class);

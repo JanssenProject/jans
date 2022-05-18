@@ -55,7 +55,7 @@ java -jar $JETTY_HOME/start.jar --add-module=server,deploy,annotations,webapp,se
 cp ${PATH_REPOSITORY}/jans-client-api/server/target/jans-client-api-server.war $JETTY_BASE/webapps/
 java -jar  $JETTY_HOME/start.jar jetty.http.port=9999
 ```
-After `jans-client-api` server is started, status can be checked using `health-check` url: http://localhost:9999/jans-client-api-server/api/health-check.
+After `jans-client-api` server is started, status can be checked using `health-check` url: http://localhost:9999/jans-client-api-server/health-check.
 
 ## Api Description
 
