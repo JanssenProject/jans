@@ -2,7 +2,7 @@
 
 - User
   - Installation Guides
-  - How to implement use-cases
+  - How to implement use-cases 
     - Implementing Authentication with Apache reverse proxy
 - Developer
 - Community
