@@ -12,7 +12,6 @@ import io.jans.service.custom.javacompiler.CachedCompilerA;
 import io.jans.util.StringHelper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import net.openhft.compiler.CachedCompiler;
 import net.openhft.compiler.CompilerUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
@@ -48,7 +47,7 @@ public class ExternalTypeCreator {
     protected AbstractCustomScriptService customScriptService;
 
     public BaseExternalType createExternalType(CustomScript customScript,
-                                                Map<String, SimpleCustomProperty> configurationAttributes) {
+                                               Map<String, SimpleCustomProperty> configurationAttributes) {
         String customScriptInum = customScript.getInum();
 
         BaseExternalType externalType;
@@ -89,7 +88,7 @@ public class ExternalTypeCreator {
                 initialized = externalType.init(customScript, configurationAttributes);
             } else {
                 initialized = externalType.init(configurationAttributes);
-                log.warn(" Update the script's init method to init(self, customScript, configurationAttributes), script name: {}",  customScript.getName());
+                log.warn(" Update the script's init method to init(self, customScript, configurationAttributes), script name: {}", customScript.getName());
             }
         } catch (Exception ex) {
             log.error("Failed to initialize custom script: '{}', exception: {}", customScript.getName(), ex);
@@ -102,21 +101,35 @@ public class ExternalTypeCreator {
     }
 
     private BaseExternalType createExternalTypeWithJava(CustomScript customScript) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
-        CompilerUtils.addClassPath("WEB-INF/lib");
-        CompilerUtils.addClassPath("WEB-INF/classes");
-        CachedCompilerA.reset();
-
-        ClassLoader cl = ClassLoader.getSystemClassLoader();
-
-        URL[] urls = ((URLClassLoader)cl).getURLs();
-        for(URL url: urls){
-            log.info("system url: {}", url.getFile());
+        log.info(" STARTING >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+        try {
+            CompilerUtils.addClassPath("WEB-INF/lib");
+            CompilerUtils.addClassPath("WEB-INF/classes");
+            CachedCompilerA.reset();
+        } catch (Throwable e) {
+            log.error("FAILED to modify class path");
         }
 
-        File tmpFile = new File(System.getProperty("java.io.tmpdir"));
-        if (tmpFile.exists() && tmpFile.isDirectory()) {
-            log.info("TMP child files: {}", Arrays.toString(tmpFile.list()));
+        try {
+            ClassLoader cl = ClassLoader.getSystemClassLoader();
+
+            URL[] urls = ((URLClassLoader) cl).getURLs();
+            for (URL url : urls) {
+                log.info("system url: {}", url.getFile());
+            }
+        } catch (Throwable e) {
+            log.error("FAILED to output system urls");
         }
+
+        try {
+            File tmpFile = new File(System.getProperty("java.io.tmpdir"));
+            if (tmpFile.exists() && tmpFile.isDirectory()) {
+                log.info("TMP child files: {}", tmpFile.list());
+            }
+        } catch (Throwable e) {
+            log.error("FAILED to output TMP folder childs");
+        }
+
 
         log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
         log.info("SYSTEM properties > java.io.tmpdir: {}", System.getProperties());
@@ -141,7 +154,7 @@ public class ExternalTypeCreator {
 
         try (InputStream bis = new ByteArrayInputStream(script.getBytes(StandardCharsets.UTF_8))) {
             externalType = pythonService.loadPythonScript(bis, scriptName, customScriptType.getClassName(),
-                    customScriptType.getCustomScriptType(), new PyObject[] { new PyLong(System.currentTimeMillis()) });
+                    customScriptType.getCustomScriptType(), new PyObject[]{new PyLong(System.currentTimeMillis())});
         }
         return externalType;
     }
