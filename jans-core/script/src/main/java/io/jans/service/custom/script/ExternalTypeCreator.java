@@ -21,10 +21,14 @@ import org.python.core.PyObject;
 import org.slf4j.Logger;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
 
@@ -101,6 +105,18 @@ public class ExternalTypeCreator {
         CompilerUtils.addClassPath("WEB-INF/lib");
         CompilerUtils.addClassPath("WEB-INF/classes");
         CachedCompilerA.reset();
+
+        ClassLoader cl = ClassLoader.getSystemClassLoader();
+
+        URL[] urls = ((URLClassLoader)cl).getURLs();
+        for(URL url: urls){
+            log.info("system url: {}", url.getFile());
+        }
+
+        File tmpFile = new File(System.getProperty("java.io.tmpdir"));
+        if (tmpFile.exists() && tmpFile.isDirectory()) {
+            log.info("TMP child files: {}", Arrays.toString(tmpFile.list()));
+        }
 
         log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
         log.info("SYSTEM properties > java.io.tmpdir: {}", System.getProperties());
