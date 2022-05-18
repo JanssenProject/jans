@@ -27,11 +27,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -107,6 +104,7 @@ public class ExternalTypeCreator {
             URL[] urls = ((URLClassLoader) classLoader).getURLs();
             for (URL url : urls) {
                 log.info("system url: {}", url.getFile());
+                CompilerUtils.addClassPath(url.getFile());
             }
         } catch (Throwable e) {
             log.error("FAILED to output class loader urls", e);
@@ -126,31 +124,24 @@ public class ExternalTypeCreator {
 
     private BaseExternalType createExternalTypeWithJava(CustomScript customScript) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         log.info(" STARTING >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+
+//        outputUrls(ClassLoader.getSystemClassLoader());
+        outputUrls(this.getClass().getClassLoader());
+//        outputUrls(Thread.currentThread().getContextClassLoader());
+
         try {
-            CompilerUtils.addClassPath("WEB-INF/lib");
-            CompilerUtils.addClassPath("WEB-INF/classes");
             CachedCompilerA.reset();
         } catch (Throwable e) {
             log.error("FAILED to modify class path");
         }
 
-        outputUrls(ClassLoader.getSystemClassLoader());
-        outputUrls(this.getClass().getClassLoader());
-        outputUrls(Thread.currentThread().getContextClassLoader());
-
-        outputTmpDir();
-        Executors.newSingleThreadScheduledExecutor().schedule(new Runnable() {
-            @Override
-            public void run() {
-                outputTmpDir();
-            }
-        }, 10, TimeUnit.SECONDS);
-
+//        outputTmpDir();
 
         log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-        log.info("SYSTEM properties > java.io.tmpdir: {}", System.getProperties());
-        log.info("TMP > java.io.tmpdir: {}", System.getProperty("java.io.tmpdir"));
+//        log.info("SYSTEM properties > java.io.tmpdir: {}", System.getProperties());
+//        log.info("TMP > java.io.tmpdir: {}", System.getProperty("java.io.tmpdir"));
         log.info("CLASSPATH > java.class.path: {}", System.getProperty("java.class.path"));
+
 
         log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
         CustomScriptType customScriptType = customScript.getScriptType();
