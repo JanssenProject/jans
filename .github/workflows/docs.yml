@@ -28,7 +28,7 @@ jobs:
           sudo apt-get install jq
           echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" > token.txt
           gh auth login --with-token < token.txt
-          NUMBER_OF_FOLDERS_CHANGED=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | cut -d/ -f1 | sort -u | wc -l)
+          NUMBER_OF_FOLDERS_CHANGED=$( git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | cut -d/ -f1 | sort -u | wc -l)
           echo "The number of folders that changed are $NUMBER_OF_FOLDERS_CHANGED"
           IS_USER_ORG_MEMBER=$(gh api -H "Accept: application/vnd.github.v3+json" --hostname github.com /orgs/${{ github.repository_owner }}/members?per_page=100 | jq .[].login | grep ${{ github.actor }})
           echo "checking if ${{ github.actor }} belongs to the ${{ github.repository_owner }}. Found $IS_USER_ORG_MEMBER."
@@ -43,5 +43,4 @@ jobs:
           else
             echo "Bot will not merge this as it does not meet the requirments."
             echo "Either the developer has merged with doc changes code changes or an external contributor has requested doc changes."
-          fi          
-
+          fi
