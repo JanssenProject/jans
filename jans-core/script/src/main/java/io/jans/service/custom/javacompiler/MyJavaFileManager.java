@@ -1,7 +1,6 @@
 package io.jans.service.custom.javacompiler;
 
 import net.openhft.compiler.CloseableByteArrayOutputStream;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sun.misc.Unsafe;
@@ -113,7 +112,6 @@ public class MyJavaFileManager implements JavaFileManager {
             if (success) {
 
                 return new SimpleJavaFileObject(URI.create(className), kind) {
-                    @NotNull
                     public InputStream openInputStream() {
                         return new ByteArrayInputStream(bytes);
                     }
@@ -123,10 +121,8 @@ public class MyJavaFileManager implements JavaFileManager {
         return fileManager.getJavaFileForInput(location, className, kind);
     }
 
-    @NotNull
     public JavaFileObject getJavaFileForOutput(Location location, final String className, JavaFileObject.Kind kind, FileObject sibling) {
         return new SimpleJavaFileObject(URI.create(className), kind) {
-            @NotNull
             public OutputStream openOutputStream() {
                 // CloseableByteArrayOutputStream.closed is used to filter partial results from getAllBuffers()
                 CloseableByteArrayOutputStream baos = new CloseableByteArrayOutputStream();
@@ -164,7 +160,6 @@ public class MyJavaFileManager implements JavaFileManager {
         buffers.clear();
     }
 
-    @NotNull
     public Map<String, byte[]> getAllBuffers() {
         Map<String, byte[]> ret = new LinkedHashMap<>(buffers.size() * 2);
         Map<String, CloseableByteArrayOutputStream> compiledClasses = new LinkedHashMap<>(ret.size());
