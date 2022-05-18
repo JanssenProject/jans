@@ -35,7 +35,7 @@ Kubernetes: `>=v1.21.0-0`
 | hpa.metrics | list | `[]` | metrics if targetCPUUtilizationPercentage is not set |
 | image.pullPolicy | string | `"IfNotPresent"` | Image pullPolicy to use for deploying. |
 | image.pullSecrets | list | `[]` | Image Pull Secrets |
-| image.repository | string | `"janssenfederation/opendj"` | Image  to use for deploying. |
+| image.repository | string | `"gluufederation/opendj"` | Image  to use for deploying. |
 | image.tag | string | `"1.0.0_dev"` | Image  tag to use for deploying. |
 | livenessProbe | object | `{"exec":{"command":["python3","/app/scripts/healthcheck.py"]},"failureThreshold":20,"initialDelaySeconds":30,"periodSeconds":30,"timeoutSeconds":5}` | Configure the liveness healthcheck for OpenDJ if needed. https://github.com/JanssenFederation/docker-opendj/blob/4.3/scripts/healthcheck.py |
 | livenessProbe.exec | object | `{"command":["python3","/app/scripts/healthcheck.py"]}` | Executes the python3 healthcheck. |
