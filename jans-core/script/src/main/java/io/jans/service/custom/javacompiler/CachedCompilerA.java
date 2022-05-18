@@ -37,12 +37,13 @@ public class CachedCompilerA implements Closeable {
     static JavaCompiler s_compiler;
     static StandardJavaFileManager s_standardJavaFileManager;
 
-    public static final CachedCompilerA CACHED_COMPILER;
+    public static CachedCompilerA CACHED_COMPILER;
 
     static {
-        CompilerUtils.addClassPath("WEB-INF/lib");
-        CompilerUtils.addClassPath("WEB-INF/classes");
+        reset();
+    }
 
+    public static void reset() {
         CACHED_COMPILER = new CachedCompilerA(null, null);
         s_compiler = ToolProvider.getSystemJavaCompiler();
         if (s_compiler == null) {
