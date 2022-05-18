@@ -98,6 +98,10 @@ public class ExternalTypeCreator {
     }
 
     private BaseExternalType createExternalTypeWithJava(CustomScript customScript) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+        CompilerUtils.addClassPath("WEB-INF/lib");
+        CompilerUtils.addClassPath("WEB-INF/classes");
+        CachedCompilerA.reset();
+
         log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
         log.info("CLASSPATH > java.class.path: {}", System.getProperty("java.class.path"));
         log.info("CLASSPATH > externalTypeCreator loader: {}", getClass().getClassLoader().getDefinedPackages());
