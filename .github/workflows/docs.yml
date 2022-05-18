@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - 'docs/*'
+      - 'docs/**'
 
 jobs:
   docs:
@@ -29,6 +29,7 @@ jobs:
           IS_USER_ORG_MEMBER=$(gh api -H "Accept: application/vnd.github.v3+json" --hostname github.com /orgs/JanssenProject/members?per_page=100 | jq .[].login | grep ${{ github.actor }})
           #The number of folders changed should be 1. Otherwise the contributor has touched other folders besides /docs.
           if [[ $NUMBER_OF_FOLDERS_CHANGED == 1 ]] && [[ ! -z "$IS_USER_ORG_MEMBER" ]]; then
+            gh pr review --approve https://github.com/${{github.repository}}/tree/${{github.head_ref}}
             gh pr merge --squash --auto https://github.com/${{github.repository}}/tree/${{github.head_ref}}
             echo ""
           else
