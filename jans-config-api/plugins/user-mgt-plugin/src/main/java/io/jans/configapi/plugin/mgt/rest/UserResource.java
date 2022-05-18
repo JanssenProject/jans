@@ -17,7 +17,6 @@ import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.orm.model.PagedResult;
 import io.jans.util.StringHelper;
-import io.jans.util.security.StringEncrypter.EncryptionException;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -66,7 +65,7 @@ public class UserResource extends BaseResource {
             @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
             @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
             @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder)
-            throws EncryptionException, IllegalAccessException, InvocationTargetException {
+            throws IllegalAccessException, InvocationTargetException {
         if (logger.isDebugEnabled()) {
             logger.debug("User search param - limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}",
                     escapeLog(limit), escapeLog(pattern), escapeLog(startIndex), escapeLog(sortBy),
@@ -85,7 +84,7 @@ public class UserResource extends BaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.USER_READ_ACCESS })
     @Path(ApiConstants.INUM_PATH)
     public Response getUserByInum(@PathParam(ApiConstants.INUM) @NotNull String inum)
-            throws EncryptionException, IllegalAccessException, InvocationTargetException {
+            throws IllegalAccessException, InvocationTargetException {
         if (logger.isDebugEnabled()) {
             logger.debug("User search by inum:{}", escapeLog(inum));
         }
@@ -95,22 +94,19 @@ public class UserResource extends BaseResource {
 
         // excludedAttributes
         user = excludeUserAttributes(user);
-
-        // decryptUserPassword
-        decryptUserPassword(user);
         logger.debug("user:{}", user);
 
         // get custom user
         CustomUser customUser = getCustomUser(user);
         logger.debug("customUser:{}", customUser);
 
-        return Response.ok(decryptUserPassword(customUser)).build();
+        return Response.ok(customUser).build();
     }
 
     @POST
     @ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS })
     public Response createUser(@Valid CustomUser customUser)
-            throws EncryptionException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+            throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         if (logger.isDebugEnabled()) {
             logger.debug("User details to be added - customUser:{}", escapeLog(customUser));
         }
@@ -122,7 +118,7 @@ public class UserResource extends BaseResource {
         // checking mandatory attributes
         checkMissingAttributes(user);
 
-        user = userSrv.addUser(encryptUserPassword(user), true);
+        user = userSrv.addUser(user, true);
         logger.debug("User created {}", user);
 
         // excludedAttributes
@@ -138,7 +134,7 @@ public class UserResource extends BaseResource {
     @PUT
     @ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS })
     public Response updateUser(@Valid CustomUser customUser)
-            throws EncryptionException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+            throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         if (logger.isDebugEnabled()) {
             logger.debug("User details to be updated - customUser:{}", escapeLog(customUser));
         }
@@ -150,7 +146,7 @@ public class UserResource extends BaseResource {
         // checking mandatory attributes
         checkMissingAttributes(user);
 
-        user = userSrv.updateUser(encryptUserPassword(user));
+        user = userSrv.updateUser(user);
         logger.debug("Updated user:{}", user);
 
         // excludedAttributes
@@ -167,7 +163,7 @@ public class UserResource extends BaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS })
     @Path(ApiConstants.INUM_PATH)
     public Response patchUser(@PathParam(ApiConstants.INUM) @NotNull String inum,
-            @NotNull UserPatchRequest userPatchRequest) throws EncryptionException, IllegalAccessException,
+            @NotNull UserPatchRequest userPatchRequest) throws IllegalAccessException,
             InvocationTargetException, JsonPatchException, IOException {
         if (logger.isDebugEnabled()) {
             logger.debug("User:{} to be patched with :{} ", escapeLog(inum), escapeLog(userPatchRequest));
@@ -187,7 +183,7 @@ public class UserResource extends BaseResource {
         CustomUser customUser = getCustomUser(existingUser);
         logger.debug("patched customUser:{}", customUser);
 
-        return Response.ok(decryptUserPassword(customUser)).build();
+        return Response.ok(customUser).build();
     }
 
     @DELETE
@@ -204,7 +200,7 @@ public class UserResource extends BaseResource {
     }
 
     private List<CustomUser> doSearch(SearchRequest searchReq)
-            throws EncryptionException, IllegalAccessException, InvocationTargetException {
+            throws IllegalAccessException, InvocationTargetException {
         if (logger.isDebugEnabled()) {
             logger.debug("User search params - searchReq:{} ", escapeLog(searchReq));
         }
@@ -225,9 +221,6 @@ public class UserResource extends BaseResource {
 
         // excludedAttributes
         users = userSrv.excludeAttributes(users, searchReq.getExcludedAttributesStr());
-
-        // decryptUserPassword
-        getUsers(users);
         logger.debug("Users fetched  - users:{}", users);
 
         // get customUser()
@@ -248,31 +241,6 @@ public class UserResource extends BaseResource {
         }
 
         throwMissingAttributeError(missingAttributes);
-    }
-
-    private List<User> getUsers(List<User> users) throws EncryptionException {
-        if (users != null && !users.isEmpty()) {
-            for (User user : users) {
-                if (StringHelper.isNotEmpty(user.getAttribute(USER_PWD))) {
-                    decryptUserPassword(user);
-                }
-            }
-        }
-        return users;
-    }
-
-    private User encryptUserPassword(User user) throws EncryptionException {
-        if (StringHelper.isNotEmpty(user.getAttribute(USER_PWD))) {
-            user.setAttribute(USER_PWD, encryptionService.encrypt(user.getAttribute(USER_PWD)), false);
-        }
-        return user;
-    }
-
-    private User decryptUserPassword(User user) throws EncryptionException {
-        if (StringHelper.isNotEmpty(user.getAttribute(USER_PWD))) {
-            user.setAttribute(USER_PWD, encryptionService.decrypt(user.getAttribute(USER_PWD)), false);
-        }
-        return user;
     }
 
     private List<CustomUser> getCustomUserList(List<User> users) {
