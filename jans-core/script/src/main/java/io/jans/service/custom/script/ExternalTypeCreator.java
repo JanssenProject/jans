@@ -97,7 +97,7 @@ public class ExternalTypeCreator {
 
     private BaseExternalType createExternalTypeWithJava(CustomScript customScript) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         CustomScriptType customScriptType = customScript.getScriptType();
-        Class<?> aClass = CompilerUtils.CACHED_COMPILER.loadFromJava(customScriptType.getClassName(), customScript.getScript());
+        Class<?> aClass = CompilerUtils.CACHED_COMPILER.loadFromJava(getClass().getClassLoader(), customScriptType.getClassName(), customScript.getScript());
         return (BaseExternalType) aClass.getDeclaredConstructor().newInstance();
     }
 
