@@ -2,7 +2,7 @@
 
 - User
   - Installation Guides
-  - How To implement usecase
+  - How To implement use-cases
     - Implementing Authentication with Apache reverse proxy
 - Developer
 - Community
@@ -14,4 +14,3 @@
   - [Copyright Notice](./community/copyright-notices.md)
 - Code
 - Technical
-
