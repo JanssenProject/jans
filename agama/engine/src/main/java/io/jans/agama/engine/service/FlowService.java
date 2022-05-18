@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.jans.agama.dsl.Transpiler;
 import io.jans.agama.engine.continuation.PendingException;
 import io.jans.agama.engine.continuation.PendingRedirectException;
 import io.jans.agama.engine.continuation.PendingRenderException;
@@ -14,7 +15,7 @@ import io.jans.agama.engine.model.FlowResult;
 import io.jans.agama.engine.model.FlowStatus;
 import io.jans.agama.engine.model.ParentFlowData;
 import io.jans.agama.model.FlowMetadata;
-import io.jans.agama.model.Config;
+import io.jans.agama.model.EngineConfig;
 import io.jans.agama.model.Flow;
 import io.jans.util.Pair;
 
@@ -49,7 +50,6 @@ public class FlowService {
 
     private static final String SESSION_ID_COOKIE = "session_id";
     private static final String SCRIPT_SUFFIX = ".js";
-    private static final String JS_UTIL = "util.js";
     
     private static final int TIMEOUT_SKEW = 8000; //millisecons
     
@@ -66,7 +66,7 @@ public class FlowService {
     private FlowUtils flowUtils;
     
     @Inject
-    private Config config;
+    private EngineConfig engineConfig;
     
     @Inject
     private HttpServletRequest request;
@@ -105,7 +105,8 @@ public class FlowService {
             
             try {
                 globalScope = initContext(scriptCtx);
-                scriptCtx.evaluateString(globalScope, config.getUtilScript(), JS_UTIL, 1, null);
+                scriptCtx.evaluateString(globalScope, Transpiler.UTIL_SCRIPT_CONTENTS,
+                        Transpiler.UTIL_SCRIPT_NAME, 1, null);
                 flowUtils.printScopeIds(globalScope);
                 
                 scriptCtx.evaluateString(globalScope, flow.getTranspiled(), flowName + SCRIPT_SUFFIX, 1, null);
@@ -207,7 +208,7 @@ public class FlowService {
     
     public void ensureTimeNotExceeded(FlowStatus flstatus) throws FlowTimeoutException {
 
-        int time = config.getEngineConf().getInterruptionTime();
+        int time = flowUtils.getEffectiveInterruptionTime();
         //Use some seconds to account for the potential time difference due to redirections: 
         //jython script -> agama, agama -> jython script. This helps agama flows to timeout
         //before the unauthenticated unused time
@@ -246,7 +247,7 @@ public class FlowService {
             throw new IOException(msg);
         }
         
-        if (Optional.ofNullable(config.getEngineConf().getDisableTCHV()).orElse(false)) {
+        if (Optional.ofNullable(engineConfig.getDisableTCHV()).orElse(false)) {
 
             String hash = fl.getTransHash();
             //null hash means the code is being regenerated in this moment

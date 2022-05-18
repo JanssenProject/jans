@@ -2,7 +2,6 @@
 # Copyright (c) 2020, Janssen Project
 #
 from io.jans.agama import NativeJansFlowBridge
-from io.jans.agama.model import Config, EngineConfig
 from io.jans.as.server.service import AuthenticationService, SessionIdService
 from io.jans.jsf2.service import FacesService
 from io.jans.jsf2.message import FacesMessages
