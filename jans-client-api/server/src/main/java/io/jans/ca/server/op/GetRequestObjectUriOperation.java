@@ -123,6 +123,6 @@ public class GetRequestObjectUriOperation extends BaseOperation<GetRequestObject
         if (rpHost.endsWith("/")) {
             rpHost = StringUtils.removeEnd(rpHost, "/");
         }
-        return rpHost + "/get-request-object/";
+        return rpHost + "/api/get-request-object/";
     }
 }

@@ -9,10 +9,6 @@ import io.jans.ca.server.op.OpClientFactoryImpl;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.ClientErrorException;
-import jakarta.ws.rs.core.UriBuilder;
-import org.jboss.resteasy.client.jaxrs.ResteasyClient;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.spi.ReaderException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,9 +40,7 @@ public class IntrospectionService {
     private IntrospectionResponse introspectToken(String rpId, String accessToken, boolean retry) {
         final String introspectionEndpoint = discoveryService.getConnectDiscoveryResponseByRpId(rpId).getIntrospectionEndpoint();
         LOG.info("Instrospection Endpoint: {}", introspectionEndpoint);
-        final ResteasyClient client = ((ResteasyClientBuilder) ResteasyClientBuilder.newBuilder()).httpEngine(httpService.getClientEngine()).build();
-        final ResteasyWebTarget target = client.target(UriBuilder.fromPath(introspectionEndpoint));
-        final io.jans.as.client.service.IntrospectionService introspectionService = target.proxy(io.jans.as.client.service.IntrospectionService.class);
+        final io.jans.as.client.service.IntrospectionService introspectionService = ClientFactory.instance().createIntrospectionService(introspectionEndpoint, httpService.getClientEngine());
 
         try {
             String token = umaTokenService.getOAuthToken(rpId).getToken();

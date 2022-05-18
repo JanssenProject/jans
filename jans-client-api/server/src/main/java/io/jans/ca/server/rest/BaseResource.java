@@ -1,5 +1,6 @@
 package io.jans.ca.server.rest;
 
+import com.google.gson.Gson;
 import io.jans.as.model.util.Util;
 import io.jans.ca.common.Command;
 import io.jans.ca.common.CommandType;
@@ -61,6 +62,7 @@ public class BaseResource {
 
         validateIpAddressAllowed(httpRequest.getRemoteAddr());
         Object forJsonConversion = getObjectForJsonConversion(commandType, paramsAsString, paramsClass, authorization, AuthorizationRpId);
+        logger.info("Object result to Gson json: {}", new Gson().toJson(forJsonConversion));
         String response = null;
 
         if (commandType.getReturnType().equalsIgnoreCase(MediaType.APPLICATION_JSON)) {

@@ -90,7 +90,13 @@ public class ClientIterfaceImpl implements ClientInterface {
 
     @Override
     public String getRequestObject(String value) {
-        return null;
+        Invocation.Builder builder = requestBuilder(PathTestEndPoint.GET_REQUEST_OBJECT + value);
+        Response response = builder.get();
+        String entity = response.readEntity(String.class);
+
+        showResponse("getRequestObject", response, entity);
+        assertEquals(response.getStatus(), 200, "Unexpected response code.");
+        return entity;
     }
 
     @Override
@@ -131,6 +137,20 @@ public class ClientIterfaceImpl implements ClientInterface {
 
     @Override
     public CorrectRptIntrospectionResponse introspectRpt(String authorization, String authorizationRpId, IntrospectRptParams params) {
+        WebTarget webTarget = webTarget(PathTestEndPoint.INSTROSPECT_RPT);
+        Invocation.Builder builder = webTarget.request();
+        builder.header("Accept", UmaConstants.JSON_MEDIA_TYPE);
+        builder.header("Content-Type", UmaConstants.JSON_MEDIA_TYPE);
+        builder.header("Authorization", authorization);
+        builder.header("AuthorizationRpId", authorizationRpId);
+        Response response = builder.post(toPostParam(params));
+        String json = readResponse(webTarget.getUri().toString(), response);
+        try {
+            return Jackson2.createJsonMapper().readValue(json, CorrectRptIntrospectionResponse.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
         return null;
     }
 
@@ -267,6 +287,20 @@ public class ClientIterfaceImpl implements ClientInterface {
 
     @Override
     public GetLogoutUriResponse getLogoutUri(String authorization, String authorizationRpId, GetLogoutUrlParams params) {
+        WebTarget webTarget = webTarget(PathTestEndPoint.GET_LOGOUT_URI);
+        Invocation.Builder builder = webTarget.request();
+        builder.header("Accept", UmaConstants.JSON_MEDIA_TYPE);
+        builder.header("Content-Type", UmaConstants.JSON_MEDIA_TYPE);
+        builder.header("Authorization", authorization);
+        builder.header("AuthorizationRpId", authorizationRpId);
+        Response response = builder.post(toPostParam(params));
+        String json = readResponse(webTarget.getUri().toString(), response);
+        try {
+            return Jackson2.createJsonMapper().readValue(json, GetLogoutUriResponse.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
         return null;
     }
 
@@ -291,41 +325,153 @@ public class ClientIterfaceImpl implements ClientInterface {
 
     @Override
     public RsProtectResponse umaRsProtect(String authorization, String authorizationRpId, RsProtectParams2 params) {
+        WebTarget webTarget = webTarget(PathTestEndPoint.UMA_RS_PROTECT);
+        Invocation.Builder builder = webTarget.request();
+        builder.header("Accept", UmaConstants.JSON_MEDIA_TYPE);
+        builder.header("Content-Type", UmaConstants.JSON_MEDIA_TYPE);
+        builder.header("Authorization", authorization);
+        builder.header("AuthorizationRpId", authorizationRpId);
+        Response response = builder.post(toPostParam(params));
+        String json = readResponse(webTarget.getUri().toString(), response);
+        try {
+            return Jackson2.createJsonMapper().readValue(json, RsProtectResponse.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
         return null;
     }
 
     @Override
     public RsModifyResponse umaRsModify(String authorization, String authorizationRpId, RsModifyParams params) {
+        WebTarget webTarget = webTarget(PathTestEndPoint.UMA_RS_MODIFY);
+        Invocation.Builder builder = webTarget.request();
+        builder.header("Accept", UmaConstants.JSON_MEDIA_TYPE);
+        builder.header("Content-Type", UmaConstants.JSON_MEDIA_TYPE);
+        builder.header("Authorization", authorization);
+        builder.header("AuthorizationRpId", authorizationRpId);
+        Response response = builder.post(toPostParam(params));
+        String json = readResponse(webTarget.getUri().toString(), response);
+        try {
+            return Jackson2.createJsonMapper().readValue(json, RsModifyResponse.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
         return null;
     }
 
     @Override
     public RsCheckAccessResponse umaRsCheckAccess(String authorization, String authorizationRpId, RsCheckAccessParams params) {
+        WebTarget webTarget = webTarget(PathTestEndPoint.UMA_RS_CHECK_ACCESS);
+        Invocation.Builder builder = webTarget.request();
+        builder.header("Accept", UmaConstants.JSON_MEDIA_TYPE);
+        builder.header("Content-Type", UmaConstants.JSON_MEDIA_TYPE);
+        builder.header("Authorization", authorization);
+        builder.header("AuthorizationRpId", authorizationRpId);
+        Response response = builder.post(toPostParam(params));
+        String json = readResponse(webTarget.getUri().toString(), response);
+        try {
+            return Jackson2.createJsonMapper().readValue(json, RsCheckAccessResponse.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
         return null;
     }
 
     @Override
     public RpGetRptResponse umaRpGetRpt(String authorization, String authorizationRpId, RpGetRptParams params) {
+        WebTarget webTarget = webTarget(PathTestEndPoint.UMA_RP_GET_RPT);
+        Invocation.Builder builder = webTarget.request();
+        builder.header("Accept", UmaConstants.JSON_MEDIA_TYPE);
+        builder.header("Content-Type", UmaConstants.JSON_MEDIA_TYPE);
+        builder.header("Authorization", authorization);
+        builder.header("AuthorizationRpId", authorizationRpId);
+        Response response = builder.post(toPostParam(params));
+        String json = readResponse(webTarget.getUri().toString(), response);
+        try {
+            return Jackson2.createJsonMapper().readValue(json, RpGetRptResponse.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
         return null;
     }
 
     @Override
     public RpGetClaimsGatheringUrlResponse umaRpGetClaimsGatheringUrl(String authorization, String authorizationRpId, RpGetClaimsGatheringUrlParams params) {
+        WebTarget webTarget = webTarget(PathTestEndPoint.UMA_RP_GET_CLAIMS_GATHERING_URL);
+        Invocation.Builder builder = webTarget.request();
+        builder.header("Accept", UmaConstants.JSON_MEDIA_TYPE);
+        builder.header("Content-Type", UmaConstants.JSON_MEDIA_TYPE);
+        builder.header("Authorization", authorization);
+        builder.header("AuthorizationRpId", authorizationRpId);
+        Response response = builder.post(toPostParam(params));
+        String json = readResponse(webTarget.getUri().toString(), response);
+        try {
+            return Jackson2.createJsonMapper().readValue(json, RpGetClaimsGatheringUrlResponse.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
         return null;
     }
 
     @Override
     public AuthorizationCodeFlowResponse authorizationCodeFlow(String authorization, String authorizationRpId, AuthorizationCodeFlowParams params) {
+        WebTarget webTarget = webTarget(PathTestEndPoint.AUTHORIZATION_CODE_FLOW);
+        Invocation.Builder builder = webTarget.request();
+        builder.header("Accept", UmaConstants.JSON_MEDIA_TYPE);
+        builder.header("Content-Type", UmaConstants.JSON_MEDIA_TYPE);
+        builder.header("Authorization", authorization);
+        builder.header("AuthorizationRpId", authorizationRpId);
+        Response response = builder.post(toPostParam(params));
+        String json = readResponse(webTarget.getUri().toString(), response);
+        try {
+            return Jackson2.createJsonMapper().readValue(json, AuthorizationCodeFlowResponse.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
         return null;
     }
 
     @Override
     public CheckAccessTokenResponse checkAccessToken(String authorization, String authorizationRpId, CheckAccessTokenParams params) {
+        WebTarget webTarget = webTarget(PathTestEndPoint.CHECK_ACCESS_TOKEN);
+        Invocation.Builder builder = webTarget.request();
+        builder.header("Accept", UmaConstants.JSON_MEDIA_TYPE);
+        builder.header("Content-Type", UmaConstants.JSON_MEDIA_TYPE);
+        builder.header("Authorization", authorization);
+        builder.header("AuthorizationRpId", authorizationRpId);
+        Response response = builder.post(toPostParam(params));
+        String json = readResponse(webTarget.getUri().toString(), response);
+        try {
+            return Jackson2.createJsonMapper().readValue(json, CheckAccessTokenResponse.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
         return null;
     }
 
     @Override
     public CheckIdTokenResponse checkIdToken(String authorization, String authorizationRpId, CheckIdTokenParams params) {
+        WebTarget webTarget = webTarget(PathTestEndPoint.CHECK_ID_TOKEN);
+        Invocation.Builder builder = webTarget.request();
+        builder.header("Accept", UmaConstants.JSON_MEDIA_TYPE);
+        builder.header("Content-Type", UmaConstants.JSON_MEDIA_TYPE);
+        builder.header("Authorization", authorization);
+        builder.header("AuthorizationRpId", authorizationRpId);
+        Response response = builder.post(toPostParam(params));
+        String json = readResponse(webTarget.getUri().toString(), response);
+        try {
+            return Jackson2.createJsonMapper().readValue(json, CheckIdTokenResponse.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
         return null;
     }
 
@@ -380,11 +526,37 @@ public class ClientIterfaceImpl implements ClientInterface {
 
     @Override
     public GetIssuerResponse getIssuer(GetIssuerParams params) {
+        WebTarget webTarget = webTarget(PathTestEndPoint.GET_ISSUER);
+        Invocation.Builder builder = webTarget.request();
+        builder.header("Accept", UmaConstants.JSON_MEDIA_TYPE);
+        builder.header("Content-Type", UmaConstants.JSON_MEDIA_TYPE);
+        Response response = builder.post(toPostParam(params));
+        String json = readResponse(webTarget.getUri().toString(), response);
+        try {
+            return Jackson2.createJsonMapper().readValue(json, GetIssuerResponse.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
         return null;
     }
 
     @Override
     public GetRequestObjectUriResponse getRequestObjectUri(String authorization, String authorizationRpId, GetRequestObjectUriParams params) {
+        WebTarget webTarget = webTarget(PathTestEndPoint.GET_REQUEST_OBJECT_URI);
+        Invocation.Builder builder = webTarget.request();
+        builder.header("Accept", UmaConstants.JSON_MEDIA_TYPE);
+        builder.header("Content-Type", UmaConstants.JSON_MEDIA_TYPE);
+        builder.header("Authorization", authorization);
+        builder.header("AuthorizationRpId", authorizationRpId);
+        Response response = builder.post(toPostParam(params));
+        String json = readResponse(webTarget.getUri().toString(), response);
+        try {
+            return Jackson2.createJsonMapper().readValue(json, GetRequestObjectUriResponse.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
         return null;
     }
 

@@ -30,13 +30,13 @@ public class DifferentAuthServerTest extends BaseTest {
     @ArquillianResource
     private URI url;
 
-    @Parameters({"host", "opHost", "authServer", "redirectUrls", "clientId", "clientSecret", "userId", "userSecret"})
+    @Parameters({"host", "opHost", "otherAuthServer", "redirectUrls", "clientId", "clientSecret", "userId", "userSecret"})
     @Test
-    public void getUserInfo_withDifferentAuthServer(String host, String opHost, String authServer, String redirectUrls, String clientId, String clientSecret, String userId, String userSecret) {
+    public void getUserInfo_withDifferentAuthServer(String host, String opHost, String otherAuthServer, String redirectUrls, String clientId, String clientSecret, String userId, String userSecret) {
 
         ClientInterface client = getClientInterface(url);
         RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
-        RegisterSiteResponse authServerResp = RegisterSiteTest.registerSite(client, authServer, redirectUrls);
+        RegisterSiteResponse authServerResp = RegisterSiteTest.registerSite(client, otherAuthServer, redirectUrls);
 
         final GetTokensByCodeResponse2 tokens = requestTokens(client, opHost, site, authServerResp, userId, userSecret, site.getClientId(), redirectUrls);
 
@@ -50,14 +50,14 @@ public class DifferentAuthServerTest extends BaseTest {
         assertNotNull(resp.get("sub"));
     }
 
-    @Parameters({"host", "authServer", "redirectUrls", "opHost", "rsProtect"})
+    @Parameters({"host", "otherAuthServer", "redirectUrls", "opHost", "rsProtect"})
     @Test
-    public void umaFullTest_withDifferentAuthServer(String host, String authServer, String redirectUrls, String opHost, String rsProtect) throws Exception {
+    public void umaFullTest_withDifferentAuthServer(String host, String otherAuthServer, String redirectUrls, String opHost, String rsProtect) throws Exception {
 
         ClientInterface client = getClientInterface(url);
 
         RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
-        RegisterSiteResponse authServerResp = RegisterSiteTest.registerSite(client, authServer, redirectUrls);
+        RegisterSiteResponse authServerResp = RegisterSiteTest.registerSite(client, otherAuthServer, redirectUrls);
 
         RsProtectTest.protectResources(client, site, UmaFullTest.resourceList(rsProtect).getResources());
 

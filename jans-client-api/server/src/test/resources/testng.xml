@@ -2,11 +2,11 @@
 
 <suite name="jansClientApiServer" parallel="false" preserve-order="true">
 
-    <parameter name="serverUri" value="https://${test.jans.auth.server.name}"/>
+    <parameter name="apiTestUri" value="https://${test.jans.client.api.target.url}"/>
     <parameter name="host" value="http://localhost"/>
     <parameter name="port" value="8099"/>
     <parameter name="opHost" value="https://${test.jans.auth.server.name}"/>
-    <parameter name="authServer" value="https://jenkins-build.jans.io"/>
+    <parameter name="otherAuthServer" value="https://jenkins-build.jans.io"/>
     <parameter name="opDiscoveryPath" value=""/>
     <parameter name="emailWebfingerInput" value="${swd.resource}"/>
     <parameter name="urlWebfingerInput" value="https://${test.jans.auth.server.name}/admin"/>
@@ -20,10 +20,10 @@
                value="https://client.example.com/cb/logout/page1 https://client.example.com/cb/logout/page2"/>
     <parameter name="logoutUrl" value="https://client.example.com/logout"/>
     <parameter name="state" value="custom_state_for_testing"/>
-    <parameter name="userId" value="${auth.user.uid}"/>
-    <parameter name="userSecret" value="${auth.user.password}"/>
-    <parameter name="clientId" value="${auth.client.id}"/>
-    <parameter name="clientSecret" value="${auth.client.secret}"/>
+    <parameter name="userId" value="${test.auth.user.uid}"/>
+    <parameter name="userSecret" value="${test.auth.user.password}"/>
+    <parameter name="clientId" value="${test.auth.client.id}"/>
+    <parameter name="clientSecret" value="${test.auth.client.secret}"/>
     <parameter name="rsProtect"
                value="{'resources':[{'path':'/ws/phone','conditions':[{'httpMethods':['GET'],'scopes':['http://photoz.example.com/dev/actions/all','http://photoz.example.com/dev/actions/view'],'ticketScopes':['http://photoz.example.com/dev/actions/view']},{'httpMethods':['PUT', 'POST'],'scopes':['http://photoz.example.com/dev/actions/all','http://photoz.example.com/dev/actions/add'],'ticketScopes':['http://photoz.example.com/dev/actions/add']},{'httpMethods':['DELETE'],'scopes':['http://photoz.example.com/dev/actions/all','http://photoz.example.com/dev/actions/remove'],'ticketScopes':['http://photoz.example.com/dev/actions/remove']}]}]}"/>
     <parameter name="rsProtectWithSpontaneousScope"
@@ -51,9 +51,39 @@
         </classes>
     </test>
 
+    <test name="Get Rp Jwks" enabled="true">
+        <classes>
+            <class name="io.jans.ca.server.tests.GetRpJwksTest"></class>
+        </classes>
+    </test>
+
+    <test name="Get Request Uri" enabled="true">
+        <classes>
+            <class name="io.jans.ca.server.tests.GetRequestUriTest"></class>
+        </classes>
+    </test>
+
+    <test name="Get Issuer" enabled="true">
+        <classes>
+            <class name="io.jans.ca.server.tests.GetIssuerTest"></class>
+        </classes>
+    </test>
+
+    <test name="Get OpDiscovery" enabled="true">
+        <classes>
+            <class name="io.jans.ca.server.tests.GetDiscoveryTest"></class>
+        </classes>
+    </test>
+
     <test name="Register site" enabled="true">
         <classes>
             <class name="io.jans.ca.server.tests.RegisterSiteTest"/>
+        </classes>
+    </test>
+
+    <test name="Register Request Mapper" enabled="true">
+        <classes>
+            <class name="io.jans.ca.server.tests.RegisterRequestMapperTest"/>
         </classes>
     </test>
 
@@ -69,40 +99,131 @@
         </classes>
     </test>
 
-<!--    <test name="Get Client Token" enabled="true">-->
-<!--        <classes>-->
-<!--            <class name="io.jans.ca.server.tests.GetClientTokenTest"/>-->
-<!--        </classes>-->
-<!--    </test>-->
+    <test name="Get authorization url" enabled="true">
+        <classes>
+            <class name="io.jans.ca.server.tests.GetAuthorizationUrlTest"/>
+        </classes>
+    </test>
 
-    <!--    <test name="Get Tokens by Code" enabled="true">-->
-    <!--        <classes>-->
-    <!--            <class name="io.jans.ca.server.tests.GetTokensByCodeTest"/>-->
-    <!--        </classes>-->
-    <!--    </test>-->
+    <test name="Get tokens by code" enabled="false">
+        <classes>
+            <class name="io.jans.ca.server.tests.GetTokensByCodeTest"/>
+        </classes>
+    </test>
 
-<!--    <test name="Introspect Access Token" enabled="true">-->
-<!--        <classes>-->
-<!--            <class name="io.jans.ca.server.tests.IntrospectAccessTokenTest"/>-->
-<!--        </classes>-->
-<!--    </test>-->
+    <test name="Get user info" enabled="false">
+        <classes>
+            <class name="io.jans.ca.server.tests.GetUserInfoTest"/>
+        </classes>
+    </test>
+    <test name="Log out" enabled="true">
+        <classes>
+            <class name="io.jans.ca.server.tests.GetLogoutUrlTest"/>
+        </classes>
+    </test>
+    <test name="Check IdToken" enabled="false">
+        <classes>
+            <class name="io.jans.ca.server.tests.CheckIdTokenTest"/>
+        </classes>
+    </test>
 
-<!--    <test name="Get User Info" enabled="true">-->
-<!--        <classes>-->
-<!--            <class name="io.jans.ca.server.tests.GetUserInfoTest"/>-->
-<!--        </classes>-->
-<!--    </test>-->
+    <test name="Check AccessToken" enabled="false">
+        <classes>
+            <class name="io.jans.ca.server.tests.CheckAccessTokenTest"/>
+        </classes>
+    </test>
+    <test name="Authorization code flow prompt=none" enabled="true">
+        <classes>
+            <class name="io.jans.ca.server.tests.AuthorizationCodeFlowTest"/>
+        </classes>
+    </test>
+    <test name="Access Token as JWT Test" enabled="false">
+        <classes>
+            <class name="io.jans.ca.server.tests.AccessTokenAsJwtTest"/>
+        </classes>
+    </test>
+    <test name="rp" enabled="false">
+        <classes>
+            <class name="io.jans.ca.server.service.RpServiceTest"/>
+        </classes>
+    </test>
+    <test name="RS - Modify" enabled="true">
+        <classes>
+            <class name="io.jans.ca.server.tests.RsModifyTest"/>
+        </classes>
+    </test>
+    <test name="Validator test" enabled="true">
+        <classes>
+            <class name="io.jans.ca.server.service.ValidatorTest"/>
+        </classes>
+    </test>
+    <test name="Spontaneous Scope Auth Test" enabled="true">
+        <classes>
+            <class name="io.jans.ca.server.tests.SpontaneousScopeAuthTest"/>
+        </classes>
+    </test>
+    <test name="Uma Spontaneous Scope Test" enabled="false">
+        <classes>
+            <class name="io.jans.ca.server.tests.UmaSpontaneousScopeTest"/>
+        </classes>
+    </test>
 
-<!--    <test name="Get JWKS" enabled="true">-->
-<!--        <classes>-->
-<!--            <class name="io.jans.ca.server.tests.GetJwksTest"/>-->
-<!--        </classes>-->
-<!--    </test>-->
+<!--     UMA Tests -->
+    <test name="UMA - Full Flow Test" enabled="false">
+        <classes>
+            <class name="io.jans.ca.server.tests.UmaFullTest"/>
+        </classes>
+    </test>
+    <test name="RS - Protect" enabled="false">
+        <classes>
+            <class name="io.jans.ca.server.tests.RsProtectTest"/>
+        </classes>
+    </test>
+    <test name="RS - Check Access" enabled="false">
+        <classes>
+            <class name="io.jans.ca.server.tests.RsCheckAccessTest"/>
+        </classes>
+    </test>
+    <test name="RP - Get RPT" enabled="false">
+        <classes>
+            <class name="io.jans.ca.server.tests.RpGetRptTest"/>
+        </classes>
+    </test>
+    <test name="RP - Get Claims-Gathering Url" enabled="true">
+        <classes>
+            <class name="io.jans.ca.server.tests.UmaGetClaimsGatheringUrlTest"/>
+        </classes>
+    </test>
+    <test name="Introspect RPT" enabled="false">
+        <classes>
+            <class name="io.jans.ca.server.tests.IntrospectRptTest"/>
+        </classes>
+    </test>
+    <test name="Different Authorization Server Test" enabled="false">
+        <classes>
+            <class name="io.jans.ca.server.tests.DifferentAuthServerTest"/>
+        </classes>
+    </test>
 
-<!--    <test name="Get OP Discovery" enabled="true">-->
-<!--        <classes>-->
-<!--            <class name="io.jans.ca.server.tests.GetDiscoveryTest"/>-->
-<!--        </classes>-->
-<!--    </test>-->
-
+    <!-- Custom -->
+    <test name="Setup client" enabled="true">
+        <classes>
+            <class name="io.jans.ca.server.tests.SetupClientTest"/>
+        </classes>
+    </test>
+    <test name="Get client token" enabled="true">
+        <classes>
+            <class name="io.jans.ca.server.tests.GetClientTokenTest"/>
+        </classes>
+    </test>
+    <test name="Introspect access token" enabled="false">
+        <classes>
+            <class name="io.jans.ca.server.tests.IntrospectAccessTokenTest"/>
+        </classes>
+    </test>
+    <test name="JWKS Test" enabled="true">
+        <classes>
+            <class name="io.jans.ca.server.tests.GetJwksTest"/>
+        </classes>
+    </test>
 </suite>

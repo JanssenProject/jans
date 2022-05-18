@@ -37,7 +37,7 @@ public class IntrospectAccessTokenTest extends BaseTest {
 
         final GetClientTokenParams params = new GetClientTokenParams();
         params.setOpHost(opHost);
-        params.setScope(Lists.newArrayList("openid", "jans_client_api"));
+        params.setScope(Lists.newArrayList("openid", "uma_protection", "profile", "jans_client_api"));
         params.setClientId(setupResponse.getClientId());
         params.setClientSecret(setupResponse.getClientSecret());
 

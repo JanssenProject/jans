@@ -109,9 +109,9 @@ public class AppInitializer {
         // Schedule timer tasks
         configurationFactory.initTimer();
 
-        //Clear Test Data with System param
+        //Clear RP Test Data with System param
         if (System.getProperties().containsKey("clearTestData")) {
-            clearTestData();
+            clearRPTestData();
         }
 
         logger.info("============== CLIENT API APPLICATION IS UP AND RUNNING ===================");
@@ -203,7 +203,7 @@ public class AppInitializer {
         }
     }
 
-    private void clearTestData() {
+    private void clearRPTestData() {
         try {
             String val = System.getProperty("clearTestData");
             if (val != null && !val.isEmpty() && Boolean.valueOf(val)) {

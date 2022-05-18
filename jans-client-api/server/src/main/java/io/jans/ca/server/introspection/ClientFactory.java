@@ -1,7 +1,14 @@
 package io.jans.ca.server.introspection;
 
+import io.jans.as.model.uma.UmaConstants;
 import io.jans.as.model.uma.UmaMetadata;
+import io.jans.as.client.service.IntrospectionService;
+import io.jans.ca.common.Jackson2;
+import io.jans.ca.common.response.IntrospectAccessTokenResponse;
 import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.Invocation;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriBuilder;
 import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
@@ -59,4 +66,11 @@ public class ClientFactory {
         final ResteasyWebTarget target = client.target(UriBuilder.fromPath(metadata.getIntrospectionEndpoint()));
         return target.proxy(CorrectRptIntrospectionService.class);
     }
+
+    public IntrospectionService createIntrospectionService(String introspectionEndpoint, ClientHttpEngine clientEngine) {
+        final ResteasyClient client = ((ResteasyClientBuilder) ResteasyClientBuilder.newBuilder()).httpEngine(clientEngine).build();
+        final ResteasyWebTarget target = client.target(UriBuilder.fromPath(introspectionEndpoint));
+        return target.proxy(IntrospectionService.class);
+    }
+
 }

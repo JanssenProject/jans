@@ -6,9 +6,12 @@ import io.jans.ca.client.ClientInterface;
 import io.jans.ca.common.params.RegisterSiteParams;
 import io.jans.ca.common.response.RegisterSiteResponse;
 import io.jans.ca.server.Tester;
+import io.jans.ca.server.arquillian.BaseTest;
+import org.jboss.arquillian.test.api.ArquillianResource;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
+import java.net.URI;
 import java.util.ArrayList;
 
 import static io.jans.ca.server.TestUtils.notEmpty;
@@ -19,12 +22,16 @@ import static org.testng.AssertJUnit.assertNotNull;
  * @version 0.9, 30/03/2017
  */
 
-public class SetupClientTest {
+public class SetupClientTest extends BaseTest {
+
+    @ArquillianResource
+    private static URI url;
 
     @Parameters({"host", "opHost", "redirectUrls", "logoutUrl", "postLogoutRedirectUrls"})
     @Test
     public void setupClient(String host, String opHost, String redirectUrls, String logoutUrl, String postLogoutRedirectUrls) {
-        RegisterSiteResponse resp = setupClient(Tester.newClient(host), opHost, redirectUrls, postLogoutRedirectUrls, logoutUrl);
+        String hostTargetUrl = getApiTagetURL(url);
+        RegisterSiteResponse resp = setupClient(Tester.newClient(hostTargetUrl), opHost, redirectUrls, postLogoutRedirectUrls, logoutUrl);
         assertResponse(resp);
 
         // more specific client setup
@@ -38,7 +45,7 @@ public class SetupClientTest {
         params.setGrantTypes(Lists.newArrayList("authorization_code"));
         params.setResponseTypes(Lists.newArrayList("code"));
 
-        resp = Tester.newClient(host).registerSite(params);
+        resp = Tester.newClient(hostTargetUrl).registerSite(params);
         assertResponse(resp);
     }
 
