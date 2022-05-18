@@ -30,6 +30,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -100,6 +102,28 @@ public class ExternalTypeCreator {
         return null;
     }
 
+    private void outputUrls(ClassLoader classLoader) {
+        try {
+            URL[] urls = ((URLClassLoader) classLoader).getURLs();
+            for (URL url : urls) {
+                log.info("system url: {}", url.getFile());
+            }
+        } catch (Throwable e) {
+            log.error("FAILED to output class loader urls", e);
+        }
+    }
+
+    private void outputTmpDir() {
+        try {
+            File tmpFile = new File(System.getProperty("java.io.tmpdir"));
+            if (tmpFile.exists() && tmpFile.isDirectory()) {
+                log.info("TMP child files: {}", tmpFile.list());
+            }
+        } catch (Throwable e) {
+            log.error("FAILED to output TMP folder childs", e);
+        }
+    }
+
     private BaseExternalType createExternalTypeWithJava(CustomScript customScript) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         log.info(" STARTING >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
         try {
@@ -110,25 +134,17 @@ public class ExternalTypeCreator {
             log.error("FAILED to modify class path");
         }
 
-        try {
-            ClassLoader cl = ClassLoader.getSystemClassLoader();
+        outputUrls(ClassLoader.getSystemClassLoader());
+        outputUrls(this.getClass().getClassLoader());
+        outputUrls(Thread.currentThread().getContextClassLoader());
 
-            URL[] urls = ((URLClassLoader) cl).getURLs();
-            for (URL url : urls) {
-                log.info("system url: {}", url.getFile());
+        outputTmpDir();
+        Executors.newSingleThreadScheduledExecutor().schedule(new Runnable() {
+            @Override
+            public void run() {
+                outputTmpDir();
             }
-        } catch (Throwable e) {
-            log.error("FAILED to output system urls");
-        }
-
-        try {
-            File tmpFile = new File(System.getProperty("java.io.tmpdir"));
-            if (tmpFile.exists() && tmpFile.isDirectory()) {
-                log.info("TMP child files: {}", tmpFile.list());
-            }
-        } catch (Throwable e) {
-            log.error("FAILED to output TMP folder childs");
-        }
+        }, 10, TimeUnit.SECONDS);
 
 
         log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
