@@ -98,6 +98,21 @@ public class ExternalTypeCreator {
     }
 
     private BaseExternalType createExternalTypeWithJava(CustomScript customScript) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+        log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+        log.info("CLASSPATH > java.class.path: {}", System.getProperty("java.class.path"));
+        log.info("CLASSPATH > externalTypeCreator loader: {}", getClass().getClassLoader().getDefinedPackages());
+        log.info("CLASSPATH > system loader: {}", ClassLoader.getSystemClassLoader().getDefinedPackages());
+
+        final ClassLoader parent = getClass().getClassLoader().getParent();
+        if (parent != null) {
+            log.info("CLASSPATH > parent loader: {}", parent.getDefinedPackages());
+            log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+        }
+        final ClassLoader parentParent = getClass().getClassLoader().getParent();
+        if (parentParent != null) {
+            log.info("CLASSPATH > parent.parent loader: {}", parentParent.getDefinedPackages());
+        }
+        log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
         CustomScriptType customScriptType = customScript.getScriptType();
         Class<?> aClass = CachedCompilerA.CACHED_COMPILER.loadFromJava(customScriptType.getClassName(), customScript.getScript());
         return (BaseExternalType) aClass.getDeclaredConstructor().newInstance();
