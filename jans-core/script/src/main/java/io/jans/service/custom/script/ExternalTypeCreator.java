@@ -53,8 +53,8 @@ public class ExternalTypeCreator {
                 externalType = createExternalTypeFromStringWithPythonException(customScript);
             }
         } catch (Exception ex) {
-            log.error("Failed to prepare external type '{}', ex: '{}'", customScriptInum, ExceptionUtils.getStackTrace(ex));
-            log.trace("Script '{}'", customScript.getScript());
+            log.error("Failed to prepare external type '{}', exception: '{}'", customScriptInum, ExceptionUtils.getStackTrace(ex));
+            log.error("Script '{}'", customScript.getScript());
             saveScriptError(customScript, ex, true);
             return null;
         }
