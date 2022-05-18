@@ -1,0 +1,38 @@
+name: documentation
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'docs/*'
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v3
+        with:
+          python-version: 3.7
+
+      - name: Auto-merge inhouse doc prs
+        run: |
+          sudo apt-get update
+          sudo apt-get install jq
+          echo "${{ secrets.MOWORKFLOWTOKEN }}" > token.txt
+          gh auth login --with-token < token.txt
+          NUMBER_OF_FOLDERS_CHANGED=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | cut -d/ -f1 | sort -u | wc -l)
+          IS_USER_ORG_MEMBER=$(gh api -H "Accept: application/vnd.github.v3+json" --hostname github.com /orgs/JanssenProject/members?per_page=100 | jq .[].login | grep ${{ github.actor }})
+          #The number of folders changed should be 1. Otherwise the contributor has touched other folders besides /docs.
+          if [[ $NUMBER_OF_FOLDERS_CHANGED == 1 ]] && [[ ! -z "$IS_USER_ORG_MEMBER" ]]; then
+            gh pr merge --squash --auto https://github.com/${{github.repository}}/tree/${{github.head_ref}}
+            echo ""
+          else
+            echo "Bot will not merge this as it does not meet the requirments."
+            echo "Either the developer has merged with doc changes code changes or an external contributor has requested doc changes."
+          fi          
+
