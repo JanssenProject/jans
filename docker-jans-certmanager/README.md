@@ -243,4 +243,3 @@ spec:
               args: ["patch", "auth", "--opts", "interval:48"]
           restartPolicy: Never
 ```
-
