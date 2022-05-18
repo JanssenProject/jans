@@ -8,9 +8,11 @@ import io.jans.model.custom.script.model.CustomScript;
 import io.jans.model.custom.script.model.ScriptError;
 import io.jans.model.custom.script.type.BaseExternalType;
 import io.jans.service.PythonService;
+import io.jans.service.custom.javacompiler.CachedCompilerA;
 import io.jans.util.StringHelper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import net.openhft.compiler.CachedCompiler;
 import net.openhft.compiler.CompilerUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
@@ -97,7 +99,7 @@ public class ExternalTypeCreator {
 
     private BaseExternalType createExternalTypeWithJava(CustomScript customScript) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         CustomScriptType customScriptType = customScript.getScriptType();
-        Class<?> aClass = CompilerUtils.CACHED_COMPILER.loadFromJava(getClass().getClassLoader(), customScriptType.getClassName(), customScript.getScript());
+        Class<?> aClass = CachedCompilerA.CACHED_COMPILER.loadFromJava(customScriptType.getClassName(), customScript.getScript());
         return (BaseExternalType) aClass.getDeclaredConstructor().newInstance();
     }
 
