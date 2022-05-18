@@ -32,7 +32,7 @@ import static net.openhft.compiler.CompilerUtils.writeText;
 
 public class CachedCompilerA implements Closeable {
 
-    private static final Logger LOG = LoggerFactory.getLogger(CachedCompiler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CachedCompilerA.class);
     private static final PrintWriter DEFAULT_WRITER = new PrintWriter(System.err);
 
     static JavaCompiler s_compiler;
@@ -116,8 +116,11 @@ public class CachedCompilerA implements Closeable {
                 if (diagnostic.getKind() == Diagnostic.Kind.ERROR) {
                     writer.println(diagnostic);
                 }
+                LOG.info("diagnostic: " + diagnostic);
             }
         }, options, null, compilationUnits).call();
+
+        LOG.info("Is compiled: " + ok);
 
         if (!ok) {
             // compilation error, so we want to exclude this file from future compilation passes
