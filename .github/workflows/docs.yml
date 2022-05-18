@@ -24,7 +24,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install jq
-          echo "${{ secrets.MOWORKFLOWTOKEN }}" > token.txt
+          echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" > token.txt
           gh auth login --with-token < token.txt
           echo "Getting the number of folders that changed"
           NUMBER_OF_FOLDERS_CHANGED=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | cut -d/ -f1 | sort -u | wc -l)
