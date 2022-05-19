@@ -60,7 +60,7 @@ public class NativeJansFlowBridge {
                 st.setStartedAt(FlowStatus.PREPARED);
                 st.setQname(qname);
                 st.setJsonInput(jsonInput);
-                aps.createFlowRun(sessionId, st, System.currentTimeMillis() + 1000*conf.getInterruptionTime());
+                aps.createFlowRun(sessionId, st);
             }
         }        
         return alreadyRunning;
