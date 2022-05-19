@@ -1,9 +1,9 @@
-#!/usr/bin/expect -d
+#!/usr/bin/expect -f
 
 set HOST [lindex $argv 0]
 set USERNAME [lindex $argv 1]
+set OPENIDINUM [lindex $argv 2] 
 set timeout -1
-set openidinum 970accb6-f8a1-4190-825c-6492d5627223
 set umaID 7a55c863-a86b-411b-b71a-0c6c37747a3f
 spawn $env(SHELL)
 match_max 100000
@@ -14,8 +14,8 @@ send -- "\r"
 expect -re "(.*)\n"
 
 #--no-suggestion
-send -- "/opt/jans/jans-cli/config-cli.py"
-expect -exact "/opt/jans/jans-cli/config-cli.py"
+send -- "/opt/jans/jans-cli/config-cli.py --no-suggestion"
+expect -exact "/opt/jans/jans-cli/config-cli.py --no-suggestion"
 send -- "\r"
 expect "Selection:"
 
@@ -147,8 +147,9 @@ proc defaultMethods {} {
 			send -- "2\r"
 			expect "Selection:"
 			send -- "1\r"
-			expect  {"defaultAcr::" {send_error "inum not found" 
-				break }} 
+			expect "defaultAcr"
+			#expect  {"defaultAcr:" {send_error "inum not found" 
+			#	break }} 
 			#send -- "\r"
 			#expect "Selection:"
 			send -- "b\r"
@@ -259,14 +260,21 @@ proc rediscacheconf {} {
 				send -- "replace\r"
 				expect "path:"
 				send -- "connectionTimeout\r"
-				expect "value"
+				expect "value" 
 				send -- "3000\r"
 				expect "Another patch operation?"
 				send -- "n\r"
 				expect "Continue?"
 				send -- "y\r"
-				expect "3000"
-				send -- "b\r"
+				expect {
+					timeout { puts “timeout”; exit 0;}
+					“connection refused” {exit 1}
+					“unknown host” {exit 1}
+					"3000"
+				
+					}
+			#	expect "3000" continue
+			#	send -- "b\r"
 				expect "Selection:"
 				send -- "2\r"
                                 expect "Returns Redis cache configuration"
@@ -544,7 +552,7 @@ proc ldapconf {} {
 					expect "maxConnections"
 					send -- "\r"
 					expect "useSSL"
-					send -- "true\r"
+					send -- "_true\r"
 					expect "baseDNs"
 					send -- "mannoj\r"
 					expect "primaryKey"
@@ -606,15 +614,16 @@ proc ldapconf {} {
 			}
 proc cochbaseDbconf {}	{
 								
-					puts "Database - Couchbase configuration"
+					puts "Couchbase configuration"
 
 					send -- "15\r"
-					expect "Database - Couchbase configuration"
+					expect "Couchbase configuration"
 					send -- "1\r"
 					expect "Selection:"
 					send -- "b\r"
-					expect "Database - Couchbase configuration"
+					expect "Couchbase configuration"
 					send -- "2\r"
+					sleep 4
 					expect "configId"
 					send -- "couchbasetest\r"
 					expect "userName"
@@ -628,9 +637,9 @@ proc cochbaseDbconf {}	{
 					expect "buckets"
 					send -- "couchbasetest\r"
 					expect "passwordEncryptionMethod"
-					send -- "SHA"
+					send -- "SHA\r"
 					expect "sslTrustStoreFile"
-					send -- "couchbasetest\r
+					send -- "couchbasetest\r"
 					expect "sslTrustStorePin"
 					send -- "couchbasetest\r"
 					expect "sslTrustStoreFormat"
@@ -641,7 +650,7 @@ proc cochbaseDbconf {}	{
 					send -- "y\r"
 					expect "couchbasetest"
 					send -- "b\r"
-					expect "Database - Couchbase configuration"
+					expect "Couchbase configuration"
 					send -- "2\r"
 					expect "name"
 					send -- "couchbasetest\r"
@@ -655,13 +664,13 @@ proc cochbaseDbconf {}	{
 					send -- "y\r"
 					expect "100"
 					send -- "b\r"
-					expect "Database - Couchbase configuration"
+					expect "Couchbase configuration"
 					send -- "4\r"
 					expect "name"
 					send -- "couchbasetest\r"
 					expect "connectTimeout"
 					send -- "b\r"
-					expect "Database - Couchbase configuration"
+					expect "Couchbase configuration"
 					send -- "5\r"
 					expect "op:"
 					send -- "replace\r"
@@ -675,7 +684,7 @@ proc cochbaseDbconf {}	{
 					send -- "y\r"
 					expect "120"
 					send -- "b\r"
-					expect "Database - Couchbase configuration"
+					expect "Couchbase configuration"
 					send -- "6\r"
 					expect "name"
 					send -- "couchbasetest\r"
@@ -683,13 +692,13 @@ proc cochbaseDbconf {}	{
 					send -- "y\r"
 					expect  "deleted successfully"
 					send -- "b\r"
-					expect "Database - Couchbase configuration"
+					expect "Couchbase configuration"
 					send -- "b\r"
 					expect "Attribute"
 
 				}
 				
-proc openIdconnet {}	{
+proc openIdconnet {OPENIDINUM}	{
 
 				puts "OAuth - OpenID Connect - Clients"
 
@@ -721,17 +730,20 @@ proc openIdconnet {}	{
 				send -- "n\r"
 				expect "Continue?"
 				send -- "y\r"
-				sleep 20
-				#expect "myopenclient"
-				expect -re "[0-9a-zA-Z]*+\,"
-				puts "expect_out (1, string)"
+				expect "myopenclient"
+				puts "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+				set output "$expect_out(buffer)"
+				puts "$output"
+				puts "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+				#expect -re {^(inum)\=(.*)(\,)$}
+				#puts "expect_out (0, string)"
 				#------------------------------------
-				interact	
+			
 				send -- "b\r"
 				expect "OAuth - OpenID Connect - Clients"
 				send -- "3\r"
 				expect "Get OpenId Connect Client by Inum"
-				send -- "$openidinum\r"
+				send -- "${OPENIDINUM}\r"
 				expect "clientName"
 				send -- "18\r"
 				expect "contacts"
@@ -746,13 +758,13 @@ proc openIdconnet {}	{
 
 				send -- "4\r"
 				expect "Get OpenId Connect Client by Inum"
-				send -- "$openidinum\r"
-				expect "$openidinum"
+				send -- "$OPENIDINUM\r"
+				expect "${OPENIDINUM}"
 				send -- "b\r"
 				expect "OAuth - OpenID Connect - Clients"
 				send -- "6\r"
 				expect "inum:"
-				send -- "$openidinum\r"
+				send -- "${OPENIDINUM}\r"
 				expect "op:"
 				send -- "replace\r"
 				expect "path:"
@@ -764,11 +776,11 @@ proc openIdconnet {}	{
 				send -- "n\r"
 				expect "Continue?"
 				send -- "y\r"
-				expect "myopenidclient1"  timeout {
-				    puts "unable to save client name"
-				   timeout {exit 1}
-				 expect eof 
-				} 
+				expect "Jans Config Api Client"  
+			#	timeout {
+			#	    puts "unable to save client name"
+			#	 expect eof 
+			#	} 
 				send -- "b\r"
 				expect "OAuth - OpenID Connect - Clients"
 				#send -- "5\r"
@@ -1092,26 +1104,26 @@ proc scimusrmgmt {}	{
 				expect "Attribute"
 			}
 			
-#Attribute
-#defaultMethods
-#cacheconfg
-#memcacheconf
-#rediscacheconf
-#inmemcacheconf
-#nativepersistcacheconf
-#confprop	
-#fido2conf
-#smtpconf
-#Logging
-#ldapconf
-#cochbaseDbconf
-openIdconnet
-#uma
-#oauth
-#stats
-#health
-#serverstats
-#scimusrmgmt
+Attribute
+defaultMethods
+cacheconfg
+memcacheconf
+rediscacheconf
+inmemcacheconf
+nativepersistcacheconf
+confprop	
+fido2conf
+smtpconf
+Logging
+ldapconf
+cochbaseDbconf
+openIdconnet [lindex $argv 2]
+uma
+oauth
+stats
+health
+serverstats
+scimusrmgmt
 
 
 
@@ -1120,4 +1132,3 @@ openIdconnet
 send -- "exit\r"
 expect -exact "exit"
 expect eof
-

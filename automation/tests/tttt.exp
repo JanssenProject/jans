@@ -1,0 +1,10 @@
+#!/usr/bin/expect  -d
+/usr/bin/expect <(cat << EOF
+spawn /usr/bin/ssh root@64.227.129.105
+expect -re "(.*)"
+send "python3 install.py -uninstall\r"
+expect -re "(.*)"
+send "yes\r"
+EOF
+)
+

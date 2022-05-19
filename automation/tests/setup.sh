@@ -69,13 +69,36 @@ echo $OSVERSION
 			Ubuntu)
 	
 				echo " login to Ubuntu Host"
-				
-				./install.exp ${HOST} ${USERNAME} 
-				break;;
+				if ( ssh ${USERNAME}@${HOST} 'ls /opt/jans/jans-cli/config-cli.py' )
+					then
+
+expect <<EOF
+spawn /usr/bin/ssh $USERNAME@$HOST
+expect -re "(.*)"
+send "python3 install.py -uninstall\r"
+expect -re "(.*)"
+send "yes\r"
+
+expect eof
+EOF
+				fi
+
+
+
+				./install.exp ${HOST} ${USERNAME} 2>&1 >$LOG_LOCATION/install.log
+				OPENIDINUM=`ssh ${USERNAME}@${HOST} 'grep -ir "Jans Config Api Client" /opt/jans/jans-setup/logs/setup.log | cut -d'=' -f2 |rev | cut -d',' -f2 |rev'`
+                #                ./jans-cli-test.exp ${HOST} ${USERNAME} ${OPENIDINUM} 2>&1 >$LOG_LOCATION/jans-cli_test.log
+
+                                break;;
+
+
 			Suse)
 				echo "Login to Suse Host"
 				
 				./install.exp ${HOST} ${USERNAME} 2>&1 >$LOG_LOCATION/install.log
+			OPENIDINUM=`ssh ${USERNAME}@${HOST} 'grep -ir "Jans Config Api Client" /opt/jans/jans-setup/logs/setup.log | cut -d'=' -f2 |rev | cut -d',' -f2 |rev'`
+				./jans-cli-test.exp ${HOST} ${USERNAME} ${OPENIDINUM} 2>&1 >$LOG_LOCATION/jans-cli_test.log
+				
                                 break;;
 
 

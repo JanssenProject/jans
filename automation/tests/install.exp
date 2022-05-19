@@ -97,3 +97,4 @@ if { $expect_out(buffer) eq "0" } {
 send -- "exit\r"
 expect -exact "exit"
 expect eof
+exit

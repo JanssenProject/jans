@@ -1,0 +1,2663 @@
+spawn /bin/bash
+ssh root@64.227.129.105
+/opt/jans/jans-cli/config-cli.py
+]0;manoj@manoj-Inspiron-N5050: ~/Documents/janssen/jans/automation/tests[01;32mmanoj@manoj-Inspiron-N5050[00m:[01;34m~/Documents/janssen/jans/automation/tests[00m$ ssh root@64.227.129.105
+Welcome to Ubuntu 20.04.3 LTS (GNU/Linux 5.4.0-107-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/advantage
+
+  System information as of Fri May  6 10:04:43 UTC 2022
+
+  System load:           0.04
+  Usage of /:            3.9% of 154.90GB
+  Memory usage:          55%
+  Swap usage:            0%
+  Processes:             141
+  Users logged in:       1
+  IPv4 address for eth0: 64.227.129.105
+  IPv4 address for eth0: 10.47.0.5
+  IPv6 address for eth0: 2400:6180:100:d0::bb4:3001
+  IPv4 address for eth1: 10.122.0.2
+
+41 updates can be applied immediately.
+To see these additional updates run: apt list --upgradable
+
+
+*** System restart required ***
+Last login: Fri May  6 10:02:02 2022 from 103.59.74.27
+/opt/jans/jans-cli/config-cli.py
+]0;root@gluubuntu: ~root@gluubuntu:~# /opt/jans/jans-cli/config-cli.py
+[H[2J[3J[H[2J[3J[0m
+Main Menu
+---------
+1 Attribute
+2 Default Authentication Method
+3 Cache Configuration
+4 Cache Configuration – Memcached
+5 Cache Configuration – Redis
+6 Cache Configuration – in-Memory
+7 Cache Configuration – Native-Persistence
+8 Configuration – Properties
+9 Configuration – Fido2
+10 Configuration – SMTP
+11 Configuration – Logging
+12 Configuration – JWK - JSON Web Key (JWK)
+13 Custom Scripts
+14 Database - LDAP configuration
+15 Database - Couchbase configuration
+16 OAuth - OpenID Connect - Clients
+17 OAuth - UMA Resources
+18 OAuth - Scopes
+19 Statistics - User
+20 Health - Check
+21 Server Stats
+22 Configuration – User Management
+23 SCIM - Config Management
+24 Organization Configuration
+25 Auth Server Health - Check
+[38;5;242mb: back, q: quit x: logout and quit[0m
+
+[?1l[6n[?2004h[?25l[0m[?7l[0m[J[0mSelection:  [0m
+
+
+
+
+
+
+[0m                                                                                                                                              [142C [7A[11C[?7h[0m[?12l[?25hOAuth - OpenID Connect - Clients
+[?25l[?7l[11D[0mSelection: 16                                                                                                                                 [142C [13C[?7h[0m[?12l[?25h[?25l[?7l[13D[0m[J[0mSelection: 16                                                                                                                                 [142C [0m
+[J[?7h[0m[?12l[?25h[?2004l[H[2J[3J
+OAuth - OpenID Connect - Clients
+--------------------------------
+1 Gets list of OpenID Connect clients
+2 Create new OpenId connect client
+3 Update OpenId Connect client
+4 Get OpenId Connect Client by Inum
+5 Delete OpenId Connect client
+6 Update modified properties of OpenId Connect client by Inum
+[38;5;242mb: back, q: quit x: logout and quit[0m
+
+[?1l[6n[?2004h[?25l[0m[?7l[0m[J[0mSelection:  [0m
+
+
+
+
+
+
+[0m                                                                                                                                              [142C [7A[11C[?7h[0m[?12l[?25h[?25l[?7l[11D[0mSelection: 1                                                                                                                                  [142C [12C[?7h[0m[?12l[?25h[?25l[?7l[12D[0m[J[0mSelection: 1                                                                                                                                  [142C [0m
+[J[?7h[0m[?12l[?25h[?2004lException in default exception handler
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/eventloop/posix.py", line 155, in _run_task
+    t()
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/eventloop/context.py", line 116, in new_func
+    return func(*a, **kw)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/application.py", line 753, in cpr_not_supported_callback
+    run_in_terminal(in_terminal)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/run_in_terminal.py", line 50, in run_in_terminal
+    return run_coroutine_in_terminal(async_func, render_cli_done=render_cli_done)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/run_in_terminal.py", line 71, in run_coroutine_in_terminal
+    assert app._is_running
+AssertionError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/eventloop/base.py", line 132, in call_exception_handler
+    self._exception_handler(context)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/application.py", line 729, in handle_exception
+    run_coroutine_in_terminal(print_exception)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/run_in_terminal.py", line 71, in run_coroutine_in_terminal
+    assert app._is_running
+AssertionError
+[H[2J[3J
+Gets list of OpenID Connect clients
+-----------------------------------
+
+[38;5;244m«Search size - max size of the results to return. Type: integer»[0m
+[?1l[?2004h[?25l[0m[?7l[0m[J[0mlimit  [[0;1m50[0m]:                                                                                                                                  [142C [13C[?7h[0m[?12l[?25h[?25l[?7l[?7h[0m[?12l[?25h[?25l[?7l[13D[0m[J[0mlimit  [[0;1m50[0m]:                                                                                                                                  [142C [0m
+[J[?7h[0m[?12l[?25h[?2004l
+[38;5;244m«Search pattern. Type: string»[0m
+[?1l[6n[?2004h[?25l[0m[?7l[0m[J[0mpattern:  [0m
+
+
+
+
+
+
+[0m                                                                                                                                              [142C [7A[9C[?7h[0m[?12l[?25h[?25l[?7l[9D[0m[J[0mpattern:                                                                                                                                      [142C [0m
+[J[?7h[0m[?12l[?25h[?2004lException in default exception handler
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/eventloop/posix.py", line 155, in _run_task
+    t()
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/eventloop/context.py", line 116, in new_func
+    return func(*a, **kw)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/application.py", line 753, in cpr_not_supported_callback
+    run_in_terminal(in_terminal)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/run_in_terminal.py", line 50, in run_in_terminal
+    return run_coroutine_in_terminal(async_func, render_cli_done=render_cli_done)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/run_in_terminal.py", line 71, in run_coroutine_in_terminal
+    assert app._is_running
+AssertionError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/eventloop/base.py", line 132, in call_exception_handler
+    self._exception_handler(context)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/application.py", line 729, in handle_exception
+    run_coroutine_in_terminal(print_exception)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/run_in_terminal.py", line 71, in run_coroutine_in_terminal
+    assert app._is_running
+AssertionError
+
+[38;5;244m«The 1-based index of the first query result. Type: integer»[0m
+[?1l[6n[?2004h[?25l[0m[?7l[0m[J[0mstartIndex  [[0;1m1[0m]:  [0m
+
+
+
+
+
+
+[0m                                                                                                                                              [142C [7A[17C[?7h[0m[?12l[?25h[?25l[?7l[17D[0m[J[0mstartIndex  [[0;1m1[0m]:                                                                                                                              [142C [0m
+[J[?7h[0m[?12l[?25h[?2004lException in default exception handler
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/eventloop/posix.py", line 155, in _run_task
+    t()
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/eventloop/context.py", line 116, in new_func
+    return func(*a, **kw)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/application.py", line 753, in cpr_not_supported_callback
+    run_in_terminal(in_terminal)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/run_in_terminal.py", line 50, in run_in_terminal
+    return run_coroutine_in_terminal(async_func, render_cli_done=render_cli_done)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/run_in_terminal.py", line 71, in run_coroutine_in_terminal
+    assert app._is_running
+AssertionError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/eventloop/base.py", line 132, in call_exception_handler
+    self._exception_handler(context)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/application.py", line 729, in handle_exception
+    run_coroutine_in_terminal(print_exception)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/run_in_terminal.py", line 71, in run_coroutine_in_terminal
+    assert app._is_running
+AssertionError
+
+[38;5;244m«Attribute whose value will be used to order the returned response. Type: string»[0m
+[?1l[6n[?2004h[?25l[0m[?7l[0m[J[0msortBy  [[0;1minum[0m]:  [0m
+
+
+
+
+
+
+[0m                                                                                                                                              [142C [7A[16C[?7h[0m[?12l[?25h[?25l[?7l[16D[0m[J[0msortBy  [[0;1minum[0m]:                                                                                                                               [142C [0m
+[J[?7h[0m[?12l[?25h[?2004lException in default exception handler
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/eventloop/posix.py", line 155, in _run_task
+    t()
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/eventloop/context.py", line 116, in new_func
+    return func(*a, **kw)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/application.py", line 753, in cpr_not_supported_callback
+    run_in_terminal(in_terminal)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/run_in_terminal.py", line 50, in run_in_terminal
+    return run_coroutine_in_terminal(async_func, render_cli_done=render_cli_done)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/run_in_terminal.py", line 71, in run_coroutine_in_terminal
+    assert app._is_running
+AssertionError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/eventloop/base.py", line 132, in call_exception_handler
+    self._exception_handler(context)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/application.py", line 729, in handle_exception
+    run_coroutine_in_terminal(print_exception)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/run_in_terminal.py", line 71, in run_coroutine_in_terminal
+    assert app._is_running
+AssertionError
+
+[38;5;244m«Order in which the sortBy param is applied. Allowed values are "ascending" and "descending". Type: string»[0m
+[?1l[6n[?2004h[?25l[0m[?7l[0m[J[0msortOrder  [[0;1mascending[0m]:  [0m
+
+
+
+
+
+
+[0m                                                                                                                                              [142C [7A[24C[?7h[0m[?12l[?25h[?25l[?7l[24D[0m[J[0msortOrder  [[0;1mascending[0m]:                                                                                                                       [142C [0m
+[J[?7h[0m[?12l[?25h[?2004lException in default exception handler
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/eventloop/posix.py", line 155, in _run_task
+    t()
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/eventloop/context.py", line 116, in new_func
+    return func(*a, **kw)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/application.py", line 753, in cpr_not_supported_callback
+    run_in_terminal(in_terminal)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/run_in_terminal.py", line 50, in run_in_terminal
+    return run_coroutine_in_terminal(async_func, render_cli_done=render_cli_done)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/run_in_terminal.py", line 71, in run_coroutine_in_terminal
+    assert app._is_running
+AssertionError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/eventloop/base.py", line 132, in call_exception_handler
+    self._exception_handler(context)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/application.py", line 729, in handle_exception
+    run_coroutine_in_terminal(print_exception)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/run_in_terminal.py", line 71, in run_coroutine_in_terminal
+    assert app._is_running
+AssertionError
+Calling Api with parameters: {'limit': 50, 'start_index': 1, 'sort_by': 'inum', 'sort_order': 'ascending'}
+Please wait while retreiving data ...
+
+[38;5;10m[
+  {
+    "dn": "inum=108d4cb9-fc96-4473-b0ab-157b6dc7d902,ou=clients,o=jans",
+    "inum": "108d4cb9-fc96-4473-b0ab-157b6dc7d902",
+    "displayName": "myopenclient",
+    "clientSecret": "4b2cc304-8366-4cb3-a50b-c512b41b699c",
+    "frontChannelLogoutUri": null,
+    "frontChannelLogoutSessionRequired": false,
+    "registrationAccessToken": null,
+    "clientIdIssuedAt": null,
+    "clientSecretExpiresAt": null,
+    "redirectUris": null,
+    "claimRedirectUris": null,
+    "responseTypes": null,
+    "grantTypes": [],
+    "applicationType": "web",
+    "contacts": null,
+    "clientName": "myopenclient",
+    "idTokenTokenBindingCnf": null,
+    "logoUri": null,
+    "clientUri": null,
+    "policyUri": null,
+    "tosUri": null,
+    "jwksUri": null,
+    "jwks": null,
+    "sectorIdentifierUri": null,
+    "subjectType": "public",
+    "idTokenSignedResponseAlg": null,
+    "idTokenEncryptedResponseAlg": null,
+    "idTokenEncryptedResponseEnc": null,
+    "userInfoSignedResponseAlg": null,
+    "userInfoEncryptedResponseAlg": null,
+    "userInfoEncryptedResponseEnc": null,
+    "requestObjectSigningAlg": null,
+    "requestObjectEncryptionAlg": null,
+    "requestObjectEncryptionEnc": null,
+    "tokenEndpointAuthMethod": null,
+    "tokenEndpointAuthSigningAlg": null,
+    "defaultMaxAge": null,
+    "requireAuthTime": false,
+    "defaultAcrValues": null,
+    "initiateLoginUri": null,
+    "postLogoutRedirectUris": null,
+    "requestUris": null,
+    "scopes": null,
+    "claims": null,
+    "trustedClient": false,
+    "lastAccessTime": null,
+    "lastLogonTime": null,
+    "persistClientAuthorizations": false,
+    "includeClaimsInIdToken": false,
+    "refreshTokenLifetime": null,
+    "accessTokenLifetime": null,
+    "customAttributes": [],
+    "customObjectClasses": [
+      "top"
+    ],
+    "rptAsJwt": false,
+    "accessTokenAsJwt": false,
+    "accessTokenSigningAlg": null,
+    "disabled": false,
+    "authorizedOrigins": null,
+    "softwareId": null,
+    "softwareVersion": null,
+    "softwareStatement": null,
+    "attributes": {
+      "tlsClientAuthSubjectDn": null,
+      "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": false,
+      "keepClientAuthorizationAfterExpiration": false,
+      "allowSpontaneousScopes": false,
+      "spontaneousScopes": null,
+      "spontaneousScopeScriptDns": null,
+      "backchannelLogoutUri": null,
+      "backchannelLogoutSessionRequired": false,
+      "additionalAudience": null,
+      "postAuthnScripts": null,
+      "consentGatheringScripts": null,
+      "introspectionScripts": null,
+      "rptClaimsScripts": null
+    },
+    "backchannelTokenDeliveryMode": null,
+    "backchannelClientNotificationEndpoint": null,
+    "backchannelAuthenticationRequestSigningAlg": null,
+    "backchannelUserCodeParameter": null,
+    "expirationDate": null,
+    "deletable": false,
+    "jansId": null,
+    "description": null
+  },
+  {
+    "dn": "inum=1201.98bbc567-8586-4e5f-86c4-aba560e151aa,ou=clients,o=jans",
+    "inum": "1201.98bbc567-8586-4e5f-86c4-aba560e151aa",
+    "displayName": "SCIM client",
+    "clientSecret": "E1UOpdraD6g0",
+    "frontChannelLogoutUri": null,
+    "frontChannelLogoutSessionRequired": false,
+    "registrationAccessToken": null,
+    "clientIdIssuedAt": null,
+    "clientSecretExpiresAt": null,
+    "redirectUris": null,
+    "claimRedirectUris": null,
+    "responseTypes": null,
+    "grantTypes": [
+      "client_credentials"
+    ],
+    "applicationType": "native",
+    "contacts": null,
+    "clientName": "SCIM client",
+    "idTokenTokenBindingCnf": null,
+    "logoUri": null,
+    "clientUri": null,
+    "policyUri": null,
+    "tosUri": null,
+    "jwksUri": null,
+    "jwks": null,
+    "sectorIdentifierUri": null,
+    "subjectType": "pairwise",
+    "idTokenSignedResponseAlg": null,
+    "idTokenEncryptedResponseAlg": null,
+    "idTokenEncryptedResponseEnc": null,
+    "userInfoSignedResponseAlg": null,
+    "userInfoEncryptedResponseAlg": null,
+    "userInfoEncryptedResponseEnc": null,
+    "requestObjectSigningAlg": null,
+    "requestObjectEncryptionAlg": null,
+    "requestObjectEncryptionEnc": null,
+    "tokenEndpointAuthMethod": "client_secret_basic",
+    "tokenEndpointAuthSigningAlg": null,
+    "defaultMaxAge": null,
+    "requireAuthTime": false,
+    "defaultAcrValues": null,
+    "initiateLoginUri": null,
+    "postLogoutRedirectUris": null,
+    "requestUris": null,
+    "scopes": [
+      "inum=1200.CE1619,ou=scopes,o=jans",
+      "inum=1200.027390,ou=scopes,o=jans",
+      "inum=1200.38144F,ou=scopes,o=jans",
+      "inum=1200.226417,ou=scopes,o=jans",
+      "inum=1200.01E9E4,ou=scopes,o=jans",
+      "inum=1200.15A4C3,ou=scopes,o=jans",
+      "inum=1200.DFB61A,ou=scopes,o=jans",
+      "inum=1200.5D617A,ou=scopes,o=jans",
+      "inum=1200.2CEDB3,ou=scopes,o=jans",
+      "inum=1200.D15236,ou=scopes,o=jans"
+    ],
+    "claims": null,
+    "trustedClient": false,
+    "lastAccessTime": null,
+    "lastLogonTime": null,
+    "persistClientAuthorizations": false,
+    "includeClaimsInIdToken": false,
+    "refreshTokenLifetime": null,
+    "accessTokenLifetime": null,
+    "customAttributes": [],
+    "customObjectClasses": [
+      "top"
+    ],
+    "rptAsJwt": false,
+    "accessTokenAsJwt": false,
+    "accessTokenSigningAlg": "RS256",
+    "disabled": false,
+    "authorizedOrigins": null,
+    "softwareId": null,
+    "softwareVersion": null,
+    "softwareStatement": null,
+    "attributes": {
+      "tlsClientAuthSubjectDn": null,
+      "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": false,
+      "keepClientAuthorizationAfterExpiration": false,
+      "allowSpontaneousScopes": false,
+      "spontaneousScopes": null,
+      "spontaneousScopeScriptDns": null,
+      "backchannelLogoutUri": null,
+      "backchannelLogoutSessionRequired": false,
+      "additionalAudience": null,
+      "postAuthnScripts": null,
+      "consentGatheringScripts": null,
+      "introspectionScripts": null,
+      "rptClaimsScripts": null
+    },
+    "backchannelTokenDeliveryMode": null,
+    "backchannelClientNotificationEndpoint": null,
+    "backchannelAuthenticationRequestSigningAlg": null,
+    "backchannelUserCodeParameter": null,
+    "expirationDate": null,
+    "deletable": false,
+    "jansId": null,
+    "description": null
+  },
+  {
+    "dn": "inum=1341841b-95ca-4722-a5a5-a8badf3765ec,ou=clients,o=jans",
+    "inum": "1341841b-95ca-4722-a5a5-a8badf3765ec",
+    "displayName": "myopenclient",
+    "clientSecret": "df255c3e-ba1e-4b37-9c5c-862687cbf710",
+    "frontChannelLogoutUri": null,
+    "frontChannelLogoutSessionRequired": false,
+    "registrationAccessToken": null,
+    "clientIdIssuedAt": null,
+    "clientSecretExpiresAt": null,
+    "redirectUris": null,
+    "claimRedirectUris": null,
+    "responseTypes": null,
+    "grantTypes": [],
+    "applicationType": "web",
+    "contacts": null,
+    "clientName": "myopenclient",
+    "idTokenTokenBindingCnf": null,
+    "logoUri": null,
+    "clientUri": null,
+    "policyUri": null,
+    "tosUri": null,
+    "jwksUri": null,
+    "jwks": null,
+    "sectorIdentifierUri": null,
+    "subjectType": "public",
+    "idTokenSignedResponseAlg": null,
+    "idTokenEncryptedResponseAlg": null,
+    "idTokenEncryptedResponseEnc": null,
+    "userInfoSignedResponseAlg": null,
+    "userInfoEncryptedResponseAlg": null,
+    "userInfoEncryptedResponseEnc": null,
+    "requestObjectSigningAlg": null,
+    "requestObjectEncryptionAlg": null,
+    "requestObjectEncryptionEnc": null,
+    "tokenEndpointAuthMethod": null,
+    "tokenEndpointAuthSigningAlg": null,
+    "defaultMaxAge": null,
+    "requireAuthTime": false,
+    "defaultAcrValues": null,
+    "initiateLoginUri": null,
+    "postLogoutRedirectUris": null,
+    "requestUris": null,
+    "scopes": null,
+    "claims": null,
+    "trustedClient": false,
+    "lastAccessTime": null,
+    "lastLogonTime": null,
+    "persistClientAuthorizations": false,
+    "includeClaimsInIdToken": false,
+    "refreshTokenLifetime": null,
+    "accessTokenLifetime": null,
+    "customAttributes": [],
+    "customObjectClasses": [
+      "top"
+    ],
+    "rptAsJwt": false,
+    "accessTokenAsJwt": false,
+    "accessTokenSigningAlg": null,
+    "disabled": false,
+    "authorizedOrigins": null,
+    "softwareId": null,
+    "softwareVersion": null,
+    "softwareStatement": null,
+    "attributes": {
+      "tlsClientAuthSubjectDn": null,
+      "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": false,
+      "keepClientAuthorizationAfterExpiration": false,
+      "allowSpontaneousScopes": false,
+      "spontaneousScopes": null,
+      "spontaneousScopeScriptDns": null,
+      "backchannelLogoutUri": null,
+      "backchannelLogoutSessionRequired": false,
+      "additionalAudience": null,
+      "postAuthnScripts": null,
+      "consentGatheringScripts": null,
+      "introspectionScripts": null,
+      "rptClaimsScripts": null
+    },
+    "backchannelTokenDeliveryMode": null,
+    "backchannelClientNotificationEndpoint": null,
+    "backchannelAuthenticationRequestSigningAlg": null,
+    "backchannelUserCodeParameter": null,
+    "expirationDate": null,
+    "deletable": false,
+    "jansId": null,
+    "description": null
+  },
+  {
+    "dn": "inum=16ef7baa-0de1-48bf-9e04-d486defbee1c,ou=clients,o=jans",
+    "inum": "16ef7baa-0de1-48bf-9e04-d486defbee1c",
+    "displayName": "myopenclient",
+    "clientSecret": "bdb0a3d8-2bc8-43f8-9676-557d08efde62",
+    "frontChannelLogoutUri": null,
+    "frontChannelLogoutSessionRequired": false,
+    "registrationAccessToken": null,
+    "clientIdIssuedAt": null,
+    "clientSecretExpiresAt": null,
+    "redirectUris": null,
+    "claimRedirectUris": null,
+    "responseTypes": null,
+    "grantTypes": [],
+    "applicationType": "web",
+    "contacts": null,
+    "clientName": "myopenclient",
+    "idTokenTokenBindingCnf": null,
+    "logoUri": null,
+    "clientUri": null,
+    "policyUri": null,
+    "tosUri": null,
+    "jwksUri": null,
+    "jwks": null,
+    "sectorIdentifierUri": null,
+    "subjectType": "public",
+    "idTokenSignedResponseAlg": null,
+    "idTokenEncryptedResponseAlg": null,
+    "idTokenEncryptedResponseEnc": null,
+    "userInfoSignedResponseAlg": null,
+    "userInfoEncryptedResponseAlg": null,
+    "userInfoEncryptedResponseEnc": null,
+    "requestObjectSigningAlg": null,
+    "requestObjectEncryptionAlg": null,
+    "requestObjectEncryptionEnc": null,
+    "tokenEndpointAuthMethod": null,
+    "tokenEndpointAuthSigningAlg": null,
+    "defaultMaxAge": null,
+    "requireAuthTime": false,
+    "defaultAcrValues": null,
+    "initiateLoginUri": null,
+    "postLogoutRedirectUris": null,
+    "requestUris": null,
+    "scopes": null,
+    "claims": null,
+    "trustedClient": false,
+    "lastAccessTime": null,
+    "lastLogonTime": null,
+    "persistClientAuthorizations": false,
+    "includeClaimsInIdToken": false,
+    "refreshTokenLifetime": null,
+    "accessTokenLifetime": null,
+    "customAttributes": [],
+    "customObjectClasses": [
+      "top"
+    ],
+    "rptAsJwt": false,
+    "accessTokenAsJwt": false,
+    "accessTokenSigningAlg": null,
+    "disabled": false,
+    "authorizedOrigins": null,
+    "softwareId": null,
+    "softwareVersion": null,
+    "softwareStatement": null,
+    "attributes": {
+      "tlsClientAuthSubjectDn": null,
+      "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": false,
+      "keepClientAuthorizationAfterExpiration": false,
+      "allowSpontaneousScopes": false,
+      "spontaneousScopes": null,
+      "spontaneousScopeScriptDns": null,
+      "backchannelLogoutUri": null,
+      "backchannelLogoutSessionRequired": false,
+      "additionalAudience": null,
+      "postAuthnScripts": null,
+      "consentGatheringScripts": null,
+      "introspectionScripts": null,
+      "rptClaimsScripts": null
+    },
+    "backchannelTokenDeliveryMode": null,
+    "backchannelClientNotificationEndpoint": null,
+    "backchannelAuthenticationRequestSigningAlg": null,
+    "backchannelUserCodeParameter": null,
+    "expirationDate": null,
+    "deletable": false,
+    "jansId": null,
+    "description": null
+  },
+  {
+    "dn": "inum=1800.ea172df7-a993-401b-b495-d23cf57aa710,ou=clients,o=jans",
+    "inum": "1800.ea172df7-a993-401b-b495-d23cf57aa710",
+    "displayName": "Jans Config Api Client",
+    "clientSecret": "CE5qjG3oLLIO",
+    "frontChannelLogoutUri": null,
+    "frontChannelLogoutSessionRequired": false,
+    "registrationAccessToken": null,
+    "clientIdIssuedAt": null,
+    "clientSecretExpiresAt": null,
+    "redirectUris": [
+      "https://gluubuntu/admin-ui",
+      "http://localhost:4100"
+    ],
+    "claimRedirectUris": null,
+    "responseTypes": [
+      "code"
+    ],
+    "grantTypes": [
+      "authorization_code",
+      "refresh_token",
+      "client_credentials"
+    ],
+    "applicationType": "web",
+    "contacts": null,
+    "clientName": "Jans Config Api Client",
+    "idTokenTokenBindingCnf": null,
+    "logoUri": null,
+    "clientUri": null,
+    "policyUri": null,
+    "tosUri": null,
+    "jwksUri": null,
+    "jwks": null,
+    "sectorIdentifierUri": null,
+    "subjectType": "pairwise",
+    "idTokenSignedResponseAlg": "RS256",
+    "idTokenEncryptedResponseAlg": null,
+    "idTokenEncryptedResponseEnc": null,
+    "userInfoSignedResponseAlg": null,
+    "userInfoEncryptedResponseAlg": null,
+    "userInfoEncryptedResponseEnc": null,
+    "requestObjectSigningAlg": null,
+    "requestObjectEncryptionAlg": null,
+    "requestObjectEncryptionEnc": null,
+    "tokenEndpointAuthMethod": "client_secret_basic",
+    "tokenEndpointAuthSigningAlg": null,
+    "defaultMaxAge": null,
+    "requireAuthTime": false,
+    "defaultAcrValues": null,
+    "initiateLoginUri": null,
+    "postLogoutRedirectUris": null,
+    "requestUris": null,
+    "scopes": [
+      "inum=C4F7,ou=scopes,o=jans",
+      "inum=1200.CE1619,ou=scopes,o=jans",
+      "inum=1200.027390,ou=scopes,o=jans",
+      "inum=1800.E58F41,ou=scopes,o=jans",
+      "inum=1800.1439EA,ou=scopes,o=jans",
+      "inum=1800.51D734,ou=scopes,o=jans",
+      "inum=1800.59553B,ou=scopes,o=jans",
+      "inum=1800.038532,ou=scopes,o=jans",
+      "inum=1800.63EF32,ou=scopes,o=jans",
+      "inum=1800.5A76F5,ou=scopes,o=jans",
+      "inum=1800.F5B912,ou=scopes,o=jans",
+      "inum=1800.0D8CED,ou=scopes,o=jans",
+      "inum=1800.445BF5,ou=scopes,o=jans",
+      "inum=1800.30EC73,ou=scopes,o=jans",
+      "inum=1800.9436AE,ou=scopes,o=jans",
+      "inum=1800.EA6999,ou=scopes,o=jans",
+      "inum=1800.BA19D8,ou=scopes,o=jans",
+      "inum=1800.76CF65,ou=scopes,o=jans",
+      "inum=1800.B2D58B,ou=scopes,o=jans",
+      "inum=1800.3CAEBF,ou=scopes,o=jans",
+      "inum=1800.3D1FA0,ou=scopes,o=jans",
+      "inum=1800.904D0F,ou=scopes,o=jans",
+      "inum=1800.34B634,ou=scopes,o=jans",
+      "inum=1800.5E960C,ou=scopes,o=jans",
+      "inum=1800.6E74A7,ou=scopes,o=jans",
+      "inum=1800.F7A4B3,ou=scopes,o=jans",
+      "inum=1800.2CED7A,ou=scopes,o=jans",
+      "inum=1800.A2FE6E,ou=scopes,o=jans",
+      "inum=1800.FBF09A,ou=scopes,o=jans",
+      "inum=1800.8AAEF7,ou=scopes,o=jans",
+      "inum=1800.303F46,ou=scopes,o=jans",
+      "inum=1800.B5C7BE,ou=scopes,o=jans",
+      "inum=1800.CC4311,ou=scopes,o=jans",
+      "inum=1800.D67CF9,ou=scopes,o=jans",
+      "inum=1800.4D6198,ou=scopes,o=jans",
+      "inum=1800.731F54,ou=scopes,o=jans",
+      "inum=1800.844B1D,ou=scopes,o=jans",
+      "inum=1800.2530D2,ou=scopes,o=jans",
+      "inum=1800.2CB981,ou=scopes,o=jans",
+      "inum=1800.E42F91,ou=scopes,o=jans",
+      "inum=1800.F24F4F,ou=scopes,o=jans",
+      "inum=1800.348E95,ou=scopes,o=jans",
+      "inum=1800.7C0CBC,ou=scopes,o=jans",
+      "inum=1800.46E7FE,ou=scopes,o=jans",
+      "inum=1800.9356C6,ou=scopes,o=jans",
+      "inum=1800.A89079,ou=scopes,o=jans",
+      "inum=1800.74F5A7,ou=scopes,o=jans",
+      "inum=1800.D6D103,ou=scopes,o=jans",
+      "inum=1800.0BA61D,ou=scopes,o=jans",
+      "inum=1800.8909E5,ou=scopes,o=jans",
+      "inum=1800.973844,ou=scopes,o=jans",
+      "inum=1800.5AC456,ou=scopes,o=jans"
+    ],
+    "claims": null,
+    "trustedClient": false,
+    "lastAccessTime": null,
+    "lastLogonTime": null,
+    "persistClientAuthorizations": true,
+    "includeClaimsInIdToken": false,
+    "refreshTokenLifetime": null,
+    "accessTokenLifetime": null,
+    "customAttributes": [],
+    "customObjectClasses": [
+      "top"
+    ],
+    "rptAsJwt": false,
+    "accessTokenAsJwt": false,
+    "accessTokenSigningAlg": "RS256",
+    "disabled": false,
+    "authorizedOrigins": null,
+    "softwareId": null,
+    "softwareVersion": null,
+    "softwareStatement": null,
+    "attributes": {
+      "tlsClientAuthSubjectDn": null,
+      "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": false,
+      "keepClientAuthorizationAfterExpiration": false,
+      "allowSpontaneousScopes": false,
+      "spontaneousScopes": null,
+      "spontaneousScopeScriptDns": null,
+      "backchannelLogoutUri": null,
+      "backchannelLogoutSessionRequired": false,
+      "additionalAudience": null,
+      "postAuthnScripts": null,
+      "consentGatheringScripts": null,
+      "introspectionScripts": null,
+      "rptClaimsScripts": null
+    },
+    "backchannelTokenDeliveryMode": null,
+    "backchannelClientNotificationEndpoint": null,
+    "backchannelAuthenticationRequestSigningAlg": null,
+    "backchannelUserCodeParameter": null,
+    "expirationDate": null,
+    "deletable": false,
+    "jansId": null,
+    "description": null
+  },
+  {
+    "dn": "inum=2000.4441fd5b-fddd-46cb-8d71-fb24a47f80af,ou=clients,o=jans",
+    "inum": "2000.4441fd5b-fddd-46cb-8d71-fb24a47f80af",
+    "displayName": "Jans Role Based Client",
+    "clientSecret": "wsDdIHGTCYZD",
+    "frontChannelLogoutUri": "http://localhost:4100/logout",
+    "frontChannelLogoutSessionRequired": false,
+    "registrationAccessToken": null,
+    "clientIdIssuedAt": null,
+    "clientSecretExpiresAt": null,
+    "redirectUris": [
+      "https://gluubuntu/admin",
+      "http://localhost:4100"
+    ],
+    "claimRedirectUris": null,
+    "responseTypes": [
+      "code"
+    ],
+    "grantTypes": [
+      "authorization_code",
+      "refresh_token",
+      "client_credentials",
+      "urn:ietf:params:oauth:grant-type:device_code"
+    ],
+    "applicationType": "web",
+    "contacts": null,
+    "clientName": "Jans Role Based Client",
+    "idTokenTokenBindingCnf": null,
+    "logoUri": null,
+    "clientUri": null,
+    "policyUri": null,
+    "tosUri": null,
+    "jwksUri": null,
+    "jwks": null,
+    "sectorIdentifierUri": null,
+    "subjectType": "pairwise",
+    "idTokenSignedResponseAlg": "RS256",
+    "idTokenEncryptedResponseAlg": null,
+    "idTokenEncryptedResponseEnc": null,
+    "userInfoSignedResponseAlg": "RS256",
+    "userInfoEncryptedResponseAlg": null,
+    "userInfoEncryptedResponseEnc": null,
+    "requestObjectSigningAlg": null,
+    "requestObjectEncryptionAlg": null,
+    "requestObjectEncryptionEnc": null,
+    "tokenEndpointAuthMethod": "client_secret_basic",
+    "tokenEndpointAuthSigningAlg": null,
+    "defaultMaxAge": null,
+    "requireAuthTime": false,
+    "defaultAcrValues": null,
+    "initiateLoginUri": null,
+    "postLogoutRedirectUris": [
+      "http://localhost:4100",
+      "https://gluubuntu/admin"
+    ],
+    "requestUris": null,
+    "scopes": [
+      "inum=C4F7,ou=scopes,o=jans",
+      "inum=C4F6,ou=scopes,o=jans",
+      "inum=43F1,ou=scopes,o=jans",
+      "inum=764C,ou=scopes,o=jans",
+      "inum=F0C4,ou=scopes,o=jans"
+    ],
+    "claims": null,
+    "trustedClient": false,
+    "lastAccessTime": null,
+    "lastLogonTime": null,
+    "persistClientAuthorizations": true,
+    "includeClaimsInIdToken": false,
+    "refreshTokenLifetime": null,
+    "accessTokenLifetime": 2592000,
+    "customAttributes": [],
+    "customObjectClasses": [
+      "top"
+    ],
+    "rptAsJwt": false,
+    "accessTokenAsJwt": true,
+    "accessTokenSigningAlg": "RS256",
+    "disabled": false,
+    "authorizedOrigins": null,
+    "softwareId": null,
+    "softwareVersion": null,
+    "softwareStatement": null,
+    "attributes": {
+      "tlsClientAuthSubjectDn": null,
+      "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": true,
+      "keepClientAuthorizationAfterExpiration": false,
+      "allowSpontaneousScopes": false,
+      "spontaneousScopes": null,
+      "spontaneousScopeScriptDns": null,
+      "backchannelLogoutUri": null,
+      "backchannelLogoutSessionRequired": false,
+      "additionalAudience": null,
+      "postAuthnScripts": null,
+      "consentGatheringScripts": null,
+      "introspectionScripts": [
+        "inum=A44E-4F3D,ou=scripts,o=jans"
+      ],
+      "rptClaimsScripts": null
+    },
+    "backchannelTokenDeliveryMode": null,
+    "backchannelClientNotificationEndpoint": null,
+    "backchannelAuthenticationRequestSigningAlg": null,
+    "backchannelUserCodeParameter": null,
+    "expirationDate": null,
+    "deletable": false,
+    "jansId": null,
+    "description": null
+  },
+  {
+    "dn": "inum=27cc56ce-9feb-4848-a120-0eb8069fd601,ou=clients,o=jans",
+    "inum": "27cc56ce-9feb-4848-a120-0eb8069fd601",
+    "displayName": "myopenclient",
+    "clientSecret": "9162fe7a-4b75-4557-a403-65f2f3d7d7a1",
+    "frontChannelLogoutUri": null,
+    "frontChannelLogoutSessionRequired": false,
+    "registrationAccessToken": null,
+    "clientIdIssuedAt": null,
+    "clientSecretExpiresAt": null,
+    "redirectUris": null,
+    "claimRedirectUris": null,
+    "responseTypes": null,
+    "grantTypes": [],
+    "applicationType": "web",
+    "contacts": null,
+    "clientName": "myopenclient",
+    "idTokenTokenBindingCnf": null,
+    "logoUri": null,
+    "clientUri": null,
+    "policyUri": null,
+    "tosUri": null,
+    "jwksUri": null,
+    "jwks": null,
+    "sectorIdentifierUri": null,
+    "subjectType": "public",
+    "idTokenSignedResponseAlg": null,
+    "idTokenEncryptedResponseAlg": null,
+    "idTokenEncryptedResponseEnc": null,
+    "userInfoSignedResponseAlg": null,
+    "userInfoEncryptedResponseAlg": null,
+    "userInfoEncryptedResponseEnc": null,
+    "requestObjectSigningAlg": null,
+    "requestObjectEncryptionAlg": null,
+    "requestObjectEncryptionEnc": null,
+    "tokenEndpointAuthMethod": null,
+    "tokenEndpointAuthSigningAlg": null,
+    "defaultMaxAge": null,
+    "requireAuthTime": false,
+    "defaultAcrValues": null,
+    "initiateLoginUri": null,
+    "postLogoutRedirectUris": null,
+    "requestUris": null,
+    "scopes": null,
+    "claims": null,
+    "trustedClient": false,
+    "lastAccessTime": null,
+    "lastLogonTime": null,
+    "persistClientAuthorizations": false,
+    "includeClaimsInIdToken": false,
+    "refreshTokenLifetime": null,
+    "accessTokenLifetime": null,
+    "customAttributes": [],
+    "customObjectClasses": [
+      "top"
+    ],
+    "rptAsJwt": false,
+    "accessTokenAsJwt": false,
+    "accessTokenSigningAlg": null,
+    "disabled": false,
+    "authorizedOrigins": null,
+    "softwareId": null,
+    "softwareVersion": null,
+    "softwareStatement": null,
+    "attributes": {
+      "tlsClientAuthSubjectDn": null,
+      "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": false,
+      "keepClientAuthorizationAfterExpiration": false,
+      "allowSpontaneousScopes": false,
+      "spontaneousScopes": null,
+      "spontaneousScopeScriptDns": null,
+      "backchannelLogoutUri": null,
+      "backchannelLogoutSessionRequired": false,
+      "additionalAudience": null,
+      "postAuthnScripts": null,
+      "consentGatheringScripts": null,
+      "introspectionScripts": null,
+      "rptClaimsScripts": null
+    },
+    "backchannelTokenDeliveryMode": null,
+    "backchannelClientNotificationEndpoint": null,
+    "backchannelAuthenticationRequestSigningAlg": null,
+    "backchannelUserCodeParameter": null,
+    "expirationDate": null,
+    "deletable": false,
+    "jansId": null,
+    "description": null
+  },
+  {
+    "dn": "inum=4e66e6b1-4b5e-43dd-a94a-a0eaaaddb65f,ou=clients,o=jans",
+    "inum": "4e66e6b1-4b5e-43dd-a94a-a0eaaaddb65f",
+    "displayName": "myopenclient",
+    "clientSecret": "cf0a2464-341f-4ec5-b6c6-dc640304b7b8",
+    "frontChannelLogoutUri": null,
+    "frontChannelLogoutSessionRequired": false,
+    "registrationAccessToken": null,
+    "clientIdIssuedAt": null,
+    "clientSecretExpiresAt": null,
+    "redirectUris": null,
+    "claimRedirectUris": null,
+    "responseTypes": null,
+    "grantTypes": [],
+    "applicationType": "web",
+    "contacts": null,
+    "clientName": "myopenclient",
+    "idTokenTokenBindingCnf": null,
+    "logoUri": null,
+    "clientUri": null,
+    "policyUri": null,
+    "tosUri": null,
+    "jwksUri": null,
+    "jwks": null,
+    "sectorIdentifierUri": null,
+    "subjectType": "public",
+    "idTokenSignedResponseAlg": null,
+    "idTokenEncryptedResponseAlg": null,
+    "idTokenEncryptedResponseEnc": null,
+    "userInfoSignedResponseAlg": null,
+    "userInfoEncryptedResponseAlg": null,
+    "userInfoEncryptedResponseEnc": null,
+    "requestObjectSigningAlg": null,
+    "requestObjectEncryptionAlg": null,
+    "requestObjectEncryptionEnc": null,
+    "tokenEndpointAuthMethod": null,
+    "tokenEndpointAuthSigningAlg": null,
+    "defaultMaxAge": null,
+    "requireAuthTime": false,
+    "defaultAcrValues": null,
+    "initiateLoginUri": null,
+    "postLogoutRedirectUris": null,
+    "requestUris": null,
+    "scopes": null,
+    "claims": null,
+    "trustedClient": false,
+    "lastAccessTime": null,
+    "lastLogonTime": null,
+    "persistClientAuthorizations": false,
+    "includeClaimsInIdToken": false,
+    "refreshTokenLifetime": null,
+    "accessTokenLifetime": null,
+    "customAttributes": [],
+    "customObjectClasses": [
+      "top"
+    ],
+    "rptAsJwt": false,
+    "accessTokenAsJwt": false,
+    "accessTokenSigningAlg": null,
+    "disabled": false,
+    "authorizedOrigins": null,
+    "softwareId": null,
+    "softwareVersion": null,
+    "softwareStatement": null,
+    "attributes": {
+      "tlsClientAuthSubjectDn": null,
+      "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": false,
+      "keepClientAuthorizationAfterExpiration": false,
+      "allowSpontaneousScopes": false,
+      "spontaneousScopes": null,
+      "spontaneousScopeScriptDns": null,
+      "backchannelLogoutUri": null,
+      "backchannelLogoutSessionRequired": false,
+      "additionalAudience": null,
+      "postAuthnScripts": null,
+      "consentGatheringScripts": null,
+      "introspectionScripts": null,
+      "rptClaimsScripts": null
+    },
+    "backchannelTokenDeliveryMode": null,
+    "backchannelClientNotificationEndpoint": null,
+    "backchannelAuthenticationRequestSigningAlg": null,
+    "backchannelUserCodeParameter": null,
+    "expirationDate": null,
+    "deletable": false,
+    "jansId": null,
+    "description": null
+  },
+  {
+    "dn": "inum=6400fd66-7a7c-4cc9-ba37-a5751de43562,ou=clients,o=jans",
+    "inum": "6400fd66-7a7c-4cc9-ba37-a5751de43562",
+    "displayName": "myopenclient",
+    "clientSecret": "b24073fc-b9d9-4dc1-aa38-8eb48b97fe37",
+    "frontChannelLogoutUri": null,
+    "frontChannelLogoutSessionRequired": false,
+    "registrationAccessToken": null,
+    "clientIdIssuedAt": null,
+    "clientSecretExpiresAt": null,
+    "redirectUris": null,
+    "claimRedirectUris": null,
+    "responseTypes": null,
+    "grantTypes": [],
+    "applicationType": "web",
+    "contacts": null,
+    "clientName": "myopenclient",
+    "idTokenTokenBindingCnf": null,
+    "logoUri": null,
+    "clientUri": null,
+    "policyUri": null,
+    "tosUri": null,
+    "jwksUri": null,
+    "jwks": null,
+    "sectorIdentifierUri": null,
+    "subjectType": "public",
+    "idTokenSignedResponseAlg": null,
+    "idTokenEncryptedResponseAlg": null,
+    "idTokenEncryptedResponseEnc": null,
+    "userInfoSignedResponseAlg": null,
+    "userInfoEncryptedResponseAlg": null,
+    "userInfoEncryptedResponseEnc": null,
+    "requestObjectSigningAlg": null,
+    "requestObjectEncryptionAlg": null,
+    "requestObjectEncryptionEnc": null,
+    "tokenEndpointAuthMethod": null,
+    "tokenEndpointAuthSigningAlg": null,
+    "defaultMaxAge": null,
+    "requireAuthTime": false,
+    "defaultAcrValues": null,
+    "initiateLoginUri": null,
+    "postLogoutRedirectUris": null,
+    "requestUris": null,
+    "scopes": null,
+    "claims": null,
+    "trustedClient": false,
+    "lastAccessTime": null,
+    "lastLogonTime": null,
+    "persistClientAuthorizations": false,
+    "includeClaimsInIdToken": false,
+    "refreshTokenLifetime": null,
+    "accessTokenLifetime": null,
+    "customAttributes": [],
+    "customObjectClasses": [
+      "top"
+    ],
+    "rptAsJwt": false,
+    "accessTokenAsJwt": false,
+    "accessTokenSigningAlg": null,
+    "disabled": false,
+    "authorizedOrigins": null,
+    "softwareId": null,
+    "softwareVersion": null,
+    "softwareStatement": null,
+    "attributes": {
+      "tlsClientAuthSubjectDn": null,
+      "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": false,
+      "keepClientAuthorizationAfterExpiration": false,
+      "allowSpontaneousScopes": false,
+      "spontaneousScopes": null,
+      "spontaneousScopeScriptDns": null,
+      "backchannelLogoutUri": null,
+      "backchannelLogoutSessionRequired": false,
+      "additionalAudience": null,
+      "postAuthnScripts": null,
+      "consentGatheringScripts": null,
+      "introspectionScripts": null,
+      "rptClaimsScripts": null
+    },
+    "backchannelTokenDeliveryMode": null,
+    "backchannelClientNotificationEndpoint": null,
+    "backchannelAuthenticationRequestSigningAlg": null,
+    "backchannelUserCodeParameter": null,
+    "expirationDate": null,
+    "deletable": false,
+    "jansId": null,
+    "description": null
+  },
+  {
+    "dn": "inum=66c44f0c-c86d-4d78-8b0b-e87b7c8f8459,ou=clients,o=jans",
+    "inum": "66c44f0c-c86d-4d78-8b0b-e87b7c8f8459",
+    "displayName": "myopenclient",
+    "clientSecret": "29d67269-35be-455d-974c-3d3585925357",
+    "frontChannelLogoutUri": null,
+    "frontChannelLogoutSessionRequired": false,
+    "registrationAccessToken": null,
+    "clientIdIssuedAt": null,
+    "clientSecretExpiresAt": null,
+    "redirectUris": null,
+    "claimRedirectUris": null,
+    "responseTypes": null,
+    "grantTypes": [],
+    "applicationType": "web",
+    "contacts": null,
+    "clientName": "myopenclient",
+    "idTokenTokenBindingCnf": null,
+    "logoUri": null,
+    "clientUri": null,
+    "policyUri": null,
+    "tosUri": null,
+    "jwksUri": null,
+    "jwks": null,
+    "sectorIdentifierUri": null,
+    "subjectType": "public",
+    "idTokenSignedResponseAlg": null,
+    "idTokenEncryptedResponseAlg": null,
+    "idTokenEncryptedResponseEnc": null,
+    "userInfoSignedResponseAlg": null,
+    "userInfoEncryptedResponseAlg": null,
+    "userInfoEncryptedResponseEnc": null,
+    "requestObjectSigningAlg": null,
+    "requestObjectEncryptionAlg": null,
+    "requestObjectEncryptionEnc": null,
+    "tokenEndpointAuthMethod": null,
+    "tokenEndpointAuthSigningAlg": null,
+    "defaultMaxAge": null,
+    "requireAuthTime": false,
+    "defaultAcrValues": null,
+    "initiateLoginUri": null,
+    "postLogoutRedirectUris": null,
+    "requestUris": null,
+    "scopes": null,
+    "claims": null,
+    "trustedClient": false,
+    "lastAccessTime": null,
+    "lastLogonTime": null,
+    "persistClientAuthorizations": false,
+    "includeClaimsInIdToken": false,
+    "refreshTokenLifetime": null,
+    "accessTokenLifetime": null,
+    "customAttributes": [],
+    "customObjectClasses": [
+      "top"
+    ],
+    "rptAsJwt": false,
+    "accessTokenAsJwt": false,
+    "accessTokenSigningAlg": null,
+    "disabled": false,
+    "authorizedOrigins": null,
+    "softwareId": null,
+    "softwareVersion": null,
+    "softwareStatement": null,
+    "attributes": {
+      "tlsClientAuthSubjectDn": null,
+      "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": false,
+      "keepClientAuthorizationAfterExpiration": false,
+      "allowSpontaneousScopes": false,
+      "spontaneousScopes": null,
+      "spontaneousScopeScriptDns": null,
+      "backchannelLogoutUri": null,
+      "backchannelLogoutSessionRequired": false,
+      "additionalAudience": null,
+      "postAuthnScripts": null,
+      "consentGatheringScripts": null,
+      "introspectionScripts": null,
+      "rptClaimsScripts": null
+    },
+    "backchannelTokenDeliveryMode": null,
+    "backchannelClientNotificationEndpoint": null,
+    "backchannelAuthenticationRequestSigningAlg": null,
+    "backchannelUserCodeParameter": null,
+    "expirationDate": null,
+    "deletable": false,
+    "jansId": null,
+    "description": null
+  },
+  {
+    "dn": "inum=7211b3db-ef0d-4c82-8365-a348d63b54cf,ou=clients,o=jans",
+    "inum": "7211b3db-ef0d-4c82-8365-a348d63b54cf",
+    "displayName": "myopenclient",
+    "clientSecret": "7f39743e-3d9d-4cb8-9e66-978ae500b4ff",
+    "frontChannelLogoutUri": null,
+    "frontChannelLogoutSessionRequired": false,
+    "registrationAccessToken": null,
+    "clientIdIssuedAt": null,
+    "clientSecretExpiresAt": null,
+    "redirectUris": null,
+    "claimRedirectUris": null,
+    "responseTypes": null,
+    "grantTypes": [],
+    "applicationType": "web",
+    "contacts": null,
+    "clientName": "myopenclient",
+    "idTokenTokenBindingCnf": null,
+    "logoUri": null,
+    "clientUri": null,
+    "policyUri": null,
+    "tosUri": null,
+    "jwksUri": null,
+    "jwks": null,
+    "sectorIdentifierUri": null,
+    "subjectType": "public",
+    "idTokenSignedResponseAlg": null,
+    "idTokenEncryptedResponseAlg": null,
+    "idTokenEncryptedResponseEnc": null,
+    "userInfoSignedResponseAlg": null,
+    "userInfoEncryptedResponseAlg": null,
+    "userInfoEncryptedResponseEnc": null,
+    "requestObjectSigningAlg": null,
+    "requestObjectEncryptionAlg": null,
+    "requestObjectEncryptionEnc": null,
+    "tokenEndpointAuthMethod": null,
+    "tokenEndpointAuthSigningAlg": null,
+    "defaultMaxAge": null,
+    "requireAuthTime": false,
+    "defaultAcrValues": null,
+    "initiateLoginUri": null,
+    "postLogoutRedirectUris": null,
+    "requestUris": null,
+    "scopes": null,
+    "claims": null,
+    "trustedClient": false,
+    "lastAccessTime": null,
+    "lastLogonTime": null,
+    "persistClientAuthorizations": false,
+    "includeClaimsInIdToken": false,
+    "refreshTokenLifetime": null,
+    "accessTokenLifetime": null,
+    "customAttributes": [],
+    "customObjectClasses": [
+      "top"
+    ],
+    "rptAsJwt": false,
+    "accessTokenAsJwt": false,
+    "accessTokenSigningAlg": null,
+    "disabled": false,
+    "authorizedOrigins": null,
+    "softwareId": null,
+    "softwareVersion": null,
+    "softwareStatement": null,
+    "attributes": {
+      "tlsClientAuthSubjectDn": null,
+      "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": false,
+      "keepClientAuthorizationAfterExpiration": false,
+      "allowSpontaneousScopes": false,
+      "spontaneousScopes": null,
+      "spontaneousScopeScriptDns": null,
+      "backchannelLogoutUri": null,
+      "backchannelLogoutSessionRequired": false,
+      "additionalAudience": null,
+      "postAuthnScripts": null,
+      "consentGatheringScripts": null,
+      "introspectionScripts": null,
+      "rptClaimsScripts": null
+    },
+    "backchannelTokenDeliveryMode": null,
+    "backchannelClientNotificationEndpoint": null,
+    "backchannelAuthenticationRequestSigningAlg": null,
+    "backchannelUserCodeParameter": null,
+    "expirationDate": null,
+    "deletable": false,
+    "jansId": null,
+    "description": null
+  },
+  {
+    "dn": "inum=762ee1a8-0d1f-4a01-9600-48bddf23fe2c,ou=clients,o=jans",
+    "inum": "762ee1a8-0d1f-4a01-9600-48bddf23fe2c",
+    "displayName": "myopenclient",
+    "clientSecret": "f67ddc96-b59f-471b-b2d5-ed10d9138dcb",
+    "frontChannelLogoutUri": null,
+    "frontChannelLogoutSessionRequired": false,
+    "registrationAccessToken": null,
+    "clientIdIssuedAt": null,
+    "clientSecretExpiresAt": null,
+    "redirectUris": null,
+    "claimRedirectUris": null,
+    "responseTypes": null,
+    "grantTypes": [],
+    "applicationType": "web",
+    "contacts": null,
+    "clientName": "myopenclient",
+    "idTokenTokenBindingCnf": null,
+    "logoUri": null,
+    "clientUri": null,
+    "policyUri": null,
+    "tosUri": null,
+    "jwksUri": null,
+    "jwks": null,
+    "sectorIdentifierUri": null,
+    "subjectType": "public",
+    "idTokenSignedResponseAlg": null,
+    "idTokenEncryptedResponseAlg": null,
+    "idTokenEncryptedResponseEnc": null,
+    "userInfoSignedResponseAlg": null,
+    "userInfoEncryptedResponseAlg": null,
+    "userInfoEncryptedResponseEnc": null,
+    "requestObjectSigningAlg": null,
+    "requestObjectEncryptionAlg": null,
+    "requestObjectEncryptionEnc": null,
+    "tokenEndpointAuthMethod": null,
+    "tokenEndpointAuthSigningAlg": null,
+    "defaultMaxAge": null,
+    "requireAuthTime": false,
+    "defaultAcrValues": null,
+    "initiateLoginUri": null,
+    "postLogoutRedirectUris": null,
+    "requestUris": null,
+    "scopes": null,
+    "claims": null,
+    "trustedClient": false,
+    "lastAccessTime": null,
+    "lastLogonTime": null,
+    "persistClientAuthorizations": false,
+    "includeClaimsInIdToken": false,
+    "refreshTokenLifetime": null,
+    "accessTokenLifetime": null,
+    "customAttributes": [],
+    "customObjectClasses": [
+      "top"
+    ],
+    "rptAsJwt": false,
+    "accessTokenAsJwt": false,
+    "accessTokenSigningAlg": null,
+    "disabled": false,
+    "authorizedOrigins": null,
+    "softwareId": null,
+    "softwareVersion": null,
+    "softwareStatement": null,
+    "attributes": {
+      "tlsClientAuthSubjectDn": null,
+      "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": false,
+      "keepClientAuthorizationAfterExpiration": false,
+      "allowSpontaneousScopes": false,
+      "spontaneousScopes": null,
+      "spontaneousScopeScriptDns": null,
+      "backchannelLogoutUri": null,
+      "backchannelLogoutSessionRequired": false,
+      "additionalAudience": null,
+      "postAuthnScripts": null,
+      "consentGatheringScripts": null,
+      "introspectionScripts": null,
+      "rptClaimsScripts": null
+    },
+    "backchannelTokenDeliveryMode": null,
+    "backchannelClientNotificationEndpoint": null,
+    "backchannelAuthenticationRequestSigningAlg": null,
+    "backchannelUserCodeParameter": null,
+    "expirationDate": null,
+    "deletable": false,
+    "jansId": null,
+    "description": null
+  },
+  {
+    "dn": "inum=7c2705d3-f67a-4904-b3da-1bb223c91517,ou=clients,o=jans",
+    "inum": "7c2705d3-f67a-4904-b3da-1bb223c91517",
+    "displayName": "myopenclient",
+    "clientSecret": "9caceab9-c761-45e4-85ae-70d6f1075743",
+    "frontChannelLogoutUri": null,
+    "frontChannelLogoutSessionRequired": false,
+    "registrationAccessToken": null,
+    "clientIdIssuedAt": null,
+    "clientSecretExpiresAt": null,
+    "redirectUris": null,
+    "claimRedirectUris": null,
+    "responseTypes": null,
+    "grantTypes": [],
+    "applicationType": "web",
+    "contacts": null,
+    "clientName": "myopenclient",
+    "idTokenTokenBindingCnf": null,
+    "logoUri": null,
+    "clientUri": null,
+    "policyUri": null,
+    "tosUri": null,
+    "jwksUri": null,
+    "jwks": null,
+    "sectorIdentifierUri": null,
+    "subjectType": "public",
+    "idTokenSignedResponseAlg": null,
+    "idTokenEncryptedResponseAlg": null,
+    "idTokenEncryptedResponseEnc": null,
+    "userInfoSignedResponseAlg": null,
+    "userInfoEncryptedResponseAlg": null,
+    "userInfoEncryptedResponseEnc": null,
+    "requestObjectSigningAlg": null,
+    "requestObjectEncryptionAlg": null,
+    "requestObjectEncryptionEnc": null,
+    "tokenEndpointAuthMethod": null,
+    "tokenEndpointAuthSigningAlg": null,
+    "defaultMaxAge": null,
+    "requireAuthTime": false,
+    "defaultAcrValues": null,
+    "initiateLoginUri": null,
+    "postLogoutRedirectUris": null,
+    "requestUris": null,
+    "scopes": null,
+    "claims": null,
+    "trustedClient": false,
+    "lastAccessTime": null,
+    "lastLogonTime": null,
+    "persistClientAuthorizations": false,
+    "includeClaimsInIdToken": false,
+    "refreshTokenLifetime": null,
+    "accessTokenLifetime": null,
+    "customAttributes": [],
+    "customObjectClasses": [
+      "top"
+    ],
+    "rptAsJwt": false,
+    "accessTokenAsJwt": false,
+    "accessTokenSigningAlg": null,
+    "disabled": false,
+    "authorizedOrigins": null,
+    "softwareId": null,
+    "softwareVersion": null,
+    "softwareStatement": null,
+    "attributes": {
+      "tlsClientAuthSubjectDn": null,
+      "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": false,
+      "keepClientAuthorizationAfterExpiration": false,
+      "allowSpontaneousScopes": false,
+      "spontaneousScopes": null,
+      "spontaneousScopeScriptDns": null,
+      "backchannelLogoutUri": null,
+      "backchannelLogoutSessionRequired": false,
+      "additionalAudience": null,
+      "postAuthnScripts": null,
+      "consentGatheringScripts": null,
+      "introspectionScripts": null,
+      "rptClaimsScripts": null
+    },
+    "backchannelTokenDeliveryMode": null,
+    "backchannelClientNotificationEndpoint": null,
+    "backchannelAuthenticationRequestSigningAlg": null,
+    "backchannelUserCodeParameter": null,
+    "expirationDate": null,
+    "deletable": false,
+    "jansId": null,
+    "description": null
+  },
+  {
+    "dn": "inum=88fbeeed-857c-42f5-bd9b-5b136e823e35,ou=clients,o=jans",
+    "inum": "88fbeeed-857c-42f5-bd9b-5b136e823e35",
+    "displayName": "myopenclient",
+    "clientSecret": "0145ae31-57c8-48da-85bf-295a552c69a7",
+    "frontChannelLogoutUri": null,
+    "frontChannelLogoutSessionRequired": false,
+    "registrationAccessToken": null,
+    "clientIdIssuedAt": null,
+    "clientSecretExpiresAt": null,
+    "redirectUris": null,
+    "claimRedirectUris": null,
+    "responseTypes": null,
+    "grantTypes": [],
+    "applicationType": "web",
+    "contacts": null,
+    "clientName": "myopenclient",
+    "idTokenTokenBindingCnf": null,
+    "logoUri": null,
+    "clientUri": null,
+    "policyUri": null,
+    "tosUri": null,
+    "jwksUri": null,
+    "jwks": null,
+    "sectorIdentifierUri": null,
+    "subjectType": "public",
+    "idTokenSignedResponseAlg": null,
+    "idTokenEncryptedResponseAlg": null,
+    "idTokenEncryptedResponseEnc": null,
+    "userInfoSignedResponseAlg": null,
+    "userInfoEncryptedResponseAlg": null,
+    "userInfoEncryptedResponseEnc": null,
+    "requestObjectSigningAlg": null,
+    "requestObjectEncryptionAlg": null,
+    "requestObjectEncryptionEnc": null,
+    "tokenEndpointAuthMethod": null,
+    "tokenEndpointAuthSigningAlg": null,
+    "defaultMaxAge": null,
+    "requireAuthTime": false,
+    "defaultAcrValues": null,
+    "initiateLoginUri": null,
+    "postLogoutRedirectUris": null,
+    "requestUris": null,
+    "scopes": null,
+    "claims": null,
+    "trustedClient": false,
+    "lastAccessTime": null,
+    "lastLogonTime": null,
+    "persistClientAuthorizations": false,
+    "includeClaimsInIdToken": false,
+    "refreshTokenLifetime": null,
+    "accessTokenLifetime": null,
+    "customAttributes": [],
+    "customObjectClasses": [
+      "top"
+    ],
+    "rptAsJwt": false,
+    "accessTokenAsJwt": false,
+    "accessTokenSigningAlg": null,
+    "disabled": false,
+    "authorizedOrigins": null,
+    "softwareId": null,
+    "softwareVersion": null,
+    "softwareStatement": null,
+    "attributes": {
+      "tlsClientAuthSubjectDn": null,
+      "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": false,
+      "keepClientAuthorizationAfterExpiration": false,
+      "allowSpontaneousScopes": false,
+      "spontaneousScopes": null,
+      "spontaneousScopeScriptDns": null,
+      "backchannelLogoutUri": null,
+      "backchannelLogoutSessionRequired": false,
+      "additionalAudience": null,
+      "postAuthnScripts": null,
+      "consentGatheringScripts": null,
+      "introspectionScripts": null,
+      "rptClaimsScripts": null
+    },
+    "backchannelTokenDeliveryMode": null,
+    "backchannelClientNotificationEndpoint": null,
+    "backchannelAuthenticationRequestSigningAlg": null,
+    "backchannelUserCodeParameter": null,
+    "expirationDate": null,
+    "deletable": false,
+    "jansId": null,
+    "description": null
+  },
+  {
+    "dn": "inum=91765b1d-cd3a-4c8c-98cd-70e59ca004fb,ou=clients,o=jans",
+    "inum": "91765b1d-cd3a-4c8c-98cd-70e59ca004fb",
+    "displayName": "myopenclient",
+    "clientSecret": "42bec341-5a87-4c60-b1bb-9820cee4ee77",
+    "frontChannelLogoutUri": null,
+    "frontChannelLogoutSessionRequired": false,
+    "registrationAccessToken": null,
+    "clientIdIssuedAt": null,
+    "clientSecretExpiresAt": null,
+    "redirectUris": null,
+    "claimRedirectUris": null,
+    "responseTypes": null,
+    "grantTypes": [],
+    "applicationType": "web",
+    "contacts": null,
+    "clientName": "myopenclient",
+    "idTokenTokenBindingCnf": null,
+    "logoUri": null,
+    "clientUri": null,
+    "policyUri": null,
+    "tosUri": null,
+    "jwksUri": null,
+    "jwks": null,
+    "sectorIdentifierUri": null,
+    "subjectType": "public",
+    "idTokenSignedResponseAlg": null,
+    "idTokenEncryptedResponseAlg": null,
+    "idTokenEncryptedResponseEnc": null,
+    "userInfoSignedResponseAlg": null,
+    "userInfoEncryptedResponseAlg": null,
+    "userInfoEncryptedResponseEnc": null,
+    "requestObjectSigningAlg": null,
+    "requestObjectEncryptionAlg": null,
+    "requestObjectEncryptionEnc": null,
+    "tokenEndpointAuthMethod": null,
+    "tokenEndpointAuthSigningAlg": null,
+    "defaultMaxAge": null,
+    "requireAuthTime": false,
+    "defaultAcrValues": null,
+    "initiateLoginUri": null,
+    "postLogoutRedirectUris": null,
+    "requestUris": null,
+    "scopes": null,
+    "claims": null,
+    "trustedClient": false,
+    "lastAccessTime": null,
+    "lastLogonTime": null,
+    "persistClientAuthorizations": false,
+    "includeClaimsInIdToken": false,
+    "refreshTokenLifetime": null,
+    "accessTokenLifetime": null,
+    "customAttributes": [],
+    "customObjectClasses": [
+      "top"
+    ],
+    "rptAsJwt": false,
+    "accessTokenAsJwt": false,
+    "accessTokenSigningAlg": null,
+    "disabled": false,
+    "authorizedOrigins": null,
+    "softwareId": null,
+    "softwareVersion": null,
+    "softwareStatement": null,
+    "attributes": {
+      "tlsClientAuthSubjectDn": null,
+      "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": false,
+      "keepClientAuthorizationAfterExpiration": false,
+      "allowSpontaneousScopes": false,
+      "spontaneousScopes": null,
+      "spontaneousScopeScriptDns": null,
+      "backchannelLogoutUri": null,
+      "backchannelLogoutSessionRequired": false,
+      "additionalAudience": null,
+      "postAuthnScripts": null,
+      "consentGatheringScripts": null,
+      "introspectionScripts": null,
+      "rptClaimsScripts": null
+    },
+    "backchannelTokenDeliveryMode": null,
+    "backchannelClientNotificationEndpoint": null,
+    "backchannelAuthenticationRequestSigningAlg": null,
+    "backchannelUserCodeParameter": null,
+    "expirationDate": null,
+    "deletable": false,
+    "jansId": null,
+    "description": null
+  },
+  {
+    "dn": "inum=a0867edb-db51-4336-b905-4643cd4ba37e,ou=clients,o=jans",
+    "inum": "a0867edb-db51-4336-b905-4643cd4ba37e",
+    "displayName": "myopenclient",
+    "clientSecret": "ac5d411b-05fd-43a4-b1da-ad3c4887f2c1",
+    "frontChannelLogoutUri": null,
+    "frontChannelLogoutSessionRequired": false,
+    "registrationAccessToken": null,
+    "clientIdIssuedAt": null,
+    "clientSecretExpiresAt": null,
+    "redirectUris": null,
+    "claimRedirectUris": null,
+    "responseTypes": null,
+    "grantTypes": [],
+    "applicationType": "web",
+    "contacts": null,
+    "clientName": "myopenclient",
+    "idTokenTokenBindingCnf": null,
+    "logoUri": null,
+    "clientUri": null,
+    "policyUri": null,
+    "tosUri": null,
+    "jwksUri": null,
+    "jwks": null,
+    "sectorIdentifierUri": null,
+    "subjectType": "public",
+    "idTokenSignedResponseAlg": null,
+    "idTokenEncryptedResponseAlg": null,
+    "idTokenEncryptedResponseEnc": null,
+    "userInfoSignedResponseAlg": null,
+    "userInfoEncryptedResponseAlg": null,
+    "userInfoEncryptedResponseEnc": null,
+    "requestObjectSigningAlg": null,
+    "requestObjectEncryptionAlg": null,
+    "requestObjectEncryptionEnc": null,
+    "tokenEndpointAuthMethod": null,
+    "tokenEndpointAuthSigningAlg": null,
+    "defaultMaxAge": null,
+    "requireAuthTime": false,
+    "defaultAcrValues": null,
+    "initiateLoginUri": null,
+    "postLogoutRedirectUris": null,
+    "requestUris": null,
+    "scopes": null,
+    "claims": null,
+    "trustedClient": false,
+    "lastAccessTime": null,
+    "lastLogonTime": null,
+    "persistClientAuthorizations": false,
+    "includeClaimsInIdToken": false,
+    "refreshTokenLifetime": null,
+    "accessTokenLifetime": null,
+    "customAttributes": [],
+    "customObjectClasses": [
+      "top"
+    ],
+    "rptAsJwt": false,
+    "accessTokenAsJwt": false,
+    "accessTokenSigningAlg": null,
+    "disabled": false,
+    "authorizedOrigins": null,
+    "softwareId": null,
+    "softwareVersion": null,
+    "softwareStatement": null,
+    "attributes": {
+      "tlsClientAuthSubjectDn": null,
+      "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": false,
+      "keepClientAuthorizationAfterExpiration": false,
+      "allowSpontaneousScopes": false,
+      "spontaneousScopes": null,
+      "spontaneousScopeScriptDns": null,
+      "backchannelLogoutUri": null,
+      "backchannelLogoutSessionRequired": false,
+      "additionalAudience": null,
+      "postAuthnScripts": null,
+      "consentGatheringScripts": null,
+      "introspectionScripts": null,
+      "rptClaimsScripts": null
+    },
+    "backchannelTokenDeliveryMode": null,
+    "backchannelClientNotificationEndpoint": null,
+    "backchannelAuthenticationRequestSigningAlg": null,
+    "backchannelUserCodeParameter": null,
+    "expirationDate": null,
+    "deletable": false,
+    "jansId": null,
+    "description": null
+  },
+  {
+    "dn": "inum=cfdb7440-7936-4b1c-9cbb-b5a7ce0ae1d7,ou=clients,o=jans",
+    "inum": "cfdb7440-7936-4b1c-9cbb-b5a7ce0ae1d7",
+    "displayName": "myopenclient",
+    "clientSecret": "1fb2f074-f8ab-443c-a0e4-83848a9aeed3",
+    "frontChannelLogoutUri": null,
+    "frontChannelLogoutSessionRequired": false,
+    "registrationAccessToken": null,
+    "clientIdIssuedAt": null,
+    "clientSecretExpiresAt": null,
+    "redirectUris": null,
+    "claimRedirectUris": null,
+    "responseTypes": null,
+    "grantTypes": [],
+    "applicationType": "web",
+    "contacts": null,
+    "clientName": "myopenclient",
+    "idTokenTokenBindingCnf": null,
+    "logoUri": null,
+    "clientUri": null,
+    "policyUri": null,
+    "tosUri": null,
+    "jwksUri": null,
+    "jwks": null,
+    "sectorIdentifierUri": null,
+    "subjectType": "public",
+    "idTokenSignedResponseAlg": null,
+    "idTokenEncryptedResponseAlg": null,
+    "idTokenEncryptedResponseEnc": null,
+    "userInfoSignedResponseAlg": null,
+    "userInfoEncryptedResponseAlg": null,
+    "userInfoEncryptedResponseEnc": null,
+    "requestObjectSigningAlg": null,
+    "requestObjectEncryptionAlg": null,
+    "requestObjectEncryptionEnc": null,
+    "tokenEndpointAuthMethod": null,
+    "tokenEndpointAuthSigningAlg": null,
+    "defaultMaxAge": null,
+    "requireAuthTime": false,
+    "defaultAcrValues": null,
+    "initiateLoginUri": null,
+    "postLogoutRedirectUris": null,
+    "requestUris": null,
+    "scopes": null,
+    "claims": null,
+    "trustedClient": false,
+    "lastAccessTime": null,
+    "lastLogonTime": null,
+    "persistClientAuthorizations": false,
+    "includeClaimsInIdToken": false,
+    "refreshTokenLifetime": null,
+    "accessTokenLifetime": null,
+    "customAttributes": [],
+    "customObjectClasses": [
+      "top"
+    ],
+    "rptAsJwt": false,
+    "accessTokenAsJwt": false,
+    "accessTokenSigningAlg": null,
+    "disabled": false,
+    "authorizedOrigins": null,
+    "softwareId": null,
+    "softwareVersion": null,
+    "softwareStatement": null,
+    "attributes": {
+      "tlsClientAuthSubjectDn": null,
+      "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": false,
+      "keepClientAuthorizationAfterExpiration": false,
+      "allowSpontaneousScopes": false,
+      "spontaneousScopes": null,
+      "spontaneousScopeScriptDns": null,
+      "backchannelLogoutUri": null,
+      "backchannelLogoutSessionRequired": false,
+      "additionalAudience": null,
+      "postAuthnScripts": null,
+      "consentGatheringScripts": null,
+      "introspectionScripts": null,
+      "rptClaimsScripts": null
+    },
+    "backchannelTokenDeliveryMode": null,
+    "backchannelClientNotificationEndpoint": null,
+    "backchannelAuthenticationRequestSigningAlg": null,
+    "backchannelUserCodeParameter": null,
+    "expirationDate": null,
+    "deletable": false,
+    "jansId": null,
+    "description": null
+  },
+  {
+    "dn": "inum=db3cd86e-f973-4e74-90c6-74477df3e3a0,ou=clients,o=jans",
+    "inum": "db3cd86e-f973-4e74-90c6-74477df3e3a0",
+    "displayName": "myopenclient",
+    "clientSecret": "4c6cb231-26ff-403c-83f8-c973f6997162",
+    "frontChannelLogoutUri": null,
+    "frontChannelLogoutSessionRequired": false,
+    "registrationAccessToken": null,
+    "clientIdIssuedAt": null,
+    "clientSecretExpiresAt": null,
+    "redirectUris": null,
+    "claimRedirectUris": null,
+    "responseTypes": null,
+    "grantTypes": [],
+    "applicationType": "web",
+    "contacts": null,
+    "clientName": "myopenclient",
+    "idTokenTokenBindingCnf": null,
+    "logoUri": null,
+    "clientUri": null,
+    "policyUri": null,
+    "tosUri": null,
+    "jwksUri": null,
+    "jwks": null,
+    "sectorIdentifierUri": null,
+    "subjectType": "public",
+    "idTokenSignedResponseAlg": null,
+    "idTokenEncryptedResponseAlg": null,
+    "idTokenEncryptedResponseEnc": null,
+    "userInfoSignedResponseAlg": null,
+    "userInfoEncryptedResponseAlg": null,
+    "userInfoEncryptedResponseEnc": null,
+    "requestObjectSigningAlg": null,
+    "requestObjectEncryptionAlg": null,
+    "requestObjectEncryptionEnc": null,
+    "tokenEndpointAuthMethod": null,
+    "tokenEndpointAuthSigningAlg": null,
+    "defaultMaxAge": null,
+    "requireAuthTime": false,
+    "defaultAcrValues": null,
+    "initiateLoginUri": null,
+    "postLogoutRedirectUris": null,
+    "requestUris": null,
+    "scopes": null,
+    "claims": null,
+    "trustedClient": false,
+    "lastAccessTime": null,
+    "lastLogonTime": null,
+    "persistClientAuthorizations": false,
+    "includeClaimsInIdToken": false,
+    "refreshTokenLifetime": null,
+    "accessTokenLifetime": null,
+    "customAttributes": [],
+    "customObjectClasses": [
+      "top"
+    ],
+    "rptAsJwt": false,
+    "accessTokenAsJwt": false,
+    "accessTokenSigningAlg": null,
+    "disabled": false,
+    "authorizedOrigins": null,
+    "softwareId": null,
+    "softwareVersion": null,
+    "softwareStatement": null,
+    "attributes": {
+      "tlsClientAuthSubjectDn": null,
+      "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": false,
+      "keepClientAuthorizationAfterExpiration": false,
+      "allowSpontaneousScopes": false,
+      "spontaneousScopes": null,
+      "spontaneousScopeScriptDns": null,
+      "backchannelLogoutUri": null,
+      "backchannelLogoutSessionRequired": false,
+      "additionalAudience": null,
+      "postAuthnScripts": null,
+      "consentGatheringScripts": null,
+      "introspectionScripts": null,
+      "rptClaimsScripts": null
+    },
+    "backchannelTokenDeliveryMode": null,
+    "backchannelClientNotificationEndpoint": null,
+    "backchannelAuthenticationRequestSigningAlg": null,
+    "backchannelUserCodeParameter": null,
+    "expirationDate": null,
+    "deletable": false,
+    "jansId": null,
+    "description": null
+  },
+  {
+    "dn": "inum=f5eb7777-dd56-42a7-91cf-7c17823b72d0,ou=clients,o=jans",
+    "inum": "f5eb7777-dd56-42a7-91cf-7c17823b72d0",
+    "displayName": "myopenclient",
+    "clientSecret": "74edb608-6b82-4555-b89e-232a2edc1975",
+    "frontChannelLogoutUri": null,
+    "frontChannelLogoutSessionRequired": false,
+    "registrationAccessToken": null,
+    "clientIdIssuedAt": null,
+    "clientSecretExpiresAt": null,
+    "redirectUris": null,
+    "claimRedirectUris": null,
+    "responseTypes": null,
+    "grantTypes": [],
+    "applicationType": "web",
+    "contacts": null,
+    "clientName": "myopenclient",
+    "idTokenTokenBindingCnf": null,
+    "logoUri": null,
+    "clientUri": null,
+    "policyUri": null,
+    "tosUri": null,
+    "jwksUri": null,
+    "jwks": null,
+    "sectorIdentifierUri": null,
+    "subjectType": "public",
+    "idTokenSignedResponseAlg": null,
+    "idTokenEncryptedResponseAlg": null,
+    "idTokenEncryptedResponseEnc": null,
+    "userInfoSignedResponseAlg": null,
+    "userInfoEncryptedResponseAlg": null,
+    "userInfoEncryptedResponseEnc": null,
+    "requestObjectSigningAlg": null,
+    "requestObjectEncryptionAlg": null,
+    "requestObjectEncryptionEnc": null,
+    "tokenEndpointAuthMethod": null,
+    "tokenEndpointAuthSigningAlg": null,
+    "defaultMaxAge": null,
+    "requireAuthTime": false,
+    "defaultAcrValues": null,
+    "initiateLoginUri": null,
+    "postLogoutRedirectUris": null,
+    "requestUris": null,
+    "scopes": null,
+    "claims": null,
+    "trustedClient": false,
+    "lastAccessTime": null,
+    "lastLogonTime": null,
+    "persistClientAuthorizations": false,
+    "includeClaimsInIdToken": false,
+    "refreshTokenLifetime": null,
+    "accessTokenLifetime": null,
+    "customAttributes": [],
+    "customObjectClasses": [
+      "top"
+    ],
+    "rptAsJwt": false,
+    "accessTokenAsJwt": false,
+    "accessTokenSigningAlg": null,
+    "disabled": false,
+    "authorizedOrigins": null,
+    "softwareId": null,
+    "softwareVersion": null,
+    "softwareStatement": null,
+    "attributes": {
+      "tlsClientAuthSubjectDn": null,
+      "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": false,
+      "keepClientAuthorizationAfterExpiration": false,
+      "allowSpontaneousScopes": false,
+      "spontaneousScopes": null,
+      "spontaneousScopeScriptDns": null,
+      "backchannelLogoutUri": null,
+      "backchannelLogoutSessionRequired": false,
+      "additionalAudience": null,
+      "postAuthnScripts": null,
+      "consentGatheringScripts": null,
+      "introspectionScripts": null,
+      "rptClaimsScripts": null
+    },
+    "backchannelTokenDeliveryMode": null,
+    "backchannelClientNotificationEndpoint": null,
+    "backchannelAuthenticationRequestSigningAlg": null,
+    "backchannelUserCodeParameter": null,
+    "expirationDate": null,
+    "deletable": false,
+    "jansId": null,
+    "description": null
+  },
+  {
+    "dn": "inum=fb5b5c18-abf6-4edc-a985-f1ff9ad71388,ou=clients,o=jans",
+    "inum": "fb5b5c18-abf6-4edc-a985-f1ff9ad71388",
+    "displayName": "myopenclient",
+    "clientSecret": "0af4487d-a7aa-418d-8790-854d38de76c9",
+    "frontChannelLogoutUri": null,
+    "frontChannelLogoutSessionRequired": false,
+    "registrationAccessToken": null,
+    "clientIdIssuedAt": null,
+    "clientSecretExpiresAt": null,
+    "redirectUris": null,
+    "claimRedirectUris": null,
+    "responseTypes": null,
+    "grantTypes": [],
+    "applicationType": "web",
+    "contacts": null,
+    "clientName": "myopenclient",
+    "idTokenTokenBindingCnf": null,
+    "logoUri": null,
+    "clientUri": null,
+    "policyUri": null,
+    "tosUri": null,
+    "jwksUri": null,
+    "jwks": null,
+    "sectorIdentifierUri": null,
+    "subjectType": "public",
+    "idTokenSignedResponseAlg": null,
+    "idTokenEncryptedResponseAlg": null,
+    "idTokenEncryptedResponseEnc": null,
+    "userInfoSignedResponseAlg": null,
+    "userInfoEncryptedResponseAlg": null,
+    "userInfoEncryptedResponseEnc": null,
+    "requestObjectSigningAlg": null,
+    "requestObjectEncryptionAlg": null,
+    "requestObjectEncryptionEnc": null,
+    "tokenEndpointAuthMethod": null,
+    "tokenEndpointAuthSigningAlg": null,
+    "defaultMaxAge": null,
+    "requireAuthTime": false,
+    "defaultAcrValues": null,
+    "initiateLoginUri": null,
+    "postLogoutRedirectUris": null,
+    "requestUris": null,
+    "scopes": null,
+    "claims": null,
+    "trustedClient": false,
+    "lastAccessTime": null,
+    "lastLogonTime": null,
+    "persistClientAuthorizations": false,
+    "includeClaimsInIdToken": false,
+    "refreshTokenLifetime": null,
+    "accessTokenLifetime": null,
+    "customAttributes": [],
+    "customObjectClasses": [
+      "top"
+    ],
+    "rptAsJwt": false,
+    "accessTokenAsJwt": false,
+    "accessTokenSigningAlg": null,
+    "disabled": false,
+    "authorizedOrigins": null,
+    "softwareId": null,
+    "softwareVersion": null,
+    "softwareStatement": null,
+    "attributes": {
+      "tlsClientAuthSubjectDn": null,
+      "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": false,
+      "keepClientAuthorizationAfterExpiration": false,
+      "allowSpontaneousScopes": false,
+      "spontaneousScopes": null,
+      "spontaneousScopeScriptDns": null,
+      "backchannelLogoutUri": null,
+      "backchannelLogoutSessionRequired": false,
+      "additionalAudience": null,
+      "postAuthnScripts": null,
+      "consentGatheringScripts": null,
+      "introspectionScripts": null,
+      "rptClaimsScripts": null
+    },
+    "backchannelTokenDeliveryMode": null,
+    "backchannelClientNotificationEndpoint": null,
+    "backchannelAuthenticationRequestSigningAlg": null,
+    "backchannelUserCodeParameter": null,
+    "expirationDate": null,
+    "deletable": false,
+    "jansId": null,
+    "description": null
+  }
+][0m
+[38;5;242mb: back, q: quit x: logout and quit[0m
+
+[?1l[6n[?2004h[?25l[0m[?7l[0m[J[0mSelection:  [0m
+
+
+
+
+
+
+[0m                                                                                                                                              [142C [7A[11C[?7h[0m[?12l[?25h[?25l[?7l[11D[0mSelection: b                                                                                                                                  [142C [12C[?7h[0m[?12l[?25h[?25l[?7l[12D[0m[J[0mSelection: b                                                                                                                                  [142C [0m
+[J[?7h[0m[?12l[?25h[?2004lException in default exception handler
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/eventloop/posix.py", line 155, in _run_task
+    t()
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/eventloop/context.py", line 116, in new_func
+    return func(*a, **kw)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/application.py", line 753, in cpr_not_supported_callback
+    run_in_terminal(in_terminal)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/run_in_terminal.py", line 50, in run_in_terminal
+    return run_coroutine_in_terminal(async_func, render_cli_done=render_cli_done)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/run_in_terminal.py", line 71, in run_coroutine_in_terminal
+    assert app._is_running
+AssertionError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/eventloop/base.py", line 132, in call_exception_handler
+    self._exception_handler(context)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/application.py", line 729, in handle_exception
+    run_coroutine_in_terminal(print_exception)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/run_in_terminal.py", line 71, in run_coroutine_in_terminal
+    assert app._is_running
+AssertionError
+[H[2J[3J
+OAuth - OpenID Connect - Clients
+--------------------------------
+1 Gets list of OpenID Connect clients
+2 Create new OpenId connect client
+3 Update OpenId Connect client
+4 Get OpenId Connect Client by Inum
+5 Delete OpenId Connect client
+6 Update modified properties of OpenId Connect client by Inum
+[38;5;242mb: back, q: quit x: logout and quit[0m
+
+[?1l[6n[?2004h[?25l[0m[?7l[0m[J[0mSelection:  [0m
+
+
+
+
+
+
+[0m                                                                                                                                              [142C [7A[11C[?7h[0m[?12l[?25h[?25l[?7l[11D[0mSelection: 2                                                                                                                                  [142C [12C[?7h[0m[?12l[?25h[?25l[?7l[12D[0m[J[0mSelection: 2                                                                                                                                  [142C [0m
+[J[?7h[0m[?12l[?25h[?2004lException in default exception handler
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/eventloop/posix.py", line 155, in _run_task
+    t()
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/eventloop/context.py", line 116, in new_func
+    return func(*a, **kw)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/application.py", line 753, in cpr_not_supported_callback
+    run_in_terminal(in_terminal)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/run_in_terminal.py", line 50, in run_in_terminal
+    return run_coroutine_in_terminal(async_func, render_cli_done=render_cli_done)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/run_in_terminal.py", line 71, in run_coroutine_in_terminal
+    assert app._is_running
+AssertionError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/eventloop/base.py", line 132, in call_exception_handler
+    self._exception_handler(context)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/application.py", line 729, in handle_exception
+    run_coroutine_in_terminal(print_exception)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/run_in_terminal.py", line 71, in run_coroutine_in_terminal
+    assert app._is_running
+AssertionError
+
+[38;5;244m«Name of the user suitable for display to end-users. Type: string»[0m
+[?1l[6n[?2004h[?25l[0m[?7l[0m[J[0mdisplayName:  [0m
+
+
+
+
+
+
+[0m                                                                                                                                              [142C [7A[13C[?7h[0m[?12l[?25h[?25l[?7l[13D[0mdisplayName: myopenclient                                                                                                                     [142C [25C[?7h[0m[?12l[?25h[?25l[?7l[25D[0m[J[0mdisplayName: myopenclient                                                                                                                     [142C [0m
+[J[?7h[0m[?12l[?25h[?2004lException in default exception handler
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/eventloop/posix.py", line 155, in _run_task
+    t()
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/eventloop/context.py", line 116, in new_func
+    return func(*a, **kw)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/application.py", line 753, in cpr_not_supported_callback
+    run_in_terminal(in_terminal)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/run_in_terminal.py", line 50, in run_in_terminal
+    return run_coroutine_in_terminal(async_func, render_cli_done=render_cli_done)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/run_in_terminal.py", line 71, in run_coroutine_in_terminal
+    assert app._is_running
+AssertionError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/eventloop/base.py", line 132, in call_exception_handler
+    self._exception_handler(context)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/application.py", line 729, in handle_exception
+    run_coroutine_in_terminal(print_exception)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/run_in_terminal.py", line 71, in run_coroutine_in_terminal
+    assert app._is_running
+AssertionError
+
+[38;5;244m«Kind of the application. The default, if omitted, is web. The defined values are native or web. Web Clients using the OAuth Implicit Grant Type must only register URLs using the HTTPS scheme as redirect_uris, they must not use localhost as the hostname. Native Clients must only register redirect_uris using custom URI schemes or URLs using the http scheme with localhost as the hostname. Type: string, Valid values: [38;5;15mweb, native[0m»[0m
+[?1l[6n[?2004h[?25l[0m[?7l[0m[J[0mapplicationType:  [0m
+
+
+
+
+
+
+[0m                                                                                                                                              [142C [7A[17C[?7h[0m[?12l[?25h[?25l[?7l[17D[0mapplicationType: web                                                                                                                          [142C [20C[?7h[0m[?12l[?25h[?25l[?7l[20D[0m[J[0mapplicationType: web                                                                                                                          [142C [0m
+[J[?7h[0m[?12l[?25h[?2004lException in default exception handler
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/eventloop/posix.py", line 155, in _run_task
+    t()
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/eventloop/context.py", line 116, in new_func
+    return func(*a, **kw)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/application.py", line 753, in cpr_not_supported_callback
+    run_in_terminal(in_terminal)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/run_in_terminal.py", line 50, in run_in_terminal
+    return run_coroutine_in_terminal(async_func, render_cli_done=render_cli_done)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/run_in_terminal.py", line 71, in run_coroutine_in_terminal
+    assert app._is_running
+AssertionError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/eventloop/base.py", line 132, in call_exception_handler
+    self._exception_handler(context)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/application.py", line 729, in handle_exception
+    run_coroutine_in_terminal(print_exception)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/run_in_terminal.py", line 71, in run_coroutine_in_terminal
+    assert app._is_running
+AssertionError
+
+[38;5;244m«If true then claims are included in token id, default value is false. Type: boolean»[0m
+[?1l[6n[?2004h[?25l[0m[?7l[0m[J[0mincludeClaimsInIdToken  [[0;1mfalse[0m]:  [0m
+
+
+
+
+
+
+[0m                                                                                                                                              [142C [7A[33C[?7h[0m[?12l[?25h[?25l[?7l[33D[0m[J[0mincludeClaimsInIdToken  [[0;1mfalse[0m]:                                                                                                              [142C [0m
+[J[?7h[0m[?12l[?25h[?2004lException in default exception handler
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/eventloop/posix.py", line 155, in _run_task
+    t()
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/eventloop/context.py", line 116, in new_func
+    return func(*a, **kw)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/application.py", line 753, in cpr_not_supported_callback
+    run_in_terminal(in_terminal)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/run_in_terminal.py", line 50, in run_in_terminal
+    return run_coroutine_in_terminal(async_func, render_cli_done=render_cli_done)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/run_in_terminal.py", line 71, in run_coroutine_in_terminal
+    assert app._is_running
+AssertionError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/eventloop/base.py", line 132, in call_exception_handler
+    self._exception_handler(context)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/application.py", line 729, in handle_exception
+    run_coroutine_in_terminal(print_exception)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/run_in_terminal.py", line 71, in run_coroutine_in_terminal
+    assert app._is_running
+AssertionError
+
+[?1l[6n[?2004h[?25l[0m[?7l[0m[J[0mPopulate optional fields?  [0m
+
+
+
+
+
+
+[0m                                                                                                                                              [142C [7A[26C[?7h[0m[?12l[?25h[?25l[?7l[26D[0mPopulate optional fields? n                                                                                                                   [142C [27C[?7h[0m[?12l[?25h[?25l[?7l[27D[0m[J[0mPopulate optional fields? n                                                                                                                   [142C [0m
+[J[?7h[0m[?12l[?25h[?2004lException in default exception handler
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/eventloop/posix.py", line 155, in _run_task
+    t()
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/eventloop/context.py", line 116, in new_func
+    return func(*a, **kw)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/application.py", line 753, in cpr_not_supported_callback
+    run_in_terminal(in_terminal)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/run_in_terminal.py", line 50, in run_in_terminal
+    return run_coroutine_in_terminal(async_func, render_cli_done=render_cli_done)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/run_in_terminal.py", line 71, in run_coroutine_in_terminal
+    assert app._is_running
+AssertionError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/eventloop/base.py", line 132, in call_exception_handler
+    self._exception_handler(context)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/application.py", line 729, in handle_exception
+    run_coroutine_in_terminal(print_exception)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/run_in_terminal.py", line 71, in run_coroutine_in_terminal
+    assert app._is_running
+AssertionError
+Obtained Data:
+
+[38;5;10m{
+  "dn": null,
+  "inum": null,
+  "displayName": "myopenclient",
+  "clientSecret": null,
+  "frontChannelLogoutUri": null,
+  "frontChannelLogoutSessionRequired": null,
+  "registrationAccessToken": null,
+  "clientIdIssuedAt": null,
+  "clientSecretExpiresAt": null,
+  "redirectUris": null,
+  "claimRedirectUris": null,
+  "responseTypes": null,
+  "grantTypes": null,
+  "applicationType": "web",
+  "contacts": null,
+  "clientName": null,
+  "idTokenTokenBindingCnf": null,
+  "logoUri": null,
+  "clientUri": null,
+  "policyUri": null,
+  "tosUri": null,
+  "jwksUri": null,
+  "jwks": null,
+  "sectorIdentifierUri": null,
+  "subjectType": null,
+  "idTokenSignedResponseAlg": null,
+  "idTokenEncryptedResponseAlg": null,
+  "idTokenEncryptedResponseEnc": null,
+  "userInfoSignedResponseAlg": null,
+  "userInfoEncryptedResponseAlg": null,
+  "userInfoEncryptedResponseEnc": null,
+  "requestObjectSigningAlg": null,
+  "requestObjectEncryptionAlg": null,
+  "requestObjectEncryptionEnc": null,
+  "tokenEndpointAuthMethod": null,
+  "tokenEndpointAuthSigningAlg": null,
+  "defaultMaxAge": null,
+  "requireAuthTime": null,
+  "defaultAcrValues": null,
+  "initiateLoginUri": null,
+  "postLogoutRedirectUris": null,
+  "requestUris": null,
+  "scopes": null,
+  "claims": null,
+  "trustedClient": false,
+  "lastAccessTime": null,
+  "lastLogonTime": null,
+  "persistClientAuthorizations": null,
+  "includeClaimsInIdToken": false,
+  "refreshTokenLifetime": null,
+  "accessTokenLifetime": null,
+  "customAttributes": null,
+  "customObjectClasses": null,
+  "rptAsJwt": null,
+  "accessTokenAsJwt": null,
+  "accessTokenSigningAlg": null,
+  "disabled": false,
+  "authorizedOrigins": null,
+  "softwareId": null,
+  "softwareVersion": null,
+  "softwareStatement": null,
+  "attributes": null,
+  "backchannelTokenDeliveryMode": null,
+  "backchannelClientNotificationEndpoint": null,
+  "backchannelAuthenticationRequestSigningAlg": null,
+  "backchannelUserCodeParameter": null,
+  "expirationDate": null,
+  "deletable": false,
+  "jansId": null,
+  "description": null
+}[0m
+[38;5;242mb: back, q: quit x: logout and quit[0m
+
+[?1l[6n[?2004h[?25l[0m[?7l[0m[J[0mContinue?  [0m
+
+
+
+
+
+
+[0m                                                                                                                                              [142C [7A[10C[?7h[0m[?12l[?25h++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  [0m
+
+
+
+
+
+
+[0m                                                                                                                                              [142C [7A[26C[?7h[0m[?12l[?25h[?25l[?7l[26D[0mPopulate optional fields? n                                                                                                                   [142C [27C[?7h[0m[?12l[?25h[?25l[?7l[27D[0m[J[0mPopulate optional fields? n                                                                                                                   [142C [0m
+[J[?7h[0m[?12l[?25h[?2004lException in default exception handler
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/eventloop/posix.py", line 155, in _run_task
+    t()
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/eventloop/context.py", line 116, in new_func
+    return func(*a, **kw)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/application.py", line 753, in cpr_not_supported_callback
+    run_in_terminal(in_terminal)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/run_in_terminal.py", line 50, in run_in_terminal
+    return run_coroutine_in_terminal(async_func, render_cli_done=render_cli_done)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/run_in_terminal.py", line 71, in run_coroutine_in_terminal
+    assert app._is_running
+AssertionError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/eventloop/base.py", line 132, in call_exception_handler
+    self._exception_handler(context)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/application.py", line 729, in handle_exception
+    run_coroutine_in_terminal(print_exception)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/run_in_terminal.py", line 71, in run_coroutine_in_terminal
+    assert app._is_running
+AssertionError
+Obtained Data:
+
+[38;5;10m{
+  "dn": null,
+  "inum": null,
+  "displayName": "myopenclient",
+  "clientSecret": null,
+  "frontChannelLogoutUri": null,
+  "frontChannelLogoutSessionRequired": null,
+  "registrationAccessToken": null,
+  "clientIdIssuedAt": null,
+  "clientSecretExpiresAt": null,
+  "redirectUris": null,
+  "claimRedirectUris": null,
+  "responseTypes": null,
+  "grantTypes": null,
+  "applicationType": "web",
+  "contacts": null,
+  "clientName": null,
+  "idTokenTokenBindingCnf": null,
+  "logoUri": null,
+  "clientUri": null,
+  "policyUri": null,
+  "tosUri": null,
+  "jwksUri": null,
+  "jwks": null,
+  "sectorIdentifierUri": null,
+  "subjectType": null,
+  "idTokenSignedResponseAlg": null,
+  "idTokenEncryptedResponseAlg": null,
+  "idTokenEncryptedResponseEnc": null,
+  "userInfoSignedResponseAlg": null,
+  "userInfoEncryptedResponseAlg": null,
+  "userInfoEncryptedResponseEnc": null,
+  "requestObjectSigningAlg": null,
+  "requestObjectEncryptionAlg": null,
+  "requestObjectEncryptionEnc": null,
+  "tokenEndpointAuthMethod": null,
+  "tokenEndpointAuthSigningAlg": null,
+  "defaultMaxAge": null,
+  "requireAuthTime": null,
+  "defaultAcrValues": null,
+  "initiateLoginUri": null,
+  "postLogoutRedirectUris": null,
+  "requestUris": null,
+  "scopes": null,
+  "claims": null,
+  "trustedClient": false,
+  "lastAccessTime": null,
+  "lastLogonTime": null,
+  "persistClientAuthorizations": null,
+  "includeClaimsInIdToken": false,
+  "refreshTokenLifetime": null,
+  "accessTokenLifetime": null,
+  "customAttributes": null,
+  "customObjectClasses": null,
+  "rptAsJwt": null,
+  "accessTokenAsJwt": null,
+  "accessTokenSigningAlg": null,
+  "disabled": false,
+  "authorizedOrigins": null,
+  "softwareId": null,
+  "softwareVersion": null,
+  "softwareStatement": null,
+  "attributes": null,
+  "backchannelTokenDeliveryMode": null,
+  "backchannelClientNotificationEndpoint": null,
+  "backchannelAuthenticationRequestSigningAlg": null,
+  "backchannelUserCodeParameter": null,
+  "expirationDate": null,
+  "deletable": false,
+  "jansId": null,
+  "description": null
+}[0m
+[38;5;242mb: back, q: quit x: logout and quit[0m
+
+[?1l[6n[?2004h[?25l[0m[?7l[0m[J[0mContinue?
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+[?25l[?7l[10D[0mContinue? y                                                                                                                                   [142C [11C[?7h[0m[?12l[?25h[?25l[?7l[11D[0m[J[0mContinue? y                                                                                                                                   [142C [0m
+[J[?7h[0m[?12l[?25h[?2004lException in default exception handler
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/eventloop/posix.py", line 155, in _run_task
+    t()
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/eventloop/context.py", line 116, in new_func
+    return func(*a, **kw)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/application.py", line 753, in cpr_not_supported_callback
+    run_in_terminal(in_terminal)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/run_in_terminal.py", line 50, in run_in_terminal
+    return run_coroutine_in_terminal(async_func, render_cli_done=render_cli_done)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/run_in_terminal.py", line 71, in run_coroutine_in_terminal
+    assert app._is_running
+AssertionError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/eventloop/base.py", line 132, in call_exception_handler
+    self._exception_handler(context)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/application.py", line 729, in handle_exception
+    run_coroutine_in_terminal(print_exception)
+  File "/usr/lib/python3/dist-packages/prompt_toolkit/application/run_in_terminal.py", line 71, in run_coroutine_in_terminal
+    assert app._is_running
+AssertionError
+Please wait while posting data ...
+
+[38;5;10m{
+  "dn": "inum=1c198637-8f67-499c-bb48-893d12ab3a04,ou=clients,o=jans",
+  "inum": "1c198637-8f67-499c-bb48-893d12ab3a04",
+  "displayName": "myopenclient",
+  "clientSecret": "a148a717-7a4e-4ec0-9f0b-82b27158f57d",
+  "frontChannelLogoutUri": null,
+  "frontChannelLogoutSessionRequired": false,
+  "registrationAccessToken": null,
+  "clientIdIssuedAt": null,
+  "clientSecretExpiresAt": null,
+  "redirectUris": null,
+  "claimRedirectUris": null,
+  "responseTypes": null,
+  "grantTypes": [],
+  "applicationType": "web",
+  "contacts": null,
+  "clientName": "myopenclient",
+  "idTokenTokenBindingCnf": null,
+  "logoUri": null,
+  "clientUri": null,
+  "policyUri": null,
+  "tosUri": null,
+  "jwksUri": null,
+  "jwks": null,
+  "sectorIdentifierUri": null,
+  "subjectType": "public",
+  "idTokenSignedResponseAlg": null,
+  "idTokenEncryptedResponseAlg": null,
+  "idTokenEncryptedResponseEnc": null,
+  "userInfoSignedResponseAlg": null,
+  "userInfoEncryptedResponseAlg": null,
+  "userInfoEncryptedResponseEnc": null,
+  "requestObjectSigningAlg": null,
+  "requestObjectEncryptionAlg": null,
+  "requestObjectEncryptionEnc": null,
+  "tokenEndpointAuthMethod": null,
+  "tokenEndpointAuthSigningAlg": null,
+  "defaultMaxAge": null,
+  "requireAuthTime": false,
+  "defaultAcrValues": null,
+  "initiateLoginUri": null,
+  "postLogoutRedirectUris": null,
+  "requestUris": null,
+  "scopes": null,
+  "claims": null,
+  "trustedClient": false,
+  "lastAccessTime": null,
+  "lastLogonTime": null,
+  "persistClientAuthorizations": false,
+  "includeClaimsInIdToken": false,
+  "refreshTokenLifetime": null,
+  "accessTokenLifetime": null,
+  "customAttributes": [],
+  "customObjectClasses": [
+    "top"
+  ],
+  "rptAsJwt": false,
+  "accessTokenAsJwt": false,
+  "accessTokenSigningAlg": null,
+  "disabled": false,
+  "authorizedOrigins": null,
+  "softwareId": null,
+  "softwareVersion": null,
+  "softwareStatement": null,
+  "attributes": {
+    "tlsClientAuthSubjectDn": null,
+    "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": false,
+    "keepClientAuthorizationAfterExpiration": false,
+    "allowSpontaneousScopes": false,
+    "spontaneousScopes": null,
+    "spontaneousScopeScriptDns": null,
+    "backchannelLogoutUri": null,
+    "backchannelLogoutSessionRequired": false,
+    "additionalAudience": null,
+    "postAuthnScripts": null,
+    "consentGatheringScripts": null,
+    "introspectionScripts": null,
+    "rptClaimsScripts": null
+  },
+  "backchannelTokenDeliveryMode": null,
+  "backchannelClientNotificationEndpoint": null,
+  "backchannelAuthenticationRequestSigningAlg": null,
+  "backchannelUserCodeParameter": null,
+  "expirationDate": null,
+  "deletable": false,
+  "jansId": null,
+  "description": null
+}[0m
+[38;5;242mb: back, q: quit x: logout and quit[0m
+
+[?1l[6n[?2004h[?25l[0m[?7l[0m[J[0mSelection:  [0m
+
+
+
+
+
+
+[0m                                                                                                                                              [142C [7A[11C[?7h[0m[?12l[?25h[11D[J[0m[?7h[?2004l[?1lWARNING: your terminal doesn't support cursor position requests (CPR).
+[6n[?2004h[?25l[0m[?7l[0m[J[0mSelection:  [0m
+
+
+
+
+
+
+[0m                                                                                                                                              [142C [7A[11C[?7h[0m[?12l[?25h[11D[J[0m[?7h[?2004l[?1lWARNING: your terminal doesn't support cursor position requests (CPR).
+[?2004h[?25l[0m[?7l[0m[J[0mSelection:  [0m
+
+
+
+
+
+
+[0m                                                                                                                                              [142C [7A[11C[?7h[0m[?12l[?25h
