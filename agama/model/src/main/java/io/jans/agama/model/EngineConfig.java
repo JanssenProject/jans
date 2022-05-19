@@ -8,6 +8,7 @@ import io.jans.util.Pair;
 
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -15,7 +16,7 @@ import java.util.stream.Stream;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class EngineConfig {
 
-    private String rootDir;
+    private String rootDir = Path.of(System.getProperty("server.base"), "agama").toString();
     private String templatesPath = "/ftl";
     private String scriptsPath = "/scripts";
     
