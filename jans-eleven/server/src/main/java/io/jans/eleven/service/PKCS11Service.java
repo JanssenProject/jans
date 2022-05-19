@@ -89,7 +89,8 @@ public class PKCS11Service implements Serializable {
 
     public void init(String pin, Map<String, String> pkcs11Config) throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException {
         this.pin = pin.toCharArray();
-        this.provider = new SunPKCS11(getTokenCfg(pkcs11Config));
+        this.provider = null;
+        // this.provider = new SunPKCS11(getTokenCfg(pkcs11Config));
 
         Provider installedProvider = Security.getProvider(provider.getName());
         if (installedProvider == null) {
@@ -234,9 +235,12 @@ public class PKCS11Service implements Serializable {
                 SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromName(key.getAlg());
                 if (signatureAlgorithm != null) {
                     if (signatureAlgorithm.getFamily().equals(SignatureAlgorithmFamily.RSA)) {
+						publicKey = null;
+/*
                         publicKey = new RSAPublicKeyImpl(
                                 new BigInteger(1, Base64Util.base64UrlDecode(key.getN())),
                                 new BigInteger(1, Base64Util.base64UrlDecode(key.getE())));
+*/
                     } else if (signatureAlgorithm.getFamily().equals(SignatureAlgorithmFamily.EC)) {
                         AlgorithmParameters parameters = AlgorithmParameters.getInstance(SignatureAlgorithmFamily.EC);
                         parameters.init(new ECGenParameterSpec(signatureAlgorithm.getCurve().getAlias()));
