@@ -55,12 +55,12 @@
         <dependency>
             <groupId>io.jans</groupId>
             <artifactId>agama-model</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>${jans.version}</version>
         </dependency>
         <dependency>
             <groupId>io.jans</groupId>
             <artifactId>agama-transpiler</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>${jans.version}</version>
         </dependency>
         
         <!-- SERVLET -->
