@@ -40,10 +40,7 @@ public class ExecutionServlet extends BaseServlet {
     
     @Inject
     private FlowService flowService;
-    
-    @Inject
-    private FlowUtils flowUtils;
-    
+
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -124,6 +121,11 @@ public class ExecutionServlet extends BaseServlet {
     public void service(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
+        if (!flowUtils.serviceEnabled()) {
+            sendNotAvailable(response);
+            return;
+        }
+
         String method = request.getMethod();         
         String path = request.getServletPath();
         boolean match = path.startsWith(URL_PREFIX);

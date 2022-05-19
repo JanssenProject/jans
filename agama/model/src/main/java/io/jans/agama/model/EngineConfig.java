@@ -16,6 +16,8 @@ import java.util.stream.Stream;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class EngineConfig {
 
+    private boolean enabled;
+
     private String rootDir = Path.of(System.getProperty("server.base"), "agama").toString();
     private String templatesPath = "/ftl";
     private String scriptsPath = "/scripts";
@@ -53,6 +55,14 @@ public class EngineConfig {
     @JsonIgnore
     public String getJsonFinishedFlowPage() {
         return "json_"+ finishedFlowPage;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 
     public String getRootDir() {
