@@ -29,7 +29,7 @@ auth-server:
     # -- Image  to use for deploying.
     repository: janssenproject/auth-server
     # -- Image  tag to use for deploying.
-    tag: 1.0.0-beta.16
+    tag: 1.0.0-1
     # -- Image Pull Secrets
     pullSecrets: []
   # -- Service replica number.
@@ -96,7 +96,7 @@ auth-server-key-rotation:
     # -- Image  to use for deploying.
     repository: janssenproject/certmanager
     # -- Image  tag to use for deploying.
-    tag: 1.0.0-beta.16
+    tag: 1.0.0-1
     # -- Image Pull Secrets
     pullSecrets: []
   # -- Auth server key rotation keys life in hours
@@ -152,7 +152,7 @@ client-api:
     # -- Image  to use for deploying.
     repository: janssenproject/client-api
     # -- Image  tag to use for deploying.
-    tag: 1.0.0-beta.16
+    tag: 1.0.0-1
     # -- Image Pull Secrets
     pullSecrets: []
   # -- Service replica number.
@@ -307,7 +307,7 @@ config:
     # -- Image  to use for deploying.
     repository: janssenproject/configurator
     # -- Image  tag to use for deploying.
-    tag: 1.0.0-beta.16
+    tag: 1.0.0-1
     # -- Image Pull Secrets
     pullSecrets: []
   # -- LDAP admin password if OpennDJ is used for persistence.
@@ -371,7 +371,7 @@ config-api:
     # -- Image  to use for deploying.
     repository: janssenproject/config-api
     # -- Image  tag to use for deploying.
-    tag: 1.0.0-beta.16
+    tag: 1.0.0-1
     # -- Image Pull Secrets
     pullSecrets: []
   # -- Service replica number.
@@ -444,7 +444,7 @@ fido2:
     # -- Image  to use for deploying.
     repository: janssenproject/fido2
     # -- Image  tag to use for deploying.
-    tag: 1.0.0-beta.16
+    tag: 1.0.0-1
     # -- Image Pull Secrets
     pullSecrets: []
   # -- Service replica number.
@@ -829,33 +829,11 @@ opendj:
     # -- Image pullPolicy to use for deploying.
     pullPolicy: IfNotPresent
     # -- Image  to use for deploying.
-    repository: gluufedertaion/opendj
+    repository: gluufederation/opendj
     # -- Image  tag to use for deploying.
-    tag: 5.0.0_dev
+    tag: 1.0.0_dev
     # -- Image Pull Secrets
     pullSecrets: []
-  multiCluster:
-    # -- Enable OpenDJ multiCluster mode. This flag enables loading keys under `opendj.multiCluster`
-    enabled: false
-    # -- OpenDJ Serf advertise address suffix that will be added to each opendj replica.
-    # i.e RELEASE-NAME-opendj-regional-{{statefulset pod number}}-{{ $.Values.multiCluster.serfAdvertiseAddrSuffix }}
-    serfAdvertiseAddrSuffix: "regional.janssen.org:30946"
-    # -- Serf key. This key will automatically sync across clusters.
-    serfKey: Z51b6PgKU1MZ75NCZOTGGoc0LP2OF3qvF6sjxHyQCYk=
-    # -- Serf peer addresses. One per cluster.
-    serfPeers:
-      - "janssen-opendj-regional-0-regional.janssen.org:30946"
-      - "janssen-opendj-regional-0-regional.janssen.org:31946"
-    # -- The number of opendj non scalabble statefulsets to create. Each pod created must be resolvable as it follows
-    # the patterm RELEASE-NAME-opendj-regional-{{statefulset pod number}}-{{ $.Values.multiCluster.serfAdvertiseAddrSuffix }}
-    # If set to 1, with a release name of janssen,  the address of the pod would be janssen-opendj-regional-0-regional.janssen.org
-    replicaCount: 1
-    # -- This id needs to be unique to each kubernetes cluster in a multi cluster setup
-    # west, east, south, north, region ...etc If left empty it will be randomly generated.
-    clusterId: ""
-    # -- Namespace int id. This id needs to be a unique number 0-9 per janssen installation per namespace.
-    # Used when janssen is installed in the same kubernetes cluster more than once.
-    namespaceIntId: 0
 
   persistence:
     # -- OpenDJ volume size
@@ -955,7 +933,7 @@ persistence:
     # -- Image  to use for deploying.
     repository: janssenproject/persistence-loader
     # -- Image  tag to use for deploying.
-    tag: 1.0.0-beta.16
+    tag: 1.0.0-1
     # -- Image Pull Secrets
     pullSecrets: []
   # -- Resource specs.
@@ -1009,7 +987,7 @@ scim:
     # -- Image  to use for deploying.
     repository: janssenproject/scim
     # -- Image  tag to use for deploying.
-    tag: 1.0.0-beta.16
+    tag: 1.0.0-1
     # -- Image Pull Secrets
     pullSecrets: []
   # -- Service replica number.
