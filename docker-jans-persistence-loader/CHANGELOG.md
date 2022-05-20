@@ -1,5 +1,53 @@
 # Changelog
 
+## 1.0.0-1 (2022-05-20)
+
+
+### Features
+
+* add helper to create persistence entry from LDIF file ([#1262](https://github.com/JanssenProject/jans/issues/1262)) ([f2e653e](https://github.com/JanssenProject/jans/commit/f2e653ef917efd017195f2330b64e64c333f4699))
+* adjust ownership and permission to avoid bloated images ([#1312](https://github.com/JanssenProject/jans/issues/1312)) ([d016682](https://github.com/JanssenProject/jans/commit/d0166821baf52665934c0eaa38de8b2f51825456))
+* pre-populate role scope mapping dynamically ([#1201](https://github.com/JanssenProject/jans/issues/1201)) ([3ab6a11](https://github.com/JanssenProject/jans/commit/3ab6a1167328625c26b32d2b3b7cc46d37216261))
+
+
+### Bug Fixes
+
+* add missing permission and defaultPermissionInToken attribute in role-scope mapping ([#1270](https://github.com/JanssenProject/jans/issues/1270)) ([e2c67ec](https://github.com/JanssenProject/jans/commit/e2c67ec8e662adbaab7c5d735217aa5bcbf8495c))
+* avoid duplicated client when re-running persistence-loader and configurator ([#1134](https://github.com/JanssenProject/jans/issues/1134)) ([5567ba9](https://github.com/JanssenProject/jans/commit/5567ba90d0484128b5a875fdc5f1406ce2c69e8a))
+* change column size of jansFido2AuthnEntry.jansAuthData column ([#1066](https://github.com/JanssenProject/jans/issues/1066)) ([f1c3ffa](https://github.com/JanssenProject/jans/commit/f1c3ffa7fa72114b7e6dc2685789dade0feadf42))
+* errors adding/upgrading data into couchbase persistence ([#1226](https://github.com/JanssenProject/jans/issues/1226)) ([db71324](https://github.com/JanssenProject/jans/commit/db71324ee7a94ac06a5505f7ed0993bf8f1c4f79))
+* handle index error for JSON columns ([#1205](https://github.com/JanssenProject/jans/issues/1205)) ([90f77c3](https://github.com/JanssenProject/jans/commit/90f77c39beeb8a4c30a46819a7877514fdaa4531))
+* invalid LDAP schema reading token_server client ID ([#1321](https://github.com/JanssenProject/jans/issues/1321)) ([db4f080](https://github.com/JanssenProject/jans/commit/db4f0809bb697cc2e88a7ad58917006f132ea5e5))
+* typo and indexing error ([#1125](https://github.com/JanssenProject/jans/issues/1125)) ([dc87dc0](https://github.com/JanssenProject/jans/commit/dc87dc01c4c63d6fcc2b967ce97a52880083b95f))
+* Typo httpLoggingExludePaths jans-auth-server jans-cli jans-config-api jans-linux-setup docker-jans-persistence-loader ([47a20ee](https://github.com/JanssenProject/jans/commit/47a20eefa781d1ca07a9aa30a5adcde3793076d1))
+* Use highest level script in case ACR script is not found. Added FF to keep existing behavior. ([#1070](https://github.com/JanssenProject/jans/issues/1070)) ([07473d9](https://github.com/JanssenProject/jans/commit/07473d9a8c3e31f6a75670a874e17341518bf0be))
+
+
+### Miscellaneous Chores
+
+* prepare release 1.0.0-1 ([8985928](https://github.com/JanssenProject/jans/commit/89859286d69e7de7885bd9da9f50720c8371e797))
+* release 1.0.0 ([b2895f2](https://github.com/JanssenProject/jans/commit/b2895f224b5772c0724ea0afbdf67a417a5c537c))
+* release 1.0.0-beta.16 ([a083ad6](https://github.com/JanssenProject/jans/commit/a083ad6b1d43201126e8d4f690a55ea1b109524c))
+* release 1.0.0-beta.16 ([90e4bb2](https://github.com/JanssenProject/jans/commit/90e4bb29df040bd9fe5921a054bc4226d34ca1ef))
+* release 1.0.0-beta.16 ([eec2073](https://github.com/JanssenProject/jans/commit/eec2073be9fd25544f31087e171934afb9a71e6d))
+* release 1.0.0-beta.16 ([cd92ead](https://github.com/JanssenProject/jans/commit/cd92ead2ca654383091c4923d3de5619b70fc5b9))
+* release 1.0.0-beta.16 ([7f0a91b](https://github.com/JanssenProject/jans/commit/7f0a91bd90efc1cd7a80047f9cd6b7c6a22417a2))
+* release 1.0.0-beta.16 ([c2ad604](https://github.com/JanssenProject/jans/commit/c2ad604dc29e7401bc4cb0788feaa20e11de0440))
+* release 1.0.0-beta.16 ([a641486](https://github.com/JanssenProject/jans/commit/a6414864712789d1fcf80b823338100aebda030e))
+* release 1.0.0-beta.16 ([94d5791](https://github.com/JanssenProject/jans/commit/94d5791a23fce4ecb8913c16c940cfbbc85fed4c))
+* release 1.0.0-beta.16 ([16de429](https://github.com/JanssenProject/jans/commit/16de4299bc5e9c4a842f279ae0d3ae8282a4ff2c))
+* release 1.0.0-beta.16 ([72915c0](https://github.com/JanssenProject/jans/commit/72915c0e82b9684ac1c59934d5b9a36c2456058d))
+* release 1.0.0-beta.16 ([3ea2b37](https://github.com/JanssenProject/jans/commit/3ea2b37deac3416564614fb6a4e84b056ddbed3f))
+* release 1.0.0-beta.16 ([78a6d39](https://github.com/JanssenProject/jans/commit/78a6d39ffadf9abee18c7be0e14ad3eb6ec2ef1b))
+* release 1.0.0-beta.16 ([11bfa93](https://github.com/JanssenProject/jans/commit/11bfa9368e6ee482cc44240de08c8133d91b3f4c))
+* release 1.0.0-beta.16 ([22b180b](https://github.com/JanssenProject/jans/commit/22b180bba9a08045a6daa7ca8ee2b71abd42a973))
+* release 1.0.0-beta.16 ([b9acd0b](https://github.com/JanssenProject/jans/commit/b9acd0bceeeb54e3c47f869f11d97a22e8dc161f))
+* release 1.0.0-beta.16 ([328cd30](https://github.com/JanssenProject/jans/commit/328cd309ae1655a52709e13ca2f89441c6c965a2))
+* release 1.0.0-beta.16 ([5a84602](https://github.com/JanssenProject/jans/commit/5a84602838fb5d2e667422220fcd44dc53543e23))
+* release 1.0.0-beta.16 ([4923277](https://github.com/JanssenProject/jans/commit/4923277b100b5c814d94b27b88d1809794dfc413))
+* release 1.0.0-beta.16 ([258ba96](https://github.com/JanssenProject/jans/commit/258ba962bd93eb5be4d51e7de3a80da89c2e222f))
+* release 1.0.0-beta.16 ([77c4423](https://github.com/JanssenProject/jans/commit/77c4423d82b697fd91a0e61f40bad6bd9da0dba8))
+
 ## [1.0.0-beta.16](https://github.com/JanssenProject/jans/compare/docker-jans-persistence-loader-v1.0.0-beta.15...docker-jans-persistence-loader-v1.0.0-beta.16) (2022-03-14)
 
 
