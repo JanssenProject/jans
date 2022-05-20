@@ -116,45 +116,6 @@ questions:
     - "token"
     - "session"
   show_if: "global.cnPersistenceType=hybrid"
-# Multi cluster ldap replication
-- variable: opendj.multiCluster.enabled
-  default: false
-  type: boolean
-  group: "Persistence"
-  required: true
-  label: Enable OpenDJ multiCluster mode
-  description: "Enable OpenDJ multiCluster mode. This flag enables loading keys under `opendj.multiCluster`"
-  show_if: "global.opendj.enabled=true"
-  show_subquestion_if: true
-  subquestions:
-  - variable: opendj.multiCluster.serfAdvertiseAddrSuffix
-    default: "regional.gluu.org:30946s"
-    type: hostname
-    group: "Persistence"
-    required: true
-    description: "OpenDJ Serf advertise address suffix that will be added to each opendj replica. i.e RELEASE-NAME-opendj-regional-{{statefulset pod number}}-{{ $.Values.multiCluster.serfAdvertiseAddrSuffix }}"
-    label: OpenDJ Serf advertise address suffix
-  - variable: opendj.multiCluster.replicaCount
-    default: 1
-    type: int
-    group: "Persistence"
-    required: true
-    description: "The number of opendj non scalable statefulsets to create. Each pod created must be resolvable as it follows the patterm RELEASE-NAME-opendj-regional-{{statefulset pod number}}-{{ $.Values.multiCluster.serfAdvertiseAddrSuffix }} If set to 1, with a release name of gluu,  the address of the pod would be gluu-opendj-regional-0-regional.gluu.org"
-    label: The number of opendj non scalable statefulsets to create.
-  - variable: opendj.multiCluster.clusterId
-    default: "west"
-    type: string
-    group: "Persistence"
-    required: true
-    description: "This id needs to be unique to each kubernetes cluster in a multi cluster setup; west, east, south, north, region ...etc If left empty it will be randomly generated."
-    label: Unique kubernetes cluster id
-  - variable: opendj.multiCluster.serfPeers
-    default: "['gluu-opendj-regional-0-regional.gluu.org:30946', 'gluu-opendj-regional-0-regional.gluu.org:31946']"
-    type: string
-    group: "Persistence"
-    required: true
-    description: "Serf peer addresses. One per replica."
-    label: Serf peer addresses
 # SQL
 - variable: config.configmap.cnSqlDbDialect
   default: "default"
@@ -878,7 +839,7 @@ questions:
   group: "Replicas"
   label: OpenDJ Replicas
   description: "Service replica number."
-  show_if: "global.opendj.enabled=true&&opendj.multiCluster.enabled=false"
+  show_if: "global.opendj.enabled=true"
 # SCIM
 - variable: scim.replicas
   default: 1

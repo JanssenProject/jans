@@ -5,23 +5,23 @@ annotations:
   artifacthub.io/containsSecurityUpdates: 'true'
   artifacthub.io/images: |
     - name: auth-server
-      image: janssenproject/auth-server:1.0.0-beta.16
+      image: janssenproject/auth-server:1.0.0-1
     - name: auth-server-key-rotation
-      image: janssenproject/certmanager:1.0.0-beta.16
+      image: janssenproject/certmanager:1.0.0-1
     - name:  client-api
-      image: janssenproject/client-api:1.0.0-beta.16
+      image: janssenproject/client-api:1.0.0-1
     - name: configuration-manager
-      image: janssenproject/configurator:1.0.0-beta.16
+      image: janssenproject/configurator:1.0.0-1
     - name:  config-api
-      image: janssenproject/config-api:1.0.0-beta.16
+      image: janssenproject/config-api:1.0.0-1
     - name: fido2
-      image: janssenproject/fido2:1.0.0-beta.16
+      image: janssenproject/fido2:1.0.0-1
     - name: opendj
       image: gluufederation/opendj:5.0.0_dev
     - name: persistence
-      image: janssenproject/persistence-loader:1.0.0-beta.16
+      image: janssenproject/persistence-loader:1.0.0-1
     - name: scim
-      image: janssenproject/scim:1.0.0-beta.16
+      image: janssenproject/scim:1.0.0-1
   artifacthub.io/license: Apache-2.0
   artifacthub.io/prerelease: 'true'
   catalog.cattle.io/certified: partner
@@ -40,35 +40,35 @@ maintainers:
     email: support@jans.io
 description: Janssen Access and Identity Management
 name: janssen
-version: 1.0.0-beta.16
+version: 1.0.0
 dependencies:
   - name: config
     condition: global.config.enabled
-    version: 1.0.0-beta.16
+    version: 1.0.0
   - name: config-api
     condition: global.config-api.enabled
-    version: 1.0.0-beta.16
+    version: 1.0.0
   - name: opendj
     condition: global.opendj.enabled
-    version: 1.0.0-beta.16
+    version: 1.0.0
   - name: auth-server
     condition: global.auth-server.enabled
-    version: 1.0.0-beta.16
+    version: 1.0.0
   - name: fido2
     condition: global.fido2.enabled
-    version: 1.0.0-beta.16
+    version: 1.0.0
   - name: scim
     condition: global.scim.enabled
-    version: 1.0.0-beta.16
+    version: 1.0.0
   - name: nginx-ingress
     condition: global.nginx-ingress.enabled
-    version: 1.0.0-beta.16
+    version: 1.0.0
   - name: auth-server-key-rotation
     condition: global.auth-server-key-rotation.enabled
-    version: 1.0.0-beta.16
+    version: 1.0.0
   - name: client-api
     condition: global.client-api.enabled
-    version: 1.0.0-beta.16
+    version: 1.0.0
   - name: persistence
     condition: global.persistence.enabled
-    version: 1.0.0-beta.16
+    version: 1.0.0

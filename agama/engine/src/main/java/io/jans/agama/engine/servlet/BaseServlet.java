@@ -1,6 +1,7 @@
 package io.jans.agama.engine.servlet;
 
 import io.jans.agama.engine.exception.TemplateProcessingException;
+import io.jans.agama.engine.misc.FlowUtils;
 import io.jans.agama.engine.page.BasicTemplateModel;
 import io.jans.agama.engine.page.Page;
 import io.jans.agama.engine.service.TemplatingService;
@@ -17,6 +18,9 @@ import java.io.IOException;
 public abstract class BaseServlet extends HttpServlet {
     
     @Inject
+    protected FlowUtils flowUtils;
+    
+    @Inject
     private TemplatingService templatingService;
     
     @Inject
@@ -27,6 +31,11 @@ public abstract class BaseServlet extends HttpServlet {
 
     protected boolean isJsonRequest(HttpServletRequest request) {
         return MediaType.APPLICATION_JSON.equals(request.getContentType());
+    }
+    
+    protected void sendNotAvailable(HttpServletResponse response) throws IOException {
+        response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE,
+                "Flow engine not available. Check if Agama has been enabled in your configuration.");
     }
 
     protected void sendFlowTimeout(HttpServletResponse response, boolean jsonResponse, String message)
