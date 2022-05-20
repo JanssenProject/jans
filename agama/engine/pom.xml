@@ -26,30 +26,6 @@
         </repository>
     </repositories>
 
-    <!--build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.1.0</version>
-                <configuration>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>make-assembly</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build-->
-
     <dependencies>
         
         <dependency>
@@ -67,28 +43,24 @@
         <dependency>
             <groupId>jakarta.servlet</groupId>
             <artifactId>jakarta.servlet-api</artifactId>
-            <scope>provided</scope>
         </dependency>
         
         <!-- JSF -->
         <dependency>
             <groupId>jakarta.faces</groupId>
-            <artifactId>jakarta.faces-api</artifactId>
-            <scope>provided</scope>         
+            <artifactId>jakarta.faces-api</artifactId>   
         </dependency>
         
         <!-- JAX-RS -->
         <dependency>
             <groupId>org.jboss.spec.javax.ws.rs</groupId>
             <artifactId>jboss-jaxrs-api_3.0_spec</artifactId>
-            <scope>provided</scope>
         </dependency>
 
         <!-- WELD -->
         <dependency>
             <groupId>org.jboss.weld.servlet</groupId>
-            <artifactId>weld-servlet-shaded</artifactId>
-            <scope>provided</scope>
+            <artifactId>weld-servlet-core</artifactId>
         </dependency>
         
         <!-- FREEMARKER -->
@@ -102,34 +74,28 @@
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j-impl</artifactId>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
-            <scope>provided</scope>
         </dependency>
         
         <!-- JACKSON -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
-            <scope>provided</scope>
         </dependency>
 
      	<!-- Mozilla Rhino -->
@@ -143,40 +109,34 @@
         <dependency>
             <groupId>org.codehaus.groovy</groupId>
             <artifactId>groovy</artifactId>
-            <version>3.0.7</version>
+            <version>3.0.10</version>
         </dependency>
         
         <!-- JANS -->
         <dependency>
             <groupId>io.jans</groupId>
             <artifactId>jans-core-util</artifactId>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>io.jans</groupId>
             <artifactId>jans-core-cdi</artifactId>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>io.jans</groupId>
             <artifactId>jans-core-service</artifactId>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>io.jans</groupId>
             <artifactId>jans-orm-core</artifactId>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>io.jans</groupId>
             <artifactId>jans-auth-model</artifactId>
-            <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
-            <scope>provided</scope>
         </dependency>
 
         <dependency>
