@@ -1815,30 +1815,6 @@
                   }
                 }
               },
-              "multiCluster": {
-                "type": "object",
-                "properties": {
-                  "enabled": {
-                    "description": "Enable OpenDJ multiCluster mode. This flag enabbles loading keys under `opendj.multiCluster`",
-                    "type": "boolean"
-                  },
-                  "serfAdvertiseAddrSuffix": {
-                    "description": "OpenDJ Serf advertise address for the cluster",
-                    "type": "string"
-                  },
-                  "serfKey": {
-                    "description": "Serf key. This key will automatically sync across clusters.",
-                    "type": "string"
-                  },
-                  "serfPeers": {
-                    "description": "Serf peer addresses. One per cluster.",
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
-                  }
-                }
-              },
               "persistence": {
                 "type": "object",
                 "properties": {

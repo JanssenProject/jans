@@ -26,6 +26,11 @@
     "backchannelDeviceRegistrationEndpoint":"https://%(hostname)s/jans-auth/restv1/bc-deviceRegistration",
     "deviceAuthzEndpoint":"https://%(hostname)s/jans-auth/restv1/device_authorization",
     "openidSubAttribute":"inum",
+    "publicSubjectIdentifierPerClientEnabled": true,
+    "subjectIdentifiersPerClientSupported": [
+        "mail",
+        "uid"
+     ],
     "responseTypesSupported":[
         ["code"],
         ["code", "id_token"],
@@ -138,6 +143,7 @@
         "A128GCM",
         "A256GCM"
     ],
+    "forceSignedRequestObject": false,
     "requestObjectSigningAlgValuesSupported":[
         "none",
         "HS256",

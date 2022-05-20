@@ -34,7 +34,7 @@ jobs:
         echo "::set-output name=version::$(curl https://api.github.com/repos/${{ github.repository }}/releases -s | grep "tag_name" | cut -d '"' -f 4 | grep -o '^\v.*' | head -n 1 | cut -d 'v' -f 2)"
     - name: Configure Git
       run: |
-        git clone  https://mo-auto:${{ secrets.MOWORKFLOWTOKEN }}@github.com/mo-auto/partner-charts.git
+        git clone  https://mo-auto:${{ secrets.MOAUTO_WORKFLOW_TOKEN }}@github.com/mo-auto/partner-charts.git
         git config --global user.name "mo-auto"
         git config --global user.email "54212639+mo-auto@users.noreply.github.com"
         git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
@@ -65,7 +65,7 @@ jobs:
         git push origin
         MESSAGE="feat(janssen): update janssen helm partner chart"
         BODY=$(<../automation/rancher-partner-charts/pull_request_body.md)
-        echo "${{ secrets.MOWORKFLOWTOKEN }}" > token.txt
+        echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" > token.txt
         gh auth login --with-token < token.txt
         PR=$(gh pr create --base "main-source" --body "${BODY}" --title "${MESSAGE}")        
 

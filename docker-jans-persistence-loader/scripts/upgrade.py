@@ -7,15 +7,15 @@ from collections import namedtuple
 
 from ldif import LDIFParser
 
-from jans.pycloudlib.persistence.couchbase import CouchbaseClient
-from jans.pycloudlib.persistence.ldap import LdapClient
-from jans.pycloudlib.persistence.spanner import SpannerClient
-from jans.pycloudlib.persistence.sql import SqlClient
+from jans.pycloudlib.persistence import CouchbaseClient
+from jans.pycloudlib.persistence import LdapClient
+from jans.pycloudlib.persistence import SpannerClient
+from jans.pycloudlib.persistence import SqlClient
+from jans.pycloudlib.persistence import doc_id_from_dn
+from jans.pycloudlib.persistence import id_from_dn
 from jans.pycloudlib.utils import as_boolean
 
 from settings import LOGGING_CONFIG
-from utils import doc_id_from_dn
-from utils import id_from_dn
 from utils import get_role_scope_mappings
 
 logging.config.dictConfig(LOGGING_CONFIG)
@@ -85,13 +85,24 @@ def _transform_auth_dynamic_config(conf):
             conf["tokenEndpointAuthMethodsSupported"].append("private_key_jwt")
             should_update = True
 
-        if "forceSignedRequestObject" not in conf:
-            conf["forceSignedRequestObject"] = False
-            should_update = True
-
         if conf["redirectUrisRegexEnabled"]:
             conf["redirectUrisRegexEnabled"] = False
             should_update = True
+    else:
+        if all([
+            os.environ.get("CN_PERSISTENCE_TYPE") in ("sql", "spanner"),
+            conf["personCustomObjectClassList"]
+        ]):
+            conf["personCustomObjectClassList"] = []
+            should_update = True
+
+        if "subjectIdentifiersPerClientSupported" not in conf:
+            conf["subjectIdentifiersPerClientSupported"] = ["mail", "uid"]
+            should_update = True
+
+    if "forceSignedRequestObject" not in conf:
+        conf["forceSignedRequestObject"] = False
+        should_update = True
 
     if "grantTypesAndResponseTypesAutofixEnabled" not in conf:
         conf["grantTypesAndResponseTypesAutofixEnabled"] = False
@@ -124,13 +135,6 @@ def _transform_auth_dynamic_config(conf):
 
     if "httpLoggingExcludePaths" not in conf:
         conf["httpLoggingExcludePaths"] = conf.pop("httpLoggingExludePaths", [])
-        should_update = True
-
-    if all([
-        os.environ.get("CN_PERSISTENCE_TYPE") in ("sql", "spanner"),
-        conf["personCustomObjectClassList"]
-    ]):
-        conf["personCustomObjectClassList"] = []
         should_update = True
 
     # return the conf and flag to determine whether it needs update or not
