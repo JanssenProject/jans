@@ -33,6 +33,11 @@ public class RestartServlet extends BaseServlet {
     public void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        if (!flowUtils.serviceEnabled()) {
+            sendNotAvailable(response);
+            return;
+        }
+
         logger.debug("Restart servlet");
         try {
             FlowStatus st = flowService.getRunningFlowStatus();

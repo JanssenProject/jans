@@ -2,6 +2,7 @@
 # Copyright (c) 2020, Janssen Project
 #
 from io.jans.agama import NativeJansFlowBridge
+from io.jans.agama.engine.misc import FlowUtils
 from io.jans.as.server.service import AuthenticationService, SessionIdService
 from io.jans.jsf2.service import FacesService
 from io.jans.jsf2.message import FacesMessages
@@ -84,6 +85,11 @@ class PersonAuthentication(PersonAuthenticationType):
 
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
+        
+        if not CdiUtil.bean(FlowUtils).serviceEnabled():
+            print "Agama. Please ENABLE Agama engine in auth-server configuration"
+            return False
+
         if step == 1:
             print "Agama. Prepare for Step 1"
             
