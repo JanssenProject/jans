@@ -14,8 +14,8 @@ send -- "\r"
 expect -re "(.*)\n"
 
 #--no-suggestion
-send -- "/opt/jans/jans-cli/config-cli.py --no-suggestion"
-expect -exact "/opt/jans/jans-cli/config-cli.py --no-suggestion"
+send -- "/opt/jans/jans-cli/config-cli.py -use-test-client"
+expect -exact "/opt/jans/jans-cli/config-cli.py -use-test-client"
 send -- "\r"
 expect "Selection:"
 

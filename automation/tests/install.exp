@@ -14,8 +14,8 @@ send -- "curl https://raw.githubusercontent.com/JanssenProject/jans/main/jans-li
 expect -exact "curl https://raw.githubusercontent.com/JanssenProject/jans/main/jans-linux-setup/jans_setup/install.py > install.py"
 send -- "\r"
 expect -re "(.*)\n"
-send -- "python3 install.py"
-expect -exact "python3 install.py"
+send -- "python3 install.py --args=\"--cli-test-client\""
+expect -exact "python3 install.py --args=\"--cli-test-client\""
 send -- "\r"
 
 if  { $expect_out(buffer) eq  "Install now? \[Y\/n\]" }  {
@@ -89,12 +89,12 @@ send -- "y\r"
 
 expect "Janssen Server installation successful\!"
 send -- "\r"
-expect -re "(.*)\n"
+#expect -re "(.*)\n"
 
-send -- "ps ax \| grep \-v grep \| grep jans \> \/dev\/null \; echo \$\?\r" 
-if { $expect_out(buffer) eq "0" } {
+#send -- "ps ax \| grep \-v grep \| grep jans \> \/dev\/null \; echo \$\?\r" 
+#if { $expect_out(buffer) eq "0" } {
 	 puts "installation successful" }
-send -- "exit\r"
-expect -exact "exit"
+#send -- "exit\r"
+#expect -exact "exit"
+#send -- "\x03"
 expect eof
-exit
