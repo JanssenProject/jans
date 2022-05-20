@@ -71,6 +71,8 @@ public class Transpilation {
     @Asynchronous
     public void run(@Observes @Scheduled TranspilationEvent event) {
 
+        if (!futils.serviceEnabled()) return;
+
         if (isActive.get()) return;
         
         if (!isActive.compareAndSet(false, true)) return;

@@ -52,6 +52,10 @@ public class FlowUtils {
         return effectiveInterruptionTime;
     }
 
+    public boolean serviceEnabled() {
+        return engineConfig.isEnabled();
+    }
+
     /**
      * It is assumed that values in the map are String arrays with at least one element
      * @param map
