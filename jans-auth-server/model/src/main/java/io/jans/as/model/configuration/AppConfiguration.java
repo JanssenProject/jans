@@ -8,6 +8,8 @@ package io.jans.as.model.configuration;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.common.collect.Lists;
+
+import io.jans.agama.model.EngineConfig;
 import io.jans.as.model.common.*;
 import io.jans.as.model.error.ErrorHandlingMethod;
 import io.jans.as.model.jwk.KeySelectionStrategy;
@@ -313,6 +315,8 @@ public class AppConfiguration implements Configuration {
     private Boolean httpLoggingEnabled; // Used in ServletLoggingFilter to enable http request/response logging.
     private Set<String> httpLoggingExcludePaths; // Used in ServletLoggingFilter to exclude some paths from logger. Paths example: ["/jans-auth/img", "/jans-auth/stylesheet"]
     private String externalLoggerConfiguration; // Path to external log4j2 configuration file. This property might be configured from oxTrust: /identity/logviewer/configure
+    
+    private EngineConfig agamaConfiguration;
 
     public Boolean getRequireRequestObjectEncryption() {
         if (requireRequestObjectEncryption == null) requireRequestObjectEncryption = false;
@@ -2501,5 +2505,13 @@ public class AppConfiguration implements Configuration {
 
     public void setUseHighestLevelScriptIfAcrScriptNotFound(Boolean useHighestLevelScriptIfAcrScriptNotFound) {
         this.useHighestLevelScriptIfAcrScriptNotFound = useHighestLevelScriptIfAcrScriptNotFound;
+    }
+
+    public EngineConfig getAgamaConfiguration() {
+        return agamaConfiguration;
+    }
+
+    public void setAgamaConfiguration(EngineConfig agamaConfiguration) {
+        this.agamaConfiguration = agamaConfiguration;
     }
 }

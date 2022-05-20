@@ -445,5 +445,8 @@
     "deviceAuthzTokenPollInterval": 5,
     "deviceAuthzResponseTypeToProcessAuthz": "code",
     "redirectUrisRegexEnabled": true,
-    "useHighestLevelScriptIfAcrScriptNotFound": true
+    "useHighestLevelScriptIfAcrScriptNotFound": true,
+    "agamaConfiguration": {
+        "enabled": false
+    }
 }

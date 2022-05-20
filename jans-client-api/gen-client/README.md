@@ -39,7 +39,7 @@ Add this dependency to your project's POM:
 <dependency>
   <groupId>io.swagger</groupId>
   <artifactId>swagger-java-client</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1-SNAPSHOT</version>
   <scope>compile</scope>
 </dependency>
 ```

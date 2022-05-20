@@ -1,5 +1,6 @@
 package io.jans.agama.timer;
 
+import io.jans.agama.engine.misc.FlowUtils;
 import io.jans.agama.engine.model.FlowRun;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.search.filter.Filter;
@@ -32,11 +33,14 @@ public class FlowRunsCleaner {
 
     @Inject
     private PersistenceEntryManager entryManager;
-
-    private AtomicBoolean isActive;
     
     @Inject
     private Event<TimerEvent> timerEvent;
+    
+    @Inject
+    private FlowUtils futils;
+
+    private AtomicBoolean isActive;
 
     public void initTimer() {
 
@@ -50,6 +54,8 @@ public class FlowRunsCleaner {
     @Asynchronous
     public void run(@Observes @Scheduled FlowRunsCleanerEvent event) {
 
+        if (!futils.serviceEnabled()) return;
+        
         if (isActive.get()) return;
         
         if (!isActive.compareAndSet(false, true)) return;

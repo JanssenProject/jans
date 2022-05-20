@@ -160,8 +160,8 @@ def merge_extension_ctx(ctx):
         basedir = "/app/openbanking/static/extension"
 
     filepath = Path(basedir)
-    for ext_path in filepath.glob("**/*.py"):
-        if not ext_path.is_file():
+    for ext_path in filepath.glob("**/*"):
+        if not ext_path.is_file() or ext_path.suffix.lower() not in (".py", ".java"):
             continue
 
         ext_name = f"{ext_path.parent.name.lower()}_{ext_path.stem.lower()}"
@@ -396,25 +396,6 @@ def get_ldif_mappings(optional_scopes=None):
         "session": [],
     }
     return ldif_mappings
-
-
-def doc_id_from_dn(dn):
-    parsed_dn = dnutils.parse_dn(dn)
-    doc_id = parsed_dn[0][1]
-
-    if doc_id == "jans":
-        doc_id = "_"
-    return doc_id
-
-
-def id_from_dn(dn):
-    # for example: `"inum=29DA,ou=attributes,o=jans"`
-    # becomes `["29DA", "attributes"]`
-    dns = [i.split("=")[-1] for i in dn.split(",") if i != "o=jans"]
-    dns.reverse()
-
-    # the actual key
-    return '_'.join(dns) or "_"
 
 
 def get_config_api_swagger(path="/app/static/jans-config-api-swagger.yaml"):
