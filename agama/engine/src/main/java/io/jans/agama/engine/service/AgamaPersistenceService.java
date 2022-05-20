@@ -28,7 +28,8 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 @ApplicationScoped
 public class AgamaPersistenceService {
         
-    public static final String AGAMA_BASE = "ou=agama,o=jans";
+    private static final String AGAMA_BASE = "ou=agama,o=jans";
+
     public static final String AGAMA_FLOWRUNS_BASE = "ou=runs," + AGAMA_BASE;
     public static final String AGAMA_FLOWS_BASE = "ou=flows," + AGAMA_BASE;
 
@@ -73,7 +74,9 @@ public class AgamaPersistenceService {
         
     }
     
-    public void createFlowRun(String id, FlowStatus fst, long expireAt) throws Exception {
+    public void createFlowRun(String id, FlowStatus fst) throws Exception {
+
+        long expireAt = System.currentTimeMillis() + 1000L * flowUtils.getEffectiveInterruptionTime();
         
         FlowRun fr = new FlowRun();
         fr.setBaseDn(String.format("%s=%s,%s", FlowRun.ATTR_NAMES.ID, id, AGAMA_FLOWRUNS_BASE));

@@ -1,0 +1,46 @@
+name: documentation
+on:
+  workflow_dispatch:
+  pull_request:
+    types:
+      - opened
+      - edited
+    paths:
+      - 'docs/**'
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v3
+        with:
+          python-version: 3.7
+
+      - name: Auto-merge inhouse doc prs
+        run: |
+          sudo apt-get update
+          sudo apt-get install jq
+          echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" > token.txt
+          gh auth login --with-token < token.txt
+          NUMBER_OF_FOLDERS_CHANGED=$( git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | cut -d/ -f1 | sort -u | wc -l)
+          echo "The number of folders that changed are $NUMBER_OF_FOLDERS_CHANGED"
+          IS_USER_ORG_MEMBER=$(gh api -H "Accept: application/vnd.github.v3+json" --hostname github.com /orgs/${{ github.repository_owner }}/members?per_page=100 | jq .[].login | grep ${{ github.actor }})
+          echo "checking if ${{ github.actor }} belongs to the ${{ github.repository_owner }}. Found $IS_USER_ORG_MEMBER."
+          PULL_NUMBER=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
+          #The number of folders changed should be 1. Otherwise the contributor has touched other folders besides /docs.
+          if [[ $NUMBER_OF_FOLDERS_CHANGED == "1" ]] && [[ ! -z "$IS_USER_ORG_MEMBER" ]]; then
+            echo "Approving PR $PULL_NUMBER"
+            gh pr review --approve $PULL_NUMBER
+            echo "Merging PR $PULL_NUMBER"
+            gh pr merge --squash --auto $PULL_NUMBER
+            echo ""
+          else
+            echo "Bot will not merge this as it does not meet the requirments."
+            echo "Either the developer has merged with doc changes code changes or an external contributor has requested doc changes."
+          fi
