@@ -216,6 +216,26 @@ public class RegisterSiteTest extends BaseTest {
         return resp;
     }
 
+    public static RegisterSiteResponse registerSite(ClientInterface client, String opHost, String redirectUrls, String idTokenSignedResponseAlg, String opConfigurationEndpoint) {
+
+        final RegisterSiteParams params = new RegisterSiteParams();
+        params.setOpHost(opHost);
+        params.setOpConfigurationEndpoint(opConfigurationEndpoint);
+        params.setRedirectUris(Lists.newArrayList(redirectUrls.split(" ")));
+        params.setScope(Lists.newArrayList("openid", "uma_protection", "profile", "jans_client_api"));
+        params.setResponseTypes(Lists.newArrayList("code", "id_token", "token"));
+        params.setIdTokenSignedResponseAlg(idTokenSignedResponseAlg);
+        params.setGrantTypes(Lists.newArrayList(
+                GrantType.AUTHORIZATION_CODE.getValue(),
+                GrantType.OXAUTH_UMA_TICKET.getValue(),
+                GrantType.CLIENT_CREDENTIALS.getValue()));
+
+        final RegisterSiteResponse resp = client.registerSite(params);
+        assertNotNull(resp);
+        assertTrue(!Strings.isNullOrEmpty(resp.getRpId()));
+        return resp;
+    }
+
     public static RegisterSiteResponse registerSite(
             ClientInterface client, String opHost, String redirectUrls, List<String> scopes, List<String> responseTypes,
             boolean allowSpontaneousScopes, List<String> spontaneousScopes) {

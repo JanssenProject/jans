@@ -21,6 +21,7 @@
         <jersey-test-framework-provider>3.0.2</jersey-test-framework-provider>
         <compile.jans.base>/etc/jans</compile.jans.base>
         <compile.log.base></compile.log.base>
+        <test.client.api.url>http://localhost:8081/client-api-server</test.client.api.url>
     </properties>
 
     <dependencies>

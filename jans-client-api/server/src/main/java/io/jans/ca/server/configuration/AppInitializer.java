@@ -85,6 +85,9 @@ public class AppInitializer {
 
     public void onStart(@Observes @Initialized(ApplicationScoped.class) Object init) {
 
+        if (System.getProperties().containsKey("test.client.api.url")) {
+            return;
+        }
         logger.info("=============  STARTING CLIENT API APPLICATION  ========================");
         logger.info("init:{}", init);
 
