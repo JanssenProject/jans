@@ -121,6 +121,16 @@
 			<artifactId>jans-orm-ldap</artifactId>
 			<scope>test</scope>
 		</dependency>
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <scope>test</scope>
+        </dependency>
 
         <dependency>
             <groupId>net.openhft</groupId>
