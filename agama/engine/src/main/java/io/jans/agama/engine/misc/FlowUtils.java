@@ -2,10 +2,9 @@ package io.jans.agama.engine.misc;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.jans.agama.model.EngineConfig;
-import io.jans.as.model.configuration.AppConfiguration;
 
-import jakarta.annotation.PostConstruct;
+import io.jans.agama.model.EngineConfig;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import java.io.IOException;
@@ -39,9 +38,6 @@ public class FlowUtils {
     
     @Inject
     private ObjectMapper mapper;
-
-    @Inject
-    private AppConfiguration asConfig;
     
     @Inject
     private EngineConfig engineConfig;
@@ -50,6 +46,10 @@ public class FlowUtils {
     
     public int getEffectiveInterruptionTime() {
         return effectiveInterruptionTime;
+    }
+    
+    public void setEffectiveInterruptionTime(int effectiveInterruptionTime) {
+        this.effectiveInterruptionTime = effectiveInterruptionTime;        
     }
 
     public boolean serviceEnabled() {
@@ -98,19 +98,6 @@ public class FlowUtils {
         p.load(new StringReader(Files.readString(SALT_PATH, UTF_8)));
         return p.getProperty("encodeSalt");
         
-    }
-
-    @PostConstruct
-    private void init() {
-       
-        int unauth = asConfig.getSessionIdUnauthenticatedUnusedLifetime();
-        effectiveInterruptionTime = engineConfig.getInterruptionTime();
-        if (effectiveInterruptionTime == 0 || effectiveInterruptionTime > unauth) {
-            //Ensure interruption time is lower than or equal to unauthenticated unused
-            effectiveInterruptionTime = unauth;
-            logger.warn("Agama flow interruption time modified to {}", unauth);
-        }
-
     }
     
 }
