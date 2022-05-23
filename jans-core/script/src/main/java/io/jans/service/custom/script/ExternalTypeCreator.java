@@ -14,6 +14,8 @@ import jakarta.inject.Inject;
 import net.openhft.compiler.CompilerUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.io.IoBuilder;
 import org.python.core.PyLong;
 import org.python.core.PyObject;
 import org.slf4j.Logger;
@@ -21,16 +23,22 @@ import org.slf4j.Logger;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Yuriy Zabrovarnyy
  */
 @ApplicationScoped
 public class ExternalTypeCreator {
+
+    private static final AtomicBoolean classPathInitialized = new AtomicBoolean(false);
 
     @Inject
     protected Logger log;
@@ -41,8 +49,24 @@ public class ExternalTypeCreator {
     @Inject
     protected AbstractCustomScriptService customScriptService;
 
+    private void initJavaCompilerClasspathIfNeeded() {
+        if (classPathInitialized.get()) {
+            return;
+        }
+        try {
+            classPathInitialized.set(true);
+
+            URL[] urls = ((URLClassLoader) this.getClass().getClassLoader()).getURLs();
+            for (URL url : urls) {
+                CompilerUtils.addClassPath(url.getFile());
+            }
+        } catch (Exception e) {
+            log.error("FAILED to output class loader urls", e);
+        }
+    }
+
     public BaseExternalType createExternalType(CustomScript customScript,
-                                                Map<String, SimpleCustomProperty> configurationAttributes) {
+                                               Map<String, SimpleCustomProperty> configurationAttributes) {
         String customScriptInum = customScript.getInum();
 
         BaseExternalType externalType;
@@ -53,8 +77,8 @@ public class ExternalTypeCreator {
                 externalType = createExternalTypeFromStringWithPythonException(customScript);
             }
         } catch (Exception ex) {
-            log.error("Failed to prepare external type '{}', ex: '{}'", customScriptInum, ExceptionUtils.getStackTrace(ex));
-            log.trace("Script '{}'", customScript.getScript());
+            log.error("Failed to prepare external type '{}', exception: '{}'", customScriptInum, ExceptionUtils.getStackTrace(ex));
+            log.error("Script '{}'", customScript.getScript());
             saveScriptError(customScript, ex, true);
             return null;
         }
@@ -83,7 +107,7 @@ public class ExternalTypeCreator {
                 initialized = externalType.init(customScript, configurationAttributes);
             } else {
                 initialized = externalType.init(configurationAttributes);
-                log.warn(" Update the script's init method to init(self, customScript, configurationAttributes), script name: {}",  customScript.getName());
+                log.warn(" Update the script's init method to init(self, customScript, configurationAttributes), script name: {}", customScript.getName());
             }
         } catch (Exception ex) {
             log.error("Failed to initialize custom script: '{}', exception: {}", customScript.getName(), ex);
@@ -96,8 +120,11 @@ public class ExternalTypeCreator {
     }
 
     private BaseExternalType createExternalTypeWithJava(CustomScript customScript) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+        initJavaCompilerClasspathIfNeeded();
         CustomScriptType customScriptType = customScript.getScriptType();
-        Class<?> aClass = CompilerUtils.CACHED_COMPILER.loadFromJava(customScriptType.getClassName(), customScript.getScript());
+
+        PrintWriter printWriter = IoBuilder.forLogger(getClass()).setLevel(Level.DEBUG).buildPrintWriter();
+        Class<?> aClass = CompilerUtils.CACHED_COMPILER.loadFromJava(getClass().getClassLoader(), customScriptType.getClassName(), customScript.getScript(), printWriter);
         return (BaseExternalType) aClass.getDeclaredConstructor().newInstance();
     }
 
@@ -109,13 +136,11 @@ public class ExternalTypeCreator {
         }
 
         CustomScriptType customScriptType = customScript.getScriptType();
-        BaseExternalType externalType = null;
 
         try (InputStream bis = new ByteArrayInputStream(script.getBytes(StandardCharsets.UTF_8))) {
-            externalType = pythonService.loadPythonScript(bis, scriptName, customScriptType.getClassName(),
-                    customScriptType.getCustomScriptType(), new PyObject[] { new PyLong(System.currentTimeMillis()) });
+            return pythonService.loadPythonScript(bis, scriptName, customScriptType.getClassName(),
+                    customScriptType.getCustomScriptType(), new PyObject[]{new PyLong(System.currentTimeMillis())});
         }
-        return externalType;
     }
 
     public void saveScriptError(CustomScript customScript, Exception exception) {
