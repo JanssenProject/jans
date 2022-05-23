@@ -23,8 +23,6 @@ from pathlib import Path
 from types import SimpleNamespace
 from urllib.parse import urlencode
 from collections import OrderedDict
-from prompt_toolkit import prompt, HTML
-from prompt_toolkit.completion import WordCompleter
 
 home_dir = Path.home()
 config_dir = home_dir.joinpath('.config')
@@ -132,10 +130,17 @@ parser.add_argument("-use-test-client", help="Use test client without device aut
 parser.add_argument("--patch-add", help="Colon delimited key:value pair for add patch operation. For example loggingLevel:DEBUG")
 parser.add_argument("--patch-replace", help="Colon delimited key:value pair for replace patch operation. For example loggingLevel:DEBUG")
 parser.add_argument("--patch-remove", help="Key for remove patch operation. For example imgLocation")
+parser.add_argument("--no-suggestion", help="Do not use prompt toolkit to display word completer", action='store_true')
 
 # parser.add_argument("-show-data-type", help="Show data type in schema query", action='store_true')
 parser.add_argument("--data", help="Path to json data file")
 args = parser.parse_args()
+
+
+if not args.no_suggestion:
+    from prompt_toolkit import prompt, HTML
+    from prompt_toolkit.completion import WordCompleter
+
 
 ################## end of arguments #################
 
@@ -789,9 +794,13 @@ class JCA_CLI:
             values = ['_true', '_false']
 
         while True:
-            #selection = input(' ' * spacing + self.colored_text(text, 20) + ' ')
-            html_completer = WordCompleter(values)
-            selection = prompt(HTML(' ' * spacing + text + ' '), completer=html_completer)
+
+            if args.no_suggestion:
+                selection = input(' ' * spacing + self.colored_text(text, 20) + ' ')
+            else:
+                html_completer = WordCompleter(values)
+                selection = prompt(HTML(' ' * spacing + text + ' '), completer=html_completer)
+
             selection = selection.strip()
             if selection.startswith('_file '):
                 fname = selection.split()[1]
