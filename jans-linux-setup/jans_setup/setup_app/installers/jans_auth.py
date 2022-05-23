@@ -44,7 +44,8 @@ class JansAuthInstaller(JettyInstaller):
         self.ldif_groups = os.path.join(self.output_folder, 'groups.ldif')
 
         if Config.profile == SetupProfiles.OPENBANKING:
-            Config.jwksUri = base.argsp.jwks_uri
+            Config.enable_ob_auth_script = '0' if base.argsp.disable_ob_auth_script else '1'
+            Config.jwks_uri = base.argsp.jwks_uri
 
     def install(self):
         self.logIt("Copying auth.war into jetty webapps folder...")
@@ -63,22 +64,13 @@ class JansAuthInstaller(JettyInstaller):
         if not Config.get('admin_inum'):
             Config.admin_inum = str(uuid.uuid4())
 
-        if Config.profile == SetupProfiles.JANS:
-            Config.encoded_admin_password = self.ldap_encode(Config.admin_password)
+        Config.encoded_admin_password = self.ldap_encode(Config.admin_password)
 
         self.logIt("Generating OAuth openid keys", pbar=self.service_name)
         sig_keys = 'RS256 RS384 RS512 ES256 ES256K ES384 ES512 PS256 PS384 PS512'
         enc_keys = 'RSA1_5 RSA-OAEP ECDH-ES'
         jwks = self.gen_openid_jwks_jks_keys(self.oxauth_openid_jks_fn, Config.oxauth_openid_jks_pass, key_expiration=2, key_algs=sig_keys, enc_keys=enc_keys)
         self.write_openid_keys(self.oxauth_openid_jwks_fn, jwks)
-
-        if Config.profile == SetupProfiles.OPENBANKING and not Config.staticKid:
-            jwks_str = '\n'.join(jwks)
-            keys_dict = json.loads(jwks_str)
-            for k in keys_dict['keys']:
-                if k['use'] == 'sig' and k['kty']== 'RSA':
-                    Config.staticKid = k['kid']
-                    break
 
         if Config.get('use_external_key'):
             self.import_openbanking_key()
@@ -122,9 +114,7 @@ class JansAuthInstaller(JettyInstaller):
 
         Config.templateRenderingDict['person_custom_object_class_list'] = '[]' if Config.mapping_locations['default'] == 'rdbm' else '["jansCustomPerson", "jansPerson"]'
 
-        templates = [self.oxauth_config_json]
-        if Config.profile == SetupProfiles.JANS:
-            templates += [self.ldif_people, self.ldif_groups]
+        templates = [self.oxauth_config_json, self.ldif_people, self.ldif_groups]
 
         for tmp in templates:
             self.renderTemplateInOut(tmp, self.templates_folder, self.output_folder)
@@ -148,9 +138,8 @@ class JansAuthInstaller(JettyInstaller):
         for temp in (self.ldif_config, self.ldif_role_scope_mappings):
             self.renderTemplateInOut(temp, self.templates_folder, self.output_folder)
 
-        self.dbUtils.import_ldif([self.ldif_config, self.ldif_scripts, self.ldif_role_scope_mappings])
-        if Config.profile == SetupProfiles.JANS:
-            self.dbUtils.import_ldif([self.ldif_people, self.ldif_groups])
+        self.dbUtils.import_ldif([self.ldif_config, self.ldif_scripts, self.ldif_role_scope_mappings, self.ldif_people, self.ldif_groups])
+
         if Config.profile == SetupProfiles.OPENBANKING:
             self.import_openbanking_certificate()
 
@@ -174,8 +163,8 @@ class JansAuthInstaller(JettyInstaller):
     def import_openbanking_certificate(self):
         self.logIt("Importing openbanking ssl certificate")
         oxauth_config_json = base.readJsonFile(self.oxauth_config_json)
-        jwksUri = oxauth_config_json['jwksUri']
-        o = urlparse(jwksUri)
+        jwks_uri = oxauth_config_json['jwksUri']
+        o = urlparse(jwks_uri)
         jwks_addr = o.netloc
         open_banking_cert = self.get_server_certificate(jwks_addr)
         alias = jwks_addr.replace('.', '_')

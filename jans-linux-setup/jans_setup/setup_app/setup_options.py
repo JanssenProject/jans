@@ -149,7 +149,9 @@ def get_setup_options():
     if base.current_app.profile == 'openbanking':
         setupOptions['opendj_install'] = InstallTypes.NONE
         if base.argsp.static_kid:
-            setupOptions['staticKid'] = base.argsp.static_kid
+            setupOptions['static_kid'] = base.argsp.static_kid
+        if base.argsp.no_external_key:
+            setupOptions['use_external_key'] = False
 
     if base.argsp.ip_address:
         setupOptions['ip'] = base.argsp.ip_address

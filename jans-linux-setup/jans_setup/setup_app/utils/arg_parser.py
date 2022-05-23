@@ -54,6 +54,7 @@ parser.add_argument('-setup-branch', help="Jannsen setup github branch", default
 
 parser.add_argument('--disable-config-api-security', help="Turn off oauth2 security validation for jans-config-api", action='store_true')
 parser.add_argument('--cli-test-client', help="Use config api test client for CLI", action='store_true')
+parser.add_argument('--import-ldif', help="Render ldif templates from directory and import them in Database")
 
 if PROFILE != OPENBANKING_PROFILE:
 
@@ -105,7 +106,8 @@ else:
     parser.add_argument('-ob-alias', help="Openbanking key alias")
     parser.add_argument('-static-kid', help="Openbanking static kid")
     parser.add_argument('-jwks-uri', help="Openbanking jwksUri", default="https://keystore.openbankingtest.org.uk/0014H00001lFE7dQAG/axV5umCvTMBMjPwjFQgEvb.jwks")
-    parser.add_argument('--import-ldif', help="Render ldif templates from directory and import them in Database")
+    parser.add_argument('--disable-ob-auth-script', help="Disable Openbanking authentication script and use default backend", action='store_true')
+
 
 def add_to_me(you):
 

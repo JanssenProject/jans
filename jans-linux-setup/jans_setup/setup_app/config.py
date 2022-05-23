@@ -398,7 +398,7 @@ class Config:
 
         if self.profile == OPENBANKING_PROFILE:
             #default locations are rdbm
-            self.mapping_locations = {'default': 'rdbm'}
+            self.mapping_locations = { group: 'rdbm' for group in self.couchbaseBucketDict }
         else:
             #default locations are OpenDJ
             self.mapping_locations = { group: 'ldap' for group in self.couchbaseBucketDict }
