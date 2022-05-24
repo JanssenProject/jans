@@ -79,15 +79,5 @@ public class StandaloneCustomScriptManagerTest {
 		// Destroy custom script manager and scripts
 		customScriptManager.destory();
 	}
-	
-	private static class SampleContext {
-
-		long time;
-
-		public SampleContext(long time) {
-			super();
-			this.time = time;
-		}
-	}
 
 }
