@@ -100,6 +100,26 @@ def _transform_auth_dynamic_config(conf):
             conf["subjectIdentifiersPerClientSupported"] = ["mail", "uid"]
             should_update = True
 
+        if "agamaConfiguration" not in conf:
+            conf["agamaConfiguration"] = {
+                "enabled": False,
+                "templatesPath": "/ftl",
+                "scriptsPath": "/scripts",
+                "serializerType": "KRYO",
+                "interruptionTime": 0,
+                "maxItemsLoggedInCollections": 3,
+                "pageMismatchErrorPage": "mismatch.ftl",
+                "interruptionErrorPage": "timeout.ftl",
+                "crashErrorPage": "crash.ftl",
+                "finishedFlowPage": "finished.ftl",
+                "bridgeScriptPage": "agama.xhtml",
+                "defaultResponseHeaders": {
+                    "Content-Type": "text/html",
+                    "Expires": "0",
+                },
+            }
+            should_update = True
+
     if "forceSignedRequestObject" not in conf:
         conf["forceSignedRequestObject"] = False
         should_update = True
