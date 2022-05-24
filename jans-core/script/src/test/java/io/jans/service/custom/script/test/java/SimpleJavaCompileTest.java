@@ -1,4 +1,4 @@
-package io.jans.service.custom.script.test;
+package io.jans.service.custom.script.test.java;
 
 import net.openhft.compiler.CompilerUtils;
 
