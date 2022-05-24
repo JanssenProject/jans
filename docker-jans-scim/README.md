@@ -5,7 +5,7 @@ Docker image packaging for SCIM.
 ## Versions
 
 See [Releases](https://github.com/JanssenProject/docker-jans-scim/releases) for stable versions.
-For bleeding-edge/unstable version, use `janssenproject/scim:1.0.0_dev`.
+For bleeding-edge/unstable version, use `janssenproject/scim:1.0.1_dev`.
 
 ## Environment Variables
 
@@ -99,4 +99,3 @@ The following key-value pairs are the defaults:
     "script_log_level": "INFO",
 }
 ```
-
