@@ -139,9 +139,11 @@ class Config:
 
         if self.profile == OPENBANKING_PROFILE:
             self.use_external_key = True
-            self.ob_key_fn = '/root/obsigning-axV5umCvTMBMjPwjFQgEvb_NO_UPLOAD.key'
-            self.ob_cert_fn = '/root/obsigning.pem'
-            self.ob_alias = 'GkwIzWy88xWSlcWnLiEc8ip9s2M'
+            self.ob_key_fn = ''
+            self.ob_cert_fn = ''
+            self.ob_alias = ''
+            self.static_kid = ''
+            self.jwks_uri = ''
 
         # Component ithversions
         self.apache_version = None

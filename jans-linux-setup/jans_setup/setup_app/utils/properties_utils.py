@@ -101,13 +101,14 @@ class PropertiesUtils(SetupUtils):
                 tld = Config.hostname
             Config.admin_email = "support@%s" % tld
 
+
+        if not Config.admin_password and Config.ldapPass:
+            Config.admin_password = Config.ldapPass
+
+        if not Config.admin_password:
+            Config.admin_password = self.getPW()
+
         if Config.profile == 'jans':
-
-            if not Config.admin_password and Config.ldapPass:
-                Config.admin_password = Config.ldapPass
-
-            if not Config.admin_password:
-                Config.admin_password = self.getPW()
 
             if not Config.ldapPass:
                 Config.ldapPass = Config.admin_password
@@ -801,7 +802,7 @@ class PropertiesUtils(SetupUtils):
 
         self.prompt_for_rdbm()
 
-        Config.static_kid = input("Enter Openbanking static kid: ")
+        Config.static_kid = self.getPrompt("Enter Openbanking static kid: ", Config.static_kid)
 
         use_external_key_prompt = input('Use external key? [Y|n] : ')
         Config.use_external_key = not use_external_key_prompt.lower().startswith('n')
@@ -889,22 +890,21 @@ class PropertiesUtils(SetupUtils):
             Config.jans_max_mem = self.getPrompt("Enter maximum RAM for applications in MB", str(Config.jans_max_mem))
 
 
+        admin_password =  Config.ldapPass or Config.cb_password or Config.rdbm_password or self.getPW(special='.*=!%&+/-')
+
+        while True:
+            adminPass = self.getPrompt("Enter Password for Admin User", admin_password)
+            if len(adminPass) > 3:
+                break
+            else:
+                print("Admin password should be at least four characters in length.")
+
+        Config.admin_password = adminPass
+
         if Config.profile == 'openbanking':
             self.openbanking_properties()
-
         else:
             self.prompt_for_backend()
-            admin_password =  Config.ldapPass or Config.cb_password or Config.rdbm_password or self.getPW(special='.*=!%&+/-')
-
-            while True:
-                adminPass = self.getPrompt("Enter Password for Admin User", admin_password)
-                if len(adminPass) > 3:
-                    break
-                else:
-                    print("Admin password should be at least four characters in length.")
-
-            Config.admin_password = adminPass
-
             self.promptForConfigApi()
             self.promptForScimServer()
             self.promptForFido2Server()

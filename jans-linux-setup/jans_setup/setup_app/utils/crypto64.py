@@ -133,42 +133,29 @@ class Crypto64:
     def generate_base64_ldap_file(self, fn):
         return self.generate_base64_file(fn, 1)
 
-    def gen_keystore(self, suffix, keystoreFN, keystorePW, inKey, inCert, alias=None):
+    def import_key_cert_into_keystore(self, suffix, keystoreFN, keystorePW, inKey, inCert, alias=None):
 
         self.logIt("Creating keystore %s" % suffix)
         # Convert key to pkcs12
         pkcs_fn = '%s/%s.pkcs12' % (Config.certFolder, suffix)
         self.run([paths.cmd_openssl,
-                  'pkcs12',
-                  '-export',
-                  '-inkey',
-                  inKey,
-                  '-in',
-                  inCert,
-                  '-out',
-                  pkcs_fn,
-                  '-name',
-                  alias or Config.hostname,
-                  '-passout',
-                  'pass:%s' % keystorePW
+                  'pkcs12', '-export',
+                  '-inkey', inKey,
+                  '-in', inCert,
+                  '-out', pkcs_fn,
+                  '-name', alias or Config.hostname,
+                  '-passout', 'pass:%s' % keystorePW
                   ])
+
         # Import p12 to keystore
         import_cmd = [Config.cmd_keytool,
                   '-importkeystore',
-                  '-srckeystore',
-                  '%s/%s.pkcs12' % (Config.certFolder, suffix),
-                  '-srcstorepass',
-                  keystorePW,
-                  '-srcstoretype',
-                  'PKCS12',
-                  '-destkeystore',
-                  keystoreFN,
-                  '-deststorepass',
-                  keystorePW,
-                  '-deststoretype',
-                  'JKS',
-                  '-keyalg',
-                  'RSA',
+                  '-srckeystore', '%s/%s.pkcs12' % (Config.certFolder, suffix),
+                  '-srcstorepass', keystorePW,
+                  '-srcstoretype', 'PKCS12',
+                  '-destkeystore', keystoreFN,
+                  '-deststorepass', keystorePW,
+                  '-deststoretype', 'JKS',
                   '-noprompt'
                   ]
         if alias:

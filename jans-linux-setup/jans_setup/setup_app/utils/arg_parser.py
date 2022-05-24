@@ -101,9 +101,9 @@ if PROFILE != OPENBANKING_PROFILE:
 else:
     # openbanking
     parser.add_argument('--no-external-key', help="Don't use external key", action='store_true')
-    parser.add_argument('-ob-key-fn', help="Openbanking key filename")
-    parser.add_argument('-ob-cert-fn', help="Openbanking certificate filename")
-    parser.add_argument('-ob-alias', help="Openbanking key alias")
+    parser.add_argument('-ob-key-fn', help="Openbanking key filename", default='/root/obsigning-axV5umCvTMBMjPwjFQgEvb_NO_UPLOAD.key')
+    parser.add_argument('-ob-cert-fn', help="Openbanking certificate filename", default='/root/obsigning.pem')
+    parser.add_argument('-ob-alias', help="Openbanking key alias", default='GkwIzWy88xWSlcWnLiEc8ip9s2M')
     parser.add_argument('-static-kid', help="Openbanking static kid")
     parser.add_argument('-jwks-uri', help="Openbanking jwksUri", default="https://keystore.openbankingtest.org.uk/0014H00001lFE7dQAG/axV5umCvTMBMjPwjFQgEvb.jwks")
     parser.add_argument('--disable-ob-auth-script', help="Disable Openbanking authentication script and use default backend", action='store_true')

@@ -147,6 +147,7 @@ class JansAuthInstaller(JettyInstaller):
         return ''.join(random.SystemRandom().choice(string.ascii_lowercase
                                                     + string.ascii_uppercase
                                                     + string.digits) for _ in range(N))
+
     def make_salt(self, enforce=False):
         if not Config.get('pairwiseCalculationKey') or enforce:
             Config.pairwiseCalculationKey = self.genRandomString(random.randint(20,30))
@@ -179,5 +180,4 @@ class JansAuthInstaller(JettyInstaller):
 
     def import_openbanking_key(self):
         if os.path.isfile(Config.ob_key_fn) and os.path.isfile(Config.ob_cert_fn):
-            self.gen_keystore('obsigning', self.oxauth_openid_jks_fn, Config.oxauth_openid_jks_pass, Config.ob_key_fn, Config.ob_cert_fn, Config.ob_alias)
-
+            self.import_key_cert_into_keystore('obsigning', self.oxauth_openid_jks_fn, Config.oxauth_openid_jks_pass, Config.ob_key_fn, Config.ob_cert_fn, Config.ob_alias)
