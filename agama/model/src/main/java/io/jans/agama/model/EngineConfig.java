@@ -23,10 +23,6 @@ public class EngineConfig {
     private String scriptsPath = "/scripts";
     
     private Type serializerType = Type.KRYO;
-
-    //Time used to determine if flow timeout has occurred in Agama. A negative
-    //value means no timeout will ever occur
-    private int interruptionTime;
     
     private int maxItemsLoggedInCollections = 3;
     
@@ -95,14 +91,6 @@ public class EngineConfig {
 
     public void setSerializerType(Type serializerType) {
         this.serializerType = serializerType;
-    }
-    
-    public int getInterruptionTime() {
-        return interruptionTime;
-    }
-
-    public void setInterruptionTime(int interruptionTime) {
-        this.interruptionTime = interruptionTime;
     }
 
     public String getInterruptionErrorPage() {
