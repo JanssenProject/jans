@@ -52,8 +52,9 @@ public class RestartServlet extends BaseServlet {
                     flowService.terminateFlow();
 
                     logger.debug("Sending user's browser for a flow start");
-                    //This relies on the (unathenticated) session id being still alive (so the 
-                    //flow name and its inputs can be remembered
+                    //This redirection relies on the (unauthenticated) session id being still alive 
+                    //(so the flow name and its inputs can be remembered in the bridge script)
+                    //see AgamaBridge.py#prepareForStep
                     String url = bridge.scriptPageUrl().replaceFirst("\\.xhtml", ".htm");
                     response.sendRedirect(request.getContextPath() + "/" + url);
 

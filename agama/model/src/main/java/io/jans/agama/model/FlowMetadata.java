@@ -10,6 +10,7 @@ public class FlowMetadata {
     
     private String funcName;
     private List<String> inputs;
+    private Integer timeout;
     private String displayName;
     private String author;
     private long timestamp;
@@ -31,6 +32,14 @@ public class FlowMetadata {
 
     public void setInputs(List<String> inputs) {
         this.inputs = inputs;
+    }
+
+    public Integer getTimeout() {
+        return timeout;
+    }
+
+    public void setTimeout(Integer timeout) {
+        this.timeout = timeout;
     }
 
     public String getDisplayName() {

@@ -48,6 +48,16 @@ public interface AuthnFlowListener extends ParseTreeListener {
 	 */
 	void exitBase(AuthnFlowParser.BaseContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link AuthnFlowParser#timeout}.
+	 * @param ctx the parse tree
+	 */
+	void enterTimeout(AuthnFlowParser.TimeoutContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link AuthnFlowParser#timeout}.
+	 * @param ctx the parse tree
+	 */
+	void exitTimeout(AuthnFlowParser.TimeoutContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link AuthnFlowParser#configs}.
 	 * @param ctx the parse tree
 	 */

@@ -451,7 +451,6 @@
         "templatesPath": "/ftl",
         "scriptsPath": "/scripts",
         "serializerType": "KRYO",
-        "interruptionTime": 0,
         "maxItemsLoggedInCollections": 3,
         "pageMismatchErrorPage": "mismatch.ftl",
         "interruptionErrorPage": "timeout.ftl",

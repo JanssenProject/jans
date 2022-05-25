@@ -1,4 +1,4 @@
-// Whenever this file is edited, Class org.gluu.flowless.dsl.Transpiler and its dependants MUST BE reviewed
+// Whenever this file is edited, Class io.jans.agama.dsl.Transpiler and its dependants MUST BE reviewed
 grammar AuthnFlow;
 
 /*
@@ -32,12 +32,14 @@ NL: '\r'? '\n' [\t ]* ;
 
 flow: header statement+ ;
 
-header: FLOWSTART WS qname WS? INDENT base configs? inputs? DEDENT NL* ;
+header: FLOWSTART WS qname WS? INDENT base timeout? configs? inputs? DEDENT NL* ;
 // header always ends in a NL
 
 qname: ALPHANUM | QNAME ;   //if flow name is a single word, it is not identified as QNAME but ALPHANUM by parser
 
 base: BASE WS STRING WS? NL;
+
+timeout: TIMEOUT WS UINT WS SECS WS? NL ;
 
 configs: CONFIGS WS short_var WS? NL ;
  
@@ -129,6 +131,8 @@ COMMENT: '//' ~[\r\n]* -> skip ;
 FLOWSTART: 'Flow' ;
 
 BASE: 'Basepath' ;
+
+TIMEOUT: 'Timeout' ;
 
 CONFIGS: 'Configs' ;
 
