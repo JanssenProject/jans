@@ -5,7 +5,7 @@ Docker image packaging for config-api.
 ## Versions
 
 See [Releases](https://github.com/JanssenProject/docker-jans-config-api/releases) for stable versions.
-For bleeding-edge/unstable version, use `janssenproject/config-api`.
+For bleeding-edge/unstable version, use `janssenproject/config-api:1.0.1_dev`.
 
 ## Environment Variables
 
@@ -135,4 +135,3 @@ The following key-value pairs are the defaults:
     "admin_ui_audit_log_level": "INFO"
 }
 ```
-
