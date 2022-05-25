@@ -3,6 +3,7 @@ package io.jans.agama.timer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.jans.agama.dsl.TranspilationResult;
 import io.jans.agama.dsl.Transpiler;
 import io.jans.agama.dsl.TranspilerException;
 import io.jans.agama.dsl.error.SyntaxException;
@@ -37,7 +38,7 @@ import org.slf4j.Logger;
 public class Transpilation {
     
     private static final int DELAY = 10 + (int) (10 * Math.random());    //seconds
-    private static final int INTERVAL = 30;    //TODO: adjust seconds
+    private static final int INTERVAL = 45;    // seconds
     private static final double PR = 0.25;
 
     @Inject
@@ -94,7 +95,8 @@ public class Transpilation {
     }
     
     /**
-     * This method assumes that when a flow is created, attribute revision is set to a negative value
+     * This method assumes that when a flow is created (eg. via an administrative tool), 
+     * attribute revision is set to a negative value
      * @throws IOException 
      */
     public void process() throws IOException {
@@ -158,15 +160,15 @@ public class Transpilation {
 
             String error = null, shortError = null;
             try {
-                List<String> strings = Transpiler.transpile(qname, map.keySet(), fl.getSource());
+                TranspilationResult result = Transpiler.transpile(qname, map.keySet(), fl.getSource());
                 logger.debug("Successful transpilation");
-                String fname = strings.remove(0);
-                String compiled = strings.remove(0);
                 
                 FlowMetadata meta = fl.getMetadata();
-                meta.setFuncName(fname);
-                meta.setInputs(strings);
-                
+                meta.setFuncName(result.getFuncName());
+                meta.setInputs(result.getInputs());
+                meta.setTimeout(result.getTimeout());
+
+                String compiled = result.getCode();
                 fl.setMetadata(meta);
                 fl.setTranspiled(compiled);
                 fl.setTransHash(futils.hash(compiled));
@@ -203,6 +205,5 @@ public class Transpilation {
         traces = makeSimpleMap(map);
         
     }
-
     
 }
