@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -32,7 +33,6 @@ import java.util.stream.Stream;
 import net.sf.saxon.dom.NodeOverNodeInfo;
 import net.sf.saxon.s9api.Processor;
 import net.sf.saxon.s9api.SaxonApiException;
-import net.sf.saxon.s9api.Serializer;
 import net.sf.saxon.s9api.XPathCompiler;
 import net.sf.saxon.s9api.XdmItem;
 import net.sf.saxon.s9api.XdmNode;
@@ -125,7 +125,7 @@ public class Transpiler {
         
     }
 
-    public SaplingDocument asXML(String DSLCode) throws SyntaxException, TranspilerException {
+    public XdmNode asXML(String DSLCode) throws SyntaxException, TranspilerException, SaxonApiException {
 
         InputStream is = new ByteArrayInputStream(DSLCode.getBytes(UTF_8));
         CharStream input = null;
@@ -167,7 +167,7 @@ public class Transpiler {
 
             SaplingDocument document = Visitor.document(flowContext, AuthnFlowParser.RULE_flow, fanny);
             applyValidations(document);
-            return document;
+            return document.toXdmNode(processor);
 
         } catch (RecognitionException re) {
             Token offender = re.getOffendingToken();
@@ -177,23 +177,30 @@ public class Transpiler {
 
     }
 
-    public List<String> getInputs(SaplingDocument doc) throws SaxonApiException {
+    public List<String> getInputs(XdmNode node) throws SaxonApiException {
         
-        return xpathCompiler
-                .evaluate("/flow/header/inputs/short_var/text()", doc.toXdmNode(processor))
+        return xpathCompiler.evaluate("/flow/header/inputs/short_var/text()", node)
                     .stream().map(XdmItem::getStringValue).collect(Collectors.toList());
 
     }
     
-    public String generateJS(SaplingDocument doc) throws TranspilerException  {
+    public Integer getTimeout(XdmNode node) throws SaxonApiException {
+        
+        return Optional.ofNullable(
+            xpathCompiler.evaluateSingle("/flow/header/timeout/UINT/text()", node))
+                .map(XdmItem::getStringValue).map(Integer::valueOf).orElse(null);
+
+    }
+    
+    public String generateJS(XdmNode node) throws TranspilerException  {
 
         try {
             StringWriter sw = new StringWriter();
-            NodeModel model = asNodeModel(doc);
+            NodeModel model = NodeModel.wrap(NodeOverNodeInfo.wrap(node.getUnderlyingNode()));
 
             jsGenerator.process(model, sw);
             return sw.toString();
-        } catch (IOException | TemplateException | SaxonApiException e) {
+        } catch (IOException | TemplateException e) {
             throw new TranspilerException("Transformation failed", e);
         }
 
@@ -231,26 +238,9 @@ public class Transpiler {
 
     }
     
-    private void logXml(SaplingDocument doc) {
-
-        try {
-            StringWriter sw = new StringWriter();
-            Serializer serializer = processor.newSerializer(sw);
-            serializer.setOutputProperty(Serializer.Property.INDENT, "true");
-
-            logger.debug("Serializing XML document");
-            doc.serialize(serializer);
-
-            logger.debug("\n{}", sw.toString());
-        } catch (SaxonApiException e) {
-            logger.error(e.getMessage(), e);
-        }
-
-    }
-    
-    private NodeModel asNodeModel(SaplingDocument doc) throws SaxonApiException {
-        return NodeModel.wrap(NodeOverNodeInfo.wrap(
-                doc.toXdmNode(processor).getUnderlyingNode()));
+    private void logXml(XdmNode node) {
+        logger.debug("\n{}", node.toString());
+        //System.out.println("\n" + node.toString());
     }
     
     private void generateFromXml(String fileName, OutputStream out) throws Exception {
@@ -266,29 +256,29 @@ public class Transpiler {
      * triggered from the input flow (Trigger directive). Passing null disables the validation.
      * Passing an empty list will make validation fail if any Trigger directive is found
      * @param source Source code of input flow (written using Agama DSL)
-     * @return A (modifiable) list with at least 2 elements: 1st item contains the name of the function generated,
-     * 2nd item contents the actual function code. Remaining items, if any, correspond to the input
-     * parameter names the function has (as passed in the Input directive).
+     * @return A TranspilerResult object holding the details of the generated function      
      * @throws SyntaxException When the input source has syntactic errors, details are contained
      * in the exception thrown
      * @throws TranspilerException When other kind of processing error occurred.
      */
-    public static List<String> transpile(String flowQname, Set<String> flowQNames, String source)
+    public static TranspilationResult transpile(String flowQname, Set<String> flowQNames, String source)
             throws TranspilerException, SyntaxException {
-        
-        List<String> result = new ArrayList<>();
+
         Transpiler tr = new Transpiler(flowQname, flowQNames);
-        SaplingDocument doc = tr.asXML(source);
-        
-        result.add(tr.getFanny());
-        result.add(tr.generateJS(doc));
         try {
-            result.addAll(tr.getInputs(doc));
+            XdmNode doc = tr.asXML(source);
+            
+            TranspilationResult result = new TranspilationResult();
+            result.setFuncName(tr.getFanny());
+            result.setCode(tr.generateJS(doc));
+            result.setInputs(tr.getInputs(doc));
+            result.setTimeout(tr.getTimeout(doc));
+
+            return result;
         } catch (SaxonApiException e) {
             throw new TranspilerException(e.getMessage(), e);
         }
         
-        return result;
     }
 
     public static void main(String... args) throws Exception {
@@ -310,9 +300,10 @@ public class Transpiler {
         Transpiler tr = new Transpiler(args[1], knownFlows);
         String dslCode = new String(Files.readAllBytes(Paths.get(args[0])), UTF_8);
         
-        SaplingDocument doc = tr.asXML(dslCode);
+        XdmNode doc = tr.asXML(dslCode);
         tr.logXml(doc);
         System.out.println("\nInputs: " + tr.getInputs(doc));
+        System.out.println("\nTimeout: " + tr.getTimeout(doc));
         System.out.println("\n" + tr.generateJS(doc));
 
         //tr.generateFromXml("Sample.xml", System.out);

@@ -41,16 +41,6 @@ public class FlowUtils {
     
     @Inject
     private EngineConfig engineConfig;
-    
-    private int effectiveInterruptionTime;
-    
-    public int getEffectiveInterruptionTime() {
-        return effectiveInterruptionTime;
-    }
-    
-    public void setEffectiveInterruptionTime(int effectiveInterruptionTime) {
-        this.effectiveInterruptionTime = effectiveInterruptionTime;        
-    }
 
     public boolean serviceEnabled() {
         return engineConfig.isEnabled();

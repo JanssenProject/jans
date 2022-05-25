@@ -8,6 +8,7 @@ import io.jans.agama.engine.model.ProtoFlowRun;
 import io.jans.agama.engine.serialize.ContinuationSerializer;
 import io.jans.agama.model.Flow;
 import io.jans.agama.model.ProtoFlow;
+import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.search.filter.Filter;
 import io.jans.util.Pair;
@@ -18,6 +19,7 @@ import java.io.IOException;
 import java.util.Base64;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import org.mozilla.javascript.NativeContinuation;
 import org.mozilla.javascript.Scriptable;
@@ -45,6 +47,9 @@ public class AgamaPersistenceService {
     @Inject
     private FlowUtils flowUtils;
     
+    @Inject
+    private AppConfiguration appConfiguration;
+    
     public FlowStatus getFlowStatus(String sessionId) throws IOException {
 
         try {
@@ -71,19 +76,17 @@ public class AgamaPersistenceService {
         } catch(Exception e) {
             throw new IOException(e);
         }
-        
+
     }
     
-    public void createFlowRun(String id, FlowStatus fst) throws Exception {
+    public void createFlowRun(String id, FlowStatus fst, long expireAt) throws Exception {
 
-        long expireAt = System.currentTimeMillis() + 1000L * flowUtils.getEffectiveInterruptionTime();
-        
         FlowRun fr = new FlowRun();
         fr.setBaseDn(String.format("%s=%s,%s", FlowRun.ATTR_NAMES.ID, id, AGAMA_FLOWRUNS_BASE));
         fr.setId(id);
         fr.setStatus(fst);
         fr.setDeletableAt(new Date(expireAt));
-        
+
         logger.info("Creating flow run");
         entryManager.persist(fr);
         
@@ -106,6 +109,19 @@ public class AgamaPersistenceService {
             return false;
         }
         
+    }
+    
+    public int getEffectiveFlowTimeout(String flowName) {
+
+        Flow fl = entryManager.findEntries(AGAMA_FLOWS_BASE, Flow.class, 
+               Filter.createEqualityFilter(Flow.ATTR_NAMES.QNAME, flowName),
+               new String[]{ Flow.ATTR_NAMES.META }, 1).get(0);
+
+        int unauth = appConfiguration.getSessionIdUnauthenticatedUnusedLifetime();
+        Integer flowTimeout = fl.getMetadata().getTimeout();
+        int timeout = Optional.ofNullable(flowTimeout).map(Integer::intValue).orElse(unauth);
+        return Math.min(unauth, timeout);
+
     }
     
     public Flow getFlow(String flowName, boolean full) throws IOException {
