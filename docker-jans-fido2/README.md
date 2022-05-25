@@ -5,7 +5,7 @@ Docker image packaging for Fido2.
 ## Versions
 
 See [Releases](https://github.com/JanssenProject/docker-jans-fido2/releases) for stable versions.
-For bleeding-edge/unstable version, use `janssenproject/fido2:1.0.0_dev`.
+For bleeding-edge/unstable version, use `janssenproject/fido2:1.0.1_dev`.
 
 ## Environment Variables
 
@@ -93,4 +93,3 @@ The following key-value pairs are the defaults:
     "persistence_log_level": "INFO"
 }
 ```
-
