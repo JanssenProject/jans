@@ -6,6 +6,7 @@ import io.jans.agama.engine.service.AgamaPersistenceService;
 import io.jans.agama.engine.service.FlowService;
 import io.jans.agama.engine.service.WebContext;
 import io.jans.agama.engine.servlet.ExecutionServlet;
+import io.jans.agama.engine.script.LogUtils;
 import io.jans.agama.model.EngineConfig;
 
 import jakarta.inject.Inject;
@@ -45,7 +46,7 @@ public class NativeJansFlowBridge {
         
         logger.info("Preparing flow '{}'", qname);
         Boolean alreadyRunning = null;
-        if (fs.isEnabled(qname)) {
+        if (aps.flowEnabled(qname)) {
             
             FlowStatus st = aps.getFlowStatus(sessionId);
             alreadyRunning = st != null;
@@ -56,11 +57,19 @@ public class NativeJansFlowBridge {
                 st = null;
             }
             if (st == null) {
+
+                int timeout = aps.getEffectiveFlowTimeout(qname);
+                if (timeout <= 0) throw new Exception("Flow timeout negative or zero. " +
+                        "Check your AS configuration or flow definition");                
+                long expireAt = System.currentTimeMillis() + 1000L * timeout;                
+
                 st = new FlowStatus();
                 st.setStartedAt(FlowStatus.PREPARED);
                 st.setQname(qname);
                 st.setJsonInput(jsonInput);
-                aps.createFlowRun(sessionId, st);
+                st.setFinishBefore(expireAt);
+                aps.createFlowRun(sessionId, st, expireAt);
+                LogUtils.log("@w Effective timeout for this flow will be % seconds", timeout);
             }
         }        
         return alreadyRunning;

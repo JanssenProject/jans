@@ -85,10 +85,6 @@ public class FlowService {
         return aps.getFlowStatus(sessionId);
     }
 
-    public boolean isEnabled(String flowName) {        
-        return aps.flowEnabled(flowName);
-    }
-    
     public FlowStatus startFlow(FlowStatus status) throws FlowCrashException {
         
         try {
@@ -208,13 +204,10 @@ public class FlowService {
     
     public void ensureTimeNotExceeded(FlowStatus flstatus) throws FlowTimeoutException {
 
-        int time = flowUtils.getEffectiveInterruptionTime();
         //Use some seconds to account for the potential time difference due to redirections: 
         //jython script -> agama, agama -> jython script. This helps agama flows to timeout
         //before the unauthenticated unused time
-        if (time > 0 && 
-                System.currentTimeMillis() - flstatus.getStartedAt() + TIMEOUT_SKEW > 1000 * time) {
-
+        if (System.currentTimeMillis() + TIMEOUT_SKEW > flstatus.getFinishBefore()) {
             throw new FlowTimeoutException("You have exceeded the amount of time required " + 
                     "to complete your authentication process", flstatus.getQname());
             //"Your authentication attempt has run for more than " + time + " seconds"

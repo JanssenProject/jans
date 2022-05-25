@@ -2,7 +2,6 @@ package io.jans.agama.engine.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.jans.agama.engine.misc.FlowUtils;
 import io.jans.agama.model.EngineConfig;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.service.cdi.event.ConfigurationUpdate;
@@ -22,9 +21,6 @@ public class ServicesFactory {
     @Inject
     private Logger logger;
 
-    @Inject
-    private FlowUtils futils;
-    
     private ObjectMapper mapper;
     
     private EngineConfig econfig;
@@ -45,16 +41,6 @@ public class ServicesFactory {
         try {
             logger.info("Refreshing Agama configuration...");
             BeanUtils.copyProperties(econfig, appConfiguration.getAgamaConfiguration());            
-                
-            int unauth = appConfiguration.getSessionIdUnauthenticatedUnusedLifetime();
-            int effectiveInterruptionTime = econfig.getInterruptionTime();
-            if (effectiveInterruptionTime == 0 || effectiveInterruptionTime > unauth) {
-                //Ensure interruption time is lower than or equal to unauthenticated unused
-                effectiveInterruptionTime = unauth;
-                logger.warn("Agama flow interruption time modified to {}", unauth);
-            }
-            futils.setEffectiveInterruptionTime(effectiveInterruptionTime);
-            
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }
