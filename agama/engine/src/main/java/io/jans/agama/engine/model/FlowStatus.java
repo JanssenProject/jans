@@ -13,6 +13,7 @@ public class FlowStatus {
     private String qname;
     private String templatePath;
     private long startedAt;
+    private long finishBefore;
     private Object templateDataModel;
     private LinkedList<ParentFlowData> parentsData = new LinkedList<>();
     private String externalRedirectUrl;
@@ -43,6 +44,14 @@ public class FlowStatus {
 
     public void setStartedAt(long startedAt) {
         this.startedAt = startedAt;
+    }
+
+    public long getFinishBefore() {
+        return finishBefore;
+    }
+
+    public void setFinishBefore(long finishBefore) {
+        this.finishBefore = finishBefore;
     }
 
     public String getQname() {
