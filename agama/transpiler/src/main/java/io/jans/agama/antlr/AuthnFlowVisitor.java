@@ -35,6 +35,12 @@ public interface AuthnFlowVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitBase(AuthnFlowParser.BaseContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link AuthnFlowParser#timeout}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTimeout(AuthnFlowParser.TimeoutContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link AuthnFlowParser#configs}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
