@@ -87,3 +87,5 @@ HTTP request | Method | Description
 /get-request-object/{request_object_id} | GET | Get Request Object.
 
 
+jans-client-api has defined swagger specification [here](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans-client-api/master/server/src/main/resources/swagger.yaml). It is possible to generated native library in your favorite language by [Swagger Code Generator](https://swagger.io/tools/swagger-codegen/).
+

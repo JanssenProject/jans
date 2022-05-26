@@ -20,7 +20,7 @@ import java.util.Map;
 
 /**
  * @author Javier Rojas Blum
- * @version January 26. 2018
+ * @version April 25. 2022
  */
 public abstract class BaseRequest {
 

@@ -455,7 +455,7 @@ class PropertiesUtils(SetupUtils):
         self.writeFile(oxd_crt_fn, oxd_cert)
         ssl_subjects = self.get_ssl_subject(oxd_crt_fn)
         
-        if ssl_subjects['CN'] != oxd_hostname:
+        if ssl_subjects.get('commonName') != oxd_hostname:
             return ssl_subjects
 
 

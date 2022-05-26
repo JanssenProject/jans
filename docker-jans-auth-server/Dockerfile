@@ -54,8 +54,8 @@ RUN /opt/jython/bin/pip uninstall -y pip
 # Auth server
 # ===========
 
-ENV CN_VERSION=1.0.0-SNAPSHOT
-ENV CN_BUILD_DATE='2022-05-06 08:15'
+ENV CN_VERSION=1.0.0
+ENV CN_BUILD_DATE='2022-05-19 16:25'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-server/${CN_VERSION}/jans-auth-server-${CN_VERSION}.war
 
 # Install Jans Auth
@@ -219,7 +219,7 @@ LABEL name="janssenproject/auth-server" \
     maintainer="Janssen Project <support@jans.io>" \
     vendor="Janssen Project" \
     version="1.0.0" \
-    release="beta.16" \
+    release="1" \
     summary="Janssen Authorization Server" \
     description="OAuth 2.0 server and client; OpenID Connect Provider (OP) & UMA Authorization Server (AS)"
 
@@ -233,7 +233,6 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/custom/pages \
 
 COPY certs /etc/certs
 COPY jetty/jans-auth_web_resources.xml ${JETTY_BASE}/jans-auth/webapps/
-COPY jetty/jans-auth.xml ${JETTY_BASE}/jans-auth/webapps/
 COPY jetty/log4j2.xml ${JETTY_BASE}/jans-auth/resources/
 COPY conf/*.tmpl /app/templates/
 COPY scripts /app/scripts
@@ -241,6 +240,8 @@ RUN chmod +x /app/scripts/entrypoint.sh
 
 # create non-root user
 RUN adduser -s /bin/sh -D -G root -u 1000 jetty
+
+COPY --chown=1000:0 jetty/jans-auth.xml ${JETTY_BASE}/jans-auth/webapps/
 
 # adjust ownership and permission
 RUN chmod -R g=u ${JETTY_BASE}/jans-auth/custom \

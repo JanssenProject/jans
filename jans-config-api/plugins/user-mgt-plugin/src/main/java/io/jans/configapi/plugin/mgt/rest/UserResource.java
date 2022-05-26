@@ -1,6 +1,5 @@
 package io.jans.configapi.plugin.mgt.rest;
 
-
 import com.github.fge.jsonpatch.JsonPatchException;
 
 import static io.jans.as.model.util.Util.escapeLog;
@@ -8,7 +7,7 @@ import io.jans.as.common.model.common.User;
 import io.jans.as.common.service.common.EncryptionService;
 import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
-import io.jans.configapi.plugin.mgt.model.config.UserMgtConfigSource;
+import io.jans.configapi.plugin.mgt.model.user.CustomUser;
 import io.jans.configapi.plugin.mgt.model.user.UserPatchRequest;
 import io.jans.configapi.plugin.mgt.service.UserService;
 import io.jans.configapi.plugin.mgt.util.Constants;
@@ -18,7 +17,6 @@ import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.orm.model.PagedResult;
 import io.jans.util.StringHelper;
-import io.jans.util.security.StringEncrypter.EncryptionException;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -41,14 +39,18 @@ import org.slf4j.Logger;
 public class UserResource extends BaseResource {
 
     private static final String USER = "user";
+    private static final String MAIL = "mail";
+    private static final String DISPLAY_NAME = "displayName";
+    private static final String JANS_STATUS = "jansStatus";
+    private static final String GIVEN_NAME = "givenName";
     private static final String USER_PWD = "userPassword";
 
     @Inject
     Logger logger;
-    
+
     @Inject
     EncryptionService encryptionService;
-    
+
     @Inject
     MgtUtil mgtUtil;
 
@@ -57,31 +59,32 @@ public class UserResource extends BaseResource {
 
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.USER_READ_ACCESS })
-    public Response getUsers(@DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
+    public Response getUsers(
+            @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
             @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
             @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
             @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder)
-            throws EncryptionException, IllegalAccessException, InvocationTargetException {
+            throws IllegalAccessException, InvocationTargetException {
         if (logger.isDebugEnabled()) {
             logger.debug("User search param - limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}",
                     escapeLog(limit), escapeLog(pattern), escapeLog(startIndex), escapeLog(sortBy),
                     escapeLog(sortOrder));
         }
         SearchRequest searchReq = createSearchRequest(userSrv.getPeopleBaseDn(), pattern, sortBy, sortOrder, startIndex,
-                limit, null, userSrv.getUserExclusionAttributesAsString(),mgtUtil.getRecordMaxCount());
+                limit, null, userSrv.getUserExclusionAttributesAsString(), mgtUtil.getRecordMaxCount());
 
-        List<User> users = this.doSearch(searchReq);
-        logger.debug("User search result:{}", users);
+        List<CustomUser> customUsers = this.doSearch(searchReq);
+        logger.debug("CustomUser search result:{}", customUsers);
 
-        return Response.ok(getUsers(users)).build();
+        return Response.ok(customUsers).build();
     }
 
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.USER_READ_ACCESS })
     @Path(ApiConstants.INUM_PATH)
     public Response getUserByInum(@PathParam(ApiConstants.INUM) @NotNull String inum)
-            throws EncryptionException, IllegalAccessException, InvocationTargetException {
+            throws IllegalAccessException, InvocationTargetException {
         if (logger.isDebugEnabled()) {
             logger.debug("User search by inum:{}", escapeLog(inum));
         }
@@ -91,56 +94,77 @@ public class UserResource extends BaseResource {
 
         // excludedAttributes
         user = excludeUserAttributes(user);
+        logger.debug("user:{}", user);
 
-        return Response.ok(decryptUserPassword(user)).build();
+        // get custom user
+        CustomUser customUser = getCustomUser(user);
+        logger.debug("customUser:{}", customUser);
+
+        return Response.ok(customUser).build();
     }
 
     @POST
     @ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS })
-    public Response createUser(@Valid User user)
-            throws EncryptionException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+    public Response createUser(@Valid CustomUser customUser)
+            throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         if (logger.isDebugEnabled()) {
-            logger.debug("User details to be added - user:{}", escapeLog(user));
+            logger.debug("User details to be added - customUser:{}", escapeLog(customUser));
         }
+
+        // get User object
+        User user = setUserAttributes(customUser);
+        logger.debug("Create  user:{}", user);
 
         // checking mandatory attributes
         checkMissingAttributes(user);
 
-        user = userSrv.addUser(encryptUserPassword(user), true);
+        user = userSrv.addUser(user, true);
         logger.debug("User created {}", user);
 
         // excludedAttributes
         user = excludeUserAttributes(user);
 
-        return Response.status(Response.Status.CREATED).entity(user).build();
+        // get custom user
+        customUser = getCustomUser(user);
+        logger.debug("newly created customUser:{}", customUser);
+
+        return Response.status(Response.Status.CREATED).entity(customUser).build();
     }
 
     @PUT
     @ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS })
-    public Response updateUser(@Valid User user)
-            throws EncryptionException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+    public Response updateUser(@Valid CustomUser customUser)
+            throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         if (logger.isDebugEnabled()) {
-            logger.debug("User details to be updated - user:{}", escapeLog(user));
+            logger.debug("User details to be updated - customUser:{}", escapeLog(customUser));
         }
+
+        // get User object
+        User user = setUserAttributes(customUser);
+        logger.debug("Create  user:{}", user);
 
         // checking mandatory attributes
         checkMissingAttributes(user);
-        
-        user = userSrv.updateUser(encryptUserPassword(user));
+
+        user = userSrv.updateUser(user);
         logger.debug("Updated user:{}", user);
 
         // excludedAttributes
         user = excludeUserAttributes(user);
 
-        return Response.ok(user).build();
+        // get custom user
+        customUser = getCustomUser(user);
+        logger.debug("updated customUser:{}", customUser);
+
+        return Response.ok(customUser).build();
     }
 
     @PATCH
     @ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS })
     @Path(ApiConstants.INUM_PATH)
     public Response patchUser(@PathParam(ApiConstants.INUM) @NotNull String inum,
-            @NotNull UserPatchRequest userPatchRequest)
-            throws EncryptionException, IllegalAccessException, InvocationTargetException, JsonPatchException, IOException {
+            @NotNull UserPatchRequest userPatchRequest) throws IllegalAccessException,
+            InvocationTargetException, JsonPatchException, IOException {
         if (logger.isDebugEnabled()) {
             logger.debug("User:{} to be patched with :{} ", escapeLog(inum), escapeLog(userPatchRequest));
         }
@@ -155,7 +179,11 @@ public class UserResource extends BaseResource {
         // excludedAttributes
         existingUser = excludeUserAttributes(existingUser);
 
-        return Response.ok(decryptUserPassword(existingUser)).build();
+        // get custom user
+        CustomUser customUser = getCustomUser(existingUser);
+        logger.debug("patched customUser:{}", customUser);
+
+        return Response.ok(customUser).build();
     }
 
     @DELETE
@@ -171,7 +199,8 @@ public class UserResource extends BaseResource {
         return Response.noContent().build();
     }
 
-    private List<User> doSearch(SearchRequest searchReq) throws IllegalAccessException, InvocationTargetException {
+    private List<CustomUser> doSearch(SearchRequest searchReq)
+            throws IllegalAccessException, InvocationTargetException {
         if (logger.isDebugEnabled()) {
             logger.debug("User search params - searchReq:{} ", escapeLog(searchReq));
         }
@@ -192,8 +221,10 @@ public class UserResource extends BaseResource {
 
         // excludedAttributes
         users = userSrv.excludeAttributes(users, searchReq.getExcludedAttributesStr());
+        logger.debug("Users fetched  - users:{}", users);
 
-        return users;
+        // get customUser()
+        return getCustomUserList(users);
     }
 
     private User excludeUserAttributes(User user) throws IllegalAccessException, InvocationTargetException {
@@ -211,31 +242,83 @@ public class UserResource extends BaseResource {
 
         throwMissingAttributeError(missingAttributes);
     }
-    
-    private List<User> getUsers(List<User> users) throws EncryptionException {
-        if (users != null && !users.isEmpty()) {
-            for (User user : users) {
-                if (StringHelper.isNotEmpty(user.getAttribute(USER_PWD))) {
-                    decryptUserPassword(user);
-                }
-            }
+
+    private List<CustomUser> getCustomUserList(List<User> users) {
+        List<CustomUser> customUserList = new ArrayList<>();
+        if (users == null || users.isEmpty()) {
+            return customUserList;
         }
-        return users;
+
+        for (User user : users) {
+            CustomUser customUser = new CustomUser();
+            setParentAttributes(customUser, user);
+            customUserList.add(customUser);
+        }
+        logger.debug("Custom Users - customUserList:{}", customUserList);
+        return customUserList;
     }
-    
-    private User encryptUserPassword(User user) throws EncryptionException {
-        if (StringHelper.isNotEmpty(user.getAttribute(USER_PWD))) {
-            user.setAttribute(USER_PWD, encryptionService.encrypt(user.getAttribute(USER_PWD)), false);
+
+    private CustomUser getCustomUser(User user) {
+        CustomUser customUser = new CustomUser();
+        if (user == null) {
+            return customUser;
         }
+        setParentAttributes(customUser, user);
+        logger.debug("Custom User - customUser:{}", customUser);
+        return customUser;
+    }
+
+    public CustomUser setParentAttributes(CustomUser customUser, User user) {
+        customUser.setBaseDn(user.getBaseDn());
+        customUser.setCreatedAt(user.getCreatedAt());
+        customUser.setCustomAttributes(user.getCustomAttributes());
+        customUser.setCustomObjectClasses(user.getCustomObjectClasses());
+        customUser.setDn(user.getDn());
+        customUser.setOxAuthPersistentJwt(user.getOxAuthPersistentJwt());
+        customUser.setUpdatedAt(user.getUpdatedAt());
+        customUser.setUserId(user.getUserId());
+
+        return setCustomUserAttributes(customUser, user);
+    }
+
+    public CustomUser setCustomUserAttributes(CustomUser customUser, User user) {
+        customUser.setMail(user.getAttribute(MAIL));
+        customUser.setDisplayName(user.getAttribute(DISPLAY_NAME));
+        customUser.setJansStatus(user.getAttribute(JANS_STATUS));
+        customUser.setGivenName(user.getAttribute(GIVEN_NAME));
+        customUser.setUserPassword(user.getAttribute(USER_PWD));
+
+        customUser.removeAttribute(MAIL);
+        customUser.removeAttribute(DISPLAY_NAME);
+        customUser.removeAttribute(JANS_STATUS);
+        customUser.removeAttribute(GIVEN_NAME);
+        customUser.removeAttribute(USER_PWD);
+
+        return customUser;
+    }
+
+    private User setUserAttributes(CustomUser customUser) {
+        User user = new User();
+        user.setBaseDn(customUser.getBaseDn());
+        user.setCreatedAt(customUser.getCreatedAt());
+        user.setCustomAttributes(customUser.getCustomAttributes());
+        user.setCustomObjectClasses(customUser.getCustomObjectClasses());
+        user.setDn(customUser.getDn());
+        user.setOxAuthPersistentJwt(customUser.getOxAuthPersistentJwt());
+        user.setUpdatedAt(customUser.getUpdatedAt());
+        user.setUserId(customUser.getUserId());
+        return setUserCustomAttributes(customUser, user);
+    }
+
+    private User setUserCustomAttributes(CustomUser customUser, User user) {
+        user.setAttribute(MAIL, customUser.getMail(), false);
+        user.setAttribute(DISPLAY_NAME, customUser.getDisplayName(), false);
+        user.setAttribute(JANS_STATUS, customUser.getJansStatus(), false);
+        user.setAttribute(GIVEN_NAME, customUser.getGivenName(), false);
+        user.setAttribute(USER_PWD, customUser.getUserPassword(), false);
+
+        logger.debug("Custom User - user:{}", user);
         return user;
     }
 
-    private User decryptUserPassword(User user) throws EncryptionException {
-        if (StringHelper .isNotEmpty(user.getAttribute(USER_PWD))) {
-            user.setAttribute(USER_PWD, encryptionService.decrypt(user.getAttribute(USER_PWD)), false);
-        }
-        return user;
-    }
-    
-  
 }

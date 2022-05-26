@@ -22,21 +22,21 @@ import io.jans.as.server.service.ScopeService;
 import io.jans.as.server.service.token.TokenService;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.model.GluuAttribute;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-
+import io.jans.orm.model.base.LocalizedString;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.SecurityContext;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+
 import java.util.Set;
 
 /**
  * Provides interface for Client Info REST web services
  *
  * @author Javier Rojas Blum
- * @version 0.9 March 27, 2015
+ * @version April 25, 2022
  */
 @Path("/")
 public class ClientInfoRestWebServiceImpl implements ClientInfoRestWebService {
@@ -124,12 +124,16 @@ public class ClientInfoRestWebServiceImpl implements ClientInfoRestWebService {
                         Object attributeValue = clientService.getAttribute(client, ldapName);
 
                         String claimName = attribute.getClaimName();
-                        jsonObj.put(claimName, attributeValue);
+
+                        if (attributeValue instanceof LocalizedString) {
+                            LocalizedString localizedString = (LocalizedString) attributeValue;
+                            localizedString.addToJSON(jsonObj, claimName);
+                        } else {
+                            jsonObj.put(claimName, attributeValue);
+                        }
                     }
                 }
             }
-        } catch (JSONException e) {
-            log.error(e.getMessage(), e);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }

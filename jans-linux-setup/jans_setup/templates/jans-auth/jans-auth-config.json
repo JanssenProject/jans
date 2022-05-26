@@ -445,5 +445,22 @@
     "deviceAuthzTokenPollInterval": 5,
     "deviceAuthzResponseTypeToProcessAuthz": "code",
     "redirectUrisRegexEnabled": true,
-    "useHighestLevelScriptIfAcrScriptNotFound": true
+    "useHighestLevelScriptIfAcrScriptNotFound": true,
+    "agamaConfiguration": {
+        "enabled": false,
+        "templatesPath": "/ftl",
+        "scriptsPath": "/scripts",
+        "serializerType": "KRYO",
+        "interruptionTime": 0,
+        "maxItemsLoggedInCollections": 3,
+        "pageMismatchErrorPage": "mismatch.ftl",
+        "interruptionErrorPage": "timeout.ftl",
+        "crashErrorPage": "crash.ftl",
+        "finishedFlowPage": "finished.ftl",    
+        "bridgeScriptPage": "agama.xhtml",
+        "defaultResponseHeaders": {
+            "Content-Type": "text/html",
+            "Expires": "0"
+        }
+    }
 }

@@ -14,6 +14,7 @@ import io.jans.model.uma.ClaimDefinition;
 import io.jans.service.LookupService;
 import io.jans.service.custom.script.CustomScriptManager;
 import io.jans.service.custom.script.ExternalScriptService;
+import io.jans.service.custom.script.ExternalTypeCreator;
 import io.jans.util.StringHelper;
 import org.apache.commons.io.FileUtils;
 
@@ -46,6 +47,8 @@ public class ExternalUmaRptPolicyService extends ExternalScriptService {
     private LookupService lookupService;
     @Inject
     private CustomScriptManager scriptManager;
+    @Inject
+    private ExternalTypeCreator externalTypeCreator;
 
     protected Map<String, CustomScriptConfiguration> scriptInumMap;
 
@@ -83,7 +86,7 @@ public class ExternalUmaRptPolicyService extends ExternalScriptService {
     }
 
     private UmaRptPolicyType policyScript(CustomScriptConfiguration script) {
-        return HOTSWAP_UMA_SCRIPT ? (UmaRptPolicyType) hotswap(scriptManager, script, true) :
+        return HOTSWAP_UMA_SCRIPT ? (UmaRptPolicyType) hotswap(externalTypeCreator, script, true) :
                 (UmaRptPolicyType) script.getExternalType();
     }
 
@@ -126,7 +129,7 @@ public class ExternalUmaRptPolicyService extends ExternalScriptService {
         }
     }
 
-    public static <T> T hotswap(CustomScriptManager scriptManager, CustomScriptConfiguration script, boolean rptPolicyScript) {
+    public static <T> T hotswap(ExternalTypeCreator externalTypeCreator, CustomScriptConfiguration script, boolean rptPolicyScript) {
         if (!HOTSWAP_UMA_SCRIPT) {
             throw new RuntimeException("UMA script hotswap is not allowed");
         }
@@ -140,7 +143,7 @@ public class ExternalUmaRptPolicyService extends ExternalScriptService {
         try {
             String scriptCode = FileUtils.readFileToString(new File(scriptPath));
             script.getCustomScript().setScript(scriptCode);
-            return (T) scriptManager.createExternalTypeFromStringWithPythonException(script.getCustomScript(), script.getConfigurationAttributes());
+            return (T) externalTypeCreator.createExternalTypeFromStringWithPythonException(script.getCustomScript());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

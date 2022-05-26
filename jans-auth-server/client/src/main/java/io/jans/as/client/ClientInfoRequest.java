@@ -14,7 +14,8 @@ import java.util.Map;
 /**
  * Represents a Client Info request to send to the authorization server.
  *
- * @author Javier Rojas Blum Date: 07.19.2012
+ * @author Javier Rojas Blum
+ * @version April 25, 2022
  */
 public class ClientInfoRequest extends BaseRequest {
 

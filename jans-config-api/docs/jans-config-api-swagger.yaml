@@ -2178,6 +2178,12 @@ paths:
       parameters:
         - schema:
             type: string
+            enum:
+              - openid
+              - dynamic
+              - uma
+              - spontaneous
+              - oauth
           in: query
           name: type
           description: Scope type.
@@ -2442,7 +2448,7 @@ paths:
                 title: Users.
                 description: List of users.
                 items:
-                  $ref: '#/components/schemas/User'
+                  $ref: '#/components/schemas/CustomUser'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -2494,7 +2500,7 @@ paths:
             schema:
               title: User Details.
               description: User Details.
-              $ref: '#/components/schemas/User'
+              $ref: '#/components/schemas/CustomUser'
       responses:
         '201':
           description: Created
@@ -2502,7 +2508,7 @@ paths:
             application/json:
               schema:
                 title: User Details.
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/CustomUser'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -2520,7 +2526,7 @@ paths:
           application/json:
             schema:
               title: User Details.
-              $ref: '#/components/schemas/User'
+              $ref: '#/components/schemas/CustomUser'
       responses:
         '200':
           description: OK
@@ -2528,7 +2534,7 @@ paths:
             application/json:
               schema:
                 title: User Details.
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/CustomUser'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -2557,7 +2563,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/CustomUser'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -2602,7 +2608,7 @@ paths:
             application/json:
               schema:
                 title: User Details.
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/CustomUser'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -6681,7 +6687,7 @@ components:
           $ref: '#/components/schemas/FacterData'
           description: Underlying Server stats
 
-    User:
+    CustomUser:
       title: User object
       description: User.
       type: object
@@ -6691,6 +6697,12 @@ components:
         dn:
           type: string
           description: Domain name.
+        baseDN:
+          type: string
+          description: Base DN for the User entity
+        status:
+          type: string
+          description: User status
         userId:
           description: A domain issued and managed identifier for the user.
           type: string
@@ -6712,6 +6724,18 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CustomAttribute'
+        mail:
+          type: string
+          description: User mail
+        displayName:
+          type: string
+          description: Name of the user suitable for display to end-users
+        givenName:
+          type: string
+          description: User given Name
+        userPassword:
+          type: string
+          description: User password
 
     UserPatchRequest:
       title: User Patch Request object

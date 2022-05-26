@@ -31,8 +31,8 @@ RUN wget -q https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/${JETTY_
 # Config API
 # ==========
 
-ENV CN_VERSION=1.0.0-SNAPSHOT
-ENV CN_BUILD_DATE='2022-04-30 08:16'
+ENV CN_VERSION=1.0.0
+ENV CN_BUILD_DATE='2022-05-19 16:27'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api-server/${CN_VERSION}/jans-config-api-server-${CN_VERSION}.war
 
 # Install Jans Config API
@@ -63,11 +63,11 @@ RUN wget -q https://github.com/GluuFederation/gluu-snap/raw/${PYFACTER_VERSION}/
 
 RUN mkdir -p /usr/share/java
 
-ENV SCIM_PLUGIN_BUILD_DATE='2022-04-30 08:16'
+ENV SCIM_PLUGIN_BUILD_DATE='2022-05-19 16:27'
 ENV SCIM_PLUGIN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/scim-plugin/${CN_VERSION}/scim-plugin-${CN_VERSION}-distribution.jar
 RUN wget -q ${SCIM_PLUGIN_SOURCE_URL} -O /usr/share/java/scim-plugin.jar
 
-ENV ADMIN_UI_PLUGIN_BUILD_DATE='2022-04-30 08:16'
+ENV ADMIN_UI_PLUGIN_BUILD_DATE='2022-05-19 16:27'
 ENV ADMIN_UI_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/admin-ui-plugin/${CN_VERSION}/admin-ui-plugin-${CN_VERSION}-distribution.jar
 RUN wget -q ${ADMIN_UI_SOURCE_URL} -O /usr/share/java/admin-ui-plugin.jar
 
@@ -178,7 +178,7 @@ LABEL name="janssenproject/config-api" \
     maintainer="Janssen Project <support@jans.io>" \
     vendor="Janssen Project" \
     version="1.0.0" \
-    release="beta.16" \
+    release="1" \
     summary="Janssen Config API" \
     description=""
 
@@ -190,7 +190,6 @@ RUN mkdir -p /etc/certs \
     ${JETTY_BASE}/jans-config-api/logs
 
 RUN touch /etc/hosts.back
-COPY jetty/jans-config-api.xml ${JETTY_BASE}/jans-config-api/webapps/
 COPY jetty/log4j2.xml ${JETTY_BASE}/jans-config-api/resources/
 COPY conf/*.tmpl /app/templates/
 COPY plugins /app/plugins
@@ -199,6 +198,8 @@ RUN chmod +x /app/scripts/entrypoint.sh
 
 # create non-root user
 RUN adduser -s /bin/sh -D -G root -u 1000 jetty
+
+COPY --chown=1000:0 jetty/jans-config-api.xml ${JETTY_BASE}/jans-config-api/webapps/
 
 # adjust ownership and permission
 RUN chmod -R g=u ${JETTY_BASE}/jans-config-api/custom \

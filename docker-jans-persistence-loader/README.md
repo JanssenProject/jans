@@ -213,3 +213,4 @@ Hybrid is a mix of LDAP and Couchbase persistence backend. To initialize data fo
         -v /path/to/vault_secret_id.txt:/etc/certs/vault_secret_id \
         janssenproject/persistence:1.0.0_dev
     ```
+
