@@ -6,7 +6,6 @@
 
 package io.jans.scim.service;
 
-import io.jans.as.common.service.common.ExternalIdGeneratorService;
 import io.jans.as.model.common.IdType;
 import io.jans.model.GluuAttribute;
 import io.jans.orm.PersistenceEntryManager;
@@ -20,6 +19,7 @@ import io.jans.scim.exception.DuplicateEmailException;
 import io.jans.scim.model.GluuCustomAttribute;
 import io.jans.scim.model.GluuCustomPerson;
 import io.jans.scim.model.User;
+import io.jans.scim.service.ExternalIdGeneratorService;
 import io.jans.scim.util.OxTrustConstants;
 import io.jans.util.ArrayHelper;
 import io.jans.util.OxConstants;
