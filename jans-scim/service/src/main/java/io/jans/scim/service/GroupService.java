@@ -6,7 +6,6 @@
 
 package io.jans.scim.service;
 
-import io.jans.as.common.service.common.ExternalIdGeneratorService;
 import io.jans.as.model.common.IdType;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
@@ -17,6 +16,7 @@ import io.jans.orm.search.filter.Filter;
 import io.jans.scim.model.GluuCustomPerson;
 import io.jans.scim.model.GluuGroup;
 import io.jans.scim.model.GluuGroupVisibility;
+import io.jans.scim.service.ExternalIdGeneratorService;
 import io.jans.scim.util.OxTrustConstants;
 import io.jans.util.ArrayHelper;
 import io.jans.util.StringHelper;
