@@ -20,6 +20,7 @@ import io.jans.as.server.revoke.RevokeRestWebServiceImpl;
 import io.jans.as.server.revoke.RevokeSessionRestWebService;
 import io.jans.as.server.session.ws.rs.CheckSessionStatusRestWebServiceImpl;
 import io.jans.as.server.session.ws.rs.EndSessionRestWebServiceImpl;
+import io.jans.as.server.session.ws.rs.SessionRestWebService;
 import io.jans.as.server.token.ws.rs.TokenRestWebServiceImpl;
 import io.jans.as.server.uma.ws.rs.UmaGatheringWS;
 import io.jans.as.server.uma.ws.rs.UmaMetadataWS;
@@ -47,7 +48,7 @@ public class ResteasyInitializer extends Application {
 
     @Override
     public Set<Class<?>> getClasses() {
-        HashSet<Class<?>> classes = new HashSet<Class<?>>();
+        HashSet<Class<?>> classes = new HashSet<>();
         classes.add(JansConfigurationWS.class);
 
         classes.add(AuthorizeRestWebServiceImpl.class);
@@ -58,6 +59,7 @@ public class ResteasyInitializer extends Application {
         classes.add(JwkRestWebServiceImpl.class);
         classes.add(IntrospectionWebService.class);
         classes.add(ParRestWebService.class);
+        classes.add(SessionRestWebService.class);
 
         classes.add(TokenRestWebServiceImpl.class);
         classes.add(UserInfoRestWebServiceImpl.class);
