@@ -6,7 +6,6 @@
 
 package io.jans.scim.service;
 
-import io.jans.as.common.service.common.ExternalIdGeneratorService;
 import io.jans.as.model.common.IdType;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
