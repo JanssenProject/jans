@@ -88,8 +88,9 @@ EOF
 
 
 				#2>&1 >$LOG_LOCATION/install.log
-				./install.exp ${HOST} ${USERNAME}
+				./install.exp ${HOST} ${USERNAME} 2>&1 >$LOG_LOCATION/install.log
 				OPENIDINUM=`ssh ${USERNAME}@${HOST} 'grep -ir "Jans Config Api Client" /opt/jans/jans-setup/logs/setup.log | cut -d'=' -f2 |rev | cut -d',' -f2 |rev'`
+				sleep 20
                                 ./jans-cli-test.exp ${HOST} ${USERNAME} ${OPENIDINUM} 2>&1 >$LOG_LOCATION/jans-cli_test.log
 
                                 break;;
@@ -98,18 +99,58 @@ EOF
 			Suse)
 				echo "Login to Suse Host"
 				
-				./install.exp ${HOST} ${USERNAME} 2>&1 >$LOG_LOCATION/install.log
-			OPENIDINUM=`ssh ${USERNAME}@${HOST} 'grep -ir "Jans Config Api Client" /opt/jans/jans-setup/logs/setup.log | cut -d'=' -f2 |rev | cut -d',' -f2 |rev'`
-				./jans-cli-test.exp ${HOST} ${USERNAME} ${OPENIDINUM} 2>&1 >$LOG_LOCATION/jans-cli_test.log
-				
+			 if ( ssh ${USERNAME}@${HOST} 'ls /opt/jans/jans-cli/config-cli.py' )
+                                        then
+
+expect <<EOF
+
+spawn /usr/bin/ssh $USERNAME@$HOST
+expect -re "(.*)"
+send "python3 install.py -uninstall\r"
+expect -re "(.*)"
+send "yes\r"
+sleep 10
+expect "/opt/dist"
+
+expect eof
+EOF
+                                fi
+
+
+                                #2>&1 >$LOG_LOCATION/install.log
+                                ./install.exp ${HOST} ${USERNAME} 2>&1 >$LOG_LOCATION/install.log
+                                OPENIDINUM=`ssh ${USERNAME}@${HOST} 'grep -ir "Jans Config Api Client" /opt/jans/jans-setup/logs/setup.log | cut -d'=' -f2 |rev | cut -d',' -f2 |rev'`
+                                ./jans-cli-test.exp ${HOST} ${USERNAME} ${OPENIDINUM} 2>&1 >$LOG_LOCATION/jans-cli_test.log
+	
                                 break;;
 
 
 			Red)
 				echo "Login to RHEL8 Host"
 				
+				 if ( ssh ${USERNAME}@${HOST} 'ls /opt/jans/jans-cli/config-cli.py' )
+                                        then
 
-				./install.exp ${HOST} ${USERNAME} 
+expect <<EOF
+
+spawn /usr/bin/ssh $USERNAME@$HOST
+expect -re "(.*)"
+send "python3 install.py -uninstall\r"
+expect -re "(.*)"
+send "yes\r"
+sleep 10
+expect "/opt/dist"
+
+expect eof
+EOF
+                                fi
+
+
+                                #2>&1 >$LOG_LOCATION/install.log
+                                ./install.exp ${HOST} ${USERNAME} 2>&1 >$LOG_LOCATION/install.log
+                                OPENIDINUM=`ssh ${USERNAME}@${HOST} 'grep -ir "Jans Config Api Client" /opt/jans/jans-setup/logs/setup.log | cut -d'=' -f2 |rev | cut -d',' -f2 |rev'`
+                                ./jans-cli-test.exp ${HOST} ${USERNAME} ${OPENIDINUM} 2>&1 >$LOG_LOCATION/jans-cli_test.log
+
                                 break;;
 			Rocky)
 				echo "Login to Rocky Linux 8 Host"

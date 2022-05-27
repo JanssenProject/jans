@@ -3,7 +3,7 @@
 set HOST [lindex $argv 0]
 set USERNAME [lindex $argv 1]
 set OPENIDINUM [lindex $argv 2] 
-set timeout -1
+set timeout 5
 set umaID 7a55c863-a86b-411b-b71a-0c6c37747a3f
 spawn $env(SHELL)
 match_max 100000
@@ -17,7 +17,9 @@ expect -re "(.*)\n"
 send -- "/opt/jans/jans-cli/config-cli.py -use-test-client"
 expect -exact "/opt/jans/jans-cli/config-cli.py -use-test-client"
 send -- "\r"
-expect "Selection:"
+expect { "Selection:"
+		timeout {puts "timed out"; exit}
+	}
 
 proc Attribute {} {
 
@@ -29,13 +31,16 @@ proc Attribute {} {
 		puts "Gets a list of Gluu attributes"
 		expect  "Selection:"
 		send -- "1\r"
-		expect "limit"
+		expect { "limit" 
+			timeout exit} 
 
 		send -- "\r"
 
-		expect "pattern"
+		expect { "pattern" 
+			timeout exit }
 		send -- "\r"
-		expect "status"
+		expect { "status" 
+			timeout exit }
 		send -- "\r"
 		expect "Selection:"
 		send -- "b\r"
@@ -47,22 +52,28 @@ proc Attribute {} {
 		expect "2"
 		send -- "\r"
 
-		expect "name"
+		expect { "name"
+			timeout exit }
 
 		send -- "myAttr\r"
-		expect "displayName"
+		expect { "displayName"
+			timeout exit }
 		send -- "myAttr\r"
 
-		expect "description"
+		expect { "description"
+			timeout exit }
 		send -- "myAttr\r"
 
-		expect "dataType"
+		expect { "dataType"
+			timeout exit }
 		send -- "STRING\r"
 
-		expect "status"
+		expect { "status"
+			timeout exit }
 		send -- "ACTIVE\r"
 
-		expect "editType"
+		expect { "editType"
+			timeout exit }
 		send -- "ADMIN\r"
 
 		expect "viewType"
@@ -138,6 +149,7 @@ proc Attribute {} {
 		expect "Selection:"
 		send -- "b\r"
 		expect "Selection:"
+		puts "Attribute tests passed"
 
 	}
 	
@@ -171,6 +183,7 @@ proc defaultMethods {} {
 			expect "Selection:"
 			send -- "b\r"
 			expect "Selection:"
+			puts "defaultMethods tests passed"
 		    }
 
 proc cacheconfg {} {
@@ -198,20 +211,23 @@ proc cacheconfg {} {
 			send -- "b\r"
 			expect "Selection:"
 			send -- "b\r"
-			expect "Selection:"
+                        expect "Attribute" 
+			puts "cachecofig tests passed"
 		}
 proc  memcacheconf {} {
 			puts "Cache Configuration"
 
-			send -- "4\r"
-		sleep 10
-			expect "Cache Configuration"
+			send -- "3\r"
+
+			expect "Memcached"
+			send -- "3\r"
+			expect "Memcached"
 			send -- "1\r"
 			expect "bufferSize"
 			send -- "b\r"
 			expect "Cache Configuration"
 			send -- "2\r"
-		sleep 10	
+
 			expect "Selection:"
 			send -- "1\r"
 			expect "bufferSize"
@@ -228,7 +244,7 @@ proc  memcacheconf {} {
 			expect "op:"
 			send -- "replace\r"
 			expect "path:"
-			send -- "memcachedConfiguration/bufferSize\r"
+			send -- "bufferSize\r"
 			expect "value"
 			send -- "33768\r"
 			expect "Another patch operation?"
@@ -239,16 +255,19 @@ proc  memcacheconf {} {
 			send -- "b\r"
 			expect "Selection:"
 			send -- "b\r"
+                        expect "Selection:"
+			send -- "b\r"
 			expect "Attribute"
-
+			puts "memory cache config tests passed"
 		}
 
 proc rediscacheconf {} {
 
 				puts "Cache Configuration – Redis"
 
-
-				send -- "5\r"
+				send -- "3\r"
+				expect "Redis"
+				send -- "4\r"
 				expect "Configuration"
 				send -- "1\r"
 				expect "servers"
@@ -274,7 +293,7 @@ proc rediscacheconf {} {
 				
 					}
 			#	expect "3000" continue
-			#	send -- "b\r"
+				send -- "b\r"
 				expect "Selection:"
 				send -- "2\r"
                                 expect "Returns Redis cache configuration"
@@ -288,22 +307,24 @@ proc rediscacheconf {} {
                                 expect "33456"
                                 send -- "b\r"
                                 expect "Selection:"
-
+				send -- "b\r"
+				expect "Selection:"
 				send -- "b\r"
 				expect "Attribute"
-
+				puts "Redis cache config tests passed"
 			}
 
 proc  inmemcacheconf {} {
 
-				puts "Cache Configuration – in-Memory"
-
-				send -- "6\r"
-				expect "Cache Configuration – in-Memory"
+				puts "Cache Configuration: in-Memory"
+				send -- "3\r"
+				expect "in-Memory"	
+				send -- "5\r"
+				expect "in-Memory"
 				send -- "1\r"
 				expect "defaultPutExpiration"
 				send -- "b\r"
-				expect "Cache Configuration – in-Memory"
+				expect "in-Memory"
 				send -- "2\r"
 				expect "Returns in-Memory cache configuration"
 				send -- "1\r"
@@ -331,21 +352,26 @@ proc  inmemcacheconf {} {
 				expect "60"
 				send -- "b\r"
 				expect "Selection:"
-
+				send -- "b\r"
+                                expect "Selection:"
+				send -- "b\r"
+				expect "Attribute"
+				puts "in-Memory cache config tests passed"
 			}
 			
 proc nativepersistcacheconf {} {
 			
 					puts "Cache Configuration – Native-Persistence"
-
-					send -- "7\r"
-					expect "Cache Configuration \– Native-Persistence"
+					send -- "3\r"
+					expect "Native-Persistence"
+					send -- "6\r"
+					expect "Native-Persistence"
 					send -- "1\r"
 					expect "defaultPutExpiration"
 					send -- "b\r"
-					expect "Cache Configuration – Native-Persistence"
+					expect "Native-Persistence"
 					send -- "2\r"
-					expect "Returns native persistence cache configuration"
+					expect "defaultCleanupBatchSize"
 					send -- "2\r"
 					expect "defaultPutExpiration"
 					send -- "80\r"
@@ -372,19 +398,22 @@ proc nativepersistcacheconf {} {
 					send -- "b\r"
 					expect "Selection:"
 					send -- "b\r"
+                                        expect "Selection:"
+					send -- "b\r"
 					expect "Attribute"
-
+					puts "in-Memory cache config tests passed"	
 				}
-proc confprop {}	{
+proc Configuration {}	{
 				
-				puts "Configuration – Properties"
-
-				send -- "8\r"
-				expect "Configuration – Properties"
+				puts "Configuration"
+				send -- "4\r"	
+				expect "Properties"	
+				send -- "1\r"
+				expect "Configuration: Properties"
 				send -- "1\r"
 				expect "useHighestLevelScriptIfAcrScriptNotFound"
 				send -- "b\r"
-				expect "Configuration – Properties"
+				expect "Configuration: Properties"
 				send -- "3\r"
 				expect "persistenceType"
 				send -- "b\r"
@@ -404,18 +433,23 @@ proc confprop {}	{
 				send -- "b\r"
 				expect "Selection:"
 				send -- "b\r"
+                                expect "Selection:"
+				send -- "b\r"
 				expect "Attribute"
+				puts "Configuration Properties cache config tests passed"
 			}
 
 proc fido2conf {} {
 		
 
-					puts "Configuration – Fido2"
+					puts "Fido2"
 
-					send -- "9\r"
-					expect "Configuration – Fido2"
+					send -- "5\r"
+					expect "Configuration"
 					send -- "1\r"
-					expect "issuer"
+                                        expect "Fido2: Configuration"
+					send -- "1\r"
+					expect "Fido2: Configuration"
 					send -- "b\r"
 					expect "Configuration – Fido2"
 					send -- "2\r"
@@ -444,17 +478,20 @@ proc fido2conf {} {
 					expect "Selection:"
 					send -- "b\r"
 					expect "Attribute"
+					puts "fido2 configuration cache config tests passed"
 			}
 			
 proc smtpconf  {} {
 
 					puts "Configuration – SMTP"
-					send -- "10\r"
-					expect "Configuration – SMTP"
+					send -- "4\r"
+					expect "SMTP"
+					send -- "2\r"
+					expect "Configuration: SMTP"
 					send -- "1\r"
 					expect "host"
 					send -- "b\r"
-					expect "Configuration – SMTP"
+					expect "Configuration: SMTP"
 					send -- "2\r"
 					expect "host"
 					send -- "localhost\r"
@@ -466,7 +503,7 @@ proc smtpconf  {} {
 					send -- "\r"
 					expect "from_name"
 					send -- "manoj\r"
-				sleep 10
+				sleep 5
 					expect "from_email_address"
 					send  -- "manojsurya78@gmail.com\r"
 					expect "requires_authentication"
@@ -481,8 +518,8 @@ proc smtpconf  {} {
 					send -- "y\r"
 					expect  "manojsurya78@gmail.com"
 					send -- "b\r"
-					expect "Configuration – SMTP"
-					send -- "\r"
+					expect "Configuration: SMTP"
+					send -- "3\r"
 					expect "from_email_address"
 					send -- "1\r"
 					expect "from_email_address"
@@ -492,27 +529,32 @@ proc smtpconf  {} {
 					send -- "y\r"
 					expect  "manojsurya@gmail.com"
 					send -- "b\r"
-					sleep 10
-					expect "Configuration – SMTP"
+					sleep 5
+					expect "Configuration: SMTP"
 					send -- "4\r"
 					expect "Are you sure want to delete"
 					send -- "y\r"
 					expect "Entry  was deleted successfully"
 					send -- "b\r"
-					sleep 10
-					expect "Configuration – SMTP"
+					sleep 5
+					expect "Configuration: SMTP"
 					send -- "b\r"
-					expect "Attribute"
+					expect "Selection"
+					send -- "b\r"
+                                        expect "Attribute"
+					puts "SMTP configuration tests passed"
 
 		}
 proc Logging {} {
-					puts "Configuration – Logging"
-					send -- "11\r"
-					expect "Configuration – Logging"
+					puts "Logging"
+					send -- "4\r"
+					expect "Logging"
+					send -- "3\r"
+					expect "Configuration: Logging"
 					send -- "1\r"
 					expect "loggingLevel"
 					send -- "b\r"
-					expect "Configuration – Logging"
+					expect "Configuration: Logging"
 					send -- "2\r"
 					expect "Returns Jans Authorization Server logging settings"
 					send -- "7\r"
@@ -524,22 +566,26 @@ proc Logging {} {
 					send -- "y\r"
 					expect "TRACE"
 					send -- "b\r"
-					expect "Configuration – SMTP"
+					expect "Configuration: Logging"
+					send -- "b\r"
+                                        expect "Selection"
 					send -- "b\r"
 					expect "Attribute"
+					puts "Log configuration tests passed"
 			}
 			
 proc ldapconf {} {
 
 
 					puts "Database - LDAP configuration"
-
-					send -- "14\r"
-					expect "Database - LDAP configuration"
+					send -- "7\r"
+                                        expect "Database"
+					send -- "1\r"
+					expect "Database: LDAP configuration"
 					send -- "1\r"
 					expect "auth_ldap_server"
 					send -- "b\r"
-					expect "Database - LDAP configuration"
+					expect "Database: LDAP configuration"
 					send -- "2\r"
 					expect "configId"
 					send -- "auth_ldap_server1\r"
@@ -565,7 +611,7 @@ proc ldapconf {} {
 					send -- "y\r"
 					expect "auth_ldap_server1"
 					send -- "b\r"
-					expect "Database - LDAP configuration"
+					expect "Database: LDAP configuration"
 					send -- "3\r"
 					expect "name:"
 					send -- "auth_ldap_server1\r"
@@ -579,19 +625,20 @@ proc ldapconf {} {
 					send -- "y\r"
 					expect "Selection:"
 					send -- "b\r"
-					expect "Database - LDAP configuration"
+					expect "Database: LDAP configuration"
+					send -- "4\r"
 					expect "name:"
 					send -- "auth_ldap_server1\r"
 					expect "maxConnections"
 					send -- "b\r"
-					expect "Database - LDAP configuration"
+					expect "Database: LDAP configuration"
 					send -- "6\r"
 					expect "name:"
 					send -- "auth_ldap_server1\r"
 					expect "op:"
 					send -- "replace\r"
 					expect "path:"
-					send -- "maxConnections"
+					send -- "maxConnections\r"
 					expect "value"
 					send -- "10\r"
 					expect "Another patch operation?"
@@ -600,23 +647,27 @@ proc ldapconf {} {
 					send -- "y\r"
 					expect "Selection:"
 					send -- "b\r"
-					expect "Database - LDAP configuration"
-					send -- "6\r"
+					expect "Database: LDAP configuration"
+					send -- "5\r"
 					expect "name:"
 					send -- "auth_ldap_server1\r"
 					expect "Are you sure want to delete auth_ldap_server1 ?"
 					send -- "y\r"
 					expect "Entry auth_ldap_server1 was deleted successfully"
 					send -- "b\r"
-					expect "Database - LDAP configuration"
+					expect "Database: LDAP configuration"
+					send -- "b\r"
+                                        expect "Selection"
 					send -- "b\r"
 					expect "Attribute"
+					puts "LDAP configuration tests passed"
 			}
 proc cochbaseDbconf {}	{
 								
 					puts "Couchbase configuration"
-
-					send -- "15\r"
+					send -- "7\r"
+                                        expect "Database"
+					send -- "2\r"
 					expect "Couchbase configuration"
 					send -- "1\r"
 					expect "Selection:"
@@ -627,6 +678,7 @@ proc cochbaseDbconf {}	{
 					expect "configId"
 					send -- "couchbasetest\r"
 					expect "userName"
+					sleep 4
 					send -- "couchbasetest\r"
 					expect "userPassword"
 					send -- "couchbasetest\r"
@@ -651,7 +703,7 @@ proc cochbaseDbconf {}	{
 					expect "couchbasetest"
 					send -- "b\r"
 					expect "Couchbase configuration"
-					send -- "2\r"
+					send -- "3\r"
 					expect "name"
 					send -- "couchbasetest\r"
 					expect "connectTimeout"
@@ -672,6 +724,8 @@ proc cochbaseDbconf {}	{
 					send -- "b\r"
 					expect "Couchbase configuration"
 					send -- "5\r"
+					expect "name"
+					send -- "couchbasetest\r"
 					expect "op:"
 					send -- "replace\r"
 					expect "path:"
@@ -694,16 +748,21 @@ proc cochbaseDbconf {}	{
 					send -- "b\r"
 					expect "Couchbase configuration"
 					send -- "b\r"
+                                        expect "Selection"
+					send -- "b\r"
 					expect "Attribute"
+					puts "couchbase configuration tests passed"
 
 				}
 				
 proc openIdconnet {OPENIDINUM}	{
 
 				puts "OAuth - OpenID Connect - Clients"
+				send -- "8\r"
+                                expect "OpenID Connect - Clients"
 
-				send -- "16\r"
-				expect "OAuth - OpenID Connect - Clients"
+				send -- "1\r"
+				expect "OAuth: OpenID Connect - Clients"
 				send -- "1\r"
 				expect "Gets list of OpenID Connect clients"
 				send -- "\r"
@@ -716,9 +775,9 @@ proc openIdconnet {OPENIDINUM}	{
 
 				expect "sortOrder"
 				send -- "\r"
-				expect "backchannelTokenDeliveryMode"
+				expect "Jans Config Api Client"
 				send -- "b\r"
-				expect "OAuth - OpenID Connect - Clients"
+				expect "OAuth: OpenID Connect - Clients"
 				send -- "2\r"
 				expect "displayName"
 				send -- "myopenclient\r"
@@ -740,7 +799,7 @@ proc openIdconnet {OPENIDINUM}	{
 				#------------------------------------
 			
 				send -- "b\r"
-				expect "OAuth - OpenID Connect - Clients"
+				expect "OAuth: OpenID Connect - Clients"
 				send -- "3\r"
 				expect "Get OpenId Connect Client by Inum"
 				send -- "${OPENIDINUM}\r"
@@ -754,35 +813,35 @@ proc openIdconnet {OPENIDINUM}	{
 				send -- "y\r"
 				expect "manojsurya78@gmail.com"
 				send -- "b\r"
-				expect "OAuth - OpenID Connect - Clients"
+				expect "OAuth: OpenID Connect - Clients"
 
 				send -- "4\r"
 				expect "Get OpenId Connect Client by Inum"
 				send -- "$OPENIDINUM\r"
 				expect "${OPENIDINUM}"
 				send -- "b\r"
-				expect "OAuth - OpenID Connect - Clients"
-				send -- "6\r"
-				expect "inum:"
-				send -- "${OPENIDINUM}\r"
-				expect "op:"
-				send -- "replace\r"
-				expect "path:"
+				expect "OAuth: OpenID Connect - Clients"
+				#send -- "6\r"
+				#expect "inum:"
+				#send -- "${OPENIDINUM}\r"
+			#	expect "op:"
+			#	send -- "replace\r"
+			#	expect "path:"
 
-				send -- "clientName\r"
-				expect "value"
-				send -- "myopenidclient1\r"
-				expect "Another patch operation?"
-				send -- "n\r"
-				expect "Continue?"
-				send -- "y\r"
-				expect "Jans Config Api Client"  
+		#		send -- "clientName\r"
+		#		expect "value"
+		#		send -- "myopenidclient1\r"
+			#	expect "Another patch operation?"
+			#	send -- "n\r"
+			#	expect "Continue?"
+			#	send -- "y\r"
+			#	expect "Jans Config Api Client"  
 			#	timeout {
 			#	    puts "unable to save client name"
 			#	 expect eof 
 			#	} 
-				send -- "b\r"
-				expect "OAuth - OpenID Connect - Clients"
+			#	send -- "b\r"
+			#	expect "OAuth: OpenID Connect - Clients"
 				#send -- "5\r"
 				#expect "inum:"
 				#send -- "$openidinum\r"
@@ -790,9 +849,13 @@ proc openIdconnet {OPENIDINUM}	{
 				#send -- "y\r"
 				#expect "Selection:"
 				#send -- "b\r"
-				#expect "OAuth - OpenID Connect - Clients"
+				#expect "OAuth: OpenID Connect - Clients"
+				send -- "b\r"
+                                expect "Selection"
 				send -- "b\r"
 				expect "Attribute"
+				puts "openID tests passed"
+
 			}
 			
 #----------------------------------------------------
@@ -881,14 +944,17 @@ proc uma  {}	{
 		
 				send -- "b\r"
 				expect "Attribute"
+				puts "UMA tests passed"
 		}
 		
 #--------------------------------------------------------
 proc oauth {} {
 				puts "OAuth - Scopes"
 
-				send -- "18\r"
-				expect "OAuth - Scopes"
+				send -- "8\r"
+				expect "OAuth"
+				send -- "3\r"
+				expect "OAuth: Scopes"
 				send  -- "1\r"
 				expect "type:"
 				send -- "\r"
@@ -898,7 +964,7 @@ proc oauth {} {
 				send -- "\r"
 				expect "C4F6"
 				send -- "b\r"
-				expect "OAuth - Scopes"
+				expect "OAuth: Scopes"
 				send  -- "2\r"
 				expect "id:"
 				send -- "testscope\r"
@@ -910,12 +976,13 @@ proc oauth {} {
 				send -- "y\r"
 				expect "testscope"
 				send -- "b\r"
-				expect "OAuth - Scopes"
+				expect "OAuth: Scopes"
 				send  -- "3\r"
 				expect "inum"
 				send -- "C4F6\r"
 				expect "expirationDate"
 				send -- "4\r"
+				sleep 4
 				expect "deletable"
 				send -- "_true\r"
 				expect "Selection:"
@@ -924,64 +991,76 @@ proc oauth {} {
 				send -- "y\r"
 				expect "deletable"
 				send -- "b\r"
-				expect "OAuth - Scopes"
+				expect "OAuth: Scopes"
 				send  -- "4\r"
 				expect "inum"
 				send -- "C4F6\r"
 				expect "C4F6"
 				send -- "b\r"
-				expect "OAuth - Scopes"
+				expect "OAuth: Scopes"
 				send -- "b\r"
-				expect "OAuth - Scopes"
+				expect "OAuth"
 				send -- "b\r"
 				expect "Attribute"
+				puts "OAuth Scopes configuration tests passed"
 			}
 			
 proc stats {}	{
 			
 				puts "Statistics - User testing started"
 
-				send -- "19\r"
+				send -- "9\r"
+				expect "Statistics"
+				send  -- "1\r"
 				expect "Provides server with basic statistic"
 				send -- "1\r"
 				expect "month:"
-				send -- "202204"
+				send -- "202205\r"
 				expect "format"
 				send -- "\r"
 				expect "monthly_active_users"
 				send -- "b\r"
 				expect "Provides server with basic statistic"
 				send -- "b\r"
+                                expect "Statistics"
+				send -- "b\r"
 				expect "Attribute"
+				puts "Statistics tests passed"
 			}
 			
 proc  health {}	{
 						
 			puts "Health - Check"
 
-			send -- "20\r"
-			expect "Health - Check"
+			send -- "10\r"
+			expect "Health"
+			send -- "1\r"
+			expect "Health: Check"
 			send -- "1\r"
 			expect "\"status\": \"UP\""
 			send -- "b\r"
-			expect "Health - Check"
+			expect "Health: Check"
 			send -- "2\r"
 			expect "\"status\": \"UP\""
 			send -- "b\r"
-			expect "Health - Check"
+			expect "Health: Check"
 			send -- "3\r"
 			expect "\"status\": \"UP\""
 			send -- "b\r"
-			expect "Health - Check"
+			expect "Health: Check"
+			send -- "b\r"
+                        expect "Health"
 			send -- "b\r"
 			expect "Attribute"
+
+			puts "health tests passed"
 		}
 		
 proc serverstats  {}  {
 
 			puts "Server Stats"
 
-			send -- "21\r"
+			send -- "11\r"
 			expect "Server Stats"
 			send -- "1\r"
 			expect "\"dbType\": \"ldap\""
@@ -989,6 +1068,7 @@ proc serverstats  {}  {
 			expect "Server Stats"
 			send -- "b\r"
 			expect "Attribute"
+			puts "server Statistics tests passed"
 		}
 		
 proc scimusrmgmt {}	{
@@ -1102,8 +1182,71 @@ proc scimusrmgmt {}	{
 				expect "SCIM - User Management"
 				send -- "b\r"
 				expect "Attribute"
+				puts "scim tests passed"
 			}
+
+proc orgConfiguration {} {
+
+
+
+				send -- "13\r"
+				expect "Organization Configuration"
+				send -- "1\r"
+				expect "displayName"
+				send -- "b\r"
+				expect "Organization Configuration"
+				send -- "2\r"
+				expect "op:"
+				send -- "replace\r"
+				expect "path:"
+				send -- "displayName\r"
+				expect "value"
+				send -- "gluu.org\r"
+				expect "Another patch operation?"
+				send -- "n\r"
+				expect "Continue?"
+				send -- "y\r"
+				expect "gluu.org"
+				send -- "b\r"
+				expect "Organization Configuration"
+				send -- "b\r"
+                                expect "Attribute"
+				puts "Organization Configuration tests passed"
 			
+
+			}
+		
+proc AuthServer {}     {
+
+			send -- "14\r"
+			expect "Auth Server Health"
+			send -- "1\r"
+			expect "Auth Server Health: Check"
+			send -- "1\r"
+			expect "online"
+			send -- "b\r"
+			expect "Auth Server Health: Check"
+			send -- "b\r"
+			expect "Auth Server Health"
+			send -- "b\r"
+                        expect "Attribute"
+			puts "Auth Server Health tests passed"
+
+			}
+
+proc AdminUI {} 	{
+
+
+			send -- "15\r"
+			expect "Admin UI"
+			send -- "1\r"
+			expect "Admin UI: Role"
+			send -- "2\r"		
+			expect "role:"
+			send -- "admin\r"
+
+			} 
+	
 Attribute
 defaultMethods
 cacheconfg
@@ -1111,24 +1254,25 @@ memcacheconf
 rediscacheconf
 inmemcacheconf
 nativepersistcacheconf
-confprop	
-fido2conf
+Configuration	
+##fido2conf
 smtpconf
 Logging
 ldapconf
 cochbaseDbconf
 openIdconnet [lindex $argv 2]
-uma
+##uma
 oauth
 stats
 health
 serverstats
-scimusrmgmt
+##scimusrmgmt
+orgConfiguration
+AuthServer
+##AdminUI
 
 
 
-
-
-send -- "exit\r"
-expect -exact "exit"
+#send -- "exit\r"
+#expect -exact "exit"
 expect eof

@@ -17,8 +17,15 @@ expect -re "(.*)\n"
 send -- "python3 install.py --args=\"--cli-test-client\""
 expect -exact "python3 install.py --args=\"--cli-test-client\""
 send -- "\r"
+if  { $expect_out(buffer) eq  "Do you want to install these now? \[Y\/n\]" }  {
+send -- "y\r"
+}
 
 if  { $expect_out(buffer) eq  "Install now? \[Y\/n\]" }  {
+send -- "y\r"
+}
+
+if  { $expect_out(buffer) eq  "Apache-2.0 license? \[N\|y\]" }  {
 send -- "y\r"
 }
 expect -re "(.*)\n"
