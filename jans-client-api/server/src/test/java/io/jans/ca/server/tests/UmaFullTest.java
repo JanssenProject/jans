@@ -19,8 +19,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.UUID;
 
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -73,11 +72,8 @@ public class UmaFullTest extends BaseTest {
         params.setRpId(site.getRpId());
         params.setTicket(UUID.randomUUID().toString());
 
-        try {
-            client.umaRpGetRpt(Tester.getAuthorization(client.getApitargetURL(), site), null, params);
-        } catch (BadRequestException ex) {
-            return;
-        }
-        throw new AssertionError();
+        RpGetRptResponse r = client.umaRpGetRpt(Tester.getAuthorization(client.getApitargetURL(), site), null, params);
+        assertNotNull(r);
+        assertEquals(r.getError(), "invalid_ticket");
     }
 }

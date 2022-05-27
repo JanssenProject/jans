@@ -73,15 +73,9 @@ public class RsProtectTest extends BaseTest {
         final RsProtectParams2 params = new RsProtectParams2();
         params.setRpId(site.getRpId());
         params.setResources(Jackson2.createJsonMapper().readTree(Jackson2.asJsonSilently(resources)));
-
-        try {
-            client.umaRsProtect(Tester.getAuthorization(getApiTagetURL(url), site), null, params);
-        } catch (BadRequestException e) {
-            assertEquals("uma_protection_exists", TestUtils.asError(e).getError());
-            return;
-        }
-
-        throw new AssertionError("Expected 400 (bad request) but got successful result.");
+        RsProtectResponse r = client.umaRsProtect(Tester.getAuthorization(getApiTagetURL(url), site), null, params);
+        assertNotNull(r);
+        assertEquals(r.getError(), "uma_protection_exists");
     }
 
     @Parameters({"host", "redirectUrls", "opHost", "rsProtect"})

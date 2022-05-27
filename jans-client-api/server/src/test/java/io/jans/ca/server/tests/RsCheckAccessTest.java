@@ -87,8 +87,9 @@ public class RsCheckAccessTest extends BaseTest {
         params.setRpt("dummy");
         params.setScopes(scopeList);
         try {
-            client.umaRsCheckAccess(Tester.getAuthorization(client.getApitargetURL(), site), null, params);
-            assertTrue(false);
+            RsCheckAccessResponse r = client.umaRsCheckAccess(Tester.getAuthorization(client.getApitargetURL(), site), null, params);
+            assertNotNull(r);
+            assertNotNull(r.getError());
 
         } catch (Exception e) {
             //test-case passed

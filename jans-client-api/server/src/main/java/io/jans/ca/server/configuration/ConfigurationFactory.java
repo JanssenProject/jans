@@ -128,6 +128,9 @@ public class ConfigurationFactory {
     @Inject
     OpClientFactoryImpl opClientFactory;
 
+    @Inject
+    IntrospectionService introspectionService;
+
     public final static String PERSISTENCE_CONFIGUARION_RELOAD_EVENT_TYPE = "persistenceConfigurationReloadEvent";
     public final static String BASE_CONFIGUARION_RELOAD_EVENT_TYPE = "baseConfigurationReloadEvent";
     private final static int DEFAULT_INTERVAL = 30; // 30 seconds
@@ -172,6 +175,7 @@ public class ConfigurationFactory {
         serviceProvider.setPublicOpKeyService(publicOpKeyService);
         serviceProvider.setRequestObjectService(requestObjectService);
         serviceProvider.setOpClientFactory(opClientFactory);
+        serviceProvider.setIntrospectionService(introspectionService);
         return serviceProvider;
     }
 

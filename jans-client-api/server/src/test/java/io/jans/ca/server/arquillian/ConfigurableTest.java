@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.ITestContext;
 import org.testng.Reporter;
+import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeSuite;
 
 import java.io.FileInputStream;
@@ -26,6 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Stack;
 
 /**
  * Base class for all seam test which require external configuration
@@ -47,7 +49,6 @@ public abstract class ConfigurableTest extends Arquillian {
     public static Archive<?> createDeployment() {
         return Deployments.createDeployment();
     }
-
     @BeforeSuite
     public void initTestSuite(ITestContext context) throws IOException {
         if (initialized) {
@@ -88,6 +89,11 @@ public abstract class ConfigurableTest extends Arquillian {
 
         LOG.debug("Finished beforeSuite!");
         initialized = true;
+    }
+
+    @AfterSuite
+    public void finishTestSuite(ITestContext context){
+        Reporter.log("Invoked stop test suite method", true);
     }
 
     /**

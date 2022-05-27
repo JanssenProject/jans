@@ -166,7 +166,8 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
             throw new HttpException(ErrorResponseCode.BAD_REQUEST_NO_STATE);
         }
         try {
-            if (!stateService.isExpiredObjectPresent(stateService.encodeExpiredObject(params.getState(), ExpiredObjectType.STATE))) {
+            String keyExpiredObject = stateService.encodeExpiredObject(params.getState(), ExpiredObjectType.STATE);
+            if (!stateService.isExpiredObjectPresent(keyExpiredObject)) {
                 throw new HttpException(ErrorResponseCode.BAD_REQUEST_STATE_NOT_VALID);
             }
         } catch (Exception e) {

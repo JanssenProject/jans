@@ -22,6 +22,9 @@ public class RpGetRptResponse implements IOpResponse {
     @JsonProperty(value = "updated")
     private Boolean updated;
 
+    @JsonProperty(value = "error")
+    private String error;
+
     public RpGetRptResponse() {
     }
 
@@ -57,11 +60,20 @@ public class RpGetRptResponse implements IOpResponse {
         this.updated = updated;
     }
 
+    public String getError() {
+        return error;
+    }
+
+    public void setError(String error) {
+        this.error = error;
+    }
+
     @Override
     public String toString() {
         return "RpGetRptResponse{" +
                 "rpt='" + rpt + '\'' +
                 ", tokenType='" + tokenType + '\'' +
+                ", error='" + error + '\'' +
                 ", pct='" + pct + '\'' +
                 ", updated=" + updated +
                 '}';

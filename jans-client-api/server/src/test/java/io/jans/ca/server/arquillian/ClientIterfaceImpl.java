@@ -9,15 +9,14 @@ import io.jans.ca.common.Jackson2;
 import io.jans.ca.common.introspection.CorrectRptIntrospectionResponse;
 import io.jans.ca.common.params.*;
 import io.jans.ca.common.response.*;
-import io.jans.ca.server.TestUtils;
 import io.jans.ca.server.tests.PathTestEndPoint;
+import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.Invocation;
 import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.Response;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 
-import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 
@@ -57,6 +56,12 @@ public class ClientIterfaceImpl implements ClientInterface {
         String entity = response.readEntity(String.class);
         showResponse(endPoint, response, entity);
         assertEquals(response.getStatus(), 200, "Unexpected response code.");
+        return entity;
+    }
+
+    private String readResponseNoVerifyOk(String endPoint, Response response) {
+        String entity = response.readEntity(String.class);
+        showResponse(endPoint, response, entity);
         return entity;
     }
 
@@ -256,7 +261,7 @@ public class ClientIterfaceImpl implements ClientInterface {
         builder.header("Authorization", authorization);
         builder.header("AuthorizationRpId", authorizationRpId);
         Response response = builder.post(toPostParam(params));
-        String json = readResponse(webTarget.getUri().toString(), response);
+        String json = readResponseNoVerifyOk(webTarget.getUri().toString(), response);
         try {
             return Jackson2.createJsonMapper().readValue(json, GetTokensByCodeResponse2.class);
         } catch (Exception e) {
@@ -332,7 +337,7 @@ public class ClientIterfaceImpl implements ClientInterface {
         builder.header("Authorization", authorization);
         builder.header("AuthorizationRpId", authorizationRpId);
         Response response = builder.post(toPostParam(params));
-        String json = readResponse(webTarget.getUri().toString(), response);
+        String json = readResponseNoVerifyOk(webTarget.getUri().toString(), response);
         try {
             return Jackson2.createJsonMapper().readValue(json, RsProtectResponse.class);
         } catch (Exception e) {
@@ -370,7 +375,7 @@ public class ClientIterfaceImpl implements ClientInterface {
         builder.header("Authorization", authorization);
         builder.header("AuthorizationRpId", authorizationRpId);
         Response response = builder.post(toPostParam(params));
-        String json = readResponse(webTarget.getUri().toString(), response);
+        String json = readResponseNoVerifyOk(webTarget.getUri().toString(), response);
         try {
             return Jackson2.createJsonMapper().readValue(json, RsCheckAccessResponse.class);
         } catch (Exception e) {
@@ -389,7 +394,7 @@ public class ClientIterfaceImpl implements ClientInterface {
         builder.header("Authorization", authorization);
         builder.header("AuthorizationRpId", authorizationRpId);
         Response response = builder.post(toPostParam(params));
-        String json = readResponse(webTarget.getUri().toString(), response);
+        String json = readResponseNoVerifyOk(webTarget.getUri().toString(), response);
         try {
             return Jackson2.createJsonMapper().readValue(json, RpGetRptResponse.class);
         } catch (Exception e) {
