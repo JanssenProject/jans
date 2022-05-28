@@ -230,7 +230,7 @@ def wait_for_couchbase(manager, **kwargs):
     cb_client = CouchbaseClient(manager)
 
     req = cb_client.exec_query(
-        f"SELECT objectClass FROM {bucket} USE KEYS $key",
+        f"SELECT objectClass FROM {bucket} USE KEYS $key",  # nosec: B608
         key=key,
     )
 

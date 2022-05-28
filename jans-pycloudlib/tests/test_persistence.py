@@ -1,3 +1,4 @@
+import json
 import os
 import shutil
 from collections import namedtuple
@@ -423,106 +424,50 @@ def test_get_bucket_for_key(key, bucket):
 # ======
 
 
-def test_render_hybrid_properties_default(monkeypatch, tmpdir):
+def test_resolve_hybrid_storages():
+    from jans.pycloudlib.persistence.hybrid import resolve_hybrid_storages
+
+    data_mapping = {
+        "default": "sql",
+        "user": "spanner",
+        "site": "couchbase",
+        "cache": "ldap",
+        "token": "sql",
+        "session": "sql",
+    }
+    expected = {
+        "storages": "couchbase, ldap, spanner, sql",
+        "storage.default": "sql",
+        "storage.couchbase.mapping": "cache-refresh",
+        "storage.ldap.mapping": "cache",
+        "storage.spanner.mapping": "people, groups, authorizations",
+        "storage.sql.mapping": "sessions, tokens",
+    }
+    assert resolve_hybrid_storages(data_mapping) == expected
+
+
+def test_render_hybrid_properties(monkeypatch, tmpdir):
     from jans.pycloudlib.persistence.hybrid import render_hybrid_properties
 
     monkeypatch.setenv("CN_PERSISTENCE_TYPE", "hybrid")
+    monkeypatch.setenv(
+        "CN_HYBRID_MAPPING",
+        json.dumps({
+            "default": "ldap",
+            "user": "couchbase",
+            "site": "sql",
+            "cache": "sql",
+            "token": "spanner",
+            "session": "sql",
+        })
+    )
 
     expected = """
-storages: ldap, couchbase
+storages: couchbase, ldap, spanner, sql
 storage.default: ldap
-storage.ldap.mapping: default
-storage.couchbase.mapping: people, groups, authorizations, cache, cache-refresh, tokens, sessions
-""".strip()
-
-    dest = tmpdir.join("jans-hybrid.properties")
-    render_hybrid_properties(str(dest))
-    assert dest.read() == expected
-
-
-def test_render_hybrid_properties_user(monkeypatch, tmpdir):
-    from jans.pycloudlib.persistence.hybrid import render_hybrid_properties
-
-    monkeypatch.setenv("CN_PERSISTENCE_TYPE", "hybrid")
-    monkeypatch.setenv("CN_PERSISTENCE_LDAP_MAPPING", "user")
-
-    expected = """
-storages: ldap, couchbase
-storage.default: couchbase
-storage.ldap.mapping: people, groups, authorizations
-storage.couchbase.mapping: cache, cache-refresh, tokens, sessions
-""".strip()
-
-    dest = tmpdir.join("jans-hybrid.properties")
-    render_hybrid_properties(str(dest))
-    assert dest.read() == expected
-
-
-def test_render_hybrid_properties_token(monkeypatch, tmpdir):
-    from jans.pycloudlib.persistence.hybrid import render_hybrid_properties
-
-    monkeypatch.setenv("CN_PERSISTENCE_TYPE", "hybrid")
-    monkeypatch.setenv("CN_PERSISTENCE_LDAP_MAPPING", "token")
-
-    expected = """
-storages: ldap, couchbase
-storage.default: couchbase
-storage.ldap.mapping: tokens
-storage.couchbase.mapping: people, groups, authorizations, cache, cache-refresh, sessions
-""".strip()
-
-    dest = tmpdir.join("jans-hybrid.properties")
-    render_hybrid_properties(str(dest))
-    assert dest.read() == expected
-
-
-def test_render_hybrid_properties_session(monkeypatch, tmpdir):
-    from jans.pycloudlib.persistence.hybrid import render_hybrid_properties
-
-    monkeypatch.setenv("CN_PERSISTENCE_TYPE", "hybrid")
-    monkeypatch.setenv("CN_PERSISTENCE_LDAP_MAPPING", "session")
-
-    expected = """
-storages: ldap, couchbase
-storage.default: couchbase
-storage.ldap.mapping: sessions
-storage.couchbase.mapping: people, groups, authorizations, cache, cache-refresh, tokens
-""".strip()
-
-    dest = tmpdir.join("jans-hybrid.properties")
-    render_hybrid_properties(str(dest))
-    assert dest.read() == expected
-
-
-def test_render_hybrid_properties_cache(monkeypatch, tmpdir):
-    from jans.pycloudlib.persistence.hybrid import render_hybrid_properties
-
-    monkeypatch.setenv("CN_PERSISTENCE_TYPE", "hybrid")
-    monkeypatch.setenv("CN_PERSISTENCE_LDAP_MAPPING", "cache")
-
-    expected = """
-storages: ldap, couchbase
-storage.default: couchbase
-storage.ldap.mapping: cache
-storage.couchbase.mapping: people, groups, authorizations, cache-refresh, tokens, sessions
-""".strip()
-
-    dest = tmpdir.join("jans-hybrid.properties")
-    render_hybrid_properties(str(dest))
-    assert dest.read() == expected
-
-
-def test_render_hybrid_properties_site(monkeypatch, tmpdir):
-    from jans.pycloudlib.persistence.hybrid import render_hybrid_properties
-
-    monkeypatch.setenv("CN_PERSISTENCE_TYPE", "hybrid")
-    monkeypatch.setenv("CN_PERSISTENCE_LDAP_MAPPING", "site")
-
-    expected = """
-storages: ldap, couchbase
-storage.default: couchbase
-storage.ldap.mapping: cache-refresh
-storage.couchbase.mapping: people, groups, authorizations, cache, tokens, sessions
+storage.couchbase.mapping: people, groups, authorizations
+storage.spanner.mapping: tokens
+storage.sql.mapping: cache, sessions, cache-refresh
 """.strip()
 
     dest = tmpdir.join("jans-hybrid.properties")
@@ -837,3 +782,46 @@ def test_spanner_sub_tables(gmanager, monkeypatch):
 
     client = SpannerClient(gmanager)
     assert isinstance(client.sub_tables, dict)
+
+
+# =====
+# utils
+# =====
+
+
+@pytest.mark.parametrize("type_", [
+    "ldap",
+    "couchbase",
+    "sql",
+    "spanner",
+])
+def test_resolve_persistence_data_mapping(monkeypatch, type_):
+    from jans.pycloudlib.persistence import resolve_persistence_data_mapping
+
+    monkeypatch.setenv("CN_PERSISTENCE_TYPE", type_)
+    mapping = resolve_persistence_data_mapping()
+    expected = dict.fromkeys([
+        "default",
+        "user",
+        "site",
+        "cache",
+        "token",
+        "session",
+    ], type_)
+    assert mapping == expected
+
+
+def test_resolve_persistence_data_mapping_hybrid(monkeypatch):
+    from jans.pycloudlib.persistence import resolve_persistence_data_mapping
+
+    mapping = {
+        "default": "sql",
+        "user": "spanner",
+        "site": "ldap",
+        "cache": "sql",
+        "token": "couchbase",
+        "session": "sql",
+    }
+    monkeypatch.setenv("CN_PERSISTENCE_TYPE", "hybrid")
+    monkeypatch.setenv("CN_HYBRID_MAPPING", json.dumps(mapping))
+    assert resolve_persistence_data_mapping() == mapping
