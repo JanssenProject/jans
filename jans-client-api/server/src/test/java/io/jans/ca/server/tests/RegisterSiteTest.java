@@ -179,6 +179,7 @@ public class RegisterSiteTest extends BaseTest {
 
         final RegisterSiteParams params = new RegisterSiteParams();
         params.setOpHost(opHost);
+//        params.setOpConfigurationEndpoint();
         params.setPostLogoutRedirectUris(Lists.newArrayList(postLogoutRedirectUrls.split(" ")));
         params.setClientFrontchannelLogoutUri(logoutUri);
         params.setRedirectUris(Lists.newArrayList(redirectUrls.split(" ")));
@@ -189,6 +190,29 @@ public class RegisterSiteTest extends BaseTest {
                 GrantType.OXAUTH_UMA_TICKET.getValue(),
                 GrantType.CLIENT_CREDENTIALS.getValue()));
         params.setSyncClientFromOp(syncClientFromOp);
+        params.setSyncClientPeriodInSeconds(0);
+
+        final RegisterSiteResponse resp = client.registerSite(params);
+        assertNotNull(resp);
+        assertTrue(!Strings.isNullOrEmpty(resp.getRpId()));
+        return resp;
+    }
+
+    public static RegisterSiteResponse registerSite(ClientInterface client, String opHost, String redirectUrls, String postLogoutRedirectUrls, String logoutUri, String opConfigurationEndPoint) {
+
+        final RegisterSiteParams params = new RegisterSiteParams();
+        params.setOpHost(opHost);
+        params.setOpConfigurationEndpoint(opConfigurationEndPoint);
+        params.setPostLogoutRedirectUris(Lists.newArrayList(postLogoutRedirectUrls.split(" ")));
+        params.setClientFrontchannelLogoutUri(logoutUri);
+        params.setRedirectUris(Lists.newArrayList(redirectUrls.split(" ")));
+        params.setScope(Lists.newArrayList("openid", "uma_protection", "profile", "jans_client_api"));
+        params.setResponseTypes(Lists.newArrayList("code", "id_token", "token"));
+        params.setGrantTypes(Lists.newArrayList(
+                GrantType.AUTHORIZATION_CODE.getValue(),
+                GrantType.OXAUTH_UMA_TICKET.getValue(),
+                GrantType.CLIENT_CREDENTIALS.getValue()));
+        params.setSyncClientFromOp(false);
         params.setSyncClientPeriodInSeconds(0);
 
         final RegisterSiteResponse resp = client.registerSite(params);
@@ -274,6 +298,14 @@ public class RegisterSiteTest extends BaseTest {
         params.setClientTokenEndpointAuthMethod(authenticationMethod);
         params.setJwks(client.getRpJwks().toString());
 
+        final RegisterSiteResponse resp = client.registerSite(params);
+        assertNotNull(resp);
+        assertTrue(!Strings.isNullOrEmpty(resp.getRpId()));
+        return resp;
+    }
+
+
+    public static RegisterSiteResponse registerSite(ClientInterface client, RegisterSiteParams params) {
         final RegisterSiteResponse resp = client.registerSite(params);
         assertNotNull(resp);
         assertTrue(!Strings.isNullOrEmpty(resp.getRpId()));

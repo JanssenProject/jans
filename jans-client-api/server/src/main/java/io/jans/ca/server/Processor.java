@@ -114,6 +114,8 @@ public class Processor {
                     return new ImplicitFlowOperation(command, serviceProvider);
                 case CHECK_ACCESS_TOKEN:
                     return new CheckAccessTokenOperation(command, serviceProvider);
+                case CHECK_ID_TOKEN:
+                    return new CheckIdTokenOperation(command, serviceProvider);
                 case ISSUER_DISCOVERY:
                     return new GetIssuerOperation(command, serviceProvider);
                 case GET_REQUEST_URI:

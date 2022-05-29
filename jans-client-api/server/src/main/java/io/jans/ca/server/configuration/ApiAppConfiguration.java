@@ -39,7 +39,7 @@ public class ApiAppConfiguration implements Configuration {
     private int dbCleanupIntervalInHours = 1;
     private int rpCacheExpirationInMinutes = 60;
     private int publicOpKeyCacheExpirationInMinutes = 60;
-    private Boolean protectCommandsWithAccessToken;
+    private Boolean protectCommandsWithAccessToken = false;
     private Boolean acceptIdTokenWithoutSignature = false;
     private Boolean idTokenValidationCHashRequired = true;
     private Boolean idTokenValidationAtHashRequired = true;

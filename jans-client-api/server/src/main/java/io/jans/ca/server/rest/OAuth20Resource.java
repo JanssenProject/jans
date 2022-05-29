@@ -106,6 +106,16 @@ public class OAuth20Resource extends BaseResource {
     }
 
     @POST
+    @Path("/check-id-token")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response checkIdToken(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String AuthorizationRpId, String params) {
+        logger.info("Api Resource: /check-id-token  Params: {}", params);
+        String result = process(CommandType.CHECK_ID_TOKEN, params, CheckIdTokenParams.class, authorization, AuthorizationRpId);
+        return Response.ok(result).build();
+    }
+
+    @POST
     @Path("/get-issuer")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)

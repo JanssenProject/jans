@@ -1,11 +1,14 @@
 package io.jans.ca.server.tests;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.collect.Lists;
+import io.jans.as.model.common.GrantType;
 import io.jans.ca.client.ClientInterface;
 import io.jans.ca.client.GetTokensByCodeResponse2;
 import io.jans.ca.common.CoreUtils;
 import io.jans.ca.common.params.GetTokensByCodeParams;
 import io.jans.ca.common.params.GetUserInfoParams;
+import io.jans.ca.common.params.RegisterSiteParams;
 import io.jans.ca.common.params.RpGetRptParams;
 import io.jans.ca.common.response.RegisterSiteResponse;
 import io.jans.ca.common.response.RpGetRptResponse;
@@ -30,13 +33,13 @@ public class DifferentAuthServerTest extends BaseTest {
     @ArquillianResource
     private URI url;
 
-    @Parameters({"host", "opHost", "otherAuthServer", "redirectUrls", "clientId", "clientSecret", "userId", "userSecret"})
+    @Parameters({"host", "opHost", "otherAuthServer", "redirectUrls", "clientId", "clientSecret", "userId", "userSecret", "opConfigurationEndpoint"})
     @Test
-    public void getUserInfo_withDifferentAuthServer(String host, String opHost, String otherAuthServer, String redirectUrls, String clientId, String clientSecret, String userId, String userSecret) {
+    public void getUserInfo_withDifferentAuthServer(String host, String opHost, String otherAuthServer, String redirectUrls, String clientId, String clientSecret, String userId, String userSecret, String opConfigurationEndpoint) {
 
         ClientInterface client = getClientInterface(url);
         RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
-        RegisterSiteResponse authServerResp = RegisterSiteTest.registerSite(client, otherAuthServer, redirectUrls);
+        RegisterSiteResponse authServerResp = RegisterSiteTest.registerSite(client, otherAuthServer, redirectUrls, redirectUrls, "", opConfigurationEndpoint);
 
         final GetTokensByCodeResponse2 tokens = requestTokens(client, opHost, site, authServerResp, userId, userSecret, site.getClientId(), redirectUrls);
 
@@ -50,14 +53,14 @@ public class DifferentAuthServerTest extends BaseTest {
         assertNotNull(resp.get("sub"));
     }
 
-    @Parameters({"host", "otherAuthServer", "redirectUrls", "opHost", "rsProtect"})
+    @Parameters({"host", "otherAuthServer", "redirectUrls", "opHost", "rsProtect", "opConfigurationEndpoint"})
     @Test
-    public void umaFullTest_withDifferentAuthServer(String host, String otherAuthServer, String redirectUrls, String opHost, String rsProtect) throws Exception {
+    public void umaFullTest_withDifferentAuthServer(String host, String otherAuthServer, String redirectUrls, String opHost, String rsProtect, String opConfigurationEndpoint) throws Exception {
 
         ClientInterface client = getClientInterface(url);
 
         RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
-        RegisterSiteResponse authServerResp = RegisterSiteTest.registerSite(client, otherAuthServer, redirectUrls);
+        RegisterSiteResponse authServerResp = RegisterSiteTest.registerSite(client, otherAuthServer, redirectUrls, redirectUrls, "", opConfigurationEndpoint);
 
         RsProtectTest.protectResources(client, site, UmaFullTest.resourceList(rsProtect).getResources());
 

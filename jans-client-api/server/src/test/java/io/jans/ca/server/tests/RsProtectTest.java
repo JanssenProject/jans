@@ -150,7 +150,7 @@ public class RsProtectTest extends BaseTest {
     }
 
     @Parameters({"incorrectScopeExpression"})
-    @Test(expectedExceptions = HttpException.class)
+    @Test(expectedExceptions = HttpException.class, enabled = false)
     public void testIncorrectScopeExpression(String incorrectScopeExpression) {
         RsProtectOperation.validateScopeExpression(incorrectScopeExpression.replaceAll("'", "\""));
     }
