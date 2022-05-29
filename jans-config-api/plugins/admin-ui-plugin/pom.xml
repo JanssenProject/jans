@@ -21,7 +21,7 @@
         <!-- config api -->
         <dependency>
             <groupId>io.jans</groupId>
-            <artifactId>jans-config-api-server</artifactId>
+            <artifactId>jans-config-api-shared</artifactId>
             <scope>compile</scope>
         </dependency>
         <dependency>
