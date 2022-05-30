@@ -5,11 +5,9 @@ jans.pycloudlib.validators
 This module contains helpers to validate things.
 """
 
-import json
-
 from jans.pycloudlib.persistence.utils import PERSISTENCE_TYPES
 from jans.pycloudlib.persistence.utils import PERSISTENCE_SQL_DIALECTS
-from jans.pycloudlib.persistence.utils import PERSISTENCE_DATA_KEYS
+from jans.pycloudlib.persistence.utils import PersistenceMapper
 
 
 def validate_persistence_type(type_: str) -> None:
@@ -29,8 +27,14 @@ def validate_persistence_type(type_: str) -> None:
 
 
 # deprecated function
-def validate_persistence_ldap_mapping(type_: str, ldap_mapping: str):  # pragma: no cover
-    pass
+def validate_persistence_ldap_mapping(type_: str, ldap_mapping: str) -> None:
+    import warnings
+
+    warnings.warn(
+        "'validate_persistence_ldap_mapping' function is now a no-op function "
+        "and no longer required by hybrid persistence; "
+        "use 'validate_persistence_hybrid_mapping' function instead",
+        DeprecationWarning)
 
 
 def validate_persistence_sql_dialect(dialect: str) -> None:
@@ -47,32 +51,9 @@ def validate_persistence_sql_dialect(dialect: str) -> None:
         )
 
 
-def validate_persistence_hybrid_mapping(mapping: dict) -> None:
-    # invalid JSON
-    try:
-        mapping = json.loads(mapping)
-    except (json.decoder.JSONDecodeError, TypeError):
-        raise ValueError(f"Invalid hybrid mapping {mapping}")
-
-    # not a dict-like JSON
-    if not isinstance(mapping, dict):
-        raise ValueError(f"Invalid hybrid mapping {mapping}")
-
-    # empty dict
-    if not mapping:
-        raise ValueError("Empty hybrid mapping")
-
-    # check for missing keys
-    missing_keys = [
-        key for key in PERSISTENCE_DATA_KEYS
-        if key not in mapping
-    ]
-    if missing_keys:
-        raise ValueError(f"Missing keys {missing_keys} in hybrid mapping {mapping}")
-
-    invalid_kv = {
-        k: v for k, v in mapping.items()
-        if v not in PERSISTENCE_TYPES
-    }
-    if invalid_kv:
-        raise ValueError(f"Invalid key-pairs {invalid_kv} in hybrid mapping {mapping}")
+def validate_persistence_hybrid_mapping() -> None:
+    """
+    Validate hybrid mapping.
+    """
+    mapper = PersistenceMapper()
+    mapper.validate_hybrid_mapping()

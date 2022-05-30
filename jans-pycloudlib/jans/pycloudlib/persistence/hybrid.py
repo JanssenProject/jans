@@ -5,9 +5,7 @@ jans.pycloudlib.persistence.hybrid
 This module contains various helpers related to hybrid (LDAP + Couchbase) persistence.
 """
 
-from collections import defaultdict
-
-from jans.pycloudlib.persistence.utils import RDN_MAPPING, resolve_persistence_data_mapping
+from jans.pycloudlib.persistence.utils import PersistenceMapper
 
 
 def render_hybrid_properties(dest: str) -> None:
@@ -16,8 +14,7 @@ def render_hybrid_properties(dest: str) -> None:
 
     :param dest: Absolute path where generated file is located.
     """
-    data_mapping = resolve_persistence_data_mapping()
-    hybrid_storages = resolve_hybrid_storages(data_mapping)
+    hybrid_storages = resolve_hybrid_storages(PersistenceMapper())
 
     out = "\n".join([
         f"{k}: {v}" for k, v in hybrid_storages.items()
@@ -27,7 +24,7 @@ def render_hybrid_properties(dest: str) -> None:
         fw.write(out)
 
 
-def resolve_hybrid_storages(data_mapping: dict) -> dict:
+def resolve_hybrid_storages(mapper: PersistenceMapper) -> dict:
     """
     Resolve hybrid storage configuration.
 
@@ -37,19 +34,12 @@ def resolve_hybrid_storages(data_mapping: dict) -> dict:
     ctx = {
         # unique storage names
         "storages": ", ".join(sorted(set(
-            data_mapping.values())
+            mapper.mapping.values())
         )),
-        "storage.default": data_mapping["default"],
+        "storage.default": mapper.mapping["default"],
     }
 
-    mapper = defaultdict(list)
-    for k, v in sorted(data_mapping.items()):
-        mapper[v].append(RDN_MAPPING[k])
-
-    # sort by persistence type
-    mapper = dict(sorted(mapper.items()))
-
-    for k, v in mapper.items():
+    for k, v in mapper.groups_with_rdn().items():
         # remove empty value (if any)
         values = [val for val in v if val]
         if not values:

@@ -11,7 +11,7 @@ from jans.pycloudlib.persistence.sql import doc_id_from_dn  # noqa: F401
 from jans.pycloudlib.persistence.sql import SqlClient  # noqa: F401
 from jans.pycloudlib.persistence.spanner import render_spanner_properties  # noqa: F401
 from jans.pycloudlib.persistence.spanner import SpannerClient  # noqa: F401
-from jans.pycloudlib.persistence.utils import resolve_persistence_data_mapping  # noqa: F401
+from jans.pycloudlib.persistence.utils import PersistenceMapper  # noqa: F401
 from jans.pycloudlib.persistence.utils import PERSISTENCE_TYPES  # noqa: F401
 from jans.pycloudlib.persistence.utils import PERSISTENCE_SQL_DIALECTS  # noqa: F401
 from jans.pycloudlib.persistence.utils import render_salt  # noqa: F401

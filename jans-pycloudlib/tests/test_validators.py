@@ -37,16 +37,20 @@ def test_validate_persistence_sql_dialect_invalid():
         validate_persistence_sql_dialect("random")
 
 
-@pytest.mark.parametrize("mapping", [
-    "ab",
-    1,
-    "1",
-    "{}",
-    '{"user": "sql"}',  # missing remaining keys
-    '{"default": "sql", "user": "spanner", "cache": "ldap", "site": "couchbase", "token": "sql", "session": "random"}'
-])
-def test_validate_persistence_hybrid_mapping_invalid(mapping):
+def test_validate_persistence_ldap_mapping():
+    from jans.pycloudlib.validators import validate_persistence_ldap_mapping
+
+    with pytest.deprecated_call():
+        validate_persistence_ldap_mapping("hybrid", "default")
+
+
+def test_validate_persistence_hybrid_mapping(monkeypatch):
     from jans.pycloudlib.validators import validate_persistence_hybrid_mapping
 
-    with pytest.raises(ValueError):
-        validate_persistence_hybrid_mapping(mapping)
+    monkeypatch.setattr(
+        "jans.pycloudlib.persistence.utils.PersistenceMapper.validate_hybrid_mapping",
+        lambda cls: True,
+    )
+
+    # asserts PersistenceMapper.validate_hybrid_mapping is called
+    assert validate_persistence_hybrid_mapping() is None
