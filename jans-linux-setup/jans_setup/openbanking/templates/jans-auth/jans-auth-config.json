@@ -8,7 +8,7 @@
     "clientInfoEndpoint":"https://%(hostname)s/jans-auth/restv1/clientinfo",
     "checkSessionIFrame":"https://%(hostname)s/jans-auth/opiframe.htm",
     "endSessionEndpoint":"https://%(hostname)s/jans-auth/restv1/end_session",
-    "jwksUri":"%(jwksUri)s",
+    "jwksUri":"%(jwks_uri)s",
     "registrationEndpoint":"https://%(hostname)s/jans-auth/restv1/register",
     "openIdDiscoveryEndpoint":"https://%(hostname)s/.well-known/webfinger",
     "openIdConfigurationEndpoint":"https://%(hostname)s/.well-known/openid-configuration",
@@ -67,7 +67,8 @@
     "grantTypesSupported":[
         "client_credentials",
         "authorization_code",
-        "refresh_token"
+        "refresh_token",
+        "urn:ietf:params:oauth:grant-type:device_code"
     ],
     "allowIdTokenWithoutImplicitGrantType": true,
     "subjectTypesSupported":[
@@ -359,7 +360,7 @@
     "deviceAuthzRequestExpiresIn": 1800,
     "deviceAuthzTokenPollInterval": 5,
     "deviceAuthzResponseTypeToProcessAuthz": "code",
-    "staticKid": "%(staticKid)s",
+    "staticKid": "%(static_kid)s",
     "forceOfflineAccessScopeToEnableRefreshToken" : false,
     "redirectUrisRegexEnabled": false,
     "useHighestLevelScriptIfAcrScriptNotFound": true
