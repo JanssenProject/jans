@@ -162,6 +162,30 @@ paths:
       security:
         - oauth2: [https://jans.io/oauth/config/fido2.write]
     parameters: []
+  /jans-config-api/fido2/registration/entries/{username}:
+    get:
+      summary: Get details of connected FIDO2 devices registered to user.
+      description: Get details of connected FIDO2 devices registered to user.
+      operationId: get-registration-entries-fido2
+      tags:
+        - Fido2 - Configuration
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: FIDO2 registered devices
+                description: List of all FIDO2 registered devices.
+                type: array
+                items:
+                  $ref: '#/components/schemas/Fido2RegistrationEntry'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - oauth2: [ https://jans.io/oauth/config/fido2.readonly ]
   /jans-config-api/api/v1/attributes:
     get:
       summary: Gets a list of Gluu attributes.
@@ -5751,6 +5775,87 @@ components:
         fido2Configuration:
           description: Fido2Configuration.
           $ref: '#/components/schemas/Fido2Configuration'
+
+    Fido2RegistrationEntry:
+      type: object
+      description: Fido2 registration entry
+      properties:
+        publicKeyId:
+          description: Public key id
+          type: string
+        displayName:
+          description: Dislay name
+          type: string
+        counter:
+          description: counter
+          type: integer
+        deviceNotificationConf:
+          description: Device notification configuration
+          type: string
+        challangeHash:
+          description: Challange hash
+          type: string
+        registrationData:
+          description: Fido2 registration data.
+          $ref: '#/components/schemas/Fido2RegistrationData'
+        registrationStatus:
+          description: registration status
+          type: string
+          enum:
+            - pending
+            - registered
+            - compromised
+
+    Fido2RegistrationData:
+      type: object
+      description: Fido2 registration data.
+      properties:
+        username:
+          description: Username
+          type: string
+        domain:
+          description: Domain
+          type: string
+        userId:
+          description: user id
+          type: string
+        challenge:
+          description: challenge
+          type: string
+        attenstationRequest:
+          description: Attenstation request
+          type: string
+        attenstationResponse:
+          description: Attenstation response
+          type: string
+        uncompressedECPoint:
+          description: uncompressed EC point
+          type: string
+        publicKeyId:
+          description: public key id
+          type: string
+        type:
+          description: type
+          type: string
+        counter:
+          description: counter
+          type: integer
+        attestationType:
+          description: attestation type
+          type: string
+        signatureAlgorithm:
+          description: signature algorithm
+          type: integer
+        applicationId:
+          description: application id
+          type: string
+        status:
+          description: status
+          type: string
+          enum:
+            - pending
+            - registered
+            - compromised
 
     Fido2Configuration:
       type: object
