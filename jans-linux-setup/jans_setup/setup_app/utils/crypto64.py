@@ -99,6 +99,61 @@ class Crypto64:
                   "-file", public_certificate, "-keystore", truststore_fn, \
                   "-storepass", "changeit", "-noprompt"])
 
+
+    def gen_ca(self, ca_suffix='ca'):
+        self.logIt('Generating CA Certificate')
+
+        out_dir = os.path.join(Config.output_dir, 'CA')
+        self.run([paths.cmd_mkdir, '-p', out_dir])
+
+        ca_key_fn = os.path.join(out_dir, ca_suffix+'.key')
+        ca_crt_fn = os.path.join(out_dir, ca_suffix+'.crt')
+
+        self.run([paths.cmd_openssl, 'req',
+                  '-newkey', 'rsa:2048', '-nodes',
+                  '-keyform', 'PEM',
+                  '-keyout', ca_key_fn,
+                  '-x509',
+                  '-days', '3650',
+                  '-outform', 'PEM',
+                  '-out', ca_crt_fn,
+                  '-subj', '/C={}/ST={}/L={}/O={}/CN={}/emailAddress={}'.format(Config.countryCode, Config.state, Config.city, Config.orgName, Config.hostname, Config.admin_email)
+                  ])
+
+        return ca_key_fn, ca_crt_fn
+
+
+    def gen_key_cert_from_ca(self, fn_suffix, ca_suffix='ca', cn=None):
+        if not cn:
+            cn = Config.hostname
+        out_dir = os.path.join(Config.output_dir, 'CA')
+        ca_key_fn = os.path.join(out_dir, ca_suffix+'.key')
+        ca_crt_fn = os.path.join(out_dir, ca_suffix+'.crt')
+
+        key_fn = os.path.join(out_dir, fn_suffix+'.key')
+        self.run([paths.cmd_openssl, 'genrsa', '-out', key_fn, '2048'])
+
+        csr_fn = os.path.join(out_dir, fn_suffix+'.csr')
+        self.run([paths.cmd_openssl, 'req', '-new',
+            '-key', key_fn,
+            '-out', csr_fn,
+            '-subj', '/C={}/ST={}/L={}/O={}/CN={}/emailAddress={}'.format(Config.countryCode, Config.state, Config.city, Config.orgName, cn, Config.admin_email)
+            ])
+
+        crt_fn = os.path.join(out_dir, fn_suffix+'.crt')
+        self.run([paths.cmd_openssl, 'x509', '-req',
+            '-in', csr_fn,
+            '-CA', ca_crt_fn,
+            '-CAkey', ca_key_fn,
+            '-set_serial', '101',
+            '-days', '365',
+            '-outform', 'PEM',
+            '-out', crt_fn
+            ])
+
+        return key_fn, csr_fn, crt_fn
+
+
     def prepare_base64_extension_scripts(self, extensions=[]):
         self.logIt("Preparing scripts")
         extension_path = Path(Config.extensionFolder)

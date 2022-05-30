@@ -182,7 +182,9 @@ class CollectProperties(SetupUtils, BaseInstaller):
         if 'keyStoreSecret' in oxAuthConfDynamic:
             Config.oxauth_openid_jks_pass = oxAuthConfDynamic['keyStoreSecret']
 
-        ssl_subj = self.get_ssl_subject('/etc/certs/httpd.crt')
+        httpd_crt_fn = '/etc/certs/httpd.crt'
+        crt_fn = httpd_crt_fn if os.path.exists(httpd_crt_fn) else '/etc/certs/ob/server.crt'
+        ssl_subj = self.get_ssl_subject(crt_fn)
 
         Config.countryCode = ssl_subj.get('countryName', '')
         Config.state = ssl_subj.get('stateOrProvinceName', '')

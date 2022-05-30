@@ -445,7 +445,13 @@ def main():
         if Config.install_config_api or Config.install_scim_server:
             msg.installation_completed += "CLI available to manage Jannsen Server:\n"
             if Config.install_config_api:
-                msg.installation_completed += "/opt/jans/jans-cli/config-cli.py\n"
+                msg.installation_completed += "/opt/jans/jans-cli/config-cli.py"
+                base.current_app.profile == static.SetupProfiles.OPENBANKING:
+                    ca_dir = os.path.join(Config.output_dir, 'CA')
+                    crt_fn = os.path.join(ca_dir, 'client.crt')
+                    key_fn = os.path.join(ca_dir, 'client.key')
+                    msg.installation_completed += ' -CC {} -CK {}'.format(crt_fn, key_fn)
+                msg.installation_completed +="\n"
             if  Config.profile == 'jans' and Config.install_scim_server:
                 msg.installation_completed += "/opt/jans/jans-cli/scim-cli.py"
 
