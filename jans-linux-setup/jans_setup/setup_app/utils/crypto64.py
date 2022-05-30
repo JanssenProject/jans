@@ -4,6 +4,7 @@ import base64
 import json
 import socket
 import ssl
+import urllib.request
 
 from collections import OrderedDict
 from pathlib import Path
@@ -99,6 +100,61 @@ class Crypto64:
                   "-file", public_certificate, "-keystore", truststore_fn, \
                   "-storepass", "changeit", "-noprompt"])
 
+
+    def gen_ca(self, ca_suffix='ca'):
+        self.logIt('Generating CA Certificate')
+
+        out_dir = os.path.join(Config.output_dir, 'CA')
+        self.run([paths.cmd_mkdir, '-p', out_dir])
+
+        ca_key_fn = os.path.join(out_dir, ca_suffix+'.key')
+        ca_crt_fn = os.path.join(out_dir, ca_suffix+'.crt')
+
+        self.run([paths.cmd_openssl, 'req',
+                  '-newkey', 'rsa:2048', '-nodes',
+                  '-keyform', 'PEM',
+                  '-keyout', ca_key_fn,
+                  '-x509',
+                  '-days', '3650',
+                  '-outform', 'PEM',
+                  '-out', ca_crt_fn,
+                  '-subj', '/C={}/ST={}/L={}/O={}/CN={}/emailAddress={}'.format(Config.countryCode, Config.state, Config.city, Config.orgName, Config.hostname, Config.admin_email)
+                  ])
+
+        return ca_key_fn, ca_crt_fn
+
+
+    def gen_key_cert_from_ca(self, fn_suffix, ca_suffix='ca', cn=None):
+        if not cn:
+            cn = Config.hostname
+        out_dir = os.path.join(Config.output_dir, 'CA')
+        ca_key_fn = os.path.join(out_dir, ca_suffix+'.key')
+        ca_crt_fn = os.path.join(out_dir, ca_suffix+'.crt')
+
+        key_fn = os.path.join(out_dir, fn_suffix+'.key')
+        self.run([paths.cmd_openssl, 'genrsa', '-out', key_fn, '2048'])
+
+        csr_fn = os.path.join(out_dir, fn_suffix+'.csr')
+        self.run([paths.cmd_openssl, 'req', '-new',
+            '-key', key_fn,
+            '-out', csr_fn,
+            '-subj', '/C={}/ST={}/L={}/O={}/CN={}/emailAddress={}'.format(Config.countryCode, Config.state, Config.city, Config.orgName, cn, Config.admin_email)
+            ])
+
+        crt_fn = os.path.join(out_dir, fn_suffix+'.crt')
+        self.run([paths.cmd_openssl, 'x509', '-req',
+            '-in', csr_fn,
+            '-CA', ca_crt_fn,
+            '-CAkey', ca_key_fn,
+            '-set_serial', '101',
+            '-days', '365',
+            '-outform', 'PEM',
+            '-out', crt_fn
+            ])
+
+        return key_fn, csr_fn, crt_fn
+
+
     def prepare_base64_extension_scripts(self, extensions=[]):
         self.logIt("Preparing scripts")
         extension_path = Path(Config.extensionFolder)
@@ -133,42 +189,29 @@ class Crypto64:
     def generate_base64_ldap_file(self, fn):
         return self.generate_base64_file(fn, 1)
 
-    def gen_keystore(self, suffix, keystoreFN, keystorePW, inKey, inCert, alias=None):
+    def import_key_cert_into_keystore(self, suffix, keystore_fn, keystore_pw, in_key, in_cert, alias=None):
 
         self.logIt("Creating keystore %s" % suffix)
         # Convert key to pkcs12
         pkcs_fn = '%s/%s.pkcs12' % (Config.certFolder, suffix)
         self.run([paths.cmd_openssl,
-                  'pkcs12',
-                  '-export',
-                  '-inkey',
-                  inKey,
-                  '-in',
-                  inCert,
-                  '-out',
-                  pkcs_fn,
-                  '-name',
-                  alias or Config.hostname,
-                  '-passout',
-                  'pass:%s' % keystorePW
+                  'pkcs12', '-export',
+                  '-inkey', in_key,
+                  '-in', in_cert,
+                  '-out', pkcs_fn,
+                  '-name', alias or Config.hostname,
+                  '-passout', 'pass:%s' % keystore_pw
                   ])
+
         # Import p12 to keystore
         import_cmd = [Config.cmd_keytool,
                   '-importkeystore',
-                  '-srckeystore',
-                  '%s/%s.pkcs12' % (Config.certFolder, suffix),
-                  '-srcstorepass',
-                  keystorePW,
-                  '-srcstoretype',
-                  'PKCS12',
-                  '-destkeystore',
-                  keystoreFN,
-                  '-deststorepass',
-                  keystorePW,
-                  '-deststoretype',
-                  'JKS',
-                  '-keyalg',
-                  'RSA',
+                  '-srckeystore', '%s/%s.pkcs12' % (Config.certFolder, suffix),
+                  '-srcstorepass', keystore_pw,
+                  '-srcstoretype', 'PKCS12',
+                  '-destkeystore', keystore_fn,
+                  '-deststorepass', keystore_pw,
+                  '-deststoretype', 'JKS',
                   '-noprompt'
                   ]
         if alias:
@@ -332,3 +375,22 @@ class Crypto64:
         ssl_sock.connect((host, 443))
         cert_der = ssl_sock.getpeercert(True)
         return ssl.DER_cert_to_PEM_cert(cert_der)
+
+    def download_ob_cert(self, ob_cert_fn=None):
+        self.logIt("Downloading Openbanking Certificate from {}".format(Config.jwks_uri))
+        if not ob_cert_fn:
+            ob_cert_fn = Config.ob_cert_fn
+
+        try:
+            req = urllib.request.Request(Config.jwks_uri)
+            with urllib.request.urlopen(req) as f:
+                data = f.read().decode('utf-8')
+            keys = json.loads(data)
+
+            with open(ob_cert_fn, 'w') as w:
+                w.write('-----BEGIN CERTIFICATE-----\n')
+                w.write(keys["keys"][0]["x5c"][0])
+                w.write('\n-----END CERTIFICATE-----')
+        except Exception as e:
+            print("{}Can't download certificate{}".format(static.colors.DANGER, static.colors.ENDC))
+            print(e)

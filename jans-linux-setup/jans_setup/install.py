@@ -88,6 +88,7 @@ def check_installation():
 
 def profile_setup():
     print("Preparing Setup for profile {}".format(argsp.profile))
+
     profile_dir = os.path.join(argsp.setup_dir, argsp.profile)
     replace_dirs = []
     if not os.path.exists(profile_dir):
@@ -122,6 +123,8 @@ def profile_setup():
                 source_file = os.path.join(root, f)
                 print("Copying", source_file, target_dir)
                 shutil.copy(source_file, target_dir)
+
+
 
 def extract_setup():
     if os.path.exists(argsp.setup_dir):
