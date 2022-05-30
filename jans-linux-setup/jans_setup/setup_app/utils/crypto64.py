@@ -189,28 +189,28 @@ class Crypto64:
     def generate_base64_ldap_file(self, fn):
         return self.generate_base64_file(fn, 1)
 
-    def import_key_cert_into_keystore(self, suffix, keystoreFN, keystorePW, inKey, inCert, alias=None):
+    def import_key_cert_into_keystore(self, suffix, keystore_fn, keystore_pw, in_key, in_cert, alias=None):
 
         self.logIt("Creating keystore %s" % suffix)
         # Convert key to pkcs12
         pkcs_fn = '%s/%s.pkcs12' % (Config.certFolder, suffix)
         self.run([paths.cmd_openssl,
                   'pkcs12', '-export',
-                  '-inkey', inKey,
-                  '-in', inCert,
+                  '-inkey', in_key,
+                  '-in', in_cert,
                   '-out', pkcs_fn,
                   '-name', alias or Config.hostname,
-                  '-passout', 'pass:%s' % keystorePW
+                  '-passout', 'pass:%s' % keystore_pw
                   ])
 
         # Import p12 to keystore
         import_cmd = [Config.cmd_keytool,
                   '-importkeystore',
                   '-srckeystore', '%s/%s.pkcs12' % (Config.certFolder, suffix),
-                  '-srcstorepass', keystorePW,
+                  '-srcstorepass', keystore_pw,
                   '-srcstoretype', 'PKCS12',
-                  '-destkeystore', keystoreFN,
-                  '-deststorepass', keystorePW,
+                  '-destkeystore', keystore_fn,
+                  '-deststorepass', keystore_pw,
                   '-deststoretype', 'JKS',
                   '-noprompt'
                   ]
@@ -376,8 +376,10 @@ class Crypto64:
         cert_der = ssl_sock.getpeercert(True)
         return ssl.DER_cert_to_PEM_cert(cert_der)
 
-    def download_ob_cert(self, ob_cert_fn):
+    def download_ob_cert(self, ob_cert_fn=None):
         self.logIt("Downloading Openbanking Certificate from {}".format(Config.jwks_uri))
+        if not ob_cert_fn:
+            ob_cert_fn = Config.ob_cert_fn
 
         try:
             req = urllib.request.Request(Config.jwks_uri)
@@ -385,7 +387,7 @@ class Crypto64:
                 data = f.read().decode('utf-8')
             keys = json.loads(data)
 
-            with open(Config.ob_cert_fn, 'w') as w:
+            with open(ob_cert_fn, 'w') as w:
                 w.write('-----BEGIN CERTIFICATE-----\n')
                 w.write(keys["keys"][0]["x5c"][0])
                 w.write('\n-----END CERTIFICATE-----')

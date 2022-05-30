@@ -152,7 +152,6 @@ def get_setup_options():
         setupOptions['ob_key_fn'] = base.argsp.ob_key_fn
         setupOptions['ob_cert_fn'] = base.argsp.ob_cert_fn
         setupOptions['ob_alias'] = base.argsp.ob_alias
-        setupOptions['static_kid'] = base.argsp.static_kid
         setupOptions['jwks_uri'] = base.argsp.jwks_uri
 
         if base.argsp.no_external_key:
