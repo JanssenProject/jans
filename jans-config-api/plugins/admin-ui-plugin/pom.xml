@@ -10,20 +10,17 @@
     <groupId>io.jans.jans-config-api.plugins</groupId>
     <artifactId>admin-ui-plugin</artifactId>
 
-    <repositories>
-        <repository>
-            <id>jdk-java</id>
-            <url>https://licensespring-maven.s3.eu-central-1.amazonaws.com/</url>
-        </repository>
-    </repositories>
-
     <dependencies>
         <!-- config api -->
         <dependency>
             <groupId>io.jans</groupId>
-            <artifactId>jans-config-api-server</artifactId>
+            <artifactId>jans-config-api-shared</artifactId>
             <scope>compile</scope>
         </dependency>
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-auth-client</artifactId>
+		</dependency>
         <dependency>
             <groupId>commons-collections</groupId>
             <artifactId>commons-collections</artifactId>
