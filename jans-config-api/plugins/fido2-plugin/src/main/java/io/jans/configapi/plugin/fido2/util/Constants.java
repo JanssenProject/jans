@@ -10,5 +10,7 @@ public class Constants {
 
     private Constants() {}
 
-    public static final String CONFIG = "/config"; 
+    public static final String CONFIG = "/config";
+    public static final String REGISTRATION = "/registration";
+    public static final String ENTRIES = "/entries";
 }
