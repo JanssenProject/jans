@@ -17,10 +17,10 @@
             <artifactId>jans-config-api-shared</artifactId>
             <scope>compile</scope>
         </dependency>
-        <dependency>
-            <groupId>io.jans</groupId>
-            <artifactId>jans-auth-client</artifactId>
-        </dependency>
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-auth-client</artifactId>
+		</dependency>
         <dependency>
             <groupId>commons-collections</groupId>
             <artifactId>commons-collections</artifactId>
