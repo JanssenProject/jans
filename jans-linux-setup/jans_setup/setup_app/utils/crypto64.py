@@ -377,6 +377,8 @@ class Crypto64:
         return ssl.DER_cert_to_PEM_cert(cert_der)
 
     def download_ob_cert(self, ob_cert_fn):
+        self.logIt("Downloading Openbanking Certificate from {}".format(Config.jwks_uri))
+
         try:
             req = urllib.request.Request(Config.jwks_uri)
             with urllib.request.urlopen(req) as f:
