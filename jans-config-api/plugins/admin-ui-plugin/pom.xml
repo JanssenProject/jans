@@ -10,13 +10,6 @@
     <groupId>io.jans.jans-config-api.plugins</groupId>
     <artifactId>admin-ui-plugin</artifactId>
 
-    <repositories>
-        <repository>
-            <id>jdk-java</id>
-            <url>https://licensespring-maven.s3.eu-central-1.amazonaws.com/</url>
-        </repository>
-    </repositories>
-
     <dependencies>
         <!-- config api -->
         <dependency>
