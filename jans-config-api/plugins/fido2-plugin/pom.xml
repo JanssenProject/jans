@@ -24,6 +24,11 @@
 		</dependency>
 		<dependency>
 			<groupId>io.jans</groupId>
+			<artifactId>jans-fido2-model</artifactId>
+			<version>${jans.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.jans</groupId>
 			<artifactId>jans-config-api-server</artifactId>
 			<version>${jans.version}</version>
 		</dependency>
