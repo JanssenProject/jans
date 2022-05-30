@@ -703,7 +703,6 @@
 				<dependency>
 					<groupId>jakarta.el</groupId>
 					<artifactId>jakarta.el-api</artifactId>
-					<scope>test</scope>
 				</dependency>
 
 				<dependency>
@@ -722,6 +721,10 @@
     		        <groupId>jakarta.ejb</groupId>
                     <artifactId>jakarta.ejb-api</artifactId>
                 </dependency>
+				<dependency>
+					<groupId>jakarta.servlet.jsp</groupId>
+					<artifactId>jakarta.servlet.jsp-api</artifactId>
+				</dependency>
 
  
 				<!-- Test: Embedded Jetty -->
