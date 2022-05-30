@@ -817,6 +817,9 @@ class PropertiesUtils(SetupUtils):
 
             while True:
                 ob_cert_fn = self.getPrompt('  Openbanking Certificate File', Config.ob_cert_fn)
+                if not os.path.isfile(ob_cert_fn):
+                    self.download_ob_cert(ob_cert_fn)
+
                 if os.path.isfile(ob_cert_fn):
                     Config.ob_cert_fn = ob_cert_fn
                     break

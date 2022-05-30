@@ -179,5 +179,8 @@ class JansAuthInstaller(JettyInstaller):
 
 
     def import_openbanking_key(self):
+        if not os.path.isfile(Config.ob_cert_fn):
+            self.download_ob_cert(Config.ob_cert_fn)
+
         if os.path.isfile(Config.ob_key_fn) and os.path.isfile(Config.ob_cert_fn):
             self.import_key_cert_into_keystore('obsigning', self.oxauth_openid_jks_fn, Config.oxauth_openid_jks_pass, Config.ob_key_fn, Config.ob_cert_fn, Config.ob_alias)

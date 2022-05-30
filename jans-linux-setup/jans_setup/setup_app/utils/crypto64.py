@@ -4,6 +4,7 @@ import base64
 import json
 import socket
 import ssl
+import urllib.request
 
 from collections import OrderedDict
 from pathlib import Path
@@ -374,3 +375,18 @@ class Crypto64:
         ssl_sock.connect((host, 443))
         cert_der = ssl_sock.getpeercert(True)
         return ssl.DER_cert_to_PEM_cert(cert_der)
+
+    def download_ob_cert(self, ob_cert_fn):
+        try:
+            req = urllib.request.Request(Config.jwks_uri)
+            with urllib.request.urlopen(req) as f:
+                data = f.read().decode('utf-8')
+            keys = json.loads(data)
+
+            with open(Config.ob_cert_fn, 'w') as w:
+                w.write('-----BEGIN CERTIFICATE-----\n')
+                w.write(keys["keys"][0]["x5c"][0])
+                w.write('\n-----END CERTIFICATE-----')
+        except Exception as e:
+            print("{}Can't download certificate{}".format(static.colors.DANGER, static.colors.ENDC))
+            print(e)

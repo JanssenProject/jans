@@ -446,7 +446,7 @@ def main():
             msg.installation_completed += "CLI available to manage Jannsen Server:\n"
             if Config.install_config_api:
                 msg.installation_completed += "/opt/jans/jans-cli/config-cli.py"
-                base.current_app.profile == static.SetupProfiles.OPENBANKING:
+                if base.current_app.profile == static.SetupProfiles.OPENBANKING:
                     ca_dir = os.path.join(Config.output_dir, 'CA')
                     crt_fn = os.path.join(ca_dir, 'client.crt')
                     key_fn = os.path.join(ca_dir, 'client.key')
