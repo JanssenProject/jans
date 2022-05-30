@@ -73,11 +73,9 @@ public class Fido2RegistrationService {
             }
         }
 
-        Filter userInumFilter = Filter.createEqualityFilter("personInum", userInum);
         Filter registeredFilter = Filter.createEqualityFilter("jansStatus", Fido2RegistrationStatus.registered.getValue());
-        Filter filter = Filter.createANDFilter(userInumFilter, registeredFilter);
 
-        List<Fido2RegistrationEntry> fido2RegistrationnEntries = persistenceEntryManager.findEntries(baseDn, Fido2RegistrationEntry.class, filter);
+        List<Fido2RegistrationEntry> fido2RegistrationnEntries = persistenceEntryManager.findEntries(baseDn, Fido2RegistrationEntry.class, registeredFilter);
 
         return fido2RegistrationnEntries;
     }
