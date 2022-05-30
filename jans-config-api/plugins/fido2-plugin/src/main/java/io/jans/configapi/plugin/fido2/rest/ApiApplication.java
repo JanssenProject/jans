@@ -13,6 +13,7 @@ public class ApiApplication extends Application {
         HashSet<Class<?>> classes = new HashSet<>();
 
         classes.add(Fido2ConfigResource.class);
+        classes.add(Fido2RegistrationResource.class);
         
         return classes;
     }
