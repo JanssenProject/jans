@@ -132,18 +132,6 @@ class CollectProperties(SetupUtils, BaseInstaller):
             if result:
                 Config.oxtrust_requesting_party_client_id = result['inum']
 
-        #admin_dn = None
-        #result = dbUtils.search('o=jans', search_filter='(jansGrpTyp=jansManagerGroup)', search_scope=ldap3.SUBTREE)
-        #if result:
-        #    admin_dn = result['member'][0]
-
-
-        #if admin_dn:
-        #    for rd in dnutils.parse_dn(admin_dn):
-        #        if rd[0] == 'inum':
-        #            Config.admin_inum = str(rd[1])
-        #            break
-
         oxConfiguration = dbUtils.search(jans_ConfigurationDN, search_filter='(objectClass=jansAppConf)', search_scope=ldap3.BASE)
         if 'jansIpAddress' in oxConfiguration:
             Config.ip = oxConfiguration['jansIpAddress']
@@ -194,7 +182,9 @@ class CollectProperties(SetupUtils, BaseInstaller):
         if 'keyStoreSecret' in oxAuthConfDynamic:
             Config.oxauth_openid_jks_pass = oxAuthConfDynamic['keyStoreSecret']
 
-        ssl_subj = self.get_ssl_subject('/etc/certs/httpd.crt')
+        httpd_crt_fn = '/etc/certs/httpd.crt'
+        crt_fn = httpd_crt_fn if os.path.exists(httpd_crt_fn) else '/etc/certs/ob/server.crt'
+        ssl_subj = self.get_ssl_subject(crt_fn)
 
         Config.countryCode = ssl_subj.get('countryName', '')
         Config.state = ssl_subj.get('stateOrProvinceName', '')

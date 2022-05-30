@@ -29,6 +29,11 @@ class InstallOption:
     MONDATORY = 1
     OPTONAL   = 2
 
+class SetupProfiles:
+    JANS = 'jans'
+    OPENBANKING   = 'openbanking'
+
+
 COMPLETED = -99
 ERROR = -101
 

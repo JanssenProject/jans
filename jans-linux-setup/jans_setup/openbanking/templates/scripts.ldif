@@ -4,7 +4,7 @@ displayName: urn:openbanking:psd2:sca
 inum: A51E-76DA
 jansConfProperty: {"value1":"redirect_url","value2":"https://bank-op.gluu.org/oxauth/authorize.htm?scope=openid+profile+email+user_name&acr_values=basic&response_type=code&redirect_uri=https%3A%2F%2Fbank.gluu.org%2Fjans-auth%2Fpostlogin.htm&nonce=72fc1a52-25a7-4293-929d-b61b8a05c9c4&client_id=0c76f3bb-b6de-49c4-8dff-f53d7b768f96 ","description":""}
 jansConfProperty: {"value1":"tpp_jwks_url","value2":"https://keystore.openbankingtest.org.uk/0014H00001lFE7dQAG/0014H00001lFE7dQAG.jwks","description":""}
-jansEnabled: 1
+jansEnabled: %(enable_ob_auth_script)s
 jansLevel: 10
 jansModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
 jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
@@ -72,3 +72,16 @@ jansScrTyp: introspection
 objectClass: top
 objectClass: jansCustomScr
 
+dn: inum=A44E-4F3D,ou=scripts,o=jans
+objectClass: top
+objectClass: jansCustomScr
+description: Role Based Scopes
+displayName: role_based_scopes
+inum: A44E-4F3D
+jansEnabled: true
+jansLevel: 1
+jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+jansProgLng: python
+jansRevision: 1
+jansScr::%(introspection_introspection_role_based_scope)s
+jansScrTyp: introspection
