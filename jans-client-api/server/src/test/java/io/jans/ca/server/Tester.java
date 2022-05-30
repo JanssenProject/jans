@@ -118,6 +118,17 @@ public class Tester {
         }
     }
 
+    public static boolean testWithExternalApiUrl() {
+        return System.getProperties().containsKey("test.client.api.url");
+    }
+
+    public static String readExternalApiUrl() {
+        if (testWithExternalApiUrl()) {
+            return System.getProperties().getProperty("test.client.api.url");
+        }
+        return null;
+    }
+
     public static RegisterSiteResponse setupClient(String url) {
         LOG.info("------------------------- INITIALIZING CLIENT_SETUP --------------------------------");
         String opHost = Tester.getTestParam("opHost");

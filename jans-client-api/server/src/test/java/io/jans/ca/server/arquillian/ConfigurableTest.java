@@ -14,6 +14,7 @@ import org.eu.ingwar.tools.arquillian.extension.suite.annotations.ArquillianSuit
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.Archive;
+import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.ITestContext;
@@ -49,6 +50,7 @@ public abstract class ConfigurableTest extends Arquillian {
     public static Archive<?> createDeployment() {
         return Deployments.createDeployment();
     }
+
     @BeforeSuite
     public void initTestSuite(ITestContext context) throws IOException {
         if (initialized) {
@@ -92,7 +94,7 @@ public abstract class ConfigurableTest extends Arquillian {
     }
 
     @AfterSuite
-    public void finishTestSuite(ITestContext context){
+    public void finishTestSuite(ITestContext context) {
         Reporter.log("Invoked stop test suite method", true);
     }
 

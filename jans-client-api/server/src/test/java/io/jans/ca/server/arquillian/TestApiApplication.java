@@ -6,6 +6,7 @@
 
 package io.jans.ca.server.arquillian;
 
+import io.jans.ca.server.Tester;
 import io.jans.ca.server.rest.*;
 import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.ext.Provider;
@@ -22,6 +23,9 @@ public class TestApiApplication extends Application {
     @Override
     public Set<Class<?>> getClasses() {
         HashSet<Class<?>> classes = new HashSet<Class<?>>();
+        if (Tester.testWithExternalApiUrl()) {
+            return classes;
+        }
         LOG.info("----------------DEPLOYING TEST REST RESOURCES---------------------");
 
         classes.add(HealthCheckResource.class);

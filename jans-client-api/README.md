@@ -57,6 +57,23 @@ java -jar  $JETTY_HOME/start.jar jetty.http.port=9999
 ```
 After `jans-client-api` server is started, status can be checked using `health-check` url: http://localhost:9999/jans-client-api-server/health-check.
 
+## Compile and running tests
+### Compile with tests
+```
+mvn clean install -Djans.base=/etc/jans
+```
+`Djans.base` is the conf path of the local running `jans-auth-server`
+### Running tests
+```
+mvn test -Djans.base=/etc/jans
+```
+`Djans.base` is the conf path of the local running `jans-auth-server`
+### Running tests with external jans-client-api
+```
+mvn test -Dtest.client.api.url=http://localhost:9999/jans-client-api-server/
+```
+`Dtest.client.api.url` is the url of a running `jans-client-api-server`
+
 ## Api Description
 
 jans-client-api offers an easy API for [OAuth 2.0](https://tools.ietf.org/html/rfc6749), [OpenID Connect](http://openid.net/specs/openid-connect-core-1_0.html), and [UMA 2.0](https://docs.kantarainitiative.org/uma/wg/oauth-uma-grant-2.0-05.html).

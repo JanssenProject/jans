@@ -67,10 +67,12 @@ public abstract class BaseTest extends ConfigurableTest {
     }
 
     public static String getApiTagetURL(URI uriArquillianTestServer) {
-        if (uriArquillianTestServer != null) {
+        if (Tester.testWithExternalApiUrl()) {
+            return Tester.readExternalApiUrl();
+        } else if (uriArquillianTestServer != null) {
             return uriArquillianTestServer.toString();
         } else {
-            return System.getProperty("test.client.api.url");
+            return null;
         }
     }
 

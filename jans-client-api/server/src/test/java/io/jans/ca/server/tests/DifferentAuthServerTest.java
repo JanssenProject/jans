@@ -33,9 +33,9 @@ public class DifferentAuthServerTest extends BaseTest {
     @ArquillianResource
     private URI url;
 
-    @Parameters({"host", "opHost", "otherAuthServer", "redirectUrls", "clientId", "clientSecret", "userId", "userSecret", "opConfigurationEndpoint"})
+    @Parameters({"host", "opHost", "otherAuthServer", "redirectUrls", "userId", "userSecret", "opConfigurationEndpoint"})
     @Test
-    public void getUserInfo_withDifferentAuthServer(String host, String opHost, String otherAuthServer, String redirectUrls, String clientId, String clientSecret, String userId, String userSecret, String opConfigurationEndpoint) {
+    public void getUserInfo_withDifferentAuthServer(String host, String opHost, String otherAuthServer, String redirectUrls, String userId, String userSecret, String opConfigurationEndpoint) {
 
         ClientInterface client = getClientInterface(url);
         RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);

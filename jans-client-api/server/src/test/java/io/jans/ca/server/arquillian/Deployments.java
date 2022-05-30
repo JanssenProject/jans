@@ -29,7 +29,6 @@ public class Deployments {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return war;
     }
 
