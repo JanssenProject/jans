@@ -1,13 +1,11 @@
 <#ftl output_format="HTML">
-<!DOCTYPE html>
-<html>
-<body>
+<#import "template.ftl" as main>
+<@main.root>
 
-<h1>An unexpected error ocurred:</h1> 
+    <h1 class="fs-2">An unexpected error ocurred:</h1>
+    
+    <p class="my-4">${message!""}
+    
+    <p>Try again later
 
-<p>${message!""}
-
-<p>Try again later
-
-</body>
-</html>
+</@main.root>
