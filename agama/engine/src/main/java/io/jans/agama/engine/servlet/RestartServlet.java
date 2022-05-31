@@ -13,15 +13,10 @@ import io.jans.agama.engine.exception.FlowTimeoutException;
 import io.jans.agama.engine.model.FlowStatus;
 import io.jans.agama.engine.service.FlowService;
 
-import org.slf4j.Logger;
-
 @WebServlet(urlPatterns = RestartServlet.PATH)
 public class RestartServlet extends BaseServlet {
 
     public static final String PATH = "/fl/restart";
-    
-    @Inject
-    private Logger logger;
     
     @Inject
     private FlowService flowService;
@@ -59,12 +54,12 @@ public class RestartServlet extends BaseServlet {
                     response.sendRedirect(request.getContextPath() + "/" + url);
 
                 } catch (FlowTimeoutException e) {
-                    sendFlowTimeout(response, isJsonRequest(request), e.getMessage());
+                    sendFlowTimeout(response, e.getMessage());
                 }
                 
             }
         } catch (IOException e) {
-            response.sendError(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getMessage());
+            sendFlowCrashed(response, e.getMessage());
         }
 
     }
