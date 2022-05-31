@@ -1,5 +1,7 @@
 package io.jans.agama.dsl;
 
+import io.jans.agama.antlr.AuthnFlowParser;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -15,14 +17,15 @@ import org.antlr.v4.runtime.RuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
-import io.jans.agama.antlr.AuthnFlowParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Visitor {
     
-    //public static final String FLOWNAME_XPATH_EXPR = "/flow/header/qname/text()";
     public static final String FLOWCALL_XPATH_EXPR = "//flow_call/call/call_subject/qname/text()";
+    public static final String INPUTS_XPATH_EXPR = "/flow/header/inputs/short_var/text()";
+    public static final String CONFIG_XPATH_EXPR = "/flow/header/configs/short_var/text()";
+    public static final String TIMEOUT_XPATH_EXPR = "/flow/header/timeout/UINT/text()";
 
     private static final Logger logger = LoggerFactory.getLogger(Visitor.class);
     private static final Set<Integer> INCLUDE_SYMBOLS;
