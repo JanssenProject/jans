@@ -12,12 +12,9 @@ import java.util.stream.Collectors;
 
 import io.jans.agama.engine.exception.FlowCrashException;
 import io.jans.agama.engine.exception.FlowTimeoutException;
-import io.jans.agama.engine.misc.FlowUtils;
 import io.jans.agama.engine.model.FlowResult;
 import io.jans.agama.engine.model.FlowStatus;
 import io.jans.agama.engine.service.FlowService;
-
-import org.slf4j.Logger;
 
 @WebServlet(urlPatterns = {
     "*" + ExecutionServlet.URL_SUFFIX,
@@ -33,10 +30,7 @@ public class ExecutionServlet extends BaseServlet {
     
     //TODO: put string in agama resource bundle
     private static final String NO_ACTIVE_FLOW = "No flow running currently " +
-        "or your flow may have already finished/timed out";
-
-    @Inject
-    private Logger logger;
+        "or your flow may have already finished/timed out.";
     
     @Inject
     private FlowService flowService;
@@ -49,14 +43,14 @@ public class ExecutionServlet extends BaseServlet {
         String path = request.getServletPath();
 
         if (fstatus == null || fstatus.getStartedAt() == FlowStatus.FINISHED) {
-            sendNotFound(response, NO_ACTIVE_FLOW);
+            sendPageMismatch(response, NO_ACTIVE_FLOW, null);
             return;
         }
-        
-        //json-based clients must explicitly pass the content-type in GET requests :(
-        boolean jsonRequest = isJsonRequest(request);
+
+        String qname = fstatus.getQname();
+
         if (fstatus.getStartedAt() == FlowStatus.PREPARED) {
-            logger.info("Attempting to trigger flow {}", fstatus.getQname());
+            logger.info("Attempting to trigger flow {}", qname);
 
             try {
                 fstatus = flowService.startFlow(fstatus);
@@ -65,15 +59,15 @@ public class ExecutionServlet extends BaseServlet {
                 if (result == null) {
                     sendRedirect(response, request.getContextPath(), fstatus, true);
                 } else {
-                    sendFinishPage(response, jsonRequest, result);
+                    sendFinishPage(response, result);
                 }
             } catch (FlowCrashException e) {
                 logger.error(e.getMessage(), e);
-                sendFlowCrashed(response, jsonRequest, e.getMessage());
+                sendFlowCrashed(response, e.getMessage());
             }
 
         } else {
-            if (processCallback(request, response, fstatus, path)) return;
+            if (processCallback(response, fstatus, path)) return;
             
             String expectedUrl = getExpectedUrl(fstatus);
 
@@ -84,7 +78,7 @@ public class ExecutionServlet extends BaseServlet {
             } else {
                 //This is an attempt to GET a page which is not the current page of this flow
                 //json-based clients must explicitly pass the content-type in GET requests
-                sendPageMismatch(response, jsonRequest, expectedUrl);
+                sendPageMismatch(response, expectedUrl, qname);
             }            
         }
         
@@ -98,21 +92,21 @@ public class ExecutionServlet extends BaseServlet {
         String path = request.getServletPath();
 
         if (fstatus == null || fstatus.getStartedAt() == FlowStatus.FINISHED) {
-            sendNotFound(response, NO_ACTIVE_FLOW);
+            sendPageMismatch(response, NO_ACTIVE_FLOW, null);
             return;
         }
         
-        if (processCallback(request, response, fstatus, path)) return;
+        if (processCallback(response, fstatus, path)) return;
         
         String expectedUrl = getExpectedUrl(fstatus);
 
         if (path.equals(expectedUrl)) {
-            continueFlow(request, response, fstatus, false, false);
+            continueFlow(response, fstatus, false, false);
         } else if (path.equals(ABORT_PATH)) {
-            continueFlow(request, response, fstatus, false, true);
+            continueFlow(response, fstatus, false, true);
         } else {
             //This is an attempt to POST to a URL which is not the current page of this flow
-            sendPageMismatch(response, isJsonRequest(request), expectedUrl);
+            sendPageMismatch(response, expectedUrl, fstatus.getQname());
         }
         
     }
@@ -141,19 +135,18 @@ public class ExecutionServlet extends BaseServlet {
                 response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
             }
         } else {
-            sendNotFound(response, null);
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             logger.debug("Unexpected path {}", path);
         }
    
     }
     
-    private void continueFlow(HttpServletRequest request, HttpServletResponse response, FlowStatus fstatus,
-            boolean callbackResume, boolean abortSubflow) throws IOException {
+    private void continueFlow(HttpServletResponse response, FlowStatus fstatus, boolean callbackResume,
+            boolean abortSubflow) throws IOException {
 
-        boolean jsonRequest = isJsonRequest(request);
         try {
             String jsonParams;
-            if (jsonRequest) {
+            if (isJsonRequest()) {
                 //Obtain from payload
                 jsonParams = request.getReader().lines().collect(Collectors.joining());
             } else {
@@ -167,43 +160,34 @@ public class ExecutionServlet extends BaseServlet {
                 sendRedirect(response, request.getContextPath(), fstatus,
                         request.getMethod().equals(HttpMethod.GET));
             } else {                    
-                sendFinishPage(response, jsonRequest, result);
+                sendFinishPage(response, result);
             }
             
         } catch (FlowTimeoutException te) {
-            sendFlowTimeout(response, jsonRequest, te.getMessage());
+            sendFlowTimeout(response, te.getMessage());
 
         } catch (FlowCrashException ce) {
             logger.error(ce.getMessage(), ce);
-            sendFlowCrashed(response, jsonRequest, ce.getMessage());
+            sendFlowCrashed(response, ce.getMessage());
         }
 
     }
     
-    private boolean processCallback(HttpServletRequest request, HttpServletResponse response, 
-            FlowStatus fstatus, String path) throws IOException {
+    private boolean processCallback(HttpServletResponse response, FlowStatus fstatus, String path)
+            throws IOException {
 
         if (path.equals(CALLBACK_PATH)) {
             if (fstatus.isAllowCallbackResume()) {
-                continueFlow(request, response, fstatus, true, false);
+                continueFlow(response, fstatus, true, false);
             } else {
-                logger.warn("Unexpected incoming request at flow callback endpoint");
-                sendNotFound(response, null);
+                String msg = "Unexpected incoming request to flow callback endpoint";
+                logger.warn(msg);
+                sendPageMismatch(response, msg, null);
             }
             return true;
         }
         return false;
         
-    }
-    
-    private void sendNotFound(HttpServletResponse response, String msg) throws IOException {
-
-        if (msg == null) {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-        } else {
-            response.sendError(HttpServletResponse.SC_NOT_FOUND, msg);
-        }
-
     }
     
     private void sendRedirect(HttpServletResponse response, String contextPath, FlowStatus fls,
@@ -226,10 +210,10 @@ public class ExecutionServlet extends BaseServlet {
         
     }
 
-    private void sendFinishPage(HttpServletResponse response, boolean jsonResponse,
-            FlowResult result) throws IOException {
+    private void sendFinishPage(HttpServletResponse response, FlowResult result) throws IOException {
 
-        String fpage = jsonResponse ? engineConf.getJsonFinishedFlowPage() : engineConf.getFinishedFlowPage();
+        String fpage = isJsonRequest() ? engineConf.getJsonFinishedFlowPage() : 
+                engineConf.getFinishedFlowPage();
         page.setTemplatePath(fpage);
         page.setDataModel(result);
         sendPageContents(response);
