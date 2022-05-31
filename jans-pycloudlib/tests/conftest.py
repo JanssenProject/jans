@@ -71,6 +71,7 @@ def gmanager(gconsul_config, gvault_secret):
         ctx = {
             "ldap_binddn": "cn=Directory Manager",
             "couchbase_server_user": "admin",
+            "jca_client_id": "1234",
         }
         return ctx.get(key) or default
 

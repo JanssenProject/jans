@@ -210,7 +210,8 @@ class PersistenceMapper:
             mapper[v].append(RDN_MAPPING[k])
         return dict(sorted(mapper.items()))
 
-    def validate_hybrid_mapping(self) -> Dict[str, list]:
+    @classmethod
+    def validate_hybrid_mapping(cls) -> Dict[str, list]:
         """Validate the value of ``hybrid_mapping`` attribute.
         """
         mapping = json.loads(os.environ.get("CN_HYBRID_MAPPING", "{}"))

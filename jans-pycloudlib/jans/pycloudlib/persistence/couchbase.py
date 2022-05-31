@@ -748,6 +748,32 @@ class CouchbaseClient:
                     if not req.ok:
                         logger.warning("Failed to execute query, reason={}".format(req.json()))
 
+    def doc_exists(self, bucket: str, id_: str) -> bool:
+        """
+        Check if certain document exists in a bucket.
+
+        :param bucket: Bucket name.
+        :param id_: ID of document.
+        """
+        req = self.exec_query(
+            f"SELECT objectClass FROM {bucket} USE KEYS $key",  # nosec: B608
+            key=id_,
+        )
+
+        if not req.ok:
+            try:
+                data = json.loads(req.text)
+                err = data["errors"][0]["msg"]
+            except (ValueError, KeyError, IndexError):
+                err = req.reason
+            logger.warning(f"Unable to find document {id_} in bucket {bucket}; reason={err}")
+            return False
+
+        if not req.json()["results"]:
+            logger.warning(f"Missing document {id_} in bucket {bucket}")
+            return False
+        return True
+
 
 # backward-compat
 def suppress_verification_warning():
