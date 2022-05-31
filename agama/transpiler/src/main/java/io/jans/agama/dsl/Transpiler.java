@@ -112,9 +112,7 @@ public class Transpiler {
             Configuration fmConfig = new Configuration(Configuration.VERSION_2_3_31);
             fmConfig.setClassLoaderForTemplateLoading(CLS_LOADER, "/");
             fmConfig.setDefaultEncoding(UTF_8.toString());
-            //TODO: ?
-            //fmConfig.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
-            fmConfig.setTemplateExceptionHandler(TemplateExceptionHandler.DEBUG_HANDLER);
+            fmConfig.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
             fmConfig.setLogTemplateExceptions(false);
             fmConfig.setWrapUncheckedExceptions(true);
             fmConfig.setFallbackOnNullLoopVariable(false);
@@ -179,7 +177,7 @@ public class Transpiler {
 
     public List<String> getInputs(XdmNode node) throws SaxonApiException {
         
-        return xpathCompiler.evaluate("/flow/header/inputs/short_var/text()", node)
+        return xpathCompiler.evaluate(Visitor.INPUTS_XPATH_EXPR, node)
                     .stream().map(XdmItem::getStringValue).collect(Collectors.toList());
 
     }
@@ -187,7 +185,7 @@ public class Transpiler {
     public Integer getTimeout(XdmNode node) throws SaxonApiException {
         
         return Optional.ofNullable(
-            xpathCompiler.evaluateSingle("/flow/header/timeout/UINT/text()", node))
+            xpathCompiler.evaluateSingle(Visitor.TIMEOUT_XPATH_EXPR, node))
                 .map(XdmItem::getStringValue).map(Integer::valueOf).orElse(null);
 
     }
@@ -212,19 +210,19 @@ public class Transpiler {
             XdmNode node = doc.toXdmNode(processor);
             
             //Ensure only existing flows are referenced
-            checkUnknownInvocation(Visitor.FLOWCALL_XPATH_EXPR, flowNames, node);
-
+            checkUnknownInvocation(flowNames, node);
+            checkInputsUniqueness(node);
         } catch (SaxonApiException se) {
             throw new TranspilerException("Validation failed", se);
         }
-        
+
     }
 
-    private void checkUnknownInvocation(String xpathExpr, Set<String> known, XdmNode node) 
+    private void checkUnknownInvocation(Set<String> known, XdmNode node) 
             throws TranspilerException, SaxonApiException {
         
         if (known != null) {
-            List<String> invocations = xpathCompiler.evaluate(xpathExpr, node)
+            List<String> invocations = xpathCompiler.evaluate(Visitor.FLOWCALL_XPATH_EXPR, node)
                     .stream().map(XdmItem::getStringValue).collect(Collectors.toList());
 
             for (String t : invocations) {
@@ -237,7 +235,24 @@ public class Transpiler {
         }
 
     }
-    
+
+    private void checkInputsUniqueness(XdmNode node) throws TranspilerException, SaxonApiException {
+        
+        List<String> inputs = getInputs(node);
+        Set<String> inputsSet = inputs.stream().collect(Collectors.toSet());
+        String configVar = Optional.ofNullable(
+            xpathCompiler.evaluateSingle(Visitor.CONFIG_XPATH_EXPR, node))
+                .map(XdmItem::getStringValue).orElse(null);
+         
+        if (inputsSet.size() < inputs.size())
+            throw new TranspilerException("One or more input variable names are duplicated");
+        
+        if (configVar != null && inputsSet.contains(configVar))
+            throw new TranspilerException("Configuration variable '" + configVar + 
+                    "' cannot be used as an input variable");
+
+    }
+
     private void logXml(XdmNode node) {
         logger.debug("\n{}", node.toString());
         //System.out.println("\n" + node.toString());
