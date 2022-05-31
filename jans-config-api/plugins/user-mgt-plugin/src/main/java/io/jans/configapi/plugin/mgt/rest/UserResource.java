@@ -44,6 +44,7 @@ public class UserResource extends BaseResource {
     private static final String JANS_STATUS = "jansStatus";
     private static final String GIVEN_NAME = "givenName";
     private static final String USER_PWD = "userPassword";
+    private static final String INUM = "inum";
 
     @Inject
     Logger logger;
@@ -287,12 +288,14 @@ public class UserResource extends BaseResource {
         customUser.setJansStatus(user.getAttribute(JANS_STATUS));
         customUser.setGivenName(user.getAttribute(GIVEN_NAME));
         customUser.setUserPassword(user.getAttribute(USER_PWD));
+        customUser.setInum(user.getAttribute(INUM));
 
         customUser.removeAttribute(MAIL);
         customUser.removeAttribute(DISPLAY_NAME);
         customUser.removeAttribute(JANS_STATUS);
         customUser.removeAttribute(GIVEN_NAME);
         customUser.removeAttribute(USER_PWD);
+        customUser.removeAttribute(INUM);
 
         return customUser;
     }
@@ -316,6 +319,7 @@ public class UserResource extends BaseResource {
         user.setAttribute(JANS_STATUS, customUser.getJansStatus(), false);
         user.setAttribute(GIVEN_NAME, customUser.getGivenName(), false);
         user.setAttribute(USER_PWD, customUser.getUserPassword(), false);
+        user.setAttribute(INUM, customUser.getInum(), false);
 
         logger.debug("Custom User - user:{}", user);
         return user;
