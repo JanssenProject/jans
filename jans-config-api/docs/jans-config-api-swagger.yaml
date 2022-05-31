@@ -6841,6 +6841,9 @@ components:
         userPassword:
           type: string
           description: User password
+        inum:
+          description: XRI i-number. Identifier to uniquely identify the user.
+          type: string
 
     UserPatchRequest:
       title: User Patch Request object
