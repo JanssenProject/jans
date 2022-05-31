@@ -1,13 +1,11 @@
 <#ftl output_format="HTML">
-<!DOCTYPE html>
-<html>
-<body>
+<#import "template.ftl" as main>
+<@main.root>
 
-<h1>This took you more than expected!</h1>
+    <h1 class="fs-2">This took you more than expected!</h1>
+    
+    <p class="my-4">${message}
+    
+    <p>Try again later
 
-<p>${message}
-
-<p>Try again later
-
-</body>
-</html>
+</@main.root>
