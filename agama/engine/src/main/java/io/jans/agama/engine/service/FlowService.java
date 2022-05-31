@@ -372,7 +372,7 @@ public class FlowService {
      * @return 
      * @throws JsonProcessingException
      */
-    public FlowResult flowResultFrom(NativeObject result) throws JsonProcessingException {        
+    private FlowResult flowResultFrom(NativeObject result) throws JsonProcessingException {        
         return mapper.convertValue(result, FlowResult.class);
     }
 
