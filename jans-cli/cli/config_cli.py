@@ -749,7 +749,12 @@ class JCA_CLI:
                   example=None, spacing=0
                   ):
         if 'b' in values and 'q' in values and 'x' in values:
-            print(self.colored_text("b: back, q: quit x: logout and quit", grey_color))
+            greyed_help_list = [ ('b', 'back'), ('q', 'quit'),  ('x', 'logout and quit') ]
+            for k,v in (('w', 'write result'), ('y', 'yes'), ('n', 'no')):
+                if k in values:
+                    greyed_help_list.insert(1, (k, v))
+            grey_help_text = ', '.join(['{}: {}'.format(k,v) for k,v in greyed_help_list])
+            print(self.colored_text(grey_help_text, grey_color))
         print()
         type_text = ''
         if itype:
