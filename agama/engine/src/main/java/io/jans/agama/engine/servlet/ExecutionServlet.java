@@ -40,8 +40,6 @@ public class ExecutionServlet extends BaseServlet {
             throws ServletException, IOException {
 
         FlowStatus fstatus = flowService.getRunningFlowStatus();
-        String path = request.getServletPath();
-
         if (fstatus == null || fstatus.getStartedAt() == FlowStatus.FINISHED) {
             sendPageMismatch(response, NO_ACTIVE_FLOW, null);
             return;
@@ -67,8 +65,9 @@ public class ExecutionServlet extends BaseServlet {
             }
 
         } else {
+            String path = request.getServletPath();
             if (processCallback(response, fstatus, path)) return;
-            
+
             String expectedUrl = getExpectedUrl(fstatus);
 
             if (path.equals(expectedUrl)) {
@@ -89,13 +88,12 @@ public class ExecutionServlet extends BaseServlet {
             throws ServletException, IOException {
         
         FlowStatus fstatus = flowService.getRunningFlowStatus();
-        String path = request.getServletPath();
-
         if (fstatus == null || fstatus.getStartedAt() == FlowStatus.FINISHED) {
             sendPageMismatch(response, NO_ACTIVE_FLOW, null);
             return;
         }
         
+        String path = request.getServletPath();
         if (processCallback(response, fstatus, path)) return;
         
         String expectedUrl = getExpectedUrl(fstatus);
