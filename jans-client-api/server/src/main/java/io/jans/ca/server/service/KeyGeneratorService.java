@@ -112,7 +112,6 @@ public class KeyGeneratorService {
             }
         }
 
-        //LOG.trace("jwks: ", jwks);
         logger.trace("jwks generated successfully.");
         return jwks;
     }

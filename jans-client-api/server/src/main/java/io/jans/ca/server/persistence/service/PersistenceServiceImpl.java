@@ -46,8 +46,6 @@ public class PersistenceServiceImpl {
                 return new SqlPersistenceServiceImpl(new H2PersistenceProvider(apiConf));
             case "redis":
                 return new RedisPersistenceService(apiConf);
-//            case "couchbase":
-//                return new JansPersistenceService(apiConf, storage);
         }
         throw new RuntimeException("Failed to create persistence provider. Unrecognized storage specified: " + storage + ", full configuration: " + apiConf);
     }

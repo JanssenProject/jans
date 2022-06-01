@@ -163,8 +163,6 @@ public class SeleniumTestUtils {
         Holder<String> currentUrl = new Holder<>();
         WebDriverWait wait = new WebDriverWait(currentDriver, WAIT_OPERATION_TIMEOUT);
         wait.until(d -> {
-            //System.out.println("Previous url: " + previousURL);
-            //System.out.println("Current url: " + d.getCurrentUrl());
             currentUrl.setT(d.getCurrentUrl());
             return !currentUrl.getT().equals(previousURL);
         });

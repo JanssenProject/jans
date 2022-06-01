@@ -36,9 +36,6 @@ public class UpdateSiteTest extends BaseTest {
     @Parameters({"host", "opHost", "redirectUrls"})
     @Test
     public void update(String host, String opHost, String redirectUrls) throws IOException {
-
-//        SetUpTest.beforeSuite(getApiTagetURL(url), host, opHost, redirectUrls);
-
         String authorizationRedirectUri = "https://client.example.com/cb";
         String anotherRedirectUri = "https://client.example.com/another";
         String logoutUri = "https://client.example.com/logout";

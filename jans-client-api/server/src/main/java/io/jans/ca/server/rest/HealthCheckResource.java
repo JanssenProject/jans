@@ -28,7 +28,7 @@ public class HealthCheckResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response healthCheck() {
         logger.debug("Api Health Check - Entry");
-        //validateIpAddressAllowed(httpRequest.getRemoteAddr());
+
         JSONObject clientApiStatusJson = new JSONObject();
         clientApiStatusJson.put("application", "jans-client-api");
         clientApiStatusJson.put("version", Utils.getJansClientApiVersion());

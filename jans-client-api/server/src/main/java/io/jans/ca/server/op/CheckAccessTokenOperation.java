@@ -58,7 +58,6 @@ public class CheckAccessTokenOperation extends BaseOperation<CheckAccessTokenPar
 
     private boolean isAccessTokenValid(String p_accessToken, Jwt jwt, OpenIdConfigurationResponse discoveryResponse) {
         try {
-            //                final String type = jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE);
             final String algorithm = jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM);
             final String jwkUrl = discoveryResponse.getJwksUri();
             final String kid = jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID);

@@ -27,7 +27,6 @@ import java.util.stream.Collectors;
 
 public class RpGetGetClaimsGatheringUrlOperation extends BaseOperation<RpGetClaimsGatheringUrlParams> {
 
-    //    private static final Logger LOG = LoggerFactory.getLogger(RpGetGetClaimsGatheringUrlOperation.class);
     private DiscoveryService discoveryService;
     private StateService stateService;
 

@@ -15,6 +15,7 @@
         <module>uma-rs-resteasy</module>
         <module>common</module>
         <module>client</module>
+        <module>gen-client</module>
         <module>server</module>
     </modules>
 

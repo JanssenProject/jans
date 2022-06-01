@@ -133,8 +133,6 @@ public class Tester {
         LOG.info("------------------------- INITIALIZING CLIENT_SETUP --------------------------------");
         String opHost = Tester.getTestParam("opHost");
         String redirectUrls = Tester.getTestParam("redirectUrls");
-//        String postLogoutRedirectUrls = Tester.getTestParam("postLogoutRedirectUrls");
-//        String logoutUri = Tester.getTestParam("logoutUrl");
         RegisterSiteResponse setupClient = SetupClientTest.setupClient(Tester.newClient(url), opHost, redirectUrls);
         Tester.setSetupClient(setupClient, null, opHost);
         LOG.debug("SETUP_CLIENT is set in Tester.");

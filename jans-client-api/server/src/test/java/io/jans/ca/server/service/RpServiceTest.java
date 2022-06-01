@@ -6,7 +6,10 @@ import io.jans.ca.server.HttpException;
 import io.jans.ca.server.configuration.model.Rp;
 import io.jans.ca.server.persistence.service.PersistenceService;
 import jakarta.inject.Inject;
-import org.testng.annotations.*;
+import org.testng.annotations.AfterSuite;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeSuite;
+import org.testng.annotations.Test;
 import org.testng.collections.Lists;
 
 import java.io.IOException;
@@ -21,7 +24,6 @@ import static org.testng.AssertJUnit.assertNotNull;
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 05/10/2015
  */
-//@Guice(modules = GuiceModule.class)
 public class RpServiceTest {
 
     private static ExecutorService EXECUTOR_SERVICE;
@@ -35,7 +37,6 @@ public class RpServiceTest {
 
     @BeforeClass
     public void setUp() throws IOException {
-//        configurationService.setConfiguration(TestUtils.parseConfiguration(ResourceHelpers.resourceFilePath("client-api-server-jenkins.yml")));
         persistenceService.create();
         rpService.removeAllRps();
         rpService.load();

@@ -225,8 +225,6 @@ public class GetTokensByCodeTest extends BaseTest {
     public static GetTokensByCodeResponse2 tokenByInvalidCode(ClientInterface client, RegisterSiteResponse site, String userId, String userSecret, String nonce) {
 
         final String state = CoreUtils.secureRandomString();
-        //codeRequest(client, site.getRpId(), userId, userSecret, state, nonce);
-
         final String code = CoreUtils.secureRandomString();
 
         String testRpId = site.getRpId();
