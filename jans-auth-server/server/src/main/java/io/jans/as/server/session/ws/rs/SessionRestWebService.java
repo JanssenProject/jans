@@ -132,14 +132,25 @@ public class SessionRestWebService {
         final Date exp = sessionId.getExpirationDate();
         final Date iat = sessionId.getCreationDate();
         final Date lastUsedAt = sessionId.getLastUsedAt();
+        final String sid = sessionId.getOutsideSid();
+        final Date authnTime = sessionId.getAuthenticationTime();
 
         JSONObject result = new JSONObject();
-        if (lastUsedAt != null)
-            result.put("lastUsedAt", dateAsSeconds(lastUsedAt));
-        if (iat != null)
+        if (lastUsedAt != null) {
+            result.put("last_used_at", dateAsSeconds(lastUsedAt));
+        }
+        if (iat != null) {
             result.put("iat", dateAsSeconds(iat));
-        if (exp != null)
+        }
+        if (exp != null) {
             result.put("exp", dateAsSeconds(exp));
+        }
+        if (StringUtils.isNotBlank(sid)) {
+            result.put("sid", sid);
+        }
+        if (authnTime != null) {
+            result.put("authn_time", sid);
+        }
         return result;
     }
 
