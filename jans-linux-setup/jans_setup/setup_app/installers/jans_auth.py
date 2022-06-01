@@ -30,6 +30,7 @@ class JansAuthInstaller(JettyInstaller):
                     (os.path.join(Config.dist_jans_dir, 'jans-auth-client-jar-with-dependencies.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-auth-client/{0}/jans-auth-client-{0}-jar-with-dependencies.jar'.format(base.current_app.app_info['ox_version']))),
                     ]
 
+        self.jetty_service_webapps = os.path.join(self.jetty_base, self.service_name, 'webapps')
         self.templates_folder = os.path.join(Config.templateFolder, self.service_name)
         self.output_folder = os.path.join(Config.output_dir, self.service_name)
 
@@ -51,10 +52,8 @@ class JansAuthInstaller(JettyInstaller):
         self.logIt("Copying auth.war into jetty webapps folder...")
 
         self.installJettyService(self.jetty_app_configuration[self.service_name], True)
-
-        jettyServiceWebapps = os.path.join(self.jetty_base, self.service_name, 'webapps')
-        self.copyFile(self.source_files[0][0], jettyServiceWebapps)
-
+        self.copyFile(self.source_files[0][0], self.jetty_service_webapps)
+        self.setup_agama()
         self.enable()
 
     def generate_configuration(self):
@@ -184,3 +183,12 @@ class JansAuthInstaller(JettyInstaller):
 
         if os.path.isfile(Config.ob_key_fn) and os.path.isfile(Config.ob_cert_fn):
             self.import_key_cert_into_keystore('obsigning', self.oxauth_openid_jks_fn, Config.oxauth_openid_jks_pass, Config.ob_key_fn, Config.ob_cert_fn, Config.ob_alias)
+
+    def setup_agama(self):
+        agama_root = os.path.join(self.jetty_base, self.service_name, 'agama')
+        self.createDirs(agama_root)
+        for adir in ('fl', 'ftl', 'scripts'):
+            self.createDirs(os.path.join(agama_root, adir))
+        base.extract_from_zip(base.current_app.jans_zip, 'agama/misc', agama_root)
+        src_xml = os.path.join(Config.templateFolder, 'jetty/agama_web_resources.xml')
+        self.copyFile(src_xml, self.jetty_service_webapps)
