@@ -353,7 +353,8 @@ def extract_from_zip(zip_file, sub_dir, target_dir, remove_target_dir=False):
     if remove_target_dir and target_dir_path.exists():
         shutil.rmtree(target_dir_path)
 
-    target_dir_path.mkdir(parents=True)
+    if not target_dir_path.exists():
+        target_dir_path.mkdir(parents=True)
 
     for member in zipobj.infolist():
         if member.filename.startswith(parent_sub_dir):
