@@ -7,9 +7,12 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import io.jans.as.model.util.Util;
 import io.jans.ca.common.ErrorResponseCode;
+import io.jans.ca.server.op.CheckIdTokenOperation;
 import io.jans.ca.server.rest.ApiApplication;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.MalformedURLException;
@@ -25,6 +28,8 @@ import java.util.stream.Collectors;
  * @author Yuriy Zabrovarnyy
  */
 public class Utils {
+
+    private static final Logger LOG = LoggerFactory.getLogger(Utils.class);
 
     private static final int ONE_HOUR_MILLIS = 60 * 60 * 1000;
 
@@ -167,7 +172,7 @@ public class Utils {
             }
             fileProperties = new File(url.getFile());
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
         }
         if (fileProperties != null) {
             try (InputStream input = new FileInputStream(fileProperties)) {
@@ -175,7 +180,7 @@ public class Utils {
                 // load a properties file
                 prop.load(input);
             } catch (IOException ex) {
-                ex.printStackTrace();
+                LOG.error(ex.getMessage(), ex);
             }
         }
         return prop;

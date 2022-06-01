@@ -208,7 +208,6 @@ public class AppInitializer {
                 logger.info("Invalid value clearTestData.");
             }
         } catch (Exception e) {
-            e.printStackTrace();
             logger.error("Failed to remove existing RPs.", e);
         }
     }
