@@ -20,8 +20,6 @@ import io.jans.model.custom.script.type.ciba.DummyEndUserNotificationType;
 import io.jans.model.custom.script.type.ciba.EndUserNotificationType;
 import io.jans.model.custom.script.type.client.ClientRegistrationType;
 import io.jans.model.custom.script.type.client.DummyClientRegistrationType;
-import io.jans.model.custom.script.type.clientapi.ClientApiType;
-import io.jans.model.custom.script.type.clientapi.DummyClientApiType;
 import io.jans.model.custom.script.type.configapi.ConfigApiType;
 import io.jans.model.custom.script.type.configapi.DummyConfigApiType;
 import io.jans.model.custom.script.type.discovery.DiscoveryType;
@@ -101,8 +99,7 @@ public enum CustomScriptType implements AttributeEnum {
     IDP("idp", "Idp Extension", IdpType.class, CustomScript.class, "IdpExtension", new DummyIdpType()),
     DISCOVERY("discovery", "Discovery", DiscoveryType.class, CustomScript.class, "Discovery", new DummyDiscoveryType()),
     UPDATE_TOKEN("update_token", "Update Token", UpdateTokenType.class, CustomScript.class, "UpdateToken", new DummyUpdateTokenType()),
-    CONFIG_API("config_api_auth", "Config Api Auth", ConfigApiType.class, CustomScript.class,"ConfigApiAuthorization", new DummyConfigApiType()),
-    CLIENT_API("client_api_auth", "Client Api Auth", ClientApiType.class, CustomScript.class,"ClientApiAuthorization", new DummyClientApiType());
+    CONFIG_API("config_api_auth", "Config Api Auth", ConfigApiType.class, CustomScript.class,"ConfigApiAuthorization", new DummyConfigApiType());
 
     private String value;
     private String displayName;

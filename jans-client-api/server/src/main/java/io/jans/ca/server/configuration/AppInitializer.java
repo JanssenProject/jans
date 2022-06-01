@@ -11,7 +11,6 @@ import io.jans.as.model.util.SecurityProviderUtility;
 import io.jans.ca.server.persistence.service.PersistenceServiceImpl;
 import io.jans.ca.server.service.RpService;
 import io.jans.ca.server.service.logger.LoggerService;
-import io.jans.model.custom.script.CustomScriptType;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.PersistenceEntryManagerFactory;
 import io.jans.orm.model.PersistenceConfiguration;
@@ -20,7 +19,6 @@ import io.jans.orm.util.properties.FileConfiguration;
 import io.jans.service.PythonService;
 import io.jans.service.cdi.event.LdapConfigurationReload;
 import io.jans.service.cdi.util.CdiUtil;
-import io.jans.service.custom.script.CustomScriptManager;
 import io.jans.service.timer.QuartzSchedulerManager;
 import io.jans.util.security.PropertiesDecrypter;
 import io.jans.util.security.StringEncrypter;
@@ -36,8 +34,6 @@ import jakarta.inject.Named;
 import jakarta.servlet.ServletContext;
 import org.slf4j.Logger;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Properties;
 
 @ApplicationScoped
@@ -74,9 +70,6 @@ public class AppInitializer {
     private LoggerService loggerService;
 
     @Inject
-    private CustomScriptManager customScriptManager;
-
-    @Inject
     PersistenceConfiguration persistenceConfiguration;
     @Inject
     PersistenceServiceImpl persistenceService;
@@ -102,9 +95,6 @@ public class AppInitializer {
 
         // Start timer
         initSchedulerService();
-
-        // Initialize custom Script
-        customScriptManager.initTimer(Arrays.asList(CustomScriptType.CLIENT_API, CustomScriptType.PERSISTENCE_EXTENSION));
 
         // Schedule timer tasks
         loggerService.initTimer();

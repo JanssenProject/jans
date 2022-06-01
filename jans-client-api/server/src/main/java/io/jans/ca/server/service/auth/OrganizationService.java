@@ -15,6 +15,7 @@ public class OrganizationService extends io.jans.as.common.service.OrganizationS
     }
 
     public ApplicationType getApplicationType() {
+        //TODO: modify to JANS_CLIENT_API after merge
         return ApplicationType.JANS_CONFIG_API;
     }
 }
