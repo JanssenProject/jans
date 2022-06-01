@@ -286,6 +286,7 @@ class Config:
         self.ldif_base = os.path.join(self.output_dir, 'base.ldif')
         self.ldif_attributes = os.path.join(self.output_dir, 'attributes.ldif')
         self.ldif_scopes = os.path.join(self.output_dir, 'scopes.ldif')
+        self.ldif_agama = os.path.join(self.output_dir, 'agama.ldif')
 
         self.ldif_metric = os.path.join(self.staticFolder, 'metric/o_metric.ldif')
         self.ldif_site = os.path.join(self.install_dir, 'static/cache-refresh/o_site.ldif')
@@ -316,6 +317,7 @@ class Config:
                            self.ldif_site,
                            self.ldif_metric,
                            self.ldif_configuration,
+                           self.ldif_agama,
                            ]
 
 
@@ -327,6 +329,7 @@ class Config:
                              self.ldif_base: False,
                              self.ldif_attributes: False,
                              self.ldif_scopes: False,
+                             self.ldif_agama: False,
                              }
 
         if self.profile != OPENBANKING_PROFILE:
@@ -360,6 +363,7 @@ class Config:
                                             self.ldif_scopes,
                                             self.ldif_configuration,
                                             self.ldif_metric,
+                                            self.ldif_agama,
                                             ],
                                       'memory_allocation': 100,
                                       'mapping': '',
