@@ -11,7 +11,7 @@ from utils import prepare_template_ctx
 from utils import get_ldif_mappings
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("entrypoint")
+logger = logging.getLogger("couchbase_setup")
 
 
 def get_bucket_mappings(manager):
@@ -50,18 +50,18 @@ def get_bucket_mappings(manager):
     }
 
     optional_scopes = json.loads(manager.config.get("optional_scopes", "[]"))
-    ldif_mappings = get_ldif_mappings(optional_scopes)
+    ldif_mappings = get_ldif_mappings("couchbase", optional_scopes)
 
     for name, files in ldif_mappings.items():
         bucket_mappings[name]["files"] = files
 
-    persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "ldap")
-    ldap_mapping = os.environ.get("CN_PERSISTENCE_LDAP_MAPPING", "default")
-    if persistence_type == "hybrid":
-        bucket_mappings = {
-            name: mapping for name, mapping in bucket_mappings.items()
-            if name != ldap_mapping
-        }
+    # persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "ldap")
+    # ldap_mapping = os.environ.get("CN_PERSISTENCE_LDAP_MAPPING", "default")
+    # if persistence_type == "hybrid":
+    #     bucket_mappings = {
+    #         name: mapping for name, mapping in bucket_mappings.items()
+    #         if name != ldap_mapping
+    #     }
     return bucket_mappings
 
 

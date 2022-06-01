@@ -13,6 +13,7 @@ from jans.pycloudlib.persistence import SpannerClient
 from jans.pycloudlib.persistence import SqlClient
 from jans.pycloudlib.persistence import doc_id_from_dn
 from jans.pycloudlib.persistence import id_from_dn
+from jans.pycloudlib.persistence import PersistenceMapper
 from jans.pycloudlib.utils import as_boolean
 
 from settings import LOGGING_CONFIG
@@ -361,20 +362,25 @@ class SpannerBackend:
         return self.client.update(table_name, key, attrs), ""
 
 
+BACKEND_CLASSES = {
+    "sql": SQLBackend,
+    "couchbase": CouchbaseBackend,
+    "spanner": SpannerBackend,
+    "ldap": LDAPBackend,
+}
+
+
 class Upgrade:
     def __init__(self, manager):
         self.manager = manager
 
-        persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "ldap")
-        if persistence_type == "sql":
-            backend_cls = SQLBackend
-        elif persistence_type == "couchbase":
-            backend_cls = CouchbaseBackend
-        elif persistence_type == "spanner":
-            backend_cls = SpannerBackend
-        else:
-            backend_cls = LDAPBackend
+        mapper = PersistenceMapper()
+
+        backend_cls = BACKEND_CLASSES[mapper.mapping["default"]]
         self.backend = backend_cls(manager)
+
+        user_backend_cls = BACKEND_CLASSES[mapper.mapping["user"]]
+        self.user_backend = user_backend_cls(manager)
 
     def invoke(self):
         logger.info("Running upgrade process (if required)")
@@ -574,15 +580,15 @@ class Upgrade:
         id_ = f"inum={admin_inum},ou=people,o=jans"
         kwargs = {}
 
-        if self.backend.type in ("sql", "spanner"):
+        if self.user_backend.type in ("sql", "spanner"):
             id_ = doc_id_from_dn(id_)
             kwargs = {"table_name": "jansPerson"}
-        elif self.backend.type == "couchbase":
+        elif self.user_backend.type == "couchbase":
             id_ = id_from_dn(id_)
             bucket = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
             kwargs = {"bucket": f"{bucket}_user"}
 
-        entry = self.backend.get_entry(id_, **kwargs)
+        entry = self.user_backend.get_entry(id_, **kwargs)
 
         if not entry:
             return
@@ -590,10 +596,10 @@ class Upgrade:
         # add jansAdminUIRole to default admin user
         should_update = False
 
-        if self.backend.type == "sql" and not entry.attrs["jansAdminUIRole"]["v"]:
+        if self.user_backend.type == "sql" and not entry.attrs["jansAdminUIRole"]["v"]:
             entry.attrs["jansAdminUIRole"] = {"v": ["api-admin"]}
             should_update = True
-        elif self.backend.type == "spanner" and not entry.attrs["jansAdminUIRole"]:
+        elif self.user_backend.type == "spanner" and not entry.attrs["jansAdminUIRole"]:
             entry.attrs["jansAdminUIRole"] = ["api-admin"]
             should_update = True
         else:  # ldap and couchbase
@@ -602,7 +608,7 @@ class Upgrade:
                 should_update = True
 
         if should_update:
-            self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
+            self.user_backend.modify_entry(entry.id, entry.attrs, **kwargs)
 
     def update_clients_entries(self):
         # modify redirect UI of config-api client
