@@ -146,7 +146,7 @@ public class AppInitializer {
                 logger.info("Trató de leer: {}", entryManager.toString());
             } catch (Exception e) {
                 logger.warn("Unable to create persistence entry manager, retrying in {} seconds", RETRY_INTERVAL);
-                Thread.sleep(RETRY_INTERVAL * 1000);
+                Thread.sleep(RETRY_INTERVAL * 1000L);
             }
         } while (entryManager == null && i < RETRIES);
 

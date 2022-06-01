@@ -142,8 +142,6 @@ public class Rp implements Serializable {
     private String tlsClientAuthSubjectDn;
     @JsonProperty(value = "subject_type")
     private String subjectType;
-    @JsonProperty(value = "run_introspection_script_beforeaccess_token_as_jwt_creation_and_include_claims")
-    private Boolean runIntrospectionScriptBeforeaccessTokenAsJwtCreationAndIncludeClaims = false;
     @JsonProperty(value = "id_token_signed_response_alg")
     private String idTokenSignedResponseAlg;
     @JsonProperty(value = "id_token_encrypted_response_alg")

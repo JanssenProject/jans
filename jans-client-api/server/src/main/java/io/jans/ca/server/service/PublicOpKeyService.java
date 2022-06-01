@@ -43,7 +43,7 @@ public class PublicOpKeyService {
 
     public PublicKey getPublicKey(String jwkSetUrl, String keyId, SignatureAlgorithm signatureAlgorithm, Use use) {
         //Get keys from cache if present
-        Optional<PublicKey> cachedKey = getCachedKey(jwkSetUrl, keyId);
+        Optional<PublicKey> cachedKey = getCachedKey(jwkSetUrl, keyId, jansConfigurationService.find().getPublicOpKeyCacheExpirationInMinutes());
 
         if (cachedKey.isPresent()) {
             LOG.debug("Taken public key from cache. jwks_url: {}, kid : {} ", jwkSetUrl, keyId);
@@ -96,13 +96,13 @@ public class PublicOpKeyService {
         throw new RuntimeException("Failed to fetch public key from OP.");
     }
 
-    private Optional<PublicKey> getCachedKey(String jwkSetUrl, String keyId) {
+    private static Optional<PublicKey> getCachedKey(String jwkSetUrl, String keyId, int keyCacheExpirationMinutes) {
         if (Strings.isNullOrEmpty(keyId)) {
             return Optional.empty();
         }
         if (cache == null) {
             cache = CacheBuilder.newBuilder()
-                    .expireAfterWrite(jansConfigurationService.find().getPublicOpKeyCacheExpirationInMinutes(), TimeUnit.MINUTES)
+                    .expireAfterWrite(keyCacheExpirationMinutes, TimeUnit.MINUTES)
                     .build();
         }
         Pair<String, String> mapKey = new Pair<>(jwkSetUrl, keyId);
