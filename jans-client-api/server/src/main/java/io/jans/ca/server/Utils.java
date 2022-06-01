@@ -152,7 +152,7 @@ public class Utils {
 
     public static synchronized String readCompileProterty(String nameProperty) {
         Properties prop = readCompileProperties();
-        if (prop.getProperty(nameProperty) != null) {
+        if (prop != null && prop.getProperty(nameProperty) != null) {
             return prop.getProperty(nameProperty);
         } else {
             return null;

@@ -82,7 +82,6 @@ public class GetClientTokenOperation extends BaseOperation<GetClientTokenParams>
             } else {
                 tokenResponse = tokenClient.execClientCredentialsGrant(scopeAsString(params), params.getClientId(), params.getClientSecret());
             }
-            LOG.info("Token response: {} {} {}", tokenResponse.getAccessToken(), tokenResponse.getRefreshToken(), tokenResponse.getIdToken());
             if (tokenResponse != null) {
                 if (Util.allNotBlank(tokenResponse.getAccessToken())) {
                     GetClientTokenResponse response = new GetClientTokenResponse();

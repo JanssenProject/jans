@@ -286,12 +286,12 @@ public class Rp implements Serializable {
         this.softwareVersion = conf.softwareVersion;
         this.softwareStatement = conf.softwareStatement;
         this.customAttributes = conf.customAttributes;
-        this.requestUris = requestUris;
-        this.lastSynced = lastSynced;
-        this.syncClientFromOp = syncClientFromOp;
-        this.syncClientPeriodInSeconds = syncClientPeriodInSeconds;
-        this.allowSpontaneousScopes = allowSpontaneousScopes;
-        this.spontaneousScopes = spontaneousScopes;
+//        this.requestUris = conf.requestUris;
+//        this.lastSynced = conf.lastSynced;
+//        this.syncClientFromOp = conf.syncClientFromOp;
+//        this.syncClientPeriodInSeconds = conf.syncClientPeriodInSeconds;
+//        this.allowSpontaneousScopes = conf.allowSpontaneousScopes;
+//        this.spontaneousScopes = conf.spontaneousScopes;
     }
 
     public Boolean getAccessTokenAsJwt() {

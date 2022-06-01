@@ -60,8 +60,6 @@ public class ConfigurationFactory {
             BASE_DIR = System.getProperty("jans.base");
         } else if ((System.getProperty("catalina.base") != null) && (System.getProperty("catalina.base.ignore") == null)) {
             BASE_DIR = System.getProperty("catalina.base");
-        } else if ((System.getProperty("catalina.base") != null) && (System.getProperty("catalina.base.ignore") == null)) {
-            BASE_DIR = System.getProperty("catalina.base");
         } else if (System.getProperty("catalina.home") != null) {
             BASE_DIR = System.getProperty("catalina.home");
         } else if (System.getProperty("jboss.home.dir") != null) {
