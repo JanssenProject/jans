@@ -190,5 +190,11 @@ class JansAuthInstaller(JettyInstaller):
         for adir in ('fl', 'ftl', 'scripts'):
             self.createDirs(os.path.join(agama_root, adir))
         base.extract_from_zip(base.current_app.jans_zip, 'agama/misc', agama_root)
-        src_xml = os.path.join(Config.templateFolder, 'jetty/agama_web_resources.xml')
-        self.copyFile(src_xml, self.jetty_service_webapps)
+        self.chown(agama_root, Config.jetty_user, Config.jetty_group, recursive=True)
+
+        tmp_dir = os.path.join(Config.templateFolder, 'jetty')
+        src_xml = os.path.join(tmp_dir, 'agama_web_resources.xml')
+        self.renderTemplateInOut(src_xml, tmp_dir, self.jetty_service_webapps)
+        self.chown(os.path.join(self.jetty_service_webapps, os.path.basename(src_xml)), Config.jetty_user, Config.jetty_group)
+
+        
