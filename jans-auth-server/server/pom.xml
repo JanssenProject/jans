@@ -370,6 +370,13 @@
 			<artifactId>jans-fido2-client</artifactId>
 		</dependency>
 
+		<!-- agama -->
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>agama-engine</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
 		<!-- Weld -->
 		<dependency>
             <groupId>jakarta.validation</groupId>
