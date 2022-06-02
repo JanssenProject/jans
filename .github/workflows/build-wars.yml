@@ -1,0 +1,99 @@
+name: microk8s
+on:
+  pull_request:
+    branches:
+      - master
+      - main
+    paths-ignore:
+      - '**/*.yml'
+  
+  push:
+    branches:
+      - master
+      - main
+    paths-ignore:
+      - '**/*.yml'
+jobs:
+  build:
+    name: Build Package
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        repository: ${{ github.repository }}
+        token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+        
+    - name: File Changes Action
+        uses: trilom/file-changes-action@v1.2.4
+        id: file_changes
+        with:
+          output: ','
+          fileOutput: ','
+
+      - name: Building package...
+        id: prepare_git_log
+        run: |
+          echo "Files list..."
+          cat $HOME/files.csv
+
+          # ****************************************** #
+          #         READING ADDED FILES
+          # ****************************************** #
+          echo "Files added..."
+          cat $HOME/files_added.csv
+
+          echo "Parsing added files into array..."
+          files_added_str=$(cat $HOME/files_added.csv)
+
+          OIFS="$IFS"
+          IFS=','
+          read -a files_added_arr <<< "$files_added_str"
+          for ADDED_FILE in "${files_added_arr[@]}"; do
+            echo "Added file: $ADDED_FILE"
+            echo "$ADDED_FILE" >> $HOME/git_add_mod.csv
+          done;
+          IFS="$OIFS"
+
+          # ****************************************** #
+          #         READING MODIFIED FILES
+          # ****************************************** #
+          echo "Files modified..."
+          cat $HOME/files_modified.csv
+
+          echo "Parsing modified files into array..."
+          files_modified_str=$(cat $HOME/files_modified.csv)
+
+          OIFS="$IFS"
+          IFS=','
+          read -a files_modified_arr <<< "$files_modified_str"
+          for MODIFIED_FILE in "${files_modified_arr[@]}"; do
+            echo "Modified file: $MODIFIED_FILE"
+            echo "$MODIFIED_FILE" >> $HOME/git_add_mod.csv
+          done;
+          IFS="$OIFS"
+          
+          # ****************************************** #
+          #         READING DELETED FILES
+          # ****************************************** #
+          echo "Files Removed..."
+          cat $HOME/files_removed.csv
+
+          echo "Parsing deleted files into array..."
+          files_deleted_str=$(cat $HOME/files_removed.csv)
+
+          OIFS="$IFS"
+          IFS=','
+          read -a files_deleted_arr <<< "$files_deleted_str"
+          for DELETED_FILE in "${files_deleted_arr[@]}"; do
+            echo "Modified file: $DELETED_FILE"
+            echo "$DELETED_FILE" >> $HOME/git_deleted.csv
+          done;
+          IFS="$OIFS"
+          
+          echo " git add files"
+          cat $HOME/git_add_mod.csv
+          
+          echo " git deleted files"
+          $HOME/git_deleted.csv
