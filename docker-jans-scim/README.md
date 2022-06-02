@@ -46,13 +46,13 @@ The following environment variables are supported by the container:
 - `CN_WAIT_SLEEP_DURATION`: Delay between startup "health checks" (default to `10` seconds).
 - `CN_MAX_RAM_PERCENTAGE`: Value passed to Java option `-XX:MaxRAMPercentage`.
 - `CN_PERSISTENCE_TYPE`: Persistence backend being used (one of `ldap`, `couchbase`, or `hybrid`; default to `ldap`).
-- `CN_PERSISTENCE_LDAP_MAPPING`: Specify data that should be saved in LDAP (one of `default`, `user`, `cache`, `site`, or `token`; default to `default`). Note this environment only takes effect when `CN_PERSISTENCE_TYPE` is set to `hybrid`.
-- `CN_LDAP_URL`: Address and port of LDAP server (default to `localhost:1636`); required if `CN_PERSISTENCE_TYPE` is set to `ldap` or `hybrid`.
+- `CN_HYBRID_MAPPING`: Specify data mapping for each persistence (default to `"{}"`). Note this environment only takes effect when `CN_PERSISTENCE_TYPE` is set to `hybrid`. See [hybrid mapping](#hybrid-mapping) section for details.
+- `CN_LDAP_URL`: Address and port of LDAP server (default to `localhost:1636`).
 - `CN_LDAP_USE_SSL`: Whether to use SSL connection to LDAP server (default to `true`).
-- `CN_COUCHBASE_URL`: Address of Couchbase server (default to `localhost`); required if `CN_PERSISTENCE_TYPE` is set to `couchbase` or `hybrid`.
-- `CN_COUCHBASE_USER`: Username of Couchbase server (default to `admin`); required if `CN_PERSISTENCE_TYPE` is set to `couchbase` or `hybrid`.
-- `CN_COUCHBASE_CERT_FILE`: Couchbase root certificate location (default to `/etc/certs/couchbase.crt`); required if `CN_PERSISTENCE_TYPE` is set to `couchbase` or `hybrid`.
-- `CN_COUCHBASE_PASSWORD_FILE`: Path to file contains Couchbase password (default to `/etc/jans/conf/couchbase_password`); required if `CN_PERSISTENCE_TYPE` is set to `couchbase` or `hybrid`.
+- `CN_COUCHBASE_URL`: Address of Couchbase server (default to `localhost`).
+- `CN_COUCHBASE_USER`: Username of Couchbase server (default to `admin`).
+- `CN_COUCHBASE_CERT_FILE`: Couchbase root certificate location (default to `/etc/certs/couchbase.crt`).
+- `CN_COUCHBASE_PASSWORD_FILE`: Path to file contains Couchbase password (default to `/etc/jans/conf/couchbase_password`).
 - `CN_COUCHBASE_CONN_TIMEOUT`: Connect timeout used when a bucket is opened (default to `10000` milliseconds).
 - `CN_COUCHBASE_CONN_MAX_WAIT`: Maximum time to wait before retrying connection (default to `20000` milliseconds).
 - `CN_COUCHBASE_SCAN_CONSISTENCY`: Default scan consistency; one of `not_bounded`, `request_plus`, or `statement_plus` (default to `not_bounded`).
@@ -99,3 +99,35 @@ The following key-value pairs are the defaults:
     "script_log_level": "INFO",
 }
 ```
+
+### Hybrid mapping
+
+As per v1.0.1, hybrid persistence supports all available persistence types. To configure hybrid persistence and its data mapping, follow steps below:
+
+1.  Set `CN_PERSISTENCE_TYPE` environment variable to `hybrid`
+
+1.  Set `CN_HYBRID_MAPPING` with the following format:
+
+    ```
+    {
+        "default": "<couchbase|ldap|spanner|sql>",
+        "user": "<couchbase|ldap|spanner|sql>",
+        "site": "<couchbase|ldap|spanner|sql>",
+        "cache": "<couchbase|ldap|spanner|sql>",
+        "token": "<couchbase|ldap|spanner|sql>",
+        "session": "<couchbase|ldap|spanner|sql>",
+    }
+    ```
+
+    Example:
+
+    ```
+    {
+        "default": "sql",
+        "user": "spanner",
+        "site": "ldap",
+        "cache": "sql",
+        "token": "couchbase",
+        "session": "spanner",
+    }
+    ```
