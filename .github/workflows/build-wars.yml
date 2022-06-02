@@ -26,15 +26,15 @@ jobs:
         token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
         
     - name: File Changes Action
-        uses: trilom/file-changes-action@v1.2.4
-        id: file_changes
-        with:
+      uses: trilom/file-changes-action@v1.2.4
+      id: file_changes
+      with:
           output: ','
           fileOutput: ','
 
-      - name: Building package...
-        id: prepare_git_log
-        run: |
+    - name: Building package...
+      id: prepare_git_log
+      run: |
           echo "Files list..."
           cat $HOME/files.csv
 
