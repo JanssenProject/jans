@@ -54,8 +54,8 @@ RUN /opt/jython/bin/pip uninstall -y pip
 # Auth server
 # ===========
 
-ENV CN_VERSION=1.0.0-SNAPSHOT
-ENV CN_BUILD_DATE='2022-04-21 10:27'
+ENV CN_VERSION=1.0.1-SNAPSHOT
+ENV CN_BUILD_DATE='2022-05-24 08:14'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-server/${CN_VERSION}/jans-auth-server-${CN_VERSION}.war
 
 # Install Jans Auth
@@ -218,8 +218,8 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
 LABEL name="janssenproject/auth-server" \
     maintainer="Janssen Project <support@jans.io>" \
     vendor="Janssen Project" \
-    version="1.0.0" \
-    release="beta.16" \
+    version="1.0.1" \
+    release="1" \
     summary="Janssen Authorization Server" \
     description="OAuth 2.0 server and client; OpenID Connect Provider (OP) & UMA Authorization Server (AS)"
 
@@ -227,13 +227,12 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/custom/pages \
     ${JETTY_BASE}/jans-auth/custom/static \
     ${JETTY_BASE}/jans-auth/custom/libs \
     ${JETTY_BASE}/jans-auth/custom/i18n \
+    ${JETTY_BASE}/jans-auth/logs \
     /etc/jans/conf \
-    /app/templates \
-    /opt/jetty/temp
+    /app/templates
 
 COPY certs /etc/certs
 COPY jetty/jans-auth_web_resources.xml ${JETTY_BASE}/jans-auth/webapps/
-COPY jetty/jans-auth.xml ${JETTY_BASE}/jans-auth/webapps/
 COPY jetty/log4j2.xml ${JETTY_BASE}/jans-auth/resources/
 COPY conf/*.tmpl /app/templates/
 COPY scripts /app/scripts
@@ -242,16 +241,15 @@ RUN chmod +x /app/scripts/entrypoint.sh
 # create non-root user
 RUN adduser -s /bin/sh -D -G root -u 1000 jetty
 
- # adjust ownership
-RUN chown -R 1000:1000 /opt/jans/jetty \
-    && chown -R 1000:1000 /opt/jetty \
-    && chown -R 1000:1000 /tmp \
-    && chgrp -R 0 /opt/jans/jetty && chmod -R g=u /opt/jans/jetty \
-    && chgrp -R 0 /opt/jetty && chmod -R g=u /opt/jetty \
-    && chgrp -R 0 /tmp && chmod -R g=u /tmp \
-    && chgrp -R 0 /etc/certs && chmod -R g=u /etc/certs \
-    && chgrp -R 0 /etc/jans && chmod -R g=u /etc/jans \
-    && chmod -R +w /usr/java/latest/jre/lib/security/cacerts && chgrp -R 0 /usr/java/latest/jre/lib/security/cacerts && chmod -R g=u /usr/java/latest/jre/lib/security/cacerts \
+COPY --chown=1000:0 jetty/jans-auth.xml ${JETTY_BASE}/jans-auth/webapps/
+
+# adjust ownership and permission
+RUN chmod -R g=u ${JETTY_BASE}/jans-auth/custom \
+    && chmod -R g=u ${JETTY_BASE}/jans-auth/resources \
+    && chmod -R g=u ${JETTY_BASE}/jans-auth/logs \
+    && chmod -R g=u /etc/certs \
+    && chmod -R g=u /etc/jans \
+    && chmod 664 /usr/java/latest/jre/lib/security/cacerts \
     && chmod 664 /opt/jetty/etc/jetty.xml \
     && chmod 664 /opt/jetty/etc/webdefault.xml
 

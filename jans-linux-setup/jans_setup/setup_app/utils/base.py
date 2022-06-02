@@ -72,7 +72,7 @@ if not (os_type and os_version):
     sys.exit()
 
 os_name = os_type + os_version
-deb_sysd_clone = os_name in ('ubuntu18', 'ubuntu20', 'debian9', 'debian10')
+deb_sysd_clone = os_name in ('ubuntu18', 'ubuntu20', 'ubuntu22', 'debian9', 'debian10')
 
 # Determine service path
 if (os_type in ('centos', 'red', 'fedora', 'suse') and os_initdaemon == 'systemd') or deb_sysd_clone:
@@ -353,7 +353,8 @@ def extract_from_zip(zip_file, sub_dir, target_dir, remove_target_dir=False):
     if remove_target_dir and target_dir_path.exists():
         shutil.rmtree(target_dir_path)
 
-    target_dir_path.mkdir(parents=True)
+    if not target_dir_path.exists():
+        target_dir_path.mkdir(parents=True)
 
     for member in zipobj.infolist():
         if member.filename.startswith(parent_sub_dir):

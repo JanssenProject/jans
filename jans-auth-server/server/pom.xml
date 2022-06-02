@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>jans-auth-server</artifactId>
 	<name>Jans authentication server</name>
@@ -9,7 +8,7 @@
 	<parent>
 		<groupId>io.jans</groupId>
 		<artifactId>jans-auth-server-parent</artifactId>
-		<version>1.0.0-SNAPSHOT</version>
+		<version>1.0.1-SNAPSHOT</version>
 	</parent>
 
 	<prerequisites>
@@ -370,6 +369,13 @@
 			<groupId>io.jans</groupId>
 			<artifactId>jans-fido2-client</artifactId>
 		</dependency>
+
+		<!-- agama -->
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>agama-engine</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
 		<!-- Weld -->
 		<dependency>

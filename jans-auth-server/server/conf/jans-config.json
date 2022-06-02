@@ -424,5 +424,21 @@
     },
     "deviceAuthzRequestExpiresIn": 1800,
     "deviceAuthzTokenPollInterval": 5,
-    "deviceAuthzResponseTypeToProcessAuthz": "code"
+    "deviceAuthzResponseTypeToProcessAuthz": "code",
+    "agamaConfiguration": {
+        "enabled": false,
+        "templatesPath": "/ftl",
+        "scriptsPath": "/scripts",
+        "serializerType": "KRYO",
+        "maxItemsLoggedInCollections": 3,
+        "pageMismatchErrorPage": "mismatch.ftl",
+        "interruptionErrorPage": "timeout.ftl",
+        "crashErrorPage": "crash.ftl",
+        "finishedFlowPage": "finished.ftl",    
+        "bridgeScriptPage": "agama.xhtml",
+        "defaultResponseHeaders": {
+            "Content-Type": "text/html",
+            "Expires": "0"
+        }
+    }
 }

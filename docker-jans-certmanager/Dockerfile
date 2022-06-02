@@ -16,8 +16,8 @@ RUN apk update \
 # ===========
 
 # JAR files required to generate OpenID Connect keys
-ENV CN_VERSION=1.0.0-SNAPSHOT
-ENV CN_BUILD_DATE='2022-04-21 10:21'
+ENV CN_VERSION=1.0.1-SNAPSHOT
+ENV CN_BUILD_DATE='2022-05-24 08:14'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-client/${CN_VERSION}/jans-auth-client-${CN_VERSION}-jar-with-dependencies.jar
 
 RUN wget -q ${CN_SOURCE_URL} -P /app/javalibs/
@@ -138,15 +138,24 @@ ENV CN_WAIT_MAX_TIME=300 \
 LABEL name="janssenproject/certmanager" \
     maintainer="Janssen Project <support@jans.io>" \
     vendor="Janssen Project" \
-    version="1.0.0" \
-    release="beta.16" \
+    version="1.0.1" \
+    release="1" \
     summary="Janssen Certmanager" \
     description="Manage certs and crypto keys for Janssen Server"
 
-COPY scripts /app/scripts
+RUN mkdir -p /etc/certs /etc/jans/conf
 
-RUN mkdir -p /etc/certs \
-    && chmod +x /app/scripts/entrypoint.sh
+COPY scripts /app/scripts
+RUN chmod +x /app/scripts/entrypoint.sh
+
+# create non-root user
+RUN adduser -s /bin/sh -D -G root -u 1000 1000
+
+# adjust ownership and permission
+RUN chmod -R g=u /etc/certs \
+    && chmod -R g=u /etc/jans
+
+USER 1000
 
 ENTRYPOINT ["tini", "-g", "--", "sh", "/app/scripts/entrypoint.sh"]
 CMD ["--help"]

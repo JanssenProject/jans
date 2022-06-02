@@ -44,8 +44,8 @@ RUN wget -q https://ox.gluu.org/maven/org/gluufederation/jython-installer/${JYTH
 # SCIM
 # ====
 
-ENV CN_VERSION=1.0.0-SNAPSHOT
-ENV CN_BUILD_DATE='2022-04-21 10:29'
+ENV CN_VERSION=1.0.1-SNAPSHOT
+ENV CN_BUILD_DATE='2022-05-24 08:15'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-scim-server/${CN_VERSION}/jans-scim-server-${CN_VERSION}.war
 
 # Install SCIM
@@ -163,15 +163,14 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
 LABEL name="janssenproject/scim" \
     maintainer="Janssen Project <support@jans.io>" \
     vendor="Janssen Project" \
-    version="1.0.0" \
-    release="beta.16" \
+    version="1.0.1" \
+    release="1" \
     summary="Janssen SCIM" \
     description="SCIM server"
 
 RUN mkdir -p /etc/certs \
     /etc/jans/conf \
-    /app/templates \
-    /opt/jetty/temp
+    ${JETTY_BASE}/jans-scim/logs
 
 COPY jetty/jans-scim.xml ${JETTY_BASE}/jans-scim/webapps/
 COPY jetty/log4j2.xml ${JETTY_BASE}/jans-scim/resources/
@@ -183,17 +182,12 @@ RUN chmod +x /app/scripts/entrypoint.sh
 # create non-root user
 RUN adduser -s /bin/sh -D -G root -u 1000 jetty
 
- # adjust ownership
-RUN chown -R 1000:1000 /opt/jans/jetty \
-    && chown -R 1000:1000 /etc/jans \
-    && chown -R 1000:1000 /opt/jetty \
-    && chown -R 1000:1000 /tmp \
-    && chgrp -R 0 /opt/jans/jetty && chmod -R g=u /opt/jans/jetty \
-    && chgrp -R 0 /opt/jetty && chmod -R g=u /opt/jetty \
-    && chgrp -R 0 /tmp && chmod -R g=u /tmp \
-    && chgrp -R 0 /etc/certs && chmod -R g=u /etc/certs \
-    && chgrp -R 0 /etc/jans && chmod -R g=u /etc/jans \
-    && chmod -R +w /usr/java/latest/jre/lib/security/cacerts && chgrp -R 0 /usr/java/latest/jre/lib/security/cacerts && chmod -R g=u /usr/java/latest/jre/lib/security/cacerts \
+# adjust ownership
+RUN chmod -R g=u ${JETTY_BASE}/jans-scim/resources \
+    && chmod -R g=u ${JETTY_BASE}/jans-scim/logs \
+    && chmod -R g=u /etc/certs \
+    && chmod -R g=u /etc/jans \
+    && chmod 664 /usr/java/latest/jre/lib/security/cacerts \
     && chmod 664 /opt/jetty/etc/jetty.xml \
     && chmod 664 /opt/jetty/etc/webdefault.xml
 

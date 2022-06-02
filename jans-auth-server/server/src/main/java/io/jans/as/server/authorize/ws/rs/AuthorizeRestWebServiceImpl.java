@@ -288,7 +288,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             builder = authorize(authzRequest);
         } catch (WebApplicationException e) {
             applicationAuditLogger.sendMessage(authzRequest.getAuditLog());
-            if (log.isErrorEnabled())
+            if (log.isErrorEnabled() && canLogWebApplicationException(e))
                 log.error(e.getMessage(), e);
             throw e;
         } catch (AcrChangedException e) { // Acr changed
@@ -322,17 +322,23 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         return builder.build();
     }
 
+    private static boolean canLogWebApplicationException(WebApplicationException e) {
+        if (e == null || e.getResponse() == null) {
+            return false;
+        }
+        final int status = e.getResponse().getStatus();
+        return status != 302;
+    }
+
     private ResponseBuilder authorize(AuthzRequest authzRequest) throws AcrChangedException, SearchException, TokenBindingParseException {
         String tokenBindingHeader = authzRequest.getHttpRequest().getHeader("Sec-Token-Binding");
+        boolean isPar = authzRequestService.processPar(authzRequest);
+
         List<Prompt> prompts = Prompt.fromString(authzRequest.getPrompt(), " ");
         final List<ResponseType> responseTypes = authzRequest.getResponseTypeList();
 
         SessionId sessionUser = identity.getSessionId();
         User user = sessionIdService.getUser(sessionUser);
-
-        boolean isPar = authzRequestService.processPar(authzRequest);
-
-        Map<String, String> customResponseHeaders = Util.jsonObjectArrayStringAsMap(authzRequest.getCustomResponseHeaders());
 
         updateSessionForROPC(authzRequest.getHttpRequest(), sessionUser);
 
@@ -340,7 +346,6 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
         String deviceAuthzUserCode = deviceAuthorizationService.getUserCodeFromSession(authzRequest.getHttpRequest());
         authzRequest.setRedirectUri(authorizeRestWebServiceValidator.validateRedirectUri(client, authzRequest.getRedirectUri(), authzRequest.getState(), deviceAuthzUserCode, authzRequest.getHttpRequest()));
-
         authzRequestService.createRedirectUriResponse(authzRequest);
 
         authorizeRestWebServiceValidator.validateAcrs(authzRequest, client);
@@ -349,7 +354,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
         authorizeRestWebServiceValidator.checkSignedRequestRequired(authzRequest);
 
-        authzRequestService.processRequestObject(authzRequest, client, scopes, user);
+        authzRequestService.processRequestObject(authzRequest, client, scopes, user, prompts);
+
         validateRequestJwt(authzRequest, isPar, client);
 
         authorizeRestWebServiceValidator.validate(authzRequest, responseTypes, client);
@@ -495,16 +501,22 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
         ResponseBuilder builder = RedirectUtil.getRedirectResponseBuilder(authzRequest.getRedirectUriResponse().getRedirectUri(), authzRequest.getHttpRequest());
 
-        if (isTrue(appConfiguration.getCustomHeadersWithAuthorizationResponse())) {
-            for (Entry<String, String> entry : customResponseHeaders.entrySet()) {
-                builder.header(entry.getKey(), entry.getValue());
-            }
-        }
+        addCustomHeaders(builder, authzRequest);
 
         runCiba(authzRequest.getAuthReqId(), client, authzRequest.getHttpRequest(), authzRequest.getHttpResponse());
         processDeviceAuthorization(deviceAuthzUserCode, user);
 
         return builder;
+    }
+
+    private void addCustomHeaders(ResponseBuilder builder, AuthzRequest authzRequest) {
+        if (isTrue(appConfiguration.getCustomHeadersWithAuthorizationResponse())) {
+
+            Map<String, String> customResponseHeaders = Util.jsonObjectArrayStringAsMap(authzRequest.getCustomResponseHeaders());
+            for (Entry<String, String> entry : customResponseHeaders.entrySet()) {
+                builder.header(entry.getKey(), entry.getValue());
+            }
+        }
     }
 
     private void addResponseParameterScope(AuthzRequest authzRequest, AuthorizationGrant authorizationGrant) {

@@ -62,6 +62,14 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         self.copyFile(client_keystore_fn, os.path.join(Config.output_dir, 'test/jans-auth/server'))
         self.copyFile(keys_json_fn, os.path.join(Config.output_dir, 'test/jans-auth/server'))
 
+
+    def enable_cusom_scripts(self):
+        self.logIt("Enabling custom scripts")
+        custom_scripts = ('2DAF-F995', '2DAF-F996', '4BBE-C6A8', 'A51E-76DA', '0300-BA90')
+        for inum in custom_scripts:
+            self.dbUtils.enable_script(inum)
+
+
     def load_test_data(self):
         Config.pbar.progress(self.service_name, "Loading Test Data", False)
         self.logIt("Re-binding database")
@@ -235,7 +243,8 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                                     'sessionIdRequestParameterEnabled': True,
                                     'skipRefreshTokenDuringRefreshing': False,
                                     'enabledComponents': ['unknown', 'health_check', 'userinfo', 'clientinfo', 'id_generation', 'registration', 'introspection', 'revoke_token', 'revoke_session', 'end_session', 'status_session', 'jans_configuration', 'ciba', 'uma', 'u2f', 'device_authz', 'stat', 'par'],
-                                    'cleanServiceInterval':7200
+                                    'cleanServiceInterval':7200,
+                                    'loggingLevel': 'TRACE',
                                     }
 
         if Config.get('config_patch_creds'):
@@ -265,14 +274,9 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                 oxAuthConfDynamic_changes.update(datajs)
                 self.logIt("oxAuthConfDynamic was updated with auto test ciba patch")
 
-        custom_scripts = ('2DAF-F995', '2DAF-F996', '4BBE-C6A8', 'A51E-76DA')
-
         self.dbUtils.set_oxAuthConfDynamic(oxAuthConfDynamic_changes)
 
-
-        # Enable custom scripts
-        for inum in custom_scripts:
-            self.dbUtils.enable_script(inum)
+        self.enable_cusom_scripts()
 
         if self.dbUtils.moddb == static.BackendTypes.LDAP:
             # Update LDAP schema

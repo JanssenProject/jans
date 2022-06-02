@@ -22,6 +22,7 @@ import java.util.Map;
 
 /**
  * Represents a device authorization request to send to the authorization server.
+ * @version April 25, 2022
  */
 public class DeviceAuthzRequest extends ClientAuthnRequest {
 

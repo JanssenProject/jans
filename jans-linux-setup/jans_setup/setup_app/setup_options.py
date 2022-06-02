@@ -2,7 +2,7 @@ import os
 import sys
 import argparse
 
-from setup_app.static import InstallTypes
+from setup_app.static import InstallTypes, SetupProfiles
 from setup_app.utils import base
 
 def get_setup_options():
@@ -146,10 +146,18 @@ def get_setup_options():
 
         setupOptions['properties_password'] = base.argsp.properties_password
 
-    if base.current_app.profile == 'openbanking':
+    if base.current_app.profile == SetupProfiles.OPENBANKING:
         setupOptions['opendj_install'] = InstallTypes.NONE
-        if base.argsp.static_kid:
-            setupOptions['staticKid'] = base.argsp.static_kid
+        setupOptions['static_kid'] = base.argsp.static_kid
+        setupOptions['ob_key_fn'] = base.argsp.ob_key_fn
+        setupOptions['ob_cert_fn'] = base.argsp.ob_cert_fn
+        setupOptions['ob_alias'] = base.argsp.ob_alias
+        setupOptions['jwks_uri'] = base.argsp.jwks_uri
+
+        if base.argsp.no_external_key:
+            setupOptions['use_external_key'] = False
+
+
 
     if base.argsp.ip_address:
         setupOptions['ip'] = base.argsp.ip_address

@@ -23,7 +23,7 @@ RUN python3 -m ensurepip \
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_LINUX_SETUP_VERSION=eb113d09421b95671fe1ab4eaa5c4bafc2aed6af
+ENV JANS_LINUX_SETUP_VERSION=f27b30acb95e7bd59c5088350978d3792cb90a69
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -172,12 +172,12 @@ ENV CN_CACHE_TYPE=NATIVE_PERSISTENCE \
 LABEL name="janssenproject/persistence-loader" \
     maintainer="Janssen Project <support@jans.io>" \
     vendor="Janssen Project" \
-    version="1.0.0" \
-    release="beta.16" \
+    version="1.0.1" \
+    release="1" \
     summary="Janssen Authorization Server Persistence loader" \
     description="Generate initial data for persistence layer"
 
-RUN mkdir -p /app/tmp /app/custom_ldif /etc/certs /etc/jans/conf
+RUN mkdir -p /app/custom_ldif /etc/certs /etc/jans/conf
 
 COPY scripts /app/scripts
 # this overrides existing templates
@@ -187,15 +187,10 @@ RUN chmod +x /app/scripts/entrypoint.sh
 # create non-root user
 RUN adduser -s /bin/sh -D -G root -u 1000 1000
 
- # adjust ownership
-RUN chown -R 1000:1000 /tmp \
-    && chown -R 1000:1000 /app/tmp/ \
-    && chown -R 1000:1000 /app/custom_ldif/ \
-    && chgrp -R 0 /tmp && chmod -R g=u /tmp \
-    && chgrp -R 0 /app/tmp && chmod -R g=u /app/tmp \
-    && chgrp -R 0 /app/custom_ldif && chmod -R g=u /app/custom_ldif \
-    && chgrp -R 0 /etc/certs && chmod -R g=u /etc/certs \
-    && chgrp -R 0 /etc/jans && chmod -R g=u /etc/jans
+# adjust ownership and permission
+RUN chmod -R g=u /app/custom_ldif \
+    && chmod -R g=u /etc/certs \
+    && chmod -R g=u /etc/jans
 
 USER 1000
 

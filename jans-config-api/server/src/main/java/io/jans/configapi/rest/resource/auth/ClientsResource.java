@@ -11,15 +11,19 @@ import static io.jans.as.model.util.Util.escapeLog;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.common.EncryptionService;
 import io.jans.as.common.service.common.InumService;
+import io.jans.as.persistence.model.Scope;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.core.model.SearchRequest;
 import io.jans.configapi.service.auth.ClientService;
 import io.jans.configapi.service.auth.ConfigurationService;
+import io.jans.configapi.service.auth.ScopeService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.util.AttributeNames;
+import io.jans.configapi.util.AuthUtil;
 import io.jans.configapi.core.util.Jackson;
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.model.PagedResult;
 import io.jans.util.StringHelper;
 import io.jans.util.security.StringEncrypter.EncryptionException;
@@ -36,8 +40,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import org.slf4j.Logger;
-
 /**
  * @author Mougang T.Gasmyr
  *
@@ -52,9 +54,6 @@ public class ClientsResource extends ConfigBaseResource {
     private static final String OPENID_CONNECT_CLIENT = "openid connect client";
 
     @Inject
-    Logger logger;
-
-    @Inject
     ClientService clientService;
     
     @Inject
@@ -65,6 +64,12 @@ public class ClientsResource extends ConfigBaseResource {
 
     @Inject
     EncryptionService encryptionService;
+    
+    @Inject
+    AuthUtil authUtil;
+    
+    @Inject
+    ScopeService scopeService;
 
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_READ_ACCESS })
@@ -111,7 +116,11 @@ public class ClientsResource extends ConfigBaseResource {
             inum = inumService.generateClientInum();
             client.setClientId(inum);
         }
-        checkNotNull(client.getClientName(), AttributeNames.DISPLAY_NAME);
+        checkNotNull(client.getDisplayName(), AttributeNames.DISPLAY_NAME);
+        
+        //scope validation
+        checkScopeFormat(client);
+        
         String clientSecret = client.getClientSecret();
 
         if (StringHelper.isEmpty(clientSecret)) {
@@ -121,7 +130,7 @@ public class ClientsResource extends ConfigBaseResource {
         client.setClientSecret(encryptionService.encrypt(clientSecret));
         client.setDn(clientService.getDnForClient(inum));
         client.setDeletable(client.getClientSecretExpiresAt() != null);
-        ignoreCustomObjectClassesForNonLDAP(client);       
+        ignoreCustomObjectClassesForNonLDAP(client);  
         
         logger.debug("Final Client details to be added - client:{}", client);      
         clientService.addClient(client);
@@ -139,9 +148,13 @@ public class ClientsResource extends ConfigBaseResource {
         }
         String inum = client.getClientId();
         checkNotNull(inum, AttributeNames.INUM);
-        checkNotNull(client.getClientName(), AttributeNames.DISPLAY_NAME);
+        checkNotNull(client.getDisplayName(), AttributeNames.DISPLAY_NAME);
         Client existingClient = clientService.getClientByInum(inum);
         checkResourceNotNull(existingClient, OPENID_CONNECT_CLIENT);
+        
+        //scope validation
+        checkScopeFormat(client);
+        
         client.setClientId(existingClient.getClientId());
         client.setBaseDn(clientService.getDnForClient(inum));
         client.setDeletable(client.getExpirationDate() != null);
@@ -233,6 +246,57 @@ public class ClientsResource extends ConfigBaseResource {
         return client;
     }
     
-  
+    private Client checkScopeFormat(Client client) {
+        if (client == null) {
+            return client;
+        }
 
+        // check scope
+        logger.debug("Checking client.getScopes():{}", client.getScopes());
+        if (client.getScopes() == null || client.getScopes().length == 0) {
+            return client;
+        }
+
+        List<String> validScopes = new ArrayList<>();
+        List<String> invalidScopes = new ArrayList<>();
+
+        for (String scope : client.getScopes()) {
+            logger.debug("Is scope:{} valid:{}", scope, authUtil.isValidDn(scope));
+            List<Scope> scopes = new ArrayList<>();
+            if (authUtil.isValidDn(scope)) {
+                Scope scp = findScopeByDn(scope);
+                if(scp!=null) {
+                    scopes.add(scp);
+                }
+            } else {
+                scopes = scopeService.searchScopesById(scope);
+            }
+            logger.debug("Scopes from DB - {}'", scopes);
+            if (!scopes.isEmpty()) {
+                validScopes.add(scopes.get(0).getDn());
+            } else {
+                invalidScopes.add(scope);
+            }
+        }
+        logger.debug("Scope validation result - validScopes:{}, invalidScopes:{} ", validScopes, invalidScopes);
+
+        if (!invalidScopes.isEmpty()) {
+            thorwBadRequestException("Invalid scope in request -> " + invalidScopes.toString());
+        }
+
+        // reset scopes
+        if (!validScopes.isEmpty()) {
+            String[] scopeArr = validScopes.stream().toArray(String[]::new);
+            client.setScopes(scopeArr);
+        }
+        return client;
+    }
+
+    private Scope findScopeByDn(String scopeDn) {
+        try {
+            return scopeService.getScopeByDn(scopeDn);
+        } catch (EntryPersistenceException e) {
+            return null;
+        }
+    }
 }

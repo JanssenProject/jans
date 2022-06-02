@@ -34,8 +34,8 @@ EXPOSE 8080
 # FIDO2
 # =====
 
-ENV CN_VERSION=1.0.0-SNAPSHOT
-ENV CN_BUILD_DATE='2022-04-21 08:13'
+ENV CN_VERSION=1.0.1-SNAPSHOT
+ENV CN_BUILD_DATE='2022-05-24 08:13'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-fido2-server/${CN_VERSION}/jans-fido2-server-${CN_VERSION}.war
 
 # Install FIDO2
@@ -79,8 +79,10 @@ RUN cd /tmp/jans \
 # cleanup
 RUN rm -rf /tmp/jans
 
-# download Apple cert
-RUN wget -q https://www.apple.com/certificateauthority/Apple_WebAuthn_Root_CA.pem -P /etc/jans/conf/fido2
+# download external files
+RUN wget -q https://www.apple.com/certificateauthority/Apple_WebAuthn_Root_CA.pem -P /etc/jans/conf/fido2/apple/ \
+    && wget -q https://mds.fidoalliance.org/ -O /etc/jans/conf/fido2/mds/toc/toc.jwt \
+    && wget -q http://secure.globalsign.com/cacert/root-r3.crt -P /etc/jans/conf/fido2/mds/cert/
 
 # ======
 # Python
@@ -186,14 +188,13 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
 LABEL name="janssenproject/fido2" \
     maintainer="Janssen Project <support@jans.io>" \
     vendor="Janssen Project" \
-    version="1.0.0" \
-    release="beta.16" \
+    version="1.0.1" \
+    release="1" \
     summary="Janssen FIDO2" \
     description="FIDO2 server"
 
 RUN mkdir -p /etc/certs \
-    /app/templates \
-    /opt/jetty/temp
+    ${JETTY_BASE}/jans-fido2/logs
 
 COPY jetty/jans-fido2.xml ${JETTY_BASE}/jans-fido2/webapps/
 COPY jetty/log4j2.xml ${JETTY_BASE}/jans-fido2/resources/
@@ -205,17 +206,12 @@ RUN chmod +x /app/scripts/entrypoint.sh
 # create non-root user
 RUN adduser -s /bin/sh -D -G root -u 1000 jetty
 
- # adjust ownership
-RUN chown -R 1000:1000 /opt/jans/jetty \
-    && chown -R 1000:1000 /etc/jans \
-    && chown -R 1000:1000 /opt/jetty \
-    && chown -R 1000:1000 /tmp \
-    && chgrp -R 0 /opt/jans/jetty && chmod -R g=u /opt/jans/jetty \
-    && chgrp -R 0 /opt/jetty && chmod -R g=u /opt/jetty \
-    && chgrp -R 0 /tmp && chmod -R g=u /tmp \
-    && chgrp -R 0 /etc/certs && chmod -R g=u /etc/certs \
-    && chgrp -R 0 /etc/jans && chmod -R g=u /etc/jans \
-    && chmod -R +w /usr/java/latest/jre/lib/security/cacerts && chgrp -R 0 /usr/java/latest/jre/lib/security/cacerts && chmod -R g=u /usr/java/latest/jre/lib/security/cacerts \
+# adjust ownership and permission
+RUN chmod -R g=u ${JETTY_BASE}/jans-fido2/resources \
+    && chmod -R g=u ${JETTY_BASE}/jans-fido2/logs \
+    && chmod -R g=u /etc/certs \
+    && chmod -R g=u /etc/jans \
+    && chmod 664 /usr/java/latest/jre/lib/security/cacerts \
     && chmod 664 /opt/jetty/etc/jetty.xml \
     && chmod 664 /opt/jetty/etc/webdefault.xml
 

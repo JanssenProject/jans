@@ -58,10 +58,6 @@ import io.jans.model.custom.script.type.uma.UmaRptClaimsType;
 import io.jans.model.custom.script.type.uma.UmaRptPolicyType;
 import io.jans.model.custom.script.type.user.CacheRefreshType;
 import io.jans.model.custom.script.type.user.DummyCacheRefreshType;
-import io.jans.model.custom.script.type.user.DummyUpdateUserType;
-import io.jans.model.custom.script.type.user.DummyUserRegistrationType;
-import io.jans.model.custom.script.type.user.UpdateUserType;
-import io.jans.model.custom.script.type.user.UserRegistrationType;
 import io.jans.orm.annotation.AttributeEnum;
 
 /**
@@ -79,9 +75,6 @@ public enum CustomScriptType implements AttributeEnum {
             new DummyApplicationSessionType()),
     CACHE_REFRESH("cache_refresh", "Cache Refresh", CacheRefreshType.class, CustomScript.class, "CacheRefresh",
             new DummyCacheRefreshType()),
-    UPDATE_USER("update_user", "Update User", UpdateUserType.class, CustomScript.class, "UpdateUser", new DummyUpdateUserType()),
-    USER_REGISTRATION("user_registration", "User Registration", UserRegistrationType.class, CustomScript.class, "UserRegistration",
-            new DummyUserRegistrationType()),
     CLIENT_REGISTRATION("client_registration", "Client Registration", ClientRegistrationType.class, CustomScript.class, "ClientRegistration",
             new DummyClientRegistrationType()),
     ID_GENERATOR("id_generator", "Id Generator", IdGeneratorType.class, CustomScript.class, "IdGenerator",
@@ -112,10 +105,10 @@ public enum CustomScriptType implements AttributeEnum {
     private String displayName;
     private Class<? extends BaseExternalType> customScriptType;
     private Class<? extends CustomScript> customScriptModel;
-    private String pythonClass;
+    private String className;
     private BaseExternalType defaultImplementation;
 
-    private static Map<String, CustomScriptType> MAP_BY_VALUES = new HashMap<String, CustomScriptType>();
+    private static final Map<String, CustomScriptType> MAP_BY_VALUES = new HashMap<>();
 
     static {
         for (CustomScriptType enumType : values()) {
@@ -124,12 +117,12 @@ public enum CustomScriptType implements AttributeEnum {
     }
 
     CustomScriptType(String value, String displayName, Class<? extends BaseExternalType> customScriptType,
-            Class<? extends CustomScript> customScriptModel, String pythonClass, BaseExternalType defaultImplementation) {
+                     Class<? extends CustomScript> customScriptModel, String className, BaseExternalType defaultImplementation) {
         this.displayName = displayName;
         this.value = value;
         this.customScriptType = customScriptType;
         this.customScriptModel = customScriptModel;
-        this.pythonClass = pythonClass;
+        this.className = className;
         this.defaultImplementation = defaultImplementation;
     }
 
@@ -153,8 +146,8 @@ public enum CustomScriptType implements AttributeEnum {
         return customScriptModel;
     }
 
-    public String getPythonClass() {
-        return pythonClass;
+    public String getClassName() {
+        return className;
     }
 
     public BaseExternalType getDefaultImplementation() {

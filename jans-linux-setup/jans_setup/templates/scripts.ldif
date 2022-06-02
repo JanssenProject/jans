@@ -279,49 +279,6 @@ objectClass: jansCustomScr
 jansEnabled: false
 jansProgLng: python
 
-dn: inum=522F-CDC5,ou=scripts,o=jans
-description: Sample Update User script
-displayName: update_user
-inum: 522F-CDC5
-jansLevel: 100
-jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
-jansRevision: 1
-jansScr::%(update_user_samplescript)s
-jansScrTyp: update_user
-objectClass: top
-objectClass: jansCustomScr
-jansEnabled: false
-jansProgLng: python
-
-dn: inum=6EA0-8F0C,ou=scripts,o=jans
-description: Sample User Registration script
-displayName: user_registration
-inum: 6EA0-8F0C
-jansConfProperty: {"value1":"enable_user","value2":"false","description":""}
-jansLevel: 90
-jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
-jansRevision: 1
-jansScr::%(user_registration_samplescript)s
-jansScrTyp: user_registration
-objectClass: top
-objectClass: jansCustomScr
-jansEnabled: false
-jansProgLng: python
-
-dn: inum=6EA0-8F0D,ou=scripts,o=jans
-description: Sample Confirm User Registration  script
-displayName: user_confirm_registration
-inum: 6EA0-8F0D
-jansLevel: 100
-jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
-jansRevision: 1
-jansScr::%(user_registration_confirmregistrationsamplescript)s
-jansScrTyp: user_registration
-objectClass: top
-objectClass: jansCustomScr
-jansEnabled: false
-jansProgLng: python
-
 dn: inum=8BAF-80D7,ou=scripts,o=jans
 description: Fido2 authentication module
 displayName: fido2
@@ -559,3 +516,33 @@ jansRevision: 1
 jansProgLng: python
 jansScrTyp: config_api_auth
 jansScr::%(config_api_config_api_interception)s
+
+dn: inum=0300-BA90,ou=scripts,o=jans
+objectClass: jansCustomScr
+objectClass: top
+description: Java Custom Sample Script
+displayName: discovery_java_params
+inum: 0300-BA90
+jansEnabled: FALSE
+jansLevel: 1
+jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+jansProgLng: java
+jansRevision: 11
+jansScr::%(discovery_discovery)s
+jansScrTyp: discovery
+
+dn: inum=BADA-BADA,ou=scripts,o=jans
+objectClass: jansCustomScr
+objectClass: top
+description: Agama Script
+displayName: agama
+inum: BADA-BADA
+jansConfProperty: {"value1":"cust_param_name","value2":"customParam1","hide":false,"description":""}
+jansEnabled: false
+jansLevel: 10
+jansModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
+jansModuleProperty: {"value1":"location_type","value2":"ldap","description": ""}
+jansProgLng: python
+jansRevision: 1
+jansScr::%(person_authentication_agamabridge)s
+jansScrTyp: person_authentication

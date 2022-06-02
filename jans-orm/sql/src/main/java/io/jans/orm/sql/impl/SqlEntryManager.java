@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
+import io.jans.orm.model.base.LocalizedString;
 import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
@@ -950,5 +951,20 @@ public class SqlEntryManager extends BaseEntryManager implements Serializable {
 	protected boolean isSupportForceUpdate() {
 		return true;
 	}
+
+    @Override
+    protected List<AttributeData> getAttributeDataFromLocalizedString(String ldapAttributeName, LocalizedString localizedString) {
+        List<AttributeData> listAttributes = new ArrayList<>();
+
+        localizedString.getLanguageTags().forEach(languageTag -> {
+            String value = localizedString.getValue(languageTag);
+            String key = localizedString.addLdapLanguageTag(ldapAttributeName, languageTag);
+            AttributeData attributeData = new AttributeData(key, value);
+
+            listAttributes.add(attributeData);
+        });
+
+        return listAttributes;
+    }
 
 }

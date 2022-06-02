@@ -1,6 +1,6 @@
-CN_VERSION=1.0.0
+CN_VERSION=1.0.1
 IMAGE_NAME=janssenproject/fido2
-UNSTABLE_VERSION=dev
+UNSTABLE_VERSION?=dev
 
 build-dev:
 	@echo "[I] Building Docker image ${IMAGE_NAME}:${CN_VERSION}_${UNSTABLE_VERSION}"

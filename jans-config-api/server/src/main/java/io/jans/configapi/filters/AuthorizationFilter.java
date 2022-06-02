@@ -23,7 +23,6 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 import jakarta.ws.rs.ext.Provider;
 
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
 /**
@@ -78,7 +77,7 @@ public class AuthorizationFilter implements ContainerRequestFilter {
 
         log.info("\n\n\n AuthorizationFilter::filter() - Config Api OAuth Valdation Enabled");
         if (!isTokenBasedAuthentication(authorizationHeader)) {
-            abortWithUnauthorized(context);
+            abortWithUnauthorized(context, "ONLY TOKEN BASED AUTHORIZATION IS SUPPORTED!");
             log.info("======ONLY TOKEN BASED AUTHORIZATION IS SUPPORTED======================");
             return;
         }
@@ -93,7 +92,7 @@ public class AuthorizationFilter implements ContainerRequestFilter {
             log.info("======AUTHORIZATION  GRANTED===========================================");
         } catch (Exception ex) {
             log.error("======AUTHORIZATION  FAILED ===========================================", ex);
-            abortWithUnauthorized(context);
+            abortWithUnauthorized(context, ex.getMessage());
         }
 
     }
@@ -103,8 +102,8 @@ public class AuthorizationFilter implements ContainerRequestFilter {
                 && authorizationHeader.toLowerCase().startsWith(AUTHENTICATION_SCHEME.toLowerCase() + " ");
     }
 
-    private void abortWithUnauthorized(ContainerRequestContext requestContext) {
-        requestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED)
+    private void abortWithUnauthorized(ContainerRequestContext requestContext, String errMsg) {
+        requestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED).entity(errMsg)
                 .header(HttpHeaders.WWW_AUTHENTICATE, AUTHENTICATION_SCHEME).build());
     }
 
