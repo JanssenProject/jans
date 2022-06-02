@@ -18,6 +18,7 @@ import freemarker.template.TemplateExceptionHandler;
 
 import io.jans.agama.engine.exception.TemplateProcessingException;
 import io.jans.agama.model.EngineConfig;
+import io.jans.util.Pair;
 
 import org.slf4j.Logger;
 
@@ -34,17 +35,22 @@ public class TemplatingService {
     
     private Configuration fmConfig;
     
-    public String process(String templatePath, Object dataModel, Writer writer, boolean useClassloader)
+    public Pair<String, String> process(String templatePath, Object dataModel, Writer writer, boolean useClassloader)
             throws TemplateProcessingException {
+
         try {
             //Get template, inject data, and write output
             Template t = useClassloader ? getTemplateFromClassLoader(templatePath) : getTemplate(templatePath);
             t.process(Optional.ofNullable(dataModel).orElse(Collections.emptyMap()), writer);
-            return Optional.ofNullable(t.getOutputFormat()).map(OutputFormat::getMimeType).orElse(null);
+
+            String mime = Optional.ofNullable(t.getOutputFormat()).map(OutputFormat::getMimeType).orElse(null);
+            String encoding = Optional.ofNullable(t.getEncoding()).orElse(fmConfig.getDefaultEncoding());
+            return new Pair<>(mime, encoding);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             throw new TemplateProcessingException(e.getMessage(), e);
         }
+
     }
     
     private Template getTemplate(String path) throws IOException {
@@ -62,9 +68,7 @@ public class TemplatingService {
 
         fmConfig = new Configuration(Configuration.VERSION_2_3_31);
         fmConfig.setDefaultEncoding(UTF_8.toString());
-        //TODO: ?
-        //fmConfig.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
-        fmConfig.setTemplateExceptionHandler(TemplateExceptionHandler.DEBUG_HANDLER);
+        fmConfig.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
         fmConfig.setLogTemplateExceptions(false);
         fmConfig.setWrapUncheckedExceptions(true);
         fmConfig.setFallbackOnNullLoopVariable(false);
