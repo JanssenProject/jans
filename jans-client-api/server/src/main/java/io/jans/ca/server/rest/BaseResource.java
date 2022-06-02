@@ -50,19 +50,18 @@ public class BaseResource {
         try {
             return Jackson2.createJsonMapper().readValue(params, clazz);
         } catch (IOException e) {
-            logger.error("Invalid params: " + params + " exception: {}", e.getMessage());
+            logger.error("Invalid params: {} exception: {}", params, e.getMessage());
             throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).entity("Invalid parameters. Message: " + e.getMessage()).build());
         }
     }
 
     public <T extends IParams> String process(CommandType commandType, String paramsAsString, Class<T> paramsClass, String authorization, String AuthorizationRpId) {
-        logger.info("Endpoint: {}", httpRequest.getRequestURL().toString());
+        logger.info("Endpoint: {0}", httpRequest.getRequestURL().toString());
         logger.info("Request parameters: {}", paramsAsString);
         logger.info("CommandType: {}", commandType);
 
         validateIpAddressAllowed(httpRequest.getRemoteAddr());
         Object forJsonConversion = getObjectForJsonConversion(commandType, paramsAsString, paramsClass, authorization, AuthorizationRpId);
-        logger.info("Object result to Gson json: {}", new Gson().toJson(forJsonConversion));
         String response = null;
 
         if (commandType.getReturnType().equalsIgnoreCase(MediaType.APPLICATION_JSON)) {
@@ -71,14 +70,12 @@ public class BaseResource {
             response = forJsonConversion.toString();
         }
 
-        logger.info("Send back response: {}", response);
         logger.trace("Send back response: {}", response);
         return response;
     }
 
     private void validateIpAddressAllowed(String callerIpAddress) {
         logger.trace("Checking if caller ipAddress : {} is allowed to make request to jans_client_api.", callerIpAddress);
-        logger.info("Checking if caller ipAddress : {} is allowed to make request to jans_client_api.", callerIpAddress);
         final ApiAppConfiguration conf = jansConfigurationService.find();
         List<String> bindIpAddresses = conf.getBindIpAddresses();
 

@@ -164,7 +164,7 @@ public class Utils {
         File fileProperties = null;
         try {
             String fileName = "compile.properties";
-            URL url = new Utils().getClass()
+            URL url = Utils.class
                     .getClassLoader()
                     .getResource(fileName);
             if (url == null) {

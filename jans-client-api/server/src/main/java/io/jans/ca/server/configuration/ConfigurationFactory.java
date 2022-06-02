@@ -54,10 +54,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class ConfigurationFactory {
 
     public static final String CONFIGURATION_ENTRY_DN = "clientApi_ConfigurationEntryDN";
+    public static final String JANS_BASE_CONFIG = "jans.base";
 
     static {
-        if (System.getProperty("jans.base") != null) {
-            BASE_DIR = System.getProperty("jans.base");
+        if (System.getProperty(JANS_BASE_CONFIG) != null) {
+            BASE_DIR = System.getProperty(JANS_BASE_CONFIG);
         } else if ((System.getProperty("catalina.base") != null) && (System.getProperty("catalina.base.ignore") == null)) {
             BASE_DIR = System.getProperty("catalina.base");
         } else if (System.getProperty("catalina.home") != null) {
@@ -68,7 +69,7 @@ public class ConfigurationFactory {
             String jansBase = Utils.readCompileProterty("compile.jans.base");
             ;
             BASE_DIR = jansBase;
-            System.setProperty("jans.base", jansBase);
+            System.setProperty(JANS_BASE_CONFIG, jansBase);
         }
     }
 
@@ -245,7 +246,7 @@ public class ConfigurationFactory {
 
         try {
             reloadConfiguration();
-        } catch (Throwable ex) {
+        } catch (Exception ex) {
             log.error("Exception happened while reloading application configuration", ex);
         } finally {
             this.isActive.set(false);
@@ -265,9 +266,9 @@ public class ConfigurationFactory {
         }
 
         // Reload Base configuration if needed
-        File baseConfiguration = new File(BASE_PROPERTIES_FILE);
-        if (baseConfiguration.exists()) {
-            final long lastModified = baseConfiguration.lastModified();
+        File fileBaseConfiguration = new File(BASE_PROPERTIES_FILE);
+        if (fileBaseConfiguration.exists()) {
+            final long lastModified = fileBaseConfiguration.lastModified();
             if (lastModified > baseConfigurationFileLastModifiedTime) {
                 // Reload configuration only if it was modified
                 loadBaseConfiguration();
@@ -288,12 +289,12 @@ public class ConfigurationFactory {
             return false;
         }
 
-        log.trace("LDAP revision: " + conf.getRevision() + ", server revision:" + loadedRevision);
+        log.trace("LDAP revision: {}, server revision: {}", conf.getRevision(), loadedRevision);
         return conf.getRevision() > this.loadedRevision;
     }
 
     private String confDir() {
-        log.info("PROPERTIES " + System.getProperties());
+        log.info("PROPERTIES {}", System.getProperties());
         final String confDir = this.baseConfiguration.getString("confDir", null);
         if (StringUtils.isNotBlank(confDir)) {
             return confDir;
@@ -421,7 +422,6 @@ public class ConfigurationFactory {
 
             this.cryptoConfigurationSalt = cryptoConfiguration.getString("encodeSalt");
         } catch (Exception ex) {
-            log.error("Failed to load configuration from {}", saltFilePath, ex);
             throw new ConfigurationException("Failed to load configuration from " + saltFilePath, ex);
         }
     }

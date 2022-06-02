@@ -8,7 +8,7 @@ import jakarta.enterprise.context.ApplicationScoped;
  * @author Yuriy Zabrovarnyy
  */
 @ApplicationScoped
-public class OrganizationService extends io.jans.as.common.service.OrganizationService {
+public class OrganizationServiceImpl extends io.jans.as.common.service.OrganizationService {
     @Override
     protected boolean isUseLocalCache() {
         return false;

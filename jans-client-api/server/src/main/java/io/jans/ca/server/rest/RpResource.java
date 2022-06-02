@@ -45,7 +45,7 @@ public class RpResource extends BaseResource {
     @Path("/get-request-object/{request_object_id}")
     @Produces(MediaType.TEXT_PLAIN)
     public Response getRequestObject(@PathParam("request_object_id") String value) {
-        logger.info("Api Resource: get-request-object/" + value);
+        logger.info("Api Resource: get-request-object/{}", value);
         String result = process(CommandType.GET_REQUEST_OBJECT_JWT, (new StringParam(value)).toJsonString(), StringParam.class, null, null);
         return Response.ok(result).build();
     }

@@ -110,7 +110,7 @@ public class RpService {
             put(rp);
             persistenceService.create(rp);
         } else {
-            logger.error("RP already exists in database, rp_id: " + rp.getRpId());
+            logger.error("RP already exists in database, rp_id: {}", rp.getRpId());
         }
     }
 
@@ -130,7 +130,7 @@ public class RpService {
     public Rp getRpByClientId(String clientId) {
         for (Rp rp : getRpCache().asMap().values()) {
             if (rp.getClientId().equalsIgnoreCase(clientId)) {
-                logger.trace("Found rp by client_id: " + clientId + ", rp: " + rp);
+                logger.trace("Found rp by client_id: {}, rp: {}", clientId, rp);
                 return rp;
             }
         }

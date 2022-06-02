@@ -1,12 +1,15 @@
 package io.jans.ca.server.service.logger;
 
 import io.jans.ca.server.configuration.ApiAppConfiguration;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @ApplicationScoped
-public class LoggerService extends io.jans.service.logger.LoggerService {
+public class LoggerServiceImpl extends io.jans.service.logger.LoggerService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(LoggerServiceImpl.class);
 
     @Inject
     private ApiAppConfiguration appConfiguration;
@@ -14,7 +17,7 @@ public class LoggerService extends io.jans.service.logger.LoggerService {
 
     @Override
     public boolean isDisableJdkLogger() {
-        System.out.println("Disable Jdk Logger : " + appConfiguration.getDisableJdkLogger());
+        LOG.info("Disable Jdk Logger : ", appConfiguration.getDisableJdkLogger());
         return (appConfiguration.getDisableJdkLogger() != null) && appConfiguration.getDisableJdkLogger();
     }
 
@@ -25,7 +28,7 @@ public class LoggerService extends io.jans.service.logger.LoggerService {
 
     @Override
     public String getExternalLoggerConfiguration() {
-        System.out.println("Logger Configuration : " + appConfiguration.getExternalLoggerConfiguration());
+        LOG.info("Logger Configuration : {}", appConfiguration.getExternalLoggerConfiguration());
         return appConfiguration.getExternalLoggerConfiguration();
     }
 

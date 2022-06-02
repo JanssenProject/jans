@@ -10,7 +10,7 @@ import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.as.model.util.SecurityProviderUtility;
 import io.jans.ca.server.persistence.service.PersistenceServiceImpl;
 import io.jans.ca.server.service.RpService;
-import io.jans.ca.server.service.logger.LoggerService;
+import io.jans.ca.server.service.logger.LoggerServiceImpl;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.PersistenceEntryManagerFactory;
 import io.jans.orm.model.PersistenceConfiguration;
@@ -67,7 +67,7 @@ public class AppInitializer {
     private PythonService pythonService;
 
     @Inject
-    private LoggerService loggerService;
+    private LoggerServiceImpl loggerService;
 
     @Inject
     PersistenceConfiguration persistenceConfiguration;
@@ -119,7 +119,7 @@ public class AppInitializer {
     @Produces
     @ApplicationScoped
     @Named(ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME)
-    public PersistenceEntryManager createPersistenceEntryManager() throws Exception {
+    public PersistenceEntryManager createPersistenceEntryManager() throws InterruptedException {
 
         logger.debug("Obtaining PersistenceEntryManagerFactory from persistence API");
         FileConfiguration persistenceConfig = persistenceConfiguration.getConfiguration();
@@ -143,7 +143,7 @@ public class AppInitializer {
                 logger.info("Read backend properties: {}", backendProperties);
                 i++;
                 entryManager = factory.createEntryManager(backendProperties);
-                logger.info("Trató de leer: {}", entryManager.toString());
+                logger.info("Trató de leer: {}", entryManager);
             } catch (Exception e) {
                 logger.warn("Unable to create persistence entry manager, retrying in {} seconds", RETRY_INTERVAL);
                 Thread.sleep(RETRY_INTERVAL * 1000L);

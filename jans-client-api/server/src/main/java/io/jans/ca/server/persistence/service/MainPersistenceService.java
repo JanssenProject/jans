@@ -50,7 +50,9 @@ public class MainPersistenceService implements PersistenceService {
     Logger logger;
 
     private StatsData statsData;
-    private static final String baseDn = "o=jans";
+    private static final String BASE_DN = "o=jans";
+    private static final String OU_CONFIGURATION = "configuration";
+    private static final String OU_JANS_CLIENT_API = "jans-client-api";
 
     private ApiAppConfiguration configuration;
 
@@ -104,33 +106,43 @@ public class MainPersistenceService implements PersistenceService {
 
     public void prepareBranch() {
 
-        if (!this.persistenceManager.hasBranchesSupport(this.baseDn)) {
+        if (!this.persistenceManager.hasBranchesSupport(BASE_DN)) {
             return;
         }
         //create `o=jans` if not present
-        if (!containsBranch(this.baseDn)) {
-            addOrganizationBranch(this.baseDn, null);
+        if (!containsBranch(BASE_DN)) {
+            addOrganizationBranch(BASE_DN, null);
         }
         //create `ou=configuration,o=jans` if not present
-        if (!containsBranch(String.format("%s,%s", ou("configuration"), this.baseDn))) {
-            addBranch(String.format("%s,%s", ou("configuration"), this.baseDn), "configuration");
+        if (!containsBranch(joinWithComa(ou(OU_CONFIGURATION), BASE_DN))) {
+            addBranch(joinWithComa(ou(OU_CONFIGURATION), BASE_DN), OU_CONFIGURATION);
         }
         //create `ou=client-api,ou=configuration,o=jans` if not present
-        if (!containsBranch(String.format("%s,%s,%s", ou("jans-client-api"), ou("configuration"), this.baseDn))) {
-            addBranch(String.format("%s,%s,%s", ou("jans-client-api"), ou("configuration"), this.baseDn), "jans-client-api");
+        if (!containsBranch(joinWithComa(ou(OU_JANS_CLIENT_API), ou(OU_CONFIGURATION), BASE_DN))) {
+            addBranch(joinWithComa(ou(OU_JANS_CLIENT_API), ou(OU_CONFIGURATION), BASE_DN), OU_JANS_CLIENT_API);
         }
         //create `ou=client-api,o=jans` if not present
         if (!containsBranch(getClientApiDn())) {
             addBranch(getClientApiDn(), "client-api");
         }
         //create `ou=rp,ou=client-api,o=jans` if not present
-        if (!containsBranch(String.format("%s,%s", getRpOu(), getClientApiDn()))) {
-            addBranch(String.format("%s,%s", getRpOu(), getClientApiDn()), "rp");
+        if (!containsBranch(joinWithComa(getRpOu(), getClientApiDn()))) {
+            addBranch(joinWithComa(getRpOu(), getClientApiDn()), "rp");
         }
         //create `ou=expiredObjects,ou=client-api,o=jans` if not present
-        if (!containsBranch(String.format("%s,%s", getExpiredObjOu(), getClientApiDn()))) {
-            addBranch(String.format("%s,%s", getExpiredObjOu(), getClientApiDn()), "expiredObjects");
+        if (!containsBranch(joinWithComa(getExpiredObjOu(), getClientApiDn()))) {
+            addBranch(joinWithComa(getExpiredObjOu(), getClientApiDn()), "expiredObjects");
         }
+    }
+
+    private String joinWithComa(String... words) {
+        String result = "";
+        String coma = "";
+        for (String word : words) {
+            result += coma + word;
+            coma = ",";
+        }
+        return result;
     }
 
     public boolean containsBranch(String dn) {
@@ -242,7 +254,7 @@ public class MainPersistenceService implements PersistenceService {
 
     public boolean removeAllRps() {
         try {
-            this.persistenceManager.remove(String.format("%s,%s", new Object[]{getRpOu(), getClientApiDn()}), RpObject.class, null, this.configuration.getPersistenceManagerRemoveCount());
+            this.persistenceManager.remove(joinWithComa(getRpOu(), getClientApiDn()), RpObject.class, null, this.configuration.getPersistenceManagerRemoveCount());
             logger.debug("Removed all Rps successfully. ");
             return true;
         } catch (Exception e) {
@@ -252,10 +264,9 @@ public class MainPersistenceService implements PersistenceService {
     }
 
     public Set<Rp> getRps() {
+        Set<Rp> result = new HashSet<Rp>();
         try {
             List<RpObject> rpObjects = this.persistenceManager.findEntries(String.format("%s,%s", new Object[]{getRpOu(), getClientApiDn()}), RpObject.class, null);
-
-            Set<Rp> result = new HashSet();
             for (RpObject ele : rpObjects) {
                 Rp rp = MigrationService.parseRp(ele.getData());
                 if (rp != null) {
@@ -266,13 +277,13 @@ public class MainPersistenceService implements PersistenceService {
             }
             return result;
         } catch (Exception e) {
-            if (((e instanceof EntryPersistenceException)) && (e.getMessage().contains("Failed to find entries"))) {
+            if ((e instanceof EntryPersistenceException) && (e.getMessage().contains("Failed to find entries"))) {
                 logger.warn("Failed to fetch RpObjects. {} ", e.getMessage());
-                return null;
+                return new HashSet<Rp>();
             }
             logger.error("Failed to fetch rps. Error: {} ", e.getMessage(), e);
         }
-        return null;
+        return result;
     }
 
     public void destroy() {
@@ -306,7 +317,7 @@ public class MainPersistenceService implements PersistenceService {
         try {
             final Calendar cal = Calendar.getInstance();
             final Date currentTime = cal.getTime();
-            Filter exirationDateFilter = Filter.createLessOrEqualFilter("exp", this.persistenceManager.encodeTime(baseDn, currentTime));
+            Filter exirationDateFilter = Filter.createLessOrEqualFilter("exp", this.persistenceManager.encodeTime(BASE_DN, currentTime));
 
             this.persistenceManager.remove(String.format("%s,%s", new Object[]{getExpiredObjOu(), getClientApiDn()}), ExpiredObject.class, exirationDateFilter, this.configuration.getPersistenceManagerRemoveCount());
             logger.debug("Removed all expired_objects successfully. ");
@@ -330,7 +341,7 @@ public class MainPersistenceService implements PersistenceService {
     }
 
     private String getClientApiDn() {
-        return String.format("%s,%s", ou("client-api"), this.baseDn);
+        return joinWithComa(ou("client-api"), BASE_DN);
     }
 
     private String getRpOu() {

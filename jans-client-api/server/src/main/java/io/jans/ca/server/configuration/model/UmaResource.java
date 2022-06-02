@@ -2,6 +2,7 @@ package io.jans.ca.server.configuration.model;
 
 import com.google.common.collect.Lists;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -9,7 +10,7 @@ import java.util.List;
  * @version 0.9, 06/06/2016
  */
 
-public class UmaResource {
+public class UmaResource implements Serializable {
 
     private String id;
     private String path;

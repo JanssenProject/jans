@@ -288,13 +288,6 @@
             <version>3.8.0</version>
             <scope>test</scope>
         </dependency>
-        <!--        <dependency>-->
-        <!--            <groupId>io.jans</groupId>-->
-        <!--            <artifactId>jans-client-api</artifactId>-->
-        <!--            <version>${project.version}</version>-->
-        <!--            <type>test-jar</type>-->
-        <!--            <scope>test</scope>-->
-        <!--        </dependency>-->
 
         <dependency>
             <groupId>jakarta.websocket</groupId>

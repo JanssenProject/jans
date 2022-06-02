@@ -68,7 +68,7 @@ public class ClientFactory {
     }
 
     public IntrospectionService createIntrospectionService(String introspectionEndpoint, ClientHttpEngine clientEngine) {
-        final ResteasyClient client = ((ResteasyClientBuilder) ResteasyClientBuilder.newBuilder()).httpEngine(clientEngine).build();
+        final ResteasyClient client = ((ResteasyClientBuilder) ClientBuilder.newBuilder()).httpEngine(clientEngine).build();
         final ResteasyWebTarget target = client.target(UriBuilder.fromPath(introspectionEndpoint));
         return target.proxy(IntrospectionService.class);
     }

@@ -34,7 +34,7 @@
             </testResource>
         </testResources>
         <filters>
-<!--            <filter>${project.basedir}/../test/test.properties</filter>-->
+            <filter>${project.basedir}/../test/test.properties</filter>
         </filters>
 
         <plugins>

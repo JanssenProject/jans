@@ -40,10 +40,10 @@ public class Processor {
                     if (operationResponse != null) {
                         return operationResponse;
                     } else {
-                        logger.error("No response from operation. Command: " + command);
+                        logger.error("No response from operation. Command: {}", command);
                     }
                 } else {
-                    logger.error("Operation is not supported!");
+                    logger.error("Operation is not supported! null");
                     throw new HttpException(ErrorResponseCode.UNSUPPORTED_OPERATION);
                 }
             } catch (ClientErrorException e) {
