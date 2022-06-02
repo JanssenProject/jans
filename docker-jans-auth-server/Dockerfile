@@ -121,7 +121,7 @@ RUN git clone --filter blob:none --no-checkout https://github.com/janssenproject
     && git checkout ${JANS_AGAMA_VERSION} \
     && git sparse-checkout add agama/misc
 
-RUN cp -R /tmp/jans/agama/misc/ ${JETTY_BASE}/jans-auth/agama/ \
+RUN cp -R /tmp/jans/agama/misc/* ${JETTY_BASE}/jans-auth/agama/ \
     && rm -rf /tmp/jans
 
 # ======
