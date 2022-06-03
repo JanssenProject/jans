@@ -367,12 +367,16 @@ def test_get_couchbase_keepalive_timeout(monkeypatch, timeout, expected):
     assert get_couchbase_keepalive_timeout() == expected
 
 
-def test_render_couchbase_properties(monkeypatch, tmpdir, gmanager):
+@pytest.mark.parametrize("bucket_prefix", ["jans", "myprefix"])
+def test_render_couchbase_properties(monkeypatch, tmpdir, gmanager, bucket_prefix):
     from jans.pycloudlib.persistence.couchbase import render_couchbase_properties
 
     passwd = tmpdir.join("couchbase_password")
     passwd.write("secret")
+
     monkeypatch.setenv("CN_COUCHBASE_PASSWORD_FILE", str(passwd))
+    monkeypatch.setenv("CN_PERSISTENCE_TYPE", "couchbase")
+    monkeypatch.setenv("CN_COUCHBASE_BUCKET_PREFIX", bucket_prefix)
 
     tmpl = """
 connection.connect-timeout: %(couchbase_conn_timeout)s
@@ -380,6 +384,9 @@ connection.connection-max-wait-time: %(couchbase_conn_max_wait)s
 connection.scan-consistency: %(couchbase_scan_consistency)s
 connection.keep-alive-interval: %(couchbase_keepalive_interval)s
 connection.keep-alive-timeout: %(couchbase_keepalive_timeout)s
+buckets: %(couchbase_buckets)s
+bucket.default: %(default_bucket)s
+%(couchbase_mappings)s
 """.strip()
 
     expected = """
@@ -388,6 +395,61 @@ connection.connection-max-wait-time: 20000
 connection.scan-consistency: not_bounded
 connection.keep-alive-interval: 30000
 connection.keep-alive-timeout: 2500
+buckets: {bucket_prefix}, {bucket_prefix}_user, {bucket_prefix}_cache, {bucket_prefix}_site, {bucket_prefix}_token, {bucket_prefix}_session
+bucket.default: {bucket_prefix}
+bucket.{bucket_prefix}_user.mapping: people, groups, authorizations
+bucket.{bucket_prefix}_cache.mapping: cache
+bucket.{bucket_prefix}_site.mapping: cache-refresh
+bucket.{bucket_prefix}_token.mapping: tokens
+bucket.{bucket_prefix}_session.mapping: sessions
+""".strip().format(bucket_prefix=bucket_prefix)
+
+    src = tmpdir.join("jans-couchbase.properties.tmpl")
+    src.write(tmpl)
+    dest = tmpdir.join("jans-couchbase.properties")
+
+    render_couchbase_properties(gmanager, str(src), str(dest))
+    assert dest.read() == expected
+
+
+def test_render_couchbase_properties_hybrid(monkeypatch, tmpdir, gmanager):
+    from jans.pycloudlib.persistence.couchbase import render_couchbase_properties
+
+    passwd = tmpdir.join("couchbase_password")
+    passwd.write("secret")
+
+    monkeypatch.setenv("CN_COUCHBASE_PASSWORD_FILE", str(passwd))
+    monkeypatch.setenv("CN_PERSISTENCE_TYPE", "hybrid")
+    monkeypatch.setenv("CN_HYBRID_MAPPING", json.dumps({
+        "default": "ldap",
+        "user": "couchbase",
+        "site": "ldap",
+        "cache": "ldap",
+        "token": "couchbase",
+        "session": "ldap",
+    }))
+
+    tmpl = """
+connection.connect-timeout: %(couchbase_conn_timeout)s
+connection.connection-max-wait-time: %(couchbase_conn_max_wait)s
+connection.scan-consistency: %(couchbase_scan_consistency)s
+connection.keep-alive-interval: %(couchbase_keepalive_interval)s
+connection.keep-alive-timeout: %(couchbase_keepalive_timeout)s
+buckets: %(couchbase_buckets)s
+bucket.default: %(default_bucket)s
+%(couchbase_mappings)s
+""".strip()
+
+    expected = """
+connection.connect-timeout: 10000
+connection.connection-max-wait-time: 20000
+connection.scan-consistency: not_bounded
+connection.keep-alive-interval: 30000
+connection.keep-alive-timeout: 2500
+buckets: jans, jans_user, jans_token
+bucket.default: jans
+bucket.jans_user.mapping: people, groups, authorizations
+bucket.jans_token.mapping: tokens
 """.strip()
 
     src = tmpdir.join("jans-couchbase.properties.tmpl")
