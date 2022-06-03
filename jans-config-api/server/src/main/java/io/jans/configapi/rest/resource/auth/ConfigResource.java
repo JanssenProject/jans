@@ -6,6 +6,7 @@
 
 package io.jans.configapi.rest.resource.auth;
 
+import io.jans.agama.model.EngineConfig;
 import io.jans.as.model.config.Conf;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.configapi.core.rest.ProtectedApi;
@@ -27,6 +28,8 @@ import org.slf4j.Logger;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class ConfigResource extends ConfigBaseResource {
+    
+    private static final String AGAMACONFIGURATION = "agamaConfiguration";
 
     @Inject
     Logger log;
@@ -38,7 +41,7 @@ public class ConfigResource extends ConfigBaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_CONFIG_READ_ACCESS })
     public Response getAppConfiguration() {
         AppConfiguration appConfiguration = configurationService.find();
-        log.debug("ConfigResource::getAppConfiguration() appConfiguration - " + appConfiguration);
+        log.debug("ConfigResource::getAppConfiguration() appConfiguration:{}",appConfiguration);
         return Response.ok(appConfiguration).build();
     }
 
@@ -46,17 +49,22 @@ public class ConfigResource extends ConfigBaseResource {
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_CONFIG_WRITE_ACCESS })
     public Response patchAppConfigurationProperty(@NotNull String requestString) throws Exception {
-        log.debug("AUTH CONF details to patch - requestString = " + requestString);
+        log.debug("AUTH CONF details to patch - requestString:{} ", requestString);
         Conf conf = configurationService.findConf();
         AppConfiguration appConfiguration = configurationService.find();
-        log.debug("AUTH CONF details BEFORE patch - appConfiguration = " + appConfiguration);
+        log.debug("AUTH CONF details BEFORE patch - appConfiguration :{}", appConfiguration);
         appConfiguration = Jackson.applyPatch(requestString, conf.getDynamic());
-        log.debug("AUTH CONF details BEFORE patch merge - appConfiguration = " + appConfiguration);
+        log.debug("AUTH CONF details BEFORE patch merge - appConfiguration:{}", appConfiguration);
         conf.setDynamic(appConfiguration);
-
+        
+        //validate Agama Configuration
+        if(requestString.contains(AGAMACONFIGURATION)){
+            validateAgamaConfiguration(appConfiguration.getAgamaConfiguration());
+        }
+        
         configurationService.merge(conf);
         appConfiguration = configurationService.find();
-        log.debug("AUTH CONF details AFTER patch merge - appConfiguration = " + appConfiguration);
+        log.debug("AUTH CONF details AFTER patch merge - appConfiguration:{}", appConfiguration);
         return Response.ok(appConfiguration).build();
     }
 
@@ -65,11 +73,23 @@ public class ConfigResource extends ConfigBaseResource {
     @Path(ApiConstants.PERSISTENCE)
     public Response getPersistenceDetails() {
         String persistenceType = configurationService.getPersistenceType();
-        log.debug("ConfigResource::getPersistenceDetails() - persistenceType - " + persistenceType);
+        log.debug("ConfigResource::getPersistenceDetails() - persistenceType:{}", persistenceType);
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("persistenceType", persistenceType);
-        log.debug("\n\n\n ConfigResource::getPersistenceDetails() - jsonObject = " + jsonObject + "\n\n");
+        log.debug("ConfigResource::getPersistenceDetails() - jsonObject:{}", jsonObject );
         return Response.ok(jsonObject.toString()).build();
     }
 
+    
+    private void validateAgamaConfiguration(EngineConfig engineConfig) {
+        log.debug("engineConfig:{}", engineConfig);
+        
+        if(engineConfig == null) {
+            return;
+        }
+        
+        if(engineConfig.getMaxItemsLoggedInCollections()<1) {
+            thorwBadRequestException("maxItemsLoggedInCollections should be greater than zero -> " + engineConfig.getMaxItemsLoggedInCollections());
+        }
+    }
 }
