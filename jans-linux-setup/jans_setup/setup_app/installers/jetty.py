@@ -347,7 +347,9 @@ class JettyInstaller(BaseInstaller, SetupUtils):
                                     ('install_scim_server', 'jans-scim'),
                                     ('installFido2', 'jans-fido2'),
                                     ('install_config_api', 'jans-config-api'),
-                                    ('installEleven', 'jans-eleven')]:
+                                    ('installEleven', 'jans-eleven'),
+                                    ('install_client_api', 'jans-client-api'),
+                                    ]:
 
             if Config.get(config_var) and service in self.jetty_app_configuration:
                 installedComponents.append(self.jetty_app_configuration[service])
