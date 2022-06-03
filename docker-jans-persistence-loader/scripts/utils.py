@@ -8,7 +8,6 @@ from urllib.parse import urlparse
 from uuid import uuid4
 
 import ruamel.yaml
-from ldap3.utils import dn as dnutils
 
 from jans.pycloudlib.utils import as_boolean
 from jans.pycloudlib.utils import encode_text
@@ -27,7 +26,7 @@ def render_ldif(src, dst, ctx):
 
 def get_jackrabbit_creds():
     username = os.environ.get("CN_JACKRABBIT_ADMIN_ID", "admin")
-    password = ""
+    password = ""  # nosec: B105
 
     password_file = os.environ.get(
         "CN_JACKRABBIT_ADMIN_PASSWORD_FILE",
@@ -184,8 +183,6 @@ def merge_auth_ctx(ctx):
 
     if os.environ.get("CN_DISTRIBUTION", "default") == "openbanking":
         file_mappings["auth_config_base64"] = "jans-auth-config.ob.json"
-    # else:
-    #     file_mappings["auth_config_base64"] = "jans-auth-config.json"
 
     for key, file_ in file_mappings.items():
         file_path = os.path.join(basedir, file_)
@@ -345,6 +342,7 @@ def get_ldif_mappings(optional_scopes=None):
                 "configuration.ldif",
                 "o_metric.ldif",
                 "jans-config-api/clients.ldif",
+                "agama.ldif",
             ]
 
         files += [
