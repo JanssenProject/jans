@@ -4,8 +4,14 @@ jans.pycloudlib.wait
 
 This module consists of startup order utilities.
 """
+from __future__ import annotations
+from typing import TYPE_CHECKING
 
-import json
+if TYPE_CHECKING:  # pragma: no cover
+    # imported objects for function type hint, completion, etc.
+    # these won't be executed in runtime
+    from jans.pycloudlib.manager import _Manager
+
 import logging
 import os
 import sys
@@ -13,10 +19,13 @@ import sys
 import backoff
 
 from jans.pycloudlib.persistence.couchbase import CouchbaseClient
+from jans.pycloudlib.persistence.couchbase import id_from_dn
 from jans.pycloudlib.persistence.sql import SqlClient
+from jans.pycloudlib.persistence.sql import doc_id_from_dn
 from jans.pycloudlib.persistence.spanner import SpannerClient
 from jans.pycloudlib.utils import as_boolean
 from jans.pycloudlib.persistence.ldap import LdapClient
+from jans.pycloudlib.persistence.utils import PersistenceMapper
 
 
 logger = logging.getLogger(__name__)
@@ -158,39 +167,32 @@ def wait_for_secret(manager, **kwargs):
 
 
 @retry_on_exception
-def wait_for_ldap(manager, **kwargs):
+def wait_for_ldap(manager: _Manager, **kwargs) -> None:
     """Wait for readiness/availability of LDAP server based on existing entry.
 
     :param manager: An instance of :class:`~jans.pycloudlib.manager._Manager`.
     """
 
-    persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "ldap")
-    ldap_mapping = os.environ.get("CN_PERSISTENCE_LDAP_MAPPING", "default")
-
-    # a minimum service stack is having config-api client
     jca_client_id = manager.config.get("jca_client_id")
-    default_search = (
-        f"inum={jca_client_id},ou=clients,o=jans",
-        "(objectClass=jansClnt)",
-    )
-
-    if persistence_type == "hybrid":
-        # `cache` and `token` mapping only have base entries
-        search_mapping = {
-            "default": default_search,
-            "user": ("inum=60B7,ou=groups,o=jans", "(objectClass=jansGrp)"),
-            "site": ("ou=cache-refresh,o=site", "(ou=cache-refresh)"),
-            "cache": ("ou=cache,o=jans", "(ou=cache)"),
-            "token": ("ou=tokens,o=jans", "(ou=tokens)"),
-            "session": ("ou=sessions,o=jans", "(ou=sessions)"),
-        }
-        search = search_mapping[ldap_mapping]
-    else:
-        search = default_search
+    search_mapping = {
+        "default": (f"inum={jca_client_id},ou=clients,o=jans", "(objectClass=jansClnt)"),
+        "user": ("inum=60B7,ou=groups,o=jans", "(objectClass=jansGrp)"),
+        "site": ("ou=cache-refresh,o=site", "(ou=cache-refresh)"),
+        "cache": ("ou=cache,o=jans", "(ou=cache)"),
+        "token": ("ou=tokens,o=jans", "(ou=tokens)"),
+        "session": ("ou=sessions,o=jans", "(ou=sessions)"),
+    }
 
     client = LdapClient(manager)
-    entries = client.search(search[0], search[1], attributes=["objectClass"], limit=1)
-    if not entries:
+    try:
+        # get the first data key
+        key = PersistenceMapper().groups().get("ldap", [])[0]
+        search_base, search_filter = search_mapping[key]
+        init = client.search(search_base, search_filter, attributes=["objectClass"], limit=1)
+    except (IndexError, KeyError):
+        init = client.is_connected()
+
+    if not init:
         raise WaitError("LDAP is not fully initialized")
 
 
@@ -212,40 +214,24 @@ def wait_for_couchbase(manager, **kwargs):
 
     :param manager: An instance of :class:`~jans.pycloudlib.manager._Manager`.
     """
-
-    persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "couchbase")
-    ldap_mapping = os.environ.get("CN_PERSISTENCE_LDAP_MAPPING", "default")
     bucket_prefix = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
-
-    # only default and user buckets buckets that may have initial data;
-    # these data also affected by LDAP mapping selection;
     jca_client_id = manager.config.get("jca_client_id")
-    bucket, key = bucket_prefix, f"clients_{jca_client_id}"
+    search_mapping = {
+        "default": (id_from_dn(f"inum={jca_client_id},ou=clients,o=jans"), f"{bucket_prefix}"),
+        "user": (id_from_dn("inum=60B7,ou=groups,o=jans"), f"{bucket_prefix}_user"),
+    }
 
-    # if `hybrid` is selected and default mapping is stored in LDAP,
-    # the default bucket won't have data, hence we check the user bucket instead
-    if persistence_type == "hybrid" and ldap_mapping == "default":
-        bucket, key = f"{bucket_prefix}_user", "groups_60B7"
+    client = CouchbaseClient(manager)
+    try:
+        # get the first data key
+        key = PersistenceMapper().groups().get("couchbase", [])[0]
+        id_, bucket = search_mapping[key]
+        init = client.doc_exists(bucket, id_)
+    except (IndexError, KeyError):
+        init = client.get_buckets().ok
 
-    cb_client = CouchbaseClient(manager)
-
-    req = cb_client.exec_query(
-        f"SELECT objectClass FROM {bucket} USE KEYS $key",
-        key=key,
-    )
-
-    if not req.ok:
-        try:
-            data = json.loads(req.text)
-            err = data["errors"][0]["msg"]
-        except (ValueError, KeyError, IndexError):
-            err = req.reason
-        raise WaitError(err)
-
-    # request is OK, but result is not found
-    data = req.json()
-    if not data["results"]:
-        raise WaitError(f"Missing document {key} in bucket {bucket}")
+    if not init:
+        raise WaitError("Couchbase backend is not fully initialized")
 
 
 @retry_on_exception
@@ -272,13 +258,26 @@ def wait_for_sql_conn(manager, **kwargs):
 
 
 @retry_on_exception
-def wait_for_sql(manager, **kwargs):
+def wait_for_sql(manager: _Manager, **kwargs) -> None:
     """Wait for readiness/liveness of an SQL database.
     """
-    init = SqlClient(manager).row_exists("jansClnt", manager.config.get("jca_client_id"))
+    jca_client_id = manager.config.get("jca_client_id")
+    search_mapping = {
+        "default": (doc_id_from_dn(f"inum={jca_client_id},ou=clients,o=jans"), "jansClnt"),
+        "user": (doc_id_from_dn("inum=60B7,ou=groups,o=jans"), "jansGrp"),
+    }
+
+    client = SqlClient(manager)
+    try:
+        # get the first data key
+        key = PersistenceMapper().groups().get("sql", [])[0]
+        doc_id, table_name = search_mapping[key]
+        init = client.row_exists(table_name, doc_id)
+    except (IndexError, KeyError):
+        init = client.connected()
 
     if not init:
-        raise WaitError("SQL is not fully initialized")
+        raise WaitError("SQL backend is not fully initialized")
 
 
 @retry_on_exception
@@ -292,13 +291,26 @@ def wait_for_spanner_conn(manager, **kwargs):
 
 
 @retry_on_exception
-def wait_for_spanner(manager, **kwargs):
+def wait_for_spanner(manager: _Manager, **kwargs) -> None:
     """Wait for readiness/liveness of an Spanner database.
     """
-    init = SpannerClient(manager).row_exists("jansClnt", manager.config.get("jca_client_id"))
+    jca_client_id = manager.config.get("jca_client_id")
+    search_mapping = {
+        "default": (doc_id_from_dn(f"inum={jca_client_id},ou=clients,o=jans"), "jansClnt"),
+        "user": (doc_id_from_dn("inum=60B7,ou=groups,o=jans"), "jansGrp"),
+    }
+
+    client = SpannerClient(manager)
+    try:
+        # get the first data key
+        key = PersistenceMapper().groups().get("spanner", [])[0]
+        doc_id, table_name = search_mapping[key]
+        init = client.row_exists(table_name, doc_id)
+    except (IndexError, KeyError):
+        init = client.connected()
 
     if not init:
-        raise WaitError("Spanner is not fully initialized")
+        raise WaitError("Spanner backend is not fully initialized")
 
 
 def wait_for(manager, deps=None):
@@ -362,3 +374,24 @@ def wait_for(manager, deps=None):
             logger.warning(f"Unsupported callback for {dep} dependency")
             continue
         callback["func"](manager, **callback["kwargs"])
+
+
+def wait_for_persistence(manager: _Manager) -> None:
+    """Wait for defined persistence(s).
+
+    :param manager: An instance of :class:`~jans.pycloudlib.manager._Manager`.
+    """
+    mapper = PersistenceMapper()
+    # cast ``dict_keys`` to ``list``
+    deps = list(mapper.groups().keys())
+    wait_for(manager, deps)
+
+
+def wait_for_persistence_conn(manager: _Manager) -> None:
+    """Wait for defined persistence(s) connection.
+
+    :param manager: An instance of :class:`~jans.pycloudlib.manager._Manager`.
+    """
+    mapper = PersistenceMapper()
+    deps = [f"{type_}_conn" for type_ in mapper.groups().keys()]
+    wait_for(manager, deps)

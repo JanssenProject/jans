@@ -1,3 +1,4 @@
+import json
 import os
 import shutil
 from collections import namedtuple
@@ -366,12 +367,16 @@ def test_get_couchbase_keepalive_timeout(monkeypatch, timeout, expected):
     assert get_couchbase_keepalive_timeout() == expected
 
 
-def test_render_couchbase_properties(monkeypatch, tmpdir, gmanager):
+@pytest.mark.parametrize("bucket_prefix", ["jans", "myprefix"])
+def test_render_couchbase_properties(monkeypatch, tmpdir, gmanager, bucket_prefix):
     from jans.pycloudlib.persistence.couchbase import render_couchbase_properties
 
     passwd = tmpdir.join("couchbase_password")
     passwd.write("secret")
+
     monkeypatch.setenv("CN_COUCHBASE_PASSWORD_FILE", str(passwd))
+    monkeypatch.setenv("CN_PERSISTENCE_TYPE", "couchbase")
+    monkeypatch.setenv("CN_COUCHBASE_BUCKET_PREFIX", bucket_prefix)
 
     tmpl = """
 connection.connect-timeout: %(couchbase_conn_timeout)s
@@ -379,6 +384,9 @@ connection.connection-max-wait-time: %(couchbase_conn_max_wait)s
 connection.scan-consistency: %(couchbase_scan_consistency)s
 connection.keep-alive-interval: %(couchbase_keepalive_interval)s
 connection.keep-alive-timeout: %(couchbase_keepalive_timeout)s
+buckets: %(couchbase_buckets)s
+bucket.default: %(default_bucket)s
+%(couchbase_mappings)s
 """.strip()
 
     expected = """
@@ -387,6 +395,61 @@ connection.connection-max-wait-time: 20000
 connection.scan-consistency: not_bounded
 connection.keep-alive-interval: 30000
 connection.keep-alive-timeout: 2500
+buckets: {bucket_prefix}, {bucket_prefix}_user, {bucket_prefix}_cache, {bucket_prefix}_site, {bucket_prefix}_token, {bucket_prefix}_session
+bucket.default: {bucket_prefix}
+bucket.{bucket_prefix}_user.mapping: people, groups, authorizations
+bucket.{bucket_prefix}_cache.mapping: cache
+bucket.{bucket_prefix}_site.mapping: cache-refresh
+bucket.{bucket_prefix}_token.mapping: tokens
+bucket.{bucket_prefix}_session.mapping: sessions
+""".strip().format(bucket_prefix=bucket_prefix)
+
+    src = tmpdir.join("jans-couchbase.properties.tmpl")
+    src.write(tmpl)
+    dest = tmpdir.join("jans-couchbase.properties")
+
+    render_couchbase_properties(gmanager, str(src), str(dest))
+    assert dest.read() == expected
+
+
+def test_render_couchbase_properties_hybrid(monkeypatch, tmpdir, gmanager):
+    from jans.pycloudlib.persistence.couchbase import render_couchbase_properties
+
+    passwd = tmpdir.join("couchbase_password")
+    passwd.write("secret")
+
+    monkeypatch.setenv("CN_COUCHBASE_PASSWORD_FILE", str(passwd))
+    monkeypatch.setenv("CN_PERSISTENCE_TYPE", "hybrid")
+    monkeypatch.setenv("CN_HYBRID_MAPPING", json.dumps({
+        "default": "ldap",
+        "user": "couchbase",
+        "site": "ldap",
+        "cache": "ldap",
+        "token": "couchbase",
+        "session": "ldap",
+    }))
+
+    tmpl = """
+connection.connect-timeout: %(couchbase_conn_timeout)s
+connection.connection-max-wait-time: %(couchbase_conn_max_wait)s
+connection.scan-consistency: %(couchbase_scan_consistency)s
+connection.keep-alive-interval: %(couchbase_keepalive_interval)s
+connection.keep-alive-timeout: %(couchbase_keepalive_timeout)s
+buckets: %(couchbase_buckets)s
+bucket.default: %(default_bucket)s
+%(couchbase_mappings)s
+""".strip()
+
+    expected = """
+connection.connect-timeout: 10000
+connection.connection-max-wait-time: 20000
+connection.scan-consistency: not_bounded
+connection.keep-alive-interval: 30000
+connection.keep-alive-timeout: 2500
+buckets: jans, jans_user, jans_token
+bucket.default: jans
+bucket.jans_user.mapping: people, groups, authorizations
+bucket.jans_token.mapping: tokens
 """.strip()
 
     src = tmpdir.join("jans-couchbase.properties.tmpl")
@@ -423,106 +486,53 @@ def test_get_bucket_for_key(key, bucket):
 # ======
 
 
-def test_render_hybrid_properties_default(monkeypatch, tmpdir):
+def test_resolve_hybrid_storages(monkeypatch):
+    from jans.pycloudlib.persistence.hybrid import resolve_hybrid_storages
+    from jans.pycloudlib.persistence.utils import PersistenceMapper
+
+    monkeypatch.setenv("CN_PERSISTENCE_TYPE", "hybrid")
+    monkeypatch.setenv("CN_HYBRID_MAPPING", json.dumps({
+        "default": "sql",
+        "user": "spanner",
+        "site": "couchbase",
+        "cache": "ldap",
+        "token": "sql",
+        "session": "sql",
+    }))
+    expected = {
+        "storages": "couchbase, ldap, spanner, sql",
+        "storage.default": "sql",
+        "storage.couchbase.mapping": "cache-refresh",
+        "storage.ldap.mapping": "cache",
+        "storage.spanner.mapping": "people, groups, authorizations",
+        "storage.sql.mapping": "tokens, sessions",
+    }
+    mapper = PersistenceMapper()
+    assert resolve_hybrid_storages(mapper) == expected
+
+
+def test_render_hybrid_properties(monkeypatch, tmpdir):
     from jans.pycloudlib.persistence.hybrid import render_hybrid_properties
 
     monkeypatch.setenv("CN_PERSISTENCE_TYPE", "hybrid")
+    monkeypatch.setenv(
+        "CN_HYBRID_MAPPING",
+        json.dumps({
+            "default": "ldap",
+            "user": "couchbase",
+            "site": "sql",
+            "cache": "sql",
+            "token": "spanner",
+            "session": "sql",
+        })
+    )
 
     expected = """
-storages: ldap, couchbase
+storages: couchbase, ldap, spanner, sql
 storage.default: ldap
-storage.ldap.mapping: default
-storage.couchbase.mapping: people, groups, authorizations, cache, cache-refresh, tokens, sessions
-""".strip()
-
-    dest = tmpdir.join("jans-hybrid.properties")
-    render_hybrid_properties(str(dest))
-    assert dest.read() == expected
-
-
-def test_render_hybrid_properties_user(monkeypatch, tmpdir):
-    from jans.pycloudlib.persistence.hybrid import render_hybrid_properties
-
-    monkeypatch.setenv("CN_PERSISTENCE_TYPE", "hybrid")
-    monkeypatch.setenv("CN_PERSISTENCE_LDAP_MAPPING", "user")
-
-    expected = """
-storages: ldap, couchbase
-storage.default: couchbase
-storage.ldap.mapping: people, groups, authorizations
-storage.couchbase.mapping: cache, cache-refresh, tokens, sessions
-""".strip()
-
-    dest = tmpdir.join("jans-hybrid.properties")
-    render_hybrid_properties(str(dest))
-    assert dest.read() == expected
-
-
-def test_render_hybrid_properties_token(monkeypatch, tmpdir):
-    from jans.pycloudlib.persistence.hybrid import render_hybrid_properties
-
-    monkeypatch.setenv("CN_PERSISTENCE_TYPE", "hybrid")
-    monkeypatch.setenv("CN_PERSISTENCE_LDAP_MAPPING", "token")
-
-    expected = """
-storages: ldap, couchbase
-storage.default: couchbase
-storage.ldap.mapping: tokens
-storage.couchbase.mapping: people, groups, authorizations, cache, cache-refresh, sessions
-""".strip()
-
-    dest = tmpdir.join("jans-hybrid.properties")
-    render_hybrid_properties(str(dest))
-    assert dest.read() == expected
-
-
-def test_render_hybrid_properties_session(monkeypatch, tmpdir):
-    from jans.pycloudlib.persistence.hybrid import render_hybrid_properties
-
-    monkeypatch.setenv("CN_PERSISTENCE_TYPE", "hybrid")
-    monkeypatch.setenv("CN_PERSISTENCE_LDAP_MAPPING", "session")
-
-    expected = """
-storages: ldap, couchbase
-storage.default: couchbase
-storage.ldap.mapping: sessions
-storage.couchbase.mapping: people, groups, authorizations, cache, cache-refresh, tokens
-""".strip()
-
-    dest = tmpdir.join("jans-hybrid.properties")
-    render_hybrid_properties(str(dest))
-    assert dest.read() == expected
-
-
-def test_render_hybrid_properties_cache(monkeypatch, tmpdir):
-    from jans.pycloudlib.persistence.hybrid import render_hybrid_properties
-
-    monkeypatch.setenv("CN_PERSISTENCE_TYPE", "hybrid")
-    monkeypatch.setenv("CN_PERSISTENCE_LDAP_MAPPING", "cache")
-
-    expected = """
-storages: ldap, couchbase
-storage.default: couchbase
-storage.ldap.mapping: cache
-storage.couchbase.mapping: people, groups, authorizations, cache-refresh, tokens, sessions
-""".strip()
-
-    dest = tmpdir.join("jans-hybrid.properties")
-    render_hybrid_properties(str(dest))
-    assert dest.read() == expected
-
-
-def test_render_hybrid_properties_site(monkeypatch, tmpdir):
-    from jans.pycloudlib.persistence.hybrid import render_hybrid_properties
-
-    monkeypatch.setenv("CN_PERSISTENCE_TYPE", "hybrid")
-    monkeypatch.setenv("CN_PERSISTENCE_LDAP_MAPPING", "site")
-
-    expected = """
-storages: ldap, couchbase
-storage.default: couchbase
-storage.ldap.mapping: cache-refresh
-storage.couchbase.mapping: people, groups, authorizations, cache, tokens, sessions
+storage.couchbase.mapping: people, groups, authorizations
+storage.spanner.mapping: tokens
+storage.sql.mapping: cache-refresh, cache, sessions
 """.strip()
 
     dest = tmpdir.join("jans-hybrid.properties")
@@ -837,3 +847,108 @@ def test_spanner_sub_tables(gmanager, monkeypatch):
 
     client = SpannerClient(gmanager)
     assert isinstance(client.sub_tables, dict)
+
+
+# =====
+# utils
+# =====
+
+
+@pytest.mark.parametrize("type_", [
+    "ldap",
+    "couchbase",
+    "sql",
+    "spanner",
+])
+def test_persistence_mapper_mapping(monkeypatch, type_):
+    from jans.pycloudlib.persistence import PersistenceMapper
+
+    monkeypatch.setenv("CN_PERSISTENCE_TYPE", type_)
+    expected = dict.fromkeys([
+        "default",
+        "user",
+        "site",
+        "cache",
+        "token",
+        "session",
+    ], type_)
+    assert PersistenceMapper().mapping == expected
+
+
+def test_persistence_mapper_hybrid_mapping(monkeypatch):
+    from jans.pycloudlib.persistence import PersistenceMapper
+
+    mapping = {
+        "default": "sql",
+        "user": "spanner",
+        "site": "ldap",
+        "cache": "sql",
+        "token": "couchbase",
+        "session": "sql",
+    }
+    monkeypatch.setenv("CN_PERSISTENCE_TYPE", "hybrid")
+    monkeypatch.setenv("CN_HYBRID_MAPPING", json.dumps(mapping))
+    assert PersistenceMapper().mapping == mapping
+
+
+@pytest.mark.parametrize("mapping", [
+    "ab",
+    "1",
+    "[]",
+    "{}",  # empty dict
+    {"user": "sql"},  # missing remaining keys
+    {"default": "sql", "user": "spanner", "cache": "ldap", "site": "couchbase", "token": "sql", "session": "random"},  # invalid type
+    {"default": "sql", "user": "spanner", "cache": "ldap", "site": "couchbase", "token": "sql", "foo": "sql"},  # invalid key
+])
+def test_persistence_mapper_validate_hybrid_mapping(monkeypatch, mapping):
+    from jans.pycloudlib.persistence.utils import PersistenceMapper
+
+    monkeypatch.setenv("CN_PERSISTENCE_TYPE", "hybrid")
+    monkeypatch.setenv("CN_HYBRID_MAPPING", json.dumps(mapping))
+
+    with pytest.raises(ValueError):
+        PersistenceMapper().validate_hybrid_mapping()
+
+
+def test_persistence_mapper_groups(monkeypatch):
+    from jans.pycloudlib.persistence.utils import PersistenceMapper
+
+    monkeypatch.setenv("CN_PERSISTENCE_TYPE", "hybrid")
+    monkeypatch.setenv("CN_HYBRID_MAPPING", json.dumps({
+        "default": "sql",
+        "user": "spanner",
+        "site": "ldap",
+        "cache": "sql",
+        "token": "couchbase",
+        "session": "sql",
+    }))
+
+    groups = {
+        "couchbase": ["token"],
+        "ldap": ["site"],
+        "spanner": ["user"],
+        "sql": ["default", "cache", "session"],
+    }
+    assert PersistenceMapper().groups() == groups
+
+
+def test_persistence_mapper_groups_rdn(monkeypatch):
+    from jans.pycloudlib.persistence.utils import PersistenceMapper
+
+    monkeypatch.setenv("CN_PERSISTENCE_TYPE", "hybrid")
+    monkeypatch.setenv("CN_HYBRID_MAPPING", json.dumps({
+        "default": "sql",
+        "user": "spanner",
+        "site": "ldap",
+        "cache": "sql",
+        "token": "couchbase",
+        "session": "sql",
+    }))
+
+    groups = {
+        "couchbase": ["tokens"],
+        "ldap": ["cache-refresh"],
+        "spanner": ["people, groups, authorizations"],
+        "sql": ["", "cache", "sessions"],
+    }
+    assert PersistenceMapper().groups_with_rdn() == groups
