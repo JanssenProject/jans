@@ -355,6 +355,7 @@ class SpannerBackend:
             ("jansPerson", "jansTrustedDevices"),
             ("jansUmaRPT", "dpop"),
             ("jansUmaPCT", "dpop"),
+            ("jansClnt", "o"),
         ]:
             add_column(mod[0], mod[1])
 

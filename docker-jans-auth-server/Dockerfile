@@ -55,7 +55,7 @@ RUN /opt/jython/bin/pip uninstall -y pip
 # ===========
 
 ENV CN_VERSION=1.0.1-SNAPSHOT
-ENV CN_BUILD_DATE='2022-05-24 08:14'
+ENV CN_BUILD_DATE='2022-06-03 08:14'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-server/${CN_VERSION}/jans-auth-server-${CN_VERSION}.war
 
 # Install Jans Auth
@@ -102,6 +102,27 @@ RUN git clone --filter blob:none --no-checkout https://github.com/GluuFederation
     && cd /opt/jans/python/libs \
     && cp /tmp/flex/${CASA_EXTRAS_DIR}/casa-external_* . \
     && rm -rf /tmp/flex
+
+# ===========
+# Agama files
+# ===========
+
+RUN mkdir -p ${JETTY_BASE}/jans-auth/agama/fl \
+    ${JETTY_BASE}/jans-auth/agama/ftl \
+    ${JETTY_BASE}/jans-auth/agama/scripts
+
+ARG JANS_AGAMA_VERSION=6b23bfe19ef960039f76df4de167c159312dd930
+
+# note that as we're pulling from a monorepo (with multiple project in it)
+# we are using partial-clone and sparse-checkout to get the agama code
+RUN git clone --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
+    && cd /tmp/jans \
+    && git sparse-checkout init --cone \
+    && git checkout ${JANS_AGAMA_VERSION} \
+    && git sparse-checkout add agama/misc
+
+RUN cp -R /tmp/jans/agama/misc/* ${JETTY_BASE}/jans-auth/agama/ \
+    && rm -rf /tmp/jans
 
 # ======
 # Python
@@ -233,6 +254,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/custom/pages \
 
 COPY certs /etc/certs
 COPY jetty/jans-auth_web_resources.xml ${JETTY_BASE}/jans-auth/webapps/
+COPY jetty/agama_web_resources.xml ${JETTY_BASE}/jans-auth/webapps/
 COPY jetty/log4j2.xml ${JETTY_BASE}/jans-auth/resources/
 COPY conf/*.tmpl /app/templates/
 COPY scripts /app/scripts
@@ -251,7 +273,8 @@ RUN chmod -R g=u ${JETTY_BASE}/jans-auth/custom \
     && chmod -R g=u /etc/jans \
     && chmod 664 /usr/java/latest/jre/lib/security/cacerts \
     && chmod 664 /opt/jetty/etc/jetty.xml \
-    && chmod 664 /opt/jetty/etc/webdefault.xml
+    && chmod 664 /opt/jetty/etc/webdefault.xml \
+    && chown -R 1000:0 ${JETTY_BASE}/jans-auth/agama
 
 USER 1000
 
