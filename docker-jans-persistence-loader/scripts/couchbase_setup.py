@@ -16,52 +16,38 @@ logger = logging.getLogger("couchbase_setup")
 
 def get_bucket_mappings(manager):
     prefix = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
-    bucket_mappings = {
+    _mappings = {
         "default": {
             "bucket": prefix,
             "mem_alloc": 100,
-            # "document_key_prefix": [],
         },
         "user": {
             "bucket": f"{prefix}_user",
             "mem_alloc": 300,
-            # "document_key_prefix": ["groups_", "people_", "authorizations_"],
         },
         "site": {
             "bucket": f"{prefix}_site",
             "mem_alloc": 100,
-            # "document_key_prefix": ["site_", "cache-refresh_"],
         },
         "token": {
             "bucket": f"{prefix}_token",
             "mem_alloc": 300,
-            # "document_key_prefix": ["tokens_"],
         },
         "cache": {
             "bucket": f"{prefix}_cache",
             "mem_alloc": 100,
-            # "document_key_prefix": ["cache_"],
         },
         "session": {
             "bucket": f"{prefix}_session",
             "mem_alloc": 200,
-            # "document_key_prefix": [],
         },
     }
 
     optional_scopes = json.loads(manager.config.get("optional_scopes", "[]"))
-    ldif_mappings = get_ldif_mappings("couchbase", optional_scopes)
-
-    for name, files in ldif_mappings.items():
-        bucket_mappings[name]["files"] = files
-
-    # persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "ldap")
-    # ldap_mapping = os.environ.get("CN_PERSISTENCE_LDAP_MAPPING", "default")
-    # if persistence_type == "hybrid":
-    #     bucket_mappings = {
-    #         name: mapping for name, mapping in bucket_mappings.items()
-    #         if name != ldap_mapping
-    #     }
+    bucket_mappings = {
+        mapping: {"files": files} | _mappings[mapping]
+        for mapping, files in get_ldif_mappings("couchbase", optional_scopes).items()
+    }
     return bucket_mappings
 
 
@@ -89,18 +75,16 @@ class CouchbaseBackend:
         if total_mem < min_mem:
             logger.warning("Available quota on couchbase node is less than {} MB".format(min_mem))
 
-        persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "ldap")
-        ldap_mapping = os.environ.get("CN_PERSISTENCE_LDAP_MAPPING", "default")
-
-        # always create `jans` bucket even when `default` mapping stored in LDAP
-        if persistence_type == "hybrid" and ldap_mapping == "default":
+        # always create `jans` bucket even when `default` mapping stored in another persistence
+        if "default" not in bucket_mappings:
             memsize = 100
+            bucket = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
 
-            logger.info("Creating bucket {0} with type {1} and RAM size {2}".format("jans", bucket_type, memsize))
-            prefix = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
-            req = self.client.add_bucket(prefix, memsize, bucket_type)
+            logger.info(f"Creating bucket {bucket} with type {bucket_type} and RAM size {memsize}")
+
+            req = self.client.add_bucket(bucket, memsize, bucket_type)
             if not req.ok:
-                logger.warning("Failed to create bucket {}; reason={}".format("jans", req.text))
+                logger.warning(f"Failed to create bucket {bucket}; reason={req.text}")
 
         req = self.client.get_buckets()
         if req.ok:
@@ -114,10 +98,11 @@ class CouchbaseBackend:
 
             memsize = int((mapping["mem_alloc"] / float(min_mem)) * total_mem)
 
-            logger.info("Creating bucket {0} with type {1} and RAM size {2}".format(mapping["bucket"], bucket_type, memsize))
+            logger.info(f"Creating bucket {mapping['bucket']} with type {bucket_type} and RAM size {memsize}")
+
             req = self.client.add_bucket(mapping["bucket"], memsize, bucket_type)
             if not req.ok:
-                logger.warning("Failed to create bucket {}; reason={}".format(mapping["bucket"], req.text))
+                logger.warning(f"Failed to create bucket {mapping['bucket']}; reason={req.text}")
 
     def create_indexes(self, bucket_mappings):
         buckets = [mapping["bucket"] for _, mapping in bucket_mappings.items()]
@@ -131,65 +116,61 @@ class CouchbaseBackend:
             if bucket not in indexes:
                 continue
 
-            query_file = "/app/tmp/index_{}.n1ql".format(bucket)
-
             logger.info("Running Couchbase index creation for {} bucket (if not exist)".format(bucket))
 
-            with open(query_file, "w") as f:
-                index_list = indexes.get(bucket, {})
-                index_names = []
+            queries = []
+            index_list = indexes.get(bucket, {})
+            index_names = []
 
-                for index in index_list.get("attributes", []):
-                    if '(' in ''.join(index):
-                        attr_ = index[0]
-                        index_name_ = index[0].replace('(', '_').replace(')', '_').replace('`', '').lower()
-                        if index_name_.endswith('_'):
-                            index_name_ = index_name_[:-1]
-                        index_name = 'def_{0}_{1}'.format(bucket, index_name_)
+            for index in index_list.get("attributes", []):
+                if '(' in ''.join(index):
+                    attr_ = index[0]
+                    index_name_ = index[0].replace('(', '_').replace(')', '_').replace('`', '').lower()
+                    if index_name_.endswith('_'):
+                        index_name_ = index_name_[:-1]
+                    index_name = 'def_{0}_{1}'.format(bucket, index_name_)
+                else:
+                    attr_ = ','.join(['`{}`'.format(a) for a in index])
+                    index_name = "def_{0}_{1}".format(bucket, '_'.join(index))
+
+                queries.append(
+                    'CREATE INDEX %s ON `%s`(%s) USING GSI WITH {"defer_build":true,"num_replica": %s};\n' % (index_name, bucket, attr_, self.index_num_replica)
+                )
+
+                index_names.append(index_name)
+
+            if index_names:
+                queries.append('BUILD INDEX ON `%s` (%s) USING GSI;\n' % (bucket, ', '.join(index_names)))
+
+            sic = 1
+            for attribs, wherec in index_list.get("static", []):
+                attrquoted = []
+
+                for a in attribs:
+                    if '(' not in a:
+                        attrquoted.append('`{}`'.format(a))
                     else:
-                        attr_ = ','.join(['`{}`'.format(a) for a in index])
-                        index_name = "def_{0}_{1}".format(bucket, '_'.join(index))
+                        attrquoted.append(a)
+                attrquoteds = ', '.join(attrquoted)
 
-                    f.write(
-                        'CREATE INDEX %s ON `%s`(%s) USING GSI WITH {"defer_build":true,"num_replica": %s};\n' % (index_name, bucket, attr_, self.index_num_replica)
-                    )
+                queries.append(
+                    'CREATE INDEX `{0}_static_{1:02d}` ON `{0}`({2}) WHERE ({3}) WITH {{ "num_replica": {4} }}\n'.format(bucket, sic, attrquoteds, wherec, self.index_num_replica)
+                )
+                sic += 1
 
-                    index_names.append(index_name)
+            for query in queries:
+                query = query.strip()
+                if not query:
+                    continue
 
-                if index_names:
-                    f.write('BUILD INDEX ON `%s` (%s) USING GSI;\n' % (bucket, ', '.join(index_names)))
-
-                sic = 1
-                for attribs, wherec in index_list.get("static", []):
-                    attrquoted = []
-
-                    for a in attribs:
-                        if '(' not in a:
-                            attrquoted.append('`{}`'.format(a))
-                        else:
-                            attrquoted.append(a)
-                    attrquoteds = ', '.join(attrquoted)
-
-                    f.write(
-                        'CREATE INDEX `{0}_static_{1:02d}` ON `{0}`({2}) WHERE ({3}) WITH {{ "num_replica": {4} }}\n'.format(bucket, sic, attrquoteds, wherec, self.index_num_replica)
-                    )
-                    sic += 1
-
-            # exec query
-            with open(query_file) as f:
-                for line in f:
-                    query = line.strip()
-                    if not query:
+                req = self.client.exec_query(query)
+                if not req.ok:
+                    # the following code should be ignored
+                    # - 4300: index already exists
+                    error = req.json()["errors"][0]
+                    if error["code"] in (4300,):
                         continue
-
-                    req = self.client.exec_query(query)
-                    if not req.ok:
-                        # the following code should be ignored
-                        # - 4300: index already exists
-                        error = req.json()["errors"][0]
-                        if error["code"] in (4300,):
-                            continue
-                        logger.warning(f"Failed to execute query, reason={error['msg'].strip()}")  # .format(error["msg"]))
+                    logger.warning(f"Failed to execute query, reason={error['msg'].strip()}")  # .format(error["msg"]))
 
     def import_builtin_ldif(self, bucket_mappings, ctx):
         for _, mapping in bucket_mappings.items():
@@ -215,7 +196,11 @@ class CouchbaseBackend:
 
         time.sleep(5)
         ctx = prepare_template_ctx(self.manager)
+
+        logger.info("Importing builtin LDIF files")
         self.import_builtin_ldif(bucket_mappings, ctx)
+
+        logger.info("Importing custom LDIF files (if any)")
         self.import_custom_ldif(ctx)
 
         time.sleep(5)
