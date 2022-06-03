@@ -3444,6 +3444,7 @@
     {
       "kind": "STRUCTURAL",
       "may": [
+        "o",
         "displayName",
         "description",
         "inum",
