@@ -106,7 +106,6 @@ def _transform_auth_dynamic_config(conf):
                 "templatesPath": "/ftl",
                 "scriptsPath": "/scripts",
                 "serializerType": "KRYO",
-                "interruptionTime": 0,
                 "maxItemsLoggedInCollections": 3,
                 "pageMismatchErrorPage": "mismatch.ftl",
                 "interruptionErrorPage": "timeout.ftl",
@@ -118,6 +117,10 @@ def _transform_auth_dynamic_config(conf):
                     "Expires": "0",
                 },
             }
+            should_update = True
+
+        if "interruptionTime" in conf["agamaConfiguration"]:
+            conf["agamaConfiguration"].pop("interruptionTime", None)
             should_update = True
 
     if "forceSignedRequestObject" not in conf:
