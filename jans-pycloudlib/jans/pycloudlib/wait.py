@@ -166,6 +166,10 @@ def wait_for_secret(manager, **kwargs):
         raise WaitError("Secret 'ssl_cert' is not available")
 
 
+#: DN of admin group
+_ADMIN_GROUP_DN = "inum=60B7,ou=groups,o=jans"
+
+
 @retry_on_exception
 def wait_for_ldap(manager: _Manager, **kwargs) -> None:
     """Wait for readiness/availability of LDAP server based on existing entry.
@@ -176,7 +180,7 @@ def wait_for_ldap(manager: _Manager, **kwargs) -> None:
     jca_client_id = manager.config.get("jca_client_id")
     search_mapping = {
         "default": (f"inum={jca_client_id},ou=clients,o=jans", "(objectClass=jansClnt)"),
-        "user": ("inum=60B7,ou=groups,o=jans", "(objectClass=jansGrp)"),
+        "user": (_ADMIN_GROUP_DN, "(objectClass=jansGrp)"),
         "site": ("ou=cache-refresh,o=site", "(ou=cache-refresh)"),
         "cache": ("ou=cache,o=jans", "(ou=cache)"),
         "token": ("ou=tokens,o=jans", "(ou=tokens)"),
@@ -218,7 +222,7 @@ def wait_for_couchbase(manager, **kwargs):
     jca_client_id = manager.config.get("jca_client_id")
     search_mapping = {
         "default": (id_from_dn(f"inum={jca_client_id},ou=clients,o=jans"), f"{bucket_prefix}"),
-        "user": (id_from_dn("inum=60B7,ou=groups,o=jans"), f"{bucket_prefix}_user"),
+        "user": (id_from_dn(_ADMIN_GROUP_DN), f"{bucket_prefix}_user"),
     }
 
     client = CouchbaseClient(manager)
@@ -264,7 +268,7 @@ def wait_for_sql(manager: _Manager, **kwargs) -> None:
     jca_client_id = manager.config.get("jca_client_id")
     search_mapping = {
         "default": (doc_id_from_dn(f"inum={jca_client_id},ou=clients,o=jans"), "jansClnt"),
-        "user": (doc_id_from_dn("inum=60B7,ou=groups,o=jans"), "jansGrp"),
+        "user": (doc_id_from_dn(_ADMIN_GROUP_DN), "jansGrp"),
     }
 
     client = SqlClient(manager)
@@ -297,7 +301,7 @@ def wait_for_spanner(manager: _Manager, **kwargs) -> None:
     jca_client_id = manager.config.get("jca_client_id")
     search_mapping = {
         "default": (doc_id_from_dn(f"inum={jca_client_id},ou=clients,o=jans"), "jansClnt"),
-        "user": (doc_id_from_dn("inum=60B7,ou=groups,o=jans"), "jansGrp"),
+        "user": (doc_id_from_dn(_ADMIN_GROUP_DN), "jansGrp"),
     }
 
     client = SpannerClient(manager)

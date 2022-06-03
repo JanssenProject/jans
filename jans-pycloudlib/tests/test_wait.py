@@ -88,6 +88,9 @@ def test_wait_for_ldap(gmanager, monkeypatch):
         wait_for_ldap(gmanager)
 
 
+_PERSISTENCE_MAPPER_GROUP_FUNC = "jans.pycloudlib.persistence.utils.PersistenceMapper.groups"
+
+
 def test_wait_for_ldap_no_search_mapping(gmanager, monkeypatch):
     from jans.pycloudlib.wait import wait_for_ldap
 
@@ -100,7 +103,7 @@ def test_wait_for_ldap_no_search_mapping(gmanager, monkeypatch):
     )
 
     monkeypatch.setattr(
-        "jans.pycloudlib.persistence.utils.PersistenceMapper.groups",
+        _PERSISTENCE_MAPPER_GROUP_FUNC,
         lambda cls: {"ldap": ["random"]}
     )
 
@@ -150,7 +153,7 @@ def test_wait_for_couchbase_no_search_mapping(gmanager, monkeypatch):
     )
 
     monkeypatch.setattr(
-        "jans.pycloudlib.persistence.utils.PersistenceMapper.groups",
+        _PERSISTENCE_MAPPER_GROUP_FUNC,
         lambda cls: {"couchbase": ["random"]}
     )
 
@@ -208,7 +211,7 @@ def test_wait_for_sql_no_search_mapping(monkeypatch, gmanager):
     monkeypatch.setenv("CN_PERSISTENCE_TYPE", "sql")
 
     monkeypatch.setattr(
-        "jans.pycloudlib.persistence.utils.PersistenceMapper.groups",
+        _PERSISTENCE_MAPPER_GROUP_FUNC,
         lambda cls: {"sql": ["random"]}
     )
 
@@ -258,7 +261,7 @@ def test_wait_for_spanner_no_search_mapping(monkeypatch, gmanager):
     monkeypatch.setenv("CN_PERSISTENCE_TYPE", "spanner")
 
     monkeypatch.setattr(
-        "jans.pycloudlib.persistence.utils.PersistenceMapper.groups",
+        _PERSISTENCE_MAPPER_GROUP_FUNC,
         lambda cls: {"spanner": ["random"]}
     )
 
@@ -286,6 +289,9 @@ def test_wait_for_spanner_conn(monkeypatch, gmanager):
         wait_for_spanner_conn(gmanager)
 
 
+_WAIT_FOR_FUNC = "jans.pycloudlib.wait.wait_for"
+
+
 @pytest.mark.parametrize("persistence_type, deps", [
     ("ldap", ["ldap"]),
     ("couchbase", ["couchbase"]),
@@ -297,7 +303,7 @@ def test_wait_for_persistence(monkeypatch, gmanager, persistence_type, deps):
 
     monkeypatch.setenv("CN_PERSISTENCE_TYPE", persistence_type)
 
-    with patch("jans.pycloudlib.wait.wait_for", autospec=True) as patched:
+    with patch(_WAIT_FOR_FUNC, autospec=True) as patched:
         wait_for_persistence(gmanager)
         patched.assert_called_with(gmanager, deps)
 
@@ -318,7 +324,7 @@ def test_wait_for_persistence_hybrid(monkeypatch, gmanager):
         }),
     )
 
-    with patch("jans.pycloudlib.wait.wait_for", autospec=True) as patched:
+    with patch(_WAIT_FOR_FUNC, autospec=True) as patched:
         wait_for_persistence(gmanager)
         patched.assert_called_with(gmanager, ["couchbase", "ldap", "spanner", "sql"])
 
@@ -334,7 +340,7 @@ def test_wait_for_persistence_conn(monkeypatch, gmanager, persistence_type, deps
 
     monkeypatch.setenv("CN_PERSISTENCE_TYPE", persistence_type)
 
-    with patch("jans.pycloudlib.wait.wait_for", autospec=True) as patched:
+    with patch(_WAIT_FOR_FUNC, autospec=True) as patched:
         wait_for_persistence_conn(gmanager)
         patched.assert_called_with(gmanager, deps)
 
@@ -355,7 +361,7 @@ def test_wait_for_persistence_conn_hybrid(monkeypatch, gmanager):
         }),
     )
 
-    with patch("jans.pycloudlib.wait.wait_for", autospec=True) as patched:
+    with patch(_WAIT_FOR_FUNC, autospec=True) as patched:
         wait_for_persistence_conn(gmanager)
         patched.assert_called_with(gmanager, ["couchbase_conn", "ldap_conn", "spanner_conn", "sql_conn"])
 
