@@ -316,6 +316,11 @@ public class RegisterService {
         }
 
         if (requestObject.getJsonObject() != null) {
+            final String orgId = requestObject.getJsonObject().optString("org_id");
+            if (StringUtils.isNotBlank(orgId)) {
+                client.setOrganization(orgId);
+            }
+
             // Custom params
             putCustomStuffIntoObject(client, requestObject.getJsonObject());
         }
