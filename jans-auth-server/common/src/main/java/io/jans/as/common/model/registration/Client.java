@@ -237,8 +237,19 @@ public class Client extends DeletableEntity implements Serializable {
     @AttributeName(name = "description")
     private String description;
 
+    @AttributeName(name = "o")
+    private String organization;
+
     @Expiration
     private Integer ttl;
+
+    public String getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(String organization) {
+        this.organization = organization;
+    }
 
     public ClientAttributes getAttributes() {
         if (attributes == null) {
