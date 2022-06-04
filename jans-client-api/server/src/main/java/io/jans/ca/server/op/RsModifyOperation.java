@@ -105,7 +105,7 @@ public class RsModifyOperation extends BaseOperation<RsModifyParams> {
         return new RsModifyResponse(rp.getRpId());
     }
 
-    private io.jans.as.model.uma.UmaResource getResource(UmaResourceService resourceService, RsModifyParams params, String resourceId) throws Exception {
+    private io.jans.as.model.uma.UmaResource getResource(UmaResourceService resourceService, RsModifyParams params, String resourceId) {
         String pat = umaTokenService.getPat(params.getRpId()).getToken();
         UmaResourceWithId umaResourceWithId = resourceService.getResource("Bearer " + pat, resourceId);
 

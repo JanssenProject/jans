@@ -4,7 +4,6 @@ import io.jans.ca.common.ExpiredObject;
 import io.jans.ca.server.configuration.ApiAppConfiguration;
 import io.jans.ca.server.configuration.model.Rp;
 import io.jans.ca.server.persistence.providers.H2PersistenceProvider;
-import jakarta.ejb.Stateless;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,8 +45,10 @@ public class PersistenceServiceImpl {
                 return new SqlPersistenceServiceImpl(new H2PersistenceProvider(apiConf));
             case "redis":
                 return new RedisPersistenceService(apiConf);
+            default:
+                LOG.error("Failed to recognize persistence provider. Unrecognized storage specified: {}, full api configuration: {}", storage, apiConf);
+                return jansConfigurationService;
         }
-        throw new RuntimeException("Failed to create persistence provider. Unrecognized storage specified: " + storage + ", full configuration: " + apiConf);
     }
 
     public boolean create(Rp rp) {

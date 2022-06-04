@@ -21,9 +21,9 @@ public class OAuth20Resource extends BaseResource {
     @POST
     @Path("/update-site")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response updateSite(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String AuthorizationRpId, String params) {
+    public Response updateSite(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String authorizationRpId, String params) {
         logger.info("Api Resource: /update-site  Params: {}", params);
-        String result = process(CommandType.UPDATE_SITE, params, UpdateSiteParams.class, authorization, AuthorizationRpId);
+        String result = process(CommandType.UPDATE_SITE, params, UpdateSiteParams.class, authorization, authorizationRpId);
         return Response.ok(result).build();
     }
 
@@ -31,9 +31,9 @@ public class OAuth20Resource extends BaseResource {
     @Path("/remove-site")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response removeSite(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String AuthorizationRpId, String params) {
+    public Response removeSite(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String authorizationRpId, String params) {
         logger.info("Api Resource: /remove-site  Params: {}", params);
-        String result = process(CommandType.REMOVE_SITE, params, RemoveSiteParams.class, authorization, AuthorizationRpId);
+        String result = process(CommandType.REMOVE_SITE, params, RemoveSiteParams.class, authorization, authorizationRpId);
         return Response.ok(result).build();
     }
 
@@ -50,9 +50,9 @@ public class OAuth20Resource extends BaseResource {
     @Path("/get-access-token-by-refresh-token")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response getAccessTokenByRefreshToken(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String AuthorizationRpId, String params) {
+    public Response getAccessTokenByRefreshToken(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String authorizationRpId, String params) {
         logger.info("Api Resource: /get-access-token-by-refresh-token  Params: {}", params);
-        String result = process(CommandType.GET_ACCESS_TOKEN_BY_REFRESH_TOKEN, params, GetAccessTokenByRefreshTokenParams.class, authorization, AuthorizationRpId);
+        String result = process(CommandType.GET_ACCESS_TOKEN_BY_REFRESH_TOKEN, params, GetAccessTokenByRefreshTokenParams.class, authorization, authorizationRpId);
         return Response.ok(result).build();
     }
 
@@ -60,9 +60,9 @@ public class OAuth20Resource extends BaseResource {
     @Path("/introspect-access-token")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response introspectAccessToken(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String AuthorizationRpId, String params) {
+    public Response introspectAccessToken(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String authorizationRpId, String params) {
         logger.info("Api Resource: /introspect-access-token  Params: {}", params);
-        String result = process(CommandType.INTROSPECT_ACCESS_TOKEN, params, IntrospectAccessTokenParams.class, authorization, AuthorizationRpId);
+        String result = process(CommandType.INTROSPECT_ACCESS_TOKEN, params, IntrospectAccessTokenParams.class, authorization, authorizationRpId);
         return Response.ok(result).build();
     }
 
@@ -70,9 +70,9 @@ public class OAuth20Resource extends BaseResource {
     @Path("/get-user-info")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response getUserInfo(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String AuthorizationRpId, String params) {
+    public Response getUserInfo(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String authorizationRpId, String params) {
         logger.info("Api Resource: /get-user-info  Params: {}", params);
-        String result = process(CommandType.GET_USER_INFO, params, GetUserInfoParams.class, authorization, AuthorizationRpId);
+        String result = process(CommandType.GET_USER_INFO, params, GetUserInfoParams.class, authorization, authorizationRpId);
         return Response.ok(result).build();
     }
 
@@ -80,9 +80,9 @@ public class OAuth20Resource extends BaseResource {
     @Path("/get-jwks")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response getJwks(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String AuthorizationRpId, String params) {
+    public Response getJwks(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String authorizationRpId, String params) {
         logger.info("Api Resource: /get-jwks  Params: {}", params);
-        String result = process(CommandType.GET_JWKS, params, GetJwksParams.class, authorization, AuthorizationRpId);
+        String result = process(CommandType.GET_JWKS, params, GetJwksParams.class, authorization, authorizationRpId);
         return Response.ok(result).build();
     }
 
@@ -99,9 +99,9 @@ public class OAuth20Resource extends BaseResource {
     @Path("/check-access-token")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response checkAccessToken(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String AuthorizationRpId, String params) {
+    public Response checkAccessToken(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String authorizationRpId, String params) {
         logger.info("Api Resource: /check-access-token  Params: {}", params);
-        String result = process(CommandType.CHECK_ACCESS_TOKEN, params, CheckAccessTokenParams.class, authorization, AuthorizationRpId);
+        String result = process(CommandType.CHECK_ACCESS_TOKEN, params, CheckAccessTokenParams.class, authorization, authorizationRpId);
         return Response.ok(result).build();
     }
 
@@ -109,9 +109,9 @@ public class OAuth20Resource extends BaseResource {
     @Path("/check-id-token")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response checkIdToken(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String AuthorizationRpId, String params) {
+    public Response checkIdToken(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String authorizationRpId, String params) {
         logger.info("Api Resource: /check-id-token  Params: {}", params);
-        String result = process(CommandType.CHECK_ID_TOKEN, params, CheckIdTokenParams.class, authorization, AuthorizationRpId);
+        String result = process(CommandType.CHECK_ID_TOKEN, params, CheckIdTokenParams.class, authorization, authorizationRpId);
         return Response.ok(result).build();
     }
 

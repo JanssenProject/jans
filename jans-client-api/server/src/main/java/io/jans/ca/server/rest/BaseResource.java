@@ -1,6 +1,5 @@
 package io.jans.ca.server.rest;
 
-import com.google.gson.Gson;
 import io.jans.as.model.util.Util;
 import io.jans.ca.common.Command;
 import io.jans.ca.common.CommandType;
@@ -50,18 +49,18 @@ public class BaseResource {
         try {
             return Jackson2.createJsonMapper().readValue(params, clazz);
         } catch (IOException e) {
-            logger.error("Invalid params: {} exception: {}", params, e.getMessage());
             throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).entity("Invalid parameters. Message: " + e.getMessage()).build());
         }
     }
 
-    public <T extends IParams> String process(CommandType commandType, String paramsAsString, Class<T> paramsClass, String authorization, String AuthorizationRpId) {
-        logger.info("Endpoint: {0}", httpRequest.getRequestURL().toString());
+    public <T extends IParams> String process(CommandType commandType, String paramsAsString, Class<T> paramsClass, String authorization, String authorizationRpId) {
+        String endPointUrl = httpRequest.getRequestURL().toString();
+        logger.info("Endpoint: {}", endPointUrl);
         logger.info("Request parameters: {}", paramsAsString);
         logger.info("CommandType: {}", commandType);
 
         validateIpAddressAllowed(httpRequest.getRemoteAddr());
-        Object forJsonConversion = getObjectForJsonConversion(commandType, paramsAsString, paramsClass, authorization, AuthorizationRpId);
+        Object forJsonConversion = getObjectForJsonConversion(commandType, paramsAsString, paramsClass, authorization, authorizationRpId);
         String response = null;
 
         if (commandType.getReturnType().equalsIgnoreCase(MediaType.APPLICATION_JSON)) {
@@ -100,15 +99,15 @@ public class BaseResource {
         throw new HttpException(ErrorResponseCode.RP_ACCESS_DENIED);
     }
 
-    private <T extends IParams> Object getObjectForJsonConversion(CommandType commandType, String paramsAsString, Class<T> paramsClass, String authorization, String AuthorizationRpId) {
+    private <T extends IParams> Object getObjectForJsonConversion(CommandType commandType, String paramsAsString, Class<T> paramsClass, String authorization, String authorizationRpId) {
         logger.trace("Command: {}", paramsAsString);
         T params = read(safeToJson(paramsAsString), paramsClass);
 
         final ApiAppConfiguration conf = jansConfigurationService.find();
 
         if (commandType.isAuthorizationRequired()) {
-            validateAuthorizationRpId(conf, AuthorizationRpId);
-            validateAccessToken(authorization, safeToRpId((HasRpIdParams) params, AuthorizationRpId));
+            validateAuthorizationRpId(conf, authorizationRpId);
+            validateAccessToken(authorization, safeToRpId((HasRpIdParams) params, authorizationRpId));
         }
 
         Command command = new Command(commandType, params);
@@ -120,13 +119,13 @@ public class BaseResource {
         return forJsonConversion;
     }
 
-    private void validateAuthorizationRpId(ApiAppConfiguration conf, String AuthorizationRpId) {
+    private void validateAuthorizationRpId(ApiAppConfiguration conf, String authorizationRpId) {
 
-        if (Util.isNullOrEmpty(AuthorizationRpId)) {
+        if (Util.isNullOrEmpty(authorizationRpId)) {
             return;
         }
 
-        final Rp rp = rpSyncService.getRp(AuthorizationRpId);
+        final Rp rp = rpSyncService.getRp(authorizationRpId);
 
         if (rp == null || Util.isNullOrEmpty(rp.getRpId())) {
             logger.debug("`rp_id` in `AuthorizationRpId` header is not registered in jans_client_api.");
@@ -137,13 +136,13 @@ public class BaseResource {
             return;
         }
 
-        if (!conf.getProtectCommandsWithRpId().contains(AuthorizationRpId)) {
+        if (!conf.getProtectCommandsWithRpId().contains(authorizationRpId)) {
             logger.debug("`rp_id` in `AuthorizationRpId` header is invalid. The `AuthorizationRpId` header should contain `rp_id` from `protect_commands_with_rp_id` field in client-api-server.yml.");
             throw new HttpException(ErrorResponseCode.INVALID_AUTHORIZATION_RP_ID);
         }
     }
 
-    private void validateAccessToken(String authorization, String AuthorizationRpId) {
+    private void validateAccessToken(String authorization, String authorizationRpId) {
         final String prefix = "Bearer ";
         final ApiAppConfiguration conf = jansConfigurationService.find();
 
@@ -163,11 +162,11 @@ public class BaseResource {
             throw new HttpException(ErrorResponseCode.BLANK_ACCESS_TOKEN);
         }
 
-        validationService.validateAccessToken(accessToken, AuthorizationRpId);
+        validationService.validateAccessToken(accessToken, authorizationRpId);
     }
 
-    private String safeToRpId(HasRpIdParams params, String AuthorizationRpId) {
-        return Util.isNullOrEmpty(AuthorizationRpId) ? params.getRpId() : AuthorizationRpId;
+    private String safeToRpId(HasRpIdParams params, String authorizationRpId) {
+        return Util.isNullOrEmpty(authorizationRpId) ? params.getRpId() : authorizationRpId;
     }
 
     private String safeToJson(String jsonString) {

@@ -6,9 +6,7 @@ import com.google.common.collect.Lists;
 import io.jans.as.model.configuration.Configuration;
 import io.jans.ca.common.proxy.ProxyConfiguration;
 import io.jans.ca.server.configuration.model.Rp;
-import io.jans.configapi.model.configuration.CorsConfigurationFilter;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)

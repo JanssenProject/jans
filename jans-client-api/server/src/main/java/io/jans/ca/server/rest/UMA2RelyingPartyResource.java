@@ -14,9 +14,9 @@ public class UMA2RelyingPartyResource extends BaseResource {
     @Path("/uma-rp-get-rpt")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response umaRpGetRpt(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String AuthorizationRpId, String params) {
+    public Response umaRpGetRpt(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String authorizationRpId, String params) {
         logger.info("Api Resource: /uma-rp-get-rpt  Params: {}", params);
-        String result = process(CommandType.RP_GET_RPT, params, RpGetRptParams.class, authorization, AuthorizationRpId);
+        String result = process(CommandType.RP_GET_RPT, params, RpGetRptParams.class, authorization, authorizationRpId);
         return Response.ok(result).build();
     }
 
@@ -24,9 +24,9 @@ public class UMA2RelyingPartyResource extends BaseResource {
     @Path("/uma-rp-get-claims-gathering-url")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response umaRpGetClaimsGatheringUrl(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String AuthorizationRpId, String params) {
+    public Response umaRpGetClaimsGatheringUrl(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String authorizationRpId, String params) {
         logger.info("Api Resource: /uma-rp-get-claims-gathering-url  Params: {}", params);
-        String result = process(CommandType.RP_GET_CLAIMS_GATHERING_URL, params, RpGetClaimsGatheringUrlParams.class, authorization, AuthorizationRpId);
+        String result = process(CommandType.RP_GET_CLAIMS_GATHERING_URL, params, RpGetClaimsGatheringUrlParams.class, authorization, authorizationRpId);
         return Response.ok(result).build();
     }
 

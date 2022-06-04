@@ -136,13 +136,13 @@ public class MainPersistenceService implements PersistenceService {
     }
 
     private String joinWithComa(String... words) {
-        String result = "";
+        StringBuilder stringBuilder = new StringBuilder();
         String coma = "";
         for (String word : words) {
-            result += coma + word;
+            stringBuilder.append(coma + word);
             coma = ",";
         }
-        return result;
+        return stringBuilder.toString();
     }
 
     public boolean containsBranch(String dn) {
@@ -208,7 +208,7 @@ public class MainPersistenceService implements PersistenceService {
 
     public Rp getRp(String rpId) {
         try {
-            RpObject rpFromGluuPersistance = getRpObject(rpId, new String[0]);
+            RpObject rpFromGluuPersistance = getRpObject(rpId);
 
             Rp rp = MigrationService.parseRp(rpFromGluuPersistance.getData());
             if (rp != null) {
@@ -224,12 +224,12 @@ public class MainPersistenceService implements PersistenceService {
     }
 
     private RpObject getRpObject(String rpId, String... returnAttributes) {
-        return (RpObject) this.persistenceManager.find(getDnForRp(rpId), RpObject.class, returnAttributes);
+        return this.persistenceManager.find(getDnForRp(rpId), RpObject.class, returnAttributes);
     }
 
     public ExpiredObject getExpiredObject(String key) {
         try {
-            ExpiredObject expiredObject = (ExpiredObject) this.persistenceManager.find(getDnForExpiredObj(key), ExpiredObject.class, null);
+            ExpiredObject expiredObject = this.persistenceManager.find(getDnForExpiredObj(key), ExpiredObject.class, null);
             if (expiredObject != null) {
                 expiredObject.setType(ExpiredObjectType.fromValue(expiredObject.getTypeString()));
                 logger.debug("Found ExpiredObject id: {} , ExpiredObject : {} ", key, expiredObject);
@@ -239,7 +239,7 @@ public class MainPersistenceService implements PersistenceService {
             logger.error("Failed to fetch ExpiredObject by id: {} ", key);
             return null;
         } catch (Exception e) {
-            if (((e instanceof EntryPersistenceException)) && (e.getMessage().contains("Failed to find entry"))) {
+            if ((e instanceof EntryPersistenceException) && (e.getMessage().contains("Failed to find entry"))) {
                 logger.warn("Failed to fetch ExpiredObject by id: {}. {} ", key, e.getMessage());
                 return null;
             }
@@ -264,9 +264,9 @@ public class MainPersistenceService implements PersistenceService {
     }
 
     public Set<Rp> getRps() {
-        Set<Rp> result = new HashSet<Rp>();
+        Set<Rp> result = new HashSet<>();
         try {
-            List<RpObject> rpObjects = this.persistenceManager.findEntries(String.format("%s,%s", new Object[]{getRpOu(), getClientApiDn()}), RpObject.class, null);
+            List<RpObject> rpObjects = this.persistenceManager.findEntries(joinWithComa(getRpOu(), getClientApiDn()), RpObject.class, null);
             for (RpObject ele : rpObjects) {
                 Rp rp = MigrationService.parseRp(ele.getData());
                 if (rp != null) {
@@ -279,7 +279,7 @@ public class MainPersistenceService implements PersistenceService {
         } catch (Exception e) {
             if ((e instanceof EntryPersistenceException) && (e.getMessage().contains("Failed to find entries"))) {
                 logger.warn("Failed to fetch RpObjects. {} ", e.getMessage());
-                return new HashSet<Rp>();
+                return new HashSet<>();
             }
             logger.error("Failed to fetch rps. Error: {} ", e.getMessage(), e);
         }
@@ -319,7 +319,7 @@ public class MainPersistenceService implements PersistenceService {
             final Date currentTime = cal.getTime();
             Filter exirationDateFilter = Filter.createLessOrEqualFilter("exp", this.persistenceManager.encodeTime(BASE_DN, currentTime));
 
-            this.persistenceManager.remove(String.format("%s,%s", new Object[]{getExpiredObjOu(), getClientApiDn()}), ExpiredObject.class, exirationDateFilter, this.configuration.getPersistenceManagerRemoveCount());
+            this.persistenceManager.remove(joinWithComa(getExpiredObjOu(), getClientApiDn()), ExpiredObject.class, exirationDateFilter, this.configuration.getPersistenceManagerRemoveCount());
             logger.debug("Removed all expired_objects successfully. ");
             return true;
         } catch (Exception e) {
@@ -329,11 +329,11 @@ public class MainPersistenceService implements PersistenceService {
     }
 
     public String getDnForRp(String rpId) {
-        return String.format("jansId=%s,%s,%s", new Object[]{rpId, getRpOu(), getClientApiDn()});
+        return joinWithComa("jansId=", rpId, getRpOu(), getClientApiDn());
     }
 
     public String getDnForExpiredObj(String rpId) {
-        return String.format("rpId=%s,%s,%s", new Object[]{rpId, getExpiredObjOu(), getClientApiDn()});
+        return joinWithComa("rpId=", rpId, getExpiredObjOu(), getClientApiDn());
     }
 
     public String ou(String ouName) {

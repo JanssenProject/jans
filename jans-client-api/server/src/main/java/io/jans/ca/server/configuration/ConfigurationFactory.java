@@ -13,7 +13,6 @@ import io.jans.as.model.configuration.Configuration;
 import io.jans.as.model.util.SecurityProviderUtility;
 import io.jans.ca.server.Utils;
 import io.jans.ca.server.configuration.model.ApiConf;
-import io.jans.ca.server.op.OpClientFactory;
 import io.jans.ca.server.op.OpClientFactoryImpl;
 import io.jans.ca.server.persistence.service.MainPersistenceService;
 import io.jans.ca.server.service.*;
@@ -67,7 +66,6 @@ public class ConfigurationFactory {
             BASE_DIR = System.getProperty("jboss.home.dir");
         } else {
             String jansBase = Utils.readCompileProterty("compile.jans.base");
-            ;
             BASE_DIR = jansBase;
             System.setProperty(JANS_BASE_CONFIG, jansBase);
         }
@@ -130,9 +128,9 @@ public class ConfigurationFactory {
     @Inject
     IntrospectionService introspectionService;
 
-    public final static String PERSISTENCE_CONFIGUARION_RELOAD_EVENT_TYPE = "persistenceConfigurationReloadEvent";
-    public final static String BASE_CONFIGUARION_RELOAD_EVENT_TYPE = "baseConfigurationReloadEvent";
-    private final static int DEFAULT_INTERVAL = 30; // 30 seconds
+    public static final String PERSISTENCE_CONFIGUARION_RELOAD_EVENT_TYPE = "persistenceConfigurationReloadEvent";
+    public static final String BASE_CONFIGUARION_RELOAD_EVENT_TYPE = "baseConfigurationReloadEvent";
+    private static final int DEFAULT_INTERVAL = 30; // 30 seconds
     private AtomicBoolean isActive;
     private long baseConfigurationFileLastModifiedTime;
 
@@ -220,8 +218,7 @@ public class ConfigurationFactory {
             log.error("Failed to load api configuration from persistence. Please fix it!!!.");
             throw new ConfigurationException("Failed to load api configuration from persistence.");
         } else {
-            log.info("Api Configuration loaded successfully - apiLoadedRevision:{}, ApiAppConfiguration:{}",
-                    this.loadedRevision, getAppConfiguration());
+            log.info("Api Configuration loaded successfully - apiLoadedRevision:{}, ApiAppConfiguration:{}", this.loadedRevision, getAppConfiguration());
         }
     }
 
@@ -230,8 +227,7 @@ public class ConfigurationFactory {
 
         final int delay = 30;
 
-        timerEvent.fire(new TimerEvent(new TimerSchedule(delay, DEFAULT_INTERVAL), new ConfigurationEvent(),
-                Scheduled.Literal.INSTANCE));
+        timerEvent.fire(new TimerEvent(new TimerSchedule(delay, DEFAULT_INTERVAL), new ConfigurationEvent(), Scheduled.Literal.INSTANCE));
     }
 
     @Asynchronous
@@ -257,12 +253,11 @@ public class ConfigurationFactory {
         // Reload LDAP configuration if needed
         PersistenceConfiguration newPersistenceConfiguration = persistanceFactoryService.loadPersistenceConfiguration(APP_PROPERTIES_FILE);
 
-        if (newPersistenceConfiguration != null) {
-            if (!StringHelper.equalsIgnoreCase(this.persistenceConfiguration.getFileName(), newPersistenceConfiguration.getFileName()) || (newPersistenceConfiguration.getLastModifiedTime() > this.persistenceConfiguration.getLastModifiedTime())) {
-                // Reload configuration only if it was modified
-                this.persistenceConfiguration = newPersistenceConfiguration;
-                event.select(LdapConfigurationReload.Literal.INSTANCE).fire(PERSISTENCE_CONFIGUARION_RELOAD_EVENT_TYPE);
-            }
+        if (!StringHelper.equalsIgnoreCase(this.persistenceConfiguration.getFileName(), newPersistenceConfiguration.getFileName())
+                || newPersistenceConfiguration.getLastModifiedTime() > this.persistenceConfiguration.getLastModifiedTime()) {
+            // Reload configuration only if it was modified
+            this.persistenceConfiguration = newPersistenceConfiguration;
+            event.select(LdapConfigurationReload.Literal.INSTANCE).fire(PERSISTENCE_CONFIGUARION_RELOAD_EVENT_TYPE);
         }
 
         // Reload Base configuration if needed
@@ -386,7 +381,6 @@ public class ConfigurationFactory {
 
     public String getConfigurationDn(String keyDn) {
         return this.baseConfiguration.getString(keyDn);
-        //return "ou=jans-client-api,ou=configuration,o=jans";
     }
 
     private void initApiAuthConf(ApiConf apiConf) {
@@ -402,9 +396,7 @@ public class ConfigurationFactory {
         }
 
         this.loadedRevision = apiConf.getRevision();
-        log.debug(
-                "*** ConfigurationFactory::loadApiAppConfigurationFromDb() - apiAppConfiguration:{}, apiLoadedRevision:{} ",
-                this.getAppConfiguration(), loadedRevision);
+        log.debug("*** ConfigurationFactory::loadApiAppConfigurationFromDb() - apiAppConfiguration:{}, apiLoadedRevision:{} ", this.getAppConfiguration(), loadedRevision);
     }
 
     private void loadBaseConfiguration() {
@@ -428,9 +420,7 @@ public class ConfigurationFactory {
 
     private FileConfiguration createFileConfiguration(String fileName, boolean isMandatory) {
         try {
-            FileConfiguration fileConfiguration = new FileConfiguration(fileName);
-
-            return fileConfiguration;
+            return new FileConfiguration(fileName);
         } catch (Exception ex) {
             if (isMandatory) {
                 log.error("Failed to load configuration from {}", fileName, ex);

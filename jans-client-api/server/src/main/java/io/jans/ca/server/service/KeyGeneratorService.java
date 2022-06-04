@@ -6,6 +6,7 @@ import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.exception.CryptoProviderException;
+import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.jwk.JSONWebKey;
 import io.jans.as.model.jwk.JSONWebKeySet;
@@ -48,9 +49,9 @@ public class KeyGeneratorService {
         ApiAppConfiguration configuration = getConfiguration();
         try {
             return new AuthCryptoProvider(configuration.getCryptProviderKeyStorePath(), configuration.getCryptProviderKeyStorePassword(), configuration.getCryptProviderDnName());
-        } catch (Exception e) {
-            logger.error("Failed to create CryptoProvider.", e);
-            throw new RuntimeException("Failed to create CryptoProvider.", e);
+        } catch (KeyStoreException e) {
+            logger.error("Failed to create CryptoProvider.");
+            throw e;
         }
     }
 
@@ -59,7 +60,7 @@ public class KeyGeneratorService {
     }
 
 
-    public void generateKeys() {
+    public void generateKeys() throws KeyStoreException {
 
         List<Algorithm> signatureAlgorithms = Lists.newArrayList(Algorithm.RS256, Algorithm.RS384, Algorithm.RS512, Algorithm.ES256,
                 Algorithm.ES384, Algorithm.ES512, Algorithm.PS256, Algorithm.PS384, Algorithm.PS512);
@@ -72,24 +73,23 @@ public class KeyGeneratorService {
                 saveKeysInStorage(keySet.toString());
                 setKeys(keySet);
             }
-        } catch (Exception e) {
-            logger.error("Failed to generate json web keys.", e);
-            throw new RuntimeException("Failed to generate json web keys.", e);
+        } catch (KeyStoreException e) {
+            logger.error("Failed to generate json web keys.");
+            throw e;
         }
     }
 
     private JSONWebKeySet generateKeys(List<Algorithm> signatureAlgorithms,
-                                       List<Algorithm> encryptionAlgorithms, int expiration_hours) throws KeyStoreException {
+                                       List<Algorithm> encryptionAlgorithms, int expirationHours) throws KeyStoreException {
         logger.trace("Generating jwks keys...");
         JSONWebKeySet jwks = new JSONWebKeySet();
 
         Calendar calendar = new GregorianCalendar();
-        calendar.add(Calendar.HOUR, expiration_hours);
+        calendar.add(Calendar.HOUR, expirationHours);
 
         AbstractCryptoProvider cryptoProvider = getCryptoProvider();
         for (Algorithm algorithm : signatureAlgorithms) {
             try {
-                SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(algorithm.name());
                 JSONObject result = cryptoProvider.generateKey(algorithm, calendar.getTimeInMillis());
 
                 JSONWebKey key = JSONWebKey.fromJSONObject(result);
@@ -101,7 +101,6 @@ public class KeyGeneratorService {
 
         for (Algorithm algorithm : encryptionAlgorithms) {
             try {
-                KeyEncryptionAlgorithm encryptionAlgorithm = KeyEncryptionAlgorithm.fromName(algorithm.getParamName());
                 JSONObject result = cryptoProvider.generateKey(algorithm,
                         calendar.getTimeInMillis());
 
@@ -116,19 +115,18 @@ public class KeyGeneratorService {
         return jwks;
     }
 
-    public Jwt sign(Jwt jwt, String sharedSecret, SignatureAlgorithm signatureAlgorithm) {
+    public Jwt sign(Jwt jwt, String sharedSecret, SignatureAlgorithm signatureAlgorithm) throws CryptoProviderException, KeyStoreException, InvalidJwtException {
         try {
             String signature = getCryptoProvider().sign(jwt.getSigningInput(), jwt.getHeader().getKeyId(), sharedSecret, signatureAlgorithm);
             jwt.setEncodedSignature(signature);
-            //return signed jwt
             return jwt;
-        } catch (Exception e) {
-            logger.error("Failed to sign signingInput.", e);
-            throw new RuntimeException("Failed to signingInput.", e);
+        } catch (CryptoProviderException | KeyStoreException | InvalidJwtException e) {
+            logger.error("Failed to sign signingInput.");
+            throw e;
         }
     }
 
-    public JSONWebKeySet getKeys() {
+    public JSONWebKeySet getKeys() throws KeyStoreException {
         ApiAppConfiguration configuration = getConfiguration();
         if (configuration.getEnableJwksGeneration()) {
             logger.info("Keys found: {}", keys);
@@ -136,9 +134,9 @@ public class KeyGeneratorService {
                 return this.keys;
             }
             //if keys not found then search in storage
-            JSONWebKeySet keys = getKeysFromStorage();
-            if (keys != null && !keys.getKeys().isEmpty()) {
-                this.keys = keys;
+            JSONWebKeySet keyset = getKeysFromStorage();
+            if (keyset != null && !keyset.getKeys().isEmpty()) {
+                this.keys = keyset;
                 return this.keys;
             }
             //generate new keys in case they do not exist
@@ -163,10 +161,9 @@ public class KeyGeneratorService {
             return kid;
 
         } catch (CryptoProviderException e) {
-            logger.error("Error in keyId generation");
-
+            logger.error("Error in keyId generation", e);
         } catch (KeyStoreException e) {
-            throw new RuntimeException(e);
+            logger.error("Error in keystore", e);
         }
         return null;
     }
@@ -183,7 +180,7 @@ public class KeyGeneratorService {
         }
 
         JSONObject keysInJson = new JSONObject(expiredObject.getValue());
-        JSONWebKeySet keys = JSONWebKeySet.fromJSONObject(keysInJson);
+        JSONWebKeySet keyset = JSONWebKeySet.fromJSONObject(keysInJson);
         try {
             if (hasKeysExpired(expiredObject)) {
                 logger.trace("The keys in storage got expired. Deleting the expired keys from storage.");
@@ -195,7 +192,7 @@ public class KeyGeneratorService {
             deleteKeysFromStorage();
             return null;
         }
-        return keys;
+        return keyset;
     }
 
     public void deleteKeysFromStorage() {

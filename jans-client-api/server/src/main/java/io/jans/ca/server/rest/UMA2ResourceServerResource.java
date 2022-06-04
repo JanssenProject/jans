@@ -13,9 +13,9 @@ public class UMA2ResourceServerResource extends BaseResource {
     @Path("/uma-rs-protect")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response umaRsProtect(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String AuthorizationRpId, String params) {
+    public Response umaRsProtect(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String authorizationRpId, String params) {
         logger.info("Api Resource: /uma-rs-protect  Params: {}", params);
-        String result = process(CommandType.RS_PROTECT, params, RsProtectParams.class, authorization, AuthorizationRpId);
+        String result = process(CommandType.RS_PROTECT, params, RsProtectParams.class, authorization, authorizationRpId);
         return Response.ok(result).build();
     }
 
@@ -23,9 +23,9 @@ public class UMA2ResourceServerResource extends BaseResource {
     @Path("/uma-rs-check-access")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response umaRsCheckAccess(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String AuthorizationRpId, String params) {
+    public Response umaRsCheckAccess(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String authorizationRpId, String params) {
         logger.info("Api Resource: /uma-rs-check-access  Params: {}", params);
-        String result = process(CommandType.RS_CHECK_ACCESS, params, RsCheckAccessParams.class, authorization, AuthorizationRpId);
+        String result = process(CommandType.RS_CHECK_ACCESS, params, RsCheckAccessParams.class, authorization, authorizationRpId);
         return Response.ok(result).build();
     }
 
@@ -33,9 +33,9 @@ public class UMA2ResourceServerResource extends BaseResource {
     @Path("/introspect-rpt")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response introspectRpt(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String AuthorizationRpId, String params) {
+    public Response introspectRpt(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String authorizationRpId, String params) {
         logger.info("Api Resource: /introspect-rpt  Params: {}", params);
-        String result = process(CommandType.INTROSPECT_RPT, params, IntrospectRptParams.class, authorization, AuthorizationRpId);
+        String result = process(CommandType.INTROSPECT_RPT, params, IntrospectRptParams.class, authorization, authorizationRpId);
         return Response.ok(result).build();
     }
 
@@ -43,9 +43,9 @@ public class UMA2ResourceServerResource extends BaseResource {
     @Path("/uma-rs-modify")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response umaRsModify(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String AuthorizationRpId, String params) {
+    public Response umaRsModify(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String authorizationRpId, String params) {
         logger.info("Api Resource: /uma-rs-modify  Params: {}", params);
-        String result = process(CommandType.RS_MODIFY, params, RsModifyParams.class, authorization, AuthorizationRpId);
+        String result = process(CommandType.RS_MODIFY, params, RsModifyParams.class, authorization, authorizationRpId);
         return Response.ok(result).build();
     }
 }

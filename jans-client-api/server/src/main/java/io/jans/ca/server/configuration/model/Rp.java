@@ -983,9 +983,9 @@ public class Rp implements Serializable {
         this.customAttributes = customAttributes;
     }
 
-    public void addCustomAttribute(String p_name, String p_value) {
-        if (RegisterRequestParam.isCustomParameterValid(p_name)) {
-            this.customAttributes.put(p_name, p_value);
+    public void addCustomAttribute(String pName, String pValue) {
+        if (RegisterRequestParam.isCustomParameterValid(pName)) {
+            this.customAttributes.put(pName, pValue);
         }
     }
 

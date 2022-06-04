@@ -5,10 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import io.jans.as.model.common.converter.ListConverter;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
 
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
@@ -94,8 +92,8 @@ public class IntrospectionResponse2 {
         return this.scope;
     }
 
-    public void setScope(Collection<String> scope) {
-        this.scope = scope != null ? new ArrayList(scope) : new ArrayList();
+    public void setScope(List<String> scope) {
+        this.scope = scope != null ? scope : Arrays.asList();
     }
 
     public Integer getExpiresAt() {

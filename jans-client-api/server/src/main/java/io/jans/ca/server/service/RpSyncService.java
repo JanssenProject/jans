@@ -6,13 +6,10 @@ import io.jans.as.client.RegisterResponse;
 import io.jans.ca.server.Utils;
 import io.jans.ca.server.configuration.model.Rp;
 import io.jans.ca.server.mapper.RegisterResponseMapper;
-import io.jans.ca.server.persistence.service.PersistenceService;
-
+import io.jans.ca.server.persistence.service.PersistenceServiceImpl;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.HttpMethod;
-
-import io.jans.ca.server.persistence.service.PersistenceServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -9,16 +9,17 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.UUID;
 
 /**
  * @author yuriyz
  */
 public class MigrationService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(MigrationService.class);
+    private MigrationService() {
 
-    private static final int FILE_NAME_LENGTH = (UUID.randomUUID().toString() + ".json").length();
+    }
+
+    private static final Logger LOG = LoggerFactory.getLogger(MigrationService.class);
 
     public static Rp parseRp(File file) {
         try {
@@ -34,12 +35,7 @@ public class MigrationService {
             if (StringUtils.isBlank(rpAsJson)) {
                 return null;
             }
-            try {
-                return Jackson2.createJsonMapper().readValue(rpAsJson, Rp.class);
-            } catch (Exception e) {
-                LOG.error(e.getMessage(), e);
-                return null;
-            }
+            return Jackson2.createJsonMapper().readValue(rpAsJson, Rp.class);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
             return null;

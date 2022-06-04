@@ -62,7 +62,7 @@ public class GetLogoutUrlOperation extends BaseOperation<GetLogoutUrlParams> {
                 return new GetLogoutUriResponse(logoutUrl);
             }
 
-            LOG.error("Failed to get end_session_endpoint at: " + discoveryService.getConnectDiscoveryUrl(rp));
+            LOG.error("Failed to get end_session_endpoint at: {}", discoveryService.getConnectDiscoveryUrl(rp));
             throw new HttpException(ErrorResponseCode.FAILED_TO_GET_END_SESSION_ENDPOINT);
         }
 

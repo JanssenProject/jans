@@ -15,10 +15,8 @@ public class RsCheckAccessResponse implements IOpResponse {
     private String wwwAuthenticateHeader;
     @JsonProperty(value = "ticket")
     private String ticket;
-
     @JsonProperty(value = "error")
     private String error;
-
     @JsonProperty(value = "error_description")
     private String errorDescription;
 

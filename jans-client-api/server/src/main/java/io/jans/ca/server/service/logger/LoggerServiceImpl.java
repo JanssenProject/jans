@@ -17,7 +17,7 @@ public class LoggerServiceImpl extends io.jans.service.logger.LoggerService {
 
     @Override
     public boolean isDisableJdkLogger() {
-        LOG.info("Disable Jdk Logger : ", appConfiguration.getDisableJdkLogger());
+        LOG.info("Disable Jdk Logger : {}", appConfiguration.getDisableJdkLogger());
         return (appConfiguration.getDisableJdkLogger() != null) && appConfiguration.getDisableJdkLogger();
     }
 
