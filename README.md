@@ -122,6 +122,14 @@ We prefer to have all our discussions through [GitHub Discussions](https://githu
 
 If you find a bug in a Janssen project, or you would like to suggest a new feature, try the [GitHub Discussions](https://github.com/JanssenProject/jans/discussion) first. If you have a "howto" or "usage" question, [raise the question or usage](https://github.com/JanssenProject/jans/discussion)! 
 
+## Releases
+
+Below are the list of current mega releases that hold information about each single release of our servies and modules:
+
+- [v1.0.0](https://github.com/JanssenProject/jans/releases/tag/v1.0.0)
+- [v1.0.0-beta.16](https://github.com/JanssenProject/jans/releases/tag/v1.0.0-beta.16)
+- [v1.0.0-beta.15](https://github.com/JanssenProject/jans/releases/tag/v1.0.0-beta.15)
+
 ## More about Janssen Project
 
 ### History
