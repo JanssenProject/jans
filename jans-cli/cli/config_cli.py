@@ -1824,8 +1824,9 @@ class JCA_CLI:
 
         c = 0
         for i, item in enumerate(menu):
-            if item.info.get('x-cli-ignore') or not item.children:
+            if item.info.get('x-cli-ignore') or (item.parent.name == 'Main Menu' and not item.children):
                 continue
+
             print(c + 1, item)
             selection_values.append(str(c + 1))
             menu_numbering[c + 1] = i
