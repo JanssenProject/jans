@@ -29,7 +29,7 @@ auth-server:
     # -- Image  to use for deploying.
     repository: janssenproject/auth-server
     # -- Image  tag to use for deploying.
-    tag: 1.0.1_dev
+    tag: 1.0.0-1
     # -- Image Pull Secrets
     pullSecrets: []
   # -- Service replica number.
@@ -96,7 +96,7 @@ auth-server-key-rotation:
     # -- Image  to use for deploying.
     repository: janssenproject/certmanager
     # -- Image  tag to use for deploying.
-    tag: 1.0.1_dev
+    tag: 1.0.0-1
     # -- Image Pull Secrets
     pullSecrets: []
   # -- Auth server key rotation keys life in hours
@@ -152,7 +152,7 @@ client-api:
     # -- Image  to use for deploying.
     repository: janssenproject/client-api
     # -- Image  tag to use for deploying.
-    tag: 1.0.1_dev
+    tag: 1.0.0-1
     # -- Image Pull Secrets
     pullSecrets: []
   # -- Service replica number.
@@ -284,7 +284,15 @@ config:
     # -- SCIM protection mode OAUTH|TEST|UMA
     cnScimProtectionMode: "OAUTH"
     # -- Specify data that should be saved in LDAP (one of default, user, cache, site, token, or session; default to default). Note this environment only takes effect when `global.cnPersistenceType`  is set to `hybrid`.
-    cnPersistenceLdapMapping: default
+    #{
+    #  "default": "<couchbase|ldap|spanner|sql>",
+    #  "user": "<couchbase|ldap|spanner|sql>",
+    #  "site": "<couchbase|ldap|spanner|sql>",
+    #  "cache": "<couchbase|ldap|spanner|sql>",
+    #  "token": "<couchbase|ldap|spanner|sql>",
+    #  "session": "<couchbase|ldap|spanner|sql>",
+    #}
+    cnPersistenceHybridMapping: "{}"
     # -- Redis Sentinel Group. Often set when `config.configmap.cnRedisType` is set to `SENTINEL`. Can be used when  `config.configmap.cnCacheType` is set to `REDIS`.
     cnRedisSentinelGroup: ""
     # -- Redis SSL truststore. Optional. Can be used when  `config.configmap.cnCacheType` is set to `REDIS`.
@@ -307,7 +315,7 @@ config:
     # -- Image  to use for deploying.
     repository: janssenproject/configurator
     # -- Image  tag to use for deploying.
-    tag: 1.0.1_dev
+    tag: 1.0.0-1
     # -- Image Pull Secrets
     pullSecrets: []
   # -- LDAP admin password if OpennDJ is used for persistence.
@@ -371,7 +379,7 @@ config-api:
     # -- Image  to use for deploying.
     repository: janssenproject/config-api
     # -- Image  tag to use for deploying.
-    tag: 1.0.1_dev
+    tag: 1.0.0-1
     # -- Image Pull Secrets
     pullSecrets: []
   # -- Service replica number.
@@ -444,7 +452,7 @@ fido2:
     # -- Image  to use for deploying.
     repository: janssenproject/fido2
     # -- Image  tag to use for deploying.
-    tag: 1.0.1_dev
+    tag: 1.0.0-1
     # -- Image Pull Secrets
     pullSecrets: []
   # -- Service replica number.
@@ -831,7 +839,7 @@ opendj:
     # -- Image  to use for deploying.
     repository: gluufederation/opendj
     # -- Image  tag to use for deploying.
-    tag: 5.0.0_dev
+    tag: 1.0.0_dev
     # -- Image Pull Secrets
     pullSecrets: []
 
@@ -933,7 +941,7 @@ persistence:
     # -- Image  to use for deploying.
     repository: janssenproject/persistence-loader
     # -- Image  tag to use for deploying.
-    tag: 1.0.1_dev
+    tag: 1.0.0-1
     # -- Image Pull Secrets
     pullSecrets: []
   # -- Resource specs.
@@ -987,7 +995,7 @@ scim:
     # -- Image  to use for deploying.
     repository: janssenproject/scim
     # -- Image  tag to use for deploying.
-    tag: 1.0.1_dev
+    tag: 1.0.0-1
     # -- Image Pull Secrets
     pullSecrets: []
   # -- Service replica number.
