@@ -11,6 +11,6 @@ for filename in $JETTY_BASE/custom/config/log4j2*.xml; do
   LOG4J_CONFIG_FILES="${LOG4J_CONFIG_FILES}${LOG4J_CONFIG_FILES:+,}$filename"
 done
 
-JAVA_OPTIONS="-server -Xms%(jans-config-api_min_heap_mem)sm -Xmx%(jans-config-api_max_heap_mem)sm -XX:+DisableExplicitGC -Djans.base=%(jansBaseFolder)s -Dserver.base=%(jetty_base)s/jans-config-api -Dlog.base=%(jetty_base)s/jans-config-api -Dpython.home=%(jython_home)s -Dlog4j.configurationFile=$LOG4J_CONFIG_FILES"
+JAVA_OPTIONS="-server -Xms%(jans-client-api_min_heap_mem)sm -Xmx%(jans-client-api_max_heap_mem)sm -XX:+DisableExplicitGC -Djans.base=%(jansBaseFolder)s -Dserver.base=%(jetty_base)s/jans-client-api -Dlog.base=%(jetty_base)s/jans-client-api -Dpython.home=%(jython_home)s -Dlog4j.configurationFile=$LOG4J_CONFIG_FILES"
 
 export PYTHON_HOME=%(jython_home)s
