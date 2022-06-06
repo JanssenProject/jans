@@ -474,6 +474,8 @@ class JCA_CLI:
                     for method_name in path:
                         method = path[method_name]
                         if 'tags' in method and tag in method['tags'] and 'operationId' in method:
+                            if method.get('x-cli-plugin') and  method['x-cli-plugin'] not in plugins:
+                                continue
                             method['__method_name__'] = method_name
                             method['__path_name__'] = path_name
                             methods.append(method)
@@ -484,10 +486,10 @@ class JCA_CLI:
 
         
         for grp in menu_groups:
+            methods = get_methods_of_tag(grp.tag)
             m = Menu(name=grp.mname)
             m.display_name = m.name + ' ˅'
             menu.add_child(m)
-            methods = get_methods_of_tag(grp.tag)
 
             for method in methods:
                 for tag in method['tags']:
@@ -503,10 +505,13 @@ class JCA_CLI:
             if grp.submenu:
                 m.display_name = m.name + ' ˅'
                 for sub in grp.submenu:
+                    methods = get_methods_of_tag(sub.tag)
+                    if not methods:
+                        continue
                     smenu = Menu(name=sub.mname)
                     smenu.display_name = smenu.name + ' ˅'
                     m.add_child(smenu)
-                    methods = get_methods_of_tag(sub.tag)
+                    
                     for method in methods:
                         for tag in method['tags']:
 
@@ -749,7 +754,12 @@ class JCA_CLI:
                   example=None, spacing=0
                   ):
         if 'b' in values and 'q' in values and 'x' in values:
-            print(self.colored_text("b: back, q: quit x: logout and quit", grey_color))
+            greyed_help_list = [ ('b', 'back'), ('q', 'quit'),  ('x', 'logout and quit') ]
+            for k,v in (('w', 'write result'), ('y', 'yes'), ('n', 'no')):
+                if k in values:
+                    greyed_help_list.insert(1, (k, v))
+            grey_help_text = ', '.join(['{}: {}'.format(k,v) for k,v in greyed_help_list])
+            print(self.colored_text(grey_help_text, grey_color))
         print()
         type_text = ''
         if itype:
@@ -1814,8 +1824,9 @@ class JCA_CLI:
 
         c = 0
         for i, item in enumerate(menu):
-            if item.info.get('x-cli-ignore'):
+            if item.info.get('x-cli-ignore') or (item.parent.name == 'Main Menu' and not item.children):
                 continue
+
             print(c + 1, item)
             selection_values.append(str(c + 1))
             menu_numbering[c + 1] = i

@@ -163,6 +163,13 @@ paths:
         - oauth2: [https://jans.io/oauth/config/fido2.write]
     parameters: []
   /jans-config-api/fido2/registration/entries/{username}:
+    parameters:
+      - name: username
+        in: path
+        required: true
+        description: Username.
+        schema:
+          type: string
     get:
       summary: Get details of connected FIDO2 devices registered to user.
       description: Get details of connected FIDO2 devices registered to user.
@@ -4743,6 +4750,10 @@ components:
         useHighestLevelScriptIfAcrScriptNotFound:
           type: boolean
           description: Enable/Disable usage of highest level script in case ACR script does not exist.
+        agamaConfiguration:
+          type: object
+          desciption: Engine Config which offers an alternative way to build authentication flows in Janssen server
+          $ref: '#/components/schemas/EngineConfig'
 
     GluuAttribute:
       title: GluuAttribute
@@ -6859,3 +6870,58 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CustomAttribute'
+
+    EngineConfig:
+      title: Engine config object
+      description: Engine config object that offers an alternative way to build authentication flows in Janssen server.
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          description: boolean value indicating if agama configuration enabled.
+          default: false
+        templatesPath:
+          type: string
+          description: path to the templates
+          default: '/ftl'
+        scriptsPath:
+          type: string
+          description: path to the scripts
+          default: '/scripts'
+        serializerType:
+          type: string
+          description: type of supported serializer
+          default: KRYO
+          enum:
+            - KRYO
+            - FST
+        maxItemsLoggedInCollections:
+          type: integer
+          description: maximum logged in collection item
+          default: 3
+          minimum: 1
+        pageMismatchErrorPage:
+          type: string
+          description: mismatch error page.
+          default: mismatch.ftl
+        interruptionErrorPage:
+          type: string
+          description: interruption error page.
+          default: timeout.ftl
+        crashErrorPage:
+          type: string
+          description: crash error page.
+          default: crash.ftl
+        finishedFlowPage:
+          type: string
+          description: finished flow page.
+          default: finished.ftl
+        bridgeScriptPage:
+          type: string
+          description: bridge script page.
+          default: agama.xhtml
+        defaultResponseHeaders:
+          type: object
+          additionalProperties:
+            type: string
+		
