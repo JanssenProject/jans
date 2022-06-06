@@ -10,6 +10,7 @@ from jans.pycloudlib.persistence.couchbase import CouchbaseClient
 from jans.pycloudlib.persistence.ldap import LdapClient
 from jans.pycloudlib.persistence.sql import SqlClient
 from jans.pycloudlib.persistence.spanner import SpannerClient
+from jans.pycloudlib.persistence.utils import PersistenceMapper
 from jans.pycloudlib.utils import encode_text
 from jans.pycloudlib.utils import exec_cmd
 from jans.pycloudlib.utils import generate_base64_contents
@@ -113,7 +114,7 @@ class CouchbasePersistence(BasePersistence):
     def get_auth_config(self):
         bucket = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
         req = self.client.exec_query(
-            "SELECT jansRevision, jansConfDyn, jansConfWebKeys "
+            "SELECT jansRevision, jansConfDyn, jansConfWebKeys "  # nosec: B608
             f"FROM `{bucket}` "
             "USE KEYS 'configuration_jans-auth'",
         )
@@ -187,20 +188,11 @@ class AuthHandler(BaseHandler):
     def __init__(self, manager, dry_run, **opts):
         super().__init__(manager, dry_run, **opts)
 
-        persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "ldap")
-        ldap_mapping = os.environ.get("CN_PERSISTENCE_LDAP_MAPPING", "default")
-
-        if persistence_type in ("ldap", "couchbase", "sql", "spanner"):
-            backend_type = persistence_type
-        else:
-            # persistence_type is hybrid
-            if ldap_mapping == "default":
-                backend_type = "ldap"
-            else:
-                backend_type = "couchbase"
-
         # resolve backend
+        mapper = PersistenceMapper()
+        backend_type = mapper.mapping["default"]
         self.backend = _backend_classes[backend_type](manager)
+
         self.rotation_interval = opts.get("interval", 48)
         self.push_keys = as_boolean(opts.get("push-to-container", True))
         self.key_strategy = opts.get("key-strategy", "OLDER")

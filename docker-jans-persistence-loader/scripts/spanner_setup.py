@@ -13,7 +13,7 @@ from utils import get_ldif_mappings
 FIELD_RE = re.compile(r"[^0-9a-zA-Z\s]+")
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("entrypoint")
+logger = logging.getLogger("spanner_setup")
 
 
 class SpannerBackend:
@@ -158,7 +158,7 @@ class SpannerBackend:
 
     def import_builtin_ldif(self, ctx):
         optional_scopes = json.loads(self.manager.config.get("optional_scopes", "[]"))
-        ldif_mappings = get_ldif_mappings(optional_scopes)
+        ldif_mappings = get_ldif_mappings("spanner", optional_scopes)
 
         for _, files in ldif_mappings.items():
             for file_ in files:
