@@ -7,6 +7,7 @@ from jans.pycloudlib.persistence.couchbase import CouchbaseClient
 from jans.pycloudlib.persistence.sql import SqlClient
 from jans.pycloudlib.persistence.ldap import LdapClient
 from jans.pycloudlib.persistence.spanner import SpannerClient
+from jans.pycloudlib.persistence.utils import PersistenceMapper
 
 
 class LdapPersistence:
@@ -30,7 +31,7 @@ class CouchbasePersistence:
     def get_auth_config(self):
         bucket = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
         req = self.client.exec_query(
-            f"SELECT jansConfDyn FROM `{bucket}` USE KEYS 'configuration_jans-auth'"
+            f"SELECT jansConfDyn FROM `{bucket}` USE KEYS 'configuration_jans-auth'"  # nosec: B608
         )
         if not req.ok:
             return {}
@@ -85,19 +86,9 @@ _backend_classes = {
 def get_injected_urls():
     manager = get_manager()
 
-    persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "ldap")
-    ldap_mapping = os.environ.get("CN_PERSISTENCE_LDAP_MAPPING", "default")
-
-    if persistence_type in ("ldap", "couchbase", "sql", "spanner"):
-        backend_type = persistence_type
-    else:
-        # maybe hybrid
-        if ldap_mapping == "default":
-            backend_type = "ldap"
-        else:
-            backend_type = "couchbase"
-
     # resolve backend
+    mapping = PersistenceMapper().mapping
+    backend_type = mapping["default"]
     backend = _backend_classes[backend_type](manager)
 
     auth_config = backend.get_auth_config()

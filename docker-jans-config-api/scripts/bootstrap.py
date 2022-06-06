@@ -14,6 +14,7 @@ from jans.pycloudlib.persistence import sync_couchbase_truststore
 from jans.pycloudlib.persistence import sync_ldap_truststore
 from jans.pycloudlib.persistence import render_sql_properties
 from jans.pycloudlib.persistence import render_spanner_properties
+from jans.pycloudlib.persistence.utils import PersistenceMapper
 from jans.pycloudlib.utils import cert_to_truststore
 
 from settings import LOGGING_CONFIG
@@ -31,7 +32,13 @@ def main():
     render_salt(manager, "/app/templates/salt.tmpl", "/etc/jans/conf/salt")
     render_base_properties("/app/templates/jans.properties.tmpl", "/etc/jans/conf/jans.properties")
 
-    if persistence_type in ("ldap", "hybrid"):
+    mapper = PersistenceMapper()
+    persistence_groups = mapper.groups().keys()
+
+    if persistence_type == "hybrid":
+        render_hybrid_properties("/etc/jans/conf/jans-hybrid.properties")
+
+    if "ldap" in persistence_groups:
         render_ldap_properties(
             manager,
             "/app/templates/jans-ldap.properties.tmpl",
@@ -39,7 +46,7 @@ def main():
         )
         sync_ldap_truststore(manager)
 
-    if persistence_type in ("couchbase", "hybrid"):
+    if "couchbase" in persistence_groups:
         render_couchbase_properties(
             manager,
             "/app/templates/jans-couchbase.properties.tmpl",
@@ -48,17 +55,14 @@ def main():
         # need to resolve whether we're using default or user-defined couchbase cert
         sync_couchbase_truststore(manager)
 
-    if persistence_type == "hybrid":
-        render_hybrid_properties("/etc/jans/conf/jans-hybrid.properties")
-
-    if persistence_type == "sql":
+    if "sql" in persistence_groups:
         render_sql_properties(
             manager,
             "/app/templates/jans-sql.properties.tmpl",
             "/etc/jans/conf/jans-sql.properties",
         )
 
-    if persistence_type == "spanner":
+    if "spanner" in persistence_groups:
         render_spanner_properties(
             manager,
             "/app/templates/jans-spanner.properties.tmpl",

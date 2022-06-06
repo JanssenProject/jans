@@ -18,6 +18,8 @@ import requests
 from requests_toolbelt.adapters.host_header_ssl import HostHeaderSSLAdapter
 from ldif import LDIFParser
 
+from jans.pycloudlib.persistence.utils import PersistenceMapper
+from jans.pycloudlib.persistence.utils import RDN_MAPPING
 from jans.pycloudlib.utils import encode_text
 from jans.pycloudlib.utils import cert_to_truststore
 from jans.pycloudlib.utils import as_boolean
@@ -75,7 +77,7 @@ def get_couchbase_password(manager) -> str:
     :params manager: An instance of :class:`~jans.pycloudlib.manager._Manager`.
     :returns: Plaintext password.
     """
-    secret_name = "couchbase_password"
+    secret_name = "couchbase_password"  # nosec: B105
     password_file = os.environ.get("CN_COUCHBASE_PASSWORD_FILE", "/etc/jans/conf/couchbase_password")
     return _get_cb_password(manager, password_file, secret_name)
 
@@ -99,55 +101,9 @@ def get_couchbase_superuser_password(manager) -> str:
     :params manager: An instance of :class:`~jans.pycloudlib.manager._Manager`.
     :returns: Plaintext password.
     """
-    secret_name = "couchbase_superuser_password"
+    secret_name = "couchbase_superuser_password"  # nosec: B105
     password_file = os.environ.get("CN_COUCHBASE_SUPERUSER_PASSWORD_FILE", "/etc/jans/conf/couchbase_superuser_password")
     return _get_cb_password(manager, password_file, secret_name)
-
-
-def prefixed_couchbase_mappings():
-    prefix = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
-    mappings = {
-        "default": {"bucket": prefix, "mapping": ""},
-        "user": {"bucket": f"{prefix}_user", "mapping": "people, groups, authorizations"},
-        "cache": {"bucket": f"{prefix}_cache", "mapping": "cache"},
-        "site": {"bucket": f"{prefix}_site", "mapping": "cache-refresh"},
-        "token": {"bucket": f"{prefix}_token", "mapping": "tokens"},
-        "session": {"bucket": f"{prefix}_session", "mapping": "sessions"},
-    }
-    return mappings
-
-
-def get_couchbase_mappings(persistence_type: str, ldap_mapping: str) -> dict:
-    """Get mappings of Couchbase buckets.
-
-    Supported persistence types:
-
-    - ``ldap``
-    - ``couchbase``
-    - ``hybrid``
-
-    Supported LDAP mappings:
-
-    - ``default``
-    - ``user``
-    - ``token``
-    - ``site``
-    - ``cache``
-    - ``session``
-
-    :params persistence_type: Type of persistence.
-    :params ldap_mapping: Mapping that stored in LDAP persistence.
-    :returns: A map of Couchbase buckets.
-    """
-    mappings = prefixed_couchbase_mappings()
-
-    if persistence_type == "hybrid":
-        return {
-            name: mapping
-            for name, mapping in mappings.items()
-            if name != ldap_mapping
-        }
-    return mappings
 
 
 def get_couchbase_conn_timeout() -> int:
@@ -211,24 +167,38 @@ def render_couchbase_properties(manager, src: str, dest: str) -> None:
     :params src: Absolute path to the template.
     :params dest: Absolute path where generated file is located.
     """
-    persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "couchbase")
-    ldap_mapping = os.environ.get("CN_PERSISTENCE_LDAP_MAPPING", "default")
     hostname = os.environ.get("CN_COUCHBASE_URL", "localhost")
     bucket_prefix = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
 
-    _couchbase_mappings = get_couchbase_mappings(persistence_type, ldap_mapping)
+    mapper = PersistenceMapper()
+    groups = mapper.groups()["couchbase"]
+
+    mappings = {}
+    for mapping, rdn in RDN_MAPPING.items():
+        if mapping not in groups:
+            continue
+
+        if mapping == "default":
+            bucket = ""
+        else:
+            bucket = f"{bucket_prefix}_{mapping}"
+
+        mappings[mapping] = {
+            "bucket": bucket,
+            "rdn": rdn,
+        }
+
     couchbase_buckets = []
     couchbase_mappings = []
 
-    for _, mapping in _couchbase_mappings.items():
-        couchbase_buckets.append(mapping["bucket"])
+    for mapping in mappings.values():
+        if mapping["bucket"]:
+            couchbase_buckets.append(mapping["bucket"])
 
-        if not mapping["mapping"]:
-            continue
-
-        couchbase_mappings.append(
-            f"bucket.{mapping['bucket']}.mapping: {mapping['mapping']}"
-        )
+        if mapping["rdn"]:
+            couchbase_mappings.append(
+                f"bucket.{mapping['bucket']}.mapping: {mapping['rdn']}"
+            )
 
     # always have  _default_ bucket
     if bucket_prefix not in couchbase_buckets:
@@ -237,33 +207,33 @@ def render_couchbase_properties(manager, src: str, dest: str) -> None:
     with open(src) as fr:
         txt = fr.read()
 
-        with open(dest, "w") as fw:
-            rendered_txt = txt % {
-                "hostname": hostname,
-                "couchbase_server_user": get_couchbase_user(manager),
-                "encoded_couchbase_server_pw": encode_text(
-                    get_couchbase_password(manager),
-                    manager.secret.get("encoded_salt"),
-                ).decode(),
-                "couchbase_buckets": ", ".join(couchbase_buckets),
-                "default_bucket": bucket_prefix,
-                "couchbase_mappings": "\n".join(couchbase_mappings),
-                "encryption_method": "SSHA-256",
-                "ssl_enabled": str(as_boolean(
-                    os.environ.get("CN_COUCHBASE_TRUSTSTORE_ENABLE", True)
-                )).lower(),
-                "couchbaseTrustStoreFn": manager.config.get("couchbaseTrustStoreFn") or "/etc/certs/couchbase.pkcs12",
-                "encoded_couchbaseTrustStorePass": encode_text(
-                    CN_COUCHBASE_TRUSTSTORE_PASSWORD,
-                    manager.secret.get("encoded_salt"),
-                ).decode(),
-                "couchbase_conn_timeout": get_couchbase_conn_timeout(),
-                "couchbase_conn_max_wait": get_couchbase_conn_max_wait(),
-                "couchbase_scan_consistency": get_couchbase_scan_consistency(),
-                "couchbase_keepalive_interval": get_couchbase_keepalive_interval(),
-                "couchbase_keepalive_timeout": get_couchbase_keepalive_timeout(),
-            }
-            fw.write(rendered_txt)
+    with open(dest, "w") as fw:
+        rendered_txt = txt % {
+            "hostname": hostname,
+            "couchbase_server_user": get_couchbase_user(manager),
+            "encoded_couchbase_server_pw": encode_text(
+                get_couchbase_password(manager),
+                manager.secret.get("encoded_salt"),
+            ).decode(),
+            "couchbase_buckets": ", ".join(couchbase_buckets),
+            "default_bucket": bucket_prefix,
+            "couchbase_mappings": "\n".join(couchbase_mappings),
+            "encryption_method": "SSHA-256",
+            "ssl_enabled": str(as_boolean(
+                os.environ.get("CN_COUCHBASE_TRUSTSTORE_ENABLE", True)
+            )).lower(),
+            "couchbaseTrustStoreFn": manager.config.get("couchbaseTrustStoreFn") or "/etc/certs/couchbase.pkcs12",
+            "encoded_couchbaseTrustStorePass": encode_text(
+                CN_COUCHBASE_TRUSTSTORE_PASSWORD,
+                manager.secret.get("encoded_salt"),
+            ).decode(),
+            "couchbase_conn_timeout": get_couchbase_conn_timeout(),
+            "couchbase_conn_max_wait": get_couchbase_conn_max_wait(),
+            "couchbase_scan_consistency": get_couchbase_scan_consistency(),
+            "couchbase_keepalive_interval": get_couchbase_keepalive_interval(),
+            "couchbase_keepalive_timeout": get_couchbase_keepalive_timeout(),
+        }
+        fw.write(rendered_txt)
 
 
 # DEPRECATED
@@ -742,11 +712,37 @@ class CouchbaseClient:
                     data = json.dumps(entry)
 
                     # using INSERT will cause duplication error, but the data is left intact
-                    query = 'INSERT INTO `%s` (KEY, VALUE) VALUES ("%s", %s)' % (bucket, key, data)
+                    query = 'INSERT INTO `%s` (KEY, VALUE) VALUES ("%s", %s)' % (bucket, key, data)  # nosec: B608
                     req = self.exec_query(query)
 
                     if not req.ok:
                         logger.warning("Failed to execute query, reason={}".format(req.json()))
+
+    def doc_exists(self, bucket: str, id_: str) -> bool:
+        """
+        Check if certain document exists in a bucket.
+
+        :param bucket: Bucket name.
+        :param id_: ID of document.
+        """
+        req = self.exec_query(
+            f"SELECT objectClass FROM {bucket} USE KEYS $key",  # nosec: B608
+            key=id_,
+        )
+
+        if not req.ok:
+            try:
+                data = json.loads(req.text)
+                err = data["errors"][0]["msg"]
+            except (ValueError, KeyError, IndexError):
+                err = req.reason
+            logger.warning(f"Unable to find document {id_} in bucket {bucket}; reason={err}")
+            return False
+
+        if not req.json()["results"]:
+            logger.warning(f"Missing document {id_} in bucket {bucket}")
+            return False
+        return True
 
 
 # backward-compat

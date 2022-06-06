@@ -52,16 +52,16 @@ The following environment variables are supported by the container:
 - `CN_REDIS_TYPE`: Redis service type, either `STANDALONE` or `CLUSTER` (optional; default to `STANDALONE`).
 - `CN_MEMCACHED_URL`: URL of Memcache server, format is host:port (optional; default to `localhost:11211`).
 - `CN_PERSISTENCE_TYPE`: Persistence backend being used (one of `ldap`, `couchbase`, or `hybrid`; default to `ldap`).
-- `CN_PERSISTENCE_LDAP_MAPPING`: Specify data that should be saved in LDAP (one of `default`, `user`, `cache`, `site`, `token`, or `session`; default to `default`). Note this environment only takes effect when `CN_PERSISTENCE_TYPE` is set to `hybrid`.
+- `CN_HYBRID_MAPPING`: Specify data mapping for each persistence (default to `"{}"`). Note this environment only takes effect when `CN_PERSISTENCE_TYPE` is set to `hybrid`. See [hybrid mapping](#hybrid-mapping) section for details.
 - `CN_PERSISTENCE_SKIP_INITIALIZED`: skip initialization if backend already initialized (default to `false`).
-- `CN_LDAP_URL`: Address and port of LDAP server (default to `localhost:1636`); required if `CN_PERSISTENCE_TYPE` is set to `ldap` or `hybrid`.
+- `CN_LDAP_URL`: Address and port of LDAP server (default to `localhost:1636`).
 - `CN_LDAP_USE_SSL`: Whether to use SSL connection to LDAP server (default to `true`).
-- `CN_COUCHBASE_URL`: Address of Couchbase server (default to `localhost`); required if `CN_PERSISTENCE_TYPE` is set to `couchbase` or `hybrid`.
-- `CN_COUCHBASE_USER`: Username of Couchbase server (default to `admin`); required if `CN_PERSISTENCE_TYPE` is set to `couchbase` or `hybrid`.
-- `CN_COUCHBASE_SUPERUSER`: Superuser of Couchbase server (default to empty-string); required if `CN_PERSISTENCE_TYPE` is set to `couchbase` or `hybrid`. Fallback to `CN_COUCHBASE_USER`.
-- `CN_COUCHBASE_CERT_FILE`: Couchbase root certificate location (default to `/etc/certs/couchbase.crt`); required if `CN_PERSISTENCE_TYPE` is set to `couchbase` or `hybrid`.
-- `CN_COUCHBASE_PASSWORD_FILE`: Path to file contains Couchbase password (default to `/etc/jans/conf/couchbase_password`); required if `CN_PERSISTENCE_TYPE` is set to `couchbase` or `hybrid`.
-- `CN_COUCHBASE_SUPERUSER_PASSWORD_FILE`: Path to file contains Couchbase superuser password (default to `/etc/jans/conf/couchbase_superuser_password`); required if `CN_PERSISTENCE_TYPE` is set to `couchbase` or `hybrid`.
+- `CN_COUCHBASE_URL`: Address of Couchbase server (default to `localhost`).
+- `CN_COUCHBASE_USER`: Username of Couchbase server (default to `admin`).
+- `CN_COUCHBASE_SUPERUSER`: Superuser of Couchbase server (default to empty-string).
+- `CN_COUCHBASE_CERT_FILE`: Couchbase root certificate location (default to `/etc/certs/couchbase.crt`).
+- `CN_COUCHBASE_PASSWORD_FILE`: Path to file contains Couchbase password (default to `/etc/jans/conf/couchbase_password`).
+- `CN_COUCHBASE_SUPERUSER_PASSWORD_FILE`: Path to file contains Couchbase superuser password (default to `/etc/jans/conf/couchbase_superuser_password`).
 - `CN_DOCUMENT_STORE_TYPE`: Document store type (one of `LOCAL` or `JCA`; default to `LOCAL`).
 - `CN_JACKRABBIT_URL`: URL to remote repository (default to `http://localhost:8080`).
 - `CN_JACKRABBIT_ADMIN_ID_FILE`: Absolute path to file contains ID for admin user (default to `/etc/jans/conf/jackrabbit_admin_id`).
@@ -73,143 +73,34 @@ The following environment variables are supported by the container:
 - `CN_AUTH_SERVER_URL`: Base URL of Janssen Auth server, i.e. `auth-server:8080` (default to empty string).
 - `CN_TOKEN_SERVER_BASE_HOSTNAME`: Hostname of token server (default to empty string).
 
-## Initializing Data
+### Hybrid mapping
 
-### LDAP
+As per v1.0.1, hybrid persistence supports all available persistence types. To configure hybrid persistence and its data mapping, follow steps below:
 
-Deploy Wren:DS container:
+1.  Set `CN_PERSISTENCE_TYPE` environment variable to `hybrid`
 
-```sh
-docker run -d \
-    --network container:consul \
-    --name ldap \
-    -e CN_CONFIG_ADAPTER=consul \
-    -e CN_CONFIG_CONSUL_HOST=consul \
-    -e CN_SECRET_ADAPTER=vault \
-    -e CN_SECRET_VAULT_HOST=vault \
-    -v /path/to/opendj/config:/opt/opendj/config \
-    -v /path/to/opendj/db:/opt/opendj/db \
-    -v /path/to/opendj/logs:/opt/opendj/logs \
-    -v /path/to/opendj/ldif:/opt/opendj/ldif \
-    -v /path/to/opendj/backup:/opt/opendj/bak \
-    -v /path/to/vault_role_id.txt:/etc/certs/vault_role_id \
-    -v /path/to/vault_secret_id.txt:/etc/certs/vault_secret_id \
-    gluufederation/opendj:4.2.1_02
-```
+1.  Set `CN_HYBRID_MAPPING` with the following format:
 
-Run the following command to initialize data and save it to LDAP:
-
-```sh
-docker run --rm \
-    --network container:consul \
-    --name persistence \
-    -e CN_CONFIG_ADAPTER=consul \
-    -e CN_CONFIG_CONSUL_HOST=consul \
-    -e CN_SECRET_ADAPTER=vault \
-    -e CN_SECRET_VAULT_HOST=vault \
-    -e CN_PERSISTENCE_TYPE=ldap \
-    -e CN_LDAP_URL=ldap:1636 \
-    -v /path/to/vault_role_id.txt:/etc/certs/vault_role_id \
-    -v /path/to/vault_secret_id.txt:/etc/certs/vault_secret_id \
-    janssenproject/persistence:1.0.1_dev
-```
-
-The process may take awhile, check the output of the `persistence` container log.
-
-### Couchbase
-
-Assuming there is Couchbase instance running hosted at `192.168.100.2` address, setup the cluster:
-
-1. Set the username and password of Couchbase cluster
-1. Configure the instance to use Query, Data, and Index services
-
-Once cluster has been configured successfully, do the following steps:
-
-1. Pass the address of Couchbase server in `CN_COUCHBASE_URL` (omit the port)
-1. Pass the Couchbase superuser in `CN_COUCHBASE_SUPERUSER`
-1. Save the password into `/path/to/couchbase_superuser_password` file
-1. Get the certificate root of Couchbase and save it into `/path/to/couchbase.crt` file
-
-Run the following command to initialize data and save it to Couchbase:
-
-```sh
-docker run --rm \
-    --network container:consul \
-    --name persistence \
-    -e CN_CONFIG_ADAPTER=consul \
-    -e CN_CONFIG_CONSUL_HOST=consul \
-    -e CN_SECRET_ADAPTER=vault \
-    -e CN_SECRET_VAULT_HOST=vault \
-    -e CN_PERSISTENCE_TYPE=couchbase \
-    -e CN_COUCHBASE_URL=192.168.100.2 \
-    -e CN_COUCHBASE_SUPERUSER=admin \
-    -v /path/to/couchbase.crt:/etc/certs/couchbase.crt \
-    -v /path/to/couchbase_superuser_password:/etc/jans/conf/couchbase_superuser_password \
-    -v /path/to/vault_role_id.txt:/etc/certs/vault_role_id \
-    -v /path/to/vault_secret_id.txt:/etc/certs/vault_secret_id \
-    janssenproject/persistence:1.0.1_dev
-```
-
-The process may take awhile, check the output of the `persistence` container log.
-
-### Hybrid
-
-Hybrid is a mix of LDAP and Couchbase persistence backend. To initialize data for this type of persistence:
-
-1.  Deploy LDAP container:
-
-    ```sh
-    docker run -d \
-        --network container:consul \
-        --name ldap \
-        -e CN_CONFIG_ADAPTER=consul \
-        -e CN_CONFIG_CONSUL_HOST=consul \
-        -e CN_SECRET_ADAPTER=vault \
-        -e CN_SECRET_VAULT_HOST=vault \
-        -v /path/to/opendj/config:/opt/opendj/config \
-        -v /path/to/opendj/db:/opt/opendj/db \
-        -v /path/to/opendj/logs:/opt/opendj/logs \
-        -v /path/to/opendj/ldif:/opt/opendj/ldif \
-        -v /path/to/opendj/backup:/opt/opendj/bak \
-        -v /path/to/vault_role_id.txt:/etc/certs/vault_role_id \
-        -v /path/to/vault_secret_id.txt:/etc/certs/vault_secret_id \
-        gluufederation/opendj:4.2.1_02
+    ```
+    {
+        "default": "<couchbase|ldap|spanner|sql>",
+        "user": "<couchbase|ldap|spanner|sql>",
+        "site": "<couchbase|ldap|spanner|sql>",
+        "cache": "<couchbase|ldap|spanner|sql>",
+        "token": "<couchbase|ldap|spanner|sql>",
+        "session": "<couchbase|ldap|spanner|sql>",
+    }
     ```
 
-1.  Prepare Couchbase cluster.
+    Example:
 
-    Assuming there is Couchbase instance running hosted at `192.168.100.2` address, setup the cluster:
-
-    1. Set the username and password of Couchbase cluster
-    1. Configure the instance to use Query, Data, and Index services
-
-    Once cluster has been configured successfully, do the following steps:
-
-    1. Pass the address of Couchbase server in `CN_COUCHBASE_URL` (omit the port)
-    1. Pass the Couchbase user in `CN_COUCHBASE_SUPERUSER`
-    1. Save the password into `/path/to/couchbase_superuser_password` file
-    1. Get the certificate root of Couchbase and save it into `/path/to/couchbase.crt` file
-
-1.  Determine which data goes to LDAP backend by specifying it using `CN_PERSISTENCE_LDAP_MAPPING` environment variable. For example, if `user` data should be saved into LDAP, set `CN_PERSISTENCE_LDAP_MAPPING=user`. This will make other data saved into Couchbase.
-
-1.  Run the following command to initialize data and save it to LDAP and Couchbase:
-
-    ```sh
-    docker run --rm \
-        --network container:consul \
-        --name persistence \
-        -e CN_CONFIG_ADAPTER=consul \
-        -e CN_CONFIG_CONSUL_HOST=consul \
-        -e CN_SECRET_ADAPTER=vault \
-        -e CN_SECRET_VAULT_HOST=vault \
-        -e CN_PERSISTENCE_TYPE=hybrid \
-        -e CN_PERSISTENCE_LDAP_MAPPING=user \
-        -e CN_LDAP_URL=ldap:1636 \
-        -e CN_COUCHBASE_URL=192.168.100.2 \
-        -e CN_COUCHBASE_SUPERUSER=admin \
-        -v /path/to/couchbase.crt:/etc/certs/couchbase.crt \
-        -v /path/to/couchbase_superuser_password:/etc/jans/conf/couchbase_superuser_password \
-        -v /path/to/vault_role_id.txt:/etc/certs/vault_role_id \
-        -v /path/to/vault_secret_id.txt:/etc/certs/vault_secret_id \
-        janssenproject/persistence:1.0.1_dev
+    ```
+    {
+        "default": "sql",
+        "user": "spanner",
+        "site": "ldap",
+        "cache": "sql",
+        "token": "couchbase",
+        "session": "spanner",
+    }
     ```
