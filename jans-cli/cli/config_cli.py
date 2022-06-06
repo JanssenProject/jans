@@ -474,6 +474,8 @@ class JCA_CLI:
                     for method_name in path:
                         method = path[method_name]
                         if 'tags' in method and tag in method['tags'] and 'operationId' in method:
+                            if method.get('x-cli-plugin') and  method['x-cli-plugin'] not in plugins:
+                                continue
                             method['__method_name__'] = method_name
                             method['__path_name__'] = path_name
                             methods.append(method)
@@ -484,10 +486,10 @@ class JCA_CLI:
 
         
         for grp in menu_groups:
+            methods = get_methods_of_tag(grp.tag)
             m = Menu(name=grp.mname)
             m.display_name = m.name + ' ˅'
             menu.add_child(m)
-            methods = get_methods_of_tag(grp.tag)
 
             for method in methods:
                 for tag in method['tags']:
@@ -503,10 +505,13 @@ class JCA_CLI:
             if grp.submenu:
                 m.display_name = m.name + ' ˅'
                 for sub in grp.submenu:
+                    methods = get_methods_of_tag(sub.tag)
+                    if not methods:
+                        continue
                     smenu = Menu(name=sub.mname)
                     smenu.display_name = smenu.name + ' ˅'
                     m.add_child(smenu)
-                    methods = get_methods_of_tag(sub.tag)
+                    
                     for method in methods:
                         for tag in method['tags']:
 
@@ -1819,7 +1824,7 @@ class JCA_CLI:
 
         c = 0
         for i, item in enumerate(menu):
-            if item.info.get('x-cli-ignore'):
+            if item.info.get('x-cli-ignore') or not item.children:
                 continue
             print(c + 1, item)
             selection_values.append(str(c + 1))
