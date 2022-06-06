@@ -80,10 +80,6 @@ public class ServiceProvider {
         return jansConfigurationService;
     }
 
-    public void setJansConfigurationService(MainPersistenceService jansConfigurationService) {
-        this.jansConfigurationService = jansConfigurationService;
-    }
-
     public StateService getStateService() {
         return stateService;
     }
