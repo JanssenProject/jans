@@ -163,6 +163,13 @@ paths:
         - oauth2: [https://jans.io/oauth/config/fido2.write]
     parameters: []
   /jans-config-api/fido2/registration/entries/{username}:
+    parameters:
+      - name: username
+        in: path
+        required: true
+        description: Username.
+        schema:
+          type: string
     get:
       summary: Get details of connected FIDO2 devices registered to user.
       description: Get details of connected FIDO2 devices registered to user.
