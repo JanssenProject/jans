@@ -66,7 +66,7 @@
       "ratio": 0.15
     },
     "jetty": {
-      "modules": "server,deploy,resources,http,http-forwarded,console-capture,jsp,websocket"
+      "modules": "server,deploy,annotations,webapp,servlet,resources,http,http-forwarded,threadpool,jsp,websocket,logging/slf4j,logging-jetty"
     },
     "installed": false,
     "name": "jans-client-api"
