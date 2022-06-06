@@ -316,7 +316,9 @@ def prepare_template_ctx(manager):
     return ctx
 
 
-def get_ldif_mappings(optional_scopes=None):
+def get_ldif_mappings(group, optional_scopes=None):
+    from jans.pycloudlib.persistence.utils import PersistenceMapper
+
     optional_scopes = optional_scopes or []
     dist = os.environ.get("CN_DISTRIBUTION", "default")
 
@@ -392,6 +394,12 @@ def get_ldif_mappings(optional_scopes=None):
         "cache": [],
         "token": [],
         "session": [],
+    }
+
+    mapper = PersistenceMapper()
+    ldif_mappings = {
+        mapping: files for mapping, files in ldif_mappings.items()
+        if mapping in mapper.groups()[group]
     }
     return ldif_mappings
 

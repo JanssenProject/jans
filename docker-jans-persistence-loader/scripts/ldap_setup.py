@@ -1,6 +1,5 @@
 import json
 import logging.config
-import os
 import time
 from pathlib import Path
 
@@ -8,13 +7,14 @@ from ldap3.core.exceptions import LDAPSessionTerminatedByServerError
 from ldap3.core.exceptions import LDAPSocketOpenError
 
 from jans.pycloudlib.persistence.ldap import LdapClient
+from jans.pycloudlib.persistence.utils import PersistenceMapper
 
 from settings import LOGGING_CONFIG
 from utils import prepare_template_ctx
 from utils import get_ldif_mappings
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("entrypoint")
+logger = logging.getLogger("ldap_setup")
 
 
 class LDAPBackend:
@@ -52,23 +52,16 @@ class LDAPBackend:
             time.sleep(sleep_duration)
 
     def import_builtin_ldif(self, ctx):
-        optional_scopes = json.loads(self.manager.config.get("optional_scopes", "[]"))
-        ldif_mappings = get_ldif_mappings(optional_scopes)
+        optional_scopes = json.loads(
+            self.manager.config.get("optional_scopes", "[]")
+        )
+        ldif_mappings = get_ldif_mappings("ldap", optional_scopes)
 
-        # hybrid means only a subsets of ldif are needed
-        persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "ldap")
-        ldap_mapping = os.environ.get("CN_PERSISTENCE_LDAP_MAPPING", "default")
-        if persistence_type == "hybrid":
-            mapping = ldap_mapping
-            ldif_mappings = {mapping: ldif_mappings[mapping]}
-
-            # these mappings require `base.ldif`
-            # opt_mappings = ("user", "token",)
-
-            # `user` mapping requires `o=jans` which available in `base.ldif`
-            # if mapping in opt_mappings and "base.ldif" not in ldif_mappings[mapping]:
-            if "base.ldif" not in ldif_mappings[mapping]:
-                ldif_mappings[mapping].insert(0, "base.ldif")
+        # ensure base.ldif (contains base RDNs) is in list of ldif files
+        if ldif_mappings and "default" not in ldif_mappings:
+            # insert base.ldif into the first mapping found
+            mapping = next(iter(ldif_mappings))
+            ldif_mappings[mapping].insert(0, "base.ldif")
 
         for mapping, files in ldif_mappings.items():
             self.check_indexes(mapping)
