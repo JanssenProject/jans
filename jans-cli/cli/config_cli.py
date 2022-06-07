@@ -42,8 +42,11 @@ tabulate_endpoints = {
     'jca.get-user': ['inum', 'userId', 'mail','sn', 'givenName', 'jansStatus'],
     'jca.get-attributes': ['inum', 'name', 'displayName', 'status', 'dataType', 'claimName'],
     'jca.get-oauth-openid-clients': ['inum', 'displayName', 'clientName', 'applicationType'],
-    'jca.get-oauth-scopes': ['dn', 'id', 'scopeType']
+    'jca.get-oauth-scopes': ['dn', 'id', 'scopeType'],
+    'scim.get-users': ['id', 'userName', 'displayName', 'active']
 }
+
+tabular_dataset = {'scim.get-users': 'Resources'}
 
 my_op_mode = 'scim' if 'scim' in os.path.basename(sys.argv[0]) else 'jca'
 sys.path.append(os.path.join(cur_dir, my_op_mode))
@@ -1102,7 +1105,7 @@ class JCA_CLI:
         for i, entry in enumerate(data):
             row_ = [i + 1]
             for header in headers:
-                row_.append(entry.get(header, ''))
+                row_.append(str(entry.get(header, '')))
             tab_data.append(row_)
 
         print(tabulate(tab_data, headers, tablefmt="grid"))
@@ -1183,7 +1186,10 @@ class JCA_CLI:
                             elif attrib['name'] in tabulate_endpoints[op_mode_endpoint]:
                                 entry[attrib['name']] = attrib['values'][0]
 
-                self.tabular_data(api_response_unmapped_ext, op_mode_endpoint)
+                tab_data = api_response_unmapped_ext
+                if op_mode_endpoint in tabular_dataset:
+                    tab_data = api_response_unmapped_ext[tabular_dataset[op_mode_endpoint]]
+                self.tabular_data(tab_data, op_mode_endpoint)
                 item_counters = [str(i + 1) for i in range(len(api_response_unmapped))]
                 tabulated = True
             else:
