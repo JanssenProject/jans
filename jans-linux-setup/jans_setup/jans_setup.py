@@ -88,8 +88,6 @@ from setup_app import downloads
 downloads.download_apps()
 
 sys.path.insert(0, base.pylib_dir)
-sys.path.insert(0, os.path.join(base.pylib_dir, 'gcs'))
-
 
 if argsp.download_exit:
     downloads.download_all()
@@ -98,6 +96,7 @@ if argsp.download_exit:
 from setup_app.utils.package_utils import packageUtils
 
 packageUtils.check_and_install_packages()
+sys.path.insert(0, os.path.join(base.pylib_dir, 'gcs'))
 
 from setup_app.messages import msg
 from setup_app.config import Config
