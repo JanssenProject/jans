@@ -1,14 +1,8 @@
 package io.jans.ca.server.introspection;
 
-import io.jans.as.model.uma.UmaConstants;
-import io.jans.as.model.uma.UmaMetadata;
 import io.jans.as.client.service.IntrospectionService;
-import io.jans.ca.common.Jackson2;
-import io.jans.ca.common.response.IntrospectAccessTokenResponse;
+import io.jans.as.model.uma.UmaMetadata;
 import jakarta.ws.rs.client.ClientBuilder;
-import jakarta.ws.rs.client.Invocation;
-import jakarta.ws.rs.client.WebTarget;
-import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriBuilder;
 import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;

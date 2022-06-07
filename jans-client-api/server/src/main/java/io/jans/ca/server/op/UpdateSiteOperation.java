@@ -20,8 +20,6 @@ import io.jans.ca.server.HttpException;
 import io.jans.ca.server.Utils;
 import io.jans.ca.server.configuration.model.Rp;
 import io.jans.ca.server.mapper.RegisterRequestMapper;
-import io.jans.ca.server.service.RpService;
-import io.jans.ca.server.persistence.service.MainPersistenceService;
 import io.jans.ca.server.service.ServiceProvider;
 import jakarta.ws.rs.HttpMethod;
 import org.apache.commons.collections.CollectionUtils;

@@ -2,7 +2,6 @@ package io.jans.ca.server.op;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import com.google.gson.Gson;
 import io.jans.as.client.AuthorizationRequest;
 import io.jans.as.client.AuthorizationResponse;
 import io.jans.as.client.AuthorizeClient;
@@ -19,7 +18,6 @@ import io.jans.ca.server.service.DiscoveryService;
 import io.jans.ca.server.service.HttpService;
 import io.jans.ca.server.service.ServiceProvider;
 import io.jans.ca.server.service.StateService;
-import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,8 +38,8 @@ public class GetAuthorizationCodeOperation extends BaseOperation<GetAuthorizatio
     OpClientFactoryImpl opClientFactory;
     StateService stateService;
 
-    public GetAuthorizationCodeOperation(Command p_command, ServiceProvider serviceProvider) {
-        super(p_command, serviceProvider, GetAuthorizationCodeParams.class);
+    public GetAuthorizationCodeOperation(Command pCommand, ServiceProvider serviceProvider) {
+        super(pCommand, serviceProvider, GetAuthorizationCodeParams.class);
         this.discoveryService = serviceProvider.getDiscoveryService();
         this.stateService = serviceProvider.getStateService();
         this.opClientFactory = serviceProvider.getOpClientFactory();

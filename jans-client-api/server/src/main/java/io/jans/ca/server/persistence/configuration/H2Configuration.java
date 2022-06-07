@@ -1,7 +1,6 @@
 package io.jans.ca.server.persistence.configuration;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.apache.commons.lang.SystemUtils;
 
 import java.io.Serializable;
 

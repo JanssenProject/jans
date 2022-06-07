@@ -199,7 +199,7 @@ public class AppInitializer {
     private void clearRPTestData() {
         try {
             String val = System.getProperty("clearTestData");
-            if (val != null && !val.isEmpty() && Boolean.valueOf(val)) {
+            if (val != null && !val.isEmpty() && Boolean.valueOf(val).booleanValue()) {
                 persistenceService.create();
                 rpService.removeAllRps();
                 rpService.load();

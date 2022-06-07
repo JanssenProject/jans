@@ -138,8 +138,8 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         if (grantTypes.isEmpty() && fallback.getGrantType() != null && !fallback.getGrantType().isEmpty()) {
             grantTypes.addAll(fallback.getGrantType());
         }
-
-        if (!grantTypes.contains(GrantType.CLIENT_CREDENTIALS.getValue()) && jansConfigurationService.find().getAddClientCredentialsGrantTypeAutomaticallyDuringClientRegistration()) {
+        boolean addCredentials = jansConfigurationService.find().getAddClientCredentialsGrantTypeAutomaticallyDuringClientRegistration().booleanValue();
+        if (!grantTypes.contains(GrantType.CLIENT_CREDENTIALS.getValue()) && addCredentials) {
             grantTypes.add(GrantType.CLIENT_CREDENTIALS.getValue());
         }
 
@@ -617,7 +617,8 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
                 throw new HttpException(ErrorResponseCode.INVALID_SIGNATURE_ALGORITHM);
             }
 
-            if (signatureAlgorithms == SignatureAlgorithm.NONE && !jansConfigurationService.find().getAcceptIdTokenWithoutSignature()) {
+            boolean acceptIdTokenWithoutSignature = jansConfigurationService.find().getAcceptIdTokenWithoutSignature().booleanValue();
+            if (signatureAlgorithms == SignatureAlgorithm.NONE && !acceptIdTokenWithoutSignature) {
                 LOG.error("`ID_TOKEN` without signature is not allowed. To allow `ID_TOKEN` without signature set `accept_id_token_without_signature` field to 'true' in client-api-server.yml.");
                 throw new HttpException(ErrorResponseCode.ID_TOKEN_WITHOUT_SIGNATURE_NOT_ALLOWED);
             }

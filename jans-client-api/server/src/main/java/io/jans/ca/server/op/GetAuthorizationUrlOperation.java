@@ -80,7 +80,8 @@ public class GetAuthorizationUrlOperation extends BaseOperation<GetAuthorization
 
         String state = StringUtils.isNotBlank(params.getState()) ? stateService.putState(stateService.encodeExpiredObject(params.getState(), ExpiredObjectType.STATE)) : stateService.generateState();
         String nonce = StringUtils.isNotBlank(params.getNonce()) ? stateService.putNonce(stateService.encodeExpiredObject(params.getNonce(), ExpiredObjectType.NONCE)) : stateService.generateNonce();
-        String clientId = jansConfigurationService.find().getEncodeClientIdInAuthorizationUrl() ? Utils.encode(rp.getClientId()) : rp.getClientId();
+        boolean encodeClientIdInAuthorizationUrl = jansConfigurationService.find().getEncodeClientIdInAuthorizationUrl() != null ? jansConfigurationService.find().getEncodeClientIdInAuthorizationUrl().booleanValue() : false;
+        String clientId = encodeClientIdInAuthorizationUrl ? Utils.encode(rp.getClientId()) : rp.getClientId();
         String redirectUri = StringUtils.isNotBlank(params.getRedirectUri()) ? params.getRedirectUri() : rp.getRedirectUri();
 
         authorizationEndpoint += "?response_type=" + Utils.joinAndUrlEncode(responseTypes);

@@ -1,8 +1,6 @@
 package io.jans.ca.server.configuration.model;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.io.Serializable;
 
 /**

@@ -59,11 +59,11 @@ public class StateService {
     }
 
     public String encodeExpiredObject(String expiredObject, ExpiredObjectType type) throws UnsupportedEncodingException {
-        if (type == ExpiredObjectType.STATE && jansConfigurationService.find().getEncodeStateFromRequestParameter()) {
+        if (type == ExpiredObjectType.STATE && jansConfigurationService.find().getEncodeStateFromRequestParameter().booleanValue()) {
             return Utils.encode(expiredObject);
         }
 
-        if (type == ExpiredObjectType.NONCE && jansConfigurationService.find().getEncodeNonceFromRequestParameter()) {
+        if (type == ExpiredObjectType.NONCE && jansConfigurationService.find().getEncodeNonceFromRequestParameter().booleanValue()) {
             return Utils.encode(expiredObject);
         }
 

@@ -6,7 +6,6 @@
 
 package io.jans.ca.server.rest;
 
-import io.jans.ca.server.op.GetIssuerOperation;
 import jakarta.ws.rs.ApplicationPath;
 import jakarta.ws.rs.core.Application;
 import org.slf4j.Logger;
@@ -22,7 +21,7 @@ public class ApiApplication extends Application {
 
     @Override
     public Set<Class<?>> getClasses() {
-        HashSet<Class<?>> classes = new HashSet<Class<?>>();
+        HashSet<Class<?>> classes = new HashSet<>();
         LOG.info("--------------------------------DEPLOYING REST RESOURCES-------------------------------------------");
         classes.add(HealthCheckResource.class);
 

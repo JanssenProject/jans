@@ -5,7 +5,6 @@ import io.jans.ca.common.introspection.CorrectRptIntrospectionResponse;
 import io.jans.ca.common.params.IntrospectRptParams;
 import io.jans.ca.common.response.IOpResponse;
 import io.jans.ca.common.response.POJOResponse;
-import io.jans.ca.server.service.IntrospectionService;
 import io.jans.ca.server.service.ServiceProvider;
 
 /**

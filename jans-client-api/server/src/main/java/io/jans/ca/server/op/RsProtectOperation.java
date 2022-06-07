@@ -44,8 +44,8 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(RsProtectOperation.class);
 
-    public RsProtectOperation(Command p_command, io.jans.ca.server.service.ServiceProvider serviceProvider) {
-        super(p_command, serviceProvider, RsProtectParams.class);
+    public RsProtectOperation(Command pCommand, io.jans.ca.server.service.ServiceProvider serviceProvider) {
+        super(pCommand, serviceProvider, RsProtectParams.class);
     }
 
     @Override

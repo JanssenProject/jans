@@ -7,18 +7,14 @@ import com.google.common.base.Strings;
 import io.jans.as.client.OpenIdConfigurationClient;
 import io.jans.as.client.OpenIdConfigurationResponse;
 import io.jans.as.model.uma.UmaMetadata;
-import io.jans.as.model.util.Util;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.server.HttpException;
 import io.jans.ca.server.configuration.model.Rp;
-import io.jans.ca.server.op.OpClientFactory;
-
+import io.jans.ca.server.op.OpClientFactoryImpl;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
-
-import io.jans.ca.server.op.OpClientFactoryImpl;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

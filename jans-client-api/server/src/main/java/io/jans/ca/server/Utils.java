@@ -7,7 +7,6 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import io.jans.as.model.util.Util;
 import io.jans.ca.common.ErrorResponseCode;
-import io.jans.ca.server.op.CheckIdTokenOperation;
 import io.jans.ca.server.rest.ApiApplication;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
