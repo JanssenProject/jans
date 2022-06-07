@@ -6809,6 +6809,11 @@ components:
       type: object
       required:
         - userId
+        - mail
+        - displayName
+        - givenName
+        - jansStatus
+        - userPassword
       properties:
         dn:
           type: string
@@ -6816,7 +6821,7 @@ components:
         baseDN:
           type: string
           description: Base DN for the User entity
-        status:
+        jansStatus:
           type: string
           description: User status
         userId:
