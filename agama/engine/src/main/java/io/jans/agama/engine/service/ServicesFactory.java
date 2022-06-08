@@ -2,6 +2,7 @@ package io.jans.agama.engine.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.jans.agama.engine.serialize.SerializerFactory;
 import io.jans.agama.model.EngineConfig;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.service.cdi.event.ConfigurationUpdate;
@@ -21,8 +22,11 @@ public class ServicesFactory {
     @Inject
     private Logger logger;
 
+    @Inject 
+    private SerializerFactory serializerFactory;
+
     private ObjectMapper mapper;
-    
+
     private EngineConfig econfig;
 
     @Produces
@@ -35,12 +39,13 @@ public class ServicesFactory {
     public EngineConfig engineConfigInstance() {
         return econfig;
     }
-    
+
     public void updateConfiguration(@Observes @ConfigurationUpdate AppConfiguration appConfiguration) {
         
         try {
             logger.info("Refreshing Agama configuration...");
-            BeanUtils.copyProperties(econfig, appConfiguration.getAgamaConfiguration());            
+            BeanUtils.copyProperties(econfig, appConfiguration.getAgamaConfiguration());
+            serializerFactory.refresh();
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }
