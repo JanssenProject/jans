@@ -3,7 +3,6 @@ package io.jans.agama.engine.script;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import jakarta.enterprise.inject.spi.CDI;
 
 import io.jans.agama.engine.continuation.PendingRedirectException;
 import io.jans.agama.engine.continuation.PendingRenderException;
