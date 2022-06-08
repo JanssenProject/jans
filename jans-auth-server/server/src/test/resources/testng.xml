@@ -8,6 +8,7 @@
 
     <test name="Unit Tests" enabled="true">
         <classes>
+            <class name="io.jans.as.server.ws.rs.stat.MonthsTest" />
             <class name="io.jans.as.server.service.MTLSServiceTest" />
             <class name="io.jans.as.server.model.authorize.JwtAuthorizationRequestTest" />
 			<class name="io.jans.as.server.service.ScopeServiceTest" />
