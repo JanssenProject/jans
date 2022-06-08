@@ -1,9 +1,17 @@
 package io.jans.agama.engine.serialize;
 
+import io.jans.agama.engine.service.ActionService;
+import io.jans.agama.engine.service.ManagedBeanService;
+import io.jans.agama.model.serialize.Type;
+import io.jans.util.Pair;
+import io.jans.service.cdi.util.CdiUtil;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.lang.annotation.Annotation;
+import java.util.Set;
 
 import org.mozilla.javascript.NativeJavaArray;
 import org.mozilla.javascript.NativeJavaClass;
@@ -18,6 +26,10 @@ public class NativeJavaBox implements Serializable {
     
     private static final long serialVersionUID = 3843792598994958978L;        
     private static final Logger logger = LoggerFactory.getLogger(NativeJavaBox.class);
+
+    private static final ManagedBeanService MBSRV = CdiUtil.bean(ManagedBeanService.class);
+    private static final SerializerFactory SERFACT = CdiUtil.bean(SerializerFactory.class);
+    private static final ActionService ACTSRV = CdiUtil.bean(ActionService.class);
     
     private NativeJavaObject raw;
     private Object unwrapped;
@@ -38,31 +50,65 @@ public class NativeJavaBox implements Serializable {
     private void writeObject(ObjectOutputStream out) throws IOException {
 
         String rawClsName = raw.getClass().getName();
-        logger.trace("{} in the output stream", rawClsName);
+        logger.trace("{} to the output stream", rawClsName);
 
         out.writeUTF(rawClsName);
         out.writeObject(raw.getParentScope());
-
         logger.trace("Underlying object is an instance of {}", unwrapped.getClass().getName());
-        ObjectSerializer serializer = ContinuationSerializer.getObjectSerializer();
-        if (serializer == null) {
-            out.writeObject(unwrapped);   
+
+        Pair<Class<?>, Set<Annotation>> metadata = MBSRV.getBeanMetadata(unwrapped);
+        Class<?> cdiBeanClass = metadata.getFirst();
+
+        boolean cdiBean = cdiBeanClass != null; 
+        out.writeBoolean(cdiBean);
+
+        if (cdiBean) {
+            String realClassName = cdiBeanClass.getName();
+            Set<Annotation> qualies = metadata.getSecond();
+            logger.trace("Managed bean class {}", realClassName);
+
+            //store class name and qualifiers only, not the bean itself
+            out.writeUTF(realClassName);
+            out.writeObject(qualies);   //kryo fails deserializing Annotations :(
         } else {
-            serializer.serialize(unwrapped, out);
+
+            //The object serializer instance may change at runtime. It has to be looked up every time 
+            ObjectSerializer serializer = SERFACT.get();
+            boolean useJavaOnlySerialization = serializer == null;
+
+            out.writeObject(useJavaOnlySerialization ? null : serializer.getType());
+            //unwrapped is not a managed object
+            if (useJavaOnlySerialization) {
+                out.writeObject(unwrapped);
+            } else {
+                serializer.serialize(unwrapped, out);
+            }
         }
-        
+
     }
     
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-        
-        logger.trace("Reading NativeJavaBox");
-        Class<?> rawCls = classFromName(in.readUTF());
+
+        Class<?> rawCls = ACTSRV.classFromName(in.readUTF());
 
         logger.trace("{} in the input stream", rawCls.getName());
         Scriptable parentScope = (Scriptable) in.readObject();
-        
-        ObjectSerializer serializer = ContinuationSerializer.getObjectSerializer();
-        unwrapped = serializer == null ? in.readObject() : serializer.deserialize(in);
+
+        boolean cdiBean = in.readBoolean();
+        if (cdiBean) {
+
+            String realClassName = in.readUTF(); 
+            Set<Annotation> qualies = (Set<Annotation>) in.readObject();
+
+            logger.trace("Managed bean class {}", realClassName);
+            unwrapped = ManagedBeanService.instance(ACTSRV.classFromName(realClassName), qualies);
+        } else {
+
+            Type type = (Type) in.readObject();
+            ObjectSerializer serializer = SERFACT.get(type);
+            unwrapped = serializer == null ? in.readObject() : serializer.deserialize(in);
+        }
+
         logger.trace("Underlying object is an instance of {}", unwrapped.getClass().getName());
         
         if (rawCls.equals(NativeJavaObject.class)) {
@@ -82,10 +128,6 @@ public class NativeJavaBox implements Serializable {
             
         }
 
-    }
-    
-    private static Class<?> classFromName(String qname) throws ClassNotFoundException {
-        return Class.forName(qname, false, ContinuationSerializer.getClassLoader());        
     }
 
     public NativeJavaObject getRaw() {
