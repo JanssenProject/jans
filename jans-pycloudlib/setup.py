@@ -35,7 +35,10 @@ setup(
         # "urllib3<1.25,>=1.21.1",
         # "urllib3>=1.25.2",
         "ldap3>=2.5",
-        "backoff>=1.8.0",
+
+        # backoff v2 introduces non-compatible code
+        "backoff>=1.8.0,<2.0.0",
+
         "docker>=3.7.2",
         "requests-toolbelt>=0.9.1",
         "cryptography>=2.8",

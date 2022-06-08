@@ -1,4 +1,3 @@
-import logging
 import logging.config
 import os
 
@@ -12,7 +11,6 @@ from jans.pycloudlib.validators import validate_persistence_sql_dialect
 from settings import LOGGING_CONFIG
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("wait")
 
 
 def main():
