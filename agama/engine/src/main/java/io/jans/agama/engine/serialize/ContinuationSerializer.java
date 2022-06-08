@@ -1,5 +1,11 @@
 package io.jans.agama.engine.serialize;
 
+import io.jans.agama.engine.service.ActionService;
+import io.jans.util.Pair;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -8,12 +14,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.ObjectStreamClass;
 import java.io.OutputStream;
-import jakarta.annotation.PostConstruct;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
-import io.jans.agama.engine.service.ActionService;
-import io.jans.util.Pair;
 
 import org.mozilla.javascript.NativeContinuation;
 import org.mozilla.javascript.NativeJavaObject;
@@ -25,12 +25,6 @@ public class ContinuationSerializer {
     @Inject
     private ActionService actionService;
 
-    @Inject
-    private SerializerFactory serializerFactory;
-    
-    private static ObjectSerializer objectSerializer;
-    private static ClassLoader classLoader;
-    
     public byte[] save(Scriptable scope, NativeContinuation continuation) throws IOException {
         
         class CustomObjectOutputStream extends ObjectOutputStream {
@@ -39,11 +33,11 @@ public class ContinuationSerializer {
                 super(out);
                 enableReplaceObject(true);
             }
-            
+
             @Override
             protected Object replaceObject​(Object obj) throws IOException {
 
-                if (NativeJavaObject.class.isInstance(obj)) {                    
+                if (NativeJavaObject.class.isInstance(obj)) {
                     return new NativeJavaBox((NativeJavaObject) obj);
                 }
                 return super.replaceObject(obj);
@@ -61,7 +55,7 @@ public class ContinuationSerializer {
         }
         
     }
-    
+
     public Pair<Scriptable, NativeContinuation> restore(byte[] data) throws IOException {
 
         class CustomObjectInputStream extends ObjectInputStream {
@@ -73,7 +67,7 @@ public class ContinuationSerializer {
 
             @Override
             public Class<?> resolveClass​(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
-                return Class.forName(desc.getName(), false, classLoader);
+                return actionService.classFromName(desc.getName());
             }
 
             @Override
@@ -100,18 +94,4 @@ public class ContinuationSerializer {
         
     }
 
-    protected static ObjectSerializer getObjectSerializer() {
-        return objectSerializer;
-    }
-
-    protected static ClassLoader getClassLoader() {
-        return classLoader;
-    }
-
-    @PostConstruct
-    private void init() {
-        objectSerializer = serializerFactory.get();
-        classLoader = actionService.getClassLoader();   
-    }
-    
 }

@@ -211,6 +211,10 @@ public class ActionService {
         return loader;
     }
     
+    public Class<?> classFromName(String qname) throws ClassNotFoundException {
+        return Class.forName(qname, false, loader);        
+    }
+
     private void mismatchError(Class<?> argClass, String typeName) throws IllegalArgumentException {
         throw new IllegalArgumentException(argClass.getSimpleName() + " passed for a " + typeName);
     }
