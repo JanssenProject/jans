@@ -55,7 +55,7 @@ RUN /opt/jython/bin/pip uninstall -y pip
 # ===========
 
 ENV CN_VERSION=1.0.1-SNAPSHOT
-ENV CN_BUILD_DATE='2022-06-03 08:14'
+ENV CN_BUILD_DATE='2022-06-06 08:14'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-server/${CN_VERSION}/jans-auth-server-${CN_VERSION}.war
 
 # Install Jans Auth
@@ -83,7 +83,7 @@ RUN wget -q https://repo1.maven.org/maven2/org/jsmpp/jsmpp/${JSMPP_VERSION}/jsmp
 
 # This will later be refactored and moved to be pulled from persitence or a central bucket
 ARG CASA_CONFIG_VERSION=5.0.0-SNAPSHOT
-ARG CASA_CONFIG_BUILD_DATE="2022-03-17 11:52"
+ARG CASA_CONFIG_BUILD_DATE="2022-05-26 13:56"
 RUN wget -q https://jenkins.gluu.org/maven/org/gluu/casa-config/${CASA_CONFIG_VERSION}/casa-config-${CASA_CONFIG_VERSION}.jar -O /usr/share/java/casa-config.jar
 
 # =====================
