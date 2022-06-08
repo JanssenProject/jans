@@ -79,7 +79,6 @@ public class Page {
     @PostConstruct
     private void init() {
         dataModel = new HashMap<>();
-        labels = new Labels();
     }
     
 }
