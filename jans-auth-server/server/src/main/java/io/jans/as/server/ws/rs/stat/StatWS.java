@@ -14,7 +14,6 @@ import io.jans.as.server.util.ServerUtil;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Counter;
 import io.prometheus.client.exporter.common.TextFormat;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -33,8 +32,8 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static io.jans.as.model.util.Util.escapeLog;
 
@@ -58,9 +57,6 @@ public class StatWS {
 
     @Inject
     private ErrorResponseFactory errorResponseFactory;
-
-    @Inject
-    private StatService statService;
 
     @Inject
     private AppConfiguration appConfiguration;
@@ -143,23 +139,32 @@ public class StatWS {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response statGet(@HeaderParam("Authorization") String authorization, @QueryParam("month") String month, @QueryParam("format") String format) {
-        return stat(authorization, month, format);
+    public Response statGet(@HeaderParam("Authorization") String authorization,
+                            @QueryParam("month") String months,
+                            @QueryParam("start-month") String startMonth,
+                            @QueryParam("end-month") String endMonth,
+                            @QueryParam("format") String format) {
+        return stat(authorization, months, startMonth, endMonth, format);
     }
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    public Response statPost(@HeaderParam("Authorization") String authorization, @FormParam("month") String month, @FormParam("format") String format) {
-        return stat(authorization, month, format);
+    public Response statPost(@HeaderParam("Authorization") String authorization,
+                             @FormParam("month") String months,
+                             @FormParam("start-month") String startMonth,
+                             @FormParam("end-month") String endMonth,
+                             @FormParam("format") String format) {
+        return stat(authorization, months, startMonth, endMonth, format);
     }
 
-    public Response stat(String authorization, String month, String format) {
+    public Response stat(String authorization, String monthsParam, String startMonth, String endMonth, String format) {
         if (log.isDebugEnabled())
-            log.debug("Attempting to request stat, month: {}, format: {}", escapeLog(month), escapeLog(format));
+            log.debug("Attempting to request stat, month: {}, startMonth: {}, endMonth: {}, format: {}",
+                    escapeLog(monthsParam), escapeLog(startMonth), escapeLog(endMonth), escapeLog(format));
 
         errorResponseFactory.validateComponentEnabled(ComponentType.STAT);
         validateAuthorization(authorization);
-        final List<String> months = validateMonth(month);
+        final Set<String> months = validateMonths(monthsParam, startMonth, endMonth);
 
         try {
             if (log.isTraceEnabled())
@@ -213,25 +218,19 @@ public class StatWS {
         }
     }
 
-    private List<String> validateMonth(String month) {
-        if (StringUtils.isBlank(month)) {
-            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, TokenErrorResponseType.INVALID_REQUEST, "`month` parameter can't be blank and should be in format yyyyMM (e.g. 202012)");
+    private Set<String> validateMonths(String months, String startMonth, String endMonth) {
+        if (!Months.isValid(months, startMonth, endMonth)) {
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, TokenErrorResponseType.INVALID_REQUEST, "`month` or `start-month`/`end-month` parameter(s) can't be blank and should be in format yyyyMM (e.g. 202012)");
         }
 
-        month = ServerUtil.urlDecode(month);
+        months = ServerUtil.urlDecode(months);
 
-        List<String> months = new ArrayList<>();
-        for (String m : month.split(" ")) {
-            m = m.trim();
-            if (m.length() == 6) {
-                months.add(m);
-            }
+        Set<String> monthList = Months.getMonths(months, startMonth, endMonth);
+
+        if (monthList.isEmpty()) {
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, TokenErrorResponseType.INVALID_REQUEST, "Unable to identify months. Check `month` or `start-month`/`end-month` parameter(s). It can't be blank and should be in format yyyyMM (e.g. 202012). start-month must be before end-month");
         }
 
-        if (months.isEmpty()) {
-            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, TokenErrorResponseType.INVALID_REQUEST, "`month` parameter can't be blank and should be in format yyyyMM (e.g. 202012)");
-        }
-
-        return months;
+        return monthList;
     }
 }
