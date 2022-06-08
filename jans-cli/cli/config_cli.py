@@ -1180,11 +1180,12 @@ class JCA_CLI:
                 api_response_unmapped_ext = copy.deepcopy(api_response_unmapped)
                 if endpoint.info['operationId'] == 'get-user':
                     for entry in api_response_unmapped_ext:
-                        for attrib in entry['customAttributes']:
-                            if attrib['name'] == 'mail':
-                                entry['mail'] = ', '.join(attrib['values'])
-                            elif attrib['name'] in tabulate_endpoints[op_mode_endpoint]:
-                                entry[attrib['name']] = attrib['values'][0]
+                        if entry.get('customAttributes'):
+                            for attrib in entry['customAttributes']:
+                                if attrib['name'] == 'mail':
+                                    entry['mail'] = ', '.join(attrib['values'])
+                                elif attrib['name'] in tabulate_endpoints[op_mode_endpoint]:
+                                    entry[attrib['name']] = attrib['values'][0]
 
                 tab_data = api_response_unmapped_ext
                 if op_mode_endpoint in tabular_dataset:
