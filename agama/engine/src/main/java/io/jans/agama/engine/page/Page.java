@@ -43,6 +43,7 @@ public class Page {
             if (dataModel != null) {
                 dataModel.putIfAbsent(WEB_CTX_KEY, webContext);
                 dataModel.putIfAbsent(Labels.BUNDLE_ID, labels);
+                labels.useLocale(webContext.getLocale());
                 return dataModel;
             } else return new Object();
         } else return rawModel;
