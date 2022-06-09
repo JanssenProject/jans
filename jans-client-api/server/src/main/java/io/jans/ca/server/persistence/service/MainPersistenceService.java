@@ -329,11 +329,11 @@ public class MainPersistenceService implements PersistenceService {
     }
 
     public String getDnForRp(String rpId) {
-        return joinWithComa("jansId=", rpId, getRpOu(), getClientApiDn());
+        return "jansId=" + joinWithComa(rpId, getRpOu(), getClientApiDn());
     }
 
     public String getDnForExpiredObj(String rpId) {
-        return joinWithComa("rpId=", rpId, getExpiredObjOu(), getClientApiDn());
+        return "rpId=" + joinWithComa(rpId, getExpiredObjOu(), getClientApiDn());
     }
 
     public String ou(String ouName) {
