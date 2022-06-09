@@ -1,9 +1,5 @@
-/*
- * All rights reserved -- Copyright 2015 Gluu Inc.
- */
 package io.jans.ca.server.op;
 
-import com.google.inject.Injector;
 import io.jans.as.client.OpenIdConfigurationResponse;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.jwt.Jwt;
@@ -14,7 +10,8 @@ import io.jans.ca.common.response.CheckIdTokenResponse;
 import io.jans.ca.common.response.IOpResponse;
 import io.jans.ca.server.HttpException;
 import io.jans.ca.server.Utils;
-import io.jans.ca.server.service.Rp;
+import io.jans.ca.server.configuration.model.Rp;
+import io.jans.ca.server.service.ServiceProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,8 +26,8 @@ public class CheckIdTokenOperation extends BaseOperation<CheckIdTokenParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(CheckIdTokenOperation.class);
 
-    protected CheckIdTokenOperation(Command command, final Injector injector) {
-        super(command, injector, CheckIdTokenParams.class);
+    public CheckIdTokenOperation(Command command, ServiceProvider serviceProvider) {
+        super(command, serviceProvider, CheckIdTokenParams.class);
     }
 
     @Override
@@ -44,9 +41,9 @@ public class CheckIdTokenOperation extends BaseOperation<CheckIdTokenParams> {
             final Validator validator = new Validator.Builder()
                     .discoveryResponse(discoveryResponse)
                     .idToken(jwt)
-                    .keyService(getKeyService())
+                    .keyService(getPublicOpKeyService())
                     .opClientFactory(getOpClientFactory())
-                    .rpServerConfiguration(getConfigurationService().getConfiguration())
+                    .rpServerConfiguration(getJansConfigurationService().find())
                     .rp(rp)
                     .build();
 

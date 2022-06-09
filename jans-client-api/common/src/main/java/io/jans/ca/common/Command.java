@@ -18,8 +18,6 @@ import java.io.Serializable;
 @JsonPropertyOrder({"command", "params"})
 public class Command implements Serializable {
 
-//    private static final Logger LOG = LoggerFactory.getLogger(Command.class);
-
     @JsonProperty(value = "command")
     private CommandType commandType;
     @JsonProperty(value = "params")

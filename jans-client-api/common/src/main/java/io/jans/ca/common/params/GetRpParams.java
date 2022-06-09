@@ -17,8 +17,8 @@ public class GetRpParams implements HasRpIdParams {
     public GetRpParams() {
     }
 
-    public GetRpParams(String oxdId) {
-        this.rp_id = oxdId;
+    public GetRpParams(String rpId) {
+        this.rp_id = rpId;
     }
 
     public String getRpId() {

@@ -3,10 +3,6 @@ package io.jans.ca.server.op;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.google.inject.Injector;
-import io.jans.ca.rs.protect.ResourceValidator;
-import io.jans.ca.server.HttpException;
-import org.apache.commons.lang.StringUtils;
 import io.jans.as.client.uma.UmaClientFactory;
 import io.jans.as.client.uma.UmaResourceService;
 import io.jans.as.model.uma.JsonLogic;
@@ -20,17 +16,20 @@ import io.jans.ca.common.params.RsProtectParams;
 import io.jans.ca.common.response.IOpResponse;
 import io.jans.ca.common.response.RsProtectResponse;
 import io.jans.ca.rs.protect.Condition;
+import io.jans.ca.rs.protect.ResourceValidator;
 import io.jans.ca.rs.protect.RsResource;
 import io.jans.ca.rs.protect.resteasy.Key;
 import io.jans.ca.rs.protect.resteasy.PatProvider;
 import io.jans.ca.rs.protect.resteasy.ResourceRegistrar;
 import io.jans.ca.rs.protect.resteasy.ServiceProvider;
-import io.jans.ca.server.model.UmaResource;
-import io.jans.ca.server.service.Rp;
+import io.jans.ca.server.HttpException;
+import io.jans.ca.server.configuration.model.Rp;
+import io.jans.ca.server.configuration.model.UmaResource;
+import jakarta.ws.rs.ClientErrorException;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.ws.rs.ClientErrorException;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -45,8 +44,8 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(RsProtectOperation.class);
 
-    protected RsProtectOperation(Command p_command, final Injector injector) {
-        super(p_command, injector, RsProtectParams.class);
+    public RsProtectOperation(Command pCommand, io.jans.ca.server.service.ServiceProvider serviceProvider) {
+        super(pCommand, serviceProvider, RsProtectParams.class);
     }
 
     @Override

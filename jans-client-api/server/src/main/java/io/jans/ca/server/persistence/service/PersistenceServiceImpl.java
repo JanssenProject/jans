@@ -1,104 +1,101 @@
 package io.jans.ca.server.persistence.service;
 
-import com.google.inject.Inject;
 import io.jans.ca.common.ExpiredObject;
+import io.jans.ca.server.configuration.ApiAppConfiguration;
+import io.jans.ca.server.configuration.model.Rp;
 import io.jans.ca.server.persistence.providers.H2PersistenceProvider;
-import io.jans.ca.server.persistence.providers.SqlPersistenceProvider;
-import io.jans.ca.server.service.ConfigurationService;
-import io.jans.ca.server.service.Rp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import java.util.Set;
 
 /**
  * @author Yuriy Zabrovarnyy
  */
-
-public class PersistenceServiceImpl implements PersistenceService {
+@ApplicationScoped
+public class PersistenceServiceImpl {
 
     private static final Logger LOG = LoggerFactory.getLogger(PersistenceServiceImpl.class);
-
-    private ConfigurationService configurationService;
-    private SqlPersistenceProvider sqlProvider;
-    private PersistenceService persistenceService;
-
     @Inject
-    public PersistenceServiceImpl(ConfigurationService configurationService) {
-        this.configurationService = configurationService;
-    }
+    MainPersistenceService jansConfigurationService;
+    private PersistenceService persistenceService;
 
     public void create() {
         persistenceService = createServiceInstance();
         persistenceService.create();
     }
 
-    private PersistenceService createServiceInstance() {
-
-        String storage = this.configurationService.getConfiguration().getStorage();
-        switch (storage) {
-            case "h2":
-                this.sqlProvider = new H2PersistenceProvider(this.configurationService);
-                return new SqlPersistenceServiceImpl(this.sqlProvider, this.configurationService);
-            case "redis":
-                return new RedisPersistenceService(this.configurationService.getConfiguration());
-            case "jans_server_configuration":
-                return new JansPersistenceService(this.configurationService.getConfiguration());
-            case "sql":
-            case "spanner":
-            case "ldap":
-            case "couchbase":
-                return new JansPersistenceService(this.configurationService.getConfiguration(), storage);
+    private PersistenceService getPersistenceService() {
+        if (persistenceService == null) {
+            create();
         }
-        throw new RuntimeException("Failed to create persistence provider. Unrecognized storage specified: " + storage + ", full configuration: " + this.configurationService.get());
+        return persistenceService;
+    }
+
+    private PersistenceService createServiceInstance() {
+        ApiAppConfiguration apiConf = this.jansConfigurationService.find();
+        String storage = apiConf.getStorage();
+        switch (storage) {
+            case "jans_server_configuration":
+                return jansConfigurationService;
+            case "h2":
+                return new SqlPersistenceServiceImpl(new H2PersistenceProvider(apiConf));
+            case "redis":
+                return new RedisPersistenceService(apiConf);
+            default:
+                LOG.error("Failed to recognize persistence provider. Unrecognized storage specified: {}, full api configuration: {}", storage, apiConf);
+                return jansConfigurationService;
+        }
     }
 
     public boolean create(Rp rp) {
-        return persistenceService.create(rp);
+        return getPersistenceService().create(rp);
     }
 
     public boolean createExpiredObject(ExpiredObject obj) {
-        return persistenceService.createExpiredObject(obj);
+        return getPersistenceService().createExpiredObject(obj);
     }
 
     public ExpiredObject getExpiredObject(String key) {
-        return persistenceService.getExpiredObject(key);
+        return getPersistenceService().getExpiredObject(key);
     }
 
     public boolean isExpiredObjectPresent(String key) {
-        return persistenceService.isExpiredObjectPresent(key);
+        return getPersistenceService().isExpiredObjectPresent(key);
     }
 
     public boolean update(Rp rp) {
-        return persistenceService.update(rp);
+        return getPersistenceService().update(rp);
     }
 
     public Rp getRp(String rpId) {
-        return persistenceService.getRp(rpId);
+        return getPersistenceService().getRp(rpId);
     }
 
     public boolean removeAllRps() {
-        return persistenceService.removeAllRps();
+        return getPersistenceService().removeAllRps();
     }
 
     public Set<Rp> getRps() {
-        return persistenceService.getRps();
+        return getPersistenceService().getRps();
     }
 
     public boolean deleteExpiredObjectsByKey(String key) {
-        return persistenceService.deleteExpiredObjectsByKey(key);
+        return getPersistenceService().deleteExpiredObjectsByKey(key);
     }
 
     public boolean deleteAllExpiredObjects() {
-        return persistenceService.deleteAllExpiredObjects();
+        return getPersistenceService().deleteAllExpiredObjects();
     }
 
     public void destroy() {
-        persistenceService.destroy();
+        getPersistenceService().destroy();
     }
 
-    @Override
     public boolean remove(String rpId) {
-        return persistenceService.remove(rpId);
+        return getPersistenceService().remove(rpId);
     }
 }

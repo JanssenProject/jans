@@ -1,17 +1,15 @@
 package io.jans.ca.server;
 
-import io.dropwizard.configuration.ConfigurationException;
-import io.dropwizard.configuration.ConfigurationFactory;
-import io.dropwizard.configuration.DefaultConfigurationFactoryFactory;
-import io.dropwizard.jackson.Jackson;
-import io.dropwizard.jersey.validation.Validators;
+import com.fasterxml.jackson.databind.AnnotationIntrospector;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
+import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
 import io.jans.ca.common.ErrorResponse;
 import io.jans.ca.common.Jackson2;
+import jakarta.ws.rs.WebApplicationException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 
-import jakarta.ws.rs.WebApplicationException;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -50,16 +48,15 @@ public class TestUtils {
         return Jackson2.createJsonMapper().readValue(entityAsString, ErrorResponse.class);
     }
 
-    public static RpServerConfiguration parseConfiguration(String pathToYaml) throws IOException, ConfigurationException {
+    public static ObjectMapper createJsonMapper() {
+        final AnnotationIntrospector jaxb = new JaxbAnnotationIntrospector();
+        final AnnotationIntrospector jackson = new JacksonAnnotationIntrospector();
 
-        File file = new File(pathToYaml);
-        if (!file.exists()) {
-            System.out.println("Failed to find yml configuration file. Please check " + pathToYaml);
-            System.exit(1);
-        }
+        final AnnotationIntrospector pair = AnnotationIntrospector.pair(jackson, jaxb);
 
-        DefaultConfigurationFactoryFactory<RpServerConfiguration> configurationFactoryFactory = new DefaultConfigurationFactoryFactory<>();
-        ConfigurationFactory<RpServerConfiguration> configurationFactory = configurationFactoryFactory.create(RpServerConfiguration.class, Validators.newValidatorFactory().getValidator(), Jackson.newObjectMapper(), "dw");
-        return configurationFactory.build(file);
+        final ObjectMapper mapper = new ObjectMapper();
+        mapper.getDeserializationConfig().with(pair);
+        mapper.getSerializationConfig().with(pair);
+        return mapper;
     }
 }

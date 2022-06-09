@@ -5,12 +5,12 @@ import io.jans.as.client.uma.UmaClientFactory;
 import io.jans.as.model.crypto.signature.RSAPublicKey;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.jws.RSASigner;
-import jakarta.ws.rs.client.Invocation.Builder;
 import io.jans.ca.rs.protect.resteasy.PatProvider;
 import io.jans.ca.rs.protect.resteasy.ResourceRegistrar;
 import io.jans.ca.rs.protect.resteasy.RptPreProcessInterceptor;
 import io.jans.ca.rs.protect.resteasy.ServiceProvider;
 import io.jans.ca.server.introspection.ClientFactory;
+import jakarta.ws.rs.client.Invocation.Builder;
 import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
 
 public interface OpClientFactory {

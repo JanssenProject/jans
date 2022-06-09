@@ -33,45 +33,72 @@ public class SeleniumTestUtils {
 
     public static AuthorizationResponse authorizeClient(
             String opHost, String userId, String userSecret, String clientId, String redirectUrls, String state, String nonce, List<String> responseTypes, List<String> scopes) {
-        WebDriver driver = initWebDriver(true, true);
+        WebDriver currentDriver = initWebDriver(true, true);
 
-        loginGluuServer(driver, opHost, userId, userSecret, clientId, redirectUrls, state, nonce, responseTypes, scopes);
-        AuthorizationResponse authorizationResponse = acceptAuthorization(driver);
+        loginGluuServer(currentDriver, opHost, userId, userSecret, clientId, redirectUrls, state, nonce, responseTypes, scopes);
+        AuthorizationResponse authorizationResponse = acceptAuthorization(currentDriver);
 
-        driver.quit();
+        currentDriver.close();
+        currentDriver.quit();
         return authorizationResponse;
     }
 
     private static void loginGluuServer(
             WebDriver driver, String opHost, String userId, String userSecret, String clientId, String redirectUrls, String state, String nonce, List<String> responseTypes, List<String> scopes) {
         //navigate to opHost
-        driver.navigate().to(getAuthorizationUrl(opHost, clientId, redirectUrls, state, nonce, responseTypes, scopes));
-        //driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
-        Wait<WebDriver> wait = new FluentWait<WebDriver>(driver)
-                .withTimeout(Duration.ofSeconds(WAIT_OPERATION_TIMEOUT))
-                .pollingEvery(Duration.ofMillis(500))
-                .ignoring(NoSuchElementException.class);
-        WebElement loginButton = wait.until(new Function<WebDriver, WebElement>() {
-            public WebElement apply(WebDriver d) {
-                //System.out.println(d.getCurrentUrl());
-                //System.out.println(d.getPageSource());
-                return d.findElement(By.id("loginForm:loginButton"));
-            }
-        });
+        String authorizationUrl = getAuthorizationUrl(opHost, clientId, redirectUrls, state, nonce, responseTypes, scopes);
 
-        LOG.info("Login page loaded. The current url is: " + driver.getCurrentUrl());
-        //username field
-        WebElement usernameElement = driver.findElement(By.id("loginForm:username"));
-        usernameElement.sendKeys(userId);
-        //password field
-        WebElement passwordElement = driver.findElement(By.id("loginForm:password"));
-        passwordElement.sendKeys(userSecret);
-        //click on login button
+        driver.navigate().to(authorizationUrl);
+
+        LOG.info("Login page loaded. The current url is: " + authorizationUrl);
+
+        WebElement loginButton = waitForRequredElementLoad(driver, "loginForm:loginButton");
+        if (userId != null) {
+            setWebElementValue(driver, "loginForm:username", userId);
+        }
+        setWebElementValue(driver, "loginForm:password", userSecret);
 
         loginButton.click();
+        waitForPageSwitch(driver, authorizationUrl);
 
+        if (driver.getPageSource().contains("Failed to authenticate.")) {
+            fail("Failed to authenticate user");
+        }
         driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+    }
 
+    private static void setWebElementValue(WebDriver currentDriver, String elemnetId, String value) {
+        WebElement webElement = currentDriver.findElement(By.id(elemnetId));
+        webElement.sendKeys(value);
+
+        int remainAttempts = 10;
+        do {
+            if (value.equals(webElement.getAttribute("value"))) {
+                break;
+            }
+
+            ((JavascriptExecutor) currentDriver).executeScript("arguments[0].value='" + value + "';", webElement);
+
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            remainAttempts--;
+        } while (remainAttempts >= 1);
+    }
+
+    private static WebElement waitForRequredElementLoad(WebDriver currentDriver, String id) {
+        Wait<WebDriver> wait = new FluentWait<>(currentDriver)
+                .withTimeout(Duration.ofSeconds(WAIT_OPERATION_TIMEOUT))
+                .pollingEvery(Duration.ofMillis(1000))
+                .ignoring(NoSuchElementException.class);
+
+        WebElement loginButton = wait.until(d -> {
+            return d.findElement(By.id(id));
+        });
+        return loginButton;
     }
 
     private static AuthorizationResponse acceptAuthorization(WebDriver driver) {
@@ -79,24 +106,11 @@ public class SeleniumTestUtils {
         AuthorizationResponse authorizationResponse = null;
         // Check for authorization form if client has no persistent authorization
         if (!authorizationResponseStr.contains("#")) {
-            Wait<WebDriver> wait = new FluentWait<WebDriver>(driver)
-                    .withTimeout(Duration.ofSeconds(WAIT_OPERATION_TIMEOUT))
-                    .pollingEvery(Duration.ofMillis(500))
-                    .ignoring(NoSuchElementException.class);
-
-            WebElement allowButton = wait.until(new Function<WebDriver, WebElement>() {
-                public WebElement apply(WebDriver d) {
-                    //System.out.println(d.getCurrentUrl());
-                    //System.out.println(d.getPageSource());
-                    return d.findElement(By.id("authorizeForm:allowButton"));
-                }
-            });
+            WebElement allowButton = waitForRequredElementLoad(driver, "authorizeForm:allowButton");
 
             // We have to use JavaScript because target is link with onclick
             JavascriptExecutor jse = (JavascriptExecutor) driver;
             jse.executeScript("scroll(0, 1000)");
-
-            String previousURL = driver.getCurrentUrl();
 
             Actions actions = new Actions(driver);
             actions.click(allowButton).perform();
@@ -112,17 +126,16 @@ public class SeleniumTestUtils {
     }
 
     private static WebDriver initWebDriver(boolean enableJavascript, boolean cleanupCookies) {
-        WebDriver currentDriver = new HtmlUnitDriver();
-        ((HtmlUnitDriver) currentDriver).setJavascriptEnabled(enableJavascript);
+        WebDriver webDriver = new HtmlUnitDriver(enableJavascript);
         try {
             if (cleanupCookies) {
-                currentDriver.manage().deleteAllCookies();
+                webDriver.manage().deleteAllCookies();
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        return currentDriver;
+        return webDriver;
     }
 
     private static String getAuthorizationUrl(String opHost, String clientId, String redirectUrls, String state, String nonce, List<String> responseTypes, List<String> scopes) {
@@ -140,14 +153,6 @@ public class SeleniumTestUtils {
             authorizationRequest.setState(state);
 
             return URLDecoder.decode(opHost + "/jans-auth/restv1/authorize?" +authorizationRequest.getQueryString(), Util.UTF8_STRING_ENCODING);
-
-            /*return URLDecoder.decode(opHost + "/oxauth/restv1/authorize?" +
-                    "response_type=code+id_token+token" +
-                    "&state=" + state +
-                    "&nonce=" + nonce +
-                    "&client_id=" + clientId +
-                    "&redirect_uri=" + redirectUrls.split(" ")[0] +
-                    "&scope=openid+profile+oxd+uma_protection", Util.UTF8_STRING_ENCODING);*/
         } catch (UnsupportedEncodingException ex) {
             fail("Failed to decode the authorization URL.");
             return null;
@@ -158,8 +163,6 @@ public class SeleniumTestUtils {
         Holder<String> currentUrl = new Holder<>();
         WebDriverWait wait = new WebDriverWait(currentDriver, WAIT_OPERATION_TIMEOUT);
         wait.until(d -> {
-            //System.out.println("Previous url: " + previousURL);
-            //System.out.println("Current url: " + d.getCurrentUrl());
             currentUrl.setT(d.getCurrentUrl());
             return !currentUrl.getT().equals(previousURL);
         });

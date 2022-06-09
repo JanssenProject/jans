@@ -1,32 +1,30 @@
 package io.jans.ca.server.service;
 
-import com.google.inject.Inject;
 import io.jans.as.client.RegisterClient;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
 import io.jans.ca.server.Utils;
+import io.jans.ca.server.configuration.model.Rp;
 import io.jans.ca.server.mapper.RegisterResponseMapper;
-import io.jans.ca.server.persistence.service.PersistenceService;
+import io.jans.ca.server.persistence.service.PersistenceServiceImpl;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.HttpMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.ws.rs.HttpMethod;
 import java.util.Calendar;
 import java.util.Date;
 
+@ApplicationScoped
 public class RpSyncService {
-
-    private RpService rpService;
-
-    private PersistenceService persistenceService;
-
-    private static final Logger LOG = LoggerFactory.getLogger(RpSyncService.class);
+    @Inject
+    RpService rpService;
 
     @Inject
-    public RpSyncService(RpService rpService, PersistenceService persistenceService) {
-        this.rpService = rpService;
-        this.persistenceService = persistenceService;
-    }
+    PersistenceServiceImpl persistenceService;
+
+    private static final Logger LOG = LoggerFactory.getLogger(RpSyncService.class);
 
     public static boolean shouldSync(Rp rp) {
         if (rp == null || !rp.isSyncClientFromOp())

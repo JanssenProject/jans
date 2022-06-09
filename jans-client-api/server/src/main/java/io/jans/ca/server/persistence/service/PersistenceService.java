@@ -1,7 +1,7 @@
 package io.jans.ca.server.persistence.service;
 
 import io.jans.ca.common.ExpiredObject;
-import io.jans.ca.server.service.Rp;
+import io.jans.ca.server.configuration.model.Rp;
 
 import java.util.Set;
 

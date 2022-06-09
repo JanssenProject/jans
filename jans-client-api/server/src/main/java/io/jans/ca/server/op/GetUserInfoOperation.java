@@ -1,7 +1,6 @@
 package io.jans.ca.server.op;
 
-import com.google.inject.Injector;
-import io.dropwizard.util.Strings;
+import com.google.common.base.Strings;
 import io.jans.as.client.UserInfoClient;
 import io.jans.as.client.UserInfoRequest;
 import io.jans.as.client.UserInfoResponse;
@@ -14,6 +13,10 @@ import io.jans.ca.common.params.GetUserInfoParams;
 import io.jans.ca.common.response.IOpResponse;
 import io.jans.ca.common.response.POJOResponse;
 import io.jans.ca.server.HttpException;
+import io.jans.ca.server.service.DiscoveryService;
+import io.jans.ca.server.service.HttpService;
+import io.jans.ca.server.service.ServiceProvider;
+import io.jans.ca.server.persistence.service.MainPersistenceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,22 +30,26 @@ import java.io.IOException;
 public class GetUserInfoOperation extends BaseOperation<GetUserInfoParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(GetUserInfoOperation.class);
+    DiscoveryService discoveryService;
+    MainPersistenceService jansConfigurationService;
+    OpClientFactoryImpl opClientFactory;
+    HttpService httpService;
 
-    /**
-     * Base constructor
-     *
-     * @param command command
-     */
-    protected GetUserInfoOperation(Command command, final Injector injector) {
-        super(command, injector, GetUserInfoParams.class);
+
+    public GetUserInfoOperation(Command command, ServiceProvider serviceProvider) {
+        super(command, serviceProvider, GetUserInfoParams.class);
+        this.discoveryService = serviceProvider.getDiscoveryService();
+        this.jansConfigurationService = serviceProvider.getJansConfigurationService();
+        this.opClientFactory = discoveryService.getOpClientFactory();
+        this.httpService = discoveryService.getHttpService();
     }
 
     @Override
     public IOpResponse execute(GetUserInfoParams params) throws IOException {
         getValidationService().validate(params);
 
-        UserInfoClient client = getOpClientFactory().createUserInfoClient(getDiscoveryService().getConnectDiscoveryResponseByRpId(params.getRpId()).getUserInfoEndpoint());
-        client.setExecutor(getHttpService().getClientEngine());
+        UserInfoClient client = opClientFactory.createUserInfoClient(discoveryService.getConnectDiscoveryResponseByRpId(params.getRpId()).getUserInfoEndpoint());
+        client.setExecutor(httpService.getClientEngine());
         client.setRequest(new UserInfoRequest(params.getAccessToken()));
 
         final UserInfoResponse response = client.exec();
@@ -56,7 +63,7 @@ public class GetUserInfoOperation extends BaseOperation<GetUserInfoParams> {
 
     public void validateSubjectIdentifier(String idToken, UserInfoResponse response) {
         try {
-            boolean validateUserInfoWithIdToken = getConfigurationService().getConfiguration().getValidateUserInfoWithIdToken();
+            boolean validateUserInfoWithIdToken = jansConfigurationService.find().getValidateUserInfoWithIdToken();
             if (!validateUserInfoWithIdToken) {
                 return;
             }

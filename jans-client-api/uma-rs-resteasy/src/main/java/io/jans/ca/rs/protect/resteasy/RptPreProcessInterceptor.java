@@ -6,19 +6,19 @@ import io.jans.as.model.uma.PermissionTicket;
 import io.jans.as.model.uma.RptIntrospectionResponse;
 import io.jans.as.model.uma.UmaPermission;
 import io.jans.as.model.uma.UmaPermissionList;
-import io.jans.util.StringHelper;
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 import io.jans.ca.rs.protect.Jackson;
-import org.jboss.resteasy.core.ResourceMethodInvoker;
-import org.jboss.resteasy.core.ServerResponse;
-import org.jboss.resteasy.specimpl.BuiltResponse;
-import org.jboss.resteasy.spi.Failure;
-import org.jboss.resteasy.spi.HttpRequest;
+import io.jans.util.StringHelper;
 import jakarta.ws.rs.ClientErrorException;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+import org.jboss.resteasy.core.ServerResponse;
+import org.jboss.resteasy.specimpl.BuiltResponse;
+import org.jboss.resteasy.spi.Failure;
+import org.jboss.resteasy.spi.HttpRequest;
+
 import java.util.List;
 
 /**

@@ -1,140 +1,148 @@
 package io.jans.ca.server.service;
 
 import com.google.common.collect.Lists;
-import com.google.inject.Inject;
-import io.dropwizard.util.Strings;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.crypto.AuthCryptoProvider;
-import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.exception.CryptoProviderException;
+import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.jwk.JSONWebKey;
 import io.jans.as.model.jwk.JSONWebKeySet;
 import io.jans.as.model.jwk.Use;
 import io.jans.as.model.jwt.Jwt;
+import io.jans.as.model.util.Util;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.ExpiredObject;
 import io.jans.ca.common.ExpiredObjectType;
 import io.jans.ca.server.HttpException;
-import io.jans.ca.server.RpServerConfiguration;
-import io.jans.ca.server.persistence.service.PersistenceService;
+import io.jans.ca.server.configuration.ApiAppConfiguration;
+import io.jans.ca.server.persistence.service.MainPersistenceService;
+import io.jans.ca.server.persistence.service.PersistenceServiceImpl;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import org.json.JSONObject;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import java.security.KeyStoreException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 
+@ApplicationScoped
 public class KeyGeneratorService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(KeyGeneratorService.class);
+    @Inject
+    Logger logger;
 
-    private RpServerConfiguration configuration;
-    private PersistenceService persistenceService;
-    private AbstractCryptoProvider cryptoProvider;
+    @Inject
+    PersistenceServiceImpl persistenceService;
+
+    @Inject
+    MainPersistenceService jansConfigurationService;
 
     private JSONWebKeySet keys;
 
-    @Inject
-    public KeyGeneratorService(RpServerConfiguration configuration, PersistenceService persistenceService) {
-        this.configuration = configuration;
-        this.keys = new JSONWebKeySet();
-        this.persistenceService = persistenceService;
+    public AbstractCryptoProvider getCryptoProvider() throws KeyStoreException {
+        ApiAppConfiguration configuration = getConfiguration();
         try {
-            this.cryptoProvider = new AuthCryptoProvider(configuration.getCryptProviderKeyStorePath(), configuration.getCryptProviderKeyStorePassword(), configuration.getCryptProviderDnName());
-        } catch (Exception e) {
-            LOG.error("Failed to create CryptoProvider.", e);
-            throw new RuntimeException("Failed to create CryptoProvider.", e);
+            return new AuthCryptoProvider(configuration.getCryptProviderKeyStorePath(), configuration.getCryptProviderKeyStorePassword(), configuration.getCryptProviderDnName());
+        } catch (KeyStoreException e) {
+            logger.error("Failed to create CryptoProvider.");
+            throw e;
         }
     }
 
-    public void generateKeys() {
+    private ApiAppConfiguration getConfiguration() {
+        return jansConfigurationService.find();
+    }
+
+
+    public void generateKeys() throws KeyStoreException {
 
         List<Algorithm> signatureAlgorithms = Lists.newArrayList(Algorithm.RS256, Algorithm.RS384, Algorithm.RS512, Algorithm.ES256,
                 Algorithm.ES384, Algorithm.ES512, Algorithm.PS256, Algorithm.PS384, Algorithm.PS512);
 
         List<Algorithm> encryptionAlgorithms = Lists.newArrayList(Algorithm.RSA1_5, Algorithm.RSA_OAEP);
-
+        ApiAppConfiguration configuration = getConfiguration();
         try {
             if (configuration.getEnableJwksGeneration()) {
                 JSONWebKeySet keySet = generateKeys(signatureAlgorithms, encryptionAlgorithms, configuration.getJwksExpirationInHours());
                 saveKeysInStorage(keySet.toString());
                 setKeys(keySet);
             }
-        } catch (Exception e) {
-            LOG.error("Failed to generate json web keys.", e);
-            throw new RuntimeException("Failed to generate json web keys.", e);
+        } catch (KeyStoreException e) {
+            logger.error("Failed to generate json web keys.");
+            throw e;
         }
     }
 
     private JSONWebKeySet generateKeys(List<Algorithm> signatureAlgorithms,
-                                       List<Algorithm> encryptionAlgorithms, int expiration_hours) {
-        LOG.trace("Generating jwks keys...");
+                                       List<Algorithm> encryptionAlgorithms, int expirationHours) throws KeyStoreException {
+        logger.trace("Generating jwks keys...");
         JSONWebKeySet jwks = new JSONWebKeySet();
 
         Calendar calendar = new GregorianCalendar();
-        calendar.add(Calendar.HOUR, expiration_hours);
+        calendar.add(Calendar.HOUR, expirationHours);
 
+        AbstractCryptoProvider cryptoProvider = getCryptoProvider();
         for (Algorithm algorithm : signatureAlgorithms) {
             try {
-                SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(algorithm.name());
-                JSONObject result = this.cryptoProvider.generateKey(algorithm, calendar.getTimeInMillis());
+                JSONObject result = cryptoProvider.generateKey(algorithm, calendar.getTimeInMillis());
 
                 JSONWebKey key = JSONWebKey.fromJSONObject(result);
                 jwks.getKeys().add(key);
             } catch (Exception ex) {
-                LOG.error(ex.getMessage(), ex);
+                logger.error(ex.getMessage(), ex);
             }
         }
 
         for (Algorithm algorithm : encryptionAlgorithms) {
             try {
-                KeyEncryptionAlgorithm encryptionAlgorithm = KeyEncryptionAlgorithm.fromName(algorithm.getParamName());
-                JSONObject result = this.cryptoProvider.generateKey(algorithm,
+                JSONObject result = cryptoProvider.generateKey(algorithm,
                         calendar.getTimeInMillis());
 
                 JSONWebKey key = JSONWebKey.fromJSONObject(result);
                 jwks.getKeys().add(key);
             } catch (Exception ex) {
-                LOG.error(ex.getMessage(), ex);
+                logger.error(ex.getMessage(), ex);
             }
         }
 
-        //LOG.trace("jwks: ", jwks);
-        LOG.trace("jwks generated successfully.");
+        logger.trace("jwks generated successfully.");
         return jwks;
     }
 
-    public Jwt sign(Jwt jwt, String sharedSecret, SignatureAlgorithm signatureAlgorithm) {
+    public Jwt sign(Jwt jwt, String sharedSecret, SignatureAlgorithm signatureAlgorithm) throws CryptoProviderException, KeyStoreException, InvalidJwtException {
         try {
-            String signature = cryptoProvider.sign(jwt.getSigningInput(), jwt.getHeader().getKeyId(), sharedSecret, signatureAlgorithm);
+            String signature = getCryptoProvider().sign(jwt.getSigningInput(), jwt.getHeader().getKeyId(), sharedSecret, signatureAlgorithm);
             jwt.setEncodedSignature(signature);
-            //return signed jwt
             return jwt;
-        } catch (Exception e) {
-            LOG.error("Failed to sign signingInput.", e);
-            throw new RuntimeException("Failed to signingInput.", e);
+        } catch (CryptoProviderException | KeyStoreException | InvalidJwtException e) {
+            logger.error("Failed to sign signingInput.");
+            throw e;
         }
     }
 
-    public JSONWebKeySet getKeys() {
+    public JSONWebKeySet getKeys() throws KeyStoreException {
+        ApiAppConfiguration configuration = getConfiguration();
         if (configuration.getEnableJwksGeneration()) {
+            logger.info("Keys found: {}", keys);
             if (keys != null && !keys.getKeys().isEmpty()) {
                 return this.keys;
             }
             //if keys not found then search in storage
-            JSONWebKeySet keys = getKeysFromStorage();
-            if (keys != null && !keys.getKeys().isEmpty()) {
-                this.keys = keys;
+            JSONWebKeySet keyset = getKeysFromStorage();
+            if (keyset != null && !keyset.getKeys().isEmpty()) {
+                this.keys = keyset;
                 return this.keys;
             }
             //generate new keys in case they do not exist
             generateKeys();
             return this.keys;
         }
-        LOG.info("Relying party JWKS generation is disabled in running jans_client_api instance. To enable it set `enable_jwks_generation` field to true in `client-api-server.yml`.");
+        logger.info("Relying party JWKS generation is disabled in running jans_client_api instance. To enable it set `enableJwksGeneration` field to true in ApiAppConfiguration.");
         throw new HttpException(ErrorResponseCode.JWKS_GENERATION_DISABLE);
     }
 
@@ -144,6 +152,7 @@ public class KeyGeneratorService {
 
     public String getKeyId(Algorithm algorithm, Use use) {
         try {
+            AbstractCryptoProvider cryptoProvider = getCryptoProvider();
             final String kid = cryptoProvider.getKeyId(getKeys(), algorithm, use);
             if (!cryptoProvider.getKeys().contains(kid)) {
                 return cryptoProvider.getKeyId(getKeys(), algorithm, use);
@@ -151,37 +160,38 @@ public class KeyGeneratorService {
             return kid;
 
         } catch (CryptoProviderException e) {
-            LOG.error("Error in keyId generation");
-
+            logger.error("Error in keyId generation", e);
+        } catch (KeyStoreException e) {
+            logger.error("Error in keystore", e);
         }
         return null;
     }
 
     public void saveKeysInStorage(String jwks) {
-        persistenceService.createExpiredObject(new ExpiredObject(ExpiredObjectType.JWKS.getValue(), jwks, ExpiredObjectType.JWKS, configuration.getJwksExpirationInHours() * 60));
+        persistenceService.createExpiredObject(new ExpiredObject(ExpiredObjectType.JWKS.getValue(), jwks, ExpiredObjectType.JWKS, getConfiguration().getJwksExpirationInHours() * 60));
     }
 
     public JSONWebKeySet getKeysFromStorage() {
         ExpiredObject expiredObject = persistenceService.getExpiredObject(ExpiredObjectType.JWKS.getValue());
-
-        if (expiredObject == null || Strings.isNullOrEmpty(expiredObject.getValue())) {
+        logger.info("Expired Object found from Storage: {}", expiredObject);
+        if (expiredObject == null || Util.isNullOrEmpty(expiredObject.getValue())) {
             return null;
         }
 
         JSONObject keysInJson = new JSONObject(expiredObject.getValue());
-        JSONWebKeySet keys = JSONWebKeySet.fromJSONObject(keysInJson);
+        JSONWebKeySet keyset = JSONWebKeySet.fromJSONObject(keysInJson);
         try {
             if (hasKeysExpired(expiredObject)) {
-                LOG.trace("The keys in storage got expired. Deleting the expired keys from storage.");
+                logger.trace("The keys in storage got expired. Deleting the expired keys from storage.");
                 deleteKeysFromStorage();
                 return null;
             }
         } catch (Exception e) {
-            LOG.error("Error in reading expiry date or deleting expired keys from storage. Trying to delete the keys from storage.", e);
+            logger.error("Error in reading expiry date or deleting expired keys from storage. Trying to delete the keys from storage.", e);
             deleteKeysFromStorage();
             return null;
         }
-        return keys;
+        return keyset;
     }
 
     public void deleteKeysFromStorage() {
@@ -195,9 +205,5 @@ public class KeyGeneratorService {
         long expiresInMinutes = (expirationDate - today) / (60 * 1000);
 
         return (expiresInMinutes <= 0);
-    }
-
-    public AbstractCryptoProvider getCryptoProvider() {
-        return cryptoProvider;
     }
 }

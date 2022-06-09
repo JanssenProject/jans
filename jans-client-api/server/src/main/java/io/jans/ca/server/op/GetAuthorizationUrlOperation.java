@@ -2,10 +2,6 @@ package io.jans.ca.server.op;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import com.google.inject.Injector;
-import io.jans.ca.server.HttpException;
-import io.jans.ca.server.Utils;
-import org.apache.commons.lang.StringUtils;
 import io.jans.as.model.authorize.AuthorizeRequestParam;
 import io.jans.as.model.util.Util;
 import io.jans.ca.common.Command;
@@ -14,7 +10,14 @@ import io.jans.ca.common.ExpiredObjectType;
 import io.jans.ca.common.params.GetAuthorizationUrlParams;
 import io.jans.ca.common.response.GetAuthorizationUrlResponse;
 import io.jans.ca.common.response.IOpResponse;
-import io.jans.ca.server.service.Rp;
+import io.jans.ca.server.HttpException;
+import io.jans.ca.server.Utils;
+import io.jans.ca.server.configuration.model.Rp;
+import io.jans.ca.server.service.DiscoveryService;
+import io.jans.ca.server.service.ServiceProvider;
+import io.jans.ca.server.service.StateService;
+import io.jans.ca.server.persistence.service.MainPersistenceService;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,20 +33,27 @@ public class GetAuthorizationUrlOperation extends BaseOperation<GetAuthorization
 
     private static final Logger LOG = LoggerFactory.getLogger(GetAuthorizationUrlOperation.class);
 
+    DiscoveryService discoveryService;
+    StateService stateService;
+    MainPersistenceService jansConfigurationService;
+
     /**
      * Base constructor
      *
      * @param command command
      */
-    protected GetAuthorizationUrlOperation(Command command, final Injector injector) {
-        super(command, injector, GetAuthorizationUrlParams.class);
+    public GetAuthorizationUrlOperation(Command command, ServiceProvider serviceProvider) {
+        super(command, serviceProvider, GetAuthorizationUrlParams.class);
+        this.discoveryService = serviceProvider.getDiscoveryService();
+        this.stateService = serviceProvider.getStateService();
+        this.jansConfigurationService = serviceProvider.getJansConfigurationService();
     }
 
     @Override
     public IOpResponse execute(GetAuthorizationUrlParams params) throws Exception {
         final Rp rp = getRp();
 
-        String authorizationEndpoint = getDiscoveryService().getConnectDiscoveryResponse(rp).getAuthorizationEndpoint();
+        String authorizationEndpoint = discoveryService.getConnectDiscoveryResponse(rp).getAuthorizationEndpoint();
 
         List<String> scope = Lists.newArrayList();
         if (params.getScope() != null && !params.getScope().isEmpty()) {
@@ -68,9 +78,10 @@ public class GetAuthorizationUrlOperation extends BaseOperation<GetAuthorization
             responseTypes.addAll(rp.getResponseTypes());
         }
 
-        String state = StringUtils.isNotBlank(params.getState()) ? getStateService().putState(getStateService().encodeExpiredObject(params.getState(), ExpiredObjectType.STATE)) : getStateService().generateState();
-        String nonce = StringUtils.isNotBlank(params.getNonce()) ? getStateService().putNonce(getStateService().encodeExpiredObject(params.getNonce(), ExpiredObjectType.NONCE)) : getStateService().generateNonce();
-        String clientId = getConfigurationService().getConfiguration().getEncodeClientIdInAuthorizationUrl() ? Utils.encode(rp.getClientId()) : rp.getClientId();
+        String state = StringUtils.isNotBlank(params.getState()) ? stateService.putState(stateService.encodeExpiredObject(params.getState(), ExpiredObjectType.STATE)) : stateService.generateState();
+        String nonce = StringUtils.isNotBlank(params.getNonce()) ? stateService.putNonce(stateService.encodeExpiredObject(params.getNonce(), ExpiredObjectType.NONCE)) : stateService.generateNonce();
+        boolean encodeClientIdInAuthorizationUrl = jansConfigurationService.find().getEncodeClientIdInAuthorizationUrl() != null ? jansConfigurationService.find().getEncodeClientIdInAuthorizationUrl().booleanValue() : false;
+        String clientId = encodeClientIdInAuthorizationUrl ? Utils.encode(rp.getClientId()) : rp.getClientId();
         String redirectUri = StringUtils.isNotBlank(params.getRedirectUri()) ? params.getRedirectUri() : rp.getRedirectUri();
 
         authorizationEndpoint += "?response_type=" + Utils.joinAndUrlEncode(responseTypes);
