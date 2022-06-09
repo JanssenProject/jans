@@ -57,17 +57,9 @@ class ClientApiInstaller(JettyInstaller):
     def render_import_templates(self):
         Config.templateRenderingDict['client_api_crypto_provider_fn'] = os.path.join(Config.certFolder, 'client-api-jwks.keystore')
         self.renderTemplateInOut(self.dynamic_conf_json, self.templates_folder, self.output_folder)
+
         dynamic_conf_json = base.readJsonFile(self.dynamic_conf_json, ordered=True)
-        if Config.client_api_storage_type == 'h2':
-            storage_config = {'dbFileLocation': self.data_dir}
-        else:
-            storage_config = {
-                                'baseDn': 'o=jans',
-                                'type': Config.jans_properties_fn,
-                                'connection': os.path.join(Config.configFolder, 'jans-{}.properties'.format(Config.persistence_type)),
-                                "salt": Config.salt_fn
-                             }
-        dynamic_conf_json['storageConfiguration'] = storage_config
+        dynamic_conf_json['storageConfiguration'] = {'dbFileLocation': self.data_dir} if Config.client_api_storage_type == 'h2' else {}
         dynamic_conf_json_str = json.dumps(dynamic_conf_json, indent=2)
         self.writeFile(self.dynamic_conf_json, dynamic_conf_json_str, backup=False)
 
