@@ -288,7 +288,7 @@ class SetupUtils(Crypto64):
 
 
     def getPW(self, size=12, chars=string.ascii_uppercase + string.digits + string.ascii_lowercase, special=''):
-        
+
         if not special:
             random_password = [random.choice(chars) for _ in range(size)]
         else:
@@ -304,11 +304,11 @@ class SetupUtils(Crypto64):
             for n, rc in ((ndigit, string.digits), (nspecial, special),
                         (ncletter, string.ascii_uppercase),
                         (nsletter, string.ascii_lowercase)):
-            
+
                 random_password += [random.choice(rc) for _ in range(n)]
-            
+
         random.shuffle(random_password)
-                
+
         return ''.join(random_password)
 
     def isIP(self, address):

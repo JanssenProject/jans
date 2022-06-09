@@ -5,9 +5,9 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
 import io.jans.ca.common.ExpiredObject;
 import io.jans.ca.common.Jackson2;
-import io.jans.ca.server.RpServerConfiguration;
+import io.jans.ca.server.configuration.ApiAppConfiguration;
+import io.jans.ca.server.configuration.model.Rp;
 import io.jans.ca.server.service.MigrationService;
-import io.jans.ca.server.service.Rp;
 import io.jans.service.cache.AbstractRedisProvider;
 import io.jans.service.cache.RedisConfiguration;
 import io.jans.service.cache.RedisProviderFactory;
@@ -24,10 +24,10 @@ public class RedisPersistenceService implements PersistenceService {
 
     private static final Logger LOG = LoggerFactory.getLogger(RedisPersistenceService.class);
 
-    private final RpServerConfiguration configuration;
+    private final ApiAppConfiguration configuration;
     private AbstractRedisProvider redisProvider;
 
-    public RedisPersistenceService(RpServerConfiguration configuration) {
+    public RedisPersistenceService(ApiAppConfiguration configuration) {
         this.configuration = configuration;
     }
 
@@ -177,7 +177,7 @@ public class RedisPersistenceService implements PersistenceService {
         return (String) redisProvider.get(key);
     }
 
-    public static RedisConfiguration asRedisConfiguration(RpServerConfiguration configuration) throws Exception {
+    public static RedisConfiguration asRedisConfiguration(ApiAppConfiguration configuration) throws Exception {
         return asRedisConfiguration(Jackson2.asOldNode(configuration.getStorageConfiguration()));
     }
 

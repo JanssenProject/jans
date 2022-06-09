@@ -3,9 +3,6 @@
  */
 package io.jans.ca.server.op;
 
-import com.google.inject.Injector;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import io.jans.as.client.JwkClient;
 import io.jans.as.client.OpenIdConfigurationResponse;
 import io.jans.as.model.crypto.signature.RSAPublicKey;
@@ -18,6 +15,10 @@ import io.jans.ca.common.Command;
 import io.jans.ca.common.params.CheckAccessTokenParams;
 import io.jans.ca.common.response.CheckAccessTokenResponse;
 import io.jans.ca.common.response.IOpResponse;
+import io.jans.ca.server.service.DiscoveryService;
+import io.jans.ca.server.service.ServiceProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Date;
 
@@ -30,13 +31,16 @@ public class CheckAccessTokenOperation extends BaseOperation<CheckAccessTokenPar
 
     private static final Logger LOG = LoggerFactory.getLogger(CheckAccessTokenOperation.class);
 
-    protected CheckAccessTokenOperation(Command command, final Injector injector) {
-        super(command, injector, CheckAccessTokenParams.class);
+    private DiscoveryService discoveryService;
+
+    public CheckAccessTokenOperation(Command command, ServiceProvider serviceProvider) {
+        super(command, serviceProvider, CheckAccessTokenParams.class);
+        this.discoveryService = serviceProvider.getDiscoveryService();
     }
 
     @Override
     public IOpResponse execute(CheckAccessTokenParams params) throws Exception {
-        final OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponseByRpId(params.getRpId());
+        final OpenIdConfigurationResponse discoveryResponse = discoveryService.getConnectDiscoveryResponseByRpId(params.getRpId());
         final String idToken = params.getIdToken();
         final String accessToken = params.getAccessToken();
 
@@ -54,7 +58,6 @@ public class CheckAccessTokenOperation extends BaseOperation<CheckAccessTokenPar
 
     private boolean isAccessTokenValid(String p_accessToken, Jwt jwt, OpenIdConfigurationResponse discoveryResponse) {
         try {
-            //                final String type = jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE);
             final String algorithm = jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM);
             final String jwkUrl = discoveryResponse.getJwksUri();
             final String kid = jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID);

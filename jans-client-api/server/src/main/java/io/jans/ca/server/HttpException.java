@@ -3,10 +3,10 @@ package io.jans.ca.server;
 import io.jans.ca.common.ErrorResponse;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.Jackson2;
-
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+
 import java.util.Objects;
 
 /**
@@ -19,7 +19,6 @@ public class HttpException extends WebApplicationException {
     public HttpException(ErrorResponseCode code) {
         super(Response.status(code.getHttpStatus()).type(MediaType.APPLICATION_JSON_TYPE).entity(Jackson2.asJsonSilently(new ErrorResponse(code))).build());
         this.code = code;
-        TracingUtil.errorLog(code.toString());
     }
 
     public ErrorResponseCode getCode() {

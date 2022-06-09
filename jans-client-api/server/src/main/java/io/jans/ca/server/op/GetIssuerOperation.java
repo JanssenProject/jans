@@ -1,8 +1,5 @@
 package io.jans.ca.server.op;
 
-import com.google.inject.Injector;
-import io.jans.ca.server.HttpException;
-import org.apache.commons.beanutils.BeanUtils;
 import io.jans.as.client.OpenIdConnectDiscoveryClient;
 import io.jans.as.client.OpenIdConnectDiscoveryResponse;
 import io.jans.as.model.discovery.WebFingerParam;
@@ -11,6 +8,9 @@ import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.params.GetIssuerParams;
 import io.jans.ca.common.response.GetIssuerResponse;
 import io.jans.ca.common.response.IOpResponse;
+import io.jans.ca.server.HttpException;
+import io.jans.ca.server.service.ServiceProvider;
+import org.apache.commons.beanutils.BeanUtils;
 import org.python.google.common.base.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,8 +22,8 @@ public class GetIssuerOperation extends BaseOperation<GetIssuerParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(GetIssuerOperation.class);
 
-    protected GetIssuerOperation(Command command, final Injector injector) {
-        super(command, injector, GetIssuerParams.class);
+    public GetIssuerOperation(Command command, ServiceProvider serviceProvider) {
+        super(command, serviceProvider, GetIssuerParams.class);
     }
 
     public IOpResponse execute(GetIssuerParams params) {

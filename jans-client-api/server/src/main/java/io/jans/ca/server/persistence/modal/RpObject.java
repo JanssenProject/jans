@@ -1,8 +1,8 @@
 package io.jans.ca.server.persistence.modal;
 
-import java.io.Serializable;
-
 import io.jans.orm.annotation.*;
+
+import java.io.Serializable;
 
 @DataEntry
 @ObjectClass("jansRp")

@@ -15,12 +15,12 @@ public class RemoveSiteParams implements HasRpIdParams {
     public RemoveSiteParams() {
     }
 
-    public RemoveSiteParams(String oxdId) {
-        this(oxdId, null);
+    public RemoveSiteParams(String rpId) {
+        this(rpId, null);
     }
 
-    public RemoveSiteParams(String oxdId, String token) {
-        this.rp_id = oxdId;
+    public RemoveSiteParams(String rpId, String token) {
+        this.rp_id = rpId;
     }
 
     @Override
