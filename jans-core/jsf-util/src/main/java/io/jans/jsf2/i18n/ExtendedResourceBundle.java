@@ -75,6 +75,10 @@ public class ExtendedResourceBundle extends ResourceBundle {
         setParent(ResourceBundle.getBundle(getBaseName(), locale, CONTROL));
     }
 
+    public ExtendedResourceBundle(String baseName, Locale locale) {
+        setParent(ResourceBundle.getBundle(baseName, locale, CONTROL));
+    }
+
     private ExtendedResourceBundle(Path externalResource, Properties properties) {
         this.externalResource = externalResource;
         this.properties = properties;
