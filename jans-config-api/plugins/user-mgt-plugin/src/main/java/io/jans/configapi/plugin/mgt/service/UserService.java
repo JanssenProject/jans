@@ -21,6 +21,7 @@ import java.lang.reflect.Field;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -221,10 +222,10 @@ public class UserService extends io.jans.as.common.service.common.UserService {
         return authUtil.getUserExclusionAttributesAsString();
     }
 
-    public String checkMandatoryFields(User user)
+    public String checkMandatoryFields(User user, List<String> excludeAttributes)
             throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         List<String> mandatoryAttributes = authUtil.getUserMandatoryAttributes();
-        logger.debug("mandatoryAttributess :{} ", mandatoryAttributes);
+        logger.debug("mandatoryAttributess :{}, excludeAttributes:{} ", mandatoryAttributes, excludeAttributes);
 
         StringBuilder missingAttributes = new StringBuilder();
 
@@ -239,6 +240,13 @@ public class UserService extends io.jans.as.common.service.common.UserService {
         for (String attribute : mandatoryAttributes) {
             logger.debug("User class allFields:{} conatins attribute:{} ? :{} ", allFields, attribute,
                     authUtil.containsField(allFields, attribute));
+            
+            //check if to be excluded
+           if(isExcludedAttribute(excludeAttributes,attribute)) {
+               logger.error("Not checking if the attribute:{} is missing as it's in excludeAttributes:{}" , attribute, excludeAttributes);
+               break;
+           }
+            
             if (authUtil.containsField(allFields, attribute)) {
                 logger.debug("Checking if attribute:{} is simple attribute", attribute);
                 attributeValue = BeanUtils.getProperty(user, attribute);
@@ -261,5 +269,15 @@ public class UserService extends io.jans.as.common.service.common.UserService {
         logger.debug("Returning missingAttributes:{} ", missingAttributes);
         return missingAttributes.toString();
     }
-
+    
+    private boolean isExcludedAttribute(List<String> excludeAttributes,String attribute) {
+        logger.error(" Is attribute:{} in excludeAttributeList:{} ", attribute, excludeAttributes);
+        
+        if(excludeAttributes==null || excludeAttributes.isEmpty()) {
+            return false;
+        }
+        
+        return excludeAttributes.stream().anyMatch( e -> e.equals(attribute));
+    }
+ 
 }

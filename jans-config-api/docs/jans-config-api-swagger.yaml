@@ -2531,7 +2531,7 @@ paths:
             schema:
               title: User Details.
               description: User Details.
-              $ref: '#/components/schemas/CustomUser'
+              $ref: '#/components/schemas/ExtendedCustomUser'
       responses:
         '201':
           description: Created
@@ -6813,7 +6813,6 @@ components:
         - displayName
         - givenName
         - jansStatus
-        - userPassword
       properties:
         dn:
           type: string
@@ -6860,7 +6859,14 @@ components:
         inum:
           description: XRI i-number. Identifier to uniquely identify the user.
           type: string
-
+		  
+    ExtendedCustomUser:
+      allOf:     # Combines the CustomUser and the inline model
+        - $ref: '#/components/schemas/CustomUser'
+        - type: object
+          required:
+            - userPassword
+          
     UserPatchRequest:
       title: User Patch Request object
       description: UserPatchRequest.
