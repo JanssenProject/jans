@@ -3,21 +3,23 @@
  */
 package io.jans.ca.server.service;
 
-import com.google.inject.Inject;
-import io.dropwizard.util.Strings;
-import io.jans.ca.server.HttpException;
-import io.jans.ca.server.op.OpClientFactory;
-import org.apache.commons.lang.StringUtils;
+import com.google.common.base.Strings;
 import io.jans.as.client.OpenIdConfigurationClient;
 import io.jans.as.client.OpenIdConfigurationResponse;
 import io.jans.as.model.uma.UmaMetadata;
 import io.jans.ca.common.ErrorResponseCode;
+import io.jans.ca.server.HttpException;
+import io.jans.ca.server.configuration.model.Rp;
+import io.jans.ca.server.op.OpClientFactoryImpl;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLHandshakeException;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -25,7 +27,7 @@ import java.util.concurrent.ConcurrentMap;
 /**
  * @author Yuriy Zabrovarnyy
  */
-
+@ApplicationScoped
 public class DiscoveryService {
 
     /**
@@ -39,19 +41,14 @@ public class DiscoveryService {
 
     private final ConcurrentMap<String, OpenIdConfigurationResponse> map = new ConcurrentHashMap<String, OpenIdConfigurationResponse>();
     private final ConcurrentMap<String, UmaMetadata> umaMap = new ConcurrentHashMap<String, UmaMetadata>();
-
-    private final HttpService httpService;
-    private final RpSyncService rpSyncService;
-    private final ValidationService validationService;
-    private final OpClientFactory opClientFactory;
-
     @Inject
-    public DiscoveryService(HttpService httpService, RpSyncService rpSyncService, ValidationService validationService, OpClientFactory opClientFactory) {
-        this.httpService = httpService;
-        this.rpSyncService = rpSyncService;
-        this.validationService = validationService;
-        this.opClientFactory = opClientFactory;
-    }
+    HttpService httpService;
+    @Inject
+    RpSyncService rpSyncService;
+    @Inject
+    ValidationService validationService;
+    @Inject
+    OpClientFactoryImpl opClientFactory;
 
     public OpenIdConfigurationResponse getConnectDiscoveryResponseByRpId(String rpId) {
         validationService.notBlankRpId(rpId);
@@ -172,4 +169,15 @@ public class DiscoveryService {
         return opHost;
     }
 
+    public HttpService getHttpService() {
+        return httpService;
+    }
+
+    public ValidationService getValidationService() {
+        return validationService;
+    }
+
+    public OpClientFactoryImpl getOpClientFactory() {
+        return opClientFactory;
+    }
 }

@@ -1,7 +1,6 @@
 package io.jans.ca.server.op;
 
 import com.google.common.base.Strings;
-import com.google.inject.Injector;
 import io.jans.as.model.uma.JsonLogicNodeParser;
 import io.jans.as.model.uma.PermissionTicket;
 import io.jans.ca.common.*;
@@ -15,16 +14,18 @@ import io.jans.ca.rs.protect.resteasy.ResourceRegistrar;
 import io.jans.ca.rs.protect.resteasy.RptPreProcessInterceptor;
 import io.jans.ca.rs.protect.resteasy.ServiceProvider;
 import io.jans.ca.server.HttpException;
-import io.jans.ca.server.model.UmaResource;
-import io.jans.ca.server.service.Rp;
-import org.apache.commons.collections.CollectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import io.jans.ca.server.configuration.model.Rp;
+import io.jans.ca.server.configuration.model.UmaResource;
+import io.jans.ca.server.service.IntrospectionService;
+import io.jans.ca.server.service.UmaTokenService;
 import jakarta.ws.rs.ClientErrorException;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.apache.commons.collections.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -36,14 +37,15 @@ import java.util.List;
 public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(RsCheckAccessOperation.class);
+    private UmaTokenService umaTokenService;
+    private IntrospectionService introspectionService;
+    private OpClientFactoryImpl opClientFactory;
 
-    /**
-     * Constructor
-     *
-     * @param command command
-     */
-    RsCheckAccessOperation(Command command, final Injector injector) {
-        super(command, injector, RsCheckAccessParams.class);
+    public RsCheckAccessOperation(Command command, io.jans.ca.server.service.ServiceProvider serviceProvider) {
+        super(command, serviceProvider, RsCheckAccessParams.class);
+        this.umaTokenService = serviceProvider.getUmaTokenService();
+        this.introspectionService = umaTokenService.getIntrospectionService();
+        this.opClientFactory = umaTokenService.getOpClientFactory();
     }
 
     @Override
@@ -67,7 +69,7 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
         PatProvider patProvider = new PatProvider() {
             @Override
             public String getPatToken() {
-                return getUmaTokenService().getPat(params.getRpId()).getToken();
+                return umaTokenService.getPat(params.getRpId()).getToken();
             }
 
             @Override
@@ -78,7 +80,7 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
 
         List<String> requiredScopes = getRequiredScopes(params, resource);
 
-        CorrectRptIntrospectionResponse status = getIntrospectionService().introspectRpt(params.getRpId(), params.getRpt());
+        CorrectRptIntrospectionResponse status = introspectionService.introspectRpt(params.getRpId(), params.getRpt());
 
         LOG.trace("RPT: " + params.getRpt() + ", status: " + status);
 
@@ -102,7 +104,7 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
             requiredScopes = resource.getTicketScopes();
         }
 
-        final RptPreProcessInterceptor rptInterceptor = getOpClientFactory().createRptPreProcessInterceptor(new ResourceRegistrar(patProvider, new ServiceProvider(rp.getOpHost())));
+        final RptPreProcessInterceptor rptInterceptor = opClientFactory.createRptPreProcessInterceptor(new ResourceRegistrar(patProvider, new ServiceProvider(rp.getOpHost())));
         Response response = null;
         try {
             LOG.trace("Try to register ticket, scopes: " + requiredScopes + ", resourceId: " + resource.getId());
@@ -111,7 +113,7 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
             LOG.debug("Failed to register ticket. Entity: " + e.getResponse().readEntity(String.class) + ", status: " + e.getResponse().getStatus(), e);
             if (e.getResponse().getStatus() == 400 || e.getResponse().getStatus() == 401) {
                 LOG.debug("Try maybe PAT is lost on AS, force refresh PAT and request ticket again ...");
-                getUmaTokenService().obtainPat(params.getRpId()); // force to refresh PAT
+                umaTokenService.obtainPat(params.getRpId()); // force to refresh PAT
                 response = rptInterceptor.registerTicketResponse(requiredScopes, resource.getId());
             } else {
                 throw e;

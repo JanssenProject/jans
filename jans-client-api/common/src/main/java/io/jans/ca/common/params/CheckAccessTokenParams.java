@@ -17,7 +17,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class CheckAccessTokenParams implements HasRpIdParams {
 
     /**
-     * oxd ID
+     * rp ID
      */
     @JsonProperty(value = "rp_id")
     private String rp_id;

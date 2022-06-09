@@ -1,7 +1,6 @@
 package io.jans.ca.server.op;
 
-import com.google.inject.Injector;
-import io.dropwizard.util.Strings;
+import com.google.common.base.Strings;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.jwk.Use;
@@ -14,7 +13,8 @@ import io.jans.ca.common.response.GetRequestObjectUriResponse;
 import io.jans.ca.common.response.IOpResponse;
 import io.jans.ca.server.HttpException;
 import io.jans.ca.server.Utils;
-import io.jans.ca.server.service.Rp;
+import io.jans.ca.server.configuration.model.Rp;
+import io.jans.ca.server.service.ServiceProvider;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -30,8 +30,8 @@ public class GetRequestObjectUriOperation extends BaseOperation<GetRequestObject
 
     private static final Logger LOG = LoggerFactory.getLogger(GetRequestObjectUriOperation.class);
 
-    protected GetRequestObjectUriOperation(Command command, final Injector injector) {
-        super(command, injector, GetRequestObjectUriParams.class);
+    public GetRequestObjectUriOperation(Command command, ServiceProvider serviceProvider) {
+        super(command, serviceProvider, GetRequestObjectUriParams.class);
     }
 
     public IOpResponse execute(GetRequestObjectUriParams params) {
@@ -91,7 +91,7 @@ public class GetRequestObjectUriOperation extends BaseOperation<GetRequestObject
         jwt.getClaims().setJwtId(UUID.randomUUID().toString());
         jwt.getClaims().setClaim("client_id", rp.getClientId());
         jwt.getClaims().setIssuedAt(new Date());
-        jwt.getClaims().setExpirationTime(Utils.addTimeToDate(new Date(), getConfigurationService().getConfiguration().getRequestObjectExpirationInMinutes(), Calendar.MINUTE));
+        jwt.getClaims().setExpirationTime(Utils.addTimeToDate(new Date(), getJansConfigurationService().find().getRequestObjectExpirationInMinutes(), Calendar.MINUTE));
         jwt.getClaims().setClaim("response_type", rp.getResponseTypes());
         jwt.getClaims().setClaim("rp_id", rp.getRpId());
         //set claims from params

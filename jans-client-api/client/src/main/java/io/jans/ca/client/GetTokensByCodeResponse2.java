@@ -20,6 +20,12 @@ public class GetTokensByCodeResponse2  implements IOpResponse {
     @JsonProperty("id_token_claims")
     private JsonNode idTokenClaims;
 
+    @JsonProperty("error")
+    private String error;
+
+    @JsonProperty("error_description")
+    private String errorDescription;
+
     public GetTokensByCodeResponse2() {
     }
 
@@ -63,6 +69,22 @@ public class GetTokensByCodeResponse2  implements IOpResponse {
         this.idTokenClaims = idTokenClaims;
     }
 
+    public String getError() {
+        return error;
+    }
+
+    public void setError(String error) {
+        this.error = error;
+    }
+
+    public String getErrorDescription() {
+        return errorDescription;
+    }
+
+    public void setErrorDescription(String errorDescription) {
+        this.errorDescription = errorDescription;
+    }
+
     @Override
     public String toString() {
         return "GetTokensByCodeResponse2{" +
@@ -70,7 +92,9 @@ public class GetTokensByCodeResponse2  implements IOpResponse {
                 ", expiresIn=" + expiresIn +
                 ", idToken='" + idToken + '\'' +
                 ", refreshToken='" + refreshToken + '\'' +
-                ", idTokenClaims=" + idTokenClaims +
+                ", idTokenClaims=" + idTokenClaims + '\'' +
+                ", error=" + error + '\'' +
+                ", errorDescription=" + errorDescription +
                 '}';
     }
 }

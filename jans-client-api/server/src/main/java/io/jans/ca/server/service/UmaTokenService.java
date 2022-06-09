@@ -2,7 +2,6 @@ package io.jans.ca.server.service;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import com.google.inject.Inject;
 import io.jans.as.client.*;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
@@ -19,18 +18,20 @@ import io.jans.ca.common.introspection.CorrectRptIntrospectionResponse;
 import io.jans.ca.common.params.RpGetRptParams;
 import io.jans.ca.common.response.RpGetRptResponse;
 import io.jans.ca.server.HttpException;
-import io.jans.ca.server.RpServerConfiguration;
-import io.jans.ca.server.ServerLauncher;
 import io.jans.ca.server.Utils;
+import io.jans.ca.server.configuration.ApiAppConfiguration;
+import io.jans.ca.server.configuration.model.Rp;
 import io.jans.ca.server.model.Pat;
 import io.jans.ca.server.model.Token;
 import io.jans.ca.server.model.TokenFactory;
-import io.jans.ca.server.op.OpClientFactory;
+import io.jans.ca.server.op.OpClientFactoryImpl;
 import io.jans.ca.server.op.RpGetRptOperation;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.Invocation.Builder;
 import jakarta.ws.rs.core.Form;
@@ -42,38 +43,29 @@ import java.util.*;
  * @author Yuriy Zabrovarnyy
  */
 
+@ApplicationScoped
 public class UmaTokenService {
 
     private static final Logger LOG = LoggerFactory.getLogger(UmaTokenService.class);
-
-    private final RpService rpService;
-    private final RpSyncService rpSyncService;
-    private final ValidationService validationService;
-    private final DiscoveryService discoveryService;
-    private final HttpService httpService;
-    private final RpServerConfiguration configuration;
-    private final StateService stateService;
-    private final OpClientFactory opClientFactory;
-
     @Inject
-    public UmaTokenService(RpService rpService,
-                           RpSyncService rpSyncService,
-                           ValidationService validationService,
-                           DiscoveryService discoveryService,
-                           HttpService httpService,
-                           RpServerConfiguration configuration,
-                           StateService stateService,
-                           OpClientFactory opClientFactory
-    ) {
-        this.rpService = rpService;
-        this.rpSyncService = rpSyncService;
-        this.validationService = validationService;
-        this.discoveryService = discoveryService;
-        this.httpService = httpService;
-        this.configuration = configuration;
-        this.stateService = stateService;
-        this.opClientFactory = opClientFactory;
-    }
+    RpService rpService;
+    @Inject
+    RpSyncService rpSyncService;
+    @Inject
+    ValidationService validationService;
+    @Inject
+    DiscoveryService discoveryService;
+    @Inject
+    HttpService httpService;
+    @Inject
+    ApiAppConfiguration configuration;
+    @Inject
+    StateService stateService;
+    @Inject
+    private OpClientFactoryImpl opClientFactory;
+    @Inject
+    IntrospectionService introspectionService;
+
 
     public RpGetRptResponse getRpt(RpGetRptParams params) throws Exception {
         Rp rp = rpSyncService.getRp(params.getRpId());
@@ -145,7 +137,6 @@ public class UmaTokenService {
         UmaTokenResponse tokenResponse = asTokenResponse(entityResponse);
 
         if (tokenResponse != null && StringUtils.isNotBlank(tokenResponse.getAccessToken())) {
-            final IntrospectionService introspectionService = ServerLauncher.getInjector().getInstance(IntrospectionService.class);
             CorrectRptIntrospectionResponse status = introspectionService.introspectRpt(params.getRpId(), tokenResponse.getAccessToken());
 
             LOG.debug("RPT " + tokenResponse.getAccessToken() + ", status: " + status);
@@ -370,5 +361,29 @@ public class UmaTokenService {
             LOG.debug("Authorization code is blank.");
         }
         throw new RuntimeException("Failed to obtain Token, scopeType: " + scopeType + ", site: " + rp);
+    }
+
+    public HttpService getHttpService() {
+        return httpService;
+    }
+
+    public OpClientFactoryImpl getOpClientFactory() {
+        return opClientFactory;
+    }
+
+    public IntrospectionService getIntrospectionService() {
+        return introspectionService;
+    }
+
+    public RpService getRpService() {
+        return rpService;
+    }
+
+    public DiscoveryService getDiscoveryService() {
+        return discoveryService;
+    }
+
+    public StateService getStateService() {
+        return stateService;
     }
 }

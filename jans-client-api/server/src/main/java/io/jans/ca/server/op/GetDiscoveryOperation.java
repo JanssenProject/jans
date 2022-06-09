@@ -1,14 +1,15 @@
 package io.jans.ca.server.op;
 
-import com.google.inject.Injector;
-import io.jans.ca.server.HttpException;
-import org.apache.commons.beanutils.BeanUtils;
 import io.jans.as.client.OpenIdConfigurationResponse;
 import io.jans.ca.common.Command;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.params.GetDiscoveryParams;
 import io.jans.ca.common.response.GetDiscoveryResponse;
 import io.jans.ca.common.response.IOpResponse;
+import io.jans.ca.server.HttpException;
+import io.jans.ca.server.service.DiscoveryService;
+import io.jans.ca.server.service.ServiceProvider;
+import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,17 +24,20 @@ public class GetDiscoveryOperation extends BaseOperation<GetDiscoveryParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(GetDiscoveryOperation.class);
 
+    private DiscoveryService discoveryService;
+
     /**
      * Base constructor
      *
      * @param command command
      */
-    protected GetDiscoveryOperation(Command command, final Injector injector) {
-        super(command, injector, GetDiscoveryParams.class);
+    public GetDiscoveryOperation(Command command, ServiceProvider serviceProvider) {
+        super(command, serviceProvider, GetDiscoveryParams.class);
+        this.discoveryService = serviceProvider.getDiscoveryService();
     }
 
     public IOpResponse execute(GetDiscoveryParams params) {
-        OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponse(params.getOpConfigurationEndpoint(), params.getOpHost(), params.getOpDiscoveryPath());
+        OpenIdConfigurationResponse discoveryResponse = discoveryService.getConnectDiscoveryResponse(params.getOpConfigurationEndpoint(), params.getOpHost(), params.getOpDiscoveryPath());
 
         GetDiscoveryResponse response = new GetDiscoveryResponse();
         try {

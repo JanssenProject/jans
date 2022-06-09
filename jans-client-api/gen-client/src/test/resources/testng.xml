@@ -21,28 +21,28 @@
                value="{'resources':[{'path':'/GetAll','conditions':[{'httpMethods':['GET'],'scopes':['http://photoz.example.com/dev/actions/a1','http://photoz.example.com/dev/actions/a2','http://photoz.example.com/dev/actions/a3'],'ticketScopes':['http://photoz.example.com/dev/actions/a1','http://photoz.example.com/dev/actions/a2','http://photoz.example.com/dev/actions/a3'],'scope_expression':{'rule':{'and':[{'or':[{'var':0},{'var':1}]},{'var':2}]},'data':['http://photoz.example.com/dev/actions/a1','http://photoz.example.com/dev/actions/a2','http://photoz.example.com/dev/actions/a3']}}]}]}"/>
 
     <!-- main class to set up and tear down suite -->
-   <test name="SetUp" enabled="true">
-        <classes>
-            <class name="io.swagger.client.api.SetUpTest"/>
-        </classes>
-    </test>
+<!--   <test name="SetUp" enabled="true">-->
+<!--        <classes>-->
+<!--            <class name="io.swagger.client.api.SetUpTest"/>-->
+<!--        </classes>-->
+<!--    </test>-->
 
     <!-- Connect -->
-    <test name="Get Discovery" enabled="true">
-        <classes>
-            <class name="io.swagger.client.api.GetDiscoveryTest"></class>
-        </classes>
-    </test>
-    <test name="Register site" enabled="true">
-        <classes>
-            <class name="io.swagger.client.api.RegisterSiteTest"/>
-        </classes>
-    </test>
-    <test name="Remove site" enabled="true">
-        <classes>
-            <class name="io.swagger.client.api.RemoveSiteTest"/>
-        </classes>
-    </test>
+<!--    <test name="Get Discovery" enabled="true">-->
+<!--        <classes>-->
+<!--            <class name="io.swagger.client.api.GetDiscoveryTest"></class>-->
+<!--        </classes>-->
+<!--    </test>-->
+<!--    <test name="Register site" enabled="true">-->
+<!--        <classes>-->
+<!--            <class name="io.swagger.client.api.RegisterSiteTest"/>-->
+<!--        </classes>-->
+<!--    </test>-->
+<!--    <test name="Remove site" enabled="true">-->
+<!--        <classes>-->
+<!--            <class name="io.swagger.client.api.RemoveSiteTest"/>-->
+<!--        </classes>-->
+<!--    </test>-->
     <!--
         <test name="Get authorization url" enabled="true">
             <classes>

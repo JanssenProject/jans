@@ -2,11 +2,11 @@ package io.jans.ca.server.mapper;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Strings;
-import org.apache.commons.lang.StringUtils;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
 import io.jans.ca.common.Jackson2;
-import io.jans.ca.server.service.Rp;
+import io.jans.ca.server.configuration.model.Rp;
+import org.apache.commons.lang.StringUtils;
 
 import java.io.IOException;
 import java.util.HashSet;

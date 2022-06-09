@@ -1,7 +1,6 @@
 package io.jans.ca.server.op;
 
 import com.google.common.base.Strings;
-import com.google.inject.Injector;
 import io.jans.as.client.OpenIdConfigurationResponse;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.ca.common.Command;
@@ -10,7 +9,8 @@ import io.jans.ca.common.params.ValidateParams;
 import io.jans.ca.common.response.IOpResponse;
 import io.jans.ca.common.response.POJOResponse;
 import io.jans.ca.server.HttpException;
-import io.jans.ca.server.service.Rp;
+import io.jans.ca.server.configuration.model.Rp;
+import io.jans.ca.server.service.ServiceProvider;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -19,13 +19,9 @@ import io.jans.ca.server.service.Rp;
 
 public class ValidateOperation extends BaseOperation<ValidateParams> {
 
-    //private static final Logger LOG = LoggerFactory.getLogger(ValidateOperation.class);
 
-    /**
-     * @param command command
-     */
-    protected ValidateOperation(Command command, final Injector injector) {
-        super(command, injector, ValidateParams.class);
+    public ValidateOperation(Command command, ServiceProvider serviceProvider) {
+        super(command, serviceProvider, ValidateParams.class);
     }
 
     @Override
@@ -40,9 +36,9 @@ public class ValidateOperation extends BaseOperation<ValidateParams> {
         final Validator validator = new Validator.Builder()
                 .discoveryResponse(discoveryResponse)
                 .idToken(idToken)
-                .keyService(getKeyService())
+                .keyService(getPublicOpKeyService())
                 .opClientFactory(getOpClientFactory())
-                .rpServerConfiguration(getConfigurationService().getConfiguration())
+                .rpServerConfiguration(getJansConfigurationService().find())
                 .rp(rp)
                 .build();
         validator.validateNonce(getStateService());

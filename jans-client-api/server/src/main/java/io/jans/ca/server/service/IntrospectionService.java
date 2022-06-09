@@ -1,20 +1,18 @@
 package io.jans.ca.server.service;
 
-import com.google.inject.Inject;
 import io.jans.as.model.common.IntrospectionResponse;
 import io.jans.as.model.uma.UmaMetadata;
 import io.jans.ca.common.introspection.CorrectRptIntrospectionResponse;
 import io.jans.ca.common.introspection.CorrectUmaPermission;
 import io.jans.ca.server.introspection.*;
 import io.jans.ca.server.op.OpClientFactoryImpl;
-import org.jboss.resteasy.client.jaxrs.ResteasyClient;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.ClientErrorException;
 import org.jboss.resteasy.spi.ReaderException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import jakarta.ws.rs.ClientErrorException;
-import jakarta.ws.rs.core.UriBuilder;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -22,22 +20,18 @@ import java.util.List;
 /**
  * @author yuriyz
  */
+@ApplicationScoped
 public class IntrospectionService {
 
     private static final Logger LOG = LoggerFactory.getLogger(IntrospectionService.class);
-
-    private HttpService httpService;
-    private UmaTokenService umaTokenService;
-    private DiscoveryService discoveryService;
-    private OpClientFactoryImpl opClientFactory;
-
     @Inject
-    public IntrospectionService(HttpService httpService, UmaTokenService umaTokenService, DiscoveryService discoveryService, OpClientFactoryImpl opClientFactory) {
-        this.httpService = httpService;
-        this.umaTokenService = umaTokenService;
-        this.discoveryService = discoveryService;
-        this.opClientFactory = opClientFactory;
-    }
+    HttpService httpService;
+    @Inject
+    UmaTokenService umaTokenService;
+    @Inject
+    DiscoveryService discoveryService;
+    @Inject
+    OpClientFactoryImpl opClientFactory;
 
     public IntrospectionResponse introspectToken(String rpId, String accessToken) {
         return introspectToken(rpId, accessToken, true);
@@ -45,12 +39,13 @@ public class IntrospectionService {
 
     private IntrospectionResponse introspectToken(String rpId, String accessToken, boolean retry) {
         final String introspectionEndpoint = discoveryService.getConnectDiscoveryResponseByRpId(rpId).getIntrospectionEndpoint();
-        final ResteasyClient client = ((ResteasyClientBuilder) ResteasyClientBuilder.newBuilder()).httpEngine(httpService.getClientEngine()).build();
-        final ResteasyWebTarget target = client.target(UriBuilder.fromPath(introspectionEndpoint));
-        final io.jans.as.client.service.IntrospectionService introspectionService = target.proxy(io.jans.as.client.service.IntrospectionService.class);
+        LOG.info("Instrospection Endpoint: {}", introspectionEndpoint);
+        final io.jans.as.client.service.IntrospectionService introspectionService = ClientFactory.instance().createIntrospectionService(introspectionEndpoint, httpService.getClientEngine());
 
         try {
-            IntrospectionResponse response = introspectionService.introspectToken("Bearer " + umaTokenService.getOAuthToken(rpId).getToken(), accessToken);
+            String token = umaTokenService.getOAuthToken(rpId).getToken();
+            LOG.info("Token instrospection: {}", token);
+            final IntrospectionResponse response = introspectionService.introspectToken(bearerToken(token), accessToken);
             return response; // we need local variable to force convertion here
         } catch (ClientErrorException e) {
             int status = e.getResponse().getStatus();
@@ -68,7 +63,7 @@ public class IntrospectionService {
                 // trying to handle compatiblity issue.
                 LOG.trace("Trying to handle compatibility issue ...");
                 BackCompatibleIntrospectionService backCompatibleIntrospectionService = ClientFactory.instance().createBackCompatibleIntrospectionService(introspectionEndpoint, httpService.getClientEngine());
-                BackCompatibleIntrospectionResponse backResponse = backCompatibleIntrospectionService.introspectToken("Bearer " + umaTokenService.getOAuthToken(rpId).getToken(), accessToken);
+                BackCompatibleIntrospectionResponse backResponse = backCompatibleIntrospectionService.introspectToken(bearerToken(umaTokenService.getOAuthToken(rpId).getToken()), accessToken);
                 LOG.trace("Handled compatibility issue. Response: " + backResponse);
 
                 IntrospectionResponse response = new IntrospectionResponse();
@@ -94,6 +89,10 @@ public class IntrospectionService {
         }
     }
 
+    private String bearerToken(String token) {
+        return "Bearer " + token;
+    }
+
     public CorrectRptIntrospectionResponse introspectRpt(String rpId, String rpt) {
         return introspectRpt(rpId, rpt, true);
     }
@@ -103,7 +102,7 @@ public class IntrospectionService {
 
         try {
             final CorrectRptIntrospectionService introspectionService = opClientFactory.createClientFactory().createCorrectRptStatusService(metadata, httpService.getClientEngine());
-            return introspectionService.requestRptStatus("Bearer " + umaTokenService.getPat(rpId).getToken(), rpt, "");
+            return introspectionService.requestRptStatus(bearerToken(umaTokenService.getPat(rpId).getToken()), rpt, "");
         } catch (ClientErrorException e) {
             int httpStatus = e.getResponse().getStatus();
             if (retry && (httpStatus == 401 || httpStatus == 400 || httpStatus == 403)) {
@@ -118,7 +117,7 @@ public class IntrospectionService {
                 // trying to handle compatiblity issue.
                 LOG.trace("Trying to handle compatibility issue ...");
                 BadRptIntrospectionService badService = ClientFactory.instance().createBadRptStatusService(metadata, httpService.getClientEngine());
-                BadRptIntrospectionResponse badResponse = badService.requestRptStatus("Bearer " + umaTokenService.getPat(rpId).getToken(), rpt, "");
+                BadRptIntrospectionResponse badResponse = badService.requestRptStatus(bearerToken(umaTokenService.getPat(rpId).getToken()), rpt, "");
 
                 LOG.trace("Handled compatibility issue. Response: " + badResponse);
 
