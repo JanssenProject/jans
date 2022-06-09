@@ -1,11 +1,7 @@
 package io.jans.ca.server.introspection;
 
 import io.jans.as.model.uma.UmaConstants;
-
-import jakarta.ws.rs.FormParam;
-import jakarta.ws.rs.HeaderParam;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.*;
 
 /**
  * @author yuriyz

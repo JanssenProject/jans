@@ -17,9 +17,9 @@ import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.jwt.JwtHeaderName;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.server.HttpException;
-import io.jans.ca.server.RpServerConfiguration;
+import io.jans.ca.server.configuration.ApiAppConfiguration;
+import io.jans.ca.server.configuration.model.Rp;
 import io.jans.ca.server.service.PublicOpKeyService;
-import io.jans.ca.server.service.Rp;
 import io.jans.ca.server.service.StateService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +39,7 @@ public class Validator {
     private static final Logger LOG = LoggerFactory.getLogger(Validator.class);
 
     private final OpenIdConfigurationResponse discoveryResponse;
-    private RpServerConfiguration configuration;
+    private ApiAppConfiguration configuration;
     private AbstractJwsSigner jwsSigner;
     private final Jwt idToken;
     private OpClientFactory opClientFactory;
@@ -50,7 +50,7 @@ public class Validator {
         return discoveryResponse;
     }
 
-    public RpServerConfiguration getRpServerConfiguration() {
+    public ApiAppConfiguration getConfiguration() {
         return configuration;
     }
 
@@ -85,7 +85,7 @@ public class Validator {
 
         // required parameters
         private OpenIdConfigurationResponse discoveryResponse;
-        private RpServerConfiguration configuration;
+        private ApiAppConfiguration configuration;
         private Jwt idToken;
         private OpClientFactory opClientFactory;
         private PublicOpKeyService keyService;
@@ -99,7 +99,7 @@ public class Validator {
             return this;
         }
 
-        public Builder rpServerConfiguration(RpServerConfiguration configuration) {
+        public Builder rpServerConfiguration(ApiAppConfiguration configuration) {
             this.configuration = configuration;
             return this;
         }
@@ -203,7 +203,7 @@ public class Validator {
         }
     }
 
-    public static AbstractJwsSigner createJwsSigner(Jwt idToken, OpenIdConfigurationResponse discoveryResponse, PublicOpKeyService keyService, OpClientFactory opClientFactory, Rp rp, RpServerConfiguration configuration) {
+    public static AbstractJwsSigner createJwsSigner(Jwt idToken, OpenIdConfigurationResponse discoveryResponse, PublicOpKeyService keyService, OpClientFactory opClientFactory, Rp rp, ApiAppConfiguration configuration) {
         final String algorithm = idToken.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM);
         final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(algorithm);
         final String jwkUrl = discoveryResponse.getJwksUri();
@@ -213,7 +213,7 @@ public class Validator {
             throw new HttpException(ErrorResponseCode.INVALID_ALGORITHM);
 
         if (Strings.isNullOrEmpty(kid) && (signatureAlgorithm.getFamily() == AlgorithmFamily.RSA || signatureAlgorithm.getFamily() == AlgorithmFamily.EC)) {
-            LOG.warn("Warning:`kid` is missing in id_token header. oxd will throw error if RP is unable to determine the key to used for `id_token` validation.");
+            LOG.warn("Warning:`kid` is missing in id_token header. jans-client-apì will throw error if RP is unable to determine the key to used for `id_token` validation.");
         }
         if (signatureAlgorithm == SignatureAlgorithm.NONE) {
 
@@ -248,7 +248,7 @@ public class Validator {
     public void validateNonce(StateService stateService) {
         final String nonceFromToken = idToken.getClaims().getClaimAsString(JwtClaimName.NONCE);
         if (!stateService.isExpiredObjectPresent(nonceFromToken)) {
-            LOG.error("Nonce value from `id_token` is not registered with oxd.");
+            LOG.error("Nonce value from `id_token` is not registered with jans-client-apì.");
             throw new HttpException(ErrorResponseCode.INVALID_NONCE);
         }
     }

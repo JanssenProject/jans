@@ -7,7 +7,7 @@ import io.jans.ca.common.params.IParams;
 import io.jans.ca.common.response.IOpResponse;
 
 /**
- * Base interface for oxd operations. Operation parameter must be specified via contructor.
+ * Base interface for client-api operations. Operation parameter must be specified via contructor.
  *
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 09/08/2013

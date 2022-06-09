@@ -3,10 +3,10 @@ package io.jans.ca.server.introspection;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
-
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
+import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
+
 import java.util.Date;
 import java.util.List;
 

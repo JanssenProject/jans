@@ -1,5 +1,0 @@
-jans-client-api-server %VERSION% %DIST%; urgency=low
-
-  * New version %VERSION%
-
--- Davit Nikoghosyan <davit@gluu.org> Wed, 16 Oct 2019 23:36:36 -0500

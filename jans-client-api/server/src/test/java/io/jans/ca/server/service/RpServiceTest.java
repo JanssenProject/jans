@@ -1,15 +1,15 @@
 package io.jans.ca.server.service;
 
-import com.google.inject.Inject;
-import io.dropwizard.configuration.ConfigurationException;
-import io.dropwizard.testing.ResourceHelpers;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.Jackson2;
 import io.jans.ca.server.HttpException;
-import io.jans.ca.server.TestUtils;
-import io.jans.ca.server.guice.GuiceModule;
+import io.jans.ca.server.configuration.model.Rp;
 import io.jans.ca.server.persistence.service.PersistenceService;
-import org.testng.annotations.*;
+import jakarta.inject.Inject;
+import org.testng.annotations.AfterSuite;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeSuite;
+import org.testng.annotations.Test;
 import org.testng.collections.Lists;
 
 import java.io.IOException;
@@ -24,26 +24,22 @@ import static org.testng.AssertJUnit.assertNotNull;
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 05/10/2015
  */
-@Guice(modules = GuiceModule.class)
 public class RpServiceTest {
 
     private static ExecutorService EXECUTOR_SERVICE;
 
     @Inject
-    ConfigurationService configurationService;
-    @Inject
-    RpService service;
+    RpService rpService;
     @Inject
     PersistenceService persistenceService;
     @Inject
     ValidationService validationService;
 
     @BeforeClass
-    public void setUp() throws IOException, ConfigurationException {
-        configurationService.setConfiguration(TestUtils.parseConfiguration(ResourceHelpers.resourceFilePath("client-api-server-jenkins.yml")));
+    public void setUp() throws IOException {
         persistenceService.create();
-        service.removeAllRps();
-        service.load();
+        rpService.removeAllRps();
+        rpService.load();
     }
 
     @BeforeSuite
@@ -53,25 +49,25 @@ public class RpServiceTest {
 
     @AfterSuite
     public void tearDownSuite() {
-        service.removeAllRps();
+        rpService.removeAllRps();
         persistenceService.destroy();
         EXECUTOR_SERVICE.shutdown();
     }
 
     @Test(enabled = false)
     public void load() {
-        assertEquals(service.getRps().size(), 1);
+        assertEquals(rpService.getRps().size(), 1);
     }
 
     @Test
     public void persist() throws Exception {
         Rp rp = newRp();
 
-        service.create(rp);
-        assertEquals(service.getRps().size(), 1);
+        rpService.create(rp);
+        assertEquals(rpService.getRps().size(), 1);
 
         rp.setClientName("Updated name");
-        service.update(rp);
+        rpService.update(rp);
 
         assertEquals(persistenceService.getRp(rp.getRpId()).getClientName(), "Updated name");
         assertEquals(persistenceService.getRp(rp.getRpId()).getClientName(), "Updated name");
@@ -81,16 +77,16 @@ public class RpServiceTest {
     public void remove() throws Exception {
         Rp rp = newRp();
 
-        service.create(rp);
+        rpService.create(rp);
         assertNotNull(persistenceService.getRp(rp.getRpId()));
 
         rp.setClientName("Updated name");
-        service.update(rp);
+        rpService.update(rp);
 
         assertEquals(persistenceService.getRp(rp.getRpId()).getClientName(), "Updated name");
         assertEquals(persistenceService.getRp(rp.getRpId()).getClientName(), "Updated name");
 
-        service.remove(rp.getRpId());
+        rpService.remove(rp.getRpId());
         try {
             rp = persistenceService.getRp(rp.getRpId());
             validationService.validate(rp);
@@ -103,11 +99,11 @@ public class RpServiceTest {
     @Test(invocationCount = 10, threadPoolSize = 10, enabled = false)
     public void stressTest() throws IOException {
 
-        final Rp rp = configurationService.defaultRp();
+        final Rp rp = rpService.defaultRp();
         rp.setRpId(UUID.randomUUID().toString());
         rp.setPat(UUID.randomUUID().toString());
 
-        service.create(rp);
+        rpService.create(rp);
 
         for (int i = 0; i < 11; i++) {
             EXECUTOR_SERVICE.submit(new Runnable() {
@@ -115,7 +111,7 @@ public class RpServiceTest {
                 public void run() {
                     try {
                         rp.setPat(UUID.randomUUID().toString());
-                        service.update(rp);
+                        rpService.update(rp);
                         System.out.println("Updated PAT: " + rp.getPat() + ", for site: " + rp.getRpId());
                     } catch (Throwable e) {
                         throw new AssertionError("Failed to update configuration: " + rp.getRpId());
@@ -141,14 +137,14 @@ public class RpServiceTest {
     }
 
     public Rp newRp() throws IOException {
-        Rp rp = new Rp(configurationService.defaultRp());
+        Rp rp = new Rp(rpService.defaultRp());
         rp.setRpId(UUID.randomUUID().toString());
         rp.setOpHost("test.gluu.org");
         return rp;
     }
 
     public Rp createRpWithNotNullFields() throws IOException {
-        Rp rp = new Rp(configurationService.defaultRp());
+        Rp rp = new Rp(rpService.defaultRp());
         rp.setRpId("test_rp_id");
         rp.setOpHost("https://test.gluu.org");
         rp.setRedirectUri("https://localhost:5053/authorization");
