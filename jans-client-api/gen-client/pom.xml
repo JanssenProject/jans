@@ -23,7 +23,7 @@
         <swagger-core-version>2.0.0</swagger-core-version>
         <threetenbp-version>1.3.5</threetenbp-version>
         <maven-plugin-version>1.0.0</maven-plugin-version>
-        <junit-version>4.12</junit-version>
+        <junit-version>4.13.1</junit-version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <skip.swagger.client.generation>true</skip.swagger.client.generation>
     </properties>
