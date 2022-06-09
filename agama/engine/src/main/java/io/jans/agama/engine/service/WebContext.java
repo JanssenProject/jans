@@ -5,6 +5,8 @@ import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
 
+import java.util.Locale;
+
 import io.jans.agama.engine.servlet.RestartServlet;
 
 @RequestScoped
@@ -15,7 +17,7 @@ public class WebContext {
     
     private String contextPath;
     private String relativePath;
-    private String rpFlowInitiatorUrl;
+    private Locale locale;
 
     public String getContextPath() {
         return contextPath;
@@ -41,10 +43,15 @@ public class WebContext {
 
     }
     
+    public Locale getLocale() {
+        return locale;
+    }
+    
     @PostConstruct
     private void init() {
         contextPath = request.getContextPath();
         relativePath = request.getServletPath();
+        locale = request.getLocale();
     }
     
 }
