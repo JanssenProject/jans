@@ -80,7 +80,7 @@ def download_sqlalchemy():
 
 def download_all():
     download_files = []
-
+    sys.path.insert(0, os.path.join(base.pylib_dir, 'gcs'))
     modules = glob.glob(os.path.join(base.ces_dir, 'installers/*.py'))
 
     for installer in modules:
