@@ -21,7 +21,6 @@ import java.lang.reflect.Field;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -243,8 +242,8 @@ public class UserService extends io.jans.as.common.service.common.UserService {
             
             //check if to be excluded
            if(isExcludedAttribute(excludeAttributes,attribute)) {
-               logger.error("Not checking if the attribute:{} is missing as it's in excludeAttributes:{}" , attribute, excludeAttributes);
-               break;
+               logger.debug("Not checking if the attribute:{} is missing as it's in excludeAttributes:{}" , attribute, excludeAttributes);
+               continue;
            }
             
             if (authUtil.containsField(allFields, attribute)) {
@@ -271,7 +270,7 @@ public class UserService extends io.jans.as.common.service.common.UserService {
     }
     
     private boolean isExcludedAttribute(List<String> excludeAttributes,String attribute) {
-        logger.error(" Is attribute:{} in excludeAttributeList:{} ", attribute, excludeAttributes);
+        logger.debug(" Is attribute:{} in excludeAttributeList:{} ", attribute, excludeAttributes);
         
         if(excludeAttributes==null || excludeAttributes.isEmpty()) {
             return false;

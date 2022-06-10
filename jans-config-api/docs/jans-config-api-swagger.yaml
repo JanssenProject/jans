@@ -6823,6 +6823,11 @@ components:
         jansStatus:
           type: string
           description: User status
+          enum:
+            - ACTIVE
+            - INACTIVE
+            - EXPIRED
+            - REGISTER
         userId:
           description: A domain issued and managed identifier for the user.
           type: string
@@ -6866,6 +6871,10 @@ components:
         - type: object
           required:
             - userPassword
+          properties:
+            userPassword:
+              type: string
+              description: User password
           
     UserPatchRequest:
       title: User Patch Request object
