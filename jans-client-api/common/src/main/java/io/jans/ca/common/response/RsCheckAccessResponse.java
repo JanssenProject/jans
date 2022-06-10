@@ -15,6 +15,10 @@ public class RsCheckAccessResponse implements IOpResponse {
     private String wwwAuthenticateHeader;
     @JsonProperty(value = "ticket")
     private String ticket;
+    @JsonProperty(value = "error")
+    private String error;
+    @JsonProperty(value = "error_description")
+    private String errorDescription;
 
     public RsCheckAccessResponse() {
     }
@@ -47,12 +51,30 @@ public class RsCheckAccessResponse implements IOpResponse {
         this.ticket = ticket;
     }
 
+    public String getError() {
+        return error;
+    }
+
+    public void setError(String error) {
+        this.error = error;
+    }
+
+    public String getErrorDescription() {
+        return errorDescription;
+    }
+
+    public void setErrorDescription(String errorDescription) {
+        this.errorDescription = errorDescription;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         sb.append("RsCheckResponse");
         sb.append("{access='").append(access).append('\'');
         sb.append(", wwwAuthenticateHeader='").append(wwwAuthenticateHeader).append('\'');
+        sb.append(", error='").append(error).append('\'');
+        sb.append(", errorDescription='").append(errorDescription).append('\'');
         sb.append(", ticket='").append(ticket).append('\'');
         sb.append('}');
         return sb.toString();

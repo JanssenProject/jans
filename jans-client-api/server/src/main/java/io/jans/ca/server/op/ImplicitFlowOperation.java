@@ -4,9 +4,6 @@
 package io.jans.ca.server.op;
 
 import com.google.api.client.util.Lists;
-import com.google.inject.Injector;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import io.jans.as.client.*;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
@@ -17,6 +14,9 @@ import io.jans.ca.common.Command;
 import io.jans.ca.common.params.ImplicitFlowParams;
 import io.jans.ca.common.response.IOpResponse;
 import io.jans.ca.common.response.ImplicitFlowResponse;
+import io.jans.ca.server.service.ServiceProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,8 +31,8 @@ public class ImplicitFlowOperation extends BaseOperation<ImplicitFlowParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(ImplicitFlowOperation.class);
 
-    protected ImplicitFlowOperation(Command p_command, final Injector injector) {
-        super(p_command, injector, ImplicitFlowParams.class);
+    public ImplicitFlowOperation(Command p_command, ServiceProvider serviceProvider) {
+        super(p_command, serviceProvider, ImplicitFlowParams.class);
     }
 
     @Override

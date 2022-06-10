@@ -5,14 +5,15 @@ package io.jans.ca.server;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang.StringUtils;
 import io.jans.as.model.util.Util;
 import io.jans.ca.common.ErrorResponseCode;
+import io.jans.ca.server.rest.ApiApplication;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
@@ -26,6 +27,8 @@ import java.util.stream.Collectors;
  * @author Yuriy Zabrovarnyy
  */
 public class Utils {
+
+    private static final Logger LOG = LoggerFactory.getLogger(Utils.class);
 
     private static final int ONE_HOUR_MILLIS = 60 * 60 * 1000;
 
@@ -142,7 +145,43 @@ public class Utils {
         }
     }
 
-    public static String getOxdVersion() {
-        return !Strings.isNullOrEmpty(System.getProperty("projectVersion")) ? System.getProperty("projectVersion") : RpServerApplication.class.getPackage().getImplementationVersion();
+    public static String getJansClientApiVersion() {
+        return !Strings.isNullOrEmpty(System.getProperty("projectVersion")) ? System.getProperty("projectVersion") : ApiApplication.class.getPackage().getImplementationVersion();
+    }
+
+    public static synchronized String readCompileProterty(String nameProperty) {
+        Properties prop = readCompileProperties();
+        if (prop != null && prop.getProperty(nameProperty) != null) {
+            return prop.getProperty(nameProperty);
+        } else {
+            return null;
+        }
+    }
+
+    public static Properties readCompileProperties() {
+        Properties prop = null;
+        File fileProperties = null;
+        try {
+            String fileName = "compile.properties";
+            URL url = Utils.class
+                    .getClassLoader()
+                    .getResource(fileName);
+            if (url == null) {
+                throw new IllegalArgumentException(fileName + " is not found 1");
+            }
+            fileProperties = new File(url.getFile());
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+        }
+        if (fileProperties != null) {
+            try (InputStream input = new FileInputStream(fileProperties)) {
+                prop = new Properties();
+                // load a properties file
+                prop.load(input);
+            } catch (IOException ex) {
+                LOG.error(ex.getMessage(), ex);
+            }
+        }
+        return prop;
     }
 }
