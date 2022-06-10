@@ -1,7 +1,7 @@
 
 apiVersion: v1
 kind: ConfigMap
-metadata: 
+metadata:
   name: {{ .Release.Name }}-config-cm
   namespace: {{ .Release.Namespace }}
   labels:
@@ -134,8 +134,11 @@ data:
   CN_PERSISTENCE_LDAP_MAPPING: {{ .Values.configmap.cnPersistenceLdapMapping | quote }}
   {{- end }}
   # Auto enable installation of some services
+  # deprecated in favor of CN_CLIENT_API_CERT_CN
   CN_CLIENT_API_APPLICATION_CERT_CN: {{ .Values.configmap.cnClientApiApplicationCertCn | quote }}
+  # deprecated
   CN_CLIENT_API_ADMIN_CERT_CN: {{ .Values.configmap.cnClientApiAdminCertCn | quote }}
+  CN_CLIENT_API_CERT_CN: {{ .Values.configmap.cnClientApiCertCn | quote }}
   {{ if eq .Values.configmap.cnCacheType "REDIS" }}
   CN_REDIS_URL: {{ .Values.configmap.cnRedisUrl | quote }}
   CN_REDIS_TYPE: {{ .Values.configmap.cnRedisType | quote }}
