@@ -60,8 +60,9 @@ The following environment variables are supported by the container:
 - `CN_COUCHBASE_TRUSTSTORE_ENABLE`: Enable truststore for encrypted Couchbase connection (default to `true`).
 - `CN_COUCHBASE_KEEPALIVE_INTERVAL`: Keep-alive interval for Couchbase connection (default to `30000` milliseconds).
 - `CN_COUCHBASE_KEEPALIVE_TIMEOUT`: Keep-alive timeout for Couchbase connection (default to `2500` milliseconds).
-- `CN_CLIENT_API_APPLICATION_CERT_CN`: CommonName used in application certificate subject
-- `CN_CLIENT_API_ADMIN_CERT_CN`: CommonName used in admin certificate subject
+- `CN_CLIENT_API_APPLICATION_CERT_CN`: CommonName used in application certificate subject. This environment variable is **DEPRECATED** in favor of `CN_CLIENT_API_CERT_CN`.
+- `CN_CLIENT_API_ADMIN_CERT_CN`: CommonName used in admin certificate subject. This environment variable is **DEPRECATED** and no longer used.
+- `CN_CLIENT_API_CERT_CN`: CommonName used in certificate subject.
 - `CN_CLIENT_API_BIND_IP_ADDRESSES`: A comma-separated host/IP address that are allowed to access client-api (default to `*`).
 - `CN_JAVA_OPTIONS`: Java options passed to entrypoint, i.e. `-Xmx1024m` (default to empty-string).
 - `GOOGLE_PROJECT_ID`: Google Project ID (default to empty string). Used when `CN_CONFIG_ADAPTER` or `CN_SECRET_ADAPTER` set to `google`.
@@ -91,7 +92,15 @@ The following key-value pairs are the defaults:
 ```json
 {
     "client_api_log_target": "STDOUT",
-    "client_api_log_level": "INFO"
+    "client_api_log_level": "INFO",
+    "persistence_log_target": "FILE",
+    "persistence_log_level": "INFO",
+    "persistence_duration_log_target": "FILE",
+    "persistence_duration_log_level": "INFO",
+    "ldap_stats_log_target": "FILE",
+    "ldap_stats_log_level": "INFO",
+    "script_log_target": "FILE",
+    "script_log_level": "INFO"
 }
 ```
 

@@ -7,25 +7,46 @@ FROM bellsoft/liberica-openjre-alpine:11.0.15
 RUN apk update \
     && apk upgrade \
     && apk add --no-cache openssl python3 tini curl py3-cryptography py3-psycopg2 py3-grpcio \
-    && apk add --no-cache --virtual .build-deps unzip wget git \
+    && apk add --no-cache --virtual .build-deps zip wget git \
     && mkdir -p /usr/java/latest \
     && ln -sf /usr/lib/jvm/jre /usr/java/latest/jre
+
+# =====
+# Jetty
+# =====
+
+ARG JETTY_VERSION=11.0.8
+ARG JETTY_HOME=/opt/jetty
+ARG JETTY_BASE=/opt/jans/jetty
+ARG JETTY_USER_HOME_LIB=/home/jetty/lib
+
+# Install jetty
+RUN wget -q https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/${JETTY_VERSION}/jetty-home-${JETTY_VERSION}.tar.gz -O /tmp/jetty.tar.gz \
+    && mkdir -p /opt \
+    && tar -xzf /tmp/jetty.tar.gz -C /opt \
+    && mv /opt/jetty-home-${JETTY_VERSION} ${JETTY_HOME} \
+    && rm -rf /tmp/jetty.tar.gz
+
+# Ports required by jetty
+EXPOSE 8080
 
 # ==========
 # Client API
 # ==========
 
-ENV CN_VERSION=1.0.0
-ENV CN_BUILD_DATE='2022-04-22 08:50'
-ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-client-api-server/${CN_VERSION}/jans-client-api-server-${CN_VERSION}-distribution.zip
+ENV CN_VERSION=1.0.1-SNAPSHOT
+ENV CN_BUILD_DATE='2022-06-09 08:49'
+ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-client-api-server/${CN_VERSION}/jans-client-api-server-${CN_VERSION}.war
 
-RUN wget -q ${CN_SOURCE_URL} -O /tmp/client-api.zip \
-    && mkdir -p /opt/client-api \
-    && unzip -qq /tmp/client-api.zip -d /opt/client-api \
-    && rm /tmp/client-api.zip \
-    && rm -rf /opt/client-api/conf/client-api-server.keystore /opt/client-api/conf/client-api-server.yml
-
-EXPOSE 8443 8444
+COPY jetty/jetty-env.xml /tmp/WEB-INF/jetty-env.xml
+RUN mkdir -p ${JETTY_BASE}/jans-client-api/webapps \
+    && wget -q ${CN_SOURCE_URL} -O /tmp/jans-client-api.war \
+    && cd /tmp \
+    && zip -d jans-client-api.war WEB-INF/jetty-web.xml \
+    && zip -r jans-client-api.war WEB-INF/jetty-env.xml \
+    && cp jans-client-api.war ${JETTY_BASE}/jans-client-api/webapps/jans-client-api.war \
+    && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-client-api --add-module=server,deploy,annotations,webapp,servlet,resources,http,http-forwarded,threadpool,jsp,websocket,logging/slf4j,logging-jetty \
+    && rm -rf /tmp/jans-client-api.war /tmp/WEB-INF
 
 # ======
 # Python
@@ -37,12 +58,40 @@ RUN python3 -m ensurepip \
     && pip3 install --no-cache-dir -r /app/requirements.txt \
     && pip3 uninstall -y pip wheel
 
+# =====================
+# jans-linux-setup sync
+# =====================
+
+ENV JANS_LINUX_SETUP_VERSION=819fc2bc8ca596845a17498f7bd2e101cc466775
+ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
+
+# note that as we're pulling from a monorepo (with multiple project in it)
+# we are using partial-clone and sparse-checkout to get the jans-linux-setup code
+RUN git clone --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
+    && cd /tmp/jans \
+    && git sparse-checkout init --cone \
+    && git checkout ${JANS_LINUX_SETUP_VERSION} \
+    && git sparse-checkout set ${JANS_SETUP_DIR}
+
+RUN mkdir -p /app/static/rdbm /app/schema /app/templates/jans-client-api
+
+# sync static files and templates from linux-setup
+RUN cd /tmp/jans \
+    && cp ${JANS_SETUP_DIR}/static/rdbm/sql_data_types.json /app/static/rdbm/ \
+    && cp ${JANS_SETUP_DIR}/static/rdbm/ldap_sql_data_type_mapping.json /app/static/rdbm/ \
+    && cp ${JANS_SETUP_DIR}/static/rdbm/opendj_attributes_syntax.json /app/static/rdbm/ \
+    && cp ${JANS_SETUP_DIR}/static/rdbm/sub_tables.json /app/static/rdbm/ \
+    && cp ${JANS_SETUP_DIR}/schema/jans_schema.json /app/schema/ \
+    && cp ${JANS_SETUP_DIR}/schema/custom_schema.json /app/schema/ \
+    && cp ${JANS_SETUP_DIR}/schema/opendj_types.json /app/schema/ \
+    && cp ${JANS_SETUP_DIR}/templates/jans-client-api/configuration.ldif /app/templates/jans-client-api/ \
+    && cp ${JANS_SETUP_DIR}/templates/jans-client-api/dynamic-conf.json /app/templates/jans-client-api/
+
 # =======
 # Cleanup
 # =======
 
-RUN apk del .build-deps \
-    && rm -rf /var/cache/apk/*
+RUN apk del .build-deps && rm -rf /var/cache/apk/* /tmp/jans
 
 # =======
 # License
@@ -118,7 +167,7 @@ ENV CN_PERSISTENCE_TYPE=ldap \
 # ==============
 
 ENV CN_CLIENT_API_APPLICATION_CERT_CN=localhost \
-    CN_CLIENT_API_ADMIN_CERT_CN=localhost \
+    CN_CLIENT_API_CERT_CN=localhost \
     CN_CLIENT_API_BIND_IP_ADDRESSES="*"
 
 # ===========
@@ -144,22 +193,23 @@ LABEL name="janssenproject/client-api" \
     summary="Janssen Client API" \
     description="Client software to secure apps with OAuth 2.0, OpenID Connect, and UMA"
 
-RUN mkdir -p /etc/certs \
-    /etc/jans/conf \
-    /opt/client-api/logs
+RUN mkdir -p /etc/certs /etc/jans/conf ${JETTY_BASE}/jans-client-api/logs
+COPY jetty/log4j2.xml ${JETTY_BASE}/jans-client-api/resources/
 COPY scripts /app/scripts
 COPY templates/*.tmpl /app/templates/
 RUN chmod +x /app/scripts/entrypoint.sh
 
 # create non-root user
-RUN adduser -s /bin/sh -D -G root -u 1000 1000
+RUN adduser -s /bin/sh -D -G root -u 1000 jetty
 
 # adjust ownership and permission
-RUN chmod -R g=u /opt/client-api/conf \
-    && chmod -R g=u /opt/client-api/logs \
+RUN chmod -R g=u ${JETTY_BASE}/jans-client-api/resources \
+    && chmod -R g=u ${JETTY_BASE}/jans-client-api/logs \
     && chmod -R g=u /etc/certs \
     && chmod -R g=u /etc/jans \
-    && chmod 664 /usr/java/latest/jre/lib/security/cacerts
+    && chmod 664 /usr/java/latest/jre/lib/security/cacerts \
+    && chmod 664 /opt/jetty/etc/jetty.xml \
+    && chmod 664 /opt/jetty/etc/webdefault.xml
 
 USER 1000
 
