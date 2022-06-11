@@ -227,6 +227,7 @@ OIDCProviderMetadataURL https://janssen.op.io/jans-auth/.well-known/openid-confi
 OIDCClientID <inum-as-received-in-client-registration-response>
 OIDCClientSecret <as-provided-in-client-registration-request>
 OIDCResponseType code
+OIDCScope "openid email profile"
 OIDCProviderTokenEndpointAuth client_secret_basic
 OIDCSSLValidateServer Off
 OIDCProviderIssuer https://janssen.op.io
@@ -246,4 +247,35 @@ service apache2 restart
 
 ## Test Complete Flow
 
-- Accessing `https://test.apache.rp.io/cgi-bin/printHeaders.py` should redirect to Janssen authentication screen.
+- Accessing `https://test.apache.rp.io/cgi-bin/printHeaders.py` should redirect to the Janssen authentication screen.
+- Upon valid authentication, Janssen will present the user with a consent screen where the user will be able to allow user attributes that can be provided to the app
+- If allowed, the user will be successfully taken to the `printHeaders.py` page. In the process, `mod_auth_openidc` also requests user claims (i.e attributes) from the `/userinfo` endpoint of the Janssen server. And makes these claims available as environment variables to the application.
+- `printHeaders.py` prints all the environment variables, along with user claims received from the Janssen server. The application can use this information to identify the user and also enforce access policies. Sample output below shows some of this user information and token information printed as part of environment variables:
+
+```
+Environment Variables
+
+OIDC_CLAIM_sub: e205be81-6a85-4d83-9126
+
+OIDC_CLAIM_email_verified: 1
+
+OIDC_CLAIM_name: Default myname User
+
+OIDC_CLAIM_nickname: myname
+
+OIDC_CLAIM_given_name: myname
+
+OIDC_CLAIM_middle_name: myname
+
+OIDC_CLAIM_family_name: User
+
+OIDC_CLAIM_email: myname@mydomain.io
+
+OIDC_access_token: d6a12cce-f196-4da3-ba17
+
+OIDC_access_token_expires: 165493257
+
+HTTPS: on
+
+SSL_TLS_SNI: test.apache.rp.io
+```
