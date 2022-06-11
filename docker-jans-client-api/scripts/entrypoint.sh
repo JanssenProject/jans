@@ -19,6 +19,7 @@ exec java \
     -Dserver.base=/opt/jans/jetty/jans-client-api \
     -Dlog.base=/opt/jans/jetty/jans-client-api \
     -Djava.io.tmpdir=/tmp \
+    -Dpython.home=/opt/jython \
     -Dlog4j2.configurationFile=resources/log4j2.xml \
     ${CN_JAVA_OPTIONS} \
     -jar /opt/jetty/start.jar \
