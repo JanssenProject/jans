@@ -14,11 +14,15 @@ To run Janssen integration test suite, we need a Janssen server installed. Janss
 
 - OS platform: 
   
-  In absence of a native Ubuntu system, it is recommended to use virtualization tools to bring up an Ubuntu 20.04 system. In this guide, we will assume that Janssen server has been intalled on an Ubuntu VM created using VMWare Player.
+  It is recommended to use virtualization tools to bring up an Ubuntu 20.04 system. In this guide, we will assume that Janssen server has been intalled on an Ubuntu VM created using VMWare Player. Using a local VM to install the Janssen server is beneficial as it allows an easy way to start over by recreating the entire VM and get a blank slate to work on.
   
 - Install Janssen: 
 
   Install the Janssen server using `Dynamic download` method described in [this](https://github.com/JanssenProject/jans/wiki#janssen-installation) guide. Make a note of `host name` that you assign to the Janssen server during the installation. For the purpose of this guide, the Janssen host name would be `janssen2.op.io`
+
+### Component Setup
+
+![Component Diagram](../../assets/how-to/images/image-run-integration-test-from-workspace-06122022.png)
 
 
 Once Janssen server up and running in a local VM, follow the steps below:
