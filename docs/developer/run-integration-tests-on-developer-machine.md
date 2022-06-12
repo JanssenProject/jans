@@ -20,9 +20,9 @@ To run Janssen integration test suite, we need a Janssen server installed. Janss
 
   Install the Janssen server using `Dynamic download` method described in [this](https://github.com/JanssenProject/jans/wiki#janssen-installation) guide. Make a note of `host name` that you assign to the Janssen server during the installation. For the purpose of this guide, the Janssen host name would be `janssen2.op.io`
 
-### Component Setup
+#### Component Setup
 
-![Component Diagram](../../assets/how-to/images/image-run-integration-test-from-workspace-06122022.png)
+![Component Diagram](../assets/developer/images/image-run-integration-test-from-workspace-06122022.png)
 
 
 Once Janssen server up and running in a local VM, follow the steps below:
