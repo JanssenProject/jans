@@ -7,8 +7,8 @@
 - Developer
 - Community
   - [Charter](./community/charter.md)
-  - [Contributing](./community/CONTRIBUTING.md)
-  - [Code of Conduct](./community/code-of-conduct.md)
+  - [Contributing](./CONTRIBUTING.md)
+  - [Code of Conduct](./CODE_OF_CONDUCT.md)
   - [Triage Process](./community/triage.md)
   - [Testing](./community/testing.md)
   - [Copyright Notice](./community/copyright-notices.md)
