@@ -1225,6 +1225,7 @@ class JCA_CLI:
 
         if 'allOf' in schema_:
             all_schema = OrderedDict()
+            all_schema['required'] = []
 
             all_schema['properties'] = OrderedDict()
             for sch in schema_['allOf']:
@@ -1233,6 +1234,7 @@ class JCA_CLI:
                 elif 'properties' in sch:
                     for sprop in sch['properties']:
                         all_schema['properties'][sprop] = sch['properties'][sprop]
+                all_schema['required'] += sch.get('required', [])
 
             schema_ = all_schema
 
@@ -1408,10 +1410,12 @@ class JCA_CLI:
 
         if model.__class__.__name__ == 'type':
             modelObject = model(**data)
+            for key_ in data:
+                if data[key_] and not getattr(modelObject, key_, None):
+                    setattr(modelObject, key_, data[key_])
             return modelObject
         else:
             for key_ in data:
-                # if data[key_]:
                 setattr(model, key_, data[key_])
 
             return model
