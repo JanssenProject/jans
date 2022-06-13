@@ -46,16 +46,11 @@ questions:
   description: "Middleware API to help application developers call an OAuth, OpenID or UMA server. You may wonder why this is necessary. It makes it easier for client developers to use OpenID signing and encryption features, without becoming crypto experts. This API provides some high level endpoints to do some of the heavy lifting."
   show_subquestion_if: true
   subquestions:
-  - variable: config.configmap.cnClientApiApplicationCertCn
+  - variable: config.configmap.cnClientApiCertCn
     default: "client-api"
-    description: "Client API application keystore name"
+    description: "Client API CommonName value for certificate subject"
     type: string
-    label: Client API application keystore name
-  - variable: config.configmap.cnClientApiAdminCertCn
-    default: "client-api"
-    description: "Client API admin keystore name"
-    type: string
-    label: Client API admin keystore name
+    label: Client API certificate CommonName (CN)
 
 # ======================
 # Test environment group
@@ -849,5 +844,3 @@ questions:
   label: SCIM Replicas
   description: "Service replica number."
   show_if: "global.scim.enabled=true"
-
-

@@ -1,9 +1,9 @@
 import json
 import logging.config
 import os
-
-from ruamel.yaml import safe_load
-from ruamel.yaml import safe_dump
+import re
+from functools import cached_property
+from string import Template
 
 from jans.pycloudlib import get_manager
 from jans.pycloudlib.persistence import render_couchbase_properties
@@ -15,11 +15,16 @@ from jans.pycloudlib.persistence import sync_couchbase_truststore
 from jans.pycloudlib.persistence import sync_ldap_truststore
 from jans.pycloudlib.persistence import render_sql_properties
 from jans.pycloudlib.persistence import render_spanner_properties
-from jans.pycloudlib.persistence.utils import PersistencMapper
+from jans.pycloudlib.persistence import CouchbaseClient
+from jans.pycloudlib.persistence import LdapClient
+from jans.pycloudlib.persistence import SpannerClient
+from jans.pycloudlib.persistence import SqlClient
+from jans.pycloudlib.persistence.utils import PersistenceMapper
 from jans.pycloudlib.utils import cert_to_truststore
 from jans.pycloudlib.utils import get_random_chars
 from jans.pycloudlib.utils import exec_cmd
 from jans.pycloudlib.utils import generate_ssl_certkey
+from jans.pycloudlib.utils import generate_base64_contents
 
 from settings import LOGGING_CONFIG
 
@@ -53,42 +58,39 @@ def generate_keystore(cert_file, key_file, keystore_file, keystore_password):
 
 
 class Connector:
-    def __init__(self, manager, type_):
+    def __init__(self, manager):
         self.manager = manager
-        self.type = type_
-        assert self.type in ("application", "admin")
 
     @property
     def cert_file(self):
-        return f"/etc/certs/client_api_{self.type}.crt"
+        return "/etc/certs/client_api.crt"
 
     @property
     def key_file(self):
-        return f"/etc/certs/client_api_{self.type}.key"
+        return "/etc/certs/client_api.key"
 
     @property
     def keystore_file(self):
-        return f"/etc/certs/client_api_{self.type}.keystore"
+        return "/etc/certs/client_api.jks"
 
     @property
     def cert_cn(self):
-        conn_type = self.type.upper()
-
-        # backward-compat with 4.1.x
-        if f"{conn_type}_KEYSTORE_CN" in os.environ:
-            return os.environ.get(f"{conn_type}_KEYSTORE_CN", "localhost")
-        return os.environ.get(f"CN_CLIENT_API_{conn_type}_CERT_CN", "localhost")
+        # CN_CLIENT_API_APPLICATION_CERT_CN is deprecated, but we keep it as backward-compat
+        legacy_cn = os.environ.get("CN_CLIENT_API_APPLICATION_CERT_CN", "")
+        if legacy_cn:
+            return legacy_cn
+        return os.environ.get("CN_CLIENT_API_CERT_CN", "localhost")
 
     def sync_x509(self):
-        cert = self.manager.secret.get(f"client_api_{self.type}_cert")
-        key = self.manager.secret.get(f"client_api_{self.type}_key")
+        cert = self.manager.secret.get("client_api_cert")
+        key = self.manager.secret.get("client_api_key")
 
         if cert and key:
-            self.manager.secret.to_file(f"client_api_{self.type}_cert", self.cert_file)
-            self.manager.secret.to_file(f"client_api_{self.type}_key", self.key_file)
+            self.manager.secret.to_file("client_api_cert", self.cert_file)
+            self.manager.secret.to_file("client_api_key", self.key_file)
         else:
             generate_ssl_certkey(
-                f"client_api_{self.type}",
+                "client_api",
                 self.manager.config.get("admin_email"),
                 self.manager.config.get("hostname"),
                 self.manager.config.get("orgName"),
@@ -98,88 +100,34 @@ class Connector:
                 extra_dns=[self.cert_cn],
             )
             # save cert and key to secrets for later use
-            self.manager.secret.from_file(f"client_api_{self.type}_cert", self.cert_file)
-            self.manager.secret.from_file(f"client_api_{self.type}_key", self.key_file)
+            self.manager.secret.from_file("client_api_cert", self.cert_file)
+            self.manager.secret.from_file("client_api_key", self.key_file)
 
     def get_keystore_password(self):
-        password = manager.secret.get(f"client_api_{self.type}_keystore_password")
+        password = manager.secret.get("client_api_keystore_password")
 
         if not password:
             password = get_random_chars()
-            manager.secret.set(f"client_api_{self.type}_keystore_password", password)
+            manager.secret.set("client_api_keystore_password", password)
         return password
 
     def sync_keystore(self):
-        jks = self.manager.secret.get(f"client_api_{self.type}_jks_base64")
+        jks = self.manager.secret.get("client_api_jks_base64")
 
         if jks:
             self.manager.secret.to_file(
-                f"client_api_{self.type}_jks_base64", self.keystore_file, decode=True, binary_mode=True,
+                "client_api_jks_base64", self.keystore_file, decode=True, binary_mode=True,
             )
         else:
             generate_keystore(self.cert_file, self.key_file, self.keystore_file, self.get_keystore_password())
             # save keystore to secrets for later use
             self.manager.secret.from_file(
-                f"client_api_{self.type}_jks_base64", self.keystore_file, encode=True, binary_mode=True,
+                "client_api_jks_base64", self.keystore_file, encode=True, binary_mode=True,
             )
 
     def sync(self):
         self.sync_x509()
         self.sync_keystore()
-
-
-def render_client_api_config():
-    with open("/app/templates/client-api-server.yml.tmpl") as f:
-        data = safe_load(f.read())
-
-    persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "ldap")
-    conn = f"jans-{persistence_type}.properties"
-
-    data["storage"] = "jans_server_configuration"
-    data["storage_configuration"] = {
-        "baseDn": "o=jans",
-        "type": "/etc/jans/conf/jans.properties",
-        "salt": "/etc/jans/conf/salt",
-        "connection": f"/etc/jans/conf/{conn}",
-    }
-
-    app_connector = Connector(manager, "application")
-    app_connector.sync()
-    admin_connector = Connector(manager, "admin")
-    admin_connector.sync()
-
-    data["server"]["applicationConnectors"][0]["keyStorePassword"] = app_connector.get_keystore_password()
-    data["server"]["applicationConnectors"][0]["keyStorePath"] = app_connector.keystore_file
-    data["server"]["adminConnectors"][0]["keyStorePassword"] = admin_connector.get_keystore_password()
-    data["server"]["adminConnectors"][0]["keyStorePath"] = admin_connector.keystore_file
-
-    ip_addresses = os.environ.get("CN_CLIENT_API_BIND_IP_ADDRESSES", "*")
-    data["bind_ip_addresses"] = [
-        addr.strip()
-        for addr in ip_addresses.split(",")
-        if addr
-    ]
-
-    log_config = configure_logging()
-    data["logging"]["loggers"]["io.jans"] = log_config["client_api_log_level"]
-
-    if log_config["client_api_log_target"] == "FILE":
-        data["logging"]["appenders"] = [
-            {
-                "type": "file",
-                "threshold": log_config["client_api_log_level"],
-                "logFormat": "%-6level [%d{HH:mm:ss.SSS}] [%t] %logger{5} - %X{code} %msg %n",
-                "currentLogFilename": "/opt/client-api/logs/client-api.log",
-                "archivedLogFilenamePattern": "/opt/client-api/logs/client-api-%d{yyyy-MM-dd}-%i.log.gz",
-                "archivedFileCount": 7,
-                "timeZone": "UTC",
-                "maxFileSize": "10MB",
-            },
-        ]
-
-    # write config
-    with open("/opt/client-api/conf/client-api-server.yml", "w") as f:
-        f.write(safe_dump(data))
 
 
 def main():
@@ -188,7 +136,7 @@ def main():
     render_salt(manager, "/app/templates/salt.tmpl", "/etc/jans/conf/salt")
     render_base_properties("/app/templates/jans.properties.tmpl", "/etc/jans/conf/jans.properties")
 
-    mapper = PersistencMapper()
+    mapper = PersistenceMapper()
     persistence_groups = mapper.groups()
 
     if persistence_type == "hybrid":
@@ -226,8 +174,15 @@ def main():
 
     get_web_cert()
 
-    # if not os.path.isfile("/opt/client-api/client-api-server.yml"):
-    render_client_api_config()
+    modify_jetty_xml()
+    modify_webdefault_xml()
+    configure_logging()
+
+    connector = Connector(manager)
+    connector.sync()
+
+    persistence_setup = PersistenceSetup(manager, connector)
+    persistence_setup.import_ldif_files()
 
 
 def configure_logging():
@@ -235,6 +190,14 @@ def configure_logging():
     config = {
         "client_api_log_target": "STDOUT",
         "client_api_log_level": "INFO",
+        "persistence_log_target": "FILE",
+        "persistence_log_level": "INFO",
+        "persistence_duration_log_target": "FILE",
+        "persistence_duration_log_level": "INFO",
+        "ldap_stats_log_target": "FILE",
+        "ldap_stats_log_level": "INFO",
+        "script_log_target": "FILE",
+        "script_log_level": "INFO"
     }
 
     # pre-populate custom config; format is JSON string of ``dict``
@@ -270,8 +233,136 @@ def configure_logging():
         # update the config
         config[k] = v
 
-    # finalize
-    return config
+    # mapping between the ``log_target`` value and their appenders
+    file_aliases = {
+        "client_api_log_target": "FILE",
+        "persistence_log_target": "JANS_CLIENTAPI_PERSISTENCE_FILE",
+        "persistence_duration_log_target": "JANS_CLIENTAPI_PERSISTENCE_DURATION_FILE",
+        "ldap_stats_log_target": "JANS_CLIENTAPI_PERSISTENCE_LDAP_STATISTICS_FILE",
+        "script_log_target": "JANS_CLIENTAPI_SCRIPT_LOG_FILE",
+    }
+
+    for key, value in config.items():
+        if not key.endswith("_target"):
+            continue
+
+        if value == "STDOUT":
+            config[key] = "Console"
+        else:
+            config[key] = file_aliases[key]
+
+    logfile = "/opt/jans/jetty/jans-client-api/resources/log4j2.xml"
+    with open(logfile) as f:
+        txt = f.read()
+
+    tmpl = Template(txt)
+    with open(logfile, "w") as f:
+        f.write(tmpl.safe_substitute(config))
+
+
+def modify_jetty_xml():
+    fn = "/opt/jetty/etc/jetty.xml"
+    with open(fn) as f:
+        txt = f.read()
+
+    # disable contexts
+    updates = re.sub(
+        r'<New id="DefaultHandler" class="org.eclipse.jetty.server.handler.DefaultHandler"/>',
+        r'<New id="DefaultHandler" class="org.eclipse.jetty.server.handler.DefaultHandler">\n\t\t\t\t <Set name="showContexts">false</Set>\n\t\t\t </New>',
+        txt,
+        flags=re.DOTALL | re.M,
+    )
+
+    with open(fn, "w") as f:
+        f.write(updates)
+
+
+def modify_webdefault_xml():
+    fn = "/opt/jetty/etc/webdefault.xml"
+    with open(fn) as f:
+        txt = f.read()
+
+    # disable dirAllowed
+    updates = re.sub(
+        r'(<param-name>dirAllowed</param-name>)(\s*)(<param-value>)true(</param-value>)',
+        r'\1\2\3false\4',
+        txt,
+        flags=re.DOTALL | re.M,
+    )
+
+    with open(fn, "w") as f:
+        f.write(updates)
+
+
+class PersistenceSetup:
+    def __init__(self, manager, connector):
+        self.manager = manager
+        self.connector = connector
+
+        client_classes = {
+            "ldap": LdapClient,
+            "couchbase": CouchbaseClient,
+            "spanner": SpannerClient,
+            "sql": SqlClient,
+        }
+
+        # determine persistence type
+        mapper = PersistenceMapper()
+        self.persistence_type = mapper.mapping["default"]
+
+        # determine persistence client
+        client_cls = client_classes.get(self.persistence_type)
+        self.client = client_cls(manager)
+
+    def get_dynamic_conf(self, ctx):
+        with open("/app/templates/jans-client-api/dynamic-conf.json") as f:
+            txt = f.read() % ctx
+
+        conf = json.loads(txt)
+
+        ip_addresses = os.environ.get("CN_CLIENT_API_BIND_IP_ADDRESSES", "*")
+        conf["bindIpAddresses"] = [
+            addr.strip()
+            for addr in ip_addresses.split(",")
+            if addr
+        ]
+
+        persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "ldap")
+        conf["storageConfiguration"] = {
+            "baseDn": "o=jans",
+            "type": "/etc/jans/conf/jans.properties",
+            "salt": "/etc/jans/conf/salt",
+            "connection": f"/etc/jans/conf/jans-{persistence_type}.properties",
+        }
+
+        # TODO: change loggingLevel?
+        return conf
+
+    @cached_property
+    def ctx(self):
+        ctx = {
+            "client_api_keystore_fn": self.connector.keystore_file,
+            "client_api_keystore_pw": self.connector.get_keystore_password(),
+            "client_api_crypto_provider_fn": "/etc/certs/client-api-jwks.keystore",
+            "client_api_storage_type": "jans_server_configuration",
+        }
+
+        dynamic_conf = json.dumps(self.get_dynamic_conf(ctx))
+        ctx["client_api_dynamic_conf_base64"] = generate_base64_contents(dynamic_conf)
+        return ctx
+
+    @cached_property
+    def ldif_files(self):
+        filenames = ["configuration.ldif"]
+        return [
+            f"/app/templates/jans-client-api/{filename}"
+            for filename in filenames
+        ]
+
+    def import_ldif_files(self):
+        for file_ in self.ldif_files:
+            logger.info(f"Importing {file_}")
+            self.client.create_from_ldif(file_, self.ctx)
 
 
 if __name__ == "__main__":
