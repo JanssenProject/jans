@@ -117,7 +117,7 @@ public class UserResource extends BaseResource {
         logger.debug("Create  user:{}", user);
 
         // checking mandatory attributes
-        checkMissingAttributes(user);
+        checkMissingAttributes(user,null);
 
         user = userSrv.addUser(user, true);
         logger.debug("User created {}", user);
@@ -145,7 +145,8 @@ public class UserResource extends BaseResource {
         logger.debug("Create  user:{}", user);
 
         // checking mandatory attributes
-        checkMissingAttributes(user);
+        List<String> excludeAttributes = List.of(USER_PWD);
+        checkMissingAttributes(user, excludeAttributes);
 
         user = userSrv.updateUser(user);
         logger.debug("Updated user:{}", user);
@@ -232,9 +233,9 @@ public class UserResource extends BaseResource {
         return userSrv.excludeAttributes(user, userSrv.getUserExclusionAttributesAsString());
     }
 
-    private void checkMissingAttributes(User user)
+    private void checkMissingAttributes(User user, List<String> excludeAttributes)
             throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        String missingAttributes = userSrv.checkMandatoryFields(user);
+        String missingAttributes = userSrv.checkMandatoryFields(user,excludeAttributes);
         logger.debug("missingAttributes:{}", missingAttributes);
 
         if (StringHelper.isEmpty(missingAttributes)) {
