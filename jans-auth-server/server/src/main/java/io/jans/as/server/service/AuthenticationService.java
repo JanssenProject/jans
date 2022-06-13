@@ -546,11 +546,11 @@ public class AuthenticationService {
     private boolean checkUserStatus(User user) {
         CustomObjectAttribute userStatus = userService.getCustomAttribute(user, "jansStatus");
 
-        if ((userStatus != null) && GluuStatus.ACTIVE.equals(GluuStatus.getByValue(StringHelper.toString(userStatus.getValue())))) {
+        if ((userStatus != null) && GluuStatus.ACTIVE.getValue().equalsIgnoreCase(StringHelper.toString(userStatus.getValue()))) {
             return true;
         }
 
-        log.warn("User '{}' was disabled", user.getUserId());
+        log.warn("User '{}' is disabled", user.getUserId());
         return false;
     }
 
