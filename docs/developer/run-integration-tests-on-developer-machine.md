@@ -4,11 +4,15 @@ In this guide, we will look at steps to run the Janssen integration test suite a
 
 ## Table of Content
 
+- Component setup
 - Configure the Janssen server for tests
 - Configure developer workspace
 - Run tests
 
-### Configure the Janssen server for tests
+### Component Setup
+
+![Component Diagram](../assets/developer/images/image-run-integration-test-from-workspace-06122022.png)
+
 
 To run Janssen integration test suite, we need a Janssen server installed. Janssen server can be installed on many different platforms, and steps mentioned in this guide are applicable to most of these platforms with few platform specific tweaks that may be required. 
 
@@ -18,12 +22,9 @@ To run Janssen integration test suite, we need a Janssen server installed. Janss
   
 - Install Janssen: 
 
-  Install the Janssen server using `Dynamic download` method described in [this](https://github.com/JanssenProject/jans/wiki#janssen-installation) guide. Make a note of `host name` that you assign to the Janssen server during the installation. For the purpose of this guide, the Janssen host name would be `janssen2.op.io`
+  Install the Janssen server using one of the methods described in [this](https://github.com/JanssenProject/jans/wiki#janssen-installation) guide. Make a note of the `host name` that you assign to the Janssen server during the installation. For the purpose of this guide, the Janssen host name would be `janssen2.op.io`
 
-#### Component Setup
-
-![Component Diagram](../assets/developer/images/image-run-integration-test-from-workspace-06122022.png)
-
+### Configure the Janssen server for tests
 
 Once Janssen server up and running in a local VM, follow the steps below:
 - Add `<IP> <host name>` pair to the developer machine's host name resolution file (i.e for Windows it would be `c:\windows\system32\drivers\etc\hosts` and for Ubuntu it would be `/etc/hosts`). `<host name>` is name of the Janssen host as assigned during installation.
@@ -71,3 +72,6 @@ Once Janssen server up and running in a local VM, follow the steps below:
   ```
   
   This acertains that the Janssen server running inside local VM is healthy and also accessible from developer's machine.
+
+### Configure developer workspace
+
