@@ -51,16 +51,6 @@ questions:
     description: "Client API CommonName value for certificate subject"
     type: string
     label: Client API certificate CommonName (CN)
-  - variable: config.configmap.cnClientApiApplicationCertCn
-    default: "client-api"
-    description: "Client API application keystore name (deprecated in favor of config.configmap.cnClientApiCertCn)"
-    type: string
-    label: Client API application keystore name
-  - variable: config.configmap.cnClientApiAdminCertCn
-    default: "client-api"
-    description: "Client API admin keystore name (deprecated)"
-    type: string
-    label: Client API admin keystore name
 
 # ======================
 # Test environment group

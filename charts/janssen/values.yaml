@@ -229,10 +229,6 @@ config:
     cnSqldbUserPassword: Test1234#
     # -- Cache type. `NATIVE_PERSISTENCE`, `REDIS`. or `IN_MEMORY`. Defaults to `NATIVE_PERSISTENCE` .
     cnCacheType: NATIVE_PERSISTENCE
-    # -- Client-api OAuth client admin certificate common name. This should be left to the default value client-api (deprecated) .
-    cnClientApiAdminCertCn: client-api
-    # -- Client-api OAuth client application certificate common name. This should be left to the default value client-api (deprecated in favor of cnClientApiCertCn).
-    cnClientApiApplicationCertCn: client-api
     # -- Client-api OAuth certificate common name. This should be left to the default value client-api.
     cnClientApiCertCn: client-api
     # -- Client-api bind address. This limits what ip ranges can access the client-api. This should be left as * and controlled by a NetworkPolicy
@@ -569,6 +565,22 @@ global:
       clientApiLogTarget: "STDOUT"
       # -- client-api.log level
       clientApiLogLevel: "INFO"
+      # -- client-api_persistence.log target
+      persistenceLogTarget: "FILE"
+      # -- client-api_persistence.log level
+      persistenceLogLevel: "INFO"
+      # -- client-api_persistence_duration.log target
+      persistenceDurationLogTarget: "FILE"
+      # -- client-api_persistence_duration.log level
+      persistenceDurationLogLevel: "INFO"
+      # -- client-api_persistence_ldap_statistics.log target
+      ldapStatsLogTarget: "FILE"
+      # -- client-api_persistence_ldap_statistics.log level
+      ldapStatsLogLevel: "INFO"
+      # -- client-api_script.log target
+      scriptLogTarget: "FILE"
+      # -- client-api_script.log level
+      scriptLogLevel: "INFO"
   cloud:
     # -- Boolean flag if enabled will strip resources requests and limits from all services.
     testEnviroment: false
