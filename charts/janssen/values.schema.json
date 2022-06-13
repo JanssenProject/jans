@@ -78,13 +78,8 @@
               "type": "string",
               "pattern": "^(NATIVE_PERSISTENCE|REDIS|IN_MEMORY)$"
             },
-            "cnClientApiAdminCertCn": {
-              "description": "Client-api OAuth client admin certificate common name. This should be left to the default value client-api",
-              "type": "string",
-              "pattern": "^[a-z-]+$"
-            },
-            "cnClientApiApplicationCertCn": {
-              "description": "Client-api OAuth client application certificate common name. This should be left to the default value client-api",
+            "cnClientApiCertCn": {
+              "description": "Client-api OAuth certificate common name. This should be left to the default value client-api",
               "type": "string",
               "pattern": "^[a-z-]+$"
             },
