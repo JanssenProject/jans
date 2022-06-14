@@ -47,7 +47,11 @@ function _flowCall(flowName, basePath, urlOverrides, args) {
     let p = _scriptUtils.prepareSubflow(flowName, basePath, urlOverrides)
     let params = args.map(_scan)
     params.splice(0, 0, p.second)
-    let result = p.first.apply(null, params)
+
+    let f = p.first
+    //Nullify p to avoid serializing a Java Pair in the next RRF call
+    p = null
+    let result = f.apply(null, params)
 
     _scriptUtils.closeSubflow()
     return result
