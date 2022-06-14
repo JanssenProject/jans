@@ -1,5 +1,4 @@
-<#ftl output_format="HTML">
-<#import "template.ftl" as main>
+<#import "template.ftlh" as main>
 <@main.root>
 
     <h1 class="fs-2">An unexpected error ocurred:</h1>

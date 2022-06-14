@@ -20,7 +20,7 @@ public class Flow extends ProtoFlow  {
     
     @JsonObject
     @AttributeName(name = ATTR_NAMES.META)
-    private FlowMetadata metadata;
+    private FlowMetadata metadata = new FlowMetadata();
     
     @AttributeName(name = "jansScr")
     private String source;

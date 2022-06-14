@@ -1,4 +1,3 @@
-<#ftl output_format="HTML">
 <#macro root pageTitle="">
 
 <!DOCTYPE html>

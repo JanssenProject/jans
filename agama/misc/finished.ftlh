@@ -1,5 +1,4 @@
-<#ftl output_format="HTML">
-<#import "template.ftl" as main>
+<#import "template.ftlh" as main>
 
 <@main.root pageTitle=success?then("Redirecting you...", "There was an error :(")>
     <#if success>
