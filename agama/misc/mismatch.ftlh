@@ -1,5 +1,4 @@
-<#ftl output_format="HTML">
-<#import "template.ftl" as main>
+<#import "template.ftlh" as main>
 <@main.root>
 
     <#if flowName??>
