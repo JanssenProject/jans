@@ -209,7 +209,7 @@ public class FlowService {
         //before the unauthenticated unused time
         if (System.currentTimeMillis() + TIMEOUT_SKEW > flstatus.getFinishBefore()) {
             throw new FlowTimeoutException("You have exceeded the amount of time required " + 
-                    "to complete your authentication process", flstatus.getQname());
+                    "to complete your authentication", flstatus.getQname());
             //"Your authentication attempt has run for more than " + time + " seconds"
         }
 

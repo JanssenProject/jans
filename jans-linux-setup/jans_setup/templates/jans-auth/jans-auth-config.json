@@ -452,13 +452,12 @@
         "scriptsPath": "/scripts",
         "serializerType": "KRYO",
         "maxItemsLoggedInCollections": 3,
-        "pageMismatchErrorPage": "mismatch.ftl",
-        "interruptionErrorPage": "timeout.ftl",
-        "crashErrorPage": "crash.ftl",
-        "finishedFlowPage": "finished.ftl",    
+        "pageMismatchErrorPage": "mismatch.ftlh",
+        "interruptionErrorPage": "timeout.ftlh",
+        "crashErrorPage": "crash.ftlh",
+        "finishedFlowPage": "finished.ftlh",
         "bridgeScriptPage": "agama.xhtml",
         "defaultResponseHeaders": {
-            "Content-Type": "text/html",
             "Expires": "0"
         }
     }
