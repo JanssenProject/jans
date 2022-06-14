@@ -38,8 +38,7 @@ public class EngineConfig {
     private String bridgeScriptPage = "agama.xhtml";
     
     private Map<String, String> defaultResponseHeaders = Stream.of(
-                  new Pair<>(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_HTML)
-                , new Pair<>(HttpHeaders.EXPIRES, "0")
+                  new Pair<>(HttpHeaders.EXPIRES, "0")
                 //, new Pair<>(HttpHeaders.CACHE_CONTROL, "no-cache")
                 //, new Pair<>(HttpHeaders.CACHE_CONTROL, "no-store")
         ).collect(Collectors.toMap(Pair::getFirst, Pair::getSecond));
