@@ -6,12 +6,15 @@
 
 package io.jans.util;
 
+import java.io.Serializable;
+
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 26/11/2012
  */
+public class Pair<A, B> implements Serializable {
 
-public class Pair<A, B> {
+    private static final long serialVersionUID = 8287836230637556740L;
 
     private A first;
     private B second;
