@@ -261,6 +261,10 @@
     "claimsParameterSupported":false,
     "requestParameterSupported":true,
     "requestUriParameterSupported":true,
+    "requestUriBlockList": [
+        "localhost",
+        "127.0.0.1"
+    ],
     "requireRequestUriRegistration":false,
     "allowPostLogoutRedirectWithoutValidation":false,
     "introspectionAccessTokenMustHaveUmaProtectionScope":false,
