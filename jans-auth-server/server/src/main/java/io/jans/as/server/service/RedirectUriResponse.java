@@ -54,6 +54,10 @@ public class RedirectUriResponse {
         this.state = state;
     }
 
+    public String getState() {
+        return state;
+    }
+
     public Response.ResponseBuilder createErrorBuilder(IErrorType errorType) {
         redirectUri.parseQueryString(errorFactory.getErrorAsQueryString(errorType, state));
         return RedirectUtil.getRedirectResponseBuilder(redirectUri, httpRequest);
