@@ -4164,6 +4164,11 @@ components:
         requestUriParameterSupported:
           type: boolean
           description: Boolean value specifying whether the OP supports use of the request_uri parameter.
+        requestUriBlockList:
+          type: array
+          description: Block list for requestUri that can come to Authorization Endpoint (e.g. "localhost")
+          items:
+            type: string
         requestUriHashVerificationEnabled:
           type: boolean
           description: Boolean value specifying whether the OP supports use of the request_uri hash verification.
