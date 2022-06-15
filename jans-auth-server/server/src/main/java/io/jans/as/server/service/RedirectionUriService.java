@@ -26,6 +26,8 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.core.Response;
+import org.slf4j.LoggerFactory;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,8 +41,7 @@ import java.util.Set;
 @Named
 public class RedirectionUriService {
 
-    @Inject
-    private Logger log;
+    private static final Logger log = LoggerFactory.getLogger(RedirectionUriService.class);
 
     @Inject
     private ClientService clientService;
@@ -138,7 +139,7 @@ public class RedirectionUriService {
         return null;
     }
 
-    public boolean isUriEqual(String redirectionUri, String[] redirectUris) {
+    public static boolean isUriEqual(String redirectionUri, String[] redirectUris) {
         final String redirectUriWithoutParams = uriWithoutParams(redirectionUri);
 
         for (String uri : redirectUris) {
