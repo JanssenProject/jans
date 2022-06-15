@@ -166,7 +166,7 @@ jobs:
           mv jans-cli.pyz jans-cli-linux-X86-64.pyz
           sha256sum jans-cli-linux-X86-64.pyz > jans-cli-linux-X86-64.pyz.sha256sum
     - name: Set up Python 3.6
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v4
       with:
         python-version: 3.6
     - name: Build with Ubuntu

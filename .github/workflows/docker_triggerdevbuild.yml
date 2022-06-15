@@ -22,7 +22,7 @@ jobs:
           git_commit_gpgsign: true
 
       - name: Setup Python 3.7
-        uses: actions/setup-python@v2.3.2
+        uses: actions/setup-python@v4
         with:
           python-version: 3.7
 
