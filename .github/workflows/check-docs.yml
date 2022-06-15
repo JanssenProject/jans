@@ -1,0 +1,50 @@
+name: check-docs
+on:
+  workflow_dispatch:
+  pull_request:
+    types:
+      - opened
+      - edited
+    paths:
+      - 'docs/**'
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          
+      - name: Verify Changed files
+        uses: tj-actions/verify-changed-files@v9.2
+        id: verify-changed-files
+        with:
+          files: |
+             docs
+
+      - name: Check output if changes exist
+        if: steps.verify-changed-files.outputs.files_changed == 'true'
+        run: |
+          echo "Changes exist"
+          exit 0
+
+      - name: Check output if there are no changes
+        if: steps.verify-changed-files.outputs.files_changed == 'false'
+        run: |
+          echo "No changes"
+          exit 1 
+
+      - name: Get PR Commits
+        id: 'get-pr-commits'
+        uses: tim-actions/get-pr-commits@master
+        with:
+          token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+
+      - name: Check commit message
+        uses: tim-actions/commit-message-checker-with-regex@v0.3.1
+        with:
+          commits: ${{ steps.get-pr-commits.outputs.commits }}
+          pattern: '^docs:$'
+          error: 'Empty commit'          
