@@ -20,6 +20,7 @@ import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
 import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
 import io.jans.as.model.crypto.signature.AlgorithmFamily;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwe.Jwe;
 import io.jans.as.model.jwe.JweDecrypterImpl;
@@ -28,11 +29,14 @@ import io.jans.as.model.jwt.JwtHeader;
 import io.jans.as.model.jwt.JwtHeaderName;
 import io.jans.as.model.util.Base64Util;
 import io.jans.as.model.util.JwtUtil;
+import io.jans.as.model.util.URLPatternList;
 import io.jans.as.model.util.Util;
 import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.RedirectUriResponse;
+import io.jans.as.server.service.RedirectionUriService;
 import io.jans.service.cdi.util.CdiUtil;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
@@ -509,6 +513,7 @@ public class JwtAuthorizationRequest {
     }
 
     public static JwtAuthorizationRequest createJwtRequest(String request, String requestUri, Client client, RedirectUriResponse redirectUriResponse, AbstractCryptoProvider cryptoProvider, AppConfiguration appConfiguration) {
+        validateRequestUri(requestUri, client, appConfiguration, redirectUriResponse.getState());
         final String requestFromClient = queryRequest(requestUri, redirectUriResponse, appConfiguration);
         if (StringUtils.isNotBlank(requestFromClient)) {
             request = requestFromClient;
@@ -570,6 +575,38 @@ public class JwtAuthorizationRequest {
         if (nbfDiff > SIXTY_MINUTES_AS_SECONDS) { // https://github.com/JanssenProject/jans-auth-server/issues/166
             log.error("nbf claim is more then 60 Minutes in the past, nbf: {}, nowSeconds: {}", nbf, nowSeconds);
             throw new InvalidJwtException("nbf claim is more then 60 in the past");
+        }
+    }
+
+    public static void validateRequestUri(String requestUri, Client client, AppConfiguration appConfiguration, String state) {
+        validateRequestUri(requestUri, client, appConfiguration, state, CdiUtil.bean(ErrorResponseFactory.class));
+    }
+
+    public static void validateRequestUri(String requestUri, Client client, AppConfiguration appConfiguration, String state, ErrorResponseFactory errorResponseFactory) {
+        if (StringUtils.isBlank(requestUri)) {
+            return; // nothing to validate
+        }
+
+        // client.requestUris() - validation
+        if (ArrayUtils.isNotEmpty(client.getRequestUris()) && !RedirectionUriService.isUriEqual(requestUri, client.getRequestUris())) {
+            log.debug("request_uri is forbidden by client request uris.");
+            throw new WebApplicationException(Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST_URI, state, ""))
+                    .build());
+        }
+
+        // check block list
+        final List<String> blockList = appConfiguration.getRequestUriBlockList();
+        if (!blockList.isEmpty()) {
+            URLPatternList urlPatternList = new URLPatternList(blockList);
+            if (urlPatternList.isUrlListed(requestUri)) {
+                log.debug("request_uri is forbidden by requestUriBlackList configuration.");
+                throw new WebApplicationException(Response
+                        .status(Response.Status.BAD_REQUEST)
+                        .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST_URI, state, ""))
+                        .build());
+            }
         }
     }
 }
