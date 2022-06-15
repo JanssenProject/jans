@@ -1,10 +1,4 @@
-"""
-jans.pycloudlib.cli
-~~~~~~~~~~~~~~~~~~~
-
-This module contains helper for CLI.
-
-"""
+"""This module contains helper for CLI."""
 
 import click
 
@@ -16,8 +10,7 @@ from jans.pycloudlib.cli.encoding import decode_string
     context_settings={"help_option_names": ["-h", "--help"]}
 )
 def cli():  # pragma: no cover
-    """Entrypoint of CLI commands.
-    """
+    """Entrypoint of CLI commands."""
     pass
 
 

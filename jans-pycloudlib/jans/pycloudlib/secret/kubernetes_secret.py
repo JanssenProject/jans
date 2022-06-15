@@ -1,10 +1,4 @@
-"""
-jans.pycloudlib.secret.kubernetes_secret
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-This module contains secret adapter class to interact with
-Kubernetes Secret.
-"""
+"""This module contains secret adapter class to interact with Kubernetes Secret."""
 
 import base64
 import os
@@ -48,8 +42,7 @@ class KubernetesSecret(BaseSecret):
 
     @property
     def client(self):
-        """Lazy-loaded client to interact with Kubernetes API.
-        """
+        """Lazy-loaded client to interact with Kubernetes API."""
         if not self._client:
             if as_boolean(self.settings["CN_SECRET_KUBERNETES_USE_KUBE_CONFIG"]):
                 kubernetes.config.load_kube_config(self.kubeconfig_file)
@@ -61,16 +54,15 @@ class KubernetesSecret(BaseSecret):
     def get(self, key, default: Any = "") -> Any:
         """Get value based on given key.
 
-        :params key: Key name.
-        :params default: Default value if key is not exist.
+        :param key: Key name.
+        :param default: Default value if key is not exist.
         :returns: Value based on given key or default one.
         """
         result = self.all()
         return result.get(key) or default
 
     def _prepare_secret(self) -> None:
-        """Create a secret name if not exist.
-        """
+        """Create a secret name if not exist."""
         if not self.name_exists:
             try:
                 self.client.read_namespaced_secret(
@@ -100,8 +92,8 @@ class KubernetesSecret(BaseSecret):
     def set(self, key: str, value: Any) -> bool:
         """Set key with given value.
 
-        :params key: Key name.
-        :params value: Value of the key.
+        :param key: Key name.
+        :param value: Value of the key.
         :returns: A ``bool`` to mark whether config is set or not.
         """
         self._prepare_secret()
@@ -142,8 +134,8 @@ class KubernetesSecret(BaseSecret):
     def set_all(self, data: dict) -> bool:
         """Set all key-value pairs.
 
-        :params key: Key name.
-        :params value: Value of the key.
+        :param key: Key name.
+        :param value: Value of the key.
         :returns: A ``bool`` to mark whether config is set or not.
         """
         self._prepare_secret()

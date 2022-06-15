@@ -1,9 +1,4 @@
-"""
-jans.pycloudlib.config.consul_config
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-This module contains config adapter class to interact with Consul.
-"""
+"""This module contains config adapter class to interact with Consul."""
 
 import logging
 import os
@@ -22,7 +17,6 @@ logger = logging.getLogger(__name__)
 
 class ConsulConfig(BaseConfig):
     """This class interacts with Consul backend.
-
 
     The following environment variables are used to instantiate the client:
 
@@ -110,7 +104,7 @@ class ConsulConfig(BaseConfig):
         For example, given the namespace is ``jans``, prefix will be set as ``jans/config``
         and key ``random``, calling this method returns ``jans/config/random`` key.
 
-        :params key: Key name as relative path.
+        :param key: Key name as relative path.
         :returns: Absolute path to prefixed key.
         """
         return "".join([self.prefix, key])
@@ -121,7 +115,7 @@ class ConsulConfig(BaseConfig):
         For example, given the namespace is ``jans``, prefix will be set as ``jans/config``
         and an absolute path``jans/config/random``, calling this method returns ``random`` key.
 
-        :params key: Key name as relative path.
+        :param key: Key name as relative path.
         :returns: Relative path to key.
         """
         return key[len(self.prefix):]
@@ -129,8 +123,8 @@ class ConsulConfig(BaseConfig):
     def get(self, key: str, default: Any = "") -> Any:
         """Get value based on given key.
 
-        :params key: Key name.
-        :params default: Default value if key is not exist.
+        :param key: Key name.
+        :param default: Default value if key is not exist.
         :returns: Value based on given key or default one.
         """
         _, result = self.client.kv.get(self._merge_path(key))
@@ -142,8 +136,8 @@ class ConsulConfig(BaseConfig):
     def set(self, key: str, value: Any) -> bool:
         """Set key with given value.
 
-        :params key: Key name.
-        :params value: Value of the key.
+        :param key: Key name.
+        :param value: Value of the key.
         :returns: A ``bool`` to mark whether config is set or not.
         """
         return self.client.kv.put(self._merge_path(key), safe_value(value))
@@ -158,8 +152,8 @@ class ConsulConfig(BaseConfig):
     def _request_warning(self, scheme: str, verify: bool) -> None:
         """Emit warning about unverified request to unsecure Consul address.
 
-        :params scheme: Scheme of Consul address.
-        :params verify: Mark whether client needs to verify the address.
+        :param scheme: Scheme of Consul address.
+        :param verify: Mark whether client needs to verify the address.
         """
         if scheme == "https" and verify is False:
             import urllib3
@@ -173,7 +167,7 @@ class ConsulConfig(BaseConfig):
     def _token_from_file(self, path) -> str:
         """Get the token string from a path.
 
-        :params path: Path to file contains token string.
+        :param path: Path to file contains token string.
         :returns: Token string.
         """
         if not os.path.isfile(path):
@@ -186,11 +180,11 @@ class ConsulConfig(BaseConfig):
     def _verify_cert(self, scheme, verify, cacert_file, cert_file, key_file) -> Tuple[Union[None, tuple], Union[bool, str]]:
         """Verify client cert and key.
 
-        :params scheme: Scheme of Consul address.
-        :params verify: Mark whether client needs to verify the address.
-        :params cacert_file: Path to CA cert file.
-        :params cert_file: Path to client's cert file.
-        :params key_file: Path to client's key file.
+        :param scheme: Scheme of Consul address.
+        :param verify: Mark whether client needs to verify the address.
+        :param cacert_file: Path to CA cert file.
+        :param cert_file: Path to client's cert file.
+        :param key_file: Path to client's key file.
         :returns: A pair of cert key files (if exist) and verification.
         """
         cert = None
@@ -209,10 +203,9 @@ class ConsulConfig(BaseConfig):
     def set_all(self, data: dict) -> bool:
         """Set key-value pairs.
 
-        :params data: Key-value pairs.
+        :param data: Key-value pairs.
         :returns: A ``bool`` to mark whether config is set or not.
         """
-
         for k, v in data.items():
             self.set(k, v)
         return True
@@ -222,7 +215,6 @@ class ConsulConfig(BaseConfig):
 
         :returns: A ``dict`` of key-value pairs (if any).
         """
-
         _, resultset = self.client.kv.get(self._merge_path(""), recurse=True)
 
         if not resultset:

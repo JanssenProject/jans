@@ -1,16 +1,10 @@
-"""
-jans.pycloudlib.persistence.hybrid
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-This module contains various helpers related to hybrid (LDAP + Couchbase) persistence.
-"""
+"""This module contains various helpers related to hybrid (LDAP + Couchbase) persistence."""
 
 from jans.pycloudlib.persistence.utils import PersistenceMapper
 
 
 def render_hybrid_properties(dest: str) -> None:
-    """Render file contains properties to connect to hybrid
-    persistence, i.e. ``/etc/jans/conf/jans-hybrid.properties``.
+    """Render file contains properties to connect to hybrid persistence.
 
     :param dest: Absolute path where generated file is located.
     """

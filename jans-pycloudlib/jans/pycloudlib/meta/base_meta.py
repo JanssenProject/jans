@@ -1,16 +1,12 @@
-"""
-jans.pycloudlib.meta.base_meta
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-This module contains base class for meta adapter.
-"""
+"""This module contains base class for meta adapter."""
 
 from typing import NoReturn
 
 
 class BaseMeta:
-    """Base class for meta client adapter. Must be sub-classed per
-    implementation details.
+    """Base class for meta client adapter.
+
+    Must be sub-classed per implementation details.
     """
 
     def get_containers(self, label) -> NoReturn:
