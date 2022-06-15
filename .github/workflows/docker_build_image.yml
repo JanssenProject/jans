@@ -126,7 +126,7 @@ jobs:
       # UPDATE BUILD DATES INSIDE THE DOCKERFILE BEFORE BUILDING THE DEV IMAGES TRIGGERED BY JENKINS
       - name: Setup Python 3.7
         if: github.event_name == 'workflow_dispatch'
-        uses: actions/setup-python@v2.3.2
+        uses: actions/setup-python@v4
         with:
           python-version: 3.7
 
