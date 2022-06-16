@@ -3,7 +3,7 @@
 set HOST [lindex $argv 0]
 set USERNAME [lindex $argv 1]
 set OPENIDINUM [lindex $argv 2] 
-set timeout 5
+set timeout 3
 set umaID 7a55c863-a86b-411b-b71a-0c6c37747a3f
 spawn $env(SHELL)
 match_max 100000
@@ -14,8 +14,8 @@ send -- "\r"
 expect -re "(.*)\n"
 
 #--no-suggestion
-send -- "/opt/jans/jans-cli/config-cli.py -use-test-client"
-expect -exact "/opt/jans/jans-cli/config-cli.py -use-test-client"
+send -- "/opt/jans/jans-cli/config-cli.py -use-test-client --no-suggestion"
+expect -exact "/opt/jans/jans-cli/config-cli.py -use-test-client --no-suggestion"
 send -- "\r"
 expect { "Selection:"
 		timeout {puts "timed out"; exit}
@@ -97,7 +97,9 @@ proc Attribute {} {
 		#set fid [open /tmp/capture.txt w]
 		#puts $fid $var
 
-		expect "Selection:"
+		expect { "Selection:"
+		timeout {puts "timed out"; exit}
+       			 }
 		send -- "b\r"
 		expect "Selection:"
 		send -- "3"
@@ -144,7 +146,9 @@ proc Attribute {} {
 		#expect { -re inum=(.*?) {send_error "inum not found" exit} }
 
 		send -- "\r"
-		expect "Selection:"
+		expect { "Selection:"
+			timeout {puts "timed out"; exit}
+       			 }
 		send -- "b\r"
 		expect "Selection:"
 		send -- "b\r"
@@ -207,12 +211,16 @@ proc cacheconfg {} {
 			send -- "n\r"
 			expect "Continue?"
 			send -- "y\r"
-			expect "33768"
+			expect { "33768"
+				timeout {puts "timed out"; exit}
+        			}
 			send -- "b\r"
 			expect "Selection:"
 			send -- "b\r"
-                        expect "Attribute" 
-			puts "cachecofig tests passed"
+                        expect { "Attribute" 
+				timeout {puts "timed out"; exit }
+        			}
+			puts "cacheconfig tests passed"
 		}
 proc  memcacheconf {} {
 			puts "Cache Configuration"
@@ -251,14 +259,16 @@ proc  memcacheconf {} {
 			send -- "n\r"
 			expect "Continue?"
 			send -- "y\r"
-			expect "33768"
+			expect { "33768"
+				timeout {puts "timed out"; exit}
+			        }
 			send -- "b\r"
 			expect "Selection:"
 			send -- "b\r"
                         expect "Selection:"
 			send -- "b\r"
 			expect "Attribute"
-			puts "memory cache config tests passed"
+			puts "memory-cache-configue tests passed"
 		}
 
 proc rediscacheconf {} {
@@ -298,7 +308,9 @@ proc rediscacheconf {} {
 				send -- "2\r"
                                 expect "Returns Redis cache configuration"
                                 send -- "1\r"
-                                expect "connectionTimeout"
+                                expect { "connectionTimeout"
+					timeout {puts "timed out"; exit}
+        				}
                                 send -- "33456\r"
                                 expect "Selection:"
                                 send -- "s\r"
@@ -311,7 +323,7 @@ proc rediscacheconf {} {
 				expect "Selection:"
 				send -- "b\r"
 				expect "Attribute"
-				puts "Redis cache config tests passed"
+				puts "redis-cache-configuration tests passed"
 			}
 
 proc  inmemcacheconf {} {
@@ -334,7 +346,9 @@ proc  inmemcacheconf {} {
 				send -- "s\r"
 				expect "Continue?"
 				send -- "y\r"
-				expect "80"
+				expect { "80"
+					timeout {puts "timed out"; exit}
+        				}
 				send -- "b\r"
 				expect "Selection:"
 				send -- "3\r"
@@ -349,14 +363,16 @@ proc  inmemcacheconf {} {
 				send -- "n\r"
 				expect "Continue?"
 				send -- "y\r"
-				expect "60"
+				expect { "60"
+					timeout {puts "timed out"; exit}
+				        }
 				send -- "b\r"
 				expect "Selection:"
 				send -- "b\r"
                                 expect "Selection:"
 				send -- "b\r"
 				expect "Attribute"
-				puts "in-Memory cache config tests passed"
+				puts "in-Memory-cache-configuration tests passed"
 			}
 			
 proc nativepersistcacheconf {} {
@@ -379,7 +395,9 @@ proc nativepersistcacheconf {} {
 					send -- "s\r"
 					expect "Continue?"
 					send -- "y\r"
-					expect "80"
+					expect { "80"
+						timeout {puts "timed out"; exit}
+					        }
 					send -- "b\r"
 					expect "Selection:"
 					send -- "3\r"
@@ -394,14 +412,16 @@ proc nativepersistcacheconf {} {
 					send -- "n\r"
 					expect "Continue?"
 					send -- "y\r"
-					expect "60"
+					expect { "60"
+						timeout {puts "timed out"; exit}
+					        }
 					send -- "b\r"
 					expect "Selection:"
 					send -- "b\r"
                                         expect "Selection:"
 					send -- "b\r"
 					expect "Attribute"
-					puts "in-Memory cache config tests passed"	
+					puts "native-persist-cacheconf tests passed"	
 				}
 proc Configuration {}	{
 				
@@ -429,14 +449,16 @@ proc Configuration {}	{
 				send -- "n\r"
 				expect "Continue?"
 				send -- "y\r"
-				expect "http://glubuntu1"
+				expect { "http://glubuntu1"
+					timeout {puts "timed out"; exit}
+       					 }
 				send -- "b\r"
 				expect "Selection:"
 				send -- "b\r"
                                 expect "Selection:"
 				send -- "b\r"
 				expect "Attribute"
-				puts "Configuration Properties cache config tests passed"
+				puts "Configuration-property tests passed"
 			}
 
 proc fido2conf {} {
@@ -461,7 +483,9 @@ proc fido2conf {} {
 					send -- "s\r"
 					expect "Continue?"
 					send -- "y\r"
-					expect "https://gluubuntu/jans-fido2/restv2"
+					expect  { "https://gluubuntu/jans-fido2/restv2"
+							timeout {puts "timed out"; exit}
+        					}
 					send -- "b\r"
 					expect "Selection:"
 					send -- "2\r"
@@ -473,12 +497,14 @@ proc fido2conf {} {
 					send -- "s\r"
 					expect "Continue?"
 					send -- "y\r"
-					expect "https://gluubuntu/jans-fido2/restv1"
+					expect { "https://gluubuntu/jans-fido2/restv1"
+						timeout {puts "timed out"; exit}
+       						 }
 					send -- "b\r"
 					expect "Selection:"
 					send -- "b\r"
 					expect "Attribute"
-					puts "fido2 configuration cache config tests passed"
+					puts "fido2-configuration tests passed"
 			}
 			
 proc smtpconf  {} {
@@ -503,7 +529,7 @@ proc smtpconf  {} {
 					send -- "\r"
 					expect "from_name"
 					send -- "manoj\r"
-				sleep 5
+					sleep 5
 					expect "from_email_address"
 					send  -- "manojsurya78@gmail.com\r"
 					expect "requires_authentication"
@@ -542,7 +568,7 @@ proc smtpconf  {} {
 					expect "Selection"
 					send -- "b\r"
                                         expect "Attribute"
-					puts "SMTP configuration tests passed"
+					puts "SMTP-configuration tests passed"
 
 		}
 proc Logging {} {
@@ -571,7 +597,7 @@ proc Logging {} {
                                         expect "Selection"
 					send -- "b\r"
 					expect "Attribute"
-					puts "Log configuration tests passed"
+					puts "Logconfiguration tests passed "
 			}
 			
 proc ldapconf {} {
@@ -660,7 +686,7 @@ proc ldapconf {} {
                                         expect "Selection"
 					send -- "b\r"
 					expect "Attribute"
-					puts "LDAP configuration tests passed"
+					puts "LDAP-configuration tests passed "
 			}
 proc cochbaseDbconf {}	{
 								
@@ -751,7 +777,7 @@ proc cochbaseDbconf {}	{
                                         expect "Selection"
 					send -- "b\r"
 					expect "Attribute"
-					puts "couchbase configuration tests passed"
+					puts "couchbaseDB-configuration tests passed "
 
 				}
 				
@@ -805,13 +831,20 @@ proc openIdconnet {OPENIDINUM}	{
 				send -- "${OPENIDINUM}\r"
 				expect "clientName"
 				send -- "18\r"
-				expect "contacts"
-				send -- "manojsurya78@gmail.com\r"
+				expect "displayName"
+				send "\r"	
+				expect "multiValued"
+				send "\r"
+				expect "values"
+                                send "jansApiclient\r"
+	
+				expect "Add CustomAttribute"
+				send -- "n\r"
 				expect "Selection:"
 				send -- "s\r"
 				expect "Continue?"
 				send -- "y\r"
-				expect "manojsurya78@gmail.com"
+				expect "jansApiclient"
 				send -- "b\r"
 				expect "OAuth: OpenID Connect - Clients"
 
@@ -854,7 +887,7 @@ proc openIdconnet {OPENIDINUM}	{
                                 expect "Selection"
 				send -- "b\r"
 				expect "Attribute"
-				puts "openID tests passed"
+				puts "openID-connnect tests passed "
 
 			}
 			
@@ -944,7 +977,7 @@ proc uma  {}	{
 		
 				send -- "b\r"
 				expect "Attribute"
-				puts "UMA tests passed"
+				puts "UMA tests passed "
 		}
 		
 #--------------------------------------------------------
@@ -982,7 +1015,6 @@ proc oauth {} {
 				send -- "C4F6\r"
 				expect "expirationDate"
 				send -- "4\r"
-				sleep 4
 				expect "deletable"
 				send -- "_true\r"
 				expect "Selection:"
@@ -1002,7 +1034,7 @@ proc oauth {} {
 				expect "OAuth"
 				send -- "b\r"
 				expect "Attribute"
-				puts "OAuth Scopes configuration tests passed"
+				puts "OAuth-Scopes tests passed "
 			}
 			
 proc stats {}	{
@@ -1015,7 +1047,7 @@ proc stats {}	{
 				expect "Provides server with basic statistic"
 				send -- "1\r"
 				expect "month:"
-				send -- "202205\r"
+				send -- "202206\r"
 				expect "format"
 				send -- "\r"
 				expect "monthly_active_users"
@@ -1025,7 +1057,7 @@ proc stats {}	{
                                 expect "Statistics"
 				send -- "b\r"
 				expect "Attribute"
-				puts "Statistics tests passed"
+				puts "Statistics tests passed "
 			}
 			
 proc  health {}	{
@@ -1053,7 +1085,7 @@ proc  health {}	{
 			send -- "b\r"
 			expect "Attribute"
 
-			puts "health tests passed"
+			puts "health tests passed "
 		}
 		
 proc serverstats  {}  {
@@ -1068,7 +1100,7 @@ proc serverstats  {}  {
 			expect "Server Stats"
 			send -- "b\r"
 			expect "Attribute"
-			puts "server Statistics tests passed"
+			puts "server-Statistics tests passed "
 		}
 		
 proc scimusrmgmt {}	{
@@ -1182,7 +1214,7 @@ proc scimusrmgmt {}	{
 				expect "SCIM - User Management"
 				send -- "b\r"
 				expect "Attribute"
-				puts "scim tests passed"
+				puts "scim-user-mgmt tests passed "
 			}
 
 proc orgConfiguration {} {
@@ -1211,7 +1243,7 @@ proc orgConfiguration {} {
 				expect "Organization Configuration"
 				send -- "b\r"
                                 expect "Attribute"
-				puts "Organization Configuration tests passed"
+				puts "Organization-Configuration tests passed "
 			
 
 			}
@@ -1230,7 +1262,7 @@ proc AuthServer {}     {
 			expect "Auth Server Health"
 			send -- "b\r"
                         expect "Attribute"
-			puts "Auth Server Health tests passed"
+			puts "AuthServerHealth tests passed "
 
 			}
 

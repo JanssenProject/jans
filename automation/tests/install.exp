@@ -15,30 +15,26 @@ expect -exact "curl https://raw.githubusercontent.com/JanssenProject/jans/main/j
 send -- "\r"
 expect -re "(.*)\n"
 send -- "python3 install.py --args=\"--cli-test-client\""
-expect -exact "python3 install.py --args=\"--cli-test-client\""
+expect "python3 install.py --args=\"--cli-test-client\""
 send -- "\r"
-if  { $expect_out(buffer) eq  "Do you want to install these now? \[Y\/n\]" }  {
-send -- "y\r"
-}
-
-if  { $expect_out(buffer) eq  "Install now? \[Y\/n\]" }  {
-send -- "y\r"
-}
-
-if  { $expect_out(buffer) eq  "Apache-2.0 license? \[N\|y\]" }  {
-send -- "y\r"
-}
+expect { 
+	"python3-ldap3. Install now?"  {send "Y\r"}
+	"Do you want to install these now?" {send "Y\r"} 
+	 "Install now? \[Y\/n\]" {send "Y\r"}
+	"RAM size" {send "Y\r"}
+	"free disk space" {send "Y\r"}
+	 "Proceed anyways?" {send "Y\r"}
+	"Apache-2.0 license?" {send "Y\r"}
+	}
 expect -re "(.*)\n"
-#expect "Proceed anyways? \[Y\|n\] "
-send -- "y\r"
+send "y\r"	
 
 expect -re "(.*)\n"
 send -- "y\r"
+
 expect -re "(.*)\n" 
-
 send -- "\r"
 expect -re "(.*)\n"
-
 send -- "\r"
 expect  -exact "\r
 Enter your city or locality : "
@@ -57,10 +53,12 @@ send -- "\r"
 expect "Enter Organization Name : "
 send -- "glu\r"
 expect "Enter email address for support at your organization : "
-send -- "manojsurya78@gmail.com"
+send -- "manojsurya78@gmail.com\r"
 expect  "manojsurya78@gmail.com"
 send -- "\r"
 expect " : "
+send -- "Admin@123"
+expect "Admin@123"
 send -- "\r"
 expect -exact "\r
 Chose Backend Type:\r
@@ -73,26 +71,30 @@ Chose Backend Type:\r
 Selection \[1\]: "
 send -- "1\r"
 expect -re "(.*)\n"
-send -- "Admin@123"
-expect -exact "Admin@123"
 send -- "\r"
 expect -re "(.*)\n"
 send -- "\r"
-expect -exact "\r
-Install Jans Auth Config Api? \[Yes\] : "
+
+expect "Install Jans Auth Config Api?" 
 send -- "\r"
-expect -exact "\r
-Install Scim Server? \[Yes\] : "
+
+expect "Install Scim Server?"
 send -- "\r"
-expect -exact "\r
-Install Fido2 Server? \[Yes\] : "
+
+expect "Install Fido2 Server?"
 send -- "\r"
-expect -exact "\r
-Install Eleven Server? \[No\] : "
+
+expect "Install Eleven Server?"
 send -- "\r"
-expect -exact "\r
-Proceed with these values \[Y|n\] "
-send -- "y\r"
+
+expect -re "(.*)\n"
+send -- "\r"
+
+expect -re "(.*)\n"
+send -- "\r"
+
+expect "Proceed with these values "
+send -- "\r"
 
 expect "Janssen Server installation successful\!"
 send -- "\r"
