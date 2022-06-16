@@ -1,9 +1,4 @@
-"""
-jans.pycloudlib.pki
-~~~~~~~~~~~~~~~~~~~
-
-This module contains various Public Key Infrastucture (PKI) helpers.
-"""
+"""This module contains various Public Key Infrastucture (PKI) helpers."""
 
 import os
 from datetime import datetime
@@ -23,7 +18,6 @@ def generate_private_key(filename):
 
     :param filename: Path to generated private key.
     """
-
     private_key = rsa.generate_private_key(
         public_exponent=65537, key_size=2048, backend=default_backend(),
     )
@@ -39,7 +33,7 @@ def generate_private_key(filename):
     return private_key
 
 
-def generate_public_key(filename, private_key, is_ca=False, add_san=False, add_key_usage=False, **kwargs):
+def generate_public_key(filename, private_key, is_ca=False, add_san=False, add_key_usage=False, **kwargs):  # noqa: D412
     """Generate public key (cert).
 
     :param filename: Path to generated public key.
@@ -47,7 +41,7 @@ def generate_public_key(filename, private_key, is_ca=False, add_san=False, add_k
     :param is_ca: Whether add constraint extension as CA.
     :param add_san: Whether to add SubjectAlternativeName extension.
     :param add_key_usage: Whether to add KeyUsage extension.
-    :param kwargs: Optional arguments.
+    :param kwargs: Keyword arguments.
 
     Keyword arguments:
 
@@ -61,7 +55,6 @@ def generate_public_key(filename, private_key, is_ca=False, add_san=False, add_k
     - ``extra_ips``: Additional IP addresses (added if ``add_san`` argument is set to ``True``).
     - ``valid_to``: Validity length in days.
     """
-
     valid_from = datetime.utcnow()
     valid_to = valid_from + timedelta(days=kwargs.get("valid_to", 365))
 
@@ -143,27 +136,26 @@ def generate_public_key(filename, private_key, is_ca=False, add_san=False, add_k
     return public_key
 
 
-def generate_csr(filename, private_key, add_san=False, add_key_usage=False, **kwargs):
+def generate_csr(filename, private_key, add_san=False, add_key_usage=False, **kwargs):  # noqa: D412
     """Generate a certificate signing request (CSR).
 
     :param filename: Path to generate CSR.
     :param private_key: An instance of PrivateKey object.
     :param add_san: Whether to add SubjectAlternativeName extension.
     :param add_key_usage: Whether to add KeyUsage extension.
-    :param kwargs: Optional arguments.
+    :param kwargs: Keyword arguments.
 
     Keyword arguments:
 
-        - ``email``: Email address for subject/issuer.
-        - ``hostname``: Hostname (common name) for subject/issuer.
-        - ``org_name``: Organization name for subject/issuer.
-        - ``country_code``: Country name in ISO format for subject/issuer.
-        - ``state``: State/province name for subject/issuer.
-        - ``city``: City/locality name for subject/issuer.
-        - ``extra_dns``: Additional DNS names (added if ``add_san`` argument is set to ``True``).
-        - ``extra_ips``: Additional IP addresses (added if ``add_san`` argument is set to ``True``).
+    - ``email``: Email address for subject/issuer.
+    - ``hostname``: Hostname (common name) for subject/issuer.
+    - ``org_name``: Organization name for subject/issuer.
+    - ``country_code``: Country name in ISO format for subject/issuer.
+    - ``state``: State/province name for subject/issuer.
+    - ``city``: City/locality name for subject/issuer.
+    - ``extra_dns``: Additional DNS names (added if ``add_san`` argument is set to ``True``).
+    - ``extra_ips``: Additional IP addresses (added if ``add_san`` argument is set to ``True``).
     """
-
     subject = x509.Name([
         x509.NameAttribute(NameOID.COUNTRY_NAME, kwargs.get("country_code")),
         x509.NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, kwargs.get("state")),
@@ -238,7 +230,6 @@ def sign_csr(filename, csr, ca_private_key, ca_public_key, **kwargs):
     :param ca_private_key: An instance of CA PrivateKey object.
     :param ca_public_key: An instance of CA Certificate object.
     """
-
     valid_from = datetime.utcnow()
     valid_to = valid_from + timedelta(days=kwargs.get("valid_to", 365))
 

@@ -1,9 +1,4 @@
-"""
-jans.pycloudlib.meta.kubernetes_meta
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-This module consists of class to interact with Kubernetes API.
-"""
+"""This module consists of class to interact with Kubernetes API."""
 
 import logging
 import os
@@ -21,12 +16,16 @@ logger = logging.getLogger(__name__)
 
 
 class KubernetesMeta(BaseMeta):
+    """A class to interact with a subset of Kubernetes APIs."""
+
     def __init__(self):
+        """Initialize kubernetes meta wrapper."""
         self._client = None
         self.kubeconfig_file = os.path.expanduser("~/.kube/config")
 
     @property
     def client(self):
+        """Get kubernetes client instance."""
         if not self._client:
             # config loading priority
             try:
@@ -115,7 +114,6 @@ class KubernetesMeta(BaseMeta):
         :params container: Container object.
         :params cmd: String of command.
         """
-
         return stream(
             self.client.connect_get_namespaced_pod_exec,
             container.metadata.name,
@@ -131,7 +129,7 @@ class KubernetesMeta(BaseMeta):
     def _get_main_container_name(self, container) -> str:
         """Get the pod's main container name.
 
-        :params container: Container object.
+        :param container: Container object.
         """
         name = ""
         for cntr in container.spec.containers:
