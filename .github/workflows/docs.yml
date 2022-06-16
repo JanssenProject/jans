@@ -53,17 +53,6 @@ jobs:
         with:
           fetch-depth: 0
           
-      - name: Verify Changed files
-        run: |
-          CHANGES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | cut -d/ -f1 | grep '^docs' | sort -u )
-          if [ -n "$CHANGES" ]; then 
-            echo "Changes exist"
-            exit 0
-          else
-            echo "No changes"
-            exit 1  
-          fi
-
       - name: Get PR Commits
         id: 'get-pr-commits'
         uses: tim-actions/get-pr-commits@master
@@ -75,4 +64,16 @@ jobs:
         with:
           commits: ${{ steps.get-pr-commits.outputs.commits }}
           pattern: '^docs:$'
-          error: 'Empty commit'             
+          error: 'Empty commit'            
+
+      - name: Verify Changed files
+        run: |
+          CHANGES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | cut -d/ -f1 | grep '^docs' | sort -u )
+          if [ -n "$CHANGES" ]; then
+            echo "Changes exist"
+            exit 0
+          else
+            echo "No changes"
+            exit 1
+          fi
+          
