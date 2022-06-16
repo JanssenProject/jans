@@ -55,7 +55,7 @@ RUN /opt/jython/bin/pip uninstall -y pip
 # ===========
 
 ENV CN_VERSION=1.0.1-SNAPSHOT
-ENV CN_BUILD_DATE='2022-06-06 08:14'
+ENV CN_BUILD_DATE='2022-06-16 08:14'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-server/${CN_VERSION}/jans-auth-server-${CN_VERSION}.war
 
 # Install Jans Auth
@@ -90,14 +90,14 @@ RUN wget -q https://jenkins.gluu.org/maven/org/gluu/casa-config/${CASA_CONFIG_VE
 # Casa external scripts
 # =====================
 
-ARG CASA_EXTRAS_VERSION=fe01bcb3d46311355b15a37b655253ca17997358
+ARG FLEX_SOURCE_VERSION=fe01bcb3d46311355b15a37b655253ca17997358
 ARG CASA_EXTRAS_DIR=casa/extras
 
 RUN mkdir -p /opt/jans/python/libs
 RUN git clone --filter blob:none --no-checkout https://github.com/GluuFederation/flex.git /tmp/flex \
     && cd /tmp/flex \
     && git sparse-checkout init --cone \
-    && git checkout ${CASA_EXTRAS_VERSION} \
+    && git checkout ${FLEX_SOURCE_VERSION} \
     && git sparse-checkout set ${CASA_EXTRAS_DIR} \
     && cd /opt/jans/python/libs \
     && cp /tmp/flex/${CASA_EXTRAS_DIR}/casa-external_* . \
@@ -111,14 +111,15 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/agama/fl \
     ${JETTY_BASE}/jans-auth/agama/ftl \
     ${JETTY_BASE}/jans-auth/agama/scripts
 
-ARG JANS_AGAMA_VERSION=6b23bfe19ef960039f76df4de167c159312dd930
+# janssenproject/jans SHA commit
+ARG JANS_SOURCE_VERSION=0f1a2e6761c0522acdfdab3d69adac5c8062e780
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the agama code
 RUN git clone --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
     && cd /tmp/jans \
     && git sparse-checkout init --cone \
-    && git checkout ${JANS_AGAMA_VERSION} \
+    && git checkout ${JANS_SOURCE_VERSION} \
     && git sparse-checkout add agama/misc
 
 RUN cp -R /tmp/jans/agama/misc/* ${JETTY_BASE}/jans-auth/agama/ \
