@@ -156,4 +156,4 @@ Afterwards, metrics can be scraped by Prometheus or accessed manually by making 
 i.e. `http://container:9093/metrics`.
 
 Note that Prometheus JMX exporter uses pre-defined config file (see `conf/prometheus-config.yaml`).
-To customize the config, mount custom config file to `/opt/prometheus/prometheus-config.yml` inside the container.
+To customize the config, mount custom config file to `/opt/prometheus/prometheus-config.yaml` inside the container.
