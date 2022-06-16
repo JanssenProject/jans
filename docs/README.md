@@ -133,7 +133,7 @@
     - Returning Group / Role User information
     - Social Login
       - Facebook
-      - Google
+      - [Google](user/auth-server/user-authentication/social-login/google-signin.md)
       - Apple
     - Registration
     - Password Expiration
@@ -206,7 +206,7 @@
 
 ### Integration Guide
   - Custom Web Development
-    - Protecting a website with mod_auth_openidc
+    - [Protecting a website with mod_auth_openidc]()
     - AppAuth iOS
     - AppAuth Android
     - AppAuth JS
@@ -340,7 +340,7 @@
 
 ## Developer
   - Interception Script Overview
-  - Testing / Debugging scripts
+  - [Testing / Debugging scripts](developer/interception-scripts-debug.md)
   - Web Flows
   - Set variables in Context for scripts / xhtml
   - Customization
