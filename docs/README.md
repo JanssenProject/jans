@@ -206,7 +206,7 @@
 
 ### Integration Guide
   - Custom Web Development
-    - [Protecting a website with mod_auth_openidc]()
+    - [Protecting a website with mod_auth_openidc](user/integration/custom-web-development/authn-with-apache-reverse-proxy.md)
     - AppAuth iOS
     - AppAuth Android
     - AppAuth JS
