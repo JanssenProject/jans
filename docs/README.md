@@ -2,10 +2,10 @@
 
 ## Governance
 
-- [Charter](charter.md)
-- [Testing](testing.md)
-- [Triage](triage.md)
-- [Copyright Notice](copyright-notices.md)
+- [Charter](governance/charter.md)
+- [Testing](governance/testing.md)
+- [Triage](governance/triage.md)
+- [Copyright Notice](governance/copyright-notices.md)
 
 ## User
 
@@ -137,7 +137,7 @@
       - Apple
     - Registration
     - Password Expiration
-    - Temporarirly locking or permanently disabling accounts
+    - Temporarily locking or permanently disabling accounts
     - Forgot Password
       - Email
       - SMS
@@ -228,13 +228,13 @@
     - Rancher
     - Rocket
     - NextCloud
-    - Wordpress
+    - WordPress
     - Magento
     - Teleport
     - Moodle
     - Drupal
   - SaaS provider
-    - Office365
+    - Office 365
     - Salesforce
     - Google
     - Zoom
@@ -331,7 +331,7 @@
   - PingID
   - Deduce
   - PrivacyIdea
-  - Vericlouds
+  - VeriClouds
   - Stytch
   - Transmit
   - 1Kosmos
@@ -385,7 +385,7 @@
       - jans-scim
   - CI-CD
       - Jenkins CI (Current)
-      - Github CI (Up coming)
+      - GitHub CI (Upcoming)
       - Release process
   - FAQ
 
