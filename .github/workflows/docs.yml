@@ -52,19 +52,17 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-          
-      - name: Get PR Commits
-        id: 'get-pr-commits'
-        uses: tim-actions/get-pr-commits@master
-        with:
-          token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
 
       - name: Check commit message
-        uses: tim-actions/commit-message-checker-with-regex@v0.3.1
-        with:
-          commits: ${{ steps.get-pr-commits.outputs.commits }}
-          pattern: '^docs:$'
-          error: 'Empty commit'            
+        run: |
+          MESSAGE=$(git log ${{ github.event.pull_request.head.sha }} ^origin --pretty=format:%s | grep "^docs:$")
+          if [ -n "$MESSAGE" ]; then
+            echo "Empty message exist"
+            exit 0
+          else
+            echo "No empty message"
+            exit 1
+          fi
 
       - name: Verify Changed files
         run: |
