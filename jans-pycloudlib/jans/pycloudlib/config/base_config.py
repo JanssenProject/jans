@@ -1,17 +1,13 @@
-"""
-jans.pycloudlib.config.base_config
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-This module contains base class for config adapter.
-"""
+"""This module contains base class for config adapter."""
 
 from typing import Any
 from typing import NoReturn
 
 
 class BaseConfig:
-    """Base class for config adapter. Must be sub-classed per
-    implementation details.
+    """Base class for config adapter.
+
+    Must be sub-classed per implementation details.
     """
 
     type = "config"

@@ -1,10 +1,4 @@
-"""
-jans.pycloudlib.config.kubernetes_config
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-This module contains config adapter class to interact with
-Kubernetes ConfigMap.
-"""
+"""This module contains config adapter class to interact with Kubernetes ConfigMap."""
 
 import os
 from typing import Any
@@ -50,8 +44,8 @@ class KubernetesConfig(BaseConfig):
     def get(self, key: str, default: Any = "") -> Any:
         """Get value based on given key.
 
-        :params key: Key name.
-        :params default: Default value if key is not exist.
+        :param key: Key name.
+        :param default: Default value if key is not exist.
         :returns: Value based on given key or default one.
         """
         result = self.all()
@@ -59,8 +53,7 @@ class KubernetesConfig(BaseConfig):
 
     @property
     def client(self):
-        """Lazy-loaded client to interact with Kubernetes API.
-        """
+        """Lazy-loaded client to interact with Kubernetes API."""
         if not self._client:
             if as_boolean(self.settings["CN_CONFIG_KUBERNETES_USE_KUBE_CONFIG"]):
                 kubernetes.config.load_kube_config(self.kubeconfig_file)
@@ -70,8 +63,7 @@ class KubernetesConfig(BaseConfig):
         return self._client
 
     def _prepare_configmap(self) -> None:
-        """Create a configmap name if not exist.
-        """
+        """Create a configmap name if not exist."""
         if not self.name_exists:
             try:
                 self.client.read_namespaced_config_map(
@@ -101,8 +93,8 @@ class KubernetesConfig(BaseConfig):
     def set(self, key: str, value: Any) -> bool:
         """Set key with given value.
 
-        :params key: Key name.
-        :params value: Value of the key.
+        :param key: Key name.
+        :param value: Value of the key.
         :returns: A ``bool`` to mark whether config is set or not.
         """
         self._prepare_configmap()

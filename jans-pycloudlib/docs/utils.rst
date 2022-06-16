@@ -30,3 +30,21 @@ Utilities
 .. autofunction:: encode_text
 
 .. autofunction:: decode_text
+
+.. autofunction:: generate_keystore
+
+.. autofunction:: generate_ssl_certkey
+
+.. autofunction:: generate_ssl_ca_certkey
+
+.. autofunction:: generate_signed_ssl_certkey
+
+.. module:: jans.pycloudlib.pki
+
+.. autofunction:: generate_private_key
+
+.. autofunction:: generate_public_key
+
+.. autofunction:: generate_csr
+
+.. autofunction:: sign_csr

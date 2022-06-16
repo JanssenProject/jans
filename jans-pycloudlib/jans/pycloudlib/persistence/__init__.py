@@ -1,3 +1,4 @@
+# noqa: D104
 from jans.pycloudlib.persistence.couchbase import render_couchbase_properties  # noqa: F401
 from jans.pycloudlib.persistence.couchbase import sync_couchbase_truststore  # noqa: F401
 from jans.pycloudlib.persistence.couchbase import id_from_dn  # noqa: F401
