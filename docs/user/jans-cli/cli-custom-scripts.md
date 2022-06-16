@@ -47,7 +47,7 @@ The command line is:
 /opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts
 ```
 
-It returns all the custom scripts of the Janssen Server. You may get nagging here as it display lots of custom scripts together, nearly 40 custom scripts on the terminal. So, I would like to prefer use [IM method](im/../../im/im-custom-scripts.md#get-list-of-custom-scripts) in this case. 
+It returns all the custom scripts of the Janssen Server. You may get nagging here as it display lots of custom scripts together, nearly 40 custom scripts on the terminal. So, I would like to prefer use [IM method](im/im-custom-scripts.md#get-list-of-custom-scripts) in this case. 
 
 
 ## Adds a New Custom Script
@@ -355,4 +355,4 @@ For example, in our case; the command line is:
 /opt/jans/jans-cli/config-cli.py --operation-id delete-config-scripts-by-inum --url-suffix inum:61aef81b-b22d-42c0-89d5-b098c976a2b7
 ```
 
-That's all for `Custom Script` management with `CLI` feature. You can check `IM` method from [here](../im/im-custom-scripts.md).
+That's all for `Custom Script` management with `CLI` feature. You can check `IM` method from [here](im/im-custom-scripts.md).
