@@ -1,9 +1,5 @@
-"""
-jans.pycloudlib.persistence.utils
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""This module consists of common utilities to work with persistence."""
 
-This module consists of common utilities to work with persistence.
-"""
 import json
 import os
 from collections import defaultdict
@@ -19,9 +15,9 @@ def render_salt(manager, src: str, dest: str) -> None:
 
         encode_salt = random-salt-string
 
-    :params manager: An instance of :class:`~jans.pycloudlib.manager._Manager`.
-    :params src: Absolute path to the template.
-    :params dest: Absolute path where generated file is located.
+    :param manager: An instance of :class:`~jans.pycloudlib.manager._Manager`.
+    :param src: Absolute path to the template.
+    :param dest: Absolute path where generated file is located.
     """
     encode_salt = manager.secret.get("encoded_salt")
 
@@ -36,8 +32,8 @@ def render_salt(manager, src: str, dest: str) -> None:
 def render_base_properties(src: str, dest: str) -> None:
     """Render file contains properties for Janssen Server.
 
-    :params src: Absolute path to the template.
-    :params dest: Absolute path where generated file is located.
+    :param src: Absolute path to the template.
+    :param dest: Absolute path where generated file is located.
     """
     with open(src) as f:
         txt = f.read()
@@ -148,7 +144,7 @@ class PersistenceMapper:
 
     @property
     def mapping(self) -> Dict[str, str]:
-        """Pre-populate mapping (if empty).
+        """Pre-populate a key-value pair of persistence data (if empty).
 
         Example of pre-populated mapping:
 
@@ -204,7 +200,6 @@ class PersistenceMapper:
                 "ldap": ["cache-refresh"],
             }
         """
-
         mapper = defaultdict(list)
         for k, v in self.mapping.items():
             mapper[v].append(RDN_MAPPING[k])
@@ -212,8 +207,7 @@ class PersistenceMapper:
 
     @classmethod
     def validate_hybrid_mapping(cls) -> Dict[str, list]:
-        """Validate the value of ``hybrid_mapping`` attribute.
-        """
+        """Validate the value of ``hybrid_mapping`` attribute."""
         mapping = json.loads(os.environ.get("CN_HYBRID_MAPPING", "{}"))
 
         # build whitelisted mapping based on supported PERSISTENCE_DATA_KEYS and PERSISTENCE_TYPES

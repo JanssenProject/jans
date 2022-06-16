@@ -12,6 +12,11 @@ LDAP
 
 .. module:: jans.pycloudlib.persistence.ldap
 
+.. autoclass:: LdapClient
+    :members:
+    :private-members:
+    :undoc-members:
+
 .. autofunction:: render_ldap_properties
 
 .. autofunction:: sync_ldap_truststore
@@ -27,15 +32,9 @@ Couchbase
 
 .. autofunction:: get_couchbase_password
 
-.. autodata:: get_encoded_couchbase_password
-
 .. autofunction:: get_couchbase_superuser
 
 .. autofunction:: get_couchbase_superuser_password
-
-.. autodata:: get_encoded_couchbase_superuser_password
-
-.. autofunction:: get_couchbase_mappings
 
 .. autofunction:: get_couchbase_conn_timeout
 
@@ -61,6 +60,31 @@ Couchbase
     :undoc-members:
 
 .. autoclass:: CouchbaseClient
+    :members:
+    :private-members:
+    :undoc-members:
+
+SQL
+===
+
+.. module:: jans.pycloudlib.persistence.sql
+
+.. autoclass:: MysqlAdapter
+    :members:
+    :private-members:
+    :undoc-members:
+
+.. autoclass:: SqlClient
+    :members:
+    :private-members:
+    :undoc-members:
+
+Spanner
+=======
+
+.. module:: jans.pycloudlib.persistence.spanner
+
+.. autoclass:: SpannerClient
     :members:
     :private-members:
     :undoc-members:

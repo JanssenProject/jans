@@ -1,9 +1,5 @@
-"""
-jans.pycloudlib.wait
-~~~~~~~~~~~~~~~~~~~~
+"""This module consists of startup order utilities."""
 
-This module consists of startup order utilities.
-"""
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
@@ -31,9 +27,8 @@ from jans.pycloudlib.persistence.utils import PersistenceMapper
 logger = logging.getLogger(__name__)
 
 
-class WaitError(Exception):
-    """Class to mark error while running ``wait_for_*`` functions.
-    """
+class WaitError(Exception):  # noqa: D204
+    """Class to mark error while running ``wait_for_*`` functions."""
     pass
 
 
@@ -94,6 +89,7 @@ def get_wait_interval() -> int:
 
 
 def on_backoff(details: dict):
+    """Emit logs automatically when error is thrown while running a backoff-decorated function."""
     details["error"] = sys.exc_info()[1]
     details["kwargs"]["label"] = details["kwargs"].pop("label", "Service")
     logger.warning(
@@ -103,11 +99,13 @@ def on_backoff(details: dict):
 
 
 def on_success(details: dict):
+    """Emit logs automatically when there's no error while running a backoff-decorated function."""
     details["kwargs"]["label"] = details["kwargs"].pop("label", "Service")
     logger.info("{kwargs[label]} is ready".format(**details))
 
 
 def on_giveup(details: dict):
+    """Emit logs automatically when a backoff-decorated function exceeds allowed retries."""
     details["kwargs"]["label"] = details["kwargs"].pop("label", "Service")
     logger.error(
         "{kwargs[label]} is not ready after " "{elapsed:0.1f} seconds".format(**details)
@@ -176,7 +174,6 @@ def wait_for_ldap(manager: _Manager, **kwargs) -> None:
 
     :param manager: An instance of :class:`~jans.pycloudlib.manager._Manager`.
     """
-
     jca_client_id = manager.config.get("jca_client_id")
     search_mapping = {
         "default": (f"inum={jca_client_id},ou=clients,o=jans", "(objectClass=jansClnt)"),
@@ -206,7 +203,6 @@ def wait_for_ldap_conn(manager, **kwargs):
 
     :param manager: An instance of :class:`~jans.pycloudlib.manager._Manager`.
     """
-
     connected = LdapClient(manager).is_connected()
     if not connected:
         raise WaitError("LDAP is unreachable")
@@ -253,8 +249,7 @@ def wait_for_couchbase_conn(manager, **kwargs):
 
 @retry_on_exception
 def wait_for_sql_conn(manager, **kwargs):
-    """Wait for readiness/liveness of an SQL database connection.
-    """
+    """Wait for readiness/liveness of an SQL database connection."""
     # checking connection
     init = SqlClient(manager).connected()
     if not init:
@@ -263,8 +258,7 @@ def wait_for_sql_conn(manager, **kwargs):
 
 @retry_on_exception
 def wait_for_sql(manager: _Manager, **kwargs) -> None:
-    """Wait for readiness/liveness of an SQL database.
-    """
+    """Wait for readiness/liveness of an SQL database."""
     jca_client_id = manager.config.get("jca_client_id")
     search_mapping = {
         "default": (doc_id_from_dn(f"inum={jca_client_id},ou=clients,o=jans"), "jansClnt"),
@@ -286,8 +280,7 @@ def wait_for_sql(manager: _Manager, **kwargs) -> None:
 
 @retry_on_exception
 def wait_for_spanner_conn(manager, **kwargs):
-    """Wait for readiness/liveness of an Spanner database connection.
-    """
+    """Wait for readiness/liveness of an Spanner database connection."""
     # checking connection
     init = SpannerClient(manager).connected()
     if not init:
@@ -296,8 +289,7 @@ def wait_for_spanner_conn(manager, **kwargs):
 
 @retry_on_exception
 def wait_for_spanner(manager: _Manager, **kwargs) -> None:
-    """Wait for readiness/liveness of an Spanner database.
-    """
+    """Wait for readiness/liveness of an Spanner database."""
     jca_client_id = manager.config.get("jca_client_id")
     search_mapping = {
         "default": (doc_id_from_dn(f"inum={jca_client_id},ou=clients,o=jans"), "jansClnt"),
@@ -318,7 +310,7 @@ def wait_for_spanner(manager: _Manager, **kwargs) -> None:
 
 
 def wait_for(manager, deps=None):
-    """A high-level function to run one or more ``wait_for_*`` function(s).
+    """Dispatch appropriate one or more ``wait_for_*`` function(s).
 
     The following dependencies are supported:
 

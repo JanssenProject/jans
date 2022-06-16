@@ -21,3 +21,11 @@ Kubernetes
     :members:
     :private-members:
     :undoc-members:
+
+Google
+======
+
+.. autoclass:: jans.pycloudlib.config.google_config.GoogleConfig
+    :members:
+    :private-members:
+    :undoc-members:

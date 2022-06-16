@@ -36,7 +36,7 @@ copyright = '2020, Janssen'  # noqa: A001
 author = 'Janssen'
 
 # The full version, including alpha/beta/rc tags
-release = find_version("../jans/pycloudlib/__init__.py")
+release = find_version("../jans/pycloudlib/version.py")
 
 # -- General configuration ---------------------------------------------------
 
@@ -56,6 +56,9 @@ autodoc_mock_imports = [
     "docker",
     "cryptography",
     "requests_toolbelt",
+    "google",
+    "ldif",
+    "sqlalchemy",
 ]
 
 # Add any paths that contain templates here, relative to this directory.

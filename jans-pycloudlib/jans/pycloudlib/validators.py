@@ -1,9 +1,4 @@
-"""
-jans.pycloudlib.validators
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-This module contains helpers to validate things.
-"""
+"""This module contains helpers to validate things."""
 
 from jans.pycloudlib.persistence.utils import PERSISTENCE_TYPES
 from jans.pycloudlib.persistence.utils import PERSISTENCE_SQL_DIALECTS
@@ -11,12 +6,18 @@ from jans.pycloudlib.persistence.utils import PersistenceMapper
 
 
 def validate_persistence_type(type_: str) -> None:
-    """
-    Validates persistence type.
+    r"""Validate persistence type.
 
-    :param type\\_: Persistence type.
-    """
+    Supported types:
 
+    - ``couchbase``
+    - ``hybrid``
+    - ``ldap``
+    - ``spanner``
+    - ``sql``
+
+    :param type\_: Persistence type.
+    """
     if type_ not in PERSISTENCE_TYPES:
         types = ", ".join(PERSISTENCE_TYPES)
 
@@ -26,8 +27,11 @@ def validate_persistence_type(type_: str) -> None:
         )
 
 
-# deprecated function
 def validate_persistence_ldap_mapping(type_: str, ldap_mapping: str) -> None:
+    """Validate persistence mapping for ldap.
+
+    This function is deprecated.
+    """
     import warnings
 
     warnings.warn(
@@ -38,8 +42,11 @@ def validate_persistence_ldap_mapping(type_: str, ldap_mapping: str) -> None:
 
 
 def validate_persistence_sql_dialect(dialect: str) -> None:
-    """
-    Validates SQL dialect.
+    """Validate SQL dialect.
+
+    Supported dialects:
+
+    - ``mysql``
 
     :param dialect: Dialect of SQL.
     """
@@ -52,8 +59,6 @@ def validate_persistence_sql_dialect(dialect: str) -> None:
 
 
 def validate_persistence_hybrid_mapping() -> None:
-    """
-    Validate hybrid mapping.
-    """
+    """Validate hybrid mapping."""
     mapper = PersistenceMapper()
     mapper.validate_hybrid_mapping()

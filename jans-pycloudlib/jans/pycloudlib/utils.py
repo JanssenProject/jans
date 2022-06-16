@@ -1,9 +1,4 @@
-"""
-jans.pycloudlib.utils
-~~~~~~~~~~~~~~~~~~~~~
-
-This module contains various helpers.
-"""
+"""This module contains various helpers."""
 
 import base64
 import contextlib
@@ -80,9 +75,7 @@ def get_random_chars(size: int = 12, chars: str = "") -> str:
     """Generate random characters.
 
     If character set is not provided, the default set (consists of digits and ASCII letters)
-    will be used instead.
-
-    Example:
+    will be used instead, for example:
 
     .. code-block:: python
 
@@ -239,8 +232,8 @@ def encode_text(text: AnyStr, key: AnyStr) -> bytes:
         # output: b'OdiOLVWUv7f8OzfNsuB5Fg=='
         encode_text("secret text", "a" * 24)
 
-    :params text: Plain text (``str`` or ``bytes``) need to be encoded.
-    :params key: Key used for encoding salt.
+    :param text: Plain text (``str`` or ``bytes``) need to be encoded.
+    :param key: Key used for encoding salt.
     :returns: Encoded ``bytes`` text.
     """
     with contextlib.suppress(AttributeError):
@@ -271,8 +264,8 @@ def decode_text(text: AnyStr, key: AnyStr) -> bytes:
         # output: b'secret text'
         decode_text(b'OdiOLVWUv7f8OzfNsuB5Fg==', "a" * 24)
 
-    :params text: Encoded text (``str`` or ``bytes``) need to be decoded.
-    :params key: Key used for decoding salt.
+    :param text: Encoded text (``str`` or ``bytes``) need to be decoded.
+    :param key: Key used for decoding salt.
     :returns: Decoded ``bytes`` text.
     """
     encoded_text = base64.b64decode(text)
@@ -321,7 +314,6 @@ def generate_ssl_certkey(
     :param valid_to: Validity length in days.
     :returns: A pair of path to generated public and private keys.
     """
-
     key_fn = f"{base_dir}/{suffix}.key"
     priv_key = generate_private_key(key_fn)
 
@@ -345,8 +337,7 @@ def generate_ssl_certkey(
 
 
 def generate_keystore(suffix, hostname, keypasswd, jks_fn="", in_key="", in_cert="", alias="", in_passwd=""):
-    """
-    Generate Java keystore (JKS).
+    """Generate Java keystore (JKS).
 
     :param suffix: Suffix as basename (i.e. ``auth-server``)
     :param hostname: Hostname
@@ -357,7 +348,6 @@ def generate_keystore(suffix, hostname, keypasswd, jks_fn="", in_key="", in_cert
     :param alias: Alias used in generated JKS file
     :param in_passwd: Password/passphrase for key file (if any)
     """
-
     in_key = in_key or f"/etc/certs/{suffix}.key"
     in_cert = in_cert or f"/etc/certs/{suffix}.crt"
     jks_fn = jks_fn or f"/etc/certs/{suffix}.jks"
@@ -431,7 +421,6 @@ def generate_ssl_ca_certkey(
     :param valid_to: Validity length in days.
     :returns: A pair of path to generated public and private keys.
     """
-
     key_fn = f"{base_dir}/{suffix}.key"
     priv_key = generate_private_key(key_fn)
 
@@ -483,7 +472,6 @@ def generate_signed_ssl_certkey(
     :param valid_to: Validity length in days.
     :returns: A pair of path to generated public and private keys.
     """
-
     key_fn = f"{base_dir}/{suffix}.key"
     priv_key = generate_private_key(key_fn)
 

@@ -1,10 +1,4 @@
-"""
-jans.pycloudlib.config.google_config
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-This module contains config adapter class to interact with
-Google Secret.
-"""
+"""This module contains config adapter class to interact with Google Secret."""
 
 import sys
 import logging
@@ -41,12 +35,17 @@ class GoogleConfig(BaseConfig):
         self.client = secretmanager.SecretManagerServiceClient()
 
     def all(self) -> dict:  # pragma: no cover
+        """Access the payload for the given secret version if one exists.
+
+        This method is deprecated, use ``get_all`` instead.
+        """
         return self.get_all()
 
     def get_all(self) -> dict:
-        """
-        Access the payload for the given secret version if one exists. The version
-        can be a version number as a string (e.g. "5") or an alias (e.g. "latest").
+        """Access the payload for the given secret version if one exists.
+
+        The version can be a version number as a string (e.g. "5") or an alias (e.g. "latest").
+
         :returns: A ``dict`` of key-value pairs (if any)
         """
         # Try to get the latest resource name. Used in initialization. If the latest version doesn't exist
@@ -79,8 +78,9 @@ class GoogleConfig(BaseConfig):
 
     def get(self, key, default: Any = "") -> Any:
         """Get value based on given key.
-        :params key: Key name.
-        :params default: Default value if key is not exist.
+
+        :param key: Key name.
+        :param default: Default value if key is not exist.
         :returns: Value based on given key or default one.
         """
         result = self.get_all()
@@ -89,9 +89,8 @@ class GoogleConfig(BaseConfig):
     def set(self, key: str, value: Any) -> bool:
         """Set key with given value.
 
-        :params key: Key name.
-        :params value: Value of the key.
-        :params data full dictionary to push. Used in initial creation of config and secret
+        :param key: Key name.
+        :param value: Value of the key.
         :returns: A ``bool`` to mark whether config is set or not.
         """
         all_ = self.get_all()
@@ -104,7 +103,8 @@ class GoogleConfig(BaseConfig):
 
     def set_all(self, data: dict) -> bool:
         """Push a full dictionary to secrets.
-        :params data full dictionary to push. Used in initial creation of config and secret
+
+        :param data: full dictionary to push. Used in initial creation of config and secret
         :returns: A ``bool`` to mark whether config is set or not.
         """
         all_ = {}
@@ -116,12 +116,11 @@ class GoogleConfig(BaseConfig):
         return secret_version_bool
 
     def create_secret(self) -> bool:
-        """
-        Create a new secret with the given name. A secret is a logical wrapper
-        around a collection of secret versions. Secret versions hold the actual
-        secret material.
-        """
+        """Create a new secret with the given name.
 
+        A secret is a logical wrapper around a collection of secret versions.
+        Secret versions hold the actual secret material.
+        """
         # Build the resource name of the parent project.
         parent = f"projects/{self.project_id}"
         response = False
@@ -142,11 +141,10 @@ class GoogleConfig(BaseConfig):
         return bool(response)
 
     def add_secret_version(self, payload: str) -> bool:
-        """
-        Add a new secret version to the given secret with the provided payload.
-        :params payload:  payload
-        """
+        """Add a new secret version to the given secret with the provided payload.
 
+        :param payload:  payload
+        """
         # Build the resource name of the parent secret.
         parent = self.client.secret_path(self.project_id, self.google_secret_name)
 
