@@ -1,17 +1,13 @@
-"""
-jans.pycloudlib.secret.base_secret
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-This module contains base class for secret adapter.
-"""
+"""This module contains base class for secret adapter."""
 
 from typing import Any
 from typing import NoReturn
 
 
 class BaseSecret:
-    """Base class for secret adapter. Must be sub-classed per
-    implementation details.
+    """Base class for secret adapter.
+
+    Must be sub-classed per implementation details.
     """
 
     type = "secret"
