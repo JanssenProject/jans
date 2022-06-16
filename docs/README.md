@@ -204,6 +204,9 @@
     - log4j2 configuration
   - FAQ
 
+### jans-cli
+  - [User Guide](user/jans-cli)
+
 ### Integration Guide
   - Custom Web Development
     - [Protecting a website with mod_auth_openidc](user/integration/custom-web-development/authn-with-apache-reverse-proxy.md)
