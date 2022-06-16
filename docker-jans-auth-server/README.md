@@ -75,6 +75,7 @@ The following environment variables are supported by the container:
 - `CN_GOOGLE_SPANNER_DATABASE_ID`: Google Spanner database ID.
 - `CN_JETTY_REQUEST_HEADER_SIZE`: Maximum size of request header accepted by Jetty (default to `8192`).
 - `CN_AUTH_APP_LOGGERS`: Custom logging configuration in JSON-string format with hash type (see [Configure app loggers](#configure-app-loggers) section for details).
+- `CN_PROMETHEUS_PORT`: Port used by Prometheus JMX agent (default to empty string). To enable Prometheus JMX agent, set the value to a number. See [Exposing metrics](#exposing-metrics) for details.
 
 ### Configure app loggers
 
@@ -146,3 +147,13 @@ As per v1.0.1, hybrid persistence supports all available persistence types. To c
         "session": "spanner",
     }
     ```
+
+### Exposing metrics
+
+As per v1.0.1, certain metrics can be exposed via Prometheus JMX exporter.
+To expose the metrics, set the `CN_PROMETHEUS_PORT` environment variable, i.e. `CN_PROMETHEUS_PORT=9093`.
+Afterwards, metrics can be scraped by Prometheus or accessed manually by making request to `/metrics` URL,
+i.e. `http://container:9093/metrics`.
+
+Note that Prometheus JMX exporter uses pre-defined config file (see `conf/prometheus-config.yaml`).
+To customize the config, mount custom config file to `/opt/prometheus/prometheus-config.yml` inside the container.
