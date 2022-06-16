@@ -161,6 +161,13 @@ def _transform_auth_dynamic_config(conf):
         conf["httpLoggingExcludePaths"] = conf.pop("httpLoggingExludePaths", [])
         should_update = True
 
+    if "requestUriBlockList" not in conf:
+        conf["requestUriBlockList"] = [
+            "localhost",
+            "127.0.0.1",
+        ]
+        should_update = True
+
     # return the conf and flag to determine whether it needs update or not
     return conf, should_update
 
