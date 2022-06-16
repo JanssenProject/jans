@@ -23,7 +23,8 @@ RUN python3 -m ensurepip \
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_LINUX_SETUP_VERSION=07f544ff00c6e8923b480da1bfb4ee7847933c60
+# janssenproject/jans SHA commit
+ENV JANS_SOURCE_VERSION=0f1a2e6761c0522acdfdab3d69adac5c8062e780
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -31,7 +32,7 @@ ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 RUN git clone --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
     && cd /tmp/jans \
     && git sparse-checkout init --cone \
-    && git checkout ${JANS_LINUX_SETUP_VERSION} \
+    && git checkout ${JANS_SOURCE_VERSION} \
     && git sparse-checkout set ${JANS_SETUP_DIR}
 
 RUN mkdir -p /app/static /app/static/couchbase /app/schema /app/openbanking/static /app/static/opendj
@@ -63,7 +64,7 @@ RUN cd /tmp/jans \
     && cp -R ${JANS_SETUP_DIR}/templates/jans-cli /app/templates/jans-cli
 
 # Download jans-config-api-swagger for role_scope_mapping
-RUN wget -q https://github.com/JanssenProject/jans/raw/${JANS_LINUX_SETUP_VERSION}/jans-config-api/docs/jans-config-api-swagger.yaml -P /app/static
+RUN wget -q https://github.com/JanssenProject/jans/raw/${JANS_SOURCE_VERSION}/jans-config-api/docs/jans-config-api-swagger.yaml -P /app/static
 
 # cleanup
 RUN rm -rf /tmp/jans
