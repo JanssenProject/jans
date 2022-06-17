@@ -1,9 +1,4 @@
-"""
-jans.pycloudlib.meta.docker_meta
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-This module consists of class to interact with Docker API.
-"""
+"""This module consists of class to interact with Docker API."""
 
 import contextlib
 import os
@@ -15,10 +10,10 @@ from jans.pycloudlib.meta.base_meta import BaseMeta
 
 
 class DockerMeta(BaseMeta):
-    """This class interacts with Docker API.
-    """
+    """This class interacts with a subset of Docker APIs."""
 
     def __init__(self, base_url="unix://var/run/docker.sock"):
+        """Initialize Docker meta wrapper."""
         self.client = docker.DockerClient(base_url=base_url)
 
     def get_containers(self, label: str) -> list:

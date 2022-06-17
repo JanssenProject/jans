@@ -1,10 +1,4 @@
-"""
-jans.pycloudlib.secret.google_secret
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-This module contains secret adapter class to interact with
-Google Secret.
-"""
+"""This module contains secret adapter class to interact with Google Secret."""
 
 import hashlib
 import sys
@@ -51,16 +45,16 @@ class GoogleSecret(BaseSecret):
         self.key = self._set_key()
 
     def _set_key(self) -> bytes:
-        """
-        Return key for for encrypting and decrypting payload
+        """Return key for for encrypting and decrypting payload.
+
         :return: key
         """
         return hashlib.pbkdf2_hmac("sha256", self.passphrase.encode("utf8"), self.salt, 1000)
 
     def _encrypt(self, plaintext: str) -> str:
-        """
-        Encrypt payload
-        :oarans plaintext: plain string to encrypt
+        """Encrypt payload.
+
+        :param plaintext: plain string to encrypt
         :return: A string including salr, iv, and encrypted payload
         """
         aes = AESGCM(self.key)
@@ -73,9 +67,9 @@ class GoogleSecret(BaseSecret):
             hexlify(self.salt).decode("utf8"), hexlify(iv).decode("utf8"), hexlify(ciphertext).decode("utf8"))
 
     def _decrypt(self, ciphertext: str) -> str:
-        """
-        Decrypt payload
-        :params ciphertext: encrypted string to decrypt
+        """Decrypt payload.
+
+        :param ciphertext: encrypted string to decrypt
         :return: decrypted payload
         """
         self.salt, iv, ciphertext = map(unhexlify, ciphertext.split("-"))
@@ -90,12 +84,18 @@ class GoogleSecret(BaseSecret):
         return plaintext.decode("utf8")
 
     def all(self) -> dict:  # pragma: no cover
+        """Access the payload for the given secret version if one exists.
+
+        This method is deprecated, use ``get_all`` instead.
+        """
         return self.get_all()
 
     def get_all(self) -> dict:
-        """
-        Access the payload for the given secret version if one exists. The version
-        can be a version number as a string (e.g. "5") or an alias (e.g. "latest").
+        """Access the payload for the given secret version if one exists.
+
+        The version can be a version number as a string (e.g. "5")
+        or an alias (e.g. "latest").
+
         :returns: A ``dict`` of key-value pairs (if any)
         """
         # Try to get the latest resource name. Used in initialization. If the latest version doesn't exist
@@ -127,8 +127,9 @@ class GoogleSecret(BaseSecret):
 
     def get(self, key, default: Any = "") -> Any:
         """Get value based on given key.
-        :params key: Key name.
-        :params default: Default value if key is not exist.
+
+        :param key: Key name.
+        :param default: Default value if key is not exist.
         :returns: Value based on given key or default one.
         """
         result = self.get_all()
@@ -137,8 +138,8 @@ class GoogleSecret(BaseSecret):
     def set(self, key: str, value: Any) -> bool:
         """Set key with given value.
 
-        :params key: Key name.
-        :params value: Value of the key.
+        :param key: Key name.
+        :param value: Value of the key.
         :returns: A ``bool`` to mark whether config is set or not.
         """
         all_ = self.get_all()
@@ -152,7 +153,8 @@ class GoogleSecret(BaseSecret):
 
     def set_all(self, data: dict) -> bool:
         """Push a full dictionary to secrets.
-        :params data full dictionary to push. Used in initial creation of config and secret
+
+        :param data: full dictionary to push. Used in initial creation of config and secret
         :returns: A ``bool`` to mark whether config is set or not.
         """
         all_ = {}
@@ -165,12 +167,11 @@ class GoogleSecret(BaseSecret):
         return secret_version_bool
 
     def create_secret(self) -> bool:
-        """
-        Create a new secret with the given name. A secret is a logical wrapper
-        around a collection of secret versions. Secret versions hold the actual
-        secret material.
-        """
+        """Create a new secret with the given name.
 
+        A secret is a logical wrapper around a collection of secret versions.
+        Secret versions hold the actual secret material.
+        """
         # Build the resource name of the parent project.
         parent = f"projects/{self.project_id}"
         response = False
@@ -191,11 +192,10 @@ class GoogleSecret(BaseSecret):
         return bool(response)
 
     def add_secret_version(self, payload: str) -> bool:
-        """
-        Add a new secret version to the given secret with the provided payload.
-        :params payload: encrypted payload
-        """
+        """Add a new secret version to the given secret with the provided payload.
 
+        :param payload: encrypted payload
+        """
         # Build the resource name of the parent secret.
         parent = self.client.secret_path(self.project_id, self.google_secret_name)
 
@@ -212,9 +212,7 @@ class GoogleSecret(BaseSecret):
         return bool(response)
 
     def delete(self) -> None:
-        """
-        Delete the secret with the given name and all of its versions.
-        """
+        """Delete the secret with the given name and all of its versions."""
         # Build the resource name of the secret.
         name = self.client.secret_path(self.project_id, self.google_secret_name)
 
