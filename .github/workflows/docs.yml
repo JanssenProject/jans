@@ -54,6 +54,7 @@ jobs:
           fetch-depth: 0
 
       - name: Check commit message
+        id: check_message
         run: |
           MESSAGE=$(git log ${{ github.event.pull_request.head.sha }} ^origin --pretty=format:%s | grep "^docs:$")
           if [ -n "$MESSAGE" ]; then
@@ -65,6 +66,8 @@ jobs:
           fi
 
       - name: Verify Changed files
+        if: steps.check_message.outcome == 'success'
+        id: check_files
         run: |
           CHANGES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | cut -d/ -f1 | grep '^docs' | sort -u )
           if [ -n "$CHANGES" ]; then
