@@ -13,6 +13,7 @@ Consul
     :members:
     :private-members:
     :undoc-members:
+    :show-inheritance:
 
 Kubernetes
 ==========
@@ -21,6 +22,7 @@ Kubernetes
     :members:
     :private-members:
     :undoc-members:
+    :show-inheritance:
 
 Google
 ======
@@ -29,3 +31,4 @@ Google
     :members:
     :private-members:
     :undoc-members:
+    :show-inheritance:

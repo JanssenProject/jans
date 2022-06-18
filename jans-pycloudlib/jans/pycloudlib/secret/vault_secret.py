@@ -1,10 +1,8 @@
 """This module contains secret adapter class to interact with Vault."""
 
+import typing as _t
 import logging
 import os
-from typing import Any
-from typing import Tuple
-from typing import Union
 
 import hvac
 
@@ -13,6 +11,9 @@ from jans.pycloudlib.utils import as_boolean
 from jans.pycloudlib.utils import safe_value
 
 logger = logging.getLogger(__name__)
+
+MaybeCert = _t.Optional[tuple[str, str]]
+MaybeCacert = _t.Union[bool, str]
 
 
 class VaultSecret(BaseSecret):
@@ -32,7 +33,7 @@ class VaultSecret(BaseSecret):
     - ``CN_SECRET_VAULT_NAMESPACE``
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.settings = {
             k: v
             for k, v in os.environ.items()
@@ -42,13 +43,13 @@ class VaultSecret(BaseSecret):
             "CN_SECRET_VAULT_HOST", "localhost",
         )
         self.settings.setdefault(
-            "CN_SECRET_VAULT_PORT", 8200,
+            "CN_SECRET_VAULT_PORT", "8200",
         )
         self.settings.setdefault(
             "CN_SECRET_VAULT_SCHEME", "http",
         )
         self.settings.setdefault(
-            "CN_SECRET_VAULT_VERIFY", False,
+            "CN_SECRET_VAULT_VERIFY", "false",
         )
         self.settings.setdefault(
             "CN_SECRET_VAULT_ROLE_ID_FILE", "/etc/certs/vault_role_id",
@@ -70,7 +71,7 @@ class VaultSecret(BaseSecret):
 
         cert, verify = self._verify_cert(
             self.settings["CN_SECRET_VAULT_SCHEME"],
-            self.settings["CN_SECRET_VAULT_VERIFY"],
+            as_boolean(self.settings["CN_SECRET_VAULT_VERIFY"]),
             self.settings["CN_SECRET_VAULT_CACERT_FILE"],
             self.settings["CN_SECRET_VAULT_CERT_FILE"],
             self.settings["CN_SECRET_VAULT_KEY_FILE"],
@@ -82,7 +83,7 @@ class VaultSecret(BaseSecret):
             url="{}://{}:{}".format(
                 self.settings["CN_SECRET_VAULT_SCHEME"],
                 self.settings["CN_SECRET_VAULT_HOST"],
-                self.settings["CN_SECRET_VAULT_PORT"],
+                int(self.settings["CN_SECRET_VAULT_PORT"]),
             ),
             cert=cert,
             verify=verify,
@@ -90,7 +91,7 @@ class VaultSecret(BaseSecret):
         self.prefix = f"secret/{self.settings['CN_SECRET_VAULT_NAMESPACE']}"
 
     @property
-    def role_id(self):
+    def role_id(self) -> str:
         """Get the Role ID from file.
 
         The file location is determined by
@@ -104,7 +105,7 @@ class VaultSecret(BaseSecret):
         return role_id
 
     @property
-    def secret_id(self):
+    def secret_id(self) -> str:
         """Get the Secret ID from file.
 
         The file location is determined by
@@ -114,7 +115,7 @@ class VaultSecret(BaseSecret):
             with open(self.settings["CN_SECRET_VAULT_SECRET_ID_FILE"]) as f:
                 secret_id = f.read()
         except FileNotFoundError:
-            secret_id = ""
+            secret_id = ""  # nosec: B105
         return secret_id
 
     def _authenticate(self) -> None:
@@ -125,7 +126,7 @@ class VaultSecret(BaseSecret):
         creds = self.client.auth.approle.login(self.role_id, self.secret_id, use_token=False)
         self.client.token = creds["auth"]["client_token"]
 
-    def get(self, key: str, default: Any = "") -> Any:
+    def get(self, key: str, default: _t.Any = "") -> _t.Any:
         """Get value based on given key.
 
         :param key: Key name.
@@ -139,7 +140,7 @@ class VaultSecret(BaseSecret):
             return default
         return sc["data"]["value"]
 
-    def set(self, key: str, value: Any) -> bool:
+    def set(self, key: str, value: _t.Any) -> bool:
         """Set key with given value.
 
         :param key: Key name.
@@ -155,32 +156,32 @@ class VaultSecret(BaseSecret):
         response = self.client._adapter.post(
             f"/v1/{self.prefix}/{key}", json=val,
         )
-        return response.status_code == 204
+        return bool(response.status_code == 204)
 
-    def all(self) -> dict:  # pragma: no cover
-        """Get all key-value pairs.
-
-        :returns: A ``dict`` of key-value pairs (if any).
-        """
-        return self.get_all()
-
-    def _request_warning(self, scheme: str, verify: bool) -> None:
+    def _request_warning(self, scheme: str, verify: _t.Union[bool, str]) -> None:
         """
         Emit warning about unverified request to unsecure Consul address.
 
         :param scheme: Scheme of Vault address.
         :param verify: Mark whether client needs to verify the address.
         """
-        if scheme == "https" and verify is False:
-            import urllib3
+        import urllib3
 
-            urllib3.disable_warnings()
+        if scheme == "https" and verify is False:
+            urllib3.disable_warnings()  # type: ignore
             logger.warning(
                 "All requests to Vault will be unverified. "
                 "Please adjust CN_SECRET_VAULT_SCHEME and "
                 "CN_SECRET_VAULT_VERIFY environment variables.")
 
-    def _verify_cert(self, scheme, verify, cacert_file, cert_file, key_file) -> Tuple[Union[None, tuple], Union[bool, str]]:
+    def _verify_cert(
+        self,
+        scheme: str,
+        verify: bool,
+        cacert_file: str,
+        cert_file: str,
+        key_file: str,
+    ) -> tuple[MaybeCert, MaybeCacert]:
         """Verify client cert and key.
 
         :param scheme: Scheme of Consul address.
@@ -191,19 +192,18 @@ class VaultSecret(BaseSecret):
         :returns: A pair of cert key files (if exist) and verification.
         """
         cert = None
+        maybe_cacert: MaybeCacert = as_boolean(verify)
 
         if scheme == "https":
-            verify = as_boolean(verify)
-
             # verify using CA cert (if any)
-            if all([verify, os.path.isfile(cacert_file)]):
-                verify = cacert_file
+            if all([maybe_cacert, os.path.isfile(cacert_file)]):
+                maybe_cacert = cacert_file
 
             if all([os.path.isfile(cert_file), os.path.isfile(key_file)]):
                 cert = (cert_file, key_file)
-        return cert, verify
+        return cert, maybe_cacert
 
-    def set_all(self, data: dict) -> bool:
+    def set_all(self, data: dict[str, _t.Any]) -> bool:
         """Set key-value pairs.
 
         :param data: Key-value pairs.
@@ -213,7 +213,7 @@ class VaultSecret(BaseSecret):
             self.set(k, v)
         return True
 
-    def get_all(self) -> dict:
+    def get_all(self) -> dict[str, _t.Any]:
         """
         Get all key-value pairs.
 

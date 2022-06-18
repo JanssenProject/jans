@@ -1,10 +1,11 @@
 """This module contains config and secret helpers."""
 
 import os
-from collections import namedtuple
-from typing import Any
-from typing import AnyStr
-from typing import NamedTuple
+import typing as _t
+from abc import ABC
+from abc import abstractproperty
+from dataclasses import dataclass
+from functools import cached_property
 
 from jans.pycloudlib.config import ConsulConfig
 from jans.pycloudlib.config import KubernetesConfig
@@ -15,29 +16,40 @@ from jans.pycloudlib.secret import GoogleSecret
 from jans.pycloudlib.utils import decode_text
 from jans.pycloudlib.utils import encode_text
 
+ConfigAdapter = _t.Union[ConsulConfig, KubernetesConfig, GoogleConfig]
+SecretAdapter = _t.Union[VaultSecret, KubernetesSecret, GoogleSecret]
 
-class ConfigManager:
-    """This class acts as a proxy to specific config adapter class.
 
-    Supported config adapter class:
+class AdapterProtocol(_t.Protocol):  # pragma: no cover
+    """Custom class to define adapter contracts (only useful for type check)."""
 
-    - :class:`~jans.pycloudlib.config.consul_config.ConsulConfig`
-    - :class:`~jans.pycloudlib.config.kubernetes_config.KubernetesConfig`
-    - :class:`~jans.pycloudlib.config.google_config.GoogleConfig`
-    """
+    def get(self, key: str, default: _t.Any = "") -> _t.Any:  # noqa: D102
+        ...
 
-    def __init__(self):
-        _adapter = os.environ.get("CN_CONFIG_ADAPTER", "consul",)
-        if _adapter == "consul":
-            self.adapter = ConsulConfig()
-        elif _adapter == "kubernetes":
-            self.adapter = KubernetesConfig()
-        elif _adapter == "google":
-            self.adapter = GoogleConfig()
-        else:
-            self.adapter = None
+    def set(self, key: str, value: _t.Any) -> bool:  # noqa: D102
+        ...
 
-    def get(self, key: str, default: Any = "") -> Any:
+    def all(self) -> dict[str, _t.Any]:  # noqa: A003,D102
+        ...
+
+    def get_all(self) -> dict[str, _t.Any]:  # noqa: D102
+        ...
+
+    def set_all(self, data: dict[str, _t.Any]) -> bool:  # noqa: D102
+        ...
+
+
+class BaseConfiguration(ABC):
+    """Base class to provide contracts for managing configuration (configs or secrets)."""
+
+    @abstractproperty
+    def adapter(self) -> AdapterProtocol:  # pragma: no cover
+        """Abstract attribute as a container of adapter instance.
+
+        Any subclass **MUST** returns an instance of adapter or raise exception.
+        """
+
+    def get(self, key: str, default: _t.Any = "") -> _t.Any:
         """Get value based on given key.
 
         :param key: Key name.
@@ -46,7 +58,7 @@ class ConfigManager:
         """
         return self.adapter.get(key, default)
 
-    def set(self, key: str, value: Any) -> bool:
+    def set(self, key: str, value: _t.Any) -> bool:
         """Set key with given value.
 
         :param key: Key name.
@@ -55,21 +67,21 @@ class ConfigManager:
         """
         return self.adapter.set(key, value)
 
-    def all(self) -> dict:  # noqa: A003
+    def all(self) -> dict[str, _t.Any]:  # noqa: A003
         """Get all key-value pairs (deprecated in favor of ``get_all``).
 
-        :returns: A ``dict`` of key-value pairs (if any).
+        :returns: A ``dict`` of key-value pairs.
         """
         return self.get_all()
 
-    def get_all(self) -> dict:
+    def get_all(self) -> dict[str, _t.Any]:
         """Get all key-value pairs.
 
-        :returns: A ``dict`` of key-value pairs (if any).
+        :returns: A ``dict`` of key-value pairs.
         """
         return self.adapter.get_all()
 
-    def set_all(self, data: dict) -> bool:
+    def set_all(self, data: dict[str, _t.Any]) -> bool:
         """Set all key-value pairs.
 
         :param data: Key-value pairs.
@@ -77,69 +89,72 @@ class ConfigManager:
         return self.adapter.set_all(data)
 
 
-class SecretManager:
-    """This class acts as a proxy to specific secret adapter class.
+class ConfigManager(BaseConfiguration):
+    """A subclass of :class:`~jans.pycloudlib.manager.BaseConfiguration` to manage configs.
 
-    Supported secret adapter class:
-
-    - :class:`~jans.pycloudlib.secret.vault_secret.VaultSecret`
-    - :class:`~jans.pycloudlib.secret.kubernetes_secret.KubernetesSecret`
-    - :class:`~jans.pycloudlib.secret.google_secret.GoogleSecret`
+    This class acts as a proxy to specific config adapter class.
     """
 
-    def __init__(self):
-        _adapter = os.environ.get("CN_SECRET_ADAPTER", "vault",)
-        if _adapter == "vault":
-            self.adapter = VaultSecret()
-        elif _adapter == "kubernetes":
-            self.adapter = KubernetesSecret()
-        elif _adapter == "google":
-            self.adapter = GoogleSecret()
-        else:
-            self.adapter = None
+    @cached_property
+    def adapter(self) -> ConfigAdapter:
+        """Get an instance of adapter class.
 
-    def get(self, key: str, default: Any = "") -> Any:
-        """Get value based on given key.
+        The adapter name is pre-populated from ``CN_CONFIG_ADAPTER`` environment variable.
 
-        :param key: Key name.
-        :param default: Default value if key is not exist.
-        :returns: Value based on given key or default one.
+        Supported config adapter class:
+
+        - :class:`~jans.pycloudlib.config.consul_config.ConsulConfig`
+        - :class:`~jans.pycloudlib.config.kubernetes_config.KubernetesConfig`
+        - :class:`~jans.pycloudlib.config.google_config.GoogleConfig`
         """
-        return self.adapter.get(key, default)
+        adapter = os.environ.get("CN_CONFIG_ADAPTER", "consul")
 
-    def set(self, key: str, value: Any) -> bool:  # noqa: A003
-        """Set key with given value.
+        if adapter == "consul":
+            return ConsulConfig()
 
-        :param key: Key name.
-        :param value: Value of the key.
-        :returns: A ``bool`` to mark whether config is set or not.
+        if adapter == "kubernetes":
+            return KubernetesConfig()
+
+        if adapter == "google":
+            return GoogleConfig()
+
+        raise ValueError(f"Unsupported secret adapter {adapter!r}")
+
+
+class SecretManager(BaseConfiguration):
+    """A subclass of :class:`~jans.pycloudlib.manager.BaseConfiguration` to manage secrets.
+
+    This class acts as a proxy to specific secret adapter class.
+    """
+
+    @cached_property
+    def adapter(self) -> SecretAdapter:
+        """Get an instance of adapter class.
+
+        The adapter name is pre-populated from ``CN_SECRET_ADAPTER`` environment variable.
+
+        Supported secret adapter class:
+
+        - :class:`~jans.pycloudlib.secret.vault_secret.VaultSecret`
+        - :class:`~jans.pycloudlib.secret.kubernetes_secret.KubernetesSecret`
+        - :class:`~jans.pycloudlib.secret.google_secret.GoogleSecret`
         """
-        return self.adapter.set(key, value)
+        adapter = os.environ.get("CN_SECRET_ADAPTER", "vault")
 
-    def all(self) -> dict:  # noqa: A003
-        """Get all key-value pairs (deprecated in favor of ``get_all``).
+        if adapter == "vault":
+            return VaultSecret()
 
-        :returns: A ``dict`` of key-value pairs (if any).
-        """
-        return self.get_all()
+        if adapter == "kubernetes":
+            return KubernetesSecret()
 
-    def get_all(self) -> dict:
-        """Get all key-value pairs.
+        if adapter == "google":
+            return GoogleSecret()
 
-        :returns: A ``dict`` of key-value pairs (if any).
-        """
-        return self.adapter.get_all()
-
-    def set_all(self, data: dict) -> bool:
-        """Set all key-value pairs.
-
-        :param data: Key-value pairs.
-        """
-        return self.adapter.set_all(data)
+        raise ValueError(f"Unsupported secret adapter {adapter!r}")
 
     def to_file(
         self, key: str, dest: str, decode: bool = False, binary_mode: bool = False
-    ) -> AnyStr:  # noqa: D412
+    ) -> None:  # noqa: D412
         """Pull secret and write to a file.
 
         Example:
@@ -190,7 +205,7 @@ class SecretManager:
     def from_file(
         self, key: str, src: str, encode: bool = False, binary_mode: bool = False
     ) -> None:  # noqa: D412
-        """Put secret from a file.
+        """Read from a file and put to secret.
 
         Example:
 
@@ -231,18 +246,34 @@ class SecretManager:
         self.adapter.set(key, value)
 
 
-#: Object as a placeholder of config and secret manager.
-#: This object is not intended for direct use, use ``get_manager``
-#: function instead.
-_Manager = namedtuple("_Manager", ["config", "secret"])
+@dataclass
+class _Manager:
+    """Class acts as a container of config and secret manager.
+
+    This object is not intended for direct use, use :func:`~jans.pycloudlib.manager.get_manager` function instead.
+    """
+
+    #: An instance of :class:`~jans.pycloudlib.manager.ConfigManager`
+    config: ConfigManager
+
+    #: An instance of :class:`~jans.pycloudlib.manager.SecretManager`
+    secret: SecretManager
 
 
-def get_manager() -> NamedTuple:
-    """Get config and secret manager instances.
+def get_manager() -> _Manager:
+    """Create an instance of :class:`~jans.pycloudlib.manager._Manager` class.
 
-    :returns: A ``namedtuple`` consists of :class:`~jans.pycloudlib.manager.ConfigManager`
-        and :class:`~jans.pycloudlib.manager.SecretManager` instances.
+    The instance has ``config`` and ``secret`` attributes to interact with
+    configs and secrets, for example:
+
+    .. code-block:: python
+
+        manager = get_manager()
+        manager.config.get("hostname")
+        manager.secret.get("ssl-cert")
+
+    :returns: An instance of :class:`~jans.pycloudlib.manager._Manager`.
     """
     config_mgr = ConfigManager()
     secret_mgr = SecretManager()
-    return _Manager(config=config_mgr, secret=secret_mgr)
+    return _Manager(config_mgr, secret_mgr)

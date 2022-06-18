@@ -5,36 +5,6 @@ import pytest
 
 KubeResult = namedtuple("KubeResult", ["data"])
 
-
-# ===========
-# base config
-# ===========
-
-
-def test_config_get(gconfig):
-    with pytest.raises(NotImplementedError) as exc:
-        gconfig.get("foo")
-    assert "" in str(exc.value)
-
-
-def test_config_set(gconfig):
-    with pytest.raises(NotImplementedError) as exc:
-        gconfig.set("foo", "bar")
-    assert "" in str(exc.value)
-
-
-def test_config_get_all(gconfig):
-    with pytest.raises(NotImplementedError) as exc:
-        gconfig.all()
-    assert "" in str(exc.value)
-
-
-def test_config_set_all(gconfig):
-    with pytest.raises(NotImplementedError) as exc:
-        gconfig.set_all({})
-    assert "" in str(exc.value)
-
-
 # =============
 # consul config
 # =============
@@ -95,7 +65,7 @@ def test_consul_config_set(gconsul_config, monkeypatch):
     assert gconsul_config.set("foo", "bar") is True
 
 
-def test_consul_config_all(gconsul_config, monkeypatch):
+def test_consul_config_get_all(gconsul_config, monkeypatch):
     monkeypatch.setattr(
         "consul.Consul.KV.get",
         lambda cls, k, recurse: (
@@ -106,20 +76,29 @@ def test_consul_config_all(gconsul_config, monkeypatch):
             ],
         ),
     )
-    assert gconsul_config.all() == {"foo": "bar", "lorem": "ipsum"}
+    assert gconsul_config.get_all() == {"foo": "bar", "lorem": "ipsum"}
 
 
-def test_consul_config_all_empty(gconsul_config, monkeypatch):
+def test_consul_config_get_all_empty(gconsul_config, monkeypatch):
     monkeypatch.setattr(
         "consul.Consul.KV.get",
         lambda cls, k, recurse: (1, []),
     )
-    assert gconsul_config.all() == {}
+    assert gconsul_config.get_all() == {}
 
 
 def test_consul_config_request_warning(gconsul_config, caplog):
     gconsul_config._request_warning("https", False)
     assert "All requests to Consul will be unverified" in caplog.records[0].message
+
+
+def test_consul_config_set_all(gconsul_config, monkeypatch):
+    monkeypatch.setattr(
+        "consul.Consul.KV.put",
+        lambda cls, k, v: True,
+    )
+    assert gconsul_config.set_all({"foo": "bar"}) is True
+
 
 # =================
 # kubernetes config
