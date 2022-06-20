@@ -12,7 +12,7 @@ from jans.pycloudlib.utils import safe_value
 
 logger = logging.getLogger(__name__)
 
-MaybeCert = _t.Optional[tuple[str, str]]
+MaybeCert = _t.Union[tuple[str, str], None]
 MaybeCacert = _t.Union[bool, str]
 
 
