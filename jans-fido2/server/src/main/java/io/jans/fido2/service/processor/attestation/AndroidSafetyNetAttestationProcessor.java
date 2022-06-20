@@ -35,7 +35,7 @@ import io.jans.fido2.google.safetynet.AttestationStatement;
 import io.jans.fido2.google.safetynet.OfflineVerify;
 import io.jans.fido2.model.auth.AuthData;
 import io.jans.fido2.model.auth.CredAndCounterData;
-import io.jans.fido2.model.entry.Fido2RegistrationData;
+import io.jans.orm.model.fido2.Fido2RegistrationData;
 import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.mds.AttestationCertificateService;
 import io.jans.fido2.service.processors.AttestationFormatProcessor;
