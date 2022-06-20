@@ -121,7 +121,7 @@ class GoogleConfig(BaseConfig):
         secret_version_bool = self.add_secret_version(safe_value(all_))
         return secret_version_bool
 
-    def create_secret(self) -> secretmanager_v1.types.Secret:
+    def create_secret(self) -> _t.Union[secretmanager_v1.types.Secret, None]:
         """Create a new secret with the given name.
 
         A secret is a logical wrapper around a collection of secret versions.
@@ -133,6 +133,7 @@ class GoogleConfig(BaseConfig):
         # Build the resource name of the parent project.
         parent = f"projects/{self.project_id}"
 
+        response = None
         try:
             # Create the secret.
             response = self.client.create_secret(
