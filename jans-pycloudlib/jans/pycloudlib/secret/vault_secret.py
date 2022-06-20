@@ -19,18 +19,20 @@ MaybeCacert = _t.Union[bool, str]
 class VaultSecret(BaseSecret):
     """This class interacts with Vault backend.
 
-    The following environment variables are used to instantiate the client:
+    .. important:: The instance of this class is configured via environment variables.
 
-    - ``CN_SECRET_VAULT_HOST``
-    - ``CN_SECRET_VAULT_PORT``
-    - ``CN_SECRET_VAULT_SCHEME``
-    - ``CN_SECRET_VAULT_VERIFY``
-    - ``CN_SECRET_VAULT_ROLE_ID_FILE``
-    - ``CN_SECRET_VAULT_SECRET_ID_FILE``
-    - ``CN_SECRET_VAULT_CERT_FILE``
-    - ``CN_SECRET_VAULT_KEY_FILE``
-    - ``CN_SECRET_VAULT_CACERT_FILE``
-    - ``CN_SECRET_VAULT_NAMESPACE``
+    Supported environment variables:
+
+    - ``CN_SECRET_VAULT_SCHEME``: supported Vault scheme (``http`` or ``https``).
+    - ``CN_SECRET_VAULT_HOST``: hostname or IP of Vault (default to ``localhost``).
+    - ``CN_SECRET_VAULT_PORT``: port of Vault (default to ``8200``).
+    - ``CN_SECRET_VAULT_VERIFY``: whether to verify cert or not (default to ``false``).
+    - ``CN_SECRET_VAULT_ROLE_ID_FILE``: path to file contains Vault AppRole role ID (default to ``/etc/certs/vault_role_id``).
+    - ``CN_SECRET_VAULT_SECRET_ID_FILE``: path to file contains Vault AppRole secret ID (default to ``/etc/certs/vault_secret_id``).
+    - ``CN_SECRET_VAULT_CERT_FILE``: path to Vault cert file (default to ``/etc/certs/vault_client.crt``).
+    - ``CN_SECRET_VAULT_KEY_FILE``: path to Vault key file (default to ``/etc/certs/vault_client.key``).
+    - ``CN_SECRET_VAULT_CACERT_FILE``: path to Vault CA cert file (default to ``/etc/certs/vault_ca.crt``). This file will be used if it exists and ``CN_SECRET_VAULT_VERIFY`` set to ``true``.
+    - ``CN_SECRET_VAULT_NAMESPACE``: namespace used to create the config tree, i.e. ``secret/jans`` (default to ``jans``).
     """
 
     def __init__(self) -> None:

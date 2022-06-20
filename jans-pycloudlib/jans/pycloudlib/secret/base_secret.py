@@ -11,7 +11,13 @@ class BaseSecret(ABC):
     Must be sub-classed per implementation details.
     """
 
-    type = "secret"
+    @property
+    def type(self) -> str:
+        """Name of the configuration type.
+
+        This attribute always returns ``secret``.
+        """
+        return "secret"
 
     @abstractmethod
     def get(self, key: str, default: _t.Any = "") -> _t.Any:

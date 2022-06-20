@@ -14,11 +14,13 @@ from jans.pycloudlib.utils import safe_value
 class KubernetesConfig(BaseConfig):
     """This class interacts with Kubernetes ConfigMap backend.
 
-    The following environment variables are used to instantiate the client:
+    .. important:: The instance of this class is configured via environment variables.
 
-    - ``CN_CONFIG_KUBERNETES_NAMESPACE``
-    - ``CN_CONFIG_KUBERNETES_CONFIGMAP``
-    - ``CN_CONFIG_KUBERNETES_USE_KUBE_CONFIG``
+        Supported environment variables:
+
+        - ``CN_CONFIG_KUBERNETES_NAMESPACE``: Kubernetes namespace (default to ``default``).
+        - ``CN_CONFIG_KUBERNETES_CONFIGMAP``: Kubernetes configmaps name (default to ``jans``).
+        - ``CN_CONFIG_KUBERNETES_USE_KUBE_CONFIG``: Load credentials from ``$HOME/.kube/config``, only useful for non-container environment (default to ``false``).
     """
 
     def __init__(self) -> None:

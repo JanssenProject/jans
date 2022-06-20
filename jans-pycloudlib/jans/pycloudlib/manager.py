@@ -46,6 +46,13 @@ class BaseConfiguration(ABC):
     def adapter(self) -> AdapterProtocol:  # pragma: no cover
         """Abstract attribute as a container of adapter instance.
 
+        The adapter is used in the following public methods:
+
+        - ``get``
+        - ``get_all``
+        - ``set``
+        - ``set_all``
+
         Any subclass **MUST** returns an instance of adapter or raise exception.
         """
 
@@ -96,16 +103,23 @@ class ConfigManager(BaseConfiguration):
     """
 
     @cached_property
-    def adapter(self) -> ConfigAdapter:
+    def adapter(self) -> ConfigAdapter:  # noqa: D412
         """Get an instance of adapter class.
 
-        The adapter name is pre-populated from ``CN_CONFIG_ADAPTER`` environment variable.
+        Example:
 
-        Supported config adapter class:
+        .. code-block:: python
 
-        - :class:`~jans.pycloudlib.config.consul_config.ConsulConfig`
-        - :class:`~jans.pycloudlib.config.kubernetes_config.KubernetesConfig`
-        - :class:`~jans.pycloudlib.config.google_config.GoogleConfig`
+            os.environ["CN_CONFIG_ADAPTER"] = "consul"
+            ConfigManager().adapter  # returns an instance of adapter class
+
+        .. important:: The adapter name is pre-populated from ``CN_CONFIG_ADAPTER`` environment variable.
+
+            Supported config adapter name:
+
+            - ``consul``: returns an instance of :class:`~jans.pycloudlib.config.consul_config.ConsulConfig`
+            - ``kubernetes``: returns an instance of :class:`~jans.pycloudlib.config.kubernetes_config.KubernetesConfig`
+            - ``google``: returns an instance of :class:`~jans.pycloudlib.config.google_config.GoogleConfig`
         """
         adapter = os.environ.get("CN_CONFIG_ADAPTER", "consul")
 
@@ -128,16 +142,23 @@ class SecretManager(BaseConfiguration):
     """
 
     @cached_property
-    def adapter(self) -> SecretAdapter:
+    def adapter(self) -> SecretAdapter:  # noqa: D412
         """Get an instance of adapter class.
 
-        The adapter name is pre-populated from ``CN_SECRET_ADAPTER`` environment variable.
+        Example:
 
-        Supported secret adapter class:
+        .. code-block:: python
 
-        - :class:`~jans.pycloudlib.secret.vault_secret.VaultSecret`
-        - :class:`~jans.pycloudlib.secret.kubernetes_secret.KubernetesSecret`
-        - :class:`~jans.pycloudlib.secret.google_secret.GoogleSecret`
+            os.environ["CN_SECRET_ADAPTER"] = "vault"
+            SecretManager().adapter  # returns an instance of adapter class
+
+        .. important:: The adapter name is pre-populated from ``CN_SECRET_ADAPTER`` environment variable (i.e. ``CN_SECRET_ADAPTER=vault``).
+
+            Supported config adapter name:
+
+            - ``vault``: returns an instance of :class:`~jans.pycloudlib.secret.vault_secret.VaultSecret`
+            - ``kubernetes``: returns an instance of :class:`~jans.pycloudlib.secret.kubernetes_secret.KubernetesSecret`
+            - ``google``: returns an instance of :class:`~jans.pycloudlib.secret.google_secret.GoogleSecret`
         """
         adapter = os.environ.get("CN_SECRET_ADAPTER", "vault")
 

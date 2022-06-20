@@ -32,13 +32,15 @@ logger = logging.getLogger(__name__)
 class GoogleSecret(BaseSecret):
     """This class interacts with Google Secret backend.
 
-    The following environment variables are used to instantiate the client:
+    .. important:: The instance of this class is configured via environment variables.
 
-    - ``GOOGLE_APPLICATION_CREDENTIALS`` json file that should be injected in upstream images
-    - ``GOOGLE_PROJECT_ID``
-    - ``CN_SECRET_GOOGLE_SECRET_VERSION_ID``
-    - ``CN_SECRET_GOOGLE_SECRET_MANAGER_PASSPHRASE``
-    - ``CN_SECRET_GOOGLE_SECRET_NAME_PREFIX``
+        Supported environment variables:
+
+        - ``CN_SECRET_GOOGLE_SECRET_VERSION_ID``:  Janssen secret version ID in Google Secret Manager. Defaults to ``latest``, which is recommended.
+        - ``CN_SECRET_GOOGLE_SECRET_MANAGER_PASSPHRASE``: Passphrase for Janssen secret in Google Secret Manager. This is recommended to be changed and defaults to ``secret``.
+        - ``CN_SECRET_GOOGLE_SECRET_NAME_PREFIX``: Prefix for Janssen secret in Google Secret Manager. Defaults to ``jans``. If left ``jans-secret`` secret will be created.
+        - ``GOOGLE_APPLICATION_CREDENTIALS``: JSON file (contains Google credentials) that should be injected into container.
+        - ``GOOGLE_PROJECT_ID``: ID of Google project.
     """
 
     def __init__(self) -> None:

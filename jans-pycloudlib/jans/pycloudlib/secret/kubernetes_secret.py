@@ -15,11 +15,13 @@ from jans.pycloudlib.utils import safe_value
 class KubernetesSecret(BaseSecret):
     """This class interacts with Kubernetes Secret backend.
 
-    The following environment variables are used to instantiate the client:
+    .. important:: The instance of this class is configured via environment variables.
 
-    - ``CN_SECRET_KUBERNETES_NAMESPACE``
-    - ``CN_SECRET_KUBERNETES_SECRET``
-    - ``CN_SECRET_KUBERNETES_USE_KUBE_CONFIG``
+        Supported environment variables:
+
+        - ``CN_SECRET_KUBERNETES_NAMESPACE``: Kubernetes namespace (default to ``default``).
+        - ``CN_SECRET_KUBERNETES_SECRET``: Kubernetes secrets name (default to ``jans``).
+        - ``CN_SECRET_KUBERNETES_USE_KUBE_CONFIG``: Load credentials from ``$HOME/.kube/config``, only useful for non-container environment (default to ``false``).
     """
 
     def __init__(self) -> None:

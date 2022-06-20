@@ -19,18 +19,20 @@ MaybeCacert = _t.Union[bool, str]
 class ConsulConfig(BaseConfig):
     """This class interacts with Consul backend.
 
-    The following environment variables are used to instantiate the client:
+    .. important:: The instance of this class is configured via environment variables.
 
-    - ``CN_CONFIG_CONSUL_HOST``
-    - ``CN_CONFIG_CONSUL_PORT``
-    - ``CN_CONFIG_CONSUL_CONSISTENCY``
-    - ``CN_CONFIG_CONSUL_SCHEME``
-    - ``CN_CONFIG_CONSUL_VERIFY``
-    - ``CN_CONFIG_CONSUL_CACERT_FILE``
-    - ``CN_CONFIG_CONSUL_CERT_FILE``
-    - ``CN_CONFIG_CONSUL_KEY_FILE``
-    - ``CN_CONFIG_CONSUL_TOKEN_FILE``
-    - ``CN_CONFIG_CONSUL_NAMESPACE``
+        Supported environment variables:
+
+        - ``CN_CONFIG_CONSUL_HOST``: hostname or IP of Consul (default to ``localhost``).
+        - ``CN_CONFIG_CONSUL_PORT``: port of Consul (default to ``8500``).
+        - ``CN_CONFIG_CONSUL_CONSISTENCY``: Consul consistency mode (choose one of ``default``, ``consistent``, or ``stale``). Default to ``stale`` mode.
+        - ``CN_CONFIG_CONSUL_SCHEME``: supported Consul scheme (``http`` or ``https``).
+        - ``CN_CONFIG_CONSUL_VERIFY``: whether to verify cert or not (default to ``false``).
+        - ``CN_CONFIG_CONSUL_CACERT_FILE``: path to Consul CA cert file (default to ``/etc/certs/consul_ca.crt``). This file will be used if it exists and ``CN_CONFIG_CONSUL_VERIFY`` set to ``true``.
+        - ``CN_CONFIG_CONSUL_CERT_FILE``: path to Consul cert file (default to ``/etc/certs/consul_client.crt``).
+        - ``CN_CONFIG_CONSUL_KEY_FILE``: path to Consul key file (default to ``/etc/certs/consul_client.key``).
+        - ``CN_CONFIG_CONSUL_TOKEN_FILE``: path to file contains ACL token (default to ``/etc/certs/consul_token``).
+        - ``CN_CONFIG_CONSUL_NAMESPACE``: namespace used to create the config tree, i.e. ``jans/config`` (default to ``jans``).
     """
 
     def __init__(self) -> None:

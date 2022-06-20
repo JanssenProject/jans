@@ -11,7 +11,13 @@ class BaseConfig(ABC):
     Must be sub-classed per implementation details.
     """
 
-    type = "config"
+    @property
+    def type(self) -> str:
+        """Name of the configuration type.
+
+        This attribute always returns ``config``.
+        """
+        return "config"
 
     @abstractmethod
     def get(self, key: str, default: _t.Any = "") -> _t.Any:
