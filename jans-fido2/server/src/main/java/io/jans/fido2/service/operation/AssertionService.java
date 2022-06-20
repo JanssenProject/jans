@@ -10,6 +10,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import io.jans.orm.model.fido2.Fido2RegistrationData;
+import io.jans.orm.model.fido2.Fido2RegistrationEntry;
+import io.jans.orm.model.fido2.Fido2RegistrationStatus;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -26,9 +29,6 @@ import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.entry.Fido2AuthenticationData;
 import io.jans.fido2.model.entry.Fido2AuthenticationEntry;
 import io.jans.fido2.model.entry.Fido2AuthenticationStatus;
-import io.jans.fido2.model.entry.Fido2RegistrationData;
-import io.jans.fido2.model.entry.Fido2RegistrationEntry;
-import io.jans.fido2.model.entry.Fido2RegistrationStatus;
 import io.jans.fido2.service.ChallengeGenerator;
 import io.jans.fido2.service.DataMapperService;
 import io.jans.fido2.service.persist.AuthenticationPersistenceService;

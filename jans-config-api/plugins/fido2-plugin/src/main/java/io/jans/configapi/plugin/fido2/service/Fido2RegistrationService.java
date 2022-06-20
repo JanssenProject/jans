@@ -8,10 +8,10 @@ package io.jans.configapi.plugin.fido2.service;
 
 import io.jans.as.common.service.common.UserService;
 import io.jans.as.model.config.StaticConfiguration;
-import io.jans.fido2.model.entry.Fido2RegistrationEntry;
-import io.jans.fido2.model.entry.Fido2RegistrationStatus;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.base.SimpleBranch;
+import io.jans.orm.model.fido2.Fido2RegistrationEntry;
+import io.jans.orm.model.fido2.Fido2RegistrationStatus;
 import io.jans.orm.search.filter.Filter;
 import io.jans.util.StringHelper;
 import jakarta.enterprise.context.ApplicationScoped;
