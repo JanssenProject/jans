@@ -180,3 +180,20 @@ def test_k8s_config_incluster():
 
     with pytest.raises(kubernetes.config.config_exception.ConfigException):
         config.client
+
+
+def test_k8s_config_set_all(gk8s_config, monkeypatch):
+    monkeypatch.setattr(
+        "kubernetes.client.CoreV1Api.read_namespaced_config_map",
+        lambda cls, n, ns: KubeResult(data={"foo": "bar"})
+    )
+    monkeypatch.setattr(
+        "kubernetes.client.CoreV1Api.patch_namespaced_config_map",
+        lambda cls, n, ns, body: KubeResult(data={"foo": "bar"})
+    )
+    assert gk8s_config.set_all({"foo": "bar"}) is True
+
+
+def test_k8s_config_type(gk8s_config):
+    # gk8s_config is a subclass of BaseConfig
+    assert gk8s_config.type == "config"

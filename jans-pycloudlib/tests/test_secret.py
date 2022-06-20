@@ -249,3 +249,18 @@ def test_k8s_secret_incluster():
 
     with pytest.raises(kubernetes.config.config_exception.ConfigException):
         secret.client
+
+
+def test_k8s_secret_set_all(gk8s_secret, monkeypatch):
+    gk8s_secret.name_exists = True
+
+    monkeypatch.setattr(
+        "kubernetes.client.CoreV1Api.patch_namespaced_secret",
+        lambda cls, n, ns, body: KubeResult(data={})
+    )
+    assert gk8s_secret.set_all({"foo": "bar"}) is True
+
+
+def test_k8s_secret_type(gk8s_secret):
+    # gk8s_secret is a subclass of BaseSecret
+    assert gk8s_secret.type == "secret"
