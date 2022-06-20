@@ -139,9 +139,10 @@ RUN python3 -m ensurepip \
 # Prometheus
 # ==========
 
+ARG PROMETHEUS_JAVAAGENT_VERSION=0.17.0
 COPY conf/prometheus-config.yaml /opt/prometheus/
 RUN mkdir -p /opt/prometheus \
-    && wget -q https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/0.17.0/jmx_prometheus_javaagent-0.17.0.jar -O /opt/prometheus/jmx_prometheus_javaagent.jar \
+    && wget -q https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/${PROMETHEUS_JAVAAGENT_VERSION}/jmx_prometheus_javaagent-${PROMETHEUS_JAVAAGENT_VERSION}.jar -O /opt/prometheus/jmx_prometheus_javaagent.jar \
     && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-auth --add-module=jmx,stats
 
 # =======
