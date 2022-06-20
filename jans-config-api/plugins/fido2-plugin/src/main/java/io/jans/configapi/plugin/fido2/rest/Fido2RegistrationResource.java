@@ -6,7 +6,7 @@ import io.jans.configapi.plugin.fido2.service.Fido2RegistrationService;
 import io.jans.configapi.plugin.fido2.util.Constants;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
-import io.jans.fido2.model.entry.Fido2RegistrationEntry;
+import io.jans.orm.model.fido2.Fido2RegistrationEntry;
 import jakarta.inject.Inject;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;

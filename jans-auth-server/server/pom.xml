@@ -364,12 +364,6 @@
 			<artifactId>jans-notify-client</artifactId>
 		</dependency>
 
-		<!-- Fido2 -->
-		<dependency>
-			<groupId>io.jans</groupId>
-			<artifactId>jans-fido2-client</artifactId>
-		</dependency>
-
 		<!-- agama -->
         <dependency>
             <groupId>io.jans</groupId>
