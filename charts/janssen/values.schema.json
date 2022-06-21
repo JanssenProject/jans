@@ -191,10 +191,9 @@
               "type": "string",
               "pattern": "^(OAUTH|TEST|UMA)$"
             },
-            "cnPersistenceLdapMapping": {
+            "cnPersistenceHybridMapping": {
               "description": "Specify data that should be saved in LDAP (one of default, user, cache, site, token, or session; default to default). Note this environment only takes effect when `global.cnPersistenceType`  is set to `hybrid`.",
-              "type": "string",
-              "pattern": "^(default|user|site|cache|statistic)$"
+              "type": "string"
             },
             "cnRedisSentinelGroup": {
               "description": "Redis Sentinel Group. Often set when `config.configmap.cnRedisType` is set to `SENTINEL`. Can be used when  `config.configmap.cnCacheType` is set to `REDIS`.",
