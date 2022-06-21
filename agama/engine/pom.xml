@@ -45,12 +45,6 @@
             <artifactId>jakarta.servlet-api</artifactId>
         </dependency>
         
-        <!-- JSF -->
-        <dependency>
-            <groupId>jakarta.faces</groupId>
-            <artifactId>jakarta.faces-api</artifactId>   
-        </dependency>
-        
         <!-- JAX-RS -->
         <dependency>
             <groupId>org.jboss.spec.javax.ws.rs</groupId>
@@ -111,9 +105,9 @@
         
         <!-- Groovy -->
         <dependency>
-            <groupId>org.codehaus.groovy</groupId>
+            <groupId>org.apache.groovy</groupId>
             <artifactId>groovy</artifactId>
-            <version>3.0.10</version>
+            <version>4.0.3</version>
         </dependency>
         
         <!-- JANS -->

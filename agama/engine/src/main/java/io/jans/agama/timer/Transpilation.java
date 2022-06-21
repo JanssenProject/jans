@@ -102,7 +102,7 @@ public class Transpilation {
     public void process() throws IOException {
 
         List<ProtoFlow> flows = entryManager.findEntries(AgamaPersistenceService.AGAMA_FLOWS_BASE,
-                ProtoFlow.class,  Filter.createEqualityFilter("jansEnabled", true), null);
+                ProtoFlow.class, Filter.createEqualityFilter("jansEnabled", true), null);
 
         Map<String, ProtoFlow> map = flows.stream().collect(
                 Collectors.toMap(ProtoFlow::getQName, Function.identity()));
@@ -127,7 +127,7 @@ public class Transpilation {
                     //there might be a compilation of this script running already.
                     //If the node in charge of this crashed before completion, the random 
                     //condition helps to get the job done by another node in the near future
-                    candidates.add(name);               
+                    candidates.add(name);
                 } else {
                 
                     rev = pfl.getRevision();    
@@ -186,6 +186,9 @@ public class Transpilation {
                 }
             } catch (TranspilerException te) {
                 error = te.getMessage();
+                if (te.getCause() != null) {
+                    error += "\n" + te.getCause().getMessage();
+                }
             }
             
             if (error != null) {
