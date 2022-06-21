@@ -132,7 +132,7 @@ class ConfigManager(BaseConfiguration):
         if adapter == "google":
             return GoogleConfig()
 
-        raise ValueError(f"Unsupported secret adapter {adapter!r}")
+        raise ValueError(f"Unsupported config adapter {adapter!r}")
 
 
 class SecretManager(BaseConfiguration):

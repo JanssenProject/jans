@@ -46,15 +46,15 @@ def test_config_manager(monkeypatch, adapter, adapter_cls):
     monkeypatch.setenv("CN_CONFIG_ADAPTER", adapter)
     manager = ConfigManager()
     assert manager.adapter.__class__.__name__ == adapter_cls
-    assert id(manager.adapter) == id(manager.adapter)
 
 
 def test_config_manager_invalid_adapter(monkeypatch):
     from jans.pycloudlib.manager import ConfigManager
 
     monkeypatch.setenv("CN_CONFIG_ADAPTER", "random")
-    with pytest.raises(ValueError):
-        ConfigManager().adapter
+    with pytest.raises(ValueError) as exc:
+        _ = ConfigManager().get("config1")
+    assert "Unsupported config adapter" in str(exc.value)
 
 
 @pytest.mark.parametrize("adapter, adapter_cls", [
@@ -74,8 +74,9 @@ def test_secret_manager_invalid_adapter(monkeypatch):
     from jans.pycloudlib.manager import SecretManager
 
     monkeypatch.setenv("CN_SECRET_ADAPTER", "random")
-    with pytest.raises(ValueError):
-        SecretManager().adapter
+    with pytest.raises(ValueError) as exc:
+        _ = SecretManager().get("secret1")
+    assert "Unsupported secret adapter" in str(exc.value)
 
 
 @pytest.mark.parametrize("key, expected, decode, binary_mode", [
