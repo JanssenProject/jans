@@ -21,6 +21,17 @@ get_logging_files() {
     echo $logs
 }
 
+get_prometheus_opt() {
+    prom_opt=""
+
+    if [ -n "${CN_PROMETHEUS_PORT}" ]; then
+        prom_opt="
+            -javaagent:/opt/prometheus/jmx_prometheus_javaagent.jar=${CN_PROMETHEUS_PORT}:/opt/prometheus/prometheus-config.yaml
+        "
+    fi
+    echo "${prom_opt}"
+}
+
 python3 /app/scripts/wait.py
 
 copy_builtin_plugins
@@ -39,6 +50,7 @@ exec java \
     -Dlog.base=/opt/jans/jetty/jans-config-api \
     -Djava.io.tmpdir=/tmp \
     -Dlog4j2.configurationFile=$(get_logging_files) \
+    $(get_prometheus_opt) \
     ${CN_JAVA_OPTIONS} \
     -jar /opt/jetty/start.jar \
         jetty.http.port=8074 \
