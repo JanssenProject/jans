@@ -32,6 +32,17 @@ move_builtin_jars() {
     fi
 }
 
+get_prometheus_opt() {
+    prom_opt=""
+
+    if [ -n "${CN_PROMETHEUS_PORT}" ]; then
+        prom_opt="
+            -javaagent:/opt/prometheus/jmx_prometheus_javaagent.jar=${CN_PROMETHEUS_PORT}:/opt/prometheus/prometheus-config.yaml
+        "
+    fi
+    echo "${prom_opt}"
+}
+
 # ==========
 # ENTRYPOINT
 # ==========
@@ -57,6 +68,7 @@ exec java \
     -Djava.io.tmpdir=/tmp \
     -Dlog4j2.configurationFile=resources/log4j2.xml \
     $(get_debug_opt) \
+    $(get_prometheus_opt) \
     ${CN_JAVA_OPTIONS} \
     -jar /opt/jetty/start.jar \
         jetty.deploy.scanInterval=0 \
