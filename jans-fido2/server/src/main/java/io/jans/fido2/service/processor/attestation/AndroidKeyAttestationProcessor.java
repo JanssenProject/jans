@@ -35,7 +35,7 @@ import io.jans.fido2.ctap.AttestationFormat;
 import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.auth.AuthData;
 import io.jans.fido2.model.auth.CredAndCounterData;
-import io.jans.fido2.model.entry.Fido2RegistrationData;
+import io.jans.orm.model.fido2.Fido2RegistrationData;
 import io.jans.fido2.service.CertificateService;
 import io.jans.fido2.service.mds.AttestationCertificateService;
 import io.jans.fido2.service.processors.AttestationFormatProcessor;
