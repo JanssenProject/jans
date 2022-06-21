@@ -7,7 +7,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import groovy.lang.GroovyClassLoader;
 import groovy.util.GroovyScriptEngine;
 import groovy.util.ResourceException;
+import groovy.util.ScriptException;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
@@ -17,22 +21,23 @@ import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.BiPredicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import jakarta.annotation.PostConstruct;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 
 import io.jans.agama.engine.misc.PrimitiveUtils;
 import io.jans.agama.model.EngineConfig;
 
+import org.codehaus.groovy.control.CompilerConfiguration;
 import org.slf4j.Logger;
 
 @ApplicationScoped
 public class ActionService {
     
-    private static final String CLASS_SUFFIX = ".groovy";
+    private static final List<String> CLASS_EXTENSIONS = Arrays.asList("java", "groovy");
     
     @Inject
     private Logger logger;
@@ -48,7 +53,7 @@ public class ActionService {
             throws Exception {
 
         boolean noInst = instance == null;
-        Class actionCls;
+        Class actionCls = null;
         
         if (!noInst) {
             actionCls = instance.getClass();
@@ -60,13 +65,22 @@ public class ActionService {
                 //Try the fastest lookup first
                 actionCls = Class.forName(className);
             } catch (ClassNotFoundException e) {
-                try {
-                    String classFilePath = className.replace('.', File.separatorChar) + CLASS_SUFFIX;
-                    //GroovyScriptEngine classes are only really reloaded when the underlying file changes
-                    actionCls = gse.loadScriptByName(classFilePath);
-                } catch (ResourceException re) {
-                    throw new ClassNotFoundException(re.getMessage(), e);
+
+                ResourceException rex = null;
+                for (String ext : CLASS_EXTENSIONS) {
+                    try {
+                        String classFilePath = className.replace('.', File.separatorChar) +  "." + ext;
+                        //GroovyScriptEngine classes are only really reloaded when the underlying file changes
+                        actionCls = gse.loadScriptByName(classFilePath);
+                        break;
+                    } catch (ResourceException re) {
+                        if (rex == null) rex = re;
+                    } catch (ScriptException se) {
+                        throw se;
+                    }
                 }
+                
+                if (actionCls == null) throw new ClassNotFoundException(rex.getMessage(), rex);                
             }
         }
         logger.info("Class {} loaded successfully", className);
@@ -229,24 +243,20 @@ public class ActionService {
             logger.error(e.getMessage());
             throw new RuntimeException(e);
         }
-        
+
         logger.debug("Creating a Groovy Script Engine based at {}", url.toString());        
         gse = new GroovyScriptEngine(new URL[]{ url });
-        /*
-        //Failed attempt to force scripts have java extension instead of groovy:
-        //Dependant scripts are not found if .groovy is not used
+
         CompilerConfiguration cc = gse.getConfig();
-        cc.setDefaultScriptExtension(CLASS_SUFFIX.substring(1));
-        
-        //Set it so change takes effect
-        gse.setConfig(cc);
-        */
+        cc.setDefaultScriptExtension(CLASS_EXTENSIONS.get(0));
+        cc.setScriptExtensions(CLASS_EXTENSIONS.stream().collect(Collectors.toSet()));
+
         loader = gse.getGroovyClassLoader();
         loader.setShouldRecompile(true);
 
         mapper = new ObjectMapper();
         mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-        
+
     }
 
 }
