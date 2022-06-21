@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.fido2.model.entry;
+package io.jans.orm.model.fido2;
 
 import java.util.HashMap;
 import java.util.Map;
