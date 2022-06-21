@@ -68,6 +68,16 @@ RUN python3 -m ensurepip \
     && pip3 install --no-cache-dir -r /app/requirements.txt \
     && pip3 uninstall -y pip wheel
 
+# ==========
+# Prometheus
+# ==========
+
+ARG PROMETHEUS_JAVAAGENT_VERSION=0.17.0
+COPY conf/prometheus-config.yaml /opt/prometheus/
+RUN mkdir -p /opt/prometheus \
+    && wget -q https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/${PROMETHEUS_JAVAAGENT_VERSION}/jmx_prometheus_javaagent-${PROMETHEUS_JAVAAGENT_VERSION}.jar -O /opt/prometheus/jmx_prometheus_javaagent.jar \
+    && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-client-api --add-module=jmx,stats
+
 # =====================
 # jans-linux-setup sync
 # =====================
@@ -206,7 +216,7 @@ LABEL name="janssenproject/client-api" \
 RUN mkdir -p /etc/certs /etc/jans/conf ${JETTY_BASE}/jans-client-api/logs
 COPY jetty/log4j2.xml ${JETTY_BASE}/jans-client-api/resources/
 COPY scripts /app/scripts
-COPY templates/*.tmpl /app/templates/
+COPY conf/*.tmpl /app/templates/
 RUN chmod +x /app/scripts/entrypoint.sh
 
 # create non-root user

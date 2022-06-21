@@ -3,7 +3,7 @@
 
 # include required files/directories
 !scripts
-!templates
+!conf
 !LICENSE
 !requirements.txt
 !jetty
