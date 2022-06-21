@@ -44,7 +44,7 @@ class GoogleSecret(BaseSecret):
     """
 
     def __init__(self) -> None:
-        self.project_id = os.getenv("GOOGLE_PROJECT_ID")
+        self.project_id = os.getenv("GOOGLE_PROJECT_ID", "")
         self.version_id = os.getenv("CN_SECRET_GOOGLE_SECRET_VERSION_ID", "latest")
         self.salt = os.urandom(16)
         self.passphrase = os.getenv("CN_SECRET_GOOGLE_SECRET_MANAGER_PASSPHRASE", "secret")

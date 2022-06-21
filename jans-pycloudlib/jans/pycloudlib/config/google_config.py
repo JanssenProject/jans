@@ -37,7 +37,7 @@ class GoogleConfig(BaseConfig):
     """
 
     def __init__(self) -> None:
-        self.project_id = os.getenv("GOOGLE_PROJECT_ID")
+        self.project_id = os.getenv("GOOGLE_PROJECT_ID", "")
         self.version_id = os.getenv("CN_CONFIG_GOOGLE_SECRET_VERSION_ID", "latest")
         # secrets key value by default
         self.google_secret_name = os.getenv("CN_CONFIG_GOOGLE_SECRET_NAME_PREFIX", "jans") + "-configuration"
