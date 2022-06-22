@@ -161,7 +161,7 @@ class Crypto64:
         extension_path = Path(Config.extensionFolder)
         for ep in extension_path.glob("**/*"):
             if ep.is_file() and ep.suffix.lower() in ['.py', '.java']:
-                extension_type = ep.parent.name.lower()
+                extension_type = ep.relative_to(Config.extensionFolder).parent.as_posix().lower().replace(os.path.sep, '_')
                 extension_name = ep.stem.lower()
                 extension_script_name = '{}_{}'.format(extension_type, extension_name)
 
