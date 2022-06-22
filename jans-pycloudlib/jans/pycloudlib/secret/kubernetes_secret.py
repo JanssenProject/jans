@@ -2,7 +2,7 @@
 
 import base64
 import os
-from typing import Any
+import typing as _t
 
 import kubernetes.client
 import kubernetes.config
@@ -15,14 +15,16 @@ from jans.pycloudlib.utils import safe_value
 class KubernetesSecret(BaseSecret):
     """This class interacts with Kubernetes Secret backend.
 
-    The following environment variables are used to instantiate the client:
+    .. important:: The instance of this class is configured via environment variables.
 
-    - ``CN_SECRET_KUBERNETES_NAMESPACE``
-    - ``CN_SECRET_KUBERNETES_SECRET``
-    - ``CN_SECRET_KUBERNETES_USE_KUBE_CONFIG``
+        Supported environment variables:
+
+        - ``CN_SECRET_KUBERNETES_NAMESPACE``: Kubernetes namespace (default to ``default``).
+        - ``CN_SECRET_KUBERNETES_SECRET``: Kubernetes secrets name (default to ``jans``).
+        - ``CN_SECRET_KUBERNETES_USE_KUBE_CONFIG``: Load credentials from ``$HOME/.kube/config``, only useful for non-container environment (default to ``false``).
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.settings = {
             k: v
             for k, v in os.environ.items()
@@ -34,14 +36,14 @@ class KubernetesSecret(BaseSecret):
         self.settings.setdefault(
             "CN_SECRET_KUBERNETES_SECRET", "jans",
         )
-        self.settings.setdefault("CN_SECRET_KUBERNETES_USE_KUBE_CONFIG", False)
+        self.settings.setdefault("CN_SECRET_KUBERNETES_USE_KUBE_CONFIG", "false")
 
         self._client = None
         self.name_exists = False
         self.kubeconfig_file = os.path.expanduser("~/.kube/config")
 
     @property
-    def client(self):
+    def client(self) -> kubernetes.client.CoreV1Api:
         """Lazy-loaded client to interact with Kubernetes API."""
         if not self._client:
             if as_boolean(self.settings["CN_SECRET_KUBERNETES_USE_KUBE_CONFIG"]):
@@ -51,14 +53,14 @@ class KubernetesSecret(BaseSecret):
             self._client = kubernetes.client.CoreV1Api()
         return self._client
 
-    def get(self, key, default: Any = "") -> Any:
+    def get(self, key: str, default: _t.Any = "") -> _t.Any:
         """Get value based on given key.
 
         :param key: Key name.
         :param default: Default value if key is not exist.
         :returns: Value based on given key or default one.
         """
-        result = self.all()
+        result = self.get_all()
         return result.get(key) or default
 
     def _prepare_secret(self) -> None:
@@ -89,7 +91,7 @@ class KubernetesSecret(BaseSecret):
                 else:
                     raise
 
-    def set(self, key: str, value: Any) -> bool:
+    def set(self, key: str, value: _t.Any) -> bool:
         """Set key with given value.
 
         :param key: Key name.
@@ -110,14 +112,7 @@ class KubernetesSecret(BaseSecret):
         )
         return bool(ret)
 
-    def all(self) -> dict:  # pragma: no cover
-        """Get all key-value pairs.
-
-        :returns: A ``dict`` of key-value pairs (if any).
-        """
-        return self.get_all()
-
-    def get_all(self) -> dict:
+    def get_all(self) -> dict[str, _t.Any]:
         """Get all key-value pairs.
 
         :returns: A ``dict`` of key-value pairs (if any).
@@ -131,7 +126,7 @@ class KubernetesSecret(BaseSecret):
         data = result.data or {}
         return {k: base64.b64decode(v).decode() for k, v in data.items()}
 
-    def set_all(self, data: dict) -> bool:
+    def set_all(self, data: dict[str, _t.Any]) -> bool:
         """Set all key-value pairs.
 
         :param key: Key name.

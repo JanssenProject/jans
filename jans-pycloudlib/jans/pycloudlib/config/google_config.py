@@ -1,10 +1,13 @@
 """This module contains config adapter class to interact with Google Secret."""
 
+from __future__ import annotations
+
 import sys
 import logging
 import os
 import json
-from typing import Any
+import typing as _t
+from functools import cached_property
 
 from google.cloud import secretmanager
 from google.api_core.exceptions import AlreadyExists, NotFound
@@ -12,36 +15,39 @@ from google.api_core.exceptions import AlreadyExists, NotFound
 from jans.pycloudlib.utils import safe_value
 from jans.pycloudlib.config.base_config import BaseConfig
 
+if _t.TYPE_CHECKING:  # pragma: no cover
+    # imported objects for function type hint, completion, etc.
+    # these won't be executed in runtime
+    from google.cloud import secretmanager_v1
+
 logger = logging.getLogger(__name__)
 
 
 class GoogleConfig(BaseConfig):
     """This class interacts with Google Secret backend.
 
-    The following environment variables are used to instantiate the client:
+    .. important:: The instance of this class is configured via environment variables.
 
-    - ``GOOGLE_APPLICATION_CREDENTIALS`` json file that should be injected in upstream images
-    - ``GOOGLE_PROJECT_ID``
-    - ``CN_CONFIG_GOOGLE_SECRET_VERSION_ID``
-    - ``CN_CONFIG_GOOGLE_SECRET_NAME_PREFIX``
+        Supported environment variables:
+
+        - ``CN_CONFIG_GOOGLE_SECRET_VERSION_ID``: Janssen configuration secret version ID in Google Secret Manager. Defaults to ``latest``, which is recommended.
+        - ``CN_CONFIG_GOOGLE_SECRET_NAME_PREFIX``: Prefix for Janssen configuration secret in Google Secret Manager. Defaults to ``jans``. If left intact ``jans-configuration`` secret will be created.
+        - ``GOOGLE_APPLICATION_CREDENTIALS``: JSON file (contains Google credentials) that should be injected into container.
+        - ``GOOGLE_PROJECT_ID``: ID of Google project.
     """
 
-    def __init__(self):
-        self.project_id = os.getenv("GOOGLE_PROJECT_ID")
+    def __init__(self) -> None:
+        self.project_id = os.getenv("GOOGLE_PROJECT_ID", "")
         self.version_id = os.getenv("CN_CONFIG_GOOGLE_SECRET_VERSION_ID", "latest")
         # secrets key value by default
         self.google_secret_name = os.getenv("CN_CONFIG_GOOGLE_SECRET_NAME_PREFIX", "jans") + "-configuration"
-        # Create the Secret Manager client.
-        self.client = secretmanager.SecretManagerServiceClient()
 
-    def all(self) -> dict:  # pragma: no cover
-        """Access the payload for the given secret version if one exists.
+    @cached_property
+    def client(self) -> secretmanager.SecretManagerServiceClient:
+        """Create the Secret Manager client."""
+        return secretmanager.SecretManagerServiceClient()
 
-        This method is deprecated, use ``get_all`` instead.
-        """
-        return self.get_all()
-
-    def get_all(self) -> dict:
+    def get_all(self) -> dict[str, _t.Any]:
         """Access the payload for the given secret version if one exists.
 
         The version can be a version number as a string (e.g. "5") or an alias (e.g. "latest").
@@ -76,7 +82,7 @@ class GoogleConfig(BaseConfig):
 
         return data
 
-    def get(self, key, default: Any = "") -> Any:
+    def get(self, key: str, default: _t.Any = "") -> _t.Any:
         """Get value based on given key.
 
         :param key: Key name.
@@ -86,7 +92,7 @@ class GoogleConfig(BaseConfig):
         result = self.get_all()
         return result.get(key) or default
 
-    def set(self, key: str, value: Any) -> bool:
+    def set(self, key: str, value: _t.Any) -> bool:
         """Set key with given value.
 
         :param key: Key name.
@@ -101,7 +107,7 @@ class GoogleConfig(BaseConfig):
         secret_version_bool = self.add_secret_version(safe_value(all_))
         return secret_version_bool
 
-    def set_all(self, data: dict) -> bool:
+    def set_all(self, data: dict[str, _t.Any]) -> bool:
         """Push a full dictionary to secrets.
 
         :param data: full dictionary to push. Used in initial creation of config and secret
@@ -115,15 +121,19 @@ class GoogleConfig(BaseConfig):
         secret_version_bool = self.add_secret_version(safe_value(all_))
         return secret_version_bool
 
-    def create_secret(self) -> bool:
+    def create_secret(self) -> _t.Union[secretmanager_v1.types.Secret, None]:
         """Create a new secret with the given name.
 
         A secret is a logical wrapper around a collection of secret versions.
         Secret versions hold the actual secret material.
+
+        .. versionchanged:: 1.0.1
+            Returns ``google.cloud.secretmanager_v1.types.Secret`` instead of boolean.
         """
         # Build the resource name of the parent project.
         parent = f"projects/{self.project_id}"
-        response = False
+
+        response = None
         try:
             # Create the secret.
             response = self.client.create_secret(
@@ -133,14 +143,12 @@ class GoogleConfig(BaseConfig):
                     "secret": {"replication": {"automatic": {}}},
                 }
             )
-            logger.info("Created secret: {}".format(response.name))
-
+            logger.info(f"Created secret: {response.name}")
         except AlreadyExists:
             logger.warning(f'Secret {self.google_secret_name} already exists. A new version will be created.')
+        return response
 
-        return bool(response)
-
-    def add_secret_version(self, payload: str) -> bool:
+    def add_secret_version(self, payload: _t.AnyStr) -> bool:
         """Add a new secret version to the given secret with the provided payload.
 
         :param payload:  payload
@@ -148,13 +156,16 @@ class GoogleConfig(BaseConfig):
         # Build the resource name of the parent secret.
         parent = self.client.secret_path(self.project_id, self.google_secret_name)
 
-        # Convert the string payload into a bytes. This step can be omitted if you
-        # pass in bytes instead of a str for the payload argument.
-        payload = payload.encode("UTF-8")
+        if isinstance(payload, str):
+            # Convert the string payload into a bytes (if it's a string).
+            # This step can be omitted if you pass in bytes instead of a str for the payload argument.
+            payload_bytes = payload.encode("UTF-8")
+        else:
+            payload_bytes = payload
 
         # Add the secret version.
         response = self.client.add_secret_version(
-            request={"parent": parent, "payload": {"data": payload}}
+            request={"parent": parent, "payload": {"data": payload_bytes}}
         )
 
         logger.info("Added secret version: {}".format(response.name))
