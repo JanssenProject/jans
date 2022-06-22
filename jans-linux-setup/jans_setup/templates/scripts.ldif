@@ -546,3 +546,18 @@ jansProgLng: python
 jansRevision: 1
 jansScr::%(person_authentication_agamabridge)s
 jansScrTyp: person_authentication
+
+dn: inum=B270-381E,ou=scripts,o=jans
+objectClass: jansCustomScr
+objectClass: top
+description: This script is a 2 in 1. It can be used to enable user to reset its password or to enable 2FA sending a token to user's email
+displayName: Forgot Password 2FA Token
+inum: B270-381E
+jansConfProperty: {"value1":"SCRIPT_FUNCTION","value2":"forgot_password","description":""}
+jansEnabled: false
+jansLevel: 10
+jansModuleProperty: {"value1":"SCRIPT_FUNCTION","value2":"ldap","description":""}
+jansProgLng: python
+jansRevision: 1
+jansScr::%(person_authentication_other_forgot_password_forgot_password)s
+jansScrTyp: person_authentication
