@@ -55,7 +55,7 @@ RUN /opt/jython/bin/pip uninstall -y pip
 # ===========
 
 ENV CN_VERSION=1.0.1-SNAPSHOT
-ENV CN_BUILD_DATE='2022-06-16 08:14'
+ENV CN_BUILD_DATE='2022-06-22 08:14'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-server/${CN_VERSION}/jans-auth-server-${CN_VERSION}.war
 
 # Install Jans Auth
@@ -90,7 +90,7 @@ RUN wget -q https://jenkins.gluu.org/maven/org/gluu/casa-config/${CASA_CONFIG_VE
 # Casa external scripts
 # =====================
 
-ARG FLEX_SOURCE_VERSION=fe01bcb3d46311355b15a37b655253ca17997358
+ARG FLEX_SOURCE_VERSION=87276ada2aa5004941e3fd6cc55833f5153f8254
 ARG CASA_EXTRAS_DIR=casa/extras
 
 RUN mkdir -p /opt/jans/python/libs
@@ -98,7 +98,7 @@ RUN git clone --filter blob:none --no-checkout https://github.com/GluuFederation
     && cd /tmp/flex \
     && git sparse-checkout init --cone \
     && git checkout ${FLEX_SOURCE_VERSION} \
-    && git sparse-checkout set ${CASA_EXTRAS_DIR} \
+    && git sparse-checkout add ${CASA_EXTRAS_DIR} \
     && cd /opt/jans/python/libs \
     && cp /tmp/flex/${CASA_EXTRAS_DIR}/casa-external_* . \
     && rm -rf /tmp/flex
@@ -286,7 +286,8 @@ RUN chmod -R g=u ${JETTY_BASE}/jans-auth/custom \
     && chmod 664 /usr/java/latest/jre/lib/security/cacerts \
     && chmod 664 /opt/jetty/etc/jetty.xml \
     && chmod 664 /opt/jetty/etc/webdefault.xml \
-    && chown -R 1000:0 ${JETTY_BASE}/jans-auth/agama
+    && chown -R 1000:0 ${JETTY_BASE}/jans-auth/agama \
+    && chown -R 1000:0 /opt/jans/python/libs
 
 USER 1000
 
