@@ -1,48 +1,52 @@
 """This module contains base class for secret adapter."""
 
-from typing import Any
-from typing import NoReturn
+import typing as _t
+from abc import ABC
+from abc import abstractmethod
 
 
-class BaseSecret:
+class BaseSecret(ABC):
     """Base class for secret adapter.
 
     Must be sub-classed per implementation details.
     """
 
-    type = "secret"
+    @property
+    def type(self) -> str:
+        """Name of the configuration type.
 
-    def get(self, key: str, default: Any = "") -> NoReturn:
+        This attribute always returns ``secret``.
+        """
+        return "secret"
+
+    @abstractmethod
+    def get(self, key: str, default: _t.Any = "") -> _t.Any:
         """Get specific secret.
 
         Subclass **MUST** implement this method.
         """
-        raise NotImplementedError
 
-    def set(self, key: str, value: Any) -> NoReturn:
+    @abstractmethod
+    def set(self, key: str, value: _t.Any) -> bool:
         """Set specific secret.
 
         Subclass **MUST** implement this method.
         """
-        raise NotImplementedError
 
-    def all(self) -> NoReturn:  # pragma: no cover
-        """Get all secrets (deprecated in favor of ``get_all``).
-
-        Subclass **MUST** implement this method.
-        """
+    def all(self) -> dict[str, _t.Any]:  # pragma: no cover
+        """Get all secrets (deprecated in favor of ``get_all``)."""
         return self.get_all()
 
-    def set_all(self, data: dict) -> NoReturn:
+    @abstractmethod
+    def set_all(self, data: dict[str, _t.Any]) -> bool:
         """Set all secrets.
 
         Subclass **MUST** implement this method.
         """
-        raise NotImplementedError
 
-    def get_all(self) -> NoReturn:
+    @abstractmethod
+    def get_all(self) -> dict[str, _t.Any]:
         """Get all secrets.
 
         Subclass **MUST** implement this method.
         """
-        raise NotImplementedError
