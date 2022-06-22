@@ -2,4 +2,4 @@
 grpcio==1.41.0
 ruamel.yaml==0.16.10
 libcst<0.4
-git+https://github.com/JanssenProject/jans@0f1a2e6761c0522acdfdab3d69adac5c8062e780#egg=jans-pycloudlib&subdirectory=jans-pycloudlib
+git+https://github.com/JanssenProject/jans@39b9b42f981e9526f0292d6be300e56d9a17c0ae#egg=jans-pycloudlib&subdirectory=jans-pycloudlib
