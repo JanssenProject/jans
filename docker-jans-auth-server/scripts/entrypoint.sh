@@ -16,6 +16,7 @@ get_debug_opt() {
 }
 
 move_builtin_jars() {
+    #twilio, jsmpp, casa-config, jans-fido2-client
     for src in /usr/share/java/*.jar; do
         fname=$(basename "$src")
         cp "$src" "/opt/jans/jetty/jans-auth/custom/libs/$fname"

@@ -87,7 +87,6 @@ ARG CASA_CONFIG_BUILD_DATE="2022-05-26 13:56"
 RUN wget -q https://jenkins.gluu.org/maven/org/gluu/casa-config/${CASA_CONFIG_VERSION}/casa-config-${CASA_CONFIG_VERSION}.jar -P /usr/share/java/
 
 # A workaround for Fido2 integration
-# @TODO: possibly will be removed (depends on https://github.com/JanssenProject/jans/issues/1499)
 ARG FIDO2_CLIENT_VERSION=1.0.1-SNAPSHOT
 ARG FIDO2_CLIENT_BUILD_DATE="2022-06-22 08:13"
 RUN wget -q https://jenkins.jans.io/maven/io/jans/jans-fido2-client/${FIDO2_CLIENT_VERSION}/jans-fido2-client-${FIDO2_CLIENT_VERSION}.jar -P /usr/share/java/
