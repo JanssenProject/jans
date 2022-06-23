@@ -62,10 +62,10 @@ public class Processor {
 
         if (command != null && command.getCommandType() != null) {
             switch (command.getCommandType()) {
-                case REGISTER_SITE:
-                    return new RegisterSiteOperation(command, serviceProvider);
-                case UPDATE_SITE:
-                    return new UpdateSiteOperation(command, serviceProvider);
+//                case REGISTER_SITE:
+//                    return new RegisterSiteOperation(command, serviceProvider);
+//                case UPDATE_SITE:
+//                    return new UpdateSiteOperation(command, serviceProvider);
                 case REMOVE_SITE:
                     return new RemoveSiteOperation(command, serviceProvider);
                 case GET_CLIENT_TOKEN:
@@ -78,8 +78,8 @@ public class Processor {
                     return new GetUserInfoOperation(command, serviceProvider);
                 case GET_JWKS:
                     return new GetJwksOperation(command, serviceProvider);
-                case GET_DISCOVERY:
-                    return new GetDiscoveryOperation(command, serviceProvider);
+//                case GET_DISCOVERY:
+//                    return new GetDiscoveryOperation(command, serviceProvider);
                 case GET_AUTHORIZATION_URL:
                     return new GetAuthorizationUrlOperation(command, serviceProvider);
                 case GET_TOKENS_BY_CODE:

@@ -172,4 +172,8 @@ public class BaseResource {
     private String safeToJson(String jsonString) {
         return Util.isNullOrEmpty(jsonString) ? "{}" : jsonString;
     }
+
+    public HttpServletRequest getHttpRequest() {
+        return httpRequest;
+    }
 }

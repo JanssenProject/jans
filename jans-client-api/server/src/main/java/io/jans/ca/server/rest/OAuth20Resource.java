@@ -2,6 +2,10 @@ package io.jans.ca.server.rest;
 
 import io.jans.ca.common.CommandType;
 import io.jans.ca.common.params.*;
+import io.jans.ca.server.op.GetDiscoveryOperation;
+import io.jans.ca.server.op.RegisterSiteOperation;
+import io.jans.ca.server.op.UpdateSiteOperation;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -9,13 +13,19 @@ import jakarta.ws.rs.core.Response;
 @Path("/")
 public class OAuth20Resource extends BaseResource {
 
+    @Inject
+    GetDiscoveryOperation getDiscoveryOp;
+    @Inject
+    RegisterSiteOperation registerSiteOp;
+    @Inject
+    UpdateSiteOperation updateSiteOp;
+
     @POST
     @Path("/register-site")
     @Produces(MediaType.APPLICATION_JSON)
     public Response registerSite(String params) {
         logger.info("Api Resource: /register-site  Params: {}", params);
-        String result = process(CommandType.REGISTER_SITE, params, RegisterSiteParams.class, null, null);
-        return Response.ok(result).build();
+        return registerSiteOp.process(params, getHttpRequest());
     }
 
     @POST
@@ -23,8 +33,7 @@ public class OAuth20Resource extends BaseResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response updateSite(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String authorizationRpId, String params) {
         logger.info("Api Resource: /update-site  Params: {}", params);
-        String result = process(CommandType.UPDATE_SITE, params, UpdateSiteParams.class, authorization, authorizationRpId);
-        return Response.ok(result).build();
+        return updateSiteOp.process(params, authorization, authorizationRpId, getHttpRequest());
     }
 
     @POST
@@ -91,8 +100,7 @@ public class OAuth20Resource extends BaseResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getDiscovery(String params) {
         logger.info("Api Resource: /get-discovery  Params: {}", params);
-        String result = process(CommandType.GET_DISCOVERY, params, GetDiscoveryParams.class, null, null);
-        return Response.ok(result).build();
+        return getDiscoveryOp.process(params, getHttpRequest());
     }
 
     @POST

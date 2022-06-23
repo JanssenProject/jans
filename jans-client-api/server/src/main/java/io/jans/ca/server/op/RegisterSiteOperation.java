@@ -16,6 +16,7 @@ import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.uma.UmaMetadata;
 import io.jans.ca.common.Command;
+import io.jans.ca.common.CommandType;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.params.RegisterSiteParams;
 import io.jans.ca.common.response.IOpResponse;
@@ -28,6 +29,8 @@ import io.jans.ca.server.service.DiscoveryService;
 import io.jans.ca.server.service.RpService;
 import io.jans.ca.server.persistence.service.MainPersistenceService;
 import io.jans.ca.server.service.ServiceProvider;
+import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -43,27 +46,17 @@ import java.util.UUID;
  * @author Yuriy Zabrovarnyy
  */
 
-public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
+public class RegisterSiteOperation extends TemplateOperation<RegisterSiteParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(RegisterSiteOperation.class);
 
     private Rp rp;
 
-    private RpService rpService;
-    private DiscoveryService discoveryService;
-    private MainPersistenceService jansConfigurationService;
+    @Inject
+    RpService rpService;
+    @Inject
+    DiscoveryService discoveryService;
 
-    /**
-     * Base constructor
-     *
-     * @param command command
-     */
-    public RegisterSiteOperation(Command command, ServiceProvider serviceProvider) {
-        super(command, serviceProvider, RegisterSiteParams.class);
-        this.discoveryService = serviceProvider.getDiscoveryService();
-        this.rpService = serviceProvider.getRpService();
-        this.jansConfigurationService = rpService.getConfigurationService();
-    }
 
     public RegisterSiteResponse execute_(RegisterSiteParams params) {
         validateParametersAndFallbackIfNeeded(params);
@@ -89,7 +82,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
     }
 
     @Override
-    public IOpResponse execute(RegisterSiteParams params) {
+    public IOpResponse execute(RegisterSiteParams params, HttpServletRequest httpRequest) {
         try {
             return execute_(params);
         } catch (HttpException e) {
@@ -98,6 +91,16 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
             LOG.error(e.getMessage(), e);
         }
         throw HttpException.internalError();
+    }
+
+    @Override
+    public Class<RegisterSiteParams> getParameterClass() {
+        return RegisterSiteParams.class;
+    }
+
+    @Override
+    public CommandType getCommandType() {
+        return CommandType.REGISTER_SITE;
     }
 
     private void validateParametersAndFallbackIfNeeded(RegisterSiteParams params) {
