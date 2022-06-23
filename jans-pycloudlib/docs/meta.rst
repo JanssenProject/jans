@@ -14,7 +14,7 @@ Docker
 .. autoclass:: DockerMeta
     :members:
     :private-members:
-    :undoc-members:
+    :show-inheritance:
 
 Kubernetes
 ==========
@@ -24,4 +24,4 @@ Kubernetes
 .. autoclass:: KubernetesMeta
     :members:
     :private-members:
-    :undoc-members:
+    :show-inheritance:

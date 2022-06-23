@@ -20,5 +20,7 @@ module = [
     "hvac",
     "kubernetes.*",
     "urllib3",
+    "docker.*",
+    "google.cloud",
 ]
 ignore_missing_imports = true

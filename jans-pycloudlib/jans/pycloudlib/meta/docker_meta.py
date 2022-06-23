@@ -1,48 +1,60 @@
 """This module consists of class to interact with Docker API."""
 
+from __future__ import annotations
+
 import contextlib
 import os
 import tarfile
+import typing as _t
 
-import docker
+from docker import DockerClient
 
 from jans.pycloudlib.meta.base_meta import BaseMeta
+
+if _t.TYPE_CHECKING:  # pragma: no cover
+    # imported objects for function type hint, completion, etc.
+    # these won't be executed in runtime
+    from docker.models.containers import Container
 
 
 class DockerMeta(BaseMeta):
     """This class interacts with a subset of Docker APIs."""
 
-    def __init__(self, base_url="unix://var/run/docker.sock"):
+    def __init__(self, base_url: str = "unix://var/run/docker.sock") -> None:
         """Initialize Docker meta wrapper."""
-        self.client = docker.DockerClient(base_url=base_url)
+        self.client = DockerClient(base_url=base_url)
 
-    def get_containers(self, label: str) -> list:
+    def get_containers(self, label: str) -> list[Container]:
         """Get list of containers based on label.
 
         :params label: Label name, i.e. ``APP_NAME=oxauth``.
         :returns: List of container objects.
         """
-        return self.client.containers.list(filters={'label': label})
+        containers: list[Container] = self.client.containers.list(filters={'label': label})
+        return containers
 
-    def get_container_ip(self, container) -> str:
+    def get_container_ip(self, container: Container) -> str:
         """Get container's IP address.
 
         :params container: Container object.
         :returns: IP address associated with the container.
         """
+        ip = ""
         for _, network in container.attrs["NetworkSettings"]["Networks"].items():
-            return network["IPAddress"]
-        return ""
+            ip = network["IPAddress"]
+            break
+        return ip
 
-    def get_container_name(self, container) -> str:
+    def get_container_name(self, container: Container) -> str:
         """Get container's name.
 
         :params container: Container object.
         :returns: Container name.
         """
-        return container.name
+        name: str = container.name
+        return name
 
-    def copy_to_container(self, container, path: str) -> None:
+    def copy_to_container(self, container: Container, path: str) -> None:
         """Copy path to container.
 
         :params container: Container object.
@@ -68,7 +80,7 @@ class DockerMeta(BaseMeta):
         with contextlib.suppress(FileNotFoundError):
             os.unlink(src + ".tar")
 
-    def exec_cmd(self, container, cmd: str):
+    def exec_cmd(self, container: Container, cmd: str) -> _t.Any:
         """Run command inside container.
 
         :params container: Container object.
