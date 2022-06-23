@@ -16,20 +16,11 @@ get_debug_opt() {
 }
 
 move_builtin_jars() {
-    # move twilio lib
-    if [ ! -f /opt/jans/jetty/jans-auth/custom/libs/twilio.jar ]; then
-        cp /usr/share/java/twilio.jar /opt/jans/jetty/jans-auth/custom/libs/twilio.jar
-    fi
-
-    # move jsmpp lib
-    if [ ! -f /opt/jans/jetty/jans-auth/custom/libs/jsmpp.jar ]; then
-        cp /usr/share/java/jsmpp.jar /opt/jans/jetty/jans-auth/custom/libs/jsmpp.jar
-    fi
-
-    # move casa-config lib
-    if [ ! -f /opt/jans/jetty/jans-auth/custom/libs/casa-config.jar ]; then
-        cp /usr/share/java/casa-config.jar /opt/jans/jetty/jans-auth/custom/libs/casa-config.jar
-    fi
+    #twilio, jsmpp, casa-config, jans-fido2-client
+    for src in /usr/share/java/*.jar; do
+        fname=$(basename "$src")
+        cp "$src" "/opt/jans/jetty/jans-auth/custom/libs/$fname"
+    done
 }
 
 get_prometheus_opt() {
