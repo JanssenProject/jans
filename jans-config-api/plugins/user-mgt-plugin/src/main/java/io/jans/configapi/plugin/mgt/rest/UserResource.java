@@ -16,12 +16,8 @@ import io.jans.configapi.core.model.SearchRequest;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.orm.model.PagedResult;
+import io.jans.orm.model.base.CustomObjectAttribute;
 import io.jans.util.StringHelper;
-
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -29,8 +25,15 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-
 import org.slf4j.Logger;
+
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import static io.jans.as.model.util.Util.escapeLog;
 
 @Path(Constants.CONFIG_USER)
 @Produces(MediaType.APPLICATION_JSON)
@@ -114,10 +117,11 @@ public class UserResource extends BaseResource {
 
         // get User object
         User user = setUserAttributes(customUser);
+        hasBirthDateAttribute(user);
         logger.debug("Create  user:{}", user);
 
         // checking mandatory attributes
-        checkMissingAttributes(user,null);
+        checkMissingAttributes(user, null);
 
         user = userSrv.addUser(user, true);
         logger.debug("User created {}", user);
@@ -142,6 +146,7 @@ public class UserResource extends BaseResource {
 
         // get User object
         User user = setUserAttributes(customUser);
+        hasBirthDateAttribute(user);
         logger.debug("Create  user:{}", user);
 
         // checking mandatory attributes
@@ -172,6 +177,7 @@ public class UserResource extends BaseResource {
         }
         // check if user exists
         User existingUser = userSrv.getUserBasedOnInum(inum);
+        hasBirthDateAttribute(existingUser);
         checkResourceNotNull(existingUser, USER);
 
         // patch user
@@ -235,7 +241,7 @@ public class UserResource extends BaseResource {
 
     private void checkMissingAttributes(User user, List<String> excludeAttributes)
             throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        String missingAttributes = userSrv.checkMandatoryFields(user,excludeAttributes);
+        String missingAttributes = userSrv.checkMandatoryFields(user, excludeAttributes);
         logger.debug("missingAttributes:{}", missingAttributes);
 
         if (StringHelper.isEmpty(missingAttributes)) {
@@ -326,4 +332,13 @@ public class UserResource extends BaseResource {
         return user;
     }
 
+    private void hasBirthDateAttribute(User user) {
+        if (user.getAttributeObjectValues("birthdate") != null) {
+
+            Date date = mgtUtil.parseStringToDateObj(user.getAttributeObjectValues("birthdate").stream().findFirst().get().toString());
+
+            user.getCustomAttributes().remove(new CustomObjectAttribute("birthdate"));
+            user.getCustomAttributes().add(new CustomObjectAttribute("birthdate", date));
+        }
+    }
 }

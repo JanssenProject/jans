@@ -16,6 +16,10 @@ import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 @ApplicationScoped
 public class MgtUtil {    
     
@@ -28,6 +32,8 @@ public class MgtUtil {
     @Inject 
     UserMgtConfigSource configSource;
 
+    public static final String DATE_PATTERN_YYYY_MM_DD = "yyyy-MM-dd";
+
        
     public int getRecordMaxCount() {
         logger.trace(" MaxCount details - ApiAppConfiguration.MaxCount():{}, DEFAULT_MAX_COUNT:{} ",
@@ -35,5 +41,17 @@ public class MgtUtil {
         return (configurationFactory.getApiAppConfiguration().getMaxCount() > 0
                 ? configurationFactory.getApiAppConfiguration().getMaxCount()
                 : ApiConstants.DEFAULT_MAX_COUNT);
+    }
+
+    public Date parseStringToDateObj(String dateString){
+        SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_PATTERN_YYYY_MM_DD);
+
+        Date date = null;
+        try {
+            date = dateFormat.parse(dateString);
+        } catch (ParseException e) {
+            logger.error("Error in parsing string to date. Allowed Date Format : {},  Date-String : {} ",DATE_PATTERN_YYYY_MM_DD, dateString);
+        }
+        return date;
     }
 }
