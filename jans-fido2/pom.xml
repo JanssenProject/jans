@@ -7,7 +7,14 @@
 	<packaging>pom</packaging>
 	<version>1.0.1-SNAPSHOT</version>
 	<name>Fido2 API</name>
-	
+
+    <distributionManagement>
+	  <repository>
+          <id>github</id>
+          <name>GitHub Packages</name>
+          <url>https://maven.pkg.github.com/JanssenProject/jans</url>
+      </repository>
+    </distributionManagement>
 	<properties>
 		<maven.min-version>3.3.9</maven.min-version>
 		<maven.compiler.source>1.8</maven.compiler.source>
