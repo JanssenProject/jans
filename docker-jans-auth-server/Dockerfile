@@ -76,15 +76,20 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/webapps \
 RUN mkdir -p /usr/share/java
 
 ARG TWILIO_VERSION=7.17.0
-RUN wget -q https://repo1.maven.org/maven2/com/twilio/sdk/twilio/${TWILIO_VERSION}/twilio-${TWILIO_VERSION}.jar -O /usr/share/java/twilio.jar
+RUN wget -q https://repo1.maven.org/maven2/com/twilio/sdk/twilio/${TWILIO_VERSION}/twilio-${TWILIO_VERSION}.jar -P /usr/share/java/
 
 ARG JSMPP_VERSION=2.3.7
-RUN wget -q https://repo1.maven.org/maven2/org/jsmpp/jsmpp/${JSMPP_VERSION}/jsmpp-${JSMPP_VERSION}.jar -O /usr/share/java/jsmpp.jar
+RUN wget -q https://repo1.maven.org/maven2/org/jsmpp/jsmpp/${JSMPP_VERSION}/jsmpp-${JSMPP_VERSION}.jar -P /usr/share/java/
 
 # This will later be refactored and moved to be pulled from persitence or a central bucket
 ARG CASA_CONFIG_VERSION=5.0.0-SNAPSHOT
 ARG CASA_CONFIG_BUILD_DATE="2022-05-26 13:56"
-RUN wget -q https://jenkins.gluu.org/maven/org/gluu/casa-config/${CASA_CONFIG_VERSION}/casa-config-${CASA_CONFIG_VERSION}.jar -O /usr/share/java/casa-config.jar
+RUN wget -q https://jenkins.gluu.org/maven/org/gluu/casa-config/${CASA_CONFIG_VERSION}/casa-config-${CASA_CONFIG_VERSION}.jar -P /usr/share/java/
+
+# A workaround for Fido2 integration
+ARG FIDO2_CLIENT_VERSION=1.0.1-SNAPSHOT
+ARG FIDO2_CLIENT_BUILD_DATE="2022-06-22 08:13"
+RUN wget -q https://jenkins.jans.io/maven/io/jans/jans-fido2-client/${FIDO2_CLIENT_VERSION}/jans-fido2-client-${FIDO2_CLIENT_VERSION}.jar -P /usr/share/java/
 
 # =====================
 # Casa external scripts
