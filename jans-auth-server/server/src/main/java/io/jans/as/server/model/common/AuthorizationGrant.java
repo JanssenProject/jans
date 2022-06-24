@@ -187,22 +187,22 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
     public AccessToken createAccessToken(ExecutionContext context) {
         try {
             final AccessToken accessToken = super.createAccessToken(context);
-            if (getClient().isAccessTokenAsJwt()) {
-                accessToken.setCode(createAccessTokenAsJwt(accessToken, context));
-            }
             if (accessToken.getExpiresIn() < 0) {
                 log.trace("Failed to create access token with negative expiration time");
                 return null;
             }
-
-            final TokenEntity tokenEntity = asToken(accessToken);
-            context.setAccessTokenEntity(tokenEntity);
+            if (getClient().isAccessTokenAsJwt()) {
+                accessToken.setCode(createAccessTokenAsJwt(accessToken, context));
+            }
 
             boolean externalOk = externalUpdateTokenService.modifyAccessToken(accessToken, ExternalUpdateTokenContext.of(context));
             if (!externalOk) {
                 log.trace("External script forbids access token creation.");
                 return null;
             }
+
+            final TokenEntity tokenEntity = asToken(accessToken);
+            context.setAccessTokenEntity(tokenEntity);
 
             persist(tokenEntity);
             statService.reportAccessToken(getGrantType());
@@ -218,7 +218,7 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
         }
     }
 
-    private String createAccessTokenAsJwt(AccessToken accessToken, ExecutionContext context) throws Exception {
+    public String createAccessTokenAsJwt(AccessToken accessToken, ExecutionContext context) throws Exception {
         final User user = getUser();
         final Client client = getClient();
 
