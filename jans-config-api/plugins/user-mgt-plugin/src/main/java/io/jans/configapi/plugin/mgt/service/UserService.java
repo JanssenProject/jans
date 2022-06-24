@@ -287,7 +287,7 @@ public class UserService extends io.jans.as.common.service.common.UserService {
 
             Optional<Object> optionalBithdate = user.getAttributeObjectValues("birthdate").stream().findFirst();
 
-            if(optionalBithdate.isPresent()) {
+            if(!optionalBithdate.isPresent()) {
                 return user;
             }
 
