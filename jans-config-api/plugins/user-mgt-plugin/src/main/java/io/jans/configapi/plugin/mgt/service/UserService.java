@@ -21,10 +21,7 @@ import static io.jans.as.model.util.Util.escapeLog;
 import java.lang.reflect.Field;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -288,10 +285,16 @@ public class UserService extends io.jans.as.common.service.common.UserService {
     public User parseBirthDateAttribute(User user) {
         if (user.getAttributeObjectValues("birthdate") != null) {
 
-            Date date = mgtUtil.parseStringToDateObj(user.getAttributeObjectValues("birthdate").stream().findFirst().get().toString());
+            Optional<Object> optionalBithdate = user.getAttributeObjectValues("birthdate").stream().findFirst();
+
+            if(optionalBithdate.isPresent()) {
+                return user;
+            }
+
+            Date date = mgtUtil.parseStringToDateObj(optionalBithdate.get().toString());
             //parse date with persistenceEntryManager.decodeTime if it is null
             if (date == null) {
-                date = persistenceEntryManager.decodeTime(null, user.getAttributeObjectValues("birthdate").stream().findFirst().get().toString());
+                date = persistenceEntryManager.decodeTime(null, optionalBithdate.get().toString());
             }
             user.getCustomAttributes().remove(new CustomObjectAttribute("birthdate"));
             user.getCustomAttributes().add(new CustomObjectAttribute("birthdate", date));
