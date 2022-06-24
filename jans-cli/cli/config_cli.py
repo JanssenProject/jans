@@ -18,12 +18,14 @@ import base64
 import requests
 import html
 import glob
+import logging
 
 from pathlib import Path
 from types import SimpleNamespace
 from urllib.parse import urlencode
 from collections import OrderedDict
 from urllib.parse import urljoin
+from http.client import HTTPConnection
 from pygments import highlight, lexers, formatters
 
 home_dir = Path.home()
@@ -59,9 +61,11 @@ success_color = 10
 bold_color = 15
 grey_color = 242
 
-#clear = lambda: os.system('clear')
+
 def clear():
-    pass
+    if not debug:
+        os.system('clear')
+
 urllib3.disable_warnings()
 config = configparser.ConfigParser()
 
@@ -315,11 +319,31 @@ class JCA_CLI:
         if my_op_mode == 'scim':
             self.host += '/jans-scim/restv1/v2'
 
+
+        self.set_logging()
+
         self.ssl_settings()
 
         self.make_menu()
         self.current_menu = self.menu
         self.enums()
+
+
+    def set_logging(self):
+        if debug:
+            logging.basicConfig()
+            logging.getLogger().setLevel(logging.DEBUG)
+            self.cli_logger = logging.getLogger("urllib3")
+            self.cli_logger.setLevel(logging.DEBUG)
+            self.cli_logger.propagate = True
+            HTTPConnection.debuglevel = 1
+
+
+    def log_response(self, response):
+        if debug:
+            self.cli_logger.debug('requests response status: %s', str(response.status_code))
+            self.cli_logger.debug('requests response headers: %s', str(response.headers))
+            self.cli_logger.debug('requests response text: %s', str(response.text))
 
     def enums(self):
         self.enum_dict = {
@@ -386,7 +410,7 @@ class JCA_CLI:
                 data={"grant_type": "client_credentials"},
                 verify=self.verify_ssl
             )
-
+        self.log_response(response)
         if response.status_code != 200:
             raise ValueError(
                 self.colored_text("Unable to connect jans-auth server:\n {}".format(response.text), error_color))
@@ -526,7 +550,7 @@ class JCA_CLI:
             data=post_params,
             verify=self.verify_ssl
         )
-
+        self.log_response(response)
         try:
             result = response.json()
             if 'access_token' in result:
@@ -556,7 +580,7 @@ class JCA_CLI:
             data={'client_id': self.client_id, 'scope': 'openid+profile+email+offline_access'},
             verify=self.verify_ssl
         )
-
+        self.log_response(response)
         if response.status_code != 200:
             raise ValueError(
                 self.colored_text("Unable to get device authorization user code: {}".format(response.reason), error_color))
@@ -594,7 +618,7 @@ class JCA_CLI:
                 ],
              verify=self.verify_ssl
             )
-
+        self.log_response(response)
         if response.status_code != 200:
             raise ValueError(
                 self.colored_text("Unable to get access token"))
@@ -613,7 +637,7 @@ class JCA_CLI:
             data={'access_token': result['access_token']},
             verify=self.verify_ssl
             )
-
+        self.log_response(response)
         if response.status_code != 200:
             raise ValueError(
                 self.colored_text("Unable to get access token"))
@@ -632,7 +656,7 @@ class JCA_CLI:
             data={'grant_type': 'client_credentials', 'scope': 'openid', 'ujwt': result},
             verify=self.verify_ssl
             )
-
+        self.log_response(response)
         if response.status_code != 200:
             raise ValueError(
                 self.colored_text("Unable to get access token"))
@@ -1012,7 +1036,7 @@ class JCA_CLI:
             params=params,
             verify=False
         )
-
+        self.log_response(response)
         if response.status_code == 404:
             print(self.colored_text("Server returned 404", error_color))
             print(self.colored_text(response.text, error_color))
@@ -1291,7 +1315,7 @@ class JCA_CLI:
             json=data,
             verify=self.verify_ssl
             )
-
+        self.log_response(response)
         try:
             return response.json()
         except:
@@ -1372,7 +1396,7 @@ class JCA_CLI:
             headers=headers,
             verify=self.verify_ssl
             )
-
+        self.log_response(response)
         if response.status_code in (200, 204):
             return None
 
@@ -1418,7 +1442,7 @@ class JCA_CLI:
             json=data,
             verify=self.verify_ssl
             )
-
+        self.log_response(response)
         try:
             return response.json()
         except:
@@ -1503,7 +1527,7 @@ class JCA_CLI:
                 json=data,
                 verify=False
             )
-
+        self.log_response(response)
         return response.json()
 
 
