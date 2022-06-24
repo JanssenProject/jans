@@ -32,6 +32,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static io.jans.as.model.util.Util.escapeLog;
 
@@ -117,7 +118,8 @@ public class UserResource extends BaseResource {
 
         // get User object
         User user = setUserAttributes(customUser);
-        hasBirthDateAttribute(user);
+        //parse birthdate if present
+        userSrv.parseBirthDateAttribute(user);
         logger.debug("Create  user:{}", user);
 
         // checking mandatory attributes
@@ -146,7 +148,8 @@ public class UserResource extends BaseResource {
 
         // get User object
         User user = setUserAttributes(customUser);
-        hasBirthDateAttribute(user);
+        //parse birthdate if present
+        userSrv.parseBirthDateAttribute(user);
         logger.debug("Create  user:{}", user);
 
         // checking mandatory attributes
@@ -177,7 +180,8 @@ public class UserResource extends BaseResource {
         }
         // check if user exists
         User existingUser = userSrv.getUserBasedOnInum(inum);
-        hasBirthDateAttribute(existingUser);
+        //parse birthdate if present
+        userSrv.parseBirthDateAttribute(existingUser);
         checkResourceNotNull(existingUser, USER);
 
         // patch user
@@ -230,6 +234,9 @@ public class UserResource extends BaseResource {
         // excludedAttributes
         users = userSrv.excludeAttributes(users, searchReq.getExcludedAttributesStr());
         logger.debug("Users fetched  - users:{}", users);
+
+        //parse birthdate if present
+        users = users.stream().map(user -> userSrv.parseBirthDateAttribute(user)).collect(Collectors.toList());
 
         // get customUser()
         return getCustomUserList(users);
@@ -330,15 +337,5 @@ public class UserResource extends BaseResource {
 
         logger.debug("Custom User - user:{}", user);
         return user;
-    }
-
-    private void hasBirthDateAttribute(User user) {
-        if (user.getAttributeObjectValues("birthdate") != null) {
-
-            Date date = mgtUtil.parseStringToDateObj(user.getAttributeObjectValues("birthdate").stream().findFirst().get().toString());
-
-            user.getCustomAttributes().remove(new CustomObjectAttribute("birthdate"));
-            user.getCustomAttributes().add(new CustomObjectAttribute("birthdate", date));
-        }
     }
 }

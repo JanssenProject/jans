@@ -8,6 +8,7 @@ import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.configapi.core.util.Jackson;
 import io.jans.configapi.plugin.mgt.model.user.UserPatchRequest;
 import io.jans.configapi.core.model.SearchRequest;
+import io.jans.configapi.plugin.mgt.util.MgtUtil;
 import io.jans.configapi.util.AuthUtil;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;
@@ -21,8 +22,10 @@ import java.lang.reflect.Field;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
@@ -48,6 +51,9 @@ public class UserService extends io.jans.as.common.service.common.UserService {
     @Inject
     AuthUtil authUtil;
 
+    @Inject
+    MgtUtil mgtUtil;
+
     @Override
     public List<String> getPersonCustomObjectClassList() {
         return appConfiguration.getPersonCustomObjectClassList();
@@ -64,7 +70,7 @@ public class UserService extends io.jans.as.common.service.common.UserService {
         }
         Filter searchFilter = null;
         if (StringUtils.isNotEmpty(searchRequest.getFilter())) {
-            String[] targetArray = new String[] { searchRequest.getFilter() };
+            String[] targetArray = new String[]{searchRequest.getFilter()};
             Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.DISPLAY_NAME, null, targetArray,
                     null);
             Filter descriptionFilter = Filter.createSubstringFilter(AttributeConstants.DESCRIPTION, null, targetArray,
@@ -239,13 +245,13 @@ public class UserService extends io.jans.as.common.service.common.UserService {
         for (String attribute : mandatoryAttributes) {
             logger.debug("User class allFields:{} conatins attribute:{} ? :{} ", allFields, attribute,
                     authUtil.containsField(allFields, attribute));
-            
+
             //check if to be excluded
-           if(isExcludedAttribute(excludeAttributes,attribute)) {
-               logger.debug("Not checking if the attribute:{} is missing as it's in excludeAttributes:{}" , attribute, excludeAttributes);
-               continue;
-           }
-            
+            if (isExcludedAttribute(excludeAttributes, attribute)) {
+                logger.debug("Not checking if the attribute:{} is missing as it's in excludeAttributes:{}", attribute, excludeAttributes);
+                continue;
+            }
+
             if (authUtil.containsField(allFields, attribute)) {
                 logger.debug("Checking if attribute:{} is simple attribute", attribute);
                 attributeValue = BeanUtils.getProperty(user, attribute);
@@ -268,15 +274,28 @@ public class UserService extends io.jans.as.common.service.common.UserService {
         logger.debug("Returning missingAttributes:{} ", missingAttributes);
         return missingAttributes.toString();
     }
-    
-    private boolean isExcludedAttribute(List<String> excludeAttributes,String attribute) {
+
+    private boolean isExcludedAttribute(List<String> excludeAttributes, String attribute) {
         logger.debug(" Is attribute:{} in excludeAttributeList:{} ", attribute, excludeAttributes);
-        
-        if(excludeAttributes==null || excludeAttributes.isEmpty()) {
+
+        if (excludeAttributes == null || excludeAttributes.isEmpty()) {
             return false;
         }
-        
-        return excludeAttributes.stream().anyMatch( e -> e.equals(attribute));
+
+        return excludeAttributes.stream().anyMatch(e -> e.equals(attribute));
     }
- 
+
+    public User parseBirthDateAttribute(User user) {
+        if (user.getAttributeObjectValues("birthdate") != null) {
+
+            Date date = mgtUtil.parseStringToDateObj(user.getAttributeObjectValues("birthdate").stream().findFirst().get().toString());
+            //parse date with persistenceEntryManager.decodeTime if it is null
+            if (date == null) {
+                date = persistenceEntryManager.decodeTime(null, user.getAttributeObjectValues("birthdate").stream().findFirst().get().toString());
+            }
+            user.getCustomAttributes().remove(new CustomObjectAttribute("birthdate"));
+            user.getCustomAttributes().add(new CustomObjectAttribute("birthdate", date));
+        }
+        return user;
+    }
 }
