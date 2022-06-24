@@ -1,10 +1,9 @@
 package io.jans.configapi.plugin.mgt.rest;
 
 import com.github.fge.jsonpatch.JsonPatchException;
-
-import static io.jans.as.model.util.Util.escapeLog;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.service.common.EncryptionService;
+import io.jans.configapi.core.model.SearchRequest;
 import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.plugin.mgt.model.user.CustomUser;
@@ -12,11 +11,9 @@ import io.jans.configapi.plugin.mgt.model.user.UserPatchRequest;
 import io.jans.configapi.plugin.mgt.service.UserService;
 import io.jans.configapi.plugin.mgt.util.Constants;
 import io.jans.configapi.plugin.mgt.util.MgtUtil;
-import io.jans.configapi.core.model.SearchRequest;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.orm.model.PagedResult;
-import io.jans.orm.model.base.CustomObjectAttribute;
 import io.jans.util.StringHelper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -30,7 +27,6 @@ import org.slf4j.Logger;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
