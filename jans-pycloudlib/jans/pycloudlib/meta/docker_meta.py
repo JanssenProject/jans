@@ -27,7 +27,7 @@ class DockerMeta(BaseMeta):
     def get_containers(self, label: str) -> list[Container]:
         """Get list of containers based on label.
 
-        :params label: Label name, i.e. ``APP_NAME=oxauth``.
+        :param label: Label name, i.e. ``APP_NAME=oxauth``.
         :returns: List of container objects.
         """
         containers: list[Container] = self.client.containers.list(filters={'label': label})
@@ -36,7 +36,7 @@ class DockerMeta(BaseMeta):
     def get_container_ip(self, container: Container) -> str:
         """Get container's IP address.
 
-        :params container: Container object.
+        :param container: Container object.
         :returns: IP address associated with the container.
         """
         ip = ""
@@ -48,7 +48,7 @@ class DockerMeta(BaseMeta):
     def get_container_name(self, container: Container) -> str:
         """Get container's name.
 
-        :params container: Container object.
+        :param container: Container object.
         :returns: Container name.
         """
         name: str = container.name
@@ -57,8 +57,8 @@ class DockerMeta(BaseMeta):
     def copy_to_container(self, container: Container, path: str) -> None:
         """Copy path to container.
 
-        :params container: Container object.
-        :params path: Path to file or directory.
+        :param container: Container object.
+        :param path: Path to file or directory.
         """
         src = os.path.basename(path)
         dirname = os.path.dirname(path)
@@ -83,7 +83,7 @@ class DockerMeta(BaseMeta):
     def exec_cmd(self, container: Container, cmd: str) -> _t.Any:
         """Run command inside container.
 
-        :params container: Container object.
-        :params cmd: String of command.
+        :param container: Container object.
+        :param cmd: String of command.
         """
         return container.exec_run(cmd)
