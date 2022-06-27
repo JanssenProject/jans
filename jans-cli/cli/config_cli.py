@@ -386,14 +386,9 @@ class JCA_CLI:
             self.verify_ssl = False
         else:
             self.verify_ssl = True
-
-
-        # TODO: mtls client and cert settings for request
-        #if args.config_api_mtls_client_cert:
-        #    self.swagger_configuration.cert_file = args.config_api_mtls_client_cert
-
-        #if args.config_api_mtls_client_key:
-        #    self.swagger_configuration.key_file = args.config_api_mtls_client_key
+        self.mtls_client_cert = None
+        if args.config_api_mtls_client_cert and args.config_api_mtls_client_key:
+            self.mtls_client_cert = (args.config_api_mtls_client_cert, args.config_api_mtls_client_key)
 
     def drop_to_shell(self, mylocals):
         locals_ = locals()
@@ -417,7 +412,8 @@ class JCA_CLI:
                 url=url,
                 auth=(self.client_id, self.client_secret),
                 data={"grant_type": "client_credentials"},
-                verify=self.verify_ssl
+                verify=self.verify_ssl,
+                cert=self.mtls_client_cert
             )
         self.log_response(response)
         if response.status_code != 200:
@@ -428,7 +424,8 @@ class JCA_CLI:
             response = requests.get(
                     url = self.jwt_validation_url,
                     headers=self.get_request_header({'Accept': 'application/json'}),
-                    verify=self.verify_ssl
+                    verify=self.verify_ssl,
+                    cert=self.mtls_client_cert
                 )
 
         if not response.status_code == 200:
@@ -569,7 +566,8 @@ class JCA_CLI:
             url,
             auth=(client_id, client_secret),
             data=post_params,
-            verify=self.verify_ssl
+            verify=self.verify_ssl,
+            cert=self.mtls_client_cert
         )
         self.log_response(response)
         try:
@@ -599,7 +597,8 @@ class JCA_CLI:
             url='https://{}/jans-auth/restv1/device_authorization'.format(self.host),
             auth=(self.client_id, self.client_secret),
             data={'client_id': self.client_id, 'scope': 'openid+profile+email+offline_access'},
-            verify=self.verify_ssl
+            verify=self.verify_ssl,
+            cert=self.mtls_client_cert
         )
         self.log_response(response)
         if response.status_code != 200:
@@ -637,7 +636,8 @@ class JCA_CLI:
                 ('grant_type', 'refresh_token'),
                 ('device_code',result['device_code'])
                 ],
-             verify=self.verify_ssl
+             verify=self.verify_ssl,
+             cert=self.mtls_client_cert
             )
         self.log_response(response)
         if response.status_code != 200:
@@ -656,7 +656,8 @@ class JCA_CLI:
             url='https://{}/jans-auth/restv1/userinfo'.format(self.host),
             headers=headers_basic_auth,
             data={'access_token': result['access_token']},
-            verify=self.verify_ssl
+            verify=self.verify_ssl,
+            cert=self.mtls_client_cert
             )
         self.log_response(response)
         if response.status_code != 200:
@@ -675,7 +676,8 @@ class JCA_CLI:
             url='https://{}/jans-auth/restv1/token'.format(self.host),
             headers=headers_basic_auth,
             data={'grant_type': 'client_credentials', 'scope': 'openid', 'ujwt': result},
-            verify=self.verify_ssl
+            verify=self.verify_ssl,
+            cert=self.mtls_client_cert
             )
         self.log_response(response)
         if response.status_code != 200:
@@ -1057,7 +1059,8 @@ class JCA_CLI:
             url = url,
             headers=self.get_request_header({'Accept': 'application/json'}),
             params=params,
-            verify=False
+            verify=self.verify_ssl,
+            cert=self.mtls_client_cert
         )
         self.log_response(response)
         if response.status_code == 404:
@@ -1336,7 +1339,8 @@ class JCA_CLI:
         response = requests.post(url,
             headers=headers,
             json=data,
-            verify=self.verify_ssl
+            verify=self.verify_ssl,
+            cert=self.mtls_client_cert
             )
         self.log_response(response)
 
@@ -1417,7 +1421,8 @@ class JCA_CLI:
         response = requests.delete(
             url='https://{}{}'.format(self.host, endpoint.path.format(**url_param_dict)),
             headers=self.get_request_header({'Accept': 'application/json'}),
-            verify=self.verify_ssl
+            verify=self.verify_ssl,
+            cert=self.mtls_client_cert
             )
         self.log_response(response)
         if response.status_code in (200, 204):
@@ -1464,7 +1469,8 @@ class JCA_CLI:
             url=url,
             headers=headers,
             json=data,
-            verify=self.verify_ssl
+            verify=self.verify_ssl,
+            cert=self.mtls_client_cert
             )
         self.log_response(response)
         try:
@@ -1549,7 +1555,8 @@ class JCA_CLI:
                 url='https://{}{}'.format(self.host, endpoint.path),
                 headers=self.get_request_header({'Accept': mime_type}),
                 json=data,
-                verify=False
+                verify=self.verify_ssl,
+                cert=self.mtls_client_cert
             )
         self.log_response(response)
         return response.json()
