@@ -8,6 +8,13 @@
 	<name>notify</name>
 	<url>http://ox.gluu.org</url>
 
+    <distributionManagement>
+	  <repository>
+          <id>github</id>
+          <name>GitHub Packages</name>
+          <url>https://maven.pkg.github.com/JanssenProject/jans</url>
+      </repository>
+    </distributionManagement>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.min-version>3.3.9</maven.min-version>
