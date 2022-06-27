@@ -231,7 +231,7 @@ class PropertiesUtils(SetupUtils):
         if prop_file.endswith('-DEC~'):
             self.run(['rm', '-f', prop_file])
 
-        if not 'admin_password' in properties_list and 'ldapPass' in p:
+        if 'admin_password' not in properties_list and 'ldapPass' in p:
             Config.admin_password = p['ldapPass']
             
         if p.get('ldap_hostname') != 'localhost':
