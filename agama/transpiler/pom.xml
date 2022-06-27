@@ -12,6 +12,27 @@
         <version>1.0.1-SNAPSHOT</version>
     </parent>
 
+    <properties>
+        <antlr4.version>4.10.1</antlr4.version>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.antlr</groupId>
+                <artifactId>antlr4-maven-plugin</artifactId>
+                <version>${antlr4.version}</version>                
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>antlr4</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
     <dependencies>
         <dependency>
             <groupId>net.sf.saxon</groupId>
@@ -26,7 +47,7 @@
         <dependency>
             <groupId>org.antlr</groupId>
             <artifactId>antlr4-runtime</artifactId>
-            <version>4.9.2</version>
+            <version>${antlr4.version}</version>
         </dependency>       
         
         <!-- FREEMARKER -->
