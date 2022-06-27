@@ -309,7 +309,7 @@ class JCA_CLI:
         self.client_secret = client_secret
         self.use_test_client = test_client
         self.access_token = access_token or config['DEFAULT'].get('access_token')
-
+        self.jwt_validation_url = 'https://{}/jans-config-api/api/v1/acrs'.format(self.host)
         self.set_user()
         self.plugins()
 
@@ -415,8 +415,20 @@ class JCA_CLI:
             raise ValueError(
                 self.colored_text("Unable to connect jans-auth server:\n {}".format(response.text), error_color))
 
+        if not self.use_test_client and self.access_token:
+            response = requests.get(
+                    url = self.jwt_validation_url,
+                    headers={'Accept': 'application/json', 'Authorization': 'Bearer {}'.format(self.access_token)},
+                    verify=self.verify_ssl
+                )
+
+        if not response.status_code == 200:
+            self.access_token = None
+
+
 
     def check_access_token(self):
+
         if not self.access_token :
             print(self.colored_text("Access token was not found.", warning_color))
             return
