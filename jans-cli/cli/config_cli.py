@@ -401,6 +401,15 @@ class JCA_CLI:
         code.interact(local=locals_)
         sys.exit()
 
+    def get_request_header(self, headers={}, access_token=None):
+        if not access_token:
+            access_token = self.access_token
+
+        ret_val = {'Authorization': 'Bearer {}'.format(access_token)}
+        ret_val.update(headers)
+        return ret_val
+
+
 
     def check_connection(self):
         url = 'https://{}/jans-auth/restv1/token'.format(self.host)
@@ -418,7 +427,7 @@ class JCA_CLI:
         if not self.use_test_client and self.access_token:
             response = requests.get(
                     url = self.jwt_validation_url,
-                    headers={'Accept': 'application/json', 'Authorization': 'Bearer {}'.format(self.access_token)},
+                    headers=self.get_request_header({'Accept': 'application/json'}),
                     verify=self.verify_ssl
                 )
 
@@ -637,7 +646,7 @@ class JCA_CLI:
 
         result = response.json()
 
-        headers_basic_auth = {'Authorization': 'Bearer {}'.format(result['access_token'])}
+        headers_basic_auth = self.get_request_header(access_token=result['access_token'])
 
         """
         STEP 3: Get user info
@@ -1046,7 +1055,7 @@ class JCA_CLI:
 
         response = requests.get(
             url = url,
-            headers={'Accept': 'application/json', 'Authorization': 'Bearer {}'.format(self.access_token)},
+            headers=self.get_request_header({'Accept': 'application/json'}),
             params=params,
             verify=False
         )
@@ -1322,7 +1331,7 @@ class JCA_CLI:
         self.get_access_token(security)
         mime_type = self.get_mime_for_endpoint(endpoint)
 
-        headers = {'Accept': 'application/json', 'Content-Type': mime_type, 'Authorization': 'Bearer {}'.format(self.access_token)}
+        headers = self.get_request_header({'Accept': 'application/json', 'Content-Type': mime_type})
 
         response = requests.post(url,
             headers=headers,
@@ -1404,11 +1413,10 @@ class JCA_CLI:
     def delete_requests(self, endpoint, url_param_dict):
         security = self.get_scope_for_endpoint(endpoint)
         self.get_access_token(security)
-        url = 'https://{}{}'.format(self.host, endpoint.path.format(**url_param_dict))
-        headers = {'Accept': 'application/json', 'Authorization': 'Bearer {}'.format(self.access_token)}
 
-        response = requests.delete(url,
-            headers=headers,
+        response = requests.delete(
+            url='https://{}{}'.format(self.host, endpoint.path.format(**url_param_dict)),
+            headers=self.get_request_header({'Accept': 'application/json'}),
             verify=self.verify_ssl
             )
         self.log_response(response)
@@ -1450,9 +1458,10 @@ class JCA_CLI:
         security = self.get_scope_for_endpoint(endpoint)
         self.get_access_token(security)
 
-        headers = {'Accept': 'application/json', 'Content-Type': 'application/json-patch+json', 'Authorization': 'Bearer {}'.format(self.access_token)}
+        headers = self.get_request_header({'Accept': 'application/json', 'Content-Type': 'application/json-patch+json'})
         data = data
-        response = requests.patch(url,
+        response = requests.patch(
+            url=url,
             headers=headers,
             json=data,
             verify=self.verify_ssl
@@ -1538,7 +1547,7 @@ class JCA_CLI:
 
         response = requests.put(
                 url='https://{}{}'.format(self.host, endpoint.path),
-                headers={'Accept': mime_type, 'Authorization': 'Bearer {}'.format(self.access_token)},
+                headers=self.get_request_header({'Accept': mime_type}),
                 json=data,
                 verify=False
             )
