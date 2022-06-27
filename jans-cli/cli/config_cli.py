@@ -112,7 +112,7 @@ def get_named_tag(tag):
 for path in cfg_yml['paths']:
     for method in cfg_yml['paths'][path]:
         if isinstance(cfg_yml['paths'][path][method], dict):
-            for tag_ in cfg_yml['paths'][path][method]['tags']:
+            for tag_ in cfg_yml['paths'][path][method].get('tags', []):
                 tag = get_named_tag(tag_)
                 if not tag in op_list:
                     op_list.append(tag)
@@ -304,12 +304,12 @@ class Menu(object):
 class JCA_CLI:
 
     def __init__(self, host, client_id, client_secret, access_token, test_client=False):
-        self.host = host
+        self.host = self.idp_host = host
         self.client_id = client_id
         self.client_secret = client_secret
         self.use_test_client = test_client
         self.access_token = access_token or config['DEFAULT'].get('access_token')
-        self.jwt_validation_url = 'https://{}/jans-config-api/api/v1/acrs'.format(self.host)
+        self.jwt_validation_url = 'https://{}/jans-config-api/api/v1/acrs'.format(self.idp_host)
         self.set_user()
         self.plugins()
 
@@ -319,11 +319,8 @@ class JCA_CLI:
         if my_op_mode == 'scim':
             self.host += '/jans-scim/restv1/v2'
 
-
         self.set_logging()
-
         self.ssl_settings()
-
         self.make_menu()
         self.current_menu = self.menu
         self.enums()
@@ -407,7 +404,7 @@ class JCA_CLI:
 
 
     def check_connection(self):
-        url = 'https://{}/jans-auth/restv1/token'.format(self.host)
+        url = 'https://{}/jans-auth/restv1/token'.format(self.idp_host)
         response = requests.post(
                 url=url,
                 auth=(self.client_id, self.client_secret),
@@ -1115,22 +1112,25 @@ class JCA_CLI:
             op_mode_endpoint = my_op_mode + '.' + endpoint.info['operationId']
             import copy
             if op_mode_endpoint in tabulate_endpoints:
-                data_ext = copy.deepcopy(data)
-                if endpoint.info['operationId'] == 'get-user':
-                    for entry in data_ext:
-                        if entry.get('customAttributes'):
-                            for attrib in entry['customAttributes']:
-                                if attrib['name'] == 'mail':
-                                    entry['mail'] = ', '.join(attrib['values'])
-                                elif attrib['name'] in tabulate_endpoints[op_mode_endpoint]:
-                                    entry[attrib['name']] = attrib['values'][0]
+                try:
+                    data_ext = copy.deepcopy(data)
+                    if endpoint.info['operationId'] == 'get-user':
+                        for entry in data_ext:
+                            if entry.get('customAttributes'):
+                                for attrib in entry['customAttributes']:
+                                    if attrib['name'] == 'mail':
+                                        entry['mail'] = ', '.join(attrib['values'])
+                                    elif attrib['name'] in tabulate_endpoints[op_mode_endpoint]:
+                                        entry[attrib['name']] = attrib['values'][0]
 
-                tab_data = data_ext
-                if op_mode_endpoint in tabular_dataset:
-                    tab_data = data_ext[tabular_dataset[op_mode_endpoint]]
-                self.tabular_data(tab_data, op_mode_endpoint)
-                item_counters = [str(i + 1) for i in range(len(data))]
-                tabulated = True
+                    tab_data = data_ext
+                    if op_mode_endpoint in tabular_dataset:
+                        tab_data = data_ext[tabular_dataset[op_mode_endpoint]]
+                    self.tabular_data(tab_data, op_mode_endpoint)
+                    item_counters = [str(i + 1) for i in range(len(data))]
+                    tabulated = True
+                except:
+                    self.pretty_print(data)
             else:
                 self.pretty_print(data)
 
