@@ -1,0 +1,68 @@
+name: Build Wars
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'agama/**'
+      - 'jans-auth-server/**'
+      - 'jans-bom/**'
+      - 'jans-config-api/**'
+      - 'jans-core/**'
+      - 'jans-eleven/**'
+      - 'jans-fido2/**'
+      - 'jans-notify/**'
+      - 'jans-orm/**'
+      - 'jans-scim/**'
+      - 'jans-client-api/**'
+
+  push:
+   branches:
+      - main
+   paths:
+      - 'agama/**'
+      - 'jans-auth-server/**'
+      - 'jans-bom/**'
+      - 'jans-config-api/**'
+      - 'jans-core/**'
+      - 'jans-eleven/**'
+      - 'jans-fido2/**'
+      - 'jans-notify/**'
+      - 'jans-orm/**'
+      - 'jans-scim/**'
+      - 'jans-client-api/**'
+jobs:
+  build:
+    name: Build Package
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    strategy:
+      max-parallel: 1
+      matrix:
+        fldrpath: ['jans-bom','agama','jans-fido2','jans-core','jans-eleven','jans-notify','jans-auth-server','jans-orm','jans-config-api','jans-scim','jans-client-api']
+        experimental: [false]
+    steps:
+    - name : Variables
+      run: |
+         echo ${{ github.repository }}
+         echo ${{ github.actor }}
+
+    - uses: actions/checkout@v1
+      with:
+          repository: ${{ github.repository }}
+          token: ${{ secrets.githubtoken }}
+    - uses: actions/setup-java@v3
+      with:
+          java-version: '11'
+          distribution: 'zulu'
+
+    - name: Publish package
+      env:
+           GITHUB_USERNAME: ${{ github.actor }}
+           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+           pwd
+           mvn clean install -DskipTests --file ${{ matrix.fldrpath }}
+           mvn -B package --file ${{ matrix.fldrpath }}/pom.xml -Dmaven.test.skip=true
+           mvn --file ${{ matrix.fldrpath }}/pom.xml deploy -Dmaven.test.skip=true
