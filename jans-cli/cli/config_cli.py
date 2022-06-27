@@ -1846,11 +1846,8 @@ class JCA_CLI:
 
 
     def process_command_get(self, path, suffix_param, endpoint_params, data_fn, data=None):
-        #TODO: suffix_param, data_fn, data
-
         endpoint = self.get_fake_endpoint(path)
-
-        response = self.get_requests(endpoint, endpoint_params)
+        response = self.get_requests(endpoint, suffix_param)
         self.pretty_print(response)
 
 
