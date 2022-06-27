@@ -240,13 +240,12 @@ public class FlowService {
             throw new IOException(msg);
         }
         
-        if (Optional.ofNullable(engineConfig.getDisableTCHV()).orElse(false)) {
+        if (!Optional.ofNullable(engineConfig.getDisableTCHV()).orElse(false)) {
 
             String hash = fl.getTransHash();
             //null hash means the code is being regenerated in this moment
-
             if (hash != null && !flowUtils.hash(code).equals(hash))
-                throw new IOException("Flow code seems to have been altered. " +
+                throw new IOException("Transpiled code seems to have been altered. " +
                         "Restore the code by increasing this flow's jansRevision attribute");
         }
         
