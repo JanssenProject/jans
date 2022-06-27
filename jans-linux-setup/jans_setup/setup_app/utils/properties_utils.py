@@ -110,6 +110,9 @@ class PropertiesUtils(SetupUtils):
 
         if Config.profile == 'jans':
 
+            if not (Config.cb_install or Config.rdbm_install):
+                Config.opendj_install = InstallTypes.LOCAL
+
             if not Config.ldapPass:
                 Config.ldapPass = Config.admin_password
 
@@ -129,6 +132,7 @@ class PropertiesUtils(SetupUtils):
                     print(msg.used_ports.format(','.join(used_ports)))
                     sys.exit(1)
 
+
             self.set_persistence_type()
 
             if not Config.opendj_p12_pass:
@@ -141,6 +145,10 @@ class PropertiesUtils(SetupUtils):
 
         if not Config.jans_max_mem:
             Config.jans_max_mem = int(base.current_mem_size * .83 * 1000) # 83% of physical memory
+
+
+        print(Config.cb_install, Config.rdbm_install, Config.opendj_install)
+
 
     def check_oxd_server_https(self):
 
@@ -223,7 +231,7 @@ class PropertiesUtils(SetupUtils):
         if prop_file.endswith('-DEC~'):
             self.run(['rm', '-f', prop_file])
 
-        if not 'admin_password' in properties_list:
+        if 'admin_password' not in properties_list and 'ldapPass' in p:
             Config.admin_password = p['ldapPass']
             
         if p.get('ldap_hostname') != 'localhost':
@@ -271,15 +279,13 @@ class PropertiesUtils(SetupUtils):
                 print("Can't connect to remote LDAP Server with credentials found in setup.properties.")
                 sys.exit(1)
 
-
-        if not 'admin_password' in p:
-            p['admin_password'] = p['ldapPass']
-
+        if not (Config.cb_install or Config.rdbm_install):
+            p['opendj_install'] = InstallTypes.LOCAL
 
         return p
 
     def save_properties(self, prop_fn=None, obj=None):
-        
+
         if not prop_fn:
             prop_fn = Config.savedProperties
 
@@ -313,7 +319,7 @@ class PropertiesUtils(SetupUtils):
                     else:
                         value = getString(obj)
                         if value != '':
-                            p[obj_name] = value                
+                            p[obj_name] = value
 
             with open(prop_fn, 'wb') as f:
                 p.store(f, encoding="utf-8")
