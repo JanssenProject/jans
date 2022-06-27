@@ -8,6 +8,12 @@
 
 	<name>jans-auth-static</name>
 
+	<parent>
+		<groupId>io.jans</groupId>
+		<artifactId>jans-auth-server-parent</artifactId>
+		<version>1.0.1-SNAPSHOT</version>
+	</parent>
+
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
