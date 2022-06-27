@@ -231,7 +231,7 @@ class PropertiesUtils(SetupUtils):
         if prop_file.endswith('-DEC~'):
             self.run(['rm', '-f', prop_file])
 
-        if not 'admin_password' in properties_list:
+        if not 'admin_password' in properties_list and 'ldapPass' in p:
             Config.admin_password = p['ldapPass']
             
         if p.get('ldap_hostname') != 'localhost':
@@ -278,9 +278,6 @@ class PropertiesUtils(SetupUtils):
             if not conn_check['result']:
                 print("Can't connect to remote LDAP Server with credentials found in setup.properties.")
                 sys.exit(1)
-
-        if not 'admin_password' in p:
-            p['admin_password'] = p['ldapPass']
 
         if not (Config.cb_install or Config.rdbm_install):
             p['opendj_install'] = InstallTypes.LOCAL
