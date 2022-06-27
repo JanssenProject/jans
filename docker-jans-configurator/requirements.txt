@@ -4,4 +4,4 @@ click==6.7
 marshmallow==3.10.0
 fqdn==1.4.0
 libcst<0.4
-git+https://github.com/JanssenProject/jans@430540887b193aab833994133ecb8214daae4c4a#egg=jans-pycloudlib&subdirectory=jans-pycloudlib
+git+https://github.com/JanssenProject/jans@379e5cb8bb7f60556154e066bbae408808ce4851#egg=jans-pycloudlib&subdirectory=jans-pycloudlib
