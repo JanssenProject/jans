@@ -86,15 +86,6 @@ def gmanager(gconsul_config, gvault_secret):
 
 
 @pytest.fixture
-def gmeta():
-    from jans.pycloudlib.meta.base_meta import BaseMeta
-
-    class GMeta(BaseMeta):
-        pass
-    yield GMeta()
-
-
-@pytest.fixture
 def gk8s_meta():
     from jans.pycloudlib.meta import KubernetesMeta
 
