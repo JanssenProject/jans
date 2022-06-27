@@ -688,6 +688,8 @@ class JCA_CLI:
         if not error_printed:
             print(self.colored_text("Error retreiving data", warning_color))
             print('\u001b[38;5;196m')
+            if isinstance(e, str):
+                print(e)
             if hasattr(e, 'reason'):
                 print(e.reason)
             if hasattr(e, 'body'):
@@ -1316,6 +1318,7 @@ class JCA_CLI:
             verify=self.verify_ssl
             )
         self.log_response(response)
+
         try:
             return response.json()
         except:
@@ -1864,6 +1867,12 @@ class JCA_CLI:
         endpoint.info = path
         return endpoint
 
+
+    def print_response(self, response):
+        if response:
+            sys.stderr.write("Server Response:\n")
+            self.pretty_print(response)
+
     def process_command_post(self, path, suffix_param, endpoint_params, data_fn, data):
 
         # TODO: suffix_param, endpoint_params
@@ -1887,8 +1896,7 @@ class JCA_CLI:
         elif path['__method__'] == 'put':
             response = self.put_requests(endpoint, data)
 
-        sys.stderr.write("Server Response:\n")
-        self.pretty_print(response)
+        self.print_response(response)
 
     def process_command_put(self, path, suffix_param, endpoint_params, data_fn, data=None):
         self.process_command_post(path, suffix_param, endpoint_params, data_fn, data=None)
@@ -1918,15 +1926,14 @@ class JCA_CLI:
 
         response = self.patch_requests(endpoint, suffix_param, data)
 
-        sys.stderr.write("Server Response:\n")
-        self.pretty_print(response)
+        self.print_response(response)
+
 
     def process_command_delete(self, path, suffix_param, endpoint_params, data_fn, data=None):
         endpoint = self.get_fake_endpoint(path)
         response = self.delete_requests(endpoint, suffix_param)
         if response:
-            sys.stderr.write("Server Response:\n")
-            self.pretty_print(response)
+            self.print_response(response)
         else:
             print(self.colored_text("Object was successfully deleted.", success_color))
 
