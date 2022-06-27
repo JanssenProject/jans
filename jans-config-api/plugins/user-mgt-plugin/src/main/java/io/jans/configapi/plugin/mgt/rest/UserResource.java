@@ -1,10 +1,9 @@
 package io.jans.configapi.plugin.mgt.rest;
 
 import com.github.fge.jsonpatch.JsonPatchException;
-
-import static io.jans.as.model.util.Util.escapeLog;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.service.common.EncryptionService;
+import io.jans.configapi.core.model.SearchRequest;
 import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.plugin.mgt.model.user.CustomUser;
@@ -12,16 +11,10 @@ import io.jans.configapi.plugin.mgt.model.user.UserPatchRequest;
 import io.jans.configapi.plugin.mgt.service.UserService;
 import io.jans.configapi.plugin.mgt.util.Constants;
 import io.jans.configapi.plugin.mgt.util.MgtUtil;
-import io.jans.configapi.core.model.SearchRequest;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.orm.model.PagedResult;
 import io.jans.util.StringHelper;
-
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -29,8 +22,15 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-
 import org.slf4j.Logger;
+
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static io.jans.as.model.util.Util.escapeLog;
 
 @Path(Constants.CONFIG_USER)
 @Produces(MediaType.APPLICATION_JSON)
@@ -114,10 +114,12 @@ public class UserResource extends BaseResource {
 
         // get User object
         User user = setUserAttributes(customUser);
+        //parse birthdate if present
+        userSrv.parseBirthDateAttribute(user);
         logger.debug("Create  user:{}", user);
 
         // checking mandatory attributes
-        checkMissingAttributes(user,null);
+        checkMissingAttributes(user, null);
 
         user = userSrv.addUser(user, true);
         logger.debug("User created {}", user);
@@ -142,6 +144,8 @@ public class UserResource extends BaseResource {
 
         // get User object
         User user = setUserAttributes(customUser);
+        //parse birthdate if present
+        userSrv.parseBirthDateAttribute(user);
         logger.debug("Create  user:{}", user);
 
         // checking mandatory attributes
@@ -165,13 +169,15 @@ public class UserResource extends BaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS })
     @Path(ApiConstants.INUM_PATH)
     public Response patchUser(@PathParam(ApiConstants.INUM) @NotNull String inum,
-            @NotNull UserPatchRequest userPatchRequest) throws IllegalAccessException,
+                              @NotNull UserPatchRequest userPatchRequest) throws IllegalAccessException,
             InvocationTargetException, JsonPatchException, IOException {
         if (logger.isDebugEnabled()) {
             logger.debug("User:{} to be patched with :{} ", escapeLog(inum), escapeLog(userPatchRequest));
         }
         // check if user exists
         User existingUser = userSrv.getUserBasedOnInum(inum);
+        //parse birthdate if present
+        userSrv.parseBirthDateAttribute(existingUser);
         checkResourceNotNull(existingUser, USER);
 
         // patch user
@@ -225,6 +231,9 @@ public class UserResource extends BaseResource {
         users = userSrv.excludeAttributes(users, searchReq.getExcludedAttributesStr());
         logger.debug("Users fetched  - users:{}", users);
 
+        //parse birthdate if present
+        users = users.stream().map(user -> userSrv.parseBirthDateAttribute(user)).collect(Collectors.toList());
+
         // get customUser()
         return getCustomUserList(users);
     }
@@ -235,7 +244,7 @@ public class UserResource extends BaseResource {
 
     private void checkMissingAttributes(User user, List<String> excludeAttributes)
             throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        String missingAttributes = userSrv.checkMandatoryFields(user,excludeAttributes);
+        String missingAttributes = userSrv.checkMandatoryFields(user, excludeAttributes);
         logger.debug("missingAttributes:{}", missingAttributes);
 
         if (StringHelper.isEmpty(missingAttributes)) {
@@ -325,5 +334,4 @@ public class UserResource extends BaseResource {
         logger.debug("Custom User - user:{}", user);
         return user;
     }
-
 }
