@@ -59,7 +59,7 @@ public class UserResource extends BaseResource {
     UserService userSrv;
 
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.USER_READ_ACCESS })
+    @ProtectedApi(scopes = {ApiAccessConstants.USER_READ_ACCESS})
     public Response getUsers(
             @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
@@ -82,7 +82,7 @@ public class UserResource extends BaseResource {
     }
 
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.USER_READ_ACCESS })
+    @ProtectedApi(scopes = {ApiAccessConstants.USER_READ_ACCESS})
     @Path(ApiConstants.INUM_PATH)
     public Response getUserByInum(@PathParam(ApiConstants.INUM) @NotNull String inum)
             throws IllegalAccessException, InvocationTargetException {
@@ -105,7 +105,7 @@ public class UserResource extends BaseResource {
     }
 
     @POST
-    @ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS })
+    @ProtectedApi(scopes = {ApiAccessConstants.USER_WRITE_ACCESS})
     public Response createUser(@Valid CustomUser customUser)
             throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         if (logger.isDebugEnabled()) {
@@ -135,7 +135,7 @@ public class UserResource extends BaseResource {
     }
 
     @PUT
-    @ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS })
+    @ProtectedApi(scopes = {ApiAccessConstants.USER_WRITE_ACCESS})
     public Response updateUser(@Valid CustomUser customUser)
             throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         if (logger.isDebugEnabled()) {
@@ -166,7 +166,7 @@ public class UserResource extends BaseResource {
     }
 
     @PATCH
-    @ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS })
+    @ProtectedApi(scopes = {ApiAccessConstants.USER_WRITE_ACCESS})
     @Path(ApiConstants.INUM_PATH)
     public Response patchUser(@PathParam(ApiConstants.INUM) @NotNull String inum,
                               @NotNull UserPatchRequest userPatchRequest) throws IllegalAccessException,
@@ -196,7 +196,7 @@ public class UserResource extends BaseResource {
 
     @DELETE
     @Path(ApiConstants.INUM_PATH)
-    @ProtectedApi(scopes = { ApiAccessConstants.USER_DELETE_ACCESS })
+    @ProtectedApi(scopes = {ApiAccessConstants.USER_DELETE_ACCESS})
     public Response deleteUser(@PathParam(ApiConstants.INUM) @NotNull String inum) {
         if (logger.isDebugEnabled()) {
             logger.debug("User to be deleted - inum:{} ", escapeLog(inum));
