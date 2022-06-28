@@ -39,7 +39,7 @@ public class ScriptUtils {
             PendingRenderException pending = new PendingRenderException(
                     (NativeContinuation) cx.captureContinuation().getContinuation());
             pending.setTemplatePath(page);
-            pending.setDataModel((Map<String, Object>) data);
+            pending.setDataModel(data);
             pending.setAllowCallbackResume(allowCallbackResume);
             LOG.debug("Pausing flow");
             throw pending;
