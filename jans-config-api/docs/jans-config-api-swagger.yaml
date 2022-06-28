@@ -4713,9 +4713,6 @@ components:
         dcrAuthorizationWithClientCredentials:
           type: boolean
           description: Boolean value indicating if DCR authorization to be performed using client credentials.
-        dcrSkipSignatureValidation:
-          type: boolean
-          description: Boolean value indicating if signature validation is to be skipped.
         statTimerIntervalInSeconds:
           type: integer
           description: Statistical data capture time interval.
