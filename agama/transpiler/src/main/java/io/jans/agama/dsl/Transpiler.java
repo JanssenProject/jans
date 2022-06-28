@@ -21,7 +21,6 @@ import java.io.Reader;
 import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -56,6 +55,7 @@ public class Transpiler {
     private static final String FTL_LOCATION = "JSGenerator.ftl";
 
     private static final ClassLoader CLS_LOADER = Transpiler.class.getClassLoader();
+    private static final Configuration FM_CONFIG;
 
     private final Logger logger = LoggerFactory.getLogger(Transpiler.class);
 
@@ -78,7 +78,15 @@ public class Transpiler {
         } catch (IOException e) {
             throw new RuntimeException("Unable to read utility script", e);
         }
-        
+
+        FM_CONFIG = new Configuration(Configuration.VERSION_2_3_31);
+        FM_CONFIG.setClassLoaderForTemplateLoading(CLS_LOADER, "/");
+        FM_CONFIG.setDefaultEncoding(UTF_8.toString());
+        FM_CONFIG.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
+        FM_CONFIG.setLogTemplateExceptions(false);
+        FM_CONFIG.setWrapUncheckedExceptions(true);
+        FM_CONFIG.setFallbackOnNullLoopVariable(false);
+
     }
     
     public Transpiler(String flowQName, Set<String> flowQNames) throws TranspilerException {
@@ -98,7 +106,11 @@ public class Transpiler {
         xpathCompiler = processor.newXPathCompiler();
         xpathCompiler.setCaching(true);
 
-        loadFreeMarkerTemplate();
+        try {
+            jsGenerator = FM_CONFIG.getTemplate(FTL_LOCATION);
+        } catch (Exception e) {
+            throw new TranspilerException("Template loading failed", e);
+        }
 
     }
     
@@ -106,24 +118,8 @@ public class Transpiler {
         return fanny;
     }
     
-    private void loadFreeMarkerTemplate() throws TranspilerException {
-        
-        try{
-            Configuration fmConfig = new Configuration(Configuration.VERSION_2_3_31);
-            fmConfig.setClassLoaderForTemplateLoading(CLS_LOADER, "/");
-            fmConfig.setDefaultEncoding(UTF_8.toString());
-            fmConfig.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
-            fmConfig.setLogTemplateExceptions(false);
-            fmConfig.setWrapUncheckedExceptions(true);
-            fmConfig.setFallbackOnNullLoopVariable(false);
-            jsGenerator = fmConfig.getTemplate(FTL_LOCATION);
-        } catch (Exception e) {
-            throw new TranspilerException("Template loading failed", e);
-        }
-        
-    }
-
-    public XdmNode asXML(String DSLCode) throws SyntaxException, TranspilerException, SaxonApiException {
+    private AuthnFlowParser.FlowContext getFlowContext(String DSLCode)
+            throws SyntaxException, TranspilerException {
 
         InputStream is = new ByteArrayInputStream(DSLCode.getBytes(UTF_8));
         CharStream input = null;
@@ -159,19 +155,26 @@ public class Transpiler {
                 throw new SyntaxException("Unable to process the input code thoroughly",
                         lexer.getText(), lexer.getLine(), lexer.getCharPositionInLine());                
             }
-
-            logger.debug("Traversing parse tree");
-            //Generate XML representation
-
-            SaplingDocument document = Visitor.document(flowContext, AuthnFlowParser.RULE_flow, fanny);
-            applyValidations(document);
-            return document.toXdmNode(processor);
+            return flowContext;
 
         } catch (RecognitionException re) {
             Token offender = re.getOffendingToken();
             throw new SyntaxException(re.getMessage(), offender.getText(),
                     offender.getLine(), offender.getCharPositionInLine());
         }
+
+    }
+
+    public XdmNode asXML(String DSLCode) throws SyntaxException, TranspilerException, SaxonApiException {
+
+        AuthnFlowParser.FlowContext flowContext = getFlowContext(DSLCode);
+        validateName(flowContext);
+        logger.debug("Traversing parse tree");
+
+        //Generate XML representation
+        SaplingDocument document = Visitor.document(flowContext, AuthnFlowParser.RULE_flow, fanny);
+        applyValidations(document);
+        return document.toXdmNode(processor);
 
     }
 
@@ -215,6 +218,14 @@ public class Transpiler {
         } catch (SaxonApiException se) {
             throw new TranspilerException("Validation failed", se);
         }
+
+    }
+    
+    private void validateName(AuthnFlowParser.FlowContext flowContext) throws TranspilerException {
+        
+        String qname = flowContext.header().qname().getText();
+        if (!flowId.equals(qname))
+            throw new TranspilerException("Qualified name mismatch: " + flowId + " vs. " + qname);
 
     }
 
@@ -293,7 +304,14 @@ public class Transpiler {
         } catch (SaxonApiException e) {
             throw new TranspilerException(e.getMessage(), e);
         }
-        
+
+    }
+    
+    public static void runSyntaxCheck(String flowQname, String source)
+            throws SyntaxException, TranspilerException {
+
+        Transpiler tr = new Transpiler(flowQname, null);        
+        tr.validateName(tr.getFlowContext(source));
     }
 
     public static void main(String... args) throws Exception {
