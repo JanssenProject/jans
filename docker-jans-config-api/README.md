@@ -68,7 +68,7 @@ The following environment variables are supported by the container:
 - `CN_GOOGLE_SPANNER_INSTANCE_ID`: Google Spanner instance ID.
 - `CN_GOOGLE_SPANNER_DATABASE_ID`: Google Spanner database ID.
 - `CN_CONFIG_API_APP_LOGGERS`: Custom logging configuration in JSON-string format with hash type (see [Configure app loggers](#configure-app-loggers) section for details).
-- `CN_CONFIG_API_PLUGINS`: Comma-separated plugin names that should be enabled (available plugins are `admin-ui` and `scim`).
+- `CN_CONFIG_API_PLUGINS`: Comma-separated plugin names that should be enabled (available plugins are `admin-ui`, `scim`, and `fido2`). Note that default plugin called `user-mgt` will always be enabled.
 - `CN_TOKEN_SERVER_CERT_FILE`: Path to token server certificate (default to `/etc/certs/token_server.crt`).
 - `CN_ADMIN_UI_PLUGIN_LOGGERS`: Custom logging configuration for AdminUI plugin in JSON-string format with hash type (see [Configure plugin loggers](#configure-plugin-loggers) section for details).
 - `CN_PROMETHEUS_PORT`: Port used by Prometheus JMX agent (default to empty string). To enable Prometheus JMX agent, set the value to a number. See [Exposing metrics](#exposing-metrics) for details.

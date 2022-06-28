@@ -2,16 +2,6 @@
 
 set -e
 
-copy_builtin_plugins() {
-    if [ ! -f /opt/jans/jetty/jans-config-api/custom/libs/scim-plugin.jar ]; then
-        cp /usr/share/java/scim-plugin.jar /opt/jans/jetty/jans-config-api/custom/libs/
-    fi
-
-    if [ ! -f /opt/jans/jetty/jans-config-api/custom/libs/admin-ui-plugin.jar ]; then
-        cp /usr/share/java/admin-ui-plugin.jar /opt/jans/jetty/jans-config-api/custom/libs/
-    fi
-}
-
 get_logging_files() {
     logs="resources/log4j2.xml"
 
@@ -33,9 +23,6 @@ get_prometheus_opt() {
 }
 
 python3 /app/scripts/wait.py
-
-copy_builtin_plugins
-
 python3 /app/scripts/bootstrap.py
 
 # run config-api
