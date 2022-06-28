@@ -45,3 +45,4 @@ This part of the documentation lists the API reference of public classes and fun
    meta
    utils
    validators
+   cli
