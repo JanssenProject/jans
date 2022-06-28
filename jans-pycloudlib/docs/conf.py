@@ -45,6 +45,7 @@ release = find_version("../jans/pycloudlib/version.py")
 # ones.
 extensions = [
     "sphinx.ext.autodoc",
+    "sphinx_click",
 ]
 
 autodoc_mock_imports = [
@@ -59,6 +60,7 @@ autodoc_mock_imports = [
     "google",
     "ldif",
     "sqlalchemy",
+    "click",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
