@@ -87,9 +87,6 @@ public class RegisterValidator {
             if (isFalse(appConfiguration.getDcrSignatureValidationEnabled())) {
                 return;
             }
-            if (isTrue(appConfiguration.getDcrSkipSignatureValidation())) {
-                return;
-            }
 
             final Jwt jwt = Jwt.parseOrThrow(requestParams);
             final SignatureAlgorithm signatureAlgorithm = jwt.getHeader().getSignatureAlgorithm();
