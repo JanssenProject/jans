@@ -1287,7 +1287,7 @@ rediscacheconf
 inmemcacheconf
 nativepersistcacheconf
 Configuration	
-##fido2conf
+#fido2conf
 smtpconf
 Logging
 ldapconf
