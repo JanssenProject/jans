@@ -13,7 +13,7 @@ A Java invocation of the form `Call package.className#new ...` is passing a numb
 
 ### Unable to find a method called ... with arity ... in class ...
 
-A java invocation is attempting to call a method that is not part of the given class or the number of parameters passed for the method is not correct. 
+A java invocation is attempting to call a method that is not part of the given class or the number of parameters passed for the method is not correct.
 
 ## Classes added on the fly
 

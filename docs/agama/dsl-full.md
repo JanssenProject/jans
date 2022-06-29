@@ -408,6 +408,16 @@ Finish it
 <td>
 
 ```
+Finish "as9233Qz"
+```
+
+</td>
+		<td>Shorthand for <code>{ success: true, data: { userId: "as9233Qz" } }</code></td>
+	</tr>
+	<tr>
+<td>
+
+```
 it = { nonsense: [ null ] }
 Finish it.nonsense
 ```
@@ -816,6 +826,18 @@ Call p2 translate -1 1
 
 </td>
 		<td>Creates instances of class <code>java.awt.Point</code> with different constructors. For <code>p1</code> the no-args constructor is used.<br/>Method <code>translate</code> is invoked on the <code>p2</code> instance. Note usage of a space here instead of hash (<code>#</code>)</td>
+	</tr>
+	<tr>
+<td>
+
+```
+cls1 = Call java.lang.CharSequence#class
+cls2 = Call java.lang.Integer#class
+Call cls2 parseInt "FF" 16
+```
+
+</td>
+		<td>Stores in <code>cls1</code> a reference to interface class <code>CharSequence.class</code>.<br/>Stores in <code>cls2</code> a reference to <code>Integer.class</code>.<br/>The 3rd line statement achieves the same effect of <code>Call java.lang.Integer#parseInt "FF" 16</code></td>
 	</tr>
 	<tr>
 <td>
