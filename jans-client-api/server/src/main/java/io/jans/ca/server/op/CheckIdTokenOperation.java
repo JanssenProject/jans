@@ -5,13 +5,18 @@ import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.ca.common.Command;
+import io.jans.ca.common.CommandType;
 import io.jans.ca.common.params.CheckIdTokenParams;
 import io.jans.ca.common.response.CheckIdTokenResponse;
 import io.jans.ca.common.response.IOpResponse;
 import io.jans.ca.server.HttpException;
 import io.jans.ca.server.Utils;
 import io.jans.ca.server.configuration.model.Rp;
+import io.jans.ca.server.service.DiscoveryService;
+import io.jans.ca.server.service.PublicOpKeyService;
 import io.jans.ca.server.service.ServiceProvider;
+import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,27 +27,30 @@ import java.util.List;
  * @version 0.9, 18/10/2013
  */
 
-public class CheckIdTokenOperation extends BaseOperation<CheckIdTokenParams> {
+public class CheckIdTokenOperation extends TemplateOperation<CheckIdTokenParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(CheckIdTokenOperation.class);
 
-    public CheckIdTokenOperation(Command command, ServiceProvider serviceProvider) {
-        super(command, serviceProvider, CheckIdTokenParams.class);
-    }
+    @Inject
+    DiscoveryService discoveryService;
+    @Inject
+    OpClientFactoryImpl opClientFactory;
+    @Inject
+    PublicOpKeyService publicOpKeyService;
 
     @Override
-    public IOpResponse execute(CheckIdTokenParams params) {
+    public IOpResponse execute(CheckIdTokenParams params, HttpServletRequest httpServletRequest) {
         try {
-            OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponseByRpId(params.getRpId());
+            OpenIdConfigurationResponse discoveryResponse = discoveryService.getConnectDiscoveryResponseByRpId(params.getRpId());
 
-            final Rp rp = getRp();
+            final Rp rp = getRp(params);
             final String idToken = params.getIdToken();
             final Jwt jwt = Jwt.parse(idToken);
             final Validator validator = new Validator.Builder()
                     .discoveryResponse(discoveryResponse)
                     .idToken(jwt)
-                    .keyService(getPublicOpKeyService())
-                    .opClientFactory(getOpClientFactory())
+                    .keyService(publicOpKeyService)
+                    .opClientFactory(opClientFactory)
                     .rpServerConfiguration(getJansConfigurationService().find())
                     .rp(rp)
                     .build();
@@ -70,5 +78,15 @@ public class CheckIdTokenOperation extends BaseOperation<CheckIdTokenParams> {
 
     public static boolean atHashCheckRequired(List<String> responseTypes) {
         return responseTypes.stream().anyMatch(s -> ResponseType.fromString(s, " ").contains(ResponseType.TOKEN));
+    }
+
+    @Override
+    public Class<CheckIdTokenParams> getParameterClass() {
+        return CheckIdTokenParams.class;
+    }
+
+    @Override
+    public CommandType getCommandType() {
+        return CommandType.CHECK_ID_TOKEN;
     }
 }

@@ -5,6 +5,11 @@ import io.jans.ca.common.params.GetAuthorizationCodeParams;
 import io.jans.ca.common.params.GetAuthorizationUrlParams;
 import io.jans.ca.common.params.GetLogoutUrlParams;
 import io.jans.ca.common.params.GetTokensByCodeParams;
+import io.jans.ca.server.op.GetAuthorizationCodeOperation;
+import io.jans.ca.server.op.GetAuthorizationUrlOperation;
+import io.jans.ca.server.op.GetLogoutUrlOperation;
+import io.jans.ca.server.op.GetTokensByCodeOperation;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -12,14 +17,22 @@ import jakarta.ws.rs.core.Response;
 @Path("/")
 public class OpenIdConnectResource extends BaseResource {
 
+    @Inject
+    GetAuthorizationCodeOperation getAuthorizationCodeOp;
+    @Inject
+    GetAuthorizationUrlOperation getAuthorizationUrlOp;
+    @Inject
+    GetTokensByCodeOperation getTokensByCodeOp;
+    @Inject
+    GetLogoutUrlOperation getLogoutUrlOp;
+
     @POST
     @Path("/get-authorization-url")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public Response getAuthorizationUrl(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String authorizationRpId, String params) {
         logger.info("Api Resource: /get-authorization-url  Params: {}", params);
-        String result = process(CommandType.GET_AUTHORIZATION_URL, params, GetAuthorizationUrlParams.class, authorization, authorizationRpId);
-        return Response.ok(result).build();
+        return getAuthorizationUrlOp.process(params, authorization, authorizationRpId, getHttpRequest());
     }
 
     @POST
@@ -28,8 +41,7 @@ public class OpenIdConnectResource extends BaseResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response getAuthorizationCode(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String authorizationRpId, String params) {
         logger.info("Api Resource: /get-authorization-code  Params: {}", params);
-        String result = process(CommandType.GET_AUTHORIZATION_CODE, params, GetAuthorizationCodeParams.class, authorization, authorizationRpId);
-        return Response.ok(result).build();
+        return getAuthorizationCodeOp.process(params, authorization, authorizationRpId, getHttpRequest());
     }
 
     @POST
@@ -38,8 +50,7 @@ public class OpenIdConnectResource extends BaseResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response getTokenByCode(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String authorizationRpId, String params) {
         logger.info("Api Resource: /get-tokens-by-code  Params: {}", params);
-        String result = process(CommandType.GET_TOKENS_BY_CODE, params, GetTokensByCodeParams.class, authorization, authorizationRpId);
-        return Response.ok(result).build();
+        return getTokensByCodeOp.process(params, authorization, authorizationRpId, getHttpRequest());
     }
 
     @POST
@@ -48,7 +59,6 @@ public class OpenIdConnectResource extends BaseResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response getLogoutUri(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String authorizationRpId, String params) {
         logger.info("Api Resource: /get-logout-uri  Params: {}", params);
-        String result = process(CommandType.GET_LOGOUT_URI, params, GetLogoutUrlParams.class, authorization, authorizationRpId);
-        return Response.ok(result).build();
+        return getLogoutUrlOp.process(params, authorization, authorizationRpId, getHttpRequest());
     }
 }

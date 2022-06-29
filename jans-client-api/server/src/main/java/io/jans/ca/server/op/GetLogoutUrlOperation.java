@@ -3,6 +3,7 @@ package io.jans.ca.server.op;
 import com.google.common.base.Strings;
 import io.jans.as.client.OpenIdConfigurationResponse;
 import io.jans.ca.common.Command;
+import io.jans.ca.common.CommandType;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.ExpiredObjectType;
 import io.jans.ca.common.params.GetLogoutUrlParams;
@@ -14,36 +15,31 @@ import io.jans.ca.server.persistence.service.MainPersistenceService;
 import io.jans.ca.server.service.DiscoveryService;
 import io.jans.ca.server.service.ServiceProvider;
 import io.jans.ca.server.service.StateService;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URLEncoder;
 
-/**
- * @author Yuriy Zabrovarnyy
- * @version 0.9, 17/11/2015
- */
-
-public class GetLogoutUrlOperation extends BaseOperation<GetLogoutUrlParams> {
+@RequestScoped
+@Named
+public class GetLogoutUrlOperation extends TemplateOperation<GetLogoutUrlParams> {
 
     private static final String GOOGLE_OP_HOST = "https://accounts.google.com";
 
     private static final Logger LOG = LoggerFactory.getLogger(GetLogoutUrlOperation.class);
 
-    private DiscoveryService discoveryService;
-    private MainPersistenceService configurationService;
-    private StateService stateService;
-
-    public GetLogoutUrlOperation(Command command, ServiceProvider serviceProvider) {
-        super(command, serviceProvider, GetLogoutUrlParams.class);
-        this.discoveryService = serviceProvider.getDiscoveryService();
-        this.stateService = serviceProvider.getStateService();
-        this.configurationService = serviceProvider.getJansConfigurationService();
-    }
+    @Inject
+    DiscoveryService discoveryService;
+    @Inject
+    StateService stateService;
 
     @Override
-    public IOpResponse execute(GetLogoutUrlParams params) throws Exception {
-        final Rp rp = getRp();
+    public IOpResponse execute(GetLogoutUrlParams params, HttpServletRequest httpServletRequest) throws Exception {
+        final Rp rp = getRp(params);
 
         OpenIdConfigurationResponse discoveryResponse = discoveryService.getConnectDiscoveryResponse(rp);
         String endSessionEndpoint = discoveryResponse.getEndSessionEndpoint();
@@ -57,7 +53,7 @@ public class GetLogoutUrlOperation extends BaseOperation<GetLogoutUrlParams> {
         }
 
         if (Strings.isNullOrEmpty(endSessionEndpoint)) {
-            if (rp.getOpHost().startsWith(GOOGLE_OP_HOST) && configurationService.find().getSupportGoogleLogout()) {
+            if (rp.getOpHost().startsWith(GOOGLE_OP_HOST) && getJansConfigurationService().find().getSupportGoogleLogout()) {
                 String logoutUrl = "https://www.google.com/accounts/Logout?continue=https://appengine.google.com/_ah/logout?continue=" + postLogoutRedirectUrl;
                 return new GetLogoutUriResponse(logoutUrl);
             }
@@ -81,6 +77,16 @@ public class GetLogoutUrlOperation extends BaseOperation<GetLogoutUrlParams> {
         }
 
         return new GetLogoutUriResponse(uri);
+    }
+
+    @Override
+    public Class<GetLogoutUrlParams> getParameterClass() {
+        return GetLogoutUrlParams.class;
+    }
+
+    @Override
+    public CommandType getCommandType() {
+        return CommandType.GET_LOGOUT_URI;
     }
 
     private static String separator(String uri) {

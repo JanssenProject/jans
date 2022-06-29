@@ -23,7 +23,9 @@ import io.jans.ca.server.configuration.model.Rp;
 import io.jans.ca.server.mapper.RegisterRequestMapper;
 import io.jans.ca.server.service.RpService;
 import io.jans.ca.server.service.ServiceProvider;
+import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.HttpMethod;
 import org.apache.commons.collections.CollectionUtils;
@@ -36,11 +38,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/**
- * @author Yuriy Zabrovarnyy
- * @version 0.9, 11/03/2016
- */
-
+@RequestScoped
+@Named
 public class UpdateSiteOperation extends TemplateOperation<UpdateSiteParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(UpdateSiteOperation.class);

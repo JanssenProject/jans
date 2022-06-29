@@ -1,7 +1,8 @@
 package io.jans.ca.server.rest;
 
-import io.jans.ca.common.CommandType;
-import io.jans.ca.common.params.*;
+import io.jans.ca.common.params.StringParam;
+import io.jans.ca.server.op.*;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -9,15 +10,23 @@ import jakarta.ws.rs.core.Response;
 @Path("/")
 public class RpResource extends BaseResource {
 
+    @Inject
+    GetRpJwksOperation getRpJwksOp;
+    @Inject
+    GetRpOperation getRpOp;
+    @Inject
+    AuthorizationCodeFlowOperation authorizationCodeFlowOp;
+    @Inject
+    GetRequestObjectOperation getRequestObjectOp;
+    @Inject
+    GetRequestObjectUriOperation getRequestObjectUriOp;
+
     @GET
     @Path("/get-rp-jwks")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getRpJwks() {
         logger.info("Api Resource: get-rp-jwks");
-        String result = process(CommandType.GET_RP_JWKS, null, GetJwksParams.class, null, null);
-        logger.info("Api Resource: get-rp-jwks - result:{}", result);
-
-        return Response.ok(result).build();
+        return getRpJwksOp.process(null, getHttpRequest());
     }
 
     @POST
@@ -25,10 +34,7 @@ public class RpResource extends BaseResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getRp(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String authorizationRpId, String params) {
         logger.info("Api Resource: get-rp");
-        String result = process(CommandType.GET_RP, params, GetRpParams.class, authorization, authorizationRpId);
-        logger.info("Api Resource: get-rp - result:{}", result);
-
-        return Response.ok(result).build();
+        return getRpOp.process(params, authorization, authorizationRpId, getHttpRequest());
     }
 
     @POST
@@ -37,8 +43,7 @@ public class RpResource extends BaseResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response authorizationCodeFlow(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String authorizationRpId, String params) {
         logger.info("Api Resource: authorization-code-flow");
-        String result = process(CommandType.AUTHORIZATION_CODE_FLOW, params, AuthorizationCodeFlowParams.class, authorization, authorizationRpId);
-        return Response.ok(result).build();
+        return authorizationCodeFlowOp.process(params, authorization, authorizationRpId, getHttpRequest());
     }
 
     @GET
@@ -46,8 +51,7 @@ public class RpResource extends BaseResource {
     @Produces(MediaType.TEXT_PLAIN)
     public Response getRequestObject(@PathParam("request_object_id") String value) {
         logger.info("Api Resource: get-request-object/{}", value);
-        String result = process(CommandType.GET_REQUEST_OBJECT_JWT, (new StringParam(value)).toJsonString(), StringParam.class, null, null);
-        return Response.ok(result).build();
+        return getRequestObjectOp.process((new StringParam(value)).toJsonString(), getHttpRequest());
     }
 
     @POST
@@ -56,7 +60,6 @@ public class RpResource extends BaseResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response getRequestObjectUri(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String authorizationRpId, String params) {
         logger.info("Api Resource: get-request-object-uri");
-        String result = process(CommandType.GET_REQUEST_URI, params, GetRequestObjectUriParams.class, authorization, authorizationRpId);
-        return Response.ok(result).build();
+        return getRequestObjectUriOp.process(params, authorization, authorizationRpId, getHttpRequest());
     }
 }

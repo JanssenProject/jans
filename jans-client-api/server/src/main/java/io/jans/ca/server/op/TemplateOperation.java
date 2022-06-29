@@ -3,6 +3,7 @@
  */
 package io.jans.ca.server.op;
 
+import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.util.Util;
 import io.jans.ca.common.Command;
 import io.jans.ca.common.CommandType;
@@ -16,10 +17,13 @@ import io.jans.ca.server.HttpException;
 import io.jans.ca.server.configuration.ApiAppConfiguration;
 import io.jans.ca.server.configuration.model.Rp;
 import io.jans.ca.server.persistence.service.MainPersistenceService;
+import io.jans.ca.server.service.HttpService;
 import io.jans.ca.server.service.RpSyncService;
 import io.jans.ca.server.service.ValidationService;
 import io.jans.ca.server.utils.Convertor;
+import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.ClientErrorException;
 import jakarta.ws.rs.WebApplicationException;
@@ -31,7 +35,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.List;
-
+@RequestScoped
+@Named
 public abstract class TemplateOperation<T extends IParams> implements ITemplateOperation<T> {
 
     private static final Logger LOG = LoggerFactory.getLogger(TemplateOperation.class);
@@ -41,6 +46,8 @@ public abstract class TemplateOperation<T extends IParams> implements ITemplateO
     ValidationService validationService;
     @Inject
     RpSyncService rpSyncService;
+    @Inject
+    HttpService httpService;
     @Inject
     MainPersistenceService jansConfigurationService;
 
@@ -234,6 +241,15 @@ public abstract class TemplateOperation<T extends IParams> implements ITemplateO
         }
 
         validationService.validateAccessToken(accessToken, authorizationRpId);
+    }
+
+    public AuthCryptoProvider getCryptoProvider() throws Exception {
+        ApiAppConfiguration conf = getJansConfigurationService().find();
+        return new AuthCryptoProvider(conf.getCryptProviderKeyStorePath(), conf.getCryptProviderKeyStorePassword(), conf.getCryptProviderDnName());
+    }
+
+    public HttpService getHttpService() {
+        return httpService;
     }
 
     public MainPersistenceService getJansConfigurationService() {

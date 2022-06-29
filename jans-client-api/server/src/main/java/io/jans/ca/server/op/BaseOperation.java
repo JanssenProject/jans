@@ -46,12 +46,6 @@ public abstract class BaseOperation<T extends IParams> implements IOperation<T> 
         return params;
     }
 
-
-    public AuthCryptoProvider getCryptoProvider() throws Exception {
-        ApiAppConfiguration conf = serviceProvider.getJansConfigurationService().find();
-        return new AuthCryptoProvider(conf.getCryptProviderKeyStorePath(), conf.getCryptProviderKeyStorePassword(), conf.getCryptProviderDnName());
-    }
-
     public Rp getRp() {
         if (params instanceof HasRpIdParams) {
             serviceProvider.getValidationService().validate((HasRpIdParams) params);

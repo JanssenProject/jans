@@ -8,6 +8,7 @@ import io.jans.as.client.AuthorizeClient;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseType;
 import io.jans.ca.common.Command;
+import io.jans.ca.common.CommandType;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.params.GetAuthorizationCodeParams;
 import io.jans.ca.common.response.GetAuthorizationCodeResponse;
@@ -18,37 +19,31 @@ import io.jans.ca.server.service.DiscoveryService;
 import io.jans.ca.server.service.HttpService;
 import io.jans.ca.server.service.ServiceProvider;
 import io.jans.ca.server.service.StateService;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.UUID;
 
-/**
- * @author Yuriy Zabrovarnyy
- * @version 0.9, 06/10/2015
- */
-
-public class GetAuthorizationCodeOperation extends BaseOperation<GetAuthorizationCodeParams> {
+@RequestScoped
+@Named
+public class GetAuthorizationCodeOperation extends TemplateOperation<GetAuthorizationCodeParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(GetAuthorizationCodeOperation.class);
-
+    @Inject
     DiscoveryService discoveryService;
-    HttpService httpService;
+    @Inject
     OpClientFactoryImpl opClientFactory;
+    @Inject
     StateService stateService;
 
-    public GetAuthorizationCodeOperation(Command pCommand, ServiceProvider serviceProvider) {
-        super(pCommand, serviceProvider, GetAuthorizationCodeParams.class);
-        this.discoveryService = serviceProvider.getDiscoveryService();
-        this.stateService = serviceProvider.getStateService();
-        this.opClientFactory = serviceProvider.getOpClientFactory();
-        this.httpService = serviceProvider.getHttpService();
-    }
-
     @Override
-    public IOpResponse execute(GetAuthorizationCodeParams params) {
-        final Rp rp = getRp();
+    public IOpResponse execute(GetAuthorizationCodeParams params, HttpServletRequest httpServletRequest) {
+        final Rp rp = getRp(params);
 
         String nonce = Strings.isNullOrEmpty(params.getNonce()) ? UUID.randomUUID().toString() : params.getNonce();
         String state = Strings.isNullOrEmpty(params.getState()) ? UUID.randomUUID().toString() : params.getState();
@@ -78,6 +73,16 @@ public class GetAuthorizationCodeOperation extends BaseOperation<GetAuthorizatio
             LOG.error("Failed to get Authorization Code - rpId:{} authorizationEndPoint: {} - Check keystorePath, keystorePassword, signatureAlgorithms, jansConfWebKeys, and credentials", rp.getRpId(), authorizationEndPoint);
             throw new HttpException(ErrorResponseCode.ERROR_AUTHORIZATION_CODE);
         }
+    }
+
+    @Override
+    public Class<GetAuthorizationCodeParams> getParameterClass() {
+        return GetAuthorizationCodeParams.class;
+    }
+
+    @Override
+    public CommandType getCommandType() {
+        return CommandType.GET_AUTHORIZATION_CODE;
     }
 
     private List<String> acrValues(GetAuthorizationCodeParams params, Rp rp) {

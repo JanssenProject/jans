@@ -6,6 +6,7 @@ import io.jans.as.client.TokenClient;
 import io.jans.as.client.TokenResponse;
 import io.jans.as.model.util.Util;
 import io.jans.ca.common.Command;
+import io.jans.ca.common.CommandType;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.params.GetAccessTokenByRefreshTokenParams;
 import io.jans.ca.common.response.GetClientTokenResponse;
@@ -15,30 +16,30 @@ import io.jans.ca.server.Utils;
 import io.jans.ca.server.configuration.model.Rp;
 import io.jans.ca.server.service.DiscoveryService;
 import io.jans.ca.server.service.ServiceProvider;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Set;
 
-/**
- * @author yuriyz
- */
-public class GetAccessTokenByRefreshTokenOperation extends BaseOperation<GetAccessTokenByRefreshTokenParams> {
+@RequestScoped
+@Named
+public class GetAccessTokenByRefreshTokenOperation extends TemplateOperation<GetAccessTokenByRefreshTokenParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(GetAccessTokenByRefreshTokenOperation.class);
-    private DiscoveryService discoveryService;
 
-    public GetAccessTokenByRefreshTokenOperation(Command command, ServiceProvider serviceProvider) {
-        super(command, serviceProvider, GetAccessTokenByRefreshTokenParams.class);
-        this.discoveryService = serviceProvider.getDiscoveryService();
-    }
+    @Inject
+    DiscoveryService discoveryService;
 
     @Override
-    public IOpResponse execute(GetAccessTokenByRefreshTokenParams params) {
+    public IOpResponse execute(GetAccessTokenByRefreshTokenParams params, HttpServletRequest httpServletRequest) {
         try {
             validate(params);
-            final Rp rp = getRp();
+            final Rp rp = getRp(params);
             final TokenClient tokenClient = new TokenClient(discoveryService.getConnectDiscoveryResponse(rp).getTokenEndpoint());
             tokenClient.setExecutor(discoveryService.getHttpService().getClientEngine());
             final TokenResponse tokenResponse = tokenClient.execRefreshToken(scopeAsString(params), params.getRefreshToken(), rp.getClientId(), rp.getClientSecret());
@@ -64,6 +65,16 @@ public class GetAccessTokenByRefreshTokenOperation extends BaseOperation<GetAcce
             LOG.error(e.getMessage(), e);
         }
         throw HttpException.internalError();
+    }
+
+    @Override
+    public Class<GetAccessTokenByRefreshTokenParams> getParameterClass() {
+        return GetAccessTokenByRefreshTokenParams.class;
+    }
+
+    @Override
+    public CommandType getCommandType() {
+        return CommandType.GET_ACCESS_TOKEN_BY_REFRESH_TOKEN;
     }
 
     private String scopeAsString(GetAccessTokenByRefreshTokenParams params) throws UnsupportedEncodingException {

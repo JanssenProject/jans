@@ -12,10 +12,7 @@ import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.jwk.Use;
 import io.jans.as.model.jwt.Jwt;
-import io.jans.ca.common.Command;
-import io.jans.ca.common.ErrorResponseCode;
-import io.jans.ca.common.ExpiredObjectType;
-import io.jans.ca.common.Jackson2;
+import io.jans.ca.common.*;
 import io.jans.ca.common.params.GetTokensByCodeParams;
 import io.jans.ca.common.response.GetTokensByCodeResponse;
 import io.jans.ca.common.response.IOpResponse;
@@ -23,44 +20,37 @@ import io.jans.ca.server.HttpException;
 import io.jans.ca.server.configuration.model.Rp;
 import io.jans.ca.server.service.*;
 import io.jans.ca.server.persistence.service.MainPersistenceService;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.servlet.http.HttpServletRequest;
 import org.python.jline.internal.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * @author Yuriy Zabrovarnyy
- * @version 0.9, 22/09/2015
- */
-
-public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParams> {
+@RequestScoped
+@Named
+public class GetTokensByCodeOperation extends TemplateOperation<GetTokensByCodeParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(GetTokensByCodeOperation.class);
-    private StateService stateService;
-    private DiscoveryService discoveryService;
-    private RpService rpService;
-    private KeyGeneratorService keyGeneratorService;
-    private PublicOpKeyService publicOpKeyService;
-    private MainPersistenceService jansConfigurationService;
-    private OpClientFactoryImpl opClientFactory;
-    private HttpService httpService;
-
-    public GetTokensByCodeOperation(Command command, ServiceProvider serviceProvider) {
-        super(command, serviceProvider, GetTokensByCodeParams.class);
-        this.discoveryService = serviceProvider.getDiscoveryService();
-        this.stateService = serviceProvider.getStateService();
-        this.rpService = serviceProvider.getRpService();
-        this.keyGeneratorService = serviceProvider.getKeyGeneratorService();
-        this.httpService = discoveryService.getHttpService();
-        this.opClientFactory = discoveryService.getOpClientFactory();
-        this.jansConfigurationService = stateService.getConfigurationService();
-        this.publicOpKeyService = serviceProvider.getPublicOpKeyService();
-    }
+    @Inject
+    StateService stateService;
+    @Inject
+    DiscoveryService discoveryService;
+    @Inject
+    RpService rpService;
+    @Inject
+    KeyGeneratorService keyGeneratorService;
+    @Inject
+    PublicOpKeyService publicOpKeyService;
+    @Inject
+    OpClientFactoryImpl opClientFactory;
 
     @Override
-    public IOpResponse execute(GetTokensByCodeParams params) throws Exception {
+    public IOpResponse execute(GetTokensByCodeParams params, HttpServletRequest httpServletRequest) throws Exception {
         validate(params);
 
-        final Rp rp = getRp();
+        final Rp rp = getRp(params);
         OpenIdConfigurationResponse discoveryResponse = discoveryService.getConnectDiscoveryResponse(rp);
 
         final TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
@@ -155,6 +145,16 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
             LOG.error("Failed to get tokens because response code is: " + response.getScope());
         }
         return null;
+    }
+
+    @Override
+    public Class<GetTokensByCodeParams> getParameterClass() {
+        return GetTokensByCodeParams.class;
+    }
+
+    @Override
+    public CommandType getCommandType() {
+        return CommandType.GET_TOKENS_BY_CODE;
     }
 
     private void validate(GetTokensByCodeParams params) {

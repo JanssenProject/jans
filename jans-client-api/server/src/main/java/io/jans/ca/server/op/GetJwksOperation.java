@@ -6,7 +6,7 @@ package io.jans.ca.server.op;
 import io.jans.as.client.JwkClient;
 import io.jans.as.client.JwkResponse;
 import io.jans.as.client.OpenIdConfigurationResponse;
-import io.jans.ca.common.Command;
+import io.jans.ca.common.CommandType;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.params.GetJwksParams;
 import io.jans.ca.common.response.GetJwksResponse;
@@ -14,27 +14,21 @@ import io.jans.ca.common.response.IOpResponse;
 import io.jans.ca.common.response.POJOResponse;
 import io.jans.ca.server.HttpException;
 import io.jans.ca.server.service.DiscoveryService;
-import io.jans.ca.server.service.ServiceProvider;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang.StringUtils;
 
-/**
- * Service class for fetching JSON Web Key set
- *
- * @author Shoeb
- * @version 12/01/2018
- */
+@RequestScoped
+@Named
+public class GetJwksOperation extends TemplateOperation<GetJwksParams> {
 
-public class GetJwksOperation extends BaseOperation<GetJwksParams> {
-
-    private DiscoveryService discoveryService;
-
-    public GetJwksOperation(Command command, ServiceProvider serviceProvider) {
-        super(command, serviceProvider, GetJwksParams.class);
-        this.discoveryService = serviceProvider.getDiscoveryService();
-    }
+    @Inject
+    DiscoveryService discoveryService;
 
     @Override
-    public IOpResponse execute(GetJwksParams params) {
+    public IOpResponse execute(GetJwksParams params, HttpServletRequest httpServletRequest) {
 
         if (StringUtils.isEmpty(params.getOpHost()) && StringUtils.isEmpty(params.getOpConfigurationEndpoint())) {
             throw new HttpException(ErrorResponseCode.INVALID_OP_HOST_AND_CONFIGURATION_ENDPOINT);
@@ -61,5 +55,15 @@ public class GetJwksOperation extends BaseOperation<GetJwksParams> {
             throw new RuntimeException(ex);
         }
 
+    }
+
+    @Override
+    public Class<GetJwksParams> getParameterClass() {
+        return GetJwksParams.class;
+    }
+
+    @Override
+    public CommandType getCommandType() {
+        return CommandType.GET_JWKS;
     }
 }

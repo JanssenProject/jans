@@ -2,6 +2,7 @@ package io.jans.ca.server.op;
 
 import com.google.common.base.Strings;
 import io.jans.ca.common.Command;
+import io.jans.ca.common.CommandType;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.ExpiredObject;
 import io.jans.ca.common.params.StringParam;
@@ -10,21 +11,18 @@ import io.jans.ca.common.response.POJOResponse;
 import io.jans.ca.server.HttpException;
 import io.jans.ca.server.service.RequestObjectService;
 import io.jans.ca.server.service.ServiceProvider;
+import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class GetRequestObjectOperation extends BaseOperation<StringParam> {
+public class GetRequestObjectOperation extends TemplateOperation<StringParam> {
     private static final Logger LOG = LoggerFactory.getLogger(GetRequestObjectOperation.class);
-
-    private RequestObjectService requestObjectService;
-
-    public GetRequestObjectOperation(Command command, ServiceProvider serviceProvider) {
-        super(command, serviceProvider, StringParam.class);
-        this.requestObjectService = serviceProvider.getRequestObjectService();
-    }
+    @Inject
+    RequestObjectService requestObjectService;
 
     @Override
-    public IOpResponse execute(StringParam params) {
+    public IOpResponse execute(StringParam params, HttpServletRequest httpServletRequest) {
 
         try {
             ExpiredObject expiredObject = requestObjectService.get(params.getValue());
@@ -42,5 +40,15 @@ public class GetRequestObjectOperation extends BaseOperation<StringParam> {
             throw new HttpException(ErrorResponseCode.REQUEST_OBJECT_NOT_FOUND);
         }
 
+    }
+
+    @Override
+    public Class<StringParam> getParameterClass() {
+        return StringParam.class;
+    }
+
+    @Override
+    public CommandType getCommandType() {
+        return CommandType.GET_REQUEST_OBJECT_JWT;
     }
 }

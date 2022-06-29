@@ -4,49 +4,68 @@ import com.google.common.base.Strings;
 import io.jans.as.client.OpenIdConfigurationResponse;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.ca.common.Command;
+import io.jans.ca.common.CommandType;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.params.ValidateParams;
 import io.jans.ca.common.response.IOpResponse;
 import io.jans.ca.common.response.POJOResponse;
 import io.jans.ca.server.HttpException;
 import io.jans.ca.server.configuration.model.Rp;
+import io.jans.ca.server.service.DiscoveryService;
+import io.jans.ca.server.service.PublicOpKeyService;
 import io.jans.ca.server.service.ServiceProvider;
+import io.jans.ca.server.service.StateService;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.servlet.http.HttpServletRequest;
 
-/**
- * @author Yuriy Zabrovarnyy
- * @version 0.9, 14/03/2017
- */
+@RequestScoped
+@Named
+public class ValidateOperation extends TemplateOperation<ValidateParams> {
 
-public class ValidateOperation extends BaseOperation<ValidateParams> {
+    @Inject
+    DiscoveryService discoveryService;
+    @Inject
+    PublicOpKeyService publicOpKeyService;
+    @Inject
+    StateService stateService;
+    @Inject
+    OpClientFactoryImpl opClientFactory;
 
-
-    public ValidateOperation(Command command, ServiceProvider serviceProvider) {
-        super(command, serviceProvider, ValidateParams.class);
-    }
-
-    @Override
-    public IOpResponse execute(ValidateParams params) throws Exception {
+   @Override
+    public IOpResponse execute(ValidateParams params, HttpServletRequest httpServletRequest) throws Exception {
         validateParams(params);
 
-        Rp rp = getRp();
-        OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponseByRpId(params.getRpId());
+        Rp rp = getRp(params);
+        OpenIdConfigurationResponse discoveryResponse = discoveryService.getConnectDiscoveryResponseByRpId(params.getRpId());
 
         final Jwt idToken = Jwt.parse(params.getIdToken());
 
         final Validator validator = new Validator.Builder()
                 .discoveryResponse(discoveryResponse)
                 .idToken(idToken)
-                .keyService(getPublicOpKeyService())
-                .opClientFactory(getOpClientFactory())
+                .keyService(publicOpKeyService)
+                .opClientFactory(opClientFactory)
                 .rpServerConfiguration(getJansConfigurationService().find())
                 .rp(rp)
                 .build();
-        validator.validateNonce(getStateService());
+        validator.validateNonce(stateService);
         validator.validateIdToken(rp.getClientId());
         validator.validateAccessToken(params.getAccessToken());
         validator.validateAuthorizationCode(params.getCode());
 
         return new POJOResponse("");
+    }
+
+    @Override
+    public Class<ValidateParams> getParameterClass() {
+        return ValidateParams.class;
+    }
+
+    @Override
+    public CommandType getCommandType() {
+        return CommandType.VALIDATE;
     }
 
     private void validateParams(ValidateParams params) {
@@ -56,7 +75,7 @@ public class ValidateOperation extends BaseOperation<ValidateParams> {
         if (Strings.isNullOrEmpty(params.getState())) {
             throw new HttpException(ErrorResponseCode.BAD_REQUEST_NO_STATE);
         }
-        if (!getStateService().isExpiredObjectPresent(params.getState())) {
+        if (!stateService.isExpiredObjectPresent(params.getState())) {
             throw new HttpException(ErrorResponseCode.BAD_REQUEST_STATE_NOT_VALID);
         }
         if (!Strings.isNullOrEmpty(params.getIdToken())) {

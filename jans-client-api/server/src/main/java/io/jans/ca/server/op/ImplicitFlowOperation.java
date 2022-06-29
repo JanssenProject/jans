@@ -10,11 +10,13 @@ import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.util.Util;
-import io.jans.ca.common.Command;
+import io.jans.ca.common.CommandType;
 import io.jans.ca.common.params.ImplicitFlowParams;
 import io.jans.ca.common.response.IOpResponse;
 import io.jans.ca.common.response.ImplicitFlowResponse;
-import io.jans.ca.server.service.ServiceProvider;
+import io.jans.ca.server.service.DiscoveryService;
+import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,17 +29,15 @@ import java.util.UUID;
  * @version 0.9, 23/06/2015
  */
 
-public class ImplicitFlowOperation extends BaseOperation<ImplicitFlowParams> {
+public class ImplicitFlowOperation extends TemplateOperation<ImplicitFlowParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(ImplicitFlowOperation.class);
-
-    public ImplicitFlowOperation(Command p_command, ServiceProvider serviceProvider) {
-        super(p_command, serviceProvider, ImplicitFlowParams.class);
-    }
+    @Inject
+    DiscoveryService discoveryService;
 
     @Override
-    public IOpResponse execute(ImplicitFlowParams params) {
-        final OpenIdConfigurationResponse discovery = getDiscoveryService().getConnectDiscoveryResponseByRpId(params.getRpId());
+    public IOpResponse execute(ImplicitFlowParams params, HttpServletRequest httpServletRequest) {
+        final OpenIdConfigurationResponse discovery = discoveryService.getConnectDiscoveryResponseByRpId(params.getRpId());
         if (discovery != null) {
             return requestToken(discovery, params);
         }
@@ -100,5 +100,15 @@ public class ImplicitFlowOperation extends BaseOperation<ImplicitFlowParams> {
             LOG.debug("Authorization code is blank.");
         }
         return null;
+    }
+
+    @Override
+    public Class<ImplicitFlowParams> getParameterClass() {
+        return ImplicitFlowParams.class;
+    }
+
+    @Override
+    public CommandType getCommandType() {
+        return CommandType.IMPLICIT_FLOW;
     }
 }

@@ -11,6 +11,7 @@ import io.jans.as.model.uma.JsonLogicNodeParser;
 import io.jans.as.model.uma.UmaMetadata;
 import io.jans.as.model.util.Util;
 import io.jans.ca.common.Command;
+import io.jans.ca.common.CommandType;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.params.RsProtectParams;
 import io.jans.ca.common.response.IOpResponse;
@@ -25,6 +26,13 @@ import io.jans.ca.rs.protect.resteasy.ServiceProvider;
 import io.jans.ca.server.HttpException;
 import io.jans.ca.server.configuration.model.Rp;
 import io.jans.ca.server.configuration.model.UmaResource;
+import io.jans.ca.server.service.DiscoveryService;
+import io.jans.ca.server.service.RpService;
+import io.jans.ca.server.service.UmaTokenService;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.ClientErrorException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -34,30 +42,31 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-/**
- * @author Yuriy Zabrovarnyy
- * @version 0.9, 31/05/2016
- */
-
-public class RsProtectOperation extends BaseOperation<RsProtectParams> {
+@RequestScoped
+@Named
+public class RsProtectOperation extends TemplateOperation<RsProtectParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(RsProtectOperation.class);
 
-    public RsProtectOperation(Command pCommand, io.jans.ca.server.service.ServiceProvider serviceProvider) {
-        super(pCommand, serviceProvider, RsProtectParams.class);
-    }
+    @Inject
+    RpService rpService;
+    @Inject
+    UmaTokenService umaTokenService;
+    @Inject
+    OpClientFactoryImpl opClientFactory;
+    @Inject
+    DiscoveryService discoveryService;
 
     @Override
-    public IOpResponse execute(final RsProtectParams params) throws Exception {
+    public IOpResponse execute(final RsProtectParams params, HttpServletRequest httpServletRequest) throws Exception {
         validate(params);
 
-        Rp rp = getRp();
+        Rp rp = getRp(params);
 
         PatProvider patProvider = new PatProvider() {
             @Override
             public String getPatToken() {
-                return getUmaTokenService().getPat(params.getRpId()).getToken();
+                return umaTokenService.getPat(params.getRpId()).getToken();
             }
 
             @Override
@@ -66,14 +75,14 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
             }
         };
 
-        ResourceRegistrar registrar = getOpClientFactory().createResourceRegistrar(patProvider, new ServiceProvider(rp.getOpHost()));
+        ResourceRegistrar registrar = opClientFactory.createResourceRegistrar(patProvider, new ServiceProvider(rp.getOpHost()));
         try {
             registrar.register(params.getResources());
         } catch (ClientErrorException e) {
             LOG.debug("Failed to register resource. Entity: " + e.getResponse().readEntity(String.class) + ", status: " + e.getResponse().getStatus(), e);
             if (e.getResponse().getStatus() == 400 || e.getResponse().getStatus() == 401) {
                 LOG.debug("Try maybe PAT is lost on AS, force refresh PAT and re-try ...");
-                getUmaTokenService().obtainPat(params.getRpId()); // force to refresh PAT
+                umaTokenService.obtainPat(params.getRpId()); // force to refresh PAT
                 registrar.register(params.getResources());
             } else {
                 throw e;
@@ -86,6 +95,16 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
         persist(registrar, rp);
 
         return new RsProtectResponse(rp.getRpId());
+    }
+
+    @Override
+    public Class<RsProtectParams> getParameterClass() {
+        return RsProtectParams.class;
+    }
+
+    @Override
+    public CommandType getCommandType() {
+        return CommandType.RS_PROTECT;
     }
 
     private void persist(ResourceRegistrar registrar, Rp rp) throws IOException {
@@ -130,7 +149,7 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
             rp.getUmaProtectedResources().add(resource);
         }
 
-        getRpService().update(rp);
+        rpService.update(rp);
     }
 
     private void validate(RsProtectParams params) {
@@ -160,15 +179,15 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
             }
         }
 
-        Rp rp = getRp();
+        Rp rp = getRp(params);
         List<UmaResource> existingUmaResources = rp.getUmaProtectedResources();
         if (existingUmaResources != null && !existingUmaResources.isEmpty()) {
             if (params.getOverwrite() == null || !params.getOverwrite()) {
                 throw new HttpException(ErrorResponseCode.UMA_PROTECTION_FAILED_BECAUSE_RESOURCES_ALREADY_EXISTS);
             } else {
                 // remove existing resources, overwrite=true
-                UmaMetadata discovery = getDiscoveryService().getUmaDiscoveryByRpId(params.getRpId());
-                String pat = getUmaTokenService().getPat(params.getRpId()).getToken();
+                UmaMetadata discovery = discoveryService.getUmaDiscoveryByRpId(params.getRpId());
+                String pat = umaTokenService.getPat(params.getRpId()).getToken();
                 UmaResourceService resourceService = UmaClientFactory.instance().createResourceService(discovery, getHttpService().getClientEngine());
                 for (UmaResource resource : existingUmaResources) {
 
@@ -177,7 +196,7 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
                     LOG.trace("Removed existing resource " + resource.getId() + ".");
                 }
                 rp.getUmaProtectedResources().clear();
-                getRpService().updateSilently(rp);
+                rpService.updateSilently(rp);
             }
         }
     }

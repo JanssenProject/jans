@@ -9,6 +9,7 @@ import io.jans.as.model.common.GrantType;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.util.Util;
 import io.jans.ca.common.Command;
+import io.jans.ca.common.CommandType;
 import io.jans.ca.common.ErrorResponseCode;
 import io.jans.ca.common.params.GetClientTokenParams;
 import io.jans.ca.common.response.GetClientTokenResponse;
@@ -18,41 +19,30 @@ import io.jans.ca.server.Utils;
 import io.jans.ca.server.service.DiscoveryService;
 import io.jans.ca.server.service.HttpService;
 import io.jans.ca.server.service.ServiceProvider;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Set;
-
-/**
- * @author Yuriy Zabrovarnyy
- * @version 0.9, 31/03/2017
- */
-
-public class GetClientTokenOperation extends BaseOperation<GetClientTokenParams> {
+@RequestScoped
+@Named
+public class GetClientTokenOperation extends TemplateOperation<GetClientTokenParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(GetClientTokenOperation.class);
 
-    private DiscoveryService discoveryService;
-
-    private HttpService httpService;
-
-    private OpClientFactoryImpl opClientFactory;
-
-    /**
-     * Base constructor
-     *
-     * @param command command
-     */
-    public GetClientTokenOperation(Command command, ServiceProvider serviceProvider) {
-        super(command, serviceProvider, GetClientTokenParams.class);
-        this.discoveryService = serviceProvider.getDiscoveryService();
-        this.httpService = discoveryService.getHttpService();
-        this.opClientFactory = discoveryService.getOpClientFactory();
-    }
+    @Inject
+    DiscoveryService discoveryService;
+    @Inject
+    HttpService httpService;
+    @Inject
+    OpClientFactoryImpl opClientFactory;
 
     @Override
-    public IOpResponse execute(GetClientTokenParams params) {
+    public IOpResponse execute(GetClientTokenParams params, HttpServletRequest httpRequest) {
         try {
             final AuthenticationMethod authenticationMethod = AuthenticationMethod.fromString(params.getAuthenticationMethod());
             final String tokenEndpoint = discoveryService.getConnectDiscoveryResponse(params.getOpConfigurationEndpoint(), params.getOpHost(), params.getOpDiscoveryPath()).getTokenEndpoint();
@@ -105,6 +95,16 @@ public class GetClientTokenOperation extends BaseOperation<GetClientTokenParams>
             LOG.error(e.getMessage(), e);
         }
         throw HttpException.internalError();
+    }
+
+    @Override
+    public Class<GetClientTokenParams> getParameterClass() {
+        return GetClientTokenParams.class;
+    }
+
+    @Override
+    public CommandType getCommandType() {
+        return CommandType.GET_CLIENT_TOKEN;
     }
 
     private String scopeAsString(GetClientTokenParams params) throws UnsupportedEncodingException {
