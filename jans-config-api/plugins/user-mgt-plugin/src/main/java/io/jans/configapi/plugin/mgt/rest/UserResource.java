@@ -8,7 +8,7 @@ import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.plugin.mgt.model.user.CustomUser;
 import io.jans.configapi.plugin.mgt.model.user.UserPatchRequest;
-import io.jans.configapi.plugin.mgt.service.UserService;
+import io.jans.configapi.plugin.mgt.service.UserMgmtService;
 import io.jans.configapi.plugin.mgt.util.Constants;
 import io.jans.configapi.plugin.mgt.util.MgtUtil;
 import io.jans.configapi.util.ApiAccessConstants;
@@ -56,7 +56,7 @@ public class UserResource extends BaseResource {
     MgtUtil mgtUtil;
 
     @Inject
-    UserService userSrv;
+    UserMgmtService userMgmtSrv;
 
     @GET
     @ProtectedApi(scopes = {ApiAccessConstants.USER_READ_ACCESS})
@@ -72,8 +72,8 @@ public class UserResource extends BaseResource {
                     escapeLog(limit), escapeLog(pattern), escapeLog(startIndex), escapeLog(sortBy),
                     escapeLog(sortOrder));
         }
-        SearchRequest searchReq = createSearchRequest(userSrv.getPeopleBaseDn(), pattern, sortBy, sortOrder, startIndex,
-                limit, null, userSrv.getUserExclusionAttributesAsString(), mgtUtil.getRecordMaxCount());
+        SearchRequest searchReq = createSearchRequest(userMgmtSrv.getPeopleBaseDn(), pattern, sortBy, sortOrder, startIndex,
+                limit, null, userMgmtSrv.getUserExclusionAttributesAsString(), mgtUtil.getRecordMaxCount());
 
         List<CustomUser> customUsers = this.doSearch(searchReq);
         logger.debug("CustomUser search result:{}", customUsers);
@@ -89,7 +89,7 @@ public class UserResource extends BaseResource {
         if (logger.isDebugEnabled()) {
             logger.debug("User search by inum:{}", escapeLog(inum));
         }
-        User user = userSrv.getUserBasedOnInum(inum);
+        User user = userMgmtSrv.getUserBasedOnInum(inum);
         checkResourceNotNull(user, USER);
         logger.debug("user:{}", user);
 
@@ -115,13 +115,13 @@ public class UserResource extends BaseResource {
         // get User object
         User user = setUserAttributes(customUser);
         //parse birthdate if present
-        userSrv.parseBirthDateAttribute(user);
+        userMgmtSrv.parseBirthDateAttribute(user);
         logger.debug("Create  user:{}", user);
 
         // checking mandatory attributes
         checkMissingAttributes(user, null);
 
-        user = userSrv.addUser(user, true);
+        user = userMgmtSrv.addUser(user, true);
         logger.debug("User created {}", user);
 
         // excludedAttributes
@@ -145,14 +145,14 @@ public class UserResource extends BaseResource {
         // get User object
         User user = setUserAttributes(customUser);
         //parse birthdate if present
-        userSrv.parseBirthDateAttribute(user);
+        userMgmtSrv.parseBirthDateAttribute(user);
         logger.debug("Create  user:{}", user);
 
         // checking mandatory attributes
         List<String> excludeAttributes = List.of(USER_PWD);
         checkMissingAttributes(user, excludeAttributes);
 
-        user = userSrv.updateUser(user);
+        user = userMgmtSrv.updateUser(user);
         logger.debug("Updated user:{}", user);
 
         // excludedAttributes
@@ -175,13 +175,13 @@ public class UserResource extends BaseResource {
             logger.debug("User:{} to be patched with :{} ", escapeLog(inum), escapeLog(userPatchRequest));
         }
         // check if user exists
-        User existingUser = userSrv.getUserBasedOnInum(inum);
+        User existingUser = userMgmtSrv.getUserBasedOnInum(inum);
         //parse birthdate if present
-        userSrv.parseBirthDateAttribute(existingUser);
+        userMgmtSrv.parseBirthDateAttribute(existingUser);
         checkResourceNotNull(existingUser, USER);
 
         // patch user
-        existingUser = userSrv.patchUser(inum, userPatchRequest);
+        existingUser = userMgmtSrv.patchUser(inum, userPatchRequest);
         logger.debug("Patched user:{}", existingUser);
 
         // excludedAttributes
@@ -201,9 +201,9 @@ public class UserResource extends BaseResource {
         if (logger.isDebugEnabled()) {
             logger.debug("User to be deleted - inum:{} ", escapeLog(inum));
         }
-        User user = userSrv.getUserBasedOnInum(inum);
+        User user = userMgmtSrv.getUserBasedOnInum(inum);
         checkResourceNotNull(user, USER);
-        userSrv.removeUser(user);
+        userMgmtSrv.removeUser(user);
         return Response.noContent().build();
     }
 
@@ -213,7 +213,7 @@ public class UserResource extends BaseResource {
             logger.debug("User search params - searchReq:{} ", escapeLog(searchReq));
         }
 
-        PagedResult<User> pagedResult = userSrv.searchUsers(searchReq);
+        PagedResult<User> pagedResult = userMgmtSrv.searchUsers(searchReq);
         if (logger.isTraceEnabled()) {
             logger.debug("PagedResult  - pagedResult:{}", pagedResult);
         }
@@ -228,23 +228,23 @@ public class UserResource extends BaseResource {
         }
 
         // excludedAttributes
-        users = userSrv.excludeAttributes(users, searchReq.getExcludedAttributesStr());
+        users = userMgmtSrv.excludeAttributes(users, searchReq.getExcludedAttributesStr());
         logger.debug("Users fetched  - users:{}", users);
 
         //parse birthdate if present
-        users = users.stream().map(user -> userSrv.parseBirthDateAttribute(user)).collect(Collectors.toList());
+        users = users.stream().map(user -> userMgmtSrv.parseBirthDateAttribute(user)).collect(Collectors.toList());
 
         // get customUser()
         return getCustomUserList(users);
     }
 
     private User excludeUserAttributes(User user) throws IllegalAccessException, InvocationTargetException {
-        return userSrv.excludeAttributes(user, userSrv.getUserExclusionAttributesAsString());
+        return userMgmtSrv.excludeAttributes(user, userMgmtSrv.getUserExclusionAttributesAsString());
     }
 
     private void checkMissingAttributes(User user, List<String> excludeAttributes)
             throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        String missingAttributes = userSrv.checkMandatoryFields(user, excludeAttributes);
+        String missingAttributes = userMgmtSrv.checkMandatoryFields(user, excludeAttributes);
         logger.debug("missingAttributes:{}", missingAttributes);
 
         if (StringHelper.isEmpty(missingAttributes)) {
