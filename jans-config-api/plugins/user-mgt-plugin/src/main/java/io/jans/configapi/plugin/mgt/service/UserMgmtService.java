@@ -33,8 +33,8 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
 @ApplicationScoped
-@Named("userSrv")
-public class UserService extends io.jans.as.common.service.common.UserService {
+@Named("userMgmtSrv")
+public class UserMgmtService extends io.jans.as.common.service.common.UserService {
 
     @Inject
     private Logger logger;
