@@ -240,26 +240,26 @@ class DBUtils:
                 self.cbm.exec_query(n1ql)
 
 
-    def enable_script(self, inum):
+    def enable_script(self, inum, enable=True):
         base.logIt("Enabling script {}".format(inum))
         if self.moddb == BackendTypes.LDAP:
             ldap_operation_result = self.ldap_conn.modify(
                     'inum={},ou=scripts,o=jans'.format(inum),
-                    {"jansEnabled": [ldap3.MODIFY_REPLACE, 'true']}
+                    {"jansEnabled": [ldap3.MODIFY_REPLACE, str(enable).lower()]}
                     )
             self.log_ldap_result(ldap_operation_result)
 
         elif self.moddb in (BackendTypes.MYSQL, BackendTypes.PGSQL):
             dn = 'inum={},ou=scripts,o=jans'.format(inum)
             sqlalchemyObj = self.get_sqlalchObj_for_dn(dn)
-            sqlalchemyObj.jansEnabled = 1
+            sqlalchemyObj.jansEnabled = 1 if enable else 0
             self.session.commit()
 
         elif self.moddb == BackendTypes.SPANNER:
             dn = 'inum={},ou=scripts,o=jans'.format(inum)
             table = self.get_spanner_table_for_dn(dn)
             if table:
-                self.spanner.update_data(table=table, columns=['doc_id', 'jansEnabled'], values=[[inum, True]])
+                self.spanner.update_data(table=table, columns=['doc_id', 'jansEnabled'], values=[[inum, enable]])
 
         elif self.moddb == BackendTypes.COUCHBASE:
             n1ql = 'UPDATE `{}` USE KEYS "scripts_{}" SET jansEnabled=true'.format(self.default_bucket, inum)

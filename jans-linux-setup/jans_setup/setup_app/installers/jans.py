@@ -432,8 +432,9 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
         self.deleteLdapPw()
 
+        self.dbUtils.bind(force=True)
+
         if base.argsp.import_ldif:
-            self.dbUtils.bind(force=True)
             self.import_custom_ldif_dir(base.argsp.import_ldif)
 
         if base.snap:
@@ -504,3 +505,11 @@ class JansInstaller(BaseInstaller, SetupUtils):
                             site_file.write(gluu_site_dir)
                         self.logIt("Copying site packages to {}".format(gluu_site_dir))
                         shutil.copytree(p, gluu_site_dir, dirs_exist_ok=True)
+
+        #enable scripts
+        self.enable_scripts(base.argsp.enable_script)
+
+    def enable_scripts(self, inums, enable=True):
+        if inums:
+            for inum in inums:
+                self.dbUtils.enable_script(inum, enable)
