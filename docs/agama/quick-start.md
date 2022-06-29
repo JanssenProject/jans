@@ -74,15 +74,13 @@ A line-by-line description follows:
 
 - Line 6: RRF is used to send a response to the user's browser: it takes the path to a template (`hello/index.ftlh`) and injects a value into it (`in` in this case). The produced (**R**endered) markup is sent (**R**eplied) to the browser. Finally, the result of the interaction of the user with the page can be retrieved (**F**etched), however, this is skipped here because we are no capturing anything at the client side.
 
-- The contents of [index.ftlh](TODO) should be familiar to web developers. The `${...}` notation is used to dynamically insert values in the markup: the text `John` in this case. Expressions like this are integral part of Freemarker. Once form submission occurs, flow execution continues at line 8.       
+- The contents of [index.ftlh](TODO) should be familiar to web developers. The `${...}` notation is used to dynamically insert values in the markup: the text `John` in this case. Expressions like this are integral part of Freemarker. Once form submission occurs, flow execution continues at line 8.
 
-- Line 8: another assignment to a map variable. `true` denotes the boolean value all coders know.
+- Line 8: a logging statement. This appends the text `Done!` to the flow's log. The `Log` instruction is pretty versatile; it is used in its simplest form here.
 
-- Line 9: a logging statement. This appends the text `Done!` to the flow's log. The `Log` instruction is pretty versatile; it is used in its simplest form here.
+- Line 9: marks the flow ending. `Finish` has several forms but here a shorthand notation is used where we always report a positive success and supply the identifier of a user. If it turns out your local user database contains a user identified by `john_doe`, this will be the subject that will get authenticated by the server, otherwise an error page will be shown.
 
-- Line 10: marks the flow ending. `Finish` generally has to be supplied a map (`outcome` in this case) with at least a key named `success` whose value is boolean. Here we always report a positive success (unrealistic for sure). Additionally in a key named `data` a `userId` is supplied. If it turns out your local user database contains a user identified by `john_doe`, this will be the subject that will get authenticated by the server, otherwise an error page will be shown.
-
-This flow is extremely static but showcases minimal key elements for flow building. Please **do not** try this flow in any of your production servers.
+This flow is extremely static and unrealistic but showcases minimal key elements for flow building. Please **do not** try this flow in any of your production servers.
 
 ### Add the flow to the server
 
@@ -108,7 +106,7 @@ Let's start by changing the salutation. (TODO)
 
 Generate an authentication request again and launch it. You will be able to see the changes. Feel free to edit `index.ftlh` and re-upload - templates changes are picked up immediately.
 
-Now pick an existing username from your user base and alter the flow's code so that such user gets authenticated. Edit line 8. (TODO)
+Now pick an existing username from your user base and alter the flow's code so that such user gets authenticated. Edit line 9. (TODO)
 
 If things went fine, after the form submission your browser should have been taken to the `redirect_uri` defined for the authentication request. Depending on how evolved your client application is, it may have created a session for such user and obtained profile data already!.
 
