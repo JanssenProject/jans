@@ -513,7 +513,7 @@ public class JwtAuthorizationRequest {
     }
 
     public static JwtAuthorizationRequest createJwtRequest(String request, String requestUri, Client client, RedirectUriResponse redirectUriResponse, AbstractCryptoProvider cryptoProvider, AppConfiguration appConfiguration) {
-        validateRequestUri(requestUri, client, appConfiguration, redirectUriResponse.getState());
+        validateRequestUri(requestUri, client, appConfiguration, redirectUriResponse != null ? redirectUriResponse.getState() : null);
         final String requestFromClient = queryRequest(requestUri, redirectUriResponse, appConfiguration);
         if (StringUtils.isNotBlank(requestFromClient)) {
             request = requestFromClient;
