@@ -63,7 +63,9 @@ function _finish(val) {
 
     let javaish = _javaish(val)
     
-    if (_isBool(val, javaish))
+    if (_isString(val, javaish))
+        return { success: true, data: { userId: val } }
+    else if (_isBool(val, javaish))
         return { success: val }
     else if (_isObject(val, javaish) && _isBool(val.success))
         return val
