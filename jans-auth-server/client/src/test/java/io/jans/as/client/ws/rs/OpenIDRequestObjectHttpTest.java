@@ -51,7 +51,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static io.jans.as.client.client.Asserter.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.fail;
@@ -2033,8 +2032,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             AuthorizationResponse response = authorizeClient.exec();
 
             showClient(authorizeClient);
-            assertEquals(response.getStatus(), 302, "Unexpected response code: " + response.getStatus());
-            assertNotNull(response.getLocation(), "The location is null");
+            assertEquals(response.getStatus(), 400, "Unexpected response code: " + response.getStatus());
             assertNotNull(response.getErrorType(), "The error type is null");
             assertNotNull(response.getErrorDescription(), "The error description is null");
             assertNotNull(response.getState(), "The state is null");
