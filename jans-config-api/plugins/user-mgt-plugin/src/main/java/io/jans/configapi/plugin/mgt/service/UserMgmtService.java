@@ -5,9 +5,9 @@ import io.jans.as.common.model.common.User;
 import io.jans.as.common.util.AttributeConstants;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.configapi.core.model.SearchRequest;
 import io.jans.configapi.core.util.Jackson;
 import io.jans.configapi.plugin.mgt.model.user.UserPatchRequest;
-import io.jans.configapi.core.model.SearchRequest;
 import io.jans.configapi.plugin.mgt.util.MgtUtil;
 import io.jans.configapi.util.AuthUtil;
 import io.jans.orm.model.PagedResult;
@@ -15,26 +15,24 @@ import io.jans.orm.model.SortOrder;
 import io.jans.orm.model.base.CustomObjectAttribute;
 import io.jans.orm.search.filter.Filter;
 import io.jans.util.StringHelper;
-
-import static io.jans.as.model.util.Util.escapeLog;
-
-import java.lang.reflect.Field;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.util.*;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
-
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
+
+import static io.jans.as.model.util.Util.escapeLog;
+
 @ApplicationScoped
-@Named("userSrv")
-public class UserService extends io.jans.as.common.service.common.UserService {
+@Named("userMgmtSrv")
+public class UserMgmtService extends io.jans.as.common.service.common.UserService {
 
     @Inject
     private Logger logger;
