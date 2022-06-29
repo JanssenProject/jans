@@ -5,6 +5,5 @@ Flow test
 in = { name: "John" }
 RRF "index.ftlh" in
 
-outcome = { success: true, data: { userId: "john_doe" } }
 Log "Done!"
-Finish outcome
+Finish "john_doe"
