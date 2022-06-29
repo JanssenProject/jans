@@ -151,6 +151,9 @@ Config.init(paths.INSTALL_DIR)
 if Config.profile != 'jans':
     argsp.t = False
 
+if os.path.exists(Config.jans_properties_fn):
+    Config.installed_instance = True
+
 # we must initilize SetupUtils after initilizing Config
 SetupUtils.init()
 
@@ -167,7 +170,7 @@ try:
 except:
     argsp.no_progress = True
 
-if not argsp.n:
+if not (argsp.n or Config.installed_instance):
     base.check_resources()
 
 # pass progress indicator to Config object
@@ -179,17 +182,18 @@ for key in setupOptions:
 jansInstaller = JansInstaller()
 jansInstaller.initialize()
 
-print()
-detected_os = '{} {}'.format(base.os_type, base.os_version)
-if base.snap:
-    detected_os = 'snap ' + detected_os
-print("Installing Janssen Server...\n\nFor more info see:\n  {}  \n  {}\n".format(paths.LOG_FILE, paths.LOG_ERROR_FILE))
-print("Profile         :  {}".format(Config.profile))
-print("Detected OS     :  {}".format(detected_os))
-print("Janssen Version :  {}".format(base.current_app.app_info['ox_version']))
-print("Detected init   :  {}".format(base.os_initdaemon))
-print("Detected Apache :  {}".format(base.determineApacheVersion()))
-print()
+if not Config.installed_instance:
+    print()
+    detected_os = '{} {}'.format(base.os_type, base.os_version)
+    if base.snap:
+        detected_os = 'snap ' + detected_os
+    print("Installing Janssen Server...\n\nFor more info see:\n  {}  \n  {}\n".format(paths.LOG_FILE, paths.LOG_ERROR_FILE))
+    print("Profile         :  {}".format(Config.profile))
+    print("Detected OS     :  {}".format(detected_os))
+    print("Janssen Version :  {}".format(base.current_app.app_info['ox_version']))
+    print("Detected init   :  {}".format(base.os_initdaemon))
+    print("Detected Apache :  {}".format(base.determineApacheVersion()))
+    print()
 
 setup_loaded = {}
 if setupOptions['setup_properties']:
@@ -212,7 +216,6 @@ collectProperties = CollectProperties()
 if os.path.exists(Config.jans_properties_fn):
     collectProperties.collect()
     collectProperties.save()
-    Config.installed_instance = True
 
     if argsp.csx:
         print("Saving collected properties")
@@ -249,6 +252,18 @@ jansCliInstaller = JansCliInstaller()
 rdbmInstaller.packageUtils = packageUtils
 
 if Config.installed_instance:
+
+    if argsp.enable_script:
+        print("Enabling scripts {}".format(', '.join(argsp.enable_script)))
+        jansInstaller.enable_scripts(argsp.enable_script)
+        sys.exit()
+
+    if argsp.disable_script:
+        print("Disabling scripts {}".format(', '.join(argsp.disable_script)))
+        jansInstaller.enable_scripts(argsp.disable_script, enable=False)
+        sys.exit()
+
+
     for service in jansProgress.services:
         setattr(Config, service['object'].install_var, service['object'].installed())
 
