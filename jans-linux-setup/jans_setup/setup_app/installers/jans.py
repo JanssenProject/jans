@@ -432,8 +432,9 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
         self.deleteLdapPw()
 
+        self.dbUtils.bind(force=True)
+
         if base.argsp.import_ldif:
-            self.dbUtils.bind(force=True)
             self.import_custom_ldif_dir(base.argsp.import_ldif)
 
         if base.snap:
