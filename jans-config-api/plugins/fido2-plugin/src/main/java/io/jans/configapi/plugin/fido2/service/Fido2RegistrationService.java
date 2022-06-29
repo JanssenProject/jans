@@ -6,7 +6,6 @@
 
 package io.jans.configapi.plugin.fido2.service;
 
-import io.jans.as.common.service.common.UserService;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.base.SimpleBranch;

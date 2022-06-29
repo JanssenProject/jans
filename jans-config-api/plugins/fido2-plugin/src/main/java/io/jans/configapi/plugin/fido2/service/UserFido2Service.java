@@ -1,5 +1,6 @@
 package io.jans.configapi.plugin.fido2.service;
 
+import com.google.api.client.util.Lists;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Named;
 
@@ -10,7 +11,7 @@ import java.util.List;
 public class UserFido2Service extends io.jans.as.common.service.common.UserService {
     @Override
     public List<String> getPersonCustomObjectClassList() {
-        return null;
+        return Lists.newArrayList();
     }
 
     @Override
