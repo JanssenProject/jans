@@ -88,7 +88,7 @@ keypair: ALPHANUM WS? ':' WS? expression ;
 
 rfac: preassign? RFAC WS (STRING | variable) NL;
 
-finish: FINISH WS (BOOL | variable) WS? NL ;
+finish: FINISH WS (BOOL | STRING | variable) WS? NL ;
 
 choice: MATCH WS simple_expr WS TO WS? INDENT option+ DEDENT elseblock? ;
 
