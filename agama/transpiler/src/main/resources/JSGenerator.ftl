@@ -95,10 +95,12 @@ _flowCall(_it, _basePath, <@util_url_overrides node=.node.overrides/>, <@util_ar
 </#macro>
 
 <#macro finish>
-<#if .node.variable?size = 0>
+<#if .node.variable?size gt 0>
+    _it = ${.node.variable}
+<#elseif .node.BOOL?size gt 0>
     _it = ${.node.BOOL}
 <#else>
-    _it = ${.node.variable}
+    _it = ${.node.STRING}
 </#if>
 return _finish(_it)
 </#macro>
