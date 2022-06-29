@@ -6,7 +6,7 @@ site_description: Janssen Project Deployment and Operation References
 copyright: Copyright &copy; 2022, Gluu, Inc.
 
 # Repository - update this
-docs_dir: user
+docs_dir: admin
 repo_name: JanssenProject/docs
 repo_url: https://github.com/JanssenProject/jans/
 edit_uri: edit/main/docs/user/
