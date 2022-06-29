@@ -147,9 +147,6 @@ class PropertiesUtils(SetupUtils):
             Config.jans_max_mem = int(base.current_mem_size * .83 * 1000) # 83% of physical memory
 
 
-        print(Config.cb_install, Config.rdbm_install, Config.opendj_install)
-
-
     def check_oxd_server_https(self):
 
         if Config.get('oxd_server_https'):
@@ -206,6 +203,9 @@ class PropertiesUtils(SetupUtils):
 
         if p.get('opendj_install') == '0':
             p['opendj_install'] = InstallTypes.NONE
+
+        if p.get('enable-script'):
+            base.argsp.enable_script = p['enable-script'].split()
 
         properties_list = list(p.keys())
 

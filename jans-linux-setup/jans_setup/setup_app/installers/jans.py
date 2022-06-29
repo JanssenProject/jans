@@ -504,3 +504,11 @@ class JansInstaller(BaseInstaller, SetupUtils):
                             site_file.write(gluu_site_dir)
                         self.logIt("Copying site packages to {}".format(gluu_site_dir))
                         shutil.copytree(p, gluu_site_dir, dirs_exist_ok=True)
+
+        #enable scripts
+        self.enable_scripts(base.argsp.enable_script)
+
+    def enable_scripts(self, inums, enable=True):
+        if inums:
+            for inum in inums:
+                self.dbUtils.enable_script(inum, enable)
