@@ -84,7 +84,7 @@ When you triage an issue, you:
 
 * take ownership submitting a PR for it, in case you want 😇
 
-Here is how we [continously triage](./community/triage.md) new issues and PRs so that contributors can contribute faster and better.
+Here is how we [continously triage](governance/triage.md) new issues and PRs so that contributors can contribute faster and better.
 
 
 ## Code Conventions and Guidelines
