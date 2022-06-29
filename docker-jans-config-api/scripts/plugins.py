@@ -10,12 +10,11 @@ from settings import LOGGING_CONFIG
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("plugins")
 
-DEFAULT_PLUGIN = "user-mgt"
 SUPPORTED_PLUGINS = (
     "admin-ui",
     "scim",
     "fido2",
-    DEFAULT_PLUGIN,
+    "user-mgt",
 )
 
 
@@ -31,9 +30,6 @@ def discover_plugins() -> list[str]:
         for plugin in os.environ.get("CN_CONFIG_API_PLUGINS", "").strip().split(",")
         if plugin.strip()
     ]
-
-    # always enable ``user-mgt`` plugin
-    user_plugins.append(DEFAULT_PLUGIN)
 
     for plugin in set(user_plugins):
         if plugin not in SUPPORTED_PLUGINS:
