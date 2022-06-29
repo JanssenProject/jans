@@ -6,7 +6,6 @@
 
 package io.jans.configapi.plugin.fido2.service;
 
-import io.jans.as.common.service.common.UserService;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.base.SimpleBranch;
@@ -35,13 +34,13 @@ public class Fido2RegistrationService {
     private StaticConfiguration staticConfiguration;
 
     @Inject
-    private UserService userService;
+    private UserFido2Service userFido2Srv;
 
     @Inject
     private PersistenceEntryManager persistenceEntryManager;
 
     public List<Fido2RegistrationEntry> findAllByUsername(String username) {
-        String userInum = userService.getUserInum(username);
+        String userInum = userFido2Srv.getUserInum(username);
         if (userInum == null) {
             return Collections.emptyList();
         }
@@ -61,7 +60,7 @@ public class Fido2RegistrationService {
     }
 
     public List<Fido2RegistrationEntry> findAllRegisteredByUsername(String username) {
-        String userInum = userService.getUserInum(username);
+        String userInum = userFido2Srv.getUserInum(username);
         if (userInum == null) {
             return Collections.emptyList();
         }
