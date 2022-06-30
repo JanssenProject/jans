@@ -94,21 +94,27 @@ public class ActionService {
         
         //Search for a method/constructor matching name and arity
 
-        if (noInst && methodName.equals("new")) {
-            Constructor constr = Stream.of(actionCls.getConstructors()).filter(c -> pr.test(c, false))
-                    .findFirst().orElse(null);
-            if (constr == null) {
-                String msg = String.format("Unable to find a constructor with arity %d in class %s",
-                        arity, className);
-                logger.error(msg);
-                throw new InstantiationException(msg);
+        if (noInst) {
+            if (methodName.equals("new")) {
+                Constructor constr = Stream.of(actionCls.getConstructors()).filter(c -> pr.test(c, false))
+                        .findFirst().orElse(null);
+                if (constr == null) {
+                    String msg = String.format("Unable to find a constructor with arity %d in class %s",
+                            arity, className);
+                    logger.error(msg);
+                    throw new InstantiationException(msg);
+                }
+
+                logger.debug("Constructor found");
+                Object[] args = getArgsForCall(constr, arity, rhinoArgs);
+
+                logger.debug("Creating an instance");
+                return constr.newInstance(args);
+
+            } else if (methodName.equals("class")) {
+                logger.debug("Returning class object");
+                return actionCls;
             }
-
-            logger.debug("Constructor found");
-            Object[] args = getArgsForCall(constr, arity, rhinoArgs);
-
-            logger.debug("Creating an instance");
-            return constr.newInstance(args);
         }
 
         Method javaMethod = Stream.of(actionCls.getDeclaredMethods())
