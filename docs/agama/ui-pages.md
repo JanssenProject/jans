@@ -23,6 +23,10 @@ In agama, every template is generally "injected" some data, see [RRF](./dsl.md#r
 
 - `msgs`. It gives access to the localized messages of jans-auth application. Some developers might know this as the "internationalization labels" or "resource bundle" of an application. This is a collection of `.properties` files where common UI-related messages in different languages can be found. A message (label) is identified by a key, so in a template `${msgs.<KEY>}` could be used. As most keys in resource bundles have dot characters, the alternative notation `${webCtx["KEY"]}` works better for FreeMarker, for example `${msgs["login.errorMessage"]}`.
 
+## Output encoding
+
+The character encoding of the response sent to browser is by default `UTF-8`. To specify a different encoding the `ftl` directive can be used, for instance, `<#ftl encoding="ISO-8859-5">`. Place this at the top of the template. 
+
 ## Reusable templates
 
 A widespread practice in web page authoring is to compose pages based on reusable pieces. As an example, the need for a common header and footer is ubiquitous in HTML projects. With FreeMarker composition can be achieved by means of [macros](https://freemarker.apache.org/docs/ref_directive_macro.html). These are the equivalent to functions in programming, they can generate output based on parameters passed and can be called anywhere in a template.

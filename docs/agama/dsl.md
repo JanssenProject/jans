@@ -198,6 +198,16 @@ Finish it
 </td>
 		<td>Flow failed. Error description attached</td>
 	</tr>
+	<tr>
+<td>
+
+```
+Finish "as9233Qz"
+```
+
+</td>
+		<td>Shorthand for <code>{ success: true, data: { userId: "as9233Qz" } }</code></td>
+	</tr>
 </table>
 
 <!--
