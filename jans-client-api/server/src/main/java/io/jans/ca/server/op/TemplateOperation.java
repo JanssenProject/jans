@@ -78,7 +78,7 @@ public abstract class TemplateOperation<T extends IParams> implements ITemplateO
         LOG.info("CommandType: {}", getCommandType());
 
         validateIpAddressAllowed(httpRequest.getRemoteAddr());
-        Object forJsonConversion = getObjectForJsonConversion(paramsAsString, getParameterClass(), authorization, authorizationRpId, httpRequest);
+        Object forJsonConversion = getObjectForJsonConversion(paramsAsString, getParameterClass(), httpRequest);
         String response = null;
 
         if (getCommandType().getReturnType().equalsIgnoreCase(MediaType.APPLICATION_JSON)) {
@@ -121,26 +121,15 @@ public abstract class TemplateOperation<T extends IParams> implements ITemplateO
         LOG.trace("Command: {}", paramsAsString);
         T params = read(safeToJson(paramsAsString), paramsClass);
         Command command = new Command(getCommandType(), params);
-        final IOpResponse response = internProcess(command, httpRequest);
-        Object forJsonConversion = response;
-        if (response instanceof POJOResponse) {
-            forJsonConversion = ((POJOResponse) response).getNode();
-        }
-        return forJsonConversion;
-    }
-
-    private <T extends IParams> Object getObjectForJsonConversion(String paramsAsString, Class<T> paramsClass, String authorization, String authorizationRpId, HttpServletRequest httpRequest) {
-        LOG.trace("Command: {}", paramsAsString);
-        T params = read(safeToJson(paramsAsString), paramsClass);
-
-        final ApiAppConfiguration conf = jansConfigurationService.find();
 
         if (getCommandType().isAuthorizationRequired()) {
+            final ApiAppConfiguration conf = jansConfigurationService.find();
+            String authorization = httpRequest.getHeader("Authorization");
+            String authorizationRpId = httpRequest.getHeader("AuthorizationRpId");
             validateAuthorizationRpId(conf, authorizationRpId);
             validateAccessToken(authorization, safeToRpId((HasRpIdParams) params, authorizationRpId));
         }
 
-        Command command = new Command(getCommandType(), params);
         final IOpResponse response = internProcess(command, httpRequest);
         Object forJsonConversion = response;
         if (response instanceof POJOResponse) {
@@ -148,7 +137,6 @@ public abstract class TemplateOperation<T extends IParams> implements ITemplateO
         }
         return forJsonConversion;
     }
-
 
     private IOpResponse internProcess(Command command, HttpServletRequest httpRequest) {
         try {

@@ -5,7 +5,10 @@ import io.jans.ca.server.op.RsCheckAccessOperation;
 import io.jans.ca.server.op.RsModifyOperation;
 import io.jans.ca.server.op.RsProtectOperation;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.*;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
@@ -25,35 +28,35 @@ public class UMA2ResourceServerResource extends BaseResource {
     @Path("/uma-rs-protect")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response umaRsProtect(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String authorizationRpId, String params) {
+    public Response umaRsProtect(String params) {
         logger.info("Api Resource: /uma-rs-protect  Params: {}", params);
-        return rsProtectOp.process(params, authorization, authorizationRpId, getHttpRequest());
+        return rsProtectOp.process(params, getHttpRequest());
     }
 
     @POST
     @Path("/uma-rs-check-access")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response umaRsCheckAccess(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String authorizationRpId, String params) {
+    public Response umaRsCheckAccess(String params) {
         logger.info("Api Resource: /uma-rs-check-access  Params: {}", params);
-        return rsCheckAccessOp.process(params, authorization, authorizationRpId, getHttpRequest());
+        return rsCheckAccessOp.process(params, getHttpRequest());
     }
 
     @POST
     @Path("/introspect-rpt")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response introspectRpt(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String authorizationRpId, String params) {
+    public Response introspectRpt(String params) {
         logger.info("Api Resource: /introspect-rpt  Params: {}", params);
-        return introspectRptOp.process(params, authorization, authorizationRpId, getHttpRequest());
+        return introspectRptOp.process(params, getHttpRequest());
     }
 
     @POST
     @Path("/uma-rs-modify")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response umaRsModify(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String authorizationRpId, String params) {
+    public Response umaRsModify(String params) {
         logger.info("Api Resource: /uma-rs-modify  Params: {}", params);
-        return rsModifyOp.process(params, authorization, authorizationRpId, getHttpRequest());
+        return rsModifyOp.process(params, getHttpRequest());
     }
 }

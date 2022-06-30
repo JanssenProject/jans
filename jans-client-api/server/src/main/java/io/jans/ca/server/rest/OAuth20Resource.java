@@ -28,8 +28,6 @@ public class OAuth20Resource extends BaseResource {
     @Inject
     GetJwksOperation getJwksOp;
     @Inject
-    GetLogoutUrlOperation getLogoutUrlOp;
-    @Inject
     GetIssuerOperation getIssuerOp;
     @Inject
     CheckIdTokenOperation getCheckIdTokenOp;
@@ -47,18 +45,18 @@ public class OAuth20Resource extends BaseResource {
     @POST
     @Path("/update-site")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response updateSite(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String authorizationRpId, String params) {
+    public Response updateSite(String params) {
         logger.info("Api Resource: /update-site  Params: {}", params);
-        return updateSiteOp.process(params, authorization, authorizationRpId, getHttpRequest());
+        return updateSiteOp.process(params, getHttpRequest());
     }
 
     @POST
     @Path("/remove-site")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response removeSite(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String authorizationRpId, String params) {
+    public Response removeSite(String params) {
         logger.info("Api Resource: /remove-site  Params: {}", params);
-        return removeSiteOp.process(params, authorization, authorizationRpId, getHttpRequest());
+        return removeSiteOp.process(params, getHttpRequest());
     }
 
     @POST
@@ -73,36 +71,36 @@ public class OAuth20Resource extends BaseResource {
     @Path("/get-access-token-by-refresh-token")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response getAccessTokenByRefreshToken(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String authorizationRpId, String params) {
+    public Response getAccessTokenByRefreshToken(String params) {
         logger.info("Api Resource: /get-access-token-by-refresh-token  Params: {}", params);
-        return getAccessTokenByRefreshTokenOp.process(params, authorization, authorizationRpId, getHttpRequest());
+        return getAccessTokenByRefreshTokenOp.process(params, getHttpRequest());
     }
 
     @POST
     @Path("/introspect-access-token")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response introspectAccessToken(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String authorizationRpId, String params) {
+    public Response introspectAccessToken(String params) {
         logger.info("Api Resource: /introspect-access-token  Params: {}", params);
-        return introspectAccessTokenOp.process(params, authorization, authorizationRpId, getHttpRequest());
+        return introspectAccessTokenOp.process(params, getHttpRequest());
     }
 
     @POST
     @Path("/get-user-info")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response getUserInfo(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String authorizationRpId, String params) {
+    public Response getUserInfo(String params) {
         logger.info("Api Resource: /get-user-info  Params: {}", params);
-        return getUserInfoOp.process(params, authorization, authorizationRpId, getHttpRequest());
+        return getUserInfoOp.process(params, getHttpRequest());
     }
 
     @POST
     @Path("/get-jwks")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response getJwks(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String authorizationRpId, String params) {
+    public Response getJwks(String params) {
         logger.info("Api Resource: /get-jwks  Params: {}", params);
-        return getJwksOp.process(params, authorization, authorizationRpId, getHttpRequest());
+        return getJwksOp.process(params, getHttpRequest());
     }
 
     @POST
@@ -117,18 +115,18 @@ public class OAuth20Resource extends BaseResource {
     @Path("/check-access-token")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response checkAccessToken(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String authorizationRpId, String params) {
+    public Response checkAccessToken(String params) {
         logger.info("Api Resource: /check-access-token  Params: {}", params);
-        return getCheckAccessTokenOp.process(params, authorization, authorizationRpId, getHttpRequest());
+        return getCheckAccessTokenOp.process(params, getHttpRequest());
     }
 
     @POST
     @Path("/check-id-token")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response checkIdToken(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String authorizationRpId, String params) {
+    public Response checkIdToken(String params) {
         logger.info("Api Resource: /check-id-token  Params: {}", params);
-        return getCheckIdTokenOp.process(params, authorization, authorizationRpId, getHttpRequest());
+        return getCheckIdTokenOp.process(params, getHttpRequest());
     }
 
     @POST

@@ -30,35 +30,35 @@ public class OpenIdConnectResource extends BaseResource {
     @Path("/get-authorization-url")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response getAuthorizationUrl(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String authorizationRpId, String params) {
+    public Response getAuthorizationUrl(String params) {
         logger.info("Api Resource: /get-authorization-url  Params: {}", params);
-        return getAuthorizationUrlOp.process(params, authorization, authorizationRpId, getHttpRequest());
+        return getAuthorizationUrlOp.process(params, getHttpRequest());
     }
 
     @POST
     @Path("/get-authorization-code")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response getAuthorizationCode(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String authorizationRpId, String params) {
+    public Response getAuthorizationCode(String params) {
         logger.info("Api Resource: /get-authorization-code  Params: {}", params);
-        return getAuthorizationCodeOp.process(params, authorization, authorizationRpId, getHttpRequest());
+        return getAuthorizationCodeOp.process(params, getHttpRequest());
     }
 
     @POST
     @Path("/get-tokens-by-code")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response getTokenByCode(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String authorizationRpId, String params) {
+    public Response getTokenByCode(String params) {
         logger.info("Api Resource: /get-tokens-by-code  Params: {}", params);
-        return getTokensByCodeOp.process(params, authorization, authorizationRpId, getHttpRequest());
+        return getTokensByCodeOp.process(params, getHttpRequest());
     }
 
     @POST
     @Path("/get-logout-uri")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response getLogoutUri(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationRpId") String authorizationRpId, String params) {
+    public Response getLogoutUri(String params) {
         logger.info("Api Resource: /get-logout-uri  Params: {}", params);
-        return getLogoutUrlOp.process(params, authorization, authorizationRpId, getHttpRequest());
+        return getLogoutUrlOp.process(params, getHttpRequest());
     }
 }
