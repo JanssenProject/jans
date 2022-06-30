@@ -1,9 +1,6 @@
 package io.jans.agama.engine.script;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-
+import io.jans.agama.model.EngineConfig;
 import io.jans.agama.engine.continuation.PendingRedirectException;
 import io.jans.agama.engine.continuation.PendingRenderException;
 import io.jans.agama.engine.misc.PrimitiveUtils;
@@ -11,6 +8,13 @@ import io.jans.agama.engine.service.ActionService;
 import io.jans.agama.engine.service.FlowService;
 import io.jans.service.cdi.util.CdiUtil;
 import io.jans.util.Pair;
+
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.AccessDeniedException;
+import java.util.List;
+import java.util.Map;
 
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
@@ -27,14 +31,15 @@ public class ScriptUtils {
     // value is simulated when the continuation is resumed: see 3rd parameter in call
     // to resumeContinuation (FlowService)
     public static Pair<Boolean, String> pauseForRender(String page, boolean allowCallbackResume, Object data)
-            throws PendingRenderException {
+            throws PendingRenderException, AccessDeniedException, URISyntaxException {
         
+        page = normalize(page);
         Context cx = Context.enter();
         try {
             PendingRenderException pending = new PendingRenderException(
                     (NativeContinuation) cx.captureContinuation().getContinuation());
             pending.setTemplatePath(page);
-            pending.setDataModel((Map<String, Object>) data);
+            pending.setDataModel(data);
             pending.setAllowCallbackResume(allowCallbackResume);
             LOG.debug("Pausing flow");
             throw pending;
@@ -122,6 +127,19 @@ public class ScriptUtils {
     //Issue a call to this method only if the request scope is active
     public static void closeSubflow() throws IOException {
         CdiUtil.bean(FlowService.class).closeSubflow();
+    }
+    
+    private static String normalize(String sUri) throws AccessDeniedException, URISyntaxException {
+        
+        EngineConfig engineConf = CdiUtil.bean(EngineConfig.class);
+        String templatesFolder = engineConf.getRootDir() + engineConf.getTemplatesPath() + "/";
+
+        String ret = new URI(templatesFolder + sUri).normalize().toString();
+        if (!ret.startsWith(templatesFolder)) 
+            throw new AccessDeniedException(ret, null, "Access outside templates folder is not allowed");
+
+        return ret.substring(templatesFolder.length());
+        
     }
     
     private static String simpleName(Class<?> cls) {

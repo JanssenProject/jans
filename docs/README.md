@@ -1,16 +1,394 @@
 # Janssen Project Documentation
 
-- User
-  - Installation Guides
-  - How To implement use-cases
-    - Implementing Authentication with Apache reverse proxy
-- Developer
-- Community
-  - [Charter](./community/charter.md)
-  - [Contributing](./CONTRIBUTING.md)
-  - [Code of Conduct](./CODE_OF_CONDUCT.md)
-  - [Triage Process](./community/triage.md)
-  - [Testing](./community/testing.md)
-  - [Copyright Notice](./community/copyright-notices.md)
-- Code
-- Technical
+## Governance
+
+- [Charter](governance/charter.md)
+- [Testing](governance/testing.md)
+- [Triage](governance/triage.md)
+- [Copyright Notice](governance/copyright-notices.md)
+
+## User
+
+### Deployment and Planning Guide
+  - Platform Goal
+  - Use Cases
+  - Kubernetes
+  - Components
+  - VM Cluster
+  - VM Single Instance
+  - Persistence
+  - Caching
+  - Security Best Practices
+  - Load Balancers
+  - Certificates / Keys
+  - DNS
+  - Multi-tenancy
+  - Benchmarking
+  - Application Portal
+  - Discovery
+  - Customization / Localization
+  - Timeout Management (Sessions, Tokens, Applications)
+  - Identity Management
+  - Self-Service Password / 2FA Portal
+  - Identity Access Governance
+  - Role Based Access Management
+  - Integration with a central Authorization Service
+  - Stepped-up Authentication / Adaptive Authentication
+  - Delegated User Administration
+  - Passwordless Authentication
+  - Authenticating non-humans (Machine-to-Machine)
+  - FAQ
+
+### Installation
+  - Setup / Initial Configuration
+  - VM
+    - Ubuntu
+    - EL 8
+    - Suse
+    - RHEL 8 FIPS DISA STIG
+    - Dynamic Download
+  - Kubernetes
+    - Rancher Marketplace
+    - Local / Amazon / Google / MS / Open Shift
+  - CORS configuration
+  - FAQ
+
+### Upgrade Guide
+  - VM
+    - Version upgrade paths
+    - Backup
+    - Rollback
+  - Kubernetes
+    - Version upgrade paths
+    - Backup
+    - Rollback
+  - FAQ
+
+### Reference
+  - Swagger / OpenAPI Documentation
+  - Database Schema / Indexing / Operational Basics
+    - LDAP
+    - MySQL
+    - Couchbase
+    - Spanner
+  - JSON Configuration / Properties
+    - Auth Server
+    - FIDO
+    - SCIM
+    - Auth Server
+  - Javadocs
+  - Command Line Interface (CLI)
+    - Interactive Mode
+    - Script Mode
+    - Authentication via Device Flow
+  - Kubernetes
+    - Config and Secret Keys
+    - Image Config Properties
+      - Config Init
+      - Auth Server
+      - Config API
+      - FIDO
+      - SCIM
+      - Client API
+      - Persistence
+      - Gluu Cert Manager
+      - Gluu OpenDJ
+
+### Auth Server
+  - Configuration
+    - JSON Properties
+    - External Libraries
+    - JVM considerations
+  - OpenID Provider metadata
+  - Crypto
+    - Supported cryptographic Algorithms
+    - Local PKCS key storage
+    - Key rotation
+    - Jans Eleven HSM API
+    - How to validate JWTs
+  - Health
+  - Reporting / Metrics
+    - Monthly active users
+    - Failed / Successful authentications
+    - Tokens issued
+    - Counts of Users, Clients
+  - User Authentication
+    - Pairwise / Public subject identifiers
+    - id_token (include claims)
+    - ACRs
+    - Request objects
+    - Prompt parameter / Login Hint
+    - Consent
+      - Customize
+      - List / Delete Consents for Person
+    - Userinfo endpoint
+      - Overview, configuration, claims parameter
+    - Passwordless
+    - Forcing re-authentication
+    - Web Applications
+    - Mobile Applications
+    - Single Page Applications
+    - Impersonation
+    - Non-web Devices (ROPW / Device Flow)
+    - Returning Group / Role User information
+    - Social Login
+      - Facebook
+      - [Google](user/auth-server/user-authentication/social-login/google-signin.md)
+      - Apple
+    - Registration
+    - Password Expiration
+    - Temporarily locking or permanently disabling accounts
+    - Forgot Password
+      - Email
+      - SMS
+    - Multiple Sessions in One Browser
+    - Multiple Sessions for many browsers, devices
+    - Adaptive Authentication
+    - PKCE
+    - CIBA
+    - JARM
+    - DPoP
+    - MTLS
+    - Custom Request params
+    - SIOP
+  - API Access Control
+    - Access tokens: reference tokens versus value tokens (aka JWT's)
+    - Client Credential Grant Flow
+    - Using scopes to manage extent of Access
+    - Adding user claims into access tokens
+    - Software Statements: trusted client registration
+    - Using OAuth with API Gateways
+    - Using OPA and access tokens
+    - Swagger / OpenAPI best practices for security
+  - Client Management
+    - Client metadata table
+    - Client Registration
+    - Client Authentication
+    - Access Tokens
+    - Refresh Tokens
+    - Scopes (Default, OpenID, OAuth, Dynamic, Spontaneous)
+    - Redirect URIs
+    - Grant Types
+    - Software Statements
+    - Sector Identifier
+    - PAR
+    - Custom Client Claims
+  - FAPI
+    - Open Banking Requirements / Federation Operator Role
+    - Client Registration
+    - MTLS
+    - FAPI Authentication Request
+  - Logout
+    - Front Channel
+    - Back Channel
+    - Customizing logout
+    - Forcing logout on browser exit
+    - WebCM based logout with Chrome
+  - User Claims (Attributes)
+    - Built-in claims
+    - Adding custom claims
+    - Claim uniqueness / validation
+  - UMA
+    - Introduction: When to use it
+    - Non-browser UMA flows
+    - Interacting with users via the claims gathering endpoint
+  - International
+    - Web Pages (Login, Consent etc)
+    - Client Configuration (e.g. Display Name [#1057](https://github.com/JanssenProject/jans/issues/1057))
+    - Scope descriptions
+  - Logging
+    - Standard logs
+    - Log Levels
+    - Audit logs
+    - Custom logs
+    - log4j2 configuration
+  - FAQ
+
+### jans-cli
+  - [User Guide](user/jans-cli)
+
+### Integration Guide
+  - Custom Web Development
+    - [Protecting a website with mod_auth_openidc](user/integration/custom-web-development/authn-with-apache-reverse-proxy.md)
+    - AppAuth iOS
+    - AppAuth Android
+    - AppAuth JS
+    - Node
+    - React
+    - React Native
+    - Angular
+    - Spring Boot
+    - Django
+    - Flask
+    - ASP .Net
+  - SAML
+    - SSO with SAML SP's
+      - Shibboleth IDP with Gluu Server 4
+      - SimpleSAML PHP
+    - Federation with SAML IDPs
+    - SAML IDP Initiated Authentication
+  - Applications
+    - Rancher
+    - Rocket
+    - NextCloud
+    - WordPress
+    - Magento
+    - Teleport
+    - Moodle
+    - Drupal
+  - SaaS provider
+    - Office 365
+    - Salesforce
+    - Google
+    - Zoom
+    - Webex
+    - Amazon AWS
+    - Jira
+    - Docusign
+  - Passport-JS
+  - Gluu Casa
+  - FAQ
+
+### Config API
+  - Swagger
+  - Configuration
+  - Security
+  - Logs
+  - Monitoring
+  - Calling the Config API with CURL
+  - Calling the Config API with the Command Line Interface (CLI)
+
+### FIDO
+  - Swagger
+  - Configuration
+  - Vendor metadata management
+  - Key management / rotation
+  - Logs
+  - Monitoring
+  - Support for USB authenticators
+  - Support for platform authenticators
+  - Support for Bluetooth authenticators
+  - SCIM Extension to Add/Delete device for Person
+
+### SCIM
+  - Swagger
+  - Configuration
+  - Logs
+  - Monitoring
+  - OAuth protection
+  - Security considerations
+  - Bulk adding users
+  - Adding Custom Attributes
+
+### Client API
+  - Overview
+  - OAuth Features
+  - OpenID Connect Features
+  - UMA Features
+  - SIOP Features
+  - Swagger
+  - Configuration
+  - Logs
+  - Monitoring
+  - Key management
+  - SDKs
+    - Java
+
+### Kubernetes Operation Guide
+  - Logs
+  - Health Check
+  - Restarting pods
+  - Secret management
+  - Managing istio service mesh
+  - FAQ
+
+### VM Operation Guide
+  - Running setup
+  - Backup
+  - Logs
+  - Checking service status
+  - Restarting services
+  - Managing key rotation
+  - Certificates
+  - Web services
+  - FAQ
+
+### Authentication Script Catalog
+  - Gluu Casa
+  - FIDO / WebAuthn
+  - OTP
+  - Super Gluu
+  - SMS SMPP
+  - SMS Twilio
+  - Radius
+  - Integrated Windows Authentication (IWA) / SPENGO / Kerberos
+  - Email
+  - Forgot Password
+  - Registration
+  - Account Lockout
+  - X.509 Certificate
+  - Allowed Countries
+  - BioID
+  - Whispeak
+  - Duo Security
+  - PingID
+  - Deduce
+  - PrivacyIdea
+  - VeriClouds
+  - Stytch
+  - Transmit
+  - 1Kosmos
+  - Gluu Scan API
+  - Sign in With Ethereum
+
+## Developer
+  - Interception Script Overview
+  - [Testing / Debugging scripts](developer/interception-scripts-debug.md)
+  - Web Flows
+  - Set variables in Context for scripts / xhtml
+  - Customization
+      - Message files
+      - Error Pages
+      - Login / Consent Pages
+  - Scripts
+      - Person Authentication
+      - Consent Gathering
+      - Post Authentication
+      - id_token
+      - Resource Owner Password Credentials
+      - CIBA End User Notification
+      - OpenID Configuration
+      - Dynamic Scope
+      - Spontaneous Scope
+      - Application Session
+      - End Session
+      - Client Registration
+      - Introspection
+      - Update Token
+      - Revoke Token
+      - ID Generator
+      - UMA RPT Policies
+      - UMA Claims Gathering (Web Flow)
+      - UMA Claims (JWT Transformation)
+      - SCIM
+      - Persistence
+      - Config API
+  - Implementation Design
+      - agama
+      - fidowallet
+      - jans-auth-server
+      - jans-cli
+      - jans-client-api
+      - jans-config-api
+      - jans-core
+      - jans-eleven
+      - jans-fido2
+      - jans-notify
+      - jans-orm
+      - jans-scim
+  - CI-CD
+      - Jenkins CI (Current)
+      - GitHub CI (Upcoming)
+      - Release process
+  - FAQ
+

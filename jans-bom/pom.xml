@@ -7,6 +7,13 @@
 	<name>jans-bom</name>
 	<version>1.0.1-SNAPSHOT</version>
 
+    <distributionManagement>
+	  <repository>
+          <id>github</id>
+          <name>GitHub Packages</name>
+          <url>https://maven.pkg.github.com/JanssenProject/jans</url>
+      </repository>
+    </distributionManagement>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.min-version>3.0.3</maven.min-version>
@@ -720,7 +727,7 @@
 			<dependency>
 			    <groupId>mysql</groupId>
 			    <artifactId>mysql-connector-java</artifactId>
-			    <version>8.0.27</version>
+			    <version>8.0.28</version>
 			</dependency>
 			<dependency>
 			    <groupId>org.postgresql</groupId>

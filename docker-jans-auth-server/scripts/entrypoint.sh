@@ -16,20 +16,22 @@ get_debug_opt() {
 }
 
 move_builtin_jars() {
-    # move twilio lib
-    if [ ! -f /opt/jans/jetty/jans-auth/custom/libs/twilio.jar ]; then
-        cp /usr/share/java/twilio.jar /opt/jans/jetty/jans-auth/custom/libs/twilio.jar
-    fi
+    #twilio, jsmpp, casa-config, jans-fido2-client
+    for src in /usr/share/java/*.jar; do
+        fname=$(basename "$src")
+        cp "$src" "/opt/jans/jetty/jans-auth/custom/libs/$fname"
+    done
+}
 
-    # move jsmpp lib
-    if [ ! -f /opt/jans/jetty/jans-auth/custom/libs/jsmpp.jar ]; then
-        cp /usr/share/java/jsmpp.jar /opt/jans/jetty/jans-auth/custom/libs/jsmpp.jar
-    fi
+get_prometheus_opt() {
+    prom_opt=""
 
-    # move casa-config lib
-    if [ ! -f /opt/jans/jetty/jans-auth/custom/libs/casa-config.jar ]; then
-        cp /usr/share/java/casa-config.jar /opt/jans/jetty/jans-auth/custom/libs/casa-config.jar
+    if [ -n "${CN_PROMETHEUS_PORT}" ]; then
+        prom_opt="
+            -javaagent:/opt/prometheus/jmx_prometheus_javaagent.jar=${CN_PROMETHEUS_PORT}:/opt/prometheus/prometheus-config.yaml
+        "
     fi
+    echo "${prom_opt}"
 }
 
 # ==========
@@ -57,6 +59,7 @@ exec java \
     -Djava.io.tmpdir=/tmp \
     -Dlog4j2.configurationFile=resources/log4j2.xml \
     $(get_debug_opt) \
+    $(get_prometheus_opt) \
     ${CN_JAVA_OPTIONS} \
     -jar /opt/jetty/start.jar \
         jetty.deploy.scanInterval=0 \

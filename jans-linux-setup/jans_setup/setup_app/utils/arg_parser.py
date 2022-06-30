@@ -56,6 +56,9 @@ parser.add_argument('--disable-config-api-security', help="Turn off oauth2 secur
 parser.add_argument('--cli-test-client', help="Use config api test client for CLI", action='store_true')
 parser.add_argument('--import-ldif', help="Render ldif templates from directory and import them in Database")
 
+parser.add_argument('-enable-script', action='append', help="inum of script to enable", required=False)
+parser.add_argument('-disable-script', action='append', help="inum of script to enable", required=False)
+
 if PROFILE != OPENBANKING_PROFILE:
 
     parser.add_argument('-stm', '--enable-scim-test-mode', help="Enable Scim Test Mode", action='store_true')

@@ -26,6 +26,7 @@ import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -38,7 +39,7 @@ import org.slf4j.Logger;
 public class Transpilation {
     
     private static final int DELAY = 10 + (int) (10 * Math.random());    //seconds
-    private static final int INTERVAL = 45;    // seconds
+    private static final int INTERVAL = 30;    // seconds
     private static final double PR = 0.25;
 
     @Inject
@@ -89,11 +90,6 @@ public class Transpilation {
         
     }
 
-    private Map<String, Integer> makeSimpleMap(Map<String, ProtoFlow> map) {
-        return map.entrySet().stream().collect(Collectors.toMap(
-                        Map.Entry::getKey, e -> e.getValue().getRevision()));
-    }
-    
     /**
      * This method assumes that when a flow is created (eg. via an administrative tool), 
      * attribute revision is set to a negative value
@@ -102,38 +98,39 @@ public class Transpilation {
     public void process() throws IOException {
 
         List<ProtoFlow> flows = entryManager.findEntries(AgamaPersistenceService.AGAMA_FLOWS_BASE,
-                ProtoFlow.class,  Filter.createEqualityFilter("jansEnabled", true), null);
+                ProtoFlow.class, Filter.createEqualityFilter("jansEnabled", true), null);
 
         Map<String, ProtoFlow> map = flows.stream().collect(
                 Collectors.toMap(ProtoFlow::getQName, Function.identity()));
 
         if (traces == null) {
-            traces = makeSimpleMap(map);
+            traces = map.entrySet().stream().collect(Collectors.toMap(
+                        Map.Entry::getKey, e -> e.getValue().getRevision()));
+            //make it modifiable
+            traces = new HashMap<>(traces);
+        } else {
+            //remove flows that were disabled/removed wrt the previous timer run
+            traces.keySet().retainAll(map.keySet());
         }
 
         List<String> candidates = new ArrayList<>();
         for (String name : map.keySet()) {
             
-            int rev;
-            Integer revision = traces.get(name);
+            ProtoFlow pfl = map.get(name);
+            Integer rev = pfl.getRevision();
 
-            if (revision == null) {
-                //A newcomer. This script was enabled recently
-                candidates.add(name);
-            } else {
-                ProtoFlow pfl = map.get(name);
-                
-                if (pfl.getTransHash() == null && Math.random() < PR) {
+            if (rev != null) {
+                if (!traces.containsKey(name)) {
+                    //A newcomer. This script was enabled recently
+                    candidates.add(name);
+                    traces.put(name, rev);
+                } else if (
                     //there might be a compilation of this script running already.
                     //If the node in charge of this crashed before completion, the random 
                     //condition helps to get the job done by another node in the near future
-                    candidates.add(name);               
-                } else {
-                
-                    rev = pfl.getRevision();    
-                    if (rev < 0 || rev > revision) {
-                        candidates.add(name);
-                    }
+                    (pfl.getTransHash() == null && Math.random() < PR) ||
+                    (rev < 0 || rev > traces.get(name))) {
+                    candidates.add(name);
                 }
             }
         }
@@ -153,6 +150,7 @@ public class Transpilation {
             
             logger.debug("Marking the script is under compilation");                
             entryManager.merge(pfl);
+            traces.put(qname, pfl.getRevision());
 
             //This time retrieve all attributes for the flow of interest
             Flow fl = entryManager.findEntries(AgamaPersistenceService.AGAMA_FLOWS_BASE,
@@ -186,6 +184,9 @@ public class Transpilation {
                 }
             } catch (TranspilerException te) {
                 error = te.getMessage();
+                if (te.getCause() != null) {
+                    error += "\n" + te.getCause().getMessage();
+                }
             }
             
             if (error != null) {
@@ -202,7 +203,6 @@ public class Transpilation {
                 logger.warn("Check database for errors");
             }
         }
-        traces = makeSimpleMap(map);
         
     }
     

@@ -2,15 +2,6 @@ import pytest
 
 
 @pytest.fixture()
-def gconfig():
-    from jans.pycloudlib.config.base_config import BaseConfig
-
-    class GConfig(BaseConfig):
-        pass
-    yield GConfig()
-
-
-@pytest.fixture()
 def gconsul_config():
     from jans.pycloudlib.config import ConsulConfig
 
@@ -29,15 +20,6 @@ def gk8s_config():
     config.settings["CN_CONFIG_KUBERNETES_CONFIGMAP"] = "testing"
     config.kubeconfig_file = "tests/kubeconfig"
     yield config
-
-
-@pytest.fixture
-def gsecret():
-    from jans.pycloudlib.secret.base_secret import BaseSecret
-
-    class GSecret(BaseSecret):
-        pass
-    yield GSecret()
 
 
 @pytest.fixture()
@@ -84,6 +66,7 @@ def gmanager(gconsul_config, gvault_secret):
             "sql_password": "secret",
             "couchbase_password": "secret",
             "couchbase_superuser_password": "secret",
+            "random": ENCODED_PW,
         }
         return ctx.get(key) or default
 
@@ -100,15 +83,6 @@ def gmanager(gconsul_config, gvault_secret):
     gmanager.secret.adapter = gvault_secret
 
     yield gmanager
-
-
-@pytest.fixture
-def gmeta():
-    from jans.pycloudlib.meta.base_meta import BaseMeta
-
-    class GMeta(BaseMeta):
-        pass
-    yield GMeta()
 
 
 @pytest.fixture

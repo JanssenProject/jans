@@ -138,6 +138,7 @@ class PersonAuthentication(PersonAuthenticationType):
         return 1
 
     def getPageForStep(self, configurationAttributes, step):
+        # page referenced here is only used when a flow is restarted
         return "/" + CdiUtil.bean(NativeJansFlowBridge).scriptPageUrl()
 
     def getNextStep(self, configurationAttributes, requestParameters, step):

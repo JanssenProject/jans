@@ -10,6 +10,13 @@
     <version>1.0.1-SNAPSHOT</version>
     <name>jans-client-api</name>
 
+    <distributionManagement>
+	  <repository>
+          <id>github</id>
+          <name>GitHub Packages</name>
+          <url>https://maven.pkg.github.com/JanssenProject/jans</url>
+      </repository>
+    </distributionManagement>
     <modules>
         <module>uma-rs-core</module>
         <module>uma-rs-resteasy</module>

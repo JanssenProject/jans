@@ -45,6 +45,7 @@ release = find_version("../jans/pycloudlib/version.py")
 # ones.
 extensions = [
     "sphinx.ext.autodoc",
+    "sphinx_click",
 ]
 
 autodoc_mock_imports = [
@@ -59,6 +60,7 @@ autodoc_mock_imports = [
     "google",
     "ldif",
     "sqlalchemy",
+    "click",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -81,3 +83,8 @@ html_theme = 'nature'
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+
+autodoc_default_options = {
+    "undoc-members": True,
+    "exclude-members": "_abc_impl",
+}
