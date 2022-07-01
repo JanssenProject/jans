@@ -31,16 +31,19 @@ public class StatResource extends ConfigBaseResource {
     AuthService authService;
 
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.STATS_USER_READ_ACCESS, ApiAccessConstants.JANS_STAT })
+    @ProtectedApi(scopes = {ApiAccessConstants.STATS_USER_READ_ACCESS, ApiAccessConstants.JANS_STAT})
     @Produces(MediaType.APPLICATION_JSON)
     public Response getStatistics(@HeaderParam("Authorization") String authorization,
-            @QueryParam(value = "month") String month, @QueryParam(value = "format") String format) {
+                                  @QueryParam(value = "month") String month,
+                                  @QueryParam(value = "start-month") String startMonth,
+                                  @QueryParam(value = "end-month") String endMonth,
+                                  @QueryParam(value = "format") String format) {
         if (StringUtils.isBlank(format)) {
             format = "";
         }
         String url = getIssuer() + this.statUrl;
-        JsonNode jsonNode = this.authService.getStat(url, authorization, month, format);
-        logger.trace("StatResource::getUserStatistics() - jsonNode:{} ",jsonNode);
+        JsonNode jsonNode = this.authService.getStat(url, authorization, month, startMonth, endMonth, format);
+        logger.trace("StatResource::getUserStatistics() - jsonNode:{} ", jsonNode);
         return Response.ok(jsonNode.get("response")).build();
     }
 
