@@ -26,7 +26,7 @@ import java.util.Locale;
 
 /**
  * @author Javier Rojas Blum
- * @version April 25, 2022
+ * @version June 30, 2022
  */
 @DataEntry(sortBy = {"displayName"})
 @ObjectClass(value = "jansClnt")
@@ -79,22 +79,27 @@ public class Client extends DeletableEntity implements Serializable {
     private String idTokenTokenBindingCnf;
 
     @AttributeName(name = "displayName")
+    @JsonObject
     @LanguageTag
     private LocalizedString clientName = new LocalizedString();
 
     @AttributeName(name = "jansLogoURI")
+    @JsonObject
     @LanguageTag
     private LocalizedString logoUri = new LocalizedString();
 
     @AttributeName(name = "jansClntURI")
+    @JsonObject
     @LanguageTag
     private LocalizedString clientUri = new LocalizedString();
 
     @AttributeName(name = "jansPolicyURI")
+    @JsonObject
     @LanguageTag
     private LocalizedString policyUri = new LocalizedString();
 
     @AttributeName(name = "jansTosURI")
+    @JsonObject
     @LanguageTag
     private LocalizedString tosUri = new LocalizedString();
 
