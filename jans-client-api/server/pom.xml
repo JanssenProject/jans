@@ -20,7 +20,7 @@
         <h2.version>2.1.210</h2.version>
         <jersey-test-framework-provider>3.0.2</jersey-test-framework-provider>
         <compile.jans.base>/etc/jans</compile.jans.base>
-        <compile.log.base></compile.log.base>
+        <compile.log.base/>
         <test.client.api.url>http://localhost:8081/jans-client-api-server/</test.client.api.url>
     </properties>
 
@@ -134,7 +134,7 @@
         <dependency>
             <groupId>io.jaegertracing</groupId>
             <artifactId>jaeger-core</artifactId>
-            <version>0.32.0</version>
+            <version>1.8.1</version>
         </dependency>
         <dependency>
             <groupId>io.opentracing.brave</groupId>
