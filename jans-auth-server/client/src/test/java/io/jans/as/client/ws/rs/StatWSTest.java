@@ -34,7 +34,7 @@ public class StatWSTest extends BaseTest {
         final Token authorization = UmaClient.requestPat(tokenEndpoint, umaPatClientId, umaPatClientSecret);
 
         final StatService service = ClientFactory.instance().createStatService(issuer + STAT_PATH);
-        final JsonNode node = service.stat("Bearer " + authorization.getAccessToken(), null,"202201",  "202204", null);
+        final JsonNode node = service.stat("Bearer " + authorization.getAccessToken(), null, "202201", "202204", null);
         assertTrue(node != null && node.hasNonNull("response"));
     }
 
