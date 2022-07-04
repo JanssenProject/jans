@@ -24,7 +24,17 @@ public class StatWSTest extends BaseTest {
         final Token authorization = UmaClient.requestPat(tokenEndpoint, umaPatClientId, umaPatClientSecret);
 
         final StatService service = ClientFactory.instance().createStatService(issuer + STAT_PATH);
-        final JsonNode node = service.stat("Bearer " + authorization.getAccessToken(), "202101", null);
+        final JsonNode node = service.stat("Bearer " + authorization.getAccessToken(), "202101", null, null, null);
+        assertTrue(node != null && node.hasNonNull("response"));
+    }
+
+    @Test(enabled = false)
+    @Parameters({"umaPatClientId", "umaPatClientSecret"})
+    public void statWithDateRange(final String umaPatClientId, final String umaPatClientSecret) throws Exception {
+        final Token authorization = UmaClient.requestPat(tokenEndpoint, umaPatClientId, umaPatClientSecret);
+
+        final StatService service = ClientFactory.instance().createStatService(issuer + STAT_PATH);
+        final JsonNode node = service.stat("Bearer " + authorization.getAccessToken(), null, "202201", "202204", null);
         assertTrue(node != null && node.hasNonNull("response"));
     }
 
@@ -33,7 +43,7 @@ public class StatWSTest extends BaseTest {
     public void statPost(final String umaPatClientId, final String umaPatClientSecret) throws Exception {
         final Token authorization = UmaClient.requestPat(tokenEndpoint, umaPatClientId, umaPatClientSecret);
         final StatService service = ClientFactory.instance().createStatService(issuer + "/jans-auth/restv1/internal/stat");
-        final JsonNode node = service.stat(authorization.getAccessToken(), "202101", null);
+        final JsonNode node = service.stat(authorization.getAccessToken(), "202101", null, null, null);
         assertTrue(node != null && node.hasNonNull("response"));
     }
 }
