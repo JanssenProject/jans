@@ -29,7 +29,7 @@ public interface StatService {
     @Produces({MediaType.APPLICATION_JSON})
     JsonNode statPost(@HeaderParam("Authorization") String authorization,
                       @FormParam("month") String month,
-                      @QueryParam("start-month") String startMonth,
-                      @QueryParam("end-month") String endMonth,
+                      @FormParam("start-month") String startMonth,
+                      @FormParam("end-month") String endMonth,
                       @FormParam("format") String format);
 }
