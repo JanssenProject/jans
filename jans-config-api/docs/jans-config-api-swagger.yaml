@@ -1892,8 +1892,8 @@ paths:
     post:
       tags:
         - OAuth - OpenID Connect - Clients
-      summary: Create new OpenId connect client
-      description: Create new OpenId connect client
+      summary: Create new OpenId Connect client
+      description: Create new OpenId Connect client
       operationId: post-oauth-openid-clients
       requestBody:
         content:
@@ -5048,10 +5048,7 @@ components:
       description: Client.
       type: object
       required:
-        - applicationType
-        - logout
-        - includeClaimsInIdToken
-        - displayName
+        - redirectUris
       properties:
         dn:
           type: string
@@ -6060,6 +6057,10 @@ components:
       description: Server statistics data
       properties:
         month:
+          type: integer
+        start_month:
+          type: integer
+        end_month:
           type: integer
         monthly_active_users:
           type: integer
