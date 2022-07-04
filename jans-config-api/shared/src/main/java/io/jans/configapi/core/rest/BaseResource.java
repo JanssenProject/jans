@@ -42,6 +42,12 @@ public class BaseResource {
         }
     }
 
+    public static void checkNotNull(String[] attributes, String attributeName) {
+        if (attributes == null || attributes.length <= 0) {
+            throw new BadRequestException(getMissingAttributeError(attributeName));
+        }
+    }
+
     public static void throwMissingAttributeError(String attributeName) {
         if (StringUtils.isNotEmpty(attributeName)) {
             throw new BadRequestException(getMissingAttributeError(attributeName));

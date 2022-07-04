@@ -35,8 +35,8 @@ public class StatResource extends ConfigBaseResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getStatistics(@HeaderParam("Authorization") String authorization,
                                   @QueryParam(value = "month") String month,
-                                  @QueryParam(value = "start-month") String startMonth,
-                                  @QueryParam(value = "end-month") String endMonth,
+                                  @QueryParam(value = "start_month") String startMonth,
+                                  @QueryParam(value = "end_month") String endMonth,
                                   @QueryParam(value = "format") String format) {
         if (StringUtils.isBlank(format)) {
             format = "";
