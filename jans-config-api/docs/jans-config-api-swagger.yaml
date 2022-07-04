@@ -1162,8 +1162,8 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
         '500':
-          $ref: '#/components/responses/InternalServerError'	
-				
+          $ref: '#/components/responses/InternalServerError'
+
   /jans-config-api/api/v1/config/cache:
     get:
       summary: Returns cache configuration.
@@ -2462,7 +2462,7 @@ paths:
                 $ref: '#/components/schemas/StatsData'
         '500':
           description: Internal Server Error
-		  
+  
   /jans-config-api/mgt/configuser:
     get:
       tags:
@@ -3462,6 +3462,7 @@ components:
           enum:
             - PYTHON
             - JAVA_SCRIPT
+            - JAVA
           description: Programming language of the custom script.
         moduleProperties:
           type: array
@@ -6866,7 +6867,7 @@ components:
         inum:
           description: XRI i-number. Identifier to uniquely identify the user.
           type: string
-		  
+
     ExtendedCustomUser:
       allOf:     # Combines the CustomUser and the inline model
         - $ref: '#/components/schemas/CustomUser'
@@ -6946,4 +6947,4 @@ components:
           type: object
           additionalProperties:
             type: string
-		
+
