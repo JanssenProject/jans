@@ -7,6 +7,9 @@ Table of Contents
    * [<em>Janssen Command Line Interface</em>](#janssen-command-line-interface)
    * [<em>Installation</em>](#installation)
    * [<em>Quick Start</em>](#quick-start)
+   * [<em>Documentation</em>](#documentation)
+
+   
 
 # _Installation_
 
@@ -141,5 +144,9 @@ Now selecting 1 and it returns our desired result as below image:
 
 ![default-authentication-method.png](../docs/assets/user/using-jans-cli/images/image-im-cur-default-auth-03042021.png)
 
-So, That was a quick start to view how this _jans-cli_ Interactive Mode works. Please, follow this [link](../docs/user/using-jans-cli) to read the _jans-cli_ docs for a better understanding of the Janssen Command-Line.
+So, That was a quick start to view how this _jans-cli_ Interactive Mode works. Please, see documentation for further information.
 
+
+
+# _Documentation_
+We have extensive documentation for CLI: [https://github.com/JanssenProject/jans/tree/main/docs/admin/jans-cli](https://github.com/JanssenProject/jans/tree/main/docs/admin/jans-cli)
