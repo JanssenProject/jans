@@ -3461,7 +3461,6 @@ components:
           type: string
           enum:
             - PYTHON
-            - JAVA_SCRIPT
             - JAVA
           description: Programming language of the custom script.
         moduleProperties:
