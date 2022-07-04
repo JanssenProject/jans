@@ -78,6 +78,8 @@ jobs:
          cp -r /opt/jans jans-src/opt/
          touch jans-src/opt/jans/jans-setup/package
          rm -rf install.py install jans-cli
+         rm -rf jans-src/opt/jans/jans-setup/logs/setup.log
+         rm -rf jans-src/opt/jans/jans-setup/logs/setup_error.log         
          sed -i "s/%VERSION%/${{ steps.previoustag.outputs.version }}/g" run-build.sh
          cat run-build.sh
          sudo ./run-build.sh
