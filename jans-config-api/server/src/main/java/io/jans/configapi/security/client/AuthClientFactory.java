@@ -7,6 +7,7 @@
 package io.jans.configapi.security.client;
 
 import static io.jans.as.model.util.Util.escapeLog;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -18,7 +19,9 @@ import io.jans.as.client.service.IntrospectionService;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.IntrospectionResponse;
 import io.jans.as.model.jwk.JSONWebKeySet;
+
 import static io.jans.as.model.jwk.JWKParameter.JSON_WEB_KEY_SET;
+
 import io.jans.configapi.core.util.Jackson;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
@@ -41,10 +44,10 @@ import org.slf4j.LoggerFactory;
 @RegisterProvider(StatClient.class)
 @ApplicationScoped
 public class AuthClientFactory {
-    
+
 
     private static final String CONTENT_TYPE = "Content-Type";
-  
+
     private static Logger log = LoggerFactory.getLogger(AuthClientFactory.class);
 
     public static IntrospectionService getIntrospectionService(String url, boolean followRedirects) {
@@ -52,7 +55,7 @@ public class AuthClientFactory {
     }
 
     public static IntrospectionResponse getIntrospectionResponse(String url, String header, String token,
-            boolean followRedirects) {
+                                                                 boolean followRedirects) {
         log.debug("Introspect Token - url:{}, header:{}, token:{} ,followRedirects:{} ", url, header, token,
                 followRedirects);
         ResteasyWebTarget target = (ResteasyWebTarget) ClientBuilder.newClient()
@@ -61,15 +64,15 @@ public class AuthClientFactory {
         return proxy.introspectToken(header, token);
     }
 
-    public static JsonNode getStatResponse(String url, String token, String month, String format) {
+    public static JsonNode getStatResponse(String url, String token, String month, String startMonth, String endMonth, String format) {
         if (log.isDebugEnabled()) {
-            log.debug("Stat Response Token - url:{}, token:{}, month:{} ,format:{} ", escapeLog(url), escapeLog(token),
-                    escapeLog(month), escapeLog(format));
+            log.debug("Stat Response Token - url:{}, token:{}, month:{}, startMonth:{}, endMonth:{}, format:{} ", escapeLog(url), escapeLog(token),
+                    escapeLog(month), escapeLog(startMonth), escapeLog(endMonth), escapeLog(format));
         }
-       ResteasyWebTarget webTarget = (ResteasyWebTarget) ClientBuilder.newClient()
+        ResteasyWebTarget webTarget = (ResteasyWebTarget) ClientBuilder.newClient()
                 .target(url);
         StatService statService = webTarget.proxy(StatService.class);
-        return statService.stat(token, month, format);
+        return statService.stat(token, month, startMonth, endMonth, format);
     }
 
     public static JsonNode getHealthCheckResponse(String url) {
@@ -86,7 +89,7 @@ public class AuthClientFactory {
     }
 
     public static TokenResponse requestAccessToken(final String tokenUrl, final String clientId,
-            final String clientSecret, final String scope) {
+                                                   final String clientSecret, final String scope) {
         log.debug("Request for Access Token -  tokenUrl:{}, clientId:{}, clientSecret:{}, scope:{} ", tokenUrl,
                 clientId, clientSecret, scope);
         Response response = null;
@@ -186,7 +189,7 @@ public class AuthClientFactory {
         return null;
     }
 
-  
+
     private static Builder getClientBuilder(String url) {
         return ClientBuilder.newClient().target(url).request();
     }
