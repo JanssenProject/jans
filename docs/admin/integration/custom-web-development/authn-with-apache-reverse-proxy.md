@@ -56,7 +56,7 @@ To register a new OpenID connect client on the Janssen server, we will use `jans
 
     Running above command will bring up main menu as shown in sample below:
     
-    ![CLI-main-menu](../../assets/how-to/images/image-howto-mod-auth-cli-main-menu-04292022.png)
+    ![CLI-main-menu](../../../assets/how-to/images/image-howto-mod-auth-cli-main-menu-04292022.png)
     
     To register a new OpenID Connect client, select `OAuth OpenID Connect - Clients` option (`16` in above sample). Selecting an appropriate option will bring up related sub-menu. 
    
