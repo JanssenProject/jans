@@ -469,7 +469,7 @@ Select 1 to get all the details about Jans authorization server configuration. I
 ```
 By selecting the 2nd option, you can modify its properties partially. 
 
-![update jans authorization server](../../../assets/user/using-jans-cli/images/image-im-update-jans-auth-03042021.png)
+![update jans authorization server](../../../assets/image-im-update-jans-auth-03042021.png)
 
 At the end, it will show the updated result.
 
