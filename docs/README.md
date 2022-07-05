@@ -133,7 +133,7 @@
     - Returning Group / Role User information
     - Social Login
       - Facebook
-      - [Google](user/auth-server/user-authentication/social-login/google-signin.md)
+      - [Google](admin/auth-server/user-authentication/social-login/google-signin.md)
       - Apple
     - Registration
     - Password Expiration
@@ -205,11 +205,11 @@
   - FAQ
 
 ### jans-cli
-  - [User Guide](user/jans-cli)
+  - [User Guide](admin/jans-cli)
 
 ### Integration Guide
   - Custom Web Development
-    - [Protecting a website with mod_auth_openidc](user/integration/custom-web-development/authn-with-apache-reverse-proxy.md)
+    - [Protecting a website with mod_auth_openidc](admin/integration/custom-web-development/authn-with-apache-reverse-proxy.md)
     - AppAuth iOS
     - AppAuth Android
     - AppAuth JS
@@ -343,7 +343,7 @@
 
 ## Developer
   - Interception Script Overview
-  - [Testing / Debugging scripts](developer/interception-scripts-debug.md)
+  - [Testing / Debugging scripts](admin/developer/interception-scripts-debug.md)
   - Web Flows
   - Set variables in Context for scripts / xhtml
   - Customization
