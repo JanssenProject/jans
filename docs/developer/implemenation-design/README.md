@@ -40,6 +40,6 @@ This section outlines high-level design principles, styles and design choices th
 - Detailed technical documentation for each module should be placed under directory with module's name. For example, technical documentation for `jans-mod` should be placed under directory `docs/technical/jans-mod`
 - Each module directory should have a README file that follows [Technical Overview Template](./technical-overview-template.md).
 - Create directories if required under module directory to further arrange documentation
-- Place all the digital assets to support your documentation under [assets](../assets) following these [guidelines](../assets/README.md)
+- Place all the digital assets to support your documentation under [assets](../../assets) following these [guidelines](../../assets/README.md)
 
 
