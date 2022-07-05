@@ -4107,6 +4107,7 @@
       "may": [
         "jansId",
         "dat",
+        "jansData",
         "attr"
       ],
       "must": [
