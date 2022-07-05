@@ -24,7 +24,7 @@ RUN python3 -m ensurepip \
 # =====================
 
 # janssenproject/jans SHA commit
-ENV JANS_SOURCE_VERSION=0f1a2e6761c0522acdfdab3d69adac5c8062e780
+ENV JANS_SOURCE_VERSION=377affc238bca236324dd8eeb9d9e6750879560f
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
