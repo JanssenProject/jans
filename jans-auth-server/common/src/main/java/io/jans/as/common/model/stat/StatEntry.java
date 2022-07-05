@@ -22,12 +22,23 @@ public class StatEntry implements Serializable {
     @AttributeName(name = "jansId")
     private String id;
 
+    @AttributeName(name = "jansData")
+    private String month;
+
     @AttributeName(name = "dat")
     private String userHllData;
 
     @AttributeName(name = "attr")
     @JsonObject
     private Stat stat;
+
+    public String getMonth() {
+        return month;
+    }
+
+    public void setMonth(String month) {
+        this.month = month;
+    }
 
     public String getDn() {
         return dn;
