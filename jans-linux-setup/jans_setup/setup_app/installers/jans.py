@@ -76,6 +76,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
                 txt += 'Install Scim Server'.ljust(30) + repr(Config.install_scim_server).rjust(35) + (' *' if 'install_scim_server' in Config.addPostSetupService else '') + "\n"
                 txt += 'Install Eleven Server'.ljust(30) + repr(Config.installEleven).rjust(35) + (' *' if 'installEleven' in Config.addPostSetupService else '') + "\n"
                 txt += 'Install Jans Client Api'.ljust(30) + repr(Config.install_client_api).rjust(35) + (' *' if 'install_client_api' in Config.addPostSetupService else '') + "\n"
+                txt += 'Install Casa'.ljust(30) + repr(Config.install_casa).rjust(35) + (' *' if 'install_casa' in Config.addPostSetupService else '') + "\n"
                 #txt += 'Install Oxd '.ljust(30) + repr(Config.installOxd).rjust(35) + (' *' if 'installOxd' in Config.addPostSetupService else '') + "\n"
 
             if base.argsp.t:

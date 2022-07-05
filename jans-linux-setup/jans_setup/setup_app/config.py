@@ -199,6 +199,7 @@ class Config:
         self.installOxd = False
         self.installEleven = False
         self.install_jans_cli = True
+        self.install_casa = False
         self.loadTestData = False
         self.allowPreReleasedFeatures = False
         self.install_client_api = True

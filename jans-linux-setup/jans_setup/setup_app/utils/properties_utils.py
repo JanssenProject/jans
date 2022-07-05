@@ -621,6 +621,16 @@ class PropertiesUtils(SetupUtils):
             if prompt == 'n':
                 Config.client_api_storage_type = 'h2'
 
+    def prompt_for_casa(self):
+        prompt = self.getPrompt("Install Casa?", 
+                            self.getDefaultOption(Config.install_casa)
+                            )[0].lower()
+
+        Config.install_casa = True if prompt == 'y' else False
+
+        if Config.installed_instance and Config.install_casa:
+            Config.addPostSetupService.append('install_casa')
+
 
     def prompt_for_rdbm(self):
         while True:
@@ -937,6 +947,7 @@ class PropertiesUtils(SetupUtils):
             self.promptForFido2Server()
             self.promptForEleven()
             self.prompt_for_client_api()
+            self.prompt_for_casa()
             #if (not Config.installOxd) and Config.oxd_package:
             #    self.promptForOxd()
 

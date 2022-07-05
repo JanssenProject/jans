@@ -123,6 +123,8 @@ if base.current_app.profile == 'jans':
     from setup_app.installers.scim import ScimInstaller
     from setup_app.installers.fido import FidoInstaller
     from setup_app.installers.eleven import ElevenInstaller
+    from setup_app.installers.casa import CasaInstaller
+    
 
 from setup_app.installers.config_api import ConfigApiInstaller
 from setup_app.installers.jans_cli import JansCliInstaller
@@ -245,6 +247,8 @@ if Config.profile == 'jans':
     scimInstaller = ScimInstaller()
     elevenInstaller = ElevenInstaller()
     client_api_installer = ClientApiInstaller()
+    casa_installer = CasaInstaller()
+
 jansCliInstaller = JansCliInstaller()
 
 # oxdInstaller = OxdInstaller()
@@ -420,6 +424,9 @@ def main():
                         not Config.installed_instance and Config.get(client_api_installer.install_var)):
                     client_api_installer.start_installation()
 
+                if (Config.installed_instance and casa_installer.install_var in Config.addPostSetupService) or (
+                        not Config.installed_instance and Config.get(casa_installer.install_var)):
+                    casa_installer.start_installation()
 
             if Config.install_jans_cli:
                 jansCliInstaller.start_installation()

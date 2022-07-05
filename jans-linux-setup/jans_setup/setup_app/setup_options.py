@@ -13,6 +13,7 @@ def get_setup_options():
         'downloadWars': False,
         'installOxAuth': True,
         'install_config_api': True,
+        'install_casa': False,
         'installHTTPD': True,
         'install_scim_server': True if base.current_app.profile == 'jans' else False,
         'installOxd': False,
@@ -100,6 +101,9 @@ def get_setup_options():
 
         if base.argsp.install_eleven:
             setupOptions['installEleven'] = True
+
+        if base.argsp.install_casa:
+            setupOptions['install_casa'] = True
 
         if base.argsp.jans_max_mem:
             setupOptions['jans_max_mem'] = base.argsp.jans_max_mem

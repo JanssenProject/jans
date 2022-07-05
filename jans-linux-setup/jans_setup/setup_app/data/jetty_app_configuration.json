@@ -27,7 +27,7 @@
     "memory": {
       "max_allowed_mb": 1024,
       "jvm_heap_ration": 0.7,
-      "ratio": 0.2
+      "ratio": 0.15
     },
     "jetty": {
       "modules": "server,deploy,resources,http,http-forwarded,console-capture,jsp,websocket"
@@ -39,7 +39,7 @@
     "memory": {
       "max_allowed_mb": 1024,
       "jvm_heap_ration": 0.7,
-      "ratio": 0.15
+      "ratio": 0.10
     },
     "jetty": {
       "modules": "server,deploy,resources,http,http-forwarded,console-capture,jsp,websocket"
@@ -70,5 +70,17 @@
     },
     "installed": false,
     "name": "jans-client-api"
+  },
+  "casa": {
+    "memory": {
+      "max_allowed_mb": 1024,
+      "jvm_heap_ration": 0.7,
+      "ratio": 0.1
+    },
+    "jetty": {
+      "modules": "server,deploy,resources,http,http-forwarded,console-capture,jsp,cdi-decorate"
+    },
+    "installed": false,
+    "name": "casa"
   }
 }
