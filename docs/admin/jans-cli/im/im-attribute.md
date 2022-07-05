@@ -10,15 +10,15 @@ Using **Janssen CLI**, You can perform some quick operations in _Attribute_. Suc
 
 For example, to get all attributes to choose 1 from the Main Menu, you will get the following options:
 
-![jans-cli Attributes Menu](../../../assets/user/using-jans-cli/images/image-im-attributes-main-03042021.png)
+![jans-cli Attributes Menu](../../../assets/image-im-attributes-main-03042021.png)
 
 To `View/Find` attributes choose 1, you will be asked to enter `Search size`,  `Search pattern` and `Status of the attribute` . For simplicity, leave defaults in our case:
 
-![jans-cli Attributes Get All](../../../assets/user/using-jans-cli/images/image-im-attributes-get-all-03042021.png)
+![jans-cli Attributes Get All](../../../assets/image-im-attributes-get-all-03042021.png)
 
 Once press Enter, it will retrieve 50 attributes and prints to screen in green color:
 
-![jans-cli Attributes Get All Response](../../../assets/user/using-jans-cli/images/image-im-attributes-get-all-response-03042021.png)
+![jans-cli Attributes Get All Response](../../../assets/image-im-attributes-get-all-response-03042021.png)
 
 You can save the result as a file by choosing `w` in the result screen. To go back enter `b`, to quit enter `q`. If you enter a recognized command, it will display valid command.
 
@@ -67,7 +67,7 @@ Obtained Data:
 }
 ```
 
-![add attribute](../../../assets/user/using-jans-cli/images/image-im-add-attrb-03042021.png) 
+![add attribute](../../../assets/image-im-add-attrb-03042021.png) 
 
 To `update` an attribute, choose 3 (on the Attribute screen). It will ask `inum` of the attribute you are going to update. For example, I want to change the description for an attribute having `inum=BCA8`. 
 It will retrieve current data and ask for the modification of each property, just leave defaults if you don't want to change that property.
@@ -117,7 +117,7 @@ Obtained Data:
   "tooltip": null
 }
 ```
-![jans-cli Attributes Update](../../../assets/user/using-jans-cli/images/image-im-attributes-update-03042021.png)
+![jans-cli Attributes Update](../../../assets/image-im-attributes-update-03042021.png)
 
 Enter `y` to perform an `update` and display updated data on the screen.
 
@@ -127,7 +127,7 @@ To update property of an attribute, you can go with partial updates from Attribu
 - **__path__** chose path where operation will be performed: for example `attributeValidation/minLength`
 - **__value__** value that you want update. It can be integer, boolean or string.
 
-![partially update attribute](../../../assets/user/using-jans-cli/images/image-im-partial-attrb-update-03042021.png)
+![partially update attribute](../../../assets/image-im-partial-attrb-update-03042021.png)
 
 Finally, it will display the updated result.
 
@@ -178,5 +178,5 @@ Please wait for patching...
 
 To `delete` an attribute, choose option 5 from Attribute Menu. Enter the `inum` value that you want to delete. Here I chose that I already created in the above: `"inum=0adfeb80-cb57-4f7b-a3a0-944082e4c199"` It will ask for confirmation, enter `y` to confirm.
 
-![delete attribute](../../../assets/user/using-jans-cli/images/image-im-delete-attrb-03042021.png)
+![delete attribute](../../../assets/image-im-delete-attrb-03042021.png)
 

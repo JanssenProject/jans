@@ -280,4 +280,4 @@ To patch data, the command looks like for this:
 
 It will update the configuration and will show the updated result as below image on the display.
 
-![patch-ldap](../../assets/user/using-jans-cli/images/image-cli-patch-ldap-configuration-03042021.png)
+![patch-ldap](../../assets/image-cli-patch-ldap-configuration-03042021.png)
