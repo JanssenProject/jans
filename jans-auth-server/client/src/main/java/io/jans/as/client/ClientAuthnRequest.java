@@ -1,7 +1,7 @@
 /*
  * Janssen Project software is available under the Apache License (2004). See http://www.apache.org/licenses/ for full text.
  *
- * Copyright (c) 2020, Janssen Project
+ * Copyright (c) 2022, Janssen Project
  */
 
 package io.jans.as.client;
@@ -86,6 +86,10 @@ public abstract class ClientAuthnRequest extends BaseRequest {
         }
     }
 
+    public SignatureAlgorithm getFallbackAlgorithm() {
+        return StringUtils.isBlank(keyId) ? SignatureAlgorithm.HS256 : SignatureAlgorithm.RS256;
+    }
+
     public String getClientAssertion() {
         if (cryptoProvider == null) {
             LOG.error("Crypto provider is not specified");
@@ -93,7 +97,7 @@ public abstract class ClientAuthnRequest extends BaseRequest {
         }
 
         if (algorithm == null) {
-            algorithm = SignatureAlgorithm.HS256;
+            algorithm = getFallbackAlgorithm();
         }
 
         GregorianCalendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
