@@ -268,10 +268,13 @@ class SecretManager(BaseConfiguration):
 
 
 @dataclass
-class _Manager:
+class Manager:
     """Class acts as a container of config and secret manager.
 
     This object is not intended for direct use, use :func:`~jans.pycloudlib.manager.get_manager` function instead.
+
+    :param config: An instance of config manager class.
+    :param secret: An instance of secret manager class.
     """
 
     #: An instance of :class:`~jans.pycloudlib.manager.ConfigManager`
@@ -281,8 +284,8 @@ class _Manager:
     secret: SecretManager
 
 
-def get_manager() -> _Manager:
-    """Create an instance of :class:`~jans.pycloudlib.manager._Manager` class.
+def get_manager() -> Manager:
+    """Create an instance of :class:`~jans.pycloudlib.manager.Manager` class.
 
     The instance has ``config`` and ``secret`` attributes to interact with
     configs and secrets, for example:
@@ -293,8 +296,8 @@ def get_manager() -> _Manager:
         manager.config.get("hostname")
         manager.secret.get("ssl-cert")
 
-    :returns: An instance of :class:`~jans.pycloudlib.manager._Manager`.
+    :returns: An instance of manager class.
     """
     config_mgr = ConfigManager()
     secret_mgr = SecretManager()
-    return _Manager(config_mgr, secret_mgr)
+    return Manager(config_mgr, secret_mgr)
