@@ -1,20 +1,12 @@
 Use the [assets](../assets) directory to store digital assets like images and diagrams that are used to support documentation for all modules. 
 
 ## Directory Structure
-Directory structure under this directory should closely follow directory structure under [docs](../docs) directory. 
+`logo`: This directory holds logo files used for official documentation and publications. Do not change these files without consulting the CODEOWNER. 
 
-For example, documents located under `docs/user/howto` should place their supporting images\diagrams under `docs/assets/user/howto`.
+## Guidelines
+- Name the file using 4 to 5 keywords (separated by dash `-`) which describes content of the file i.e `diagram-user-registration-sequence.pdf`
+- Max file size 1MB each
+- images format preferably `.png`
+- diagrams format preferably `.svg`
+- Preferred diagramming tool: `draw.io`. Upload `.drawio` file along with diagram pdf file with same name. This allows future updates to the diagram to keep it updated
 
-## Images and Diagrams
-Keep images and diagrams in separate directories as below. 
- - `images` : to hold screenshots and other images (Max size 1MB each, preferrably `.png`)
- - `diagrams` : to hold interaction diagrams, class diagrams, sequence diagram. (Preferrably as PDF)
-
-For instance, images that support technical documentation for `jans-core` module should be located in `jans/docs/assets/technical/jans-core/images`
-
-## File Naming Conventions 
-Image/diagram file names should follow the pattern: `image/diagram`-`3 tag words`-`mmddyyyy`.`type`.
-
-For example,
-- A screenshot of IDE settings for developer workspace setup can be named `image-eclipse-ide-setting-04052022.png`
-- A sequence diagram for user registration flow can be named `diagram-user-registration-sequence-03062022.pdf`
