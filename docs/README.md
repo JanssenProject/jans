@@ -390,5 +390,6 @@
       - Jenkins CI (Current)
       - GitHub CI (Upcoming)
       - Release process
+  - Developer tools
   - FAQ
 
