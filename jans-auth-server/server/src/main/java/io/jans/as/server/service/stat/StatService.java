@@ -147,6 +147,10 @@ public class StatService {
                 tokenCounters = new ConcurrentHashMap<>(entryFromPersistence.getStat().getTokenCountPerGrantType());
                 currentEntry = entryFromPersistence;
                 log.trace("Stat entry loaded.");
+
+                if (currentEntry != null && StringUtils.isBlank(currentEntry.getMonth()) && currentEntry.getStat() != null) {
+                    currentEntry.setMonth(currentEntry.getStat().getMonth());
+                }
                 return;
             }
         } catch (EntryPersistenceException e) {
@@ -157,12 +161,15 @@ public class StatService {
             log.trace("Creating stat entry ...");
             hll = newHll();
             tokenCounters = new ConcurrentHashMap<>();
+            final String monthString = periodDateFormat.format(new Date());
 
             currentEntry = new StatEntry();
             currentEntry.setId(nodeId);
             currentEntry.setDn(dn);
             currentEntry.setUserHllData(Base64.getEncoder().encodeToString(hll.toBytes()));
-            currentEntry.getStat().setMonth(periodDateFormat.format(new Date()));
+
+            currentEntry.getStat().setMonth(monthString);
+            currentEntry.setMonth(monthString);
             entryManager.persist(currentEntry);
             log.trace("Created stat entry.");
         }
