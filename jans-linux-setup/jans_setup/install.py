@@ -235,7 +235,7 @@ def do_install():
 
     print("Launching Janssen Setup")
 
-    setup_cmd = 'python3 {}/setup.py'.format(argsp.setup_dir)
+    setup_cmd = '{} {}/setup.py'.format(sys.executable, argsp.setup_dir)
     setup_args = argsp.args or ''
     if argsp.force_download:
         setup_args += ' --force-download'
