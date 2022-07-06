@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.0.1](https://github.com/JanssenProject/jans/compare/docs-v1.0.0...docs-v1.0.1) (2022-07-06)
+
+
+### Bug Fixes
+
+* correct the link to image ([#1660](https://github.com/JanssenProject/jans/issues/1660)) ([0943d81](https://github.com/JanssenProject/jans/commit/0943d813f782a3babaa5166f426533fd561419a5))
+
+
+### Miscellaneous Chores
+
+* release 1.0.1 ([828bfe8](https://github.com/JanssenProject/jans/commit/828bfe80cee87e639839391f98ac3dc2f2d4a920))
+
 ## 1.0.0 (2022-05-20)
 
 
