@@ -56,6 +56,10 @@ spec:
           ports:
             - containerPort: 9444
             - containerPort: 8074
+            {{ if .Values.global.cnPrometheusPort }}
+            - name: prometheus-port
+              containerPort: {{ .Values.global.cnPrometheusPort }}
+            {{- end }}
           envFrom:
             - configMapRef:
                 name: {{ .Release.Name }}-config-cm
