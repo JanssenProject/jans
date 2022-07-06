@@ -24,7 +24,7 @@ class CasaInstaller(JettyInstaller):
             (os.path.join(casa_dist_dir, 'casa_web_resources.xml'), os.path.join(casa_github_repo, 'extras/casa_web_resources.xml')),
             (os.path.join(casa_dist_dir, 'casa-config.jar'), os.path.join(base.current_app.app_info['GLUU_MAVEN'], 'maven/org/gluu/casa-config/{0}/casa-config-{0}.jar'.format(base.current_app.app_info['CASA_VERSION']))),
             (os.path.join(casa_dist_dir, 'jans-fido2-client.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-fido2-client/{0}{1}/jans-fido2-client-{0}{1}.jar'.format(base.current_app.app_info['JANS_APP_VERSION'], base.current_app.app_info['JANS_BUILD']))),
-            (os.path.join(casa_dist_dir, 'twilio.jar'), 'https://repo1.maven.org/maven2/com/twilio/sdk/twilio/{0}/twilio-{0}.jar'.format(base.current_app.app_info['CASA_VERSION'])),
+            (os.path.join(casa_dist_dir, 'twilio.jar'), 'https://repo1.maven.org/maven2/com/twilio/sdk/twilio/{0}/twilio-{0}.jar'.format(base.current_app.app_info['TWILIO_VERSION'])),
             (os.path.join(casa_dist_dir, 'pylib/Casa.py'), os.path.join(casa_github_repo, 'extras/Casa.py')),
             (os.path.join(casa_dist_dir, 'pylib/casa-external_fido2.py'), os.path.join(casa_github_repo, 'extras/casa-external_fido2.py')),
             (os.path.join(casa_dist_dir, 'pylib/casa-external_otp.py'), os.path.join(casa_github_repo, 'extras/casa-external_otp.py')),
@@ -45,15 +45,16 @@ class CasaInstaller(JettyInstaller):
         self.output_dir = os.path.join(Config.output_dir, 'casa')
         self.jetty_service_dir = os.path.join(Config.jetty_base, self.service_name)
         self.jetty_service_webapps_dir = os.path.join(self.jetty_service_dir, 'webapps')
-        self.jans_auth_custom_lib_dir = os.path.join(Config.jetty_base, base.current_app.JansAuthInstaller.service_name)
+        self.jans_auth_custom_lib_dir = os.path.join(Config.jetty_base, base.current_app.JansAuthInstaller.service_name, 'custom/libs')
         self.py_lib_dir = os.path.join(Config.jansOptPythonFolder, 'libs')
 
     def install(self):
 
         self.installJettyService(self.jetty_app_configuration[self.service_name], True)
         self.copyFile(self.source_files[0][0], self.jetty_service_webapps_dir)
-        self.copyFile(self.source_files[0][1], self.jetty_service_webapps_dir)
+        self.copyFile(self.source_files[1][0], self.jetty_service_webapps_dir)
         self.chown(self.jetty_service_webapps_dir, Config.jetty_user, Config.jetty_group, recursive=True)
+
         self.enable()
 
     def generate_configuration(self):

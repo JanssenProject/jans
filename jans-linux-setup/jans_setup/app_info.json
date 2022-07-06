@@ -8,10 +8,9 @@
   "JANS_MAVEN": "https://jenkins.jans.io",
   "GLUU_MAVEN": "https://jenkins.gluu.org",
   "CASA_VERSION": "5.0.0-SNAPSHOT",
-  "TWILIO_VERSION": "TWILIO_VERSION",
+  "TWILIO_VERSION": "7.17.0",
   "EXTERNAL_LIBS": "https://ox.gluu.org/icrby8xcvbcv/",
   "APPLE_WEBAUTHN": "https://www.apple.com/certificateauthority/Apple_WebAuthn_Root_CA.pem",
   "SQLALCHEMY": "https://github.com/sqlalchemy/sqlalchemy/archive/rel_1_3_23.zip",
   "PYJWT": "https://github.com/jpadilla/pyjwt/archive/refs/tags/2.3.0.zip"
-  
 }
