@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.0.1](https://github.com/JanssenProject/jans/compare/jans-scim-v1.0.0...jans-scim-v1.0.1) (2022-07-06)
+
+
+### Features
+
+* enhance error handling [#1434](https://github.com/JanssenProject/jans/issues/1434) ([a3f6314](https://github.com/JanssenProject/jans/commit/a3f631421f125501f9c7cf0be207744860d856cc))
+
+
+### Bug Fixes
+
+* remove jans-auth-common dependency [#1459](https://github.com/JanssenProject/jans/issues/1459) ([75f4fb5](https://github.com/JanssenProject/jans/commit/75f4fb5487b8adc6300c939ea9a0a3302b235d0e))
+
+
+### Miscellaneous Chores
+
+* release 1.0.0 ([3df6f77](https://github.com/JanssenProject/jans/commit/3df6f7721a8e9d57e28d065ee29153d023dfe9ea))
+* release 1.0.0 ([9644d1b](https://github.com/JanssenProject/jans/commit/9644d1bd29c291e57c140b0c9ac67243c322ac35))
+* release 1.0.1 ([828bfe8](https://github.com/JanssenProject/jans/commit/828bfe80cee87e639839391f98ac3dc2f2d4a920))
+
 ## 1.0.0 (2022-05-19)
 
 
