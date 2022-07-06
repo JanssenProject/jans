@@ -1,5 +1,38 @@
 # Changelog
 
+## [1.0.1](https://github.com/JanssenProject/jans/compare/jans-config-api-v1.0.0...jans-config-api-v1.0.1) (2022-07-06)
+
+
+### Features
+
+* add support for date ranges in statistic client [#1575](https://github.com/JanssenProject/jans/issues/1575) ([#1653](https://github.com/JanssenProject/jans/issues/1653)) ([8048cd9](https://github.com/JanssenProject/jans/commit/8048cd9b6ab393b8a3e4a1aaf36e09abe20f605b))
+* endpoint to get details of connected FIDO devices registered to users [#1465](https://github.com/JanssenProject/jans/issues/1465) ([#1466](https://github.com/JanssenProject/jans/issues/1466)) ([62522fe](https://github.com/JanssenProject/jans/commit/62522fe5aaa2971835c76e8e9b0d4280fee1db32))
+* fix the dependencies and code issues ([#1473](https://github.com/JanssenProject/jans/issues/1473)) ([f4824c6](https://github.com/JanssenProject/jans/commit/f4824c6c6c6a036c5d01b7a6710f51477a49a3fb))
+* **jans-auth-server:** added restriction for request_uri parameter (blocklist and allowed client.request_uri) [#1503](https://github.com/JanssenProject/jans/issues/1503) ([0696d92](https://github.com/JanssenProject/jans/commit/0696d92094eeb2ed36f6b0075680634acbf8992f))
+* **jans-auth-server:** removed dcrSkipSignatureValidation configuration property [#1623](https://github.com/JanssenProject/jans/issues/1623) ([6550247](https://github.com/JanssenProject/jans/commit/6550247ca727d9437ffceec3fa12b9fef93b81e4))
+* **jans-config-api:** agama configuration integration ([#1501](https://github.com/JanssenProject/jans/issues/1501)) ([e84575b](https://github.com/JanssenProject/jans/commit/e84575b018f1910860ca6fbf13f5418e8fa131f6))
+* **jans-config-api:** enhancement to expose user inum at root level of response ([#1477](https://github.com/JanssenProject/jans/issues/1477)) ([1e4b6bc](https://github.com/JanssenProject/jans/commit/1e4b6bc9955a0cd91d6dff000a860ca96b6bd822))
+* **jans-config-api:** fixed user management swagger spec for mandatory fields ([#1519](https://github.com/JanssenProject/jans/issues/1519)) ([29ff812](https://github.com/JanssenProject/jans/commit/29ff812c7d6cb94e98886ea7cab0ab08a44879dd))
+* **jans-config-api:** swagger spec change to expose user inum at root level of response ([#1483](https://github.com/JanssenProject/jans/issues/1483)) ([c202705](https://github.com/JanssenProject/jans/commit/c202705f2585c4f8f8c9259ad41b388e97f97573))
+* **jans-config-api:** user management endpoint 418 ([#1548](https://github.com/JanssenProject/jans/issues/1548)) ([b95fa7b](https://github.com/JanssenProject/jans/commit/b95fa7bcd56ef39f8478a9e879c493f815b29dd3))
+
+
+### Bug Fixes
+
+* add path parameter to /fido2/registration/entries [#1465](https://github.com/JanssenProject/jans/issues/1465) ([#1508](https://github.com/JanssenProject/jans/issues/1508)) ([808d0c4](https://github.com/JanssenProject/jans/commit/808d0c4a9b2701c9238926141e22662b918e5990))
+* fido2-plugin throwing error during deployment [#1632](https://github.com/JanssenProject/jans/issues/1632) ([#1633](https://github.com/JanssenProject/jans/issues/1633)) ([90d2c8a](https://github.com/JanssenProject/jans/commit/90d2c8ace819b784a293df698e316c13a8548fd1))
+* fix typos and other issues in jans-config-api swagger specs [#1665](https://github.com/JanssenProject/jans/issues/1665) ([#1668](https://github.com/JanssenProject/jans/issues/1668)) ([3c3a0f4](https://github.com/JanssenProject/jans/commit/3c3a0f47f6274c8b106bebabc38df927a4238ac3))
+* jans-config-api add JAVA to programmingLanguage (ref: [#1656](https://github.com/JanssenProject/jans/issues/1656)) ([#1667](https://github.com/JanssenProject/jans/issues/1667)) ([a885a92](https://github.com/JanssenProject/jans/commit/a885a925cdd711158435fedd643f1dd67afad736))
+* **jans-config-api:** removed java_script from programmingLanguages ([8b935d8](https://github.com/JanssenProject/jans/commit/8b935d8249ab97f912993a07be0a093b89e52c8b))
+* **jans-config-api:** switch to 1.0.1-SNAPSHOT ([e8a9186](https://github.com/JanssenProject/jans/commit/e8a918647da488038ff593da875614b6d7c60cc2))
+
+
+### Miscellaneous Chores
+
+* release 1.0.0 ([3df6f77](https://github.com/JanssenProject/jans/commit/3df6f7721a8e9d57e28d065ee29153d023dfe9ea))
+* release 1.0.0 ([9644d1b](https://github.com/JanssenProject/jans/commit/9644d1bd29c291e57c140b0c9ac67243c322ac35))
+* release 1.0.1 ([828bfe8](https://github.com/JanssenProject/jans/commit/828bfe80cee87e639839391f98ac3dc2f2d4a920))
+
 ## 1.0.0 (2022-05-19)
 
 
