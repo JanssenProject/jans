@@ -54,8 +54,8 @@ RUN /opt/jython/bin/pip uninstall -y pip
 # Auth server
 # ===========
 
-ENV CN_VERSION=1.0.1-SNAPSHOT
-ENV CN_BUILD_DATE='2022-06-22 08:14'
+ENV CN_VERSION=1.0.1
+ENV CN_BUILD_DATE='2022-07-06 12:51'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-server/${CN_VERSION}/jans-auth-server-${CN_VERSION}.war
 
 # Install Jans Auth
@@ -87,15 +87,15 @@ ARG CASA_CONFIG_BUILD_DATE="2022-05-26 13:56"
 RUN wget -q https://jenkins.gluu.org/maven/org/gluu/casa-config/${CASA_CONFIG_VERSION}/casa-config-${CASA_CONFIG_VERSION}.jar -P /usr/share/java/
 
 # A workaround for Fido2 integration
-ARG FIDO2_CLIENT_VERSION=1.0.1-SNAPSHOT
-ARG FIDO2_CLIENT_BUILD_DATE="2022-06-22 08:13"
+ARG FIDO2_CLIENT_VERSION=1.0.1
+ARG FIDO2_CLIENT_BUILD_DATE="2022-07-06 12:49"
 RUN wget -q https://jenkins.jans.io/maven/io/jans/jans-fido2-client/${FIDO2_CLIENT_VERSION}/jans-fido2-client-${FIDO2_CLIENT_VERSION}.jar -P /usr/share/java/
 
 # =====================
 # Casa external scripts
 # =====================
 
-ARG FLEX_SOURCE_VERSION=87276ada2aa5004941e3fd6cc55833f5153f8254
+ARG FLEX_SOURCE_VERSION=99558e9998b5f1168e4b7b755cad7a7be00caa93
 ARG CASA_EXTRAS_DIR=casa/extras
 
 RUN mkdir -p /opt/jans/python/libs
@@ -117,7 +117,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/agama/fl \
     ${JETTY_BASE}/jans-auth/agama/scripts
 
 # janssenproject/jans SHA commit
-ARG JANS_SOURCE_VERSION=0f1a2e6761c0522acdfdab3d69adac5c8062e780
+ARG JANS_SOURCE_VERSION=7ad2b06edf70322d85b40de05a423c2f8cdd4200
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the agama code
