@@ -1,5 +1,34 @@
 # Changelog
 
+## [1.0.1](https://github.com/JanssenProject/jans/compare/agama-v1.0.0...agama-v1.0.1) (2022-07-06)
+
+
+### Features
+
+* **agama:** allow the config-api to perform syntax check of flows ([#1621](https://github.com/JanssenProject/jans/issues/1621)) ([2e99d3a](https://github.com/JanssenProject/jans/commit/2e99d3a9bec389f68086c606062280967ce338ce))
+* **agama:** improve flows timeout ([#1447](https://github.com/JanssenProject/jans/issues/1447)) ([ccfb62e](https://github.com/JanssenProject/jans/commit/ccfb62ec13d371c96a0d597d5a0229864f044373))
+* **agama:** reject usage of repeated input names ([#1484](https://github.com/JanssenProject/jans/issues/1484)) ([aed8cf3](https://github.com/JanssenProject/jans/commit/aed8cf33d89b98f0ac6aae52e145a84a0937d60e))
+* update DSL to support shorthand for finish [#1628](https://github.com/JanssenProject/jans/issues/1628) ([71e4652](https://github.com/JanssenProject/jans/commit/71e46524492d48fccf2ed2840ede3d6ae525a3e3))
+
+
+### Bug Fixes
+
+* **agama:** adjust pom version [#1402](https://github.com/JanssenProject/jans/issues/1402) ([#1403](https://github.com/JanssenProject/jans/issues/1403)) ([930f080](https://github.com/JanssenProject/jans/commit/930f0801177d516d6bfa9c536d590556144cbd61))
+* **agama:** adjust pom version [#1402](https://github.com/JanssenProject/jans/issues/1402) ([#1404](https://github.com/JanssenProject/jans/issues/1404)) ([86bf614](https://github.com/JanssenProject/jans/commit/86bf61420bf6b8d236b8200835a2ff05f430308b))
+* update pom [#1438](https://github.com/JanssenProject/jans/issues/1438) ([#1439](https://github.com/JanssenProject/jans/issues/1439)) ([66b9962](https://github.com/JanssenProject/jans/commit/66b996286a2285986845677ea039f177f756d962))
+
+
+### Documentation
+
+* update docs wrt to language updates [#1628](https://github.com/JanssenProject/jans/issues/1628) ([ca32bd5](https://github.com/JanssenProject/jans/commit/ca32bd54ec109134dad04d4a0f15eebc6d7bdd8e))
+
+
+### Miscellaneous Chores
+
+* release 1.0.0 ([3df6f77](https://github.com/JanssenProject/jans/commit/3df6f7721a8e9d57e28d065ee29153d023dfe9ea))
+* release 1.0.0 ([9644d1b](https://github.com/JanssenProject/jans/commit/9644d1bd29c291e57c140b0c9ac67243c322ac35))
+* release 1.0.1 ([828bfe8](https://github.com/JanssenProject/jans/commit/828bfe80cee87e639839391f98ac3dc2f2d4a920))
+
 ## 1.0.0 (2022-05-19)
 
 
