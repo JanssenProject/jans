@@ -1034,7 +1034,7 @@ class JCA_CLI:
                 row_.append(str(entry.get(header, '')))
             tab_data.append(row_)
 
-        print(tabulate(tab_data, headers, tablefmt="grid"))
+        print(tabulate(tab_data, ['#']+headers, tablefmt="grid"))
 
 
     def get_requests(self, endpoint, params={}):
@@ -1046,7 +1046,7 @@ class JCA_CLI:
         url_param_name = self.get_url_param(endpoint.path)
 
         url = 'https://{}{}'.format(self.host, endpoint.path)
-        if url_param_name in params:
+        if params and url_param_name in params:
             url = url.format(**{url_param_name: params.pop(url_param_name)})
 
         if params:
@@ -1072,7 +1072,7 @@ class JCA_CLI:
             print("An error ocurred while retreiving data")
             self.print_exception(e)
 
-    def process_get(self, endpoint, return_value=False, parameters=None):
+    def process_get(self, endpoint, return_value=False, parameters=None, noprompt=False, update=False):
         clear()
         if not return_value:
             title = endpoint.name
@@ -1081,7 +1081,7 @@ class JCA_CLI:
 
             self.print_underlined(title)
 
-        if not parameters:
+        if not parameters and not noprompt:
             parameters = self.obtain_parameters(endpoint, single=return_value)
 
             for param in parameters.copy():
@@ -1107,8 +1107,6 @@ class JCA_CLI:
             except:
                 pass
 
-            selections.append('w')
-
             op_mode_endpoint = my_op_mode + '.' + endpoint.info['operationId']
             import copy
             if op_mode_endpoint in tabulate_endpoints:
@@ -1133,6 +1131,9 @@ class JCA_CLI:
                     self.pretty_print(data)
             else:
                 self.pretty_print(data)
+
+        if update:
+            return item_counters, data
 
         selections += item_counters
         while True:
@@ -1559,7 +1560,12 @@ class JCA_CLI:
                 cert=self.mtls_client_cert
             )
         self.log_response(response)
-        return response.json()
+        try:
+            result = response.json()
+        except Exception:
+            self.exit_with_error(response.text)
+
+        return result
 
 
     def process_put(self, endpoint):
@@ -1569,13 +1575,13 @@ class JCA_CLI:
         cur_data = None
         go_back = False
 
-
         if endpoint.info.get('x-cli-getdata') != '_file':
             if 'x-cli-getdata' in endpoint.info and endpoint.info['x-cli-getdata'] != None:
                 for m in endpoint.parent:
                     if m.info['operationId'] == endpoint.info['x-cli-getdata']:
                         while True:
                             try:
+                                print("cur_data-1")
                                 cur_data = self.process_get(m, return_value=True)
                                 break
                             except ValueError as e:
@@ -1587,14 +1593,24 @@ class JCA_CLI:
                         break
 
             else:
+                for mi in endpoint.parent :
+                    if mi.method == 'get' and not mi.path.endswith('}'):
+                        cur_data = self.process_get(mi, noprompt=True, update=True)
+                        values = ['b', 'q', 'x'] + cur_data[0]
+                        item_number = self.get_input(text="Enter item # to update", values=values)
+
+                        cur_data = cur_data[1][int(item_number) -1]
+                """
                 for m in endpoint.parent:
                     if m.method == 'get' and m.path.endswith('}'):
                         while True:
                             while True:
                                 try:
+                                    
                                     key_name_desc = self.get_endpiont_url_param(m)
                                     if key_name_desc and 'name' in key_name_desc:
                                         key_name = key_name_desc['name']
+                                    print("P-X", m)
                                     cur_data = self.process_get(m, return_value=True)
                                     break
                                 except ValueError as e:
@@ -1608,6 +1624,7 @@ class JCA_CLI:
 
                         get_endpoint = m
                         break
+                """
             if not cur_data:
                 for m in endpoint.parent:
                     if m.method == 'get' and not m.path.endswith('}'):
@@ -1615,7 +1632,7 @@ class JCA_CLI:
                         get_endpoint = m
 
         end_point_param = self.get_endpiont_url_param(endpoint)
-        
+
         if endpoint.info.get('x-cli-getdata') == '_file':
 
             # TODO: To be implemented
