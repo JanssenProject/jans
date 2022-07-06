@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.0.1](https://github.com/JanssenProject/jans/compare/jans-pycloudlib-v1.0.0...jans-pycloudlib-v1.0.1) (2022-07-06)
+
+
+### Features
+
+* introduce new hybrid persistence mapping ([#1505](https://github.com/JanssenProject/jans/issues/1505)) ([a77ab60](https://github.com/JanssenProject/jans/commit/a77ab602d15cb6bdf4751aaa11c2be9485b04a34))
+
+
+### Documentation
+
+* **pycloudlib:** update docstrings and internal API docs ([#1566](https://github.com/JanssenProject/jans/issues/1566)) ([0f1a2e6](https://github.com/JanssenProject/jans/commit/0f1a2e6761c0522acdfdab3d69adac5c8062e780))
+
+
+### Miscellaneous Chores
+
+* release 1.0.1 ([828bfe8](https://github.com/JanssenProject/jans/commit/828bfe80cee87e639839391f98ac3dc2f2d4a920))
+
 ## 1.0.0 (2022-05-20)
 
 
