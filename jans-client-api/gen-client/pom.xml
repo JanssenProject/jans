@@ -3,7 +3,7 @@
     <artifactId>jans-client-api-gen</artifactId>
     <packaging>jar</packaging>
     <name>jans-client-api-gen</name>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.1</version>
     <url>https://github.com/swagger-api/swagger-codegen</url>
     <description>Swagger Java</description>
 
