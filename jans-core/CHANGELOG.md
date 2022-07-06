@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.0.1](https://github.com/JanssenProject/jans/compare/jans-core-v1.0.0...jans-core-v1.0.1) (2022-07-06)
+
+
+### Features
+
+* **jans-client-api:** migration to Weld/Resteasy and Jetty 11 - Issue 260 ([#1319](https://github.com/JanssenProject/jans/issues/1319)) ([420ffc3](https://github.com/JanssenProject/jans/commit/420ffc3329b91c52d5c9996d7c1e600d9b6fead2))
+* **jans-core:** added Discovery.java script and sample external service ([440f2dd](https://github.com/JanssenProject/jans/commit/440f2dd41a0dafc915fd409b21da454f8cf1e046))
+* **jans-core:** added StandaloneJavaCustomScriptManagerTest ([48ba08b](https://github.com/JanssenProject/jans/commit/48ba08b2f336c2cef1f244d1411c71859fe337a4))
+* **jans-core:** added test dependencies to scripts ([53e5f67](https://github.com/JanssenProject/jans/commit/53e5f6725648521a983a86a533f62587b902f951))
+* **jans-core:** wip for java compiler ([e038ff3](https://github.com/JanssenProject/jans/commit/e038ff3b1ea0d6ec670940e140304bde65e93926))
+
+
+### Bug Fixes
+
+* **jans-core:** switch to 1.0.1-SNAPSHOT ([dbe9355](https://github.com/JanssenProject/jans/commit/dbe9355d97618a267df1ab7aa5c0780e125a3420))
+
+
+### Miscellaneous Chores
+
+* release 1.0.0 ([3df6f77](https://github.com/JanssenProject/jans/commit/3df6f7721a8e9d57e28d065ee29153d023dfe9ea))
+* release 1.0.0 ([9644d1b](https://github.com/JanssenProject/jans/commit/9644d1bd29c291e57c140b0c9ac67243c322ac35))
+* release 1.0.1 ([828bfe8](https://github.com/JanssenProject/jans/commit/828bfe80cee87e639839391f98ac3dc2f2d4a920))
+
 ## 1.0.0 (2022-05-19)
 
 
