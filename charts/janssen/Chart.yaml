@@ -38,7 +38,7 @@ maintainers:
     email: support@jans.io
 description: Janssen Access and Identity Management
 name: janssen
-version: 1.0.1-dev
+version: 1.0.0
 dependencies:
   - name: config
     condition: global.config.enabled

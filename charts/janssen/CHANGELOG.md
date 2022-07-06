@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.0.0](https://github.com/JanssenProject/jans/compare/charts/janssen-v1.0.0...charts/janssen-v1.0.0) (2022-07-06)
+
+
+### Features
+
+* add newly redesigned jans-client-api ([#1540](https://github.com/JanssenProject/jans/issues/1540)) ([4582ae5](https://github.com/JanssenProject/jans/commit/4582ae563ddf2492c519fdbc7685af2ce3c5529d))
+
+
+### Miscellaneous Chores
+
+* release 1.0.0 ([b2895f2](https://github.com/JanssenProject/jans/commit/b2895f224b5772c0724ea0afbdf67a417a5c537c))
+
 ## 1.0.1-dev (2022-05-20)
 
 
