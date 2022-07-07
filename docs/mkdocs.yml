@@ -3,13 +3,13 @@ site_name: Janssen Documentation
 site_description: Janssen Project Deployment and Operation References
 
 # Copyright
-copyright: Copyright &copy; 2022, Gluu, Inc.
+copyright: Copyright &copy; 2022, The Janssen Project
 
-# Repository - update this
-docs_dir: user
+# Repository
+docs_dir: admin
 repo_name: JanssenProject/docs
 repo_url: https://github.com/JanssenProject/jans/
-edit_uri: edit/main/docs/user/
+edit_uri: edit/main/docs/admin/
 
 # Configuration
 theme:
@@ -17,15 +17,10 @@ theme:
     palette:
         primary: 'green'
         accent: 'green'
-#    logo: 'gluu.jpg'
-#    favicon: 'favicon.ico'
+#    logo: 'janssen_project.png'
+#    favicon: 'janssen_project_favicon_transparent_50px_50px.png'
 extra_css:
   - css/tabs.css
-
-# Tracking
-google_analytics:
-  - 'UA-31008645-7'
-  - 'auto'
 
 # Extensions
 markdown_extensions:
@@ -39,6 +34,7 @@ markdown_extensions:
 
 # Navigation
 nav:
+- 'Home': 'index.md'
 - 'Deployment and Planning Guide': 'deployment.md'
 - 'Installation':
     - 'Setup': 'install/setup.md'
