@@ -17,8 +17,8 @@ theme:
     palette:
         primary: 'green'
         accent: 'green'
-#    logo: 'gluu.jpg'
-#    favicon: 'favicon.ico'
+#    logo: 'janssen_project.png'
+#    favicon: 'janssen_project_favicon_transparent_50px_50px.png'
 extra_css:
   - css/tabs.css
 
