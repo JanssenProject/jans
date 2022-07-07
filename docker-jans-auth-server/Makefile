@@ -1,4 +1,4 @@
-CN_VERSION=1.0.1
+CN_VERSION=1.0.2
 IMAGE_NAME=janssenproject/auth-server
 UNSTABLE_VERSION?=dev
 
